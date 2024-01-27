@@ -21,9 +21,49 @@ type Event = TestEvent | RemoveEvent | { type: 'log', message: string };
 @Activatible('@travetto/test', 'test')
 class TestRunnerFeature extends BaseFeature {
 
-  #activeProcesses: Record<string, ChildProcess> = {};
+  #server: ChildProcess | undefined;
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (e: void) => unknown;
+
+  #start(): void {
+    if (!this.#server) {
+      this.log.info('Starting server');
+      const config: SpawnOptions = {
+        cwd: Workspace.path,
+        env: {
+          ...process.env,
+          ...Env.TRV_MANIFEST.export(undefined),
+          ...Env.TRV_QUIET.export(true)
+        },
+        stdio: ['pipe', 'pipe', 2, 'ipc']
+      };
+
+      this.#server = spawn('node', [RunUtil.cliFile, 'test:watch', '--format', 'exec', '--mode', 'change'], config)
+        .on('message', (ev: Event | { type: 'ready' }) => {
+          switch (ev.type) {
+            case 'ready': {
+              // Trigger all visible editors on start
+              for (const editor of vscode.window.visibleTextEditors) {
+                this.onChangedActiveEditor(editor);
+              }
+              return;
+            }
+            case 'log': this.log.info('[Log  ]', ev.message); return;
+            case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
+          }
+          this.#consumer.onEvent(ev);
+          this.#codeLensUpdated?.();
+        });
+    }
+  }
+
+  #stop(): void {
+    if (this.#server) {
+      this.log.info('Stopping server');
+      this.#server.kill();
+      this.#server = undefined;
+    }
+  }
 
   #getTestModule(file?: string): IndexedModule | ManifestModule | undefined {
     if (!file) {
@@ -41,7 +81,7 @@ class TestRunnerFeature extends BaseFeature {
     return Workspace.isCompilerWatching && !!this.#getTestModule(file);
   }
 
-  #runFile(file: string, line?: number): void {
+  #runFile(file: string): void {
     const mod = this.#getTestModule(file);
 
     if (!mod) {
@@ -49,37 +89,21 @@ class TestRunnerFeature extends BaseFeature {
       return;
     }
 
-    this.#activeProcesses[file]?.kill(); // Ensure only one at a time
+    if (!this.#server) {
+      this.log.warn('Server is not currently running');
+      return;
+    }
 
-    const args = [
-      RunUtil.cliFile,
-      'test:direct', '-f', 'exec',
-      file, `${line ?? '0'}`
-    ];
 
-    const config: SpawnOptions = {
-      cwd: Workspace.path,
-      env: {
-        ...process.env,
-        ...Env.TRV_MANIFEST.export(undefined),
-        ...Env.TRV_MODULE.export(mod.name),
-        ...Env.TRV_QUIET.export(true)
-      },
-      stdio: ['pipe', 'pipe', 2, 'ipc']
-    };
+    this.#server.send({ type: 'run-test', file });
+  }
 
-    const proc = spawn('node', args, config);
-
-    proc.on('message', (ev: Event) => {
-      switch (ev.type) {
-        case 'log': this.log.info('[Log  ]', ev.message); return;
-        case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
-      }
-      this.#consumer.onEvent(ev);
-      this.#codeLensUpdated?.();
-    });
-
-    this.#activeProcesses[file] = proc;
+  #rerunActive(): void {
+    const editor = vscode.window.activeTextEditor;
+    if (this.#isTestDoc(editor)) {
+      this.#consumer.reset(editor);
+      this.#runFile(editor!.document.fileName);
+    }
   }
 
   constructor(module?: string, command?: string) {
@@ -90,7 +114,7 @@ class TestRunnerFeature extends BaseFeature {
   /**
    * Launch a test from the current location
    */
-  async launchTestDebugger(line?: number): Promise<void> {
+  async #launchTestDebugger(line?: number): Promise<void> {
     const editor = Workspace.getDocumentEditor(vscode.window.activeTextEditor);
     if (!editor || !this.#isTestDoc(editor)) {
       return;
@@ -147,19 +171,6 @@ class TestRunnerFeature extends BaseFeature {
     }
   }
 
-  async onDidSaveTextDocument(doc: vscode.TextDocument): Promise<void> {
-    if (this.#isTestDoc(doc)) {
-      let line = undefined;
-      if (vscode.window.activeTextEditor?.document === doc) {
-        const sels = vscode.window.activeTextEditor.selections;
-        if (sels.length === 1) {
-          line = sels[0].start.line;
-        }
-      }
-      this.#runFile(doc.fileName, line);
-    }
-  }
-
   async onCloseTextDocument(doc: vscode.TextDocument): Promise<void> {
     this.#consumer.untrackEditor(doc);
   }
@@ -168,23 +179,12 @@ class TestRunnerFeature extends BaseFeature {
    * On feature activate
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
-    this.register('line', this.launchTestDebugger.bind(this));
-    this.register('rerun', () => {
-      const editor = vscode.window.activeTextEditor;
-      if (this.#isTestDoc(editor)) {
-        this.#consumer.reset(editor);
-        this.#runFile(editor!.document.fileName);
-      }
-    });
+    this.register('line', () => this.#launchTestDebugger());
+    this.register('stop', () => this.#stop());
+    this.register('start', () => this.#start());
+    this.register('rerun', () => this.#rerunActive());
 
-    Workspace.onCompilerState(state => {
-      // Trigger all visible editors on start
-      for (const editor of vscode.window.visibleTextEditors) {
-        this.onChangedActiveEditor(editor);
-      }
-    });
-
-    vscode.workspace.onDidSaveTextDocument(x => this.onDidSaveTextDocument(x), null, context.subscriptions);
+    Workspace.onCompilerState(state => (state === 'watch-start') ? this.#start() : this.#stop());
     vscode.workspace.onDidOpenTextDocument(x => this.onOpenTextDocument(x), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(x => this.onCloseTextDocument(x), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.onChangedActiveEditor(x), null, context.subscriptions);
@@ -196,7 +196,7 @@ class TestRunnerFeature extends BaseFeature {
         pattern: '**/test/**/*.{ts,tsx}'
       }
     }, {
-      provideCodeLenses: this.buildCodeLenses.bind(this),
+      provideCodeLenses: (doc, token) => this.buildCodeLenses(doc),
       onDidChangeCodeLenses: l => {
         this.#codeLensUpdated = l;
         return { dispose: (): void => { } };
