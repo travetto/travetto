@@ -48,6 +48,7 @@ export class RunUtil {
       program: config.main.replace(Workspace.path, WORKSPACE),
       args: (config.args ?? []).map(x => `${x}`),
       env: {
+        ...Env.TRV_CAN_RESTART.export(false),
         ...this.buildEnv(config.cliModule),
         ...config.env ?? {},
         ...Env.TRV_DYNAMIC.export(true)

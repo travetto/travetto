@@ -1,7 +1,9 @@
 import vscode from 'vscode';
 import util from 'node:util';
 
-import type { TestResult, ErrorHoverAssertion, StatusUnknown, TestConfig, Assertion } from './types';
+import type { TestResult, Assertion, TestConfig } from '@travetto/test';
+
+import type { ErrorHoverAssertion, StatusUnknown, TestLevel } from './types';
 import { Workspace } from '../../../core/workspace';
 
 /**
@@ -77,7 +79,7 @@ export class Decorations {
     let title: string;
     let body: string;
     let bodyFirst: string;
-    let suffix = assertion.message;
+    let suffix = assertion.message || '';
     const error = assertion.error!;
 
     if (isBatchError(error)) {
@@ -92,7 +94,7 @@ export class Decorations {
       body = `\t${messages.join('  \n\t')}  `;
       bodyFirst = `${title} - ${messages.join(', ')}`;
     } else if (!(assertion.expected === undefined && assertion.actual === undefined)) {
-      title = assertion.message
+      title = assertion.message!
         .replace(/^.*should/, 'Should');
 
       const extra = title.split(/^Should(?:\s+[a-z]+)+/)[1];
@@ -115,12 +117,16 @@ export class Decorations {
       } else {
         body = `\t${assertion.message}`;
       }
-      bodyFirst = assertion.message;
+      bodyFirst = assertion.message!;
     } else {
       title = error.message;
       suffix = error.message;
 
-      body = error.stack!;
+      body = error.stack?.replaceAll(Workspace.path, '.')!
+        .replaceAll('\n', '  \n')
+        .replace(
+          /[(]([^):]+)[:]?(\d+(?:[:]\d+)?)?[)]/g, (_, file, loc) => loc ? `(**${file}**:_${loc}_)` : `(**${file}**)`
+        )!;
       bodyFirst = body.split('\n')[0];
     }
     return { suffix, title, bodyFirst, body, markdown: new vscode.MarkdownString(`**${title}** \n\n${body}`) };
@@ -166,8 +172,8 @@ export class Decorations {
    * Build assertion
    * @param assertion
    */
-  static buildAssertion(assertion: { error?: Error, line: number, lineEnd?: number, message: string }): vscode.DecorationOptions {
-    let out = this.line(assertion.line, assertion.lineEnd);
+  static buildAssertion(assertion: Assertion): vscode.DecorationOptions {
+    let out = this.line(assertion.line);
     if (assertion.error) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const { suffix, markdown } = this.buildErrorHover(assertion as ErrorHoverAssertion);
@@ -203,7 +209,7 @@ export class Decorations {
     if ('error' in test) {
       const tt = test;
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      err = ((tt.assertions || []).find(x => x.status === 'failed') as ErrorHoverAssertion) ||
+      err = ((tt.assertions || []).find(x => !!x.error) as ErrorHoverAssertion) ||
         (tt.error && { error: tt.error, message: tt.error.message });
     }
     if (err) {
@@ -223,7 +229,7 @@ export class Decorations {
    * @param entity
    * @param state
    */
-  static buildStyle(entity: 'assertion' | 'test' | 'suite', state: StatusUnknown): vscode.TextEditorDecorationType {
+  static buildStyle(entity: TestLevel, state: StatusUnknown): vscode.TextEditorDecorationType {
     return (entity === 'assertion') ?
       this.buildAssertStyle(state) :
       this.buildImage(state, entity === 'test' ? Style.SMALL_IMAGE : Style.FULL_IMAGE);

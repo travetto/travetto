@@ -161,11 +161,19 @@ export class AssertCheck {
 
       // If a string, check if error exists, and then see if the string is included in the message
       if (typeof shouldThrow === 'string' && (!err || !(err instanceof Error ? err.message : err).includes(shouldThrow))) {
-        return new assert.AssertionError({ message: `Expected error containing text '${shouldThrow}', but got ${actual}` });
+        return new assert.AssertionError({
+          message: `Expected error containing text '${shouldThrow}', but got ${actual}`,
+          actual,
+          expected: shouldThrow
+        });
       }
       // If a regexp, check if error exists, and then test the error message against the regex
       if (shouldThrow instanceof RegExp && (!err || !shouldThrow.test(typeof err === 'string' ? err : err.message))) {
-        return new assert.AssertionError({ message: `Expected error with message matching '${shouldThrow.source}', but got ${actual} ` });
+        return new assert.AssertionError({
+          message: `Expected error with message matching '${shouldThrow.source}', but got ${actual}`,
+          actual,
+          expected: shouldThrow.source
+        });
       }
       // If passing in a constructor
     } else if (shouldThrow === Error ||
@@ -173,7 +181,11 @@ export class AssertCheck {
       Object.getPrototypeOf(shouldThrow) !== Object.getPrototypeOf(Function)
     ) { // if not simple function, treat as class
       if (!err || !(err instanceof shouldThrow)) {
-        return new assert.AssertionError({ message: `Expected to throw ${shouldThrow.name}, but got ${err ?? 'nothing'} ` });
+        return new assert.AssertionError({
+          message: `Expected to throw ${shouldThrow.name}, but got ${err ?? 'nothing'}`,
+          actual: (err ?? 'nothing'),
+          expected: shouldThrow.name
+        });
       }
     } else {
       // Else treat as a simple function to build an error or not

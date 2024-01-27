@@ -1,17 +1,13 @@
 import type vscode from 'vscode';
 
-export type Status = 'skipped' | 'failed' | 'passed';
-export type StatusUnknown = Status | 'unknown';
+import type { Assertion, SuiteConfig, SuiteResult, TestConfig, TestEvent, TestResult } from '@travetto/test';
 
-export type SMap<V> = Record<string, V>;
+export type StatusUnknown = TestResult['status'] | 'unknown';
+export type TestLevel = TestEvent['type'];
 
-export type Decs<T> = SMap<SMap<T>>;
+type ResultStyles = Record<string, vscode.TextEditorDecorationType>;
 
-export interface ResultStyles {
-  [key: string]: vscode.TextEditorDecorationType;
-}
-
-export interface Result {
+interface Result {
   status: StatusUnknown;
   decoration: vscode.DecorationOptions;
 }
@@ -30,58 +26,9 @@ export interface TestState extends ResultState<TestConfig | TestResult> {
 }
 
 export interface AllState {
-  suite: SMap<SuiteState>;
-  test: SMap<TestState>;
+  suite: Record<string, SuiteState>;
+  test: Record<string, TestState>;
 }
-
-export interface SuiteConfig {
-  file: string;
-  classId: string;
-  lines: { start: number, end: number };
-}
-
-export interface TestCore extends SuiteConfig {
-  lines: { start: number, end: number, codeStart: number };
-}
-
-export interface SuiteResult extends SuiteConfig {
-  skipped: number;
-  failed: number;
-  passed: number;
-}
-
-export interface TestConfig extends TestCore {
-  methodName: string;
-}
-
-export interface TestResult extends TestConfig {
-  status: Status;
-  assertions?: Assertion[];
-  error?: Error;
-}
-
-export interface Assertion {
-  expected?: unknown;
-  actual?: unknown;
-  operator?: string;
-  file: string;
-  classId: string;
-  methodName: string;
-  status: Status;
-  error?: Error;
-  message: string;
-  line: number;
-  lineEnd?: number;
-}
-
-export type TestEvent =
-  { phase: 'before', type: 'suite', suite: SuiteConfig } |
-  { phase: 'after', type: 'suite', suite: SuiteResult } |
-  { phase: 'before', type: 'test', test: TestConfig } |
-  { phase: 'after', type: 'test', test: TestResult } |
-  { phase: 'after', type: 'assertion', assertion: Assertion };
-
-export type Level = TestEvent['type'];
 
 export interface ErrorHoverAssertion {
   message: string;
@@ -90,20 +37,3 @@ export interface ErrorHoverAssertion {
   operator?: string;
   error: Error;
 }
-
-export type RemoveEvent = {
-  type: 'removeTest';
-  method: string;
-  file: string;
-  classId: string;
-};
-
-export type CompleteEvent = {
-  type: 'runComplete';
-  error?: Error;
-};
-
-export type TestCommand = {
-  type: 'run-test';
-  file: string;
-};

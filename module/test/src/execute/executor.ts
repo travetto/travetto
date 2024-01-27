@@ -140,13 +140,15 @@ export class TestExecutor {
     // Run method and get result
     let error = await this.#executeTestMethod(test);
 
-    if (error) {
+    if (!error) {
+      error = AssertCheck.checkError(test.shouldThrow, error); // Rewrite error
+    } else {
       if (error instanceof AssertionError) {
-        // Pass
+        // Pass, do nothing
       } else if (error instanceof ExecutionError) { // Errors that are not expected
         AssertCheck.checkUnhandled(test, error);
-      } else if (test.shouldThrow) { // Errors that are
-        error = AssertCheck.checkError(test.shouldThrow!, error); // Rewrite error
+      } else if (test.shouldThrow) {
+        error = AssertCheck.checkError(test.shouldThrow, error); // Rewrite error
       } else if (error instanceof Error) {
         AssertCheck.checkUnhandled(test, error);
       }
