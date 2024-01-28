@@ -70,8 +70,8 @@ export class EmailCompilerFeature extends BaseFeature {
     StreamUtil.onLine(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line}`));
   }
 
-  #renderActive(): void {
-    this.#activeFile && this.#server?.send({ type: 'render', file: this.#activeFile! });
+  #compileActive(): void {
+    this.#activeFile && this.#server?.send({ type: 'compile', file: this.#activeFile! });
   }
 
   getPanel(): vscode.WebviewPanel {
@@ -95,7 +95,7 @@ export class EmailCompilerFeature extends BaseFeature {
     if (file !== this.#activeFile) {
       this.#activeFile = file;
       this.setActiveContent(undefined);
-      this.#renderActive();
+      this.#compileActive();
     }
   }
 
@@ -109,7 +109,7 @@ export class EmailCompilerFeature extends BaseFeature {
 
   savedFile(file: vscode.TextDocument): void {
     if (isResource(file.fileName) && this.#activeFile) {
-      this.#renderActive();
+      this.#compileActive();
     }
   }
 
@@ -123,7 +123,7 @@ export class EmailCompilerFeature extends BaseFeature {
     if (this.#activeContent) {
       this.setActiveContent(this.#activeContent);
     } else {
-      this.#renderActive();
+      this.#compileActive();
     }
   }
 
