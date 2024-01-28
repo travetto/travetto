@@ -6,6 +6,7 @@ import { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerEvent, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types';
 import type { CompilerLogger } from '../log';
+import { PidFile } from './pid';
 
 declare global {
   interface RequestInit { timeout?: number }
@@ -17,8 +18,6 @@ type FetchEventsConfig<T> = {
   enforceIteration?: boolean;
 };
 
-const SHUTDOWN_TIMEOUT = 3000;
-
 /**
  * Compiler Client Operations
  */
@@ -26,10 +25,12 @@ export class CompilerClient {
 
   #url: string;
   #log?: CompilerLogger;
+  #pid: PidFile<'compiler' | 'server'>;
 
   constructor(ctx: ManifestContext, log?: CompilerLogger) {
     this.#url = ctx.build.compilerUrl.replace('localhost', '127.0.0.1');
     this.#log = log;
+    this.#pid = new PidFile(ctx);
   }
 
   toString(): string {
@@ -43,7 +44,7 @@ export class CompilerClient {
   /** Get server information, if server is running */
   info(): Promise<CompilerServerInfo | undefined> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return fetch(`${this.#url}/info`, { signal: AbortSignal.timeout(250) }).then(v => v.json(), () => undefined) as Promise<CompilerServerInfo>;
+    return fetch(`${this.#url}/info`, { signal: AbortSignal.timeout(3000) }).then(v => v.json(), () => undefined) as Promise<CompilerServerInfo>;
   }
 
   async isWatching(): Promise<boolean> {
@@ -59,22 +60,12 @@ export class CompilerClient {
   async stop(): Promise<boolean> {
     const info = await this.info();
     if (!info) {
-      return false;
+      return await this.#pid.kill();
     }
 
-    await fetch(`${this.#url}/stop`, { signal: AbortSignal.timeout(250) }).then(v => v.ok, () => false); // Trigger
-    const start = Date.now();
-    for (; ;) { // Ensure its done
-      try {
-        process.kill(info.compilerPid, 0); // See if process is still running
-      } catch {
-        return true; // If not, its done
-      }
-      await timers.setTimeout(100);
-      if ((Date.now() - start) > SHUTDOWN_TIMEOUT) { // If we exceed the max timeout
-        process.kill(info.compilerPid); // Force kill
-      }
-    }
+    await fetch(`${this.#url}/stop`, { signal: AbortSignal.timeout(3000) }).then(v => v.ok, () => false); // Trigger
+    await this.#pid.ensureKilled('compiler');
+    return true;
   }
 
   /** Fetch compiler events */
@@ -106,6 +97,7 @@ export class CompilerClient {
         signal.addEventListener('abort', () => ctrl.abort());
         const stream = await fetch(`${this.#url}/event/${type}`, {
           signal: ctrl.signal,
+          keepalive: true,
           timeout: 1000 * 60 * 60
         });
         for await (const line of rl.createInterface(Readable.fromWeb(stream.body!))) {
@@ -143,6 +135,7 @@ export class CompilerClient {
       return;
     }
     // Loop until
+    this.#log?.('debug', `Current state, ${existing?.state}`);
     this.#log?.('debug', `Waiting for states, ${states.join(', ')}`);
     for await (const _ of this.fetchEvents('state', { signal, until: s => set.has(s.state) })) { }
     this.#log?.('debug', `Found state, one of ${states.join(', ')} `);
