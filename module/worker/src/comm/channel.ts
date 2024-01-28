@@ -55,7 +55,7 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unk
     if (!this.#proc) {
       throw new Error('this.proc was not defined');
     } else if (this.#proc.send && this.#proc.connected) {
-      this.#proc.send({ ...(data ?? {}), type: eventType });
+      this.#proc.send({ ...(data ?? {}), type: eventType }, (err) => console.error(err));
     } else {
       throw new Error('this.proc.send was not defined');
     }

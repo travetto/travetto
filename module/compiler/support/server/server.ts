@@ -9,6 +9,7 @@ import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventT
 import { LogUtil } from '../log';
 import { CompilerClient } from './client';
 import { CommonUtil } from '../util';
+import { PidFile } from './pid';
 
 const log = LogUtil.logger('compiler-server');
 
@@ -40,11 +41,14 @@ export class CompilerServer {
   info: CompilerServerInfo;
   #client: CompilerClient;
   #url: string;
+  #pid: PidFile<'compiler' | 'server'>;
 
   constructor(ctx: ManifestContext, mode: CompilerMode) {
     this.#ctx = ctx;
     this.#client = new CompilerClient(ctx, LogUtil.logger('client.server'));
     this.#url = this.#client.url;
+    this.#pid = new PidFile(ctx);
+
     this.info = {
       state: 'startup',
       iteration: Date.now(),
@@ -99,6 +103,8 @@ export class CompilerServer {
       // Let the server finish
       await this.#client.waitForState(['close'], 'Server closed', this.signal);
       return this.#tryListen(attempt + 1);
+    } else if (output === 'ok') {
+      await this.#pid.write({ server: this.info.serverPid });
     }
 
     return output;
@@ -166,7 +172,6 @@ export class CompilerServer {
    * Process events
    */
   async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
-
     for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
       if (ev.type === 'progress') {
         await LogUtil.logProgress?.(ev.payload);
@@ -176,6 +181,7 @@ export class CompilerServer {
 
       if (ev.type === 'state') {
         this.info.state = ev.payload.state;
+        await this.#pid.write({ server: this.info.serverPid, compiler: this.info.compilerPid });
         if (ev.payload.state === 'init' && ev.payload.extra && 'pid' in ev.payload.extra && typeof ev.payload.extra.pid === 'number') {
           this.info.compilerPid = ev.payload.extra.pid;
         }
