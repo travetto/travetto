@@ -125,6 +125,7 @@ export class Grade {
 export class Opaque {
   name: string;
   details: object;
+  age?: number;
 }
 
 type HeightUnit = 'm' | 'ft' | undefined;

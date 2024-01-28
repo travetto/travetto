@@ -91,8 +91,8 @@ class Validation {
   @Test('Nested validations should be fine')
   @ShouldThrow(ValidationResultError)
   async nestedObjectErrors() {
-    // @ts-ignore
     const obj = Nested.from({
+      // @ts-ignore
       name: 5,
       address: {
         street1: 'abc',
@@ -318,19 +318,21 @@ class Validation {
     await SchemaValidator.validate(Opaque, child);
   }
 
-  @Test({
-    shouldThrow: ValidationResultError
-  })
-  async badOpqaueChild() {
+  @Test()
+  @ShouldThrow(ValidationResultError)
+  async badOpaqueChild() {
     const child = Opaque.from({
       // @ts-expect-error
       name: 5,
+      // @ts-expect-error
+      age: 'bob',
       details: {
         age: 20
       }
     });
 
-    await SchemaValidator.validate(Opaque, child);
+    const validated = await SchemaValidator.validate(Opaque, child);
+    assert(validated.name === '5');
   }
 
   @Test()
