@@ -9,7 +9,7 @@ import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventT
 import { LogUtil } from '../log';
 import { CompilerClient } from './client';
 import { CommonUtil } from '../util';
-import { PidFile } from './pid';
+import { ProcessHandle } from './process-handle';
 
 const log = LogUtil.logger('compiler-server');
 
@@ -41,13 +41,13 @@ export class CompilerServer {
   info: CompilerServerInfo;
   #client: CompilerClient;
   #url: string;
-  #pid: PidFile<'compiler' | 'server'>;
+  #handle: Record<'compiler' | 'server', ProcessHandle>;
 
   constructor(ctx: ManifestContext, mode: CompilerMode) {
     this.#ctx = ctx;
     this.#client = new CompilerClient(ctx, LogUtil.logger('client.server'));
     this.#url = this.#client.url;
-    this.#pid = new PidFile(ctx);
+    this.#handle = { server: new ProcessHandle(ctx, 'server'), compiler: new ProcessHandle(ctx, 'compiler') };
 
     this.info = {
       state: 'startup',
@@ -104,7 +104,7 @@ export class CompilerServer {
       await this.#client.waitForState(['close'], 'Server closed', this.signal);
       return this.#tryListen(attempt + 1);
     } else if (output === 'ok') {
-      await this.#pid.write({ server: this.info.serverPid });
+      await this.#handle.server.writePid(this.info.serverPid);
     }
 
     return output;
@@ -181,7 +181,7 @@ export class CompilerServer {
 
       if (ev.type === 'state') {
         this.info.state = ev.payload.state;
-        await this.#pid.write({ server: this.info.serverPid, compiler: this.info.compilerPid });
+        await this.#handle.compiler.writePid(this.info.compilerPid);
         if (ev.payload.state === 'init' && ev.payload.extra && 'pid' in ev.payload.extra && typeof ev.payload.extra.pid === 'number') {
           this.info.compilerPid = ev.payload.extra.pid;
         }

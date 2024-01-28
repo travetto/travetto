@@ -6,7 +6,7 @@ import { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerEvent, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types';
 import type { CompilerLogger } from '../log';
-import { PidFile } from './pid';
+import { ProcessHandle } from './process-handle';
 
 declare global {
   interface RequestInit { timeout?: number }
@@ -25,12 +25,12 @@ export class CompilerClient {
 
   #url: string;
   #log?: CompilerLogger;
-  #pid: PidFile<'compiler' | 'server'>;
+  #handle: Record<'compiler' | 'server', ProcessHandle>;
 
   constructor(ctx: ManifestContext, log?: CompilerLogger) {
     this.#url = ctx.build.compilerUrl.replace('localhost', '127.0.0.1');
     this.#log = log;
-    this.#pid = new PidFile(ctx);
+    this.#handle = { compiler: new ProcessHandle(ctx, 'compiler'), server: new ProcessHandle(ctx, 'server') };
   }
 
   toString(): string {
@@ -60,11 +60,12 @@ export class CompilerClient {
   async stop(): Promise<boolean> {
     const info = await this.info();
     if (!info) {
-      return await this.#pid.kill();
+      return Promise.all([this.#handle.server.kill(), this.#handle.compiler.kill()])
+        .then(v => v.some(x => x));
     }
 
     await fetch(`${this.#url}/stop`, { signal: AbortSignal.timeout(3000) }).then(v => v.ok, () => false); // Trigger
-    await this.#pid.ensureKilled('compiler');
+    await this.#handle.compiler.ensureKilled();
     return true;
   }
 
