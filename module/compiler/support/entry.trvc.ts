@@ -17,7 +17,6 @@ export const main = (ctx: ManifestContext) => {
   const client = new CompilerClient(ctx, log);
   const buildFolders = [ctx.build.outputFolder, ctx.build.compilerFolder];
 
-
   /** Main entry point for compilation */
   const compile = async (op: CompilerMode, logLevel: CompilerLogLevel, setupOnly = false): Promise<void> => {
     LogUtil.initLogs(ctx, logLevel ?? 'info');

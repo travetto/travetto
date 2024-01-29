@@ -115,9 +115,9 @@ export class CompilerServer {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     this.#listeners.push({ res, type: type as 'change' });
     if (type === 'state') { // Send on initial connect
-      res.write(JSON.stringify(this.info));
+      res.write(JSON.stringify({ state: this.info.state }));
     }
-    res.write('\n');
+    res.write('\n'); // Send at least one byte on listen
     await new Promise(resolve => res.on('close', resolve));
     this.#listeners.splice(this.#listeners.findIndex(x => x.res === res), 1);
     res.end();
