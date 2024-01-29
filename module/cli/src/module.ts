@@ -20,7 +20,7 @@ export class CliModuleUtil {
     fromHash ??= await CliScmUtil.findLastRelease();
 
     if (!fromHash) {
-      return RuntimeIndex.getLocalModules();
+      return RuntimeIndex.getWorkspaceModules();
     }
 
     const out = new Map<string, IndexedModule>();

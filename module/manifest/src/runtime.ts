@@ -1,6 +1,9 @@
 import { path } from './path';
-import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata, ManifestContext, ManifestModule } from './types';
+import { ManifestIndex } from './manifest-index';
+
+import type { FunctionMetadata } from './types/common';
+import type { IndexedModule, ManifestModule } from './types/manifest';
+import type { ManifestContext } from './types/context';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };

@@ -43,8 +43,8 @@ export class DynamicCommonjsLoader {
       }
 
       const fileName = Module._resolveFilename!(request, parent);
-      // Only proxy local modules
-      if (RuntimeIndex.getModuleFromSource(fileName)?.local) {
+      // Only proxy workspace modules
+      if (RuntimeIndex.getModuleFromSource(fileName)?.workspace) {
         return proxyModuleLoad ? proxyModuleLoad(fileName, mod) : mod;
       } else {
         return mod;

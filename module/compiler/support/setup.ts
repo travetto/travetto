@@ -214,7 +214,7 @@ export class CompilerSetup {
       // Update all manifests when in mono repo
       if (delta.length && ctx.workspace.mono) {
         const names: string[] = [];
-        const mods = Object.values(manifest.modules).filter(x => x.local && x.name !== ctx.workspace.name);
+        const mods = Object.values(manifest.modules).filter(x => x.workspace && x.name !== ctx.workspace.name);
         for (const mod of mods) {
           const modCtx = ManifestUtil.getModuleContext(ctx, mod.sourceFolder);
           const modManifest = await ManifestUtil.buildManifest(modCtx);
