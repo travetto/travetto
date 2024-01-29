@@ -120,6 +120,7 @@ export class CompilerWatchFeature extends BaseFeature {
 
       if (connected) {
         this.#log.info('Disconnecting', !!ctrl.signal.aborted, state);
+        this.#onState('close');
       }
       ctrl.abort();
       // Check every second
@@ -129,26 +130,22 @@ export class CompilerWatchFeature extends BaseFeature {
 
   #onState(state: CompilerStateType): void {
     this.#log.info('Compiler state changed', state);
-    let v: string;
+    let v: string | undefined;
     switch (state) {
+      case undefined: return;
       case 'reset': v = '$(flame) Restarting'; break;
       case 'startup':
       case 'init': v = '$(flame) Initializing'; break;
       case 'compile-start': v = '$(flame) Compiling'; break;
-      case 'compile-end':
       case 'watch-start': v = '$(pass-filled) Ready'; break;
-      case 'watch-end':
-      case 'close':
-      default: v = '$(debug-pause) Disconnected'; break;
+      case 'close': v = '$(debug-pause) Disconnected'; break;
     }
-    this.#status.text = v;
+    this.#status.text = v ?? this.#status.text;
     Workspace.compilerState = state;
   }
 
   async #trackState(): Promise<void> {
     try {
-      const state = await this.#compilerState();
-      this.#onState(state!);
       for await (const ev of this.#compilerEvents<CompilerStateEvent>('state')) {
         this.#onState(ev.state);
       }

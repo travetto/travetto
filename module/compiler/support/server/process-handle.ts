@@ -33,7 +33,9 @@ export class ProcessHandle {
   async kill(): Promise<boolean> {
     const pid = await this.getPid();
     if (pid && await this.isRunning()) {
-      return process.kill(pid);
+      try {
+        return process.kill(pid);
+      } catch { }
     }
     return false;
   }
@@ -47,7 +49,9 @@ export class ProcessHandle {
       }
       await timers.setTimeout(100);
     }
-    pid && process.kill(pid); // Force kill
+    try {
+      pid && process.kill(pid); // Force kill
+    } catch { }
     return pid !== undefined;
   }
 }
