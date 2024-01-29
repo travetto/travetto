@@ -1,5 +1,6 @@
 /// <reference path="./trv.d.ts" />
 
+import { RuntimeContext } from '@travetto/manifest';
 import { TimeSpan, TimeUtil } from './time';
 
 const IS_TRUE = /^(true|yes|on|1)$/i;
@@ -104,7 +105,7 @@ const prod = (): boolean => process.env.NODE_ENV === 'production';
 export const Env = delegate({
   /** Get name */
   get name(): string | undefined {
-    return process.env.TRV_ENV || (!prod() ? 'local' : undefined);
+    return process.env.TRV_ENV || (!prod() ? RuntimeContext.workspace.defaultEnv : undefined);
   },
 
   /** Are we in development mode */

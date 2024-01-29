@@ -2,38 +2,10 @@ import { existsSync } from 'node:fs';
 
 import { ManifestModuleUtil } from './module';
 import { path } from './path';
-
-import {
-  ManifestModule, ManifestModuleCore, ManifestModuleFile,
-  ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleRole, ManifestRoot
-} from './types';
-
 import { ManifestUtil } from './util';
 
-export type FindConfig = {
-  folder?: (folder: ManifestModuleFolderType) => boolean;
-  module?: (module: IndexedModule) => boolean;
-  file?: (file: IndexedFile) => boolean;
-  sourceOnly?: boolean;
-};
-
-export type IndexedFile = {
-  id: string;
-  import: string;
-  module: string;
-  sourceFile: string;
-  outputFile: string;
-  relativeFile: string;
-  role: ManifestModuleRole;
-  type: ManifestModuleFileType;
-};
-
-export type IndexedModule = ManifestModuleCore & {
-  sourcePath: string;
-  outputPath: string;
-  files: Record<ManifestModuleFolderType, IndexedFile[]>;
-  children: Set<string>;
-};
+import type { ManifestModuleFolderType } from './types/common';
+import type { ManifestModule, ManifestRoot, ManifestModuleFile, IndexedModule, IndexedFile, FindConfig } from './types/manifest';
 
 const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
@@ -144,11 +116,11 @@ export class ManifestIndex {
   }
 
   /**
-   * Get all local modules
+   * Get all workspace modules
    * @returns
    */
-  getLocalModules(): IndexedModule[] {
-    return this.#modules.filter(x => x.local);
+  getWorkspaceModules(): IndexedModule[] {
+    return this.#modules.filter(x => x.workspace);
   }
 
   /**
@@ -243,12 +215,9 @@ export class ManifestIndex {
   /**
    * Build module list from an expression list (e.g. `@travetto/rest,-@travetto/log)
    */
-  getModuleList(mode: 'local' | 'all', exprList: string = ''): Set<string> {
+  getModuleList(mode: 'workspace' | 'all', exprList: string = ''): Set<string> {
     const allMods = Object.keys(this.#manifest.modules);
-    const active = new Set<string>(
-      mode === 'local' ? this.getLocalModules().map(x => x.name) :
-        (mode === 'all' ? allMods : [])
-    );
+    const active = new Set<string>(mode === 'workspace' ? this.getWorkspaceModules().map(x => x.name) : allMods);
 
     for (const expr of exprList.split(/\s*,\s*/g)) {
       const [, neg, mod] = expr.match(/(-|[+])?([^+\- ]+)$/) ?? [];

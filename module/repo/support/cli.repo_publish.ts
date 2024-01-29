@@ -15,7 +15,7 @@ export class RepoPublishCommand implements CliCommandShape {
 
   async main(): Promise<void> {
     const published = await RepoExecUtil.execOnModules('all', mod => PackageManager.isPublished(RuntimeContext, mod), {
-      filter: mod => !!mod.local && !mod.internal,
+      filter: mod => !!mod.workspace && !mod.internal,
       progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,
       showStderr: false,
       transformResult: (mod, res) => PackageManager.validatePublishedResult(RuntimeContext, mod, res),

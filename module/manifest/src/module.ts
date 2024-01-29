@@ -1,14 +1,12 @@
 import fs from 'node:fs/promises';
 
 import { path } from './path';
-import {
-  ManifestContext,
-  ManifestModule, ManifestModuleFile, ManifestModuleFileType,
-  ManifestModuleFolderType,
-  ManifestModuleRole
-} from './types';
-import { ModuleDep, ModuleDependencyVisitor } from './dependencies';
 import { PackageUtil } from './package';
+import { ManifestPackageVisitor } from './dependencies';
+
+import type { ManifestModuleFileType, ManifestModuleRole, ManifestModuleFolderType } from './types/common';
+import type { ManifestModuleFile, ManifestModule, ManifestPackageNode } from './types/manifest';
+import type { ManifestContext } from './types/context';
 
 const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
   '.js': 'js',
@@ -177,8 +175,8 @@ export class ManifestModuleUtil {
   /**
    * Visit a module and describe files, and metadata
    */
-  static async describeModule(ctx: ManifestContext, dep: ModuleDep): Promise<ManifestModule> {
-    const { main, mainLike, local, name, version, sourcePath, roleSet, prod, parentSet, internal } = dep;
+  static async describeModule(ctx: ManifestContext, dep: ManifestPackageNode): Promise<ManifestModule> {
+    const { main, mainLike, workspace, name, version, sourcePath, prod, parent, internal } = dep;
 
     const files: ManifestModule['files'] = {};
 
@@ -195,13 +193,13 @@ export class ManifestModuleUtil {
       files.$root = files.$root?.filter(([file, type]) => type !== 'ts');
     }
 
-    const roles = [...roleSet ?? []].sort();
-    const parents = [...parentSet].sort();
+    const roles = [...dep.roles ?? []].sort();
+    const parents = [...parent ?? []].sort();
     const outputFolder = `node_modules/${name}`;
     const sourceFolder = sourcePath === ctx.workspace.path ? '' : sourcePath.replace(`${ctx.workspace.path}/`, '');
 
     const res: ManifestModule = {
-      main, name, version, local, internal, sourceFolder, outputFolder, roles, parents, prod, files
+      main, name, version, workspace, internal, sourceFolder, outputFolder, roles, parents, prod, files
     };
     return res;
   }
@@ -210,7 +208,7 @@ export class ManifestModuleUtil {
    * Produce all modules for a given manifest folder, adding in some given modules when developing framework
    */
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
-    const visitor = new ModuleDependencyVisitor(ctx);
+    const visitor = new ManifestPackageVisitor(ctx);
     const declared = await PackageUtil.visitPackages(visitor);
     const sorted = [...declared].sort((a, b) => a.name.localeCompare(b.name));
     const modules = await Promise.all(sorted.map(x => this.describeModule(ctx, x)));

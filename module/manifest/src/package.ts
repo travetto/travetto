@@ -1,9 +1,12 @@
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
 
-import type { ManifestContext, NodePackageManager, Package, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
 import { path } from './path';
 import { ManifestFileUtil } from './file';
+
+import type { Package, PackageNode, PackageVisitor, PackageWorkspaceEntry } from './types/package';
+import type { ManifestContext } from './types/context';
+import type { NodePackageManager } from './types/common';
 
 /**
  * Utilities for querying, traversing and reading package.json files.
@@ -57,23 +60,30 @@ export class PackageUtil {
   /**
    * Build a package visit req
    */
-  static packageReq<T>(sourcePath: string, prod: boolean, topLevel?: boolean): PackageVisitReq<T> {
-    return { pkg: this.readPackage(sourcePath), sourcePath, prod, topLevel };
+  static packageReq<T>(mod: string, cfg: Partial<Omit<PackageNode<T>, 'pkg' | 'sourcePath'>>): PackageNode<T> {
+    const pkg = this.readPackage(mod);
+    return {
+      pkg,
+      topLevel: false, prod: false,
+      workspace: !mod.includes('node_modules') || pkg.private === true,
+      ...cfg,
+      sourcePath: mod,
+    };
   }
 
   /**
    * Extract all dependencies from a package
    */
-  static getAllDependencies<T = unknown>(modulePath: string, local: boolean): PackageVisitReq<T>[] {
+  static getAllDependencies<T = unknown>(modulePath: string, workspace: boolean): PackageNode<T>[] {
     const pkg = this.readPackage(modulePath);
-    const children: Record<string, PackageVisitReq<T>> = {};
+    const children: Record<string, PackageNode<T>> = {};
     for (const [deps, prod] of [
       [pkg.dependencies, true],
-      ...(local ? [[pkg.devDependencies, false] as const] : []),
+      ...(workspace ? [[pkg.devDependencies, false] as const] : []),
     ] as const) {
       for (const [name, version] of Object.entries(deps ?? {})) {
         const depPath = this.resolveVersionPath(modulePath, version) ?? this.resolvePackagePath(name);
-        children[`${name}#${version}`] = this.packageReq<T>(depPath, prod, false);
+        children[`${name}#${version}`] = this.packageReq<T>(depPath, { prod });
       }
     }
     return Object.values(children).sort((a, b) => a.pkg.name.localeCompare(b.pkg.name));
@@ -100,10 +110,10 @@ export class PackageUtil {
    */
   static async visitPackages<T>(visitor: PackageVisitor<T>): Promise<Set<T>> {
 
-    const root = this.packageReq<T>(visitor.rootPath, false, true);
+    const root = this.packageReq<T>(visitor.rootPath, { topLevel: true });
 
     const seen = new Map<string, T>();
-    const queue: PackageVisitReq<T>[] = [...await visitor.init?.(root) ?? [], root];
+    const queue: PackageNode<T>[] = [...await visitor.init?.(root) ?? [], root];
     const out = new Set<T>();
 
     while (queue.length) {
@@ -121,14 +131,7 @@ export class PackageUtil {
         out.add(dep);
         await visitor.visit?.(req, dep);
         seen.set(key, dep);
-        const children = this.getAllDependencies<T>(
-          req.sourcePath,
-          // We consider a module local if its not in the node_modules
-          !req.sourcePath.includes('node_modules') && (
-            // And its the root or we are in a monorepo
-            root.sourcePath === req.sourcePath || !!root.pkg.workspaces
-          )
-        );
+        const children = this.getAllDependencies<T>(req.sourcePath, !!req.workspace);
         queue.push(...children.map(x => ({ ...x, parent: dep })));
       }
     }

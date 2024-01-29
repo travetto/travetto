@@ -4,9 +4,9 @@ import { Program, BaseExpression, Expression } from 'estree';
 import type { TrvEslintPlugin } from '@travetto/eslint';
 
 const groupTypeMap = {
-  node: ['node', 'travetto', 'local'],
-  travetto: ['travetto', 'local'],
-  local: ['local'],
+  node: ['node', 'travetto', 'workspace'],
+  travetto: ['travetto', 'workspace'],
+  workspace: ['workspace'],
 };
 
 interface TSAsExpression extends BaseExpression {
@@ -64,9 +64,9 @@ export const ImportOrder: TrvEslintPlugin = {
               continue;
             }
 
-            const lineType: typeof groupType = /^@travetto/.test(from) ? 'travetto' : /^[^.]/.test(from) ? 'node' : 'local';
+            const lineType: typeof groupType = /^@travetto/.test(from) ? 'travetto' : /^[^.]/.test(from) ? 'node' : 'workspace';
 
-            if (/module\/[^/]+\/doc\//.test(context.getFilename()) && lineType === 'local' && from.startsWith('..')) {
+            if (/module\/[^/]+\/doc\//.test(context.getFilename()) && lineType === 'workspace' && from.startsWith('..')) {
               context.report({ message: 'Doc does not support parent imports', node });
             }
 

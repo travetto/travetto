@@ -1,9 +1,9 @@
 // @ts-check
 
 /**
- * @typedef {import('../src/types').Package & { path:string }} Pkg
+ * @typedef {import('../src/types/package').Package & { path:string }} Pkg
  * @typedef {Pkg & { mono: boolean, manager: 'yarn'|'npm', resolve: (file:string) => string}} Workspace
- * @typedef {import('../src/types').ManifestContext} ManifestContext
+ * @typedef {import('../src/types/context').ManifestContext} ManifestContext
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -151,7 +151,8 @@ export function getManifestContext(folder) {
       path: workspace.path,
       mono: workspace.mono,
       manager: workspace.manager,
-      type: workspace.type ?? 'commonjs'
+      type: workspace.type ?? 'commonjs',
+      defaultEnv: workspace.travetto?.defaultEnv ?? 'local'
     },
     build: {
       compilerFolder: build.compilerFolder ?? COMPILER_FOLDER,

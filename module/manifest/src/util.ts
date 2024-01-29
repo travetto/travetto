@@ -1,8 +1,10 @@
 import { path } from './path';
-import { ManifestContext, ManifestRoot } from './types';
 import { ManifestModuleUtil } from './module';
 import { ManifestFileUtil } from './file';
 import { PackageUtil } from './package';
+
+import type { ManifestContext } from './types/context';
+import type { ManifestRoot } from './types/manifest';
 
 const MANIFEST_FILE = 'manifest.json';
 

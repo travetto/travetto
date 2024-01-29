@@ -33,7 +33,7 @@ class RuntimeIndexTests {
   @Test()
   async testModuleExpression() {
 
-    const found = RuntimeIndex.getModuleList('local');
+    const found = RuntimeIndex.getModuleList('workspace');
     assert(found.size >= 1);
     assert(found.has('@travetto/base'));
 
@@ -42,26 +42,26 @@ class RuntimeIndexTests {
     assert(found2.has('@travetto/base'));
     assert(found2.has('@travetto/manifest'));
 
-    found2 = RuntimeIndex.getModuleList('local', '*');
+    found2 = RuntimeIndex.getModuleList('workspace', '*');
     assert(found2.size > 1);
     assert(found2.has('@travetto/base'));
     assert(found2.has('@travetto/manifest'));
 
-    found2 = RuntimeIndex.getModuleList('local', '@travetto/*');
+    found2 = RuntimeIndex.getModuleList('workspace', '@travetto/*');
     assert(found2.size > 1);
     assert(found2.has('@travetto/base'));
     assert(found2.has('@travetto/manifest'));
 
-    let found3 = RuntimeIndex.getModuleList('local', '-@travetto/base');
+    let found3 = RuntimeIndex.getModuleList('workspace', '-@travetto/base');
     assert(found3.size === found.size - 1);
     assert(!found3.has('@travetto/base'));
 
-    found3 = RuntimeIndex.getModuleList('local', '*,-@travetto/base');
+    found3 = RuntimeIndex.getModuleList('workspace', '*,-@travetto/base');
     assert(found3.size === found2.size - 1);
     assert(!found3.has('@travetto/base'));
     assert(found3.has('@travetto/manifest'));
 
-    found3 = RuntimeIndex.getModuleList('local', '*,-@travetto/*');
+    found3 = RuntimeIndex.getModuleList('workspace', '*,-@travetto/*');
     assert(!found3.size);
     assert(!found3.has('@travetto/base'));
     assert(!found3.has('@travetto/manifest'));
