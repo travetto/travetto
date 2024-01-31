@@ -12,7 +12,8 @@ type DeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFi
 export type DeltaEvent = { file: string, type: DeltaEventType, module: string, sourceFile: string };
 
 const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$package', 'doc']);
-const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
+const VALID_OUTPUT_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
+const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>([...VALID_OUTPUT_TYPE, 'typings']);
 
 /**
  * Produce delta for the manifest
@@ -37,7 +38,7 @@ export class ManifestDeltaUtil {
       (await ManifestModuleUtil.scanFolder(root, left.main))
         .filter(x => {
           const type = ManifestModuleUtil.getFileType(x);
-          return type === 'ts' || type === 'typings' || type === 'js' || type === 'package-json';
+          return VALID_SOURCE_TYPE.has(type);
         })
         .map(x => ManifestModuleUtil.sourceToBlankExt(x.replace(`${root}/`, '')))
     );
@@ -77,7 +78,7 @@ export class ManifestDeltaUtil {
         continue;
       }
       for (const [name, type, date] of m.files?.[key] ?? []) {
-        if (VALID_SOURCE_TYPE.has(type)) {
+        if (VALID_OUTPUT_TYPE.has(type)) {
           out[name] = [name, type, date];
         }
       }

@@ -1,7 +1,10 @@
 import type { ManifestModuleRole, NodeModuleType } from './common';
 import type { ManifestContext } from './context';
 
+export const PackagePath = Symbol.for('@travetto/manifest:package-path');
+
 export type Package = {
+  [PackagePath]: string;
   name: string;
   type?: NodeModuleType;
   version: string;
@@ -48,32 +51,25 @@ export type Package = {
   publishConfig?: { access?: 'restricted' | 'public' };
 };
 
-type OrProm<T> = T | Promise<T>;
+export type PackageDepType = 'dependencies' | 'devDependencies' | 'optionalDependencies' | 'peerDependencies';
 
-export type PackageNode<T> = {
-  /** The package to visit */
+export type PackageVisitReq<T> = {
+  /** Request package */
   pkg: Package;
-  /** Is the module intended to be viewed as a main module, compiling all top level files beyond index */
-  mainLike?: boolean;
-  /** The path, on disk, to the module source */
-  sourcePath: string;
-  /** Dependency is direct to the main module or its part of the workspace global set */
-  topLevel?: boolean;
-  /** Should this package go to production */
-  prod: boolean;
-  /** Is the package a workspace module */
-  workspace?: boolean;
-  /** Parent node? */
+  /** Children to visit */
+  children: Record<string, string>;
+  /** Value */
+  value: T;
+  /** Parent */
   parent?: T;
 };
 
 export type PackageVisitor<T> = {
-  rootPath: string;
-  init?(node: PackageNode<T>): OrProm<undefined | void | PackageNode<T>[]>;
-  valid?(node: PackageNode<T>): boolean;
-  create(node: PackageNode<T>): OrProm<T>;
-  visit?(node: PackageNode<T>, item: T): OrProm<void>;
-  complete?(values: Set<T>): OrProm<Set<T> | undefined>;
+  create(pkg: Package, cfg?: Partial<T>): PackageVisitReq<T>;
+  init(): Promise<Iterable<PackageVisitReq<T>>>;
+  valid(req: PackageVisitReq<T>): boolean;
+  visit(req: PackageVisitReq<T>): void;
+  complete(values: Iterable<T>): Promise<Iterable<T>>;
 };
 
-export type PackageWorkspaceEntry = { name: string, sourcePath: string };
+export type PackageWorkspaceEntry = { name: string, path: string };

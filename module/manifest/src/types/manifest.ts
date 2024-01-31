@@ -1,6 +1,6 @@
 import type { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleRole } from './common';
 import type { ManifestContext } from './context';
-import type { PackageNode } from './package';
+import { Package } from './package';
 
 export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestModuleRole];
 
@@ -61,9 +61,17 @@ export type IndexedModule = ManifestModuleCore & {
 };
 
 /** Module dependency, used in dependency visiting */
-export type ManifestPackageNode = ManifestDepCore & PackageNode<Set<string>> & {
-  /** Set of child package names */
-  children: Set<string>;
-  /** Defined roles for a given module */
-  roles: Set<ManifestModuleRole>;
+export type PackageModule = Omit<ManifestModule, 'files' | 'parents' | 'roles'> & {
+  state: {
+    /** Travetto package info */
+    travetto?: Package['travetto'];
+    /** Prod dependencies */
+    prodDeps: Set<string>;
+    /** Set of parent package names */
+    parentSet: Set<string>;
+    /** Set of child package names */
+    childSet: Set<string>;
+    /** Defined roles for a given module */
+    roleSet: Set<ManifestModuleRole>;
+  };
 };
