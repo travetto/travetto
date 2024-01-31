@@ -4,7 +4,7 @@ import { execSync } from 'node:child_process';
 import { path } from './path';
 import { ManifestFileUtil } from './file';
 
-import type { Package, PackageNode, PackageVisitor, PackageWorkspaceEntry } from './types/package';
+import { PackagePath, type Package, type PackageVisitor, type PackageWorkspaceEntry } from './types/package';
 import type { ManifestContext } from './types/context';
 import type { NodePackageManager } from './types/common';
 
@@ -34,9 +34,9 @@ export class PackageUtil {
   /**
    * Resolve version path, if file: url
    */
-  static resolveVersionPath(rootPath: string, ver: string): string | undefined {
+  static resolveVersionPath(root: Package, ver: string): string | undefined {
     if (ver.startsWith('file:')) {
-      return path.resolve(rootPath, ver.replace('file:', ''));
+      return path.resolve(this.getPackagePath(root), ver.replace('file:', ''));
     } else {
       return;
     }
@@ -58,38 +58,6 @@ export class PackageUtil {
   }
 
   /**
-   * Build a package visit req
-   */
-  static packageReq<T>(mod: string, cfg: Partial<Omit<PackageNode<T>, 'pkg' | 'sourcePath'>>): PackageNode<T> {
-    const pkg = this.readPackage(mod);
-    return {
-      pkg,
-      topLevel: false, prod: false,
-      workspace: !mod.includes('node_modules') || pkg.private === true,
-      ...cfg,
-      sourcePath: mod,
-    };
-  }
-
-  /**
-   * Extract all dependencies from a package
-   */
-  static getAllDependencies<T = unknown>(modulePath: string, workspace: boolean): PackageNode<T>[] {
-    const pkg = this.readPackage(modulePath);
-    const children: Record<string, PackageNode<T>> = {};
-    for (const [deps, prod] of [
-      [pkg.dependencies, true],
-      ...(workspace ? [[pkg.devDependencies, false] as const] : []),
-    ] as const) {
-      for (const [name, version] of Object.entries(deps ?? {})) {
-        const depPath = this.resolveVersionPath(modulePath, version) ?? this.resolvePackagePath(name);
-        children[`${name}#${version}`] = this.packageReq<T>(depPath, { prod });
-      }
-    }
-    return Object.values(children).sort((a, b) => a.pkg.name.localeCompare(b.pkg.name));
-  }
-
-  /**
    * Read a package.json from a given folder
    */
   static readPackage(modulePath: string, forceRead = false): Package {
@@ -102,40 +70,47 @@ export class PackageUtil {
 
     res.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for npx execution
 
+    res[PackagePath] = modulePath;
     return res;
+  }
+
+  /**
+   * Get the package path
+   */
+  static getPackagePath(pkg: Package): string {
+    return pkg[PackagePath];
   }
 
   /**
    * Visit packages with ability to track duplicates
    */
-  static async visitPackages<T>(visitor: PackageVisitor<T>): Promise<Set<T>> {
-
-    const root = this.packageReq<T>(visitor.rootPath, { topLevel: true });
-
-    const seen = new Map<string, T>();
-    const queue: PackageNode<T>[] = [...await visitor.init?.(root) ?? [], root];
-    const out = new Set<T>();
+  static async visitPackages<T>(visitor: PackageVisitor<T>): Promise<Iterable<T>> {
+    const seen = new Set<T>();
+    const queue = [...await visitor.init()];
 
     while (queue.length) {
-      const req = queue.shift(); // Visit initial set first
+      const node = queue.shift()!; // Visit initial set first
 
-      if (!req || (visitor.valid && !visitor.valid(req))) {
+      if (!visitor.valid(node)) {
         continue;
       }
 
-      const key = req.sourcePath;
-      if (seen.has(key)) {
-        await visitor.visit?.(req, seen.get(key)!);
+      visitor.visit(node);
+
+      if (seen.has(node.value)) {
+        continue;
       } else {
-        const dep = await visitor.create(req);
-        out.add(dep);
-        await visitor.visit?.(req, dep);
-        seen.set(key, dep);
-        const children = this.getAllDependencies<T>(req.sourcePath, !!req.workspace);
-        queue.push(...children.map(x => ({ ...x, parent: dep })));
+        seen.add(node.value);
       }
+
+      const children = Object.entries(node.children)
+        .map(([n, v]) => this.readPackage(this.resolveVersionPath(node.pkg, v) ?? this.resolvePackagePath(n)))
+        .map(pkg => ({ ...visitor.create(pkg), parent: node.value }));
+
+      queue.push(...children);
     }
-    return (await visitor.complete?.(out)) ?? out;
+
+    return await visitor.complete(seen);
   }
 
   /**
@@ -151,7 +126,7 @@ export class PackageUtil {
           case 'yarn':
           case 'npm': {
             const res = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
-            out = res.map(d => ({ sourcePath: d.location, name: d.name }));
+            out = res.map(d => ({ path: path.resolve(ctx.workspace.path, d.location), name: d.name }));
             break;
           }
         }

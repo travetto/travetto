@@ -2,10 +2,10 @@ import fs from 'node:fs/promises';
 
 import { path } from './path';
 import { PackageUtil } from './package';
-import { ManifestPackageVisitor } from './dependencies';
+import { PackageModuleVisitor } from './dependencies';
 
 import type { ManifestModuleFileType, ManifestModuleRole, ManifestModuleFolderType } from './types/common';
-import type { ManifestModuleFile, ManifestModule, ManifestPackageNode } from './types/manifest';
+import type { ManifestModuleFile, ManifestModule, PackageModule } from './types/manifest';
 import type { ManifestContext } from './types/context';
 
 const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
@@ -45,9 +45,10 @@ export class ManifestModuleUtil {
   /**
    * Simple file scanning
    */
-  static async scanFolder(folder: string, mainLike = false): Promise<string[]> {
-    if (!mainLike && folder in this.#scanCache) {
-      return this.#scanCache[folder];
+  static async scanFolder(folder: string, full = false): Promise<string[]> {
+    const key = `${folder}|${full}`;
+    if (key in this.#scanCache) {
+      return this.#scanCache[key];
     }
 
     if (!await fs.stat(folder).catch(() => false)) {
@@ -71,7 +72,7 @@ export class ManifestModuleUtil {
       }
 
       for (const sub of await fs.readdir(top)) {
-        const valid = !sub.startsWith('.') && (depth > 0 || mainLike);
+        const valid = !sub.startsWith('.') && (depth > 0 || full);
         const stat = await fs.stat(`${top}/${sub}`);
         if (stat.isFile()) {
           if (valid || STD_TOP_FILES.has(sub)) {
@@ -85,11 +86,7 @@ export class ManifestModuleUtil {
       }
     }
 
-    if (!mainLike) {
-      this.#scanCache[folder] = out;
-    }
-
-    return out;
+    return this.#scanCache[key] = out;
   }
 
   /**
@@ -175,12 +172,13 @@ export class ManifestModuleUtil {
   /**
    * Visit a module and describe files, and metadata
    */
-  static async describeModule(ctx: ManifestContext, dep: ManifestPackageNode): Promise<ManifestModule> {
-    const { main, mainLike, workspace, name, version, sourcePath, prod, parent, internal } = dep;
+  static async describeModule(ctx: ManifestContext, mod: PackageModule): Promise<ManifestModule> {
+    const { state, ...rest } = mod;
+    const sourcePath = path.resolve(ctx.workspace.path, rest.sourceFolder);
 
     const files: ManifestModule['files'] = {};
 
-    for (const file of await this.scanFolder(sourcePath, mainLike)) {
+    for (const file of await this.scanFolder(sourcePath, rest.main)) {
       // Group by top folder
       const moduleFile = file.replace(`${sourcePath}/`, '');
       const entry = await this.transformFile(moduleFile, file);
@@ -188,30 +186,20 @@ export class ManifestModuleUtil {
       (files[key] ??= []).push(entry);
     }
 
-    // Refine non-main source, remove anything in root that is source (doesn't include $index)
-    if (!mainLike) {
-      files.$root = files.$root?.filter(([file, type]) => type !== 'ts');
-    }
-
-    const roles = [...dep.roles ?? []].sort();
-    const parents = [...parent ?? []].sort();
-    const outputFolder = `node_modules/${name}`;
-    const sourceFolder = sourcePath === ctx.workspace.path ? '' : sourcePath.replace(`${ctx.workspace.path}/`, '');
-
-    const res: ManifestModule = {
-      main, name, version, workspace, internal, sourceFolder, outputFolder, roles, parents, prod, files
+    return {
+      ...rest,
+      files,
+      roles: [...state.roleSet].sort(),
+      parents: [...state.parentSet].sort()
     };
-    return res;
   }
 
   /**
    * Produce all modules for a given manifest folder, adding in some given modules when developing framework
    */
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
-    const visitor = new ManifestPackageVisitor(ctx);
-    const declared = await PackageUtil.visitPackages(visitor);
-    const sorted = [...declared].sort((a, b) => a.name.localeCompare(b.name));
-    const modules = await Promise.all(sorted.map(x => this.describeModule(ctx, x)));
+    const pkgs = await PackageUtil.visitPackages(new PackageModuleVisitor(ctx));
+    const modules = await Promise.all([...pkgs].map(x => this.describeModule(ctx, x)));
     return Object.fromEntries(modules.map(m => [m.name, m]));
   }
 

@@ -1,5 +1,5 @@
 import { RuntimeIndex } from '@travetto/manifest';
-import { Util } from '@travetto/base';
+import { ExecUtil, Util } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
 
 import { CommandUtil } from '../../src/util';
@@ -102,9 +102,9 @@ export class ServiceUtil {
           }
         }
 
-        const promise = await container.setUnref(false).run(svc.args ?? []);
+        const child = await container.setUnref(false).run(svc.args ?? []);
+        const out = (await ExecUtil.getResult(child)).stdout;
 
-        const out = (await promise).stdout;
         const running = yield* this.isRunning(svc, 'startup', svc.startupTimeout ?? 5000);
         if (!running) {
           yield event('failed', { failure: 'Failed to start service correctly' });
