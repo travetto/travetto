@@ -11,6 +11,7 @@ export class EmailEditorCommand {
 
   preMain(): void {
     Env.TRV_DYNAMIC.set(true);
+    Env.TRV_ROLE.set('build');
   }
 
   async main(): Promise<void> {

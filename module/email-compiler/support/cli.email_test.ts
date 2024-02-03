@@ -2,6 +2,7 @@ import { path } from '@travetto/manifest';
 import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
+import { Env } from '@travetto/base';
 
 import { EditorService } from './bin/editor';
 
@@ -10,6 +11,10 @@ import { EditorService } from './bin/editor';
  */
 @CliCommand({ addEnv: true })
 export class EmailTestCommand implements CliCommandShape {
+
+  preMain(): void {
+    Env.TRV_ROLE.set('build');
+  }
 
   async main(file: string, to: string): Promise<void> {
     file = path.resolve(file);

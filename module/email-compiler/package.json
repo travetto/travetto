@@ -47,7 +47,10 @@
     }
   },
   "travetto": {
-    "displayName": "Email Compilation Support"
+    "displayName": "Email Compilation Support",
+    "roles": [
+      "build"
+    ]
   },
   "publishConfig": {
     "access": "public"
