@@ -31,7 +31,7 @@ Base is the foundation of all <a target="_blank" class="external-link" href="htt
 
 <h2 id="environment-support">Environment Support</h2>
 
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L104">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
 
   <figure class="code">
     <figcaption class="code">Base Known Environment Flags
@@ -87,11 +87,11 @@ The functionality we support for testing and retrieving environment information 
 
 <h3 id="environment-property">Environment Property</h3>
 
-For a given <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8">EnvProp</a>, we support the ability to access different properties as a means to better facilitate environment variable usage.
+For a given <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9">EnvProp</a>, we support the ability to access different properties as a means to better facilitate environment variable usage.
 
   <figure class="code">
     <figcaption class="code">EnvProp Shape
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">EnvProp<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
@@ -123,17 +123,17 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
 
 <h3 id="runtime-flags">Runtime Flags</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L104">Env</a> also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to <code class="item field">process.env</code> values with a little bit of logic sprinkled in.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105">Env</a> also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to <code class="item field">process.env</code> values with a little bit of logic sprinkled in.
 
   <figure class="code">
     <figcaption class="code">Provided Flags
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L104">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">const</span> Env <span class="token operator">=</span> <span class="token function">delegate</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/** Get name */</span>
   <span class="token keyword">get</span> <span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_ENV</span> <span class="token operator">||</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">prod</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token string">'local'</span> <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_ENV</span> <span class="token operator">||</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">prod</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">?</span> RuntimeContext<span class="token punctuation">.</span>workspace<span class="token punctuation">.</span>defaultEnv <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
 
   <span class="token comment">/** Are we in development mode */</span>
@@ -158,7 +158,7 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
 
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.<br><br>
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> with a category of 'notfound'.  <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10">ResourceLoader</a> extends <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12">FileLoader</a> and utilizes the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L104">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10">ResourceLoader</a> extends <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12">FileLoader</a> and utilizes the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
 
 <h2 id="standard-error-support">Standard Error Support</h2>
 

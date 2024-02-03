@@ -246,7 +246,8 @@ Initialized {
       path: './doc-exec',
       mono: false,
       manager: 'npm',
-      type: 'commonjs'
+      type: 'commonjs',
+      defaultEnv: 'local'
     }
   },
   env: {
@@ -329,7 +330,8 @@ Initialized {
       path: './doc-exec',
       mono: false,
       manager: 'npm',
-      type: 'commonjs'
+      type: 'commonjs',
+      defaultEnv: 'local'
     }
   },
   env: {

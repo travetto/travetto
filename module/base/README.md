@@ -27,7 +27,7 @@ Base is the foundation of all [Travetto](https://travetto.dev) applications.  It
    *  Shutdown Management
 
 ## Environment Support
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L104) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
 
 **Code: Base Known Environment Flags**
 ```typescript
@@ -79,7 +79,7 @@ interface TravettoEnv {
 ```
 
 ### Environment Property
-For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8), we support the ability to access different properties as a means to better facilitate environment variable usage.
+For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9), we support the ability to access different properties as a means to better facilitate environment variable usage.
 
 **Code: EnvProp Shape**
 ```typescript
@@ -111,14 +111,14 @@ export class EnvProp<T> {
 ```
 
 ### Runtime Flags
-[Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L104) also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to `process.env` values with a little bit of logic sprinkled in.
+[Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105) also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to `process.env` values with a little bit of logic sprinkled in.
 
 **Code: Provided Flags**
 ```typescript
 export const Env = delegate({
   /** Get name */
   get name(): string | undefined {
-    return process.env.TRV_ENV || (!prod() ? 'local' : undefined);
+    return process.env.TRV_ENV || (!prod() ? RuntimeContext.workspace.defaultEnv : undefined);
   },
 
   /** Are we in development mode */
@@ -144,7 +144,7 @@ The primary access patterns for resources, is to directly request a file, and to
 
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
 
-The [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10) extends [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) and utilizes the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L104)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10) extends [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) and utilizes the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Standard Error Support
 While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 

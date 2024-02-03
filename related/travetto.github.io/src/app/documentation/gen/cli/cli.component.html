@@ -61,7 +61,7 @@ This module also has a tight integration with the <a target="_blank" class="exte
 At it's heart, a cli command is the contract defined by what flags, and what arguments the command supports. Within the framework this requires three criteria to be met:
 <ul> <li>The file must be located in the <code class="item path">support/</code> folder, and have a name that matches <code class="item path">cli.*.ts</code></li>
 <li>The file must be a class that has a main method</li>
-<li>The class must use the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L16">&#64;CliCommand</a> decorator</li>
+<li>The class must use the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15">&#64;CliCommand</a> decorator</li>
 </ul>
 
   <figure class="code">
@@ -103,7 +103,7 @@ The pattern is that underscores(_) translate to colons (:), and the <code class=
 
 <h2 id="binding-flags">Binding Flags</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L16">&#64;CliCommand</a> is a wrapper for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">&#64;Schema</a>, and so every class that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L16">&#64;CliCommand</a> decorator is now a full <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">&#64;Schema</a> class. The fields of the class represent the flags that are available to the command.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15">&#64;CliCommand</a> is a wrapper for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">&#64;Schema</a>, and so every class that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15">&#64;CliCommand</a> decorator is now a full <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">&#64;Schema</a> class. The fields of the class represent the flags that are available to the command.
 
   <figure class="code">
     <figcaption class="code">Basic Command with Flag
@@ -147,7 +147,7 @@ As you can see the command now has the support of a basic boolean flag to determ
 HELLO</code></pre>
   </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L16">&#64;CliCommand</a> supports the following data types for flags:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15">&#64;CliCommand</a> supports the following data types for flags:
 <ul> <li>Boolean values</li>
 <li>Number values. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L172">&#64;Integer</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L178">&#64;Float</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L166">&#64;Precision</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107">&#64;Min</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117">&#64;Max</a> decorators help provide additional validation.</li>
 <li>String values. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107">&#64;MinLength</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117">&#64;MaxLength</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99">&#64;Match</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L78">&#64;Enum</a> provide additional constraints</li>
@@ -461,7 +461,7 @@ Ultimately, after resolution, the content of these files will be injected inline
 
 <h2 id="vscode-integration">VSCode Integration</h2>
 
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> does expose a cli target <code class="item input">run:rest</code> that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the <a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a>. This is achieved by setting the <code class="item input">runTarget</code> field on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L16">&#64;CliCommand</a> decorator.  This means the target will be visible within the editor tooling.
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> does expose a cli target <code class="item input">run:rest</code> that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the <a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a>. This is achieved by setting the <code class="item input">runTarget</code> field on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15">&#64;CliCommand</a> decorator.  This means the target will be visible within the editor tooling.
 
   <figure class="code">
     <figcaption class="code">Simple Run Target
@@ -579,7 +579,7 @@ If the goal is to run a more complex application, which may include depending on
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-As noted in the example above, <code class="item input">fields</code> is specified in this execution, with support for <code class="item input">module</code>, and <code class="item input">env</code>. These env flag is directly tied to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L104">Runtime</a> <code class="item field">name</code> defined in the <a class="module-link" routerLink="/docs/base" title="Environment config and common utilities for travetto applications.">Base</a> module. <br><br>
+As noted in the example above, <code class="item input">fields</code> is specified in this execution, with support for <code class="item input">module</code>, and <code class="item input">env</code>. These env flag is directly tied to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105">Runtime</a> <code class="item field">name</code> defined in the <a class="module-link" routerLink="/docs/base" title="Environment config and common utilities for travetto applications.">Base</a> module. <br><br>
 The <code class="item input">module</code> field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 <h3 id="custom-validation">Custom Validation</h3>
@@ -607,7 +607,7 @@ A simple example of the validation can be found in the <code class="item input">
 
   <figure class="code">
     <figcaption class="code">Simple Validation Example
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/doc/support/cli.doc.ts#L41">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/doc/support/cli.doc.ts#L42">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">async</span> <span class="token function">validate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>CliValidationError <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
