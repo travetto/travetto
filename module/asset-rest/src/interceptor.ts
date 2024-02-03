@@ -1,4 +1,4 @@
-import busboy from 'busboy';
+import busboy, { type BusboyHeaders } from '@fastify/busboy';
 
 import { Asset } from '@travetto/asset';
 import { Inject, Injectable } from '@travetto/di';
@@ -50,10 +50,11 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     const allCleanups: Function[] = [];
     const managedCleanups: Function[] = [];
 
-    const uploader = busboy({ headers: req.headers, limits: { fileSize: largestMax } })
-      .on('file', (field, stream, meta) =>
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const uploader = busboy({ headers: req.headers as BusboyHeaders, limits: { fileSize: largestMax } })
+      .on('file', (field, stream, filename) =>
         uploads.push(
-          AssetRestUtil.writeToAsset(stream, meta.filename, config.files![field]?.maxSize ?? largestMax)
+          AssetRestUtil.writeToAsset(stream, filename, config.files![field]?.maxSize ?? largestMax)
             .then(([asset, cleanup]) => {
               if (config.deleteFiles !== false) {
                 managedCleanups.push(cleanup);

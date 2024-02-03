@@ -25,11 +25,10 @@
     "directory": "module/asset-rest"
   },
   "dependencies": {
+    "@fastify/busboy": "^2.1.0",
     "@travetto/asset": "^4.0.0-rc.0",
     "@travetto/config": "^4.0.0-rc.0",
-    "@travetto/rest": "^4.0.0-rc.0",
-    "@types/busboy": "^1.5.3",
-    "busboy": "^1.6.0"
+    "@travetto/rest": "^4.0.0-rc.0"
   },
   "peerDependencies": {
     "@travetto/test": "^4.0.0-rc.0"

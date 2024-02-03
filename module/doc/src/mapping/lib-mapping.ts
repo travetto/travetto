@@ -98,7 +98,7 @@ export const LIB_MAPPING = {
   // Rest
   Express: { title: 'express', href: 'https://expressjs.com' },
   Passport: { title: 'passport', href: 'http://passportjs.org' },
-  Busboy: { title: 'busboy', href: 'https://github.com/mscdex/busboy' },
+  Busboy: { title: '@fastify/busboy', href: 'https://github.com/fastify/busboy' },
   Cookies: { title: 'cookies', href: 'https://www.npmjs.com/package/cookies' },
   ServerlessExpress: { title: 'aws-serverless-express', href: 'https://github.com/awslabs/aws-serverless-express/blob/master/README.md' },
   AwsLambdaFastify: { title: '@fastify/aws-lambda', href: 'https://github.com/fastify/aws-lambda-fastify/blob/master/README.md' },
