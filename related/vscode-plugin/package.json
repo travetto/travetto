@@ -40,8 +40,8 @@
     "@travetto/pack": "^4.0.0-rc.0",
     "@travetto/log": "^4.0.0-rc.0",
     "@travetto/test": "^4.0.0-rc.0",
-    "@types/node": "^20.8.10",
-    "@types/vscode": "^1.83.1"
+    "@types/node": "^20.11.16",
+    "@types/vscode": "^1.86.0"
   },
   "dependencies": {
     "@travetto/base": "^4.0.0-rc.0",

@@ -33,7 +33,7 @@
     "@parcel/watcher": "^2.4.0",
     "@travetto/manifest": "^4.0.0-rc.0",
     "@travetto/transformer": "^4.0.0-rc.0",
-    "@types/node": "^20.11.5"
+    "@types/node": "^20.11.16"
   },
   "peerDependencies": {
     "@travetto/cli": "^4.0.0-rc.0"

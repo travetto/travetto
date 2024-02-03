@@ -115,7 +115,7 @@ export class AssertCheck {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'greaterThanEqual': assertFn((actual as number) >= (expected as number), message); break;
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        case 'ok': assertFn.apply(null, args as [unknown, string]); break; // eslint-disable-line prefer-spread
+        case 'ok': assertFn(...args as [unknown, string]); break; // eslint-disable-line prefer-spread
         default:
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           if (fn && assert[fn as keyof typeof assert]) { // Assert call

@@ -1,6 +1,5 @@
 import https from 'node:https';
 import compress from '@fastify/compress';
-
 import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 
 import { Request, Response, RestConfig, RouteConfig, RestServer } from '@travetto/rest';
