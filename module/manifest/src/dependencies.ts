@@ -40,13 +40,12 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
 
     // If we have 'withModules'
     for (const [name, type] of Object.entries(root.travetto?.build?.withModules ?? {})) {
-      if (type === true) {
-        (main.devDependencies ??= {})[name] = '0.0.0';
-      }
-      globals.push(this.create(
+      const req = this.create(
         PackageUtil.readPackage(PackageUtil.resolvePackagePath(name)),
         { main: type === 'main', workspace: true }
-      ));
+      );
+      req.value.state.withMainParentSet.add(main.name);
+      globals.push(req);
     }
 
     return globals;
@@ -62,19 +61,19 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
   /**
    * Build a package module
    */
-  create(pkg: Package, cfg: Partial<PackageModule> = {}): PackageVisitReq<PackageModule> {
+  create(pkg: Package, { main, workspace, prod = false }: Partial<PackageModule> = {}): PackageVisitReq<PackageModule> {
     const sourcePath = PackageUtil.getPackagePath(pkg);
     const value = this.#cache[sourcePath] ??= {
-      workspace: this.#workspaceModules.has(pkg.name),
-      prod: false,
-      internal: pkg.private === true,
+      main,
+      prod,
       name: pkg.name,
       version: pkg.version,
-      outputFolder: `node_modules/${pkg.name}`,
+      workspace: workspace ?? this.#workspaceModules.has(pkg.name),
+      internal: pkg.private === true,
       sourceFolder: sourcePath === this.ctx.workspace.path ? '' : sourcePath.replace(`${this.ctx.workspace.path}/`, ''),
-      ...cfg,
+      outputFolder: `node_modules/${pkg.name}`,
       state: {
-        childSet: new Set(), parentSet: new Set(), roleSet: new Set(),
+        childSet: new Set(), parentSet: new Set(), roleSet: new Set(), withMainParentSet: new Set(),
         travetto: pkg.travetto, prodDeps: new Set(Object.keys(pkg.dependencies ?? {}))
       }
     };
@@ -147,6 +146,9 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
     for (const el of mods) {
       if (el.main) {
         el.state.roleSet.add('std');
+        for (const p of el.state.withMainParentSet) {
+          el.state.parentSet.add(p);
+        }
       }
     }
 

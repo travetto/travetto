@@ -209,7 +209,7 @@ export class CompilerSetup {
     // Write manifest
     await LogUtil.withLogger('manifest', async log => {
       await ManifestUtil.writeManifest(manifest);
-      log('debug', `Wrote manifest ${ctx.workspace.name}`, delta.length);
+      log('debug', `Wrote manifest ${ctx.workspace.name}`);
 
       // Update all manifests when in mono repo
       if (delta.length && ctx.workspace.mono) {

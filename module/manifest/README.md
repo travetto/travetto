@@ -35,7 +35,7 @@ During the compilation process, it is helpful to know how the output content dif
 ## Class and Function Metadata
 For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every `class` is decorated with an additional field of `Ⲑid`.  `Ⲑid` represents a computed id that is tied to the file/class combination. 
 
-`Ⲑid` is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the [RuntimeIndex](https://github.com/travetto/travetto/tree/main/module/manifest/src/runtime.ts#L11) using the `getFunctionMetadata` method.
+`Ⲑid` is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the [RuntimeIndex](https://github.com/travetto/travetto/tree/main/module/manifest/src/runtime.ts#L14) using the `getFunctionMetadata` method.
 
 **Code: Test Class**
 ```typescript
@@ -97,7 +97,8 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
     "path": "<generated>",
     "mono": true,
     "manager": "npm",
-    "type": "commonjs"
+    "type": "commonjs",
+    "defaultEnv": "local"
   },
   "build": {
     "compilerFolder": ".trv/compiler",
@@ -115,15 +116,15 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
   "modules": {
     "@travetto/manifest": {
       "main": true,
+      "prod": true,
       "name": "@travetto/manifest",
       "version": "x.x.x",
-      "local": true,
+      "workspace": true,
       "internal": false,
       "sourceFolder": "module/manifest",
       "outputFolder": "node_modules/@travetto/manifest",
       "roles": [ "std" ],
       "parents": [],
-      "prod": true,
       "files": {
         "$root": [
           [ "DOC.html", "unknown", 1868155200000 ],
@@ -161,8 +162,11 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
           [ "src/package.ts", "ts", 1868155200000 ],
           [ "src/path.ts", "ts", 1868155200000 ],
           [ "src/runtime.ts", "ts", 1868155200000 ],
-          [ "src/types.ts", "ts", 1868155200000 ],
-          [ "src/util.ts", "ts", 1868155200000 ]
+          [ "src/util.ts", "ts", 1868155200000 ],
+          [ "src/types/common.ts", "ts", 1868155200000 ],
+          [ "src/types/context.ts", "ts", 1868155200000 ],
+          [ "src/types/manifest.ts", "ts", 1868155200000 ],
+          [ "src/types/package.ts", "ts", 1868155200000 ]
         ],
         "bin": [
           [ "bin/context.d.ts", "typings", 1868155200000 ],

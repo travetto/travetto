@@ -188,9 +188,9 @@ export class ManifestModuleUtil {
 
     return {
       ...rest,
-      files,
       roles: [...state.roleSet].sort(),
-      parents: [...state.parentSet].sort()
+      parents: [...state.parentSet].sort(),
+      files
     };
   }
 

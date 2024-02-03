@@ -73,5 +73,7 @@ export type PackageModule = Omit<ManifestModule, 'files' | 'parents' | 'roles'> 
     childSet: Set<string>;
     /** Defined roles for a given module */
     roleSet: Set<ManifestModuleRole>;
+    /** Set of parent package names, */
+    withMainParentSet: Set<string>;
   };
 };

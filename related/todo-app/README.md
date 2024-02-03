@@ -322,7 +322,8 @@ npx trv run:rest
       path: '<workspace-root>',
       mono: true,
       manager: 'npm',
-      type: 'commonjs'
+      type: 'commonjs',
+      defaultEnv: 'local'
     }
   },
   env: {
