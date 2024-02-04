@@ -1,8 +1,7 @@
 {
   "name": "@travetto-doc/cli",
-  "dependencies": {
-    "@travetto/cli": "^3.0.0-rc.13",
-    "@travetto/compiler": "^3.0.0-rc.16"
+  "devDependencies": {
+    "@travetto/compiler": "^4.0.0-rc.0"
   },
   "travetto": {
     "build": {
