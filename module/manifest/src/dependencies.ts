@@ -58,7 +58,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
   /**
    * Build a package module
    */
-  create(pkg: Package, { main, workspace, prod = false, ignoreRoles }: CreateOpts = {}): PackageVisitReq<PackageModule> {
+  create(pkg: Package, { main, workspace, prod = false, ignoreRoles = false }: CreateOpts = {}): PackageVisitReq<PackageModule> {
     const sourcePath = PackageUtil.getPackagePath(pkg);
     const value = this.#cache[sourcePath] ??= {
       main,
@@ -70,9 +70,8 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
       sourceFolder: sourcePath === this.ctx.workspace.path ? '' : sourcePath.replace(`${this.ctx.workspace.path}/`, ''),
       outputFolder: `node_modules/${pkg.name}`,
       state: {
-        childSet: new Set(), parentSet: new Set(), roleSet: new Set(),
+        childSet: new Set(), parentSet: new Set(), roleSet: new Set(), ignoreRoles,
         travetto: pkg.travetto, prodDeps: new Set(Object.keys(pkg.dependencies ?? {})),
-        ignoreRoles: !!ignoreRoles,
       }
     };
 
