@@ -71,7 +71,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
       outputFolder: `node_modules/${pkg.name}`,
       state: {
         childSet: new Set(), parentSet: new Set(), roleSet: new Set(), ignoreRoles,
-        travetto: pkg.travetto, prodDeps: new Set(Object.keys(pkg.dependencies ?? {})),
+        travetto: pkg.travetto, prodDeps: new Set(Object.keys(pkg.dependencies ?? {}))
       }
     };
 
