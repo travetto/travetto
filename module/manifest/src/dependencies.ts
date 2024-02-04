@@ -89,6 +89,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
    * Visit dependency
    */
   visit({ value: mod, parent }: PackageVisitReq<PackageModule>): void {
+    if (mod.name === this.ctx.main.name) { return; } // Skip root
     if (parent) {
       mod.state.parentSet.add(parent.name);
       parent.state.childSet.add(mod.name);
@@ -102,11 +103,6 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
     const main = [...mods].find(x => x.name === this.ctx.main.name)!;
     for (const el of mods) {
       el.state.childSet.delete(main.name); // Remove main as a child dependency
-      if (el.name !== main.name) {
-        el.state.childSet.delete(main.name);
-      } else {
-        el.state.parentSet.clear();
-      }
     }
 
     const mapping = new Map([...mods].map(el => [el.name, { parent: new Set(el.state.parentSet), el }]));
