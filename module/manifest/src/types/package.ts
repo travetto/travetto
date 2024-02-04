@@ -65,7 +65,7 @@ export type PackageVisitReq<T> = {
 };
 
 export type PackageVisitor<T> = {
-  create(pkg: Package, cfg?: Partial<T>): PackageVisitReq<T>;
+  create(pkg: Package): PackageVisitReq<T>;
   init(): Promise<Iterable<PackageVisitReq<T>>>;
   valid(req: PackageVisitReq<T>): boolean;
   visit(req: PackageVisitReq<T>): void;
