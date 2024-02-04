@@ -101,17 +101,13 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
    */
   async complete(mods: Iterable<PackageModule>): Promise<PackageModule[]> {
     const main = [...mods].find(x => x.name === this.ctx.main.name)!;
-    for (const el of mods) {
-      el.state.childSet.delete(main.name); // Remove main as a child dependency
-    }
-
     const mapping = new Map([...mods].map(el => [el.name, { parent: new Set(el.state.parentSet), el }]));
 
     // All first-level dependencies should have role filled in (for propagation)
     for (const dep of [...mods].filter(x => x.state.ignoreRoles)) {
       for (const c of dep.state.childSet) { // Visit children
         const cDep = mapping.get(c)!.el;
-        if (cDep.state.ignoreRoles) { continue; }
+        if (c === main.name || cDep.state.ignoreRoles) { continue; }
         // Set roles for all top level modules
         for (const role of cDep.state.travetto?.roles ?? ['std']) {
           cDep.state.roleSet.add(role);
