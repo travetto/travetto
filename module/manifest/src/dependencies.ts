@@ -33,19 +33,15 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
         (await PackageUtil.resolveWorkspaces(this.ctx)).map(x => [x.name, x.path])
       );
       for (const [, loc] of workspaceModules) {
-        globals.push(this.create(
-          PackageUtil.readPackage(loc),
-          { main: true, workspace: true, ignoreRoles: true }
-        ));
+        const depPkg = PackageUtil.readPackage(loc);
+        globals.push(this.create(depPkg, { main: true, workspace: true, ignoreRoles: true }));
       }
     } else {
       // If we have 'withModules' at workspace root
       const root = PackageUtil.readPackage(this.ctx.workspace.path);
       for (const [name, type] of Object.entries(root.travetto?.build?.withModules ?? {})) {
-        globals.push(this.create(
-          PackageUtil.readPackage(PackageUtil.resolvePackagePath(name)),
-          { main: type === 'main', workspace: true }
-        ));
+        const depPkg = PackageUtil.readPackage(PackageUtil.resolvePackagePath(name));
+        globals.push(this.create(depPkg, { main: type === 'main', workspace: true }));
       }
     }
 
