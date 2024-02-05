@@ -5,7 +5,7 @@ import type { Package, PackageDepType, PackageVisitReq, PackageVisitor } from '.
 import type { ManifestContext } from './types/context';
 import type { PackageModule } from './types/manifest';
 
-type CreateOpts = Partial<Record<'main' | 'workspace' | 'prod' | 'ignoreRoles', boolean>>;
+type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'prod'>> & { ignoreRoles?: boolean };
 
 /**
  * Used for walking dependencies for collecting modules for the manifest

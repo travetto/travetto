@@ -29,11 +29,11 @@
   "dependencies": {
     "@travetto/base": "^4.0.0-rc.0",
     "@travetto/cli": "^4.0.0-rc.0",
+    "@travetto/compiler": "^4.0.0-rc.0",
     "enquirer": "^2.4.1",
     "mustache": "^4.2.0"
   },
   "devDependencies": {
-    "@travetto/compiler": "^4.0.0-rc.0",
     "@types/mustache": "^4.2.5"
   },
   "travetto": {
