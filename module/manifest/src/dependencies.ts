@@ -1,16 +1,27 @@
 import { PackageUtil } from './package';
 import { path } from './path';
 
-import type { Package, PackageDepType, PackageVisitReq, PackageVisitor } from './types/package';
+import type { Package, PackageDepType } from './types/package';
 import type { ManifestContext } from './types/context';
 import type { PackageModule } from './types/manifest';
 
-type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'prod'>> & { roleRoot?: boolean };
+type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'prod'>> & { roleRoot?: boolean, parent?: PackageModule };
+
+type Req = {
+  /** Request package */
+  pkg: Package;
+  /** Children to visit */
+  children: Record<string, string>;
+  /** Value */
+  value: PackageModule;
+  /** Parent */
+  parent?: PackageModule;
+};
 
 /**
  * Used for walking dependencies for collecting modules for the manifest
  */
-export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
+export class PackageModuleVisitor {
 
   constructor(public ctx: ManifestContext) {
     this.#mainSourcePath = path.resolve(this.ctx.workspace.path, this.ctx.main.folder);
@@ -23,9 +34,8 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
   /**
    * Initialize visitor, and provide global dependencies
    */
-  async init(): Promise<Iterable<PackageVisitReq<PackageModule>>> {
-    const mainPkg = PackageUtil.readPackage(this.#mainSourcePath);
-    const mainReq = this.create(mainPkg, { main: true, workspace: true, roleRoot: true, prod: true });
+  async init(): Promise<Iterable<Req>> {
+    const mainReq = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, prod: true });
     const globals = [mainReq];
     this.#workspaceModules = new Map(
       (await PackageUtil.resolveWorkspaces(this.ctx)).map(x => [x.name, x.path])
@@ -34,33 +44,26 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
     // Treat all workspace modules as main modules
     if (this.ctx.workspace.mono && !this.ctx.main.folder) {
       for (const [, loc] of this.#workspaceModules) {
-        const depPkg = PackageUtil.readPackage(loc);
-        globals.push(this.create(depPkg, { main: true, workspace: true, roleRoot: true }));
+        globals.push(this.#create(loc, { main: true, workspace: true, roleRoot: true, parent: mainReq.value }));
       }
     } else {
       // If we have 'withModules' at workspace root
       const root = PackageUtil.readPackage(this.ctx.workspace.path);
       for (const [name, type] of Object.entries(root.travetto?.build?.withModules ?? {})) {
-        const depPkg = PackageUtil.readPackage(PackageUtil.resolvePackagePath(name));
-        globals.push(this.create(depPkg, { main: type === 'main', workspace: true }));
+        globals.push(this.#create(PackageUtil.resolvePackagePath(name),
+          { main: type === 'main', workspace: true, parent: mainReq.value }
+        ));
       }
     }
 
-    return globals.map((x, i) => i === 0 ? x : { ...x, parent: mainReq.value });
-  }
-
-  /**
-   * Is valid dependency for searching
-   */
-  valid({ value: node }: PackageVisitReq<PackageModule>): boolean {
-    return node.workspace || !!node.state.travetto; // Workspace or travetto module
+    return globals;
   }
 
   /**
    * Build a package module
    */
-  create(pkg: Package, { main, workspace, prod = false, roleRoot = false }: CreateOpts = {}): PackageVisitReq<PackageModule> {
-    const sourcePath = PackageUtil.getPackagePath(pkg);
+  #create(sourcePath: string, { main, workspace, prod = false, roleRoot = false, parent }: CreateOpts = {}): Req {
+    const pkg = PackageUtil.readPackage(sourcePath);
     const value = this.#cache[sourcePath] ??= {
       main,
       prod,
@@ -78,24 +81,13 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
 
     const deps: PackageDepType[] = ['dependencies', ...(value.main ? ['devDependencies'] as const : [])];
     const children = Object.fromEntries(deps.flatMap(x => Object.entries(pkg[x] ?? {})));
-    return { pkg, value, children };
-  }
-
-  /**
-   * Visit dependency
-   */
-  visit({ value: mod, parent }: PackageVisitReq<PackageModule>): void {
-    if (mod.name === this.ctx.main.name) { return; } // Skip root
-    if (parent) {
-      mod.state.parentSet.add(parent.name);
-      parent.state.childSet.add(mod.name);
-    }
+    return { pkg, value, children, parent };
   }
 
   /**
    * Propagate prod, role information through graph
    */
-  async complete(mods: Iterable<PackageModule>): Promise<PackageModule[]> {
+  async #complete(mods: Iterable<PackageModule>): Promise<PackageModule[]> {
     const mapping = new Map([...mods].map(el => [el.name, { parent: new Set(el.state.parentSet), el }]));
 
     // All first-level dependencies should have role filled in (for propagation)
@@ -143,5 +135,41 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
     }
 
     return [...mods].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+
+  /**
+   * Visit packages with ability to track duplicates
+   */
+  async visit(): Promise<Iterable<PackageModule>> {
+    const seen = new Set<PackageModule>();
+    const queue = [...await this.init()];
+
+    while (queue.length) {
+      const { value: node, parent, children, pkg } = queue.shift()!; // Visit initial set first
+      if (!node || (!node.workspace && !node.state.travetto)) {
+        continue;
+      }
+
+      // Track parentage
+      if (node.name !== this.ctx.main.name && parent) {
+        node.state.parentSet.add(parent.name);
+        parent.state.childSet.add(node.name);
+      }
+
+      if (seen.has(node)) {
+        continue;
+      } else {
+        seen.add(node);
+      }
+
+      const next = Object.entries(children)
+        .map(([n, v]) => PackageUtil.resolveVersionPath(pkg, v) ?? PackageUtil.resolvePackagePath(n))
+        .map(loc => this.#create(loc, { parent: node }));
+
+      queue.push(...next);
+    }
+
+    return await this.#complete(seen);
   }
 }

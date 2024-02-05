@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 
 import { path } from './path';
-import { PackageUtil } from './package';
 import { PackageModuleVisitor } from './dependencies';
 
 import type { ManifestModuleFileType, ManifestModuleRole, ManifestModuleFolderType } from './types/common';
@@ -198,7 +197,7 @@ export class ManifestModuleUtil {
    * Produce all modules for a given manifest folder, adding in some given modules when developing framework
    */
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
-    const pkgs = await PackageUtil.visitPackages(new PackageModuleVisitor(ctx));
+    const pkgs = await new PackageModuleVisitor(ctx).visit();
     const modules = await Promise.all([...pkgs].map(x => this.describeModule(ctx, x)));
     return Object.fromEntries(modules.map(m => [m.name, m]));
   }

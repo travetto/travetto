@@ -4,7 +4,7 @@ import { execSync } from 'node:child_process';
 import { path } from './path';
 import { ManifestFileUtil } from './file';
 
-import { PackagePath, type Package, type PackageVisitor, type PackageWorkspaceEntry } from './types/package';
+import { PackagePath, type Package, type PackageWorkspaceEntry } from './types/package';
 import type { ManifestContext } from './types/context';
 import type { NodePackageManager } from './types/common';
 
@@ -79,38 +79,6 @@ export class PackageUtil {
    */
   static getPackagePath(pkg: Package): string {
     return pkg[PackagePath];
-  }
-
-  /**
-   * Visit packages with ability to track duplicates
-   */
-  static async visitPackages<T>(visitor: PackageVisitor<T>): Promise<Iterable<T>> {
-    const seen = new Set<T>();
-    const queue = [...await visitor.init()];
-
-    while (queue.length) {
-      const node = queue.shift()!; // Visit initial set first
-
-      if (!visitor.valid(node)) {
-        continue;
-      }
-
-      visitor.visit(node);
-
-      if (seen.has(node.value)) {
-        continue;
-      } else {
-        seen.add(node.value);
-      }
-
-      const children = Object.entries(node.children)
-        .map(([n, v]) => this.readPackage(this.resolveVersionPath(node.pkg, v) ?? this.resolvePackagePath(n)))
-        .map(pkg => ({ ...visitor.create(pkg), parent: node.value }));
-
-      queue.push(...children);
-    }
-
-    return await visitor.complete(seen);
   }
 
   /**

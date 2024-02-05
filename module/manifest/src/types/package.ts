@@ -53,23 +53,4 @@ export type Package = {
 
 export type PackageDepType = 'dependencies' | 'devDependencies' | 'optionalDependencies' | 'peerDependencies';
 
-export type PackageVisitReq<T> = {
-  /** Request package */
-  pkg: Package;
-  /** Children to visit */
-  children: Record<string, string>;
-  /** Value */
-  value: T;
-  /** Parent */
-  parent?: T;
-};
-
-export type PackageVisitor<T> = {
-  create(pkg: Package): PackageVisitReq<T>;
-  init(): Promise<Iterable<PackageVisitReq<T>>>;
-  valid(req: PackageVisitReq<T>): boolean;
-  visit(req: PackageVisitReq<T>): void;
-  complete(values: Iterable<T>): Promise<Iterable<T>>;
-};
-
 export type PackageWorkspaceEntry = { name: string, path: string };
