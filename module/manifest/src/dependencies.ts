@@ -114,7 +114,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
     while (mapping.size > 0) {
       const toProcess = [...mapping.values()].filter(x => x.parent.size === 0);
       if (!toProcess.length) {
-        throw new Error(`We have reached a cycle for ${[...mapping.keys()].join('\n')}`);
+        throw new Error(`We have reached a cycle for ${[...mapping.keys()]}`);
       }
       // Propagate to children
       for (const { el } of toProcess) {
