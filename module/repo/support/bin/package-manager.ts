@@ -67,7 +67,7 @@ export class PackageManager {
   /**
    * Dry-run packaging
    */
-  static dryRunPackaging(ctx: ManifestContext): ChildProcess {
+  static dryRunPackaging(ctx: ManifestContext, mod: IndexedModule): ChildProcess {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -75,7 +75,7 @@ export class PackageManager {
         args = ['pack', '--dry-run'];
         break;
     }
-    return spawn(ctx.workspace.manager, args, { cwd: ctx.workspace.path });
+    return spawn(ctx.workspace.manager, args, { cwd: mod.sourcePath });
   }
 
   /**
@@ -83,7 +83,7 @@ export class PackageManager {
    */
   static publish(ctx: ManifestContext, mod: IndexedModule, dryRun: boolean | undefined): ChildProcess {
     if (dryRun) {
-      return this.dryRunPackaging(ctx);
+      return this.dryRunPackaging(ctx, mod);
     }
 
     const versionTag = mod.version.match(/^.*-(rc|alpha|beta|next)[.]\d+/)?.[1] ?? 'latest';
@@ -94,7 +94,7 @@ export class PackageManager {
         args = ['publish', '--tag', versionTag, '--access', 'public'];
         break;
     }
-    return spawn(ctx.workspace.manager, args, { cwd: ctx.workspace.path });
+    return spawn(ctx.workspace.manager, args, { cwd: mod.sourcePath });
   }
 
   /**
