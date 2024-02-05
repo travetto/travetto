@@ -5,7 +5,7 @@ import type { Package, PackageDepType, PackageVisitReq, PackageVisitor } from '.
 import type { ManifestContext } from './types/context';
 import type { PackageModule } from './types/manifest';
 
-type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'prod'>> & { ignoreRoles?: boolean };
+type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'prod'>> & { roleRoot?: boolean };
 
 /**
  * Used for walking dependencies for collecting modules for the manifest
@@ -24,7 +24,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
    */
   async init(): Promise<Iterable<PackageVisitReq<PackageModule>>> {
     const mainPkg = PackageUtil.readPackage(this.#mainSourcePath);
-    const mainReq = this.create(mainPkg, { main: true, workspace: true, ignoreRoles: true, prod: true });
+    const mainReq = this.create(mainPkg, { main: true, workspace: true, roleRoot: true, prod: true });
     const globals = [mainReq];
 
     // Treat all workspace modules as main modules
@@ -34,7 +34,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
       );
       for (const [, loc] of workspaceModules) {
         const depPkg = PackageUtil.readPackage(loc);
-        globals.push(this.create(depPkg, { main: true, workspace: true, ignoreRoles: true }));
+        globals.push(this.create(depPkg, { main: true, workspace: true, roleRoot: true }));
       }
     } else {
       // If we have 'withModules' at workspace root
@@ -58,7 +58,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
   /**
    * Build a package module
    */
-  create(pkg: Package, { main, workspace, prod = false, ignoreRoles = false }: CreateOpts = {}): PackageVisitReq<PackageModule> {
+  create(pkg: Package, { main, workspace, prod = false, roleRoot = false }: CreateOpts = {}): PackageVisitReq<PackageModule> {
     const sourcePath = PackageUtil.getPackagePath(pkg);
     const value = this.#cache[sourcePath] ??= {
       main,
@@ -70,7 +70,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
       sourceFolder: sourcePath === this.ctx.workspace.path ? '' : sourcePath.replace(`${this.ctx.workspace.path}/`, ''),
       outputFolder: `node_modules/${pkg.name}`,
       state: {
-        childSet: new Set(), parentSet: new Set(), roleSet: new Set(), ignoreRoles,
+        childSet: new Set(), parentSet: new Set(), roleSet: new Set(), roleRoot,
         travetto: pkg.travetto, prodDeps: new Set(Object.keys(pkg.dependencies ?? {}))
       }
     };
@@ -98,10 +98,11 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
     const mapping = new Map([...mods].map(el => [el.name, { parent: new Set(el.state.parentSet), el }]));
 
     // All first-level dependencies should have role filled in (for propagation)
-    for (const dep of [...mods].filter(x => x.state.ignoreRoles)) {
+    for (const dep of [...mods].filter(x => x.state.roleRoot)) {
+      dep.state.roleSet.clear(); // Ensure the roleRoot is empty
       for (const c of dep.state.childSet) { // Visit children
         const cDep = mapping.get(c)!.el;
-        if (cDep.state.ignoreRoles) { continue; }
+        if (cDep.state.roleRoot) { continue; }
         // Set roles for all top level modules
         for (const role of cDep.state.travetto?.roles ?? ['std']) {
           cDep.state.roleSet.add(role);
@@ -122,7 +123,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
           if (!child) { continue; }
           child.parent.delete(el.name);
           // Propagate roles from parent to child
-          if (!child.el.state.ignoreRoles) {
+          if (!child.el.state.roleRoot) {
             for (const role of el.state.roleSet) {
               child.el.state.roleSet.add(role);
             }
@@ -138,9 +139,8 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
     }
 
     // Mark as standard at the end
-    for (const dep of [...mods].filter(x => x.state.ignoreRoles)) {
-      dep.state.roleSet.clear(); // Ensure all ignore roles are std only
-      dep.state.roleSet.add('std');
+    for (const dep of [...mods].filter(x => x.state.roleRoot)) {
+      dep.state.roleSet = new Set(['std']);
     }
 
     return [...mods].sort((a, b) => a.name.localeCompare(b.name));

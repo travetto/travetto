@@ -63,8 +63,8 @@ export type IndexedModule = ManifestModuleCore & {
 /** Module dependency, used in dependency visiting */
 export type PackageModule = Omit<ManifestModule, 'files' | 'parents' | 'roles'> & {
   state: {
-    /** Ignore roles? */
-    ignoreRoles?: boolean;
+    /** Role root? */
+    roleRoot?: boolean;
     /** Travetto package info */
     travetto?: Package['travetto'];
     /** Prod dependencies */
