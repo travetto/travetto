@@ -42,19 +42,12 @@ Details
   - Workspace?: true // Ensure its viewed as in the workspace, even if its external
   - Role Root?: false
   - Roles?: `[]` // To be filled in
-- Level 1 Dependency/DevDependency
-  - Prod?: is not DevDependency
+- Dependency/DevDependency
+  - Prod?: has Dependency path to root
   - Main?: false
   - Workspace?: If in workspace
   - Role Root?: false
-  - Roles?: `pkg.travetto.roles ?? ['std']`
-- Level N+1 Dependency
-  - Prod?: (and has Dependency path to root)
-  - Main?: false
-  - Workspace?: If in workspace
-  - Role Root?: false
-  - Roles?: `[]` // To be filled in
-
+  - Roles?: if child of `roleRoot` then `pkg.travetto.roles ?? ['std']` else `SUM of all parent roles`
 
 ## Dependency Traversal
 Within the code base, we have a series of the above packages that need to be understood when we are generating the manifest.

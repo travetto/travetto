@@ -104,9 +104,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
         const cDep = mapping.get(c)!.el;
         if (cDep.state.roleRoot) { continue; }
         // Set roles for all top level modules
-        for (const role of cDep.state.travetto?.roles ?? ['std']) {
-          cDep.state.roleSet.add(role);
-        }
+        cDep.state.roleSet = new Set(cDep.state.travetto?.roles ?? ['std']);
       }
     }
 
