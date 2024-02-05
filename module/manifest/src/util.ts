@@ -36,6 +36,8 @@ export class ManifestUtil {
    * Produce a production manifest from a given manifest
    */
   static createProductionManifest(manifest: ManifestRoot): ManifestRoot {
+    const prodModules = Object.values(manifest.modules).filter(x => x.prod);
+    const prodModNames = new Set([...prodModules.map(x => x.name)]);
     return {
       generated: manifest.generated,
       workspace: manifest.workspace,
@@ -46,9 +48,9 @@ export class ManifestUtil {
       },
       main: manifest.main,
       modules: Object.fromEntries(
-        Object.values(manifest.modules)
-          .filter(x => x.prod)
-          .map(m => [m.name, m])
+        prodModules.map(m => [m.name, Object.assign(m, {
+          parents: m.parents.filter(x => prodModNames.has(x))
+        })])
       ),
     };
   }

@@ -1,6 +1,6 @@
 import { EmailTemplateModule, EmailTemplateLocation, EmailResourceLoader } from '@travetto/email';
 import { PackageUtil, path } from '@travetto/manifest';
-import { JSXElement } from '@travetto/doc/jsx-runtime';
+import { JSXElement } from '@travetto/email-inky/jsx-runtime';
 
 import { InkyRenderer } from './render/renderer';
 import { Html } from './render/html';

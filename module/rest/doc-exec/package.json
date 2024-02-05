@@ -1,11 +1,11 @@
 {
   "name": "@travetto-doc/rest",
   "dependencies": {
-    "@travetto/cli": "^3.0.0-rc.13",
-    "@travetto/rest": "^3.0.0-rc.16"
+    "@travetto/cli": "^4.0.0-rc.0",
+    "@travetto/rest": "^4.0.0-rc.0"
   },
   "devDependencies": {
-    "@travetto/compiler": "^3.0.0-rc.16"
+    "@travetto/compiler": "^4.0.0-rc.0"
   },
   "travetto": {
     "build": {

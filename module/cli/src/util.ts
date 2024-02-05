@@ -36,7 +36,6 @@ export class CliUtil {
     return ExecUtil.withRestart(() => spawn(process.argv0, process.argv.slice(1), {
       env: {
         ...process.env,
-        ...Env.TRV_DYNAMIC.export(true),
         ...Env.TRV_CAN_RESTART.export(false)
       },
       stdio: [0, 1, 2, 'ipc']
