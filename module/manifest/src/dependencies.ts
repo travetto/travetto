@@ -18,6 +18,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
 
   #mainSourcePath: string;
   #cache: Record<string, PackageModule> = {};
+  #workspaceModules: Map<string, string>;
 
   /**
    * Initialize visitor, and provide global dependencies
@@ -26,13 +27,13 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
     const mainPkg = PackageUtil.readPackage(this.#mainSourcePath);
     const mainReq = this.create(mainPkg, { main: true, workspace: true, roleRoot: true, prod: true });
     const globals = [mainReq];
+    this.#workspaceModules = new Map(
+      (await PackageUtil.resolveWorkspaces(this.ctx)).map(x => [x.name, x.path])
+    );
 
     // Treat all workspace modules as main modules
     if (this.ctx.workspace.mono && !this.ctx.main.folder) {
-      const workspaceModules = new Map(
-        (await PackageUtil.resolveWorkspaces(this.ctx)).map(x => [x.name, x.path])
-      );
-      for (const [, loc] of workspaceModules) {
+      for (const [, loc] of this.#workspaceModules) {
         const depPkg = PackageUtil.readPackage(loc);
         globals.push(this.create(depPkg, { main: true, workspace: true, roleRoot: true }));
       }
@@ -65,7 +66,7 @@ export class PackageModuleVisitor implements PackageVisitor<PackageModule> {
       prod,
       name: pkg.name,
       version: pkg.version,
-      workspace,
+      workspace: workspace ?? this.#workspaceModules.has(pkg.name),
       internal: pkg.private === true,
       sourceFolder: sourcePath === this.ctx.workspace.path ? '' : sourcePath.replace(`${this.ctx.workspace.path}/`, ''),
       outputFolder: `node_modules/${pkg.name}`,
