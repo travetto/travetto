@@ -35,7 +35,7 @@
   "devDependencies": {
     "@travetto/compiler": "^4.0.0-rc.2",
     "@travetto/email-compiler": "^4.0.0-rc.3",
-    "@travetto/pack": "^4.0.0-rc.3",
+    "@travetto/pack": "^4.0.0-rc.4",
     "@travetto/rest-client": "^4.0.0-rc.3"
   },
   "travetto": {
