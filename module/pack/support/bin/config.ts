@@ -62,9 +62,7 @@ export function getOutput(): OutputOptions {
     sourcemapExcludeSources: !(new EnvProp('BUNDLE_SOURCES').bool ?? false),
     compact: new EnvProp('BUNDLE_COMPRESS').bool ?? true,
     file: path.resolve(dir, mainFile),
-    ...(format === 'commonjs' ? {} : {
-      inlineDynamicImports: true
-    }),
+    inlineDynamicImports: true
   };
 }
 
