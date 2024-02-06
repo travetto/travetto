@@ -29,9 +29,9 @@ function __init(mod: typeof fs, file?: string, freezeProto?: boolean): void {
   }
 }
 
-const INTRO = (envFile: string | undefined, sourceMap?: boolean): Record<NodeModuleType, string> => ({
-  commonjs: `(${__init.toString()})(require('node:fs'), '${envFile}', ${!!sourceMap})`,
-  module: `(${__init.toString()})(await import('node:fs'), '${envFile}', ${!!sourceMap})`
+const INTRO = (envFile: string | undefined, freezeProto?: boolean): Record<NodeModuleType, string> => ({
+  commonjs: `(${__init.toString()})(require('node:fs'), '${envFile}', ${!!freezeProto})`,
+  module: `(${__init.toString()})(await import('node:fs'), '${envFile}', ${!!freezeProto})`
 });
 
 function getFilesFromModule(m: ManifestModule): string[] {

@@ -160,7 +160,7 @@ export class PackOperation {
         text: [
           ShellCommands[type].scriptOpen(),
           ShellCommands[type].chdirScript(),
-          ShellCommands[type].callCommandWithAllArgs('node', `--env-file=${cfg.envFile}`, cfg.mainFile, ...cfg.entryArguments),
+          ShellCommands[type].callCommandWithAllArgs('node', cfg.mainFile, ...cfg.entryArguments),
         ].map(x => x.join(' '))
       }));
 
