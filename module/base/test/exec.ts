@@ -4,9 +4,10 @@ import fs from 'node:fs/promises';
 import { fork, spawn } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
+import timers from 'node:timers/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { RuntimeIndex, path } from '@travetto/manifest';
+import { RuntimeContext, RuntimeIndex, path } from '@travetto/manifest';
 
 import { ExecUtil } from '../src/exec';
 
@@ -82,5 +83,13 @@ export class ExecUtilTest {
     const lines = await (await fs.readFile(file, 'utf8')).split('\n');
     assert(lines.filter(x => !!x).length === 4);
     assert(await fs.stat(file).catch(() => undefined));
+  }
+
+  @Test()
+  async testImmediateFail() {
+    const proc = spawn('npm', ['run', 'zork'], { cwd: RuntimeContext.workspace.path });
+    await timers.setTimeout(600);
+    const failure = await ExecUtil.getResult(proc, { catch: true });
+    assert(!failure.valid);
   }
 }

@@ -123,6 +123,10 @@ export class ExecUtil {
 
       proc.on('close', (code: number) =>
         finish({ code, valid: code === null || code === 0 }));
+
+      if (proc.exitCode !== null) { // We are already done
+        finish({ code: proc.exitCode, valid: proc.exitCode === 0 });
+      }
     });
 
     return options.catch ? res : res.then(v => {
