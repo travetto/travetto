@@ -1,6 +1,7 @@
 import { path } from '@travetto/manifest';
 import { CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
 import { DockerContainer } from '@travetto/command';
+import { ExecUtil } from '@travetto/base';
 
 import { OpenApiClientHelp } from './bin/help';
 import { OpenApiClientPresets } from './bin/presets';
@@ -62,7 +63,7 @@ export class OpenApiClientCommand implements CliCommandShape {
 
     const propList = await this.getPropList(format);
 
-    const res = cmd.run([
+    const proc = await cmd.run([
       'generate',
       '--skip-validate-spec',
       '--remove-operation-id-prefix',
@@ -73,7 +74,7 @@ export class OpenApiClientCommand implements CliCommandShape {
       ...(propList ? ['--additional-properties', propList] : [])
     ]);
 
-    const result = await res;
+    const result = await ExecUtil.getResult(proc);
     if (!result.valid) {
       process.exitCode = 1;
     }
