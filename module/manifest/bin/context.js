@@ -2,10 +2,10 @@
 
 /**
  * @typedef {import('../src/types/package').Package & { path:string }} Pkg
- * @typedef {Pkg & { mono: boolean, manager: 'yarn'|'npm', resolve: (file:string) => string}} Workspace
+ * @typedef {Pkg & { mono: boolean, manager: 'yarn'|'npm', resolve: (file:string) => string, stripRoot: (file:string)=>string}} Workspace
  * @typedef {import('../src/types/context').ManifestContext} ManifestContext
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -79,6 +79,7 @@ function $resolveWorkspace(base = process.cwd()) {
     type: pkg.type,
     manager: existsSync(path.resolve(pkg.path, 'yarn.lock')) ? 'yarn' : 'npm',
     resolve: createRequire(`${pkg.path}/node_modules`).resolve.bind(null),
+    stripRoot: (full) => full === pkg.path ? '' : full.replace(`${pkg.path}/`, ''),
     mono: !!pkg.workspaces || (!pkg.travetto?.build?.isolated && !!prevPkg)  // Workspaces or nested projects
   };
 }
@@ -86,18 +87,11 @@ function $resolveWorkspace(base = process.cwd()) {
 /**
  * Get Compiler url
  * @param {Workspace} ws
- * @param {string} toolFolder
  */
-function $getCompilerUrl(ws, toolFolder) {
-  const file = path.resolve(ws.path, toolFolder, 'build.compilerUrl');
+function $getCompilerUrl(ws) {
   // eslint-disable-next-line no-bitwise
-  const port = (Math.abs([...file].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
-  const out = `http://localhost:${port}`;
-  if (!existsSync(file)) {
-    mkdirSync(path.dirname(file), { recursive: true });
-    writeFileSync(file, out, 'utf8');
-  }
-  return out;
+  const port = (Math.abs([...ws.path].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
+  return `http://localhost:${port}`;
 }
 
 /**
@@ -156,14 +150,14 @@ export function getManifestContext(folder) {
     },
     build: {
       compilerFolder: build.compilerFolder ?? COMPILER_FOLDER,
-      compilerUrl: build.compilerUrl ?? $getCompilerUrl(workspace, toolFolder),
-      compilerModuleFolder: path.dirname(workspace.resolve('@travetto/compiler/package.json')).replace(`${workspace.path}/`, ''),
+      compilerUrl: build.compilerUrl ?? $getCompilerUrl(workspace),
+      compilerModuleFolder: workspace.stripRoot(path.dirname(workspace.resolve('@travetto/compiler/package.json'))),
       outputFolder: build.outputFolder ?? OUTPUT_FOLDER,
       toolFolder
     },
     main: {
       name: mod.name ?? 'untitled',
-      folder: mod.path === workspace.path ? '' : mod.path.replace(`${workspace.path}/`, ''),
+      folder: workspace.stripRoot(mod.path),
       version: mod.version,
       description: mod.description
     }

@@ -127,6 +127,13 @@ export const RuntimeContext = build({
     return path.resolve(RuntimeIndex.manifest.workspace.path, ...rel);
   },
   /**
+   * Strip off the workspace path from a file
+   * @param full A full path
+   */
+  stripWorkspacePath(full: string): string {
+    return full === RuntimeIndex.manifest.workspace.path ? '' : full.replace(`${RuntimeIndex.manifest.workspace.path}/`, '');
+  },
+  /**
    * Produce a workspace path for tooling, with '@' being replaced by node_module/name folder
    * @param rel The relative path
    */
