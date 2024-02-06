@@ -27,7 +27,7 @@ export class EmailCompileCommand implements CliCommandShape {
     const all = await EmailCompiler.compileAll();
     console!.log(cliTpl`Successfully compiled ${{ param: `${all.length}` }} templates`);
     for (const el of all) {
-      console!.log(cliTpl`  * ${{ param: el.replace(`${RuntimeContext.workspace.path}/`, '') }}`);
+      console!.log(cliTpl`  * ${{ param: RuntimeContext.stripWorkspacePath(el) }}`);
     }
 
     if (this.watch) {
