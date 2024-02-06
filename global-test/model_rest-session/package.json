@@ -11,8 +11,8 @@
     "@travetto/model-redis": "^4.0.0-rc.3",
     "@travetto/model-s3": "^4.0.0-rc.3",
     "@travetto/model-sqlite": "^4.0.0-rc.3",
-    "@travetto/rest-express": "^4.0.0-rc.3",
-    "@travetto/rest-session": "^4.0.0-rc.3"
+    "@travetto/rest-express": "^4.0.0-rc.4",
+    "@travetto/rest-session": "^4.0.0-rc.4"
   },
   "travetto": {},
   "private": true
