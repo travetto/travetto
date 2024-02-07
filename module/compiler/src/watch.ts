@@ -1,4 +1,4 @@
-import { ManifestContext, ManifestModuleUtil, ManifestUtil, RuntimeIndex, path } from '@travetto/manifest';
+import { ManifestContext, ManifestModuleUtil, ManifestUtil, PackageUtil, RuntimeIndex, path } from '@travetto/manifest';
 
 import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';
@@ -22,10 +22,28 @@ export class CompilerWatcher {
     this.#signal = signal;
   }
 
+  #getIgnores(): string[] {
+    // TODO: Read .gitignore?
+    let ignores = PackageUtil.readPackage(this.#state.manifest.workspace.path)?.travetto?.build?.watchIgnores;
+
+    if (!ignores) {
+      ignores = ['node_modules/**'];
+    }
+
+    return [
+      ...ignores,
+      '.git', '**/.git',
+      `${this.#state.manifest.build.outputFolder}/node_modules/**`,
+      `${this.#state.manifest.build.compilerFolder}/node_modules/**`,
+      `${this.#state.manifest.build.toolFolder}/**`
+    ];
+  }
+
   /** Watch files */
   async * #watchFolder(rootPath: string): AsyncIterable<WatchEvent> {
     const q = new AsyncQueue<WatchEvent>(this.#signal);
     const lib = await import('@parcel/watcher');
+    const ignore = this.#getIgnores();
 
     const cleanup = await lib.subscribe(rootPath, (err, events) => {
       if (err) {
@@ -36,15 +54,7 @@ export class CompilerWatcher {
       for (const ev of events) {
         q.add({ action: ev.type, file: path.toPosix(ev.path) });
       }
-    }, {
-      // TODO: Read .gitignore?
-      ignore: [
-        'node_modules', '**/node_modules', '.git', '**/.git',
-        `${this.#state.manifest.build.outputFolder}/node_modules/**`,
-        `${this.#state.manifest.build.compilerFolder}/node_modules/**`,
-        `${this.#state.manifest.build.toolFolder}/**`
-      ]
-    });
+    }, { ignore });
 
     if (this.#signal.aborted) { // If already aborted, can happen async
       cleanup.unsubscribe();

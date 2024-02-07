@@ -44,6 +44,7 @@ export type Package = {
     build?: Partial<ManifestContext['build']> & {
       isolated?: boolean;
       withModules?: Record<string, 'main' | true>;
+      watchIgnores?: string[];
     };
   };
   workspaces?: string[];
