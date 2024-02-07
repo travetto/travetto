@@ -65,7 +65,8 @@ export class ImportManager {
         const type = this.#resolver.getType(el.name);
         const objFlags = DeclarationUtil.getObjectFlags(type);
         const typeFlags = type.getFlags();
-        if (objFlags || typeFlags !== 1) {
+        // eslint-disable-next-line no-bitwise
+        if (!(objFlags & (ts.SymbolFlags.Type | ts.SymbolFlags.Interface)) || !(typeFlags & ts.TypeFlags.Any)) {
           newBindings.push(el);
         }
       }
