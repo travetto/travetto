@@ -12,7 +12,8 @@ export class ProcessHandle {
     this.#file = path.resolve(ctx.workspace.path, ctx.build.toolFolder, `${name}.pid`);
   }
 
-  writePid(pid: number): Promise<void> {
+  async writePid(pid: number): Promise<void> {
+    await fs.mkdir(path.dirname(this.#file), { recursive: true });
     return fs.writeFile(this.#file, JSON.stringify(pid), 'utf8');
   }
 

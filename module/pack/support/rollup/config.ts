@@ -1,38 +1,9 @@
-import type fs from 'node:fs';
 import type { OutputOptions } from 'rollup';
 
 import type terser from '@rollup/plugin-terser';
 
 import { ManifestModule, ManifestModuleUtil, NodeModuleType, path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { EnvProp } from '@travetto/base';
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-function __init(mod: typeof fs, file?: string, freezeProto?: boolean): void {
-  if (freezeProto !== false) {
-    // @ts-expect-error -- Lock to prevent __proto__ pollution in JSON
-    const objectProto = Object.prototype.__proto__;
-    Object.defineProperty(Object.prototype, '__proto__', {
-      get() { return objectProto; },
-      set(val) { Object.setPrototypeOf(this, val); }
-    });
-  }
-
-  if (file) {
-    if (process.env.TRV_MODULE) { return; }
-    try {
-      mod.readFileSync(file, 'utf8')
-        .split('\n')
-        .map(x => x.match(/\s*(?<key>[^ =]+)\s*=\s*(?<value>\S+)/)?.groups)
-        .filter((x): x is Exclude<typeof x, null | undefined> => !!x)
-        .forEach(x => process.env[x.key] = x.value);
-    } catch { }
-  }
-}
-
-const INTRO = (envFile: string | undefined, freezeProto?: boolean): Record<NodeModuleType, string> => ({
-  commonjs: `(${__init.toString()})(require('node:fs'), '${envFile}', ${!!freezeProto})`,
-  module: `(${__init.toString()})(await import('node:fs'), '${envFile}', ${!!freezeProto})`
-});
 
 function getFilesFromModule(m: ManifestModule): string[] {
   return [
@@ -41,7 +12,7 @@ function getFilesFromModule(m: ManifestModule): string[] {
     ...(m.files.bin ?? [])
       .filter(f => !(/bin\/trv[.]js$/.test(f[0]) && m.name === '@travetto/cli')),
     ...(m.files.support ?? [])
-      .filter(f => !/support\/(test|doc)/.test(f[0]))
+      .filter(f => !/support\/(test|doc|pack)/.test(f[0]))
   ]
     .filter(([, t]) => t === 'ts' || t === 'js' || t === 'json')
     .map(([f]) => ManifestModuleUtil.sourceToOutputExt(path.resolve(m.outputFolder, f)));
@@ -55,7 +26,6 @@ export function getOutput(): OutputOptions {
   return {
     format,
     interop: format === 'commonjs' ? 'auto' : undefined,
-    intro: INTRO(new EnvProp('BUNDLE_ENV_FILE').val)[format],
     sourcemapPathTransform: (src, map): string =>
       RuntimeContext.stripWorkspacePath(path.resolve(path.dirname(map), src)),
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,
@@ -70,11 +40,12 @@ export function getEntry(): string {
   return process.env.BUNDLE_ENTRY!;
 }
 
-export function getFiles(): string[] {
+export function getFiles(entry?: string): string[] {
   return [...RuntimeIndex.getModuleList('all')]
     .map(x => RuntimeIndex.getManifestModule(x))
     .filter(m => m.prod)
-    .flatMap(getFilesFromModule);
+    .flatMap(getFilesFromModule)
+    .filter(x => (!entry || !x.endsWith(entry)) && !x.includes('@travetto/pack/support/rollup'));
 }
 
 export function getIgnoredModules(): string[] {

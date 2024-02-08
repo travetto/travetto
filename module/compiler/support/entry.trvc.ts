@@ -40,6 +40,7 @@ export const main = (ctx: ManifestContext) => {
       await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
       ctrl.abort();
     }
+    LogUtil.cleanup();
   };
 
   const ops = {

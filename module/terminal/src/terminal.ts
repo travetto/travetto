@@ -19,7 +19,6 @@ export class Terminal {
 
   #interactive: boolean;
   #writer: TerminalWriter;
-  #reset: () => Promise<void>;
   #cleanExit = 0;
   #width: number;
   #height: number;
@@ -37,10 +36,10 @@ export class Terminal {
 
   #cleanOnExit(): () => void {
     if (this.#cleanExit === 0) {
-      process.on('exit', this.#reset);
+      process.on('exit', TerminalWriter.reset);
     }
     this.#cleanExit += 1;
-    return () => (this.#cleanExit -= 1) === 0 && process.off('exit', this.#reset);
+    return () => (this.#cleanExit -= 1) === 0 && process.off('exit', TerminalWriter.reset);
   }
 
   constructor(output?: tty.WriteStream, config?: { width?: number, height?: number }) {
@@ -48,8 +47,7 @@ export class Terminal {
     this.#interactive = this.#output.isTTY && !Env.TRV_QUIET.isTrue;
     this.#width = config?.width ?? (this.#output.isTTY ? this.#output.columns : 120);
     this.#height = config?.height ?? (this.#output.isTTY ? this.#output.rows : 120);
-    const w = this.#writer = new TerminalWriter(this);
-    this.#reset = (): Promise<void> => w.softReset().commit();
+    this.#writer = new TerminalWriter(this);
   }
 
   get output(): tty.WriteStream { return this.#output; }

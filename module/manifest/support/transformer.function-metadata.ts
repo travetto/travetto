@@ -7,7 +7,6 @@ import {
 
 const MANIFEST_MOD = '@travetto/manifest';
 const MANIFEST_IDX = `${MANIFEST_MOD}/__index__`;
-const ENTRY_POINT = 'support/entry';
 
 const RUNTIME_IDX_IMPORT = `${MANIFEST_MOD}/src/runtime`;
 const RUNTIME_IDX_CLS = 'RuntimeIndex';
@@ -32,9 +31,7 @@ interface MetadataInfo {
 export class RegisterTransformer {
 
   static #valid({ importName: imp }: TransformerState): boolean {
-    return !imp.startsWith(MANIFEST_MOD) ?
-      !imp.includes(ENTRY_POINT) :
-      !(/[/](src|support)[/]/.test(imp) || imp === MANIFEST_IDX);
+    return !imp.startsWith(MANIFEST_MOD) || !(/[/](src|support)[/]/.test(imp) || imp === MANIFEST_IDX);
   }
 
   /**

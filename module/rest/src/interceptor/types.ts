@@ -1,13 +1,11 @@
-import { Class } from '@travetto/base';
+import type { Class } from '@travetto/base';
 import { Schema } from '@travetto/schema';
 
-import { RouteConfig, Filter } from '../types';
-import { ControllerConfig } from '../registry/types';
+import type { RouteConfig, Filter } from '../types';
 
-export type RouteApplies = (route: RouteConfig, controller?: ControllerConfig) => boolean;
+export type RouteApplies = (route: RouteConfig, config?: { basePath: string }) => boolean;
 
 export type LightweightConfig = ({ disabled?: boolean } & Record<string, unknown>);
-
 
 @Schema()
 export abstract class ManagedInterceptorConfig {

@@ -10,6 +10,8 @@ const LEVEL_TO_PRI: Record<CompilerLogLevel, number> = { debug: 1, info: 2, warn
 
 const SCOPE_MAX = 15;
 
+const ESC = '\x1b[';
+
 export class LogUtil {
 
   static root = process.cwd();
@@ -22,13 +24,12 @@ export class LogUtil {
 
   static #rewriteLine(text: string): Promise<void> | void {
     // Move to 1st position, and clear after text
-    const done = process.stdout.write(`\x1b[1G${text}\x1b[0K`);
+    const done = process.stdout.write(`${ESC}1G${text}${ESC}0K`);
     this.linePartial = !!text;
     if (!done) {
       return new Promise<void>(r => process.stdout.once('drain', r));
     }
   }
-
 
   /**
    * Set level for operation
@@ -40,7 +41,18 @@ export class LogUtil {
       this.logLevel = build || defaultLevel;
     }
     this.root = ctx.workspace.path;
-    this.logProgress = (this.isLevelActive('info') && process.stdout.isTTY) ? this.#logProgressEvent : undefined;
+    // If we are in info or a terminal and also in a tty
+    this.logProgress = ((this.isLevelActive('info') || process.env.PS1) && process.stdout.isTTY) ? this.#logProgressEvent : undefined;
+    if (this.logProgress) {
+      process.stdout.write(`${ESC}?25l`); // Hide cursor
+    }
+    process.on('exit', () => this.cleanup());
+  }
+
+  static cleanup(): void {
+    if (this.logProgress) {
+      process.stdout.write(`${ESC}!p`); // Reset
+    }
   }
 
   static #logProgressEvent(ev: CompilerProgressEvent): Promise<void> | void {
