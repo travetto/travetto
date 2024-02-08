@@ -1,6 +1,6 @@
-import puppeteer from 'puppeteer';
+import { launch } from 'puppeteer';
 
-const browser = await puppeteer.launch({ headless: 'new', args: ['--allow-file-access-from-files'] });
+const browser = await launch({ headless: 'new', args: ['--allow-file-access-from-files'] });
 const page = await browser.newPage();
 
 await page.setViewport({ width: 1080, height: 1024 });

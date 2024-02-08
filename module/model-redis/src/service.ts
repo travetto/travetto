@@ -1,4 +1,4 @@
-import * as redis from 'redis';
+import { createClient } from 'redis';
 
 import { ShutdownManager, type Class } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
@@ -16,7 +16,7 @@ import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { RedisModelConfig } from './config';
 
 type RedisScan = { key: string } | { match: string };
-type RedisClient = ReturnType<typeof redis.createClient>;
+type RedisClient = ReturnType<typeof createClient>;
 type RedisMulti = ReturnType<RedisClient['multi']>;
 
 /**
@@ -173,7 +173,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   async postConstruct(): Promise<void> {
-    this.client = redis.createClient(this.config.client);
+    this.client = createClient(this.config.client);
     await this.client.connect();
     await ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onGracefulShutdown(() => this.client.disconnect(), this);

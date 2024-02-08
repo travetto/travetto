@@ -1,4 +1,4 @@
-import es from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import {
   AggregationsStringTermsAggregate, AggregationsStringTermsBucket, DeleteByQueryRequest, SearchRequest, SearchResponse, UpdateByQueryResponse
 } from '@elastic/elasticsearch/lib/api/types';
@@ -48,7 +48,7 @@ export class ElasticsearchModelService implements
   ModelQuerySuggestSupport, ModelQueryFacetSupport {
 
   idSource = ModelCrudUtil.uuidSource();
-  client: es.Client;
+  client: Client;
   manager: IndexManager;
 
   constructor(public readonly config: ElasticsearchModelConfig) { }
@@ -69,7 +69,7 @@ export class ElasticsearchModelService implements
       });
       return res;
     } catch (err) {
-      if (err instanceof es.errors.ResponseError && err.meta.body && typeof err.meta.body === 'object' && 'error' in err.meta.body) {
+      if (err instanceof errors.ResponseError && err.meta.body && typeof err.meta.body === 'object' && 'error' in err.meta.body) {
         console.error(err.meta.body.error);
       }
       throw err;
@@ -100,7 +100,7 @@ export class ElasticsearchModelService implements
   }
 
   async postConstruct(this: ElasticsearchModelService): Promise<void> {
-    this.client = new es.Client({
+    this.client = new Client({
       nodes: this.config.hosts,
       ...(this.config.options || {}),
     });
@@ -144,7 +144,7 @@ export class ElasticsearchModelService implements
         throw new NotFoundError(cls, id);
       }
     } catch (err) {
-      if (err && err instanceof es.errors.ResponseError && err.body && err.body.result === 'not_found') {
+      if (err && err instanceof errors.ResponseError && err.body && err.body.result === 'not_found') {
         throw new NotFoundError(cls, id);
       }
       throw err;
@@ -462,7 +462,7 @@ export class ElasticsearchModelService implements
       }
     } catch (err) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      if (err instanceof es.errors.ResponseError && (err.body as UpdateByQueryResponse).version_conflicts) {
+      if (err instanceof errors.ResponseError && (err.body as UpdateByQueryResponse).version_conflicts) {
         throw new NotFoundError(cls, id);
       } else {
         throw err;

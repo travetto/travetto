@@ -1,3 +1,4 @@
+// @ts-expect-error
 import * as parser from '@typescript-eslint/parser';
 
 import { RuntimeContext } from '@travetto/manifest';

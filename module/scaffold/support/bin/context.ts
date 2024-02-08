@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import mustache from 'mustache';
+import { render } from 'mustache';
 
 import { ExecUtil, StreamUtil } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
@@ -129,7 +129,7 @@ export class Context {
   async template(file: string, { rename }: ListingEntry): Promise<void> {
     const contents = await fs.readFile(this.source(file), 'utf-8');
     const out = this.destination(rename ?? file);
-    const rendered = mustache.render(
+    const rendered = render(
       contents
         .replaceAll('$_', '{{{')
         .replaceAll('_$', '}}}'),

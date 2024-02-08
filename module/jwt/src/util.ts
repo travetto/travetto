@@ -1,4 +1,4 @@
-import jws from 'jws';
+import { sign, Header, decode, verify } from 'jws';
 
 import { JWTError } from './error';
 import { Payload, SignOptions, SignHeader, TypedSig, VerifyOptions } from './types';
@@ -33,14 +33,14 @@ export class JWTUtil {
 
     const opts = {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      header: header as jws.Header,
+      header: header as Header,
       privateKey,
       payload: JSON.stringify(payload),
       encoding: options.encoding || 'utf8'
     };
 
     try {
-      return jws.sign(opts);
+      return sign(opts);
     } catch (err) {
       throw new JWTError(err instanceof Error ? err.message : `${err}`);
     }
@@ -60,7 +60,7 @@ export class JWTUtil {
       throw new JWTError('malformed token');
     }
 
-    const decoded: TypedSig<T> = jws.decode(jwt);
+    const decoded: TypedSig<T> = decode(jwt);
 
     if (!decoded) {
       throw new JWTError('invalid token', { token: jwt });
@@ -98,11 +98,11 @@ export class JWTUtil {
 
     if (!keys.length || keys.length === 1) {
       JWTVerifier.verifyHeader(header, signature, keys[0], options);
-      valid = jws.verify(jwt, header.alg, keys[0] ?? '');
+      valid = verify(jwt, header.alg, keys[0] ?? '');
     } else {
       for (const key of keys) {
         JWTVerifier.verifyHeader(header, signature, key, options);
-        valid = jws.verify(jwt, header.alg, key ?? '');
+        valid = verify(jwt, header.alg, key ?? '');
         if (valid) {
           break;
         }

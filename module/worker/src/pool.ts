@@ -1,6 +1,6 @@
-import gp from 'generic-pool';
 import os from 'node:os';
 import timers from 'node:timers/promises';
+import { Options, Pool, createPool } from 'generic-pool';
 
 import { Env, Util } from '@travetto/base';
 
@@ -21,7 +21,7 @@ export interface Worker<I, O = unknown> {
 }
 
 type WorkerInput<I, O> = (() => Worker<I, O>) | ((input: I, inputIdx: number) => Promise<O>);
-type WorkPoolConfig<I, O> = gp.Options & {
+type WorkPoolConfig<I, O> = Options & {
   onComplete?: (output: O, input: I, finishIdx: number) => void;
   onError?(ev: Error, input: I, finishIdx: number): (unknown | Promise<unknown>);
   shutdown?: AbortSignal;
@@ -38,13 +38,13 @@ export class WorkPool {
   static DEFAULT_SIZE = Math.min(WorkPool.MAX_SIZE, 4);
 
   /** Build worker pool */
-  static #buildPool<I, O>(worker: WorkerInput<I, O>, opts?: WorkPoolConfig<I, O>): gp.Pool<Worker<I, O>> {
+  static #buildPool<I, O>(worker: WorkerInput<I, O>, opts?: WorkPoolConfig<I, O>): Pool<Worker<I, O>> {
     let pendingAcquires = 0;
 
     const trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
 
     // Create the pool
-    const pool = gp.createPool({
+    const pool = createPool({
       async create() {
         try {
           pendingAcquires += 1;

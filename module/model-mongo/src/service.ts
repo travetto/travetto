@@ -1,5 +1,8 @@
 // Wildcard import needed here due to packaging issues
-import * as mongo from 'mongodb';
+import {
+  type Db, GridFSBucket, MongoClient, type Sort, type CreateIndexesOptions,
+  type GridFSFile, type IndexSpecification, type Collection, type ObjectId, type Filter, type Document
+} from 'mongodb';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
@@ -37,11 +40,11 @@ import { MongoModelConfig } from './config';
 const IdxFieldsⲐ = Symbol.for('@travetto/model-mongo:idx');
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const asFielded = <T extends ModelType>(cfg: IndexConfig<T>): { [IdxFieldsⲐ]: mongo.Sort } => (cfg as unknown as { [IdxFieldsⲐ]: mongo.Sort });
+const asFielded = <T extends ModelType>(cfg: IndexConfig<T>): { [IdxFieldsⲐ]: Sort } => (cfg as unknown as { [IdxFieldsⲐ]: Sort });
 
-type IdxCfg = mongo.CreateIndexesOptions;
+type IdxCfg = CreateIndexesOptions;
 
-type StreamRaw = mongo.GridFSFile & { metadata: StreamMeta };
+type StreamRaw = GridFSFile & { metadata: StreamMeta };
 
 /**
  * Mongo-based model source
@@ -55,9 +58,9 @@ export class MongoModelService implements
   ModelQuerySuggestSupport, ModelExpirySupport {
 
   idSource = ModelCrudUtil.uuidSource();
-  client: mongo.MongoClient;
-  #db: mongo.Db;
-  #bucket: mongo.GridFSBucket;
+  client: MongoClient;
+  #db: Db;
+  #bucket: GridFSBucket;
 
   constructor(public readonly config: MongoModelConfig) { }
 
@@ -73,9 +76,9 @@ export class MongoModelService implements
   }
 
   async postConstruct(): Promise<void> {
-    this.client = await mongo.MongoClient.connect(this.config.url, this.config.options);
+    this.client = await MongoClient.connect(this.config.url, this.config.options);
     this.#db = this.client.db(this.config.namespace);
-    this.#bucket = new mongo.GridFSBucket(this.#db, {
+    this.#bucket = new GridFSBucket(this.#db, {
       bucketName: STREAMS,
       writeConcern: { w: 1 }
     });
@@ -95,11 +98,11 @@ export class MongoModelService implements
     await this.#db.dropDatabase();
   }
 
-  getGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls): mongo.IndexSpecification[] {
+  getGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls): IndexSpecification[] {
     const fields = SchemaRegistry.has(cls) ?
       Object.values(SchemaRegistry.get(cls).views[AllViewⲐ].schema) :
       [];
-    const out: mongo.IndexSpecification[] = [];
+    const out: IndexSpecification[] = [];
     for (const field of fields) {
       if (SchemaRegistry.has(field.type)) {
         // Recurse
@@ -113,18 +116,18 @@ export class MongoModelService implements
     return out;
   }
 
-  getIndicies<T extends ModelType>(cls: Class<T>): ([mongo.IndexSpecification] | [mongo.IndexSpecification, IdxCfg])[] {
+  getIndicies<T extends ModelType>(cls: Class<T>): ([IndexSpecification] | [IndexSpecification, IdxCfg])[] {
     const indices = ModelRegistry.get(cls).indices ?? [];
     return [
-      ...indices.map((idx): [mongo.IndexSpecification, IdxCfg] => {
+      ...indices.map((idx): [IndexSpecification, IdxCfg] => {
         const combined = asFielded(idx)[IdxFieldsⲐ] ??= Object.assign({}, ...idx.fields.map(x => MongoUtil.toIndex(x)));
         return [
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          combined as mongo.IndexSpecification,
+          combined as IndexSpecification,
           (idx.type === 'unique' ? { unique: true } : {})
         ];
       }),
-      ...this.getGeoIndices(cls).map((x): [mongo.IndexSpecification] => [x])
+      ...this.getGeoIndices(cls).map((x): [IndexSpecification] => [x])
     ];
   }
 
@@ -161,7 +164,7 @@ export class MongoModelService implements
   /**
    * Get mongo collection
    */
-  async getStore<T extends ModelType>(cls: Class<T>): Promise<mongo.Collection> {
+  async getStore<T extends ModelType>(cls: Class<T>): Promise<Collection> {
     return this.#db.collection(ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
   }
 
@@ -373,7 +376,7 @@ export class MongoModelService implements
       }
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    for (const [index, _id] of TypedObject.entries(res.upsertedIds) as [number, mongo.ObjectId][]) {
+    for (const [index, _id] of TypedObject.entries(res.upsertedIds) as [number, ObjectId][]) {
       out.insertedIds.set(+index, MongoUtil.idToString(_id));
     }
 
@@ -453,7 +456,7 @@ export class MongoModelService implements
       cls,
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }) as WhereClause<T>
-    ) as mongo.Filter<mongo.Document>;
+    ) as Filter<Document>;
 
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(asFielded(idxCfg)[IdxFieldsⲐ]);
 
@@ -571,7 +574,7 @@ export class MongoModelService implements
     aggs.unshift({ $match: q });
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const result = (await col.aggregate(aggs).toArray()) as { _id: mongo.ObjectId, count: number }[];
+    const result = (await col.aggregate(aggs).toArray()) as { _id: ObjectId, count: number }[];
 
     return result.map(val => ({
       key: MongoUtil.idToString(val._id),

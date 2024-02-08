@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import * as s3 from '@aws-sdk/client-s3';
+import { S3, CompletedPart, type CreateMultipartUploadRequest } from '@aws-sdk/client-s3';
 import type { MetadataBearer } from '@aws-sdk/types';
 
 import {
@@ -28,7 +28,7 @@ function hasContentType<T>(o: T): o is T & { contenttype?: string } {
 
 const STREAM_SPACE = '@travetto/model-s3:stream';
 
-type MetaBase = Pick<s3.CreateMultipartUploadRequest,
+type MetaBase = Pick<CreateMultipartUploadRequest,
   'ContentType' | 'Metadata' | 'ContentEncoding' | 'ContentLanguage' | 'CacheControl' | 'ContentDisposition'
 >;
 
@@ -39,7 +39,7 @@ type MetaBase = Pick<s3.CreateMultipartUploadRequest,
 export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, ModelExpirySupport {
 
   idSource = ModelCrudUtil.uuidSource();
-  client: s3.S3;
+  client: S3;
 
   constructor(public readonly config: S3ModelConfig) { }
 
@@ -110,7 +110,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   async #writeMultipart(id: string, input: Readable, meta: StreamMeta): Promise<void> {
     const { UploadId } = await this.client.createMultipartUpload(this.#q(STREAM_SPACE, id, this.#getMetaBase(meta)));
 
-    const parts: s3.CompletedPart[] = [];
+    const parts: CompletedPart[] = [];
     let buffers: Buffer[] = [];
     let total = 0;
     let n = 1;
@@ -163,7 +163,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async postConstruct(): Promise<void> {
-    this.client = new s3.S3(this.config.config);
+    this.client = new S3(this.config.config);
     ModelStorageUtil.registerModelChangeListener(this);
   }
 

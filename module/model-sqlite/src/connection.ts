@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import timers from 'node:timers/promises';
-import sqlDb, * as sqlite3 from 'better-sqlite3';
-import pool from 'generic-pool';
+import sqlDb, { type Database, Options } from 'better-sqlite3';
+import { Pool, createPool } from 'generic-pool';
 
 import { RuntimeContext, path } from '@travetto/manifest';
 import { ShutdownManager } from '@travetto/base';
@@ -12,16 +12,16 @@ import { SQLModelConfig, Connection } from '@travetto/model-sql';
 /**
  * Connection support for Sqlite
  */
-export class SqliteConnection extends Connection<sqlite3.Database> {
+export class SqliteConnection extends Connection<Database> {
 
   isolatedTransactions = false;
 
-  #config: SQLModelConfig<sqlite3.Options & { file?: string }>;
-  #pool: pool.Pool<sqlite3.Database>;
+  #config: SQLModelConfig<Options & { file?: string }>;
+  #pool: Pool<Database>;
 
   constructor(
     context: AsyncContext,
-    config: SQLModelConfig<sqlite3.Options & { file?: string }>
+    config: SQLModelConfig<Options & { file?: string }>
   ) {
     super(context);
     this.#config = config;
@@ -43,7 +43,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
     }
   }
 
-  async #create(): Promise<sqlite3.Database> {
+  async #create(): Promise<Database> {
     const file = path.resolve(this.#config.options.file ?? RuntimeContext.toolPath('@', 'sqlite_db'));
     await fs.mkdir(path.dirname(file), { recursive: true });
     const db = new sqlDb(file, this.#config.options);
@@ -60,7 +60,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
   override async init(): Promise<void> {
     await this.#create();
 
-    this.#pool = pool.createPool<sqlite3.Database>({
+    this.#pool = createPool<Database>({
       create: () => this.#withRetries(() => this.#create()),
       destroy: async db => { db.close(); }
     }, { max: 1 });
@@ -69,7 +69,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
     ShutdownManager.onGracefulShutdown(() => this.#pool.clear(), this);
   }
 
-  async execute<T = unknown>(conn: sqlite3.Database, query: string): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(conn: Database, query: string): Promise<{ count: number, records: T[] }> {
     return this.#withRetries(async () => {
       console.debug('Executing query', { query });
       try {
@@ -95,7 +95,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
     return await this.#pool.acquire();
   }
 
-  async release(db: sqlite3.Database): Promise<void> {
+  async release(db: Database): Promise<void> {
     return this.#pool.release(db);
   }
 }

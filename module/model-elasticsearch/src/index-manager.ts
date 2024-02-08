@@ -1,4 +1,4 @@
-import es from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { ReindexRequest } from '@elastic/elasticsearch/lib/api/types';
 
 import { Class } from '@travetto/base';
@@ -17,9 +17,9 @@ export class IndexManager implements ModelStorageSupport {
   #indexToAlias = new Map<string, string>();
   #aliasToIndex = new Map<string, string>();
   #identities = new Map<Class, { index: string }>();
-  #client: es.Client;
+  #client: Client;
 
-  constructor(public readonly config: ElasticsearchModelConfig, client: es.Client) {
+  constructor(public readonly config: ElasticsearchModelConfig, client: Client) {
     this.#client = client;
   }
 

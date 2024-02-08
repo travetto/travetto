@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import stream from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import mime from 'mime';
+import { getExtension } from 'mime';
 
 import { Renderable, Request, Response } from '@travetto/rest';
 import { Asset, AssetResponse, AssetUtil } from '@travetto/asset';
@@ -84,7 +84,7 @@ export class AssetRestUtil {
     } else {
       const contentType = req.getContentType();
       if (contentType) {
-        return `file-upload.${mime.getExtension(contentType.full)}`;
+        return `file-upload.${getExtension(contentType.full)}`;
       } else {
         return 'file-upload.unknown';
       }
