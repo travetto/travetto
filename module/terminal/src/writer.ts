@@ -14,7 +14,7 @@ const Codes = {
   SCROLL_RANGE_CLEAR: `${ESC}r`,
   POSITION_RESTORE: `${ESC}u`,
   POSITION_SAVE: `${ESC}s`,
-  SOFT_RESET_CODES: `${ESC}!p`,
+  SOFT_RESET: `${ESC}!p`,
   ERASE_LINE_RIGHT: `${ESC}0K`,
   ERASE_LINE_LEFT: `${ESC}1K`,
   ERASE_LINE_ALL: `${ESC}2K`,
@@ -31,6 +31,12 @@ const Codes = {
  * Buffered/batched writer.  Meant to be similar to readline.Readline, but with more general writing support and extensibility
  */
 export class TerminalWriter {
+
+  static reset(): void {
+    process.stdout.isTTY && process.stdout.write(Codes.SOFT_RESET);
+    process.stderr.isTTY && process.stderr.write(Codes.SOFT_RESET);
+  }
+
   #buffer: (string | number)[] = [];
   #restoreOnCommit = false;
   #term: State;
@@ -141,6 +147,6 @@ export class TerminalWriter {
 
   /** Reset */
   softReset(): this {
-    return this.write(Codes.SOFT_RESET_CODES);
+    return this.write(Codes.SOFT_RESET);
   }
 }

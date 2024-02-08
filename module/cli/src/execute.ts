@@ -85,6 +85,7 @@ export class ExecutionManager {
         await CliUtil.listenForResponse(result);
       }
     } catch (err) {
+      process.exitCode ??= 1;
       console.error!(err);
       console.error!();
     } finally {

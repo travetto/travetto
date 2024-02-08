@@ -1,8 +1,8 @@
-import { Class } from '@travetto/base';
-import { FieldConfig, ClassConfig } from '@travetto/schema';
+import type { Class } from '@travetto/base';
+import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
-import { RestInterceptor } from '../interceptor/types';
-import { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
+import type { RestInterceptor } from '../interceptor/types';
+import type { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
 
 /**
  * Endpoint decorator for composition of routing logic
@@ -130,3 +130,8 @@ export interface ControllerVisitor<T = unknown> {
 
   onComplete?(): T | Promise<T>;
 }
+
+
+export type RouteApplies = (route: RouteConfig, controller?: ControllerConfig) => boolean;
+
+export type LightweightConfig = ({ disabled?: boolean } & Record<string, unknown>);
