@@ -4,7 +4,7 @@ import { createReadStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import crypto from 'node:crypto';
 
-import mime from 'mime';
+import { getExtension, getType } from 'mime';
 
 import { path } from '@travetto/manifest';
 import { StreamMeta } from '@travetto/model';
@@ -74,7 +74,7 @@ export class AssetUtil {
    */
   static async ensureFileExtension(filePath: string): Promise<string> {
     const type = await this.resolveFileType(filePath);
-    const ext = mime.getExtension(type);
+    const ext = getExtension(type);
     const baseName = path.basename(filePath, path.extname(filePath));
     const newFile = `${baseName}.${ext}`;
 
@@ -94,7 +94,7 @@ export class AssetUtil {
     let contentType: string | undefined | null = undefined;
 
     if (!detected || detected.mime === 'application/octet-stream') {
-      contentType = mime.getType(pth);
+      contentType = getType(pth);
     } else {
       contentType = detected.mime;
     }
@@ -115,7 +115,7 @@ export class AssetUtil {
       filename = path.basename(file);
       const extName = path.extname(file);
       if (!extName) {
-        const ext = mime.getExtension(contentType);
+        const ext = getExtension(contentType);
         if (ext) {
           filename = `${filename}.${ext}`;
         }

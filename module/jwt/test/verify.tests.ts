@@ -1,4 +1,4 @@
-import jws from 'jws';
+import { sign } from 'jws';
 import assert from 'node:assert';
 
 import { Suite, Test, ShouldThrow, TestFixtures } from '@travetto/test';
@@ -17,7 +17,7 @@ class VerifySuite {
     const priv = await this.fixture.read('/priv.pem', true);
     const pub = await this.fixture.read('/pub.pem', true);
 
-    const signed = jws.sign({
+    const signed = sign({
       header: { alg: 'RS256', typ: 'JWT' },
       payload,
       secret: priv,
@@ -35,7 +35,7 @@ class VerifySuite {
     const pub = await this.fixture.read('/pub.pem', true);
     const expiredPub = await this.fixture.read('/invalid_pub.pem', true);
 
-    const signed = jws.sign({
+    const signed = sign({
       header: { alg: 'RS256', typ: 'JWT' },
       payload,
       secret: priv,
@@ -50,7 +50,7 @@ class VerifySuite {
   async multiVerifySymmetric() {
     const payload = { iat: Math.floor(Date.now() / 1000) };
 
-    const signed = jws.sign({
+    const signed = sign({
       header: { alg: 'HS256', typ: 'JWT' },
       payload,
       secret: 'test',
@@ -66,7 +66,7 @@ class VerifySuite {
     const payload = { iat: Math.floor(Date.now() / 1000) };
     const priv = await this.fixture.read('/priv.pem', true);
 
-    const signed = jws.sign({
+    const signed = sign({
       header: { alg: 'none' },
       payload,
       secret: priv,
@@ -83,7 +83,7 @@ class VerifySuite {
 
     const payload = { iat: Math.floor(Date.now() / 1000) };
 
-    const signed = jws.sign({
+    const signed = sign({
       header: { alg: 'none' },
       payload,
       secret: priv,

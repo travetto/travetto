@@ -1,4 +1,4 @@
-import mime from 'mime';
+import { getExtension } from 'mime';
 
 import { StreamMeta } from '@travetto/model';
 
@@ -38,7 +38,7 @@ export class HashNamingStrategy implements AssetNamingStrategy {
     let ext = '';
 
     if (asset.contentType) {
-      ext = mime.getExtension(asset.contentType)!;
+      ext = getExtension(asset.contentType)!;
     } else if (asset.filename) {
       const dot = asset.filename.indexOf('.');
       if (dot > 0) {

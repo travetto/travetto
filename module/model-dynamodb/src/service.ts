@@ -1,4 +1,7 @@
-import * as dynamodb from '@aws-sdk/client-dynamodb';
+import {
+  AttributeDefinition, AttributeValue, DynamoDB, GlobalSecondaryIndex,
+  KeySchemaElement, PutItemCommandInput, PutItemCommandOutput
+} from '@aws-sdk/client-dynamodb';
 
 import { ShutdownManager, type Class } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
@@ -22,8 +25,8 @@ function simpleName(idx: string): string {
   return idx.replace(/[^A-Za-z0-9]/g, '');
 }
 
-function toValue(val: string | number | boolean | Date | undefined | null, forceString?: boolean): dynamodb.AttributeValue;
-function toValue(val: unknown, forceString?: boolean): dynamodb.AttributeValue | undefined {
+function toValue(val: string | number | boolean | Date | undefined | null, forceString?: boolean): AttributeValue;
+function toValue(val: unknown, forceString?: boolean): AttributeValue | undefined {
   if (val === undefined || val === null || val === '') {
     return { NULL: true };
   } else if (typeof val === 'string' || forceString) {
@@ -58,7 +61,7 @@ async function loadAndCheckExpiry<T extends ModelType>(cls: Class<T>, doc: strin
 export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
   idSource = ModelCrudUtil.uuidSource();
-  client: dynamodb.DynamoDB;
+  client: DynamoDB;
 
   constructor(public readonly config: DynamoDBModelConfig) { }
 
@@ -70,7 +73,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     return table;
   }
 
-  async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert'): Promise<dynamodb.PutItemCommandOutput> {
+  async #putItem<T extends ModelType>(cls: Class<T>, id: string, item: T, mode: 'create' | 'update' | 'upsert'): Promise<PutItemCommandOutput> {
     const config = ModelRegistry.get(cls);
     let expiry: number | undefined;
 
@@ -92,7 +95,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
             indices[`${prop}_sort__`] = toValue(+sort);
           }
         }
-        const query: dynamodb.PutItemCommandInput = {
+        const query: PutItemCommandInput = {
           TableName: this.#resolveTable(cls),
           ConditionExpression: 'attribute_not_exists(body)',
           Item: {
@@ -148,16 +151,16 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     }
   }
 
-  #computeIndexConfig<T extends ModelType>(cls: Class<T>): { indices?: dynamodb.GlobalSecondaryIndex[], attributes: dynamodb.AttributeDefinition[] } {
+  #computeIndexConfig<T extends ModelType>(cls: Class<T>): { indices?: GlobalSecondaryIndex[], attributes: AttributeDefinition[] } {
     const config = ModelRegistry.get(cls);
-    const attributes: dynamodb.AttributeDefinition[] = [];
-    const indices: dynamodb.GlobalSecondaryIndex[] = [];
+    const attributes: AttributeDefinition[] = [];
+    const indices: GlobalSecondaryIndex[] = [];
 
     for (const idx of config.indices ?? []) {
       const idxName = simpleName(idx.name);
       attributes.push({ AttributeName: `${idxName}__`, AttributeType: 'S' });
 
-      const keys: dynamodb.KeySchemaElement[] = [{
+      const keys: KeySchemaElement[] = [{
         AttributeName: `${idxName}__`,
         KeyType: 'HASH'
       }];
@@ -185,7 +188,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async postConstruct(): Promise<void> {
-    this.client = new dynamodb.DynamoDB({ ...this.config.client });
+    this.client = new DynamoDB({ ...this.config.client });
     await ModelStorageUtil.registerModelChangeListener(this);
     ShutdownManager.onGracefulShutdown(async () => this.client.destroy(), this);
   }
@@ -328,7 +331,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     let done = false;
-    let token: Record<string, dynamodb.AttributeValue> | undefined;
+    let token: Record<string, AttributeValue> | undefined;
     while (!done) {
       const batch = await this.client.scan({
         TableName: this.#resolveTable(cls),
@@ -415,7 +418,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     const idxName = simpleName(idx);
 
     let done = false;
-    let token: Record<string, dynamodb.AttributeValue> | undefined;
+    let token: Record<string, AttributeValue> | undefined;
     while (!done) {
       const batch = await this.client.query({
         TableName: this.#resolveTable(cls),

@@ -5,7 +5,7 @@ import { CliValidationError } from './types';
 const COMMAND_PACKAGE = [
   [/^test(:watch)?$/, 'test', false],
   [/^service$/, 'command', true],
-  [/^lint(:register)?$/, 'lint', true],
+  [/^lint(:register)?$/, 'eslint', true],
   [/^model:(install|export)$/, 'model', true],
   [/^openapi:(spec|client)$/, 'openapi', true],
   [/^email:(compile|editor)$/, 'email-compiler', false],

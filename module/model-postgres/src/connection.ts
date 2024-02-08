@@ -1,4 +1,4 @@
-import pg from 'pg';
+import { Pool, PoolClient } from 'pg';
 
 import { ShutdownManager } from '@travetto/base';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
@@ -9,9 +9,9 @@ import { SQLModelConfig, Connection } from '@travetto/model-sql';
 /**
  * Connection support for postgresql
  */
-export class PostgreSQLConnection extends Connection<pg.PoolClient> {
+export class PostgreSQLConnection extends Connection<PoolClient> {
 
-  #pool: pg.Pool;
+  #pool: Pool;
   #config: SQLModelConfig;
 
   constructor(
@@ -27,7 +27,7 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
    */
   @WithAsyncContext()
   async init(): Promise<void> {
-    this.#pool = new pg.Pool({
+    this.#pool = new Pool({
       user: this.#config.user,
       password: this.#config.password,
       database: this.#config.database,
@@ -48,7 +48,7 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
     ShutdownManager.onGracefulShutdown(() => this.#pool.end(), this);
   }
 
-  async execute<T = unknown>(conn: pg.PoolClient, query: string): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(conn: PoolClient, query: string): Promise<{ count: number, records: T[] }> {
     console.debug('Executing query', { query });
     try {
       const out = await conn.query(query);
@@ -63,11 +63,11 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
     }
   }
 
-  acquire(): Promise<pg.PoolClient> {
+  acquire(): Promise<PoolClient> {
     return this.#pool.connect();
   }
 
-  release(conn: pg.PoolClient): void {
+  release(conn: PoolClient): void {
     conn.release();
   }
 }

@@ -1,4 +1,4 @@
-import * as mongo from 'mongodb';
+import { Binary, ObjectId } from 'mongodb';
 
 import { Class, ObjectUtil } from '@travetto/base';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
@@ -18,7 +18,7 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
   rad: 1
 };
 
-export type WithId<T> = T & { _id?: mongo.Binary };
+export type WithId<T> = T & { _id?: Binary };
 const isWithId = <T extends ModelType>(o: T): o is WithId<T> => o && '_id' in o;
 
 /**
@@ -41,14 +41,14 @@ export class MongoUtil {
     };
   }
 
-  static uuid(val: string): mongo.Binary {
-    return new mongo.Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), mongo.Binary.SUBTYPE_UUID);
+  static uuid(val: string): Binary {
+    return new Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), Binary.SUBTYPE_UUID);
   }
 
-  static idToString(id: string | mongo.ObjectId | mongo.Binary): string {
+  static idToString(id: string | ObjectId | Binary): string {
     if (typeof id === 'string') {
       return id;
-    } else if (id instanceof mongo.ObjectId) {
+    } else if (id instanceof ObjectId) {
       return id.toHexString();
     } else {
       return Buffer.from(id.buffer).toString('hex');
@@ -107,9 +107,9 @@ export class MongoUtil {
   /**
    * Convert ids from '_id' to 'id'
    */
-  static replaceId(v: Record<string, unknown>): Record<string, mongo.Binary>;
-  static replaceId(v: string[]): mongo.Binary[];
-  static replaceId(v: string): mongo.Binary;
+  static replaceId(v: Record<string, unknown>): Record<string, Binary>;
+  static replaceId(v: string[]): Binary[];
+  static replaceId(v: string): Binary;
   static replaceId(v: unknown): undefined;
   static replaceId(v: string | string[] | Record<string, unknown> | unknown): unknown {
     if (typeof v === 'string') {
@@ -117,7 +117,7 @@ export class MongoUtil {
     } else if (Array.isArray(v)) {
       return v.map(x => this.replaceId(x));
     } else if (ObjectUtil.isPlainObject(v)) {
-      const out: Record<string, mongo.Binary> = {};
+      const out: Record<string, Binary> = {};
       for (const [k, el] of Object.entries(v)) {
         const found = this.replaceId(el);
         if (found) {

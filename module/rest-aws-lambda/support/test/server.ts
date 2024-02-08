@@ -1,4 +1,4 @@
-import type * as lambda from 'aws-lambda';
+import type lambda from 'aws-lambda';
 
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';

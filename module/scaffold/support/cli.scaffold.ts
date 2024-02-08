@@ -1,4 +1,4 @@
-import enquirer from 'enquirer';
+import { prompt } from 'enquirer';
 
 import { path } from '@travetto/manifest';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
@@ -23,7 +23,7 @@ export class ScaffoldCommand implements CliCommandShape {
 
   async #getName(name?: string): Promise<string> {
     if (!name) {
-      const res = await enquirer.prompt<{ name: string }>([
+      const res = await prompt<{ name: string }>([
         {
           type: 'input',
           name: 'name',
@@ -36,7 +36,7 @@ export class ScaffoldCommand implements CliCommandShape {
   }
 
   async #chooseFeature(feature: Feature): Promise<Feature | undefined> {
-    const choice: (Parameters<typeof enquirer['prompt']>[0] & { type: 'select' }) = {
+    const choice: (Parameters<typeof prompt>[0] & { type: 'select' }) = {
       type: 'select' as const,
       name: 'choice',
       message: 'Please select one',
@@ -44,14 +44,14 @@ export class ScaffoldCommand implements CliCommandShape {
       choices: feature.choices!.map(x => x.title).filter((x?: string): x is string => !!x),
     };
 
-    const res = await enquirer.prompt<{ choice: string }>(choice);
+    const res = await prompt<{ choice: string }>(choice);
     return feature.choices?.find(x => x.title === res.choice);
   }
 
   async * #resolveFeatures(features: Feature[], chosen = false): AsyncGenerator<Feature> {
     for (const feat of features) {
       if (!chosen && !feat.required) {
-        const ans = await enquirer.prompt<{ choice: boolean | string }>([{
+        const ans = await prompt<{ choice: boolean | string }>([{
           type: 'confirm',
           name: 'choice',
           message: `Include ${feat.title} support?`,
