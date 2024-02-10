@@ -79,7 +79,7 @@ export class VisitorFactory<S extends State = State> {
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       const type = ManifestModuleUtil.getFileType(file.fileName);
-      if (type !== 'ts' || file.fileName.includes('support/entry.') || file.getText().endsWith('// #no-transform')) { // Skip all non-ts files
+      if (type !== 'ts' || /^\/\/\s*@trv-no-transform/.test(file.getFullText())) { // Skip all non-ts files
         return file;
       }
 
