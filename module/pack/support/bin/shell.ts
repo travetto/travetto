@@ -1,7 +1,7 @@
 import { path } from '@travetto/manifest';
 import { StyleUtil } from '@travetto/terminal';
 
-import { ShellCommandImpl } from './types';
+import { ShellCommandImpl } from '../../src/types';
 
 const escape = (text: string): string =>
   text

@@ -1,4 +1,4 @@
-import { DockerPackFactory } from './bin/types';
-import { PackConfigUtil } from './bin/config-util';
+import { DockerPackFactory } from '../src/types';
+import { PackConfigUtil } from '../src/config-util';
 
 export const factory: DockerPackFactory = cfg => PackConfigUtil.dockerStandardFile(cfg);

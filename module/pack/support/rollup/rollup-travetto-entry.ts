@@ -25,7 +25,7 @@ globalThis.${GLOBAL_IMPORT} = trvImp;`;
     name: 'travetto-entry',
 
     intro() {
-      return readFileSync(RuntimeIndex.getFromImport('@travetto/pack/support/rollup/preamble')!.outputFile, 'utf8')
+      return readFileSync(RuntimeIndex.getFromImport('@travetto/pack/support/bin/preamble')!.outputFile, 'utf8')
         .replaceAll('%%ENV_FILE%%', envFile ?? '')
         .replace(/\/\/# source.*$/m, '');
     },
