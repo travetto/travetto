@@ -4,7 +4,7 @@ import { Ignore, Required } from '@travetto/schema';
 
 import { DockerPackOperation } from './bin/docker-operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
-import { DockerPackConfig } from './bin/types';
+import { DockerPackConfig } from '../src/types';
 
 const NODE_MAJOR = +process.version.match(/\d+/)![0];
 const DEFAULT_USER_ID = 2000;

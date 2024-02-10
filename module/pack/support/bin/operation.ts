@@ -4,7 +4,7 @@ import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
 import { Env } from '@travetto/base';
 
-import { CommonPackConfig } from './types';
+import { CommonPackConfig } from '../../src/types';
 import { PackUtil } from './util';
 import { ActiveShellCommand, ShellCommands } from './shell';
 

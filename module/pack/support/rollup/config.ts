@@ -45,7 +45,7 @@ export function getFiles(entry?: string): string[] {
     .map(x => RuntimeIndex.getManifestModule(x))
     .filter(m => m.prod)
     .flatMap(getFilesFromModule)
-    .filter(x => (!entry || !x.endsWith(entry)) && !x.includes('@travetto/pack/support/rollup'));
+    .filter(x => (!entry || !x.endsWith(entry)) && !x.includes('@travetto/pack/support'));
 }
 
 export function getIgnoredModules(): string[] {

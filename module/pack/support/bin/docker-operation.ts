@@ -4,7 +4,7 @@ import { path, RuntimeIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell';
-import { DockerPackConfig, DockerPackFactoryModule } from './types';
+import { DockerPackConfig, DockerPackFactoryModule } from '../../src/types';
 import { PackOperation } from './operation';
 import { PackUtil } from './util';
 
