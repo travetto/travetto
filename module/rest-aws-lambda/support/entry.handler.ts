@@ -1,3 +1,4 @@
+// @trv-no-transform
 import type { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from '../src/types';
 import type { AwsLambdaHandler } from '../src/server';
 
