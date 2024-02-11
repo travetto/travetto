@@ -20,7 +20,7 @@ export class CompilerServer {
 
   #ctx: ManifestContext;
   #server: http.Server;
-  #listeners: { res: http.ServerResponse, type: CompilerEventType }[] = [];
+  #listeners: Record<string, { res: http.ServerResponse, type: CompilerEventType }> = {};
   #shutdown = new AbortController();
   signal = this.#shutdown.signal;
   info: CompilerServerInfo;
@@ -97,20 +97,21 @@ export class CompilerServer {
 
   async #addListener(type: string, res: http.ServerResponse): Promise<void> {
     res.writeHead(200);
+    const id = `id_${Date.now()}_${Math.random()}`.replace('.', '1');
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.#listeners.push({ res, type: type as 'change' });
+    this.#listeners[id] = { res, type: type as 'change' };
     if (type === 'state') { // Send on initial connect
       res.write(JSON.stringify({ state: this.info.state }));
     }
     res.write('\n'); // Send at least one byte on listen
-    await new Promise(resolve => res.on('close', resolve));
-    this.#listeners.splice(this.#listeners.findIndex(x => x.res === res), 1);
-    res.end();
+
+    // Do not wait on it
+    res.on('close', () => { delete this.#listeners[id]; });
   }
 
   #emitEvent(ev: CompilerEvent): void {
     const msg = `${JSON.stringify(ev.payload)}\n`;
-    for (const el of this.#listeners) {
+    for (const el of Object.values(this.#listeners)) {
       if (!el.res.closed && el.type === ev.type) {
         el.res.write(msg);
       }
@@ -121,8 +122,8 @@ export class CompilerServer {
     log('info', 'Server disconnect requested');
     this.info.iteration = Date.now();
     await new Promise(r => setTimeout(r, 20));
-    for (const el of this.#listeners) {
-      el.res.destroy();
+    for (const el of Object.values(this.#listeners)) {
+      el.res.end();
     }
   }
 
