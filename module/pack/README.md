@@ -39,7 +39,7 @@ Options:
   -sm, --sourcemap                     Bundle source maps (default: false)
   -is, --include-sources               Include source with source maps (default: false)
   -x, --eject-file <string>            Eject commands to file
-  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
   -m, --module <module>                Module to run for
@@ -103,7 +103,7 @@ Options:
   -sm, --sourcemap                     Bundle source maps (default: false)
   -is, --include-sources               Include source with source maps (default: false)
   -x, --eject-file <string>            Eject commands to file
-  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
   -m, --module <module>                Module to run for
@@ -130,7 +130,7 @@ Options:
   -sm, --sourcemap                       Bundle source maps (default: false)
   -is, --include-sources                 Include source with source maps (default: false)
   -x, --eject-file <string>              Eject commands to file
-  -r, --rollup-configuration <string>    Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  -r, --rollup-configuration <string>    Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                    Env Flag File Name (default: ".env")
   --manifest-file <string>               Manifest File Name (default: "manifest.json")
   -df, --docker-factory <string>         Docker Factory source  (default: "@travetto/pack/support/pack.dockerfile")
@@ -195,7 +195,7 @@ echo "Writing entry scripts todo-app.sh args=(run:rest)"
 
 echo "#!/bin/sh" > $DIST/todo-app.sh
 echo "cd \$(dirname \"\$0\")" >> $DIST/todo-app.sh
-echo "node --env-file=.env todo-app.js run:rest \$@" >> $DIST/todo-app.sh
+echo "node todo-app.js run:rest \$@" >> $DIST/todo-app.sh
 chmod 755 $DIST/todo-app.sh
 
 # Writing entry scripts todo-app.cmd args=(run:rest) 
@@ -204,7 +204,7 @@ echo "Writing entry scripts todo-app.cmd args=(run:rest)"
 
 echo "" > $DIST/todo-app.cmd
 echo "cd %~p0" >> $DIST/todo-app.cmd
-echo "node --env-file=.env todo-app.js run:rest %*" >> $DIST/todo-app.cmd
+echo "node todo-app.js run:rest %*" >> $DIST/todo-app.cmd
 chmod 755 $DIST/todo-app.cmd
 
 # Copying over resources 
@@ -233,7 +233,7 @@ export BUNDLE_FORMAT=commonjs
 export BUNDLE_ENV_FILE=.env
 export TRV_MANIFEST=$TRV_OUT/node_modules/$MOD
 cd $TRV_OUT
-npx rollup -c $TRV_OUT/node_modules/@travetto/pack/support/bin/rollup.js
+npx rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
 cd $ROOT
 
 # Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile 

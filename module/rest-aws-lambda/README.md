@@ -34,7 +34,7 @@ Options:
   -sm, --sourcemap                     Bundle source maps (default: false)
   -is, --include-sources               Include source with source maps (default: false)
   -x, --eject-file <string>            Eject commands to file
-  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
   -m, --module <module>                Module to run for

@@ -43,7 +43,7 @@ Options:
   -sm, <span class="token parameter variable">--sourcemap</span>                     Bundle <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -is, --include-sources               Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -x, --eject-file <span class="token operator">&lt;</span>string<span class="token operator">></span>            Eject commands to <span class="token function">file</span>
-  -r, --rollup-configuration <span class="token operator">&lt;</span>string<span class="token operator">></span>  Rollup configuration <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"&#64;travetto/pack/support/bin/rollup"</span><span class="token punctuation">)</span>
+  -r, --rollup-configuration <span class="token operator">&lt;</span>string<span class="token operator">></span>  Rollup configuration <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"&#64;travetto/pack/support/rollup/build"</span><span class="token punctuation">)</span>
   --env-file <span class="token operator">&lt;</span>string<span class="token operator">></span>                  Env Flag File Name <span class="token punctuation">(</span>default: <span class="token string">".env"</span><span class="token punctuation">)</span>
   --manifest-file <span class="token operator">&lt;</span>string<span class="token operator">></span>             Manifest File Name <span class="token punctuation">(</span>default: <span class="token string">"manifest.json"</span><span class="token punctuation">)</span>
   -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>                Module to run <span class="token keyword">for</span>
@@ -113,7 +113,7 @@ Options:
   -sm, <span class="token parameter variable">--sourcemap</span>                     Bundle <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -is, --include-sources               Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -x, --eject-file <span class="token operator">&lt;</span>string<span class="token operator">></span>            Eject commands to <span class="token function">file</span>
-  -r, --rollup-configuration <span class="token operator">&lt;</span>string<span class="token operator">></span>  Rollup configuration <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"&#64;travetto/pack/support/bin/rollup"</span><span class="token punctuation">)</span>
+  -r, --rollup-configuration <span class="token operator">&lt;</span>string<span class="token operator">></span>  Rollup configuration <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"&#64;travetto/pack/support/rollup/build"</span><span class="token punctuation">)</span>
   --env-file <span class="token operator">&lt;</span>string<span class="token operator">></span>                  Env Flag File Name <span class="token punctuation">(</span>default: <span class="token string">".env"</span><span class="token punctuation">)</span>
   --manifest-file <span class="token operator">&lt;</span>string<span class="token operator">></span>             Manifest File Name <span class="token punctuation">(</span>default: <span class="token string">"manifest.json"</span><span class="token punctuation">)</span>
   -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>                Module to run <span class="token keyword">for</span>
@@ -143,7 +143,7 @@ Options:
   -sm, <span class="token parameter variable">--sourcemap</span>                       Bundle <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -is, --include-sources                 Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -x, --eject-file <span class="token operator">&lt;</span>string<span class="token operator">></span>              Eject commands to <span class="token function">file</span>
-  -r, --rollup-configuration <span class="token operator">&lt;</span>string<span class="token operator">></span>    Rollup configuration <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"&#64;travetto/pack/support/bin/rollup"</span><span class="token punctuation">)</span>
+  -r, --rollup-configuration <span class="token operator">&lt;</span>string<span class="token operator">></span>    Rollup configuration <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"&#64;travetto/pack/support/rollup/build"</span><span class="token punctuation">)</span>
   --env-file <span class="token operator">&lt;</span>string<span class="token operator">></span>                    Env Flag File Name <span class="token punctuation">(</span>default: <span class="token string">".env"</span><span class="token punctuation">)</span>
   --manifest-file <span class="token operator">&lt;</span>string<span class="token operator">></span>               Manifest File Name <span class="token punctuation">(</span>default: <span class="token string">"manifest.json"</span><span class="token punctuation">)</span>
   -df, --docker-factory <span class="token operator">&lt;</span>string<span class="token operator">></span>         Docker Factory <span class="token builtin class-name">source</span>  <span class="token punctuation">(</span>default: <span class="token string">"&#64;travetto/pack/support/pack.dockerfile"</span><span class="token punctuation">)</span>
@@ -211,7 +211,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token builtin class-name">echo</span> <span class="token string">"#!/bin/sh"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/todo-app.sh
 <span class="token builtin class-name">echo</span> <span class="token string">"cd \<span class="token variable"><span class="token variable">$(</span><span class="token function">dirname</span> <span class="token punctuation">\</span>"<span class="token punctuation">\</span>$0<span class="token punctuation">\</span>"<span class="token variable">)</span></span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.sh
-<span class="token builtin class-name">echo</span> <span class="token string">"node --env-file=.env todo-app.js run:rest \<span class="token variable">$&#64;</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.sh
+<span class="token builtin class-name">echo</span> <span class="token string">"node todo-app.js run:rest \<span class="token variable">$&#64;</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.sh
 <span class="token function">chmod</span> <span class="token number">755</span> <span class="token variable">$DIST</span>/todo-app.sh
 
 <span class="token comment"># Writing entry scripts todo-app.cmd args=(run:rest)</span>
@@ -220,7 +220,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token builtin class-name">echo</span> <span class="token string">""</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/todo-app.cmd
 <span class="token builtin class-name">echo</span> <span class="token string">"cd %~p0"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.cmd
-<span class="token builtin class-name">echo</span> <span class="token string">"node --env-file=.env todo-app.js run:rest %*"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.cmd
+<span class="token builtin class-name">echo</span> <span class="token string">"node todo-app.js run:rest %*"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.cmd
 <span class="token function">chmod</span> <span class="token number">755</span> <span class="token variable">$DIST</span>/todo-app.cmd
 
 <span class="token comment"># Copying over resources</span>
@@ -249,7 +249,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_ENV_FILE</span><span class="token operator">=</span>.env
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">TRV_MANIFEST</span><span class="token operator">=</span><span class="token variable">$TRV_OUT</span>/node_modules/<span class="token variable">$MOD</span>
 <span class="token builtin class-name">cd</span> <span class="token variable">$TRV_OUT</span>
-npx rollup <span class="token parameter variable">-c</span> <span class="token variable">$TRV_OUT</span>/node_modules/&#64;travetto/pack/support/bin/rollup.js
+npx rollup <span class="token parameter variable">-c</span> <span class="token variable">$TRV_OUT</span>/node_modules/&#64;travetto/pack/support/rollup/build.js
 <span class="token builtin class-name">cd</span> <span class="token variable">$ROOT</span>
 
 <span class="token comment"># Generating Docker File $DIST/Dockerfile &#64;travetto/pack/support/pack.dockerfile</span>
