@@ -37,11 +37,11 @@ export class CompilerClient {
     return this.#url;
   }
 
-  async #fetch(rel: string, opts?: RequestInit & { timeout?: number }): Promise<Response> {
+  async #fetch(rel: string, opts?: RequestInit & { timeout?: number }, logTimeout = true): Promise<Response> {
     const ctrl = new AbortController();
     opts?.signal?.addEventListener('abort', () => ctrl.abort());
     const timeoutId = setTimeout(() => {
-      this.#log('error', `Timeout on request to ${this.#url}${rel}`);
+      logTimeout && this.#log('error', `Timeout on request to ${this.#url}${rel}`);
       ctrl.abort('TIMEOUT');
     }, 100).unref();
     try {
@@ -53,7 +53,7 @@ export class CompilerClient {
 
   /** Get server information, if server is running */
   info(): Promise<CompilerServerInfo | undefined> {
-    return this.#fetch('/info').then(v => v.json(), () => undefined)
+    return this.#fetch('/info', {}, false).then(v => v.json(), () => undefined)
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       .then(v => v as CompilerServerInfo);
   }
