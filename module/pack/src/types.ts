@@ -1,3 +1,6 @@
+import { type OutputOptions } from 'rollup';
+import type terser from '@rollup/plugin-terser';
+
 export type CommonPackConfig = {
   workspace: string;
   output: string;
@@ -58,3 +61,12 @@ export type ShellCommandImpl = {
 
 export type DockerPackFactory = (cfg: DockerPackConfig) => (string | Promise<string>);
 export type DockerPackFactoryModule = { factory: DockerPackFactory };
+
+export type CoreRollupConfig = {
+  envFile?: string;
+  output: OutputOptions;
+  entry: string;
+  files: string[];
+  ignore: Set<string>;
+  minify: Parameters<typeof terser>[0];
+};

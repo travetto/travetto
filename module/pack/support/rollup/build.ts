@@ -4,36 +4,26 @@ import terser from '@rollup/plugin-terser';
 import jsonImport from '@rollup/plugin-json';
 import type { RollupOptions } from 'rollup';
 
-import { EnvProp } from '@travetto/base';
-import { RuntimeContext } from '@travetto/manifest';
-
-import { getEntry, getOutput, getTerserConfig, getFiles, getIgnoredModules } from './config';
+import { getCoreConfig } from './config';
 import { travettoImportPlugin } from './rollup-travetto-import';
-import { sourcemaps } from './rollup-sourcemaps';
+import { travettoSourcemaps } from './rollup-travetto-sourcemaps';
 import { travettoEntryPlugin } from './rollup-travetto-entry';
 
 export default function buildConfig(): RollupOptions {
-  const output = getOutput();
-  const entry = getEntry();
-  const files = getFiles(entry);
-  const ignore = getIgnoredModules();
-  const ignoreRe = new RegExp(`^(${ignore.join('|')})`);
+  // Load up if not defined
+  const config = getCoreConfig();
 
   return {
-    input: [entry],
-    output,
+    input: [config.entry],
+    output: config.output,
     plugins: [
       jsonImport(),
-      travettoEntryPlugin(entry, new EnvProp('BUNDLE_ENV_FILE').val, files),
-      travettoImportPlugin(files, ignore),
-      commonjsRequire({
-        ignore: id => ignoreRe.test(id),
-        dynamicRequireRoot: RuntimeContext.workspace.path,
-        dynamicRequireTargets: []
-      }),
+      travettoEntryPlugin(config),
+      travettoImportPlugin(config),
+      commonjsRequire({ ignore: id => config.ignore.has(id) }),
       nodeResolve({ preferBuiltins: true }),
-      ...(output.sourcemap !== 'hidden' && output.sourcemap !== false ? [sourcemaps()] : []),
-      ...(output.compact ? [terser(getTerserConfig())] : [])
+      travettoSourcemaps(config),
+      ...(config.output.compact ? [terser(config.minify)] : [])
     ]
   };
 }

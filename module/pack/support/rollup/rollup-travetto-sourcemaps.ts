@@ -2,14 +2,18 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 
 import { LoadResult, Plugin, PluginContext } from 'rollup';
+import { CoreRollupConfig } from '../../src/types';
 
 function toString(error: unknown): string {
   return error instanceof Error ? error.stack ?? error.toString() : JSON.stringify(error);
 }
 // Pulled from https://github.com/Azure/azure-sdk-for-js/blob/main/common/tools/dev-tool/src/config/rollup.base.config.ts#L128
-export function sourcemaps(): Plugin {
+export function travettoSourcemaps(config: CoreRollupConfig): Plugin {
+  if (config.output.sourcemap === 'hidden' || config.output.sourcemap === false) {
+    return { name: 'travetto-source-maps' };
+  }
   return {
-    name: 'load-source-maps',
+    name: 'travetto-source-maps',
     async load(this: PluginContext, id: string): Promise<LoadResult> {
       if (!id.endsWith('.js')) {
         return null;

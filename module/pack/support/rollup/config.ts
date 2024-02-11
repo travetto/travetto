@@ -4,6 +4,7 @@ import type terser from '@rollup/plugin-terser';
 
 import { ManifestModule, ManifestModuleUtil, NodeModuleType, path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { EnvProp } from '@travetto/base';
+import { CoreRollupConfig } from '../../src/types';
 
 function getFilesFromModule(m: ManifestModule): string[] {
   return [
@@ -48,14 +49,13 @@ export function getFiles(entry?: string): string[] {
     .filter(x => (!entry || !x.endsWith(entry)) && !x.includes('@travetto/pack/support'));
 }
 
-export function getIgnoredModules(): string[] {
+export function getIgnoredModules(): ManifestModule[] {
   return [...RuntimeIndex.getModuleList('all')]
     .map(x => RuntimeIndex.getManifestModule(x))
-    .filter(m => !m.prod)
-    .map(m => m.name);
+    .filter(m => !m.prod);
 }
 
-export function getTerserConfig(): Parameters<typeof terser>[0] {
+export function getMinifyConfig(): Parameters<typeof terser>[0] {
   return {
     mangle: true,
     keep_classnames: true,
@@ -66,5 +66,20 @@ export function getTerserConfig(): Parameters<typeof terser>[0] {
       shebang: false,
       comments: false,
     }
+  };
+}
+
+export function getCoreConfig(): CoreRollupConfig {
+  const output = getOutput();
+  const entry = getEntry();
+  const files = getFiles(entry);
+  const ignoreModules = getIgnoredModules();
+  const ignoreFiles = ignoreModules.flatMap(getFilesFromModule);
+  const minify = getMinifyConfig();
+  const envFile = new EnvProp('BUNDLE_ENV_FILE').val;
+
+  return {
+    output, entry, files, envFile, minify,
+    ignore: new Set([...ignoreModules.map(x => x.name), ...ignoreFiles]),
   };
 }

@@ -3,20 +3,19 @@ import { walk } from 'estree-walker';
 import magicString from 'magic-string';
 
 import { GLOBAL_IMPORT } from './rollup-travetto-entry';
+import { CoreRollupConfig } from '../../src/types';
 
 type TNode = AstNode & { source?: { type: string }, callee?: TNode & { name?: string }, args?: TNode[] };
 
-export function travettoImportPlugin(files: string[], ignore: Iterable<string>): Plugin {
-  const ignoreSet = new Set(ignore);
-  const ignoreRe = new RegExp(`^(${[...ignore].join('|')})`);
-  const fileSet = new Set(files);
+export function travettoImportPlugin(config: CoreRollupConfig): Plugin {
+  const fileSet = new Set(config.files);
 
   const out: Plugin = {
     name: 'travetto-import',
 
     resolveDynamicImport(specifier, importer, options) {
       const key = typeof specifier === 'string' ? specifier : '';
-      if (ignoreSet.has(key) || ignoreRe.test(key)) {
+      if (config.ignore.has(key)) {
         return false;
       }
     },
