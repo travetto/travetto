@@ -130,8 +130,3 @@ export interface ControllerVisitor<T = unknown> {
 
   onComplete?(): T | Promise<T>;
 }
-
-
-export type RouteApplies = (route: RouteConfig, controller?: ControllerConfig) => boolean;
-
-export type LightweightConfig = ({ disabled?: boolean } & Record<string, unknown>);
