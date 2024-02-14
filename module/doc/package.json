@@ -41,6 +41,7 @@
     "roles": [
       "doc"
     ],
+    "workspaceInclude": true,
     "displayName": "Documentation"
   },
   "private": false,

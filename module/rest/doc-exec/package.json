@@ -10,7 +10,7 @@
   "travetto": {
     "build": {
       "isolated": true,
-      "withModules": {
+      "includes": {
         "@travetto/rest": "main"
       }
     }

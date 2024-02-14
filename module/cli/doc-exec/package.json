@@ -6,7 +6,7 @@
   "travetto": {
     "build": {
       "isolated": true,
-      "withModules": {
+      "includes": {
         "@travetto/cli": "main"
       }
     }

@@ -47,6 +47,7 @@
   },
   "travetto": {
     "displayName": "Testing",
+    "workspaceInclude": true,
     "roles": [
       "test"
     ]

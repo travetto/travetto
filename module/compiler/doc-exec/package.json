@@ -10,7 +10,7 @@
     "build": {
       "isolated": true,
       "compilerUrl": "http://localhost:25539",
-      "withModules": {
+      "includes": {
         "@travetto/cli": "main"
       }
     }

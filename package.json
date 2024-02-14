@@ -20,12 +20,7 @@
   },
   "travetto": {
     "build": {
-      "compilerUrl": "http://127.0.0.1:26803",
-      "withModules": {
-        "@travetto/cli": true,
-        "@travetto/test": true,
-        "@travetto/doc": true
-      }
+      "compilerUrl": "http://127.0.0.1:26803"
     },
     "doc": {
       "baseUrl": "https://github.com/travetto/travetto/tree/main",

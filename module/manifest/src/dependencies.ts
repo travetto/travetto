@@ -32,31 +32,51 @@ export class PackageModuleVisitor {
   #workspaceModules: Map<string, string>;
 
   /**
+   * Get monorepo root includes
+   */
+  #getMonoRootIncludes(parent: Req): Req[] {
+    if (!(this.ctx.workspace.mono && !this.ctx.main.folder)) { // If not mono root, bail
+      return [];
+    }
+
+    return [...this.#workspaceModules.values()]
+      .map(loc => this.#create(loc, { main: true, workspace: true, roleRoot: true, parent: parent.value }));
+  }
+
+  /**
+   * Determine default includes
+   */
+  #getIncludes(parent: Req): Req[] {
+    if (this.ctx.workspace.mono && !this.ctx.main.folder) { // If mono and not at mono root, bail
+      return [];
+    }
+
+    const root = PackageUtil.readPackage(this.ctx.workspace.path);
+    if (root.travetto?.build?.includes) {
+      return Object.entries(root.travetto.build.includes).map(([name, type]) =>
+        this.#create(PackageUtil.resolvePackagePath(name), { main: type === 'main', workspace: true, parent: parent.value })
+      );
+    } else {
+      return [...this.#workspaceModules.values()]
+        .filter((loc) => PackageUtil.readPackage(loc).travetto?.workspaceInclude)
+        .map(loc => this.#create(loc, { workspace: true, parent: parent.value }));
+    }
+  }
+
+  /**
    * Initialize visitor, and provide global dependencies
    */
   async init(): Promise<Iterable<Req>> {
     const mainReq = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, prod: true });
-    const globals = [mainReq];
     this.#workspaceModules = new Map(
       (await PackageUtil.resolveWorkspaces(this.ctx)).map(x => [x.name, x.path])
     );
 
-    // Treat all workspace modules as main modules
-    if (this.ctx.workspace.mono && !this.ctx.main.folder) {
-      for (const [, loc] of this.#workspaceModules) {
-        globals.push(this.#create(loc, { main: true, workspace: true, roleRoot: true, parent: mainReq.value }));
-      }
-    } else {
-      // If we have 'withModules' at workspace root
-      const root = PackageUtil.readPackage(this.ctx.workspace.path);
-      for (const [name, type] of Object.entries(root.travetto?.build?.withModules ?? {})) {
-        globals.push(this.#create(PackageUtil.resolvePackagePath(name),
-          { main: type === 'main', workspace: true, parent: mainReq.value }
-        ));
-      }
-    }
-
-    return globals;
+    return [
+      mainReq,
+      ...this.#getMonoRootIncludes(mainReq),
+      ...this.#getIncludes(mainReq)
+    ];
   }
 
   /**
