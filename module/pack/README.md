@@ -133,15 +133,16 @@ Options:
   -r, --rollup-configuration <string>    Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                    Env Flag File Name (default: ".env")
   --manifest-file <string>               Manifest File Name (default: "manifest.json")
-  -df, --docker-factory <string>         Docker Factory source  (default: "@travetto/pack/support/pack.dockerfile")
-  -di, --docker-image <string>           Docker Image to extend  (default: "node:20-alpine")
-  -dn, --docker-name <string>            Docker Image Name  (default: "travetto_pack")
-  -dt, --docker-tag <string>             Docker Image Tag  (default: ["latest"])
-  -dp, --docker-port <number>            Docker Image Port  (default: [])
-  -dx, --docker-push                     Docker Push Tags  (default: false)
+  -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile")
+  -di, --docker-image <string>           Docker Image to extend (default: "node:20-alpine")
+  -dn, --docker-name <string>            Docker Image Name (default: "travetto_pack")
+  -dt, --docker-tag <string>             Docker Image Tag (default: ["latest"])
+  -dp, --docker-port <number>            Docker Image Port (default: [])
+  -dx, --docker-push                     Docker Push Tags (default: false)
   -db, --docker-build-platform <string>  Docker Build Platform
   -dr, --docker-registry <string>        Docker Registry
-  -du, --docker-runtime-user <string>    Docker Runtime user
+  -ru, --runtime-user <string>           Docker Runtime user
+  -rp, --runtime-package <string>        Docker Runtime Packages (default: [])
   -m, --module <module>                  Module to run for
   -h, --help                             display help for command
 ```

@@ -15,25 +15,27 @@ const DEFAULT_USER = 'app';
  */
 @CliCommand({ addModule: true })
 export class PackDockerCommand extends BasePackCommand {
-  @CliFlag({ desc: 'Docker Factory source ', short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
+  @CliFlag({ desc: 'Docker Factory source', short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
   dockerFactory = '@travetto/pack/support/pack.dockerfile';
-  @CliFlag({ desc: 'Docker Image to extend ', short: 'di', envVars: ['PACK_DOCKER_IMAGE'] })
+  @CliFlag({ desc: 'Docker Image to extend', short: 'di', envVars: ['PACK_DOCKER_IMAGE'] })
   dockerImage = `node:${NODE_MAJOR}-alpine`;
-  @CliFlag({ desc: 'Docker Image Name ', short: 'dn', envVars: ['PACK_DOCKER_IMAGE'] })
+  @CliFlag({ desc: 'Docker Image Name', short: 'dn', envVars: ['PACK_DOCKER_IMAGE'] })
   @Required(false)
   dockerName: string;
-  @CliFlag({ desc: 'Docker Image Tag ', short: 'dt', envVars: ['PACK_DOCKER_TAGS'] })
+  @CliFlag({ desc: 'Docker Image Tag', short: 'dt', envVars: ['PACK_DOCKER_TAGS'] })
   dockerTag: string[] = ['latest'];
-  @CliFlag({ desc: 'Docker Image Port ', short: 'dp', envVars: ['PACK_DOCKER_PORT'] })
+  @CliFlag({ desc: 'Docker Image Port', short: 'dp', envVars: ['PACK_DOCKER_PORT'] })
   dockerPort: number[] = [];
-  @CliFlag({ desc: 'Docker Push Tags ', short: 'dx', envVars: ['PACK_DOCKER_PUSH'] })
+  @CliFlag({ desc: 'Docker Push Tags', short: 'dx', envVars: ['PACK_DOCKER_PUSH'] })
   dockerPush = false;
-  @CliFlag({ desc: 'Docker Build Platform ', short: 'db', envVars: ['PACK_DOCKER_BUILD_PLATFORM'] })
+  @CliFlag({ desc: 'Docker Build Platform', short: 'db', envVars: ['PACK_DOCKER_BUILD_PLATFORM'] })
   dockerBuildPlatform?: string;
-  @CliFlag({ desc: 'Docker Registry ', short: 'dr', envVars: ['PACK_DOCKER_REGISTRY'] })
+  @CliFlag({ desc: 'Docker Registry', short: 'dr', envVars: ['PACK_DOCKER_REGISTRY'] })
   dockerRegistry?: string;
-  @CliFlag({ desc: 'Docker Runtime user ', short: 'du', name: 'docker-runtime-user', envVars: ['PACK_DOCKER_RUNTIME_USER'] })
+  @CliFlag({ desc: 'Docker Runtime user', short: 'ru', name: 'runtime-user', envVars: ['PACK_DOCKER_RUNTIME_USER'] })
   dockerRuntimeUserSrc?: string;
+  @CliFlag({ desc: 'Docker Runtime Packages', short: 'rp', name: 'runtime-package', envVars: ['PACK_DOCKER_RUNTIME_PACKAGES'] })
+  dockerRuntimePackages: string[] = [];
 
   @Ignore()
   dockerRuntime: DockerPackConfig['dockerRuntime'];
@@ -67,7 +69,7 @@ export class PackDockerCommand extends BasePackCommand {
     const gid = groupIsNum ? +groupOrGid : DEFAULT_USER_ID;
     const group = (!groupIsNum ? groupOrGid : undefined) || DEFAULT_USER;
     const user = (!userIsNum ? userOrUid : undefined) || DEFAULT_USER;
-    this.dockerRuntime = { user, uid, group, gid, folder: `/${DEFAULT_USER}` };
+    this.dockerRuntime = { user, uid, group, gid, folder: `/${DEFAULT_USER}`, packages: this.dockerRuntimePackages };
   }
 
   preHelp(): void {
