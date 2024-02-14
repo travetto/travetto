@@ -33,6 +33,7 @@ export type DockerPackConfig = {
   dockerPush?: boolean;
   dockerRegistry?: string;
   dockerRuntime: {
+    packages?: string[];
     folder: string;
     user: string;
     uid: number;

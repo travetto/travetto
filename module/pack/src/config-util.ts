@@ -14,6 +14,21 @@ export class PackConfigUtil {
   }
 
   /**
+   * Install docker pages in either apk or apt environments
+   */
+  static dockerPackageInstall(cfg: DockerPackConfig): string {
+    const { packages } = cfg.dockerRuntime;
+    if (packages?.length) {
+      return ifElse('RUN which apk',
+        `apk --update add ${packages.join(' ')} && rm -rf /var/cache/apk/*`,
+        `apt update && apt install -y ${packages.join(' ')} && rm -rf  /var/lib/{apt,dpkg,cache,log}/`,
+      );
+    } else {
+      return '';
+    }
+  }
+
+  /**
    * Setup docker ports
    */
   static dockerPorts(cfg: DockerPackConfig): string {
@@ -79,6 +94,7 @@ export class PackConfigUtil {
     return [
       this.dockerPorts(cfg),
       this.dockerUser(cfg),
+      this.dockerPackageInstall(cfg),
       this.dockerAppFolder(cfg),
       this.dockerAppFiles(cfg),
       this.dockerEnvVars(cfg),
