@@ -1,6 +1,6 @@
 {
   "name": "@travetto/manifest",
-  "version": "4.0.0-rc.3",
+  "version": "4.0.0-rc.4",
   "description": "Support for project indexing, manifesting, along with file watching",
   "keywords": [
     "path",
