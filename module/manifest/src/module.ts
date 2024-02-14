@@ -197,7 +197,7 @@ export class ManifestModuleUtil {
    * Produce all modules for a given manifest folder, adding in some given modules when developing framework
    */
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
-    const pkgs = await new PackageModuleVisitor(ctx).visit();
+    const pkgs = await PackageModuleVisitor.visit(ctx);
     const modules = await Promise.all([...pkgs].map(x => this.describeModule(ctx, x)));
     return Object.fromEntries(modules.map(m => [m.name, m]));
   }

@@ -23,60 +23,20 @@ type Req = {
  */
 export class PackageModuleVisitor {
 
-  constructor(public ctx: ManifestContext) {
-    this.#mainSourcePath = path.resolve(this.ctx.workspace.path, this.ctx.main.folder);
+  static async visit(ctx: ManifestContext): Promise<Iterable<PackageModule>> {
+    const visitor = new PackageModuleVisitor(ctx, Object.fromEntries((await PackageUtil.resolveWorkspaces(ctx)).map(x => [x.name, x.path])));
+    return visitor.visit();
   }
 
   #mainSourcePath: string;
   #cache: Record<string, PackageModule> = {};
-  #workspaceModules: Map<string, string>;
+  #workspaceModules: Record<string, string>;
+  #ctx: ManifestContext;
 
-  /**
-   * Get monorepo root includes
-   */
-  #getMonoRootIncludes(parent: Req): Req[] {
-    if (!(this.ctx.workspace.mono && !this.ctx.main.folder)) { // If not mono root, bail
-      return [];
-    }
-
-    return [...this.#workspaceModules.values()]
-      .map(loc => this.#create(loc, { main: true, workspace: true, roleRoot: true, parent: parent.value }));
-  }
-
-  /**
-   * Determine default includes
-   */
-  #getIncludes(parent: Req): Req[] {
-    if (this.ctx.workspace.mono && !this.ctx.main.folder) { // If mono and not at mono root, bail
-      return [];
-    }
-
-    const root = PackageUtil.readPackage(this.ctx.workspace.path);
-    if (root.travetto?.build?.includes) {
-      return Object.entries(root.travetto.build.includes).map(([name, type]) =>
-        this.#create(PackageUtil.resolvePackagePath(name), { main: type === 'main', workspace: true, parent: parent.value })
-      );
-    } else {
-      return [...this.#workspaceModules.values()]
-        .filter((loc) => PackageUtil.readPackage(loc).travetto?.workspaceInclude)
-        .map(loc => this.#create(loc, { workspace: true, parent: parent.value }));
-    }
-  }
-
-  /**
-   * Initialize visitor, and provide global dependencies
-   */
-  async init(): Promise<Iterable<Req>> {
-    const mainReq = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, prod: true });
-    this.#workspaceModules = new Map(
-      (await PackageUtil.resolveWorkspaces(this.ctx)).map(x => [x.name, x.path])
-    );
-
-    return [
-      mainReq,
-      ...this.#getMonoRootIncludes(mainReq),
-      ...this.#getIncludes(mainReq)
-    ];
+  constructor(ctx: ManifestContext, workspaceModules: Record<string, string>) {
+    this.#mainSourcePath = path.resolve(ctx.workspace.path, ctx.main.folder);
+    this.#ctx = ctx;
+    this.#workspaceModules = workspaceModules;
   }
 
   /**
@@ -89,9 +49,9 @@ export class PackageModuleVisitor {
       prod,
       name: pkg.name,
       version: pkg.version,
-      workspace: workspace ?? this.#workspaceModules.has(pkg.name),
+      workspace: workspace ?? (pkg.name in this.#workspaceModules),
       internal: pkg.private === true,
-      sourceFolder: sourcePath === this.ctx.workspace.path ? '' : sourcePath.replace(`${this.ctx.workspace.path}/`, ''),
+      sourceFolder: sourcePath === this.#ctx.workspace.path ? '' : sourcePath.replace(`${this.#ctx.workspace.path}/`, ''),
       outputFolder: `node_modules/${pkg.name}`,
       state: {
         childSet: new Set(), parentSet: new Set(), roleSet: new Set(), roleRoot,
@@ -102,6 +62,38 @@ export class PackageModuleVisitor {
     const deps: PackageDepType[] = ['dependencies', ...(value.main ? ['devDependencies'] as const : [])];
     const children = Object.fromEntries(deps.flatMap(x => Object.entries(pkg[x] ?? {})));
     return { pkg, value, children, parent };
+  }
+
+  /**
+   * Get monorepo root includes
+   */
+  #getMonoRootIncludes(parent: Req): Req[] {
+    if (!(this.#ctx.workspace.mono && !this.#ctx.main.folder)) { // If not mono root, bail
+      return [];
+    }
+
+    return Object.values(this.#workspaceModules)
+      .map(loc => this.#create(loc, { main: true, workspace: true, roleRoot: true, parent: parent.value }));
+  }
+
+  /**
+   * Determine default includes
+   */
+  #getIncludes(parent: Req): Req[] {
+    if (this.#ctx.workspace.mono && !this.#ctx.main.folder) { // If mono and not at mono root, bail
+      return [];
+    }
+
+    const root = PackageUtil.readPackage(this.#ctx.workspace.path);
+    if (root.travetto?.build?.includes) {
+      return Object.entries(root.travetto.build.includes).map(([name, type]) =>
+        this.#create(PackageUtil.resolvePackagePath(name), { main: type === 'main', workspace: true, parent: parent.value })
+      );
+    } else {
+      return Object.values(this.#workspaceModules)
+        .filter((loc) => PackageUtil.readPackage(loc).travetto?.workspaceInclude)
+        .map(loc => this.#create(loc, { workspace: true, parent: parent.value }));
+    }
   }
 
   /**
@@ -163,7 +155,13 @@ export class PackageModuleVisitor {
    */
   async visit(): Promise<Iterable<PackageModule>> {
     const seen = new Set<PackageModule>();
-    const queue = [...await this.init()];
+    const mainReq = this.#create(this.#mainSourcePath, { main: true, workspace: true, roleRoot: true, prod: true });
+
+    const queue = [
+      mainReq,
+      ...this.#getMonoRootIncludes(mainReq),
+      ...this.#getIncludes(mainReq)
+    ];
 
     while (queue.length) {
       const { value: node, parent, children, pkg } = queue.shift()!; // Visit initial set first
@@ -172,7 +170,7 @@ export class PackageModuleVisitor {
       }
 
       // Track parentage
-      if (node.name !== this.ctx.main.name && parent) {
+      if (node.name !== this.#ctx.main.name && parent) {
         node.state.parentSet.add(parent.name);
         parent.state.childSet.add(node.name);
       }
