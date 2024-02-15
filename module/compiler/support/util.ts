@@ -63,7 +63,8 @@ export class CommonUtil {
       const controller = new AbortController();
       setMaxListeners(1000, controller.signal);
       // Chain
-      parent.addEventListener('abort', () => controller.abort());
+      const kill = (): void => controller.abort();
+      parent.addEventListener('abort', kill);
 
       const comp = src(controller.signal);
 
@@ -75,6 +76,7 @@ export class CommonUtil {
         if (shouldRestart(ev)) {
           log('debug', 'Restarting stream');
           controller.abort(); // Ensure terminated of process
+          parent.removeEventListener('abort', kill);
           continue outer;
         }
       }

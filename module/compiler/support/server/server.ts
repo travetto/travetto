@@ -7,8 +7,8 @@ import type { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types';
 import { LogUtil } from '../log';
-import { CompilerClient } from './client';
 import { CommonUtil } from '../util';
+import { CompilerClient } from './client';
 import { ProcessHandle } from './process-handle';
 
 const log = LogUtil.logger('compiler-server');
@@ -123,8 +123,9 @@ export class CompilerServer {
     this.info.iteration = Date.now();
     await new Promise(r => setTimeout(r, 20));
     for (const el of Object.values(this.#listeners)) {
-      el.res.end();
+      try { el.res.end(); } catch { }
     }
+    this.#listeners = {}; // Ensure its empty
   }
 
   async #clean(): Promise<{ clean: boolean }> {
@@ -144,19 +145,18 @@ export class CompilerServer {
     log('debug', 'Receive request', { action, subAction });
 
     let out: unknown;
+    let close = false;
     switch (action) {
       case 'event': return await this.#addListener(subAction, res);
       case 'clean': out = await this.#clean(); break;
-      case 'stop': {
-        // Must send immediately
-        res.end(JSON.stringify({ closing: true }));
-        await this.close();
-        break;
-      }
+      case 'stop': out = JSON.stringify({ closing: true }); close = true; break;
       case 'info':
       default: out = this.info ?? {}; break;
     }
     res.end(JSON.stringify(out));
+    if (close) {
+      await this.close();
+    }
   }
 
   /**
@@ -217,11 +217,7 @@ export class CompilerServer {
     } catch { // Timeout or other error
       // Force shutdown
       this.#server.closeAllConnections();
-      if (this.info.compilerPid) { // Ensure its killed
-        try {
-          process.kill(this.info.compilerPid);
-        } catch { }
-      }
+      await this.#handle.compiler.kill();
     }
 
     log('info', 'Closed down server');

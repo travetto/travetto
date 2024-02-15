@@ -31,10 +31,15 @@ export class LogUtil {
     }
   }
 
+  /** Are we in a shell that is interactive */
+  static get isInteractiveShell(): boolean {
+    return !!process.env.PS1 && process.stdout.isTTY;
+  }
+
   /**
    * Set level for operation
    */
-  static initLogs(ctx: ManifestContext, defaultLevel: CompilerLogLevel): void {
+  static initLogs(ctx: ManifestContext, defaultLevel?: CompilerLogLevel): void {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const build = process.env.TRV_BUILD as CompilerLogLevel | 'none';
     if (build !== 'none' && process.env.TRV_QUIET !== 'true') {
@@ -42,7 +47,7 @@ export class LogUtil {
     }
     this.root = ctx.workspace.path;
     // If we are in info or a terminal and also in a tty
-    this.logProgress = ((this.isLevelActive('info') || process.env.PS1) && process.stdout.isTTY) ? this.#logProgressEvent : undefined;
+    this.logProgress = (this.isLevelActive('info') && process.stdout.isTTY) ? this.#logProgressEvent : undefined;
     if (this.logProgress) {
       process.stdout.write(`${ESC}?25l`); // Hide cursor
     }
