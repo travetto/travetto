@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-session",
-  "version": "4.0.0-rc.6",
+  "version": "4.0.0-rc.7",
   "description": "Session provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -25,12 +25,12 @@
     "directory": "module/rest-session"
   },
   "dependencies": {
-    "@travetto/config": "^4.0.0-rc.5",
-    "@travetto/model": "^4.0.0-rc.5",
-    "@travetto/rest": "^4.0.0-rc.6"
+    "@travetto/config": "^4.0.0-rc.6",
+    "@travetto/model": "^4.0.0-rc.6",
+    "@travetto/rest": "^4.0.0-rc.7"
   },
   "peerDependencies": {
-    "@travetto/test": "^4.0.0-rc.5"
+    "@travetto/test": "^4.0.0-rc.6"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

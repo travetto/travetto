@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-express",
-  "version": "4.0.0-rc.6",
+  "version": "4.0.0-rc.7",
   "description": "Express provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -24,7 +24,7 @@
     "directory": "module/rest-express"
   },
   "dependencies": {
-    "@travetto/rest": "^4.0.0-rc.6",
+    "@travetto/rest": "^4.0.0-rc.7",
     "@types/compression": "^1.7.5",
     "@types/express": "^4.17.21",
     "compression": "^1.7.4",
