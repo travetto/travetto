@@ -216,7 +216,7 @@ export class CompilerSetup {
         const names: string[] = [];
         const mods = Object.values(manifest.modules).filter(x => x.workspace && x.name !== ctx.workspace.name);
         for (const mod of mods) {
-          const modCtx = ManifestUtil.getModuleContext(ctx, mod.sourceFolder);
+          const modCtx = ManifestUtil.getModuleContext(ctx, mod.sourceFolder, true);
           const modManifest = await ManifestUtil.buildManifest(modCtx);
           await ManifestUtil.writeManifest(modManifest);
           names.push(mod.name);

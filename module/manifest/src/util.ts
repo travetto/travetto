@@ -116,9 +116,9 @@ export class ManifestUtil {
   /**
    * Produce the manifest context for a given module module
    */
-  static getModuleContext(ctx: ManifestContext, folder: string): ManifestContext {
+  static getModuleContext(ctx: ManifestContext, folder: string, ensureLatest = false): ManifestContext {
     const modPath = path.resolve(ctx.workspace.path, folder);
-    const pkg = PackageUtil.readPackage(modPath);
+    const pkg = PackageUtil.readPackage(modPath, ensureLatest);
 
     return {
       workspace: ctx.workspace,
