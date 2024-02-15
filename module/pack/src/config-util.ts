@@ -1,7 +1,5 @@
 import { DockerPackConfig } from './types';
 
-const ifElse = (check: string, succ: string, fail: string): string => `${check} && (${succ}) || (${fail})`;
-
 /**
  * Common utils for setting up pack config
  */
@@ -17,12 +15,15 @@ export class PackConfigUtil {
    * Install docker pages in either apk or apt environments
    */
   static dockerPackageInstall(cfg: DockerPackConfig): string {
-    const { packages } = cfg.dockerRuntime;
+    const { os, packages } = cfg.dockerRuntime;
     if (packages?.length) {
-      return ifElse('RUN which apk',
-        `apk --update add ${packages.join(' ')} && rm -rf /var/cache/apk/*`,
-        `apt update && apt install -y ${packages.join(' ')} && rm -rf  /var/lib/{apt,dpkg,cache,log}/`,
-      );
+      switch (os) {
+        case 'alpine': return `RUN apk --update add ${packages.join(' ')} && rm -rf /var/cache/apk/*`;
+        case 'debian': return `RUN apt update && apt install -y ${packages.join(' ')} && rm -rf  /var/lib/{apt,dpkg,cache,log}/`;
+        case 'centos': return `RUN yum -y install ${packages.join(' ')} && yum -y clean all && rm -fr /var/cache`;
+        case 'unknown':
+        default: throw new Error('Unable to install packages in an unknown os');
+      }
     } else {
       return '';
     }
@@ -39,14 +40,18 @@ export class PackConfigUtil {
    * Setup docker user
    */
   static dockerUser(cfg: DockerPackConfig): string {
-    const { user, group, uid, gid } = cfg.dockerRuntime;
-    return [
-      user !== 'root' ? ifElse(
-        'RUN which useradd',
-        `groupadd --gid ${gid} ${group} && useradd -u ${uid} -g ${group} ${user}`,
-        `addgroup -g ${gid} ${group} && adduser -D -G ${group} -u ${uid} ${user}`
-      ) : '',
-    ].join('\n');
+    const { os, user, group, uid, gid } = cfg.dockerRuntime;
+    if (user === 'root') {
+      return '';
+    } else {
+      switch (os) {
+        case 'alpine': return `RUN addgroup -g ${gid} ${group} && adduser -D -G ${group} -u ${uid} ${user}`;
+        case 'debian':
+        case 'centos': return `RUN groupadd --gid ${gid} ${group} && useradd -u ${uid} -g ${group} ${user}`;
+        case 'unknown':
+        default: throw new Error('Unable to add user/group for an unknown os');
+      }
+    }
   }
 
   /**

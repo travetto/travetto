@@ -33,6 +33,7 @@ export type DockerPackConfig = {
   dockerPush?: boolean;
   dockerRegistry?: string;
   dockerRuntime: {
+    os?: 'alpine' | 'debian' | 'centos' | 'unknown';
     packages?: string[];
     folder: string;
     user: string;

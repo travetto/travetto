@@ -79,8 +79,9 @@ export class PackDockerCommand extends BasePackCommand {
   getOperations(): PackOperationShape<this>[] {
     return [
       ...super.getOperations(),
-      DockerPackOperation.writeDockerFile,
       DockerPackOperation.pullDockerBaseImage,
+      DockerPackOperation.detectDockerImageOs,
+      DockerPackOperation.writeDockerFile,
       DockerPackOperation.buildDockerContainer,
       DockerPackOperation.pushDockerContainer
     ];

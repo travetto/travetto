@@ -15,6 +15,18 @@ export class DockerPackOperation {
   }
 
   /**
+   * Detect image os
+   */
+  static async* detectDockerImageOs(cfg: DockerPackConfig): AsyncIterable<string[]> {
+    // Read os before writing
+    cfg.dockerRuntime.os = await PackUtil.runCommand(
+      ['docker', 'run', '--entrypoint', '/bin/sh', cfg.dockerImage, '-c', 'cat /etc/*release*']
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    ).then(out => out.match(/\b(?:debian|alpine|centos)\b/i)?.[0].toLowerCase() as 'alpine' ?? 'unknown');
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Detected Image OS' }} ${{ param: cfg.dockerImage }} as ${{ param: cfg.dockerRuntime.os }}`);
+  }
+
+  /**
    * Write Docker File
    */
   static async* writeDockerFile(cfg: DockerPackConfig): AsyncIterable<string[]> {
