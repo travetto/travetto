@@ -63,7 +63,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.83.1"
+    "vscode": "^1.86.0"
   },
   "publishConfig": {
     "access": "restricted"

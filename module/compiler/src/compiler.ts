@@ -70,7 +70,7 @@ export class Compiler {
         break;
       }
       case 'reset': {
-        Log.info('Triggering reset due to change in core files');
+        Log.info('Triggering reset due to change in core files', err?.cause);
         EventUtil.sendEvent('state', { state: 'reset' });
         process.exitCode = 0;
         break;

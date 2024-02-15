@@ -43,7 +43,7 @@ export class CompilerClient {
     const timeoutId = setTimeout(() => {
       logTimeout && this.#log('error', `Timeout on request to ${this.#url}${rel}`);
       ctrl.abort('TIMEOUT');
-    }, 100).unref();
+    }, opts?.timeout ?? 100).unref();
     try {
       return await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
     } finally {
@@ -53,7 +53,7 @@ export class CompilerClient {
 
   /** Get server information, if server is running */
   info(): Promise<CompilerServerInfo | undefined> {
-    return this.#fetch('/info', {}, false).then(v => v.json(), () => undefined)
+    return this.#fetch('/info', { timeout: 200 }, false).then(v => v.json(), () => undefined)
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       .then(v => v as CompilerServerInfo);
   }

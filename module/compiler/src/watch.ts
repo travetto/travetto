@@ -128,7 +128,7 @@ export class CompilerWatcher {
         sourceFile === ROOT_PKG ||
         (action === 'delete' && (sourceFile === OUTPUT_PATH || sourceFile === COMPILER_PATH))
       ) {
-        throw new Error('RESET');
+        throw new Error('RESET', { cause: `${action}:${sourceFile}` });
       }
 
       const fileType = ManifestModuleUtil.getFileType(sourceFile);

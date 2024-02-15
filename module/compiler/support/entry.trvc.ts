@@ -47,6 +47,7 @@ export const main = (ctx: ManifestContext) => {
   const ops = {
     /** Stop the server */
     async stop(): Promise<void> {
+      LogUtil.initLogs(ctx);
       if (await client.stop()) {
         console.log(`Stopped server ${ctx.workspace.path}: ${client}`);
       } else {
@@ -62,6 +63,7 @@ export const main = (ctx: ManifestContext) => {
 
     /** Clean the server */
     async clean(): Promise<void> {
+      LogUtil.initLogs(ctx);
       if (await client.clean()) {
         return console.log(`Clean triggered ${ctx.workspace.path}:`, buildFolders);
       } else {
@@ -90,7 +92,7 @@ export const main = (ctx: ManifestContext) => {
     async getLoader(): Promise<(mod: string) => Promise<unknown>> {
       // Short circuit if we can
       if (!(await client.isWatching())) {
-        await compile('build', 'error');
+        await compile('build', LogUtil.isInteractiveShell ? 'info' : 'error');
       }
       return CommonUtil.moduleLoader(ctx);
     },
