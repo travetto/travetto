@@ -60,22 +60,23 @@ export class CompilerWatchFeature extends BaseFeature {
    * @param command
    */
   run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info' | 'event', args?: string[], signal?: AbortSignal): ChildProcess {
+    const debug = command !== 'info' && command !== 'event';
     this.#log.trace('Running Compiler', this.#compilerCliFile, command, args);
     const proc = spawn('node', [this.#compilerCliFile, command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
-      stdio: 'pipe',
+      stdio: (command === 'start' || command === 'restart') ? ['pipe', null, 'pipe'] : 'pipe',
       env: {
         PATH: process.env.PATH,
-        ...(command !== 'info' && command !== 'event') ? Env.TRV_BUILD.export('debug') : {}
+        ...(debug ? Env.TRV_BUILD.export('debug') : {})
       }
     }).on('exit', (code) => {
       this.#log.debug('Finished command', command, 'with', code);
     });
 
-    if (command === 'start' || command === 'restart') {
-      StreamUtil.onLine(proc.stderr, line => this.#log.error(`> ${line}`));
-    }
+    debug && proc.stderr && StreamUtil.onLine(proc.stderr, line => this.#log.error(`> ${line}`));
+    debug && proc.stdout && StreamUtil.onLine(proc.stdout, line => this.#log.info(`> ${line}`));
+
     return proc;
   }
 
