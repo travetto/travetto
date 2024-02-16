@@ -237,24 +237,28 @@ cd $TRV_OUT
 npx rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
 cd $ROOT
 
+# Pulling Docker Base Image node:20-alpine 
+
+echo "Pulling Docker Base Image node:20-alpine"
+
+docker pull node:20-alpine
+
+# Detected Image OS node:20-alpine as alpine 
+
+echo "Detected Image OS node:20-alpine as alpine"
+
 # Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile 
 
 echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile"
 
 echo "FROM node:20-alpine" > $DIST/Dockerfile
-echo "RUN which useradd && (groupadd --gid 2000 app && useradd -u 2000 -g app app) || (addgroup -g 2000 app && adduser -D -G app -u 2000 app)" >> $DIST/Dockerfile
+echo "RUN addgroup -g 2000 app && adduser -D -G app -u 2000 app" >> $DIST/Dockerfile
 echo "RUN mkdir /app && chown app:app /app" >> $DIST/Dockerfile
 echo "COPY --chown=\"app:app\" . /app" >> $DIST/Dockerfile
 echo "ENV NODE_OPTIONS=\"\"" >> $DIST/Dockerfile
 echo "USER app" >> $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
-
-# Pulling Docker Base Image node:20-alpine 
-
-echo "Pulling Docker Base Image node:20-alpine"
-
-docker pull node:20-alpine
 
 # Building Docker Container latest 
 
