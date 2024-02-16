@@ -1,5 +1,7 @@
 import tty from 'node:tty';
 
+import { ShutdownManager } from '@travetto/base';
+
 type State = { output: tty.WriteStream, height: number, width: number };
 type TermCoord = { x: number, y: number };
 
@@ -31,18 +33,29 @@ const Codes = {
  * Buffered/batched writer.  Meant to be similar to readline.Readline, but with more general writing support and extensibility
  */
 export class TerminalWriter {
-
-  static reset(): void {
-    process.stdout.isTTY && process.stdout.write(Codes.SOFT_RESET);
-    process.stderr.isTTY && process.stderr.write(Codes.SOFT_RESET);
-  }
-
   #buffer: (string | number)[] = [];
   #restoreOnCommit = false;
   #term: State;
+  #cleanup: (() => undefined) | undefined;
 
   constructor(state: State) {
     this.#term = state;
+  }
+
+  /** Track dirty state for the stream */
+  trackDirty(on: boolean): this {
+    const output = this.#term.output;
+    if (output.isTTY) {
+      if (on && !this.#cleanup) {
+        const exit = (): Promise<void> => this.reset().commit(false);
+        const free = ShutdownManager.onGracefulShutdown(exit);
+        process.on('exit', exit);
+        this.#cleanup = (): undefined => { free(); process.off('exit', exit); };
+      } else if (!on) {
+        this.#cleanup = this.#cleanup?.();
+      }
+    }
+    return this;
   }
 
   /** Pad to width of terminal */
@@ -132,12 +145,12 @@ export class TerminalWriter {
 
   /** Hide cursor */
   hideCursor(): this {
-    return this.write(Codes.HIDE_CURSOR);
+    return this.trackDirty(true).write(Codes.HIDE_CURSOR);
   }
 
   /** Set scrolling range */
   scrollRange({ start = 0, end = -1 }: { start?: number, end?: number }): this {
-    return this.write(Codes.SCROLL_RANGE_SET(start, end, this.#term.height));
+    return this.trackDirty(true).write(Codes.SCROLL_RANGE_SET(start, end, this.#term.height));
   }
 
   /** Clear scrolling range */
@@ -146,7 +159,7 @@ export class TerminalWriter {
   }
 
   /** Reset */
-  softReset(): this {
-    return this.write(Codes.SOFT_RESET);
+  reset(): this {
+    return this.trackDirty(false).write(Codes.SOFT_RESET).write(Codes.SHOW_CURSOR);
   }
 }
