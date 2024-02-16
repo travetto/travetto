@@ -19,7 +19,6 @@ export class Terminal {
 
   #interactive: boolean;
   #writer: TerminalWriter;
-  #cleanExit = 0;
   #width: number;
   #height: number;
   #output: tty.WriteStream;
@@ -32,14 +31,6 @@ export class Terminal {
       await this.#writer.setPosition(pos).write(STD_WAIT_STATES[i++ % STD_WAIT_STATES.length]).commit(true);
       await timers.setTimeout(100);
     }
-  }
-
-  #cleanOnExit(): () => void {
-    if (this.#cleanExit === 0) {
-      process.on('exit', TerminalWriter.reset);
-    }
-    this.#cleanExit += 1;
-    return () => (this.#cleanExit -= 1) === 0 && process.off('exit', TerminalWriter.reset);
   }
 
   constructor(output?: tty.WriteStream, config?: { width?: number, height?: number }) {
@@ -77,7 +68,6 @@ export class Terminal {
   async streamToBottom(source: AsyncIterable<string | undefined>, config: TerminalStreamingConfig = {}): Promise<void> {
     const writePos = { x: 0, y: -1 };
     const minDelay = config.minDelay ?? 0;
-    const remove = this.#cleanOnExit();
 
     let prev: string | undefined;
     let stop: AbortController | undefined;
@@ -117,8 +107,7 @@ export class Terminal {
 
       await this.#writer.setPosition(writePos).clearLine().commit(true);
     } finally {
-      await this.#writer.softReset().commit();
-      remove();
+      await this.#writer.reset().commit();
     }
   }
 
@@ -137,7 +126,6 @@ export class Terminal {
       return;
     }
 
-    const remove = this.#cleanOnExit();
     let max = 0;
     try {
       await this.#writer.hideCursor().commit();
@@ -146,8 +134,7 @@ export class Terminal {
         await this.#writer.write('\n'.repeat(idx)).setPosition({ x: 0 }).write(text).clearLine(1).changePosition({ y: -idx }).commit();
       }
     } finally {
-      await this.#writer.changePosition({ y: max + 1 }).writeLine('\n').softReset().commit();
-      remove();
+      await this.#writer.changePosition({ y: max + 1 }).writeLine('\n').reset().commit();
     }
   }
 }
