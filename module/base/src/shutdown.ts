@@ -33,7 +33,7 @@ export class ShutdownManager {
   /**
    * Wait for graceful shutdown to run and complete
    */
-  static async gracefulShutdown(code?: number): Promise<void> {
+  static async gracefulShutdown(code: number | undefined = process.exitCode): Promise<void> {
     if (this.#handlers.length) {
       console.debug('Graceful shutdown: started');
 
