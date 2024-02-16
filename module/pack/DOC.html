@@ -253,24 +253,28 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 npx rollup <span class="token parameter variable">-c</span> <span class="token variable">$TRV_OUT</span>/node_modules/@travetto/pack/support/rollup/build.js
 <span class="token builtin class-name">cd</span> <span class="token variable">$ROOT</span>
 
+<span class="token comment"># Pulling Docker Base Image node:20-alpine</span>
+
+<span class="token builtin class-name">echo</span> <span class="token string">"Pulling Docker Base Image node:20-alpine"</span>
+
+<span class="token function">docker</span> pull node:20-alpine
+
+<span class="token comment"># Detected Image OS node:20-alpine as alpine</span>
+
+<span class="token builtin class-name">echo</span> <span class="token string">"Detected Image OS node:20-alpine as alpine"</span>
+
 <span class="token comment"># Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile</span>
 
 <span class="token builtin class-name">echo</span> <span class="token string">"Generating Docker File <span class="token variable">$DIST</span>/Dockerfile @travetto/pack/support/pack.dockerfile"</span>
 
 <span class="token builtin class-name">echo</span> <span class="token string">"FROM node:20-alpine"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/Dockerfile
-<span class="token builtin class-name">echo</span> <span class="token string">"RUN which useradd &amp;&amp; (groupadd --gid 2000 app &amp;&amp; useradd -u 2000 -g app app) || (addgroup -g 2000 app &amp;&amp; adduser -D -G app -u 2000 app)"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
+<span class="token builtin class-name">echo</span> <span class="token string">"RUN addgroup -g 2000 app &amp;&amp; adduser -D -G app -u 2000 app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"RUN mkdir /app &amp;&amp; chown app:app /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"COPY --chown=<span class="token entity" title="\&quot;">\"</span>app:app<span class="token entity" title="\&quot;">\"</span> . /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"ENV NODE_OPTIONS=<span class="token entity" title="\&quot;">\"</span><span class="token entity" title="\&quot;">\"</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"USER app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"WORKDIR /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"ENTRYPOINT [<span class="token entity" title="\&quot;">\"</span>/app/todo-app.sh<span class="token entity" title="\&quot;">\"</span>]"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
-
-<span class="token comment"># Pulling Docker Base Image node:20-alpine</span>
-
-<span class="token builtin class-name">echo</span> <span class="token string">"Pulling Docker Base Image node:20-alpine"</span>
-
-<span class="token function">docker</span> pull node:20-alpine
 
 <span class="token comment"># Building Docker Container latest</span>
 
