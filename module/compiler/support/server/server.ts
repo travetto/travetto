@@ -142,8 +142,6 @@ export class CompilerServer {
 
     const [, action, subAction] = new URL(`${this.#url}${req.url}`).pathname.split('/');
 
-    log('debug', 'Receive request', { action, subAction });
-
     let out: unknown;
     let close = false;
     switch (action) {
