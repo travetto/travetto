@@ -1,6 +1,6 @@
 import { PackageUtil, RuntimeContext } from '@travetto/manifest';
 import { cliTpl } from './color';
-import { CliValidationError } from './types';
+import { CliValidationError, CliCommandShape } from './types';
 
 const COMMAND_PACKAGE = [
   [/^test(:watch)?$/, 'test', false],
@@ -50,9 +50,11 @@ ${{ identifier: install }}
  */
 export class CliValidationResultError extends Error {
   errors: CliValidationError[];
+  command: CliCommandShape;
 
-  constructor(errors: CliValidationError[]) {
+  constructor(command: CliCommandShape, errors: CliValidationError[]) {
     super('');
+    this.command = command;
     this.errors = errors;
   }
 }

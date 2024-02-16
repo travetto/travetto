@@ -23,7 +23,8 @@ export class HelpUtil {
    * Render command-specific help
    * @param command
    */
-  static async renderCommandHelp(command: CliCommandShape): Promise<string> {
+  static async renderCommandHelp(cmd: CliCommandShape | string): Promise<string> {
+    const command = typeof cmd === 'string' ? await CliCommandRegistry.getInstance(cmd, true) : cmd;
     const commandName = CliCommandRegistry.getName(command);
 
     await command.preHelp?.();
@@ -130,7 +131,7 @@ export class HelpUtil {
   /**
    * Render validation error to a string
    */
-  static renderValidationError(cmd: CliCommandShape, err: CliValidationResultError): string {
+  static renderValidationError(err: CliValidationResultError): string {
     return [
       cliTpl`${{ failure: 'Execution failed' }}:`,
       ...err.errors.map(e => e.source && e.source !== 'custom' ?

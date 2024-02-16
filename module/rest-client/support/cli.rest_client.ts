@@ -34,7 +34,7 @@ export class CliRestClientCommand implements CliCommandShape {
       }
     } else {
       if (!output) {
-        throw new CliValidationResultError([
+        throw new CliValidationResultError(this, [
           { message: 'output is required when type is not `config`', source: 'arg' }
         ]);
       }

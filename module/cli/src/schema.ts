@@ -171,7 +171,7 @@ export class CliCommandSchemaUtil {
       async (): Promise<void> => {
         const res = await cmd.validate?.(...args);
         if (res) {
-          throw new CliValidationResultError(Array.isArray(res) ? res : [res]);
+          throw new CliValidationResultError(cmd, Array.isArray(res) ? res : [res]);
         }
       },
     ];
@@ -187,7 +187,7 @@ export class CliCommandSchemaUtil {
 
     const errors = (await Promise.all(results)).flatMap(x => (x ?? []));
     if (errors.length) {
-      throw new CliValidationResultError(errors);
+      throw new CliValidationResultError(cmd, errors);
     }
     return cmd;
   }

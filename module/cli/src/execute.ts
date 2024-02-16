@@ -1,7 +1,6 @@
 import { ConsoleManager, Env, ShutdownManager } from '@travetto/base';
 
 import { HelpUtil } from './help';
-import { CliCommandShape } from './types';
 import { CliCommandRegistry } from './registry';
 import { CliCommandSchemaUtil } from './schema';
 import { CliUnknownCommandError, CliValidationResultError } from './error';
@@ -13,51 +12,44 @@ import { CliUtil } from './util';
  */
 export class ExecutionManager {
 
-  /** Prepare command for execution */
-  static async #prepareAndBind(cmd: CliCommandShape, args: string[]): Promise<unknown[]> {
-    const schema = await CliCommandSchemaUtil.getSchema(cmd);
-    args = await CliParseUtil.expandArgs(schema, args);
-    cmd._parsed = await CliParseUtil.parse(schema, args);
-
-    await cmd.preBind?.();
-    try {
-      const known = await CliCommandSchemaUtil.bindInput(cmd, cmd._parsed);
-
-      await cmd.preValidate?.();
-      await CliCommandSchemaUtil.validate(cmd, known);
-
-      await cmd._cfg!.preMain?.(cmd);
-      await cmd.preMain?.();
-
-      return known;
-    } catch (err) {
-      if (err instanceof CliValidationResultError) {
-        console.error!(await HelpUtil.renderValidationError(cmd, err));
-        console.error!(await HelpUtil.renderCommandHelp(cmd));
-        process.exit(1);
+  /** Error handler */
+  static async #onError(err: unknown): Promise<void> {
+    process.exitCode ??= 1;
+    if (err instanceof CliValidationResultError) {
+      console.error!(await HelpUtil.renderValidationError(err));
+      console.error!(await HelpUtil.renderCommandHelp(err.command));
+    } else if (err instanceof CliUnknownCommandError) {
+      if (err.help) {
+        console.error!(err.help);
       } else {
-        throw err;
+        console.error!(err.defaultMessage, '\n');
+        console.error!(await HelpUtil.renderAllHelp(''));
       }
+    } else {
+      console.error!(err);
     }
+    console.error!();
   }
 
-  /** Fetch a single command */
-  static async #getCommand(cmd: string): Promise<CliCommandShape> {
-    try {
-      return await CliCommandRegistry.getInstance(cmd, true);
-    } catch (err) {
-      if (err instanceof CliUnknownCommandError) {
-        if (err.help) {
-          console.error!(err.help);
-        } else {
-          console.error!(err.defaultMessage, '\n');
-          console.error!(await HelpUtil.renderAllHelp(''));
-        }
-        process.exit(1);
-      } else {
-        throw err;
-      }
-    }
+  /** Run command */
+  static async #runCommand(cmd: string, args: string[]): Promise<void> {
+    const command = await CliCommandRegistry.getInstance(cmd, true);
+    const schema = await CliCommandSchemaUtil.getSchema(command);
+    const fullArgs = await CliParseUtil.expandArgs(schema, args);
+    const state = command._parsed = await CliParseUtil.parse(schema, fullArgs);
+
+    await command.preBind?.();
+    const boundArgs = await CliCommandSchemaUtil.bindInput(command, state);
+
+    await command.preValidate?.();
+    await CliCommandSchemaUtil.validate(command, boundArgs);
+
+    await command._cfg!.preMain?.(command);
+    await command.preMain?.();
+
+    ConsoleManager.debug(Env.debug);
+    const result = await command.main(...boundArgs);
+    await CliUtil.listenForResponse(result);
   }
 
   /**
@@ -67,29 +59,17 @@ export class ExecutionManager {
   static async run(argv: string[]): Promise<void> {
     try {
       const { cmd, args, help } = CliParseUtil.getArgs(argv);
-
       if (!cmd) {
         console.info!(await HelpUtil.renderAllHelp());
-        return;
-      }
-
-      const command = await this.#getCommand(cmd);
-
-      if (help) {
-        console.log!(await HelpUtil.renderCommandHelp(command));
-        return;
+      } else if (help) {
+        console.log!(await HelpUtil.renderCommandHelp(cmd));
       } else {
-        const known = await this.#prepareAndBind(command, args);
-        ConsoleManager.debug(Env.debug);
-        const result = await command.main(...known);
-        await CliUtil.listenForResponse(result);
+        await this.#runCommand(cmd, args);
       }
     } catch (err) {
-      process.exitCode ??= 1;
-      console.error!(err);
-      console.error!();
+      await this.#onError(err);
     } finally {
-      await ShutdownManager.gracefulShutdown(process.exitCode);
+      await ShutdownManager.gracefulShutdown();
     }
   }
 }
