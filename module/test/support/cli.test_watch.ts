@@ -18,11 +18,9 @@ export class TestWatcherCommand {
   }
 
   async main(): Promise<void> {
-    if (await CliUtil.runWithRestart(this)) {
+    if (await CliUtil.runWithRestart(this, true)) {
       return;
     }
-
-    process.once('disconnect', () => process.exit());
 
     try {
       const { TestWatcher } = await import('../src/execute/watcher.js');

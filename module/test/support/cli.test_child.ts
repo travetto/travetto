@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { Env } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
 /** Test child worker target */
@@ -17,7 +17,7 @@ export class TestChildWorkerCommand {
   }
 
   async main(): Promise<void> {
-    process.once('disconnect', () => process.exit());
+    ExecUtil.exitOnDisconnect();
     const { TestChildWorker } = await import('../src/worker/child.js');
     return new TestChildWorker().activate();
   }
