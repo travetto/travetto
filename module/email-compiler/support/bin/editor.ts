@@ -84,7 +84,6 @@ export class EditorService {
       }
     });
 
-    process.once('disconnect', () => process.exit());
     process.send({ type: 'init' });
 
     for await (const file of EmailCompiler.watchCompile()) {

@@ -15,7 +15,7 @@ export class EmailEditorCommand {
   }
 
   async main(): Promise<void> {
-    if (await CliUtil.runWithRestart(this)) {
+    if (await CliUtil.runWithRestart(this, true)) {
       return;
     }
 

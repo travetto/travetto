@@ -40,6 +40,11 @@ export class ExecUtil {
 
   static RESTART_EXIT_CODE = 200;
 
+  /** Listen for disconnect, and exit if needed */
+  static exitOnDisconnect(): void {
+    process.once('disconnect', () => process.exit());
+  }
+
   /**
    * Run with automatic restart support
    * @param run The factory to produce the next running process
@@ -48,8 +53,6 @@ export class ExecUtil {
   static async withRestart(run: () => ChildProcess, maxRetriesPerMinute?: number): Promise<ExecutionResult> {
     const maxRetries = maxRetriesPerMinute ?? 5;
     const restarts: number[] = [];
-
-    process.once('disconnect', () => process.exit());
 
     for (; ;) {
       const proc = run();

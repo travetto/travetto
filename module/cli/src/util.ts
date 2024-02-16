@@ -28,7 +28,10 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<unknown> | undefined {
+  static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, ipc?: boolean): Promise<unknown> | undefined {
+    if (ipc && process.connected) {
+      ExecUtil.exitOnDisconnect();
+    }
     if (Env.TRV_CAN_RESTART.isFalse || !(cmd.canRestart ?? !Env.production)) {
       Env.TRV_CAN_RESTART.clear();
       return;
@@ -38,7 +41,7 @@ export class CliUtil {
         ...process.env,
         ...Env.TRV_CAN_RESTART.export(false)
       },
-      stdio: [0, 1, 2, 'ipc']
+      stdio: [0, 1, 2, ipc ? 'ipc' : undefined]
     }));
   }
 
