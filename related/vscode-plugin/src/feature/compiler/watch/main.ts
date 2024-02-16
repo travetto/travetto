@@ -65,7 +65,7 @@ export class CompilerWatchFeature extends BaseFeature {
     const proc = spawn('node', [this.#compilerCliFile, command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
-      stdio: (command === 'start' || command === 'restart') ? ['pipe', null, 'pipe'] : 'pipe',
+      stdio: (command === 'start' || command === 'restart') ? ['pipe', 'ignore', 'pipe'] : 'pipe',
       env: {
         PATH: process.env.PATH,
         ...(debug ? Env.TRV_BUILD.export('debug') : {})
@@ -113,7 +113,7 @@ export class CompilerWatchFeature extends BaseFeature {
         if (state) {
           connected = true;
           this.#log.info('Connected', state);
-          await Promise.race([this.#trackLog(), this.#trackState(), this.#trackProgress(ctrl.signal)]);
+          await Promise.race([this.#trackLog(ctrl.signal), this.#trackState(ctrl.signal), this.#trackProgress(ctrl.signal)]);
         }
       } catch (err) {
         this.#log.info('Failed to connect', `${err}`);
@@ -121,8 +121,9 @@ export class CompilerWatchFeature extends BaseFeature {
 
       if (connected) {
         this.#log.info('Disconnecting', !!ctrl.signal.aborted, state);
-        this.#onState('close');
       }
+
+      this.#onState('close');
       ctrl.abort();
       // Check every second
       await new Promise(r => setTimeout(r, 1000));
@@ -145,18 +146,17 @@ export class CompilerWatchFeature extends BaseFeature {
     Workspace.compilerState = state;
   }
 
-  async #trackState(): Promise<void> {
-    try {
-      for await (const ev of this.#compilerEvents<CompilerStateEvent>('state')) {
-        this.#onState(ev.state);
-      }
-    } finally {
-      this.#onState('close');
+  async #trackState(signal?: AbortSignal): Promise<void> {
+    this.#log.info('Tracking state started');
+    for await (const ev of this.#compilerEvents<CompilerStateEvent>('state', signal)) {
+      this.#onState(ev.state);
     }
+    this.#log.info('Tracking state ended');
   }
 
-  async #trackLog(): Promise<void> {
-    for await (const ev of this.#compilerEvents<CompilerLogEvent>('log')) {
+  async #trackLog(signal?: AbortSignal): Promise<void> {
+    this.#log.info('Tracking log started');
+    for await (const ev of this.#compilerEvents<CompilerLogEvent>('log', signal)) {
       const message = ev.message.replaceAll(Workspace.path, '.');
       let first = message;
       const params = [...ev.args ?? []];
@@ -166,9 +166,11 @@ export class CompilerWatchFeature extends BaseFeature {
       }
       this.#log[ev.level](first, ...params);
     }
+    this.#log.info('Tracking log ended');
   }
 
   async #trackProgress(signal: AbortSignal): Promise<void> {
+    this.#log.info('Tracking progress started');
     for await (const ev of this.#compilerEvents<CompilerProgressEvent>('progress')) {
       let pState = this.#progress[ev.operation];
 
@@ -184,6 +186,7 @@ export class CompilerWatchFeature extends BaseFeature {
       pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${ev.idx + 1}/${ev.total})`, increment: delta });
       pState.prev = value;
     }
+    this.#log.info('Tracking progress ended');
   }
 
   /**

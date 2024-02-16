@@ -17,7 +17,7 @@ export class TerminalUtil {
     }
   ): (ev: ProgressEvent<string>) => string {
     const styleBase = typeof cfg?.style !== 'function' ? {
-      complete: StyleUtil.getStyle(cfg?.style?.complete ?? { background: '#4aa626', text: '#ffffff' }),
+      complete: StyleUtil.getStyle(cfg?.style?.complete ?? { background: '#248613', text: '#ffffff' }),
       incomplete: cfg?.style?.incomplete ? StyleUtil.getStyle(cfg.style.incomplete) : undefined,
     } : undefined;
 

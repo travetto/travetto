@@ -1,9 +1,8 @@
-import { Util } from '@travetto/base';
 import vscode from 'vscode';
 
 export class Log {
   static #log: vscode.LogOutputChannel = vscode.window.createOutputChannel('Travetto Plugin', { log: true });
-  static #id = `<${Util.fullHash(`${process.pid}`).substring(0, 4)}>`;
+  static #id = `<${`${process.pid}`.slice(-4)}>`;
 
   #prefix: string;
 
