@@ -5,7 +5,6 @@ import { ModelQuery } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
 // {{#modules.auth_rest}}
 import { AuthService, Authenticated } from '@travetto/auth-rest';
-import { } from '@travetto/auth-rest';
 // {{/modules.auth_rest}}
 // @ts-expect-error
 import { $_modelService_$ } from '$_modelImport_$';

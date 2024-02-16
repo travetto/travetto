@@ -13,5 +13,6 @@
     }
   }
   process.argv = args;
+  process.env.TRV_QUIET = 1;
   await import('@travetto/cli/bin/trv.js');
 })();
