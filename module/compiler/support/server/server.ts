@@ -6,12 +6,12 @@ import { setMaxListeners } from 'node:events';
 import type { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types';
-import { LogUtil } from '../log';
+import { CompilerLogger } from '../log';
 import { CommonUtil } from '../util';
 import { CompilerClient } from './client';
 import { ProcessHandle } from './process-handle';
 
-const log = LogUtil.logger('compiler-server');
+const log = new CompilerLogger('compiler-server');
 
 /**
  * Compiler Server Class
@@ -30,7 +30,7 @@ export class CompilerServer {
 
   constructor(ctx: ManifestContext, mode: CompilerMode) {
     this.#ctx = ctx;
-    this.#client = new CompilerClient(ctx, LogUtil.logger('client.server'));
+    this.#client = new CompilerClient(ctx, new CompilerLogger('client.server'));
     this.#url = this.#client.url;
     this.#handle = { server: new ProcessHandle(ctx, 'server'), compiler: new ProcessHandle(ctx, 'compiler') };
 
@@ -70,11 +70,11 @@ export class CompilerServer {
             const info = await this.#client.info();
             resolve((info && info.mode === 'build' && this.mode === 'watch') ? 'retry' : 'running');
           } else {
-            log('warn', 'Failed in running server', err);
+            log.warn('Failed in running server', err);
             reject(err);
           }
         })
-        .on('close', () => log('debug', 'Server close event'));
+        .on('close', () => log.debug('Server close event'));
 
       const url = new URL(this.#url);
       setTimeout(() => this.#server.listen(+url.port, url.hostname), 1); // Run async
@@ -84,7 +84,7 @@ export class CompilerServer {
       if (attempt >= 5) {
         throw new Error('Unable to verify compilation server');
       }
-      log('info', 'Waiting for build to finish, before retrying');
+      log.info('Waiting for build to finish, before retrying');
       // Let the server finish
       await this.#client.waitForState(['close'], 'Server closed', this.signal);
       return this.#tryListen(attempt + 1);
@@ -119,7 +119,7 @@ export class CompilerServer {
   }
 
   async #disconnectActive(): Promise<void> {
-    log('info', 'Server disconnect requested');
+    log.info('Server disconnect requested');
     this.info.iteration = Date.now();
     await new Promise(r => setTimeout(r, 20));
     for (const el of Object.values(this.#listeners)) {
@@ -163,7 +163,7 @@ export class CompilerServer {
   async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
     for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
       if (ev.type === 'progress') {
-        await LogUtil.logProgress?.(ev.payload);
+        await log.onProgressEvent(ev.payload);
       }
 
       this.#emitEvent(ev);
@@ -174,9 +174,9 @@ export class CompilerServer {
         if (ev.payload.state === 'init' && ev.payload.extra && 'pid' in ev.payload.extra && typeof ev.payload.extra.pid === 'number') {
           this.info.compilerPid = ev.payload.extra.pid;
         }
-        log('info', `State changed: ${this.info.state}`);
+        log.info(`State changed: ${this.info.state}`);
       } else if (ev.type === 'log') {
-        LogUtil.logEvent(ev.payload);
+        log.onLogEvent(ev.payload);
       }
       if (this.isResetEvent(ev)) {
         await this.#disconnectActive();
@@ -186,19 +186,19 @@ export class CompilerServer {
     // Terminate, after letting all remaining events emit
     await this.close();
 
-    log('debug', 'Finished processing events');
+    log.debug('Finished processing events');
   }
 
   /**
    * Close server
    */
   async close(): Promise<void> {
-    log('info', 'Closing down server');
+    log.info('Closing down server');
 
     // If we are in a place where progress exists
     if (this.info.state === 'compile-start') {
       const cancel: CompilerProgressEvent = { complete: true, idx: 0, total: 0, message: 'Complete', operation: 'compile' };
-      LogUtil.logProgress?.(cancel);
+      log.onProgressEvent(cancel);
       this.#emitEvent({ type: 'progress', payload: cancel });
     }
 
@@ -218,7 +218,7 @@ export class CompilerServer {
       await this.#handle.compiler.kill();
     }
 
-    log('info', 'Closed down server');
+    log.info('Closed down server');
   }
 
   /**
@@ -226,7 +226,7 @@ export class CompilerServer {
    */
   async listen(): Promise<CompilerServer | undefined> {
     const running = await this.#tryListen() === 'ok';
-    log('info', running ? 'Starting server' : 'Server already running under a different process', this.#url);
+    log.info(running ? 'Starting server' : 'Server already running under a different process', this.#url);
     return running ? this : undefined;
   }
 }

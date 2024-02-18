@@ -41,7 +41,7 @@ export class CompilerClient {
     const ctrl = new AbortController();
     opts?.signal?.addEventListener('abort', () => ctrl.abort());
     const timeoutId = setTimeout(() => {
-      logTimeout && this.#log('error', `Timeout on request to ${this.#url}${rel}`);
+      logTimeout && this.#log.error(`Timeout on request to ${this.#url}${rel}`);
       ctrl.abort('TIMEOUT');
     }, opts?.timeout ?? 100).unref();
     try {
@@ -71,13 +71,13 @@ export class CompilerClient {
   async stop(): Promise<boolean> {
     const info = await this.info();
     if (!info) {
-      this.#log('debug', 'Stopping server, info not found, manual killing');
+      this.#log.debug('Stopping server, info not found, manual killing');
       return Promise.all([this.#handle.server.kill(), this.#handle.compiler.kill()])
         .then(v => v.some(x => x));
     }
 
     await this.#fetch('/stop').catch(() => { }); // Trigger
-    this.#log('debug', 'Waiting for compiler to exit');
+    this.#log.debug('Waiting for compiler to exit');
     await this.#handle.compiler.ensureKilled();
     return true;
   }
@@ -92,7 +92,7 @@ export class CompilerClient {
       return;
     }
 
-    this.#log('debug', `Starting watch for events of type "${type}"`);
+    this.#log.debug(`Starting watch for events of type "${type}"`);
 
     let signal = cfg.signal;
 
@@ -132,15 +132,15 @@ export class CompilerClient {
       info = await this.info();
 
       if (ctrl.signal.reason === 'TIMEOUT') {
-        this.#log('debug', 'Failed due to timeout');
+        this.#log.debug('Failed due to timeout');
         return;
       }
 
       if (ctrl.signal.aborted || !info || (cfg.enforceIteration && info.iteration !== iteration)) { // If health check fails, or aborted
-        this.#log('debug', `Stopping watch for events of type "${type}"`);
+        this.#log.debug(`Stopping watch for events of type "${type}"`);
         return;
       } else {
-        this.#log('debug', `Restarting watch for events of type "${type}"`);
+        this.#log.debug(`Restarting watch for events of type "${type}"`);
       }
     }
   }
@@ -149,11 +149,11 @@ export class CompilerClient {
   async waitForState(states: CompilerStateType[], message?: string, signal?: AbortSignal): Promise<void> {
     const set = new Set(states);
     // Loop until
-    this.#log('debug', `Waiting for states, ${states.join(', ')}`);
+    this.#log.debug(`Waiting for states, ${states.join(', ')}`);
     for await (const _ of this.fetchEvents('state', { signal, until: s => set.has(s.state) })) { }
-    this.#log('debug', `Found state, one of ${states.join(', ')} `);
+    this.#log.debug(`Found state, one of ${states.join(', ')} `);
     if (message) {
-      this.#log('info', message);
+      this.#log.info(message);
     }
   }
 }

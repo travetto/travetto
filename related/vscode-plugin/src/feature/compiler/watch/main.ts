@@ -15,6 +15,7 @@ type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
 
 const SCOPE_MAX = 15;
+const SUB_LOG_RE = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?\s+(info|error|debug|warn)/;
 
 /**
  * Workspace Compilation Support
@@ -74,8 +75,8 @@ export class CompilerWatchFeature extends BaseFeature {
       this.#log.debug('Finished command', command, 'with', code);
     });
 
-    debug && proc.stderr && StreamUtil.onLine(proc.stderr, line => this.#log.error(`> ${line}`));
-    debug && proc.stdout && StreamUtil.onLine(proc.stdout, line => this.#log.info(`> ${line}`));
+    debug && proc.stderr && StreamUtil.onLine(proc.stderr, line => this.#log.error(`> ${line.replace(SUB_LOG_RE, '')}`));
+    debug && proc.stdout && StreamUtil.onLine(proc.stdout, line => this.#log.info(`> ${line.replace(SUB_LOG_RE, '')}`));
 
     return proc;
   }
@@ -116,7 +117,7 @@ export class CompilerWatchFeature extends BaseFeature {
           await Promise.race([this.#trackLog(ctrl.signal), this.#trackState(ctrl.signal), this.#trackProgress(ctrl.signal)]);
         }
       } catch (err) {
-        this.#log.info('Failed to connect', `${err}`);
+        this.#log.info('Failed to connect', `${err} `);
       }
 
       if (connected) {
@@ -183,7 +184,7 @@ export class CompilerWatchFeature extends BaseFeature {
       }
 
       pState ??= await this.#buildProgressBar(ev.operation, signal);
-      pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${ev.idx + 1}/${ev.total})`, increment: delta });
+      pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${ev.idx + 1} /${ev.total})`, increment: delta });
       pState.prev = value;
     }
     this.#log.info('Tracking progress ended');
