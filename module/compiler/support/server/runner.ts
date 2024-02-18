@@ -6,10 +6,10 @@ import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
 
 import type { CompilerEvent, CompilerMode } from '../types';
 import { AsyncQueue } from '../queue';
-import { LogUtil } from '../log';
+import { CompilerLogger } from '../log';
 import { CommonUtil } from '../util';
 
-const log = LogUtil.logger('compiler-exec');
+const log = new CompilerLogger('compiler-exec');
 const isEvent = (msg: unknown): msg is CompilerEvent => !!msg && typeof msg === 'object' && 'type' in msg;
 
 /**
@@ -22,17 +22,17 @@ export class CompilerRunner {
    */
   static async * runProcess(ctx: ManifestContext, changed: DeltaEvent[], mode: CompilerMode, signal: AbortSignal): AsyncIterable<CompilerEvent> {
     if (signal.aborted) {
-      log('debug', 'Skipping, shutting down');
+      log.debug('Skipping, shutting down');
       return;
     }
 
     const watch = mode === 'watch';
     if (!changed.length && !watch) {
       yield { type: 'state', payload: { state: 'compile-end' } };
-      log('debug', 'Skipped');
+      log.debug('Skipped');
       return;
     } else {
-      log('debug', `Started watch=${watch} changed=${changed.slice(0, 10).map(x => `${x.module}/${x.file}`)}`);
+      log.debug(`Started watch=${watch} changed=${changed.slice(0, 10).map(x => `${x.module}/${x.file}`)}`);
     }
 
     const main = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
@@ -45,7 +45,7 @@ export class CompilerRunner {
     try {
       await CommonUtil.writeTextFile(deltaFile, changedFiles.join('\n'));
 
-      log('info', 'Launching compiler');
+      log.info('Launching compiler');
       const proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
         env: {
           ...process.env,
@@ -58,7 +58,7 @@ export class CompilerRunner {
         .on('exit', () => queue.close());
 
       const kill = (): unknown => {
-        log('debug', 'Shutting down process');
+        log.debug('Shutting down process');
         return (proc.connected ? proc.send('shutdown', (err) => proc.kill()) : proc.kill());
       };
 
@@ -68,11 +68,11 @@ export class CompilerRunner {
       yield* queue;
 
       if (proc.exitCode !== 0) {
-        log('error', `Terminated during compilation, code=${proc.exitCode}, killed=${proc.killed}`);
+        log.error(`Terminated during compilation, code=${proc.exitCode}, killed=${proc.killed}`);
       }
       process.off('SIGINT', kill);
 
-      log('debug', 'Finished');
+      log.debug('Finished');
     } finally {
       rmSync(deltaFile, { force: true });
     }

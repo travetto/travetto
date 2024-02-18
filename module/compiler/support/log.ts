@@ -1,31 +1,28 @@
 import type { ManifestContext } from '@travetto/manifest';
 import type { CompilerLogEvent, CompilerLogLevel, CompilerProgressEvent } from './types';
 
-export type CompilerLogger = (level: CompilerLogLevel, message: string, ...args: unknown[]) => void;
-export type WithLogger<T> = (log: CompilerLogger) => Promise<T>;
-
-type ProgressWriter = (ev: CompilerProgressEvent) => (unknown | Promise<unknown>);
-
 const LEVEL_TO_PRI: Record<CompilerLogLevel, number> = { debug: 1, info: 2, warn: 3, error: 4 };
-
 const SCOPE_MAX = 15;
-
 const ESC = '\x1b[';
 
-export class LogUtil {
+export class CompilerLogger {
 
-  static root = process.cwd();
+  static #root = process.cwd();
+  static #logLevel: CompilerLogLevel = 'error';
+  static #linePartial: boolean | undefined;
 
-  static logLevel: CompilerLogLevel = 'error';
-
-  static logProgress?: ProgressWriter;
-
-  static linePartial = false;
-
-  static #rewriteLine(text: string): Promise<void> | void {
+  /** Rewrite text line, tracking cleanup as necessary */
+  static rewriteLine(text: string): Promise<void> | void {
+    if (!text && !this.#linePartial) {
+      return;
+    }
+    if (this.#linePartial === undefined) { // First time
+      process.stdout.write(`${ESC}?25l`); // Hide cursor
+      process.on('exit', () => this.reset());
+    }
     // Move to 1st position, and clear after text
     const done = process.stdout.write(`${ESC}1G${text}${ESC}0K`);
-    this.linePartial = !!text;
+    this.#linePartial = !!text;
     if (!done) {
       return new Promise<void>(r => process.stdout.once('drain', r));
     }
@@ -39,79 +36,68 @@ export class LogUtil {
   /**
    * Set level for operation
    */
-  static initLogs(ctx: ManifestContext, defaultLevel?: CompilerLogLevel): void {
+  static init(ctx: ManifestContext, defaultLevel?: CompilerLogLevel): void {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const build = process.env.TRV_BUILD as CompilerLogLevel | 'none';
     if (build !== 'none' && process.env.TRV_QUIET !== 'true') {
-      this.logLevel = build || defaultLevel;
+      this.#logLevel = build || defaultLevel;
     }
-    this.root = ctx.workspace.path;
-    // If we are in info or a terminal and also in a tty
-    this.logProgress = (this.isLevelActive('info') && process.stdout.isTTY) ? this.#logProgressEvent : undefined;
-    if (this.logProgress) {
-      process.stdout.write(`${ESC}?25l`); // Hide cursor
-    }
-    process.on('exit', () => this.cleanup());
+    this.#root = ctx.workspace.path;
   }
 
-  static cleanup(): void {
-    if (this.logProgress) {
-      process.stdout.write(`${ESC}!p`); // Reset
-    }
+  /** Cleanup to restore behavior */
+  static reset(): void {
+    process.stdout.write(`${ESC}!p${ESC}?25h`);
   }
 
-  static #logProgressEvent(ev: CompilerProgressEvent): Promise<void> | void {
+  constructor(
+    private scope: string, private level?: CompilerLogLevel,
+    private root = CompilerLogger.#root,
+  ) { }
+
+  get #logProgress(): boolean {
+    return (LEVEL_TO_PRI[this.level ?? CompilerLogger.#logLevel] <= LEVEL_TO_PRI['info']) && process.stdout.isTTY;
+  }
+
+  #isActive(level: CompilerLogLevel): boolean {
+    return LEVEL_TO_PRI[this.level ?? CompilerLogger.#logLevel] <= LEVEL_TO_PRI[level];
+  }
+
+  /** Log event with filtering by level */
+  onLogEvent(ev: CompilerLogEvent): void {
+    if (!this.#isActive(ev.level)) { return; }
+    const params = [ev.message, ...ev.args ?? []].map(x => typeof x === 'string' ? x.replaceAll(this.root, '.') : x);
+    if (ev.scope) {
+      params.unshift(`[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`);
+    }
+    params.unshift(new Date().toISOString(), `${ev.level.padEnd(5)}`);
+    CompilerLogger.rewriteLine(''); // Clear out progress line, if active
+    // eslint-disable-next-line no-console
+    console[ev.level]!(...params);
+  }
+
+  /** Write progress event, if active */
+  onProgressEvent(ev: CompilerProgressEvent): void {
+    if (!this.#logProgress) { return; }
     const pct = Math.trunc(ev.idx * 100 / ev.total);
     const text = ev.complete ? '' : `Compiling [${'#'.repeat(Math.trunc(pct / 10)).padEnd(10, ' ')}] [${ev.idx}/${ev.total}] ${ev.message}`;
-    return this.#rewriteLine(text);
+    CompilerLogger.rewriteLine(text);
   }
 
-  /**
-   * Is the log level active?
-   */
-  static isLevelActive(lvl: CompilerLogLevel): boolean {
-    return LEVEL_TO_PRI[this.logLevel] <= LEVEL_TO_PRI[lvl];
+  /** Write all progress events if active */
+  async consumeProgressEvents(src: () => AsyncIterable<CompilerProgressEvent>): Promise<void> {
+    if (!this.#logProgress) { return; }
+    for await (const ev of src()) { this.onProgressEvent(ev); }
   }
 
-  /**
-   * Log event with filtering by level
-   */
-  static logEvent(ev: CompilerLogEvent): void {
-    if (this.isLevelActive(ev.level)) {
-      const params = [ev.message, ...ev.args ?? []].map(x => typeof x === 'string' ? x.replaceAll(this.root, '.') : x);
-      if (ev.scope) {
-        params.unshift(`[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`);
-      }
-      params.unshift(new Date().toISOString(), `${ev.level.padEnd(5)}`);
-      if (this.linePartial) {
-        this.#rewriteLine(''); // Clear out progress line
-      }
-      // eslint-disable-next-line no-console
-      console[ev.level]!(...params);
-    }
+  log(level: CompilerLogLevel, message: string, args: unknown[]): void {
+    this.onLogEvent({ scope: this.scope, message, level, args, time: Date.now() });
   }
-
-  /**
-   * With logger
-   */
-  static withLogger<T>(scope: string, op: WithLogger<T>, basic = true): Promise<T> {
-    const log = this.logger(scope);
-    basic && log('debug', 'Started');
-    return op(log).finally(() => basic && log('debug', 'Completed'));
-  }
-
-  /**
-   * With scope
-   */
-  static logger(scope: string): CompilerLogger {
-    return (level, message, ...args) => this.logEvent({ scope, message, level, args, time: Date.now() });
-  }
-
-  /**
-   * Write all progress events if active
-   */
-  static async consumeProgressEvents(src: () => AsyncIterable<CompilerProgressEvent>): Promise<void> {
-    if (!this.logProgress) { return; }
-    for await (const item of src()) { await this.logProgress?.(item); }
+  info(message: string, ...args: unknown[]): void { return this.log('info', message, args); }
+  debug(message: string, ...args: unknown[]): void { return this.log('debug', message, args); }
+  warn(message: string, ...args: unknown[]): void { return this.log('warn', message, args); }
+  error(message: string, ...args: unknown[]): void { return this.log('error', message, args); }
+  wrap<T = unknown>(op: (log: typeof this) => Promise<T>, basic = false): Promise<T> {
+    return basic ? (this.debug('Started'), op(this).finally(() => this.debug('Completed'))) : op(this);
   }
 }

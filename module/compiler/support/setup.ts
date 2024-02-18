@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 
 import { type DeltaEvent, type ManifestContext, type Package } from '@travetto/manifest';
 
-import { LogUtil } from './log';
+import { CompilerLogger } from './log';
 import { CommonUtil } from './util';
 
 type ModFile = { input: string, output: string, stale: boolean };
@@ -128,19 +128,19 @@ export class CompilerSetup {
     const out: string[] = [];
 
     try {
-      await LogUtil.withLogger(scope, async log => {
+      await new CompilerLogger(scope).wrap(async log => {
         if (files.some(f => f.stale)) {
-          log('debug', 'Starting', mod);
+          log.debug('Starting', mod);
           for (const file of files.filter(x => x.stale)) {
             await this.#transpileFile(ctx, file.input, file.output);
           }
           if (changes.length) {
             out.push(...changes.map(x => `${mod}/${x}`));
-            log('debug', `Source changed: ${changes.join(', ')}`, mod);
+            log.debug(`Source changed: ${changes.join(', ')}`, mod);
           }
-          log('debug', 'Completed', mod);
+          log.debug('Completed', mod);
         } else {
-          log('debug', 'Skipped', mod);
+          log.debug('Skipped', mod);
         }
       }, false);
     } catch (err) {
@@ -173,7 +173,7 @@ export class CompilerSetup {
   static async setup(ctx: ManifestContext): Promise<DeltaEvent[]> {
     let changes = 0;
 
-    await LogUtil.withLogger('precompile', async () => {
+    await new CompilerLogger('precompile').wrap(async () => {
       for (const mod of PRECOMPILE_MODS) {
         changes += (await this.#compileIfStale(ctx, 'precompile', mod, SOURCE_SEED)).length;
       }
@@ -181,18 +181,18 @@ export class CompilerSetup {
 
     const { ManifestUtil, ManifestDeltaUtil } = await this.#importManifest(ctx);
 
-    const manifest = await LogUtil.withLogger('manifest', () =>
+    const manifest = await new CompilerLogger('manifest').wrap(() =>
       ManifestUtil.buildManifest(ManifestUtil.getWorkspaceContext(ctx)));
 
-    await LogUtil.withLogger('transformers', async () => {
+    await new CompilerLogger('transformers').wrap(async () => {
       for (const mod of Object.values(manifest.modules).filter(m => m.files.$transformer?.length)) {
         changes += (await this.#compileIfStale(ctx, 'transformers', mod.name, ['package.json', ...mod.files.$transformer!.map(x => x[0])])).length;
       }
     });
 
-    const delta = await LogUtil.withLogger('delta', async log => {
+    const delta = await new CompilerLogger('delta').wrap(async log => {
       if (changes) {
-        log('debug', 'Skipping, everything changed');
+        log.debug('Skipping, everything changed');
         return [{ type: 'changed', file: '*', module: ctx.workspace.name, sourceFile: '' } as const];
       } else {
         return ManifestDeltaUtil.produceDelta(manifest);
@@ -200,16 +200,16 @@ export class CompilerSetup {
     });
 
     if (changes) {
-      await LogUtil.withLogger('reset', async log => {
+      await new CompilerLogger('reset').wrap(async log => {
         await fs.rm(path.resolve(ctx.workspace.path, ctx.build.outputFolder), { recursive: true, force: true });
-        log('info', 'Clearing output due to compiler changes');
+        log.info('Clearing output due to compiler changes');
       }, false);
     }
 
     // Write manifest
-    await LogUtil.withLogger('manifest', async log => {
+    await new CompilerLogger('manifest').wrap(async log => {
       await ManifestUtil.writeManifest(manifest);
-      log('debug', `Wrote manifest ${ctx.workspace.name}`);
+      log.debug(`Wrote manifest ${ctx.workspace.name}`);
 
       // Update all manifests when in mono repo
       if (delta.length && ctx.workspace.mono) {
@@ -221,8 +221,8 @@ export class CompilerSetup {
           await ManifestUtil.writeManifest(modManifest);
           names.push(mod.name);
         }
-        log('debug', `Changes triggered ${delta.slice(0, 10).map(x => `${x.type}:${x.module}:${x.file}`)}`);
-        log('debug', `Rewrote monorepo manifests [changes=${delta.length}] ${names.slice(0, 10).join(', ')}`);
+        log.debug(`Changes triggered ${delta.slice(0, 10).map(x => `${x.type}:${x.module}:${x.file}`)}`);
+        log.debug(`Rewrote monorepo manifests [changes=${delta.length}] ${names.slice(0, 10).join(', ')}`);
       }
     });
 
