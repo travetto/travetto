@@ -91,8 +91,7 @@ export const main = (ctx: ManifestContext) => {
     async getLoader(): Promise<(mod: string) => Promise<unknown>> {
       // Short circuit if we can
       if (!(await client.isWatching())) {
-        await compile('build', CompilerLogger.isInteractiveShell ? 'info' : 'error');
-        await CompilerLogger.reset();
+        await compile('build', 'error');
       }
       return CommonUtil.moduleLoader(ctx);
     },

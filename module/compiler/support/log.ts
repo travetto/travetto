@@ -11,9 +11,11 @@ export class CompilerLogger {
   static #logLevel: CompilerLogLevel = 'error';
   static #linePartial: boolean | undefined;
 
+  static logProgress = false;
+
   /** Rewrite text line, tracking cleanup as necessary */
   static rewriteLine(text: string): Promise<void> | void {
-    if (!text && !this.#linePartial) {
+    if ((!text && !this.#linePartial) || !process.stdout.isTTY) {
       return;
     }
     if (this.#linePartial === undefined) { // First time
@@ -41,31 +43,32 @@ export class CompilerLogger {
     const build = process.env.TRV_BUILD as CompilerLogLevel | 'none';
     if (build !== 'none' && process.env.TRV_QUIET !== 'true') {
       this.#logLevel = build || defaultLevel;
+      this.logProgress = this.isInteractiveShell;
     }
     this.#root = ctx.workspace.path;
   }
 
   /** Cleanup to restore behavior */
   static reset(): void {
-    process.stdout.write(`${ESC}!p${ESC}?25h`);
+    if (process.stdout.isTTY) {
+      process.stdout.write(`${ESC}!p${ESC}?25h`);
+    }
   }
 
   constructor(
-    private scope: string, private level?: CompilerLogLevel,
+    private scope: string,
+    private level?: CompilerLogLevel,
+    private logProgress?: boolean,
     private root = CompilerLogger.#root,
   ) { }
 
-  get #logProgress(): boolean {
-    return (LEVEL_TO_PRI[this.level ?? CompilerLogger.#logLevel] <= LEVEL_TO_PRI['info']) && process.stdout.isTTY;
-  }
-
-  #isActive(level: CompilerLogLevel): boolean {
+  isActive(level: CompilerLogLevel): boolean {
     return LEVEL_TO_PRI[this.level ?? CompilerLogger.#logLevel] <= LEVEL_TO_PRI[level];
   }
 
   /** Log event with filtering by level */
   onLogEvent(ev: CompilerLogEvent): void {
-    if (!this.#isActive(ev.level)) { return; }
+    if (!this.isActive(ev.level)) { return; }
     const params = [ev.message, ...ev.args ?? []].map(x => typeof x === 'string' ? x.replaceAll(this.root, '.') : x);
     if (ev.scope) {
       params.unshift(`[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`);
@@ -77,17 +80,18 @@ export class CompilerLogger {
   }
 
   /** Write progress event, if active */
-  onProgressEvent(ev: CompilerProgressEvent): void {
-    if (!this.#logProgress) { return; }
+  onProgressEvent(ev: CompilerProgressEvent): void | Promise<void> {
+    if (!(this.logProgress ?? CompilerLogger.logProgress)) { return; }
     const pct = Math.trunc(ev.idx * 100 / ev.total);
     const text = ev.complete ? '' : `Compiling [${'#'.repeat(Math.trunc(pct / 10)).padEnd(10, ' ')}] [${ev.idx}/${ev.total}] ${ev.message}`;
-    CompilerLogger.rewriteLine(text);
+    return CompilerLogger.rewriteLine(text);
   }
 
   /** Write all progress events if active */
   async consumeProgressEvents(src: () => AsyncIterable<CompilerProgressEvent>): Promise<void> {
-    if (!this.#logProgress) { return; }
+    if (!(this.logProgress ?? CompilerLogger.logProgress)) { return; }
     for await (const ev of src()) { this.onProgressEvent(ev); }
+    await CompilerLogger.reset();
   }
 
   log(level: CompilerLogLevel, message: string, args: unknown[]): void {

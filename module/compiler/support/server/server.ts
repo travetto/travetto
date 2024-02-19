@@ -198,7 +198,7 @@ export class CompilerServer {
     // If we are in a place where progress exists
     if (this.info.state === 'compile-start') {
       const cancel: CompilerProgressEvent = { complete: true, idx: 0, total: 0, message: 'Complete', operation: 'compile' };
-      log.onProgressEvent(cancel);
+      await log.onProgressEvent(cancel);
       this.#emitEvent({ type: 'progress', payload: cancel });
     }
 
