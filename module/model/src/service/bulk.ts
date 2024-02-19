@@ -42,23 +42,12 @@ export interface BulkResponse<E = unknown> {
  */
 export class BulkProcessError extends AppError {
   constructor(public errors: { idx: number, error: ValidationResultError }[]) {
-    super('Bulk processing errors have occurred', 'data', { errors });
-  }
-
-  /**
-   * Provide full results back, with validation errors
-   */
-  override toJSON(): unknown {
-    return {
-      at: new Date(),
-      message: this.message,
-      category: this.category,
-      type: this.type,
-      errors: this.errors.map(x => {
-        const { message, type, errors, payload } = x.error;
-        return { message, type, errors: errors ?? payload, idx: x.idx };
+    super('Bulk processing errors have occurred', 'data', {
+      errors: errors.map(x => {
+        const { message, type, errors: subErrors, details } = x.error;
+        return { message, type, errors: subErrors ?? details, idx: x.idx };
       })
-    };
+    });
   }
 }
 

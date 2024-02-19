@@ -12,6 +12,20 @@ export type ErrorCategory =
  */
 export class AppError extends Error {
 
+  /** Is the object in the shape of an error */
+  static isErrorLike(val: unknown): val is AppError {
+    return !!val && (typeof val === 'object' || typeof val === 'function') &&
+      'message' in val && 'category' in val && 'type' in val && 'at' in val;
+  }
+
+  /** Convert from JSON object */
+  static fromErrorLike(e: AppError): AppError {
+    const err = new AppError(e.message, e.category, e.details);
+    err.at = e.at;
+    err.type = e.type;
+    return err;
+  }
+
   type: string;
   at = new Date();
 
@@ -20,13 +34,13 @@ export class AppError extends Error {
    *
    * @param message The error message
    * @param category The error category, can be mapped to HTTP statuses
-   * @param payload Optional error payload
+   * @param details Optional error payload
    * @param stack A stack to override if needed
    */
   constructor(
     message: string,
     public category: ErrorCategory = 'general',
-    public payload?: Record<string, unknown>,
+    public details?: Record<string, unknown>,
     stack?: string
 
   ) {
@@ -40,19 +54,12 @@ export class AppError extends Error {
    * @param extra Extra data to build into the context
    */
   toJSON(): unknown {
-    const out: Record<string, unknown> = {
+    return {
       message: this.message,
       category: this.category,
       type: this.type,
+      details: this.details,
       at: this.at,
     };
-    if (this.payload) {
-      for (const [key, value] of Object.entries(this.payload)) {
-        if (!(key in out)) {
-          out[key] = value;
-        }
-      }
-    }
-    return out;
   }
 }
