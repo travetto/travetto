@@ -55,13 +55,12 @@ export class DocumentResultsManager {
   /**
    * Get list of known tests
    */
-  getListOfTests(): { name: string, start: number, code: number }[] {
-    return Object.values(this.#results.test)
-      .map(v => ({
-        name: v.src.methodName,
-        start: v.src.lineStart,
-        code: v.src.lineBodyStart
-      }));
+  getListOfTests(): Pick<TestConfig, 'methodName' | 'lineStart' | 'lineBodyStart'>[] {
+    return Object.values(this.#results.test).map(v => ({
+      methodName: v.src.methodName,
+      lineStart: v.src.lineStart,
+      lineBodyStart: v.src.lineBodyStart
+    }));
   }
 
   /**
