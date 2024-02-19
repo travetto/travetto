@@ -36,12 +36,13 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
 
   override createPendingField(cls: Class, fn: Function): Partial<TestConfig> {
     const meta = RuntimeIndex.getFunctionMetadata(cls)!;
+    const meth = meta.methods![fn.name];
     return {
       class: cls,
       module: RuntimeContext.main.name,
       file: meta.source,
-      lineStart: meta.lineStart,
-      lineEnd: meta.lineEnd,
+      lineStart: meth?.lineStart,
+      lineEnd: meth?.lineEnd,
       methodName: fn.name
     };
   }

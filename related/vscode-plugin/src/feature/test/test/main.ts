@@ -180,7 +180,7 @@ class TestRunnerFeature extends BaseFeature {
    * On feature activate
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
-    this.register('line', () => this.#launchTestDebugger());
+    this.register('line', (line?: number) => this.#launchTestDebugger(line));
     this.register('stop', () => this.#stopServer());
     this.register('start', () => this.#startServer());
     this.register('rerun', () => this.#rerunActive());
@@ -197,7 +197,7 @@ class TestRunnerFeature extends BaseFeature {
         pattern: '**/test/**/*.{ts,tsx}'
       }
     }, {
-      provideCodeLenses: (doc, token) => this.buildCodeLenses(doc),
+      provideCodeLenses: doc => this.buildCodeLenses(doc),
       onDidChangeCodeLenses: l => {
         this.#codeLensUpdated = l;
         return { dispose: (): void => { } };

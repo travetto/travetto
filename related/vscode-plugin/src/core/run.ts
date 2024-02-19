@@ -50,15 +50,14 @@ export class RunUtil {
       env: {
         ...Env.TRV_CAN_RESTART.export(false),
         ...this.buildEnv(config.cliModule),
+        ...Env.TRV_DYNAMIC.export(true),
         ...config.env ?? {},
-        ...Env.TRV_DYNAMIC.export(true)
       },
       cwd: WORKSPACE,
       sourceMaps: true,
       pauseForSourceMap: true,
       runtimeArgs: [],
       outFiles: [`${output}/**/*.js`],
-      resolveSourceMapLocations: [`${output}/**`],
       runtimeSourcemapPausePatterns: [`${output}/**/test/**/*.js`],
       skipFiles: [
         '<node_internals>/**',
@@ -79,7 +78,7 @@ export class RunUtil {
   /** Debug a given config */
   static async debug(cfg: LaunchConfig): Promise<void> {
     try {
-      await vscode.debug.startDebugging(undefined, this.buildDebugConfig(cfg));
+      await vscode.debug.startDebugging(Workspace.folder, this.buildDebugConfig(cfg));
     } catch (err) {
       vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
     }
