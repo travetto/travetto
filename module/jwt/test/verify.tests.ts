@@ -130,9 +130,9 @@ class VerifyExpirationSuite {
     } catch (err: unknown) {
       assert(err instanceof JWTError);
       assert(err.message === 'Token is expired');
-      assert(!!err.payload);
-      assert(!!err.payload.expiredAt);
-      assert(+(err.payload as { expiredAt: number }).expiredAt === 1437018592000);
+      assert(!!err.details);
+      assert(!!err.details.expiredAt);
+      assert(+(err.details as { expiredAt: number }).expiredAt === 1437018592000);
     }
   }
 
@@ -178,7 +178,7 @@ class VerifyExpirationSuite {
       // maxAge not exceeded, but still expired
       assert(err instanceof JWTError);
       assert(err.message === 'Token is expired');
-      assert(+(err.payload as { expiredAt: string }).expiredAt === 1437018800000);
+      assert(+(err.details as { expiredAt: string }).expiredAt === 1437018800000);
     }
   }
 }

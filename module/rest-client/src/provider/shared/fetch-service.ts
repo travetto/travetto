@@ -27,10 +27,8 @@ export abstract class BaseFetchService extends BaseRemoteService<BodyInit, Respo
       try {
         // @ts-ignore
         const { AppError } = await import('@travetto/base');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions
-        const ae = (err as any);
-        if ('message' in ae && 'category' in ae) {
-          return new AppError(ae.message, ae.category, ae.payload);
+        if (AppError.isErrorLike(err)) {
+          return AppError.fromErrorLike(err);
         }
       } catch { }
       return err;
