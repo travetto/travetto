@@ -300,7 +300,7 @@ export class AssertCheck {
   static checkUnhandled(test: TestConfig, err: Error | assert.AssertionError): void {
     let line = AssertUtil.getPositionOfError(err, test.file).line;
     if (line === 1) {
-      line = test.lines.start;
+      line = test.lineStart;
     }
 
     AssertCapture.add({
