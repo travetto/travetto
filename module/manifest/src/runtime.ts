@@ -1,7 +1,7 @@
 import { path } from './path';
 import { ManifestIndex } from './manifest-index';
 
-import type { FunctionMetadata } from './types/common';
+import type { FunctionMetadata, FunctionMetadataTag } from './types/common';
 import type { IndexedModule, ManifestModule } from './types/manifest';
 import type { ManifestContext } from './types/context';
 
@@ -52,16 +52,21 @@ class $RuntimeIndex extends ManifestIndex {
    * @param cls Class
    * @param `file` Filename
    * @param `hash` Hash of class contents
+   * @param `line` Line number in source
    * @param `methods` Methods and their hashes
    * @param `abstract` Is the class abstract
+   * @param `synthetic` Is this code generated at build time
    */
-  registerFunction(cls: Function, fileOrImport: string, hash: number, methods?: Record<string, { hash: number }>, abstract?: boolean, synthetic?: boolean): boolean {
+  registerFunction(
+    cls: Function, fileOrImport: string, tag: FunctionMetadataTag,
+    methods?: Record<string, FunctionMetadataTag>, abstract?: boolean, synthetic?: boolean
+  ): boolean {
     const source = this.getSourceFile(fileOrImport);
     const id = this.getId(source, cls.name);
     Object.defineProperty(cls, 'Ⲑid', { value: id });
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    (cls as unknown as Metadated)[METADATA] = { id, source, hash, methods, abstract, synthetic };
-    this.#metadata.set(id, { id, source, hash, methods, abstract, synthetic });
+    (cls as unknown as Metadated)[METADATA] = { id, source, ...tag, methods, abstract, synthetic };
+    this.#metadata.set(id, { id, source, ...tag, methods, abstract, synthetic });
     return true;
   }
 
