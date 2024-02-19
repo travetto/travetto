@@ -5,6 +5,8 @@ import {
   AfterFunction, CoreUtil, SystemUtil, Import
 } from '@travetto/transformer';
 
+import type { FunctionMetadataTag } from '../src/types/common';
+
 const MANIFEST_MOD = '@travetto/manifest';
 const MANIFEST_IDX = `${MANIFEST_MOD}/__index__`;
 
@@ -18,10 +20,8 @@ const runtimeIdx = Symbol.for(`${MANIFEST_MOD}:runtimeIndex`);
 
 interface MetadataInfo {
   [runtimeIdx]?: Import;
-  [methods]?: {
-    [key: string]: { hash: number };
-  };
-  [cls]?: number;
+  [methods]?: Record<string, FunctionMetadataTag>;
+  [cls]?: FunctionMetadataTag;
   [fn]?: number;
 }
 
@@ -29,6 +29,15 @@ interface MetadataInfo {
  * Providing metadata for classes
  */
 export class RegisterTransformer {
+
+  static #loc(state: TransformerState, node: ts.Node): FunctionMetadataTag {
+    const hash = SystemUtil.naiveHash(node.getText());
+    try {
+      return { hash, line: CoreUtil.getRangeOf(state.source, node)?.start! };
+    } catch (err) {
+      return { hash, line: 0 };
+    }
+  }
 
   static #valid({ importName: imp }: TransformerState): boolean {
     return !imp.startsWith(MANIFEST_MOD) || !(/[/](src|support)[/]/.test(imp) || imp === MANIFEST_IDX);
@@ -42,7 +51,7 @@ export class RegisterTransformer {
     if (!this.#valid(state)) {
       return node; // Exclude self
     }
-    state[cls] = SystemUtil.naiveHash(node.getText());
+    state[cls] = this.#loc(state, node);
     return node;
   }
 
@@ -52,10 +61,8 @@ export class RegisterTransformer {
   @OnMethod()
   static collectMethodMetadata(state: TransformerState & MetadataInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (state[cls] && ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
-      const hash = SystemUtil.naiveHash(node.getText());
-      const conf = { hash };
       state[methods] ??= {};
-      state[methods]![node.name.escapedText.toString()] = conf;
+      state[methods]![node.name.escapedText.toString()] = this.#loc(state, node);
     }
     return node;
   }
@@ -80,7 +87,7 @@ export class RegisterTransformer {
       [
         state.createIdentifier(name),
         state.getFilenameIdentifier(),
-        state.fromLiteral(state[cls]!),
+        state.fromLiteral(state[cls]),
         state.extendObjectLiteral(state[methods] || {}),
         state.fromLiteral(CoreUtil.isAbstract(node)),
         state.fromLiteral(name.endsWith(TransformerState.SYNTHETIC_EXT))
@@ -116,13 +123,14 @@ export class RegisterTransformer {
       // If we have a class like function
       state[runtimeIdx] ??= state.importFile(RUNTIME_IDX_IMPORT);
       const ident = state.createAccess(state[runtimeIdx].ident, RUNTIME_IDX_CLS);
+      const loc = this.#loc(state, node);
       const meta = state.factory.createCallExpression(
         state.createAccess(ident, 'registerFunction'),
         [],
         [
           state.createIdentifier(node.name),
           state.getFilenameIdentifier(),
-          state.fromLiteral(SystemUtil.naiveHash(node.getText())),
+          state.fromLiteral(loc),
         ]
       );
       state.addStatements([state.factory.createExpressionStatement(meta)]);

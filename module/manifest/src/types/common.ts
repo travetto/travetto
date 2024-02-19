@@ -10,11 +10,11 @@ export type ManifestModuleFolderType =
 
 export type ManifestModuleRole = 'std' | 'test' | 'doc' | 'compile' | 'build';
 
-export type FunctionMetadata = {
+export type FunctionMetadataTag = { hash: number, line: number };
+export type FunctionMetadata = FunctionMetadataTag & {
   id: string;
   source: string;
-  hash?: number;
-  methods?: Record<string, { hash: number }>;
+  methods?: Record<string, FunctionMetadataTag>;
   synthetic?: boolean;
   abstract?: boolean;
 };

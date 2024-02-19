@@ -225,6 +225,15 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     return { returnType, imports, paramInputs, paramConfigs };
   }
 
+  buildSee(cls: Class, method?: string): string {
+    const meta = RuntimeIndex.getFunctionMetadataFromClass(cls);
+    if (!meta) {
+      return '';
+    }
+    const line = (method ? meta.methods?.[method]?.line : undefined) ?? meta.line ?? 1;
+    return `@see file://${meta.source}#${line}`;
+  }
+
   renderEndpointDoc(endpoint: EndpointConfig, params: ParamConfig[]): string[] {
     const paramsDocs = params
       .filter(x => x.description)
@@ -234,7 +243,8 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       ((endpoint.title && endpoint.description) ? ' ' : ''),
       endpoint.description,
       (((endpoint.title || endpoint.description) && paramsDocs.length) ? ' ' : ''),
-      ...paramsDocs
+      ...paramsDocs,
+      this.buildSee(endpoint.class, endpoint.method)
     ].filter(x => !!x);
 
     return parts.length === 0 ? [] :
