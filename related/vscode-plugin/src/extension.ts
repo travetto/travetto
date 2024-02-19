@@ -13,7 +13,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   }
 
   const ctx = await getManifestContext(folder.uri.fsPath);
-  await Workspace.init(context, ctx);
+  await Workspace.init(context, ctx, folder);
 
   for (const ext of RuntimeIndex.find({ file: f => /.*\/feature.*?\/main[.]/.test(f.sourceFile) })) {
     await import(ext.import);

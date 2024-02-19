@@ -15,6 +15,8 @@ export class Workspace {
   static #compilerState: CompilerStateType | undefined;
   static #compilerStateListeners: ((ev: CompilerStateType | 'disconnected') => void)[] = [];
 
+  static readonly folder: vscode.WorkspaceFolder;
+
   static onCompilerState(handler: (ev: CompilerStateType | 'disconnected') => void): void {
     this.#compilerStateListeners.push(handler);
     handler(this.compilerState);
@@ -68,9 +70,11 @@ export class Workspace {
    * Initialize extension context
    * @param context
    */
-  static async init(context: vscode.ExtensionContext, manifestContext: ManifestContext): Promise<void> {
+  static async init(context: vscode.ExtensionContext, manifestContext: ManifestContext, folder: vscode.WorkspaceFolder): Promise<void> {
     this.#context = context;
     this.#manifestContext = manifestContext;
+    // @ts-expect-error
+    this.folder = folder;
   }
 
   /** Find full path for a resource */

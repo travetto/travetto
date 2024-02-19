@@ -1,5 +1,4 @@
 import { ClassInstance } from '@travetto/base';
-import { RuntimeIndex } from '@travetto/manifest';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig } from '../model/test';
@@ -26,15 +25,11 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
     Object.assign(extra, description).description :
     description;
 
-  for (const r of rest) {
+  for (const r of [...rest, { description: descriptionString }]) {
     Object.assign(extra, r);
   }
   return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
-    SuiteRegistry.registerField(inst.constructor, descriptor.value, {
-      ...extra,
-      file: RuntimeIndex.getFunctionMetadata(inst.constructor)!.source,
-      description: descriptionString
-    });
+    SuiteRegistry.registerField(inst.constructor, descriptor.value, extra);
     return descriptor;
   };
 }
