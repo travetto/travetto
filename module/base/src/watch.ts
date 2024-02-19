@@ -10,9 +10,11 @@ export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit
   // Load at runtime
   const { CompilerClient } = await import('@travetto/compiler/support/server/client.js');
 
-  const client = new CompilerClient(RuntimeIndex.manifest, (level, message, ...args) =>
-    console.error(level, message, ...args)
-  );
+  const client = new CompilerClient(RuntimeIndex.manifest, {
+    error(message, ...args): void { console.error('error', message, ...args); },
+    debug(message, ...args): void { console.error('debug', message, ...args); },
+    info(message, ...args): void { console.error('info', message, ...args); },
+  });
 
   const ctrl = new AbortController();
   const remove = ShutdownManager.onGracefulShutdown(async () => ctrl.abort(), watchCompiler);

@@ -14,16 +14,18 @@ type FetchEventsConfig<T> = {
   enforceIteration?: boolean;
 };
 
+type SimpleLogger = Pick<CompilerLogger, 'error' | 'info' | 'debug'>;
+
 /**
  * Compiler Client Operations
  */
 export class CompilerClient {
 
   #url: string;
-  #log: CompilerLogger;
+  #log: SimpleLogger;
   #handle: Record<'compiler' | 'server', ProcessHandle>;
 
-  constructor(ctx: ManifestContext, log: CompilerLogger) {
+  constructor(ctx: ManifestContext, log: SimpleLogger) {
     this.#url = ctx.build.compilerUrl.replace('localhost', '127.0.0.1');
     this.#log = log;
     this.#handle = { compiler: new ProcessHandle(ctx, 'compiler'), server: new ProcessHandle(ctx, 'server') };
