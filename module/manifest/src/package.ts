@@ -78,7 +78,7 @@ export class PackageUtil {
    * Get the package path
    */
   static getPackagePath(pkg: Package): string {
-    return pkg[PackagePath];
+    return pkg[PackagePath]!;
   }
 
   /**

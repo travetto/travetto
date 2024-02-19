@@ -4,7 +4,7 @@ import type { ManifestContext } from './context';
 export const PackagePath = Symbol.for('@travetto/manifest:package-path');
 
 export type Package = {
-  [PackagePath]: string;
+  [PackagePath]?: string;
   name: string;
   type?: NodeModuleType;
   version: string;
