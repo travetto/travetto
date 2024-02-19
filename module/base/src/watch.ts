@@ -12,7 +12,7 @@ export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit
 
   const client = new CompilerClient(RuntimeIndex.manifest, {
     error(message, ...args): void { console.error('error', message, ...args); },
-    debug(message, ...args): void { console.error('debug', message, ...args); },
+    debug(message, ...args): void { },
     info(message, ...args): void { console.error('info', message, ...args); },
   });
 
