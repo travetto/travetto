@@ -71,7 +71,7 @@ export class TestExecutor {
     const name = path.basename(file);
     const classId = RuntimeIndex.getId(file, name);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const suite = { class: { name }, classId, duration: 0, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
+    const suite = { class: { name }, classId, duration: 0, lineStart: 1, lineEnd: 1, file, } as SuiteConfig & SuiteResult;
     err.message = err.message.replaceAll(RuntimeIndex.mainModule.sourcePath, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
@@ -90,7 +90,8 @@ export class TestExecutor {
       failed: 0,
       skipped: 0,
       total: 0,
-      lines: { ...suite.lines },
+      lineStart: suite.lineStart,
+      lineEnd: suite.lineEnd,
       file: suite.file,
       classId: suite.classId,
       duration: 0,
@@ -113,7 +114,9 @@ export class TestExecutor {
       module: RuntimeContext.main.name,
       description: test.description,
       classId: test.classId,
-      lines: { ...test.lines },
+      lineStart: test.lineStart,
+      lineEnd: test.lineEnd,
+      lineBodyStart: test.lineBodyStart,
       file: test.file,
       status: 'skipped',
       assertions: [],

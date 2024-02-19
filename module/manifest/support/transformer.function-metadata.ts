@@ -30,12 +30,13 @@ interface MetadataInfo {
  */
 export class RegisterTransformer {
 
-  static #loc(state: TransformerState, node: ts.Node): FunctionMetadataTag {
+  static #tag(state: TransformerState, node: ts.Node): FunctionMetadataTag {
     const hash = SystemUtil.naiveHash(node.getText());
     try {
-      return { hash, line: CoreUtil.getRangeOf(state.source, node)?.start! };
+      const range = CoreUtil.getRangeOf(state.source, node) ?? { lineStart: 0, lineEnd: 0 };
+      return { hash, ...range };
     } catch (err) {
-      return { hash, line: 0 };
+      return { hash, lineStart: 0, lineEnd: 0 };
     }
   }
 
@@ -51,7 +52,7 @@ export class RegisterTransformer {
     if (!this.#valid(state)) {
       return node; // Exclude self
     }
-    state[cls] = this.#loc(state, node);
+    state[cls] = this.#tag(state, node);
     return node;
   }
 
@@ -62,7 +63,7 @@ export class RegisterTransformer {
   static collectMethodMetadata(state: TransformerState & MetadataInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (state[cls] && ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
       state[methods] ??= {};
-      state[methods]![node.name.escapedText.toString()] = this.#loc(state, node);
+      state[methods]![node.name.escapedText.toString()] = this.#tag(state, node);
     }
     return node;
   }
@@ -123,14 +124,14 @@ export class RegisterTransformer {
       // If we have a class like function
       state[runtimeIdx] ??= state.importFile(RUNTIME_IDX_IMPORT);
       const ident = state.createAccess(state[runtimeIdx].ident, RUNTIME_IDX_CLS);
-      const loc = this.#loc(state, node);
+      const tag = this.#tag(state, node);
       const meta = state.factory.createCallExpression(
         state.createAccess(ident, 'registerFunction'),
         [],
         [
           state.createIdentifier(node.name),
           state.getFilenameIdentifier(),
-          state.fromLiteral(loc),
+          state.fromLiteral(tag),
         ]
       );
       state.addStatements([state.factory.createExpressionStatement(meta)]);

@@ -22,16 +22,16 @@ export class CoreUtil {
   }
 
   /**
-   * Get first line of method body
+   * Get code range of node
    * @param m
    */
-  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, o: T | undefined): { start: number, end: number } | undefined {
+  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, o: T | undefined): { lineStart: number, lineEnd: number } | undefined {
     if (o) {
       const start = ts.getLineAndCharacterOfPosition(source, o.getStart(source));
       const end = ts.getLineAndCharacterOfPosition(source, o.getEnd());
       return {
-        start: start.line + 1,
-        end: end.line + 1
+        lineStart: start.line + 1,
+        lineEnd: end.line + 1
       };
     }
   }

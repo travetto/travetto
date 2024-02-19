@@ -64,9 +64,13 @@ export interface SuiteResult extends Counts {
    */
   file: string;
   /**
-   * Lines of the suite
+   * Start of the suite
    */
-  lines: { start: number, end: number };
+  lineStart: number;
+  /**
+   * End of the suite
+   */
+  lineEnd: number;
   /**
    * ALl test results
    */

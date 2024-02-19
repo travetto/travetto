@@ -18,11 +18,14 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   }
 
   createPending(cls: Class): Partial<SuiteConfig> {
+    const meta = RuntimeIndex.getFunctionMetadata(cls)!;
     return {
       class: cls,
       module: RuntimeContext.main.name,
       classId: cls.Ⲑid,
-      file: RuntimeIndex.getFunctionMetadata(cls)!.source,
+      file: meta.source,
+      lineStart: meta.lineStart,
+      lineEnd: meta.lineEnd,
       tests: [],
       beforeAll: [],
       beforeEach: [],
@@ -32,10 +35,13 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   }
 
   override createPendingField(cls: Class, fn: Function): Partial<TestConfig> {
+    const meta = RuntimeIndex.getFunctionMetadata(cls)!;
     return {
       class: cls,
       module: RuntimeContext.main.name,
-      file: RuntimeIndex.getFunctionMetadata(cls)!.source,
+      file: meta.source,
+      lineStart: meta.lineStart,
+      lineEnd: meta.lineEnd,
       methodName: fn.name
     };
   }
@@ -92,10 +98,10 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);
       const suites = this.getValidClasses().filter(cls => RuntimeIndex.getFunctionMetadata(cls)!.source === file).map(x => this.get(x)).filter(x => !x.skip);
-      const suite = suites.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
+      const suite = suites.find(x => line >= x.lineStart && line <= x.lineEnd);
 
       if (suite) {
-        const test = suite.tests.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
+        const test = suite.tests.find(x => line >= x.lineStart && line <= x.lineEnd);
         return test ? { suite, test } : { suite };
       } else {
         return { suites };

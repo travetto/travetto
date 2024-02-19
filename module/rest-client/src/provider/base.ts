@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/quotes */
 import fs from 'node:fs/promises';
+import { relative } from 'node:path';
 
 import { Class, Util } from '@travetto/base';
 import { RuntimeIndex, path } from '@travetto/manifest';
@@ -230,8 +231,9 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     if (!meta) {
       return '';
     }
-    const line = (method ? meta.methods?.[method]?.line : undefined) ?? meta.line ?? 1;
-    return `@see file://${meta.source}#${line}`;
+    const line = (method ? meta.methods?.[method]?.lineStart : undefined) ?? meta?.lineStart ?? 1;
+    const output = path.resolve(this.#output, this.subFolder || '.');
+    return `@see file://./${relative(output, meta.source)}:${line}`;
   }
 
   renderEndpointDoc(endpoint: EndpointConfig, params: ParamConfig[]): string[] {
@@ -244,7 +246,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       endpoint.description,
       (((endpoint.title || endpoint.description) && paramsDocs.length) ? ' ' : ''),
       ...paramsDocs,
-      this.buildSee(endpoint.class, endpoint.method)
+      this.buildSee(endpoint.class, endpoint.handlerName)
     ].filter(x => !!x);
 
     return parts.length === 0 ? [] :

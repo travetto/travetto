@@ -88,14 +88,14 @@ export class AssertUtil {
     const { file, ...pos } = this.getPositionOfError(error, suite.file);
     let line = pos.line;
 
-    if (line === 1 && suite.lines) {
-      line = suite.lines.start;
+    if (line === 1 && suite.lineStart) {
+      line = suite.lineStart;
     }
 
     const msg = error.message.split(/\n/)[0];
 
     const core = { file, classId: suite.classId, methodName, module: RuntimeContext.main.name };
-    const coreAll = { ...core, description: msg, lines: { start: line, end: line, codeStart: line } };
+    const coreAll = { ...core, description: msg, lineStart: line, lineEnd: line, lineBodyStart: line };
 
     const assert: Assertion = {
       ...core,

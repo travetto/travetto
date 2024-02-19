@@ -196,8 +196,8 @@ export class Decorations {
    * Build suite config
    * @param suite
    */
-  static buildSuite(suite: { lines: { start: number } }): vscode.DecorationOptions {
-    return { ...this.line(suite.lines.start) };
+  static buildSuite(suite: { lineStart: number }): vscode.DecorationOptions {
+    return { ...this.line(suite.lineStart) };
   }
 
   /**
@@ -216,11 +216,11 @@ export class Decorations {
       const hover = this.buildErrorHover(err);
       const tt = test;
       return {
-        ...this.line(tt.lines.start),
+        ...this.line(tt.lineStart),
         hoverMessage: hover.markdown
       };
     } else {
-      return this.line(test.lines.start);
+      return this.line(test.lineStart);
     }
   }
 

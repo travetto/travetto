@@ -22,17 +22,21 @@ export interface SuiteCore {
    */
   file: string;
   /**
-   * The lines within the file the tests overlaps
+   * The first line of the unit
    */
-  lines: { start: number, end: number };
+  lineStart: number;
+  /**
+   * The last line of the unit
+   */
+  lineEnd: number;
 }
 
 /**
- * Test core definition, adds codeStart
+ * Test core definition, adds start of body
  */
 export interface TestCore extends SuiteCore {
   /**
-   * The lines within the file the tests overlaps
+   * The first line of the unit body
    */
-  lines: { start: number, end: number, codeStart: number };
+  lineBodyStart: number;
 }

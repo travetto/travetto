@@ -59,8 +59,8 @@ export class DocumentResultsManager {
     return Object.values(this.#results.test)
       .map(v => ({
         name: v.src.methodName,
-        start: v.src.lines.start,
-        code: v.src.lines.codeStart
+        start: v.src.lineStart,
+        code: v.src.lineBodyStart
       }));
   }
 
