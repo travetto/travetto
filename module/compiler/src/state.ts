@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import timers from 'node:timers/promises';
 
 import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
@@ -6,7 +7,7 @@ import { TransformerManager } from '@travetto/transformer';
 import { CommonUtil } from '../support/util';
 
 import { CompilerUtil } from './util';
-import { CompileStateEntry } from './types';
+import { CompileEmitError, CompileStateEntry } from './types';
 
 function folderMapper(root: string, prefix: string): { dir: string, translate: (val: string) => string } {
   let matched: string = '~~';
@@ -44,6 +45,7 @@ export class CompilerState implements ts.CompilerHost {
   #modules: ManifestModule[];
   #transformerManager: TransformerManager;
   #compilerOptions: ts.CompilerOptions;
+  #program: ts.Program;
 
   #readFile(inputFile: string): string | undefined {
     return ts.sys.readFile(this.#inputToEntry.get(inputFile)?.sourceFile ?? this.#inputPathToSourcePath(inputFile));
@@ -104,24 +106,40 @@ export class CompilerState implements ts.CompilerHost {
     return this.getBySource(this.#manifestIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile)!.inputFile;
   }
 
-  createProgram(oldProgram?: ts.Program): ts.Program {
-    const prog = ts.createProgram({ rootNames: this.getAllFiles(), host: this, options: this.#compilerOptions, oldProgram });
-    this.#transformerManager.init(prog.getTypeChecker());
-    return prog;
+  async createProgram(force = false): Promise<ts.Program> {
+    if (force || !this.#program) {
+      this.#program = ts.createProgram({ rootNames: this.getAllFiles(), host: this, options: this.#compilerOptions, oldProgram: this.#program });
+      this.#transformerManager.init(this.#program.getTypeChecker());
+      await timers.setImmediate();
+    }
+    return this.#program;
   }
 
-  writeInputFile(program: ts.Program, inputFile: string): ts.EmitResult | undefined | void {
-    switch (ManifestModuleUtil.getFileType(inputFile)) {
-      case 'package-json':
-        return this.writeFile(this.#inputToEntry.get(inputFile)!.outputFile!, this.readFile(inputFile)!, false);
-      case 'js':
-        return this.writeFile(this.#inputToEntry.get(inputFile)!.outputFile!, ts.transpile(this.readFile(inputFile)!, this.#compilerOptions), false);
-      case 'ts':
-        return program.emit(
-          program.getSourceFile(inputFile)!,
-          (...args) => this.writeFile(...args), undefined, false,
-          this.#transformerManager.get()
-        );
+  async writeInputFile(inputFile: string, needsNewProgram = false): Promise<CompileEmitError | undefined> {
+    const program = await this.createProgram(needsNewProgram);
+    try {
+      switch (ManifestModuleUtil.getFileType(inputFile)) {
+        case 'package-json':
+          this.writeFile(this.#inputToEntry.get(inputFile)!.outputFile!, this.readFile(inputFile)!, false), undefined;
+          break;
+        case 'js':
+          this.writeFile(this.#inputToEntry.get(inputFile)!.outputFile!, ts.transpile(this.readFile(inputFile)!, this.#compilerOptions), false);
+          break;
+        case 'ts': {
+          const result = program.emit(
+            program.getSourceFile(inputFile)!,
+            (...args) => this.writeFile(...args), undefined, false,
+            this.#transformerManager.get()
+          );
+          return result?.diagnostics?.length ? result.diagnostics : undefined;
+        }
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        return err;
+      } else {
+        throw err;
+      }
     }
   }
 

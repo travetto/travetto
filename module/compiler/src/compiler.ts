@@ -1,4 +1,3 @@
-import ts from 'typescript';
 import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
 import { setMaxListeners } from 'node:events';
@@ -9,7 +8,7 @@ import { CompilerUtil } from './util';
 import { CompilerState } from './state';
 import { CompilerWatcher } from './watch';
 import { Log } from './log';
-import { CompileEmitError, CompileEmitEvent, CompileEmitter } from './types';
+import { CompileEmitEvent, CompileEmitter } from './types';
 import { EventUtil } from './event';
 
 /**
@@ -86,29 +85,8 @@ export class Compiler {
   /**
    * Compile in a single pass, only emitting dirty files
    */
-  async getCompiler(): Promise<CompileEmitter> {
-    let program: ts.Program;
-
-    const emit = async (inputFile: string, needsNewProgram = program === undefined): Promise<CompileEmitError | undefined> => {
-      try {
-        if (needsNewProgram) {
-          program = this.#state.createProgram(program);
-        }
-        await timers.setImmediate();
-        const result = this.#state.writeInputFile(program, inputFile);
-        if (result?.diagnostics?.length) {
-          return result.diagnostics;
-        }
-      } catch (err) {
-        if (err instanceof Error) {
-          return err;
-        } else {
-          throw err;
-        }
-      }
-    };
-
-    return emit;
+  getCompiler(): CompileEmitter {
+    return (inputFile: string, needsNewProgram?: boolean) => this.#state.writeInputFile(inputFile, needsNewProgram);
   }
 
   /**
