@@ -21,7 +21,7 @@ This module provides unit testing functionality that integrates with the framewo
 **Note**: All tests should be under the `test/.*` folders.  The pattern for tests is defined as a regex and not standard globbing.
 
 ## Definition
-A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L14) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L20) decorator.  All tests intrinsically support `async`/`await`. 
+A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L14) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L19) decorator.  All tests intrinsically support `async`/`await`. 
 
 A simple example would be:
 
@@ -87,7 +87,7 @@ var ᚕf = "@travetto/test/doc/assert-example.js";
 const node_assert_1 = tslib_1.__importDefault(require("node:assert"));
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
-    static Ⲑinit = Ⲑ_runtime_1.RuntimeIndex.registerFunction(SimpleTest, ᚕf, 1887908328, { test: { hash: 102834457 } }, false, false);
+    static Ⲑinit = Ⲑ_runtime_1.RuntimeIndex.registerFunction(SimpleTest, ᚕf, { hash: 1887908328, lineStart: 5, lineEnd: 12 }, { test: { hash: 102834457, lineStart: 8, lineEnd: 11 } }, false, false);
     async test() {
         if (Ⲑ_util_1.RunnerUtil.tryDebugger)
             debugger;
@@ -95,11 +95,11 @@ let SimpleTest = class SimpleTest {
     }
 };
 tslib_1.__decorate([
-    (0, test_1.Test)({ ident: "@Test()", lines: { start: 8, end: 11, codeStart: 10 } })
+    (0, test_1.Test)({ ident: "@Test()", lineBodyStart: 10 })
 ], SimpleTest.prototype, "test", null);
 SimpleTest = tslib_1.__decorate([
     Ⲑ_decorator_1.Register(),
-    (0, test_1.Suite)({ ident: "@Suite()", lines: { start: 5, end: 12 } })
+    (0, test_1.Suite)({ ident: "@Suite()" })
 ], SimpleTest);
 ```
 

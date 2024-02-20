@@ -108,7 +108,7 @@ const Ⲑ_runtime_1 = tslib_1.__importStar(require("@travetto/manifest/src/runti
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 var ᚕf = "@travetto/transformer/doc/upper.js";
 let TEST = class TEST {
-    static Ⲑinit = Ⲑ_runtime_1.RuntimeIndex.registerFunction(TEST, ᚕf, 649563175, { COMPUTEAGE: { hash: 1286718349 } }, false, false);
+    static Ⲑinit = Ⲑ_runtime_1.RuntimeIndex.registerFunction(TEST, ᚕf, { hash: 649563175, lineStart: 1, lineEnd: 9 }, { COMPUTEAGE: { hash: 1286718349, lineStart: 6, lineEnd: 8 } }, false, false);
     NAME;
     AGE;
     DOB;

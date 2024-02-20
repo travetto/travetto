@@ -53,7 +53,7 @@ const tslib_1 = require("tslib");
 const Ⲑ_runtime_1 = tslib_1.__importStar(require("@travetto/manifest/src/runtime.js"));
 var ᚕf = "@travetto/manifest/doc/test-class.js";
 class TestClass {
-    static Ⲑinit = Ⲑ_runtime_1.RuntimeIndex.registerFunction(TestClass, ᚕf, 197152026, { doStuff: { hash: 51337554 } }, false, false);
+    static Ⲑinit = Ⲑ_runtime_1.RuntimeIndex.registerFunction(TestClass, ᚕf, { hash: 197152026, lineStart: 1, lineEnd: 3 }, { doStuff: { hash: 51337554, lineStart: 2, lineEnd: 2 } }, false, false);
     async doStuff() { }
 }
 exports.TestClass = TestClass;
@@ -67,7 +67,9 @@ $ trv main ./doc/lookup.ts
   id: '@travetto/manifest:doc/test-class￮TestClass',
   source: './doc/test-class.ts',
   hash: 197152026,
-  methods: { doStuff: { hash: 51337554 } },
+  lineStart: 1,
+  lineEnd: 3,
+  methods: { doStuff: { hash: 51337554, lineStart: 2, lineEnd: 2 } },
   abstract: false,
   synthetic: false
 }
