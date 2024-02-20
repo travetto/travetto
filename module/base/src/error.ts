@@ -58,8 +58,8 @@ export class AppError extends Error {
       message: this.message,
       category: this.category,
       type: this.type,
-      details: this.details,
       at: this.at,
+      details: this.details,
     };
   }
 }

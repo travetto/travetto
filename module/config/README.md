@@ -199,18 +199,20 @@ $ trv main doc/dbconfig-run.ts
   category: 'data',
   type: 'ValidationResultError',
   at: 2029-03-14T04:00:00.618Z,
-  class: '@travetto/config:doc/dbconfig￮DBConfig',
-  file: './doc/dbconfig.ts',
-  errors: [
-    {
-      kind: 'required',
-      active: true,
-      value: undefined,
-      message: 'port is required',
-      path: 'port',
-      type: undefined
-    }
-  ]
+  details: {
+    class: '@travetto/config:doc/dbconfig￮DBConfig',
+    file: './doc/dbconfig.ts',
+    errors: [
+      {
+        kind: 'required',
+        active: true,
+        value: undefined,
+        message: 'port is required',
+        path: 'port',
+        type: undefined
+      }
+    ]
+  }
 }
 ```
 

@@ -220,20 +220,22 @@ Validation Failed {
   "category": "data",
   "type": "ValidationResultError",
   "at": "2029-03-14T04:00:00.618Z",
-  "errors": [
-    {
-      "kind": "type",
-      "type": "number",
-      "message": "age is not a valid number",
-      "path": "age"
-    },
-    {
-      "kind": "required",
-      "active": true,
-      "message": "address.street2 is required",
-      "path": "address.street2"
-    }
-  ]
+  "details": {
+    "errors": [
+      {
+        "kind": "type",
+        "type": "number",
+        "message": "age is not a valid number",
+        "path": "age"
+      },
+      {
+        "kind": "required",
+        "active": true,
+        "message": "address.street2 is required",
+        "path": "address.street2"
+      }
+    ]
+  }
 }
 ```
 
@@ -363,14 +365,16 @@ Validation Failed {
   "category": "data",
   "type": "ValidationResultError",
   "at": "2029-03-14T04:00:00.837Z",
-  "errors": [
-    {
-      "kind": "type",
-      "type": "PointImpl",
-      "message": "point is not a valid PointImpl",
-      "path": "point"
-    }
-  ]
+  "details": {
+    "errors": [
+      {
+        "kind": "type",
+        "type": "PointImpl",
+        "message": "point is not a valid PointImpl",
+        "path": "point"
+      }
+    ]
+  }
 }
 ```
 
