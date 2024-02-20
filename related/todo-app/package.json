@@ -21,19 +21,19 @@
     "start": "npx trv run:rest"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^3.4.5",
-    "@travetto/auth-rest-session": "^3.4.5",
-    "@travetto/cli": "^3.4.7",
-    "@travetto/log": "^3.4.4",
-    "@travetto/model-mongo": "^3.4.5",
-    "@travetto/openapi": "^3.4.5",
-    "@travetto/rest-express": "^3.4.5",
-    "@travetto/rest-session": "^3.4.5",
+    "@travetto/auth-rest": "^3.4.6",
+    "@travetto/auth-rest-session": "^3.4.6",
+    "@travetto/cli": "^3.4.8",
+    "@travetto/log": "^3.4.5",
+    "@travetto/model-mongo": "^3.4.6",
+    "@travetto/openapi": "^3.4.6",
+    "@travetto/rest-express": "^3.4.6",
+    "@travetto/rest-session": "^3.4.6",
     "vue": "^3.3.8"
   },
   "devDependencies": {
     "@travetto/pack": "^3.4.8",
-    "@travetto/rest-client": "^3.4.5"
+    "@travetto/rest-client": "^3.4.6"
   },
   "travetto": {
     "displayName": "Todo Application"
