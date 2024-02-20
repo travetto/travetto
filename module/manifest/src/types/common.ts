@@ -10,7 +10,7 @@ export type ManifestModuleFolderType =
 
 export type ManifestModuleRole = 'std' | 'test' | 'doc' | 'compile' | 'build';
 
-export type FunctionMetadataTag = { hash: number, lineStart: number, lineEnd: number };
+export type FunctionMetadataTag = { hash: number, lines: [number, number] };
 export type FunctionMetadata = FunctionMetadataTag & {
   id: string;
   source: string;

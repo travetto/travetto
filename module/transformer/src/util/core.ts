@@ -25,14 +25,11 @@ export class CoreUtil {
    * Get code range of node
    * @param m
    */
-  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, o: T | undefined): { lineStart: number, lineEnd: number } | undefined {
+  static getRangeOf<T extends ts.Node>(source: ts.SourceFile, o: T | undefined): [start: number, end: number] | undefined {
     if (o) {
       const start = ts.getLineAndCharacterOfPosition(source, o.getStart(source));
       const end = ts.getLineAndCharacterOfPosition(source, o.getEnd());
-      return {
-        lineStart: start.line + 1,
-        lineEnd: end.line + 1
-      };
+      return [start.line + 1, end.line + 1];
     }
   }
 

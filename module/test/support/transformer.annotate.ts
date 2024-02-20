@@ -50,7 +50,7 @@ export class AnnotationTransformer {
           ...(expression.arguments ?? []),
           state.fromLiteral({
             ident: `@${DecoratorUtil.getDecoratorIdent(dec).text}()`,
-            lineBodyStart: CoreUtil.getRangeOf(state.source, n?.body?.statements[0])?.lineStart
+            lineBodyStart: CoreUtil.getRangeOf(state.source, n?.body?.statements[0])?.[0]
           })
         ]
       )

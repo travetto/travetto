@@ -231,7 +231,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     if (!meta) {
       return '';
     }
-    const line = (method ? meta.methods?.[method]?.lineStart : undefined) ?? meta?.lineStart ?? 1;
+    const line = (method ? meta.methods?.[method]?.lines[0] : undefined) ?? meta?.lines[0] ?? 1;
     const output = path.resolve(this.#output, this.subFolder || '.');
     return `@see file://./${relative(output, meta.source)}#${line}`;
   }

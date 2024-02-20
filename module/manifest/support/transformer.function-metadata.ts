@@ -33,10 +33,10 @@ export class RegisterTransformer {
   static #tag(state: TransformerState, node: ts.Node): FunctionMetadataTag {
     const hash = SystemUtil.naiveHash(node.getText());
     try {
-      const range = CoreUtil.getRangeOf(state.source, node) ?? { lineStart: 0, lineEnd: 0 };
-      return { hash, ...range };
+      const range = CoreUtil.getRangeOf(state.source, node) ?? [0, 0];
+      return { hash, lines: range };
     } catch (err) {
-      return { hash, lineStart: 0, lineEnd: 0 };
+      return { hash, lines: [0, 0] };
     }
   }
 
