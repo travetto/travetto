@@ -11,8 +11,9 @@ export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit
   const { CompilerClient } = await import('@travetto/compiler/support/server/client.js');
 
   const client = new CompilerClient(RuntimeIndex.manifest, {
+    warn(message, ...args): void { console.error('warn', message, ...args); },
+    debug(message, ...args): void { console.error('debug', message, ...args); },
     error(message, ...args): void { console.error('error', message, ...args); },
-    debug(message, ...args): void { },
     info(message, ...args): void { console.error('info', message, ...args); },
   });
 

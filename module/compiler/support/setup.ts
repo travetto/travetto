@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 
 import { type DeltaEvent, type ManifestContext, type Package } from '@travetto/manifest';
 
-import { CompilerLogger } from './log';
+import { Log } from './log';
 import { CommonUtil } from './util';
 
 type ModFile = { input: string, output: string, stale: boolean };
@@ -128,7 +128,7 @@ export class CompilerSetup {
     const out: string[] = [];
 
     try {
-      await new CompilerLogger(scope).wrap(async log => {
+      await Log.wrap(scope, async log => {
         if (files.some(f => f.stale)) {
           log.debug('Starting', mod);
           for (const file of files.filter(x => x.stale)) {
@@ -173,7 +173,7 @@ export class CompilerSetup {
   static async setup(ctx: ManifestContext): Promise<DeltaEvent[]> {
     let changes = 0;
 
-    await new CompilerLogger('precompile').wrap(async () => {
+    await Log.wrap('precompile', async () => {
       for (const mod of PRECOMPILE_MODS) {
         changes += (await this.#compileIfStale(ctx, 'precompile', mod, SOURCE_SEED)).length;
       }
@@ -181,16 +181,16 @@ export class CompilerSetup {
 
     const { ManifestUtil, ManifestDeltaUtil } = await this.#importManifest(ctx);
 
-    const manifest = await new CompilerLogger('manifest').wrap(() =>
+    const manifest = await Log.wrap('manifest', () =>
       ManifestUtil.buildManifest(ManifestUtil.getWorkspaceContext(ctx)));
 
-    await new CompilerLogger('transformers').wrap(async () => {
+    await Log.wrap('transformers', async () => {
       for (const mod of Object.values(manifest.modules).filter(m => m.files.$transformer?.length)) {
         changes += (await this.#compileIfStale(ctx, 'transformers', mod.name, ['package.json', ...mod.files.$transformer!.map(x => x[0])])).length;
       }
     });
 
-    const delta = await new CompilerLogger('delta').wrap(async log => {
+    const delta = await Log.wrap('delta', async log => {
       if (changes) {
         log.debug('Skipping, everything changed');
         return [{ type: 'changed', file: '*', module: ctx.workspace.name, sourceFile: '' } as const];
@@ -200,14 +200,14 @@ export class CompilerSetup {
     });
 
     if (changes) {
-      await new CompilerLogger('reset').wrap(async log => {
+      await Log.wrap('reset', async log => {
         await fs.rm(path.resolve(ctx.workspace.path, ctx.build.outputFolder), { recursive: true, force: true });
         log.info('Clearing output due to compiler changes');
       }, false);
     }
 
     // Write manifest
-    await new CompilerLogger('manifest').wrap(async log => {
+    await Log.wrap('manifest', async log => {
       await ManifestUtil.writeManifest(manifest);
       log.debug(`Wrote manifest ${ctx.workspace.name}`);
 

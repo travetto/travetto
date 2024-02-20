@@ -3,16 +3,16 @@ import path from 'node:path';
 import timers from 'node:timers/promises';
 
 import type { ManifestContext } from '@travetto/manifest';
-import { CompilerLogger } from '../log';
+import { Log, Logger } from '../log';
 
 export class ProcessHandle {
 
   #file: string;
-  #log: CompilerLogger;
+  #log: Logger;
 
   constructor(ctx: ManifestContext, name: string) {
     this.#file = path.resolve(ctx.workspace.path, ctx.build.toolFolder, `${name}.pid`);
-    this.#log = new CompilerLogger(`process-handle.${name}`);
+    this.#log = Log.scoped(`process-handle.${name}`);
   }
 
   async writePid(pid: number): Promise<void> {

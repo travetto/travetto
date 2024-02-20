@@ -4,8 +4,8 @@ import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerLogLevel, CompilerMode, CompilerServerInfo } from './types';
-import { CompilerLogger } from './log';
+import type { CompilerMode, CompilerServerInfo } from './types';
+import { Log } from './log';
 import { CommonUtil } from './util';
 import { CompilerSetup } from './setup';
 import { CompilerServer } from './server/server';
@@ -14,15 +14,15 @@ import { CompilerClient } from './server/client';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {
-  const client = new CompilerClient(ctx, new CompilerLogger('client'));
+  const client = new CompilerClient(ctx, Log.scoped('client'));
   const buildFolders = [ctx.build.outputFolder, ctx.build.compilerFolder];
+  Log.root = ctx.workspace.path;
+  Log.initLevel('error');
 
   /** Main entry point for compilation */
-  const compile = async (op: CompilerMode, logLevel: CompilerLogLevel, setupOnly = false): Promise<void> => {
-    CompilerLogger.init(ctx, logLevel ?? 'info');
-
+  const compile = async (op: CompilerMode, setupOnly = false): Promise<void> => {
     const server = await new CompilerServer(ctx, op).listen();
-    const log = new CompilerLogger('main');
+    const log = Log.scoped('main');
 
     // Wait for build to be ready
     if (server) {
@@ -37,7 +37,7 @@ export const main = (ctx: ManifestContext) => {
     } else {
       log.info('Server already running, waiting for initial compile to complete');
       const ctrl = new AbortController();
-      log.consumeProgressEvents(() => client.fetchEvents('progress', { until: ev => !!ev.complete, signal: ctrl.signal }));
+      Log.consumeProgressEvents(() => client.fetchEvents('progress', { until: ev => !!ev.complete, signal: ctrl.signal }));
       await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
       ctrl.abort();
     }
@@ -46,7 +46,6 @@ export const main = (ctx: ManifestContext) => {
   const ops = {
     /** Stop the server */
     async stop(): Promise<void> {
-      CompilerLogger.init(ctx);
       if (await client.stop()) {
         console.log(`Stopped server ${ctx.workspace.path}: ${client}`);
       } else {
@@ -62,7 +61,6 @@ export const main = (ctx: ManifestContext) => {
 
     /** Clean the server */
     async clean(): Promise<void> {
-      CompilerLogger.init(ctx);
       if (await client.clean()) {
         return console.log(`Clean triggered ${ctx.workspace.path}:`, buildFolders);
       } else {
@@ -73,7 +71,6 @@ export const main = (ctx: ManifestContext) => {
 
     /** Stream events */
     events: async (type: string, handler: (ev: unknown) => unknown): Promise<void> => {
-      CompilerLogger.init(ctx, 'error');
       if (type === 'change' || type === 'log' || type === 'progress' || type === 'state') {
         for await (const ev of client.fetchEvents(type)) { await handler(ev); }
       } else {
@@ -82,23 +79,30 @@ export const main = (ctx: ManifestContext) => {
     },
 
     /** Build the project */
-    async build(): Promise<void> { await compile('build', 'info'); },
+    async build(): Promise<void> {
+      Log.initLevel('info');
+      await compile('build');
+    },
 
     /** Build and watch the project */
-    async watch(): Promise<void> { await compile('watch', 'info'); },
+    async watch(): Promise<void> {
+      Log.initLevel('info');
+      await compile('watch');
+    },
 
     /** Build and return a loader */
     async getLoader(): Promise<(mod: string) => Promise<unknown>> {
-      // Short circuit if we can
-      if (!(await client.isWatching())) {
-        await compile('build', 'error');
+      Log.initLevel('none');
+      if (!(await client.isWatching())) { // Short circuit if we can
+        Log.initLevel('error');
+        await compile('build');
       }
       return CommonUtil.moduleLoader(ctx);
     },
 
     /** Manifest entry point */
     async manifest(output?: string, prod?: boolean): Promise<void> {
-      await compile('build', 'error', true);
+      await compile('build', true);
       await CompilerSetup.exportManifest(ctx, output, prod); return;
     }
   };

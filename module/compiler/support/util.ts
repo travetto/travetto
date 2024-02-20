@@ -4,7 +4,7 @@ import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import { CompilerLogger } from './log';
+import { Log } from './log';
 
 const OPT_CACHE: Record<string, import('typescript').CompilerOptions> = {};
 
@@ -58,7 +58,7 @@ export class CommonUtil {
    * Restartable Event Stream
    */
   static async * restartableEvents<T>(src: (signal: AbortSignal) => AsyncIterable<T>, parent: AbortSignal, shouldRestart: (item: T) => boolean): AsyncIterable<T> {
-    const log = new CompilerLogger('event-stream');
+    const log = Log.scoped('event-stream');
     outer: while (!parent.aborted) {
       const controller = new AbortController();
       setMaxListeners(1000, controller.signal);
