@@ -8,7 +8,7 @@ import { BaseRestSuite } from './base';
 import { Path, Query } from '../../src/decorator/param';
 import { Response } from '../../src/types';
 
-type Errors = { errors: { path: string }[], message: string };
+type Errors = { details: { errors: { path: string }[] }, message: string };
 
 interface UserShape {
   id: number | undefined;
@@ -129,13 +129,13 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
 
     assert(res2.status === 400);
     assert(/Validation errors have occurred/.test(res2.body.message));
-    assert(res2.body.errors[0].path === 'id');
+    assert(res2.body.details.errors[0].path === 'id');
 
     const res3 = await this.request<Errors>('post', '/test/schema/user', { body: { id: 0, name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res3.status === 400);
     assert(/Validation errors have occurred/.test(res3.body.message));
-    assert(res3.body.errors[0].path === 'age');
+    assert(res3.body.details.errors[0].path === 'age');
   }
 
   @Test()
@@ -150,13 +150,13 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
 
     assert(res2.status === 400);
     assert(/Validation errors have occurred/.test(res2.body.message));
-    assert(res2.body.errors[0].path === 'id');
+    assert(res2.body.details.errors[0].path === 'id');
 
     const res3 = await this.request<Errors>('get', '/test/schema/user', { query: { id: '0', name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res3.status === 400);
     assert(/Validation errors have occurred/.test(res3.body.message));
-    assert(res3.body.errors[0].path === 'age');
+    assert(res3.body.details.errors[0].path === 'age');
   }
 
   @Test()
@@ -172,13 +172,13 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
 
     assert(res2.status === 400);
     assert(/Validation errors have occurred/.test(res2.body.message));
-    assert(res2.body.errors[0].path === 'id');
+    assert(res2.body.details.errors[0].path === 'id');
 
     const res3 = await this.request<Errors>('get', '/test/schema/interface', { query: { id: '0', name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res3.status === 400);
     assert(/Validation errors have occurred/.test(res3.body.message));
-    assert(res3.body.errors[0].path === 'age');
+    assert(res3.body.details.errors[0].path === 'age');
   }
 
   @Test()
@@ -193,7 +193,7 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
     assert(res1.status === 400);
     assert(/Validation errors have occurred/.test(res1.body.message));
     console.error(res1.body);
-    assert(res1.body.errors[0].path.startsWith('user2'));
+    assert(res1.body.details.errors[0].path.startsWith('user2'));
 
     const res2 = await this.request<Errors>('get', '/test/schema/interface-prefix', {
       query: { user3: user },
@@ -202,8 +202,8 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
 
     assert(res2.status === 400);
     assert(/Validation errors have occurred/.test(res2.body.message));
-    assert(res2.body.errors[0].path);
-    assert(!res2.body.errors[0].path.startsWith('user'));
+    assert(res2.body.details.errors[0].path);
+    assert(!res2.body.details.errors[0].path.startsWith('user'));
 
     const res3 = await this.request<User>('get', '/test/schema/interface-prefix', {
       query: { ...user, user2: user },
