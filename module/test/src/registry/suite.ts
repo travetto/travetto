@@ -24,8 +24,8 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       module: RuntimeContext.main.name,
       classId: cls.Ⲑid,
       file: meta.source,
-      lineStart: meta.lineStart,
-      lineEnd: meta.lineEnd,
+      lineStart: meta.lines[0],
+      lineEnd: meta.lines[1],
       tests: [],
       beforeAll: [],
       beforeEach: [],
@@ -41,8 +41,8 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       class: cls,
       module: RuntimeContext.main.name,
       file: meta.source,
-      lineStart: meth?.lineStart,
-      lineEnd: meth?.lineEnd,
+      lineStart: meth?.lines[0],
+      lineEnd: meth?.lines[1],
       methodName: fn.name
     };
   }
