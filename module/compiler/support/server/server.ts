@@ -6,12 +6,12 @@ import { setMaxListeners } from 'node:events';
 import type { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types';
-import { CompilerLogger } from '../log';
+import { Log } from '../log';
 import { CommonUtil } from '../util';
 import { CompilerClient } from './client';
 import { ProcessHandle } from './process-handle';
 
-const log = new CompilerLogger('compiler-server');
+const log = Log.scoped('server');
 
 /**
  * Compiler Server Class
@@ -30,7 +30,7 @@ export class CompilerServer {
 
   constructor(ctx: ManifestContext, mode: CompilerMode) {
     this.#ctx = ctx;
-    this.#client = new CompilerClient(ctx, new CompilerLogger('client.server'));
+    this.#client = new CompilerClient(ctx, Log.scoped('server.client'));
     this.#url = this.#client.url;
     this.#handle = { server: new ProcessHandle(ctx, 'server'), compiler: new ProcessHandle(ctx, 'compiler') };
 
@@ -163,7 +163,7 @@ export class CompilerServer {
   async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
     for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
       if (ev.type === 'progress') {
-        await log.onProgressEvent(ev.payload);
+        await Log.onProgressEvent(ev.payload);
       }
 
       this.#emitEvent(ev);
@@ -176,7 +176,7 @@ export class CompilerServer {
         }
         log.info(`State changed: ${this.info.state}`);
       } else if (ev.type === 'log') {
-        log.onLogEvent(ev.payload);
+        log.render(ev.payload);
       }
       if (this.isResetEvent(ev)) {
         await this.#disconnectActive();
@@ -198,7 +198,7 @@ export class CompilerServer {
     // If we are in a place where progress exists
     if (this.info.state === 'compile-start') {
       const cancel: CompilerProgressEvent = { complete: true, idx: 0, total: 0, message: 'Complete', operation: 'compile' };
-      await log.onProgressEvent(cancel);
+      await Log.onProgressEvent(cancel);
       this.#emitEvent({ type: 'progress', payload: cancel });
     }
 

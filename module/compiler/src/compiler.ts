@@ -7,9 +7,12 @@ import { ManifestModuleUtil, RuntimeIndex } from '@travetto/manifest';
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
 import { CompilerWatcher } from './watch';
-import { Log } from './log';
 import { CompileEmitEvent, CompileEmitter } from './types';
 import { EventUtil } from './event';
+
+import { IpcLogger } from '../support/log';
+
+const log = new IpcLogger({ level: 'debug' });
 
 /**
  * Compilation support
@@ -22,7 +25,7 @@ export class Compiler {
   static async main(): Promise<void> {
     const [dirty, watch] = process.argv.slice(2);
     const state = await CompilerState.get(RuntimeIndex);
-    Log.debug('Running compiler with dirty file', dirty);
+    log.debug('Running compiler with dirty file', dirty);
     const dirtyFiles = ManifestModuleUtil.getFileType(dirty) === 'ts' ? [dirty] : (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
     await new Compiler(state, dirtyFiles, watch === 'true').run();
   }
@@ -57,19 +60,19 @@ export class Compiler {
     this.#shuttingDown = true;
     switch (mode) {
       case 'manual': {
-        Log.error('Shutting down manually');
+        log.error('Shutting down manually');
         process.exitCode = 2;
         break;
       }
       case 'error': {
         process.exitCode = 1;
         if (err) {
-          Log.error('Shutting down due to failure', err.message);
+          log.error('Shutting down due to failure', err.message);
         }
         break;
       }
       case 'reset': {
-        Log.info('Triggering reset due to change in core files', err?.cause);
+        log.info('Triggering reset due to change in core files', err?.cause);
         EventUtil.sendEvent('state', { state: 'reset' });
         process.exitCode = 0;
         break;
@@ -112,21 +115,21 @@ export class Compiler {
 
     await timers.setTimeout(1);
 
-    Log.debug(`Compiled ${i} files`);
+    log.debug(`Compiled ${i} files`);
   }
 
   /**
    * Run the compiler
    */
   async run(): Promise<void> {
-    Log.debug('Compilation started');
+    log.debug('Compilation started');
 
     EventUtil.sendEvent('state', { state: 'init', extra: { pid: process.pid } });
 
     const emitter = await this.getCompiler();
     let failed = false;
 
-    Log.debug('Compiler loaded');
+    log.debug('Compiler loaded');
 
     EventUtil.sendEvent('state', { state: 'compile-start' });
 
@@ -139,13 +142,13 @@ export class Compiler {
         }
       }
       if (this.#signal.aborted) {
-        Log.debug('Compilation aborted');
+        log.debug('Compilation aborted');
       } else if (failed) {
-        Log.debug('Compilation failed');
+        log.debug('Compilation failed');
         process.exitCode = 1;
         return;
       } else {
-        Log.debug('Compilation succeeded');
+        log.debug('Compilation succeeded');
       }
     } else if (this.#watch) {
       // Prime compiler before complete
@@ -156,7 +159,7 @@ export class Compiler {
     EventUtil.sendEvent('state', { state: 'compile-end' });
 
     if (this.#watch && !this.#signal.aborted) {
-      Log.info('Watch is ready');
+      log.info('Watch is ready');
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
       try {
@@ -164,14 +167,14 @@ export class Compiler {
           if (ev.action !== 'delete') {
             const err = await emitter(ev.entry.inputFile, true);
             if (err) {
-              Log.info('Compilation Error', CompilerUtil.buildTranspileError(ev.entry.inputFile, err));
+              log.info('Compilation Error', CompilerUtil.buildTranspileError(ev.entry.inputFile, err));
             } else {
-              Log.info(`Compiled ${ev.entry.sourceFile} on ${ev.action}`);
+              log.info(`Compiled ${ev.entry.sourceFile} on ${ev.action}`);
             }
           } else {
             if (ev.entry.outputFile) {
               // Remove output
-              Log.info(`Removed ${ev.entry.sourceFile}, ${ev.entry.outputFile}`);
+              log.info(`Removed ${ev.entry.sourceFile}, ${ev.entry.outputFile}`);
               await fs.rm(ev.entry.outputFile, { force: true }); // Ensure output is deleted
             }
           }
@@ -194,7 +197,7 @@ export class Compiler {
       }
     }
 
-    Log.debug('Compiler process shutdown');
+    log.debug('Compiler process shutdown');
 
     this.#shutdown('complete');
   }

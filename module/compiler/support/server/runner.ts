@@ -6,10 +6,10 @@ import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
 
 import type { CompilerEvent, CompilerMode } from '../types';
 import { AsyncQueue } from '../queue';
-import { CompilerLogger } from '../log';
+import { Log } from '../log';
 import { CommonUtil } from '../util';
 
-const log = new CompilerLogger('compiler-exec');
+const log = Log.scoped('compiler-exec');
 const isEvent = (msg: unknown): msg is CompilerEvent => !!msg && typeof msg === 'object' && 'type' in msg;
 
 /**

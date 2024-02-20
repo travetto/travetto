@@ -5,7 +5,7 @@ import { Readable } from 'node:stream';
 import { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerEvent, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types';
-import type { CompilerLogger } from '../log';
+import type { LogShape } from '../log';
 import { ProcessHandle } from './process-handle';
 
 type FetchEventsConfig<T> = {
@@ -14,18 +14,16 @@ type FetchEventsConfig<T> = {
   enforceIteration?: boolean;
 };
 
-type SimpleLogger = Pick<CompilerLogger, 'error' | 'info' | 'debug'>;
-
 /**
  * Compiler Client Operations
  */
 export class CompilerClient {
 
   #url: string;
-  #log: SimpleLogger;
+  #log: LogShape;
   #handle: Record<'compiler' | 'server', ProcessHandle>;
 
-  constructor(ctx: ManifestContext, log: SimpleLogger) {
+  constructor(ctx: ManifestContext, log: LogShape) {
     this.#url = ctx.build.compilerUrl.replace('localhost', '127.0.0.1');
     this.#log = log;
     this.#handle = { compiler: new ProcessHandle(ctx, 'compiler'), server: new ProcessHandle(ctx, 'server') };

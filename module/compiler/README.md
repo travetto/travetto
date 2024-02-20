@@ -38,8 +38,8 @@ In addition to the normal output, the compiler supports an environment variable 
 ```bash
 $ TRV_BUILD=debug trvc build
 
-2029-03-14T04:00:00.618Z info  [compiler-server] Starting server http://127.0.0.1:25539
-2029-03-14T04:00:00.837Z debug [client.main    ] Start Server
+2029-03-14T04:00:00.618Z info  [server         ] Starting server http://127.0.0.1:25539
+2029-03-14T04:00:00.837Z debug [main           ] Start Server
 2029-03-14T04:00:01.510Z debug [event-stream   ] Started event stream
 2029-03-14T04:00:02.450Z debug [precompile     ] Started
 2029-03-14T04:00:02.762Z debug [precompile     ] Skipped @travetto/manifest
@@ -60,14 +60,14 @@ $ TRV_BUILD=debug trvc build
 2029-03-14T04:00:10.799Z debug [manifest       ] Started
 2029-03-14T04:00:11.013Z debug [manifest       ] Wrote manifest @travetto-doc/compiler
 2029-03-14T04:00:11.827Z debug [manifest       ] Completed
-2029-03-14T04:00:11.894Z info  [compiler-server] State changed: compile-end
+2029-03-14T04:00:11.894Z info  [server         ] State changed: compile-end
 2029-03-14T04:00:12.133Z debug [compiler-exec  ] Skipped
 2029-03-14T04:00:13.123Z debug [event-stream   ] Finished event stream
-2029-03-14T04:00:14.014Z info  [compiler-server] Closing down server
-2029-03-14T04:00:14.924Z debug [compiler-server] Server close event
-2029-03-14T04:00:15.690Z info  [compiler-server] Closed down server
-2029-03-14T04:00:15.865Z debug [compiler-server] Finished processing events
-2029-03-14T04:00:16.757Z debug [client.main    ] End Server
+2029-03-14T04:00:14.014Z info  [server         ] Closing down server
+2029-03-14T04:00:14.924Z debug [server         ] Server close event
+2029-03-14T04:00:15.690Z info  [server         ] Closed down server
+2029-03-14T04:00:15.865Z debug [server         ] Finished processing events
+2029-03-14T04:00:16.757Z debug [main           ] End Server
 ```
 
 **Terminal: Sample trv output with default log level**
