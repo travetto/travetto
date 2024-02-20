@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Schema, SchemaRegistry } from '@travetto/schema';
+import { Schema, SchemaRegistry, Validator } from '@travetto/schema';
 import { Controller, Redirect, Post, Get, MethodOrAll, ControllerRegistry } from '@travetto/rest';
 
 import { BaseRestSuite } from './base';
@@ -25,6 +25,11 @@ class SimpleUser {
   active: boolean;
 }
 
+@Validator(user => {
+  if (user && user.age === 300) {
+    return { kind: 'value', message: 'Age cannot be 300', path: 'age' };
+  }
+})
 @Schema()
 class User {
   id: number = -1;
@@ -213,6 +218,16 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
     assert(res3.body.name === user.name);
     assert(res3.body.age === 20);
 
+
+    const res4 = await this.request<Errors>('get', '/test/schema/interface-prefix', {
+      query: { ...user, user2: { ...user, age: '300' } },
+      throwOnError: false
+    });
+
+    assert(res4.status === 400);
+    assert(/Validation errors have occurred/.test(res4.body.message));
+    assert(res4.body.errors[0].path);
+    assert(!res4.body.errors[0].path.startsWith('user2.age'));
   }
 
   @Test()
