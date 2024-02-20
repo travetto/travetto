@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-rest-jwt",
-  "version": "3.4.4",
+  "version": "3.4.5",
   "description": "Rest authentication JWT integration support for the Travetto framework",
   "keywords": [
     "authentication",
@@ -27,11 +27,11 @@
   },
   "dependencies": {
     "@travetto/auth": "^3.4.1",
-    "@travetto/auth-rest": "^3.4.4",
-    "@travetto/config": "^3.4.3",
+    "@travetto/auth-rest": "^3.4.5",
+    "@travetto/config": "^3.4.4",
     "@travetto/di": "^3.4.1",
     "@travetto/jwt": "^3.4.1",
-    "@travetto/rest": "^3.4.4"
+    "@travetto/rest": "^3.4.5"
   },
   "travetto": {
     "displayName": "Rest Auth JWT"
