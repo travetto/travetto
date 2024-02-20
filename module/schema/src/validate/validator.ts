@@ -56,16 +56,7 @@ export class SchemaValidator {
    * @param relative The relative path of object traversal
    */
   static #validateFieldSchema(fieldSchema: FieldConfig, val: unknown, relative: string = ''): ValidationError[] {
-    return this.#validateFieldSchemaRaw(fieldSchema, val, `${relative}${relative ? '.' : ''}${fieldSchema.name}`);
-  }
-
-  /**
-   * Validate a single field config against a passed in value
-   * @param fieldSchema The field schema configuration
-   * @param val The raw value, could be an array or not
-   * @param path The current path of validation traversal
-   */
-  static #validateFieldSchemaRaw(fieldSchema: FieldConfig, val: unknown, path: string = ''): ValidationError[] {
+    const path = `${relative}${relative ? '.' : ''}${fieldSchema.name}`;
     const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
 
     if (!hasValue) {
@@ -242,6 +233,34 @@ export class SchemaValidator {
   }
 
   /**
+   * Validate the class level validations
+   */
+  static async #validateClassLevel<T>(cls: Class<T>, o: T, view?: string): Promise<ValidationError[]> {
+    const schema = SchemaRegistry.get(cls);
+    if (!schema) {
+      return [];
+    }
+
+    const errors: ValidationError[] = [];
+    // Handle class level validators
+    for (const fn of schema.validators) {
+      try {
+        const res = await fn(o, view);
+        if (res) {
+          errors.push(res);
+        }
+      } catch (err: unknown) {
+        if (isValidationError(err)) {
+          errors.push(err);
+        } else {
+          throw err;
+        }
+      }
+    }
+    return errors;
+  }
+
+  /**
    * Validate an object against it's constructor's schema
    * @param cls The class to validate the objects against
    * @param o The object to validate
@@ -256,27 +275,12 @@ export class SchemaValidator {
     cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
 
     const config = SchemaRegistry.getViewSchema(cls, view);
-    const validators = SchemaRegistry.get(cls).validators;
 
     // Validate using standard behaviors
-    const errors = this.#validateSchema(config.schema, o, '');
-
-    // Handle class level validators
-    for (const fn of validators) {
-      try {
-        const res = await fn(o, view);
-        if (res) {
-          errors.push(res);
-        }
-      } catch (err: unknown) {
-        if (isValidationError(err)) {
-          errors.push(err);
-        } else {
-          throw err;
-        }
-      }
-    }
-
+    const errors = [
+      ...this.#validateSchema(config.schema, o, ''),
+      ... await this.#validateClassLevel(cls, o, view)
+    ];
     if (errors.length) {
       throw new ValidationResultError(errors);
     }
@@ -327,7 +331,14 @@ export class SchemaValidator {
   static async validateMethod<T>(cls: Class<T>, method: string, params: unknown[], prefixes: (string | undefined)[] = []): Promise<void> {
     const errors: ValidationError[] = [];
     for (const field of SchemaRegistry.getMethodSchema(cls, method)) {
-      errors.push(...this.#validateFieldSchemaRaw(field, params[field.index!], prefixes[field.index!]));
+      const i = field.index!;
+      errors.push(...[
+        ... this.#validateFieldSchema(field, params[i]),
+        ... await this.#validateClassLevel(field.type, params[i])
+      ].map(x => {
+        x.path = !prefixes[i] ? x.path.replace(`${field.name}.`, '') : x.path.replace(field.name, prefixes[i]!);
+        return x;
+      }));
     }
     if (errors.length) {
       throw new ValidationResultError(errors);
