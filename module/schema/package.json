@@ -1,7 +1,7 @@
 {
   "name": "@travetto/schema",
   "version": "3.4.4",
-  "description": "Data type registry for runtime validation, reflection and binding.",
+  "description": "Data type registry for runtime validation, reflection, and binding.",
   "keywords": [
     "schema",
     "ast-transformations",
