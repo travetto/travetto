@@ -44,7 +44,7 @@ export class ManifestModuleUtil {
   /**
    * Simple file scanning
    */
-  static async scanFolder(folder: string, full = false): Promise<string[]> {
+  static async scanFolder(ctx: ManifestContext, folder: string, full = false): Promise<string[]> {
     const key = `${folder}|${full}`;
     if (key in this.#scanCache) {
       return this.#scanCache[key];
@@ -55,6 +55,12 @@ export class ManifestModuleUtil {
     }
 
     const out: string[] = [];
+
+    const exclude = new Set([
+      path.resolve(ctx.workspace.path, ctx.build.compilerFolder),
+      path.resolve(ctx.workspace.path, ctx.build.outputFolder),
+      path.resolve(ctx.workspace.path, ctx.build.toolFolder),
+    ]);
 
     const stack: [string, number][] = [[folder, 0]];
     while (stack.length) {
@@ -67,6 +73,9 @@ export class ManifestModuleUtil {
 
       // Don't navigate into sub-folders with package.json's
       if (top !== folder && await fs.stat(`${top}/package.json`).catch(() => false)) {
+        continue;
+      }
+      if (exclude.has(top)) {
         continue;
       }
 
@@ -177,7 +186,7 @@ export class ManifestModuleUtil {
 
     const files: ManifestModule['files'] = {};
 
-    for (const file of await this.scanFolder(sourcePath, rest.main)) {
+    for (const file of await this.scanFolder(ctx, sourcePath, rest.main)) {
       // Group by top folder
       const moduleFile = file.replace(`${sourcePath}/`, '');
       const entry = await this.transformFile(moduleFile, file);

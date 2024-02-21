@@ -1,4 +1,4 @@
-import { ObjectUtil, ConsoleListener, ConsoleManager, ConsoleEvent } from '@travetto/base';
+import { ConsoleListener, ConsoleManager, ConsoleEvent } from '@travetto/base';
 import { AutoCreate, DependencyRegistry, Injectable } from '@travetto/di';
 
 import { LogDecorator, LogEvent, Logger } from './types';
@@ -37,18 +37,22 @@ export class LogService implements ConsoleListener, AutoCreate {
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
   onLog(ev: ConsoleEvent): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, prefer-const
-    let [message, context, ...args] = ev.args as [string | undefined, Record<string, unknown>, ...unknown[]];
-    if (!ObjectUtil.isPlainObject(context)) {
-      if (context !== undefined) {
-        args.unshift(context);
-      }
-      context = {};
+    const args = [...ev.args];
+    let context: Record<string, unknown> | undefined;
+    let message: string | undefined;
+    if (typeof args[0] === 'string') {
+      message = args[0];
+      args.shift(); // First arg is now the message
     }
 
-    if (typeof message !== 'string' && message !== undefined) {
-      args.unshift(message);
-      message = undefined;
+    // More flexible on context
+    const last = args[args.length - 1];
+    if (last !== null && last !== undefined && typeof last === 'object') {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      context = Object.fromEntries(
+        Object.entries(last).filter(x => typeof x[1] !== 'function')
+      );
+      args.pop();
     }
 
     // Allow for controlled order of event properties

@@ -48,6 +48,13 @@ export class LineLogFormatterConfig {
   @Ignore()
   timestamp?: 's' | 'ms';
 
+  @Ignore()
+  inspectOptions: {
+    breakLength: number;
+    depth: number;
+    colors: boolean;
+  };
+
   postConstruct(): void {
     this.time ??= (!this.plain ? 'ms' : undefined);
     this.plain ??= !StyleUtil.enabled;
@@ -58,10 +65,11 @@ export class LineLogFormatterConfig {
     if (this.time !== undefined && this.time === 'ms' || this.time === 's') {
       this.timestamp = this.time;
     }
-    Object.assign(util.inspect.defaultOptions, {
+    this.inspectOptions = {
+      colors: this.colorize !== false,
       breakLength: Math.max(util.inspect.defaultOptions.breakLength ?? 0, 100),
-      depth: Math.max(util.inspect.defaultOptions.depth ?? 0, 4)
-    });
+      depth: Math.max(util.inspect.defaultOptions.depth ?? 0, 5)
+    };
   }
 }
 
@@ -79,8 +87,8 @@ export class LineLogFormatter implements LogFormatter {
 
   pretty(ev: LogEvent, o: unknown): string {
     return util.inspect(o, {
+      ...this.opts.inspectOptions,
       showHidden: ev.level === 'debug',
-      colors: this.opts.colorize !== false,
     });
   }
 
@@ -125,12 +133,12 @@ export class LineLogFormatter implements LogFormatter {
       out.push(ev.message);
     }
 
-    if (ev.context && Object.keys(ev.context).length) {
-      out.push(this.pretty(ev, ev.context));
-    }
-
     if (ev.args && ev.args.length) {
       out.push(...ev.args.map(a => this.pretty(ev, a)));
+    }
+
+    if (ev.context && Object.keys(ev.context).length) {
+      out.push(this.pretty(ev, ev.context));
     }
 
     return out.join(' ');

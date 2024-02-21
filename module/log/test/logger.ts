@@ -94,4 +94,25 @@ class LoggerTest {
     assert(logger.values[0].message === 'Hello');
     assert.deepStrictEqual(logger.values[0].context?.secret, true);
   }
+
+  @Test('Verify context handling')
+  async verifyContext() {
+    const svc = await DependencyRegistry.getInstance(LogService);
+    const logger = await DependencyRegistry.getInstance(CustomLogger);
+
+    ConsoleManager.set(svc);
+    console.log('Hello', 'Roger', { secret: true });
+    console.error(svc);
+    console.error(logger);
+    ConsoleManager.clear();
+
+    assert(logger.values.length === 3);
+    assert(logger.values[0].message === 'Hello');
+    assert(logger.values[0].args[0] === 'Roger');
+    assert(logger.values[0].context?.secret === true);
+    assert.deepStrictEqual(Object.keys(logger.values[1].context ?? {}), ['secret']);
+    assert(logger.values[1].message === undefined);
+    assert(Object.keys(logger.values[2].context ?? {}).includes('values'));
+    assert.deepStrictEqual(logger.values[1].context?.secret, false);
+  }
 }

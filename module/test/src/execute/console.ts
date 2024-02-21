@@ -18,7 +18,7 @@ export class ConsoleCapture {
   static onLog({ level, args }: ConsoleEvent): void {
     (this.out[level] = this.out[level] ?? []).push(
       args
-        .map((x => typeof x === 'string' ? x : util.inspect(x, false, 4)))
+        .map((x => typeof x === 'string' ? x : util.inspect(x, false, 5)))
         .join(' ')
     );
   }
