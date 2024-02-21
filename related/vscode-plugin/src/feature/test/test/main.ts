@@ -40,7 +40,8 @@ class TestRunnerFeature extends BaseFeature {
       env: {
         ...process.env,
         ...Env.TRV_MANIFEST.export(undefined),
-        ...Env.TRV_QUIET.export(true)
+        ...Env.TRV_QUIET.export(true),
+        ...Env.TRV_DYNAMIC.export(true)
       },
       stdio: ['pipe', 'pipe', 2, 'ipc']
     };

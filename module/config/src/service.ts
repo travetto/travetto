@@ -140,7 +140,7 @@ export class ConfigurationService {
    * Log current configuration state
    */
   async initBanner(): Promise<void> {
-    const og = util.inspect.defaultOptions.depth;
+    const ogDepth = util.inspect.defaultOptions.depth;
     util.inspect.defaultOptions.depth = 100;
 
     console.log('Initialized', {
@@ -158,7 +158,6 @@ export class ConfigurationService {
       },
       config: await this.exportActive()
     });
-
-    util.inspect.defaultOptions.depth = og;
+    util.inspect.defaultOptions.depth = ogDepth;
   }
 }
