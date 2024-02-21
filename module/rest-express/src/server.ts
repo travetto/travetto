@@ -3,7 +3,7 @@ import express from 'express';
 import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor } from '@travetto/rest';
+import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
 import { NodeEntityⲐ, TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { ServerHandle } from '@travetto/rest/src/types';
@@ -111,6 +111,6 @@ export class ExpressRestServer implements RestServer<express.Application> {
       raw = https.createServer(keys!, this.raw);
     }
     this.listening = true;
-    return raw.listen(this.config.port, this.config.bindAddress!);
+    return await RestNetUtil.listen(raw.listen(this.config.port, this.config.bindAddress!));
   }
 }

@@ -1,7 +1,9 @@
+import { Env } from '@travetto/base';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape, CliUtil } from '@travetto/cli';
 
 import { ServerHandle } from '../src/types';
+import { RestNetUtil } from '../src/util/net';
 
 /**
  * Run a rest server as an application
@@ -18,6 +20,9 @@ export class RunRestCommand implements CliCommandShape {
   /** Port to run on */
   port?: number;
 
+  /** Kill conflicting port owner */
+  killConflict?: boolean;
+
   preMain(): void {
     if (this.port) {
       process.env.REST_PORT = `${this.port}`;
@@ -28,8 +33,15 @@ export class RunRestCommand implements CliCommandShape {
     if (await CliUtil.debugIfIpc(this) || await CliUtil.runWithRestart(this)) {
       return;
     }
-
     const { RestApplication } = await import('../src/application/rest.js');
-    return DependencyRegistry.runInstance(RestApplication);
+    try {
+      return await DependencyRegistry.runInstance(RestApplication);
+    } catch (err) {
+      if (RestNetUtil.isInuseError(err) && !Env.production && this.killConflict) {
+        await RestNetUtil.freePort(err.port);
+        return await DependencyRegistry.runInstance(RestApplication);
+      }
+      throw err;
+    }
   }
 }

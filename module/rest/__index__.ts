@@ -27,4 +27,5 @@ export * from './src/util/param';
 export * from './src/util/route';
 export * from './src/util/mime';
 export * from './src/util/common';
+export * from './src/util/net';
 export * from './src/util/route-check';

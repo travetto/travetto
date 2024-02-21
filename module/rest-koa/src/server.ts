@@ -4,7 +4,7 @@ import kCompress from 'koa-compress';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { RestConfig, RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';
+import { RestConfig, RestServer, RouteConfig, RestCookieConfig, RestNetUtil } from '@travetto/rest';
 
 import { TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { ServerHandle } from '@travetto/rest/src/types';
@@ -94,6 +94,6 @@ export class KoaRestServer implements RestServer<koa> {
         .listen(this.config.port, this.config.bindAddress);
     }
     this.listening = true;
-    return raw.listen(this.config.port, this.config.bindAddress);
+    return await RestNetUtil.listen(raw.listen(this.config.port, this.config.bindAddress!));
   }
 }
