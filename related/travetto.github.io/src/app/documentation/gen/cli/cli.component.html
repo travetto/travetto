@@ -542,10 +542,12 @@ If the goal is to run a more complex application, which may include depending on
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/support/cli.run_rest.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand<span class="token punctuation">,</span> CliCommandShape<span class="token punctuation">,</span> CliUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/cli'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ServerHandle <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/types'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestNetUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/util/net'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * Run a rest server as an application
@@ -562,6 +564,9 @@ If the goal is to run a more complex application, which may include depending on
   <span class="token comment">/** Port to run on */</span>
   port<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
 
+  <span class="token comment">/** Kill conflicting port owner */</span>
+  killConflict<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+
   <span class="token function">preMain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">REST_PORT</span> <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
@@ -572,9 +577,16 @@ If the goal is to run a more complex application, which may include depending on
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">await</span> CliUtil<span class="token punctuation">.</span><span class="token function">debugIfIpc</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token keyword">await</span> CliUtil<span class="token punctuation">.</span><span class="token function">runWithRestart</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">return</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
-
     <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> RestApplication <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'../src/application/rest.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">runInstance</span><span class="token punctuation">(</span>RestApplication<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">return</span> <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">runInstance</span><span class="token punctuation">(</span>RestApplication<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>RestNetUtil<span class="token punctuation">.</span><span class="token function">isInuseError</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>Env<span class="token punctuation">.</span>production <span class="token operator">&amp;&amp;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>killConflict<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">await</span> RestNetUtil<span class="token punctuation">.</span><span class="token function">freePort</span><span class="token punctuation">(</span>err<span class="token punctuation">.</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">runInstance</span><span class="token punctuation">(</span>RestApplication<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span>
+      <span class="token keyword">throw</span> err<span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
