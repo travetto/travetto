@@ -236,6 +236,18 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     return `@see file://./${relative(output, meta.source)}#${line}`;
   }
 
+  renderControllerDoc(controller: ControllerConfig): string[] {
+    const lines = [
+      controller.description,
+      this.buildSee(controller.class),
+    ].filter(x => !!x);
+    return [
+      '/**\n',
+      ...lines.map(x => `  * ${x}\n`),
+      ' */\n'
+    ];
+  }
+
   renderEndpointDoc(endpoint: EndpointConfig, params: ParamConfig[]): string[] {
     const paramsDocs = params
       .filter(x => x.description)

@@ -100,6 +100,7 @@ export class AngularClientGenerator extends ClientGenerator {
 
     const contents = [
       `\n`,
+      ...this.renderControllerDoc(controller),
       `@`, injectable, `({ providedIn: 'root' })\n`,
       `export class ${service}Service extends `, base, ` {\n\n`,
       `  routePath = '${controller.basePath}';\n`,

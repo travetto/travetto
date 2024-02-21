@@ -60,10 +60,7 @@ export class FetchClientGenerator extends ClientGenerator<{ node?: boolean }> {
     const baseFetchService: Imp = { name: BaseFetchService.name, file: SVC, classId: '_' };
 
     const contents = [
-      '/**\n',
-      ` * ${controller.description ?? ''}\n`,
-      ` * ${this.buildSee(controller.class)}\n`,
-      ' */\n',
+      ...this.renderControllerDoc(controller),
       `export class ${service}Api extends `, baseFetchService, ` {\n\n`,
       ...results.flatMap(f => f.config),
       `  routePath = '${controller.basePath}';\n\n`,
