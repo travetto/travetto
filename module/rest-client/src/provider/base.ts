@@ -236,37 +236,36 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     return `@see file://./${relative(output, meta.source)}#${line}`;
   }
 
-  renderControllerDoc(controller: ControllerConfig): string[] {
-    const parts = [
-      controller.description,
-      this.buildSee(controller.class),
-    ].filter(x => !!x?.trim());
+  renderDoc(parts: (string | undefined)[], pad = ''): string[] {
+    parts = parts.filter(x => !!x);
+
     return parts.length === 0 ? [] : [
       '/**',
-      ...parts.map(x => `  * ${x}`.trimEnd()),
+      ...parts.map(x => ` * ${x}`.trimEnd()),
       ' */'
-    ].map(x => `${x}\n`);
+    ].map(x => `${pad}${x}\n`);
+  }
+
+  renderControllerDoc(controller: ControllerConfig): string[] {
+    return this.renderDoc([
+      controller.description,
+      this.buildSee(controller.class),
+    ]);
   }
 
   renderEndpointDoc(endpoint: EndpointConfig, params: ParamConfig[]): string[] {
     const paramsDocs = params
       .filter(x => x.description)
       .map(x => `@param ${x.name} ${x.description}`);
-    const parts = [
+
+    return this.renderDoc([
       endpoint.title,
       ((endpoint.title && endpoint.description) ? ' ' : ''),
       endpoint.description,
       (((endpoint.title || endpoint.description) && paramsDocs.length) ? ' ' : ''),
       ...paramsDocs,
       this.buildSee(endpoint.class, endpoint.handlerName)
-    ].filter(x => !!x?.trim());
-
-    return parts.length === 0 ? [] :
-      [
-        '  /**',
-        ...parts.map(x => `   * ${x}`.trimEnd()),
-        `   */`
-      ].map(x => `${x}\n`);
+    ], '  ');
   }
 
   renderEndpoint(endpoint: EndpointConfig, controller: ControllerConfig): { imports: Imp[], method: (string | Imp)[], config: (string | Imp)[] } {
