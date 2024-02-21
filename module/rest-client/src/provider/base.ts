@@ -237,15 +237,15 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
   }
 
   renderControllerDoc(controller: ControllerConfig): string[] {
-    const lines = [
+    const parts = [
       controller.description,
       this.buildSee(controller.class),
-    ].filter(x => !!x);
-    return [
-      '/**\n',
-      ...lines.map(x => `  * ${x}\n`),
-      ' */\n'
-    ];
+    ].filter(x => !!x?.trim());
+    return parts.length === 0 ? [] : [
+      '/**',
+      ...parts.map(x => `  * ${x}`.trimEnd()),
+      ' */'
+    ].map(x => `${x}\n`);
   }
 
   renderEndpointDoc(endpoint: EndpointConfig, params: ParamConfig[]): string[] {
@@ -259,7 +259,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       (((endpoint.title || endpoint.description) && paramsDocs.length) ? ' ' : ''),
       ...paramsDocs,
       this.buildSee(endpoint.class, endpoint.handlerName)
-    ].filter(x => !!x);
+    ].filter(x => !!x?.trim());
 
     return parts.length === 0 ? [] :
       [
