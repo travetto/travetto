@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-client",
-  "version": "4.0.0-rc.9",
+  "version": "4.0.0-rc.10",
   "description": "RESTful support for generating clients for controller endpoints",
   "keywords": [
     "rest",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@travetto/config": "^4.0.0-rc.8",
-    "@travetto/rest": "^4.0.0-rc.9",
+    "@travetto/rest": "^4.0.0-rc.10",
     "@travetto/schema": "^4.0.0-rc.8"
   },
   "travetto": {
