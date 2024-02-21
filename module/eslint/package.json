@@ -1,6 +1,6 @@
 {
   "name": "@travetto/eslint",
-  "version": "4.0.0-rc.6",
+  "version": "4.0.0-rc.7",
   "description": "ES Linting Rules",
   "keywords": [
     "eslint",
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@eslint/js": "^8.56.0",
-    "@travetto/manifest": "^4.0.0-rc.6",
+    "@travetto/manifest": "^4.0.0-rc.7",
     "@types/eslint": "^8.56.2",
     "@types/eslint__js": "^8.42.3",
     "@typescript-eslint/eslint-plugin": "^6.20.0",
@@ -34,7 +34,7 @@
     "eslint-plugin-unused-imports": "^3.0.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^4.0.0-rc.7"
+    "@travetto/cli": "^4.0.0-rc.8"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
