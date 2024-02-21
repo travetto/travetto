@@ -1,6 +1,6 @@
 {
   "name": "@travetto/openapi",
-  "version": "4.0.0-rc.7",
+  "version": "4.0.0-rc.8",
   "description": "OpenAPI integration support for the Travetto framework",
   "keywords": [
     "rest",
@@ -26,15 +26,15 @@
     "directory": "module/openapi"
   },
   "dependencies": {
-    "@travetto/config": "^4.0.0-rc.6",
-    "@travetto/rest": "^4.0.0-rc.7",
-    "@travetto/schema": "^4.0.0-rc.6",
-    "@travetto/yaml": "^4.0.0-rc.6",
+    "@travetto/config": "^4.0.0-rc.7",
+    "@travetto/rest": "^4.0.0-rc.8",
+    "@travetto/schema": "^4.0.0-rc.7",
+    "@travetto/yaml": "^4.0.0-rc.7",
     "openapi3-ts": "^4.2.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^4.0.0-rc.6",
-    "@travetto/command": "^4.0.0-rc.6"
+    "@travetto/cli": "^4.0.0-rc.7",
+    "@travetto/command": "^4.0.0-rc.7"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
