@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-koa-lambda",
-  "version": "4.0.0-rc.10",
+  "version": "4.0.0",
   "description": "Koa provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -25,9 +25,9 @@
     "directory": "module/rest-koa-lambda"
   },
   "dependencies": {
-    "@travetto/rest": "^4.0.0-rc.10",
-    "@travetto/rest-aws-lambda": "^4.0.0-rc.10",
-    "@travetto/rest-koa": "^4.0.0-rc.10",
+    "@travetto/rest": "^4.0.0",
+    "@travetto/rest-aws-lambda": "^4.0.0",
+    "@travetto/rest-koa": "^4.0.0",
     "@vendia/serverless-express": "^4.12.6"
   },
   "travetto": {
