@@ -38,25 +38,14 @@ export class LogService implements ConsoleListener, AutoCreate {
    */
   onLog(ev: ConsoleEvent): void {
     const args = [...ev.args];
-    let context: Record<string, unknown> | undefined;
     let message: string | undefined;
     if (typeof args[0] === 'string') {
       message = args[0];
       args.shift(); // First arg is now the message
     }
 
-    // More flexible on context
-    const last = args[args.length - 1];
-    if (last !== null && last !== undefined && typeof last === 'object') {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      context = Object.fromEntries(
-        Object.entries(last).filter(x => typeof x[1] !== 'function')
-      );
-      args.pop();
-    }
-
     // Allow for controlled order of event properties
-    let outEvent: LogEvent = { ...ev, message, context, args };
+    let outEvent: LogEvent = { ...ev, message, args };
 
     // Decorate event as needed
     for (const d of this.#decorators) {

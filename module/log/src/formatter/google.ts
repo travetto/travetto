@@ -1,8 +1,7 @@
-import util from 'node:util';
-
 import { Injectable } from '@travetto/di';
 
 import { LogFormatter, LogEvent } from '../types';
+import { LogFormatUtil } from './util';
 
 /**
  * Google Logging Formatter
@@ -11,33 +10,30 @@ import { LogFormatter, LogEvent } from '../types';
  */
 @Injectable()
 export class GoogleLogFormatter implements LogFormatter {
-  #inspectOptions = { colors: false, showHidden: false, depth: 5, breakLength: 200 };
+  format(ev: LogEvent): string {
+    const context = LogFormatUtil.getContext(ev);
 
-  format({
-    source: file, line, scope, level, message, timestamp, module, args,
-    context: { method, path, statusCode, ...context } = {},
-  }: LogEvent): string {
-    const final: unknown[] = [...args];
-    if (message) {
-      args.unshift(message);
+    const extra: Record<string, unknown> = {};
+    // Http request specific
+    if (context && ('method' in context && 'path' in context && 'statusCode' in context)) {
+      extra.httpRequest = {
+        requestMethod: context.method,
+        requestUrl: context.path,
+        status: context.statusCode
+      };
+      delete context.method;
+      delete context.path;
+      delete context.statusCode;
     }
-    if (Object.keys(context).length) {
-      args.push(context);
-    }
+
     return JSON.stringify({
       context,
-      'logging.googleapis.com/sourceLocation': { file, line },
-      'logging.googleapis.com/labels': { module, scope },
-      severity: level,
-      message: util.formatWithOptions(this.#inspectOptions, final),
-      timestamp,
-      ...(method ? {
-        httpRequest: {
-          requestMethod: method,
-          requestUrl: path,
-          status: statusCode
-        }
-      } : {})
+      'logging.googleapis.com/sourceLocation': { file: ev.source, line: ev.line },
+      'logging.googleapis.com/labels': { module: ev.module, scope: ev.scope },
+      severity: ev.level,
+      message: LogFormatUtil.getLogMessage(ev),
+      timestamp: ev.timestamp,
+      ...extra,
     });
   }
 }

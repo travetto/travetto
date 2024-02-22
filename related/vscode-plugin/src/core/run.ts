@@ -65,7 +65,7 @@ export class RunUtil {
         'internal/**',
         '**/@travetto/base/src/console.*',
         '**/@travetto/registry/src/proxy.*',
-        '**/@travetto/log/**',
+        '**/@travetto/log/src/**',
         '**/@travetto/context/src/service.*',
         '**/@travetto/rest/src/util/route.*',
         '**/tslib/**'

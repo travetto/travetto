@@ -8,6 +8,7 @@ import { RootRegistry } from '@travetto/registry';
 import { LogService } from '../src/service';
 import { LogDecorator, LogEvent, Logger } from '../src/types';
 import { JsonLogFormatter } from '../src/formatter/json';
+import { LogFormatUtil } from '../src/formatter/util';
 
 @Injectable()
 class CustomLogger implements Logger {
@@ -26,7 +27,7 @@ class CustomLogger implements Logger {
 @Injectable()
 class Decorator implements LogDecorator {
   decorate(ev: LogEvent): LogEvent {
-    (ev.context ??= {}).secret ??= false;
+    ev.args.push({ extra: { secret: true } });
     return ev;
   }
 }
@@ -56,7 +57,8 @@ class LoggerTest {
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
     assert(logger.values[0].message === 'Hello');
-    assert.deepStrictEqual(logger.values[0].context?.args, [1, 2, 3]);
+    const context = LogFormatUtil.getContext(logger.values[0]);
+    assert.deepStrictEqual(context?.args, [1, 2, 3]);
   }
 
   @Test('Formatter')
@@ -77,8 +79,9 @@ class LoggerTest {
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
     assert(logger.values[0].message === 'Hello');
-    assert.deepStrictEqual(logger.values[0].context?.secret, false);
-    assert.deepStrictEqual(logger.values[0].context?.otherSecret, true);
+    const context = LogFormatUtil.getContext(logger.values[0]);
+    assert.deepStrictEqual(context?.extra, { secret: true });
+    assert.deepStrictEqual(context?.otherSecret, true);
   }
 
   @Test('Decorator Override')
@@ -92,7 +95,8 @@ class LoggerTest {
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
     assert(logger.values[0].message === 'Hello');
-    assert.deepStrictEqual(logger.values[0].context?.secret, true);
+    const context = LogFormatUtil.getContext(logger.values[0]);
+    assert.deepStrictEqual(context?.secret, true);
   }
 
   @Test('Verify context handling')
@@ -109,10 +113,13 @@ class LoggerTest {
     assert(logger.values.length === 3);
     assert(logger.values[0].message === 'Hello');
     assert(logger.values[0].args[0] === 'Roger');
-    assert(logger.values[0].context?.secret === true);
-    assert.deepStrictEqual(Object.keys(logger.values[1].context ?? {}), ['secret']);
+    const context = LogFormatUtil.getContext(logger.values[0]);
+    assert(context?.secret === true);
+    const context2 = LogFormatUtil.getContext(logger.values[1]);
+    assert.deepStrictEqual(Object.keys(context2 ?? {}), ['extra',]);
     assert(logger.values[1].message === undefined);
-    assert(Object.keys(logger.values[2].context ?? {}).includes('values'));
-    assert.deepStrictEqual(logger.values[1].context?.secret, false);
+    const context3 = LogFormatUtil.getContext(logger.values[2]);
+    assert.deepStrictEqual(Object.keys(context3 ?? {}), ['extra']);
+    assert.deepStrictEqual(context3?.extra, { secret: true });
   }
 }
