@@ -1,5 +1,8 @@
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import type { Server } from 'node:http';
+
+import { ExecUtil } from '@travetto/base';
+
 import { ServerHandle } from '../types';
 
 /** Net utilities */
@@ -24,6 +27,15 @@ export class RestNetUtil {
 
   /** Free port if in use */
   static async freePort(port: number): Promise<void> {
-    spawnSync('/bin/sh', ['-c', `lsof -t -i tcp:${port} | xargs kill`]);
+    const proc = spawn('lsof', ['-t', '-i', `tcp:${port}`]);
+    const result = await ExecUtil.getResult(proc, { catch: true });
+    if (!result.valid) {
+      console.warn('Unable to kill process', result.stderr);
+      return;
+    }
+    const [pid] = result.stdout.trim().split(/\n/g);
+    if (pid) {
+      process.kill(+pid);
+    }
   }
 }
