@@ -2,6 +2,7 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { LogEvent, LogFormatter } from '../types';
+import { LogFormatUtil } from './util';
 
 @Config('log')
 export class JSONLogFormatterConfig {
@@ -20,6 +21,13 @@ export class JsonLogFormatter implements LogFormatter {
   }
 
   format(ev: LogEvent): string {
-    return JSON.stringify(ev, null, this.opts.jsonIndent);
+    const { message: _m, args: _a, ...rest } = ev;
+    const message = LogFormatUtil.getLogMessage(ev);
+    const context = LogFormatUtil.getContext(ev);
+    return JSON.stringify({
+      ...rest,
+      ...(message ? { message } : {}),
+      ...(context ? { context } : {}),
+    }, null, this.opts.jsonIndent);
   }
 }

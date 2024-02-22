@@ -10,10 +10,6 @@ export interface LogEvent extends ConsoleEvent {
    * Log message
    */
   message?: string;
-  /**
-   * Log Message context
-   */
-  context?: Record<string, unknown>;
 }
 
 /**

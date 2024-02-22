@@ -7,6 +7,7 @@ import { Ignore } from '@travetto/schema';
 import { StyleUtil } from '@travetto/terminal';
 
 import { LogEvent, LogFormatter } from '../types';
+import { LogFormatUtil } from './util';
 
 /**
  * Level coloring
@@ -85,13 +86,6 @@ export class LineLogFormatter implements LogFormatter {
     this.opts = opts;
   }
 
-  pretty(ev: LogEvent, o: unknown): string {
-    return util.inspect(o, {
-      ...this.opts.inspectOptions,
-      showHidden: ev.level === 'debug',
-    });
-  }
-
   /**
    * Format an event into a single line
    */
@@ -129,17 +123,7 @@ export class LineLogFormatter implements LogFormatter {
       out.push(`[${loc}]`);
     }
 
-    if (ev.message) {
-      out.push(ev.message);
-    }
-
-    if (ev.args && ev.args.length) {
-      out.push(...ev.args.map(a => this.pretty(ev, a)));
-    }
-
-    if (ev.context && Object.keys(ev.context).length) {
-      out.push(this.pretty(ev, ev.context));
-    }
+    out.push(LogFormatUtil.getLogMessage(ev, this.opts.inspectOptions));
 
     return out.join(' ');
   }
