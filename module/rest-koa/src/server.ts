@@ -91,9 +91,8 @@ export class KoaRestServer implements RestServer<koa> {
     if (this.config.ssl?.active) {
       raw = https
         .createServer((await this.config.ssl?.getKeys())!, this.raw.callback())
-        .listen(this.config.port, this.config.bindAddress);
     }
     this.listening = true;
-    return await RestNetUtil.listen(raw.listen(this.config.port, this.config.bindAddress!));
+    return await RestNetUtil.listen(raw, this.config.port, this.config.bindAddress!);
   }
 }

@@ -111,6 +111,6 @@ export class ExpressRestServer implements RestServer<express.Application> {
       raw = https.createServer(keys!, this.raw);
     }
     this.listening = true;
-    return await RestNetUtil.listen(raw.listen(this.config.port, this.config.bindAddress!));
+    return await RestNetUtil.listen(raw, this.config.port, this.config.bindAddress);
   }
 }
