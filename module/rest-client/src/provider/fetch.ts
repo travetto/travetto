@@ -43,7 +43,6 @@ export class FetchClientGenerator extends ClientGenerator<{ node?: boolean }> {
           main: `${this.subFolder ?? '.'}/index.ts`,
           dependencies: this.config.node ? {
             '@types/node': pkg.dependencies['@types/node']
-              .replace('^20.11.8', '20.11.7'),
           } : {}
         } satisfies Package, null, 2)]
       });
