@@ -13,8 +13,8 @@ import { ValidationResultError } from '../src/validate/error';
 
 import { Address2 } from './models/address';
 
-function findError(errors: ValidationError[], path: string, message: string) {
-  return errors.find(x => x.path === path && x.message.includes(message));
+function findError(errors: ValidationError[] | undefined, path: string, message: string) {
+  return errors?.find(x => x.path === path && x.message.includes(message));
 }
 
 interface Address {
@@ -58,7 +58,7 @@ class ViewsTest {
     } catch (err) {
       assert(err instanceof ValidationResultError);
       console.warn('Validation Failed', { error: err });
-      assert(findError(err.errors, 'address', 'is required'));
+      assert(findError(err.details.errors, 'address', 'is required'));
     }
 
     r = User.from({ address: {} });
@@ -69,7 +69,7 @@ class ViewsTest {
     } catch (err) {
       assert(err instanceof ValidationResultError);
       console.warn('Validation Failed', { error: err });
-      assert(findError(err.errors, 'address.street1', 'is required'));
+      assert(findError(err.details.errors, 'address.street1', 'is required'));
     }
 
     // @ts-expect-error
@@ -80,7 +80,7 @@ class ViewsTest {
     } catch (err) {
       assert(err instanceof ValidationResultError);
       console.warn('Validation Failed', { error: err });
-      assert(findError(err.errors, 'address.mode', 'is only allowed to be'));
+      assert(findError(err.details.errors, 'address.mode', 'is only allowed to be'));
     }
 
     // @ts-expect-error
@@ -91,7 +91,7 @@ class ViewsTest {
     } catch (err) {
       assert(err instanceof ValidationResultError);
       console.warn('Validation Failed', { error: err });
-      assert(findError(err.errors, 'address2.mode', 'is only allowed to be'));
+      assert(findError(err.details.errors, 'address2.mode', 'is only allowed to be'));
     }
 
     // @ts-expect-error
@@ -102,7 +102,7 @@ class ViewsTest {
     } catch (err) {
       assert(err instanceof ValidationResultError);
       console.warn('Validation Failed', { error: err });
-      assert(findError(err.errors, 'address3.poBox', 'number'));
+      assert(findError(err.details.errors, 'address3.poBox', 'number'));
     }
   }
 }

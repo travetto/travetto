@@ -6,8 +6,8 @@ import { ValidationError } from './types';
  *
  * Hold all the validation errors for a given schema validation
  */
-export class ValidationResultError extends AppError {
-  constructor(public errors: ValidationError[]) {
+export class ValidationResultError extends AppError<{ errors: ValidationError[] }> {
+  constructor(errors: ValidationError[]) {
     super('Validation errors have occurred', 'data', { errors });
   }
 }

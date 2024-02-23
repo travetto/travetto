@@ -311,9 +311,9 @@ export class SchemaValidator {
       await this.validate(cls, o, view);
     } catch (err) {
       if (err instanceof ValidationResultError) { // Don't check required fields
-        const errs = err.errors.filter(x => x.kind !== 'required');
+        const errs = err.details!.errors.filter(x => x.kind !== 'required');
         if (errs.length) {
-          err.errors = errs;
+          err.details!.errors = errs;
           throw err;
         }
       }

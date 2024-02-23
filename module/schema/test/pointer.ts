@@ -40,7 +40,7 @@ class PointerSuite {
       assert(false);
     } catch (err) {
       assert(err instanceof ValidationResultError);
-      assert(err.errors?.[0].kind === 'type');
+      assert(err.details.errors[0].kind === 'type');
     }
 
     try {
@@ -48,7 +48,7 @@ class PointerSuite {
       assert(false);
     } catch (err) {
       assert(err instanceof ValidationResultError);
-      assert(err.errors?.[0].kind === 'maxlength');
+      assert(err.details.errors[0].kind === 'maxlength');
     }
 
     try {
@@ -56,7 +56,7 @@ class PointerSuite {
       assert(false);
     } catch (err) {
       assert(err instanceof ValidationResultError);
-      assert(err.errors?.[0].kind === 'required');
+      assert(err.details.errors[0].kind === 'required');
     }
 
     await assert.doesNotReject(async () => {

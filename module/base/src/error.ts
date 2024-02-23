@@ -10,7 +10,7 @@ export type ErrorCategory =
 /**
  * Framework error class, with the aim of being extensible
  */
-export class AppError extends Error {
+export class AppError<T = unknown> extends Error {
 
   /** Is the object in the shape of an error */
   static isErrorLike(val: unknown): val is AppError {
@@ -28,6 +28,7 @@ export class AppError extends Error {
 
   type: string;
   at = new Date();
+  details: T;
 
   /**
    * Build an app error
@@ -40,13 +41,14 @@ export class AppError extends Error {
   constructor(
     message: string,
     public category: ErrorCategory = 'general',
-    public details?: Record<string, unknown>,
+    details?: T,
     stack?: string
 
   ) {
     super(message);
     this.type = this.constructor.name;
     this.stack = stack || this.stack; // eslint-disable-line no-self-assign
+    this.details = details!;
   }
 
   /**

@@ -102,7 +102,7 @@ class $ParamExtractor {
       await SchemaValidator.validateMethod(cls, method, params, route.params.map(x => x.prefix));
     } catch (err) {
       if (err instanceof ValidationResultError) {
-        for (const el of err.errors) {
+        for (const el of err.details.errors) {
           if (el.kind === 'required') {
             const config = route.params.find(x => x.name === el.path);
             if (config) {
