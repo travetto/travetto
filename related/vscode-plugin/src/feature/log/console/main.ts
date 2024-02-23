@@ -1,5 +1,6 @@
 import vscode from 'vscode';
 import fs from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
 import { path } from '@travetto/manifest';
 
@@ -13,7 +14,9 @@ interface Link extends vscode.TerminalLink {
   cls?: string;
 }
 
+const MODULE_REGEX = /(@[a-z0-9\-]+\/[a-z0-9\-]+)[^\/]/gi;
 const FILE_CLASS_REGEX = /([a-z_\-\/@]+)[:\/]((?:src|support|bin|test|doc)\/[a-z_0-9\/.\-]+)(:\d+|￮[$_a-z0-9]+)?/gi;
+const SUFFIXES = ['ts', 'js', 'tsx', 'jsx', 'd.ts'];
 
 /**
  * Logging workspace
@@ -27,13 +30,22 @@ export class LogFeature extends BaseFeature {
     if (!this.#importToFile.has(imp)) {
       let file: undefined | string;
       if (imp.startsWith(Workspace.moduleName)) {
-        file = path.resolve(Workspace.path, imp.replace(Workspace.moduleName, '.'));
+        const resolved = path.resolve(Workspace.path, imp.replace(Workspace.moduleName, '.'));
+        if (existsSync(resolved)) {
+          file = resolved;
+        }
       } else {
-        try {
-          file = Workspace.resolveImport(imp);
-        } catch {
+        imp = imp.replace(/([.]d)?[.][tj]sx?$/, '');
+        const search = [imp];
+        if (!imp.includes('.')) {
+          search.push(...SUFFIXES.map(x => `${imp}.${x}`))
+        } else {
+          search.push(imp);
+        }
+        for (const sub of search) {
           try {
-            file = Workspace.resolveImport(imp.replace(/[.]js$/, '.ts').replace(/[.]jsx$/, '.tsx'));
+            file = Workspace.resolveImport(sub);
+            break;
           } catch { }
         }
       }
@@ -54,7 +66,12 @@ export class LogFeature extends BaseFeature {
       }
     }
 
-    const url = vscode.Uri.parse(`file://${file}#${line}`);
+    let suffix = '';
+    if (line) {
+      suffix = `#${line}`;
+    }
+
+    const url = vscode.Uri.parse(`file://${file}${suffix}`);
     await vscode.commands.executeCommand('vscode.open', url);
   }
 
@@ -71,13 +88,20 @@ export class LogFeature extends BaseFeature {
         const suffixType = suffix.includes('￮') ? 'class' : suffix.includes(':') ? 'file-numbered' : 'file';
         const type = suffixType === 'class' ? 'Class' : 'File';
         out.push({
-          startIndex: context.line.indexOf(full),
+          startIndex: match.index!,
           length: full.length,
           tooltip: `Travetto ${type}: ${mod}/${pth}${suffix}`,
           file: sourceFile,
           line: suffixType === 'file-numbered' ? suffix.split(':')[1] : undefined,
           cls: suffixType === 'class' ? suffix.split('￮')[1] : undefined
         });
+      }
+    }
+    for (const match of context.line.matchAll(MODULE_REGEX)) {
+      const [, mod] = match;
+      const file = await this.getSourceFromImport(`${mod}/package.json`);
+      if (file) {
+        out.push({ startIndex: match.index!, length: mod.length, file });
       }
     }
     return out;

@@ -12,6 +12,8 @@ import { TemplateLiteralPart } from '../types/shared';
 import { Type, AnyType, UnionType, TransformResolver, TemplateType } from './types';
 import { CoerceUtil } from './coerce';
 
+const TYPINGS_RE = /[.]d[.][cm]?ts$/;
+
 /**
  * List of global types that can be parameterized
  */
@@ -60,7 +62,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     try {
       const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
       const sourceFile = source.fileName;
-      if (sourceFile?.endsWith('.d.ts') && !resolver.isKnownFile(sourceFile)) {
+      if (sourceFile && TYPINGS_RE.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
         return { category: 'foreign', type };
       }
     } catch { }
@@ -79,7 +81,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     const sourceFile = source.fileName;
     if (sourceFile?.includes('typescript/lib')) {
       return { category: 'literal', type };
-    } else if (sourceFile?.endsWith('.d.ts') && !resolver.isKnownFile(sourceFile)) {
+    } else if (sourceFile && TYPINGS_RE.test(sourceFile) && !resolver.isKnownFile(sourceFile)) {
       return { category: 'foreign', type: resolvedType };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };
