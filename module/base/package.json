@@ -1,6 +1,6 @@
 {
   "name": "@travetto/base",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Environment config and common utilities for travetto applications.",
   "keywords": [
     "console-manager",
@@ -30,7 +30,7 @@
     "debug": "^4.3.4"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^4.0.0"
+    "@travetto/transformer": "^4.0.1"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

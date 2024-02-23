@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-rest",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Rest authentication integration support for the Travetto framework",
   "keywords": [
     "authentication",
@@ -26,12 +26,12 @@
     "directory": "module/auth-rest"
   },
   "dependencies": {
-    "@travetto/auth": "^4.0.0",
-    "@travetto/config": "^4.0.0",
-    "@travetto/rest": "^4.0.0"
+    "@travetto/auth": "^4.0.1",
+    "@travetto/config": "^4.0.1",
+    "@travetto/rest": "^4.0.1"
   },
   "peerDependencies": {
-    "@travetto/test": "^4.0.0"
+    "@travetto/test": "^4.0.1"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
