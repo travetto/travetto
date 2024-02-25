@@ -1,4 +1,4 @@
-import { path } from '@travetto/manifest';
+import { RuntimeContext, RuntimeIndex, path } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { WorkPool } from '@travetto/worker';
 
@@ -52,6 +52,11 @@ export class Runner {
    * Run a single file
    */
   async runSingle(): Promise<boolean> {
+    const mod = RuntimeIndex.getEntry(path.resolve(this.#state.args[0]))!;
+    if (mod.module !== RuntimeContext.main.name) {
+      RuntimeIndex.reinitForModule(mod.module);
+    }
+
     const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
 
     const [file, ...args] = this.#state.args;
