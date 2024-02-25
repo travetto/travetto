@@ -34,7 +34,7 @@
     "eslint-plugin-unused-imports": "^3.0.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^4.0.1"
+    "@travetto/cli": "^4.0.2"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

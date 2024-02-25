@@ -2,16 +2,16 @@
   "name": "@travetto-test/model_auth-model",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/auth-model": "^4.0.1",
-    "@travetto/model-dynamodb": "^4.0.1",
-    "@travetto/model-elasticsearch": "^4.0.1",
-    "@travetto/model-firestore": "^4.0.1",
-    "@travetto/model-mongo": "^4.0.1",
-    "@travetto/model-mysql": "^4.0.1",
-    "@travetto/model-postgres": "^4.0.1",
-    "@travetto/model-redis": "^4.0.1",
-    "@travetto/model-s3": "^4.0.1",
-    "@travetto/model-sqlite": "^4.0.1"
+    "@travetto/auth-model": "^4.0.2",
+    "@travetto/model-dynamodb": "^4.0.2",
+    "@travetto/model-elasticsearch": "^4.0.2",
+    "@travetto/model-firestore": "^4.0.2",
+    "@travetto/model-mongo": "^4.0.2",
+    "@travetto/model-mysql": "^4.0.2",
+    "@travetto/model-postgres": "^4.0.2",
+    "@travetto/model-redis": "^4.0.2",
+    "@travetto/model-s3": "^4.0.2",
+    "@travetto/model-sqlite": "^4.0.2"
   },
   "travetto": {},
   "private": true
