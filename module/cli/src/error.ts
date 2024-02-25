@@ -1,3 +1,4 @@
+import { AppError } from '@travetto/base';
 import { PackageUtil, RuntimeContext } from '@travetto/manifest';
 import { cliTpl } from './color';
 import { CliValidationError, CliCommandShape } from './types';
@@ -48,13 +49,11 @@ ${{ identifier: install }}
 /**
  * Provides a basic error wrapper for cli validation issues
  */
-export class CliValidationResultError extends Error {
-  errors: CliValidationError[];
+export class CliValidationResultError extends AppError<{ errors: CliValidationError[] }> {
   command: CliCommandShape;
 
   constructor(command: CliCommandShape, errors: CliValidationError[]) {
-    super('');
+    super('', undefined, { errors });
     this.command = command;
-    this.errors = errors;
   }
 }

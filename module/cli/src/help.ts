@@ -134,7 +134,7 @@ export class HelpUtil {
   static renderValidationError(err: CliValidationResultError): string {
     return [
       cliTpl`${{ failure: 'Execution failed' }}:`,
-      ...err.errors.map(e => e.source && e.source !== 'custom' ?
+      ...err.details.errors.map(e => e.source && e.source !== 'custom' ?
         cliTpl` * ${{ identifier: validationSourceMap[e.source] }} ${{ subtitle: e.message }}` :
         cliTpl` * ${{ failure: e.message }}`),
       '',
