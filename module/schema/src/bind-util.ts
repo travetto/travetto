@@ -148,7 +148,7 @@ export class BindUtil {
       return data;
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = SchemaRegistry.resolveSubTypeForInstance<T>(cons, data as T);
+    const cls = SchemaRegistry.resolveInstanceType<T>(cons, data as T);
     if (data instanceof cls) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return data as T;

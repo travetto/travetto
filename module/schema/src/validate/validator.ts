@@ -13,7 +13,7 @@ import { isValidationError, TypeMismatchError, ValidationResultError } from './e
  */
 function resolveSchema<T>(base: Class<T>, o: T, view?: string): SchemaConfig {
   return SchemaRegistry.getViewSchema(
-    SchemaRegistry.resolveSubTypeForInstance(base, o), view
+    SchemaRegistry.resolveInstanceType(base, o), view
   ).schema;
 }
 
@@ -272,7 +272,7 @@ export class SchemaValidator {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       throw new TypeMismatchError(cls.name, (o as ClassInstance).constructor.name);
     }
-    cls = SchemaRegistry.resolveSubTypeForInstance(cls, o);
+    cls = SchemaRegistry.resolveInstanceType(cls, o);
 
     const config = SchemaRegistry.getViewSchema(cls, view);
 

@@ -42,10 +42,11 @@ export class DynamicCommonjsLoader {
         }
       }
 
-      const fileName = Module._resolveFilename!(request, parent);
+      const file = Module._resolveFilename!(request, parent);
+      const src = RuntimeIndex.getEntry(file)?.sourceFile;
       // Only proxy workspace modules
-      if (RuntimeIndex.getModuleFromSource(fileName)?.workspace) {
-        return proxyModuleLoad ? proxyModuleLoad(fileName, mod) : mod;
+      if (src && RuntimeIndex.getModuleFromSource(src)?.workspace) {
+        return proxyModuleLoad ? proxyModuleLoad(file, mod) : mod;
       } else {
         return mod;
       }

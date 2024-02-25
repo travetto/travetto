@@ -101,11 +101,13 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   }
 
   /**
-   * Find the subtype for a given instance
+   * Find the resolved type for a given instance
    * @param cls Class for instance
    * @param o Actual instance
    */
-  resolveSubTypeForInstance<T>(cls: Class<T>, o: T): Class {
+  resolveInstanceType<T>(cls: Class<T>, o: T): Class {
+    cls = SchemaRegistry.get(cls.Ⲑid).class; // Resolve by id to handle any stale references
+
     const base = this.getBaseSchema(cls);
     const clsSchema = this.get(cls);
     const baseSchema = this.get(base);
