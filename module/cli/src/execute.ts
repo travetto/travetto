@@ -6,6 +6,7 @@ import { CliCommandSchemaUtil } from './schema';
 import { CliUnknownCommandError, CliValidationResultError } from './error';
 import { CliParseUtil } from './parse';
 import { CliUtil } from './util';
+import { CliCommandShape } from './types';
 
 /**
  * Execution manager
@@ -31,8 +32,8 @@ export class ExecutionManager {
     console.error!();
   }
 
-  /** Run command */
-  static async #runCommand(cmd: string, args: string[]): Promise<void> {
+  /** Bind command  */
+  static async #bindCommand(cmd: string, args: string[]): Promise<{ command: CliCommandShape, boundArgs: unknown[] }> {
     const command = await CliCommandRegistry.getInstance(cmd, true);
     const schema = await CliCommandSchemaUtil.getSchema(command);
     const fullArgs = await CliParseUtil.expandArgs(schema, args);
@@ -40,6 +41,12 @@ export class ExecutionManager {
 
     await command.preBind?.();
     const boundArgs = await CliCommandSchemaUtil.bindInput(command, state);
+    return { command, boundArgs };
+  }
+
+  /** Run command */
+  static async #runCommand(cmd: string, args: string[]): Promise<void> {
+    const { command, boundArgs } = await this.#bindCommand(cmd, args);
 
     await command.preValidate?.();
     await CliCommandSchemaUtil.validate(command, boundArgs);
@@ -62,7 +69,8 @@ export class ExecutionManager {
       if (!cmd) {
         console.info!(await HelpUtil.renderAllHelp());
       } else if (help) {
-        console.log!(await HelpUtil.renderCommandHelp(cmd));
+        const { command } = await this.#bindCommand(cmd, args)
+        console.log!(await HelpUtil.renderCommandHelp(command));
       } else {
         await this.#runCommand(cmd, args);
       }

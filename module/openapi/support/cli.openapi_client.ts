@@ -4,7 +4,6 @@ import { DockerContainer } from '@travetto/command';
 import { ExecUtil } from '@travetto/base';
 
 import { OpenApiClientHelp } from './bin/help';
-import { OpenApiClientPresets } from './bin/presets';
 
 /**
  * CLI for generating the cli client
@@ -20,30 +19,7 @@ export class OpenApiClientCommand implements CliCommandShape {
   @CliFlag({ desc: 'Output folder' })
   output = './api-client';
   @CliFlag({ desc: 'Docker Image to user' })
-  dockerImage = 'arcsine/openapi-generator:latest';
-  @CliFlag({ desc: 'Watch for file changes' })
-  watch?: boolean;
-
-  async getPropList(format: string): Promise<string> {
-    let propMap = Object.fromEntries(this.props?.map(p => p.split('=')) ?? []);
-
-    if (format.startsWith('@travetto/')) {
-      const key = format.split('@travetto/')[1];
-      const [, props] = (await OpenApiClientPresets.getPresets())[key];
-      propMap = { ...props, ...propMap };
-    }
-
-    return OpenApiClientPresets.presetMap(propMap);
-  }
-
-  async getResolvedFormat(format: string): Promise<string> {
-    if (format.startsWith('@travetto/')) {
-      const key = format.split('@travetto/')[1];
-      const [fmt] = (await OpenApiClientPresets.getPresets())[key];
-      return fmt;
-    }
-    return format;
-  }
+  dockerImage = 'openapitools/openapi-generator-cli:latest';
 
   async help(): Promise<string[]> {
     return OpenApiClientHelp.help(this.dockerImage, this.extendedHelp ?? false);
@@ -61,17 +37,14 @@ export class OpenApiClientCommand implements CliCommandShape {
       .setTTY(false)
       .setDeleteOnFinish(true);
 
-    const propList = await this.getPropList(format);
-
     const proc = await cmd.run([
       'generate',
       '--skip-validate-spec',
       '--remove-operation-id-prefix',
-      '-g', await this.getResolvedFormat(format),
+      '-g', format,
       '-o', '/workspace',
       '-i', `/input/${path.basename(this.input)}`,
-      ...(this.watch ? ['-w'] : []),
-      ...(propList ? ['--additional-properties', propList] : [])
+      ...(this.props.length ? ['--additional-properties', this.props.join(',')] : [])
     ]);
 
     const result = await ExecUtil.getResult(proc);
