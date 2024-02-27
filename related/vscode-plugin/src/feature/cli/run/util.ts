@@ -93,16 +93,26 @@ export class CliRunUtil {
     return selected;
   }
 
-  static async getModules(): Promise<ModuleGraphItem<Set<string>>[]> {
-    const proc = spawn('node', [RunUtil.cliFile, 'repo:list', '-f', 'json'], {
+  /** Spawn CLI  */
+  static async #startCli(command: string, args: string[], action: string): Promise<{ stdout: string, stderr: string }> {
+    const proc = spawn('node', [RunUtil.cliFile, command, ...args], {
       stdio: [0, 'pipe', 'pipe', 'ignore'],
       shell: false,
+      cwd: Workspace.path,
       env: { ...process.env, ...RunUtil.buildEnv(), ...Env.TRV_QUIET.export(true) }
     });
     const data = await ExecUtil.getResult(proc, { catch: true });
     if (!data.valid) {
-      throw new Error(`Unable to collect module list: ${data.message}`);
+      throw new Error(`Unable to ${action}: ${data.message}`);
     }
+    return data;
+  }
+
+  /**
+   * Get list of modules
+   */
+  static async getModules(): Promise<ModuleGraphItem<Set<string>>[]> {
+    const data = await this.#startCli('repo:list', ['-f', 'json'], 'collect module list');
     try {
       const result: ModuleGraphItem<string[]>[] = JSON.parse(data.stdout);
       return result.map(x => ({ name: x.name, children: new Set(x.children), local: !!x.local }));
@@ -115,15 +125,7 @@ export class CliRunUtil {
    * Get list of run choices
    */
   static async getChoices(): Promise<RunChoice[]> {
-    const proc = spawn('node', [RunUtil.cliFile, 'cli:schema'], {
-      stdio: [0, 'pipe', 'pipe', 'ignore'],
-      shell: false,
-      env: { ...process.env, ...RunUtil.buildEnv(), ...Env.TRV_QUIET.export(true) }
-    });
-    const data = await ExecUtil.getResult(proc, { catch: true });
-    if (!data.valid) {
-      throw new Error(`Unable to collect cli command list: ${data.message}`);
-    }
+    const data = await this.#startCli('cli:schema', [], 'get cli command list');
     let choices: RunChoice[] = JSON.parse(data.stdout);
     let modules: ModuleGraphItem<Set<string>>[];
 
