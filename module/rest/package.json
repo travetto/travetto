@@ -40,7 +40,7 @@
     "raw-body": "^2.5.2"
   },
   "peerDependencies": {
-    "@travetto/cli": "^4.0.2",
+    "@travetto/cli": "^4.0.3",
     "@travetto/test": "^4.0.2",
     "@travetto/transformer": "^4.0.1"
   },
