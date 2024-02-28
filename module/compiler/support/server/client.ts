@@ -1,6 +1,6 @@
 import rl from 'node:readline/promises';
 import timers from 'node:timers/promises';
-import { Readable } from 'node:stream';
+import http, { Agent } from 'node:http';
 
 import { ManifestContext } from '@travetto/manifest';
 
@@ -110,9 +110,18 @@ export class CompilerClient {
       const quit = (): void => ctrl.abort();
       try {
         signal.addEventListener('abort', quit);
-        const stream = await this.#fetch(`/event/${type}`, { signal: ctrl.signal, keepalive: true });
+        const res = await new Promise<http.IncomingMessage>(resolve => {
+          http.get(`${this.#url}/event/${type}`, {
+            agent: new Agent({
+              keepAlive: true,
+              keepAliveMsecs: 10000,
+              timeout: 1000 * 60 * 60 * 24
+            }),
+            signal: ctrl.signal
+          }, res => resolve(res))
+        });
 
-        for await (const line of rl.createInterface(Readable.fromWeb(stream.body!))) {
+        for await (const line of rl.createInterface(res)) {
           if (line.trim().charAt(0) === '{') {
             const val = JSON.parse(line);
             if (cfg.until?.(val)) {
