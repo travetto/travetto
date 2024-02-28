@@ -14,6 +14,12 @@ type FetchEventsConfig<T> = {
   enforceIteration?: boolean;
 };
 
+const streamAgent = new Agent({
+  keepAlive: true,
+  keepAliveMsecs: 10000,
+  timeout: 1000 * 60 * 60 * 24
+});
+
 /**
  * Compiler Client Operations
  */
@@ -37,7 +43,7 @@ export class CompilerClient {
     return this.#url;
   }
 
-  async #fetch(rel: string, opts?: RequestInit & { timeout?: number }, logTimeout = true): Promise<Response> {
+  async #fetch(rel: string, opts?: RequestInit & { timeout?: number }, logTimeout = true): Promise<{ ok: boolean, text: string }> {
     const ctrl = new AbortController();
     opts?.signal?.addEventListener('abort', () => ctrl.abort());
     const timeoutId = setTimeout(() => {
@@ -45,7 +51,8 @@ export class CompilerClient {
       ctrl.abort('TIMEOUT');
     }, opts?.timeout ?? 100).unref();
     try {
-      return await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
+      const res = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
+      return { ok: res.ok, text: await res.text() };
     } finally {
       clearTimeout(timeoutId);
     }
@@ -53,7 +60,7 @@ export class CompilerClient {
 
   /** Get server information, if server is running */
   info(): Promise<CompilerServerInfo | undefined> {
-    return this.#fetch('/info', { timeout: 200 }, false).then(v => v.json(), () => undefined)
+    return this.#fetch('/info', { timeout: 200 }, false).then(v => JSON.parse(v.text), () => undefined)
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       .then(v => v as CompilerServerInfo);
   }
@@ -110,18 +117,12 @@ export class CompilerClient {
       const quit = (): void => ctrl.abort();
       try {
         signal.addEventListener('abort', quit);
-        const res = await new Promise<http.IncomingMessage>(resolve => {
-          http.get(`${this.#url}/event/${type}`, {
-            agent: new Agent({
-              keepAlive: true,
-              keepAliveMsecs: 10000,
-              timeout: 1000 * 60 * 60 * 24
-            }),
-            signal: ctrl.signal
-          }, res => resolve(res))
-        });
+        const response = await new Promise<http.IncomingMessage>((resolve, reject) =>
+          http.get(`${this.#url}/event/${type}`, { agent: streamAgent, signal: ctrl.signal }, resolve)
+            .on('error', reject)
+        );
 
-        for await (const line of rl.createInterface(res)) {
+        for await (const line of rl.createInterface(response)) {
           if (line.trim().charAt(0) === '{') {
             const val = JSON.parse(line);
             if (cfg.until?.(val)) {
