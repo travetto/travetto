@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import timers from 'node:timers/promises';
 
-import { ManifestContext, ManifestIndex, ManifestUtil, PackageUtil } from '@travetto/manifest';
+import { path, ManifestContext, ManifestIndex, ManifestUtil, PackageUtil } from '@travetto/manifest';
 import { CompilerStateType } from '@travetto/compiler/support/types';
 
 /**
@@ -16,6 +16,10 @@ export class Workspace {
   static #compilerStateListeners: ((ev: CompilerStateType) => void)[] = [];
 
   static readonly folder: vscode.WorkspaceFolder;
+
+  static get compilerCli(): string {
+    return path.resolve(this.#workspaceIndex.manifest.workspace.path, this.#workspaceIndex.manifest.build.compilerModuleFolder, 'bin/trvc.js');
+  }
 
   static onCompilerState(handler: (ev: CompilerStateType) => void): void {
     this.#compilerStateListeners.push(handler);

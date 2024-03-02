@@ -25,7 +25,6 @@ export class CompilerWatchFeature extends BaseFeature {
   #status = vscode.window.createStatusBarItem('travetto.build', vscode.StatusBarAlignment.Left, 1000);
   #log = new Log('travetto.compiler');
   #progress: Record<string, ProgressState> = {};
-  #compilerCliFile!: string;
 
   async #buildProgressBar(type: string, signal: AbortSignal): Promise<ProgressState> {
     this.#progress[type]?.cleanup();
@@ -62,8 +61,8 @@ export class CompilerWatchFeature extends BaseFeature {
    */
   run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info' | 'event', args?: string[], signal?: AbortSignal): ChildProcess {
     const debug = command !== 'info' && command !== 'event';
-    this.#log.trace('Running Compiler', this.#compilerCliFile, command, args);
-    const proc = spawn('node', [this.#compilerCliFile, command, ...args ?? []], {
+    this.#log.trace('Running Compiler', Workspace.compilerCli, command, args);
+    const proc = spawn('node', [Workspace.compilerCli, command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
       stdio: (command === 'start' || command === 'restart') ? ['pipe', 'ignore', 'pipe'] : 'pipe',
@@ -126,10 +125,11 @@ export class CompilerWatchFeature extends BaseFeature {
         this.#log.info('Disconnecting', !!ctrl.signal.aborted, state);
       }
 
+      ctrl.abort();
+
       if (Workspace.compilerState !== 'close') {
         this.#onState('close');
       }
-      ctrl.abort();
       // Check every second
       await new Promise(r => setTimeout(r, 1000));
     }
@@ -189,7 +189,7 @@ export class CompilerWatchFeature extends BaseFeature {
       }
 
       pState ??= await this.#buildProgressBar(ev.operation, signal);
-      pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${ev.idx + 1} /${ev.total})`, increment: delta });
+      pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${ev.idx + 1}/${ev.total})`, increment: delta });
       pState.prev = value;
     }
     this.#log.info('Tracking progress ended');
@@ -206,8 +206,6 @@ export class CompilerWatchFeature extends BaseFeature {
    * On initial activation
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
-    this.#compilerCliFile = Workspace.resolveImport('@travetto/compiler/bin/trvc.js');
-
     this.#status.command = { command: this.commandName('status-item'), title: 'Show Logs' };
     this.register('status-item', () => this.#onStatusItemClick());
     this.#onState('close');
