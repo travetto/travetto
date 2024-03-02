@@ -1,8 +1,8 @@
 import vscode from 'vscode';
 import timers from 'node:timers/promises';
 
-import type { CompilerStateType } from '@travetto/compiler/support/types';
 import { ManifestContext, ManifestIndex, ManifestUtil, PackageUtil } from '@travetto/manifest';
+import { CompilerStateType } from '@travetto/compiler/support/types';
 
 /**
  * Standard set of workspace utilities
@@ -12,24 +12,26 @@ export class Workspace {
   static #context: vscode.ExtensionContext;
   static #manifestContext: ManifestContext;
   static #workspaceIndex: ManifestIndex;
-  static #compilerState: CompilerStateType | undefined;
-  static #compilerStateListeners: ((ev: CompilerStateType | 'disconnected') => void)[] = [];
+  static #compilerState: CompilerStateType = 'close';
+  static #compilerStateListeners: ((ev: CompilerStateType) => void)[] = [];
 
   static readonly folder: vscode.WorkspaceFolder;
 
-  static onCompilerState(handler: (ev: CompilerStateType | 'disconnected') => void): void {
+  static onCompilerState(handler: (ev: CompilerStateType) => void): void {
     this.#compilerStateListeners.push(handler);
     handler(this.compilerState);
   }
 
-  static set compilerState(state: CompilerStateType | undefined) {
-    this.#compilerState = state;
-    for (const el of this.#compilerStateListeners) { el(this.compilerState); }
+  static set compilerState(state: CompilerStateType) {
+    if (state !== this.#compilerState) {
+      this.#compilerState = state;
+      for (const el of this.#compilerStateListeners) { el(this.compilerState); }
+    }
   }
 
   /** Get the current compiler state */
-  static get compilerState(): CompilerStateType | 'disconnected' {
-    return this.#compilerState ?? 'disconnected';
+  static get compilerState(): CompilerStateType {
+    return this.#compilerState;
   }
 
   static get isCompilerWatching(): boolean {

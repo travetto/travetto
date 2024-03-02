@@ -96,12 +96,14 @@ export class CompilerWatchFeature extends BaseFeature {
   /**
    * Get compiler state
    */
-  async #compilerState(): Promise<CompilerStateType | undefined> {
+  async #compilerState(): Promise<CompilerStateType> {
     const { stdout } = await ExecUtil.getResult(this.run('info'));
     try {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return JSON.parse(stdout).state as CompilerStateType;
-    } catch { }
+    } catch {
+      return 'close';
+    }
   }
 
   async #trackConnected(): Promise<void> {
@@ -111,7 +113,7 @@ export class CompilerWatchFeature extends BaseFeature {
       let state: string | undefined;
       try {
         state = await this.#compilerState();
-        if (state) {
+        if (state && state !== 'close') {
           connected = true;
           this.#log.info('Connected', state);
           await Promise.race([this.#trackLog(ctrl.signal), this.#trackState(ctrl.signal), this.#trackProgress(ctrl.signal)]);
@@ -124,7 +126,9 @@ export class CompilerWatchFeature extends BaseFeature {
         this.#log.info('Disconnecting', !!ctrl.signal.aborted, state);
       }
 
-      this.#onState('close');
+      if (Workspace.compilerState !== 'close') {
+        this.#onState('close');
+      }
       ctrl.abort();
       // Check every second
       await new Promise(r => setTimeout(r, 1000));
@@ -133,14 +137,15 @@ export class CompilerWatchFeature extends BaseFeature {
 
   #onState(state: CompilerStateType): void {
     this.#log.info('Compiler state changed', state);
-    let v: string | undefined;
+    let v: string;
     switch (state) {
-      case undefined: return;
       case 'reset': v = '$(flame) Restarting'; break;
       case 'startup':
       case 'init': v = '$(flame) Initializing'; break;
+      case 'compile-end':
       case 'compile-start': v = '$(flame) Compiling'; break;
       case 'watch-start': v = '$(pass-filled) Ready'; break;
+      case 'watch-end':
       case 'close': v = '$(debug-pause) Disconnected'; break;
     }
     this.#status.text = v ?? this.#status.text;
@@ -150,7 +155,7 @@ export class CompilerWatchFeature extends BaseFeature {
   async #trackState(signal?: AbortSignal): Promise<void> {
     this.#log.info('Tracking state started');
     for await (const ev of this.#compilerEvents<CompilerStateEvent>('state', signal)) {
-      this.#onState(ev.state);
+      this.#onState(ev.state ?? 'disconnected');
     }
     this.#log.info('Tracking state ended');
   }
@@ -190,14 +195,21 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#log.info('Tracking progress ended');
   }
 
+  async #onStatusItemClick(): Promise<void> {
+    if (Workspace.compilerState === 'close') {
+      this.run('start');
+    }
+    this.#log.show();
+  }
+
   /**
    * On initial activation
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.#compilerCliFile = Workspace.resolveImport('@travetto/compiler/bin/trvc.js');
 
-    this.#status.command = { command: this.commandName('show-log'), title: 'Show Logs' };
-    this.register('show-log', () => this.#log.show());
+    this.#status.command = { command: this.commandName('status-item'), title: 'Show Logs' };
+    this.register('status-item', () => this.#onStatusItemClick());
     this.#onState('close');
     this.#status.show();
 
