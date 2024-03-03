@@ -45,14 +45,17 @@ export class CompilerClient {
 
   async #fetch(rel: string, opts?: RequestInit & { timeout?: number }, logTimeout = true): Promise<{ ok: boolean, text: string }> {
     const ctrl = new AbortController();
+    const timeoutCtrl = new AbortController();
 
     opts?.signal?.addEventListener('abort', () => ctrl.abort());
     timers.setTimeout(opts?.timeout ?? 100, undefined, { ref: false })
       .then(() => {
         logTimeout && this.#log.error(`Timeout on request to ${this.#url}${rel}`);
         ctrl.abort('TIMEOUT');
-      });
+      })
+      .catch(() => { });
     const res = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
+    timeoutCtrl.abort();
     return { ok: res.ok, text: await res.text() };
   }
 
