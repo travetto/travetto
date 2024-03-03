@@ -1,3 +1,4 @@
+import timers from 'node:timers/promises';
 import { RuntimeIndex } from '@travetto/manifest';
 
 import { ExecUtil } from './exec';
@@ -24,7 +25,7 @@ export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit
 
   if (!await client.isWatching()) { // If we get here, without a watch
     while (!await client.isWatching()) { // Wait until watch starts
-      await new Promise(r => setTimeout(r, 1000 * 60));
+      await timers.setTimeout(1000 * 60, undefined, { ref: false });
     }
   } else {
     for await (const ev of client.fetchEvents('change', { signal: ctrl.signal, enforceIteration: true })) {

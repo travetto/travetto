@@ -1,4 +1,4 @@
-import { clearTimeout } from 'node:timers';
+import timers from 'node:timers/promises';
 import { TimeSpan, TimeUtil, Util } from '@travetto/base';
 import { ExecutionError } from './error';
 
@@ -7,7 +7,7 @@ import { ExecutionError } from './error';
  */
 export class Timeout extends ExecutionError {
 
-  #id: ReturnType<typeof setTimeout> | undefined;
+  #ctrl?: AbortController;
   #promise = Util.resolvablePromise();
   #duration: number;
 
@@ -20,10 +20,10 @@ export class Timeout extends ExecutionError {
    * Stop timeout from firing
    */
   cancel(): void {
-    if (this.#id) {
-      clearTimeout(this.#id);
+    if (this.#ctrl) {
+      this.#ctrl.abort();
       this.#promise.resolve();
-      this.#id = undefined;
+      this.#ctrl = undefined;
     }
   }
 
@@ -31,9 +31,10 @@ export class Timeout extends ExecutionError {
    * Wait for timeout as a promise
    */
   wait(): Promise<void> {
-    if (!this.#id) {
-      this.#id = setTimeout(() => this.#promise.reject(this), this.#duration);
-      this.#id.unref();
+    if (!this.#ctrl) {
+      this.#ctrl = new AbortController();
+      timers.setTimeout(this.#duration, undefined, { ref: false, signal: this.#ctrl.signal })
+        .then(() => this.#promise.reject(this), () => { });
     }
     return this.#promise;
   }

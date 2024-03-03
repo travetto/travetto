@@ -82,7 +82,7 @@ export class Compiler {
     process.removeAllListeners('disconnect');
     process.removeAllListeners('message');
     this.#ctrl.abort();
-    setTimeout(() => process.exit(), 1000).unref(); // Allow upto 1s to shutdown gracefully
+    timers.setTimeout(1000, undefined, { ref: false }).then(() => process.exit()); // Allow upto 1s to shutdown gracefully
   }
 
   /**

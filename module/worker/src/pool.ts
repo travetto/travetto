@@ -78,7 +78,7 @@ export class WorkPool {
     // Listen for shutdown
     opts?.shutdown?.addEventListener('abort', async () => {
       while (pendingAcquires) {
-        await timers.setTimeout(10);
+        await timers.setTimeout(10, undefined, { ref: false });
       }
       await pool.drain();
       await pool.clear();

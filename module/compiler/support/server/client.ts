@@ -45,17 +45,15 @@ export class CompilerClient {
 
   async #fetch(rel: string, opts?: RequestInit & { timeout?: number }, logTimeout = true): Promise<{ ok: boolean, text: string }> {
     const ctrl = new AbortController();
+
     opts?.signal?.addEventListener('abort', () => ctrl.abort());
-    const timeoutId = setTimeout(() => {
-      logTimeout && this.#log.error(`Timeout on request to ${this.#url}${rel}`);
-      ctrl.abort('TIMEOUT');
-    }, opts?.timeout ?? 100).unref();
-    try {
-      const res = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
-      return { ok: res.ok, text: await res.text() };
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    timers.setTimeout(opts?.timeout ?? 100, undefined, { ref: false })
+      .then(() => {
+        logTimeout && this.#log.error(`Timeout on request to ${this.#url}${rel}`);
+        ctrl.abort('TIMEOUT');
+      });
+    const res = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
+    return { ok: res.ok, text: await res.text() };
   }
 
   /** Get server information, if server is running */

@@ -14,7 +14,7 @@ export async function runTests(opts: RunState): Promise<void> {
 
   RunnerUtil.registerCleanup('runner');
 
-  await timers.setTimeout(Env.TRV_TEST_DELAY.time ?? 0);
+  await timers.setTimeout(Env.TRV_TEST_DELAY.time ?? 0, undefined, { ref: false });
 
   try {
     const res = await new Runner(opts).run();

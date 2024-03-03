@@ -34,7 +34,7 @@ export class SqliteConnection extends Connection<Database> {
       } catch (err) {
         if (err instanceof Error && retries > 1 && err.message.includes('database is locked')) {
           console.error('Failed, and waiting', retries);
-          await timers.setTimeout(delay);
+          await timers.setTimeout(delay, undefined, { ref: false });
           retries -= 1;
         } else {
           throw err;

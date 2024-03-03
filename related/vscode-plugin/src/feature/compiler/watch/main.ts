@@ -129,7 +129,7 @@ export class CompilerWatchFeature extends BaseFeature {
         this.#onState('closed');
       }
       // Check every second
-      await new Promise(r => setTimeout(r, 1000));
+      await timers.setTimeout(1000, undefined, { ref: false });
     }
   }
 
@@ -209,7 +209,7 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#status.show();
 
     this.#trackConnected();
-    await timers.setTimeout(1000); // Add buffer
+    await timers.setTimeout(1000, undefined, { ref: false }); // Add buffer
     this.run('start');
 
     for (const op of ['start', 'stop', 'restart', 'clean'] as const) {

@@ -14,7 +14,7 @@ export class RunnerUtil {
    * Add 50 ms to the shutdown to allow for buffers to output properly
    */
   static registerCleanup(scope: string): void {
-    ShutdownManager.onGracefulShutdown(() => timers.setTimeout(50), `test.${scope}.bufferOutput`);
+    ShutdownManager.onGracefulShutdown(() => timers.setTimeout(50, undefined, { ref: false }), `test.${scope}.bufferOutput`);
   }
 
   /**

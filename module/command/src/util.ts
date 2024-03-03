@@ -42,7 +42,7 @@ export class CommandUtil {
       if (status >= 200 && status <= 299) {
         return body; // We good
       }
-      await timers.setTimeout(100);
+      await timers.setTimeout(100, undefined, { ref: false });
     }
     throw new Error('Could not make http connection to url');
   }
@@ -67,7 +67,7 @@ export class CommandUtil {
         });
         return;
       } catch {
-        await timers.setTimeout(50);
+        await timers.setTimeout(50, undefined, { ref: false });
       }
     }
     throw new Error('Could not acquire port');

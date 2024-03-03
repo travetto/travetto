@@ -113,7 +113,7 @@ export class Workspace {
     }, async (_, token) => {
       const ctrl = new AbortController();
       token.onCancellationRequested(() => ctrl.abort());
-      await timers.setTimeout(duration, undefined, { signal: ctrl.signal });
+      await timers.setTimeout(duration, undefined, { signal: ctrl.signal }).catch(() => { });
     });
   }
 }

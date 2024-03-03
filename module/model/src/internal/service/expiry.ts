@@ -41,9 +41,9 @@ export class ModelExpiryUtil {
       ShutdownManager.onGracefulShutdown(async () => { running = false; }, this);
 
       (async (): Promise<void> => {
-        await timers.setTimeout(1000);  // Wait a second to start culling
+        await timers.setTimeout(1000, undefined, { ref: false });  // Wait a second to start culling
         while (running) {
-          await timers.setTimeout(cullInterval);
+          await timers.setTimeout(cullInterval, undefined, { ref: false });
           await Promise.all(cullable.map(cls => svc.deleteExpired(cls)));
         }
       })();
