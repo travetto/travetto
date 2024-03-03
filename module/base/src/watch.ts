@@ -31,9 +31,9 @@ export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       yield ev as unknown as T;
     }
-
-    remove();
   }
+
+  remove();
 
   if (cfg?.restartOnExit) {
     // We are done, request restart

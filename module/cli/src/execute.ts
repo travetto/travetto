@@ -69,7 +69,7 @@ export class ExecutionManager {
       if (!cmd) {
         console.info!(await HelpUtil.renderAllHelp());
       } else if (help) {
-        const { command } = await this.#bindCommand(cmd, args)
+        const { command } = await this.#bindCommand(cmd, args);
         console.log!(await HelpUtil.renderCommandHelp(command));
       } else {
         await this.#runCommand(cmd, args);

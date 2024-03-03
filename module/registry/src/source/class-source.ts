@@ -31,7 +31,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Are we in a mode that should have enhanced debug info
    */
-  trace = Env.TRV_TRACE.isTrue;
+  trace = Env.DEBUG.val?.includes('@travetto/registry');
 
   /**
    * Flush classes

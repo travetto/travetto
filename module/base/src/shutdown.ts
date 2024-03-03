@@ -52,7 +52,7 @@ export class ShutdownManager {
       }));
 
       await Promise.race([
-        timers.setTimeout(Env.TRV_SHUTDOWN_WAIT.time ?? 0, undefined, { ref: false }), // Wait 2s and then force finish
+        timers.setTimeout(Env.TRV_SHUTDOWN_WAIT.time ?? 2000, undefined, { ref: false }), // Wait 2s and then force finish
         handlers,
       ]);
 

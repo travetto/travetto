@@ -23,10 +23,10 @@ export class RestNetUtil {
   static listen(server: Server, port: number, hostname?: string): Promise<ServerHandle> {
     return new Promise<ServerHandle>((resolve, reject) => {
       try {
-        let handle = server.listen(port, hostname);
+        const handle = server.listen(port, hostname);
         handle
           .on('error', reject)
-          .on('listening', () => { resolve(handle); handle.off('error', reject); })
+          .on('listening', () => { resolve(handle); handle.off('error', reject); });
       } catch (err) {
         reject(err);
       }

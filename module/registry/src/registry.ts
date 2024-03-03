@@ -35,7 +35,7 @@ export abstract class Registry implements ChangeSource<Class> {
   /**
    * Are we in a mode that should have enhanced debug info
    */
-  trace = Env.TRV_TRACE.isTrue;
+  trace = Env.DEBUG.val?.includes('@travetto/registry');
 
   /**
    * Creates a new registry, with it's parents specified
