@@ -155,15 +155,8 @@ Options:
   -a, --additional-properties <span class="token operator">&lt;</span>string<span class="token operator">></span>  Additional Properties <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -i, <span class="token parameter variable">--input</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                  Input <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"./openapi.yml"</span><span class="token punctuation">)</span>
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                 Output folder <span class="token punctuation">(</span>default: <span class="token string">"./api-client"</span><span class="token punctuation">)</span>
-  -d, --docker-image <span class="token operator">&lt;</span>string<span class="token operator">></span>           Docker Image to user <span class="token punctuation">(</span>default: <span class="token string">"arcsine/openapi-generator:latest"</span><span class="token punctuation">)</span>
-  -w, <span class="token parameter variable">--watch</span>                           Watch <span class="token keyword">for</span> <span class="token function">file</span> changes
-  -h, <span class="token parameter variable">--help</span>                            display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
-
-Available Presets
-----------------------------------
-* @travetto/angular14 -- typescript-angular <span class="token assign-left variable">supportsES6</span><span class="token operator">=</span>true,stringEnums<span class="token operator">=</span>true,ngVersion<span class="token operator">=</span><span class="token number">14.0</span>,fileNaming<span class="token operator">=</span>kebab-case
-* @travetto/angular15 -- typescript-angular <span class="token assign-left variable">supportsES6</span><span class="token operator">=</span>true,stringEnums<span class="token operator">=</span>true,ngVersion<span class="token operator">=</span><span class="token number">15.0</span>,fileNaming<span class="token operator">=</span>kebab-case
-* @travetto/fetch -- typescript-fetch <span class="token assign-left variable">stringEnums</span><span class="token operator">=</span>true</code></pre>
+  -d, --docker-image <span class="token operator">&lt;</span>string<span class="token operator">></span>           Docker Image to user <span class="token punctuation">(</span>default: <span class="token string">"openapitools/openapi-generator-cli:latest"</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>                            display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 This tool relies upon a custom build of <a target="_blank" class="external-link" href="https://github.com/OpenAPITools/openapi-generator">OpenAPI client generation tools</a>, which supports watching.  This allows for fast responsive client generation as the shape of the API changes.

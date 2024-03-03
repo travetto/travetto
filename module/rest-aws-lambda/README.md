@@ -26,7 +26,7 @@ Usage: pack:lambda [options]
 Options:
   -w, --workspace <string>             Workspace for building (default: "/tmp/<temp-folder>")
   --clean, --no-clean                  Clean workspace (default: true)
-  -o, --output <string>                Output location (default: "travetto_rest-aws-lambda.zip")
+  -o, --output <string>                Output location (default: "<module>.zip")
   -es, --main-scripts                  Create entry scripts (default: false)
   -f, --main-name <string>             Main name for build artifact
   -e, --entry-point <string>           Entry point (default: "@travetto/rest-aws-lambda/support/entry.handler")
