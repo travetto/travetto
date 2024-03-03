@@ -1,4 +1,3 @@
-import timers from 'node:timers/promises';
 import { AssertionError } from 'node:assert';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
@@ -45,7 +44,7 @@ export class TestExecutor {
           await (suite.instance as Record<string, Function>)[test.methodName](); // Run
         } finally {
           process.env = env; // Restore
-          PromiseCapture.stop().then(() => timers.setTimeout(1).then(promCleanup.resolve), promCleanup.reject);
+          PromiseCapture.stop().then(() => Util.queueMacroTask().then(promCleanup.resolve), promCleanup.reject);
         }
       });
 

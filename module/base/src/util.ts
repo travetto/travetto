@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import timers from 'node:timers/promises';
 
 import { ManifestFileUtil } from '@travetto/manifest';
 
@@ -92,5 +93,19 @@ export class Util {
    */
   static async bufferedFileWrite(file: string, content: string | object): Promise<string> {
     return ManifestFileUtil.bufferedFileWrite(file, content);
+  }
+
+  /**
+   * Non-blocking timeout, that is cancellable
+   */
+  static nonBlockingTimeout(time: number): Promise<void> {
+    return timers.setTimeout(time, undefined, { ref: false }).catch(() => { });
+  }
+
+  /**
+   * Queue new macrotask
+   */
+  static queueMacroTask(): Promise<void> {
+    return timers.setImmediate(undefined);
   }
 }

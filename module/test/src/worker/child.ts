@@ -1,8 +1,7 @@
 import { createWriteStream } from 'node:fs';
-import timers from 'node:timers/promises';
 
 import { RuntimeContext } from '@travetto/manifest';
-import { ConsoleManager, Env, TimeUtil } from '@travetto/base';
+import { ConsoleManager, Env, TimeUtil, Util } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
 import { ErrorUtil } from '../consumer/error';
@@ -50,7 +49,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     // Let parent know the child is ready for handling commands
     this.send(Events.READY);
 
-    await timers.setTimeout(TimeUtil.timeToMs('10m'));
+    await Util.nonBlockingTimeout(TimeUtil.timeToMs('10m'));
   }
 
   /**

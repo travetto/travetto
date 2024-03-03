@@ -6,6 +6,7 @@ import { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerEvent, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types';
 import type { LogShape } from '../log';
+import { CommonUtil } from '../util';
 import { ProcessHandle } from './process-handle';
 
 type FetchEventsConfig<T> = {
@@ -45,17 +46,18 @@ export class CompilerClient {
 
   async #fetch(rel: string, opts?: RequestInit & { timeout?: number }, logTimeout = true): Promise<{ ok: boolean, text: string }> {
     const ctrl = new AbortController();
+    const timeoutCtrl = new AbortController();
+
     opts?.signal?.addEventListener('abort', () => ctrl.abort());
-    const timeoutId = setTimeout(() => {
-      logTimeout && this.#log.error(`Timeout on request to ${this.#url}${rel}`);
-      ctrl.abort('TIMEOUT');
-    }, opts?.timeout ?? 100).unref();
-    try {
-      const res = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
-      return { ok: res.ok, text: await res.text() };
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    timers.setTimeout(opts?.timeout ?? 100, undefined, { ref: false, signal: timeoutCtrl.signal })
+      .then(() => {
+        logTimeout && this.#log.error(`Timeout on request to ${this.#url}${rel}`);
+        ctrl.abort('TIMEOUT');
+      })
+      .catch(() => { });
+    const res = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
+    timeoutCtrl.abort();
+    return { ok: res.ok, text: await res.text() };
   }
 
   /** Get server information, if server is running */
@@ -126,7 +128,7 @@ export class CompilerClient {
           if (line.trim().charAt(0) === '{') {
             const val = JSON.parse(line);
             if (cfg.until?.(val)) {
-              await timers.setTimeout(1);
+              await CommonUtil.queueMacroTask();
               ctrl.abort();
             }
             yield val;
@@ -137,7 +139,7 @@ export class CompilerClient {
       }
       signal.removeEventListener('abort', quit);
 
-      await timers.setTimeout(1);
+      await CommonUtil.queueMacroTask();
 
       info = await this.info();
 

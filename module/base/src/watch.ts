@@ -2,6 +2,7 @@ import { RuntimeIndex } from '@travetto/manifest';
 
 import { ExecUtil } from './exec';
 import { ShutdownManager } from './shutdown';
+import { Util } from './util';
 
 export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete' };
 export type FullWatchEvent = WatchEvent & { output: string, module: string, time: number };
@@ -24,7 +25,7 @@ export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit
 
   if (!await client.isWatching()) { // If we get here, without a watch
     while (!await client.isWatching()) { // Wait until watch starts
-      await new Promise(r => setTimeout(r, 1000 * 60));
+      await Util.nonBlockingTimeout(1000 * 60);
     }
   } else {
     for await (const ev of client.fetchEvents('change', { signal: ctrl.signal, enforceIteration: true })) {

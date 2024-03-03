@@ -1,4 +1,3 @@
-import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
 import { setMaxListeners } from 'node:events';
 
@@ -11,6 +10,7 @@ import { CompileEmitEvent, CompileEmitter } from './types';
 import { EventUtil } from './event';
 
 import { IpcLogger } from '../support/log';
+import { CommonUtil } from '../support/util';
 
 const log = new IpcLogger({ level: 'debug' });
 
@@ -82,7 +82,7 @@ export class Compiler {
     process.removeAllListeners('disconnect');
     process.removeAllListeners('message');
     this.#ctrl.abort();
-    setTimeout(() => process.exit(), 1000).unref(); // Allow upto 1s to shutdown gracefully
+    CommonUtil.nonBlockingTimeout(1000).then(() => process.exit()); // Allow upto 1s to shutdown gracefully
   }
 
   /**
@@ -113,7 +113,7 @@ export class Compiler {
     }
     EventUtil.sendEvent('progress', { total: files.length, idx: files.length, message: 'Complete', operation: 'compile', complete: true });
 
-    await timers.setTimeout(1);
+    await CommonUtil.queueMacroTask();
 
     log.debug(`Compiled ${i} files`);
   }

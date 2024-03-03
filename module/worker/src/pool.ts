@@ -1,5 +1,4 @@
 import os from 'node:os';
-import timers from 'node:timers/promises';
 import { Options, Pool, createPool } from 'generic-pool';
 
 import { Env, Util } from '@travetto/base';
@@ -78,7 +77,7 @@ export class WorkPool {
     // Listen for shutdown
     opts?.shutdown?.addEventListener('abort', async () => {
       while (pendingAcquires) {
-        await timers.setTimeout(10);
+        await Util.nonBlockingTimeout(10);
       }
       await pool.drain();
       await pool.clear();

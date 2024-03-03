@@ -77,7 +77,7 @@ export class CompilerServer {
         .on('close', () => log.debug('Server close event'));
 
       const url = new URL(this.#url);
-      setTimeout(() => this.#server.listen(+url.port, url.hostname), 1); // Run async
+      CommonUtil.queueMacroTask().then(() => this.#server.listen(+url.port, url.hostname)); // Run async
     });
 
     if (output === 'retry') {
@@ -121,7 +121,7 @@ export class CompilerServer {
   async #disconnectActive(): Promise<void> {
     log.info('Server disconnect requested');
     this.info.iteration = Date.now();
-    await new Promise(r => setTimeout(r, 20));
+    await CommonUtil.nonBlockingTimeout(20);
     for (const el of Object.values(this.#listeners)) {
       try { el.res.end(); } catch { }
     }
@@ -204,7 +204,7 @@ export class CompilerServer {
 
     try {
       await new Promise((resolve, reject) => {
-        setTimeout(reject, 2000).unref(); // 2s max wait
+        CommonUtil.nonBlockingTimeout(2000).then(reject); // Wait 2s max
         this.#server.close(resolve);
         this.#emitEvent({ type: 'state', payload: { state: 'closed' } });
         setImmediate(() => {
