@@ -35,14 +35,14 @@ export class ModelExpiryUtil {
   static registerCull(svc: ModelExpirySupport & { readonly config?: { cullRate?: number | TimeSpan } }): void {
     const cullable = ModelRegistry.getClasses().filter(cls => !!ModelRegistry.get(cls).expiresAt);
     if (svc.deleteExpired && cullable.length) {
-      let running = true;
+      const running = new AbortController();
       const cullInterval = TimeUtil.timeToMs(svc.config?.cullRate ?? '10m');
 
-      ShutdownManager.onGracefulShutdown(async () => { running = false; }, this);
+      ShutdownManager.onGracefulShutdown(async () => running.abort(), this);
 
       (async (): Promise<void> => {
         await timers.setTimeout(1000, undefined, { ref: false });  // Wait a second to start culling
-        while (running) {
+        while (!running.signal.aborted) {
           await timers.setTimeout(cullInterval, undefined, { ref: false });
           await Promise.all(cullable.map(cls => svc.deleteExpired(cls)));
         }
