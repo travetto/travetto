@@ -1,5 +1,3 @@
-import timers from 'node:timers/promises';
-
 import { TimeSpan, Util } from '@travetto/base';
 
 import { Timeout } from './timeout';
@@ -19,7 +17,7 @@ export class Barrier {
   static listenForUnhandled(): Promise<never> & { cancel: () => void } {
     const uncaught = Util.resolvablePromise<never>();
     const uncaughtWithCancel: typeof uncaught & { cancel?: () => void } = uncaught;
-    const onError = (err: Error): void => { timers.setTimeout(1).then(() => uncaught.reject(err)); };
+    const onError = (err: Error): void => { Util.queueMacroTask().then(() => uncaught.reject(err)); };
     process.on('unhandledRejection', onError).on('uncaughtException', onError);
     const cancel = (): void => {
       process.off('unhandledRejection', onError).off('unhandledException', onError);
