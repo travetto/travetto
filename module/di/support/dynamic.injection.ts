@@ -30,15 +30,19 @@ class $DynamicDependencyRegistry {
     if (!this.#proxies.get(classId)!.has(qualifier)) {
       proxy = new RetargettingProxy<T>(instance);
       this.#proxies.get(classId)!.set(qualifier, proxy);
-      console.debug('Registering proxy', { id: target.Ⲑid, qualifier: qualifier.toString() });
+      if (this.#registry.trace) {
+        console.debug('Registering proxy', { id: target.Ⲑid, qualifier: qualifier.toString() });
+      }
     } else {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       proxy = this.#proxies.get(classId)!.get(qualifier) as RetargettingProxy<T>;
       proxy.setTarget(instance);
-      console.debug('Updating target', {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        id: target.Ⲑid, qualifier: qualifier.toString(), instanceType: (instance as unknown as ClassInstance<T>).constructor.name as string
-      });
+      if (this.#registry.trace) {
+        console.debug('Updating target', {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          id: target.Ⲑid, qualifier: qualifier.toString(), instanceType: (instance as unknown as ClassInstance<T>).constructor.name as string
+        });
+      }
     }
 
     return proxy.get();

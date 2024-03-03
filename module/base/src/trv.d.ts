@@ -16,6 +16,10 @@ declare global {
      */
     DEBUG: boolean | string;
     /** 
+     * Should we trace the framework
+     */
+    TRV_TRACE: boolean;
+    /** 
      * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.  
      */
     TRV_ENV: string;
