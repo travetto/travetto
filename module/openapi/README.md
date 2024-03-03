@@ -145,15 +145,8 @@ Options:
   -a, --additional-properties <string>  Additional Properties (default: [])
   -i, --input <string>                  Input file (default: "./openapi.yml")
   -o, --output <string>                 Output folder (default: "./api-client")
-  -d, --docker-image <string>           Docker Image to user (default: "arcsine/openapi-generator:latest")
-  -w, --watch                           Watch for file changes
+  -d, --docker-image <string>           Docker Image to user (default: "openapitools/openapi-generator-cli:latest")
   -h, --help                            display help for command
-
-Available Presets
-----------------------------------
-* @travetto/angular14 -- typescript-angular supportsES6=true,stringEnums=true,ngVersion=14.0,fileNaming=kebab-case
-* @travetto/angular15 -- typescript-angular supportsES6=true,stringEnums=true,ngVersion=15.0,fileNaming=kebab-case
-* @travetto/fetch -- typescript-fetch stringEnums=true
 ```
 
 This tool relies upon a custom build of [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator), which supports watching.  This allows for fast responsive client generation as the shape of the API changes.

@@ -14,6 +14,7 @@ const help = () => [
   ' * clean                      - Clean out the output and compiler caches',
   ' * info                       - Retrieve the compiler information, if running',
   ' * event <log|progress|state> - Watch events in realtime as newline delimited JSON',
+  ' * exec <file> [...args]      - Allow for compiling and executing an entrypoint file',
   ' * manifest --prod [output]   - Generate the project manifest',
 ].join('\n');
 
@@ -35,6 +36,7 @@ getEntry().then(async (ops) => {
     });
     case 'clean': return ops.clean();
     case 'manifest': return ops.manifest(args[0], flags.some(x => x === '--prod'));
+    case 'exec': return ops.getLoader().then(v => v(args[0], all.slice(1)));
     case 'start':
     case 'watch': return ops.watch();
     case 'build': return ops.build();

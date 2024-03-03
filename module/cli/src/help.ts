@@ -64,7 +64,7 @@ export class HelpUtil {
       params.push(param.join(' '));
       const desc = [cliTpl`${{ title: flag.description }}`];
 
-      if (key !== 'help' && flagVal !== null && flagVal !== undefined) {
+      if (key !== 'help' && flagVal !== null && flagVal !== undefined && flagVal !== '') {
         desc.push(cliTpl`(default: ${{ input: JSON.stringify(flagVal) }})`);
       }
       descs.push(desc.join(' '));

@@ -29,7 +29,7 @@ export class OpenApiClientHelp {
   }
 
   static async help(dockerImage: string, extendedHelp: boolean): Promise<string[]> {
-    let help: string[] = [];
+    const help: string[] = [];
     if (extendedHelp) {
       const formats = await this.getListOfFormats(dockerImage);
       help.push(

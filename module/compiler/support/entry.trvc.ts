@@ -91,7 +91,7 @@ export const main = (ctx: ManifestContext) => {
     },
 
     /** Build and return a loader */
-    async getLoader(): Promise<(mod: string) => Promise<unknown>> {
+    async getLoader(): Promise<(mod: string, args?: string[]) => Promise<unknown>> {
       Log.initLevel('none');
       if (!(await client.isWatching())) { // Short circuit if we can
         Log.initLevel('error');

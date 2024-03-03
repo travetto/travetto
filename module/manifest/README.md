@@ -68,7 +68,7 @@ $ trv main ./doc/lookup.ts
   source: './doc/test-class.ts',
   hash: 197152026,
   lines: [ 1, 3 ],
-  methods: { doStuff: { hash: 51337554, lines: [Array] } },
+  methods: { doStuff: { hash: 51337554, lines: [ 2, 2 ] } },
   abstract: false,
   synthetic: false
 }

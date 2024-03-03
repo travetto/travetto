@@ -34,6 +34,10 @@ export class ShutdownManager {
    * Wait for graceful shutdown to run and complete
    */
   static async gracefulShutdown(code: number | undefined = process.exitCode): Promise<void> {
+    if (code !== undefined) {
+      process.exitCode = code;
+    }
+
     if (this.#handlers.length) {
       console.debug('Graceful shutdown: started');
 
@@ -48,14 +52,14 @@ export class ShutdownManager {
       }));
 
       await Promise.race([
-        timers.setTimeout(Env.TRV_SHUTDOWN_WAIT.time ?? 2000), // Wait 2s and then force finish
+        timers.setTimeout(Env.TRV_SHUTDOWN_WAIT.time ?? 2000, undefined, { ref: false }), // Wait 2s and then force finish
         handlers,
       ]);
 
       console.debug('Graceful shutdown: completed');
     }
     if (code !== undefined) {
-      process.exit(code);
+      process.exit();
     }
   }
 }

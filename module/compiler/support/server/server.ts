@@ -86,7 +86,7 @@ export class CompilerServer {
       }
       log.info('Waiting for build to finish, before retrying');
       // Let the server finish
-      await this.#client.waitForState(['close'], 'Server closed', this.signal);
+      await this.#client.waitForState(['closed'], 'Server closed', this.signal);
       return this.#tryListen(attempt + 1);
     } else if (output === 'ok') {
       await this.#handle.server.writePid(this.info.serverPid);
@@ -206,7 +206,7 @@ export class CompilerServer {
       await new Promise((resolve, reject) => {
         setTimeout(reject, 2000).unref(); // 2s max wait
         this.#server.close(resolve);
-        this.#emitEvent({ type: 'state', payload: { state: 'close' } });
+        this.#emitEvent({ type: 'state', payload: { state: 'closed' } });
         setImmediate(() => {
           this.#server.closeAllConnections();
           this.#shutdown.abort();
