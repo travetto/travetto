@@ -106,7 +106,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param o Actual instance
    */
   resolveInstanceType<T>(cls: Class<T>, o: T): Class {
-    cls = SchemaRegistry.get(cls.Ⲑid).class; // Resolve by id to handle any stale references
+    cls = this.get(cls.Ⲑid).class; // Resolve by id to handle any stale references
 
     const base = this.getBaseSchema(cls);
     const clsSchema = this.get(cls);

@@ -34,6 +34,7 @@ class $ConsoleManager {
     this.set(listener, true);
     this.enhanceDebug(true);
     this.debug(false);
+    util.inspect.defaultOptions.depth = Math.max(util.inspect.defaultOptions.depth ?? 0, 4);
   }
 
   /**

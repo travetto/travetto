@@ -1,18 +1,45 @@
 #!/usr/bin/env node
 
-(async function () {
-  const args = [...process.argv.slice(0, 2), 'scaffold', ...process.argv.slice(2)];
+async function getScaffoldCwd() {
+  let cwd = process.cwd();
   if (process.env.npm_lifecycle_script === 'trv-scaffold') { // Is npx  run
-    const path = await import('path');
-    const parts = process.env.PATH.split(path.delimiter);
+    const { delimiter } = await import('node:path');
+    const parts = process.env.PATH.split(delimiter);
     const loc = parts.find(p => p.includes('npx') && p.includes('.bin'));
     if (loc) {
-      const final = loc.split('/node_modules')[0];
-      args.push('-c', process.cwd());
-      process.chdir(final);
+      cwd = loc.split('/node_modules')[0];
     }
   }
-  process.argv = args;
-  process.env.TRV_QUIET = 1;
-  await import('@travetto/cli/bin/trv.js');
+  return cwd;
+}
+
+async function getVersion(cwd) {
+  const fs = await import('node:fs/promises');
+  const pkg = JSON.parse(await fs.readFile(`${cwd}/package.json`, 'utf8'));
+  const version = pkg.version.replace(/(\d+[.]\d+)[.]\d+/, (_, v) => `${v}.0`).replace(/-([a-z]+)[.]\d+$/, (_, v) => `${v}.0`);
+  return version;
+}
+
+(async function () {
+  const scaffoldCwd = await getScaffoldCwd();
+  const version = await getVersion(scaffoldCwd);
+
+  const { spawn } = await import('node:child_process');
+  spawn('npx', [
+    `--package=@travetto/compiler@~${version}`,
+    '--',
+    'trvc', 'exec',
+    '@travetto/cli/support/entry.trv.js',
+    'scaffold',
+    '-c', process.cwd(),
+    ...process.argv.slice(2)
+  ], {
+    stdio: 'inherit',
+    cwd: scaffoldCwd,
+    env: {
+      ...process.env,
+      TRV_QUIET: 1,
+      NPM_CONFIG_YES: 'true'
+    }
+  });
 })();

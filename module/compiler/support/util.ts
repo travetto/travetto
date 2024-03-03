@@ -95,10 +95,13 @@ export class CommonUtil {
    * Create a module loader given a context, and assuming build is complete
    * @param ctx
    */
-  static moduleLoader(ctx: ManifestContext): (mod: string) => Promise<unknown> {
-    return (mod) => {
+  static moduleLoader(ctx: ManifestContext): (mod: string, args?: string[]) => Promise<unknown> {
+    return (mod, args) => {
       const outputRoot = path.resolve(ctx.workspace.path, ctx.build.outputFolder);
       process.env.TRV_MANIFEST = path.resolve(outputRoot, 'node_modules', ctx.main.name); // Setup for running
+      if (args) {
+        process.argv = [process.argv0, mod, ...args];
+      }
       return import(path.join(outputRoot, 'node_modules', mod)); // Return function to run import on a module
     };
   }

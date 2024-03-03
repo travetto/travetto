@@ -157,7 +157,9 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    */
   onInstall(cls: Class, e: ChangeEvent<Class>): void {
     if (this.pending.has(cls.Ⲑid) || this.pendingFields.has(cls.Ⲑid)) {
-      console.debug('Installing', { service: this.constructor.name, id: cls.Ⲑid });
+      if (this.trace) {
+        console.debug('Installing', { service: this.constructor.name, id: cls.Ⲑid });
+      }
       const result = this.onInstallFinalize(cls);
       this.pendingFields.delete(cls.Ⲑid);
       this.pending.delete(cls.Ⲑid);
@@ -172,7 +174,9 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    */
   onUninstall(cls: Class, e: ChangeEvent<Class>): void {
     if (this.entries.has(cls.Ⲑid)) {
-      console.debug('Uninstalling', { service: this.constructor.name, id: cls.Ⲑid });
+      if (this.trace) {
+        console.debug('Uninstalling', { service: this.constructor.name, id: cls.Ⲑid });
+      }
       this.expired.set(cls.Ⲑid, this.entries.get(cls.Ⲑid)!);
       this.entries.delete(cls.Ⲑid);
       this.onUninstallFinalize(cls);

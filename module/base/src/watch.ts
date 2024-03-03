@@ -22,9 +22,15 @@ export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit
 
   await client.waitForState(['compile-end', 'watch-start'], undefined, ctrl.signal);
 
-  for await (const ev of client.fetchEvents('change', { signal: ctrl.signal, enforceIteration: true })) {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    yield ev as unknown as T;
+  if (!await client.isWatching()) { // If we get here, without a watch
+    while (!await client.isWatching()) { // Wait until watch starts
+      await new Promise(r => setTimeout(r, 1000 * 60));
+    }
+  } else {
+    for await (const ev of client.fetchEvents('change', { signal: ctrl.signal, enforceIteration: true })) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      yield ev as unknown as T;
+    }
   }
 
   remove();

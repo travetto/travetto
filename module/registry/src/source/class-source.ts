@@ -29,6 +29,11 @@ export class ClassSource implements ChangeSource<Class> {
   #emitter = new EventEmitter();
 
   /**
+   * Are we in a mode that should have enhanced debug info
+   */
+  trace = Env.DEBUG.val?.includes('@travetto/registry');
+
+  /**
    * Flush classes
    */
   #flush(): void {
@@ -96,7 +101,9 @@ export class ClassSource implements ChangeSource<Class> {
    * Emit a change event
    */
   emit(e: ChangeEvent<Class>): void {
-    console.debug('Emitting change', { type: e.type, curr: e.curr?.Ⲑid, prev: e.prev?.Ⲑid });
+    if (this.trace) {
+      console.debug('Emitting change', { type: e.type, curr: e.curr?.Ⲑid, prev: e.prev?.Ⲑid });
+    }
     this.#emitter.emit('change', e);
   }
 

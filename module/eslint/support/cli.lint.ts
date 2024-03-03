@@ -19,6 +19,9 @@ export class LintCommand implements CliCommandShape {
   /** Since a specific git commit */
   since?: string;
 
+  /** Should we attempt to fix? */
+  fix?: boolean;
+
   preMain(): void {
     Env.DEBUG.set(false);
   }
@@ -33,10 +36,12 @@ export class LintCommand implements CliCommandShape {
       files = mods.filter(x => x.workspace).map(x => x.sourcePath);
     }
 
-
     const res = await ExecUtil.getResult(spawn('npx', [
       'eslint',
+      '--cache',
+      '--cache-location', RuntimeContext.toolPath('.eslintcache'),
       ...(this.format ? ['--format', this.format] : []),
+      ...(this.fix ? ['--fix'] : []),
       ...files
     ], {
       cwd: RuntimeContext.workspace.path,
