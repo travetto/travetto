@@ -1,10 +1,9 @@
 import https from 'node:https';
 import http from 'node:http';
 import net from 'node:net';
-import timers from 'node:timers/promises';
 import { spawn } from 'node:child_process';
 
-import { ExecUtil } from '@travetto/base';
+import { ExecUtil, Util } from '@travetto/base';
 
 /**
  * Utilities to support command execution
@@ -42,7 +41,7 @@ export class CommandUtil {
       if (status >= 200 && status <= 299) {
         return body; // We good
       }
-      await timers.setTimeout(100, undefined, { ref: false });
+      await Util.nonBlockingTimeout(100);
     }
     throw new Error('Could not make http connection to url');
   }
@@ -67,7 +66,7 @@ export class CommandUtil {
         });
         return;
       } catch {
-        await timers.setTimeout(50, undefined, { ref: false });
+        await Util.nonBlockingTimeout(50);
       }
     }
     throw new Error('Could not acquire port');

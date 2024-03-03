@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import timers from 'node:timers/promises';
 
 import type { ManifestContext } from '@travetto/manifest';
 import { Log, Logger } from '../log';
+import { CommonUtil } from '../util';
 
 export class ProcessHandle {
 
@@ -56,7 +56,7 @@ export class ProcessHandle {
       if (!await this.isRunning()) {
         return true;
       }
-      await timers.setTimeout(100);
+      await CommonUtil.nonBlockingTimeout(100);
     }
     try {
       this.#log.debug('Force Killing', pid);

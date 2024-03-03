@@ -1,4 +1,3 @@
-import timers from 'node:timers/promises';
 import tty from 'node:tty';
 
 import { Env, Util } from '@travetto/base';
@@ -29,7 +28,7 @@ export class Terminal {
     let i = 0;
     while (!done) {
       await this.#writer.setPosition(pos).write(STD_WAIT_STATES[i++ % STD_WAIT_STATES.length]).commit(true);
-      await timers.setTimeout(100, undefined, { ref: false });
+      await Util.nonBlockingTimeout(100);
     }
   }
 

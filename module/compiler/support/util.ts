@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import timers from 'node:timers/promises';
 import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
@@ -104,5 +105,19 @@ export class CommonUtil {
       }
       return import(path.join(outputRoot, 'node_modules', mod)); // Return function to run import on a module
     };
+  }
+
+  /**
+   * Non-blocking timeout, that is cancellable
+   */
+  static nonBlockingTimeout(time: number): Promise<void> {
+    return timers.setTimeout(time, undefined, { ref: false }).catch(() => { });
+  }
+
+  /**
+   * Queue new macrotask
+   */
+  static queueMacroTask(): Promise<void> {
+    return timers.setImmediate(undefined);
   }
 }

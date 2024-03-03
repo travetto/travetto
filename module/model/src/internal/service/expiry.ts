@@ -1,6 +1,4 @@
-import timers from 'node:timers/promises';
-
-import { ShutdownManager, Class, TimeSpan, TimeUtil } from '@travetto/base';
+import { ShutdownManager, Class, TimeSpan, TimeUtil, Util } from '@travetto/base';
 
 import { ModelRegistry } from '../../registry/model';
 import { ModelExpirySupport } from '../../service/expiry';
@@ -41,9 +39,9 @@ export class ModelExpiryUtil {
       ShutdownManager.onGracefulShutdown(async () => running.abort(), this);
 
       (async (): Promise<void> => {
-        await timers.setTimeout(1000, undefined, { ref: false });  // Wait a second to start culling
+        await Util.nonBlockingTimeout(1000);
         while (!running.signal.aborted) {
-          await timers.setTimeout(cullInterval, undefined, { ref: false });
+          await Util.nonBlockingTimeout(cullInterval);
           await Promise.all(cullable.map(cls => svc.deleteExpired(cls)));
         }
       })();

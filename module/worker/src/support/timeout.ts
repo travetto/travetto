@@ -7,7 +7,7 @@ import { ExecutionError } from './error';
  */
 export class Timeout extends ExecutionError {
 
-  #ctrl?: AbortController;
+  #timeout?: AbortController;
   #promise = Util.resolvablePromise();
   #duration: number;
 
@@ -20,10 +20,10 @@ export class Timeout extends ExecutionError {
    * Stop timeout from firing
    */
   cancel(): void {
-    if (this.#ctrl) {
-      this.#ctrl.abort();
+    if (this.#timeout) {
       this.#promise.resolve();
-      this.#ctrl = undefined;
+      this.#timeout.abort();
+      this.#timeout = undefined;
     }
   }
 
@@ -31,10 +31,11 @@ export class Timeout extends ExecutionError {
    * Wait for timeout as a promise
    */
   wait(): Promise<void> {
-    if (!this.#ctrl) {
-      this.#ctrl = new AbortController();
-      timers.setTimeout(this.#duration, undefined, { ref: false, signal: this.#ctrl.signal })
-        .then(() => this.#promise.reject(this), () => { });
+    if (!this.#timeout) {
+      this.#timeout = new AbortController();
+      timers.setTimeout(this.#duration, undefined, { ref: false, signal: this.#timeout.signal })
+        .then(() => this.#promise.reject(this))
+        .catch(() => false);
     }
     return this.#promise;
   }

@@ -6,6 +6,7 @@ import { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerEvent, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types';
 import type { LogShape } from '../log';
+import { CommonUtil } from '../util';
 import { ProcessHandle } from './process-handle';
 
 type FetchEventsConfig<T> = {
@@ -48,7 +49,7 @@ export class CompilerClient {
     const timeoutCtrl = new AbortController();
 
     opts?.signal?.addEventListener('abort', () => ctrl.abort());
-    timers.setTimeout(opts?.timeout ?? 100, undefined, { ref: false })
+    timers.setTimeout(opts?.timeout ?? 100, undefined, { ref: false, signal: timeoutCtrl.signal })
       .then(() => {
         logTimeout && this.#log.error(`Timeout on request to ${this.#url}${rel}`);
         ctrl.abort('TIMEOUT');
@@ -127,7 +128,7 @@ export class CompilerClient {
           if (line.trim().charAt(0) === '{') {
             const val = JSON.parse(line);
             if (cfg.until?.(val)) {
-              await timers.setTimeout(1);
+              await CommonUtil.queueMacroTask();
               ctrl.abort();
             }
             yield val;
@@ -138,7 +139,7 @@ export class CompilerClient {
       }
       signal.removeEventListener('abort', quit);
 
-      await timers.setTimeout(1);
+      await CommonUtil.queueMacroTask();
 
       info = await this.info();
 

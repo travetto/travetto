@@ -1,9 +1,8 @@
 import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import readline from 'node:readline';
-import timers from 'node:timers/promises';
 
-import { Env, ExecUtil, ShutdownManager } from '@travetto/base';
+import { Env, ExecUtil, ShutdownManager, Util } from '@travetto/base';
 import { IndexedFile, RuntimeIndex } from '@travetto/manifest';
 
 /**
@@ -14,7 +13,7 @@ export class RunnerUtil {
    * Add 50 ms to the shutdown to allow for buffers to output properly
    */
   static registerCleanup(scope: string): void {
-    ShutdownManager.onGracefulShutdown(() => timers.setTimeout(50, undefined, { ref: false }), `test.${scope}.bufferOutput`);
+    ShutdownManager.onGracefulShutdown(() => Util.nonBlockingTimeout(50), `test.${scope}.bufferOutput`);
   }
 
   /**

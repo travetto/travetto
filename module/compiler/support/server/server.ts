@@ -1,7 +1,6 @@
 import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import timers from 'node:timers/promises';
 import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
@@ -78,7 +77,7 @@ export class CompilerServer {
         .on('close', () => log.debug('Server close event'));
 
       const url = new URL(this.#url);
-      timers.setTimeout(1).then(() => this.#server.listen(+url.port, url.hostname)); // Run async
+      CommonUtil.queueMacroTask().then(() => this.#server.listen(+url.port, url.hostname)); // Run async
     });
 
     if (output === 'retry') {
@@ -122,7 +121,7 @@ export class CompilerServer {
   async #disconnectActive(): Promise<void> {
     log.info('Server disconnect requested');
     this.info.iteration = Date.now();
-    await timers.setTimeout(20, undefined, { ref: false });
+    await CommonUtil.nonBlockingTimeout(20);
     for (const el of Object.values(this.#listeners)) {
       try { el.res.end(); } catch { }
     }
@@ -205,7 +204,7 @@ export class CompilerServer {
 
     try {
       await new Promise((resolve, reject) => {
-        timers.setTimeout(2000, undefined, { ref: false }).then(reject); // Wait 2s max
+        CommonUtil.nonBlockingTimeout(2000).then(reject); // Wait 2s max
         this.#server.close(resolve);
         this.#emitEvent({ type: 'state', payload: { state: 'closed' } });
         setImmediate(() => {
