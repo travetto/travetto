@@ -28,7 +28,7 @@ export class Terminal {
     let i = 0;
     while (!done) {
       await this.#writer.setPosition(pos).write(STD_WAIT_STATES[i++ % STD_WAIT_STATES.length]).commit(true);
-      await Util.nonBlockingTimeout(100);
+      await Util.blockingTimeout(100);
     }
   }
 

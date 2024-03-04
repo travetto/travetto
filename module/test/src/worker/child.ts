@@ -49,7 +49,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     // Let parent know the child is ready for handling commands
     this.send(Events.READY);
 
-    await Util.nonBlockingTimeout(TimeUtil.timeToMs('10m'));
+    await Util.blockingTimeout(TimeUtil.timeToMs('10m'));
   }
 
   /**

@@ -41,7 +41,7 @@ export class CommandUtil {
       if (status >= 200 && status <= 299) {
         return body; // We good
       }
-      await Util.nonBlockingTimeout(100);
+      await Util.blockingTimeout(100);
     }
     throw new Error('Could not make http connection to url');
   }
@@ -66,7 +66,7 @@ export class CommandUtil {
         });
         return;
       } catch {
-        await Util.nonBlockingTimeout(50);
+        await Util.blockingTimeout(50);
       }
     }
     throw new Error('Could not acquire port');

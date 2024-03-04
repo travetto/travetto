@@ -96,7 +96,14 @@ export class Util {
   }
 
   /**
-   * Non-blocking timeout, that is cancellable
+   * Blocking timeout
+   */
+  static blockingTimeout(time: number): Promise<void> {
+    return timers.setTimeout(time, undefined, { ref: false }).catch(() => { });
+  }
+
+  /**
+   * Non-blocking timeout
    */
   static nonBlockingTimeout(time: number): Promise<void> {
     return timers.setTimeout(time, undefined, { ref: false }).catch(() => { });
