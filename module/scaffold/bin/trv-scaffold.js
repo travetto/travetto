@@ -16,7 +16,7 @@ async function getScaffoldCwd() {
 async function getVersion(cwd) {
   const fs = await import('node:fs/promises');
   const pkg = JSON.parse(await fs.readFile(`${cwd}/package.json`, 'utf8'));
-  const version = pkg.version.replace(/(\d+[.]\d+)[.]\d+/, (_, v) => `${v}.0`).replace(/-([a-z]+)[.]\d+$/, (_, v) => `${v}.0`);
+  const version = pkg.dependencies['@travetto/scaffold'].replace(/[^~]?(\d+[.]\d+)[.]\d+/, (_, v) => `${v}.0`).replace(/-([a-z]+)[.]\d+$/, (_, v) => `${v}.0`);
   return version;
 }
 
@@ -24,10 +24,11 @@ async function getVersion(cwd) {
   const scaffoldCwd = await getScaffoldCwd();
   const version = await getVersion(scaffoldCwd);
 
-  const { spawn } = await import('node:child_process');
+  const { spawn, execSync } = await import('node:child_process');
+  // Ensure we install the compiler first
+  execSync(`npm i @travetto/compiler@^${version}`, { stdio: 'pipe', cwd: scaffoldCwd });
+
   spawn('npx', [
-    `--package=@travetto/compiler@~${version}`,
-    '--',
     'trvc', 'exec',
     '@travetto/cli/support/entry.trv.js',
     'scaffold',
@@ -39,7 +40,6 @@ async function getVersion(cwd) {
     env: {
       ...process.env,
       TRV_QUIET: 1,
-      NPM_CONFIG_YES: 'true'
     }
   });
 })();
