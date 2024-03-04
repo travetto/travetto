@@ -56,8 +56,9 @@ export class CompilerClient {
       })
       .catch(() => { });
     const res = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
+    const out = { ok: res.ok, text: await res.text() };
     timeoutCtrl.abort();
-    return { ok: res.ok, text: await res.text() };
+    return out;
   }
 
   /** Get server information, if server is running */
