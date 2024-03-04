@@ -8,6 +8,7 @@ import type { ManifestContext } from '@travetto/manifest';
 import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types';
 import { Log } from '../log';
 import { CommonUtil } from '../util';
+import { TimerUtil } from '../timer';
 import { CompilerClient } from './client';
 import { ProcessHandle } from './process-handle';
 
@@ -77,7 +78,7 @@ export class CompilerServer {
         .on('close', () => log.debug('Server close event'));
 
       const url = new URL(this.#url);
-      CommonUtil.queueMacroTask().then(() => this.#server.listen(+url.port, url.hostname)); // Run async
+      TimerUtil.queueMacroTask().then(() => this.#server.listen(+url.port, url.hostname)); // Run async
     });
 
     if (output === 'retry') {
@@ -121,7 +122,7 @@ export class CompilerServer {
   async #disconnectActive(): Promise<void> {
     log.info('Server disconnect requested');
     this.info.iteration = Date.now();
-    await CommonUtil.nonBlockingTimeout(20);
+    await TimerUtil.nonBlockingTimeout(20);
     for (const el of Object.values(this.#listeners)) {
       try { el.res.end(); } catch { }
     }
@@ -204,7 +205,7 @@ export class CompilerServer {
 
     try {
       await new Promise((resolve, reject) => {
-        CommonUtil.nonBlockingTimeout(2000).then(reject); // Wait 2s max
+        TimerUtil.nonBlockingTimeout(2000).then(reject); // Wait 2s max
         this.#server.close(resolve);
         this.#emitEvent({ type: 'state', payload: { state: 'closed' } });
         setImmediate(() => {
