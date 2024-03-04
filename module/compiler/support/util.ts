@@ -1,44 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { setMaxListeners } from 'node:events';
-
-import type { ManifestContext } from '@travetto/manifest';
+import timers from 'node:timers/promises';
 
 import { Log } from './log';
 
-const OPT_CACHE: Record<string, import('typescript').CompilerOptions> = {};
-
 export class CommonUtil {
-  /**
-   * Returns the compiler options
-   */
-  static async getCompilerOptions(ctx: ManifestContext): Promise<{}> {
-    if (!(ctx.workspace.path in OPT_CACHE)) {
-      let tsconfig = path.resolve(ctx.workspace.path, 'tsconfig.json');
-
-      if (!await fs.stat(tsconfig).then(_ => true, _ => false)) {
-        tsconfig = path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, 'tsconfig.trv.json');
-      }
-
-      const ts = (await import('typescript')).default;
-
-      const { options } = ts.parseJsonSourceFileConfigFileContent(
-        ts.readJsonConfigFile(tsconfig, ts.sys.readFile), ts.sys, ctx.workspace.path
-      );
-
-      OPT_CACHE[ctx.workspace.path] = {
-        ...options,
-        allowJs: true,
-        resolveJsonModule: true,
-        sourceRoot: ctx.workspace.path,
-        rootDir: ctx.workspace.path,
-        outDir: path.resolve(ctx.workspace.path),
-        module: ctx.workspace.type === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext,
-      };
-    }
-    return OPT_CACHE[ctx.workspace.path];
-  }
-
   /**
    * Determine file type
    */
@@ -92,17 +59,16 @@ export class CommonUtil {
   }
 
   /**
-   * Create a module loader given a context, and assuming build is complete
-   * @param ctx
+   * Non-blocking timeout, that is cancellable
    */
-  static moduleLoader(ctx: ManifestContext): (mod: string, args?: string[]) => Promise<unknown> {
-    return (mod, args) => {
-      const outputRoot = path.resolve(ctx.workspace.path, ctx.build.outputFolder);
-      process.env.TRV_MANIFEST = path.resolve(outputRoot, 'node_modules', ctx.main.name); // Setup for running
-      if (args) {
-        process.argv = [process.argv0, mod, ...args];
-      }
-      return import(path.join(outputRoot, 'node_modules', mod)); // Return function to run import on a module
-    };
+  static nonBlockingTimeout(time: number): Promise<void> {
+    return timers.setTimeout(time, undefined, { ref: false }).catch(() => { });
+  }
+
+  /**
+   * Queue new macrotask
+   */
+  static queueMacroTask(): Promise<void> {
+    return timers.setImmediate(undefined);
   }
 }

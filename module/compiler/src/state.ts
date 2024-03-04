@@ -4,7 +4,7 @@ import timers from 'node:timers/promises';
 import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
-import { CommonUtil } from '../support/util';
+import { TypescriptUtil } from '../support/ts-util';
 
 import { CompilerUtil } from './util';
 import { CompileEmitError, CompileStateEntry } from './types';
@@ -82,7 +82,7 @@ export class CompilerState implements ts.CompilerHost {
     this.#transformerManager = await TransformerManager.create(this.#manifestIndex);
 
     this.#compilerOptions = {
-      ...await CommonUtil.getCompilerOptions(this.#manifest),
+      ...await TypescriptUtil.getCompilerOptions(this.#manifest),
       rootDir: this.#rootDir,
       outDir: this.#outputPath
     };

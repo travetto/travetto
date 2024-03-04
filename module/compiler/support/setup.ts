@@ -6,6 +6,7 @@ import { type DeltaEvent, type ManifestContext, type Package } from '@travetto/m
 
 import { Log } from './log';
 import { CommonUtil } from './util';
+import { TypescriptUtil } from './ts-util';
 
 type ModFile = { input: string, output: string, stale: boolean };
 
@@ -57,7 +58,7 @@ export class CompilerSetup {
 
       const ts = (await import('typescript')).default;
       const content = ts.transpile(text, {
-        ...await CommonUtil.getCompilerOptions(ctx),
+        ...await TypescriptUtil.getCompilerOptions(ctx),
         sourceMap: false,
         inlineSourceMap: true,
       }, inputFile);

@@ -6,7 +6,7 @@ import { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerEvent, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types';
 import type { LogShape } from '../log';
-import { TimerUtil } from '../timer';
+import { CommonUtil } from '../util';
 import { ProcessHandle } from './process-handle';
 
 type FetchEventsConfig<T> = {
@@ -129,7 +129,7 @@ export class CompilerClient {
           if (line.trim().charAt(0) === '{') {
             const val = JSON.parse(line);
             if (cfg.until?.(val)) {
-              await TimerUtil.queueMacroTask();
+              await CommonUtil.queueMacroTask();
               ctrl.abort();
             }
             yield val;
@@ -140,7 +140,7 @@ export class CompilerClient {
       }
       signal.removeEventListener('abort', quit);
 
-      await TimerUtil.queueMacroTask();
+      await CommonUtil.queueMacroTask();
 
       info = await this.info();
 

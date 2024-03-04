@@ -6,7 +6,6 @@ import type { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerMode, CompilerServerInfo } from './types';
 import { Log } from './log';
-import { CommonUtil } from './util';
 import { CompilerSetup } from './setup';
 import { CompilerServer } from './server/server';
 import { CompilerRunner } from './server/runner';
@@ -97,7 +96,15 @@ export const main = (ctx: ManifestContext) => {
         Log.initLevel('error');
         await compile('build');
       }
-      return CommonUtil.moduleLoader(ctx);
+
+      return (mod, args) => {
+        const outputRoot = path.resolve(ctx.workspace.path, ctx.build.outputFolder);
+        process.env.TRV_MANIFEST = path.resolve(outputRoot, 'node_modules', ctx.main.name); // Setup for running
+        if (args) {
+          process.argv = [process.argv0, mod, ...args];
+        }
+        return import(path.join(outputRoot, 'node_modules', mod)); // Return function to run import on a module
+      };
     },
 
     /** Manifest entry point */

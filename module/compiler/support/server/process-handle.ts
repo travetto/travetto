@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 import { Log, Logger } from '../log';
-import { TimerUtil } from '../timer';
+import { CommonUtil } from '../util';
 
 export class ProcessHandle {
 
@@ -56,7 +56,7 @@ export class ProcessHandle {
       if (!await this.isRunning()) {
         return true;
       }
-      await TimerUtil.nonBlockingTimeout(100);
+      await CommonUtil.nonBlockingTimeout(100);
     }
     try {
       this.#log.debug('Force Killing', pid);
