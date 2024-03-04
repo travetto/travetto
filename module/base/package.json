@@ -1,6 +1,6 @@
 {
   "name": "@travetto/base",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "Environment config and common utilities for travetto applications.",
   "keywords": [
     "console-manager",
