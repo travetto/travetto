@@ -121,7 +121,7 @@ export class CompilerServer {
   async #disconnectActive(): Promise<void> {
     log.info('Server disconnect requested');
     this.info.iteration = Date.now();
-    await CommonUtil.nonBlockingTimeout(20);
+    await CommonUtil.blockingTimeout(20);
     for (const el of Object.values(this.#listeners)) {
       try { el.res.end(); } catch { }
     }

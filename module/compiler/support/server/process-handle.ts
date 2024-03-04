@@ -56,7 +56,7 @@ export class ProcessHandle {
       if (!await this.isRunning()) {
         return true;
       }
-      await CommonUtil.nonBlockingTimeout(100);
+      await CommonUtil.blockingTimeout(100);
     }
     try {
       this.#log.debug('Force Killing', pid);

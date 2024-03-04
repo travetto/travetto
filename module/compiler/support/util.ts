@@ -59,10 +59,17 @@ export class CommonUtil {
   }
 
   /**
-   * Non-blocking timeout, that is cancellable
+   * Non-blocking timeout
    */
   static nonBlockingTimeout(time: number): Promise<void> {
     return timers.setTimeout(time, undefined, { ref: false }).catch(() => { });
+  }
+
+  /**
+   * Blocking timeout
+   */
+  static blockingTimeout(time: number): Promise<void> {
+    return timers.setTimeout(time, undefined, { ref: true }).catch(() => { });
   }
 
   /**
