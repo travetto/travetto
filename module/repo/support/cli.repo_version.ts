@@ -23,6 +23,8 @@ export class RepoVersionCommand implements CliCommandShape {
    * @alias m
    */
   modules?: string[];
+  /** Should we create a tag for the version */
+  tag?: boolean;
 
   async validate(): Promise<CliValidationError | undefined> {
     if (!this.force && await CliScmUtil.isWorkspaceDirty()) {
@@ -32,6 +34,8 @@ export class RepoVersionCommand implements CliCommandShape {
 
   async main(level: SemverLevel, prefix?: string): Promise<void> {
     const mode = this.mode ?? CHANGE_LEVELS.has(level) ? 'changed' : 'all';
+
+    this.tag ??= (level === 'minor' || level === 'major');
 
     const allModules = await CliModuleUtil.findModules(mode === 'changed' ? 'changed' : 'all');
 
@@ -48,6 +52,10 @@ export class RepoVersionCommand implements CliCommandShape {
     if (this.commit) {
       const commitMessage = `Publish ${modules.map(x => `${x.name}#${versions[x.name]?.replace('^', '') ?? x.version}`).join(',')}`;
       console.log!(await CliScmUtil.createCommit(commitMessage));
+      if (this.tag) {
+        await CliScmUtil.createTag(versions['@travetto/manifest']);
+      }
+
       // Touch package when done to trigger restart of compiler
       await fs.utimes(RuntimeContext.workspaceRelative('package.json'), Date.now(), Date.now());
     }

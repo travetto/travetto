@@ -8,6 +8,8 @@ import { CliModuleUtil } from '@travetto/cli';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor' | 'preminor' | 'prepatch';
 
+type Ctx = Omit<ManifestContext, 'build'>;
+
 /**
  * Utilities for working with package managers
  */
@@ -16,7 +18,7 @@ export class PackageManager {
   /**
    * Is a module already published
    */
-  static isPublished(ctx: ManifestContext, mod: IndexedModule): ChildProcess {
+  static isPublished(ctx: Ctx, mod: IndexedModule): ChildProcess {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -32,7 +34,7 @@ export class PackageManager {
   /**
    * Validate published result
    */
-  static validatePublishedResult(ctx: ManifestContext, mod: IndexedModule, result: ExecutionResult): boolean {
+  static validatePublishedResult(ctx: Ctx, mod: IndexedModule, result: ExecutionResult): boolean {
     switch (ctx.workspace.manager) {
       case 'npm': {
         if (!result.valid && !result.stderr.includes('E404')) {
@@ -52,7 +54,7 @@ export class PackageManager {
   /**
    * Setting the version
    */
-  static async version(ctx: ManifestContext, modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
+  static async version(ctx: Ctx, modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
     const mods = modules.flatMap(m => ['-w', m.sourceFolder]);
     let args: string[];
     switch (ctx.workspace.manager) {
@@ -67,7 +69,7 @@ export class PackageManager {
   /**
    * Dry-run packaging
    */
-  static dryRunPackaging(ctx: ManifestContext, mod: IndexedModule): ChildProcess {
+  static dryRunPackaging(ctx: Ctx, mod: IndexedModule): ChildProcess {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -81,7 +83,7 @@ export class PackageManager {
   /**
    * Publish a module
    */
-  static publish(ctx: ManifestContext, mod: IndexedModule, dryRun: boolean | undefined): ChildProcess {
+  static publish(ctx: Ctx, mod: IndexedModule, dryRun: boolean | undefined): ChildProcess {
     if (dryRun) {
       return this.dryRunPackaging(ctx, mod);
     }

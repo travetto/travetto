@@ -115,7 +115,7 @@ class $RuntimeIndex extends ManifestIndex {
 
 export const RuntimeIndex = new $RuntimeIndex(process.env.TRV_MANIFEST!);
 
-const build = <T extends object>(inp: T, props: (keyof ManifestContext)[]): T & ManifestContext => {
+const build = <T extends object, K extends keyof ManifestContext>(inp: T, props: K[]): T & Pick<ManifestContext, K> => {
   for (const prop of props) {
     Object.defineProperty(inp, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
   }

@@ -84,6 +84,14 @@ export class CliScmUtil {
   }
 
   /**
+   * Create a tag
+   */
+  static createTag(version: string): Promise<string> {
+    version = version.replace(/[^0-9a-z_\-.]/g, '');
+    return ExecUtil.getResult(spawn('git', ['tag', '-a', `${version}`, '-m', `Release ${version}`])).then(r => r.stdout);
+  }
+
+  /**
    * Verify if workspace is dirty
    */
   static async isWorkspaceDirty(): Promise<boolean> {
