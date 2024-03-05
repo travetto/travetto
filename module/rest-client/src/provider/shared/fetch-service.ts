@@ -67,7 +67,7 @@ export abstract class BaseFetchService extends BaseRemoteService<BodyInit, Respo
       if (req.timeout) {
         const controller = new AbortController();
         fetchInit.signal = controller.signal;
-        const timer = setTimeout(() => controller.abort(), req.timeout);
+        const timer = setTimeout(() => controller.abort(), req.timeout).unref();
         controller.signal.onabort = (): void => { timer && clearTimeout(timer); };
       }
 
