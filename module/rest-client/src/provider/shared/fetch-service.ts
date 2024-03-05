@@ -6,16 +6,14 @@ function isResponse(v: unknown): v is Response {
   return v && v.status && v.headers;
 }
 
-type BodyInit = Exclude<RequestInit['body'], undefined>;
-
-export abstract class BaseFetchService extends BaseRemoteService<BodyInit, Response> {
+export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Response> {
 
   postResponseHandlers: PostResponseHandler<Response>[];
-  preRequestHandlers: PreRequestHandler<BodyInit>[];
+  preRequestHandlers: PreRequestHandler<RequestInit>[];
 
-  constructor(cfg: IRemoteServiceConfig<BodyInit, Response> & {
+  constructor(cfg: IRemoteServiceConfig<RequestInit, Response> & {
     postResponseHandlers?: PostResponseHandler<Response>[];
-    preRequestHandlers?: PreRequestHandler<BodyInit>[];
+    preRequestHandlers?: PreRequestHandler<RequestInit>[];
   }) {
     super(cfg);
     this.postResponseHandlers = cfg.postResponseHandlers ?? [];
@@ -50,7 +48,7 @@ export abstract class BaseFetchService extends BaseRemoteService<BodyInit, Respo
   }
 
   async makeRequest<T>(params: unknown[], cfg: RequestDefinition): Promise<T> {
-    let req = CommonUtil.buildRequest<BodyInit, Response>(this, params, cfg);
+    let req = CommonUtil.buildRequest<RequestInit, Response>(this, params, cfg);
 
     try {
       for (const fn of this.preRequestHandlers) {

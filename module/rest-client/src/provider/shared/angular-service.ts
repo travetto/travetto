@@ -16,7 +16,7 @@ export class Configuration implements IAngularServiceConfig {
   }
 }
 
-export abstract class BaseAngularService extends BaseRemoteService<BodyInit, Response>  {
+export abstract class BaseAngularService extends BaseRemoteService<RequestInit, Response>  {
   abstract get transform(): <T>() => OperatorFunction<T, T>;
   abstract get client(): HttpClient;
 
