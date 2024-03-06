@@ -36,7 +36,7 @@
     "@travetto/compiler": "^4.0.7",
     "@travetto/email-compiler": "^4.0.4",
     "@travetto/pack": "^4.0.3",
-    "@travetto/rest-client": "^4.0.6"
+    "@travetto/rest-client": "^4.0.7"
   },
   "travetto": {
     "displayName": "Todo Application"
