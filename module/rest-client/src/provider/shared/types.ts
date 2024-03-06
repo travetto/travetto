@@ -29,8 +29,8 @@ export type RequestOptions<T = unknown> = {
   withCredentials?: boolean;
 };
 
-export type PreRequestHandler<B> = (req: RequestOptions<B>) => OrProm<RequestOptions<B> | undefined>;
-export type PostResponseHandler<R> = (res: R) => OrProm<R | undefined>;
+export type PreRequestHandler<B> = (req: RequestOptions<B>) => OrProm<RequestOptions<B> | undefined | void>;
+export type PostResponseHandler<R> = (res: R) => OrProm<R | undefined | void>;
 
 export type IRemoteServiceConfig<B, R> = Partial<Omit<IRemoteService<B, R>, 'routePath'>>;
 
