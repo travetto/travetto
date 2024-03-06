@@ -33,6 +33,7 @@ Options:
   -f, --force                  Force operation, even in a dirty workspace (default: false)
   --commit, --no-commit        Produce release commit message (default: true)
   -m, --modules <string>       The module when mode is single
+  -t, --tag                    Should we create a tag for the version
   -h, --help                   display help for command
 ```
 

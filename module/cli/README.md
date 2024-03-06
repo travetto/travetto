@@ -494,7 +494,7 @@ export class RunRestCommand implements CliCommandShape {
     if (await CliUtil.debugIfIpc(this) || await CliUtil.runWithRestart(this)) {
       return;
     }
-    const { RestApplication } = await import('../src/application/rest.js');
+    const { RestApplication } = await import('../src/application/rest');
     try {
       return await DependencyRegistry.runInstance(RestApplication);
     } catch (err) {
