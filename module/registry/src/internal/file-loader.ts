@@ -47,7 +47,7 @@ class $DynamicFileLoader {
     this.#initialized = true;
 
     // TODO: ESM Support?
-    const { DynamicCommonjsLoader } = await import('./commonjs-loader.js');
+    const { DynamicCommonjsLoader } = await import('./commonjs-loader');
     this.#loader = new DynamicCommonjsLoader();
 
     await this.#loader.init?.();

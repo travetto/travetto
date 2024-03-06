@@ -23,7 +23,7 @@ export class TestWatcherCommand {
     }
 
     try {
-      const { TestWatcher } = await import('../src/execute/watcher.js');
+      const { TestWatcher } = await import('../src/execute/watcher');
       await TestWatcher.watch(this.format, this.mode === 'all');
     } catch (err) {
       console.error(err);

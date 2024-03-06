@@ -17,7 +17,7 @@ const providers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
  */
 export class DocRenderer {
 
-  static async get(file: string, manifest: ManifestContext): Promise<DocRenderer> {
+  static async get(file: string, manifest: Pick<ManifestContext, 'workspace'>): Promise<DocRenderer> {
     const mod = RuntimeIndex.getFromSource(file)?.import;
     if (!mod) {
       throw new Error(`Unable to render ${file}, not in the manifest`);
