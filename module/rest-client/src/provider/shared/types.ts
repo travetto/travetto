@@ -21,7 +21,7 @@ export type RequestDefinition = {
 type OrProm<X> = X | Promise<X>;
 
 export type RequestOptions<T = unknown> = T & {
-  headers: Record<string, string>;
+  headers?: Record<string, string>;
   url: URL;
   body?: unknown;
   method: HttpMethod;
@@ -29,7 +29,7 @@ export type RequestOptions<T = unknown> = T & {
   withCredentials?: boolean;
 };
 
-export type PreRequestHandler<B> = (req: RequestOptions<B>) => OrProm<RequestOptions<B> | undefined | void>;
+export type PreRequestHandler<R> = (req: RequestOptions<R>) => OrProm<RequestOptions<R> | undefined | void>;
 export type PostResponseHandler<R> = (res: R) => OrProm<R | undefined | void>;
 
 export type IRemoteServiceConfig<B, R> = Partial<Omit<IRemoteService<B, R>, 'routePath'>>;
