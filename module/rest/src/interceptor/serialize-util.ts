@@ -66,7 +66,7 @@ export class SerializeUtil {
   static serializeJSON(req: Request, res: Response, output: unknown): void {
     const payload = ObjectUtil.hasToJSON(output) ? output.toJSON() : output;
     this.setContentTypeIfUndefined(res, 'application/json');
-    res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
+    res.send(JSON.stringify(payload, undefined, '__pretty' in req.query ? 2 : 0));
   }
 
   /**

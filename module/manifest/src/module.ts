@@ -26,6 +26,17 @@ const INDEX_FILES = new Set(
 const STD_TOP_FOLDERS = new Set(['src', 'bin', 'support']);
 const STD_TOP_FILES = new Set([...INDEX_FILES, 'package.json']);
 
+const SUPPORT_FILE_MAP: Record<string, ManifestModuleRole> = {
+  transformer: 'compile',
+  compile: 'compile',
+  test: 'test',
+  doc: 'doc',
+  pack: 'build',
+  FILEld: 'build'
+};
+
+const SUPPORT_FILE_RE = new RegExp(`^support[/](?<name>${Object.keys(SUPPORT_FILE_MAP).join('|')})[./]`);
+
 export class ManifestModuleUtil {
 
   static #scanCache: Record<string, string[]> = {};
@@ -121,9 +132,10 @@ export class ManifestModuleUtil {
    * Get file type for a file name
    */
   static getFileRole(moduleFile: string): ManifestModuleRole | undefined {
-    if (moduleFile.startsWith('support/transform')) {
-      return 'compile';
-    } else if (moduleFile.startsWith('support/test/') || moduleFile.startsWith('test/')) {
+    const matched = SUPPORT_FILE_MAP[moduleFile.match(SUPPORT_FILE_RE)?.groups?.name ?? ''];
+    if (matched) {
+      return matched;
+    } else if (moduleFile.startsWith('test/')) {
       return 'test';
     } else if (moduleFile.startsWith('doc/') || /^DOC[.]tsx?$/.test(moduleFile)) {
       return 'doc';
@@ -144,7 +156,7 @@ export class ManifestModuleUtil {
         return 'support/fixtures';
       } else if (moduleFile.startsWith('support/resources/')) {
         return 'support/resources';
-      } else if (moduleFile.startsWith('support/transform')) {
+      } else if (/^support\/transformer[./]/.test(moduleFile)) {
         return '$transformer';
       }
       const key = moduleFile.substring(0, folderLocation);
