@@ -67,8 +67,8 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       ...RULE_COMMON,
       files: [
         'module/compiler/**/*.ts', 'module/transformer/**/*.ts',
-        '**/support/transform*.ts', '**/support/transformer.*.ts',
-        '**/support/transform*.tsx', '**/support/transformer.*.tsx'
+        '**/support/transformer/**/*.ts', '**/support/transformer/**/*.tsx',
+        '**/support/transformer.*.ts', '**/support/transformer.*.tsx',
       ],
       rules: {
         'no-restricted-imports': 0

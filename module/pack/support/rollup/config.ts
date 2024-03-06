@@ -10,12 +10,12 @@ function getFilesFromModule(m: ManifestModule): string[] {
   return [
     ...m.files.$index ?? [],
     ...m.files.src ?? [],
-    ...(m.files.bin ?? [])
-      .filter(f => !(/bin\/trv[.]js$/.test(f[0]) && m.name === '@travetto/cli')),
+    ...(m.files.bin ?? []).filter(f => !(/bin\/trv[.]js$/.test(f[0]) && m.name === '@travetto/cli')),
     ...(m.files.support ?? [])
       .filter(f => !/support\/(test|doc|pack)/.test(f[0]))
   ]
     .filter(([, t]) => t === 'ts' || t === 'js' || t === 'json')
+    .filter(f => (f[3] ?? 'std') === 'std') // Only include standard files
     .map(([f]) => ManifestModuleUtil.sourceToOutputExt(path.resolve(m.outputFolder, f)));
 }
 
