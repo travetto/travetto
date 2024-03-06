@@ -20,6 +20,20 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
     this.preRequestHandlers = cfg.preRequestHandlers ?? [];
   }
 
+  // Node/Browser handling of timeout registration
+  #registerTimeout<T extends (number | string | { unref(): unknown })>(
+    controller: AbortController,
+    timeout: number,
+    start: (fn: (...args: unknown[]) => unknown, delay: number) => T,
+    stop: (val: T) => void
+  ): void {
+    const timer = start(() => controller.abort(), timeout);
+    if (!(typeof timer === 'number' || typeof timer === 'string')) {
+      timer.unref();
+    }
+    controller.signal.onabort = (): void => { timer && stop(timer); };
+  }
+
   consumeError = async (err: Error | Response): Promise<Error> => {
     if (err instanceof Error) {
       try {
@@ -52,7 +66,10 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
 
     try {
       for (const fn of this.preRequestHandlers) {
-        req = await fn(req) ?? req;
+        const computed = await fn(req);
+        if (computed) {
+          req = computed;
+        }
       }
 
       if (this.debug) {
@@ -65,14 +82,17 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
       if (req.timeout) {
         const controller = new AbortController();
         fetchInit.signal = controller.signal;
-        const timer = setTimeout(() => controller.abort(), req.timeout).unref();
-        controller.signal.onabort = (): void => { timer && clearTimeout(timer); };
+        // Node/Browser handling of timeout registration
+        this.#registerTimeout(controller, req.timeout, setTimeout, clearTimeout);
       }
 
       let resolved = await fetch(req.url, fetchInit);
 
       for (const fn of this.postResponseHandlers) {
-        resolved = await fn(resolved) ?? resolved;
+        const computed = await fn(resolved);
+        if (computed) {
+          resolved = computed;
+        }
       }
 
       const contentType = resolved.headers.get('content-type')?.split(';')[0];

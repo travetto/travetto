@@ -20,10 +20,10 @@ export type RequestDefinition = {
 
 type OrProm<X> = X | Promise<X>;
 
-export type RequestOptions<T = unknown> = {
+export type RequestOptions<T = unknown> = T & {
   headers: Record<string, string>;
   url: URL;
-  body?: T;
+  body?: unknown;
   method: HttpMethod;
   timeout?: number;
   withCredentials?: boolean;

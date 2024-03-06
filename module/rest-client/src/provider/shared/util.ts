@@ -131,6 +131,7 @@ export class CommonUtil {
 
     const { headers: requestHeaders, body: requestBody } = this.requestBody<T>(body) || {};
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return {
       headers: { ...headers, ...requestHeaders },
       url,
@@ -138,6 +139,6 @@ export class CommonUtil {
       body: requestBody,
       withCredentials: svc.withCredentials,
       timeout: svc.timeout
-    };
+    } as RequestOptions<T>;
   }
 }
