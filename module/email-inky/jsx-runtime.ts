@@ -72,7 +72,7 @@ export function createRootElement<T extends string | ConcreteClass | JSXComponen
   Object.assign(res, {
     prepare(loc: EmailTemplateLocation): Promise<EmailTemplateModule> {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return import('@travetto/email-inky/src/wrapper.js').then(v => v.prepare(res as JSXElement, loc));
+      return import('@travetto/email-inky/src/wrapper').then(v => v.prepare(res as JSXElement, loc));
     }
   });
 

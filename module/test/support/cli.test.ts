@@ -49,7 +49,7 @@ export class TestCommand implements CliCommandShape {
   }
 
   async main(first: string = 'test/.*', regexes: string[] = []): Promise<void> {
-    const { runTests } = await import('./bin/run.js');
+    const { runTests } = await import('./bin/run');
 
     return runTests({
       args: [first, ...regexes],

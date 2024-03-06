@@ -18,7 +18,7 @@ export class TestChildWorkerCommand {
 
   async main(): Promise<void> {
     ExecUtil.exitOnDisconnect();
-    const { TestChildWorker } = await import('../src/worker/child.js');
+    const { TestChildWorker } = await import('../src/worker/child');
     return new TestChildWorker().activate();
   }
 }

@@ -5,8 +5,8 @@ import type { RunState } from '../../src/execute/types';
  * @param opts
  */
 export async function runTests(opts: RunState): Promise<void> {
-  const { RunnerUtil } = await import('../../src/execute/util.js');
-  const { Runner } = await import('../../src/execute/runner.js');
+  const { RunnerUtil } = await import('../../src/execute/util');
+  const { Runner } = await import('../../src/execute/runner');
 
   RunnerUtil.registerCleanup('runner');
 

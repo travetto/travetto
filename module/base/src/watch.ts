@@ -9,7 +9,7 @@ export type FullWatchEvent = WatchEvent & { output: string, module: string, time
 
 export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit?: boolean, signal?: AbortSignal }): AsyncIterable<T> {
   // Load at runtime
-  const { CompilerClient } = await import('@travetto/compiler/support/server/client.js');
+  const { CompilerClient } = await import('@travetto/compiler/support/server/client');
 
   const client = new CompilerClient(RuntimeIndex.manifest, {
     warn(message, ...args): void { console.error('warn', message, ...args); },

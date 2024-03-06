@@ -12,7 +12,7 @@ async function buildApp(): Promise<{ handle: HandleFunction }> {
   await RootRegistry.init();
 
   const { DependencyRegistry } = await import('@travetto/di');
-  const { AwsLambdaRestApplication } = await import('../src/server.js');
+  const { AwsLambdaRestApplication } = await import('../src/server');
   const app = await DependencyRegistry.getInstance(AwsLambdaRestApplication);
   await app.run();
   return app;

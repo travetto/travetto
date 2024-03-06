@@ -12,7 +12,7 @@ class $TestConsumerRegistry {
    * Manual initialization when running outside of the bootstrap process
    */
   async manualInit(): Promise<void> {
-    await import('./types/all.js');
+    await import('./types/all');
   }
 
   /**
