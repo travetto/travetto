@@ -96,17 +96,17 @@ export class Util {
   }
 
   /**
-   * Blocking timeout
-   */
-  static blockingTimeout(time: number): Promise<void> {
-    return timers.setTimeout(time, undefined, { ref: false }).catch(() => { });
-  }
-
-  /**
    * Non-blocking timeout
    */
   static nonBlockingTimeout(time: number): Promise<void> {
     return timers.setTimeout(time, undefined, { ref: false }).catch(() => { });
+  }
+
+  /**
+   * Blocking timeout
+   */
+  static blockingTimeout(time: number): Promise<void> {
+    return timers.setTimeout(time, undefined, { ref: true }).catch(() => { });
   }
 
   /**
