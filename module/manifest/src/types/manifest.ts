@@ -2,7 +2,9 @@ import type { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleRo
 import type { ManifestContext } from './context';
 import { Package } from './package';
 
-export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestModuleRole];
+export type ManifestModuleFile =
+  [path: string, type: ManifestModuleFileType, updated: number] |
+  [path: string, type: ManifestModuleFileType, updated: number, role: ManifestModuleRole];
 
 export type ManifestDepCore = {
   /** Package name */

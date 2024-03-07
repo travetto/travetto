@@ -184,7 +184,8 @@ export class ManifestModuleUtil {
    * Convert file (by ext) to a known file type and also retrieve its latest timestamp
    */
   static async transformFile(moduleFile: string, full: string): Promise<ManifestModuleFile> {
-    const res: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), this.#getNewest(await fs.stat(full))];
+    const updated = this.#getNewest(await fs.stat(full).catch(() => ({ mtimeMs: 0, ctimeMs: 0 })));
+    const res: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), updated];
     const role = this.getFileRole(moduleFile);
     return role ? [...res, role] : res;
   }
