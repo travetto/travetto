@@ -26,11 +26,11 @@
   "dependencies": {
     "@eslint/js": "^8.56.0",
     "@travetto/manifest": "^4.0.1",
-    "@types/eslint": "^8.56.2",
+    "@types/eslint": "^8.56.5",
     "@types/eslint__js": "^8.42.3",
-    "@typescript-eslint/eslint-plugin": "^7.1.0",
-    "@typescript-eslint/parser": "^7.1.0",
-    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
+    "eslint": "^8.57.0",
     "eslint-plugin-unused-imports": "^3.1.0"
   },
   "peerDependencies": {

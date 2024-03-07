@@ -30,7 +30,7 @@
     "@travetto/rest": "^4.0.4",
     "@travetto/schema": "^4.0.4",
     "@travetto/yaml": "^4.0.3",
-    "openapi3-ts": "^4.2.1"
+    "openapi3-ts": "^4.2.2"
   },
   "peerDependencies": {
     "@travetto/cli": "^4.0.5",
