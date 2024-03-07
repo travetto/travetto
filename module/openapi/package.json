@@ -26,11 +26,11 @@
     "directory": "module/openapi"
   },
   "dependencies": {
-    "@travetto/config": "^4.0.2",
-    "@travetto/rest": "^4.0.2",
-    "@travetto/schema": "^4.0.2",
-    "@travetto/yaml": "^4.0.1",
-    "openapi3-ts": "^4.2.1"
+    "@travetto/config": "^4.0.4",
+    "@travetto/rest": "^4.0.4",
+    "@travetto/schema": "^4.0.4",
+    "@travetto/yaml": "^4.0.3",
+    "openapi3-ts": "^4.2.2"
   },
   "peerDependencies": {
     "@travetto/cli": "^4.0.3",

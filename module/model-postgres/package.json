@@ -27,12 +27,12 @@
     "directory": "module/model-postgres"
   },
   "dependencies": {
-    "@travetto/config": "^4.0.2",
-    "@travetto/context": "^4.0.2",
-    "@travetto/model": "^4.0.2",
-    "@travetto/model-query": "^4.0.2",
-    "@travetto/model-sql": "^4.0.2",
-    "@types/pg": "^8.11.0",
+    "@travetto/config": "^4.0.4",
+    "@travetto/context": "^4.0.4",
+    "@travetto/model": "^4.0.4",
+    "@travetto/model-query": "^4.0.4",
+    "@travetto/model-sql": "^4.0.4",
+    "@types/pg": "^8.11.2",
     "pg": "^8.11.3"
   },
   "peerDependencies": {

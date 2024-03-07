@@ -29,9 +29,9 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
-    "@travetto/base": "^4.0.1",
-    "@travetto/terminal": "^4.0.1",
-    "rollup": "^4.9.6"
+    "@travetto/base": "^4.0.3",
+    "@travetto/terminal": "^4.0.3",
+    "rollup": "^4.12.1"
   },
   "peerDependencies": {
     "@travetto/cli": "^4.0.3"

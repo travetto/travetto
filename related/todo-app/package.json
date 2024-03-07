@@ -21,16 +21,16 @@
     "start": "npx trv run:rest"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^4.0.2",
-    "@travetto/auth-rest-session": "^4.0.2",
-    "@travetto/cli": "^4.0.3",
-    "@travetto/email-inky": "^4.0.2",
-    "@travetto/log": "^4.0.2",
-    "@travetto/model-mongo": "^4.0.2",
-    "@travetto/openapi": "^4.0.3",
-    "@travetto/rest-express": "^4.0.2",
-    "@travetto/rest-session": "^4.0.2",
-    "vue": "^3.4.15"
+    "@travetto/auth-rest": "^4.0.4",
+    "@travetto/auth-rest-session": "^4.0.4",
+    "@travetto/cli": "^4.0.5",
+    "@travetto/email-inky": "^4.0.4",
+    "@travetto/log": "^4.0.4",
+    "@travetto/model-mongo": "^4.0.4",
+    "@travetto/openapi": "^4.0.5",
+    "@travetto/rest-express": "^4.0.4",
+    "@travetto/rest-session": "^4.0.4",
+    "vue": "^3.4.21"
   },
   "devDependencies": {
     "@travetto/compiler": "^4.0.3",

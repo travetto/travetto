@@ -25,8 +25,8 @@
   },
   "dependencies": {
     "@fastify/compress": "^7.0.0",
-    "@travetto/rest": "^4.0.2",
-    "fastify": "^4.26.0"
+    "@travetto/rest": "^4.0.4",
+    "fastify": "^4.26.2"
   },
   "travetto": {
     "displayName": "Fastify REST Source"
