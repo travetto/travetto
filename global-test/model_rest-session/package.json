@@ -2,17 +2,17 @@
   "name": "@travetto-test/model_rest-session",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/model-dynamodb": "^4.0.4",
-    "@travetto/model-elasticsearch": "^4.0.4",
-    "@travetto/model-firestore": "^4.0.4",
-    "@travetto/model-mongo": "^4.0.4",
-    "@travetto/model-mysql": "^4.0.4",
-    "@travetto/model-postgres": "^4.0.4",
-    "@travetto/model-redis": "^4.0.4",
-    "@travetto/model-s3": "^4.0.4",
-    "@travetto/model-sqlite": "^4.0.4",
-    "@travetto/rest-express": "^4.0.4",
-    "@travetto/rest-session": "^4.0.4"
+    "@travetto/model-dynamodb": "^4.0.5",
+    "@travetto/model-elasticsearch": "^4.0.5",
+    "@travetto/model-firestore": "^4.0.5",
+    "@travetto/model-mongo": "^4.0.5",
+    "@travetto/model-mysql": "^4.0.5",
+    "@travetto/model-postgres": "^4.0.5",
+    "@travetto/model-redis": "^4.0.5",
+    "@travetto/model-s3": "^4.0.5",
+    "@travetto/model-sqlite": "^4.0.5",
+    "@travetto/rest-express": "^4.0.5",
+    "@travetto/rest-session": "^4.0.5"
   },
   "travetto": {},
   "private": true
