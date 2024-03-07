@@ -1,4 +1,4 @@
-import { ManifestContext, ManifestModuleUtil, ManifestUtil, PackageUtil, RuntimeIndex, path } from '@travetto/manifest';
+import { ManifestContext, ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, RuntimeIndex, path } from '@travetto/manifest';
 
 import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';
@@ -40,8 +40,8 @@ export class CompilerWatcher {
   }
 
   /** Watch files */
-  async * #watchFolder(rootPath: string): AsyncIterable<WatchEvent> {
-    const q = new AsyncQueue<WatchEvent>(this.#signal);
+  async * #watchFolder(rootPath: string): AsyncIterable<WatchEvent[]> {
+    const q = new AsyncQueue<WatchEvent[]>(this.#signal);
     const lib = await import('@parcel/watcher');
     const ignore = this.#getIgnores();
 
@@ -51,9 +51,7 @@ export class CompilerWatcher {
         q.throw(err instanceof Error ? err : new Error((err as Error).message));
         return;
       }
-      for (const ev of events) {
-        q.add({ action: ev.type, file: path.toPosix(ev.path) });
-      }
+      q.add(events.map(ev => ({ action: ev.type, file: path.toPosix(ev.path) })));
     }, { ignore });
 
     if (this.#signal.aborted) { // If already aborted, can happen async
@@ -66,33 +64,63 @@ export class CompilerWatcher {
     yield* q;
   }
 
-  async #rebuildManifestsIfNeeded(event: CompilerWatchEvent, moduleFile: string): Promise<void> {
-    if (!event.entry.outputFile || event.action === 'update') {
+  async #rebuildManifestsIfNeeded(events: CompilerWatchEvent[]): Promise<void> {
+    events = events.filter(x => x.entry.outputFile && x.action !== 'update');
+
+    if (!events.length) {
       return;
     }
 
-    const toUpdate: ManifestContext[] = RuntimeIndex.getDependentModules(event.entry.module.name, 'parents')
-      .map(el => ManifestUtil.getModuleContext(this.#state.manifest, el.sourceFolder));
+    const mods = [...new Set(events.map(v => v.entry.module.name))];
 
-    toUpdate.push(this.#state.manifest);
+    type FileShape = {
+      mod: string;
+      folderKey: ManifestModuleFolderType;
+      fileType: ManifestModuleFileType;
+      file: string;
+      remove: boolean;
+    };
 
-    const mod = event.entry.module;
-    const folderKey = ManifestModuleUtil.getFolderKey(moduleFile);
-    const fileType = ManifestModuleUtil.getFileType(moduleFile);
+    const filesToModules = new Map<string, { context: ManifestContext, files: FileShape[] }>(mods.map(m => [m, {
+      context: ManifestUtil.getModuleContext(this.#state.manifest, RuntimeIndex.getManifestModule(m)!.sourceFolder),
+      files: []
+    }]));
 
-    for (const ctx of toUpdate) {
-      const newManifest = await ManifestUtil.buildManifest(ctx);
-      if (mod.name in newManifest.modules) {
-        const modFiles = newManifest.modules[mod.name].files[folderKey] ??= [];
-        const idx = modFiles.findIndex(x => x[0] === moduleFile);
+    const parents = new Map<string, string[]>(
+      mods.map(m => [m, RuntimeIndex.getDependentModules(m, 'parents').map(x => x.name)])
+    );
 
-        if (event.action === 'create' && idx < 0) {
-          modFiles.push([moduleFile, fileType, Date.now()]);
+    const allFiles = events.map(ev => {
+      const modRoot = ev.entry.module.sourceFolder || this.#state.manifest.workspace.path;
+      const moduleFile = ev.file.includes(modRoot) ? ev.file.split(`${modRoot}/`)[1] : ev.file;
+      return {
+        mod: ev.entry.module.name,
+        remove: ev.action === 'delete',
+        file: moduleFile,
+        folderKey: ManifestModuleUtil.getFolderKey(moduleFile),
+        fileType: ManifestModuleUtil.getFileType(moduleFile)
+      };
+    });
+
+    for (const file of allFiles) {
+      for (const parent of parents.get(file.mod)!) {
+        filesToModules.get(parent)!.files.push(file);
+      }
+    }
+
+    for (const { context, files } of filesToModules.values()) {
+      const newManifest = await ManifestUtil.buildManifest(context);
+      for (const { remove, mod, fileType, file, folderKey } of files) {
+        const modFiles = newManifest.modules[mod].files[folderKey] ??= [];
+        const idx = modFiles.findIndex(x => x[0] === file);
+
+        if (!remove && idx < 0) {
+          modFiles.push([file, fileType, Date.now()]);
         } else if (idx >= 0) {
-          if (event.action === 'delete') {
+          if (remove) {
             modFiles.splice(idx, 1);
           } else {
-            modFiles[idx] = [moduleFile, fileType, Date.now()];
+            modFiles[idx] = [file, fileType, Date.now()];
           }
         }
       }
@@ -120,45 +148,52 @@ export class CompilerWatcher {
     const OUTPUT_PATH = path.resolve(manifest.workspace.path, manifest.build.outputFolder);
     const COMPILER_PATH = path.resolve(manifest.workspace.path, manifest.build.compilerFolder);
 
-    for await (const ev of this.#watchFolder(this.#state.manifest.workspace.path)) {
-      const { action, file: sourceFile } = ev;
+    for await (const events of this.#watchFolder(this.#state.manifest.workspace.path)) {
 
-      if (
-        sourceFile === ROOT_LOCK ||
-        sourceFile === ROOT_PKG ||
-        (action === 'delete' && (sourceFile === OUTPUT_PATH || sourceFile === COMPILER_PATH))
-      ) {
-        throw new Error('RESET', { cause: `${action}:${sourceFile}` });
+      const outEvents: CompilerWatchEvent[] = [];
+
+      for (const ev of events) {
+        const { action, file: sourceFile } = ev;
+
+        if (
+          sourceFile === ROOT_LOCK ||
+          sourceFile === ROOT_PKG ||
+          (action === 'delete' && (sourceFile === OUTPUT_PATH || sourceFile === COMPILER_PATH))
+        ) {
+          throw new Error('RESET', { cause: `${action}:${sourceFile}` });
+        }
+
+        const fileType = ManifestModuleUtil.getFileType(sourceFile);
+        if (!CompilerUtil.validFile(fileType)) {
+          continue;
+        }
+
+        let entry = this.#state.getBySource(sourceFile);
+
+        const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(sourceFile);
+        if (!mod) { // Unknown module
+          continue;
+        }
+
+        const modRoot = mod.sourceFolder || this.#state.manifest.workspace.path;
+        const moduleFile = sourceFile.includes(modRoot) ? sourceFile.split(`${modRoot}/`)[1] : sourceFile;
+
+        if (action === 'create') {
+          entry = this.#state.registerInput(mod, moduleFile);
+        } else if (!entry) {
+          continue;
+        } else if (action === 'update' && !this.#state.checkIfSourceChanged(entry.inputFile)) {
+          continue;
+        } else if (action === 'delete') {
+          this.#state.removeInput(entry.inputFile);
+        }
+
+        outEvents.push({ action, file: entry.sourceFile, entry });
       }
 
-      const fileType = ManifestModuleUtil.getFileType(sourceFile);
-      if (!CompilerUtil.validFile(fileType)) {
-        continue;
-      }
+      await this.#rebuildManifestsIfNeeded(outEvents);
 
-      let entry = this.#state.getBySource(sourceFile);
-
-      const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(sourceFile);
-      if (!mod) { // Unknown module
-        continue;
-      }
-
-      const modRoot = mod.sourceFolder || this.#state.manifest.workspace.path;
-      const moduleFile = sourceFile.includes(modRoot) ? sourceFile.split(`${modRoot}/`)[1] : sourceFile;
-
-      if (action === 'create') {
-        entry = this.#state.registerInput(mod, moduleFile);
-      } else if (!entry) {
-        continue;
-      } else if (action === 'update' && !this.#state.checkIfSourceChanged(entry.inputFile)) {
-        continue;
-      } else if (action === 'delete') {
-        this.#state.removeInput(entry.inputFile);
-      }
-
-      const result: CompilerWatchEvent = { action, file: entry.sourceFile, entry };
-      await this.#rebuildManifestsIfNeeded(result, moduleFile);
-      yield result;
+      yield* outEvents;
     }
   }
 }
