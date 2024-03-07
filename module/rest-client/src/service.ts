@@ -1,10 +1,8 @@
-import { setImmediate } from 'node:timers/promises';
-
 import { AutoCreate, Inject, Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { ControllerRegistry, ControllerVisitUtil } from '@travetto/rest';
-import { Env } from '@travetto/base';
+import { Env, Util } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 
 import { RestClientConfig, RestClientProvider } from './config';
@@ -51,7 +49,7 @@ export class RestClientGeneratorService implements AutoCreate {
     }
 
     SchemaRegistry.on(async ev => {
-      await setImmediate();
+      await Util.queueMacroTask();
 
       if (ev.type === 'removing') {
         for (const el of this.providers) {
@@ -69,7 +67,7 @@ export class RestClientGeneratorService implements AutoCreate {
     });
 
     ControllerRegistry.on(async ev => {
-      await setImmediate();
+      await Util.queueMacroTask();
 
       if (ev.type === 'removing') {
         for (const el of this.providers) {

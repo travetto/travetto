@@ -1,5 +1,4 @@
 import ts from 'typescript';
-import timers from 'node:timers/promises';
 
 import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
@@ -8,6 +7,7 @@ import { TypescriptUtil } from '../support/ts-util';
 
 import { CompilerUtil } from './util';
 import { CompileEmitError, CompileStateEntry } from './types';
+import { CommonUtil } from '../support/util';
 
 function folderMapper(root: string, prefix: string): { dir: string, translate: (val: string) => string } {
   let matched: string = '~~';
@@ -110,7 +110,7 @@ export class CompilerState implements ts.CompilerHost {
     if (force || !this.#program) {
       this.#program = ts.createProgram({ rootNames: this.getAllFiles(), host: this, options: this.#compilerOptions, oldProgram: this.#program });
       this.#transformerManager.init(this.#program.getTypeChecker());
-      await timers.setImmediate();
+      await CommonUtil.queueMacroTask();
     }
     return this.#program;
   }
