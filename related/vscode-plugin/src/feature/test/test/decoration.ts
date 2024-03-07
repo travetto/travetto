@@ -62,7 +62,7 @@ const Style: {
   }
 };
 
-function isBatchError(o?: Error): o is Error & { errors: (Error | string)[] } {
+function isBatchError(o?: Error): o is Error & { details: { errors: (Error | string)[] } } {
   return !!o && o instanceof Error && 'errors' in o;
 }
 
@@ -84,7 +84,7 @@ export class Decorations {
 
     if (isBatchError(error)) {
       title = error.message;
-      const messages = error.errors
+      const messages = error.details.errors
         .map(x => typeof x === 'string' ? x : x.message);
 
       suffix = `(${title}) ${messages.join(', ')}`;
