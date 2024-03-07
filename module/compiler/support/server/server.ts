@@ -207,7 +207,7 @@ export class CompilerServer {
         CommonUtil.nonBlockingTimeout(2000).then(reject); // Wait 2s max
         this.#server.close(resolve);
         this.#emitEvent({ type: 'state', payload: { state: 'closed' } });
-        setImmediate(() => {
+        CommonUtil.queueMacroTask().then(() => {
           this.#server.closeAllConnections();
           this.#shutdown.abort();
         });
