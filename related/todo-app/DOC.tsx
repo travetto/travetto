@@ -1,6 +1,4 @@
 /** @jsxImportSource @travetto/doc */
-import timers from 'node:timers/promises';
-
 import { RuntimeIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
@@ -27,10 +25,10 @@ async function init() {
     startupBuffer.push(Buffer.from(v)));
 
   while (startupBuffer.length === 0) {
-    await timers.setTimeout(100);
+    await Util.blockingTimeout(100);
   }
 
-  await timers.setTimeout(1000);
+  await Util.blockingTimeout(1000);
 
   return DocRunUtil.cleanRunOutput(Buffer.concat(startupBuffer).toString('utf8'), {});
 }

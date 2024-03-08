@@ -1,6 +1,5 @@
 import vscode from 'vscode';
 import { createInterface } from 'node:readline/promises';
-import timers from 'node:timers/promises';
 import { ChildProcess, spawn } from 'node:child_process';
 
 import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
@@ -129,7 +128,7 @@ export class CompilerWatchFeature extends BaseFeature {
         this.#onState('closed');
       }
       // Check every second
-      await timers.setTimeout(1000, undefined, { ref: false });
+      await Util.nonBlockingTimeout(1000);
     }
   }
 
@@ -209,7 +208,7 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#status.show();
 
     this.#trackConnected();
-    await timers.setTimeout(1000, undefined, { ref: false }); // Add buffer
+    await Util.nonBlockingTimeout(1000); // Add buffer
     this.run('start');
 
     for (const op of ['start', 'stop', 'restart', 'clean'] as const) {
