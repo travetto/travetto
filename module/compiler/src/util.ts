@@ -120,18 +120,4 @@ export class CompilerUtil {
     }
     return new Error(`Transpiling ${filename.replace(nativeCwd, '.')} failed: \n${errors.join('\n')}`);
   }
-
-  /**
-   * Naive hashing
-   */
-  static naiveHash(text: string): number {
-    let hash = 5381;
-
-    for (let i = 0; i < text.length; i++) {
-      // eslint-disable-next-line no-bitwise
-      hash = (hash * 33) ^ text.charCodeAt(i);
-    }
-
-    return Math.abs(hash);
-  }
 }

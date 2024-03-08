@@ -1,4 +1,4 @@
-import { ManifestContext, ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, RuntimeIndex, path } from '@travetto/manifest';
+import { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, RuntimeIndex, path } from '@travetto/manifest';
 
 import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';
@@ -9,6 +9,14 @@ import { AsyncQueue } from '../support/queue';
 type WatchAction = 'create' | 'update' | 'delete';
 type WatchEvent = { action: WatchAction, file: string };
 type CompilerWatchEvent = WatchEvent & { entry: CompileStateEntry };
+type FileShape = {
+  mod: string;
+  folderKey: ManifestModuleFolderType;
+  fileType: ManifestModuleFileType;
+  moduleFile: string;
+  action: WatchAction;
+};
+
 
 /**
  * Watch support, based on compiler state and manifest details
@@ -73,18 +81,11 @@ export class CompilerWatcher {
 
     const mods = [...new Set(events.map(v => v.entry.module.name))];
 
-    type FileShape = {
-      mod: string;
-      folderKey: ManifestModuleFolderType;
-      fileType: ManifestModuleFileType;
-      file: string;
-      remove: boolean;
-    };
-
-    const filesToModules = new Map<string, { context: ManifestContext, files: FileShape[] }>(mods.map(m => [m, {
+    const moduleToFiles = new Map(mods.map(m => [m, {
       context: ManifestUtil.getModuleContext(this.#state.manifest, RuntimeIndex.getManifestModule(m)!.sourceFolder),
-      files: []
-    }]));
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      files: [] as FileShape[]
+    }] as const));
 
     const parents = new Map<string, string[]>(
       mods.map(m => [m, RuntimeIndex.getDependentModules(m, 'parents').map(x => x.name)])
@@ -93,34 +94,30 @@ export class CompilerWatcher {
     const allFiles = events.map(ev => {
       const modRoot = ev.entry.module.sourceFolder || this.#state.manifest.workspace.path;
       const moduleFile = ev.file.includes(modRoot) ? ev.file.split(`${modRoot}/`)[1] : ev.file;
-      return {
-        mod: ev.entry.module.name,
-        remove: ev.action === 'delete',
-        file: moduleFile,
-        folderKey: ManifestModuleUtil.getFolderKey(moduleFile),
-        fileType: ManifestModuleUtil.getFileType(moduleFile)
-      };
+      const folderKey = ManifestModuleUtil.getFolderKey(moduleFile);
+      const fileType = ManifestModuleUtil.getFileType(moduleFile);
+      return { mod: ev.entry.module.name, action: ev.action, moduleFile, folderKey, fileType };
     });
 
     for (const file of allFiles) {
       for (const parent of parents.get(file.mod)!) {
-        filesToModules.get(parent)!.files.push(file);
+        moduleToFiles.get(parent)!.files.push(file);
       }
     }
 
-    for (const { context, files } of filesToModules.values()) {
+    for (const { context, files } of moduleToFiles.values()) {
       const newManifest = await ManifestUtil.buildManifest(context);
-      for (const { remove, mod, fileType, file, folderKey } of files) {
+      for (const { action, mod, fileType, moduleFile, folderKey } of files) {
         const modFiles = newManifest.modules[mod].files[folderKey] ??= [];
-        const idx = modFiles.findIndex(x => x[0] === file);
+        const idx = modFiles.findIndex(x => x[0] === moduleFile);
 
-        if (!remove && idx < 0) {
-          modFiles.push([file, fileType, Date.now()]);
+        if (action === 'create' && idx < 0) {
+          modFiles.push([moduleFile, fileType, Date.now()]);
         } else if (idx >= 0) {
-          if (remove) {
+          if (action === 'delete') {
             modFiles.splice(idx, 1);
           } else {
-            modFiles[idx] = [file, fileType, Date.now()];
+            modFiles[idx] = [moduleFile, fileType, Date.now()];
           }
         }
       }
@@ -192,7 +189,6 @@ export class CompilerWatcher {
       }
 
       await this.#rebuildManifestsIfNeeded(outEvents);
-
       yield* outEvents;
     }
   }

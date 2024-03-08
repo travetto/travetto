@@ -179,7 +179,7 @@ export class CompilerState implements ts.CompilerHost {
     if (!contents || (contents.length === 0 && prevHash)) {
       return false; // Ignore empty file
     }
-    const currentHash = CompilerUtil.naiveHash(contents);
+    const currentHash = CommonUtil.naiveHash(contents);
     const changed = prevHash !== currentHash;
     if (changed) {
       this.#sourceHashes.set(inputFile, currentHash);
