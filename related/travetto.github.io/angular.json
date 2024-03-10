@@ -17,6 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
+            "statsJson": true,
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",

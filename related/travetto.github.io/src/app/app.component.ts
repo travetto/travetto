@@ -22,7 +22,7 @@ export class AppComponent {
       if (s instanceof NavigationEnd) {
         const tree = this.router.parseUrl(this.router.url);
         if (tree.fragment) {
-          const element = document.querySelector(`#${tree.fragment}`) as HTMLElement;
+          const element = document.querySelector<HTMLElement>(`#${tree.fragment}`);
           if (element) {
             document.getElementsByTagName('body')[0].scrollTo({ top: element.offsetTop - 74, behavior: 'smooth' });
           }

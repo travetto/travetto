@@ -1,0 +1,31 @@
+<div class="toc">
+  <div class="inner">
+    <h3>Pages</h3>
+    <ul>
+      @for (page of pages; track $index) {
+      <li [routerLinkActive]="['active']" class="{{page.path}}">
+        @if (page.component) {
+        <a [routerLink]="['', 'docs', page.path]">{{page.title}}</a>
+        } @else {
+        <h4 [class]="'grouping'" (click)="setActive(page)">{{page.title}}
+        </h4>
+        }
+        @if (page.subs) {
+        <ul [class.toggled]="active[page.path]">
+          @for(subp of page.subs; track $index) {
+          <li [ngClass]="{active:hasFragment(subp.path)}">
+            <a [routerLink]="['/', 'docs', subp.path]">{{subp.title}}</a>
+          </li>
+          }
+        </ul>
+        }
+      </li>
+      }
+    </ul>
+  </div>
+</div>
+<div class="router-outlet">
+  <div class="documentation">
+    <router-outlet></router-outlet>
+  </div>
+</div>

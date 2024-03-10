@@ -49,7 +49,7 @@ export class BlogComponent implements OnInit {
   blogId = '8362979454426216505';
   posts: Post[] = [];
 
-  ngOnInit() {
+  ngOnInit(): void {
     const key = 'AIzaSyBfg2W_JaAJU4qQWSKs-Vx_zVbFh4joYos';
 
     fetch(
