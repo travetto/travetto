@@ -4,7 +4,7 @@
     <ul>
       @for (page of pages; track $index) {
       <li [routerLinkActive]="['active']" class="{{page.path}}">
-        @if (page.component) {
+        @if (page.loadComponent) {
         <a [routerLink]="['', 'docs', page.path]">{{page.title}}</a>
         } @else {
         <h4 [class]="'grouping'" (click)="setActive(page)">{{page.title}}

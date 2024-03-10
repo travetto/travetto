@@ -1,5 +1,4 @@
 import { Route } from '@angular/router';
-import { OverviewComponent } from './gen/overview/overview.component';
 import { PAGES } from './pages';
 
 export const ROUTES: Route[] = [
@@ -10,7 +9,7 @@ export const ROUTES: Route[] = [
   },
   {
     path: 'overview',
-    component: OverviewComponent
+    loadComponent: () => import('./gen/overview/overview.component').then(m => m.OverviewComponent)
   },
-  ...PAGES.map(x => [x, ...(x.subs ?? [])]).flat().filter(x => !!x.component)
+  ...PAGES.map(x => [x, ...(x.subs ?? [])]).flat().filter(x => !!x.loadComponent)
 ];

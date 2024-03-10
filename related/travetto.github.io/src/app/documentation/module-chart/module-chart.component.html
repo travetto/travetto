@@ -7,7 +7,7 @@
     }
     @for (page of pages; track $index) {
     <div [class]="page.path">
-      @if (page.component) {
+      @if (page.loadComponent) {
       <a [routerLink]="['/', 'docs', page.path]" [innerHtml]="page.title"></a>
       } @else {
       <div class="title" [innerHtml]="page.title"></div>

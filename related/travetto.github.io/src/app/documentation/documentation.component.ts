@@ -14,7 +14,7 @@ import { PAGES } from './pages';
 })
 export class DocumentationComponent {
   pages: typeof PAGES = [
-    { path: 'overview', title: 'Overview', component: undefined, subs: undefined } as const,
+    { path: 'overview', title: 'Overview', subs: undefined } as const,
     ...PAGES
   ];
   url = '';
