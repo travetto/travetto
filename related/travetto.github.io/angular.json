@@ -17,7 +17,6 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
-            "statsJson": true,
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -36,6 +35,7 @@
           },
           "configurations": {
             "development": {
+              "statsJson": true,
               "buildOptimizer": false,
               "optimization": false,
               "vendorChunk": true,
@@ -44,6 +44,9 @@
               "namedChunks": true
             },
             "production": {
+              "buildOptimizer": true,
+              "optimization": true,
+              "sourceMap": false,
               "outputHashing": "all",
               "budgets": [
                 {
