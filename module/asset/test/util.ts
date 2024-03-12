@@ -80,7 +80,7 @@ export class UtilTest {
     const hash2 = await AssetUtil.hashUrl('https://travetto.dev/assets/landing/bg.jpg', 100000);
     assert(hash2.length === 64);
 
-    const hash3 = await AssetUtil.hashUrl('https://travetto.dev/assets/landing/bg.jpg', 1000001);
+    const hash3 = await AssetUtil.hashUrl('https://travetto.dev/assets/landing/bg.jpg', 100001);
     assert(hash3.length === 64);
 
     assert(hash3 !== hash2);

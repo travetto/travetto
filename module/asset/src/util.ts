@@ -137,22 +137,32 @@ export class AssetUtil {
    * Compute hash from a url
    */
   static async hashUrl(url: string, byteLimit = -1): Promise<string> {
-    const hasher = crypto.createHash('sha256').setEncoding('hex');
     const str = await fetch(url);
     if (!str.ok) {
       throw new AppError('Invalid url for hashing', 'data');
     }
     const body = Readable.fromWeb(str.body!);
     let count = 0;
+    const buffer: Buffer[] = [];
+
     for await (const chunk of body) {
       if (Buffer.isBuffer(chunk) || typeof chunk === 'string') {
-        count += chunk?.length ?? 0;
-        hasher.update(chunk);
-      }
-      if (count > byteLimit && byteLimit > 0) {
-        body.destroy();
+        if (Buffer.isBuffer(chunk)) {
+          buffer.push(chunk);
+          count += chunk.length;
+        } else if (typeof chunk === 'string') {
+          buffer.push(Buffer.from(chunk));
+          count += chunk.length;
+        }
+
+        if (count > byteLimit && byteLimit > 0) {
+          body.destroy();
+        }
       }
     }
-    return hasher.end().read().toString();
+
+    const hasher = crypto.createHash('sha256').setEncoding('hex');
+    const finalData = Buffer.concat(buffer, byteLimit <= 0 ? undefined : byteLimit);
+    return hasher.update(finalData).end().read().toString();
   }
 }
