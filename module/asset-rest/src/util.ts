@@ -3,6 +3,8 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import stream from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import crypto from 'node:crypto';
+
 import { getExtension } from 'mime';
 
 import { Renderable, Request, Response } from '@travetto/rest';
@@ -137,5 +139,28 @@ export class AssetRestUtil {
         return [start, end ?? (start + chunkSize)];
       }
     }
+  }
+
+  /**
+   * Compute hash from a url
+   */
+  static async hashUrl(url: string, byteLimit = -1): Promise<string> {
+    const hasher = crypto.createHash('sha256').setEncoding('hex');
+    const str = await fetch(url);
+    if (!str.ok) {
+      throw new AppError('Invalid url for hashing', 'data');
+    }
+    const body = stream.Readable.fromWeb(str.body!);
+    let count = 0;
+    for await (const chunk of body) {
+      if (Buffer.isBuffer(chunk) || typeof chunk === 'string') {
+        count += chunk?.length ?? 0;
+        hasher.update(chunk);
+      }
+      if (count > byteLimit && byteLimit > 0) {
+        body.destroy();
+      }
+    }
+    return hasher.end().read().toString();
   }
 }
