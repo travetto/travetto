@@ -74,4 +74,19 @@ export class UtilTest {
     assert(asset.filename === 'logo.png');
     assert(asset.size === (await fs.stat(png)).size);
   }
+
+  @Test()
+  async hashUrl() {
+    const hash2 = await AssetUtil.hashUrl('https://travetto.dev/assets/landing/bg.jpg', 100000);
+    assert(hash2.length === 64);
+
+    const hash3 = await AssetUtil.hashUrl('https://travetto.dev/assets/landing/bg.jpg', 1000001);
+    assert(hash3.length === 64);
+
+    assert(hash3 !== hash2);
+
+    const hashFull = await AssetUtil.hashUrl('https://travetto.dev/assets/landing/bg.jpg');
+    assert(hashFull.length === 64);
+    assert(hashFull === '4c6ab4f3fcd07005294391de6b7d83bca59397344f5897411ed5316e212e46c7');
+  }
 }
