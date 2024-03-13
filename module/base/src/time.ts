@@ -112,4 +112,14 @@ export class TimeUtil {
     }
     return out.join('');
   }
+
+  /**
+   * Determine the number of units between two dates
+   */
+  static unitsBetween(startDate: Date | number, endDate: Date | number, unit: TimeUnit): number {
+    const delta =
+      (typeof endDate === 'number' ? endDate : endDate.getTime()) -
+      (typeof startDate === 'number' ? startDate : startDate.getTime());
+    return delta / TIME_UNITS[unit];
+  }
 }

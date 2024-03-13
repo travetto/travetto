@@ -35,4 +35,17 @@ class TimeSuite {
     assert(TimeUtil.prettyDelta(1000 * 60 * 1.5) === '1m 30s');
     assert(TimeUtil.prettyDelta(1000 * 60 * 1.2) === '72s');
   }
+
+  @Test()
+  verifyTimeBetween() {
+    const now = Date.now();
+    assert(TimeUtil.unitsBetween(now - 1000 * 60 * 60 * 24 * 5, now, 'd') === 5);
+    assert(TimeUtil.unitsBetween(now - 1000 * 60 * 60 * 24 * 5.5, now, 'd') === 5.5);
+    assert(TimeUtil.unitsBetween(now - 1000 * 60 * 60 * 5, now, 'h') === 5);
+    assert(TimeUtil.unitsBetween(now - 1000 * 60 * 5, now, 'm') === 5);
+    assert(TimeUtil.unitsBetween(now - 1000 * 60 * 5.25, now, 'm') === 5.25);
+    assert(TimeUtil.unitsBetween(now - 1000 * 5, now, 's') === 5);
+    assert(TimeUtil.unitsBetween(now - 5, now, 'ms') === 5);
+    assert(TimeUtil.unitsBetween(now, now - 1000 * 60 * 5.25, 'm') === -5.25);
+  }
 }
