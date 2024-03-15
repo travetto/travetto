@@ -39,7 +39,9 @@ export class Tokenizer {
    */
   static isComment = (ch: string, pos: number): boolean => {
     const c = ch.charCodeAt(pos);
-    return c === HASH || (c === DASH && ch.charCodeAt(pos + 1) === c && ch.charCodeAt(pos + 2) === c);
+    const prev = pos > 0 ? ch.charCodeAt(pos - 1) : 0;
+    return (c === HASH && (!prev || this.isWhitespace(prev)))
+      || (c === DASH && ch.charCodeAt(pos + 1) === c && ch.charCodeAt(pos + 2) === c);
   };
   /**
    * Test for whitespace

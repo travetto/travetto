@@ -206,6 +206,19 @@ parent:
   }
 
   @Test()
+  hashKey() {
+    const output = YamlUtil.parse(`
+parent:
+  'age#bob': 200
+  age#sam: 250
+  age$jim: 300
+  #blam: 350
+`);
+
+    assert.deepStrictEqual(output, { parent: { 'age#bob': 200, 'age#sam': 250, age$jim: 300 } });
+  }
+
+  @Test()
   singleList() {
     const output = YamlUtil.parse(`--
 config:
