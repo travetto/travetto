@@ -27,7 +27,7 @@ export class AssetRestUtil {
     await fs.mkdir(uniqueDir, { recursive: true });
     const uniqueLocal = path.resolve(uniqueDir, path.basename(filename));
 
-    const cleanup = (): Promise<void> => fs.rm(uniqueDir, { force: true, recursive: true });
+    const cleanup = (): Promise<void> => fs.rm(uniqueDir, { force: true, recursive: true }).catch(() => { });
 
     return [uniqueLocal, cleanup];
   }
@@ -44,7 +44,7 @@ export class AssetRestUtil {
       new stream.Transform({
         transform(chunk, encoding, callback): void {
           read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : 0;
-          if (read >= maxSize) {
+          if (read > maxSize) {
             callback(new AppError('File size exceeded', 'data'));
           } else {
             callback(null, chunk);

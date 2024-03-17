@@ -33,4 +33,19 @@ export class UtilTest {
     const req3 = makeRequest(undefined, 'image/png');
     assert(AssetRestUtil.getFileName(req3 as Request) === 'file-upload.png');
   }
+
+  @Test({ shouldThrow: 'size' })
+  async testMaxFileWrite() {
+    await AssetRestUtil.writeToAsset(Buffer.alloc(100, 'A', 'utf8'), 'test', 1);
+  }
+
+  @Test({ shouldThrow: 'size' })
+  async testMaxCloseFileWrite() {
+    await AssetRestUtil.writeToAsset(Buffer.alloc(100, 'A', 'utf8'), 'test', 99);
+  }
+
+  @Test()
+  async testMaxExactFileWrite() {
+    await AssetRestUtil.writeToAsset(Buffer.alloc(100, 'A', 'utf8'), 'test', 100);
+  }
 }

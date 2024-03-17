@@ -32,11 +32,13 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
   }
 
   static async uploadDirect(req: Request, config: Partial<RestAssetConfig>): Promise<WithCleanup<AssetMap>> {
+    console.log('Starting direct upload', req.header('content-length'));
     const filename = AssetRestUtil.getFileName(req);
     const [asset, cleanup] = await AssetRestUtil.writeToAsset(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
     try {
       return [{ file: await this.validateAsset(config, asset) }, config.deleteFiles !== false ? cleanup : (async (): Promise<void> => { })];
     } catch (err) {
+      console.error('Failed direct upload', err);
       await cleanup();
       throw err;
     }
@@ -49,6 +51,8 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
 
     const allCleanups: Function[] = [];
     const managedCleanups: Function[] = [];
+
+    console.log('Starting multipart upload', req.header('content-length'));
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const uploader = busboy({ headers: req.headers as BusboyHeaders, limits: { fileSize: largestMax } })
@@ -69,14 +73,21 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
         uploads.push(Promise.reject(new AppError(`File size exceeded for ${field}`, 'data')))
       );
 
-    await new Promise<unknown>((res, rej) => {
-      uploader.on('finish', res).on('error', rej);
-      req.pipe(uploader);
-    });
-
     try {
+      // Do upload
+      await new Promise<unknown>((res, rej) => {
+        try {
+          uploader.on('finish', res).on('error', rej);
+          req.pipe(uploader);
+        } catch (err) {
+          rej(err);
+        }
+      });
+
+      // Finish files
       await Promise.all(uploads);
     } catch (err) {
+      console.error('Failed multipart upload', err);
       await Promise.all(allCleanups.map(x => x()));
       throw err;
     }
