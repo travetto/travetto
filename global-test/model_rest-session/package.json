@@ -9,7 +9,7 @@
     "@travetto/model-mysql": "^4.0.7",
     "@travetto/model-postgres": "^4.0.7",
     "@travetto/model-redis": "^4.0.7",
-    "@travetto/model-s3": "^4.0.7",
+    "@travetto/model-s3": "^4.0.8",
     "@travetto/model-sqlite": "^4.0.7",
     "@travetto/rest-express": "^4.0.7",
     "@travetto/rest-session": "^4.0.7"
