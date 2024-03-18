@@ -1,7 +1,9 @@
 import { Readable } from 'node:stream';
+import { Agent } from 'node:https';
 
 import { S3, CompletedPart, type CreateMultipartUploadRequest } from '@aws-sdk/client-s3';
 import type { MetadataBearer } from '@aws-sdk/types';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
@@ -163,7 +165,17 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async postConstruct(): Promise<void> {
-    this.client = new S3(this.config.config);
+    this.client = new S3({
+      ...this.config.config,
+      ...('requestHandler' in this.config.config ? {
+        requestHandler: new NodeHttpHandler({
+          ...this.config.config.requestHandler,
+          ...('httpsAgent' in this.config.config.requestHandler! ? {
+            httpsAgent: new Agent({ ...this.config.config.requestHandler?.httpsAgent ?? {} }),
+          } : {})
+        }),
+      } : {})
+    });
     ModelStorageUtil.registerModelChangeListener(this);
   }
 
