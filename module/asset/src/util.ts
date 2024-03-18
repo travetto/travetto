@@ -134,35 +134,49 @@ export class AssetUtil {
   }
 
   /**
-   * Compute hash from a url
+   * Fetch bytes from a url
    */
-  static async hashUrl(url: string, byteLimit = -1): Promise<string> {
-    const str = await fetch(url);
+  static async fetchBytes(url: string, byteLimit: number = -1): Promise<Buffer> {
+    const str = await fetch(url, {
+      headers: (byteLimit > 0) ? {
+        Range: `0-${byteLimit - 1}`
+      } : {}
+    });
+
     if (!str.ok) {
       throw new AppError('Invalid url for hashing', 'data');
     }
-    const body = Readable.fromWeb(str.body!);
+
     let count = 0;
     const buffer: Buffer[] = [];
 
-    for await (const chunk of body) {
-      if (Buffer.isBuffer(chunk) || typeof chunk === 'string') {
-        if (Buffer.isBuffer(chunk)) {
-          buffer.push(chunk);
-          count += chunk.length;
-        } else if (typeof chunk === 'string') {
-          buffer.push(Buffer.from(chunk));
-          count += chunk.length;
-        }
+    for await (const chunk of Readable.fromWeb(str.body!)) {
+      if (Buffer.isBuffer(chunk)) {
+        buffer.push(chunk);
+        count += chunk.length;
+      } else if (typeof chunk === 'string') {
+        buffer.push(Buffer.from(chunk));
+        count += chunk.length;
+      }
 
-        if (count > byteLimit && byteLimit > 0) {
-          body.destroy();
-        }
+      if (count > byteLimit && byteLimit > 0) {
+        break;
       }
     }
 
+    try {
+      await str.body?.cancel();
+    } catch { }
+
+    return Buffer.concat(buffer, byteLimit <= 0 ? undefined : byteLimit);
+  }
+
+  /**
+   * Compute hash from a url
+   */
+  static async hashUrl(url: string, byteLimit = -1): Promise<string> {
     const hasher = crypto.createHash('sha256').setEncoding('hex');
-    const finalData = Buffer.concat(buffer, byteLimit <= 0 ? undefined : byteLimit);
+    const finalData = await this.fetchBytes(url, byteLimit);
     return hasher.update(finalData).end().read().toString();
   }
 }
