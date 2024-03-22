@@ -16,7 +16,6 @@ import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { ModelStreamUtil } from '@travetto/model/src/internal/service/stream';
 
 import { S3ModelConfig } from './config';
 
@@ -325,7 +324,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
     const meta = await this.describeStream(location);
 
-    [start, end] = ModelStreamUtil.enforceRange(start, end, meta.size);
+    [start, end] = StreamUtil.enforceRange(start, end, meta.size);
 
     // Read from s3
     const res = await this.client.getObject(this.#q(STREAM_SPACE, location, {

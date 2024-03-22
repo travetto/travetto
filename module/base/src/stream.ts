@@ -3,6 +3,7 @@ import { createWriteStream } from 'node:fs';
 import { PassThrough, Readable, Writable } from 'node:stream';
 import { ReadableStream as WebReadableStream } from 'node:stream/web';
 import { pipeline } from 'node:stream/promises';
+import { AppError } from './error';
 
 type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | WebReadableStream;
 
@@ -100,5 +101,20 @@ export class StreamUtil {
         await cb(line.trimEnd());
       }
     }
+  }
+
+  /**
+   * Enforce byte range for stream stream/file of a certain size
+   */
+  static enforceRange(start: number, end: number | undefined, size: number): [start: number, end: number] {
+    end ??= size - 1;
+
+    if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0) {
+      throw new AppError('Invalid position, out of range', 'data');
+    }
+    if (end >= size) {
+      end = size - 1;
+    }
+    return [start, end];
   }
 }

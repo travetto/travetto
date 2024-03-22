@@ -1,4 +1,4 @@
-import { Readable } from 'node:stream';
+import { PassThrough } from 'node:stream';
 
 import { Inject, Injectable } from '@travetto/di';
 import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta } from '@travetto/model';
@@ -85,15 +85,15 @@ export class AssetService {
    */
   async get(location: string, start?: number, end?: number): Promise<AssetResponse> {
     const info = await this.describe(location);
-    let stream: Readable;
-    let extra: Partial<AssetResponse> | undefined;
+    const stream = new PassThrough();
+    const extra: Partial<AssetResponse> = {};
+    let load: () => void;
     if (start === undefined) {
-      stream = await this.#store.getStream(location);
+      load = (): void => { this.#store.getStream(location).then(v => v.pipe(stream)); };
     } else {
-      const res = await this.#store.getStreamPartial(location, start, end);
-      stream = res.stream;
-      extra = { range: res.range };
+      extra.range = StreamUtil.enforceRange(start, end, info.size);
+      load = (): void => { this.#store.getStreamPartial(location, start, end).then(v => v.stream.pipe(stream)); };
     }
-    return { stream: () => stream, ...info, ...extra };
+    return { stream: () => (load(), stream), ...info, ...extra };
   }
 }
