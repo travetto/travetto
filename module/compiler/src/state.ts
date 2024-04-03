@@ -63,14 +63,15 @@ export class CompilerState implements ts.CompilerHost {
 
     // Register all inputs
     for (const x of this.#modules) {
+      const base = x?.files ?? {};
       const files = [
-        ...x.files.bin ?? [],
-        ...x.files.src ?? [],
-        ...x.files.support ?? [],
-        ...x.files.doc ?? [],
-        ...x.files.test ?? [],
-        ...x.files.$index ?? [],
-        ...x.files.$package ?? []
+        ...base.bin ?? [],
+        ...base.src ?? [],
+        ...base.support ?? [],
+        ...base.doc ?? [],
+        ...base.test ?? [],
+        ...base.$index ?? [],
+        ...base.$package ?? []
       ];
       for (const [file, type] of files) {
         if (CompilerUtil.validFile(type) || type === 'typings') {
@@ -103,7 +104,11 @@ export class CompilerState implements ts.CompilerHost {
   }
 
   getArbitraryInputFile(): string {
-    return this.getBySource(this.#manifestIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile)!.inputFile;
+    const randomSource = this.#manifestIndex.getWorkspaceModules()
+      .filter(x => x.files.src.length)[0]
+      .files.src[0].sourceFile;
+
+    return this.getBySource(randomSource)!.inputFile;
   }
 
   async createProgram(force = false): Promise<ts.Program> {

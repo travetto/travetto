@@ -30,6 +30,10 @@ export class CompilerWatcher {
     this.#signal = signal;
   }
 
+  #reset(ev: WatchEvent): never {
+    throw new Error('RESET', { cause: `${ev.action}:${ev.file}` });
+  }
+
   #getIgnores(): string[] {
     // TODO: Read .gitignore?
     let ignores = PackageUtil.readPackage(this.#state.manifest.workspace.path)?.travetto?.build?.watchIgnores;
@@ -101,7 +105,11 @@ export class CompilerWatcher {
 
     for (const file of allFiles) {
       for (const parent of parents.get(file.mod)!) {
-        moduleToFiles.get(parent)!.files.push(file);
+        const mod = moduleToFiles.get(parent);
+        if (!mod || !mod.files) {
+          this.#reset({ action: file.action, file: file.moduleFile });
+        }
+        mod.files.push(file);
       }
     }
 
@@ -157,7 +165,7 @@ export class CompilerWatcher {
           sourceFile === ROOT_PKG ||
           (action === 'delete' && (sourceFile === OUTPUT_PATH || sourceFile === COMPILER_PATH))
         ) {
-          throw new Error('RESET', { cause: `${action}:${sourceFile}` });
+          this.#reset(ev);
         }
 
         const fileType = ManifestModuleUtil.getFileType(sourceFile);
