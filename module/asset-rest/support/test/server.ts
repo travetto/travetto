@@ -69,7 +69,7 @@ class TestUploadController {
 
   @Get('*')
   async get(req: Request, res: Response) {
-    const [start, end] = AssetRestUtil.getRequestedRange(req) ?? [];
+    const [start, end] = AssetRestUtil.getRequestedRange(req.headers.range) ?? [];
     if (req.headers.range) {
       res.setHeader('Accept-Ranges', 'bytes');
     }
