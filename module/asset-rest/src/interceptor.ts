@@ -1,6 +1,5 @@
 import busboy, { type BusboyHeaders } from '@fastify/busboy';
 
-import { Asset } from '@travetto/asset';
 import { Inject, Injectable } from '@travetto/di';
 import {
   BodyParseInterceptor, FilterContext, FilterReturn, FilterNext, Request,
@@ -12,7 +11,7 @@ import { AppError } from '@travetto/base';
 import { RestAssetConfig } from './config';
 import { AssetRestUtil, WithCleanup } from './util';
 
-type AssetMap = Record<string, Asset>;
+type FileMap = Record<string, File>;
 
 @Injectable()
 export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
@@ -22,21 +21,21 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     return fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
   }
 
-  static async validateAsset(config: Partial<RestAssetConfig>, asset: Asset): Promise<Asset> {
+  static async validateFile(config: Partial<RestAssetConfig>, file: File): Promise<File> {
     const check = config.matcher ??= MimeUtil.matcher(config.types);
-    if (check(asset.contentType)) {
-      return asset;
+    if (check(file.type)) {
+      return file;
     } else {
-      throw new AppError(`Content type not allowed: ${asset.contentType}`, 'data');
+      throw new AppError(`Content type not allowed: ${file.type}`, 'data');
     }
   }
 
-  static async uploadDirect(req: Request, config: Partial<RestAssetConfig>): Promise<WithCleanup<AssetMap>> {
+  static async uploadDirect(req: Request, config: Partial<RestAssetConfig>): Promise<WithCleanup<FileMap>> {
     console.log('Starting direct upload', req.header('content-length'));
     const filename = AssetRestUtil.getFileName(req);
-    const [asset, cleanup] = await AssetRestUtil.writeToAsset(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
+    const [file, cleanup] = await AssetRestUtil.writeToBlob(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
     try {
-      return [{ file: await this.validateAsset(config, asset) }, config.deleteFiles !== false ? cleanup : (async (): Promise<void> => { })];
+      return [{ file: await this.validateFile(config, file) }, config.deleteFiles !== false ? cleanup : (async (): Promise<void> => { })];
     } catch (err) {
       console.error('Failed direct upload', err);
       await cleanup();
@@ -44,10 +43,10 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     }
   }
 
-  static async uploadMultipart(req: Request, config: Partial<RestAssetConfig>): Promise<WithCleanup<AssetMap>> {
+  static async uploadMultipart(req: Request, config: Partial<RestAssetConfig>): Promise<WithCleanup<FileMap>> {
     const largestMax = this.getLargestFileMax(config);
     const uploads: Promise<unknown>[] = [];
-    const files: AssetMap = {};
+    const files: FileMap = {};
 
     const allCleanups: Function[] = [];
     const managedCleanups: Function[] = [];
@@ -58,7 +57,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     const uploader = busboy({ headers: req.headers as BusboyHeaders, limits: { fileSize: largestMax } })
       .on('file', (field, stream, filename) =>
         uploads.push(
-          AssetRestUtil.writeToAsset(stream, filename, config.files![field]?.maxSize ?? largestMax)
+          AssetRestUtil.writeToBlob(stream, filename, config.files![field]?.maxSize ?? largestMax)
             .then(([asset, cleanup]) => {
               if (config.deleteFiles !== false) {
                 managedCleanups.push(cleanup);
@@ -66,7 +65,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
               allCleanups.push(cleanup);
               return files[field] = asset;
             })
-            .then(asset => this.validateAsset(config.files?.[field] ?? config, asset))
+            .then(file => this.validateFile(config.files?.[field] ?? config, file))
         )
       )
       .on('limit', field =>

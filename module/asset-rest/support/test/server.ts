@@ -31,40 +31,48 @@ class TestUploadController {
   @UploadAll()
   async uploadAll({ files }: Request) {
     for (const [, file] of Object.entries(files)) {
-      const { source: _, ...meta } = file;
+      const { source: _, ...meta } = await AssetUtil.blobToAsset(file);
       return meta;
     }
   }
 
   @Post('/')
-  async upload(@Upload() file: Asset) {
-    const { source: _, ...meta } = file;
-    const loc = await this.service.upsert(file);
-    return { ...meta, location: loc };
+  async upload(@Upload() file: Blob) {
+    const asset = await AssetUtil.blobToAsset(file);
+    const location = await this.service.upsert(asset);
+    return { ...asset, location };
   }
 
   @Post('/cached')
-  async uploadCached(@Upload() file: Asset) {
-    file.cacheControl = 'max-age=3600';
-    file.contentLanguage = 'en-GB';
-    const loc = await this.service.upsert(file);
-    const output = await this.service.get(loc);
+  async uploadCached(@Upload() file: Blob) {
+    const asset = await AssetUtil.blobToAsset(file, {
+      cacheControl: 'max-age=3600',
+      contentLanguage: 'en-GB'
+    });
+    const location = await this.service.upsert(asset);
+    const output = await this.service.get(location);
     return AssetRestUtil.downloadable(output);
   }
 
   @Post('/all-named')
-  async uploads(@Upload('file1') file1: Asset, @Upload('file2') file2: Asset) {
-    return { hash1: file1.hash, hash2: file2.hash };
+  async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
+    const asset1 = await AssetUtil.blobToAsset(file1);
+    const asset2 = await AssetUtil.blobToAsset(file2);
+    return { hash1: asset1.hash, hash2: asset2.hash };
   }
 
   @Post('/all-named-custom')
-  async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Asset, @Upload('file2') file2: Asset) {
-    return { hash1: file1.hash, hash2: file2.hash };
+  async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
+    const asset1 = await AssetUtil.blobToAsset(file1);
+    const asset2 = await AssetUtil.blobToAsset(file2);
+    return { hash1: asset1.hash, hash2: asset2.hash };
   }
 
   @Post('/all-named-size')
-  async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: Asset, @Upload({ name: 'file2', maxSize: 8000 }) file2: Asset) {
-    return { hash1: file1.hash, hash2: file2.hash };
+  async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
+    const asset1 = await AssetUtil.blobToAsset(file1);
+    const asset2 = await AssetUtil.blobToAsset(file2);
+    return { hash1: asset1.hash, hash2: asset2.hash };
   }
 
   @Get('*')

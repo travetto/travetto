@@ -1,6 +1,5 @@
 import { Class, AppError, ClassInstance } from '@travetto/base';
 import { ControllerRegistry, ParamConfig, Param, RouteHandler } from '@travetto/rest';
-import { AssetImpl } from '@travetto/asset/src/internal/types';
 import { SchemaRegistry } from '@travetto/schema';
 import { RequestTarget } from '@travetto/rest/src/internal/types';
 
@@ -25,8 +24,8 @@ export function Upload(
 
   const finalConf = { ...param };
 
-  if (finalConf.contextType !== AssetImpl) {
-    throw new AppError('Cannot use upload decorator with anything but an Asset', 'general');
+  if (!(finalConf.contextType === Blob || finalConf.contextType === File)) {
+    throw new AppError(`Cannot use upload decorator with ${finalConf.contextType}, but only an Blob or File`, 'general');
   }
 
   return (inst: ClassInstance, prop: string, idx: number): void => {

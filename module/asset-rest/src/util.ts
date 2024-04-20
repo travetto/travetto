@@ -76,6 +76,26 @@ export class AssetRestUtil {
   }
 
   /**
+   * Write data to file, enforcing max size if needed
+   * @param data
+   * @param filename
+   * @param maxSize
+   */
+  static async writeToBlob(data: stream.Readable | Buffer, filename: string, maxSize?: number): Promise<WithCleanup<File>> {
+    const [uniqueLocal, cleanup] = await this.#createTempFileWithCleanup(filename);
+
+    try {
+      await this.#streamToFileWithMaxSize(await StreamUtil.toStream(data), uniqueLocal, maxSize);
+    } catch (err) {
+      await cleanup();
+      throw err;
+    }
+
+    const file = await AssetUtil.fileToBlob(uniqueLocal);
+    return [file, cleanup];
+  }
+
+  /**
    * Parse filename from the request headers
    */
   static getFileName(req: Request): string {
