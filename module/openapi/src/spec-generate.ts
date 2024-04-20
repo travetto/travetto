@@ -321,7 +321,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     const pConf = this.#getEndpointBody(ep.responseType, this.#getHeaderValue(ep, 'content-type'));
     const code = Object.keys(pConf.content).length ? 200 : 201;
-    op.responses[code] = pConf;
+    op.responses![code] = pConf;
 
     const schema = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
     for (const field of schema) {

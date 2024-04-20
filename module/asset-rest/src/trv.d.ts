@@ -1,8 +1,17 @@
-import { Asset } from '@travetto/asset';
 import '@travetto/rest';
 
 declare global {
   interface TravettoRequest {
-    files: Record<string, Asset>;
+    files: Record<string, File>;
   }
+
+  /**
+   * @concrete node:buffer#Blob
+   */
+  interface Blob { }
+
+  /**
+   * @concrete node:buffer#File
+   */
+  interface File { }
 }

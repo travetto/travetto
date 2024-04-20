@@ -11,6 +11,7 @@ import { StreamMeta } from '@travetto/model';
 import { AppError } from '@travetto/base';
 
 import { Asset } from './types';
+import { LocalFile } from './file';
 
 /**
  * Utilities for processing assets
@@ -127,8 +128,61 @@ export class AssetUtil {
       size,
       filename,
       contentType,
+      contentEncoding: metadata.contentEncoding,
+      contentLanguage: metadata.contentLanguage,
+      cacheControl: metadata.cacheControl,
       localFile: file,
       source: createReadStream(file),
+      hash
+    };
+  }
+
+  /**
+   * File to blob
+   * @param file
+   * @param metadata
+   */
+  static async fileToBlob(file: string, metadata: Partial<StreamMeta> = {}): Promise<File> {
+    let type = metadata.contentType;
+    if (!type) {
+      type = (await this.detectFileType(file))?.mime;
+    }
+    return new LocalFile(file, type);
+  }
+
+  /**
+   * Convert blob to asset structure
+   */
+  static async blobToAsset(blob: Blob, metadata: Partial<StreamMeta> = {}): Promise<Asset> {
+
+    if (!metadata.hash) {
+      const hasher = crypto.createHash('sha256').setEncoding('hex');
+      const str = Readable.fromWeb(blob.stream());
+      await pipeline(str, hasher);
+      metadata.hash ??= hasher.read().toString();
+    }
+
+    const hash = metadata.hash!;
+    const size = metadata.size ?? blob.size;
+    const contentType = metadata.contentType ?? blob.type;
+    let filename = metadata.filename;
+
+    if (!filename) {
+      filename = `unknown.${Date.now()}`;
+      const ext = getExtension(contentType);
+      if (ext) {
+        filename = `${filename}.${ext}`;
+      }
+    }
+
+    return {
+      size,
+      filename,
+      contentType,
+      contentEncoding: metadata.contentEncoding,
+      contentLanguage: metadata.contentLanguage,
+      cacheControl: metadata.cacheControl,
+      source: Readable.fromWeb(blob.stream()),
       hash
     };
   }
