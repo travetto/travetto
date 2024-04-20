@@ -7,7 +7,7 @@ import { pipeline } from 'node:stream/promises';
 import { getExtension } from 'mime';
 
 import { Renderable, Request, Response } from '@travetto/rest';
-import { Asset, AssetResponse, AssetUtil } from '@travetto/asset';
+import { AssetResponse, AssetUtil } from '@travetto/asset';
 import { path } from '@travetto/manifest';
 import { StreamUtil, AppError } from '@travetto/base';
 
@@ -53,26 +53,6 @@ export class AssetRestUtil {
       }),
       createWriteStream(outputFile)
     );
-  }
-
-  /**
-   * Write data to file, enforcing max size if needed
-   * @param data
-   * @param filename
-   * @param maxSize
-   */
-  static async writeToAsset(data: stream.Readable | Buffer, filename: string, maxSize?: number): Promise<WithCleanup<Asset>> {
-    const [uniqueLocal, cleanup] = await this.#createTempFileWithCleanup(filename);
-
-    try {
-      await this.#streamToFileWithMaxSize(await StreamUtil.toStream(data), uniqueLocal, maxSize);
-    } catch (err) {
-      await cleanup();
-      throw err;
-    }
-
-    const asset = await AssetUtil.fileToAsset(uniqueLocal);
-    return [asset, cleanup];
   }
 
   /**
