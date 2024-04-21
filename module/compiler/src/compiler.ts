@@ -67,6 +67,7 @@ export class Compiler {
       case 'error': {
         process.exitCode = 1;
         if (err) {
+          EventUtil.sendEvent('log', { level: 'error', message: err.toString(), time: Date.now() });
           log.error('Shutting down due to failure', err.message);
         }
         break;
@@ -127,7 +128,6 @@ export class Compiler {
     EventUtil.sendEvent('state', { state: 'init', extra: { pid: process.pid } });
 
     const emitter = await this.getCompiler();
-    let failed = false;
 
     log.debug('Compiler loaded');
 
@@ -136,17 +136,14 @@ export class Compiler {
     if (this.#dirtyFiles.length) {
       for await (const ev of this.emit(this.#dirtyFiles, emitter)) {
         if (ev.err) {
-          failed = true;
           const compileError = CompilerUtil.buildTranspileError(ev.file, ev.err);
-          EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
+          this.#shutdown('error', compileError);
+          return;
         }
       }
+
       if (this.#signal.aborted) {
         log.debug('Compilation aborted');
-      } else if (failed) {
-        log.debug('Compilation failed');
-        process.exitCode = 1;
-        return;
       } else {
         log.debug('Compilation succeeded');
       }
