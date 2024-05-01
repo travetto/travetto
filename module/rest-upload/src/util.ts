@@ -1,15 +1,16 @@
 import { createWriteStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
-import stream from 'node:stream';
+import stream, { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { getExtension } from 'mime';
 
-import { Renderable, Request, Response } from '@travetto/rest';
-import { AssetResponse, AssetUtil } from '@travetto/asset';
+import { Request } from '@travetto/rest';
 import { path } from '@travetto/manifest';
 import { StreamUtil, AppError } from '@travetto/base';
+
+import { LocalFile } from './file';
 
 export type WithCleanup<T> = [T, () => Promise<void>];
 
@@ -18,7 +19,7 @@ const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 /**
  * General support for handling file uploads/downloads
  */
-export class AssetRestUtil {
+export class RestUploadUtil {
 
   static async #createTempFileWithCleanup(filename: string): Promise<WithCleanup<string>> {
     // TODO: Should use file abstraction
@@ -56,6 +57,32 @@ export class AssetRestUtil {
   }
 
   /**
+   * Detect file type from location on disk
+   */
+  static async detectFileType(input: string | Buffer | Readable): Promise<{ ext: string, mime: string } | undefined> {
+    const { default: fileType } = await import('file-type');
+    const buffer = await StreamUtil.readChunk(input, 4100);
+    const matched = await fileType.fromBuffer(buffer);
+    if (typeof input === 'string' && matched?.mime === 'video/mp4' && input.endsWith('.m4a')) {
+      return { ext: '.m4a', mime: 'audio/mpeg' };
+    }
+    return matched;
+  }
+
+  /**
+   * File to blob
+   * @param file
+   * @param metadata
+   */
+  static async fileToBlob(file: string, metadata: Partial<{ contentType?: string }> = {}): Promise<File> {
+    let type = metadata.contentType;
+    if (!type) {
+      type = (await this.detectFileType(file))?.mime;
+    }
+    return new LocalFile(file, type);
+  }
+
+  /**
    * Write data to file, enforcing max size if needed
    * @param data
    * @param filename
@@ -71,7 +98,7 @@ export class AssetRestUtil {
       throw err;
     }
 
-    const file = await AssetUtil.fileToBlob(uniqueLocal);
+    const file = await this.fileToBlob(uniqueLocal);
     return [file, cleanup];
   }
 
@@ -90,40 +117,6 @@ export class AssetRestUtil {
         return 'file-upload.unknown';
       }
     }
-  }
-
-  /**
-   * Make any asset downloadable
-   */
-  static downloadable(asset: AssetResponse): Renderable {
-    return {
-      render(res: Response): stream.Readable {
-        res.setHeader('Content-Type', asset.contentType);
-        if (asset.filename) {
-          res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
-        }
-        if (asset.contentEncoding) {
-          res.setHeader('Content-Encoding', asset.contentEncoding);
-        }
-        if (asset.contentLanguage) {
-          res.setHeader('Content-Language', asset.contentLanguage);
-        }
-        if (asset.cacheControl) {
-          res.setHeader('Cache-Control', asset.cacheControl);
-        }
-        if (!asset.range) {
-          res.setHeader('Content-Length', `${asset.size}`);
-          res.status(200);
-        } else {
-          const [start, end] = asset.range;
-          res.status(206);
-          res.setHeader('Accept-Ranges', 'bytes');
-          res.setHeader('Content-Range', `bytes ${start}-${end}/${asset.size}`);
-          res.setHeader('Content-Length', `${end - start + 1}`);
-        }
-        return asset.stream!();
-      }
-    };
   }
 
   /**

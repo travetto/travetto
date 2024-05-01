@@ -1,11 +1,12 @@
 import { PassThrough } from 'node:stream';
 
 import { Inject, Injectable } from '@travetto/di';
-import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta } from '@travetto/model';
+import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta, StreamResponse } from '@travetto/model';
 import { StreamUtil } from '@travetto/base';
 
-import { Asset, AssetResponse } from './types';
+import { Asset } from './types';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
+import { AssetUtil } from './util';
 
 export const AssetModelⲐ = Symbol.for('@travetto/asset:model');
 
@@ -41,6 +42,20 @@ export class AssetService {
    */
   describe(location: string): Promise<StreamMeta> {
     return this.#store.describeStream(location);
+  }
+
+  /**
+   * Stores an asset with the optional ability to overwrite if the file is already found. If not
+   * overwriting and file exists, an error will be thrown.
+   *
+   * @param asset The blob to store
+   * @param meta The optional metadata for the blob
+   * @param overwriteIfFound Overwrite the asset if found
+   * @param strategy The naming strategy to use, defaults to the service's strategy if not provided
+   */
+  async upsertBlob(blob: Blob, meta: Partial<StreamMeta> = {}, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
+    const asset = await AssetUtil.blobToAsset(blob, meta);
+    return this.upsert(asset, overwriteIfFound, strategy);
   }
 
   /**
@@ -83,10 +98,10 @@ export class AssetService {
    *
    * @param location The location to find.
    */
-  async get(location: string, start?: number, end?: number): Promise<AssetResponse> {
+  async get(location: string, start?: number, end?: number): Promise<StreamResponse> {
     const info = await this.describe(location);
     const stream = new PassThrough();
-    const extra: Partial<AssetResponse> = {};
+    const extra: Partial<StreamResponse> = {};
     let load: () => void;
     if (start === undefined) {
       load = (): void => { this.#store.getStream(location).then(v => v.pipe(stream)); };

@@ -4,14 +4,14 @@ import { SchemaRegistry } from '@travetto/schema';
 import { RequestTarget } from '@travetto/rest/src/internal/types';
 
 import { RestAssetInterceptor } from './interceptor';
-import { RestAssetConfig } from './config';
+import { RestUploadConfig } from './config';
 
-type UploadConfig = Partial<Pick<RestAssetConfig, 'types' | 'maxSize' | 'deleteFiles'>>;
+type UploadConfig = Partial<Pick<RestUploadConfig, 'types' | 'maxSize' | 'deleteFiles'>>;
 
 /**
  * Allows for supporting uploads
  *
- * @augments `@travetto/asset-rest:Upload`
+ * @augments `@travetto/rest-upload:Upload`
  * @augments `@travetto/rest:Param`
  */
 export function Upload(

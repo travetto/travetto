@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Request } from '@travetto/rest';
 import { Asset } from '@travetto/asset';
-import { AssetRestUtil, Upload, UploadAll } from '@travetto/asset-rest';
+import { AssetRestUtil, Upload, UploadAll } from '@travetto/rest-upload';
 
 @Controller('/simple')
 export class Simple {
