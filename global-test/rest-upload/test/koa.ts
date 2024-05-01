@@ -1,9 +1,8 @@
+import { RestUploadServerSuite } from '@travetto/rest-upload/support/test/server';
 import { Suite } from '@travetto/test';
 import { KoaRestServer } from '@travetto/rest-koa';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
-
-import { AssetRestUploadServerSuite } from './server';
 
 const KOA = Symbol.for('koa');
 
@@ -22,6 +21,6 @@ class Config {
 }
 
 @Suite()
-export class KoaRestUploadTest extends AssetRestUploadServerSuite {
+export class KoaRestUploadTest extends RestUploadServerSuite {
   qualifier = KOA;
 }

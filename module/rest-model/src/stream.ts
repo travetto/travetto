@@ -4,7 +4,7 @@ import { path } from '@travetto/manifest';
 import { StreamResponse } from '@travetto/model';
 import { Renderable, Response } from '@travetto/rest';
 
-export class ModelStreamUtil {
+export class RestModelUtil {
   /**
    * Make any stream response downloadable
    */
