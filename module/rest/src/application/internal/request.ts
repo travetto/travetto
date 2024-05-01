@@ -1,8 +1,13 @@
 import { IncomingHttpHeaders } from 'node:http';
 
+import { getExtension } from 'mime';
+
+
 import { Request, ContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
 import { NodeEntityⲐ, ParsedType } from '../../internal/symbol';
+
+const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
 /**
  * Base Request object
@@ -75,6 +80,23 @@ export class RequestCore implements Partial<Request> {
         .map(x => x ? parseInt(x, 10) : undefined);
       if (start !== undefined) {
         return [start, end ?? (start + chunkSize)];
+      }
+    }
+  }
+
+  /**
+   * Read the filename from the content disposition
+   */
+  getFilename(this: Request): string {
+    const [, match] = (this.header('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
+    if (match) {
+      return match;
+    } else {
+      const contentType = this.getContentType();
+      if (contentType) {
+        return `file-upload.${getExtension(contentType.full)}`;
+      } else {
+        return 'file-upload.unknown';
       }
     }
   }

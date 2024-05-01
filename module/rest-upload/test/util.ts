@@ -25,13 +25,13 @@ export class UtilTest {
   @Test()
   extractFilename() {
     const req = makeRequest('"hello-world"', 'image/png');
-    assert(RestUploadUtil.getFileName(req) === 'hello-world');
+    assert(req.getFilename() === 'hello-world');
 
     const req2 = makeRequest('hello-world', 'image/png');
-    assert(RestUploadUtil.getFileName(req2) === 'hello-world');
+    assert(req2.getFilename() === 'hello-world');
 
     const req3 = makeRequest(undefined, 'image/png');
-    assert(RestUploadUtil.getFileName(req3 as Request) === 'file-upload.png');
+    assert(req3.getFilename() === 'file-upload.png');
   }
 
   @Test({ shouldThrow: 'size' })

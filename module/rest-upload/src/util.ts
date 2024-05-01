@@ -4,17 +4,12 @@ import os from 'node:os';
 import stream, { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-import { getExtension } from 'mime';
-
-import { Request } from '@travetto/rest';
 import { path } from '@travetto/manifest';
 import { StreamUtil, AppError } from '@travetto/base';
 
 import { LocalFile } from './file';
 
 export type WithCleanup<T> = [T, () => Promise<void>];
-
-const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
 /**
  * General support for handling file uploads/downloads
@@ -100,22 +95,5 @@ export class RestUploadUtil {
 
     const file = await this.fileToBlob(uniqueLocal);
     return [file, cleanup];
-  }
-
-  /**
-   * Parse filename from the request headers
-   */
-  static getFileName(req: Request): string {
-    const [, match] = (req.header('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
-    if (match) {
-      return match;
-    } else {
-      const contentType = req.getContentType();
-      if (contentType) {
-        return `file-upload.${getExtension(contentType.full)}`;
-      } else {
-        return 'file-upload.unknown';
-      }
-    }
   }
 }

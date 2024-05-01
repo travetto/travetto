@@ -32,7 +32,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
 
   static async uploadDirect(req: Request, config: Partial<RestUploadConfig>): Promise<WithCleanup<FileMap>> {
     console.log('Starting direct upload', req.header('content-length'));
-    const filename = RestUploadUtil.getFileName(req);
+    const filename = req.getFilename();
     const [file, cleanup] = await RestUploadUtil.writeToBlob(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
     try {
       return [{ file: await this.validateFile(config, file) }, config.deleteFiles !== false ? cleanup : (async (): Promise<void> => { })];
