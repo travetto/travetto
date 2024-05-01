@@ -36,22 +36,22 @@ class TestUploadController {
 
   @Post('/')
   async upload(@Upload() file: File) {
-    return file.name;
+    return { hash: await TestUploadController.hashFile(file) };
   }
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: await TestUploadController.hashFile(file1), hash2: TestUploadController.hashFile(file2) };
+    return { hash1: await TestUploadController.hashFile(file1), hash2: await TestUploadController.hashFile(file2) };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: await TestUploadController.hashFile(file1), hash2: TestUploadController.hashFile(file2) };
+    return { hash1: await TestUploadController.hashFile(file1), hash2: await TestUploadController.hashFile(file2) };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    return { hash1: await TestUploadController.hashFile(file1), hash2: TestUploadController.hashFile(file2) };
+    return { hash1: await TestUploadController.hashFile(file1), hash2: await TestUploadController.hashFile(file2) };
   }
 }
 

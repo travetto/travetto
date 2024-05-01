@@ -15,7 +15,10 @@ function makeRequest(filename: string | undefined, type: string): Request {
         case 'content-type': return type;
         case 'content-disposition': return filename ? `filename=${filename}` : filename;
       }
-    }
+    },
+    getFilename() {
+      return filename;
+    },
   } as Request;
 }
 
