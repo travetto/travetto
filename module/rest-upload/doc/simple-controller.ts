@@ -1,6 +1,5 @@
 import { Controller, Post, Get, Request } from '@travetto/rest';
-import { Asset } from '@travetto/asset';
-import { AssetRestUtil, Upload, UploadAll } from '@travetto/rest-upload';
+import { Upload, UploadAll } from '@travetto/rest-upload';
 
 @Controller('/simple')
 export class Simple {
@@ -19,8 +18,8 @@ export class Simple {
    * @param file A file to upload
    */
   @Post('/file')
-  loadFile(@Upload() file: Asset) {
-    return AssetRestUtil.downloadable(file);
+  loadFile(@Upload() file: File) {
+    return file;
   }
 
   /**
@@ -30,7 +29,7 @@ export class Simple {
   @UploadAll()
   loadFiles({ files }: Request) {
     for (const [, file] of Object.entries(files)) {
-      return AssetRestUtil.downloadable(file); // return the first
+      return file;
     }
   }
 }
