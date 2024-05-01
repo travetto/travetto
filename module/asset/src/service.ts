@@ -54,9 +54,10 @@ export class AssetService {
    * @param overwriteIfFound Overwrite the asset if found
    * @param strategy The naming strategy to use, defaults to the service's strategy if not provided
    */
-  async upsertBlob(blob: Blob, meta: Partial<StreamMeta> = {}, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
+  async upsertBlob(blob: Blob, meta: Partial<StreamMeta> = {}, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<{ asset: Asset, location: string }> {
     const asset = await AssetUtil.blobToAsset(blob, meta);
-    return this.upsert(asset, overwriteIfFound, strategy);
+    const location = await this.upsert(asset, overwriteIfFound, strategy);
+    return { asset, location };
   }
 
   /**

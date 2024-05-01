@@ -1,5 +1,5 @@
 {
-  "name": "@travetto-test/asset-rest",
+  "name": "@travetto-test/asset-rest-upload",
   "version": "0.0.0",
   "dependencies": {
     "@travetto/asset-rest": "^4.1.6",

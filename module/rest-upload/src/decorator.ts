@@ -58,7 +58,7 @@ export function Upload(
 /**
  * Allows for supporting uploads
  *
- * @augments `@travetto/asset-rest:Upload`
+ * @augments `@travetto/rest-upload:Upload`
  * @augments `@travetto/rest:Endpoint`
  */
 export function UploadAll(config: Partial<ParamConfig> & UploadConfig = {}) {
