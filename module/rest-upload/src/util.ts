@@ -118,17 +118,4 @@ export class RestUploadUtil {
       }
     }
   }
-
-  /**
-   * Get requested byte range from a given Range header
-   */
-  static getRequestedRange(rangeHeader?: string, chunkSize: number = 100 * 1024): [start: number, end?: number] | undefined {
-    if (rangeHeader) {
-      const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
-        .map(x => x ? parseInt(x, 10) : undefined);
-      if (start !== undefined) {
-        return [start, end ?? (start + chunkSize)];
-      }
-    }
-  }
 }

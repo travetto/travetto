@@ -41,7 +41,7 @@ export interface PartialStream {
 }
 
 /**
- * An stream response
+ * A stream response
  */
 export interface StreamResponse extends StreamMeta {
   stream(): Readable;

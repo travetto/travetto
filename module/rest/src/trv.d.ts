@@ -120,6 +120,11 @@ declare global {
      * Get the ip address for a request
      */
     getIp(): string | undefined;
+
+    /**
+     * Get requested range
+     */
+    getRange(chunkSize?: number): [start: number, end?: number] | undefined;
   }
 
   /**
