@@ -128,6 +128,7 @@ export class Compiler {
     EventUtil.sendEvent('state', { state: 'init', extra: { pid: process.pid } });
 
     const emitter = await this.getCompiler();
+    let failure: Error | undefined;
 
     log.debug('Compiler loaded');
 
@@ -137,13 +138,15 @@ export class Compiler {
       for await (const ev of this.emit(this.#dirtyFiles, emitter)) {
         if (ev.err) {
           const compileError = CompilerUtil.buildTranspileError(ev.file, ev.err);
-          this.#shutdown('error', compileError);
-          return;
+          failure ??= compileError;
+          EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
         }
       }
-
       if (this.#signal.aborted) {
         log.debug('Compilation aborted');
+      } else if (failure) {
+        log.debug('Compilation failed');
+        return this.#shutdown('error', failure);
       } else {
         log.debug('Compilation succeeded');
       }

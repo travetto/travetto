@@ -3,6 +3,7 @@ import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResul
 
 import { EndpointConfig } from '../registry/types';
 import { ParamConfig, Request, Response } from '../types';
+import { MissingInputⲐ, RequestInputsⲐ } from '../internal/symbol';
 
 export type ExtractFn = (c: ParamConfig, req: Request, res: Response, schema: FieldConfig) => unknown;
 
@@ -94,7 +95,10 @@ class $ParamExtractor {
     const method = route.handlerName;
 
     const methodParams = SchemaRegistry.getMethodSchema(cls, method);
-    const routed = route.params.map((c, i) => (c.extract ?? this.defaultExtractors[c.location])(c, req, res, methodParams[i]));
+    const routed = route.params.map((c, i) =>
+      (req[RequestInputsⲐ] && req[RequestInputsⲐ][i] !== MissingInputⲐ) ?
+        req[RequestInputsⲐ][i] :
+        (c.extract ?? this.defaultExtractors[c.location])(c, req, res, methodParams[i]));
 
     const params = BindUtil.coerceMethodParams(cls, method, routed);
 

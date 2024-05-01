@@ -3,7 +3,10 @@ import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'node:
 import { Readable, Writable } from 'node:stream';
 
 import { ContentType, HeaderMap } from './types';
-import { HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from './internal/symbol';
+import {
+  HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ,
+  ProviderEntityⲐ, RequestInputsⲐ, SendStreamⲐ, RequestLoggingⲐ
+} from './internal/symbol';
 
 declare global {
   /**
@@ -18,6 +21,14 @@ declare global {
    * @augments `@travetto/rest:Context`
    */
   interface TravettoRequest<T = unknown> {
+    /**
+     * The parsed inputs for the target handler
+     */
+    [RequestInputsⲐ]?: unknown[];
+    /**
+     * Additional logging context
+     */
+    [RequestLoggingⲐ]?: Record<string, unknown>;
     /**
      * The original request of the underlying framework
      */
