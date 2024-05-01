@@ -23,7 +23,7 @@ class Config {
 @Controller('/test/upload')
 class TestUploadController {
 
-  @Inject(AssetModelⲐ)
+  @Inject()
   service: AssetService;
 
   @Post('/all')
