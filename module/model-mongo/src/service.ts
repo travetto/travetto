@@ -18,7 +18,7 @@ import {
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
-import { ShutdownManager, type Class, AppError, TypedObject, StreamUtil } from '@travetto/base';
+import { ShutdownManager, type Class, AppError, TypedObject } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { DeepPartial, FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
@@ -30,7 +30,7 @@ import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/servic
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
+import { enforceRange, StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
@@ -312,7 +312,7 @@ export class MongoModelService implements
   async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
     const meta = await this.describeStream(location);
 
-    [start, end] = StreamUtil.enforceRange(start, end, meta.size);
+    [start, end] = enforceRange(start, end, meta.size);
 
     const res = await this.#bucket.openDownloadStreamByName(location, { start, end: end + 1 });
     if (!res) {

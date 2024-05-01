@@ -2,6 +2,7 @@ import { PassThrough } from 'node:stream';
 
 import { Inject, Injectable } from '@travetto/di';
 import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta, StreamResponse } from '@travetto/model';
+import { enforceRange } from '@travetto/model/src/internal/service/stream';
 import { StreamUtil } from '@travetto/base';
 
 import { Asset } from './types';
@@ -106,7 +107,7 @@ export class AssetService {
     if (start === undefined) {
       load = (): void => { this.#store.getStream(location).then(v => v.pipe(stream)); };
     } else {
-      extra.range = StreamUtil.enforceRange(start, end, info.size);
+      extra.range = enforceRange(start, end, info.size);
       load = (): void => { this.#store.getStreamPartial(location, start, end).then(v => v.stream.pipe(stream)); };
     }
     return { stream: () => (load(), stream), ...info, ...extra };

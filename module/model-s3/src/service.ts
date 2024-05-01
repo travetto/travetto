@@ -18,6 +18,7 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { S3ModelConfig } from './config';
+import { enforceRange } from '@travetto/model/src/internal/service/stream';
 
 function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && typeof o === 'object' && '$metadata' in o;
@@ -324,7 +325,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
     const meta = await this.describeStream(location);
 
-    [start, end] = StreamUtil.enforceRange(start, end, meta.size);
+    [start, end] = enforceRange(start, end, meta.size);
 
     // Read from s3
     const res = await this.client.getObject(this.#q(STREAM_SPACE, location, {

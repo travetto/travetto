@@ -18,7 +18,7 @@ import { ExistsError } from '../error/exists';
 import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
-import { StreamModel, STREAMS } from '../internal/service/stream';
+import { enforceRange, StreamModel, STREAMS } from '../internal/service/stream';
 import { IndexConfig } from '../registry/types';
 
 const STREAM_META = `${STREAMS}_meta`;
@@ -256,7 +256,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     const streams = this.#find(STREAMS, location, 'notfound');
     const buffer = streams.get(location)!;
 
-    [start, end] = StreamUtil.enforceRange(start, end, buffer.length);
+    [start, end] = enforceRange(start, end, buffer.length);
 
     const stream = await StreamUtil.bufferToStream(buffer.subarray(start, end + 1));
     return { stream, range: [start, end] };

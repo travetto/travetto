@@ -21,7 +21,7 @@ import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
-import { StreamModel, STREAMS } from '../internal/service/stream';
+import { enforceRange, StreamModel, STREAMS } from '../internal/service/stream';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -194,7 +194,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const file = await this.#find(STREAMS, BIN, location);
     const meta = await this.describeStream(location);
 
-    [start, end] = StreamUtil.enforceRange(start, end, meta.size);
+    [start, end] = enforceRange(start, end, meta.size);
 
     const stream = createReadStream(file, { start, end });
     return { stream, range: [start, end] };
