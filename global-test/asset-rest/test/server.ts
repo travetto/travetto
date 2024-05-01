@@ -7,7 +7,7 @@ import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { MemoryModelService, ModelStreamSupport } from '@travetto/model';
-import { RestUploadUtil, Upload, UploadAll } from '@travetto/rest-upload';
+import { Upload, UploadAll } from '@travetto/rest-upload';
 import { Asset, AssetModelⲐ, AssetService, AssetUtil } from '@travetto/asset';
 import { RestModelUtil } from '@travetto/rest-model/src/stream';
 
@@ -76,7 +76,7 @@ class TestUploadController {
 
   @Get('*')
   async get(req: Request, res: Response) {
-    const [start, end] = RestUploadUtil.getRequestedRange(req.headers.range) ?? [];
+    const [start, end] = req.getRange() ?? [];
     if (req.headers.range) {
       res.setHeader('Accept-Ranges', 'bytes');
     }

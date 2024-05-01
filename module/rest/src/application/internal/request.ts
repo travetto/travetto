@@ -63,4 +63,19 @@ export class RequestCore implements Partial<Request> {
     const raw = self[NodeEntityⲐ];
     return self.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
   }
+
+  /**
+   * Get requested byte range for a given request
+   */
+  getRange(this: Request, chunkSize: number = 100 * 1024): [start: number, end?: number] | undefined {
+    const rangeHeader = this.headerFirst('range');
+
+    if (rangeHeader) {
+      const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
+        .map(x => x ? parseInt(x, 10) : undefined);
+      if (start !== undefined) {
+        return [start, end ?? (start + chunkSize)];
+      }
+    }
+  }
 }
