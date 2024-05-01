@@ -37,18 +37,16 @@ class TestUploadController {
 
   @Post('/')
   async upload(@Upload() file: Blob) {
-    const asset = await AssetUtil.blobToAsset(file);
-    const location = await this.service.upsert(asset);
+    const { asset, location } = await this.service.upsertBlob(file);
     return { ...asset, location };
   }
 
   @Post('/cached')
   async uploadCached(@Upload() file: Blob) {
-    const asset = await AssetUtil.blobToAsset(file, {
+    const { location } = await this.service.upsertBlob(file, {
       cacheControl: 'max-age=3600',
       contentLanguage: 'en-GB'
     });
-    const location = await this.service.upsert(asset);
     const output = await this.service.get(location);
     return RestModelUtil.downloadable(output);
   }
