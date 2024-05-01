@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "dependencies": {
     "@travetto/asset-rest": "^4.1.6",
+    "@travetto/rest-upload": "^4.1.0",
     "@travetto/rest-express": "^4.1.3",
     "@travetto/rest-express-lambda": "^4.1.3",
     "@travetto/rest-fastify": "^4.1.4",

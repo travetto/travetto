@@ -1,82 +1,62 @@
 import assert from 'node:assert';
+import crypto from 'node:crypto';
+import { pipeline } from 'node:stream/promises';
 
-import { ObjectUtil, StreamUtil } from '@travetto/base';
-import { Controller, Get, Post, Request, Response } from '@travetto/rest';
+import { StreamUtil } from '@travetto/base';
+import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { Inject, InjectableFactory } from '@travetto/di';
-import { MemoryModelService, ModelStreamSupport } from '@travetto/model';
 
 import { Upload, UploadAll } from '../../src/decorator';
-import { RestUploadUtil } from '../../src/util';
+import { LocalFile } from '../../src/file';
 
 type FileUpload = { name: string, resource: string, type: string };
 
 @Controller('/test/upload')
 class TestUploadController {
 
+  /**
+   * Compute hash from a file location on disk
+   */
+  static async hashFile(file: Blob): Promise<string> {
+    const hasher = crypto.createHash('sha256').setEncoding('hex');
+    await pipeline(file.stream(), hasher);
+    return hasher.read().toString();
+  }
+
+
   @Post('/all')
   @UploadAll()
-  async uploadAll({ files }: Request) {
+  async uploadAll({ files }: Request): Promise<{ hash: string } | undefined> {
     for (const [, file] of Object.entries(files)) {
-      const { source: _, ...meta } = await RestUploadUtil.blobToAsset(file);
-      return meta;
+      return { hash: await TestUploadController.hashFile(file) };
     }
   }
 
   @Post('/')
-  async upload(@Upload() file: Blob) {
-    const asset = await AssetUtil.blobToAsset(file);
-    const location = await this.service.upsert(asset);
-    return { ...asset, location };
-  }
-
-  @Post('/cached')
-  async uploadCached(@Upload() file: Blob) {
-    const asset = await AssetUtil.blobToAsset(file, {
-      cacheControl: 'max-age=3600',
-      contentLanguage: 'en-GB'
-    });
-    const location = await this.service.upsert(asset);
-    const output = await this.service.get(location);
-    return RestUploadUtil.downloadable(output);
+  async upload(@Upload() file: File) {
+    return file.name;
   }
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    const asset1 = await AssetUtil.blobToAsset(file1);
-    const asset2 = await AssetUtil.blobToAsset(file2);
-    return { hash1: asset1.hash, hash2: asset2.hash };
+    return { hash1: await TestUploadController.hashFile(file1), hash2: TestUploadController.hashFile(file2) };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    const asset1 = await AssetUtil.blobToAsset(file1);
-    const asset2 = await AssetUtil.blobToAsset(file2);
-    return { hash1: asset1.hash, hash2: asset2.hash };
+    return { hash1: await TestUploadController.hashFile(file1), hash2: TestUploadController.hashFile(file2) };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    const asset1 = await AssetUtil.blobToAsset(file1);
-    const asset2 = await AssetUtil.blobToAsset(file2);
-    return { hash1: asset1.hash, hash2: asset2.hash };
-  }
-
-  @Get('*')
-  async get(req: Request, res: Response) {
-    const [start, end] = RestUploadUtil.getRequestedRange(req.headers.range) ?? [];
-    if (req.headers.range) {
-      res.setHeader('Accept-Ranges', 'bytes');
-    }
-    const response = await this.service.get(req.url.replace(/^\/test\/upload\//, ''), start, end);
-    return RestUploadUtil.downloadable(response);
+    return { hash1: await TestUploadController.hashFile(file1), hash2: TestUploadController.hashFile(file2) };
   }
 }
 
 @Suite()
-export abstract class AssetRestServerSuite extends BaseRestSuite {
+export abstract class RestUploadServerSuite extends BaseRestSuite {
 
   fixture: TestFixtures;
 
@@ -85,10 +65,6 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
       const buffer = await StreamUtil.streamToBuffer(await this.fixture.readStream(filename));
       return { name, type, filename, buffer, size: buffer.length };
     }));
-  }
-
-  async getAsset(pth: string) {
-    return AssetUtil.fileToAsset(await this.fixture.resolve(pth));
   }
 
   @BeforeAll()
@@ -100,17 +76,17 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   @Test()
   async testUploadAll() {
     const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<Asset>('post', '/test/upload/all', this.getMultipartRequest([sent]));
+    const res = await this.request<{ hash: string }>('post', '/test/upload/all', this.getMultipartRequest([sent]));
 
-    const asset = await this.getAsset('/logo.png');
-    assert(res.body.hash === asset.hash);
+    const file = new LocalFile(await this.fixture.resolve('/logo.png'));
+    assert(res.body.hash === await TestUploadController.hashFile(file));
   }
 
 
   @Test()
   async testUploadDirect() {
     const [sent] = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<Asset>('post', '/test/upload', {
+    const res = await this.request<{ hash: string }>('post', '/test/upload', {
       headers: {
         'Content-Type': sent.type,
         'Content-Length': `${sent.size}`
@@ -118,26 +94,18 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
       body: sent.buffer
     });
 
-    const asset = await this.getAsset('/logo.png');
-    assert(res.body.hash === asset.hash);
+    const file = new LocalFile(await this.fixture.resolve('/logo.png'));
+    assert(res.body.hash === await TestUploadController.hashFile(file));
   }
 
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<Asset>('post', '/test/upload', this.getMultipartRequest(uploads));
-    const asset = await this.getAsset('/logo.png');
-    assert(res.body.hash === asset.hash);
-  }
+    const res = await this.request<{ hash: string }>('post', '/test/upload', this.getMultipartRequest(uploads));
 
-  @Test()
-  async testCached() {
-    const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request('post', '/test/upload/cached', this.getMultipartRequest(uploads));
-    assert(this.getFirstHeader(res.headers, 'cache-control') === 'max-age=3600');
-    assert(this.getFirstHeader(res.headers, 'content-language') === 'en-GB');
+    const file = new LocalFile(await this.fixture.resolve('/logo.png'));
+    assert(res.body.hash === await TestUploadController.hashFile(file));
   }
-
 
   @Test()
   async testMultiUpload() {
@@ -146,9 +114,11 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
-    const asset = await this.getAsset('/logo.png');
-    assert(res.body.hash1 === asset.hash);
-    assert(res.body.hash2 === asset.hash);
+    const file = new LocalFile(await this.fixture.resolve('/logo.png'));
+    const hash = await TestUploadController.hashFile(file);
+
+    assert(res.body.hash1 === hash);
+    assert(res.body.hash2 === hash);
   }
 
   @Test()
@@ -175,11 +145,14 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
     });
     assert(res.status === 200);
 
-    const asset = await this.getAsset('/logo.gif');
-    assert(res.body.hash1 === asset.hash);
+    const file1 = new LocalFile(await this.fixture.resolve('/logo.gif'));
+    const hash1 = await TestUploadController.hashFile(file1);
 
-    const asset2 = await this.getAsset('/logo.png');
-    assert(res.body.hash2 === asset2.hash);
+    const file2 = new LocalFile(await this.fixture.resolve('/logo.png'));
+    const hash2 = await TestUploadController.hashFile(file2);
+
+    assert(res.body.hash1 === hash1);
+    assert(res.body.hash2 === hash2);
   }
 
   @Test()
@@ -206,64 +179,13 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
     });
     assert(res.status === 200);
 
-    const asset = await this.getAsset('/asset.yml');
-    assert(res.body.hash1 === asset.hash);
+    const file1 = new LocalFile(await this.fixture.resolve('/asset.yml'));
+    const hash1 = await TestUploadController.hashFile(file1);
 
-    const asset2 = await this.getAsset('/logo.png');
-    assert(res.body.hash2 === asset2.hash);
-  }
+    const file2 = new LocalFile(await this.fixture.resolve('/logo.png'));
+    const hash2 = await TestUploadController.hashFile(file2);
 
-  @Test()
-  async testRangedDownload() {
-    const [sent] = await this.getUploads({ name: 'file', resource: 'alpha.txt', type: 'text/plain' });
-    const res = await this.request<Asset & { location: string }>('post', '/test/upload', {
-      headers: {
-        'Content-Type': sent.type,
-        'Content-Length': `${sent.size}`,
-      },
-      body: sent.buffer,
-      throwOnError: false
-    });
-
-    assert(res.status === 200);
-
-    const loc = res.body.location;
-
-    const item = await this.request('get', `/test/upload/${loc}`);
-    assert(typeof item.body === 'string');
-    assert(item.body.length === 26);
-
-    const itemRanged = await this.request('get', `/test/upload/${loc}`, {
-      headers: {
-        Range: 'bytes=0-9'
-      }
-    });
-
-    assert(typeof itemRanged.body === 'string');
-    assert(itemRanged.body.length === 10);
-    assert(itemRanged.body === 'abcdefghij');
-
-    const itemRanged2 = await this.request('get', `/test/upload/${loc}`, {
-      headers: {
-        Range: 'bytes=23-25'
-      }
-    });
-
-    assert(typeof itemRanged2.body === 'string');
-    assert(itemRanged2.body.length === 3);
-    assert(itemRanged2.body === 'xyz');
-
-    const itemRanged3 = await this.request('get', `/test/upload/${loc}`, {
-      headers: {
-        Range: 'bytes=30-20'
-      },
-      throwOnError: false
-    });
-
-    assert(itemRanged3.status === 400);
-    assert(ObjectUtil.isPlainObject(itemRanged3.body));
-    assert('message' in itemRanged3.body);
-    assert(typeof itemRanged3.body.message === 'string');
-    assert(itemRanged3.body.message.includes('out of range'));
+    assert(res.body.hash1 === hash1);
+    assert(res.body.hash2 === hash2);
   }
 }

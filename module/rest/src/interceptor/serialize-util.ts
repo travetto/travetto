@@ -102,6 +102,22 @@ export class SerializeUtil {
   }
 
   /**
+   * Serialize file/blob
+   */
+  static async serializeBlob(res: Response, output: Blob | File): Promise<void> {
+    if (output instanceof File && output.name) {
+      res.setHeader('Content-Disposition', `filename="${output.name}"`);
+    }
+    if (output.type) {
+      this.setContentTypeIfUndefined(res, output.type);
+    }
+    if (output.size) {
+      res.setHeader('Content-Length', `${output.size}`);
+    }
+    return this.serializeStream(res, Readable.fromWeb(output.stream()));
+  }
+
+  /**
    * Send empty response
    */
   static serializeEmpty(req: Request, res: Response): void {
@@ -146,6 +162,8 @@ export class SerializeUtil {
           return this.serializeStream(res, output);
         } else if (output instanceof Error) {
           return this.serializeError(res, output);
+        } else if (output instanceof Blob) {
+          return this.serializeBlob(res, output);
         } else {
           return this.serializeJSON(req, res, output);
         }
