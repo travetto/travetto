@@ -3,6 +3,7 @@ import { Config } from '@travetto/config';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { FilterContext, FilterNext } from '../types';
+import { RequestLoggingⲐ } from '../internal/symbol';
 
 /**
  * Rest logging configuration
@@ -32,8 +33,9 @@ export class LoggingInterceptor implements RestInterceptor {
         path: req.path,
         query: { ...req.query },
         params: req.params,
+        ...req[RequestLoggingⲐ] ?? {},
         statusCode: res.statusCode,
-        duration
+        duration,
       };
 
       if (res.statusCode < 400) {

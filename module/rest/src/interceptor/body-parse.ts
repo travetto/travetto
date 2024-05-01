@@ -3,6 +3,7 @@ import rawBody from 'raw-body';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { AppError } from '@travetto/base';
 
 import { NodeEntityⲐ } from '../internal/symbol';
 import { RouteConfig, Request, FilterContext, FilterNext } from '../types';
@@ -10,7 +11,6 @@ import { RouteConfig, Request, FilterContext, FilterNext } from '../types';
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { LoggingInterceptor } from './logging';
 import { SerializeUtil } from './serialize-util';
-import { AppError } from '@travetto/base';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
