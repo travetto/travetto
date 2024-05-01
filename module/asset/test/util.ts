@@ -16,13 +16,6 @@ export class UtilTest {
   }
 
   @Test()
-  async readChunk() {
-    const yml = await this.fixture.resolve('/asset.yml');
-    const chunk = await AssetUtil.readChunk(yml, 10);
-    assert(chunk.length === 10);
-  }
-
-  @Test()
   async detectFileType() {
     const png = await this.fixture.resolve('/logo.png');
     const fileType = await AssetUtil.detectFileType(png);
@@ -88,17 +81,5 @@ export class UtilTest {
     const hashFull = await AssetUtil.hashUrl('https://travetto.dev/assets/landing/bg.jpg');
     assert(hashFull.length === 64);
     assert(hashFull === '4c6ab4f3fcd07005294391de6b7d83bca59397344f5897411ed5316e212e46c7');
-  }
-
-  @Test()
-  async fetchBytes() {
-    const data = await AssetUtil.fetchBytes('https://travetto.dev/assets/landing/bg.jpg', 100000);
-    assert(data.length === 100000);
-
-    const data2 = await AssetUtil.fetchBytes('https://travetto.dev/assets/landing/bg.jpg', 100001);
-    assert(data2.length === 100001);
-
-    const full = await AssetUtil.fetchBytes('https://travetto.dev/assets/landing/bg.jpg');
-    assert(full.length === 215532);
   }
 }

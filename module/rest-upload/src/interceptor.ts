@@ -8,20 +8,20 @@ import {
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { AppError } from '@travetto/base';
 
-import { RestAssetConfig } from './config';
-import { AssetRestUtil, WithCleanup } from './util';
+import { RestUploadConfig } from './config';
+import { RestUploadUtil, WithCleanup } from './util';
 
 type FileMap = Record<string, File>;
 
 @Injectable()
-export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
+export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
 
-  static getLargestFileMax(config: Partial<RestAssetConfig>): number | undefined {
+  static getLargestFileMax(config: Partial<RestUploadConfig>): number | undefined {
     const fileMaxes = [...Object.values(config.files!).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
     return fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
   }
 
-  static async validateFile(config: Partial<RestAssetConfig>, file: File): Promise<File> {
+  static async validateFile(config: Partial<RestUploadConfig>, file: File): Promise<File> {
     const check = config.matcher ??= MimeUtil.matcher(config.types);
     if (check(file.type)) {
       return file;
@@ -30,10 +30,10 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     }
   }
 
-  static async uploadDirect(req: Request, config: Partial<RestAssetConfig>): Promise<WithCleanup<FileMap>> {
+  static async uploadDirect(req: Request, config: Partial<RestUploadConfig>): Promise<WithCleanup<FileMap>> {
     console.log('Starting direct upload', req.header('content-length'));
-    const filename = AssetRestUtil.getFileName(req);
-    const [file, cleanup] = await AssetRestUtil.writeToBlob(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
+    const filename = RestUploadUtil.getFileName(req);
+    const [file, cleanup] = await RestUploadUtil.writeToBlob(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
     try {
       return [{ file: await this.validateFile(config, file) }, config.deleteFiles !== false ? cleanup : (async (): Promise<void> => { })];
     } catch (err) {
@@ -43,7 +43,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     }
   }
 
-  static async uploadMultipart(req: Request, config: Partial<RestAssetConfig>): Promise<WithCleanup<FileMap>> {
+  static async uploadMultipart(req: Request, config: Partial<RestUploadConfig>): Promise<WithCleanup<FileMap>> {
     const largestMax = this.getLargestFileMax(config);
     const uploads: Promise<unknown>[] = [];
     const files: FileMap = {};
@@ -57,7 +57,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     const uploader = busboy({ headers: req.headers as BusboyHeaders, limits: { fileSize: largestMax } })
       .on('file', (field, stream, filename) =>
         uploads.push(
-          AssetRestUtil.writeToBlob(stream, filename, config.files![field]?.maxSize ?? largestMax)
+          RestUploadUtil.writeToBlob(stream, filename, config.files![field]?.maxSize ?? largestMax)
             .then(([asset, cleanup]) => {
               if (config.deleteFiles !== false) {
                 managedCleanups.push(cleanup);
@@ -94,15 +94,15 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
   }
 
   @Inject()
-  config: RestAssetConfig;
+  config: RestUploadConfig;
 
   after = [SerializeInterceptor, BodyParseInterceptor];
 
   /**
    * Produces final config object
    */
-  resolveConfig(additional: Partial<RestAssetConfig>[]): RestAssetConfig {
-    const out: RestAssetConfig = { ...this.config };
+  resolveConfig(additional: Partial<RestUploadConfig>[]): RestUploadConfig {
+    const out: RestUploadConfig = { ...this.config };
     for (const el of additional) {
       const files = out.files ?? {};
       for (const [k, file] of Object.entries(el.files ?? {})) {
@@ -120,7 +120,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     return false;
   }
 
-  async intercept({ req, config }: FilterContext<RestAssetConfig>, next: FilterNext): Promise<FilterReturn> {
+  async intercept({ req, config }: FilterContext<RestUploadConfig>, next: FilterNext): Promise<FilterReturn> {
     let cleanup: (() => Promise<void>) | undefined;
     try {
       switch (req.getContentType()?.full) {

@@ -3,10 +3,10 @@ import { ManagedInterceptorConfig } from '@travetto/rest';
 import { Ignore } from '@travetto/schema';
 
 /**
- * Config for assets within @travetto/rest
+ * Config for uploading within @travetto/rest
  */
-@Config('rest.asset')
-export class RestAssetConfig extends ManagedInterceptorConfig {
+@Config('rest.upload')
+export class RestUploadConfig extends ManagedInterceptorConfig {
   /**
    * Max file size in bytes
    */
@@ -21,7 +21,7 @@ export class RestAssetConfig extends ManagedInterceptorConfig {
   deleteFiles: boolean = true;
 
   @Ignore()
-  files?: Record<string, Partial<RestAssetConfig>>;
+  files?: Record<string, Partial<RestUploadConfig>>;
 
   @Ignore()
   matcher: (contentType: string) => boolean;

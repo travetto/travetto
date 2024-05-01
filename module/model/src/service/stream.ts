@@ -37,7 +37,18 @@ export interface StreamMeta {
 
 export interface PartialStream {
   stream: Readable;
-  range: [number, number];
+  range: [start: number, end: number];
+}
+
+/**
+ * An stream response
+ */
+export interface StreamResponse extends StreamMeta {
+  stream(): Readable;
+  /**
+   * Response byte range, inclusive
+   */
+  range?: [start: number, end: number];
 }
 
 /**

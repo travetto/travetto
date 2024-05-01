@@ -1,6 +1,5 @@
 import assert from 'node:assert';
 
-import { AssetUtil, Asset, AssetService, AssetModelⲐ } from '@travetto/asset';
 import { ObjectUtil, StreamUtil } from '@travetto/base';
 import { Controller, Get, Post, Request, Response } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
@@ -10,28 +9,18 @@ import { Inject, InjectableFactory } from '@travetto/di';
 import { MemoryModelService, ModelStreamSupport } from '@travetto/model';
 
 import { Upload, UploadAll } from '../../src/decorator';
-import { AssetRestUtil } from '../../src/util';
+import { RestUploadUtil } from '../../src/util';
 
 type FileUpload = { name: string, resource: string, type: string };
 
-class Config {
-  @InjectableFactory(AssetModelⲐ)
-  static getStore(): ModelStreamSupport {
-    return new MemoryModelService({});
-  }
-}
-
 @Controller('/test/upload')
 class TestUploadController {
-
-  @Inject()
-  service: AssetService;
 
   @Post('/all')
   @UploadAll()
   async uploadAll({ files }: Request) {
     for (const [, file] of Object.entries(files)) {
-      const { source: _, ...meta } = await AssetUtil.blobToAsset(file);
+      const { source: _, ...meta } = await RestUploadUtil.blobToAsset(file);
       return meta;
     }
   }
@@ -51,7 +40,7 @@ class TestUploadController {
     });
     const location = await this.service.upsert(asset);
     const output = await this.service.get(location);
-    return AssetRestUtil.downloadable(output);
+    return RestUploadUtil.downloadable(output);
   }
 
   @Post('/all-named')
@@ -77,12 +66,12 @@ class TestUploadController {
 
   @Get('*')
   async get(req: Request, res: Response) {
-    const [start, end] = AssetRestUtil.getRequestedRange(req.headers.range) ?? [];
+    const [start, end] = RestUploadUtil.getRequestedRange(req.headers.range) ?? [];
     if (req.headers.range) {
       res.setHeader('Accept-Ranges', 'bytes');
     }
     const response = await this.service.get(req.url.replace(/^\/test\/upload\//, ''), start, end);
-    return AssetRestUtil.downloadable(response);
+    return RestUploadUtil.downloadable(response);
   }
 }
 

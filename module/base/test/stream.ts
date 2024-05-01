@@ -7,7 +7,6 @@ import { path as mPath } from '@travetto/manifest';
 
 import { StreamUtil } from '../src/stream';
 
-
 @Suite()
 export class StreamUtilTest {
 
@@ -63,5 +62,24 @@ export class StreamUtilTest {
 
     const buff = await StreamUtil.toBuffer(createReadStream(temp));
     assert(buff.toString('utf8') === 'Hello World');
+  }
+
+  @Test()
+  async readChunk() {
+    const yml = await this.fixture.resolve('/asset.yml');
+    const chunk = await StreamUtil.readChunk(yml, 10);
+    assert(chunk.length === 10);
+  }
+
+  @Test()
+  async fetchBytes() {
+    const data = await StreamUtil.fetchBytes('https://travetto.dev/assets/landing/bg.jpg', 100000);
+    assert(data.length === 100000);
+
+    const data2 = await StreamUtil.fetchBytes('https://travetto.dev/assets/landing/bg.jpg', 100001);
+    assert(data2.length === 100001);
+
+    const full = await StreamUtil.fetchBytes('https://travetto.dev/assets/landing/bg.jpg');
+    assert(full.length === 215532);
   }
 }
