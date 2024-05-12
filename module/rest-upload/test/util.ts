@@ -13,7 +13,7 @@ function makeRequest(filename: string | undefined, type: string): Request {
     header(key: string) {
       switch (key) {
         case 'content-type': return type;
-        case 'content-disposition': return filename ? `filename=${filename}` : filename;
+        case 'content-disposition': return filename ? `filename="${filename}"` : filename;
       }
     },
     getFilename() {
@@ -27,7 +27,7 @@ export class UtilTest {
 
   @Test()
   extractFilename() {
-    const req = makeRequest('"hello-world"', 'image/png');
+    const req = makeRequest('hello-world', 'image/png');
     assert(req.getFilename() === 'hello-world');
 
     const req2 = makeRequest('hello-world', 'image/png');
