@@ -6,6 +6,7 @@ import { ModelExpirySupport } from '@travetto/model';
 import { Inject, Injectable } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ModelSuite } from '@travetto/model/support/test/suite';
+import { isIndexedSupported } from '@travetto/model/src/internal/service/common';
 import { Class } from '@travetto/base';
 import { Schema } from '@travetto/schema';
 
@@ -69,6 +70,12 @@ class SampleService {
 
   @EvictCache('source', { keySpace: 'user.id' })
   async deleteUser(userId: string) {
+    await timers.setTimeout(100);
+    return true;
+  }
+
+  async deleteAllUsers() {
+    this.source.deleteAll('user.id');
     await timers.setTimeout(100);
     return true;
   }
@@ -208,5 +215,44 @@ export abstract class CacheServiceSuite {
     await service.deleteUser('200');
 
     await assert.doesNotReject(() => service.deleteUser('200'));
+  }
+
+  @Test()
+  async allEviction() {
+    if (!isIndexedSupported(this.serviceClass.prototype)) {
+      return;
+    }
+
+    const service = await this.testService;
+
+    // Prime cache
+    for (let i = 0; i < 10; i++) {
+      const start = Date.now();
+      await service.getUser(`${i}`);
+      assert((Date.now() - start) >= 100);
+    }
+
+    // Read cache
+    for (let i = 0; i < 10; i++) {
+      const start = Date.now();
+      await service.getUser(`${i}`);
+      assert((Date.now() - start) <= (this.baseLatency + 100));
+    }
+
+    await service.deleteAllUsers();
+
+    // Prime cache
+    for (let i = 0; i < 10; i++) {
+      const start = Date.now();
+      await service.getUser(`${i}`);
+      assert((Date.now() - start) >= 100);
+    }
+
+    // Read cache
+    for (let i = 0; i < 10; i++) {
+      const start = Date.now();
+      await service.getUser(`${i}`);
+      assert((Date.now() - start) <= (this.baseLatency + 100));
+    }
   }
 }
