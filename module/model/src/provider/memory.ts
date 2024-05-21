@@ -105,6 +105,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       let index = this.#indices[idx.type].get(idxName)?.get(key);
 
       if (!index) {
+        if (!this.#indices[idx.type].has(idxName)) {
+          this.#indices[idx.type].set(idxName, new Map());
+        }
         if (idx.type === 'sorted') {
           this.#indices[idx.type].get(idxName)!.set(key, index = new Map());
         } else {
