@@ -2,13 +2,13 @@
   "name": "@travetto-test/auth-rest-jwt",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/auth-rest-jwt": "^4.1.0",
-    "@travetto/rest-express": "^4.1.0",
-    "@travetto/rest-express-lambda": "^4.1.0",
-    "@travetto/rest-fastify": "^4.1.0",
-    "@travetto/rest-fastify-lambda": "^4.1.0",
-    "@travetto/rest-koa": "^4.1.0",
-    "@travetto/rest-koa-lambda": "^4.1.0"
+    "@travetto/auth-rest-jwt": "^4.1.1",
+    "@travetto/rest-express": "^4.1.1",
+    "@travetto/rest-express-lambda": "^4.1.1",
+    "@travetto/rest-fastify": "^4.1.1",
+    "@travetto/rest-fastify-lambda": "^4.1.1",
+    "@travetto/rest-koa": "^4.1.1",
+    "@travetto/rest-koa-lambda": "^4.1.1"
   },
   "travetto": {},
   "private": true

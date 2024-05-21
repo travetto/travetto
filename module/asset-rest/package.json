@@ -1,6 +1,6 @@
 {
   "name": "@travetto/asset-rest",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Provides integration between the travetto asset and rest module.",
   "keywords": [
     "rest",
@@ -28,7 +28,7 @@
     "@fastify/busboy": "^2.1.1",
     "@travetto/asset": "^4.1.0",
     "@travetto/config": "^4.1.0",
-    "@travetto/rest": "^4.1.0"
+    "@travetto/rest": "^4.1.1"
   },
   "peerDependencies": {
     "@travetto/test": "^4.1.0"
