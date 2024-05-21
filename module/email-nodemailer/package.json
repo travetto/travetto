@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email-nodemailer",
-  "version": "4.0.7",
+  "version": "4.1.0",
   "description": "Email transmission module.",
   "keywords": [
     "email",
@@ -24,7 +24,7 @@
     "directory": "module/email-nodemailer"
   },
   "dependencies": {
-    "@travetto/email": "^4.0.7",
+    "@travetto/email": "^4.1.0",
     "@types/nodemailer": "^6.4.15",
     "nodemailer": "^6.9.13"
   },

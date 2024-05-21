@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model",
-  "version": "4.0.7",
+  "version": "4.1.0",
   "description": "Datastore abstraction for core operations.",
   "keywords": [
     "datastore",
@@ -26,14 +26,14 @@
     "directory": "module/model"
   },
   "dependencies": {
-    "@travetto/config": "^4.0.7",
-    "@travetto/di": "^4.0.7",
-    "@travetto/registry": "^4.0.7",
-    "@travetto/schema": "^4.0.7"
+    "@travetto/config": "^4.1.0",
+    "@travetto/di": "^4.1.0",
+    "@travetto/registry": "^4.1.0",
+    "@travetto/schema": "^4.1.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^4.0.8",
-    "@travetto/test": "^4.0.7"
+    "@travetto/cli": "^4.1.0",
+    "@travetto/test": "^4.1.0"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
