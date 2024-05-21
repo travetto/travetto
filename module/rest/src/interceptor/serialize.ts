@@ -43,8 +43,11 @@ export class SerializeInterceptor implements RestInterceptor {
           new AppError(`${err['message'] || 'Unexpected error'}`, 'general', err) :
           new AppError(`${err}`, 'general')
       );
-
-      await SerializeUtil.serializeError(ctx.res, resolved);
+      if (ctx.res.headersSent) {
+        console.error('Failed to serialize, already sent partially', resolved);
+      } else {
+        await SerializeUtil.serializeError(ctx.res, resolved);
+      }
     }
   }
 }
