@@ -57,6 +57,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       files: ['**/DOC.ts', '**/DOC.tsx', '**/doc/**/*.ts', '**/doc/**/*.tsx'],
       rules: {
         'max-len': 0,
+        'no-unused-private-class-members': 0,
         '@typescript-eslint/quotes': 'warn',
         '@typescript-eslint/indent': 0,
         '@typescript-eslint/consistent-type-assertions': 0,
@@ -77,8 +78,10 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
     {
       ...RULE_COMMON,
       files: ['**/test/**/*.ts', '**/test/**/*.tsx', '**/support/test/**/*.ts', '**/support/test/**/*.tsx'],
+      ignores: ['module/test/src/**'],
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
+        'no-unused-private-class-members': 0,
         '@typescript-eslint/explicit-function-return-type': 0
       }
     },

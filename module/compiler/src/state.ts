@@ -105,7 +105,7 @@ export class CompilerState implements ts.CompilerHost {
 
   getArbitraryInputFile(): string {
     const randomSource = this.#manifestIndex.getWorkspaceModules()
-      .filter(x => x.files.src.length)[0]
+      .filter(x => x.files.src?.length)[0]
       .files.src[0].sourceFile;
 
     return this.getBySource(randomSource)!.inputFile;

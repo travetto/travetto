@@ -33,8 +33,6 @@ export class DockerContainer {
   #tempVolumes = new Map<string, string>();
   /** Remove container on finish */
   #deleteOnFinish = false;
-  /** A flag to indicate if the container should be evicted */
-  #evict: boolean = false;
   /** Internal flag to indicate if the container is unresponsive */
   #runAway: boolean = false;
   /** Labels */
@@ -79,7 +77,6 @@ export class DockerContainer {
   #watchForEviction(proc: ChildProcess, all = false): ChildProcess {
     ExecUtil.getResult(proc).catch(err => {
       if (all || err.killed) {
-        this.#evict = true;
         this.#pendingExecutions.clear();
       }
       throw err;
