@@ -105,17 +105,16 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     // Store with indices
     if (config.indices?.length) {
       const multi = this.client.multi();
+      if (existing) {
+        this.#removeIndices(cls, existing, multi);
+      }
       switch (action) {
         case 'write': {
-          if (existing) {
-            this.#removeIndices(cls, existing, multi);
-          }
           multi.set(key, JSON.stringify(item));
           this.#addIndices(cls, item, multi);
           break;
         }
         case 'delete': {
-          this.#removeIndices(cls, existing!, multi);
           multi.del(key);
           break;
         }

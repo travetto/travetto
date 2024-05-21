@@ -1,8 +1,8 @@
-import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
+import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
-import { Env } from '@travetto/base';
-import { isStorageSupported } from '@travetto/model/src/internal/service/common';
+import { AppError, Env } from '@travetto/base';
+import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 import { CacheError } from './error';
 import { CacheUtil } from './util';
@@ -12,11 +12,17 @@ export const CacheModelⲐ = Symbol.for('@travetto/cache:model');
 
 const INFINITE_MAX_AGE = '5000-01-01';
 
+@Index({
+  name: 'keySpace',
+  type: 'unsorted',
+  fields: [{ keySpace: 1 }]
+})
 @Model({ autoCreate: false })
 export class CacheRecord {
   id: string;
   @Text()
   entry: string;
+  keySpace: string;
   @ExpiresAt()
   expiresAt: Date;
   issuedAt: Date;
@@ -77,13 +83,14 @@ export class CacheService {
    * @param maxAge Max age in ms
    * @returns
    */
-  async set(id: string, entry: unknown, maxAge?: number): Promise<unknown> {
+  async set(id: string, keySpace: string, entry: unknown, maxAge?: number): Promise<unknown> {
     const entryText = CacheUtil.toSafeJSON(entry);
 
     const store = await this.#modelService.upsert(CacheRecord,
       CacheRecord.from({
         id,
         entry: entryText!,
+        keySpace,
         expiresAt: new Date(maxAge ? maxAge + Date.now() : INFINITE_MAX_AGE),
         issuedAt: new Date()
       }),
@@ -98,6 +105,22 @@ export class CacheService {
    */
   async delete(id: string): Promise<void> {
     await this.#modelService.delete(CacheRecord, id);
+  }
+
+  /**
+   * Remove all entries by key space
+   * @param id
+   */
+  async deleteAll(keySpace: string): Promise<void> {
+    if (isIndexedSupported(this.#modelService)) {
+      const removes: Promise<void>[] = [];
+      for await (const item of this.#modelService.listByIndex(CacheRecord, 'keySpace', { keySpace })) {
+        removes.push(this.#modelService.delete(CacheRecord, item.id));
+      }
+      await Promise.all(removes);
+    } else {
+      throw new AppError('Unable to delete all on an un-indexed database', 'general');
+    }
   }
 
   /**
@@ -146,7 +169,7 @@ export class CacheService {
 
     if (res === undefined) {
       const data = await fn.apply(target, params);
-      res = await this.set(id, data, config.maxAge);
+      res = await this.set(id, config.keySpace!, data, config.maxAge);
     }
 
     if (config.reinstate) { // Reinstate result value if needed
