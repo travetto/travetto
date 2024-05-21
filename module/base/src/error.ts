@@ -47,7 +47,7 @@ export class AppError<T = unknown> extends Error {
   ) {
     super(message);
     this.type = this.constructor.name;
-    this.stack = stack || this.stack; // eslint-disable-line no-self-assign
+    this.stack = stack || this.stack;
     this.details = details!;
   }
 

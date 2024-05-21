@@ -86,6 +86,6 @@ export type WhereClause<T> = WhereClauseRaw<RetainFields<T>>;
  */
 export type ValidStringFields<T> = {
   [K in Extract<keyof T, string>]:
-  (T[K] extends (String | string | string[] | String[] | undefined) ? K : never) // eslint-disable-line @typescript-eslint/ban-types
+  (T[K] extends (String | string | string[] | String[] | undefined) ? K : never)
 }[Extract<keyof T, string>];
 

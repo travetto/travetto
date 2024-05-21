@@ -215,5 +215,6 @@ export const STD_RULES = {
     'always',
     { line: { markers: ['/'] } }
   ],
+  '@typescript-eslint/no-namespace': ['error'],
   '@typescript-eslint/consistent-type-assertions': ['warn', { assertionStyle: 'never' }]
 };

@@ -85,7 +85,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
           method: 'options',
           path: '*',
           handler: (__req: Request) => '',
-          params: [{ extract: (__, r: unknown) => r, location: 'context' }],
+          params: [{ extract: (__, r: unknown): unknown => r, location: 'context' }],
           interceptors: [
             [LoggingInterceptor, { disabled: true }]
           ]

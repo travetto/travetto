@@ -131,7 +131,6 @@ export const TypeBuilder: {
   template: {
     build: (resolver, type) => {
       // If we are have a template literal type, we need to make our own type node
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       if (type.flags & ts.TypeFlags.TemplateLiteral) {
         const values: TemplateLiteralPart[] = [];
         const texts = 'texts' in type && (typeof type.texts === 'object') && Array.isArray(type.texts) ? type.texts : undefined;

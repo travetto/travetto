@@ -73,7 +73,6 @@ export class CommonUtil {
       }
     }
     if (body.length === 1) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const blob: Blob = parts[0].blob;
       return {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

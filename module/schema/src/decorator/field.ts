@@ -16,7 +16,7 @@ function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
       SchemaRegistry.registerPendingFieldFacet(t.constructor, k, obj);
     }
   };
-  fn.Param = fn;  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  fn.Param = fn;
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return fn as PropType<V>;

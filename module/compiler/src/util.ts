@@ -105,7 +105,6 @@ export class CompilerUtil {
     }
 
     const errors: string[] = diagnostics.slice(0, 5).map(diag => {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
       if (diag.file) {
         const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);

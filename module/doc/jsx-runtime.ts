@@ -27,6 +27,7 @@ export type ValidHtmlTags = 'strong' | 'em' | 'br' | 'hr' | 'li' | 'ul' | 'ol' |
 type BasicElements = { [K in ValidHtmlTags]: JSX.IntrinsicAttributes };
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface Element extends JSXElement { }
     interface IntrinsicAttributes { }

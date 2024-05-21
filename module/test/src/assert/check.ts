@@ -16,7 +16,7 @@ declare module 'assert' {
 
 type StringFields<T> = {
   [K in Extract<keyof T, string>]:
-  (T[K] extends string ? K : never) // eslint-disable-line @typescript-eslint/ban-types
+  (T[K] extends string ? K : never)
 }[Extract<keyof T, string>];
 
 /**
@@ -65,7 +65,7 @@ export class AssertCheck {
       fn = assertion.operator = 'ok';
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       [assertion.actual, assertion.message] = args as [unknown, string];
-      assertion.expected = { toClean: () => positive ? 'truthy' : 'falsy' };
+      assertion.expected = { toClean: (): string => positive ? 'truthy' : 'falsy' };
       common.state = 'should be';
     } else if (fn === 'includes') {
       assertion.operator = fn;
@@ -115,7 +115,7 @@ export class AssertCheck {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'greaterThanEqual': assertFn((actual as number) >= (expected as number), message); break;
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        case 'ok': assertFn(...args as [unknown, string]); break; // eslint-disable-line prefer-spread
+        case 'ok': assertFn(...args as [unknown, string]); break;
         default:
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           if (fn && assert[fn as keyof typeof assert]) { // Assert call

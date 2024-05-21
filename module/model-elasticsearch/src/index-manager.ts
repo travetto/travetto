@@ -56,10 +56,7 @@ export class IndexManager implements ModelStorageSupport {
    */
   async computeAliasMappings(force = false): Promise<void> {
     if (force || !this.#indexToAlias.size) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const aliases = (await this.#client.cat.aliases({
-        format: 'json'
-      }));
+      const aliases = await this.#client.cat.aliases({ format: 'json' });
 
       this.#indexToAlias = new Map();
       this.#aliasToIndex = new Map();
