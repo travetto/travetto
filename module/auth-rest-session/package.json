@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-rest-session",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "Rest authentication session integration support for the Travetto framework",
   "keywords": [
     "authentication",
@@ -29,7 +29,7 @@
     "@travetto/auth-rest": "^4.1.1",
     "@travetto/di": "^4.1.0",
     "@travetto/rest": "^4.1.1",
-    "@travetto/rest-session": "^4.1.1"
+    "@travetto/rest-session": "^4.1.2"
   },
   "travetto": {
     "displayName": "Rest Auth Session"
