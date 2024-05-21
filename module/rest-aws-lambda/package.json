@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@travetto/rest": "^4.0.7",
-    "@types/aws-lambda": "^8.10.136"
+    "@types/aws-lambda": "^8.10.138"
   },
   "peerDependencies": {
     "@travetto/cli": "^4.0.8",
