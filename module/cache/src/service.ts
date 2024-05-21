@@ -41,7 +41,7 @@ export class CacheService {
   }
 
   async postConstruct(): Promise<void> {
-    if (isStorageSupported(this.#modelService) && Env.dynamic) {
+    if (isStorageSupported(this.#modelService) && (Env.dynamic || this.#modelService.config?.autoCreate)) {
       await this.#modelService.createModel?.(CacheRecord);
     }
   }
