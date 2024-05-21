@@ -35,8 +35,8 @@
     "@types/inline-css": "^3.0.3",
     "html-entities": "^2.5.2",
     "inline-css": "^4.0.2",
-    "purgecss": "^5.0.0",
-    "sass": "^1.71.1"
+    "purgecss": "^6.0.0",
+    "sass": "^1.77.2"
   },
   "peerDependencies": {
     "@travetto/cli": "^4.0.8"
