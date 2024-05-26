@@ -7,9 +7,11 @@ import { RootRegistry } from '@travetto/registry';
 
 import { RestClientConfig, RestClientProvider } from './config';
 
-import { ClientGenerator } from './provider/base';
 import { AngularClientGenerator } from './provider/angular';
 import { FetchClientGenerator } from './provider/fetch';
+import { RestRpcClientGenerator } from './provider/rest-rpc';
+
+import type { ClientGenerator } from './provider/types';
 
 @Injectable()
 export class RestClientGeneratorService implements AutoCreate {
@@ -30,11 +32,12 @@ export class RestClientGeneratorService implements AutoCreate {
       case 'fetch':
       case 'fetch-node':
       case 'fetch-web': return new FetchClientGenerator(output, moduleName, { ...options, node: !type.includes('web') });
+      case 'rest-rpc': return new RestRpcClientGenerator(output);
     }
   }
 
   async renderClient(provider: RestClientProvider | ClientGenerator): Promise<void> {
-    await ControllerVisitUtil.visit(provider instanceof ClientGenerator ? provider : this.buildGenerator(provider));
+    await ControllerVisitUtil.visit('seenFile' in provider ? provider : this.buildGenerator(provider));
   }
 
   async postConstruct(): Promise<void> {

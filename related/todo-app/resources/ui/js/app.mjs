@@ -1,14 +1,40 @@
 // @ts-check
-/* eslint-env browser */ /* global Vue */
+/** eslint-env browser */ /* global Vue */
+
+/** 
+ * @typedef {import('../../../src/route').TodoController} TodoController 
+ * @typedef {import('../../../src/model').Todo} Todo 
+ */
+
+import { factory, RPC_IGNORE } from './api-client/factory.js';
+
+/** @type {import('@travetto/auth').Principal} */
+const PRINCIPAL = RPC_IGNORE();
+
+const { TodoController: api, AuthController: auth } = factory({
+  url: 'https://localhost:3000'
+}, (opts, controller, method) => {
+  const result = {
+    /**
+     * @template {Function} V
+     * @this {V}
+     * @param {Parameters<V>} params
+     * @returns {Awaited<ReturnType<V>>}
+     */
+    $stream(...params) {
+      console.log(opts, params);
+      // @ts-ignore
+      return null;
+    }
+  };
+  return result;
+});
+
+api.complete.$stream('100', true);
 
 /*
  * Code was taken, and adapted from https://github.com/tastejs/todomvc/tree/gh-pages/examples/vue
  */
-
-import { TodoApi } from './api-client'
-
-const api = new TodoApi({});
-
 Vue.component('app', {
   data() {
     return {
@@ -74,8 +100,8 @@ Vue.component('app', {
     removeCompleted() {
       return api.deleteAllCompleted().then(() => this.getAll());
     },
-    complete(item) {
-      return api.complete(item.id).then(() => this.getAll());
+    complete(/** @type {Todo} */ item) {
+      return api.complete(item.id, item.completed).then(() => this.getAll());
     },
     startEdit(item) {
       this.ogText = item.text;

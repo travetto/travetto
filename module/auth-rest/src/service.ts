@@ -4,6 +4,7 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { Principal, Authorizer, Authenticator } from '@travetto/auth';
 import { AuthenticatorTarget } from '@travetto/auth/src/internal/types';
 import { AsyncContext } from '@travetto/context';
+import { RequestParamsⲐ } from '@travetto/rest/src/internal/symbol';
 
 import { AuthToken, AuthTokenⲐ } from './internal/types';
 
@@ -48,7 +49,9 @@ export class AuthService {
       try {
         const idp = await this.#authenticators.get(auth)!;
         await idp.initialize?.({ req, res });
-        const principal = await idp.authenticate(req.body, { req, res });
+        // Handle RPC model, and take first non-null input if available
+        const payload = req[RequestParamsⲐ]?.find(x => x !== null) ?? req.body;
+        const principal = await idp.authenticate(payload, { req, res });
         if (!principal) { // Multi-step login process
           return;
         }

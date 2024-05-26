@@ -1,7 +1,7 @@
 export const NodeEntityⲐ = Symbol.for('@travetto/rest:node');
-export const RequestInputsⲐ = Symbol.for('@travetto/rest:request-inputs');
+export const RequestParamsⲐ = Symbol.for('@travetto/rest:request-params');
 export const RequestLoggingⲐ = Symbol.for('@travetto/rest:request-logging');
-export const MissingInputⲐ = Symbol.for('@travetto/rest:request-input-missing');
+export const MissingParamⲐ = Symbol.for('@travetto/rest:request-param-missing');
 export const ProviderEntityⲐ = Symbol.for('@travetto/rest:provider');
 export const RawBodyⲐ: unique symbol = Symbol.for('@travetto/rest:raw-body');
 export const TravettoEntityⲐ: unique symbol = Symbol.for('@travetto/rest:travetto');

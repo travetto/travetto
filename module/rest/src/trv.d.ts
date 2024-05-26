@@ -5,7 +5,7 @@ import { Readable, Writable } from 'node:stream';
 import { ContentType, HeaderMap } from './types';
 import {
   HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ,
-  ProviderEntityⲐ, RequestInputsⲐ, SendStreamⲐ, RequestLoggingⲐ
+  ProviderEntityⲐ, RequestParamsⲐ, SendStreamⲐ, RequestLoggingⲐ
 } from './internal/symbol';
 
 declare global {
@@ -22,9 +22,9 @@ declare global {
    */
   interface TravettoRequest<T = unknown> {
     /**
-     * The parsed inputs for the target handler
+     * The parsed params for the target handler
      */
-    [RequestInputsⲐ]?: unknown[];
+    [RequestParamsⲐ]?: unknown[];
     /**
      * Additional logging context
      */

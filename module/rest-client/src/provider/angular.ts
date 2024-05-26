@@ -3,7 +3,8 @@
 import { Class } from '@travetto/base';
 import { ControllerConfig } from '@travetto/rest';
 
-import { ClientGenerator, Imp, RenderContent } from './base';
+import { BaseClientGenerator } from './base';
+import type { Imp, RenderContent } from './types';
 
 import { BaseAngularService, Configuration } from './shared/angular-service';
 import { CommonUtil } from './shared/util';
@@ -11,7 +12,7 @@ import { BaseRemoteService } from './shared/types';
 
 const SVC = './shared/angular-service.ts';
 
-export class AngularClientGenerator extends ClientGenerator {
+export class AngularClientGenerator extends BaseClientGenerator {
 
   flags = {};
 

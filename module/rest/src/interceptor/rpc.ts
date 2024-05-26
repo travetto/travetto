@@ -8,13 +8,15 @@ import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { LoggingInterceptor } from './logging';
 import { BodyParseInterceptor } from './body-parse';
 import { ControllerRegistry } from '../registry/controller';
-import { MissingInputⲐ, RequestInputsⲐ, RequestLoggingⲐ } from '../internal/symbol';
+import { MissingParamⲐ, RequestParamsⲐ, RequestLoggingⲐ } from '../internal/symbol';
 import { SerializeUtil } from './serialize-util';
 
-type Command = {
+export type RestRpcCommand = {
   controller: string;
-  method: TravettoRequest['method'];
-  args: unknown[];
+  method: string;
+  params?: unknown[];
+  /** @deprecated */
+  args?: unknown[];
 };
 
 /**
@@ -44,7 +46,7 @@ export class RpcInterceptor implements RestInterceptor<RestRpcConfig> {
       return await next();
     }
 
-    const cmd: Command = req.body;
+    const cmd: RestRpcCommand = req.body;
     const cls = ControllerRegistry.getClasses().find(x => x.name.endsWith(cmd.controller));
     if (!cls) {
       return SerializeUtil.serializeError(res, new AppError('Unknown controller'));
@@ -56,8 +58,10 @@ export class RpcInterceptor implements RestInterceptor<RestRpcConfig> {
       return SerializeUtil.serializeError(res, new AppError('Unknown endpoint'));
     }
 
+    const params = cmd.params ?? cmd.args ?? [];
+
     req[RequestLoggingⲐ] = { controller: ctrl.class.name, handler: ep.handlerName };
-    req[RequestInputsⲐ] = ep.params.map((x, i) => x.location === 'context' ? MissingInputⲐ : cmd.args?.[i]);
+    req[RequestParamsⲐ] = ep.params.map((x, i) => x.location === 'context' ? MissingParamⲐ : params[i]);
 
     return await ep.handlerFinalized!(req, res);
   }
