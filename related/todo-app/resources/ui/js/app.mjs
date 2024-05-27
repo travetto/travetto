@@ -2,14 +2,10 @@
 /** eslint-env browser */ /* global Vue */
 
 /** 
- * @typedef {import('../../../src/route').TodoController} TodoController 
  * @typedef {import('../../../src/model').Todo} Todo 
  */
 
-import { factory, RPC_IGNORE } from './api-client/factory.js';
-
-/** @type {import('@travetto/auth').Principal} */
-const PRINCIPAL = RPC_IGNORE();
+import { factory } from './api-client/factory.js';
 
 const { TodoController: api, AuthController: auth } = factory({
   url: 'https://localhost:3000'
