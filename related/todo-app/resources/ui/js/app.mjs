@@ -5,7 +5,7 @@
  * @typedef {import('../../../src/model').Todo} Todo 
  */
 
-import { factory, RpcRequestUtil } from './api-client/factory.js';
+import { factory } from './api-client/factory.js';
 
 const { TodoController: api, AuthController: auth } = factory({
   url: 'https://localhost:3000'
@@ -18,7 +18,7 @@ const { TodoController: api, AuthController: auth } = factory({
      * @returns {Promise<[Awaited<ReturnType<V>>]>}
      */
     async $stream(...params) {
-      console.log(RpcRequestUtil.getRequestOptions(opts, params));
+      console.log(opts, params);
       // @ts-ignore
       return null;
     }

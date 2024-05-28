@@ -152,7 +152,7 @@ export class ServiceUtil {
       RuntimeIndex.find({
         module: m => m.roles.includes('std'),
         folder: f => f === 'support',
-        file: f => /\/service[.]/.test(f.sourceFile)
+        file: f => /support\/service[.]/.test(f.sourceFile)
       })
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         .map(async x => (await import(x.import)).service as CommandService)
