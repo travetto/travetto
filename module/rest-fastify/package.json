@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-fastify",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "Fastify provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@fastify/compress": "^7.0.3",
-    "@travetto/rest": "^4.1.1",
+    "@travetto/rest": "^4.1.2",
     "fastify": "^4.27.0"
   },
   "travetto": {
