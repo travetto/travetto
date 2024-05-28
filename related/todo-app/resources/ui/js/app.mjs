@@ -5,20 +5,20 @@
  * @typedef {import('../../../src/model').Todo} Todo 
  */
 
-import { factory } from './api-client/factory.js';
+import { factory, RpcRequestUtil } from './api-client/factory.js';
 
 const { TodoController: api, AuthController: auth } = factory({
   url: 'https://localhost:3000'
-}, (opts, controller, method) => {
+}, opts => {
   const result = {
     /**
      * @template {Function} V
      * @this {V}
      * @param {Parameters<V>} params
-     * @returns {Awaited<ReturnType<V>>}
+     * @returns {Promise<[Awaited<ReturnType<V>>]>}
      */
-    $stream(...params) {
-      console.log(opts, params);
+    async $stream(...params) {
+      console.log(RpcRequestUtil.getRequestOptions(opts, params));
       // @ts-ignore
       return null;
     }
@@ -26,7 +26,7 @@ const { TodoController: api, AuthController: auth } = factory({
   return result;
 });
 
-api.complete.$stream('100', true);
+api.complete.$stream('100', true).then(v => v[0]);
 
 /*
  * Code was taken, and adapted from https://github.com/tastejs/todomvc/tree/gh-pages/examples/vue

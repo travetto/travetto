@@ -1,108 +1,107 @@
 // @ts-check
 
-/**
- * Node/Browser handling of timeout registration
- * @template {(number | string | { unref(): unknown })} T
- * @param {AbortController} controller 
- * @param {number} timeout 
- * @param {(fn: (...args: unknown[]) => unknown, delay: number) => T} start 
- * @param {(val: T) => void} stop 
- */
-function registerTimeout(controller, timeout, start, stop) {
-  const timer = start(() => controller.abort(), timeout);
-  if (!(typeof timer === 'number' || typeof timer === 'string')) {
-    timer.unref();
-  }
-  controller.signal.onabort = () => { timer && stop(timer); };
-}
+/** @type {import('./rest-rpc.d.ts').RpcRequestUtil} */
+export const RpcRequestUtil = {
+  registerTimeout(controller, timeout, start, stop) {
+    const timer = start(() => controller.abort(), timeout);
+    if (!(typeof timer === 'number' || typeof timer === 'string')) {
+      timer.unref();
+    }
+    controller.signal.onabort = () => { timer && stop(timer); };
+  },
 
-/**
- * @template T
- * @param {import('./rest-rpc.d.ts').RestRpcClientOptions} opts 
- * @param {string} controller
- * @param {string} method
- */
-function fetcher(opts, controller, method) {
-  /** @type {AbortSignal | undefined} */
-  let signal;
-
-  if (opts.timeout) {
-    const abort = new AbortController();
-    signal = abort.signal;
-    registerTimeout(abort, opts.timeout, setTimeout, clearTimeout);
-  }
-
-  /** 
-   * @param {unknown[]} params 
-   * @returns {Promise<T>}
-   */
-  return (...params) => fetch(opts.url, {
-    ...opts.request,
-    signal,
-    body: JSON.stringify({ params, method, controller }),
-  })
-    .then(async res => {
-      let payload = res.body ? await res.text() : undefined;
-      try {
-        if (payload) {
-          payload = JSON.parse(payload);
-        }
-      } catch (err) {
-        if (res.ok) {
-          throw new Error(`Unable to parse response: ${payload}`);
-        }
+  async getBody(res) {
+    let payload = res.body ? await res.text() : undefined;
+    try {
+      if (payload) {
+        payload = JSON.parse(payload);
       }
+    } catch (err) {
       if (res.ok) {
-        /** @type {T} */
-        // @ts-ignore
-        const res = payload;
-        return res;
+        throw new Error(`Unable to parse response: ${payload}`);
+      }
+    }
+    return payload;
+  },
+
+  async getError(payload) {
+    try {
+      // @ts-ignore
+      const { AppError } = await import('@travetto/base');
+      if (AppError.isErrorLike(payload)) {
+        return AppError.fromErrorLike(payload);
+      }
+    } catch { }
+    if (payload instanceof Error) {
+      return payload;
+    } else {
+      const err = new Error();
+      Object.assign(err, payload);
+      return err;
+    }
+  },
+
+  getRequestOptions(opts, params) {
+    return {
+      ...opts.request ?? {},
+      method: 'POST',
+      headers: {
+        ...Object.fromEntries(new Headers(opts.request?.headers ?? {}).entries()),
+        'X-RPC': '1',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ params, method: opts.method, controller: opts.controller }),
+    }
+  },
+
+  /** @template T */
+  async exec(opts, ...params) {
+    /** @type {AbortSignal | undefined} */
+    let signal;
+    if (opts.timeout) {
+      const abort = new AbortController();
+      signal = abort.signal;
+      RpcRequestUtil.registerTimeout(abort, opts.timeout, setTimeout, clearTimeout);
+    }
+    try {
+      const res = await fetch(opts.url, {
+        ...RpcRequestUtil.getRequestOptions(opts, params),
+        signal
+      });
+      const payload = await RpcRequestUtil.getBody(res);
+      if (res.ok) {
+        // @ts-expect-error
+        const /** @type {T} */ final = payload;
+        return final;
       } else if (typeof payload === 'object') {
-        try {
-          // @ts-ignore
-          const { AppError } = await import('@travetto/base');
-          if (AppError.isErrorLike(payload)) {
-            throw AppError.fromErrorLike(payload);
-          }
-        } catch { }
-        const err = new Error();
-        Object.assign(err, payload);
-        throw err;
+        throw await RpcRequestUtil.getError(payload);
       } else {
         throw new Error(payload ?? `Unknown error: ${res.statusText}@${res.status}`);
       }
-    });
-}
+    } catch (err) {
+      throw await RpcRequestUtil.getError(err);
+    }
+  }
+};
 
-/** 
- * @template {Record<string, {}>} T
- */
+/** @template {Record<string, {}>} T */
 export function restRpcClientFactory() {
   /** @type {import('./rest-rpc.d.ts').RestRpcClientFactory<T>} */
   return function (opts, decorate) {
-    const headers = new Headers(opts.request?.headers ?? {});
-
-    opts.request = {
-      ...opts.request ??= {},
-      method: 'POST',
-      headers: {
-        ...Object.fromEntries(headers.entries()),
-        'X-RPC': '1',
-        'Content-Type': 'application/json'
-      }
-    };
-
     const d = {};
     // @ts-ignore
     return new Proxy({}, {
       get: (_, /** @type {string} */c) =>
         d[c] ??= new Proxy({}, {
-          get: (__, /** @type {string} */ m) => d[`${c}.${m}`] ??= Object.defineProperties(
-            fetcher(opts, c, m),
-            Object.fromEntries(
-              Object.entries(decorate?.(opts, c, m) ?? {}).map(([k, v]) => [k, { value: v }])
-            )
-          )
+          get: (__, /** @type {string} */ m) => {
+            const dec = { ...opts, controller: c, method: m };
+            return d[`${c}.${m}`] ??= Object.defineProperties(
+              RpcRequestUtil.exec.bind(RpcRequestUtil, dec),
+              Object.fromEntries(
+                Object.entries(decorate?.(dec) ?? {}).map(([k, v]) => [k, { value: v }])
+              )
+            );
+          }
         })
     });
   };
