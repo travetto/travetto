@@ -4,6 +4,8 @@ import { Inject } from '@travetto/di';
 import { TodoService } from './service';
 import { Todo, TodoSearch } from './model';
 
+type TodoRequest = Omit<Todo, 'id'>;
+
 @Controller('/todo')
 export class TodoController {
 
@@ -43,8 +45,9 @@ export class TodoController {
    * Create a todo
    */
   @Post('/')
-  async create(todo: Todo): Promise<Todo> {
-    return await this._svc.add(todo);
+  async create(todo: TodoRequest): Promise<Todo> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return await this._svc.add(todo as Todo);
   }
 
   /**
@@ -53,9 +56,8 @@ export class TodoController {
    * @param todo Todo to update
    */
   @Put('/:id')
-  async update(id: string, todo: Todo): Promise<Todo> {
-    todo.id = id;
-    return await this._svc.update(todo);
+  async update(id: string, todo: TodoRequest): Promise<Todo> {
+    return await this._svc.update({ ...todo, id });
   }
 
   /**
@@ -63,7 +65,8 @@ export class TodoController {
    * @param id Todo id
    */
   @Put('/:id/complete')
-  async complete(id: string, completed: boolean = false): Promise<Todo> {
+  async complete(id: string, completed: boolean = true): Promise<Todo> {
+    console.log('Completing', id, completed);
     return await this._svc.complete(id, completed);
   }
 

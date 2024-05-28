@@ -9,15 +9,7 @@ export class Todo {
   completed?: boolean;
   priority?: number;
   who?: string;
-  #color?: string;
-
-  set color(c: string | undefined) {
-    this.#color = c;
-  }
-
-  get color(): string | undefined {
-    return this.#color;
-  }
+  color?: string;
 }
 
 @Schema()

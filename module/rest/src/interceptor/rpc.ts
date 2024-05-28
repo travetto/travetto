@@ -8,14 +8,8 @@ import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { LoggingInterceptor } from './logging';
 import { BodyParseInterceptor } from './body-parse';
 import { ControllerRegistry } from '../registry/controller';
-import { MissingInputⲐ, RequestInputsⲐ, RequestLoggingⲐ } from '../internal/symbol';
+import { MissingParamⲐ, RequestParamsⲐ, RequestLoggingⲐ } from '../internal/symbol';
 import { SerializeUtil } from './serialize-util';
-
-type Command = {
-  controller: string;
-  method: TravettoRequest['method'];
-  args: unknown[];
-};
 
 /**
  * Rest body parse configuration
@@ -35,29 +29,37 @@ export class RpcInterceptor implements RestInterceptor<RestRpcConfig> {
   @Inject()
   config: RestRpcConfig;
 
-  applies(route: RouteConfig, config?: { basePath: string }): boolean {
+  applies(route: RouteConfig): boolean {
+    // Global handler
     return route.path === '*';
   }
 
   async intercept({ req, res }: FilterContext<RestRpcConfig>, next: FilterNext): Promise<unknown> {
-    if (!req.header('X-RPC')) {
+    const target = req.headerFirst('X-TRV-RPC')?.split(/[#:.]/);
+    if (target?.length !== 2) {
       return await next();
     }
 
-    const cmd: Command = req.body;
-    const cls = ControllerRegistry.getClasses().find(x => x.name.endsWith(cmd.controller));
+    const [controller, endpoint] = target;
+    const cls = ControllerRegistry.getClasses().find(x => x.name.endsWith(controller));
     if (!cls) {
       return SerializeUtil.serializeError(res, new AppError('Unknown controller'));
     }
 
-    const ctrl = await ControllerRegistry.get(cls);
-    const ep = ctrl.endpoints.find(x => x.handlerName === cmd.method);
+    const ctrl = ControllerRegistry.get(cls);
+    const ep = ctrl.endpoints.find(x => x.handlerName === endpoint);
     if (!ep) {
       return SerializeUtil.serializeError(res, new AppError('Unknown endpoint'));
     }
 
-    req[RequestLoggingⲐ] = { controller: ctrl.class.name, handler: ep.handlerName };
-    req[RequestInputsⲐ] = ep.params.map((x, i) => x.location === 'context' ? MissingInputⲐ : cmd.args?.[i]);
+    const params = req.body ?? [];
+    if (!Array.isArray(params)) {
+      return SerializeUtil.serializeError(res, new AppError('Invalid parameters, must be an array'));
+    }
+
+    req[RequestLoggingⲐ] = { controller: ctrl.class.name, endpoint: ep.handlerName };
+    req[RequestParamsⲐ] = ep.params.map((x, i) => x.location === 'context' ? MissingParamⲐ : params[i]);
+    req.body = ep.params.find((x, i) => x.location === 'body' ? params[i] : undefined) ?? params; // Re-assign body
 
     return await ep.handlerFinalized!(req, res);
   }

@@ -9,5 +9,5 @@ rest.client:
   providers:
     - type: fetch
       output: related/todo-app/api-client
-    - type: fetch-web
+    - type: rest-rpc
       output: related/todo-app/resources/ui/js/api-client

@@ -3,7 +3,8 @@ import { Package, RuntimeContext } from '@travetto/manifest';
 import { Class } from '@travetto/base';
 import { ControllerConfig } from '@travetto/rest';
 
-import { ClientGenerator, Imp, RenderContent } from './base';
+import { BaseClientGenerator } from './base';
+import type { Imp, RenderContent } from './types';
 
 import { BaseFetchService } from './shared/fetch-service';
 import { CommonUtil } from './shared/util';
@@ -11,7 +12,7 @@ import { BaseRemoteService } from './shared/types';
 
 const SVC = './shared/fetch-service.ts';
 
-export class FetchClientGenerator extends ClientGenerator<{ node?: boolean }> {
+export class FetchClientGenerator extends BaseClientGenerator<{ node?: boolean }> {
 
   get outputExt(): '' | '.js' { return this.config.node ? '' : '.js'; }
   get subFolder(): string { return this.config.node ? 'src' : '.'; }

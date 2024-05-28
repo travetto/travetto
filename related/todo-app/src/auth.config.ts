@@ -6,7 +6,7 @@ import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
 
 export const BasicAuthⲐ = Symbol.for('AUTH_BASIC');
 
-type User = { username: string, password: string };
+export type User = { username: string, password: string };
 
 class AuthConfig {
   @InjectableFactory(SessionModelⲐ)

@@ -4,13 +4,12 @@ import { relative } from 'node:path';
 
 import { Class, Util } from '@travetto/base';
 import { RuntimeIndex, path } from '@travetto/manifest';
-import { ControllerConfig, ControllerRegistry, ControllerVisitor, EndpointConfig } from '@travetto/rest';
+import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { ParamConfig } from './shared/types';
-
-export type Imp = { name: string, file: string, classId: string };
+import type { ClientGenerator, EndpointDesc, Imp, RenderContent } from './types';
 
 export const TYPE_MAPPING: Record<string, string> = {
   String: 'string',
@@ -18,18 +17,6 @@ export const TYPE_MAPPING: Record<string, string> = {
   Date: 'Date',
   Boolean: 'boolean',
   Object: 'object',
-};
-
-export type RenderContent = Imp & {
-  imports: Imp[];
-  content: (string | Imp)[];
-};
-
-type EndpointDesc = {
-  returnType: (string | Imp)[];
-  paramInputs: (string | Imp)[];
-  paramConfigs: ParamConfig[];
-  imports: Imp[];
 };
 
 /**
@@ -54,7 +41,7 @@ const recreateTemplateLiteral = (template: TemplateLiteral, escape = false): str
 /**
  * Base functional skeleton for generating rest client artifacts
  */
-export abstract class ClientGenerator<C = unknown> implements ControllerVisitor {
+export abstract class BaseClientGenerator<C = unknown> implements ClientGenerator {
 
   #output: string;
   #schemaContent = new Map<string, RenderContent>();
