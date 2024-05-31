@@ -17,12 +17,14 @@ export class CliSchemaCommand implements CliCommandShape {
     return CliCommandSchemaUtil.getSchema(inst!);
   }
 
-  async validate(name?: string): Promise<CliValidationError | undefined> {
-    if (name && !CliCommandRegistry.getCommandMapping().has(name)) {
-      return {
-        source: 'arg',
-        message: `name: ${name} is not a valid cli command`
-      };
+  async validate(names: string[]): Promise<CliValidationError | undefined> {
+    for (const name of names ?? []) {
+      if (name && !CliCommandRegistry.getCommandMapping().has(name)) {
+        return {
+          source: 'arg',
+          message: `name: ${name} is not a valid cli command`
+        };
+      }
     }
   }
 
@@ -30,15 +32,11 @@ export class CliSchemaCommand implements CliCommandShape {
     Env.DEBUG.set(false);
   }
 
-  async main(name?: string): Promise<void> {
-    let output: unknown = undefined;
-    if (name) {
-      output = await this.#getSchema(name);
-    } else {
-      const names = [...CliCommandRegistry.getCommandMapping().keys()];
-      const schemas = await Promise.all(names.map(x => this.#getSchema(x)));
-      output = schemas;
+  async main(names?: string[]): Promise<void> {
+    if (!names?.length) {
+      names = [...CliCommandRegistry.getCommandMapping().keys()];
     }
-    await CliUtil.writeAndEnsureComplete(output);
+    const resolved = await Promise.all(names.map(x => this.#getSchema(x)));
+    await CliUtil.writeAndEnsureComplete(resolved);
   }
 }
