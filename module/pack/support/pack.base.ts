@@ -68,6 +68,9 @@ export abstract class BasePackCommand implements CliCommandShape {
   @CliFlag({ desc: 'Manifest File Name' })
   manifestFile = 'manifest.json';
 
+  @CliFlag({ desc: 'Include workspace resources', short: 'wr' })
+  includeWorkspaceResources: boolean = false;
+
   @Ignore()
   module: string;
 
@@ -84,6 +87,7 @@ export abstract class BasePackCommand implements CliCommandShape {
       PackOperation.writeEnv,
       PackOperation.writePackageJson,
       PackOperation.writeEntryScript,
+      PackOperation.copyMonoRepoResources,
       PackOperation.copyResources,
       PackOperation.writeManifest,
       PackOperation.bundle,

@@ -26,7 +26,8 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
       )
     ],
     copy: (src, dest) => ['copy', src, dest],
-    copyRecursive: (src, dest) => ['xcopy', '/y', '/h', '/s', path.toNative(src), path.toNative(dest)],
+    copyRecursive: (src, dest, inclusive) =>
+      ['xcopy', '/y', '/h', '/s', inclusive ? `${path.toNative(src)}\\*.*` : path.toNative(src), path.toNative(dest)],
     rmRecursive: (dest) => ['rmdir', '/Q', '/S', dest],
     mkdir: (dest) => ['md', dest],
     export: (key, value) => ['set', `${key}=${value}`],
@@ -46,7 +47,8 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
       ...(mode ? [['chmod', mode, file]] : [])
     ],
     copy: (src, dest) => ['cp', src, dest],
-    copyRecursive: (src, dest) => ['cp', '-r', '-p', src, dest],
+    copyRecursive: (src, dest, inclusive) =>
+      ['cp', '-r', '-p', inclusive ? `${src}/*` : src, dest],
     rmRecursive: (dest) => ['rm', '-rf', dest],
     mkdir: (dest) => ['mkdir', '-p', dest],
     export: (key, value) => ['export', `${key}=${value}`],

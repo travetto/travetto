@@ -21,6 +21,7 @@ export type CommonPackConfig = {
   minify: boolean;
   sourcemap: boolean;
   includeSources: boolean;
+  includeWorkspaceResources?: boolean;
 };
 
 
@@ -52,7 +53,7 @@ export type ShellCommandImpl = {
   chdirScript(): string[];
   callCommandWithAllArgs(cmd: string, ...args: string[]): string[];
   copy(src: string, dest: string): string[];
-  copyRecursive(src: string, dest: string): string[];
+  copyRecursive(src: string, dest: string, inclusive?: boolean): string[];
   rmRecursive(dest: string): string[];
   mkdir(dest: string): string[];
   export(key: string, value: string): string[];

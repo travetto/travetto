@@ -22,9 +22,9 @@ export class PackUtil {
    * @param dest The folder to copy to
    * @param ignore Should errors be ignored
    */
-  static async copyRecursive(src: string, dest: string, ignore = false): Promise<void> {
-    const [cmd, ...args] = ActiveShellCommand.copyRecursive(src, dest);
-    const res = await ExecUtil.getResult(spawn(cmd, args, { shell: false }), { catch: true });
+  static async copyRecursive(src: string, dest: string, inclusive: boolean = false, ignore = false): Promise<void> {
+    const [cmd, ...args] = ActiveShellCommand.copyRecursive(src, dest, inclusive);
+    const res = await ExecUtil.getResult(spawn(cmd, args, { shell: true }), { catch: true });
     if (res.code && !ignore) {
       throw new Error(`Failed to copy ${src} to ${dest}`);
     }
@@ -48,8 +48,8 @@ export class PackUtil {
 
     if (!(file === '-' || file === '/dev/stdout')) {
       await fs.mkdir(path.dirname(file), { recursive: true });
-      await fs.truncate(file);
-      stream = await fs.open(file, 'utf8');
+      await fs.writeFile(file, '', 'utf8');
+      stream = await fs.open(file, 'w', 0o755);
     }
 
     const write = (text: string): Promise<unknown> | unknown => stream ? stream.write(`${text}\n`) : process.stdout.write(`${text}\n`);

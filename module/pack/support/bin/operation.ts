@@ -178,6 +178,27 @@ export class PackOperation {
   }
 
   /**
+   * Copy over repo /resources folder into workspace, will get packaged into final output
+   */
+  static async * copyMonoRepoResources(cfg: CommonPackConfig): AsyncIterable<string[]> {
+    if (!cfg.includeWorkspaceResources) {
+      return;
+    }
+
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Copying over workspace resources' }}`);
+
+    const dest = path.resolve(cfg.workspace, 'workspace-resources');
+    const src = RuntimeContext.workspaceRelative('resources');
+
+    if (cfg.ejectFile) {
+      yield ActiveShellCommand.copyRecursive(src, dest, true);
+    } else {
+      await fs.mkdir(dest, { recursive: true });
+      await PackUtil.copyRecursive(src, dest, true);
+    }
+  }
+
+  /**
    * Copy over /resources folder into workspace, will get packaged into final output
    */
   static async * copyResources(cfg: CommonPackConfig): AsyncIterable<string[]> {
@@ -187,7 +208,7 @@ export class PackOperation {
       dest: path.resolve(cfg.workspace, 'resources')
     };
 
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Copying over resources' }}`);
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Copying over module resources' }}`);
 
     if (cfg.ejectFile) {
       if (resources.count) {
