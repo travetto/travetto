@@ -285,14 +285,14 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preStore(cls, item, this, 'create');
     await this.#putItem(cls, prepped.id, prepped, 'create');
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    item = await ModelCrudUtil.preStore(cls, item, this);
+    item = await ModelCrudUtil.preStore(cls, item, this, 'update');
     if (ModelRegistry.get(cls).expiresAt) {
       await this.get(cls, item.id);
     }
@@ -302,7 +302,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preStore(cls, item, this, 'all');
     await this.#putItem(cls, prepped.id, prepped, 'upsert');
     return prepped;
   }

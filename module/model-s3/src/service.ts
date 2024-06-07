@@ -7,7 +7,8 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
-  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId, PartialStream
+  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId, PartialStream,
+  PrePersistScope
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { StreamUtil, Class, AppError } from '@travetto/base';
@@ -226,11 +227,11 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore = true): Promise<T> {
+  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore: PrePersistScope | undefined): Promise<T> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     let prepped: T = item as T;
     if (preStore) {
-      prepped = await ModelCrudUtil.preStore(cls, item, this);
+      prepped = await ModelCrudUtil.preStore(cls, item, this, preStore);
     }
     await this.client.putObject(this.#q(cls, prepped.id, {
       Body: JSON.stringify(prepped),
@@ -246,7 +247,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         throw new ExistsError(cls, item.id);
       }
     }
-    return this.store(cls, item);
+    return this.store(cls, item, 'create');
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
@@ -254,19 +255,19 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     if (!(await this.head(cls, item.id))) {
       throw new NotFoundError(cls, item.id);
     }
-    return this.store(cls, item);
+    return this.store(cls, item, 'update');
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    return this.store(cls, item);
+    return this.store(cls, item, 'all');
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     const prepped = await ModelCrudUtil.naivePartialUpdate(cls, item, view, (): Promise<T> => this.get(cls, id));
-    return this.store<T>(cls, prepped, false);
+    return this.store<T>(cls, prepped, undefined);
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {

@@ -19,7 +19,7 @@ import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
 import { StreamModel, STREAMS } from '../internal/service/stream';
-import { IndexConfig } from '../registry/types';
+import { IndexConfig, PrePersistScope } from '../registry/types';
 
 const STREAM_META = `${STREAMS}_meta`;
 
@@ -194,20 +194,20 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       item.id = this.idSource.create();
     }
     this.#find(cls, item.id, 'data');
-    return await this.upsert(cls, item);
+    return await this.upsert(cls, item, 'create');
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     await this.get(cls, item.id);
-    return await this.upsert(cls, item);
+    return await this.upsert(cls, item, 'update');
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, prePersistScope: PrePersistScope = 'all'): Promise<T> {
     const store = this.#getStore(cls);
     if (item.id && store.has(item.id)) {
       await ModelCrudUtil.load(cls, store.get(item.id)!, 'exists');
     }
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+    const prepped = await ModelCrudUtil.preStore(cls, item, this, prePersistScope);
     return await this.#persist(cls, prepped, 'write');
   }
 

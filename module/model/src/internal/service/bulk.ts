@@ -29,14 +29,14 @@ export class ModelBulkUtil {
     let i = 0;
     for (const op of operations) {
       if ('insert' in op && op.insert) {
-        op.insert = await ModelCrudUtil.preStore(cls, op.insert, provider);
+        op.insert = await ModelCrudUtil.preStore(cls, op.insert, provider, 'create');
         insertedIds.set(i, op.insert.id!);
       } else if ('update' in op && op.update) {
-        op.update = await ModelCrudUtil.preStore(cls, op.update, provider);
+        op.update = await ModelCrudUtil.preStore(cls, op.update, provider, 'update');
         updatedIds.set(i, op.update.id);
       } else if ('upsert' in op && op.upsert) {
         const isNew = !op.upsert.id;
-        op.upsert = await ModelCrudUtil.preStore(cls, op.upsert, provider);
+        op.upsert = await ModelCrudUtil.preStore(cls, op.upsert, provider, 'all');
         if (isNew) {
           upsertedIds.set(i, op.upsert.id!);
         } else {

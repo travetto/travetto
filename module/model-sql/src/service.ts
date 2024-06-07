@@ -2,7 +2,8 @@ import {
   ModelType,
   BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
   NotFoundError, ModelRegistry, ExistsError, OptionalId,
-  ModelIdSource
+  ModelIdSource,
+  PrePersistScope
 } from '@travetto/model';
 import { Class } from '@travetto/base';
 import { DataUtil, SchemaChange } from '@travetto/schema';
@@ -146,8 +147,8 @@ export class SQLModelService implements
   async deleteStorage(): Promise<void> { }
 
   @Transactional()
-  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this);
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, prePersistScope: PrePersistScope = 'create'): Promise<T> {
+    const prepped = await ModelCrudUtil.preStore(cls, item, this, prePersistScope);
     try {
       for (const ins of this.#dialect.getAllInsertSQL(cls, prepped)) {
         await this.#exec(ins);
@@ -165,7 +166,7 @@ export class SQLModelService implements
   @Transactional()
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     await this.#deleteRaw(cls, item.id, {}, true);
-    return await this.create(cls, item);
+    return await this.create(cls, item, 'update');
   }
 
   @Transactional()
@@ -179,7 +180,7 @@ export class SQLModelService implements
         throw err;
       }
     }
-    return await this.create(cls, item);
+    return await this.create(cls, item, 'all');
   }
 
   @Transactional()

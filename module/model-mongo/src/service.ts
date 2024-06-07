@@ -182,7 +182,7 @@ export class MongoModelService implements
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preStore(cls, item, this);
+    const cleaned = await ModelCrudUtil.preStore(cls, item, this, 'create');
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     (cleaned as WithId<T>)._id = MongoUtil.uuid(cleaned.id);
 
@@ -197,7 +197,7 @@ export class MongoModelService implements
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    item = await ModelCrudUtil.preStore(cls, item, this);
+    item = await ModelCrudUtil.preStore(cls, item, this, 'update');
     const store = await this.getStore(cls);
     const res = await store.replaceOne(this.getWhere<ModelType>(cls, { id: item.id }), item);
     if (res.matchedCount === 0) {
@@ -207,7 +207,7 @@ export class MongoModelService implements
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preStore(cls, item, this);
+    const cleaned = await ModelCrudUtil.preStore(cls, item, this, 'all');
     const store = await this.getStore(cls);
     try {
       await store.updateOne(
@@ -232,7 +232,7 @@ export class MongoModelService implements
       await SchemaValidator.validate(cls, item, view);
     }
 
-    item = await ModelCrudUtil.prePersist(cls, item);
+    item = await ModelCrudUtil.prePersist(cls, item, 'update');
 
     let final: Record<string, unknown> = item;
 
@@ -512,7 +512,7 @@ export class MongoModelService implements
   // Query Crud
   async updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
     const col = await this.getStore(cls);
-    const item = await ModelCrudUtil.preStore(cls, data, this);
+    const item = await ModelCrudUtil.preStore(cls, data, this, 'update');
     query = ModelQueryUtil.getQueryWithId(cls, data, query);
 
     const { filter } = MongoUtil.prepareQuery(cls, query);
