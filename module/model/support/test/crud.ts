@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Schema, Text, Precision, } from '@travetto/schema';
-import { ModelCrudSupport, Model, NotFoundError } from '@travetto/model';
+import { Schema, Text, Precision, Required, } from '@travetto/schema';
+import { ModelCrudSupport, Model, NotFoundError, PersistValue } from '@travetto/model';
 
 import { BaseModelSuite } from './base';
 
@@ -55,7 +55,14 @@ class User2 {
 @Model()
 class Dated {
   id: string;
-  time?: Date;
+
+  @PersistValue(v => v ??= new Date())
+  @Required(false)
+  createdDate: Date;
+
+  @PersistValue(v => new Date())
+  @Required(false)
+  updatedDate: Date;
 }
 
 @Suite()
@@ -204,10 +211,28 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('verify dates')
   async testDates() {
     const service = await this.service;
-    const res = await service.create(Dated, Dated.from({ time: new Date() }));
+    const res = await service.create(Dated, Dated.from({ createdDate: new Date() }));
 
-    assert(res.time instanceof Date);
+    assert(res.createdDate instanceof Date);
   }
+
+  @Test('verify prepersist on create/update')
+  async tetPrePersist() {
+    const service = await this.service;
+    const res = await service.create(Dated, Dated.from({}));
+    const created = res.createdDate;
+    assert(res.createdDate instanceof Date);
+    assert(res.updatedDate instanceof Date);
+
+    await new Promise(r => setTimeout(r, 100));
+
+    const final = await service.updatePartial(Dated, { id: res.id });
+    assert(final.createdDate instanceof Date);
+    assert(final.createdDate.getTime() === created?.getTime());
+    assert(final.updatedDate instanceof Date);
+    assert(final.createdDate.getTime() < final.updatedDate?.getTime());
+  }
+
 
   @Test('verify list')
   async list() {
