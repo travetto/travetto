@@ -158,7 +158,7 @@ export class ModelCrudUtil {
   static async prePersist<T>(cls: Class<T>, item: T, scope: PrePersistScope): Promise<T> {
     const config = ModelRegistry.get(cls);
     for (const state of (config.prePersist ?? [])) {
-      if (state.scope === scope || scope === 'all') {
+      if (state.scope === scope || scope === 'all' || state.scope === 'all') {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const handler = state.handler as unknown as DataHandler<T>;
         item = await handler(item) ?? item;

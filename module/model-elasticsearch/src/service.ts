@@ -214,6 +214,8 @@ export class ElasticsearchModelService implements
   async updatePartial<T extends ModelType>(cls: Class<T>, data: Partial<T> & { id: string }): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
+    await ModelCrudUtil.prePersist(cls, data, 'partial');
+
     const script = ElasticsearchSchemaUtil.generateUpdateScript(data);
     const id = data.id;
 

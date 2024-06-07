@@ -56,7 +56,7 @@ class User2 {
 class Dated {
   id: string;
 
-  @PersistValue(v => v ??= new Date(), 'full')
+  @PersistValue(v => v ?? new Date(), 'full')
   @Required(false)
   createdDate: Date;
 
