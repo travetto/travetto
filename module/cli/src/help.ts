@@ -1,5 +1,6 @@
+import util from 'node:util';
+
 import { Primitive } from '@travetto/base';
-import { StyleUtil } from '@travetto/terminal';
 
 import { cliTpl } from './color';
 import { CliCommandShape } from './types';
@@ -70,8 +71,8 @@ export class HelpUtil {
       descs.push(desc.join(' '));
     }
 
-    const paramWidths = params.map(x => StyleUtil.cleanText(x).length);
-    const descWidths = descs.map(x => StyleUtil.cleanText(x).length);
+    const paramWidths = params.map(x => util.stripVTControlCharacters(x).length);
+    const descWidths = descs.map(x => util.stripVTControlCharacters(x).length);
 
     const paramWidth = Math.max(...paramWidths);
     const descWidth = Math.max(...descWidths);
@@ -99,7 +100,7 @@ export class HelpUtil {
   static async renderAllHelp(title?: string): Promise<string> {
     const rows: string[] = [];
     const keys = [...CliCommandRegistry.getCommandMapping().keys()].sort((a, b) => a.localeCompare(b));
-    const maxWidth = keys.reduce((a, b) => Math.max(a, StyleUtil.cleanText(b).length), 0);
+    const maxWidth = keys.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b).length), 0);
 
     for (const cmd of keys) {
       try {

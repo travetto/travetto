@@ -1,5 +1,6 @@
+import util from 'node:util';
+
 import { path } from '@travetto/manifest';
-import { StyleUtil } from '@travetto/terminal';
 
 import { ShellCommandImpl } from '../../src/types';
 
@@ -30,8 +31,8 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     mkdir: (dest) => ['md', dest],
     export: (key, value) => ['set', `${key}=${value}`],
     chdir: (dest) => ['cd', dest],
-    comment: (message) => ['\nREM', StyleUtil.cleanText(message), '\n'],
-    echo: (message) => ['echo', `"${escape(StyleUtil.cleanText(message))}"\n`],
+    comment: (message) => ['\nREM', util.stripVTControlCharacters(message), '\n'],
+    echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile]
   },
   posix: {
@@ -50,8 +51,8 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     mkdir: (dest) => ['mkdir', '-p', dest],
     export: (key, value) => ['export', `${key}=${value}`],
     chdir: (dest) => ['cd', dest],
-    comment: (message) => ['\n#', StyleUtil.cleanText(message), '\n'],
-    echo: (message) => ['echo', `"${escape(StyleUtil.cleanText(message))}"\n`],
+    comment: (message) => ['\n#', util.stripVTControlCharacters(message), '\n'],
+    echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
     zip: (outputFile) => ['zip', '-r', outputFile, '.']
   },
 };

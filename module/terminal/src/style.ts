@@ -10,9 +10,6 @@ export type TermStyleFn = (input: TemplatePrim) => string;
 type TermStyledTemplate<T extends string> = (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => string;
 export type ColorLevel = 0 | 1 | 2 | 3;
 
-// eslint-disable-next-line no-control-regex
-const ANSI_CODE_REGEX = /(\x1b|\x1B)[\[\]][?]?[0-9;]+[A-Za-z]/g;
-
 export class StyleUtil {
 
   static #darkAnsi256 = new Set([
@@ -113,10 +110,4 @@ export class StyleUtil {
     };
   }
 
-  /**
-   * Remove style escape sequences
-   */
-  static cleanText(text: string): string {
-    return text.replace(ANSI_CODE_REGEX, '');
-  }
 }

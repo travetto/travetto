@@ -1,9 +1,9 @@
 import os from 'node:os';
+import util from 'node:util';
 import { spawn, ChildProcess } from 'node:child_process';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/base';
-import { StyleUtil } from '@travetto/terminal';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
 
@@ -50,7 +50,7 @@ export class DocRunUtil {
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
     const cwd = path.toPosix((cfg.module ? RuntimeIndex.getModule(cfg.module)! : RuntimeIndex.mainModule).sourcePath);
-    text = StyleUtil.cleanText(text.trim())
+    text = util.stripVTControlCharacters(text.trim())
       .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
       .replaceAll(RuntimeContext.workspace.path, '<workspace-root>')
@@ -104,7 +104,7 @@ export class DocRunUtil {
       if (!res.valid) {
         throw new Error(res.stderr);
       }
-      final = StyleUtil.cleanText(res.stdout).trim() || StyleUtil.cleanText(res.stderr).trim();
+      final = util.stripVTControlCharacters(res.stdout).trim() || util.stripVTControlCharacters(res.stderr).trim();
     } catch (err) {
       if (err instanceof Error) {
         final = err.message;
