@@ -226,7 +226,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore: boolean = true): Promise<T> {
+  async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore = true): Promise<T> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     let prepped: T = item as T;
     if (preStore) {

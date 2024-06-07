@@ -196,7 +196,7 @@ export class ElasticsearchModelService implements
   async upsert<T extends ModelType>(cls: Class<T>, o: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const item = await ModelCrudUtil.preStore(cls, o, this, 'all');
+    const item = await ModelCrudUtil.preStore(cls, o, this);
 
     await this.client.update({
       ...this.manager.getIdentity(cls),
