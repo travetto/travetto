@@ -67,14 +67,14 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const prepped = await ModelCrudUtil.preStore(cls, item, this, 'create');
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
     await this.#getCollection(cls).doc(prepped.id).create(clone(prepped));
     return prepped;
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this, 'update');
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     await this.#getCollection(cls).doc(item.id).update(clone(prepped) as unknown as UpdateData<DocumentData>);
     return item;
@@ -82,7 +82,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this, 'all');
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
     await this.#getCollection(cls).doc(prepped.id).set(clone(prepped));
     return prepped;
   }

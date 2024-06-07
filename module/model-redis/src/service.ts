@@ -4,8 +4,7 @@ import { ShutdownManager, type Class } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
-  NotFoundError, ExistsError, ModelIndexedSupport, OptionalId,
-  PrePersistScope
+  NotFoundError, ExistsError, ModelIndexedSupport, OptionalId
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 
@@ -213,7 +212,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     if (item.id) {
       await this.has(cls, item.id, 'data');
     }
-    const prepped = await ModelCrudUtil.preStore(cls, item, this, 'create');
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
     await this.#store(cls, prepped, 'write');
     return prepped;
   }
@@ -221,12 +220,12 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     await this.has(cls, item.id, 'notfound');
-    return this.upsert(cls, item, 'update');
+    return this.upsert(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, prePersistScope: PrePersistScope = 'all'): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this, prePersistScope);
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
     await this.#store(cls, prepped, 'write');
     return prepped;
   }

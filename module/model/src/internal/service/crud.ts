@@ -72,7 +72,7 @@ export class ModelCrudUtil {
    * @param cls Type to store for
    * @param item Item to store
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<OptionalId<T>>, provider: ModelCrudProvider, scope: PrePersistScope): Promise<T> {
+  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<OptionalId<T>>, provider: ModelCrudProvider, scope: PrePersistScope = 'all'): Promise<T> {
     if (!item.id) {
       item.id = provider.idSource.create();
     }
@@ -137,7 +137,7 @@ export class ModelCrudUtil {
 
     item = Object.assign(existing, item);
 
-    item = await this.prePersist(cls, item, 'update');
+    item = await this.prePersist(cls, item, 'partial');
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return item as T;

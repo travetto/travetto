@@ -153,7 +153,7 @@ export class ElasticsearchModelService implements
 
   async create<T extends ModelType>(cls: Class<T>, o: OptionalId<T>): Promise<T> {
     try {
-      const clean = await ModelCrudUtil.preStore(cls, o, this, 'create');
+      const clean = await ModelCrudUtil.preStore(cls, o, this);
       const id = clean.id;
 
       await this.client.index({
@@ -173,7 +173,7 @@ export class ElasticsearchModelService implements
   async update<T extends ModelType>(cls: Class<T>, o: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    o = await ModelCrudUtil.preStore(cls, o, this, 'update');
+    o = await ModelCrudUtil.preStore(cls, o, this);
 
     const id = o.id;
 
@@ -433,7 +433,7 @@ export class ElasticsearchModelService implements
   async updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const item = await ModelCrudUtil.preStore(cls, data, this, 'update');
+    const item = await ModelCrudUtil.preStore(cls, data, this);
     const id = item.id;
 
     query = ModelQueryUtil.getQueryWithId(cls, data, query);

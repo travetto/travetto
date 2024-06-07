@@ -22,7 +22,6 @@ import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
 import { StreamModel, STREAMS } from '../internal/service/stream';
-import { PrePersistScope } from '../registry/types';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -131,17 +130,17 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       throw new ExistsError(cls, item.id!);
     }
 
-    return await this.upsert(cls, item, 'create');
+    return await this.upsert(cls, item);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     await this.get(cls, item.id);
-    return await this.upsert(cls, item, 'update');
+    return await this.upsert(cls, item);
   }
 
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, prePersistScope: PrePersistScope = 'all'): Promise<T> {
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const prepped = await ModelCrudUtil.preStore(cls, item, this, prePersistScope);
+    const prepped = await ModelCrudUtil.preStore(cls, item, this);
 
     const file = await this.#resolveName(cls, '.json', item.id);
     await fs.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
