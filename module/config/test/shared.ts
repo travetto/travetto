@@ -4,6 +4,7 @@ import { Config, EnvVar } from '../src/decorator';
 export class NameConfig {
   @EnvVar('NAME_ACTIVE')
   active = false;
+  size?: number;
 }
 
 @Config('db.mysql')

@@ -11,6 +11,7 @@ export type CommonPackConfig = {
   mainScripts?: boolean;
   module: string;
   envFile: string;
+  env?: string;
   manifestFile: string;
 
   // Bundle

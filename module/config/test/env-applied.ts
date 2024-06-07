@@ -39,5 +39,6 @@ export class EnvConfigTest {
   async environmentOverrideFalse() {
     const conf = await DependencyRegistry.getInstance(NameConfig);
     assert(conf.active === false);
+    assert(conf.size === 23);
   }
 }
