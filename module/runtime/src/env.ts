@@ -52,8 +52,7 @@ export class EnvProp<T> {
 
   /** Add values to list */
   add(...items: string[]): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.set([... new Set([...this.list ?? [], ...items])] as T);
+    process.env[this.key] = [... new Set([...this.list ?? [], ...items])].join(',');
   }
 
   /** Read value as int  */

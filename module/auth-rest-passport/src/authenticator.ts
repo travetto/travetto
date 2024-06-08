@@ -17,7 +17,7 @@ const authenticator = (passport as unknown as passport.Authenticator<Handler>);
 /**
  * Authenticator via passport
  */
-export class PassportAuthenticator<U> implements Authenticator<U, Principal, FilterContext> {
+export class PassportAuthenticator<U extends object> implements Authenticator<U, Principal, FilterContext> {
 
   #passportInit = authenticator.initialize();
 
@@ -59,8 +59,7 @@ export class PassportAuthenticator<U> implements Authenticator<U, Principal, Fil
       throw err;
     } else {
       // Remove profile fields from passport
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const du = user as (U & { _json?: unknown, _raw?: unknown, source?: unknown });
+      const du: U & { _json?: unknown, _raw?: unknown, source?: unknown } = user;
       delete du._json;
       delete du._raw;
       delete du.source;

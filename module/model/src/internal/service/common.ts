@@ -1,3 +1,4 @@
+import { ClassInstance } from '@travetto/base';
 import type { ModelBulkSupport } from '../../service/bulk';
 import { ModelCrudSupport } from '../../service/crud';
 import type { ModelExpirySupport } from '../../service/expiry';
@@ -17,62 +18,55 @@ export class ModelIndexedSupportTarget { }
  * Type guard for determining if service supports basic operations
  * @param o
  */
-export function isBasicSupported(o: unknown): o is ModelBulkSupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['create'];
+export function isBasicSupported(o: ClassInstance): o is ModelBulkSupport {
+  return !!o && 'create' in o;
 }
 
 /**
  * Type guard for determining if service supports crud operations
  * @param o
  */
-export function isCrudSupported(o: unknown): o is ModelCrudSupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['upsert'];
+export function isCrudSupported(o: ClassInstance): o is ModelCrudSupport {
+  return !!o && 'upsert' in o;
 }
 
 /**
  * Type guard for determining if model is expirable
  * @param o
  */
-export function isExpirySupported(o: unknown): o is ModelExpirySupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['deleteExpired'];
+export function isExpirySupported(o: ClassInstance): o is ModelExpirySupport {
+  return !!o && 'deleteExpired' in o;
 }
 
 /**
  * Type guard for determining if service supports storage operation
  * @param o
  */
-export function isStorageSupported(o: unknown): o is ModelStorageSupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['createStorage'];
+export function isStorageSupported(o: ClassInstance): o is ModelStorageSupport {
+  return !!o && 'createStorage' in o;
 }
 
 /**
  * Type guard for determining if service supports streaming operation
  * @param o
  */
-export function isStreamSupported(o: unknown): o is ModelStreamSupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['getStream'];
+export function isStreamSupported(o: ClassInstance): o is ModelStreamSupport {
+  return !!o && 'getStream' in o;
 }
 
 /**
  * Type guard for determining if service supports streaming operation
  * @param o
  */
-export function isBulkSupported(o: unknown): o is ModelBulkSupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['processBulk'];
+export function isBulkSupported(o: ClassInstance): o is ModelBulkSupport {
+  return !!o && 'processBulk' in o;
 }
 
 /**
  * Type guard for determining if service supports indexed operation
  * @param o
  */
-export function isIndexedSupported(o: unknown): o is ModelIndexedSupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['getByIndex'];
+export function isIndexedSupported(o: ClassInstance): o is ModelIndexedSupport {
+  return !!o && 'getByIndex' in o;
 }
 
