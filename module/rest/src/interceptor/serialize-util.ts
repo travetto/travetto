@@ -24,10 +24,8 @@ const categoryToCode: Record<ErrorCategory, number> = {
  * Utilities for serializing output
  */
 export class SerializeUtil {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  static isRenderable = (o: unknown): o is Renderable => !!o && !ObjectUtil.isPrimitive(o) && 'render' in (o as object);
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  static isStream = (o: unknown): o is Readable => !!o && 'pipe' in (o as object) && 'on' in (o as object);
+  static isRenderable = (o: unknown): o is Renderable => !!o && !ObjectUtil.isPrimitive(o) && typeof o === 'object' && 'render' in o;
+  static isStream = (o: unknown): o is Readable => !!o && typeof o === 'object' && 'pipe' in o && 'on' in o;
 
   /**
    * Determine the error status for a given error, with special provisions for AppError
@@ -111,8 +109,7 @@ export class SerializeUtil {
     res.status(status);
     res.statusError = error;
     res.setHeader('Content-Type', 'application/json');
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const out = ObjectUtil.hasToJSON(error) ? error.toJSON() as object : { message: error.message };
+    const out = ObjectUtil.hasToJSON<object>(error) ? error.toJSON() : { message: error.message };
     res.send(JSON.stringify({ ...out, status }));
   }
 

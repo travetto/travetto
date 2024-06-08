@@ -49,8 +49,16 @@ export class EditorSendService {
       console.log('Sent email', { to });
 
       return this.ethereal ? {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any
-        url: (await import('nodemailer')).getTestMessageUrl(info as any)
+        url: (await import('nodemailer')).getTestMessageUrl({
+          envelope: undefined!,
+          accepted: undefined!,
+          messageId: undefined!,
+          pending: undefined!,
+          raw: undefined!,
+          rejected: undefined!,
+          response: undefined!,
+          ...info,
+        })
       } : {};
     } catch (err) {
       console.warn('Failed to send email', { to, error: err });
