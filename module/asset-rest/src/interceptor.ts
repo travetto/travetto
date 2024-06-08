@@ -55,10 +55,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     console.log('Starting multipart upload', req.header('content-length'));
 
     const uploader = busboy({
-      headers: {
-        ...req.headers,
-        'content-type': req.getContentType()?.type!
-      },
+      headers: req.headers as any,
       limits: { fileSize: largestMax }
     })
       .on('file', (field, stream, filename) =>

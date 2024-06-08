@@ -1,3 +1,5 @@
+import os from 'os';
+
 import { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, RuntimeIndex, path } from '@travetto/manifest';
 
 import type { CompileStateEntry } from './types';
@@ -42,7 +44,8 @@ export class CompilerWatcher {
       ignores = ['node_modules/**'];
     }
 
-    return [
+    // TODO: Fix once node/parcel sort this out
+    return os.platform() === 'linux' ? [] : [
       ...ignores,
       '.git', '**/.git',
       `${this.#state.manifest.build.outputFolder}/node_modules/**`,
