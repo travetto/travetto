@@ -3,7 +3,7 @@ import { sign, Header, decode, verify } from 'jws';
 import { TimeUtil } from '@travetto/runtime';
 
 import { JWTError } from './error';
-import { Payload, SignOptions, SignHeader, TypedSig, VerifyOptions } from './types';
+import { Payload, SignOptions, TypedSig, VerifyOptions } from './types';
 import { JWTVerifier } from './verify';
 
 export class JWTUtil {
@@ -11,7 +11,7 @@ export class JWTUtil {
    * Sign the payload and return a token
    */
   static async create<T extends Payload>(payload: T, options: SignOptions = {}): Promise<string> {
-    const header: SignHeader = {
+    const header: Header = {
       alg: options.alg ?? 'HS256',
       typ: 'JWT',
       ...options.header
@@ -34,8 +34,7 @@ export class JWTUtil {
     }
 
     const opts = {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      header: header as Header,
+      header,
       privateKey,
       payload: JSON.stringify(payload),
       encoding: options.encoding || 'utf8'
@@ -70,8 +69,7 @@ export class JWTUtil {
 
     if (typeof decoded.payload === 'string' && /^[{\[]/.test(decoded.payload)) {
       try {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        decoded.payload = JSON.parse(decoded.payload as 'string');
+        decoded.payload = JSON.parse(decoded.payload);
       } catch { }
     }
 
