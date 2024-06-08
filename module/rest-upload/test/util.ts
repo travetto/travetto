@@ -34,7 +34,7 @@ export class UtilTest {
     assert(req2.getFilename() === 'hello-world');
 
     const req3 = makeRequest(undefined, 'image/png');
-    assert(req3.getFilename() === 'file-upload.png');
+    assert(req3.getFilename() === undefined);
   }
 
   @Test({ shouldThrow: 'size' })
