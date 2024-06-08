@@ -108,9 +108,15 @@ export class DataUtil {
 
     switch (type) {
       case Date: {
-        const res = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
+        let res: Date | undefined;
+        if (typeof input === 'object' && 'toDate' in input && typeof input.toDate === 'function') {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          new Date(parseInt(input as string, 10)) : new Date(input as Date);
+          res = input.toDate() as Date;
+        } else {
+          res = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            new Date(parseInt(input as string, 10)) : new Date(input as Date);
+        }
         if (strict && Number.isNaN(res.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
         }

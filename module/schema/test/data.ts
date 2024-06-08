@@ -49,6 +49,9 @@ class DataUtilTests {
     assert.throws(() => DataUtil.coerceType('a', Date));
     assert.doesNotThrow(() => DataUtil.coerceType('a', Date, false));
     assert(Number.isNaN(DataUtil.coerceType('a', Date, false).getTime()));
+
+    const obj = { toDate: () => new Date(10) };
+    assert(DataUtil.coerceType(obj, Date).getTime() === 10);
   }
 
   @Test()

@@ -77,7 +77,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     await this.#getCollection(cls).doc(item.id).update(clone(prepped) as unknown as UpdateData<DocumentData>);
-    return item;
+    return prepped;
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
