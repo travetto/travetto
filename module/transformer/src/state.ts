@@ -151,8 +151,7 @@ export class TransformerState implements State {
     const targets = DocUtil.readAugments(this.#resolver.getType(ident));
     const module = file ? mod : undefined;
     const name = ident ?
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      ident.escapedText! as string :
+      ident.escapedText?.toString()! :
       undefined;
 
     if (ident && name) {
@@ -193,10 +192,11 @@ export class TransformerState implements State {
       while (n && !ts.isSourceFile(n.parent) && n !== n.parent) {
         n = n.parent;
       }
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const nStmt: ts.Statement = n as ts.Statement;
-      if (n && ts.isSourceFile(n.parent) && stmts.indexOf(nStmt) >= 0) {
-        idx = stmts.indexOf(nStmt) - 1;
+      if (!ts.isStatement(n)) {
+        throw new Error('Unable to find statement at top level');
+      }
+      if (n && ts.isSourceFile(n.parent) && stmts.indexOf(n) >= 0) {
+        idx = stmts.indexOf(n) - 1;
       }
     } else if (before !== undefined) {
       idx = before;
@@ -225,8 +225,7 @@ export class TransformerState implements State {
   fromLiteral(val: unknown[]): ts.ArrayLiteralExpression;
   fromLiteral(val: string | boolean | number): ts.LiteralExpression;
   fromLiteral(val: unknown): ts.Node {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return LiteralUtil.fromLiteral(this.factory, val as object);
+    return LiteralUtil.fromLiteral(this.factory, val!);
   }
 
   /**

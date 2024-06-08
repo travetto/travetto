@@ -78,9 +78,8 @@ export class Serializer {
     } else if (o instanceof Error) {
       out = `${this.serialize(o.stack, cfg, indentLevel + cfg.indent)}\n`;
     } else if (typeof o === 'function' || o instanceof RegExp) {
-      if (ObjectUtil.hasToJSON(o)) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        out = this.serialize(o.toJSON() as object, cfg, indentLevel);
+      if (ObjectUtil.hasToJSON<object>(o)) {
+        out = this.serialize(o.toJSON(), cfg, indentLevel);
       } else if (o instanceof Function) {
         out = this.serialize(o.Ⲑid ?? o.name, cfg, indentLevel);
       } else {

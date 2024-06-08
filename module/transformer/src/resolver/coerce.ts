@@ -50,8 +50,7 @@ export class CoerceUtil {
     switch (type) {
       case Date: {
         const res = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          new Date(parseInt(input as string, 10)) : new Date(input as Date);
+          new Date(parseInt(`${input}`, 10)) : new Date(`${input}`);
         if (strict && Number.isNaN(res.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
         }

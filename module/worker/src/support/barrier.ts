@@ -3,8 +3,7 @@ import { TimeSpan, Util } from '@travetto/runtime';
 import { Timeout } from './timeout';
 
 function canCancel(o: unknown): o is { cancel(): unknown } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && 'cancel' in (o as object);
+  return !!o && (typeof o === 'object') && 'cancel' in o;
 }
 
 /**
