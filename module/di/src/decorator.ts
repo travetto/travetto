@@ -30,11 +30,11 @@ function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Par
  */
 export function Injectable(first?: Partial<InjectableConfig> | symbol, ...args: (Partial<InjectableConfig> | undefined)[]) {
   return <T extends Class>(target: T): T => {
-    const config = collapseConfig<Partial<InjectableConfig>>(first, ...args);
-
-    config.class = target;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    DependencyRegistry.registerClass(target, config as InjectableConfig);
+    const config = {
+      ...collapseConfig<Partial<InjectableConfig>>(first, ...args),
+      class: target
+    };
+    DependencyRegistry.registerClass(target, config);
     return target;
   };
 }
@@ -60,7 +60,7 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
 
       DependencyRegistry.registerProperty(
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        (target as ClassInstance).constructor, propertyKey as string, config as Dependency
+        (target as ClassInstance).constructor, propertyKey!, config as Dependency
       );
     }
   };

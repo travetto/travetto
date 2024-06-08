@@ -42,12 +42,10 @@ export class ResponseCore implements Partial<Response> {
   redirect(this: Response & ResponseCore, path: string): void;
   redirect(this: Response & ResponseCore, pathOrCode: number | string, path?: string): void {
     let code = 302;
-    if (path) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      code = pathOrCode as number;
+    if (typeof pathOrCode === 'number') {
+      code = pathOrCode;
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      path = pathOrCode as string;
+      path = pathOrCode;
     }
     this.status(code);
     this.location(path!);
