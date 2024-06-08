@@ -44,7 +44,7 @@ export class CompilerWatcher {
       ignores = ['node_modules/**'];
     }
 
-    // Disable exclusions until parcel watcher fixes itself
+    // TODO: Fix once node/parcel sort this out
     return os.platform() === 'linux' ? [] : [
       ...ignores,
       '.git', '**/.git',
