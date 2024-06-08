@@ -17,15 +17,15 @@ export class InjectableTransformer {
   static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.SetAccessorDeclaration | ts.PropertyDeclaration): ts.Expression[] {
     const existing = state.findDecorator(this, param, 'Inject', INJECTABLE_MOD);
 
-    if (!existing || ts.isParameter(param)) {
+    if (!(existing || ts.isParameter(param))) {
       return [];
     }
 
-    if (!ts.isCallExpression(existing.expression)) {
-      return [];
-    }
+    const args: ts.Expression[] = [];
 
-    const args: ts.Expression[] = [...(existing.expression.arguments ?? [])];
+    if (existing && ts.isCallExpression(existing.expression)) {
+      args.push(...existing.expression.arguments);
+    }
 
     const payload: { target?: unknown, qualifier?: unknown, optional?: boolean } = {};
 
@@ -142,10 +142,6 @@ export class InjectableTransformer {
       return node;
     }
 
-    if (!ts.isClassDeclaration(node.parent)) {
-      return node;
-    }
-
     const dec = dm?.dec;
 
     // Extract config
@@ -154,7 +150,8 @@ export class InjectableTransformer {
     // Read target from config or resolve
     const config: { dependencies: unknown[], target?: unknown, qualifier?: unknown, src?: unknown } = {
       dependencies,
-      src: node.parent.name,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      src: (node.parent as ts.ClassDeclaration).name,
     };
     let ret = state.resolveReturnType(node);
     if (ret.key === 'literal' && ret.ctor === Promise && ret.typeArguments) {
