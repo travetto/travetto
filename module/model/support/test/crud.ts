@@ -56,7 +56,7 @@ class User2 {
 class Dated {
   id: string;
 
-  @PersistValue(v => v ??= new Date())
+  @PersistValue(v => v ?? new Date(), 'full')
   @Required(false)
   createdDate: Date;
 
@@ -217,7 +217,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   }
 
   @Test('verify prepersist on create/update')
-  async tetPrePersist() {
+  async testPrePersist() {
     const service = await this.service;
     const res = await service.create(Dated, Dated.from({}));
     const created = res.createdDate;

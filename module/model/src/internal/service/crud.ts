@@ -8,7 +8,7 @@ import { ModelIdSource, ModelType, OptionalId } from '../../types/model';
 import { NotFoundError } from '../../error/not-found';
 import { ExistsError } from '../../error/exists';
 import { SubTypeNotSupportedError } from '../../error/invalid-sub-type';
-import { DataHandler } from '../../registry/types';
+import { DataHandler, PrePersistScope } from '../../registry/types';
 
 export type ModelCrudProvider = {
   idSource: ModelIdSource;
@@ -72,7 +72,7 @@ export class ModelCrudUtil {
    * @param cls Type to store for
    * @param item Item to store
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<OptionalId<T>>, provider: ModelCrudProvider): Promise<T> {
+  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<OptionalId<T>>, provider: ModelCrudProvider, scope: PrePersistScope = 'all'): Promise<T> {
     if (!item.id) {
       item.id = provider.idSource.create();
     }
@@ -88,7 +88,7 @@ export class ModelCrudUtil {
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
 
-    item = await this.prePersist(cls, item);
+    item = await this.prePersist(cls, item, scope);
 
     let errors: ValidationError[] = [];
     try {
@@ -137,7 +137,7 @@ export class ModelCrudUtil {
 
     item = Object.assign(existing, item);
 
-    item = await this.prePersist(cls, item);
+    item = await this.prePersist(cls, item, 'partial');
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return item as T;
@@ -155,11 +155,14 @@ export class ModelCrudUtil {
   /**
    * Pre persist behavior
    */
-  static async prePersist<T>(cls: Class<T>, item: T): Promise<T> {
+  static async prePersist<T>(cls: Class<T>, item: T, scope: PrePersistScope): Promise<T> {
     const config = ModelRegistry.get(cls);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    for (const handler of (config.prePersist ?? []) as unknown as DataHandler<T>[]) {
-      item = await handler(item) ?? item;
+    for (const state of (config.prePersist ?? [])) {
+      if (state.scope === scope || scope === 'all' || state.scope === 'all') {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const handler = state.handler as unknown as DataHandler<T>;
+        item = await handler(item) ?? item;
+      }
     }
     if (typeof item === 'object' && item && 'prePersist' in item && typeof item['prePersist'] === 'function') {
       item = await item.prePersist() ?? item;

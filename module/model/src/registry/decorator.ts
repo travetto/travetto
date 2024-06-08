@@ -3,7 +3,7 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelType } from '../types/model';
 import { ModelRegistry } from './model';
-import { DataHandler, IndexConfig, ModelOptions } from './types';
+import { DataHandler, IndexConfig, ModelOptions, PrePersistScope } from './types';
 
 /**
  * Model decorator, extends `@Schema`
@@ -45,27 +45,33 @@ export function ExpiresAt() {
 /**
  * Model class decorator for pre-persist behavior
  */
-export function PrePersist<T>(handler: DataHandler<T>) {
+export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 'all') {
   return function (tgt: Class<T>): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    ModelRegistry.registerDataHandlers(tgt, { prePersist: [handler as DataHandler] });
+    ModelRegistry.registerDataHandlers(tgt, {
+      prePersist: [{
+        scope,
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        handler: handler as DataHandler
+      }]
+    });
   };
 }
 
 /**
  * Model field decorator for pre-persist value setting
  */
-export function PersistValue<T>(handler: (curr: T | undefined) => T) {
+export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(tgt: C, prop: K): void {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     ModelRegistry.registerDataHandlers(tgt.constructor as Class<C>, {
-      prePersist: [
-        (inst): void => {
+      prePersist: [{
+        scope,
+        handler: (inst): void => {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const cInst = (inst as unknown as Record<K, T>);
           cInst[prop] = handler(cInst[prop]);
         }
-      ]
+      }]
     });
   };
 }

@@ -23,6 +23,8 @@ type IndexClauseRaw<T> = {
 
 export type DataHandler<T = unknown> = (inst: T) => (Promise<T | void> | T | void);
 
+export type PrePersistScope = 'full' | 'partial' | 'all';
+
 /**
  * Model options
  */
@@ -62,7 +64,7 @@ export class ModelOptions<T extends ModelType = ModelType> {
   /**
    * Pre-persist handlers
    */
-  prePersist?: DataHandler<unknown>[];
+  prePersist?: { scope: PrePersistScope, handler: DataHandler<unknown> }[];
   /**
    * Post-load handlers
    */
