@@ -116,7 +116,7 @@ export class AssetUtil {
       const hasher = crypto.createHash('sha256').setEncoding('hex');
       const str = Readable.fromWeb(blob.stream());
       await pipeline(str, hasher);
-      metadata.hash ??= hasher.read().toString();
+      metadata.hash = hasher.read().toString();
     }
 
     const hash = metadata.hash!;
