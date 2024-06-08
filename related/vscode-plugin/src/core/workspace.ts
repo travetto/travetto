@@ -86,8 +86,7 @@ export class Workspace {
 
   /** See if an entity is an editor */
   static isEditor(o: unknown): o is vscode.TextEditor {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return !!o && 'document' in (o as object);
+    return !!o && typeof o === 'object' && 'document' in o;
   }
 
   /** Get the editor for a doc */

@@ -1,4 +1,4 @@
-import { ObjectUtil } from '@travetto/runtime';
+import { ObjectUtil, TypedObject } from '@travetto/base';
 
 type SerializableType = (Error & { stack: SerializableType }) | RegExp | Function | Set<unknown> | Map<string, unknown> | number | boolean | null | string | object;
 type SerializeConfig = {
@@ -111,8 +111,7 @@ export class Serializer {
       }
     } else if (o !== undefined) {
       const fin = o;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const keys = Object.keys(fin) as (keyof typeof fin)[];
+      const keys = TypedObject.keys(fin);
       if (keys.length) {
         out = keys
           .filter(x => fin[x] !== undefined)
