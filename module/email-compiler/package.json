@@ -36,7 +36,7 @@
     "html-entities": "^2.5.2",
     "inline-css": "^4.0.2",
     "purgecss": "^6.0.0",
-    "sass": "^1.77.2"
+    "sass": "^1.77.4"
   },
   "peerDependencies": {
     "@travetto/cli": "^4.1.0"
