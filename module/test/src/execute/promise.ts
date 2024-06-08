@@ -42,8 +42,7 @@ export class PromiseCapture {
    */
   static start(): void {
     this.pending = [];
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    global.Promise = Wrapped as unknown as typeof Promise;
+    Object.assign(global, { Promise: Wrapped });
   }
 
   /**

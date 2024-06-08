@@ -3,8 +3,7 @@ import { TimeSpan, Util } from '@travetto/base';
 import { Timeout } from './timeout';
 
 function canCancel(o: unknown): o is { cancel(): unknown } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && 'cancel' in (o as object);
+  return !!o && (typeof o === 'object') && 'cancel' in o;
 }
 
 /**
@@ -14,8 +13,8 @@ export class Barrier {
   /**
    * Listen for an unhandled event, as a promise
    */
-  static listenForUnhandled(): Promise<never> & { cancel: () => void } {
-    const uncaught = Util.resolvablePromise<never>();
+  static listenForUnhandled(): Promise<void> & { cancel: () => void } {
+    const uncaught = Util.resolvablePromise<void>();
     const uncaughtWithCancel: typeof uncaught & { cancel?: () => void } = uncaught;
     const onError = (err: Error): void => { Util.queueMacroTask().then(() => uncaught.reject(err)); };
     process.on('unhandledRejection', onError).on('uncaughtException', onError);
@@ -24,12 +23,11 @@ export class Barrier {
     };
     uncaughtWithCancel.cancel = (): void => {
       cancel(); // Remove the handler
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      uncaughtWithCancel.resolve(undefined as never); // Close the promise
+      uncaughtWithCancel.resolve(); // Close the promise
     };
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return uncaughtWithCancel as (Promise<never> & { cancel: () => void });
+    return uncaughtWithCancel as Required<typeof uncaughtWithCancel>;
   }
 
   #support: string[] = [];

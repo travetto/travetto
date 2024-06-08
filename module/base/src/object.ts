@@ -13,7 +13,7 @@ export class ObjectUtil {
    * Has to JSON
    * @param o Object to check
    */
-  static hasToJSON = (o: unknown): o is { toJSON(): unknown } =>
+  static hasToJSON = <T = unknown>(o: unknown): o is { toJSON(): T } =>
     !!o && (typeof o === 'object' || typeof o === 'function') && 'toJSON' in o;
 
   /**

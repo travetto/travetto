@@ -37,21 +37,12 @@ export class NodemailerTransport implements MailTransport {
 
     mail = this.#forceContentToAlternative(mail);
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const res = await this.#transport.sendMail(mail) as {
-      messageId?: string;
-      envelope?: Record<string, string>;
-      accepted?: string[];
-      rejected?: string[];
-      pending?: string[];
-      response?: string;
-    };
+    const res: S & { rejected?: unknown[] } = await this.#transport.sendMail(mail);
 
     if (res.rejected?.length) {
       console.error('Unable to send emails', { recipientCount: res.rejected?.length });
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return res as S;
+    return res;
   }
 }

@@ -127,8 +127,7 @@ export class TapEmitter implements TestConsumer {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        this.log(this.#enhancer.failure(ObjectUtil.hasToJSON(err) ? err.toJSON() as string : `${err}`));
+        this.log(this.#enhancer.failure(ObjectUtil.hasToJSON<string>(err) ? err.toJSON() : `${err}`));
       }
     }
 
