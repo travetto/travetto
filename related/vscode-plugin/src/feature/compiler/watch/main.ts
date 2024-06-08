@@ -97,8 +97,8 @@ export class CompilerWatchFeature extends BaseFeature {
   async #compilerState(): Promise<CompilerStateType | undefined> {
     const { stdout } = await ExecUtil.getResult(this.run('info'));
     try {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return JSON.parse(stdout).state as CompilerStateType;
+      const result: { state: CompilerStateType } = JSON.parse(stdout);
+      return result.state;
     } catch { }
   }
 

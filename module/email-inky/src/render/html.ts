@@ -89,10 +89,9 @@ export const Html: RenderProvider<RenderContext> = {
     const colCount = sibs.length || 1;
 
     if (parent) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const pProps = parent?.props as { columnVisited: boolean };
-      if (!pProps.columnVisited) {
-        pProps.columnVisited = true;
+      const elParent: (typeof parent) & { columnVisited?: boolean } = parent;
+      if (!elParent.columnVisited) {
+        elParent.columnVisited = true;
         if (sibs.length) {
           sibs[0].props.className = classStr(sibs[0].props.className ?? '', 'first');
           sibs[sibs.length - 1].props.className = classStr(sibs[sibs.length - 1].props.className ?? '', 'last');

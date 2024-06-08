@@ -1,4 +1,4 @@
-import busboy, { type BusboyHeaders } from '@fastify/busboy';
+import busboy from '@fastify/busboy';
 
 import { Asset } from '@travetto/asset';
 import { Inject, Injectable } from '@travetto/di';
@@ -54,8 +54,10 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
 
     console.log('Starting multipart upload', req.header('content-length'));
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const uploader = busboy({ headers: req.headers as BusboyHeaders, limits: { fileSize: largestMax } })
+    const uploader = busboy({
+      headers: req.headers as any,
+      limits: { fileSize: largestMax }
+    })
       .on('file', (field, stream, filename) =>
         uploads.push(
           AssetRestUtil.writeToAsset(stream, filename, config.files![field]?.maxSize ?? largestMax)

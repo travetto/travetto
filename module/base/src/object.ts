@@ -13,9 +13,8 @@ export class ObjectUtil {
    * Has to JSON
    * @param o Object to check
    */
-  static hasToJSON = (o: unknown): o is { toJSON(): unknown } =>
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    !!o && 'toJSON' in (o as object);
+  static hasToJSON = <T = unknown>(o: unknown): o is { toJSON(): T } =>
+    !!o && (typeof o === 'object' || typeof o === 'function') && 'toJSON' in o;
 
   /**
    * Is a value of primitive type

@@ -21,9 +21,11 @@ export class InjectableTransformer {
       return [];
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const callExpr = existing?.expression as ts.CallExpression;
-    const args: ts.Expression[] = [...(callExpr?.arguments ?? [])];
+    const args: ts.Expression[] = [];
+
+    if (existing && ts.isCallExpression(existing.expression)) {
+      args.push(...existing.expression.arguments);
+    }
 
     const payload: { target?: unknown, qualifier?: unknown, optional?: boolean } = {};
 

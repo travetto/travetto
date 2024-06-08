@@ -107,8 +107,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * Find parent class for a given class object
    */
   getParentClass(cls: Class): Class | null {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const parent = Object.getPrototypeOf(cls) as Class;
+    const parent: Class = Object.getPrototypeOf(cls);
     return parent.name && parent !== Object ? parent : null;
   }
 

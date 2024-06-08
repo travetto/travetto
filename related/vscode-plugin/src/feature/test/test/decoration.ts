@@ -175,8 +175,7 @@ export class Decorations {
   static buildAssertion(assertion: Assertion): vscode.DecorationOptions {
     let out = this.line(assertion.line);
     if (assertion.error) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { suffix, markdown } = this.buildErrorHover(assertion as ErrorHoverAssertion);
+      const { suffix, markdown } = this.buildErrorHover(assertion);
 
       out = {
         ...out,
@@ -205,11 +204,10 @@ export class Decorations {
    * @param test
    */
   static buildTest(test: TestResult | TestConfig): vscode.DecorationOptions {
-    let err: ErrorHoverAssertion | undefined;
+    let err: ErrorHoverAssertion | Assertion | undefined;
     if ('error' in test) {
       const tt = test;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      err = ((tt.assertions || []).find(x => !!x.error) as ErrorHoverAssertion) ||
+      err = (tt.assertions || []).find(x => !!x.error) ||
         (tt.error && { error: tt.error, message: tt.error.message });
     }
     if (err) {
