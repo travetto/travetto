@@ -1,6 +1,6 @@
 import { Principal } from '@travetto/auth';
 import { AuthService, PrincipalEncoder } from '@travetto/auth-rest';
-import { AppError, Env, TimeUtil } from '@travetto/base';
+import { AppError, Env, TimeSpan, TimeUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { FilterContext } from '@travetto/rest';
@@ -14,7 +14,7 @@ export class RestJWTConfig {
   cookie = 'trv.auth';
   signingKey?: string;
   headerPrefix = 'Bearer';
-  maxAge: string | number = '1h';
+  maxAge: TimeSpan | number = '1h';
   rollingRenew: boolean = false;
 
   @Ignore()
@@ -29,8 +29,7 @@ export class RestJWTConfig {
   }
 
   postConstruct(): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.maxAgeMs = typeof this.maxAge === 'string' ? TimeUtil.timeToMs(this.maxAge as '1y') : this.maxAge;
+    this.maxAgeMs = TimeUtil.timeToMs(this.maxAge);
 
     if (!this.signingKey) {
       if (Env.production) {
