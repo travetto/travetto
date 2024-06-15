@@ -70,6 +70,14 @@ export class SerializeUtil {
   }
 
   /**
+   * Primitive json
+   */
+  static serializePrimitive(res: Response, output: unknown): void {
+    this.setContentTypeIfUndefined(res, 'application/json');
+    res.send(JSON.stringify(output));
+  }
+
+  /**
    * Serialize text
    */
   static serializeText(res: Response, output: string): void {
@@ -121,19 +129,27 @@ export class SerializeUtil {
    */
   static serializeStandard(req: Request, res: Response, output: unknown): void | Promise<void> {
     this.setHeaders(res, res[HeadersAddedⲐ]);
-
-    if (!output) {
-      return this.serializeEmpty(req, res);
-    } else if (typeof output === 'string') {
-      return this.serializeText(res, output);
-    } else if (Buffer.isBuffer(output)) {
-      return this.serializeBuffer(res, output);
-    } else if (this.isStream(output)) {
-      return this.serializeStream(res, output);
-    } else if (output instanceof Error) {
-      return this.serializeError(res, output);
-    } else {
-      return this.serializeJSON(req, res, output);
+    switch (typeof output) {
+      case 'undefined': return this.serializeEmpty(req, res);
+      case 'string': return this.serializeText(res, output);
+      case 'number':
+      case 'boolean':
+      case 'bigint': return this.serializePrimitive(res, output);
+      case 'function':
+      case 'object':
+      default: {
+        if (!output) {
+          return this.serializeEmpty(req, res);
+        } else if (Buffer.isBuffer(output)) {
+          return this.serializeBuffer(res, output);
+        } else if (this.isStream(output)) {
+          return this.serializeStream(res, output);
+        } else if (output instanceof Error) {
+          return this.serializeError(res, output);
+        } else {
+          return this.serializeJSON(req, res, output);
+        }
+      }
     }
   }
 }
