@@ -1,4 +1,3 @@
-import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import timers from 'node:timers/promises';
 import { Readable } from 'node:stream';
