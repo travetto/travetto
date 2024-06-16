@@ -5,7 +5,7 @@ import stream, { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { path } from '@travetto/manifest';
-import { StreamUtil, AppError } from '@travetto/base';
+import { AppError } from '@travetto/base';
 
 import { LocalFile } from './file';
 
@@ -60,7 +60,15 @@ export class RestUploadUtil {
     let type = metadata.contentType;
     if (!type) {
       const { default: fileType } = await import('file-type');
-      const buffer = await StreamUtil.readChunk(file, 4100);
+      let buffer: Buffer;
+      const fd = await fs.open(file, 'r');
+      try {
+        buffer = Buffer.alloc(4100);
+        await fd.read(buffer, 0, 4100, 0);
+      } finally {
+        try { fd.close(); } catch { }
+      }
+
       const matched = await fileType.fromBuffer(buffer);
       if (matched?.mime === 'video/mp4' && file.endsWith('.m4a')) {
         type = 'audio/mpeg';
