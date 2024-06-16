@@ -153,8 +153,6 @@ export class AssetUtil {
    * Compute hash from a url
    */
   static async hashUrl(url: string, byteLimit = -1): Promise<string> {
-    const hasher = crypto.createHash('sha256').setEncoding('hex');
-    const finalData = await StreamUtil.fetchBytes(url, byteLimit);
-    return hasher.update(finalData).end().read().toString();
+    return this.computeHash(await StreamUtil.fetchBytes(url, byteLimit));
   }
 }
