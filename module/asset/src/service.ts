@@ -49,7 +49,7 @@ export class AssetService {
    * Stores an asset with the optional ability to overwrite if the file is already found. If not
    * overwriting and file exists, an error will be thrown.
    *
-   * @param asset The blob to store
+   * @param blob The blob to store
    * @param meta The optional metadata for the blob
    * @param overwriteIfFound Overwrite the asset if found
    * @param strategy The naming strategy to use, defaults to the service's strategy if not provided

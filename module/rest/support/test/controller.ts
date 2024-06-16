@@ -1,4 +1,4 @@
-import { StreamUtil } from '@travetto/base';
+import { Readable } from 'node:stream';
 
 import { Controller } from '../../src/decorator/controller';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';
@@ -43,7 +43,7 @@ export class TestController {
   @Get('/stream')
   @SetHeaders({ 'Content-Type': 'text/plain' })
   getStream() {
-    return StreamUtil.bufferToStream(Buffer.from('hello'));
+    return Readable.from(Buffer.from('hello'));
   }
 
   @Get('/buffer')

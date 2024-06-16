@@ -1,4 +1,5 @@
 import { Readable } from 'node:stream';
+import { buffer as toBuffer } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
 import { S3, CompletedPart, type CreateMultipartUploadRequest } from '@aws-sdk/client-s3';
@@ -202,7 +203,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       const result = await this.client.getObject(this.#q(cls, id));
       if (result.Body) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const body = (await StreamUtil.streamToBuffer(result.Body as Readable)).toString('utf8');
+        const body = (await toBuffer(result.Body as Readable)).toString('utf8');
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
           const { expiresAt } = ModelRegistry.get(cls);
@@ -301,7 +302,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     if (meta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#q(STREAM_SPACE, location, {
-        Body: await StreamUtil.toBuffer(input),
+        Body: await toBuffer(input),
         ContentLength: meta.size,
         ...this.#getMetaBase(meta),
       }));
@@ -310,9 +311,12 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async getStream(location: string): Promise<Readable> {
+  async #getObject(location: string, range?: [number, number]): Promise<Readable> {
     // Read from s3
-    const res = await this.client.getObject(this.#q(STREAM_SPACE, location));
+    const res = await this.client.getObject(this.#q(STREAM_SPACE, location, range ? {
+      Range: `bytes=${range[0]}-${range[1]}`
+    } : {}));
+
     if (res.Body instanceof Buffer || // Buffer
       typeof res.Body === 'string' || // string
       res.Body && ('pipe' in res.Body) // Stream
@@ -322,22 +326,15 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }
 
+  async getStream(location: string): Promise<Readable> {
+    return this.#getObject(location);
+  }
+
   async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
     const meta = await this.describeStream(location);
-
     [start, end] = enforceRange(start, end, meta.size);
-
-    // Read from s3
-    const res = await this.client.getObject(this.#q(STREAM_SPACE, location, {
-      Range: `bytes=${start}-${end}`
-    }));
-    if (res.Body instanceof Buffer || // Buffer
-      typeof res.Body === 'string' || // string
-      res.Body && ('pipe' in res.Body) // Stream
-    ) {
-      return { stream: await StreamUtil.toStream(res.Body), range: [start, end] };
-    }
-    throw new AppError(`Unable to read type: ${typeof res.Body}`);
+    const stream = await this.#getObject(location, [start, end]);
+    return { stream, range: [start, end] };
   }
 
   async headStream(location: string): Promise<{ Metadata?: Partial<StreamMeta>, ContentLength?: number }> {

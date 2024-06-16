@@ -1,8 +1,10 @@
 import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
+import rl from 'node:readline/promises';
+
 import { render } from 'mustache';
 
-import { ExecUtil, StreamUtil } from '@travetto/base';
+import { ExecUtil, Util } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
 import { path, RuntimeIndex, NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
@@ -60,8 +62,10 @@ export class Context {
       env: { PATH: process.env.PATH },
     });
 
-    StreamUtil.onLine(proc.stderr,
-      line => term.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`).commit());
+    if (proc.stderr) {
+      Util.consumeAsyncItr(rl.createInterface(proc.stderr),
+        line => term.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line.trimEnd()}`).commit());
+    }
 
     return ExecUtil.getResult(proc).then(() => { });
   }

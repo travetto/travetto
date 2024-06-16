@@ -30,7 +30,7 @@ export class RestUploadUtil {
 
   static async #streamToFileWithMaxSize(inputStream: stream.Readable, outputFile: string, maxSize?: number): Promise<void> {
     if (!maxSize || maxSize < 0) {
-      return StreamUtil.writeToFile(inputStream, outputFile);
+      return pipeline(inputStream, createWriteStream(outputFile));
     }
 
     let read = 0;
@@ -87,7 +87,7 @@ export class RestUploadUtil {
     const [uniqueLocal, cleanup] = await this.#createTempFileWithCleanup(filename);
 
     try {
-      await this.#streamToFileWithMaxSize(await StreamUtil.toStream(data), uniqueLocal, maxSize);
+      await this.#streamToFileWithMaxSize(Buffer.isBuffer(data) ? Readable.from(data) : data, uniqueLocal, maxSize);
     } catch (err) {
       await cleanup();
       throw err;

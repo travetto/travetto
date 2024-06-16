@@ -1,12 +1,11 @@
 import fs from 'node:fs/promises';
-import { createReadStream } from 'node:fs';
-
+import { createReadStream, createWriteStream } from 'node:fs';
 import os from 'node:os';
-
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { path, RuntimeContext } from '@travetto/manifest';
-import { StreamUtil, Class, TimeSpan } from '@travetto/base';
+import { Class, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
@@ -112,7 +111,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const file = await this.#resolveName(cls, '.json', id);
 
     if (await exists(file)) {
-      const content = await StreamUtil.streamToBuffer(createReadStream(file));
+      const content = await fs.readFile(file);
       return this.checkExpiry(cls, await ModelCrudUtil.load(cls, content));
     }
 
@@ -180,7 +179,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
     const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
-      StreamUtil.writeToFile(input, file),
+      await pipeline(input, createWriteStream(file)),
       fs.writeFile(file.replace(BIN, META), JSON.stringify(meta), 'utf8')
     ]);
   }
@@ -202,7 +201,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   async describeStream(location: string): Promise<StreamMeta> {
     const file = await this.#find(STREAMS, META, location);
-    const content = await StreamUtil.streamToBuffer(createReadStream(file));
+    const content = await fs.readFile(file);
     const text: StreamMeta = JSON.parse(content.toString('utf8'));
     return text;
   }
