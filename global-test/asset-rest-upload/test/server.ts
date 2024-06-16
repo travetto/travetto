@@ -1,5 +1,4 @@
 import assert from 'node:assert';
-import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { ObjectUtil } from '@travetto/base';
 import { Controller, Get, Post, Request, Response } from '@travetto/rest';
@@ -91,7 +90,7 @@ export abstract class AssetRestUploadServerSuite extends BaseRestSuite {
 
   async getUploads(...files: FileUpload[]) {
     return Promise.all(files.map(async ({ name, type, resource: filename }) => {
-      const buffer = await toBuffer(await this.fixture.readStream(filename));
+      const buffer = await this.fixture.read(filename, true);
       return { name, type, filename, buffer, size: buffer.length };
     }));
   }
