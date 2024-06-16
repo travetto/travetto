@@ -40,7 +40,7 @@ export abstract class AssetServiceSuite {
     const pth = await this.fixture.resolve('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const outHashed = await service.upsert(file, false, new HashNamingStrategy());
-    const hash = await AssetUtil.hashFile(pth);
+    const hash = await AssetUtil.computeHash(pth);
     assert(outHashed.replace(/\//g, '').replace(/[.][^.]+$/, '') === hash);
   }
 

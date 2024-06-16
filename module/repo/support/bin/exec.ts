@@ -1,6 +1,7 @@
 import { ChildProcess } from 'node:child_process';
+import rl from 'node:readline/promises';
 
-import { ExecutionResult, Env, Util, ExecUtil, StreamUtil } from '@travetto/base';
+import { ExecutionResult, Env, Util, ExecUtil } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
@@ -71,11 +72,15 @@ export class RepoExecUtil {
           const proc = operation(mod);
           processes.set(mod, proc);
 
-          if (config.showStdout) {
-            StreamUtil.onLine(proc.stdout, line => stdoutTerm.writer.writeLine(`${prefix}${line}`).commit());
+          if (config.showStdout && proc.stdout) {
+            Util.consumeAsyncItr(rl.createInterface(proc.stdout), line =>
+              stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
+            );
           }
-          if (config.showStderr) {
-            StreamUtil.onLine(proc.stderr, line => stderrTerm.writer.writeLine(`${prefix}${line}`).commit());
+          if (config.showStderr && proc.stderr) {
+            Util.consumeAsyncItr(rl.createInterface(proc.stderr), line =>
+              stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
+            );
           }
 
           const result = await ExecUtil.getResult(proc, { catch: true });

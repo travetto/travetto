@@ -18,17 +18,21 @@ import { Asset } from './types';
 export class AssetUtil {
 
   /**
-   * Compute hash from a file location on disk
+   * Compute hash from a file location on disk or a blob
    */
-  static async hashFile(pth: string): Promise<string> {
+  static async computeHash(input: string | Blob | Buffer): Promise<string> {
     const hasher = crypto.createHash('sha256').setEncoding('hex');
-    const str = createReadStream(pth);
+    const str = typeof input === 'string' ?
+      createReadStream(input) :
+      Buffer.isBuffer(input) ?
+        Readable.from(input) :
+        Readable.fromWeb(input.stream());
     await pipeline(str, hasher);
     return hasher.read().toString();
   }
 
   /**
-   * Detect file type from location on disk
+   * Detect file type
    */
   static async detectFileType(input: string | Buffer | Readable): Promise<{ ext: string, mime: string } | undefined> {
     const { default: fileType } = await import('file-type');
@@ -46,7 +50,7 @@ export class AssetUtil {
    */
   static async ensureFileExtension(filePath: string): Promise<string> {
     const type = await this.resolveFileType(filePath);
-    const ext = getExtension(type);
+    const ext = this.getExtension(type);
     const baseName = path.basename(filePath, path.extname(filePath));
     const newFile = `${baseName}.${ext}`;
 
@@ -56,6 +60,14 @@ export class AssetUtil {
     }
 
     return filePath;
+  }
+
+  /**
+   * Get extension for a given content type
+   * @param contentType
+   */
+  static getExtension(contentType: string): string | undefined {
+    return getExtension(contentType)!;
   }
 
   /**
@@ -78,7 +90,7 @@ export class AssetUtil {
    */
   static async fileToAsset(file: string, metadata: Partial<StreamMeta> = {}): Promise<Asset> {
 
-    const hash = metadata.hash ?? await this.hashFile(file);
+    const hash = metadata.hash ?? await this.computeHash(file);
     const size = metadata.size ?? (await fs.stat(file)).size;
     const contentType = metadata.contentType ?? await this.resolveFileType(file);
     let filename = metadata.filename;
@@ -87,7 +99,7 @@ export class AssetUtil {
       filename = path.basename(file);
       const extName = path.extname(file);
       if (!extName) {
-        const ext = getExtension(contentType);
+        const ext = this.getExtension(contentType);
         if (ext) {
           filename = `${filename}.${ext}`;
         }
@@ -112,21 +124,14 @@ export class AssetUtil {
    */
   static async blobToAsset(blob: Blob, metadata: Partial<StreamMeta> = {}): Promise<Asset> {
 
-    if (!metadata.hash) {
-      const hasher = crypto.createHash('sha256').setEncoding('hex');
-      const str = Readable.fromWeb(blob.stream());
-      await pipeline(str, hasher);
-      metadata.hash = hasher.read().toString();
-    }
-
-    const hash = metadata.hash!;
+    const hash = metadata.hash ??= await this.computeHash(blob);
     const size = metadata.size ?? blob.size;
     const contentType = metadata.contentType ?? blob.type;
     let filename = metadata.filename;
 
     if (!filename) {
       filename = `unknown.${Date.now()}`;
-      const ext = getExtension(contentType);
+      const ext = this.getExtension(contentType);
       if (ext) {
         filename = `${filename}.${ext}`;
       }

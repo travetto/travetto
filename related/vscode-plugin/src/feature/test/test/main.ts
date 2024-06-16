@@ -1,8 +1,9 @@
 import vscode from 'vscode';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
+import rl from 'node:readline/promises';
 
 import { IndexedModule, ManifestModule, path } from '@travetto/manifest';
-import { Env, StreamUtil } from '@travetto/base';
+import { Env, Util } from '@travetto/base';
 import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
 
 import { Workspace } from '../../../core/workspace';
@@ -66,8 +67,12 @@ class TestRunnerFeature extends BaseFeature {
         this.#codeLensUpdated?.();
       });
 
-    StreamUtil.onLine(this.#server.stderr, (line) => this.log.debug(`> stderr > ${line}`));
-    StreamUtil.onLine(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line}`));
+    if (this.#server.stderr) {
+      Util.consumeAsyncItr(rl.createInterface(this.#server.stderr), (line) => this.log.debug(`> stderr > ${line.trimEnd()}`));
+    }
+    if (this.#server.stdout) {
+      Util.consumeAsyncItr(rl.createInterface(this.#server.stdout), (line) => this.log.debug(`> stdout > ${line.trimEnd()}`));
+    }
   }
 
   #getTestModule(file?: string): IndexedModule | ManifestModule | undefined {

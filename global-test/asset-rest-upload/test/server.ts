@@ -1,6 +1,7 @@
 import assert from 'node:assert';
+import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { ObjectUtil, StreamUtil } from '@travetto/base';
+import { ObjectUtil } from '@travetto/base';
 import { Controller, Get, Post, Request, Response } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
@@ -90,7 +91,7 @@ export abstract class AssetRestUploadServerSuite extends BaseRestSuite {
 
   async getUploads(...files: FileUpload[]) {
     return Promise.all(files.map(async ({ name, type, resource: filename }) => {
-      const buffer = await StreamUtil.streamToBuffer(await this.fixture.readStream(filename));
+      const buffer = await toBuffer(await this.fixture.readStream(filename));
       return { name, type, filename, buffer, size: buffer.length };
     }));
   }

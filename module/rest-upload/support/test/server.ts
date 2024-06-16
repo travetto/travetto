@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 import crypto from 'node:crypto';
 import { pipeline } from 'node:stream/promises';
+import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { StreamUtil } from '@travetto/base';
 import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
@@ -62,7 +62,7 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
 
   async getUploads(...files: FileUpload[]) {
     return Promise.all(files.map(async ({ name, type, resource: filename }) => {
-      const buffer = await StreamUtil.streamToBuffer(await this.fixture.readStream(filename));
+      const buffer = await toBuffer(await this.fixture.readStream(filename));
       return { name, type, filename, buffer, size: buffer.length };
     }));
   }

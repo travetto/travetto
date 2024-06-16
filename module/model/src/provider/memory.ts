@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
+import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { StreamUtil, Class, TimeSpan } from '@travetto/base';
+import { Class, TimeSpan } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -244,12 +245,12 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     const streams = this.#getStore(STREAMS);
     const metaContent = this.#getStore(STREAM_META);
     metaContent.set(location, Buffer.from(JSON.stringify(meta)));
-    streams.set(location, await StreamUtil.streamToBuffer(input));
+    streams.set(location, await toBuffer(input));
   }
 
   async getStream(location: string): Promise<Readable> {
     const streams = this.#find(STREAMS, location, 'notfound');
-    return StreamUtil.bufferToStream(streams.get(location)!);
+    return Readable.from(streams.get(location)!);
   }
 
   async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
@@ -258,7 +259,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
     [start, end] = enforceRange(start, end, buffer.length);
 
-    const stream = await StreamUtil.bufferToStream(buffer.subarray(start, end + 1));
+    const stream = await Readable.from(buffer.subarray(start, end + 1));
     return { stream, range: [start, end] };
   }
 

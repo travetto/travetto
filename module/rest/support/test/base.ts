@@ -1,7 +1,8 @@
 import { Readable } from 'node:stream';
+import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { RootRegistry } from '@travetto/registry';
-import { StreamUtil, AppError, ConcreteClass, Util } from '@travetto/base';
+import { AppError, ConcreteClass, Util } from '@travetto/base';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
@@ -114,7 +115,7 @@ export abstract class BaseRestSuite {
       } else if (typeof body === 'string') {
         buffer = Buffer.from(body);
       } else if ('stream' in body) {
-        buffer = await StreamUtil.toBuffer(body.stream as Readable);
+        buffer = await toBuffer(body.stream as Readable);
       } else {
         buffer = Buffer.from(JSON.stringify(body));
         cfg.headers['Content-Type'] = cfg.headers['Content-Type'] ?? 'application/json';
