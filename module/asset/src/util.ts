@@ -8,7 +8,7 @@ import { getExtension, getType } from 'mime';
 
 import { path } from '@travetto/manifest';
 import { StreamMeta } from '@travetto/model';
-import { StreamUtil } from '@travetto/base';
+import { Util } from '@travetto/base';
 
 import { Asset } from './types';
 
@@ -32,11 +32,40 @@ export class AssetUtil {
   }
 
   /**
+   * Read a chunk from a file
+   */
+  static async readChunk(input: string | Readable | Buffer, bytes: number): Promise<Buffer> {
+    if (Buffer.isBuffer(input)) {
+      return input.subarray(0, bytes);
+    } else if (typeof input === 'string') {
+      const fd = await fs.open(input, 'r');
+      try {
+        const buffer = Buffer.alloc(bytes);
+        await fd.read(buffer, 0, bytes, 0);
+        return buffer;
+      } finally {
+        try { fd.close(); } catch { }
+      }
+    } else {
+      const chunks: Buffer[] = [];
+      let size = 0;
+      for await (const chunk of input) {
+        const bChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        chunks.push(bChunk);
+        if ((size += bChunk.length) >= bytes) {
+          break;
+        }
+      }
+      return Buffer.concat(chunks).subarray(0, bytes);
+    }
+  }
+
+  /**
    * Detect file type
    */
   static async detectFileType(input: string | Buffer | Readable): Promise<{ ext: string, mime: string } | undefined> {
     const { default: fileType } = await import('file-type');
-    const buffer = await StreamUtil.readChunk(input, 4100);
+    const buffer = await this.readChunk(input, 4100);
     const matched = await fileType.fromBuffer(buffer);
     if (typeof input === 'string' && matched?.mime === 'video/mp4' && input.endsWith('.m4a')) {
       return { ext: '.m4a', mime: 'audio/mpeg' };
@@ -153,6 +182,6 @@ export class AssetUtil {
    * Compute hash from a url
    */
   static async hashUrl(url: string, byteLimit = -1): Promise<string> {
-    return this.computeHash(await StreamUtil.fetchBytes(url, byteLimit));
+    return this.computeHash(await Util.fetchBytes(url, byteLimit));
   }
 }

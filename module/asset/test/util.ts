@@ -82,4 +82,11 @@ export class UtilTest {
     assert(hashFull.length === 64);
     assert(hashFull === '4c6ab4f3fcd07005294391de6b7d83bca59397344f5897411ed5316e212e46c7');
   }
+
+  @Test()
+  async readChunk() {
+    const yml = await this.fixture.resolve('/asset.yml');
+    const chunk = await AssetUtil.readChunk(yml, 10);
+    assert(chunk.length === 10);
+  }
 }
