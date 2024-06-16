@@ -1,32 +1,12 @@
 import fs from 'node:fs/promises';
 import { Readable } from 'node:stream';
-import { ReadableStream as WebReadableStream } from 'node:stream/web';
 
 import { AppError } from './error';
-
-type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | WebReadableStream;
 
 /**
  * Utilities for managing streams/buffers/etc
  */
 export class StreamUtil {
-
-  /**
-   * Convert input source (file, buffer, readable, string) to a stream
-   * @param src The input to convert to a stream
-   */
-  static async toStream(src: All): Promise<Readable> {
-    if (typeof src === 'string') {
-      return Readable.from(src, { encoding: src.endsWith('=') ? 'base64' : 'utf8' });
-    } else if ('pipe' in src) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return src as Readable;
-    } else if ('getReader' in src) {
-      return Readable.fromWeb(src);
-    } else {
-      return Readable.from(src);
-    }
-  }
 
   /**
    * Read a chunk from a file

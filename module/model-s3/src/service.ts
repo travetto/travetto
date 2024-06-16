@@ -11,7 +11,7 @@ import {
   ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId, PartialStream
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { StreamUtil, Class, AppError } from '@travetto/base';
+import { Class, AppError } from '@travetto/base';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
@@ -317,11 +317,18 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       Range: `bytes=${range[0]}-${range[1]}`
     } : {}));
 
-    if (res.Body instanceof Buffer || // Buffer
-      typeof res.Body === 'string' || // string
-      res.Body && ('pipe' in res.Body) // Stream
-    ) {
-      return StreamUtil.toStream(res.Body);
+    if (!res.Body) {
+      throw new AppError('Unable to read type: undefined');
+    }
+
+    if (typeof res.Body === 'string') { // string
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return Readable.from(res.Body, { encoding: (res.Body as string).endsWith('=') ? 'base64' : 'utf8' });
+    } else if (res.Body instanceof Buffer) { // Buffer
+      return Readable.from(res.Body);
+    } else if ('pipe' in res.Body) { // Stream
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return res.Body as Readable;
     }
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }

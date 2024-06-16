@@ -122,9 +122,8 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
     The {StreamUtil} class provides basic stream utilities for use within the framework:
 
     <ul>
-      <li>{d.method('toBuffer(src: Readable | Buffer | string): Promise<Buffer>')} for converting a stream/buffer/filepath to a Buffer.</li>
-      <li>{d.method('toReadable(src: Readable | Buffer | string):Promise<Readable>')} for converting a stream/buffer/filepath to a Readable</li>
-      <li>{d.method('writeToFile(src: Readable, out: string):Promise<void>')} will stream a readable into a file path, and wait for completion.</li>
+      <li>{d.method('readChunk(input: string | Readable | Buffer, bytes: number): Promise<Buffer>')} for reading a chunk from a stream/buffer/filepath</li>
+      <li>{d.method('fetchBytes(url: string, byteLimit: number = -1): Promise<Buffer>')} for fetching bytes from a url</li>
     </ul>
   </c.Section>
 

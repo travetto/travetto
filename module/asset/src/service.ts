@@ -1,9 +1,8 @@
-import { PassThrough } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
 
 import { Inject, Injectable } from '@travetto/di';
 import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta, StreamResponse } from '@travetto/model';
 import { enforceRange } from '@travetto/model/src/internal/service/stream';
-import { StreamUtil } from '@travetto/base';
 
 import { Asset } from './types';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
@@ -88,7 +87,15 @@ export class AssetService {
       }
     }
 
-    const stream = await StreamUtil.toStream(source);
+    let stream: Readable;
+    if (typeof source === 'string') {
+      stream = Readable.from(source, { encoding: source.endsWith('=') ? 'base64' : 'utf8' });
+    } else if (Buffer.isBuffer(source)) {
+      stream = Readable.from(source);
+    } else {
+      stream = source;
+    }
+
     await this.#store.upsertStream(location, stream, asset);
     return location;
   }

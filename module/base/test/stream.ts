@@ -1,5 +1,4 @@
 import assert from 'node:assert';
-import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
@@ -9,13 +8,6 @@ import { StreamUtil } from '../src/stream';
 export class StreamUtilTest {
 
   fixture = new TestFixtures();
-
-  @Test()
-  async toStream() {
-    const stream = await StreamUtil.toStream('Hello World');
-    const text = (await toBuffer(stream)).toString('utf8');
-    assert(text === 'Hello World');
-  }
 
   @Test()
   async readChunk() {

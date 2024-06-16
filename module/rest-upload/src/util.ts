@@ -52,19 +52,6 @@ export class RestUploadUtil {
   }
 
   /**
-   * Detect file type from location on disk
-   */
-  static async detectFileType(input: string | Buffer | Readable): Promise<{ ext: string, mime: string } | undefined> {
-    const { default: fileType } = await import('file-type');
-    const buffer = await StreamUtil.readChunk(input, 4100);
-    const matched = await fileType.fromBuffer(buffer);
-    if (typeof input === 'string' && matched?.mime === 'video/mp4' && input.endsWith('.m4a')) {
-      return { ext: '.m4a', mime: 'audio/mpeg' };
-    }
-    return matched;
-  }
-
-  /**
    * File to blob
    * @param file
    * @param metadata
@@ -72,7 +59,12 @@ export class RestUploadUtil {
   static async fileToBlob(file: string, metadata: Partial<{ contentType?: string }> = {}): Promise<File> {
     let type = metadata.contentType;
     if (!type) {
-      type = (await this.detectFileType(file))?.mime;
+      const { default: fileType } = await import('file-type');
+      const buffer = await StreamUtil.readChunk(file, 4100);
+      const matched = await fileType.fromBuffer(buffer);
+      if (matched?.mime === 'video/mp4' && file.endsWith('.m4a')) {
+        type = 'audio/mpeg';
+      }
     }
     return new LocalFile(file, type);
   }
