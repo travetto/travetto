@@ -10,6 +10,7 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
 
   postResponseHandlers: PostResponseHandler<Response>[];
   preRequestHandlers: PreRequestHandler<RequestInit>[];
+  retriesOnConnectFailure: number = 0;
 
   constructor(cfg: IRemoteServiceConfig<RequestInit, Response> & {
     postResponseHandlers?: PostResponseHandler<Response>[];
@@ -18,6 +19,7 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
     super(cfg);
     this.postResponseHandlers = cfg.postResponseHandlers ?? [];
     this.preRequestHandlers = cfg.preRequestHandlers ?? [];
+    this.retriesOnConnectFailure = cfg.retriesOnConnectFailure ?? 0;
   }
 
   // Node/Browser handling of timeout registration
@@ -86,7 +88,27 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
         this.#registerTimeout(controller, req.timeout, setTimeout, clearTimeout);
       }
 
-      let resolved = await fetch(req.url, fetchInit);
+      let resolved: Response | undefined;
+      for (let i = 0; i <= this.retriesOnConnectFailure; i += 1) {
+        try {
+          resolved = await fetch(req.url, fetchInit);
+          break;
+        } catch (err) {
+          if (i < this.retriesOnConnectFailure) {
+            if (this.debug) {
+              console.debug('Retrying request on error:', req.url.pathname, err);
+            }
+            await new Promise(r => setTimeout(r, 1000)); // Wait 1s
+            continue;
+          } else {
+            throw err;
+          }
+        }
+      }
+
+      if (!resolved) {
+        throw new Error('Unable to connect');
+      }
 
       for (const fn of this.postResponseHandlers) {
         const computed = await fn(resolved);

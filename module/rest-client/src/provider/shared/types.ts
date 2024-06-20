@@ -42,6 +42,7 @@ export type IRemoteService<B, R> = {
   routePath: string;
   headers: Record<string, string>;
   consumeJSON: <T>(text: string) => T;
+  retriesOnConnectFailure?: number;
 };
 
 export abstract class BaseRemoteService<B, R> implements IRemoteService<B, R> {
