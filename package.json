@@ -12,6 +12,7 @@
   "license": "MIT",
   "scripts": {
     "prestart": "npm ci",
+    "pretest": "npx trv service start",
     "start": "trvc clean; trvc start ",
     "test": "trv test -f tap-streamed",
     "lint": "trv lint",
