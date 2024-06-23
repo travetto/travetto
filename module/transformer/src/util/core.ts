@@ -106,7 +106,7 @@ export class CoreUtil {
       factory.createCallExpression(
         name,
         undefined,
-        contents.filter((x?: ts.Expression): x is ts.Expression => !!x)
+        contents.filter(x => !!x)
       )
     );
   }

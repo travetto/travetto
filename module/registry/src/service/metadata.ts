@@ -93,7 +93,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * Trigger initial install, moves pending to finalized (active)
    */
   override initialInstall(): Class[] {
-    return Array.from(this.pending.values()).map(x => x.class).filter((x): x is Class => !!x);
+    return Array.from(this.pending.values()).map(x => x.class).filter(x => !!x);
   }
 
   /**

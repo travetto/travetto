@@ -272,7 +272,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     const paramNames = paramConfigs.map(x => x.sourceText ?? x.name!);
     const paramArr = JSON.stringify(paramNames).replaceAll(`"`, '').replace(/,/g, ', ');
 
-    imports.push(...[...this.endpointResponseWrapper].filter((x): x is Imp => typeof x !== 'string'));
+    imports.push(...[...this.endpointResponseWrapper].filter(x => typeof x !== 'string'));
     const opts: Imp = { name: 'RequestDefinition', file: './shared/types.ts', classId: '_common' };
 
     return {

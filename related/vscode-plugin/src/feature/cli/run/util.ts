@@ -169,7 +169,7 @@ export class CliRunUtil {
   static async makeChoice(title: string, choices: RunChoice[]): Promise<RunChoice | ResolvedRunChoice | undefined> {
     const items = choices
       .map(x => this.#buildQuickPickItem(x))
-      .filter((x): x is PickItem => !!x);
+      .filter(x => !!x);
 
     const res = await ParameterSelector.getObjectQuickPickList(title, items);
     let choice: RunChoice | undefined = res?.target;

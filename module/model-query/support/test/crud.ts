@@ -63,8 +63,8 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
     const promises = todo1v.map(x => svc.updateOneWithQuery(Todo, x, { where: { version: todo1.version } }));
 
     const results = await Promise.allSettled(promises);
-    const rejected = results.filter((x): x is PromiseRejectedResult => x.status === 'rejected');
-    const fulfilled = results.filter((x): x is PromiseFulfilledResult<Todo> => x.status === 'fulfilled');
+    const rejected = results.filter(x => x.status === 'rejected');
+    const fulfilled = results.filter(x => x.status === 'fulfilled');
 
     for (const el of rejected) {
       assert(el.reason instanceof NotFoundError);

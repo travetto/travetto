@@ -1,6 +1,6 @@
 import { Class, TypedObject, ObjectUtil } from '@travetto/base';
 import { SelectClause, SortClause } from '@travetto/model-query';
-import { ModelRegistry, ModelType } from '@travetto/model';
+import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, FieldConfig } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
@@ -173,7 +173,7 @@ export class SQLUtil {
   /**
    * Process a schema instance by visiting it synchronously.  This is synchronous to prevent concurrent calls from breaking
    */
-  static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T, handler: VisitHandler<unknown, VisitInstanceNode<unknown>>): void {
+  static visitSchemaInstance<T extends ModelType>(cls: Class<T>, instance: T | OptionalId<T>, handler: VisitHandler<unknown, VisitInstanceNode<unknown>>): void {
     const pathObj: unknown[] = [instance];
     this.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: (config) => {
@@ -334,7 +334,7 @@ export class SQLUtil {
   /**
    * Get insert statements for a given class, and its child tables
    */
-  static async getInserts<T extends ModelType>(cls: Class<T>, els: T[]): Promise<InsertWrapper[]> {
+  static async getInserts<T extends ModelType>(cls: Class<T>, els: (T | OptionalId<T>)[]): Promise<InsertWrapper[]> {
     const ins: Record<string, InsertWrapper> = {};
 
     const track = (stack: VisitStack[], value: unknown): void => {

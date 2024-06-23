@@ -210,7 +210,7 @@ export class CliParseUtil {
       inputs,
       all: out,
       unknown: out.filter(x => x.type === 'unknown').map(x => x.input),
-      flags: out.filter((x): x is ParsedInput & { type: 'flag' } => x.type === 'flag')
+      flags: out.filter(x => x.type === 'flag')
     };
   }
 }

@@ -25,7 +25,7 @@
     "directory": "module/model-s3"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.592.0",
+    "@aws-sdk/client-s3": "^3.600.0",
     "@aws-sdk/credential-provider-ini": "^3.592.0",
     "@travetto/config": "^4.1.1",
     "@travetto/model": "^4.1.3"

@@ -38,7 +38,7 @@ export class LogFeature extends BaseFeature {
         imp = imp.replace(/([.]d)?[.][tj]sx?$/, '');
         const search = [imp];
         if (!imp.includes('.')) {
-          search.push(...SUFFIXES.map(x => `${imp}.${x}`))
+          search.push(...SUFFIXES.map(x => `${imp}.${x}`));
         } else {
           search.push(imp);
         }

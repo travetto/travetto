@@ -223,8 +223,9 @@ export class SQLModelService implements
       new Map([...existingUpsertedIds.entries()].map(([k, v]) => [v, k]))
     );
 
-    const get = (k: keyof BulkOp<T>): T[] =>
-      operations.map(x => x[k]).filter((x): x is T => !!x);
+    const get = <K extends keyof BulkOp<T>>(k: K): Required<BulkOp<T>>[K][] =>
+      operations.map(x => x[k]).filter((x): x is Required<BulkOp<T>>[K] => !!x);
+
     const getStatements = async (k: keyof BulkOp<T>): Promise<InsertWrapper[]> =>
       (await SQLUtil.getInserts(cls, get(k))).filter(x => !!x.records.length);
 

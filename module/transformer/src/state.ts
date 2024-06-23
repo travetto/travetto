@@ -167,7 +167,7 @@ export class TransformerState implements State {
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
     return ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? [])
       .map(dec => this.getDecoratorMeta(dec))
-      .filter((x): x is DecoratorMeta => !!x) : [];
+      .filter(x => !!x) : [];
   }
 
   /**

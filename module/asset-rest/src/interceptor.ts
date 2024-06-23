@@ -18,7 +18,7 @@ type AssetMap = Record<string, Asset>;
 export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
 
   static getLargestFileMax(config: Partial<RestAssetConfig>): number | undefined {
-    const fileMaxes = [...Object.values(config.files!).map(x => x.maxSize ?? config.maxSize)].filter((x): x is number => x !== undefined);
+    const fileMaxes = [...Object.values(config.files!).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
     return fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
   }
 

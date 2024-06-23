@@ -64,7 +64,7 @@ export class ConfigurationService {
 
     const specs = possible
       .flat()
-      .filter((x): x is Exclude<typeof x, undefined> => !!x)
+      .filter(x => !!x)
       .sort((a, b) => a.priority - b.priority);
 
     for (const spec of specs) {

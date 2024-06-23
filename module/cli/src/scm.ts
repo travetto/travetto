@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 
 import { ExecUtil } from '@travetto/base';
-import { IndexedFile, IndexedModule, RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';
+import { IndexedModule, RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';
 
 export class CliScmUtil {
   /**
@@ -68,9 +68,9 @@ export class CliScmUtil {
     const files = await this.findChangedFiles(fromHash, toHash);
     const mods = files
       .map(x => RuntimeIndex.getFromSource(x))
-      .filter((x): x is IndexedFile => !!x)
+      .filter(x => !!x)
       .map(x => RuntimeIndex.getModule(x.module))
-      .filter((x): x is IndexedModule => !!x);
+      .filter(x => !!x);
 
     return [...new Set(mods)]
       .sort((a, b) => a.name.localeCompare(b.name));
