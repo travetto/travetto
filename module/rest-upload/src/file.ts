@@ -22,4 +22,8 @@ export class LocalFile extends File {
   arrayBuffer(): Promise<ArrayBuffer> {
     return fs.readFile(this.name);
   }
+
+  cleanup(): Promise<void> {
+    return fs.rm(this.name, { force: true, recursive: true }).catch(() => { });
+  }
 }

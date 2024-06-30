@@ -5,27 +5,17 @@ import stream, { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { path } from '@travetto/manifest';
-import { AppError } from '@travetto/base';
+import { AppError, Util } from '@travetto/base';
 
 import { LocalFile } from './file';
-
-export type WithCleanup<T> = [T, () => Promise<void>];
 
 /**
  * General support for handling file uploads/downloads
  */
 export class RestUploadUtil {
 
-  static async #createTempFileWithCleanup(filename: string): Promise<WithCleanup<string>> {
-    // TODO: Should use file abstraction
-    const rnd = Math.trunc(Math.random() * 1000).toString(36);
-    const uniqueDir = path.resolve(os.tmpdir(), `upload_${Date.now()}_${rnd}`);
-    await fs.mkdir(uniqueDir, { recursive: true });
-    const uniqueLocal = path.resolve(uniqueDir, path.basename(filename));
-
-    const cleanup = (): Promise<void> => fs.rm(uniqueDir, { force: true, recursive: true }).catch(() => { });
-
-    return [uniqueLocal, cleanup];
+  static async cleanupFiles(fileMap: Record<string, File>): Promise<void> {
+    await Promise.all(Object.values(fileMap ?? {}).filter(x => x instanceof LocalFile).map(x => x.cleanup()));
   }
 
   static async #streamToFileWithMaxSize(inputStream: stream.Readable, outputFile: string, maxSize?: number): Promise<void> {
@@ -56,7 +46,7 @@ export class RestUploadUtil {
    * @param file
    * @param metadata
    */
-  static async fileToBlob(file: string, metadata: Partial<{ contentType?: string }> = {}): Promise<File> {
+  static async fileToBlob(file: string, metadata: Partial<{ contentType?: string }> = {}): Promise<LocalFile> {
     let type = metadata.contentType;
     if (!type) {
       const { default: fileType } = await import('file-type');
@@ -69,8 +59,8 @@ export class RestUploadUtil {
         try { fd.close(); } catch { }
       }
 
-      const matched = await fileType.fromBuffer(buffer);
-      if (matched?.mime === 'video/mp4' && file.endsWith('.m4a')) {
+      type = (await fileType.fromBuffer(buffer))?.mime;
+      if (type === 'video/mp4' && file.endsWith('.m4a')) {
         type = 'audio/mpeg';
       }
     }
@@ -78,22 +68,23 @@ export class RestUploadUtil {
   }
 
   /**
-   * Write data to file, enforcing max size if needed
+   * Convert stream or buffer to a file, enforcing max size if needed
    * @param data
    * @param filename
    * @param maxSize
    */
-  static async writeToBlob(data: stream.Readable | Buffer, filename: string, maxSize?: number): Promise<WithCleanup<File>> {
-    const [uniqueLocal, cleanup] = await this.#createTempFileWithCleanup(filename);
+  static async convertToBlob(data: stream.Readable | Buffer, filename: string, maxSize?: number): Promise<LocalFile> {
+    const uniqueDir = path.resolve(os.tmpdir(), `upload_${Date.now()}_${Util.uuid(5)}`);
+    await fs.mkdir(uniqueDir, { recursive: true });
+    const uniqueLocal = path.resolve(uniqueDir, path.basename(filename));
 
     try {
       await this.#streamToFileWithMaxSize(Buffer.isBuffer(data) ? Readable.from(data) : data, uniqueLocal, maxSize);
     } catch (err) {
-      await cleanup();
+      await fs.rm(uniqueLocal, { force: true });
       throw err;
     }
 
-    const file = await this.fileToBlob(uniqueLocal);
-    return [file, cleanup];
+    return await this.fileToBlob(uniqueLocal);
   }
 }
