@@ -215,6 +215,10 @@ export const MOD_MAPPING = {
     name: '@travetto/rest-session', folder: '@travetto/rest-session', displayName: 'REST Session',
     description: 'Session provider for the travetto rest module.'
   },
+  RestUpload: {
+    name: '@travetto/rest-upload', folder: '@travetto/rest-upload', displayName: 'Rest Upload Support',
+    description: 'Provides integration between the travetto asset and rest module.'
+  },
   Scaffold: {
     name: '@travetto/scaffold', folder: '@travetto/scaffold', displayName: 'App Scaffold',
     description: 'App Scaffold for the Travetto framework'
