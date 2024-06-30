@@ -299,26 +299,20 @@ export class MongoModelService implements
     await pipeline(input, writeStream);
   }
 
-  async getStream(location: string): Promise<Readable> {
-    await this.describeStream(location);
+  async getStream(location: string, start?: number, end?: number): Promise<Readable> {
+    const meta = await this.describeStream(location);
+    let options: { start: number, end: number } | undefined = undefined;
 
-    const res = await this.#bucket.openDownloadStreamByName(location);
+    if (start || end) {
+      [start, end] = enforceRange(start ?? 0, end, meta.size);
+      options = { start, end: end + 1 };
+    }
+
+    const res = await this.#bucket.openDownloadStreamByName(location, options);
     if (!res) {
       throw new NotFoundError(STREAMS, location);
     }
     return res;
-  }
-
-  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
-    const meta = await this.describeStream(location);
-
-    [start, end] = enforceRange(start, end, meta.size);
-
-    const res = await this.#bucket.openDownloadStreamByName(location, { start, end: end + 1 });
-    if (!res) {
-      throw new NotFoundError(STREAMS, location);
-    }
-    return { stream: res, range: [start, end] };
   }
 
   async describeStream(location: string): Promise<StreamMeta> {

@@ -333,15 +333,13 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }
 
-  async getStream(location: string): Promise<Readable> {
-    return this.#getObject(location);
-  }
-
-  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
-    const meta = await this.describeStream(location);
-    [start, end] = enforceRange(start, end, meta.size);
-    const stream = await this.#getObject(location, [start, end]);
-    return { stream, range: [start, end] };
+  async getStream(location: string, start?: number, end?: number): Promise<Readable> {
+    let options: [number, number] | undefined = undefined;
+    if (start || end) {
+      const meta = await this.describeStream(location);
+      options = enforceRange(start ?? 0, end, meta.size);
+    }
+    return this.#getObject(location, options);
   }
 
   async headStream(location: string): Promise<{ Metadata?: Partial<StreamMeta>, ContentLength?: number }> {

@@ -70,13 +70,7 @@ export interface ModelStreamSupport {
    * Get stream from asset store
    * @param location The location of the stream
    */
-  getStream(location: string): Promise<Readable>;
-
-  /**
-   * Get partial stream from asset store given a starting byte and an optional ending byte
-   * @param location The location of the stream
-   */
-  getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream>;
+  getStream(location: string, start?: number, end?: number): Promise<Readable>;
 
   /**
    * Get metadata for stream
