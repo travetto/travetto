@@ -24,7 +24,7 @@ npm install @travetto/model-{provider}
 yarn add @travetto/model-{provider}
 ```
 Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) support:
-   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L50), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L53)
+   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L49), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)
    *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.")
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")
 If you are using more than one [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
@@ -52,7 +52,7 @@ class FullConfiguration {
 }
 ```
 
-Reading of and writing assets uses the [AssetService](https://github.com/travetto/travetto/tree/main/module/asset/src/service.ts#L18).  Below you can see an example dealing with a user's profile image.
+Reading of and writing assets uses the [AssetService](https://github.com/travetto/travetto/tree/main/module/asset/src/service.ts#L19).  Below you can see an example dealing with a user's profile image.
 
 **Code: User Profile Images**
 ```typescript
@@ -85,7 +85,7 @@ export class UserProfileService {
 ## Naming Strategies
 By default, the assets are stored by path, as specified in the [Asset](https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts#L10) object.  This is standard, and expected, but some finer control may be desired.  In addition to standard naming, the module also supports naming by hash, to prevent duplicate storage of the same files with different hashes. This is generally useful when surfacing a lot of public (within the application) user-generated content. 
 
-The underlying contract for a [AssetNamingStrategy](https://github.com/travetto/travetto/tree/main/module/asset/src/naming.ts#L9) looks like:
+The underlying contract for a [AssetNamingStrategy](https://github.com/travetto/travetto/tree/main/module/asset/src/naming.ts#L8) looks like:
 
 **Code: AssetNamingStrategy**
 ```typescript
@@ -119,17 +119,6 @@ import { StreamMeta } from '@travetto/model';
 export interface Asset extends StreamMeta {
   source: Readable | string | Buffer;
   localFile?: string;
-}
-
-/**
- * An asset response
- */
-export interface AssetResponse extends StreamMeta {
-  stream(): Readable;
-  /**
-   * Response byte range, inclusive
-   */
-  range?: [start: number, end: number];
 }
 ```
 

@@ -194,7 +194,7 @@ export function work() {
 ```javascript
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.work = void 0;
+exports.work = work;
 const tslib_1 = require("tslib");
 const ᚕ_c = tslib_1.__importStar(require("@travetto/base/src/console.js"));
 var ᚕf = "@travetto/base/doc/transpile.js";
@@ -208,7 +208,6 @@ function work() {
     }
     ᚕ_c.log({ level: "debug", source: ᚕf, line: 9, scope: "work", args: ['End Work'] });
 }
-exports.work = work;
 ```
 
 ### Filtering Debug
@@ -233,12 +232,6 @@ Additionally, the logging framework will merge [debug](https://www.npmjs.com/pac
 $ DEBUG=express:*,@travetto/rest npx trv run rest
 ```
 
-## Stream Utilities
-The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L29) class provides basic stream utilities for use within the framework:
-   *  `toBuffer(src: Readable | Buffer | string): Promise<Buffer>` for converting a stream/buffer/filepath to a Buffer.
-   *  `toReadable(src: Readable | Buffer | string):Promise<Readable>` for converting a stream/buffer/filepath to a Readable
-   *  `writeToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
-
 ## Object Utilities
 Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [ObjectUtil](https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L10) includes:
    *  `isPrimitive(el)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
@@ -249,13 +242,14 @@ Simple functions for providing a minimal facsimile to [lodash](https://lodash.co
    *  `isPromise(a)` determines if `a` is a promise
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L12) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L13) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
    *  `naiveHash(text: string)` produces a fast, and simplistic hash.  No guarantees are made, but performs more than adequately for framework purposes.
    *  `shortHash(text: string)` produces a sha512 hash and returns the first 32 characters.
    *  `fullHash(text: string, size?: number)` produces a full sha512 hash.
    *  `resolvablePromise()` produces a `Promise` instance with the `resolve` and `reject` methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.
+   *  `fetchBytes(url: string, byteLimit?: number): Promise<Buffer>` for fetching bytes from a url
 
 **Code: Sample makeTemplate Usage**
 ```typescript
@@ -301,6 +295,10 @@ export class TimeUtil {
    * @param delta The number of milliseconds in the delta
    */
   static prettyDelta(delta: number, unit?: TimeUnit): string;
+  /**
+   * Determine the number of units between two dates
+   */
+  static unitsBetween(startDate: Date | number, endDate: Date | number, unit: TimeUnit): number;
 }
 ```
 

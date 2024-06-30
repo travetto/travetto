@@ -37,6 +37,7 @@ Options:
   -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
+  -wr, --include-workspace-resources   Include workspace resources (default: false)
   -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```

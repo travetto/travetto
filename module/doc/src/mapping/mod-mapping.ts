@@ -3,10 +3,6 @@ export const MOD_MAPPING = {
     name: '@travetto/asset', folder: '@travetto/asset', displayName: 'Asset',
     description: 'Modular library for storing and retrieving binary assets'
   },
-  AssetRest: {
-    name: '@travetto/asset-rest', folder: '@travetto/asset-rest', displayName: 'Asset Rest Support',
-    description: 'Provides integration between the travetto asset and rest module.'
-  },
   Auth: {
     name: '@travetto/auth', folder: '@travetto/auth', displayName: 'Authentication',
     description: 'Authentication scaffolding for the Travetto framework'
@@ -214,6 +210,10 @@ export const MOD_MAPPING = {
   RestSession: {
     name: '@travetto/rest-session', folder: '@travetto/rest-session', displayName: 'REST Session',
     description: 'Session provider for the travetto rest module.'
+  },
+  RestUpload: {
+    name: '@travetto/rest-upload', folder: '@travetto/rest-upload', displayName: 'Rest Upload Support',
+    description: 'Provides integration between the travetto asset and rest module.'
   },
   Scaffold: {
     name: '@travetto/scaffold', folder: '@travetto/scaffold', displayName: 'App Scaffold',
