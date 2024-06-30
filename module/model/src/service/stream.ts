@@ -35,11 +35,6 @@ export interface StreamMeta {
   cacheControl?: string;
 }
 
-export interface PartialStream {
-  stream: Readable;
-  range: [start: number, end: number];
-}
-
 /**
  * A stream response
  */

@@ -11,7 +11,7 @@ import {
   ModelCrudSupport, ModelStorageSupport, ModelStreamSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport,
   StreamMeta, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig, PartialStream
+  NotFoundError, ExistsError, IndexConfig
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,

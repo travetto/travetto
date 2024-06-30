@@ -111,13 +111,10 @@ export class AssetService {
     const info = await this.describe(location);
     const stream = new PassThrough();
     const extra: Partial<StreamResponse> = {};
-    let load: () => void;
-    if (start === undefined) {
-      load = (): void => { this.#store.getStream(location).then(v => v.pipe(stream)); };
-    } else {
-      extra.range = enforceRange(start, end, info.size);
-      load = (): void => { this.#store.getStreamPartial(location, start, end).then(v => v.stream.pipe(stream)); };
+    if (start || end) {
+      extra.range = enforceRange(start ?? 0, end, info.size);
     }
+    const load = () => { this.#store.getStream(location, start, end).then(v => v.pipe(stream)); };
     return { stream: () => (load(), stream), ...info, ...extra };
   }
 }

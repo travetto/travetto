@@ -8,7 +8,7 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
-  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId, PartialStream
+  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError } from '@travetto/base';

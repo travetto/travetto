@@ -7,7 +7,7 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, PartialStream, StreamMeta } from '../service/stream';
+import { ModelStreamSupport, StreamMeta } from '../service/stream';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
