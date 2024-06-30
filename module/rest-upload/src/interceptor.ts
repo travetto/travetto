@@ -9,7 +9,8 @@ import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { AppError } from '@travetto/base';
 
 import { RestUploadConfig } from './config';
-import { RestUploadUtil, WithCleanup } from './util';
+import { RestUploadUtil } from './util';
+import { LocalFile } from './file';
 
 type FileMap = Record<string, File>;
 
@@ -21,35 +22,32 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
     return fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
   }
 
-  static async validateFile(config: Partial<RestUploadConfig>, file: File): Promise<File> {
+  static async validateFile(config: Partial<RestUploadConfig>, file: LocalFile): Promise<LocalFile> {
     const check = config.matcher ??= MimeUtil.matcher(config.types);
     if (check(file.type)) {
       return file;
     } else {
+      await file.cleanup();
       throw new AppError(`Content type not allowed: ${file.type}`, 'data');
     }
   }
 
-  static async uploadDirect(req: Request, config: Partial<RestUploadConfig>): Promise<WithCleanup<FileMap>> {
+  static async uploadDirect(req: Request, config: Partial<RestUploadConfig>): Promise<FileMap> {
     console.log('Starting direct upload', req.header('content-length'));
     const filename = req.getFilename();
-    const [file, cleanup] = await RestUploadUtil.writeToBlob(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
+    const file = await RestUploadUtil.convertToBlob(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
     try {
-      return [{ file: await this.validateFile(config, file) }, config.deleteFiles !== false ? cleanup : (async (): Promise<void> => { })];
+      return { file: await this.validateFile(config, file) };
     } catch (err) {
       console.error('Failed direct upload', err);
-      await cleanup();
       throw err;
     }
   }
 
-  static async uploadMultipart(req: Request, config: Partial<RestUploadConfig>): Promise<WithCleanup<FileMap>> {
+  static async uploadMultipart(req: Request, config: Partial<RestUploadConfig>): Promise<FileMap> {
     const largestMax = this.getLargestFileMax(config);
-    const uploads: Promise<unknown>[] = [];
+    const uploads: Promise<LocalFile>[] = [];
     const files: FileMap = {};
-
-    const allCleanups: Function[] = [];
-    const managedCleanups: Function[] = [];
 
     console.log('Starting multipart upload', req.header('content-length'));
 
@@ -57,14 +55,8 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
     const uploader = busboy({ headers: req.headers as BusboyHeaders, limits: { fileSize: largestMax } })
       .on('file', (field, stream, filename) =>
         uploads.push(
-          RestUploadUtil.writeToBlob(stream, filename, config.files![field]?.maxSize ?? largestMax)
-            .then(([asset, cleanup]) => {
-              if (config.deleteFiles !== false) {
-                managedCleanups.push(cleanup);
-              }
-              allCleanups.push(cleanup);
-              return files[field] = asset;
-            })
+          RestUploadUtil.convertToBlob(stream, filename, config.files![field]?.maxSize ?? largestMax)
+            .then(file => files[field] = file)
             .then(file => this.validateFile(config.files?.[field] ?? config, file))
         )
       )
@@ -72,25 +64,24 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
         uploads.push(Promise.reject(new AppError(`File size exceeded for ${field}`, 'data')))
       );
 
-    try {
-      // Do upload
-      await new Promise<unknown>((res, rej) => {
-        try {
-          uploader.on('finish', res).on('error', rej);
-          req.pipe(uploader);
-        } catch (err) {
-          rej(err);
-        }
-      });
+    // Do upload
+    let err = await new Promise<Error | undefined>(res => {
+      try {
+        uploader.on('finish', () => res(undefined)).on('error', res);
+        req.pipe(uploader);
+      } catch (err) {
+        res(err as Error);
+      }
+    });
 
-      // Finish files
-      await Promise.all(uploads);
-    } catch (err) {
+    err ??= (await Promise.allSettled(uploads)).find(x => x.status === 'rejected')?.reason;
+
+    if (err) {
       console.error('Failed multipart upload', err);
-      await Promise.all(allCleanups.map(x => x()));
+      await RestUploadUtil.cleanupFiles(files);
       throw err;
     }
-    return [files, async (): Promise<void> => { await Promise.all(managedCleanups.map(x => x())); }];
+    return files;
   }
 
   @Inject()
@@ -121,21 +112,20 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
   }
 
   async intercept({ req, config }: FilterContext<RestUploadConfig>, next: FilterNext): Promise<FilterReturn> {
-    let cleanup: (() => Promise<void>) | undefined;
     try {
       switch (req.getContentType()?.full) {
         case 'application/x-www-form-urlencoded':
         case 'multipart/form-data':
-          [req.files, cleanup] = await RestAssetInterceptor.uploadMultipart(req, config);
+          req.files = await RestAssetInterceptor.uploadMultipart(req, config);
           break;
         default:
-          [req.files, cleanup] = await RestAssetInterceptor.uploadDirect(req, config);
+          req.files = await RestAssetInterceptor.uploadDirect(req, config);
           break;
       }
       return await next();
     } finally {
-      if (cleanup) {
-        await cleanup();
+      if (config.deleteFiles !== false) {
+        await RestUploadUtil.cleanupFiles(req.files);
       }
     }
   }
