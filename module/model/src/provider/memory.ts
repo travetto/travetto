@@ -248,19 +248,14 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     streams.set(location, await toBuffer(input));
   }
 
-  async getStream(location: string): Promise<Readable> {
+  async getStream(location: string, start?: number, end?: number): Promise<Readable> {
     const streams = this.#find(STREAMS, location, 'notfound');
-    return Readable.from(streams.get(location)!);
-  }
-
-  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
-    const streams = this.#find(STREAMS, location, 'notfound');
-    const buffer = streams.get(location)!;
-
-    [start, end] = enforceRange(start, end, buffer.length);
-
-    const stream = await Readable.from(buffer.subarray(start, end + 1));
-    return { stream, range: [start, end] };
+    let buffer = streams.get(location)!;
+    if (start || end) {
+      [start, end] = enforceRange(start ?? 0, end, buffer.length);
+      buffer = buffer.subarray(start, end + 1);
+    }
+    return Readable.from(buffer);
   }
 
   async describeStream(location: string): Promise<StreamMeta> {

@@ -184,19 +184,15 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     ]);
   }
 
-  async getStream(location: string): Promise<Readable> {
+  async getStream(location: string, start?: number, end?: number): Promise<Readable> {
     const file = await this.#find(STREAMS, BIN, location);
-    return createReadStream(file);
-  }
-
-  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
-    const file = await this.#find(STREAMS, BIN, location);
-    const meta = await this.describeStream(location);
-
-    [start, end] = enforceRange(start, end, meta.size);
-
-    const stream = createReadStream(file, { start, end });
-    return { stream, range: [start, end] };
+    let options: { start: number, end?: number } | undefined = undefined;
+    if (start || end) {
+      const meta = await this.describeStream(location);
+      [start, end] = enforceRange(start ?? 0, end, meta.size);
+      options = { start, end };
+    }
+    return createReadStream(file, { start, end });
   }
 
   async describeStream(location: string): Promise<StreamMeta> {
