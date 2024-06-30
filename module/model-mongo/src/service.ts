@@ -11,7 +11,8 @@ import {
   ModelCrudSupport, ModelStorageSupport, ModelStreamSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport,
   StreamMeta, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig
+  NotFoundError, ExistsError, IndexConfig,
+  StreamRange
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -299,16 +300,15 @@ export class MongoModelService implements
     await pipeline(input, writeStream);
   }
 
-  async getStream(location: string, start?: number, end?: number): Promise<Readable> {
+  async getStream(location: string, range?: StreamRange): Promise<Readable> {
     const meta = await this.describeStream(location);
-    let options: { start: number, end: number } | undefined = undefined;
 
-    if (start || end) {
-      [start, end] = enforceRange(start ?? 0, end, meta.size);
-      options = { start, end: end + 1 };
+    if (range) {
+      range = enforceRange(range, meta.size);
+      range.end! += 1; // range is exclusive
     }
 
-    const res = await this.#bucket.openDownloadStreamByName(location, options);
+    const res = await this.#bucket.openDownloadStreamByName(location, range);
     if (!res) {
       throw new NotFoundError(STREAMS, location);
     }

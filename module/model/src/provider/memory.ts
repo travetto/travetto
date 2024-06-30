@@ -7,7 +7,7 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, StreamMeta } from '../service/stream';
+import { ModelStreamSupport, StreamMeta, StreamRange } from '../service/stream';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
@@ -248,12 +248,12 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     streams.set(location, await toBuffer(input));
   }
 
-  async getStream(location: string, start?: number, end?: number): Promise<Readable> {
+  async getStream(location: string, range?: StreamRange): Promise<Readable> {
     const streams = this.#find(STREAMS, location, 'notfound');
     let buffer = streams.get(location)!;
-    if (start || end) {
-      [start, end] = enforceRange(start ?? 0, end, buffer.length);
-      buffer = buffer.subarray(start, end + 1);
+    if (range) {
+      range = enforceRange(range, buffer.length);
+      buffer = buffer.subarray(range.start, range.end! + 1);
     }
     return Readable.from(buffer);
   }

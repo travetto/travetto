@@ -1,7 +1,7 @@
 import { PassThrough, Readable } from 'node:stream';
 
 import { Inject, Injectable } from '@travetto/di';
-import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta, StreamResponse } from '@travetto/model';
+import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta, StreamRange } from '@travetto/model';
 import { enforceRange } from '@travetto/model/src/internal/service/stream';
 
 import { Asset } from './types';
@@ -9,6 +9,24 @@ import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
 import { AssetUtil } from './util';
 
 export const AssetModelⲐ = Symbol.for('@travetto/asset:model');
+
+/**
+ * A stream response
+ */
+export interface StreamResponse {
+  /**
+   * Request to begin streaming
+   */
+  stream(): Readable;
+  /**
+   * Response byte range, inclusive
+   */
+  range?: Required<StreamRange>;
+  /**
+   * Stream meta
+   */
+  meta: StreamMeta;
+}
 
 /**
  * Services asset CRUD operations.  Takes in a source is defined elsewhere.
@@ -107,14 +125,14 @@ export class AssetService {
    *
    * @param location The location to find.
    */
-  async get(location: string, start?: number, end?: number): Promise<StreamResponse> {
-    const info = await this.describe(location);
+  async get(location: string, range?: StreamRange): Promise<StreamResponse> {
+    const meta = await this.describe(location);
     const stream = new PassThrough();
     const extra: Partial<StreamResponse> = {};
-    if (start || end) {
-      extra.range = enforceRange(start ?? 0, end, info.size);
+    if (range) {
+      extra.range = enforceRange(range, meta.size);
     }
-    const load = () => { this.#store.getStream(location, start, end).then(v => v.pipe(stream)); };
-    return { stream: () => (load(), stream), ...info, ...extra };
+    const load = (): void => { this.#store.getStream(location, range).then(v => v.pipe(stream)); };
+    return { stream: () => (load(), stream), meta, ...extra };
   }
 }
