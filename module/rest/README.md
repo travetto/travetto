@@ -541,7 +541,7 @@ export class LoggingInterceptor implements RestInterceptor {
 }
 ```
 
-Currently [Asset Rest Support](https://github.com/travetto/travetto/tree/main/module/asset-rest#readme "Provides integration between the travetto asset and rest module.") is implemented in this fashion, as well as [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework").
+Currently [Rest Upload Support](https://github.com/travetto/travetto/tree/main/module/rest-upload#readme "Provides integration between the travetto asset and rest module.") is implemented in this fashion, as well as [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework").
 
 ### Configuring Interceptors
 All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:
