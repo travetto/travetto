@@ -128,11 +128,11 @@ export class AssetService {
   async get(location: string, range?: StreamRange): Promise<StreamResponse> {
     const meta = await this.describe(location);
     const stream = new PassThrough();
-    const extra: Partial<StreamResponse> = {};
     if (range) {
-      extra.range = enforceRange(range, meta.size);
+      range = enforceRange(range, meta.size);
     }
     const load = (): void => { this.#store.getStream(location, range).then(v => v.pipe(stream)); };
-    return { stream: () => (load(), stream), meta, ...extra };
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return { stream: () => (load(), stream), meta, range: range as Required<StreamRange> };
   }
 }

@@ -69,8 +69,9 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
       try {
         uploader.on('finish', () => res(undefined)).on('error', res);
         req.pipe(uploader);
-      } catch (err) {
-        res(err as Error);
+      } catch (err2) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        res(err2 as Error);
       }
     });
 
