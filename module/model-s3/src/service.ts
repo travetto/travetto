@@ -8,7 +8,8 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
-  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId
+  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
+  StreamRange
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError } from '@travetto/base';
@@ -311,10 +312,10 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async #getObject(location: string, range?: [number, number]): Promise<Readable> {
+  async #getObject(location: string, range?: StreamRange): Promise<Readable> {
     // Read from s3
     const res = await this.client.getObject(this.#q(STREAM_SPACE, location, range ? {
-      Range: `bytes=${range[0]}-${range[1]}`
+      Range: `bytes=${range.start}-${range.end ?? ''}`
     } : {}));
 
     if (!res.Body) {
@@ -333,13 +334,12 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }
 
-  async getStream(location: string, start?: number, end?: number): Promise<Readable> {
-    let options: [number, number] | undefined = undefined;
-    if (start || end) {
+  async getStream(location: string, range?: StreamRange): Promise<Readable> {
+    if (range) {
       const meta = await this.describeStream(location);
-      options = enforceRange(start ?? 0, end, meta.size);
+      range = enforceRange(range, meta.size);
     }
-    return this.#getObject(location, options);
+    return this.#getObject(location, range);
   }
 
   async headStream(location: string): Promise<{ Metadata?: Partial<StreamMeta>, ContentLength?: number }> {

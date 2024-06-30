@@ -48,7 +48,7 @@ class TestUploadController {
       contentLanguage: 'en-GB'
     });
     const output = await this.service.get(location);
-    return RestModelUtil.downloadable(output);
+    return RestModelUtil.downloadable(output.stream(), output.meta, output.range);
   }
 
   @Post('/all-named')
@@ -74,12 +74,12 @@ class TestUploadController {
 
   @Get('*')
   async get(req: Request, res: Response) {
-    const [start, end] = req.getRange() ?? [];
+    const range = req.getRange();
     if (req.headers.range) {
       res.setHeader('Accept-Ranges', 'bytes');
     }
-    const response = await this.service.get(req.url.replace(/^\/test\/upload\//, ''), start, end);
-    return RestModelUtil.downloadable(response);
+    const response = await this.service.get(req.url.replace(/^\/test\/upload\//, ''), range);
+    return RestModelUtil.downloadable(response.stream(), response.meta, response.range);
   }
 }
 

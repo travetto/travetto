@@ -35,16 +35,7 @@ export interface StreamMeta {
   cacheControl?: string;
 }
 
-/**
- * A stream response
- */
-export interface StreamResponse extends StreamMeta {
-  stream(): Readable;
-  /**
-   * Response byte range, inclusive
-   */
-  range?: [start: number, end: number];
-}
+export type StreamRange = { start: number, end?: number };
 
 /**
  * Support for Streams CRD.  Stream update is not supported.
@@ -65,7 +56,7 @@ export interface ModelStreamSupport {
    * Get stream from asset store
    * @param location The location of the stream
    */
-  getStream(location: string, start?: number, end?: number): Promise<Readable>;
+  getStream(location: string, range?: StreamRange): Promise<Readable>;
 
   /**
    * Get metadata for stream

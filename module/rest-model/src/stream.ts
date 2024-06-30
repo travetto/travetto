@@ -1,40 +1,40 @@
 import { Readable } from 'node:stream';
 
 import { path } from '@travetto/manifest';
-import { StreamResponse } from '@travetto/model';
-import { Renderable, Response } from '@travetto/rest';
+import { ByteRange, Renderable, Response } from '@travetto/rest';
+import { StreamMeta } from '@travetto/model';
 
 export class RestModelUtil {
   /**
    * Make any stream response downloadable
    */
-  static downloadable(asset: StreamResponse): Renderable {
+  static downloadable(stream: Readable, meta: StreamMeta, range?: ByteRange): Renderable {
     return {
       render(res: Response): Readable {
-        res.setHeader('Content-Type', asset.contentType);
-        if (asset.filename) {
-          res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
+        res.setHeader('Content-Type', meta.contentType);
+        if (meta.filename) {
+          res.setHeader('Content-Disposition', `attachment;filename=${path.basename(meta.filename)}`);
         }
-        if (asset.contentEncoding) {
-          res.setHeader('Content-Encoding', asset.contentEncoding);
+        if (meta.contentEncoding) {
+          res.setHeader('Content-Encoding', meta.contentEncoding);
         }
-        if (asset.contentLanguage) {
-          res.setHeader('Content-Language', asset.contentLanguage);
+        if (meta.contentLanguage) {
+          res.setHeader('Content-Language', meta.contentLanguage);
         }
-        if (asset.cacheControl) {
-          res.setHeader('Cache-Control', asset.cacheControl);
+        if (meta.cacheControl) {
+          res.setHeader('Cache-Control', meta.cacheControl);
         }
-        if (!asset.range) {
-          res.setHeader('Content-Length', `${asset.size}`);
+        if (!range) {
+          res.setHeader('Content-Length', `${meta.size}`);
           res.status(200);
         } else {
-          const [start, end] = asset.range;
+          const { start, end } = range;
           res.status(206);
           res.setHeader('Accept-Ranges', 'bytes');
-          res.setHeader('Content-Range', `bytes ${start}-${end}/${asset.size}`);
+          res.setHeader('Content-Range', `bytes ${start}-${end}/${meta.size}`);
           res.setHeader('Content-Length', `${end - start + 1}`);
         }
-        return asset.stream!();
+        return stream;
       }
     };
   }

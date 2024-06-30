@@ -9,6 +9,8 @@ import {
 } from './internal/symbol';
 
 declare global {
+  type TravettoByteRange = { start: number, end: number };
+
   /**
    * Extension point for supporting new request headers
    */
@@ -123,7 +125,7 @@ declare global {
     /**
      * Get requested range
      */
-    getRange(chunkSize?: number): [start: number, end?: number] | undefined;
+    getRange(chunkSize?: number): TravettoByteRange | undefined;
     /**
      * Read the file name from the request content disposition
      */

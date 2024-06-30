@@ -3,7 +3,7 @@ import { IncomingHttpHeaders } from 'node:http';
 import { getExtension } from 'mime';
 
 
-import { Request, ContentType } from '../../types';
+import { Request, ContentType, ByteRange } from '../../types';
 import { MimeUtil } from '../../util/mime';
 import { NodeEntityⲐ, ParsedType } from '../../internal/symbol';
 
@@ -72,14 +72,14 @@ export class RequestCore implements Partial<Request> {
   /**
    * Get requested byte range for a given request
    */
-  getRange(this: Request, chunkSize: number = 100 * 1024): [start: number, end?: number] | undefined {
+  getRange(this: Request, chunkSize: number = 100 * 1024): ByteRange | undefined {
     const rangeHeader = this.headerFirst('range');
 
     if (rangeHeader) {
       const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
         .map(x => x ? parseInt(x, 10) : undefined);
       if (start !== undefined) {
-        return [start, end ?? (start + chunkSize)];
+        return { start, end: end ?? (start + chunkSize) };
       }
     }
   }

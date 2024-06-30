@@ -11,7 +11,7 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, StreamMeta } from '../service/stream';
+import { ModelStreamSupport, StreamMeta, StreamRange } from '../service/stream';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
@@ -184,15 +184,13 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     ]);
   }
 
-  async getStream(location: string, start?: number, end?: number): Promise<Readable> {
+  async getStream(location: string, range?: StreamRange): Promise<Readable> {
     const file = await this.#find(STREAMS, BIN, location);
-    let options: { start: number, end?: number } | undefined = undefined;
-    if (start || end) {
+    if (range) {
       const meta = await this.describeStream(location);
-      [start, end] = enforceRange(start ?? 0, end, meta.size);
-      options = { start, end };
+      range = enforceRange(range, meta.size);
     }
-    return createReadStream(file, { start, end });
+    return createReadStream(file, range);
   }
 
   async describeStream(location: string): Promise<StreamMeta> {
