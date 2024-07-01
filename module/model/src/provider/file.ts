@@ -1,18 +1,17 @@
 import fs from 'node:fs/promises';
-import { createReadStream } from 'node:fs';
-
+import { createReadStream, createWriteStream } from 'node:fs';
 import os from 'node:os';
-
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { path, RuntimeContext } from '@travetto/manifest';
-import { StreamUtil, Class, TimeSpan } from '@travetto/base';
+import { Class, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, PartialStream, StreamMeta } from '../service/stream';
+import { ModelStreamSupport, StreamMeta, StreamRange } from '../service/stream';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
@@ -21,7 +20,7 @@ import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
-import { StreamModel, STREAMS } from '../internal/service/stream';
+import { enforceRange, StreamModel, STREAMS } from '../internal/service/stream';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -112,7 +111,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     const file = await this.#resolveName(cls, '.json', id);
 
     if (await exists(file)) {
-      const content = await StreamUtil.streamToBuffer(createReadStream(file));
+      const content = await fs.readFile(file);
       return this.checkExpiry(cls, await ModelCrudUtil.load(cls, content));
     }
 
@@ -180,29 +179,23 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
     const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
-      StreamUtil.writeToFile(input, file),
+      await pipeline(input, createWriteStream(file)),
       fs.writeFile(file.replace(BIN, META), JSON.stringify(meta), 'utf8')
     ]);
   }
 
-  async getStream(location: string): Promise<Readable> {
+  async getStream(location: string, range?: StreamRange): Promise<Readable> {
     const file = await this.#find(STREAMS, BIN, location);
-    return createReadStream(file);
-  }
-
-  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
-    const file = await this.#find(STREAMS, BIN, location);
-    const meta = await this.describeStream(location);
-
-    [start, end] = StreamUtil.enforceRange(start, end, meta.size);
-
-    const stream = createReadStream(file, { start, end });
-    return { stream, range: [start, end] };
+    if (range) {
+      const meta = await this.describeStream(location);
+      range = enforceRange(range, meta.size);
+    }
+    return createReadStream(file, range);
   }
 
   async describeStream(location: string): Promise<StreamMeta> {
     const file = await this.#find(STREAMS, META, location);
-    const content = await StreamUtil.streamToBuffer(createReadStream(file));
+    const content = await fs.readFile(file);
     const text: StreamMeta = JSON.parse(content.toString('utf8'));
     return text;
   }

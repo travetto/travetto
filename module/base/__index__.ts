@@ -6,7 +6,6 @@ export * from './src/env';
 export * from './src/file-loader';
 export * from './src/resource';
 export * from './src/shutdown';
-export * from './src/stream';
 export * from './src/time';
 export * from './src/types';
 export * from './src/object';

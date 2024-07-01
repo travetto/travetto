@@ -3,12 +3,13 @@ import assert from 'node:assert';
 import crypto from 'node:crypto';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
-import { StreamUtil } from '@travetto/base';
 
 import { BaseModelSuite } from './base';
 import { ModelStreamSupport } from '../../src/service/stream';
+import { enforceRange } from '../../src/internal/service/stream';
 
 @Suite()
 export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {
@@ -76,32 +77,34 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
     await service.upsertStream(meta.hash, stream, meta);
 
     const retrieved = await service.getStream(meta.hash);
-    const content = (await StreamUtil.toBuffer(retrieved)).toString('utf8');
+    const content = (await toBuffer(retrieved)).toString('utf8');
     assert(content.startsWith('abc'));
     assert(content.endsWith('xyz'));
 
-    const partial = await service.getStreamPartial(meta.hash, 10, 20);
-    const subContent = (await StreamUtil.toBuffer(partial.stream)).toString('utf8');
-    assert(subContent.length === (partial.range[1] - partial.range[0]) + 1);
+    const partial = await service.getStream(meta.hash, { start: 10, end: 20 });
+    const subContent = (await toBuffer(partial)).toString('utf8');
+    const range = await enforceRange({ start: 10, end: 20 }, meta.size);
+    assert(subContent.length === (range.end - range.start) + 1);
     assert(subContent === 'klmnopqrstu');
 
-    const partialUnbounded = await service.getStreamPartial(meta.hash, 10);
-    const subContent2 = (await StreamUtil.toBuffer(partialUnbounded.stream)).toString('utf8');
-    assert(subContent2.length === (partialUnbounded.range[1] - partialUnbounded.range[0]) + 1);
+    const partialUnbounded = await service.getStream(meta.hash, { start: 10 });
+    const subContent2 = (await toBuffer(partialUnbounded)).toString('utf8');
+    const range2 = await enforceRange({ start: 10 }, meta.size);
+    assert(subContent2.length === (range2.end - range2.start) + 1);
     assert(subContent2.startsWith('klm'));
     assert(subContent2.endsWith('xyz'));
 
-    const partialSingle = await service.getStreamPartial(meta.hash, 10, 10);
-    const subContent3 = (await StreamUtil.toBuffer(partialSingle.stream)).toString('utf8');
+    const partialSingle = await service.getStream(meta.hash, { start: 10, end: 10 });
+    const subContent3 = (await toBuffer(partialSingle)).toString('utf8');
     assert(subContent3.length === 1);
     assert(subContent3 === 'k');
 
-    const partialOverbounded = await service.getStreamPartial(meta.hash, 20, 40);
-    const subContent4 = (await StreamUtil.toBuffer(partialOverbounded.stream)).toString('utf8');
+    const partialOverbounded = await service.getStream(meta.hash, { start: 20, end: 40 });
+    const subContent4 = (await toBuffer(partialOverbounded)).toString('utf8');
     assert(subContent4.length === 6);
     assert(subContent4.endsWith('xyz'));
 
-    await assert.rejects(() => service.getStreamPartial(meta.hash, -10, 10));
-    await assert.rejects(() => service.getStreamPartial(meta.hash, 30, 37));
+    await assert.rejects(() => service.getStream(meta.hash, { start: -10, end: 10 }));
+    await assert.rejects(() => service.getStream(meta.hash, { start: 30, end: 37 }));
   }
 }

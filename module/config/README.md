@@ -76,6 +76,11 @@ Config {
     {
       priority: 100,
       source: 'file://application',
+      detail: 'resources/application.yaml'
+    },
+    {
+      priority: 101,
+      source: 'file://application',
       detail: 'module/config/doc/resources/application.yml'
     },
     {
@@ -228,6 +233,11 @@ Config {
   sources: [
     {
       priority: 100,
+      source: 'file://application',
+      detail: 'resources/application.yaml'
+    },
+    {
+      priority: 101,
       source: 'file://application',
       detail: 'module/config/doc/resources/application.yml'
     },

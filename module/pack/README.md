@@ -42,6 +42,7 @@ Options:
   -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
+  -wr, --include-workspace-resources   Include workspace resources (default: false)
   -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```
@@ -106,6 +107,7 @@ Options:
   -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
+  -wr, --include-workspace-resources   Include workspace resources (default: false)
   -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```
@@ -133,8 +135,9 @@ Options:
   -r, --rollup-configuration <string>    Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                    Env Flag File Name (default: ".env")
   --manifest-file <string>               Manifest File Name (default: "manifest.json")
+  -wr, --include-workspace-resources     Include workspace resources (default: false)
   -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile")
-  -di, --docker-image <string>           Docker Image to extend (default: "node:20-alpine")
+  -di, --docker-image <string>           Docker Image to extend (default: "node:22-alpine")
   -dn, --docker-name <string>            Docker Image Name (default: "travetto_pack")
   -dt, --docker-tag <string>             Docker Image Tag (default: ["latest"])
   -dp, --docker-port <number>            Docker Image Port (default: [])
@@ -208,9 +211,9 @@ echo "cd %~p0" >> $DIST/todo-app.cmd
 echo "node todo-app.js run:rest %*" >> $DIST/todo-app.cmd
 chmod 755 $DIST/todo-app.cmd
 
-# Copying over resources 
+# Copying over module resources 
 
-echo "Copying over resources"
+echo "Copying over module resources"
 
 cp -r -p $ROOT/resources $DIST/resources
 
@@ -237,21 +240,21 @@ cd $TRV_OUT
 npx rollup -c $TRV_OUT/node_modules/@travetto/pack/support/rollup/build.js
 cd $ROOT
 
-# Pulling Docker Base Image node:20-alpine 
+# Pulling Docker Base Image node:22-alpine 
 
-echo "Pulling Docker Base Image node:20-alpine"
+echo "Pulling Docker Base Image node:22-alpine"
 
-docker pull node:20-alpine
+docker pull node:22-alpine
 
-# Detected Image OS node:20-alpine as alpine 
+# Detected Image OS node:22-alpine as alpine 
 
-echo "Detected Image OS node:20-alpine as alpine"
+echo "Detected Image OS node:22-alpine as alpine"
 
 # Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile 
 
 echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile"
 
-echo "FROM node:20-alpine" > $DIST/Dockerfile
+echo "FROM node:22-alpine" > $DIST/Dockerfile
 echo "RUN addgroup -g 2000 app && adduser -D -G app -u 2000 app" >> $DIST/Dockerfile
 echo "RUN mkdir /app && chown app:app /app" >> $DIST/Dockerfile
 echo "COPY --chown=\"app:app\" . /app" >> $DIST/Dockerfile

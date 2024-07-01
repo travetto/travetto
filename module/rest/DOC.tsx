@@ -200,7 +200,7 @@ export const text = <>
 
       <c.Code title='Defining a fully controlled Interceptor' src='doc/interceptor-controlled.ts' />
 
-      Currently {d.mod('AssetRest')} is implemented in this fashion, as well as {d.mod('AuthRest')}.
+      Currently {d.mod('RestUpload')} is implemented in this fashion, as well as {d.mod('AuthRest')}.
     </c.SubSection>
     <c.SubSection title='Configuring Interceptors'>
       All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:

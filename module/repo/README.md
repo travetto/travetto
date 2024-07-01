@@ -104,7 +104,7 @@ Options:
 ```bash
 $ trv repo:list
 
-global-test/asset-rest
+global-test/asset-rest-upload
 global-test/auth-rest
 global-test/auth-rest-jwt
 global-test/model_asset
@@ -115,9 +115,9 @@ global-test/openapi
 global-test/pack_app
 global-test/rest-client
 global-test/rest-session
+global-test/rest-upload
 global-test/transformer-test
 module/asset
-module/asset-rest
 module/auth
 module/auth-model
 module/auth-rest
@@ -170,6 +170,7 @@ module/rest-koa-lambda
 module/rest-model
 module/rest-model-query
 module/rest-session
+module/rest-upload
 module/scaffold
 module/schema
 module/schema-faker
@@ -204,7 +205,7 @@ The standard format includes prefixed output to help identify which module produ
 ```bash
 $ trv repo:exec pwd
 
-global-test/asset-rest <workspace-root>/global-test/asset-rest
+global-test/asset-rest-upload <workspace-root>/global-test/asset-rest-upload
          global-test/auth-rest <workspace-root>/global-test/auth-rest
      global-test/auth-rest-jwt <workspace-root>/global-test/auth-rest-jwt
        global-test/model_asset <workspace-root>/global-test/model_asset
@@ -215,9 +216,9 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
           global-test/pack_app <workspace-root>/global-test/pack_app
        global-test/rest-client <workspace-root>/global-test/rest-client
       global-test/rest-session <workspace-root>/global-test/rest-session
+       global-test/rest-upload <workspace-root>/global-test/rest-upload
   global-test/transformer-test <workspace-root>/global-test/transformer-test
                   module/asset <workspace-root>/module/asset
-             module/asset-rest <workspace-root>/module/asset-rest
                    module/auth <workspace-root>/module/auth
              module/auth-model <workspace-root>/module/auth-model
               module/auth-rest <workspace-root>/module/auth-rest
@@ -270,6 +271,7 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
              module/rest-model <workspace-root>/module/rest-model
        module/rest-model-query <workspace-root>/module/rest-model-query
            module/rest-session <workspace-root>/module/rest-session
+            module/rest-upload <workspace-root>/module/rest-upload
                module/scaffold <workspace-root>/module/scaffold
                  module/schema <workspace-root>/module/schema
            module/schema-faker <workspace-root>/module/schema-faker

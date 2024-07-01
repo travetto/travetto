@@ -1,9 +1,10 @@
 import vscode from 'vscode';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
+import rl from 'node:readline/promises';
 
 import { CliCommandInput } from '@travetto/cli';
-import { ExecUtil, StreamUtil } from '@travetto/base';
+import { ExecUtil, Util } from '@travetto/base';
 import { path } from '@travetto/manifest';
 
 import { Workspace } from './workspace';
@@ -150,8 +151,10 @@ export class ParameterSelector {
             const items: { label: string, description: string }[] = [];
             const proc = spawn(rgPath, args, { stdio: [0, 'pipe', 2], shell: true, cwd, });
 
-            StreamUtil.onLine(proc.stdout, item => items.push({ label: item, description: path.resolve(cwd, item) }));
-
+            if (proc.stdout) {
+              Util.consumeAsyncItr(rl.createInterface(proc.stdout),
+                item => items.push({ label: item, description: path.resolve(cwd, item.trim()) }));
+            }
             await ExecUtil.getResult(proc, { catch: true });
             input.items = items;
             input.busy = false;
