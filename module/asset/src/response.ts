@@ -33,25 +33,25 @@ export class StreamResponse {
 
   headers(): Record<string, string> {
     const headers: Record<string, string> = {};
-    headers['Content-Type'] = this.meta.contentType;
+    headers['content-type'] = this.meta.contentType;
     if (this.meta.filename) {
-      headers['Content-Disposition'] = `attachment;filename=${path.basename(this.meta.filename)}`;
+      headers['content-disposition'] = `attachment;filename=${path.basename(this.meta.filename)}`;
     }
     if (this.meta.contentEncoding) {
-      headers['Content-Encoding'] = this.meta.contentEncoding;
+      headers['content-encoding'] = this.meta.contentEncoding;
     }
     if (this.meta.contentLanguage) {
-      headers['Content-Language'] = this.meta.contentLanguage;
+      headers['content-language'] = this.meta.contentLanguage;
     }
     if (this.meta.cacheControl) {
-      headers['Cache-Control'] = this.meta.cacheControl;
+      headers['cache-control'] = this.meta.cacheControl;
     }
     if (!this.range) {
-      headers['Content-Length'] = `${this.meta.size}`;
+      headers['content-length'] = `${this.meta.size}`;
     } else {
-      headers['Accept-Ranges'] = 'bytes';
-      headers['Content-Range'] = `bytes ${this.range.start}-${this.range.end}/${this.meta.size}`;
-      headers['Content-Length'] = `${this.range.end - this.range.start + 1}`;
+      headers['accept-ranges'] = 'bytes';
+      headers['content-range'] = `bytes ${this.range.start}-${this.range.end}/${this.meta.size}`;
+      headers['content-length'] = `${this.range.end - this.range.start + 1}`;
     }
     return headers;
   }
