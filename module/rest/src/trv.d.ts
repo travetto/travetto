@@ -5,7 +5,7 @@ import { Readable, Writable } from 'node:stream';
 import { ContentType, HeaderMap } from './types';
 import {
   HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ,
-  ProviderEntityⲐ, RequestParamsⲐ, SendStreamⲐ, RequestLoggingⲐ
+  ProviderEntityⲐ, RequestParamsⲐ, RequestLoggingⲐ
 } from './internal/symbol';
 
 declare global {
@@ -189,7 +189,6 @@ declare global {
      * @param cb The callback for the event
      */
     on(ev: 'close' | 'finish', cb: Function): unknown;
-
     /**
      * Redirect the request to a new location
      * @param path The new location
@@ -202,7 +201,6 @@ declare global {
      */
     redirect(code: number, path: string): unknown;
     redirect(code: number | string, path?: string): unknown;
-
     /**
      * Set the request's location
      * @param path The location to point to
@@ -213,11 +211,6 @@ declare global {
      * @param value Value to send
      */
     send(value: any): unknown;
-    /**
-     * Optional internal method for sending streams
-     * @param stream
-     */
-    [SendStreamⲐ]?(stream: Readable): Promise<void>;
     /**
      * Write content directly to the output stream
      * @param value The value to write
@@ -240,5 +233,10 @@ declare global {
        */
       set(name: string, value?: any, options?: SetOption): void;
     };
+    /**
+     * Send readable stream to the response
+     * @param stream
+     */
+    sendStream(stream: Readable): Promise<void>;
   }
 }

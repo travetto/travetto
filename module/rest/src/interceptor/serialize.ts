@@ -21,6 +21,14 @@ export class SerializeInterceptor implements RestInterceptor {
    */
   async serialize({ req, res }: FilterContext, output: unknown): Promise<void> {
     if (SerializeUtil.isRenderable(output)) {
+      if ('headers' in output && output.headers) {
+        for (const [k, v] of Object.entries(output.headers())) {
+          res.setHeader(k, v);
+        }
+      }
+      if ('statusCode' in output && output.statusCode) {
+        res.status(output.statusCode());
+      }
       output = await output.render(res);
       if (output === undefined) { // If render didn't return a result, consider us done
         return;

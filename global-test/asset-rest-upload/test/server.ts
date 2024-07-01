@@ -9,7 +9,6 @@ import { Inject, InjectableFactory } from '@travetto/di';
 import { MemoryModelService, ModelStreamSupport } from '@travetto/model';
 import { Upload, UploadAll } from '@travetto/rest-upload';
 import { Asset, AssetModelⲐ, AssetService, AssetUtil } from '@travetto/asset';
-import { RestModelUtil } from '@travetto/rest-model/src/stream';
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -47,8 +46,7 @@ class TestUploadController {
       cacheControl: 'max-age=3600',
       contentLanguage: 'en-GB'
     });
-    const output = await this.service.get(location);
-    return RestModelUtil.downloadable(output.stream(), output.meta, output.range);
+    return await this.service.get(location);
   }
 
   @Post('/all-named')
@@ -78,8 +76,7 @@ class TestUploadController {
     if (req.headers.range) {
       res.setHeader('Accept-Ranges', 'bytes');
     }
-    const response = await this.service.get(req.url.replace(/^\/test\/upload\//, ''), range);
-    return RestModelUtil.downloadable(response.stream(), response.meta, response.range);
+    return await this.service.get(req.url.replace(/^\/test\/upload\//, ''), range);
   }
 }
 

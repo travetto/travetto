@@ -1,10 +1,7 @@
-import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
-
 import type koa from 'koa';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
-import { NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from '@travetto/rest/src/internal/symbol';
+import { NodeEntityⲐ, ProviderEntityⲐ } from '@travetto/rest/src/internal/symbol';
 
 /**
  * Provides translation between koa request/response objects and the framework
@@ -50,11 +47,6 @@ export class KoaServerUtil {
         }
       },
       send: b => ctx.body = b,
-      [SendStreamⲐ]: async (stream: Readable): Promise<void> => {
-        ctx.respond = false;
-        ctx.response.status = 200;
-        await pipeline(stream, ctx.res);
-      },
       on: ctx.res.on.bind(ctx.res),
       end: (val?: unknown): void => {
         if (val) {
@@ -69,7 +61,7 @@ export class KoaServerUtil {
       getHeader: ctx.response.get.bind(ctx.response),
       removeHeader: ctx.response.remove.bind(ctx.response),
       write: ctx.res.write.bind(ctx.res),
-      cookies: ctx.cookies,
+      cookies: ctx.cookies
     });
   }
 }

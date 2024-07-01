@@ -51,7 +51,7 @@ export abstract class AssetServiceSuite {
     const file = await AssetUtil.fileToAsset(pth);
     const loc = await service.upsert(file);
 
-    const saved = await service.get(loc);
+    const { meta: saved } = await service.get(loc);
 
     assert(file.contentType === saved.contentType);
     assert(file.size === saved.size);

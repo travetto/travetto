@@ -7,26 +7,9 @@ import { enforceRange } from '@travetto/model/src/internal/service/stream';
 import { Asset } from './types';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
 import { AssetUtil } from './util';
+import { StreamResponse } from './response';
 
 export const AssetModelⲐ = Symbol.for('@travetto/asset:model');
-
-/**
- * A stream response
- */
-export interface StreamResponse {
-  /**
-   * Request to begin streaming
-   */
-  stream(): Readable;
-  /**
-   * Response byte range, inclusive
-   */
-  range?: Required<StreamRange>;
-  /**
-   * Stream meta
-   */
-  meta: StreamMeta;
-}
 
 /**
  * Services asset CRUD operations.  Takes in a source is defined elsewhere.
@@ -127,12 +110,13 @@ export class AssetService {
    */
   async get(location: string, range?: StreamRange): Promise<StreamResponse> {
     const meta = await this.describe(location);
-    const stream = new PassThrough();
     if (range) {
       range = enforceRange(range, meta.size);
     }
+
+    const stream = new PassThrough();
     const load = (): void => { this.#store.getStream(location, range).then(v => v.pipe(stream)); };
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return { stream: () => (load(), stream), meta, range: range as Required<StreamRange> };
+    return new StreamResponse(() => (load(), stream), meta, range as Required<StreamRange>);
   }
 }
