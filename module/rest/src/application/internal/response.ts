@@ -1,4 +1,8 @@
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+
 import { Response } from '../../types';
+import { NodeEntityⲐ } from '../../internal/symbol';
 
 /**
  * Base response object
@@ -23,11 +27,9 @@ export class ResponseCore implements Partial<Response> {
    * Send the request to a new location, given a path
    */
   location(this: Response, path: string): void {
-
     if (!this.statusCode) {
       this.status(302);
     }
-
     this.setHeader('Location', path);
   }
 
@@ -51,5 +53,13 @@ export class ResponseCore implements Partial<Response> {
     this.location(path!);
     this.setHeader('Content-Length', '0');
     this.send('');
+  }
+
+  /**
+   * Send a stream to the response and wait for completion
+   */
+  async sendStream(this: Response, data: Readable): Promise<void> {
+    await pipeline(data, this[NodeEntityⲐ], { end: false });
+    this.end();
   }
 }

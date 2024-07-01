@@ -312,10 +312,10 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async #getObject(location: string, range?: StreamRange): Promise<Readable> {
+  async #getObject(location: string, range: Required<StreamRange>): Promise<Readable> {
     // Read from s3
     const res = await this.client.getObject(this.#q(STREAM_SPACE, location, range ? {
-      Range: `bytes=${range.start}-${range.end ?? ''}`
+      Range: `bytes=${range.start}-${range.end}`
     } : {}));
 
     if (!res.Body) {
@@ -339,7 +339,8 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       const meta = await this.describeStream(location);
       range = enforceRange(range, meta.size);
     }
-    return this.#getObject(location, range);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return this.#getObject(location, range as Required<StreamRange>);
   }
 
   async headStream(location: string): Promise<{ Metadata?: Partial<StreamMeta>, ContentLength?: number }> {

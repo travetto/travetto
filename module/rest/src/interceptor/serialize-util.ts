@@ -1,9 +1,8 @@
 import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
 
 import { ErrorCategory, AppError, ObjectUtil } from '@travetto/base';
 
-import { SendStreamⲐ, NodeEntityⲐ, HeadersAddedⲐ } from '../internal/symbol';
+import { HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
 import { Request, Response } from '../types';
 
@@ -98,7 +97,7 @@ export class SerializeUtil {
    */
   static async serializeStream(res: Response, output: Readable): Promise<void> {
     this.setContentTypeIfUndefined(res, 'application/octet-stream');
-    return (res[SendStreamⲐ] ? res[SendStreamⲐ](output) : pipeline(output, res[NodeEntityⲐ]));
+    await res.sendStream(output);
   }
 
   /**
