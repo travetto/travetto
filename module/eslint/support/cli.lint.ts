@@ -29,10 +29,10 @@ export class LintCommand implements CliCommandShape {
   async main(): Promise<void> {
     let files: string[];
     if (this.since) {
-      files = (await CliScmUtil.findChangedFiles(this.since))
+      files = (await CliScmUtil.findChangedFiles(this.since, 'HEAD', true))
         .filter(x => !x.endsWith('package.json') && !x.endsWith('package-lock.json'));
     } else {
-      const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');
+      const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all', undefined, 'HEAD', true);
       files = mods.filter(x => x.workspace).map(x => x.sourcePath);
     }
 
