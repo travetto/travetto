@@ -1,6 +1,6 @@
 {
   "name": "@travetto/config",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "Configuration support",
   "keywords": [
     "yaml",

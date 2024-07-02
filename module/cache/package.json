@@ -30,7 +30,7 @@
   },
   "peerDependencies": {
     "@travetto/test": "^4.1.1",
-    "@travetto/transformer": "^4.1.1"
+    "@travetto/transformer": "^4.1.2"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

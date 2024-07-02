@@ -25,10 +25,10 @@
     "directory": "module/command"
   },
   "dependencies": {
-    "@travetto/base": "^4.1.1"
+    "@travetto/base": "^4.1.2"
   },
   "peerDependencies": {
-    "@travetto/cli": "^4.1.1"
+    "@travetto/cli": "^4.1.2"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

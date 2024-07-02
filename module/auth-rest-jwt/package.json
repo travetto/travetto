@@ -28,10 +28,10 @@
   "dependencies": {
     "@travetto/auth": "^4.1.1",
     "@travetto/auth-rest": "^4.1.3",
-    "@travetto/config": "^4.1.1",
+    "@travetto/config": "^4.1.2",
     "@travetto/di": "^4.1.1",
     "@travetto/jwt": "^4.1.1",
-    "@travetto/rest": "^4.1.3"
+    "@travetto/rest": "^4.1.4"
   },
   "travetto": {
     "displayName": "Rest Auth JWT"

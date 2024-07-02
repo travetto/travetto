@@ -23,7 +23,7 @@
     "directory": "module/jwt"
   },
   "dependencies": {
-    "@travetto/base": "^4.1.1",
+    "@travetto/base": "^4.1.2",
     "@types/jws": "^3.2.10",
     "jws": "^4.0.0"
   },

@@ -26,13 +26,13 @@
     "directory": "module/model"
   },
   "dependencies": {
-    "@travetto/config": "^4.1.1",
+    "@travetto/config": "^4.1.2",
     "@travetto/di": "^4.1.1",
-    "@travetto/registry": "^4.1.1",
+    "@travetto/registry": "^4.1.2",
     "@travetto/schema": "^4.1.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^4.1.1",
+    "@travetto/cli": "^4.1.2",
     "@travetto/test": "^4.1.1"
   },
   "peerDependenciesMeta": {
