@@ -120,7 +120,7 @@ export class WorkspaceResultsManager {
   /**
    * Reset all
    */
-  async resetAll(): Promise<void> {
+  resetAll(): void {
     // Remove all state
     this.setStatus('');
     const entries = [...this.#results.entries()];
@@ -128,6 +128,8 @@ export class WorkspaceResultsManager {
     for (const [, v] of entries) {
       v.dispose();
     }
+    // Clear out all diagnostics
+    // testDiagnostics.clear();
   }
 
   /**

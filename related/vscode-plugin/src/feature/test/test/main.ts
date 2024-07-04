@@ -23,12 +23,15 @@ class TestRunnerFeature extends BaseFeature {
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (e: void) => unknown;
 
-  #stopServer(): void {
+  #stopServer(force = false): void {
     if (!this.#server) { return; }
 
     this.log.info('Stopping server');
     this.#server.kill();
     this.#server = undefined;
+    if (force) {
+      this.#consumer.resetAll();
+    }
   }
 
   #startServer(): void {
@@ -182,7 +185,7 @@ class TestRunnerFeature extends BaseFeature {
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', (line?: number) => this.#launchTestDebugger(line));
-    this.register('stop', () => this.#stopServer());
+    this.register('stop', () => this.#stopServer(true));
     this.register('start', () => this.#startServer());
     this.register('rerun', () => this.#rerunActive());
 

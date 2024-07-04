@@ -9,7 +9,7 @@ import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig } from
 import { Decorations } from './decoration';
 import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown } from './types';
 
-const diagColl = vscode.languages.createDiagnosticCollection('Travetto');
+export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 
 type TestItem = Assertion | TestResult | TestConfig | SuiteResult | SuiteConfig;
 
@@ -111,6 +111,7 @@ export class DocumentResultsManager {
       for (const style of Object.values(test.styles)) { style.dispose(); }
       for (const style of Object.values(test.assertStyles)) { style.dispose(); }
     }
+    testDiagnostics.set(vscode.Uri.file(this.#file), []);
   }
 
   refreshTest(test: TestState | string): void {
@@ -212,7 +213,7 @@ export class DocumentResultsManager {
         }
         return acc;
       }, []);
-    diagColl.set(vscode.Uri.file(this.#file), this.#diagnostics);
+    testDiagnostics.set(vscode.Uri.file(this.#file), this.#diagnostics);
   }
 
   /**
