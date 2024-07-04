@@ -24,6 +24,9 @@ export class CompilerWatchFeature extends BaseFeature {
   #status = vscode.window.createStatusBarItem('travetto.build', vscode.StatusBarAlignment.Left, 1000);
   #log = new Log('travetto.compiler');
   #progress: Record<string, ProgressState> = {};
+  #stateController?: AbortController;
+  #shuttingDown = false;
+  #started = false;
 
   async #buildProgressBar(type: string, signal: AbortSignal): Promise<ProgressState> {
     this.#progress[type]?.cleanup();
@@ -61,15 +64,18 @@ export class CompilerWatchFeature extends BaseFeature {
   run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info' | 'event', args?: string[], signal?: AbortSignal): ChildProcess {
     const debug = command !== 'info' && command !== 'event';
     this.#log.trace('Running Compiler', 'npx', 'trvc', command, args);
+    const starting = command === 'start' || command === 'restart';
+    this.#started ||= starting;
     const proc = spawn('npx', ['trvc', command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
-      stdio: (command === 'start' || command === 'restart') ? ['pipe', 'ignore', 'pipe'] : 'pipe',
+      stdio: ['pipe', starting ? 'ignore' : 'pipe', 'pipe'],
       env: {
         PATH: process.env.PATH,
         ...(debug ? Env.TRV_BUILD.export('debug') : {})
       }
     }).on('exit', (code) => {
+      this.#started &&= !starting;
       this.#log.debug('Finished command', command, 'with', code);
     });
 
@@ -103,8 +109,8 @@ export class CompilerWatchFeature extends BaseFeature {
   }
 
   async #trackConnected(): Promise<void> {
-    for (; ;) {
-      const ctrl = new AbortController();
+    while (!this.#shuttingDown) {
+      const ctrl = this.#stateController = new AbortController();
       let connected = false;
       let state: string | undefined;
       try {
@@ -173,7 +179,7 @@ export class CompilerWatchFeature extends BaseFeature {
 
   async #trackProgress(signal: AbortSignal): Promise<void> {
     this.#log.info('Tracking progress started');
-    for await (const ev of this.#compilerEvents<CompilerProgressEvent>('progress')) {
+    for await (const ev of this.#compilerEvents<CompilerProgressEvent>('progress', signal)) {
       let pState = this.#progress[ev.operation];
 
       const value = 100 * (ev.idx / ev.total);
@@ -214,5 +220,13 @@ export class CompilerWatchFeature extends BaseFeature {
     for (const op of ['start', 'stop', 'restart', 'clean'] as const) {
       this.register(op, () => this.run(op));
     }
+  }
+
+  async deactivate(): Promise<void> {
+    this.#shuttingDown = true;
+    if (this.#started) {
+      this.run('stop');
+    }
+    this.#stateController?.abort();
   }
 }

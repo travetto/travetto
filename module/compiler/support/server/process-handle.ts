@@ -51,8 +51,12 @@ export class ProcessHandle {
   async ensureKilled(gracePeriod: number = 3000): Promise<boolean> {
     const start = Date.now();
     const pid = await this.getPid();
+    if (!pid) {
+      return false;
+    }
+
     this.#log.debug('Ensuring Killed', pid);
-    while (pid && (Date.now() - start) < gracePeriod) { // Ensure its done
+    while ((Date.now() - start) < gracePeriod) { // Ensure its done
       if (!await this.isRunning()) {
         return true;
       }
@@ -60,9 +64,9 @@ export class ProcessHandle {
     }
     try {
       this.#log.debug('Force Killing', pid);
-      pid && process.kill(pid); // Force kill
+      process.kill(pid); // Force kill
     } catch { }
     this.#log.debug('Did Kill', this.#file, !!pid);
-    return pid !== undefined;
+    return true;
   }
 }
