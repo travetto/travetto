@@ -9,5 +9,5 @@ export const service: CommandService = {
   env: {
     FIRESTORE_PROJECT_ID: 'trv-local-dev'
   },
-  image: `mtlynch/firestore-emulator-docker:${version}`
+  image: `ridedott/firestore-emulator:${version}`
 };
