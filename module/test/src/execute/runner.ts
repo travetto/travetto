@@ -37,7 +37,7 @@ export class Runner {
     const testCount = await RunnerUtil.getTestCount(this.#state.args);
     await consumer.onStart({ testCount });
     await WorkPool.run(
-      () => buildStandardTestManager(consumer),
+      buildStandardTestManager.bind(null, consumer),
       files,
       {
         idleTimeoutMillis: TimeUtil.timeToMs('10s'),

@@ -88,7 +88,7 @@ export class TestWatcher {
     }
 
     await WorkPool.run(
-      () => buildStandardTestManager(consumer),
+      buildStandardTestManager.bind(null, consumer),
       itr,
       {
         idleTimeoutMillis: 120000,
