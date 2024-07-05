@@ -48,6 +48,7 @@ export class SqliteConnection extends Connection<Database> {
     const db = new sqlDb(file, this.#config.options);
     await db.pragma('foreign_keys = ON');
     await db.pragma('journal_mode = WAL');
+    await db.pragma('synchronous = NORMAL');
     db.function('regexp', (a, b) => new RegExp(`${a}`).test(`${b}`) ? 1 : 0);
     return db;
   }
@@ -57,6 +58,8 @@ export class SqliteConnection extends Connection<Database> {
    */
   @WithAsyncContext()
   override async init(): Promise<void> {
+    this.transactionDialect = { ...this.transactionDialect, begin: 'BEGIN IMMEDIATE;' };
+
     await this.#create();
 
     this.#pool = createPool<Database>({

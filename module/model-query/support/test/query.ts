@@ -280,18 +280,18 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const simple3 = await service.queryCount(Aged, {
       where: {
         createdAt: {
-          $gt: '-1d',
-          $lt: '3d'
+          $gt: '-.9d',
+          $lt: '2.9d'
         }
       }
     });
-    assert(simple3 === 4);
+    assert(simple3 === 3);
 
     const simple4 = await service.queryCount(Aged, {
       where: {
         createdAt: {
-          $gt: new Date(),
-          $lt: TimeUtil.timeFromNow('3d')
+          $gt: TimeUtil.timeFromNow('-0.1d'),
+          $lt: TimeUtil.timeFromNow('2.9d')
         }
       }
     });
