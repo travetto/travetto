@@ -1,7 +1,7 @@
 import { createWriteStream } from 'node:fs';
 
 import { RuntimeContext } from '@travetto/manifest';
-import { ConsoleManager, Env, TimeUtil, Util } from '@travetto/base';
+import { ConsoleManager, Env, Util } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
 import { ErrorUtil } from '../consumer/error';
@@ -14,6 +14,8 @@ import { Events, RunEvent } from './types';
  * to run specific tests
  */
 export class TestChildWorker extends ChildCommChannel<RunEvent> {
+
+  #done = Util.resolvablePromise();
 
   async #exec(op: () => Promise<unknown>, type: string): Promise<void> {
     try {
@@ -49,7 +51,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     // Let parent know the child is ready for handling commands
     this.send(Events.READY);
 
-    await Util.blockingTimeout(TimeUtil.timeToMs('10m'));
+    await this.#done;
   }
 
   /**
@@ -80,11 +82,15 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
     console.debug('Running', { file: event.file });
 
-    await new Runner({
-      format: 'exec',
-      mode: 'single',
-      args: [event.file!, event.class!, event.method!],
-      concurrency: 1
-    }).run();
+    try {
+      await new Runner({
+        format: 'exec',
+        mode: 'single',
+        args: [event.file!, event.class!, event.method!],
+        concurrency: 1
+      }).run();
+    } finally {
+      this.#done.resolve();
+    }
   }
 }
