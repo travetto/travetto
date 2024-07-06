@@ -1,8 +1,7 @@
+import { isGeneratorFunction, isAsyncFunction } from 'node:util/types';
 import { Class } from './types';
 
 const AsyncGeneratorFunction = Object.getPrototypeOf(async function* () { });
-const GeneratorFunction = Object.getPrototypeOf(function* () { });
-const AsyncFunction = Object.getPrototypeOf(async function () { });
 
 /**
  * Common utilities for object detection/manipulation
@@ -45,7 +44,7 @@ export class ObjectUtil {
    */
   static isFunction(o: unknown): o is Function {
     const proto = o && Object.getPrototypeOf(o);
-    return proto && (proto === Function.prototype || proto === AsyncFunction || proto === AsyncGeneratorFunction || proto === GeneratorFunction);
+    return proto && (typeof o === 'function' || proto === AsyncGeneratorFunction || isAsyncFunction(o) || isGeneratorFunction(o));
   }
 
   /**
@@ -65,12 +64,5 @@ export class ObjectUtil {
    */
   static isSimple(a: unknown): a is Function | Class | string | number | RegExp | Date {
     return this.isPrimitive(a) || this.isFunction(a) || this.isClass(a);
-  }
-
-  /**
-   * Is a promise object
-   */
-  static isPromise(a: unknown): a is Promise<unknown> {
-    return !!a && (a instanceof Promise || (typeof a === 'object') && 'then' in a);
   }
 }

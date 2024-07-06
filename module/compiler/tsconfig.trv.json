@@ -4,7 +4,7 @@
     "target": "esnext",
     "moduleResolution": "Bundler",
     "lib": [
-      "es2022"
+      "ES2023"
     ],
     "jsx": "react-jsx",
     "strict": true,
