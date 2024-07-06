@@ -172,7 +172,7 @@ export interface ModelStreamSupport {
    * Get stream from asset store
    * @param location The location of the stream
    */
-  getStream(location: string, start?: number, end?: number): Promise<Readable>;
+  getStream(location: string, range?: StreamRange): Promise<Readable>;
 
   /**
    * Get metadata for stream
@@ -240,7 +240,7 @@ import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, StreamMeta } from '../service/stream';
+import { ModelStreamSupport, StreamMeta, StreamRange } from '../service/stream';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
@@ -296,7 +296,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T>;
   // Stream Support
   async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void>;
-  async getStream(location: string, start?: number, end?: number): Promise<Readable>;
+  async getStream(location: string, range?: StreamRange): Promise<Readable>;
   async describeStream(location: string): Promise<StreamMeta>;
   async deleteStream(location: string): Promise<void>;
   // Expiry

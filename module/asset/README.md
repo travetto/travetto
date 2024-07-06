@@ -52,7 +52,7 @@ class FullConfiguration {
 }
 ```
 
-Reading of and writing assets uses the [AssetService](https://github.com/travetto/travetto/tree/main/module/asset/src/service.ts#L19).  Below you can see an example dealing with a user's profile image.
+Reading of and writing assets uses the [AssetService](https://github.com/travetto/travetto/tree/main/module/asset/src/service.ts#L20).  Below you can see an example dealing with a user's profile image.
 
 **Code: User Profile Images**
 ```typescript
