@@ -4,7 +4,12 @@ import { Readable } from 'node:stream';
 
 import { ManifestFileUtil } from '@travetto/manifest';
 
-type PromiseResolver<T> = { resolve: (v: T) => void, reject: (err?: unknown) => void };
+type PromiseWithResolvers<T> = {
+  resolve: (v: T) => void;
+  reject: (err?: unknown) => void;
+  promise: Promise<T>;
+};
+
 type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
 
 /**
@@ -62,10 +67,10 @@ export class Util {
   /**
    * Produce a promise that is externally resolvable
    */
-  static resolvablePromise<T = void>(): Promise<T> & PromiseResolver<T> {
-    let ops: PromiseResolver<T>;
+  static resolvablePromise<T = void>(): PromiseWithResolvers<T> {
+    let ops: Pick<PromiseWithResolvers<T>, 'reject' | 'resolve'>;
     const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
-    return Object.assign(prom, ops!);
+    return { ...ops!, promise: prom };
   }
 
   /**

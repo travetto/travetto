@@ -183,7 +183,7 @@ export class ServiceUtil {
     }
 
     while (active.size) {
-      await (signal = Util.resolvablePromise());
+      await (signal = Util.resolvablePromise()).promise;
       yield* updates.splice(0, updates.length);
     }
   }

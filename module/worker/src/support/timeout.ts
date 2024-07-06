@@ -8,7 +8,7 @@ import { ExecutionError } from './error';
 export class Timeout extends ExecutionError {
 
   #timeout?: AbortController;
-  #promise = Util.resolvablePromise();
+  #resolver = Util.resolvablePromise();
   #duration: number;
 
   constructor(duration: number | TimeSpan, op: string = 'Operation') {
@@ -21,7 +21,7 @@ export class Timeout extends ExecutionError {
    */
   cancel(): void {
     if (this.#timeout) {
-      this.#promise.resolve();
+      this.#resolver.resolve();
       this.#timeout.abort();
       this.#timeout = undefined;
     }
@@ -34,9 +34,9 @@ export class Timeout extends ExecutionError {
     if (!this.#timeout) {
       this.#timeout = new AbortController();
       timers.setTimeout(this.#duration, undefined, { ref: false, signal: this.#timeout.signal })
-        .then(() => this.#promise.reject(this))
+        .then(() => this.#resolver.reject(this))
         .catch(() => false);
     }
-    return this.#promise;
+    return this.#resolver.promise;
   }
 }

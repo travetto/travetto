@@ -29,11 +29,11 @@ export class TestExecutor {
    */
   static async #executeTestMethod(test: TestConfig): Promise<Error | undefined> {
     const suite = SuiteRegistry.get(test.class);
-    const promCleanup = Util.resolvablePromise();
+    const cleanupResolver = Util.resolvablePromise();
 
     // Ensure all the criteria below are satisfied before moving forward
     const barrier = new Barrier(test.timeout || TEST_TIMEOUT, true)
-      .add(promCleanup, true) // If not timeout or unhandled, ensure all promises are cleaned up
+      .add(cleanupResolver.promise, true) // If not timeout or unhandled, ensure all promises are cleaned up
       .add(async () => {
         const env = process.env;
 
@@ -44,7 +44,7 @@ export class TestExecutor {
           await (suite.instance as Record<string, Function>)[test.methodName](); // Run
         } finally {
           process.env = env; // Restore
-          PromiseCapture.stop().then(() => Util.queueMacroTask().then(promCleanup.resolve), promCleanup.reject);
+          PromiseCapture.stop().then(() => Util.queueMacroTask().then(cleanupResolver.resolve), cleanupResolver.reject);
         }
       });
 

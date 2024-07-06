@@ -32,7 +32,7 @@ export class WorkQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
    */
   async next(): Promise<IteratorResult<X>> {
     while (!this.#done && !this.#queue.length) {
-      await this.#ready;
+      await this.#ready.promise;
       this.#ready = Util.resolvablePromise();
     }
     return { value: (this.#queue.length ? this.#queue.shift() : undefined)!, done: this.#done };

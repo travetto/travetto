@@ -50,7 +50,7 @@ export class CompilerWatchFeature extends BaseFeature {
           { location: vscode.ProgressLocation.Notification, cancellable: false, title },
           p => {
             resolve(p);
-            return complete;
+            return complete.promise;
           }
         )
       )
