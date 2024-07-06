@@ -1,4 +1,5 @@
 import { Readable } from 'node:stream';
+import { buffer as toBuffer } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
 import { S3, CompletedPart, type CreateMultipartUploadRequest } from '@aws-sdk/client-s3';
@@ -7,10 +8,11 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
-  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId, PartialStream
+  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
+  StreamRange
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { StreamUtil, Class, AppError } from '@travetto/base';
+import { Class, AppError } from '@travetto/base';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
@@ -18,6 +20,7 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { S3ModelConfig } from './config';
+import { enforceRange } from '@travetto/model/src/internal/service/stream';
 
 function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && typeof o === 'object' && '$metadata' in o;
@@ -201,7 +204,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       const result = await this.client.getObject(this.#q(cls, id));
       if (result.Body) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const body = (await StreamUtil.streamToBuffer(result.Body as Readable)).toString('utf8');
+        const body = (await toBuffer(result.Body as Readable)).toString('utf8');
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
           const { expiresAt } = ModelRegistry.get(cls);
@@ -300,7 +303,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     if (meta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#q(STREAM_SPACE, location, {
-        Body: await StreamUtil.toBuffer(input),
+        Body: await toBuffer(input),
         ContentLength: meta.size,
         ...this.#getMetaBase(meta),
       }));
@@ -309,34 +312,35 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async getStream(location: string): Promise<Readable> {
+  async #getObject(location: string, range: Required<StreamRange>): Promise<Readable> {
     // Read from s3
-    const res = await this.client.getObject(this.#q(STREAM_SPACE, location));
-    if (res.Body instanceof Buffer || // Buffer
-      typeof res.Body === 'string' || // string
-      res.Body && ('pipe' in res.Body) // Stream
-    ) {
-      return StreamUtil.toStream(res.Body);
+    const res = await this.client.getObject(this.#q(STREAM_SPACE, location, range ? {
+      Range: `bytes=${range.start}-${range.end}`
+    } : {}));
+
+    if (!res.Body) {
+      throw new AppError('Unable to read type: undefined');
+    }
+
+    if (typeof res.Body === 'string') { // string
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return Readable.from(res.Body, { encoding: (res.Body as string).endsWith('=') ? 'base64' : 'utf8' });
+    } else if (res.Body instanceof Buffer) { // Buffer
+      return Readable.from(res.Body);
+    } else if ('pipe' in res.Body) { // Stream
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return res.Body as Readable;
     }
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }
 
-  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
-    const meta = await this.describeStream(location);
-
-    [start, end] = StreamUtil.enforceRange(start, end, meta.size);
-
-    // Read from s3
-    const res = await this.client.getObject(this.#q(STREAM_SPACE, location, {
-      Range: `bytes=${start}-${end}`
-    }));
-    if (res.Body instanceof Buffer || // Buffer
-      typeof res.Body === 'string' || // string
-      res.Body && ('pipe' in res.Body) // Stream
-    ) {
-      return { stream: await StreamUtil.toStream(res.Body), range: [start, end] };
+  async getStream(location: string, range?: StreamRange): Promise<Readable> {
+    if (range) {
+      const meta = await this.describeStream(location);
+      range = enforceRange(range, meta.size);
     }
-    throw new AppError(`Unable to read type: ${typeof res.Body}`);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return this.#getObject(location, range as Required<StreamRange>);
   }
 
   async headStream(location: string): Promise<{ Metadata?: Partial<StreamMeta>, ContentLength?: number }> {

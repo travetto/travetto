@@ -172,13 +172,7 @@ export interface ModelStreamSupport {
    * Get stream from asset store
    * @param location The location of the stream
    */
-  getStream(location: string): Promise<Readable>;
-
-  /**
-   * Get partial stream from asset store given a starting byte and an optional ending byte
-   * @param location The location of the stream
-   */
-  getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream>;
+  getStream(location: string, start?: number, end?: number): Promise<Readable>;
 
   /**
    * Get metadata for stream
@@ -231,8 +225,8 @@ The `id` is the only required field for a model, as this is a hard requirement o
 |[Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
 |[S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
-|[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L53)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L50)|X|X| |X|X|X|
+|[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)|X|X|X|X|X|X|
+|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L49)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
@@ -240,12 +234,13 @@ In addition to the provided contracts, the module also provides common utilities
 **Code: Memory Service**
 ```typescript
 import { Readable } from 'node:stream';
-import { StreamUtil, Class, TimeSpan } from '@travetto/base';
+import { buffer as toBuffer } from 'node:stream/consumers';
+import { Class, TimeSpan } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, PartialStream, StreamMeta } from '../service/stream';
+import { ModelStreamSupport, StreamMeta } from '../service/stream';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
@@ -257,7 +252,7 @@ import { ExistsError } from '../error/exists';
 import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
-import { StreamModel, STREAMS } from '../internal/service/stream';
+import { enforceRange, StreamModel, STREAMS } from '../internal/service/stream';
 import { IndexConfig } from '../registry/types';
 const STREAM_META = `${STREAMS}_meta`;
 type StoreType = Map<string, Buffer>;
@@ -301,8 +296,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T>;
   // Stream Support
   async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void>;
-  async getStream(location: string): Promise<Readable>;
-  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream>;
+  async getStream(location: string, start?: number, end?: number): Promise<Readable>;
   async describeStream(location: string): Promise<StreamMeta>;
   async deleteStream(location: string): Promise<void>;
   // Expiry

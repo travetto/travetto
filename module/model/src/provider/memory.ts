@@ -1,12 +1,13 @@
 import { Readable } from 'node:stream';
+import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { StreamUtil, Class, TimeSpan } from '@travetto/base';
+import { Class, TimeSpan } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, PartialStream, StreamMeta } from '../service/stream';
+import { ModelStreamSupport, StreamMeta, StreamRange } from '../service/stream';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
@@ -18,7 +19,7 @@ import { ExistsError } from '../error/exists';
 import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
-import { StreamModel, STREAMS } from '../internal/service/stream';
+import { enforceRange, StreamModel, STREAMS } from '../internal/service/stream';
 import { IndexConfig } from '../registry/types';
 
 const STREAM_META = `${STREAMS}_meta`;
@@ -244,22 +245,17 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     const streams = this.#getStore(STREAMS);
     const metaContent = this.#getStore(STREAM_META);
     metaContent.set(location, Buffer.from(JSON.stringify(meta)));
-    streams.set(location, await StreamUtil.streamToBuffer(input));
+    streams.set(location, await toBuffer(input));
   }
 
-  async getStream(location: string): Promise<Readable> {
+  async getStream(location: string, range?: StreamRange): Promise<Readable> {
     const streams = this.#find(STREAMS, location, 'notfound');
-    return StreamUtil.bufferToStream(streams.get(location)!);
-  }
-
-  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
-    const streams = this.#find(STREAMS, location, 'notfound');
-    const buffer = streams.get(location)!;
-
-    [start, end] = StreamUtil.enforceRange(start, end, buffer.length);
-
-    const stream = await StreamUtil.bufferToStream(buffer.subarray(start, end + 1));
-    return { stream, range: [start, end] };
+    let buffer = streams.get(location)!;
+    if (range) {
+      range = enforceRange(range, buffer.length);
+      buffer = buffer.subarray(range.start, range.end! + 1);
+    }
+    return Readable.from(buffer);
   }
 
   async describeStream(location: string): Promise<StreamMeta> {

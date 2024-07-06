@@ -35,10 +35,7 @@ export interface StreamMeta {
   cacheControl?: string;
 }
 
-export interface PartialStream {
-  stream: Readable;
-  range: [number, number];
-}
+export type StreamRange = { start: number, end?: number };
 
 /**
  * Support for Streams CRD.  Stream update is not supported.
@@ -59,13 +56,7 @@ export interface ModelStreamSupport {
    * Get stream from asset store
    * @param location The location of the stream
    */
-  getStream(location: string): Promise<Readable>;
-
-  /**
-   * Get partial stream from asset store given a starting byte and an optional ending byte
-   * @param location The location of the stream
-   */
-  getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream>;
+  getStream(location: string, range?: StreamRange): Promise<Readable>;
 
   /**
    * Get metadata for stream

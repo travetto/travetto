@@ -11,14 +11,15 @@ import {
   ModelCrudSupport, ModelStorageSupport, ModelStreamSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport,
   StreamMeta, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig, PartialStream
+  NotFoundError, ExistsError, IndexConfig,
+  StreamRange
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
-import { ShutdownManager, type Class, AppError, TypedObject, StreamUtil } from '@travetto/base';
+import { ShutdownManager, type Class, AppError, TypedObject } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { DeepPartial, FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
@@ -30,7 +31,7 @@ import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/servic
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
+import { enforceRange, StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
@@ -299,26 +300,19 @@ export class MongoModelService implements
     await pipeline(input, writeStream);
   }
 
-  async getStream(location: string): Promise<Readable> {
-    await this.describeStream(location);
+  async getStream(location: string, range?: StreamRange): Promise<Readable> {
+    const meta = await this.describeStream(location);
 
-    const res = await this.#bucket.openDownloadStreamByName(location);
+    if (range) {
+      range = enforceRange(range, meta.size);
+      range.end! += 1; // range is exclusive
+    }
+
+    const res = await this.#bucket.openDownloadStreamByName(location, range);
     if (!res) {
       throw new NotFoundError(STREAMS, location);
     }
     return res;
-  }
-
-  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
-    const meta = await this.describeStream(location);
-
-    [start, end] = StreamUtil.enforceRange(start, end, meta.size);
-
-    const res = await this.#bucket.openDownloadStreamByName(location, { start, end: end + 1 });
-    if (!res) {
-      throw new NotFoundError(STREAMS, location);
-    }
-    return { stream: res, range: [start, end] };
   }
 
   async describeStream(location: string): Promise<StreamMeta> {

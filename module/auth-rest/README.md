@@ -71,7 +71,7 @@ export interface Authenticator<T = unknown, P extends Principal = Principal, C =
 }
 ```
 
-The only required method to be defined is the `authenticate` method.  This takes in a pre-principal payload and a filter context with a [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L15) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L130), and is responsible for:
+The only required method to be defined is the `authenticate` method.  This takes in a pre-principal payload and a filter context with a [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L15) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L138), and is responsible for:
    *  Returning an [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) if authentication was successful
    *  Throwing an error if it failed
    *  Returning undefined if the authentication is multi-staged and has not completed yet

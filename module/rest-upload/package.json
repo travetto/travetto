@@ -1,0 +1,49 @@
+{
+  "name": "@travetto/rest-upload",
+  "version": "4.1.4",
+  "description": "Provides integration between the travetto asset and rest module.",
+  "keywords": [
+    "rest",
+    "travetto",
+    "typescript",
+    "upload"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src",
+    "support"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-upload"
+  },
+  "dependencies": {
+    "@fastify/busboy": "^2.1.1",
+    "@travetto/asset": "^4.1.3",
+    "@travetto/config": "^4.1.2",
+    "@travetto/rest": "^4.1.4",
+    "file-type": "^16.5.4"
+  },
+  "peerDependencies": {
+    "@travetto/test": "^4.1.1"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "travetto": {
+    "displayName": "Rest Upload Support"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,6 +1,5 @@
-import { getExtension } from 'mime';
-
 import { StreamMeta } from '@travetto/model';
+import { AssetUtil } from './util';
 
 /**
  * Standard class for an asset naming strategy
@@ -35,10 +34,10 @@ export class HashNamingStrategy implements AssetNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 
   resolve(asset: StreamMeta): string {
-    let ext = '';
+    let ext: string | undefined = '';
 
     if (asset.contentType) {
-      ext = getExtension(asset.contentType)!;
+      ext = AssetUtil.getExtension(asset.contentType);
     } else if (asset.filename) {
       const dot = asset.filename.indexOf('.');
       if (dot > 0) {

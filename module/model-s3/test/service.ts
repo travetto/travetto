@@ -1,6 +1,6 @@
 import assert from 'node:assert';
+import { Readable } from 'node:stream';
 
-import { StreamUtil } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
@@ -49,9 +49,9 @@ export class S3StreamSuite extends ModelStreamSuite {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
-    const hash = await this.getHash(await StreamUtil.bufferToStream(buffer));
+    const hash = await this.getHash(Readable.from(buffer));
 
-    await service.upsertStream(hash, await StreamUtil.bufferToStream(buffer), {
+    await service.upsertStream(hash, Readable.from(buffer), {
       filename: 'Random.bin',
       contentType: 'binary/octet-stream',
       size: buffer.length,

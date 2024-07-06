@@ -8,7 +8,7 @@ import { getExtension, getType } from 'mime';
 
 import { path } from '@travetto/manifest';
 import { StreamMeta } from '@travetto/model';
-import { AppError } from '@travetto/base';
+import { Util } from '@travetto/base';
 
 import { Asset } from './types';
 
@@ -18,21 +18,25 @@ import { Asset } from './types';
 export class AssetUtil {
 
   /**
-   * Compute hash from a file location on disk
+   * Compute hash from a file location on disk or a blob
    */
-  static async hashFile(pth: string): Promise<string> {
+  static async computeHash(input: string | Blob | Buffer): Promise<string> {
     const hasher = crypto.createHash('sha256').setEncoding('hex');
-    const str = createReadStream(pth);
+    const str = typeof input === 'string' ?
+      createReadStream(input) :
+      Buffer.isBuffer(input) ?
+        Readable.from(input) :
+        Readable.fromWeb(input.stream());
     await pipeline(str, hasher);
     return hasher.read().toString();
   }
 
   /**
-   * Read a chunk from a file, primarily used for mime detection
+   * Read a chunk from a file
    */
   static async readChunk(input: string | Readable | Buffer, bytes: number): Promise<Buffer> {
     if (Buffer.isBuffer(input)) {
-      return input;
+      return input.subarray(0, bytes);
     } else if (typeof input === 'string') {
       const fd = await fs.open(input, 'r');
       try {
@@ -52,12 +56,12 @@ export class AssetUtil {
           break;
         }
       }
-      return Buffer.concat(chunks);
+      return Buffer.concat(chunks).subarray(0, bytes);
     }
   }
 
   /**
-   * Detect file type from location on disk
+   * Detect file type
    */
   static async detectFileType(input: string | Buffer | Readable): Promise<{ ext: string, mime: string } | undefined> {
     const { default: fileType } = await import('file-type');
@@ -75,7 +79,7 @@ export class AssetUtil {
    */
   static async ensureFileExtension(filePath: string): Promise<string> {
     const type = await this.resolveFileType(filePath);
-    const ext = getExtension(type);
+    const ext = this.getExtension(type);
     const baseName = path.basename(filePath, path.extname(filePath));
     const newFile = `${baseName}.${ext}`;
 
@@ -85,6 +89,14 @@ export class AssetUtil {
     }
 
     return filePath;
+  }
+
+  /**
+   * Get extension for a given content type
+   * @param contentType
+   */
+  static getExtension(contentType: string): string | undefined {
+    return getExtension(contentType)!;
   }
 
   /**
@@ -107,7 +119,7 @@ export class AssetUtil {
    */
   static async fileToAsset(file: string, metadata: Partial<StreamMeta> = {}): Promise<Asset> {
 
-    const hash = metadata.hash ?? await this.hashFile(file);
+    const hash = metadata.hash ?? await this.computeHash(file);
     const size = metadata.size ?? (await fs.stat(file)).size;
     const contentType = metadata.contentType ?? await this.resolveFileType(file);
     let filename = metadata.filename;
@@ -116,7 +128,7 @@ export class AssetUtil {
       filename = path.basename(file);
       const extName = path.extname(file);
       if (!extName) {
-        const ext = getExtension(contentType);
+        const ext = this.getExtension(contentType);
         if (ext) {
           filename = `${filename}.${ext}`;
         }
@@ -127,6 +139,9 @@ export class AssetUtil {
       size,
       filename,
       contentType,
+      contentEncoding: metadata.contentEncoding,
+      contentLanguage: metadata.contentLanguage,
+      cacheControl: metadata.cacheControl,
       localFile: file,
       source: createReadStream(file),
       hash
@@ -134,49 +149,39 @@ export class AssetUtil {
   }
 
   /**
-   * Fetch bytes from a url
+   * Convert blob to asset structure
    */
-  static async fetchBytes(url: string, byteLimit: number = -1): Promise<Buffer> {
-    const str = await fetch(url, {
-      headers: (byteLimit > 0) ? {
-        Range: `0-${byteLimit - 1}`
-      } : {}
-    });
+  static async blobToAsset(blob: Blob, metadata: Partial<StreamMeta> = {}): Promise<Asset> {
 
-    if (!str.ok) {
-      throw new AppError('Invalid url for hashing', 'data');
-    }
+    const hash = metadata.hash ??= await this.computeHash(blob);
+    const size = metadata.size ?? blob.size;
+    const contentType = metadata.contentType ?? blob.type;
+    let filename = metadata.filename;
 
-    let count = 0;
-    const buffer: Buffer[] = [];
-
-    for await (const chunk of Readable.fromWeb(str.body!)) {
-      if (Buffer.isBuffer(chunk)) {
-        buffer.push(chunk);
-        count += chunk.length;
-      } else if (typeof chunk === 'string') {
-        buffer.push(Buffer.from(chunk));
-        count += chunk.length;
-      }
-
-      if (count > byteLimit && byteLimit > 0) {
-        break;
+    if (!filename) {
+      filename = `unknown.${Date.now()}`;
+      const ext = this.getExtension(contentType);
+      if (ext) {
+        filename = `${filename}.${ext}`;
       }
     }
 
-    try {
-      await str.body?.cancel();
-    } catch { }
-
-    return Buffer.concat(buffer, byteLimit <= 0 ? undefined : byteLimit);
+    return {
+      size,
+      filename,
+      contentType,
+      contentEncoding: metadata.contentEncoding,
+      contentLanguage: metadata.contentLanguage,
+      cacheControl: metadata.cacheControl,
+      source: Readable.fromWeb(blob.stream()),
+      hash
+    };
   }
 
   /**
    * Compute hash from a url
    */
   static async hashUrl(url: string, byteLimit = -1): Promise<string> {
-    const hasher = crypto.createHash('sha256').setEncoding('hex');
-    const finalData = await this.fetchBytes(url, byteLimit);
-    return hasher.update(finalData).end().read().toString();
+    return this.computeHash(await Util.fetchBytes(url, byteLimit));
   }
 }

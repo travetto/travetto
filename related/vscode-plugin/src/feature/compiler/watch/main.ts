@@ -3,7 +3,7 @@ import { createInterface } from 'node:readline/promises';
 import { ChildProcess, spawn } from 'node:child_process';
 
 import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
-import { Env, ExecUtil, StreamUtil, Util } from '@travetto/base';
+import { Env, ExecUtil, Util } from '@travetto/base';
 
 import { BaseFeature } from '../../base';
 import { Log } from '../../../core/log';
@@ -79,8 +79,13 @@ export class CompilerWatchFeature extends BaseFeature {
       this.#log.debug('Finished command', command, 'with', code);
     });
 
-    debug && proc.stderr && StreamUtil.onLine(proc.stderr, line => this.#log.error(`> ${line.replace(SUB_LOG_RE, '')}`));
-    debug && proc.stdout && StreamUtil.onLine(proc.stdout, line => this.#log.info(`> ${line.replace(SUB_LOG_RE, '')}`));
+    if (debug && proc.stderr) {
+      Util.consumeAsyncItr(createInterface(proc.stderr), line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
+    }
+
+    if (debug && proc.stdout) {
+      Util.consumeAsyncItr(createInterface(proc.stdout), line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
+    }
 
     return proc;
   }

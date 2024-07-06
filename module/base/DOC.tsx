@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { c, d } from '@travetto/doc';
 import {
-  ExecUtil, AppError, StreamUtil, ObjectUtil, Util,
+  ExecUtil, AppError, ObjectUtil, Util,
   FileLoader, TimeUtil, ResourceLoader, EnvProp
 } from '@travetto/base';
 import { RuntimeIndex } from '@travetto/manifest';
@@ -118,16 +118,6 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
     </c.SubSection>
   </c.Section>
 
-  <c.Section title='Stream Utilities'>
-    The {StreamUtil} class provides basic stream utilities for use within the framework:
-
-    <ul>
-      <li>{d.method('toBuffer(src: Readable | Buffer | string): Promise<Buffer>')} for converting a stream/buffer/filepath to a Buffer.</li>
-      <li>{d.method('toReadable(src: Readable | Buffer | string):Promise<Readable>')} for converting a stream/buffer/filepath to a Readable</li>
-      <li>{d.method('writeToFile(src: Readable, out: string):Promise<void>')} will stream a readable into a file path, and wait for completion.</li>
-    </ul>
-  </c.Section>
-
   <c.Section title='Object Utilities'>
     Simple functions for providing a minimal facsimile to {d.library('Lodash')}, but without all the weight. Currently {ObjectUtil} includes:
 
@@ -151,6 +141,7 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
       <li>{d.method('shortHash(text: string)')} produces a sha512 hash and returns the first 32 characters.</li>
       <li>{d.method('fullHash(text: string, size?: number)')} produces a full sha512 hash.</li>
       <li>{d.method('resolvablePromise()')} produces a <c.Class name='Promise' /> instance with the {d.method('resolve')} and {d.method('reject')} methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.</li>
+      <li>{d.method('fetchBytes(url: string, byteLimit?: number): Promise<Buffer>')} for fetching bytes from a url</li>
     </ul>
 
     <c.Code title='Sample makeTemplate Usage' src={`

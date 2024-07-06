@@ -1,9 +1,8 @@
 import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
 
 import { ErrorCategory, AppError, ObjectUtil } from '@travetto/base';
 
-import { SendStreamⲐ, NodeEntityⲐ, HeadersAddedⲐ } from '../internal/symbol';
+import { HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
 import { Request, Response } from '../types';
 
@@ -98,7 +97,23 @@ export class SerializeUtil {
    */
   static async serializeStream(res: Response, output: Readable): Promise<void> {
     this.setContentTypeIfUndefined(res, 'application/octet-stream');
-    return (res[SendStreamⲐ] ? res[SendStreamⲐ](output) : pipeline(output, res[NodeEntityⲐ]));
+    await res.sendStream(output);
+  }
+
+  /**
+   * Serialize file/blob
+   */
+  static async serializeBlob(res: Response, output: Blob | File): Promise<void> {
+    if (output instanceof File && output.name) {
+      res.setHeader('Content-Disposition', `filename="${output.name}"`);
+    }
+    if (output.type) {
+      this.setContentTypeIfUndefined(res, output.type);
+    }
+    if (output.size) {
+      res.setHeader('Content-Length', `${output.size}`);
+    }
+    return this.serializeStream(res, Readable.fromWeb(output.stream()));
   }
 
   /**
@@ -146,6 +161,8 @@ export class SerializeUtil {
           return this.serializeStream(res, output);
         } else if (output instanceof Error) {
           return this.serializeError(res, output);
+        } else if (output instanceof Blob) {
+          return this.serializeBlob(res, output);
         } else {
           return this.serializeJSON(req, res, output);
         }

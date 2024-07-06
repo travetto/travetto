@@ -1,8 +1,13 @@
 import { IncomingHttpHeaders } from 'node:http';
 
-import { Request, ContentType } from '../../types';
+import { getExtension } from 'mime';
+
+
+import { Request, ContentType, ByteRange } from '../../types';
 import { MimeUtil } from '../../util/mime';
 import { NodeEntityⲐ, ParsedType } from '../../internal/symbol';
+
+const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
 /**
  * Base Request object
@@ -62,5 +67,37 @@ export class RequestCore implements Partial<Request> {
     const self = (this as unknown as Request);
     const raw = self[NodeEntityⲐ];
     return self.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
+  }
+
+  /**
+   * Get requested byte range for a given request
+   */
+  getRange(this: Request, chunkSize: number = 100 * 1024): ByteRange | undefined {
+    const rangeHeader = this.headerFirst('range');
+
+    if (rangeHeader) {
+      const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
+        .map(x => x ? parseInt(x, 10) : undefined);
+      if (start !== undefined) {
+        return { start, end: end ?? (start + chunkSize) };
+      }
+    }
+  }
+
+  /**
+   * Read the filename from the content disposition
+   */
+  getFilename(this: Request): string {
+    const [, match] = (this.header('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
+    if (match) {
+      return match;
+    } else {
+      const contentType = this.getContentType();
+      if (contentType) {
+        return `file-upload.${getExtension(contentType.full)}`;
+      } else {
+        return 'file-upload.unknown';
+      }
+    }
   }
 }

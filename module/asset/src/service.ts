@@ -1,11 +1,13 @@
-import { PassThrough } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
 
 import { Inject, Injectable } from '@travetto/di';
-import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta } from '@travetto/model';
-import { StreamUtil } from '@travetto/base';
+import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta, StreamRange } from '@travetto/model';
+import { enforceRange } from '@travetto/model/src/internal/service/stream';
 
-import { Asset, AssetResponse } from './types';
+import { Asset } from './types';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
+import { AssetUtil } from './util';
+import { StreamResponse } from './response';
 
 export const AssetModelⲐ = Symbol.for('@travetto/asset:model');
 
@@ -47,6 +49,21 @@ export class AssetService {
    * Stores an asset with the optional ability to overwrite if the file is already found. If not
    * overwriting and file exists, an error will be thrown.
    *
+   * @param blob The blob to store
+   * @param meta The optional metadata for the blob
+   * @param overwriteIfFound Overwrite the asset if found
+   * @param strategy The naming strategy to use, defaults to the service's strategy if not provided
+   */
+  async upsertBlob(blob: Blob, meta: Partial<StreamMeta> = {}, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<{ asset: Asset, location: string }> {
+    const asset = await AssetUtil.blobToAsset(blob, meta);
+    const location = await this.upsert(asset, overwriteIfFound, strategy);
+    return { asset, location };
+  }
+
+  /**
+   * Stores an asset with the optional ability to overwrite if the file is already found. If not
+   * overwriting and file exists, an error will be thrown.
+   *
    * @param asset The asset to store
    * @param overwriteIfFound Overwrite the asset if found
    * @param strategy The naming strategy to use, defaults to the service's strategy if not provided
@@ -71,7 +88,15 @@ export class AssetService {
       }
     }
 
-    const stream = await StreamUtil.toStream(source);
+    let stream: Readable;
+    if (typeof source === 'string') {
+      stream = Readable.from(source, { encoding: source.endsWith('=') ? 'base64' : 'utf8' });
+    } else if (Buffer.isBuffer(source)) {
+      stream = Readable.from(source);
+    } else {
+      stream = source;
+    }
+
     await this.#store.upsertStream(location, stream, asset);
     return location;
   }
@@ -83,17 +108,15 @@ export class AssetService {
    *
    * @param location The location to find.
    */
-  async get(location: string, start?: number, end?: number): Promise<AssetResponse> {
-    const info = await this.describe(location);
-    const stream = new PassThrough();
-    const extra: Partial<AssetResponse> = {};
-    let load: () => void;
-    if (start === undefined) {
-      load = (): void => { this.#store.getStream(location).then(v => v.pipe(stream)); };
-    } else {
-      extra.range = StreamUtil.enforceRange(start, end, info.size);
-      load = (): void => { this.#store.getStreamPartial(location, start, end).then(v => v.stream.pipe(stream)); };
+  async get(location: string, range?: StreamRange): Promise<StreamResponse> {
+    const meta = await this.describe(location);
+    if (range) {
+      range = enforceRange(range, meta.size);
     }
-    return { stream: () => (load(), stream), ...info, ...extra };
+
+    const stream = new PassThrough();
+    const load = (): void => { this.#store.getStream(location, range).then(v => v.pipe(stream)); };
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return new StreamResponse(() => (load(), stream), meta, range as Required<StreamRange>);
   }
 }

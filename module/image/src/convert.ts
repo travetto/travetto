@@ -1,10 +1,10 @@
 import { Readable } from 'node:stream';
+import { buffer as toBuffer } from 'node:stream/consumers';
 import { createReadStream } from 'node:fs';
 import { ChildProcess } from 'node:child_process';
 import { pipeline } from 'node:stream/promises';
 
 import { CommandOperation } from '@travetto/command';
-import { MemoryWritable, StreamUtil } from '@travetto/base';
 
 /**
  * Image output options
@@ -62,13 +62,12 @@ export class ImageConverter {
 
   static async #stream<T extends ImageType>(proc: ChildProcess, input: T): Promise<T> {
     if (Buffer.isBuffer(input)) {
-      const buffer = new MemoryWritable();
-      await Promise.all([
-        pipeline(await StreamUtil.toStream(input), proc.stdin!),
-        pipeline(proc.stdout!, buffer)
+      const [_, output] = await Promise.all([
+        pipeline(Readable.from(input), proc.stdin!),
+        toBuffer(proc.stdout!)
       ]);
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return buffer.toBuffer() as T;
+      return output as T;
     } else {
       input.pipe(proc.stdin!); // Start the process
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -122,13 +121,12 @@ export class ImageConverter {
       image = createReadStream(image);
     }
 
-    const buffer = new MemoryWritable();
-    await Promise.all([
+    const [_, output] = await Promise.all([
       pipeline(image, proc.stdin!),
-      pipeline(proc.stdout!, buffer)
+      toBuffer(proc.stdout!)
     ]);
 
-    const text = buffer.toBuffer('utf8');
+    const text = output.toString('utf8');
     const [w, h] = text.split('X').map(x => parseFloat(x));
 
     return { width: w, height: h };

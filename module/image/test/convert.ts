@@ -1,9 +1,11 @@
 import os from 'node:os';
 import assert from 'node:assert';
 import fs from 'node:fs/promises';
+import { pipeline } from 'node:stream/promises';
+import { buffer as toBuffer } from 'node:stream/consumers';
+import { createWriteStream } from 'node:fs';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { StreamUtil } from '@travetto/base';
 import { path } from '@travetto/manifest';
 
 import { ImageConverter } from '../src/convert';
@@ -34,7 +36,7 @@ class ImageConverterTest {
 
     const out = await ImageConverter.optimize('png', imgStream);
 
-    const optimized = await StreamUtil.toBuffer(out);
+    const optimized = await toBuffer(out);
 
     assert(optimized.length > 0);
 
@@ -48,7 +50,7 @@ class ImageConverterTest {
 
     const out = await ImageConverter.optimize('jpeg', imgStream);
 
-    const optimized = await StreamUtil.toBuffer(out);
+    const optimized = await toBuffer(out);
 
     assert(optimized.length > 0);
 
@@ -65,7 +67,7 @@ class ImageConverterTest {
     });
 
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
-    await StreamUtil.writeToFile(out, outFile);
+    await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
     const dims = await ImageConverter.getDimensions(outFile);
@@ -87,7 +89,7 @@ class ImageConverterTest {
     });
 
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
-    await StreamUtil.writeToFile(out, outFile);
+    await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
     const dims = await ImageConverter.getDimensions(outFile);

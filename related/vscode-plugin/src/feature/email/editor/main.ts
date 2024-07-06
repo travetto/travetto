@@ -1,7 +1,8 @@
 import { ChildProcess, spawn } from 'node:child_process';
+import rl from 'node:readline/promises';
 import vscode from 'vscode';
 
-import { StreamUtil } from '@travetto/base';
+import { Util } from '@travetto/base';
 import type { EditorResponse } from '@travetto/email-compiler/support/bin/types';
 import type { EmailCompiled } from '@travetto/email';
 
@@ -66,8 +67,12 @@ export class EmailCompilerFeature extends BaseFeature {
         }
       });
 
-    StreamUtil.onLine(this.#server.stderr, (line) => this.log.debug(`> stderr > ${line}`));
-    StreamUtil.onLine(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line}`));
+    if (this.#server.stderr) {
+      Util.consumeAsyncItr(rl.createInterface(this.#server.stderr), (line) => this.log.debug(`> stderr > ${line.trimEnd()}`));
+    }
+    if (this.#server.stdout) {
+      Util.consumeAsyncItr(rl.createInterface(this.#server.stdout), (line) => this.log.debug(`> stdout > ${line.trimEnd()}`));
+    }
   }
 
   #compileActive(): void {

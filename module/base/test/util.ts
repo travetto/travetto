@@ -59,4 +59,16 @@ export class UtilTest {
     assert(values[0] === 'aaa = 0');
     assert(values[1] === 'bbb = 1');
   }
+
+  @Test()
+  async fetchBytes() {
+    const data = await Util.fetchBytes('https://travetto.dev/assets/landing/bg.jpg', 100000);
+    assert(data.length === 100000);
+
+    const data2 = await Util.fetchBytes('https://travetto.dev/assets/landing/bg.jpg', 100001);
+    assert(data2.length === 100001);
+
+    const full = await Util.fetchBytes('https://travetto.dev/assets/landing/bg.jpg');
+    assert(full.length === 215532);
+  }
 }

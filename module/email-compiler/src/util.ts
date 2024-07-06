@@ -1,7 +1,6 @@
 import util from 'node:util';
-import { pipeline } from 'node:stream/promises';
+import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { MemoryWritable } from '@travetto/base';
 import { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
 import { ImageConverter } from '@travetto/image';
 import { path } from '@travetto/manifest';
@@ -141,9 +140,8 @@ export class EmailCompileUtil {
         const output = await ImageConverter.optimize(
           ext === '.png' ? 'png' : 'jpeg', await opts.loader.readStream(src)
         );
-        const buffer = new MemoryWritable();
-        await pipeline(output, buffer);
-        pendingImages.push([token, ext, buffer.toBuffer()]);
+        const buffer = toBuffer(output);
+        pendingImages.push([token, ext, buffer]);
       } else {
         pendingImages.push([token, ext, opts.loader.read(src, true)]);
       }
