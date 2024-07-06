@@ -1,72 +1,51 @@
+import { createHook } from 'node:async_hooks';
+
 import { ExecutionError } from '@travetto/worker';
 
-const og = Promise;
-
-declare global {
-  interface Promise<T> {
-    status: 'ok' | 'error';
-  }
-}
-
-/**
- * Promise stub to track creation
- */
-function Wrapped(this: Promise<unknown>, ex: (res: (v: unknown) => unknown, rej?: (err: unknown) => unknown) => void): Promise<unknown> {
-  const prom = new og(ex);
-  this.then = prom.then.bind(prom);
-  this.catch = prom.catch.bind(prom);
-  this.finally = prom.finally.bind(prom);
-  this.then(() => prom.status = 'ok',
-    () => prom.status = 'error');
-
-  if (PromiseCapture.pending) {
-    PromiseCapture.pending.push(prom);
-  }
-  return this;
-}
-
-Wrapped.allSettled = Promise.allSettled.bind(Promise);
-Wrapped.race = Promise.race.bind(Promise);
-Wrapped.all = Promise.all.bind(Promise);
-Wrapped.resolve = Promise.resolve.bind(Promise);
-Wrapped.reject = Promise.reject.bind(Promise);
+const PENDING = Symbol.for('@travetto/test:promise-pending');
 
 /**
  * Promise watcher, to catch any unfinished promises
  */
 export class PromiseCapture {
-  static pending: Promise<unknown>[];
+  static #pending: Promise<unknown>[] = [];
+  static #hook = createHook({
+    init(id, type, triggerId, resource) {
+      if (type === 'PROMISE') {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        PromiseCapture.#pending.push(resource as Promise<unknown>);
+      }
+    }
+  });
 
   /**
-   * Swap method and track progress
+   * Track promise creation
    */
   static start(): void {
-    this.pending = [];
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    global.Promise = Wrapped as unknown as typeof Promise;
-  }
-
-  /**
-   * Wait for all promises to resolve
-   */
-  static async resolvePending(pending: Promise<unknown>[]): Promise<void> {
-    if (pending.length) {
-      let final: Error | undefined;
-      console.debug('Resolving', { pending: this.pending.length });
-      await Promise.all(pending).catch(err => final = err);
-
-      // If any return in an error, make that the final result
-      throw new ExecutionError(`Pending promises: ${pending.length}`, final?.stack);
-    }
+    this.#hook.enable();
   }
 
   /**
    * Stop the capture
    */
-  static stop(): Promise<void> {
-    console.debug('Stopping', { pending: this.pending.length });
-    // Restore the promise
-    global.Promise = og;
-    return this.resolvePending(this.pending.filter(x => x.status === undefined));
+  static async stop(): Promise<void> {
+    this.#hook.disable();
+
+    const all = await Promise.all(this.#pending.map(val =>
+      Promise.race([val, PENDING])
+        .then(v => v === PENDING ? val : undefined)
+        .catch(() => val)
+    ));
+    this.#pending = [];
+
+    const pending = all.filter(x => !!x);
+    if (pending.length) {
+      console.debug('Resolving', { pending: pending.length });
+      const results = await Promise.allSettled(pending);
+      const final: Error | undefined = results.find(v => v.status === 'rejected')?.reason;
+
+      // If any return in an error, make that the final result
+      throw new ExecutionError(`Pending promises: ${pending.length}`, final?.stack);
+    }
   }
 }
