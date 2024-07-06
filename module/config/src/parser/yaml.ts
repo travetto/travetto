@@ -1,10 +1,11 @@
 import { Injectable } from '@travetto/di';
-import { YamlUtil } from '@travetto/yaml';
+import { parse as parseYaml } from 'yaml';
 
 import { ConfigParser } from './types';
 
 @Injectable()
 export class YAMLConfigParser implements ConfigParser {
   ext = ['.yaml', '.yml'];
-  parse = YamlUtil.parse;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parse = (v: string): any => parseYaml(v) ?? {};
 }

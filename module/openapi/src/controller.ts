@@ -1,6 +1,6 @@
 import { ConfigureInterceptor, Controller, CorsInterceptor, Get, SetHeaders, Undocumented } from '@travetto/rest';
 import { Inject } from '@travetto/di';
-import { YamlUtil } from '@travetto/yaml';
+import { stringify } from 'yaml';
 
 import { OpenApiService } from './service';
 
@@ -23,6 +23,6 @@ export class OpenApiController {
   @Get('openapi.yaml')
   @SetHeaders({ 'Content-Type': 'text/vnd.yaml' })
   async getYmlSpec(): Promise<string> {
-    return YamlUtil.serialize(await this.service.getSpec()); // Force output to be simple
+    return stringify(await this.service.getSpec()); // Force output to be simple
   }
 }

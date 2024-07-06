@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { RuntimeContext } from '@travetto/manifest';
-import { YamlUtil } from '@travetto/yaml';
+import { parse, stringify } from 'yaml';
 import { Util } from '@travetto/base';
 
 import { EditorConfigType } from './types';
@@ -38,7 +38,7 @@ export class EditorConfig {
     try {
       const resolved = RuntimeContext.workspaceRelative(CONFIG_FILE);
       const content = await fs.readFile(resolved, 'utf8');
-      const data = YamlUtil.parse<EditorConfigType>(content);
+      const data: EditorConfigType = parse(content) ?? {};
       return key ? data[key] : data;
     } catch {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -47,7 +47,7 @@ export class EditorConfig {
   }
 
   static getDefaultConfig(): string {
-    return YamlUtil.serialize(this.DEFAULT_CONFIG);
+    return stringify(this.DEFAULT_CONFIG);
   }
 
   static async ensureConfig(): Promise<string> {

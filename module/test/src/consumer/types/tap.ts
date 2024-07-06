@@ -1,7 +1,7 @@
 import { RuntimeIndex } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
 import { ObjectUtil, TimeUtil } from '@travetto/base';
-import { YamlUtil } from '@travetto/yaml';
+import { stringify } from 'yaml';
 
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
@@ -44,7 +44,7 @@ export class TapEmitter implements TestConsumer {
    */
   logMeta(obj: Record<string, unknown>): void {
     const lineLength = this.#terminal.width - 5;
-    let body = YamlUtil.serialize(obj, { wordwrap: lineLength });
+    let body = stringify(obj, { lineWidth: lineLength });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
   }

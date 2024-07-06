@@ -4,7 +4,7 @@ import { Util } from '@travetto/base';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerRegistry, ControllerVisitUtil, RestConfig } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
-import { YamlUtil } from '@travetto/yaml';
+import { stringify } from 'yaml';
 
 import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config';
 import { OpenapiVisitor } from './spec-generate';
@@ -78,7 +78,7 @@ export class OpenApiService {
 
       const output = this.apiSpecConfig.output.endsWith('.json') ?
         JSON.stringify(spec, undefined, 2) :
-        YamlUtil.serialize(spec);
+        stringify(spec);
 
       await Util.bufferedFileWrite(this.apiSpecConfig.output, output);
     } catch (err) {

@@ -1,6 +1,6 @@
 import { Writable } from 'node:stream';
 
-import { YamlUtil } from '@travetto/yaml';
+import { stringify } from 'yaml';
 
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
@@ -33,7 +33,7 @@ export class XunitEmitter implements TestConsumer {
       }
     }
     if (Object.keys(obj).length) {
-      let body = YamlUtil.serialize(obj);
+      let body = stringify(obj);
       body = body.split('\n').map(x => `  ${x}`).join('\n');
       return `<![CDATA[\n${body}\n]]>`;
     } else {
