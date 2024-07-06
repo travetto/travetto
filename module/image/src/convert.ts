@@ -1,11 +1,9 @@
 import { Readable } from 'node:stream';
-import { buffer as toBuffer } from 'node:stream/consumers';
-import { createReadStream } from 'node:fs';
-import { ChildProcess } from 'node:child_process';
 import { pipeline } from 'node:stream/promises';
 
 import { CommandOperation } from '@travetto/command';
 import { castTo } from '@travetto/runtime';
+import sharp from 'sharp';
 
 /**
  * Image output options
@@ -32,8 +30,7 @@ export interface ImageOptions {
 type ImageType = Readable | Buffer;
 
 /**
- * Simple support for image manipulation.  Built upon @travetto/command, it can
- * run imagemagick and pngquant locally or via docker as needed.
+ * Simple support for image manipulation.
  */
 export class ImageConverter {
 
@@ -73,58 +70,52 @@ export class ImageConverter {
 
   /**
    * Resize image using imagemagick
+   * Resize image
    */
   static async resize<T extends ImageType>(image: T, options: ImageOptions): Promise<T> {
-    const dims = [options.w, options.h].map(d => (d && options.strictResolution !== false) ? `${d}!` : d).join('x');
+    const dims = [options.w, options.h].map(d => (d && options.strictResolution !== false) ? d : d);
+    const pipe = (Buffer.isBuffer(image) ? sharp(image) : sharp())
+      .resize({ width: dims[0], height: dims[1], fit: options.strictResolution !== false ? 'fill' : 'inside' });
 
-    const proc = await this.CONVERTER.exec(
-      'gm', 'convert', '-resize', dims, '-auto-orient',
-      ...(options.optimize ? ['-strip', '-quality', '86'] : []),
-      '-', '-');
-
-    return this.#stream(proc, image);
+    if (Buffer.isBuffer(image)) {
+      return pipe.toBuffer() as Promise<T>;
+    } else {
+      pipeline(image, pipe);
+      return pipe as unknown as Promise<T>;
+    }
   }
 
   /**
    * Optimize image
    */
   static async optimize<T extends ImageType>(format: 'png' | 'jpeg', image: T): Promise<T> {
-    let proc: ChildProcess;
     switch (format) {
       case 'png': {
-        proc = await this.PNG_COMPRESSOR.exec(
-          'pngquant', '--quality', '40-80', '--speed', '1', '--force', '-');
-        break;
+        if (Buffer.isBuffer(image)) {
+          return sharp(image).toFormat('png', { quality: 80, }).toBuffer() as Promise<T>
+        } else {
+          const pipe = sharp().toFormat('png', { quality: 80, });
+          pipeline(image, pipe);
+          return pipe as unknown as Promise<T>;
+        }
       }
       case 'jpeg': {
-        proc = await this.JPEG_COMPRESSOR.exec('jpegoptim', '-m70', '-s', '--stdin', '--stdout');
-        break;
+        if (Buffer.isBuffer(image)) {
+          return sharp(image).toFormat('jpg', { quality: 70, }).toBuffer() as Promise<T>
+        } else {
+          const pipe = sharp().toFormat('jpg', { quality: 70 });
+          pipeline(image, pipe);
+          return pipe as unknown as Promise<T>;
+        }
       }
     }
-    return this.#stream(proc, image);
   }
 
   /**
    * Get Image Dimensions
    * @param image
    */
-  static async getDimensions(image: Readable | Buffer | string): Promise<{ width: number, height: number }> {
-    const proc = await this.CONVERTER.exec(
-      'gm', 'identify', '-format', '%wX%h', '-',
-    );
-
-    if (typeof image === 'string') {
-      image = createReadStream(image);
-    }
-
-    const [_, output] = await Promise.all([
-      pipeline(image, proc.stdin!),
-      toBuffer(proc.stdout!)
-    ]);
-
-    const text = output.toString('utf8');
-    const [w, h] = text.split('X').map(x => parseFloat(x));
-
-    return { width: w, height: h };
+  static async getDimensions(image: Buffer | string): Promise<{ width: number, height: number }> {
+    return sharp(image).metadata().then(v => ({ width: v.width!, height: v.height! }));
   }
 }
