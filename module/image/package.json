@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@travetto/base": "^4.1.2",
-    "@travetto/command": "^4.1.1"
+    "sharp": "^0.33.4"
   },
   "travetto": {
     "displayName": "Image"
