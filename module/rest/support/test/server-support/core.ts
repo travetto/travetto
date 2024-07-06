@@ -38,7 +38,9 @@ export class CoreRestServerSupport implements RestServerSupport {
 
     while ((Date.now() - start) < 5000) {
       try {
-        await fetch(this.url);
+        const ctrl = new AbortController();
+        await fetch(this.url, { signal: ctrl.signal });
+        ctrl.abort();
         break; // We good
       } catch {
         await timers.setTimeout(100);
@@ -55,13 +57,19 @@ export class CoreRestServerSupport implements RestServerSupport {
       const pairs = Object.entries(query).map(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`] as [string, string]);
       q = `?${new URLSearchParams(pairs).toString()}`;
     }
+
+    const ctrl = new AbortController();
+
     const res = await fetch(`${this.url}${path}${q}`, {
       method,
       headers: headerToShape.single(headers),
-      body
+      body,
+      signal: ctrl.signal
     });
 
-    return { status: res.status, body: Buffer.from(await res.text()), headers: Object.fromEntries(res.headers.entries()) };
+    const out = { status: res.status, body: Buffer.from(await res.text()), headers: Object.fromEntries(res.headers.entries()) };
+    ctrl.abort();
+    return out;
   }
 
   get url() {

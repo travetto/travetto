@@ -56,6 +56,8 @@ export class UtilTest {
       }
     }
 
+    lines.close();
+
     assert(values[0] === 'aaa = 0');
     assert(values[1] === 'bbb = 1');
   }

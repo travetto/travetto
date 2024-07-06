@@ -71,7 +71,12 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
     );
 
     this.#lambda = await DependencyRegistry.getInstance(AwsLambdaRestApplication, qualifier);
-    return await this.#lambda.run();
+    const res = await this.#lambda.run();
+
+    // Initialize
+    await this.execute('GET', '/');
+
+    return res;
   }
 
   async execute(method: Request['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {

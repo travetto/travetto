@@ -1,7 +1,7 @@
 import { AssertionError } from 'node:assert';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env, Util } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -12,7 +12,7 @@ import { AssertCheck } from '../assert/check';
 import { AssertCapture } from '../assert/capture';
 import { ConsoleCapture } from './console';
 import { TestPhaseManager } from './phase';
-import { PromiseCapture } from './promise';
+import { PromiseCapturer } from './promise';
 import { AssertUtil } from '../assert/util';
 
 const TEST_TIMEOUT = Env.TRV_TEST_TIMEOUT.time ?? 5000;
@@ -29,22 +29,21 @@ export class TestExecutor {
    */
   static async #executeTestMethod(test: TestConfig): Promise<Error | undefined> {
     const suite = SuiteRegistry.get(test.class);
-    const cleanupResolver = Util.resolvablePromise();
 
     // Ensure all the criteria below are satisfied before moving forward
     const barrier = new Barrier(test.timeout || TEST_TIMEOUT, true)
-      .add(cleanupResolver.promise, true) // If not timeout or unhandled, ensure all promises are cleaned up
       .add(async () => {
         const env = process.env;
+        process.env = { ...env }; // Created an isolated environment
+        const pCap = new PromiseCapturer();
 
         try {
-          PromiseCapture.start(); // Listen for all promises to detect any unfinished, only start once method is invoked
-          process.env = { ...env }; // Created an isolated environment
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          await (suite.instance as Record<string, Function>)[test.methodName](); // Run
+          await pCap.run(() =>
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            (suite.instance as Record<string, Function>)[test.methodName]()
+          );
         } finally {
           process.env = env; // Restore
-          PromiseCapture.stop().then(() => Util.queueMacroTask().then(cleanupResolver.resolve), cleanupResolver.reject);
         }
       });
 

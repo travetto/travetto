@@ -1,51 +1,44 @@
-import { createHook } from 'node:async_hooks';
+import { createHook, executionAsyncId } from 'node:async_hooks';
 
 import { ExecutionError } from '@travetto/worker';
-
-const PENDING = Symbol.for('@travetto/test:promise-pending');
+import { Util } from '@travetto/base';
 
 /**
  * Promise watcher, to catch any unfinished promises
  */
-export class PromiseCapture {
-  static #pending: Promise<unknown>[] = [];
-  static #hook = createHook({
-    init(id, type, triggerId, resource) {
-      if (type === 'PROMISE') {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        PromiseCapture.#pending.push(resource as Promise<unknown>);
-      }
-    }
-  });
+export class PromiseCapturer {
+  #pending = new Map<number, Promise<unknown>>();
+  #id: number = 0;
 
-  /**
-   * Track promise creation
-   */
-  static start(): void {
-    this.#hook.enable();
+  #init(id: number, type: string, triggerId: number, resource: unknown): void {
+    if (this.#id && type === 'PROMISE' && triggerId === this.#id) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      this.#pending.set(id, resource as Promise<unknown>);
+    }
   }
 
-  /**
-   * Stop the capture
-   */
-  static async stop(): Promise<void> {
-    this.#hook.disable();
+  #promiseResolve(asyncId: number): void {
+    this.#pending.delete(asyncId);
+  }
 
-    const all = await Promise.all(this.#pending.map(val =>
-      Promise.race([val, PENDING])
-        .then(v => v === PENDING ? val : undefined)
-        .catch(() => val)
-    ));
-    this.#pending = [];
+  async run(op: () => Promise<unknown> | unknown): Promise<unknown> {
+    const hook = createHook({
+      init: (...args) => this.#init(...args),
+      promiseResolve: (id) => this.#promiseResolve(id)
+    });
 
-    const pending = all.filter(x => !!x);
-    if (pending.length) {
-      console.debug('Resolving', { pending: pending.length });
-      const results = await Promise.allSettled(pending);
-      const final: Error | undefined = results.find(v => v.status === 'rejected')?.reason;
+    hook.enable();
 
-      // If any return in an error, make that the final result
-      throw new ExecutionError(`Pending promises: ${pending.length}`, final?.stack);
+    await Util.queueMacroTask();
+    this.#id = executionAsyncId();
+    try {
+      const res = await op();
+      if (this.#pending.size) {
+        throw new ExecutionError(`Pending promises: ${this.#pending.size}`);
+      }
+      return res;
+    } finally {
+      hook.disable();
     }
   }
 }

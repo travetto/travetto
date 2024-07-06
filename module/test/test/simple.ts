@@ -1,6 +1,8 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
+import { ExecutionError } from '@travetto/worker';
+
 import { Test } from '../src/decorator/test';
 import { Suite, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../src/decorator/suite';
 
@@ -150,5 +152,14 @@ class Simple {
     const d = { name: 20 };
 
     assert(c === d);
+  }
+
+
+  @Test({ shouldThrow: ExecutionError, skip: true })
+  async testUnhandledPromise() {
+    for (let i = 0; i < 100; i += 1) {
+      new Promise((_, r) => setTimeout(r, 10, new Error('Timeout')));
+    }
+    // await new Promise(r => setTimeout(r, 10));
   }
 }
