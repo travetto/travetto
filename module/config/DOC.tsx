@@ -12,7 +12,7 @@ const ConfigSource = d.codeLink('ConfigSource', 'src/source/types.ts', /interfac
 export const text = <>
   <c.StdHeader />
 
-  The config module provides support for loading application config on startup. Configuration values support the common {d.library('YAML')} constructs as defined in {d.mod('Yaml')}.  Additionally, the configuration is built upon the {d.mod('Schema')} module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application.  Given that all {ConfigDec} classes are {Schema}-based classes, all the standard {Schema} and {Field} functionality applies.
+  The config module provides support for loading application config on startup. Configuration values support the common {d.library('YAML')} constructs as defined in {d.library('NodeYaml')}.  Additionally, the configuration is built upon the {d.mod('Schema')} module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application.  Given that all {ConfigDec} classes are {Schema}-based classes, all the standard {Schema} and {Field} functionality applies.
 
   <c.Section title='Resolution'>
 

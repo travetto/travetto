@@ -246,9 +246,5 @@ export const MOD_MAPPING = {
   Worker: {
     name: '@travetto/worker', folder: '@travetto/worker', displayName: 'Worker',
     description: 'Process management utilities, with a focus on inter-process communication'
-  },
-  Yaml: {
-    name: '@travetto/yaml', folder: '@travetto/yaml', displayName: 'YAML',
-    description: 'Simple YAML support, provides only clean subset of yaml'
   }
 };

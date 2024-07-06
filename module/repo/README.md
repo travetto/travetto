@@ -177,7 +177,6 @@ module/terminal
 module/test
 module/transformer
 module/worker
-module/yaml
 related/todo-app
 ```
 
@@ -278,5 +277,4 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
               related/todo-app <workspace-root>/related/todo-app
             module/transformer <workspace-root>/module/transformer
                  module/worker <workspace-root>/module/worker
-                   module/yaml <workspace-root>/module/yaml
 ```

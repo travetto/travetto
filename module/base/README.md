@@ -194,7 +194,7 @@ export function work() {
 ```javascript
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.work = void 0;
+exports.work = work;
 const tslib_1 = require("tslib");
 const ᚕ_c = tslib_1.__importStar(require("@travetto/base/src/console.js"));
 var ᚕf = "@travetto/base/doc/transpile.js";
@@ -208,7 +208,6 @@ function work() {
     }
     ᚕ_c.log({ level: "debug", source: ᚕf, line: 9, scope: "work", args: ['End Work'] });
 }
-exports.work = work;
 ```
 
 ### Filtering Debug
@@ -234,7 +233,7 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
 ```
 
 ## Stream Utilities
-The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L29) class provides basic stream utilities for use within the framework:
+The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L30) class provides basic stream utilities for use within the framework:
    *  `toBuffer(src: Readable | Buffer | string): Promise<Buffer>` for converting a stream/buffer/filepath to a Buffer.
    *  `toReadable(src: Readable | Buffer | string):Promise<Readable>` for converting a stream/buffer/filepath to a Readable
    *  `writeToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
@@ -301,6 +300,10 @@ export class TimeUtil {
    * @param delta The number of milliseconds in the delta
    */
   static prettyDelta(delta: number, unit?: TimeUnit): string;
+  /**
+   * Determine the number of units between two dates
+   */
+  static unitsBetween(startDate: Date | number, endDate: Date | number, unit: TimeUnit): number;
 }
 ```
 

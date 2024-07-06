@@ -257,13 +257,13 @@ import { ExistsError } from '../error/exists';
 import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
-import { ModelStreamUtil, StreamModel, STREAMS } from '../internal/service/stream';
+import { StreamModel, STREAMS } from '../internal/service/stream';
 import { IndexConfig } from '../registry/types';
 const STREAM_META = `${STREAMS}_meta`;
 type StoreType = Map<string, Buffer>;
 @Config('model.memory')
 export class MemoryModelConfig {
-  autoCreate?: boolean;
+  autoCreate?: boolean = true;
   namespace?: string;
   cullRate?: number | TimeSpan;
 }

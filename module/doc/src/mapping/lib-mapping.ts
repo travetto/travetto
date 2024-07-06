@@ -66,6 +66,7 @@ export const LIB_MAPPING = {
   Fetch: { title: 'fetch', href: 'https://nodejs.org/api/globals.html#fetch' },
   ParcelWatcher: { title: '@parcel/watcher', href: 'https://www.npmjs.com/package/@parcel/watcher' },
   Preact: { title: 'preact', href: 'https://preactjs.com' },
+  NodeYaml: { title: 'yaml', href: 'https://github.com/eemeli/yaml' },
 
   // JWT
   JWT: { title: 'JWT', href: 'https://jwt.io/' },

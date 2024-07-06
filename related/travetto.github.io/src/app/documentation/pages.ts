@@ -209,10 +209,6 @@ export const PAGES = [
         path: 'worker', title: 'Worker',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/worker/worker.component').then(m => m.WorkerComponent)
       },
-      {
-        path: 'yaml', title: 'YAML Parser',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/yaml/yaml.component').then(m => m.YamlComponent)
-      },
     ]
   },
   {

@@ -58,15 +58,7 @@ export class Todo {
   completed?: boolean;
   priority?: number;
   who?: string;
-  #color?: string;
-
-  set color(c: string | undefined) {
-    this.#color = c;
-  }
-
-  get color(): string | undefined {
-    return this.#color;
-  }
+  color?: string;
 }
 
 @Schema()
@@ -224,6 +216,8 @@ import { Inject } from '@travetto/di';
 import { TodoService } from './service';
 import { Todo, TodoSearch } from './model';
 
+type TodoRequest = Omit<Todo, 'id'>;
+
 @Controller('/todo')
 export class TodoController {
 
@@ -263,8 +257,9 @@ export class TodoController {
    * Create a todo
    */
   @Post('/')
-  async create(todo: Todo): Promise<Todo> {
-    return await this._svc.add(todo);
+  async create(todo: TodoRequest): Promise<Todo> {
+
+    return await this._svc.add(todo as Todo);
   }
 
   /**
@@ -273,9 +268,8 @@ export class TodoController {
    * @param todo Todo to update
    */
   @Put('/:id')
-  async update(id: string, todo: Todo): Promise<Todo> {
-    todo.id = id;
-    return await this._svc.update(todo);
+  async update(id: string, todo: TodoRequest): Promise<Todo> {
+    return await this._svc.update({ ...todo, id });
   }
 
   /**
@@ -283,7 +277,8 @@ export class TodoController {
    * @param id Todo id
    */
   @Put('/:id/complete')
-  async complete(id: string, completed: boolean = false): Promise<Todo> {
+  async complete(id: string, completed: boolean = true): Promise<Todo> {
+    console.log('Completing', id, completed);
     return await this._svc.complete(id, completed);
   }
 
@@ -339,8 +334,9 @@ npx trv run:rest
   },
   config: {
     sources: [
+      { priority: 100, source: 'file://application', detail: 'resources/application.yaml' },
       {
-        priority: 100,
+        priority: 101,
         source: 'file://application',
         detail: 'related/todo-app/resources/application.yml'
       },
@@ -367,7 +363,10 @@ npx trv run:rest
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
-      FileModelConfig: { folder: '/tmp/<temp-folder>', namespace: '.' },
+      FileModelConfig: {
+        folder: '/tmp/<temp-folder>',
+        namespace: '.'
+      },
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,
@@ -385,7 +384,7 @@ npx trv run:rest
           replyTo: 'Travetto Mailer <mailer@travetto.dev>'
         }
       },
-      MemoryModelConfig: {},
+      MemoryModelConfig: { autoCreate: true },
       MongoModelConfig: {
         hosts: { '0': 'localhost' },
         namespace: 'app',
@@ -403,7 +402,7 @@ npx trv run:rest
       RestClientConfig: {
         providers: {
           '0': { type: 'fetch', output: 'related/todo-app/api-client' },
-          '1': { type: 'fetch-web', output: 'related/todo-app/resources/ui/js/api-client' }
+          '1': { type: 'rest-rpc', output: 'related/todo-app/resources/ui/js/api-client' }
         }
       },
       RestConfig: {
@@ -420,6 +419,7 @@ npx trv run:rest
       RestCorsConfig: {},
       RestGetCacheConfig: {},
       RestLogRoutesConfig: {},
+      RestRpcConfig: {},
       RestSessionConfig: {},
       RestSslConfig: { active: false },
       SessionConfig: {
@@ -461,9 +461,21 @@ export async function main(key: string, port: number) {
 $ trv main support/create-todo.ts <key> <port>
 
 {
-  text: 'New Todo - <key>',
-  created: '2029-03-14T04:00:01.510Z',
-  id: '<uniqueId>'
+  message: 'Validation errors have occurred',
+  category: 'data',
+  type: 'ValidationResultError',
+  at: '2029-03-14T04:00:01.510Z',
+  details: {
+    errors: [
+      {
+        kind: 'required',
+        active: true,
+        message: 'Missing query: todo',
+        path: 'todo'
+      }
+    ]
+  },
+  status: 400
 }
 ```
 
@@ -481,11 +493,5 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-[
-  {
-    id: '<uniqueId>',
-    text: 'New Todo - <key>',
-    created: '2029-03-14T04:00:01.814Z'
-  }
-]
+[]
 ```

@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/config</code></pre>
   </figure>
 
-The config module provides support for loading application config on startup. Configuration values support the common <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> constructs as defined in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/yaml" title="Simple YAML support, provides only clean subset of yaml">YAML</a>.  Additionally, the configuration is built upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application.  Given that all <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13">@Config</a> classes are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a>-based classes, all the standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L31">@Field</a> functionality applies.
+The config module provides support for loading application config on startup. Configuration values support the common <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> constructs as defined in <a target="_blank" class="external-link" href="https://github.com/eemeli/yaml">yaml</a>.  Additionally, the configuration is built upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> module, to enforce type correctness, and allow for validation of configuration as an entrypoint into the application.  Given that all <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13">@Config</a> classes are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a>-based classes, all the standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L31">@Field</a> functionality applies.
 <h2 id="resolution">Resolution</h2>
 
 The configuration information is comprised of:
@@ -92,6 +92,11 @@ Config <span class="token punctuation">{{'{'}}</span>
   sources: <span class="token punctuation">[</span>
     <span class="token punctuation">{{'{'}}</span>
       priority: <span class="token number">100</span>,
+      source: <span class="token string">'file://application'</span>,
+      detail: <span class="token string">'resources/application.yaml'</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    <span class="token punctuation">{{'{'}}</span>
+      priority: <span class="token number">101</span>,
       source: <span class="token string">'file://application'</span>,
       detail: <span class="token string">'module/config/doc/resources/application.yml'</span>
     <span class="token punctuation">{{'}'}}</span>,
@@ -263,6 +268,11 @@ Config <span class="token punctuation">{{'{'}}</span>
   sources: <span class="token punctuation">[</span>
     <span class="token punctuation">{{'{'}}</span>
       priority: <span class="token number">100</span>,
+      source: <span class="token string">'file://application'</span>,
+      detail: <span class="token string">'resources/application.yaml'</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    <span class="token punctuation">{{'{'}}</span>
+      priority: <span class="token number">101</span>,
       source: <span class="token string">'file://application'</span>,
       detail: <span class="token string">'module/config/doc/resources/application.yml'</span>
     <span class="token punctuation">{{'}'}}</span>,
