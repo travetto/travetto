@@ -74,10 +74,16 @@ class TestRunnerFeature extends BaseFeature {
     if (!file) {
       return;
     }
-    const mod = Workspace.workspaceIndex.getModuleFromSource(file) ??
-      Workspace.workspaceIndex.findModuleForArbitraryFile(file);
-    if (mod && file.startsWith(path.resolve(Workspace.path, mod.sourceFolder, 'test'))) {
-      return mod;
+    const mod = Workspace.workspaceIndex.getModuleFromSource(file);
+    if (mod) {
+      const entry = Workspace.workspaceIndex.getEntry(file);
+      if (entry && entry.role === 'test' && (entry.type === 'ts' || entry.type === 'js')) {
+        return mod;
+      }
+      return;
+    }
+    if (/test\/.*[.][tj]sx?$/.test(file)) {
+      return Workspace.workspaceIndex.findModuleForArbitraryFile(file);
     }
   }
 
