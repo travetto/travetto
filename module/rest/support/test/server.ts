@@ -122,7 +122,6 @@ export abstract class RestServerSuite extends BaseRestSuite {
     assert.deepStrictEqual(ret, { size: 20 });
   }
 
-
   @Test()
   async testWildcard() {
     const { body: ret } = await this.request<{ path: string }>('get', '/test/fun/1/2/3/4');

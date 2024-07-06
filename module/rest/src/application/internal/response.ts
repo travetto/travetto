@@ -59,6 +59,7 @@ export class ResponseCore implements Partial<Response> {
    * Send a stream to the response and wait for completion
    */
   async sendStream(this: Response, data: Readable): Promise<void> {
-    await pipeline(data, this[NodeEntityⲐ]);
+    await pipeline(data, this[NodeEntityⲐ], { end: false });
+    this.end();
   }
 }
