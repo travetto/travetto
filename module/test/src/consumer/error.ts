@@ -44,8 +44,11 @@ export class ErrorUtil {
     if (isSerialized(e)) {
       const err = new Error();
 
-      for (const k of TypedObject.keys<{ name: string }>(e)) {
-        err[k] = e[k];
+      for (const k of TypedObject.keys(e)) {
+        if (k === '$') {
+          continue;
+        }
+        err[k] = e[k]!;
       }
       err.message = e.message;
       err.stack = e.stack;

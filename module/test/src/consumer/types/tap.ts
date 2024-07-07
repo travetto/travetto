@@ -101,7 +101,7 @@ export class TapEmitter implements TestConsumer {
 
       // Handle error
       if (test.status === 'failed') {
-        if (test.error?.stack && !test.error.stack.includes('AssertionError')) {
+        if (test.error && test.error.name !== 'AssertionError') {
           const err = ErrorUtil.deserializeError(test.error);
           this.logMeta({ error: ObjectUtil.hasToJSON(err) ? err.toJSON() : err });
         }
