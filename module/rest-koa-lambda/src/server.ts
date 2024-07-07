@@ -1,4 +1,4 @@
-import { configure } from '@vendia/serverless-express';
+import { configure } from '@codegenie/serverless-express';
 
 import { Inject, Injectable } from '@travetto/di';
 import {

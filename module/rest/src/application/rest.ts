@@ -17,7 +17,7 @@ import { RestCommonUtil } from '../util/common';
  * The rest application
  */
 @Injectable()
-export class RestApplication<T = unknown>  {
+export class RestApplication<T = unknown> {
 
   @Inject()
   config: RestConfig;
