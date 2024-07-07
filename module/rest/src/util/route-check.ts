@@ -21,7 +21,7 @@ export class RouteCheckUtil {
     return { base: base.replace(/^\/+/, ''), sub: final };
   }
 
-  static #compareRule({ sub, base }: RouteRule, route: RouteConfig, controller?: ControllerConfig): boolean {
+  static #compareRule({ sub, base }: RouteRule, route: RouteConfig, controller?: Pick<ControllerConfig, 'basePath'>): boolean {
     console.log('Comparing rule', { base, sub }, { base: controller?.basePath, sub: route.path });
     let match = false;
     if (base === (controller?.basePath ?? '').replace(/^\/+/, '') || base === '*') {

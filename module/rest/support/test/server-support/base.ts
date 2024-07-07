@@ -1,5 +1,4 @@
-import { Request } from '@travetto/rest/src/types';
-import { ServerHandle } from '@travetto/rest';
+import type { Request, ServerHandle } from '../../../src/types';
 
 export type MakeRequestConfig<T> = {
   query?: Record<string, unknown>;

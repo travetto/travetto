@@ -33,8 +33,13 @@ export class PromiseCapturer {
     this.#id = executionAsyncId();
     try {
       const res = await op();
-      if (this.#pending.size) {
-        throw new ExecutionError(`Pending promises: ${this.#pending.size}`);
+      let i = 5; // Wait upto 5 macro tasks before continuing
+      while (this.#pending.size) {
+        await Util.queueMacroTask();
+        i -= 1;
+        if (i === 0) {
+          throw new ExecutionError(`Pending promises: ${this.#pending.size}`);
+        }
       }
       return res;
     } finally {

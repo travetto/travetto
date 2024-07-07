@@ -52,11 +52,9 @@ export class UtilTest {
     for await (const el of Util.mapAsyncItr(lines, (text, i) => `${text} = ${i}`)) {
       values.push(el);
       if ((j += 1) === 2) {
-        break;
+        lines.close();
       }
     }
-
-    lines.close();
 
     assert(values[0] === 'aaa = 0');
     assert(values[1] === 'bbb = 1');
