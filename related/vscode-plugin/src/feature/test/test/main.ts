@@ -36,7 +36,7 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   #startServer(): void {
-    if (this.#server) { return; }
+    if (this.#server || Workspace.compilerState !== 'watch-start') { return; }
 
     this.log.info('Starting server');
     const config: SpawnOptions = {
@@ -117,6 +117,7 @@ class TestRunnerFeature extends BaseFeature {
   #rerunActive(): void {
     const editor = vscode.window.activeTextEditor;
     if (this.#isTestDoc(editor)) {
+      this.#startServer();
       this.#consumer.reset(editor);
       this.#runFile(editor!.document.fileName);
     }
@@ -174,6 +175,7 @@ class TestRunnerFeature extends BaseFeature {
 
   async onChangedActiveEditor(editor: vscode.TextEditor | undefined): Promise<void> {
     if (editor && this.#isTestDoc(editor)) {
+      this.#startServer();
       this.#consumer.trackEditor(editor);
       if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
         this.#runFile(editor.document.fileName);
@@ -183,6 +185,7 @@ class TestRunnerFeature extends BaseFeature {
 
   async onOpenTextDocument(doc: vscode.TextDocument): Promise<void> {
     if (this.#isTestDoc(doc)) {
+      this.#startServer();
       this.#consumer.trackEditor(doc);
     }
   }
@@ -200,7 +203,10 @@ class TestRunnerFeature extends BaseFeature {
     this.register('start', () => this.#startServer());
     this.register('rerun', () => this.#rerunActive());
 
-    Workspace.onCompilerState(state => (state === 'watch-start') ? this.#startServer() : this.#stopServer());
+    Workspace.onCompilerState(state => (state === 'watch-start') ?
+      this.onChangedActiveEditor(vscode.window.activeTextEditor) :
+      this.#stopServer()
+    );
     vscode.workspace.onDidOpenTextDocument(x => this.onOpenTextDocument(x), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(x => this.onCloseTextDocument(x), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.onChangedActiveEditor(x), null, context.subscriptions);

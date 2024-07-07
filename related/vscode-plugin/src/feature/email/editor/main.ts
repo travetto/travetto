@@ -36,7 +36,7 @@ export class EmailCompilerFeature extends BaseFeature {
   }
 
   #startServer(): void {
-    if (this.#server) { return; }
+    if (this.#server || Workspace.compilerState !== 'watch-start') { return; }
 
     this.log.info('Starting server');
     this.#server = spawn('node', [RunUtil.cliFile, 'email:editor'], {
@@ -97,6 +97,9 @@ export class EmailCompilerFeature extends BaseFeature {
     if (!isTemplate(file)) {
       return;
     }
+
+    this.#startServer();
+
     if (file !== this.#activeFile) {
       this.#activeFile = file;
       this.setActiveContent(undefined);
@@ -144,14 +147,21 @@ export class EmailCompilerFeature extends BaseFeature {
     }
   }
 
+  activeEditorChanged(e?: vscode.TextEditor): void {
+    this.setActiveFile(e?.document.fileName);
+  }
+
   /**
    * On initial activation
    */
   activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidSaveTextDocument(x => this.savedFile(x), null, context.subscriptions);
-    vscode.window.onDidChangeActiveTextEditor(x => this.setActiveFile(vscode.window.activeTextEditor?.document.fileName), null, context.subscriptions);
+    vscode.window.onDidChangeActiveTextEditor(x => this.activeEditorChanged(x), null, context.subscriptions);
 
-    Workspace.onCompilerState(state => state === 'watch-start' ? this.#startServer() : this.#stopServer());
+    Workspace.onCompilerState(state => state === 'watch-start' ?
+      this.activeEditorChanged(vscode.window.activeTextEditor) :
+      this.#stopServer()
+    );
 
     this.register('preview-html', () => this.openPreview('html'));
     this.register('preview-text', () => this.openPreview('text'));

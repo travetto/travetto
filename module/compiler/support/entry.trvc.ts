@@ -72,6 +72,8 @@ export const main = (ctx: ManifestContext) => {
     events: async (type: string, handler: (ev: unknown) => unknown): Promise<void> => {
       if (type === 'change' || type === 'log' || type === 'progress' || type === 'state') {
         for await (const ev of client.fetchEvents(type)) { await handler(ev); }
+      } else if (type === 'all') {
+        for await (const ev of client.fetchEvents(type)) { await handler(ev); }
       } else {
         throw new Error(`Unknown event type: ${type}`);
       }

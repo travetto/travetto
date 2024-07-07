@@ -20,7 +20,8 @@ export class CompilerServer {
 
   #ctx: ManifestContext;
   #server: http.Server;
-  #listeners: Record<string, { res: http.ServerResponse, type: CompilerEventType }> = {};
+  #listenersAll = new Set<http.ServerResponse>();
+  #listeners: Partial<Record<CompilerEventType | 'all', Record<string, http.ServerResponse>>> = {};
   #shutdown = new AbortController();
   signal = this.#shutdown.signal;
   info: CompilerServerInfo;
@@ -95,25 +96,43 @@ export class CompilerServer {
     return output;
   }
 
-  async #addListener(type: string, res: http.ServerResponse): Promise<void> {
+  #addListener(type: CompilerEventType | 'all', res: http.ServerResponse): void {
     res.writeHead(200);
     const id = `id_${Date.now()}_${Math.random()}`.replace('.', '1');
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.#listeners[id] = { res, type: type as 'change' };
-    if (type === 'state') { // Send on initial connect
-      res.write(JSON.stringify({ state: this.info.state }));
+    (this.#listeners[type] ??= {})[id] = res;
+    this.#listenersAll.add(res);
+    if (type === 'state' || type === 'all') { // Send on initial connect
+      this.#emitEvent({ type: 'state', payload: { state: this.info.state } }, id);
+    } else {
+      res.write('\n'); // Send at least one byte on listen
     }
-    res.write('\n'); // Send at least one byte on listen
 
     // Do not wait on it
-    res.on('close', () => { delete this.#listeners[id]; });
+    res.on('close', () => {
+      delete this.#listeners[type]?.[id];
+      this.#listenersAll.delete(res);
+    });
   }
 
-  #emitEvent(ev: CompilerEvent): void {
-    const msg = `${JSON.stringify(ev.payload)}\n`;
-    for (const el of Object.values(this.#listeners)) {
-      if (!el.res.closed && el.type === ev.type) {
-        el.res.write(msg);
+  #emitEvent(ev: CompilerEvent, to?: string): void {
+    if (this.#listeners.all) {
+      const msg = JSON.stringify(ev);
+      for (const [id, item] of Object.entries(this.#listeners.all)) {
+        if (item.closed || (to && id !== to)) {
+          continue;
+        }
+        item.write(msg);
+        item.write('\n');
+      }
+    }
+    if (this.#listeners[ev.type]) {
+      const msg = JSON.stringify(ev.payload);
+      for (const [id, item] of Object.entries(this.#listeners[ev.type]!)) {
+        if (item.closed || (to && id !== to)) {
+          continue;
+        }
+        item.write(msg);
+        item.write('\n');
       }
     }
   }
@@ -122,10 +141,11 @@ export class CompilerServer {
     log.info('Server disconnect requested');
     this.info.iteration = Date.now();
     await CommonUtil.blockingTimeout(20);
-    for (const el of Object.values(this.#listeners)) {
-      try { el.res.end(); } catch { }
+    for (const el of this.#listenersAll) {
+      try { el.end(); } catch { }
     }
     this.#listeners = {}; // Ensure its empty
+    this.#listenersAll.clear();
   }
 
   async #clean(): Promise<{ clean: boolean }> {
@@ -145,7 +165,8 @@ export class CompilerServer {
     let out: unknown;
     let close = false;
     switch (action) {
-      case 'event': return await this.#addListener(subAction, res);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      case 'event': return this.#addListener(subAction as 'change', res);
       case 'clean': out = await this.#clean(); break;
       case 'stop': out = JSON.stringify({ closing: true }); close = true; break;
       case 'info':

@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import { createInterface } from 'node:readline/promises';
 import { ChildProcess, spawn } from 'node:child_process';
 
-import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
+import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
 import { Env, ExecUtil, Util } from '@travetto/base';
 
 import { BaseFeature } from '../../base';
@@ -91,25 +91,13 @@ export class CompilerWatchFeature extends BaseFeature {
   }
 
   /**
-   * Spawn the compiler cli and listen for events
-   * @param type
-   * @param signal
-   */
-  async * #compilerEvents<T>(type: 'state' | 'log' | 'progress', signal?: AbortSignal): AsyncIterable<T> {
-    const proc = this.run('event', [type], signal);
-    for await (const line of createInterface(proc.stdout!)) {
-      yield JSON.parse(line);
-    }
-  }
-
-  /**
    * Get compiler state
    */
   async #compilerState(): Promise<CompilerStateType | undefined> {
     const { stdout } = await ExecUtil.getResult(this.run('info'));
     try {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return JSON.parse(stdout).state as CompilerStateType;
+      const res: CompilerStateEvent = JSON.parse(stdout);
+      return res.state;
     } catch { }
   }
 
@@ -123,7 +111,15 @@ export class CompilerWatchFeature extends BaseFeature {
         if (state && state !== 'closed') {
           connected = true;
           this.#log.info('Connected', state);
-          await Promise.race([this.#trackLog(ctrl.signal), this.#trackState(ctrl.signal), this.#trackProgress(ctrl.signal)]);
+          const proc = this.run('event', ['all'], ctrl.signal);
+          for await (const line of createInterface(proc.stdout!)) {
+            const { type, payload }: CompilerEvent = JSON.parse(line);
+            switch (type) {
+              case 'log': this.#ongLogEvent(payload); break;
+              case 'state': this.#onStateEvent(payload); break;
+              case 'progress': this.#onProgressEvent(payload, ctrl.signal); break;
+            }
+          }
         }
       } catch (err) {
         this.#log.info('Failed to connect', `${err} `);
@@ -136,15 +132,16 @@ export class CompilerWatchFeature extends BaseFeature {
       ctrl.abort();
 
       if (Workspace.compilerState !== 'closed') {
-        this.#onState('closed');
+        this.#onStateEvent('closed');
       }
       // Check every second
       await Util.nonBlockingTimeout(1000);
     }
   }
 
-  #onState(state: CompilerStateType | undefined): void {
-    state ??= 'closed';
+  #onStateEvent(ev: CompilerStateEvent | CompilerStateType | undefined): void {
+    const state = (typeof ev === 'string' ? ev : ev?.state ?? 'closed');
+
     this.#log.info('Compiler state changed', state);
     let v: string | undefined;
     switch (state) {
@@ -159,47 +156,30 @@ export class CompilerWatchFeature extends BaseFeature {
     Workspace.compilerState = state;
   }
 
-  async #trackState(signal?: AbortSignal): Promise<void> {
-    this.#log.info('Tracking state started');
-    for await (const ev of this.#compilerEvents<CompilerStateEvent>('state', signal)) {
-      this.#onState(ev.state);
+  async #ongLogEvent(ev: CompilerLogEvent): Promise<void> {
+    const message = ev.message.replaceAll(Workspace.path, '.');
+    let first = message;
+    const params = [...ev.args ?? []];
+    if (ev.scope) {
+      params.unshift(message);
+      first = `[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`;
     }
-    this.#log.info('Tracking state ended');
+    this.#log[ev.level](first, ...params);
   }
 
-  async #trackLog(signal?: AbortSignal): Promise<void> {
-    this.#log.info('Tracking log started');
-    for await (const ev of this.#compilerEvents<CompilerLogEvent>('log', signal)) {
-      const message = ev.message.replaceAll(Workspace.path, '.');
-      let first = message;
-      const params = [...ev.args ?? []];
-      if (ev.scope) {
-        params.unshift(message);
-        first = `[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`;
-      }
-      this.#log[ev.level](first, ...params);
-    }
-    this.#log.info('Tracking log ended');
-  }
+  async #onProgressEvent(ev: CompilerProgressEvent, signal: AbortSignal): Promise<void> {
+    let pState = this.#progress[ev.operation];
 
-  async #trackProgress(signal: AbortSignal): Promise<void> {
-    this.#log.info('Tracking progress started');
-    for await (const ev of this.#compilerEvents<CompilerProgressEvent>('progress', signal)) {
-      let pState = this.#progress[ev.operation];
+    const value = 100 * (ev.idx / ev.total);
+    const delta = value - (pState?.prev ?? 0);
 
-      const value = 100 * (ev.idx / ev.total);
-      const delta = value - (pState?.prev ?? 0);
-
-      if (ev.complete || delta < 0 || ev.total < 5) {
-        pState?.cleanup();
-        continue;
-      }
-
+    if (ev.complete || delta < 0 || ev.total < 5) {
+      pState?.cleanup();
+    } else {
       pState ??= await this.#buildProgressBar(ev.operation, signal);
       pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${ev.idx + 1}/${ev.total})`, increment: delta });
       pState.prev = value;
     }
-    this.#log.info('Tracking progress ended');
   }
 
   async #onStatusItemClick(): Promise<void> {
@@ -215,7 +195,7 @@ export class CompilerWatchFeature extends BaseFeature {
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.#status.command = { command: this.commandName('status-item'), title: 'Show Logs' };
     this.register('status-item', () => this.#onStatusItemClick());
-    this.#onState('closed');
+    this.#onStateEvent('closed');
     this.#status.show();
 
     this.#trackConnected();
