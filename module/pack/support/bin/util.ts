@@ -23,10 +23,16 @@ export class PackUtil {
    * @param ignore Should errors be ignored
    */
   static async copyRecursive(src: string, dest: string, inclusive: boolean = false, ignore = false): Promise<void> {
-    const [cmd, ...args] = ActiveShellCommand.copyRecursive(src, dest, inclusive);
-    const res = await ExecUtil.getResult(spawn(cmd, args, { shell: true }), { catch: true });
-    if (res.code && !ignore) {
-      throw new Error(`Failed to copy ${src} to ${dest}`);
+    try {
+      if (inclusive) {
+        await fs.cp(src, dest, { recursive: true });
+      } else {
+        await fs.cp(src, path.resolve(dest, path.basename(src)), { recursive: true });
+      }
+    } catch (err) {
+      if (!ignore) {
+        throw new Error(`Failed to copy ${src} to ${dest}`);
+      }
     }
   }
 
