@@ -18,5 +18,4 @@ export class Util {
   static work3() {
     console.log('Wors');
   }
-
 }

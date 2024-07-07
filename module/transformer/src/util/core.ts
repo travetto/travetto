@@ -26,7 +26,7 @@ export class CoreUtil {
    * @param m
    */
   static getRangeOf<T extends ts.Node>(source: ts.SourceFile, o: T | undefined): [start: number, end: number] | undefined {
-    if (o) {
+    if (o && o.pos >= 0) {
       const start = ts.getLineAndCharacterOfPosition(source, o.getStart(source));
       const end = ts.getLineAndCharacterOfPosition(source, o.getEnd());
       return [start.line + 1, end.line + 1];
