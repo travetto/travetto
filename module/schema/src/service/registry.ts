@@ -411,6 +411,17 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     // Write views out
     config = this.finalizeViews(cls, config);
 
+    if (config.subTypeName && config.subTypeField in config.views[AllViewⲐ].schema) {
+      const field = config.views[AllViewⲐ].schema[config.subTypeField];
+      config.views[AllViewⲐ].schema[config.subTypeField] = {
+        ...field,
+        enum: {
+          values: [config.subTypeName],
+          message: `${config.subTypeField} can only be '${config.subTypeName}'`,
+        }
+      };
+    }
+
     return config;
   }
 

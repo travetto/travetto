@@ -296,21 +296,25 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     visited.add(schema.class.Ⲑid);
     const imports: Imp[] = [];
 
-    if (schema.subTypeName) { // There is a base type
-      const base = SchemaRegistry.getBaseSchema(schema.class);
-      const parentSchema = SchemaRegistry.get(base);
-      if (parentSchema.class !== schema.class) {
-        parent = this.renderSchema(parentSchema, force, visited);
-        imports.push(parent);
-      }
-    }
     if (schema.baseType) {
       // Render all children
+      const children: RenderContent[] = [];
       for (const el of SchemaRegistry.getSubTypesForClass(schema.class) ?? []) {
         if (el !== schema.class && !visited.has(el.Ⲑid)) {
-          this.renderSchema(SchemaRegistry.get(el), force, visited);
+          children.push(this.renderSchema(SchemaRegistry.get(el), force, visited));
         }
       }
+      const baseName = this.#nameResolver.getName(schema);
+      const baseResult = {
+        name: baseName,
+        content: [`export type ${baseName} = ${children.map(x => x.name).join(' | ')};\n`],
+        file: './schema.ts',
+        imports: [],
+        classId: schema.class.Ⲑid,
+      };
+      this.#schemaContent.set(schema.class.Ⲑid, baseResult);
+      this.#files.add(RuntimeIndex.getFunctionMetadataFromClass(schema.class)!.source);
+      return baseResult;
     }
 
     const fields: (string | Imp)[] = [];
@@ -321,7 +325,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
 
     const view = schema.views[AllViewⲐ];
     for (const fieldName of view.fields) {
-      if (parentFieldNames.has(fieldName)) {
+      if (!schema.subTypeName && parentFieldNames.has(fieldName)) {
         continue;
       }
 

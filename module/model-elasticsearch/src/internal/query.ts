@@ -321,7 +321,7 @@ export class ElasticsearchQueryUtil {
       const obj = r._source!;
       if (includeId) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        (obj as unknown as { _id: string })._id = r._id;
+        (obj as unknown as { _id: string })._id = r._id!;
       }
       out.push(obj);
     }
