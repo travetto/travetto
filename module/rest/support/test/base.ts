@@ -28,7 +28,11 @@ export abstract class BaseRestSuite {
   @BeforeAll()
   async initServer(): Promise<void> {
     if (!this.type || this.type === CoreRestServerSupport) {
-      this.#support = new CoreRestServerSupport((Util.naiveHash(this.constructor.Ⲑid) % 60000) + 2000);
+
+      // eslint-disable-next-line no-bitwise
+      const uniqueId = Math.abs(Buffer.from(this.constructor.Ⲑid).reduce((a, v) => (a * 33) ^ v, 5381));
+
+      this.#support = new CoreRestServerSupport((uniqueId % 60000) + 2000);
     } else {
       this.#support = new this.type();
     }

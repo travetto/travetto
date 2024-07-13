@@ -19,13 +19,6 @@ export class UtilTest {
   }
 
   @Test()
-  async testHash() {
-    const allHashes = ' '.repeat(1000).split('').map((x, i) => Util.naiveHash(' '.repeat(i + 2)));
-    const hashForSpace = Util.naiveHash(' ');
-    assert(!allHashes.includes(hashForSpace));
-  }
-
-  @Test()
   staticUuidVerify() {
     const hash = crypto.createHash('sha512');
     hash.update('roger');

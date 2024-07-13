@@ -1,4 +1,3 @@
-import { Util } from '@travetto/base';
 import { ContextProvider } from '@travetto/rest';
 
 /**
@@ -15,15 +14,15 @@ export interface SessionData {
  * @augments `@travetto/rest:Context`
  */
 @ContextProvider((c, req) => req.session)
-export class Session<T extends SessionData = SessionData>  {
+export class Session<T extends SessionData = SessionData> {
   /**
    * The expiry time when the session was loaded
    */
   #expiresAtLoaded: Date | undefined;
   /**
-   * The hash of the session at load
+   * The payload of the session at load
    */
-  #hash: number;
+  #payload: string;
   /**
    * The session identifier
    */
@@ -73,7 +72,7 @@ export class Session<T extends SessionData = SessionData>  {
     }
 
     // Hash the session as it stands
-    this.#hash = Util.naiveHash(JSON.stringify(this));
+    this.#payload = JSON.stringify(this);
   }
 
   /**
@@ -97,7 +96,7 @@ export class Session<T extends SessionData = SessionData>  {
    * Determine if session has changed
    */
   isChanged(): boolean {
-    return this.isTimeChanged() || this.#hash !== Util.naiveHash(JSON.stringify(this));
+    return this.isTimeChanged() || this.#payload !== JSON.stringify(this);
   }
 
   /**
