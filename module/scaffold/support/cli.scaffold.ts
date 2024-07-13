@@ -15,7 +15,7 @@ export class ScaffoldCommand implements CliCommandShape {
   /** Template */
   template = 'todo';
   /** Current Working Directory override */
-  cwd: string = path.cwd();
+  cwd: string = path.resolve();
   /** Target Directory */
   dir?: string;
   /** Force writing into an existing directory */

@@ -15,11 +15,9 @@ const cwd = (): string => toPosix(process.cwd());
 
 type PathModType =
   { toPosix: typeof toPosix, toNative: typeof toNative } &
-  Pick<typeof pathMod, 'basename' | 'dirname' | 'extname' | 'join' | 'resolve'> &
-  Pick<typeof process, 'cwd'>;
+  Pick<typeof pathMod, 'basename' | 'dirname' | 'extname' | 'join' | 'resolve'>;
 
 export const path: PathModType = {
-  cwd,
   toPosix,
   toNative,
   basename: (file, suffix) => basename(toPosix(file), suffix),

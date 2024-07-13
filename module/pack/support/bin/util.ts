@@ -40,7 +40,7 @@ export class PackUtil {
    * Finalize eject output
    */
   static async writeEjectOutput(workspace: string, module: string, output: AsyncIterable<string>, file: string): Promise<void> {
-    const vars = { DIST: workspace, TRV_OUT: RuntimeIndex.outputRoot, ROOT: path.cwd(), MOD: module };
+    const vars = { DIST: workspace, TRV_OUT: RuntimeIndex.outputRoot, ROOT: path.resolve(), MOD: module };
 
     const replaceArgs = (text: string): string => Object.entries(vars)
       .reduce((str, [k, v]) => str.replaceAll(v, ActiveShellCommand.var(k)), text);

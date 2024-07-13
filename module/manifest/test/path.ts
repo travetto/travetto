@@ -9,7 +9,7 @@ class PathTests {
 
   @Test()
   verifyRelative() {
-    const pwd = path.cwd().replace(/[a-z\- ]+/g, '..');
+    const pwd = path.resolve().replace(/[a-z\- ]+/g, '..');
     assert(pwd.includes('../../..'));
     assert(path.resolve(`${pwd}/test`) === '/test');
   }
@@ -29,7 +29,7 @@ class PathTests {
 
   @Test()
   verifyWin32Paths() {
-    const winResolve = (...args: string[]): string => path.toPosix(winPath.resolve(path.cwd(), ...args.map(path.toPosix)));
+    const winResolve = (...args: string[]): string => path.toPosix(winPath.resolve(path.resolve(), ...args.map(path.toPosix)));
     const winJoin = (root: string, ...args: string[]): string => path.toPosix(winPath.join(path.toPosix(root), ...args.map(path.toPosix)));
 
 

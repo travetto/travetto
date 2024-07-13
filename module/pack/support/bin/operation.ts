@@ -86,7 +86,7 @@ export class PackOperation {
       );
       yield ActiveShellCommand.chdir(cwd);
       yield bundleCommand;
-      yield ActiveShellCommand.chdir(path.cwd());
+      yield ActiveShellCommand.chdir(path.resolve());
     } else {
       await PackUtil.runCommand(bundleCommand, { cwd, env: { ...process.env, ...env } });
       const stat = await fs.stat(path.resolve(cfg.buildDir, cfg.mainFile));
@@ -248,7 +248,7 @@ export class PackOperation {
       await ActiveShellCommand.mkdir(path.dirname(cfg.output));
       yield ActiveShellCommand.chdir(cfg.buildDir);
       yield ActiveShellCommand.zip(cfg.output);
-      yield ActiveShellCommand.chdir(path.cwd());
+      yield ActiveShellCommand.chdir(path.resolve());
     } else {
       await fs.mkdir(path.dirname(cfg.output), { recursive: true });
       await PackUtil.runCommand(ActiveShellCommand.zip(cfg.output), { cwd: cfg.buildDir });
