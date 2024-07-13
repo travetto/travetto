@@ -1,25 +1,20 @@
 import type * as pathMod from 'node:path';
 import { extname, dirname, basename, resolve, join } from 'node:path/posix';
-import { sep, resolve as nativeResolve, join as nativeJoin } from 'node:path';
+import { resolve as nativeResolve, join as nativeJoin } from 'node:path';
 
 /**
  * Converts a given file name by replace all slashes, with forward slashes
  */
 const toPosix = (file: string): string => file.replaceAll('\\', '/');
-/**
- * Converts a given file name by replace all slashes, with platform dependent path separators
- */
-const toNative = (file: string): string => file.replace(/[\\\/]+/g, sep);
 
 const cwd = (): string => toPosix(process.cwd());
 
 type PathModType =
-  { toPosix: typeof toPosix, toNative: typeof toNative } &
+  { toPosix: typeof toPosix } &
   Pick<typeof pathMod, 'basename' | 'dirname' | 'extname' | 'join' | 'resolve'>;
 
 export const path: PathModType = {
   toPosix,
-  toNative,
   basename: (file, suffix) => basename(toPosix(file), suffix),
   extname: file => extname(toPosix(file)),
   dirname: file => dirname(toPosix(file)),

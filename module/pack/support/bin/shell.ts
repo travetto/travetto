@@ -1,6 +1,5 @@
 import util from 'node:util';
-
-import { path } from '@travetto/manifest';
+import { sep } from 'node:path/win32';
 
 import { ShellCommandImpl } from '../../src/types';
 
@@ -12,6 +11,8 @@ const escape = (text: string): string =>
 const escapedArgs = (args: string[]): string[] => args.map(x =>
   x.includes(' ') || x.includes('"') ? `'${x}'` : (x.includes("'") ? `"${x}"` : x)
 );
+
+const toWin = (file: string): string => file.replace(/[\\\/]+/g, sep);
 
 export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
   win32: {
@@ -25,7 +26,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     ],
     copy: (src, dest) => ['copy', src, dest],
     copyRecursive: (src, dest, inclusive) =>
-      ['xcopy', '/y', '/h', '/s', inclusive ? `${path.toNative(src)}\\*.*` : path.toNative(src), path.toNative(dest)],
+      ['xcopy', '/y', '/h', '/s', inclusive ? `${toWin(src)}\\*.*` : toWin(src), toWin(dest)],
     rmRecursive: (dest) => ['rmdir', '/Q', '/S', dest],
     mkdir: (dest) => ['md', dest],
     export: (key, value) => ['set', `${key}=${value}`],

@@ -1,9 +1,11 @@
 import { Module } from 'node:module';
+import { sep } from 'node:path';
 
-import { RuntimeIndex, path } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 
 import { RetargettingProxy } from '../proxy';
+
 
 declare module 'module' {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -71,7 +73,7 @@ export class DynamicCommonjsLoader {
   }
 
   async unload(file: string): Promise<void> {
-    const native = path.toNative(file);
+    const native = file.replace(/[\\\/]+/g, sep);
     if (native in require.cache) {
       delete require.cache[native]; // Remove require cached element
     }
