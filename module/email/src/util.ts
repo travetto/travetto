@@ -78,7 +78,7 @@ export class MailUtil {
   static buildUniqueMessageId(message: EmailOptions): string {
     const from = this.getPrimaryEmail(message.from)!;
     const to = this.getPrimaryEmail(message.to)!;
-    const uid = Util.shortHash(`${to}${from}${message.subject}${Date.now()}`).substring(0, 12);
+    const uid = Util.hash(`${to}${from}${message.subject}${Date.now()}`, 12);
     return `<${uid}@${from.split('@')[1]}>`;
   }
 }

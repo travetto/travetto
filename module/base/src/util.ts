@@ -35,19 +35,11 @@ export class Util {
    * @param src The seed value to build the hash from
    * @param len The optional length of the hash to generate
    */
-  static fullHash(src: string, len: number = -1): string {
+  static hash(src: string, len: number = -1): string {
     const hash = crypto.createHash('sha512');
     hash.update(src);
     const ret = hash.digest('hex');
     return len > 0 ? ret.substring(0, len) : ret;
-  }
-
-  /**
-   * Generate a short hash from a src value, based on sha512
-   * @param src The seed value to build the hash from
-   */
-  static shortHash(src: string): string {
-    return this.fullHash(src, 32);
   }
 
   /**

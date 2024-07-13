@@ -48,7 +48,7 @@ export class WorkPool {
         try {
           pendingAcquires += 1;
           const res = isWorkerFactory(worker) ? await worker() : { execute: worker };
-          res.id ??= Util.shortHash(`${Math.random()}`);
+          res.id ??= Util.uuid();
 
           if (res.init) {
             await res.init();

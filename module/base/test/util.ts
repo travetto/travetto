@@ -24,16 +24,15 @@ export class UtilTest {
     hash.update('roger');
     const key = hash.digest('hex');
 
-    assert(Util.shortHash('roger') === key.substring(0, 32));
-    assert(Util.fullHash('roger', 64) === key.substring(0, 64));
+    assert(Util.hash('roger', 64) === key.substring(0, 64));
 
     const hash2 = crypto.createHash('sha512');
     hash2.update('');
     const unKey = hash2.digest('hex');
 
-    assert(Util.fullHash('', 20) === unKey.substring(0, 20));
+    assert(Util.hash('', 20) === unKey.substring(0, 20));
 
-    assert(Util.fullHash('', 20) !== key.substring(0, 20));
+    assert(Util.hash('', 20) !== key.substring(0, 20));
   }
 
   @Test()

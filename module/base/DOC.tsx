@@ -137,9 +137,7 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
     <ul>
       <li>{d.method('uuid(len: number)')} generates a simple uuid for use within the application.</li>
       <li>{d.method('allowDenyMatcher(rules[])')} builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
-      <li>{d.method('naiveHash(text: string)')} produces a fast, and simplistic hash.  No guarantees are made, but performs more than adequately for framework purposes.</li>
-      <li>{d.method('shortHash(text: string)')} produces a sha512 hash and returns the first 32 characters.</li>
-      <li>{d.method('fullHash(text: string, size?: number)')} produces a full sha512 hash.</li>
+      <li>{d.method('hash(text: string, size?: number)')} produces a full sha512 hash.</li>
       <li>{d.method('resolvablePromise()')} produces a <c.Class name='Promise' /> instance with the {d.method('resolve')} and {d.method('reject')} methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.</li>
       <li>{d.method('fetchBytes(url: string, byteLimit?: number): Promise<Buffer>')} for fetching bytes from a url</li>
     </ul>
