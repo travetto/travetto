@@ -89,4 +89,16 @@ export class UtilTest {
     const chunk = await AssetUtil.readChunk(yml, 10);
     assert(chunk.length === 10);
   }
+
+  @Test()
+  async fetchBytes() {
+    const data = await AssetUtil.fetchBytes('https://travetto.dev/assets/landing/bg.jpg', 100000);
+    assert(data.length === 100000);
+
+    const data2 = await AssetUtil.fetchBytes('https://travetto.dev/assets/landing/bg.jpg', 100001);
+    assert(data2.length === 100001);
+
+    const full = await AssetUtil.fetchBytes('https://travetto.dev/assets/landing/bg.jpg');
+    assert(full.length === 215532);
+  }
 }

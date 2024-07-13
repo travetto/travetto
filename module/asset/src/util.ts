@@ -8,7 +8,6 @@ import { getExtension, getType } from 'mime';
 
 import { path } from '@travetto/manifest';
 import { StreamMeta } from '@travetto/model';
-import { Util } from '@travetto/base';
 
 import { Asset } from './types';
 
@@ -179,9 +178,47 @@ export class AssetUtil {
   }
 
   /**
+   * Fetch bytes from a url
+   */
+  static async fetchBytes(url: string, byteLimit: number = -1): Promise<Buffer> {
+    const str = await fetch(url, {
+      headers: (byteLimit > 0) ? {
+        Range: `0-${byteLimit - 1}`
+      } : {}
+    });
+
+    if (!str.ok) {
+      throw new Error('Invalid url for hashing');
+    }
+
+    let count = 0;
+    const buffer: Buffer[] = [];
+
+    for await (const chunk of Readable.fromWeb(str.body!)) {
+      if (Buffer.isBuffer(chunk)) {
+        buffer.push(chunk);
+        count += chunk.length;
+      } else if (typeof chunk === 'string') {
+        buffer.push(Buffer.from(chunk));
+        count += chunk.length;
+      }
+
+      if (count > byteLimit && byteLimit > 0) {
+        break;
+      }
+    }
+
+    try {
+      await str.body?.cancel();
+    } catch { }
+
+    return Buffer.concat(buffer, byteLimit <= 0 ? undefined : byteLimit);
+  }
+
+  /**
    * Compute hash from a url
    */
   static async hashUrl(url: string, byteLimit = -1): Promise<string> {
-    return this.computeHash(await Util.fetchBytes(url, byteLimit));
+    return this.computeHash(await this.fetchBytes(url, byteLimit));
   }
 }

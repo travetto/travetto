@@ -20,7 +20,6 @@ export const text = <>
     <li>Console Management</li>
     <li>Resource Access</li>
     <li>Standard Error Support</li>
-    <li>Stream Utilities</li>
     <li>Object Utilities</li>
     <li>Common Utilities</li>
     <li>Time Utilities</li>
@@ -139,7 +138,6 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
       <li>{d.method('allowDenyMatcher(rules[])')} builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
       <li>{d.method('hash(text: string, size?: number)')} produces a full sha512 hash.</li>
       <li>{d.method('resolvablePromise()')} produces a <c.Class name='Promise' /> instance with the {d.method('resolve')} and {d.method('reject')} methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.</li>
-      <li>{d.method('fetchBytes(url: string, byteLimit?: number): Promise<Buffer>')} for fetching bytes from a url</li>
     </ul>
 
     <c.Code title='Sample makeTemplate Usage' src={`

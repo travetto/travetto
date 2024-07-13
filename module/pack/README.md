@@ -186,7 +186,7 @@ echo "NODE_ENV=production" > $DIST/.env
 echo "TRV_MANIFEST=manifest.json" >> $DIST/.env
 echo "TRV_MODULE=$MOD" >> $DIST/.env
 echo "TRV_CLI_IPC=" >> $DIST/.env
-echo "TRV_RESOURCE_OVERRIDES=@#resources=@@#resources/" >> $DIST/.env
+echo "TRV_RESOURCE_OVERRIDES=@#resources=@@#resources" >> $DIST/.env
 
 # Writing package.json 
 
