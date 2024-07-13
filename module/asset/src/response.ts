@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
+import path from 'node:path';
 
 import { StreamMeta, StreamRange } from '@travetto/model';
-import { path } from '@travetto/manifest';
 import { TypedObject } from '@travetto/base';
 
 const FIELD_TO_HEADER: Record<keyof StreamMeta, string> = {

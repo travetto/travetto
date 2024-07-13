@@ -3,10 +3,10 @@ import { Readable } from 'node:stream';
 import { createReadStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import crypto from 'node:crypto';
+import path from 'node:path';
 
 import { getExtension, getType } from 'mime';
 
-import { path } from '@travetto/manifest';
 import { StreamMeta } from '@travetto/model';
 
 import { Asset } from './types';

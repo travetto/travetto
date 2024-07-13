@@ -1,12 +1,12 @@
 import os from 'node:os';
 import assert from 'node:assert';
+import path from 'node:path';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Util } from '@travetto/base';
 import { Inject } from '@travetto/di';
-import { path } from '@travetto/manifest';
 
 import { RestClientGeneratorService } from '../../src/service';
 import { Todo } from './service';

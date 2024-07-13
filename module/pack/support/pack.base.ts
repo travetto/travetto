@@ -1,7 +1,8 @@
 import os from 'node:os';
+import path from 'node:path';
 
 import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
-import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { Terminal } from '@travetto/terminal';
 import { Ignore, Required, Schema } from '@travetto/schema';

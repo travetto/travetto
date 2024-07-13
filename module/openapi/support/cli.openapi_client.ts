@@ -1,4 +1,5 @@
-import { path } from '@travetto/manifest';
+import path from 'node:path';
+
 import { CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
 import { DockerContainer } from '@travetto/command';
 import { ExecUtil } from '@travetto/base';

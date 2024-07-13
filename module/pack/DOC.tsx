@@ -1,6 +1,8 @@
 /** @jsxImportSource @travetto/doc */
+import path from 'node:path';
+
 import { d, c } from '@travetto/doc';
-import { path, RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 
 export const text = <>
   <c.StdHeader />

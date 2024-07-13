@@ -1,9 +1,14 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import { setMaxListeners } from 'node:events';
 import timers from 'node:timers/promises';
+import posix from 'node:path/posix';
+import native from 'node:path';
+
+import { type ManifestContext } from '@travetto/manifest';
 
 import { Log } from './log';
+
+const toPosix = (file: string): string => file.replaceAll('\\', '/');
 
 export class CommonUtil {
   /**
@@ -19,7 +24,7 @@ export class CommonUtil {
    * Write text file, and ensure folder exists
    */
   static writeTextFile = (file: string, content: string): Promise<void> =>
-    fs.mkdir(path.dirname(file), { recursive: true }).then(() => fs.writeFile(file, content, 'utf8'));
+    fs.mkdir(native.dirname(file), { recursive: true }).then(() => fs.writeFile(file, content, 'utf8'));
 
   /**
    * Restartable Event Stream
@@ -91,5 +96,10 @@ export class CommonUtil {
    */
   static queueMacroTask(): Promise<void> {
     return timers.setImmediate(undefined);
+  }
+
+  static resolveWorkspace(ctx: ManifestContext, ...args: string[]): string {
+    const all = [process.cwd(), ctx.workspace.path, ...args].map(toPosix);
+    return process.platform === 'win32' ? toPosix(native.resolve(...all)) : posix.resolve(...all);
   }
 }

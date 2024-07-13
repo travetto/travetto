@@ -1,9 +1,10 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
+import path from 'node:path';
 
 import { ExecUtil, Util } from '@travetto/base';
-import { RuntimeContext, path } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 import { TestFixtures } from '@travetto/test';
 
 import { RestClientGeneratorService } from '../../src/service';

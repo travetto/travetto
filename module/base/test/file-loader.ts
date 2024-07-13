@@ -1,9 +1,10 @@
 import fs from 'node:fs/promises';
 import assert from 'node:assert';
+import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
 import { FileLoader } from '../src/file-loader';
-import { RuntimeIndex, path } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 @Suite()
 class FileLoaderSuite {

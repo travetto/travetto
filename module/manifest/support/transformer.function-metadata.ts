@@ -8,9 +8,10 @@ import {
 import type { FunctionMetadataTag } from '../src/types/common';
 
 const MANIFEST_MOD = '@travetto/manifest';
+const MANIFEST_MOD_SRC = `${MANIFEST_MOD}/src`;
 const MANIFEST_IDX = `${MANIFEST_MOD}/__index__`;
 
-const RUNTIME_IDX_IMPORT = `${MANIFEST_MOD}/src/runtime`;
+const RUNTIME_IDX_IMPORT = `${MANIFEST_MOD_SRC}/runtime`;
 const RUNTIME_IDX_CLS = 'RuntimeIndex';
 
 const methods = Symbol.for(`${MANIFEST_MOD}:methods`);
@@ -41,7 +42,7 @@ export class RegisterTransformer {
   }
 
   static #valid({ importName: imp }: TransformerState): boolean {
-    return !imp.startsWith(MANIFEST_MOD) || !(/[/](src|support)[/]/.test(imp) || imp === MANIFEST_IDX);
+    return !imp.startsWith(MANIFEST_MOD_SRC) && imp !== MANIFEST_IDX;
   }
 
   /**

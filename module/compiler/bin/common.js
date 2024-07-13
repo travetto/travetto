@@ -10,8 +10,13 @@ const TS_EXT = /[.]tsx?$/;
 
 const getAge = (/** @type {{mtimeMs:number, ctimeMs:number}} */ st) => Math.max(st.mtimeMs, st.ctimeMs);
 
+const modPath = (/** @type {Ctx} */ ctx, mod, file) => {
+  const base = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', mod, file);
+  return `${base}${file.includes('.') ? '' : file.includes('/') ? '.ts' : '/__index__.ts'}`.replace(TS_EXT, '.js');
+};
+
 const getTarget = (/** @type {Ctx} */ ctx, file = '') => ({
-  dest: path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler', file).replace(TS_EXT, '.js'),
+  dest: modPath(ctx, '@travetto/compiler', file),
   src: path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, file),
   async writeIfStale(/** @type {(text:string)=>(string|Promise<string>)}*/ transform) {
     if (!existsSync(this.dest) || getAge(statSync(this.dest)) < getAge(statSync(this.src))) {
@@ -28,8 +33,7 @@ const getTranspiler = async (/** @type {Ctx} */ ctx) => {
   return (content = '') =>
     ts.transpile(content, { target: ts.ScriptTarget.ES2022, module, esModuleInterop: true, allowSyntheticDefaultImports: true })
       .replace(/from '([.][^']+)'/g, (_, i) => `from '${i.replace(/[.]js$/, '')}.js'`)
-      .replace(/from '(@travetto\/(.*?))'/g, (_, i, s) =>
-        `from '${path.resolve(ctx.workspace.path, ctx.build.compilerFolder, `${i}${s.includes('/') ? '.js' : '/__index__.js'}`)}'`);
+      .replace(/from '(@travetto\/[^/']+)([/][^']+)?'/g, (_, mod, file) => `from '${modPath(ctx, mod, file)}'`);
 };
 
 /** @returns {Promise<import('@travetto/compiler/support/entry.trvc')>} */
@@ -44,14 +48,21 @@ export async function getEntry() {
 
   // Setup Tsconfig
   const tsconfig = path.resolve(ctx.workspace.path, 'tsconfig.json');
-  existsSync(tsconfig) || writeFileSync(tsconfig, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
+  existsSync(tsconfig) || writeFileSync(tsconfig,
+    JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
 
   // Compile support folder
-  await target('package.json').writeIfStale(text => JSON.stringify(Object.assign(JSON.parse(text), { type: ctx.workspace.type }), null, 2));
+  await target('package.json').writeIfStale(text =>
+    JSON.stringify(Object.assign(JSON.parse(text), { type: ctx.workspace.type }), null, 2)
+  );
 
   let transpile;
   for (const file of readdirSync(target('support').src, { recursive: true, encoding: 'utf8' })) {
-    if (TS_EXT.test(file)) { await target(`support/${file}`).writeIfStale(async (text) => (transpile ??= await getTranspiler(ctx))(text)); }
+    if (TS_EXT.test(file)) {
+      await target(`support/${file}`).writeIfStale(async (text) =>
+        (transpile ??= await getTranspiler(ctx))(text)
+      );
+    }
   }
 
   // Load

@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
+import path from 'node:path';
 
 import { CliCommandShape, CliCommand, CliValidationError, ParsedState } from '@travetto/cli';
-import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Ignore } from '@travetto/schema';
 
 /**

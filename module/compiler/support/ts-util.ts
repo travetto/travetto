@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
-import { ManifestContext } from '@travetto/manifest';
+import { type ManifestContext } from '@travetto/manifest';
+import { CommonUtil } from './util';
 
 const OPT_CACHE: Record<string, import('typescript').CompilerOptions> = {};
 
@@ -11,10 +11,10 @@ export class TypescriptUtil {
      */
   static async getCompilerOptions(ctx: ManifestContext): Promise<{}> {
     if (!(ctx.workspace.path in OPT_CACHE)) {
-      let tsconfig = path.resolve(ctx.workspace.path, 'tsconfig.json');
+      let tsconfig = CommonUtil.resolveWorkspace(ctx, 'tsconfig.json');
 
       if (!await fs.stat(tsconfig).then(_ => true, _ => false)) {
-        tsconfig = path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, 'tsconfig.trv.json');
+        tsconfig = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerModuleFolder, 'tsconfig.trv.json');
       }
 
       const ts = (await import('typescript')).default;
@@ -29,7 +29,7 @@ export class TypescriptUtil {
         resolveJsonModule: true,
         sourceRoot: ctx.workspace.path,
         rootDir: ctx.workspace.path,
-        outDir: path.resolve(ctx.workspace.path),
+        outDir: CommonUtil.resolveWorkspace(ctx),
         module: ctx.workspace.type === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext,
       };
     }

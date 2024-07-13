@@ -1,6 +1,5 @@
 // @trv-no-transform
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
@@ -10,6 +9,8 @@ import { CompilerSetup } from './setup';
 import { CompilerServer } from './server/server';
 import { CompilerRunner } from './server/runner';
 import { CompilerClient } from './server/client';
+import { CommonUtil } from './util';
+
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {
@@ -63,7 +64,7 @@ export const main = (ctx: ManifestContext) => {
       if (await client.clean()) {
         return console.log(`Clean triggered ${ctx.workspace.path}:`, buildFolders);
       } else {
-        await Promise.all(buildFolders.map(f => fs.rm(path.resolve(ctx.workspace.path, f), { force: true, recursive: true })));
+        await Promise.all(buildFolders.map(f => fs.rm(CommonUtil.resolveWorkspace(ctx, f), { force: true, recursive: true })));
         return console.log(`Cleaned ${ctx.workspace.path}:`, buildFolders);
       }
     },
@@ -100,12 +101,11 @@ export const main = (ctx: ManifestContext) => {
       }
 
       return (mod, args) => {
-        const outputRoot = path.resolve(ctx.workspace.path, ctx.build.outputFolder);
-        process.env.TRV_MANIFEST = path.resolve(outputRoot, 'node_modules', ctx.main.name); // Setup for running
+        process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.main.name); // Setup for running
         if (args) {
           process.argv = [process.argv0, mod, ...args];
         }
-        return import(path.join(outputRoot, 'node_modules', mod)); // Return function to run import on a module
+        return import(CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', mod)); // Return function to run import on a module
       };
     },
 

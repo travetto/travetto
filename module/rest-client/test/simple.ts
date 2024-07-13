@@ -1,9 +1,9 @@
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import assert from 'node:assert';
+import path from 'node:path';
 
 import { AfterAll, Suite, Test } from '@travetto/test';
-import { path } from '@travetto/manifest';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 

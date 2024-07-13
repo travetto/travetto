@@ -1,4 +1,4 @@
-import { render } from 'mustache';
+import mustache from 'mustache';
 
 import { Injectable } from '@travetto/di';
 import { RuntimeResources } from '@travetto/base';
@@ -43,6 +43,6 @@ export class MustacheInterpolator implements MailInterpolator {
    * Interpolate text with data
    */
   render(text: string, data: Record<string, unknown>): string {
-    return render(text, data);
+    return mustache.render(text, data);
   }
 }

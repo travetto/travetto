@@ -1,9 +1,7 @@
 import crypto from 'node:crypto';
 import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
-
-import { path } from '@travetto/manifest';
-
+import path from 'node:path';
 
 type PromiseWithResolvers<T> = {
   resolve: (v: T) => void;

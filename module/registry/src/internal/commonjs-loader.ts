@@ -1,6 +1,6 @@
 import { Module } from 'node:module';
 
-import { RuntimeIndex, path } from '@travetto/manifest';
+import { path, RuntimeIndex } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 
 import { RetargettingProxy } from '../proxy';

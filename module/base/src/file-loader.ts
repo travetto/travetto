@@ -1,8 +1,9 @@
 import { createReadStream } from 'node:fs';
 import { Readable } from 'node:stream';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 
-import { path, RuntimeIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import { AppError } from './error';
 import { Env } from './env';

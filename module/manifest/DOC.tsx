@@ -1,8 +1,9 @@
 /** @jsxImportSource @travetto/doc */
 import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
 import { d, c } from '@travetto/doc';
-import { ManifestRoot, path, RuntimeIndex } from '@travetto/manifest';
+import { ManifestRoot, RuntimeIndex } from '@travetto/manifest';
 import { COMMON_DATE } from '@travetto/doc/src/util/run';
 
 const RuntimeIndexRef = d.codeLink('RuntimeIndex', 'src/runtime.ts', /class .*RuntimeIndex/);
@@ -80,7 +81,9 @@ export const text = <>
     </ul>
   </c.Section>
   <c.Section title='Path Normalization' >
-    By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up <c.CodeLink title='path' src='./src/path.ts' startRe={/export/} /> as an equivalent to {d.library('Node')}'s {d.library('Path')} library.  This allows for consistent behavior across all file-interactions, and also allows for easy analysis if {d.library('Node')}'s {d.library('Path')} library is ever imported.
+    By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up <c.CodeLink title='path' src='./src/path.ts' startRe={/export/} /> as an equivalent to {d.library('Node')}'s {d.library('Path')} library.  This allows for consistent behavior across all file-interactions.
+    <br />
+    Imports pointing at ${d.input('node:path')} and ${d.input('path')} are rewritten at compile time to point to the implementation provided by the module.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.
   </c.Section>
   <c.Section title='Anatomy of a Manifest'>
 

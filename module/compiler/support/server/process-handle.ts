@@ -11,7 +11,7 @@ export class ProcessHandle {
   #log: Logger;
 
   constructor(ctx: ManifestContext, name: string) {
-    this.#file = path.resolve(ctx.workspace.path, ctx.build.toolFolder, `${name}.pid`);
+    this.#file = CommonUtil.resolveWorkspace(ctx, ctx.build.toolFolder, `${name}.pid`);
     this.#log = Log.scoped(`process-handle.${name}`);
   }
 

@@ -4,9 +4,9 @@ import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
 import { buffer as toBuffer } from 'node:stream/consumers';
 import { createWriteStream } from 'node:fs';
+import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { path } from '@travetto/manifest';
 
 import { ImageConverter } from '../src/convert';
 

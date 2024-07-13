@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
+import path from 'node:path';
 
-import { path, RuntimeIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell';
@@ -78,7 +79,7 @@ export class DockerPackOperation {
     if (cfg.ejectFile) {
       yield ActiveShellCommand.chdir(cfg.buildDir);
       yield cmd;
-      yield ActiveShellCommand.chdir(path.cwd());
+      yield ActiveShellCommand.chdir(path.resolve());
     } else {
       await PackUtil.runCommand(cmd, { cwd: cfg.buildDir, stdio: [0, 'pipe', 2] });
       const [image] = JSON.parse(await PackUtil.runCommand(['docker', 'inspect', cfg.dockerImage]));

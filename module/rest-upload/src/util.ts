@@ -3,8 +3,8 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import stream, { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import path from 'node:path';
 
-import { path } from '@travetto/manifest';
 import { AppError, Util } from '@travetto/base';
 
 import { LocalFile } from './file';

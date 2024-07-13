@@ -1,6 +1,7 @@
 import { AssertionError } from 'node:assert';
+import path from 'node:path';
 
-import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 

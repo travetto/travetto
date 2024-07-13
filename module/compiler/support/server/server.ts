@@ -1,6 +1,5 @@
 import http from 'node:http';
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
@@ -150,7 +149,7 @@ export class CompilerServer {
 
   async #clean(): Promise<{ clean: boolean }> {
     await Promise.all([this.#ctx.build.compilerFolder, this.#ctx.build.outputFolder]
-      .map(f => fs.rm(path.resolve(this.#ctx.workspace.path, f), { recursive: true, force: true })));
+      .map(f => fs.rm(CommonUtil.resolveWorkspace(this.#ctx, f), { recursive: true, force: true })));
     return { clean: true };
   }
 

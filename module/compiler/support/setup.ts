@@ -1,6 +1,6 @@
-import path from 'node:path';
 import { createRequire } from 'node:module';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 
 import { type DeltaEvent, type ManifestContext, type Package } from '@travetto/manifest';
 
@@ -27,7 +27,7 @@ export class CompilerSetup {
     Pick<typeof import('@travetto/manifest'), 'ManifestDeltaUtil' | 'ManifestUtil'>
   > => {
     const all = ['util', 'delta'].map(f =>
-      import(path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}.js`))
+      import(CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}.js`))
     );
     return Promise.all(all).then(props => Object.assign({}, ...props));
   };
@@ -50,11 +50,11 @@ export class CompilerSetup {
   static async #transpileFile(ctx: ManifestContext, inputFile: string, outputFile: string): Promise<void> {
     const type = CommonUtil.getFileType(inputFile);
     if (type === 'js' || type === 'ts') {
-      const compilerOut = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules');
+      const compilerOut = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules');
 
       const text = (await fs.readFile(inputFile, 'utf8'))
         .replace(/from '([.][^']+)'/g, (_, i) => `from '${i.replace(/[.]js$/, '')}.js'`)
-        .replace(/from '(@travetto\/(.*?))'/g, (_, i, s) => `from '${path.resolve(compilerOut, `${i}${s.includes('/') ? '.js' : '/__index__.js'}`)}'`);
+        .replace(/from '(@travetto\/(.*?))'/g, (_, i, s) => `from '${compilerOut}/${i}${s.includes('/') ? '.js' : '/__index__.js'}'`);
 
       const ts = (await import('typescript')).default;
       const content = ts.transpile(text, {
@@ -92,7 +92,7 @@ export class CompilerSetup {
         if (file.startsWith('.')) {
           continue;
         }
-        const resolvedInput = path.resolve(sub, file);
+        const resolvedInput = path.resolve(sub, file).replaceAll('\\', '/'); // To posix
         const stat = await fs.stat(resolvedInput);
 
         if (stat.isDirectory()) {
@@ -105,14 +105,14 @@ export class CompilerSetup {
       }
     }
 
-    const outputFolder = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', module);
+    const outputFolder = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', module);
     const out: ModFile[] = [];
     for (const input of files) {
       const output = this.#sourceToOutputExt(input.replace(inputFolder, outputFolder));
       const inputTs = await fs.stat(input).then(RECENT_STAT, () => 0);
       if (inputTs) {
         const outputTs = await fs.stat(output).then(RECENT_STAT, () => 0);
-        await fs.mkdir(path.dirname(output), { recursive: true, });
+        await fs.mkdir(path.dirname(output), { recursive: true });
         out.push({ input, output, stale: inputTs > outputTs });
       }
     }
@@ -202,7 +202,7 @@ export class CompilerSetup {
 
     if (changes) {
       await Log.wrap('reset', async log => {
-        await fs.rm(path.resolve(ctx.workspace.path, ctx.build.outputFolder), { recursive: true, force: true });
+        await fs.rm(CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder), { recursive: true, force: true });
         log.info('Clearing output due to compiler changes');
       }, false);
     }

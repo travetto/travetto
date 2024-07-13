@@ -1,6 +1,7 @@
+import path from 'node:path';
+
 import { prompt } from 'enquirer';
 
-import { path } from '@travetto/manifest';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
 
@@ -15,7 +16,7 @@ export class ScaffoldCommand implements CliCommandShape {
   /** Template */
   template = 'todo';
   /** Current Working Directory override */
-  cwd: string = path.cwd();
+  cwd: string = path.resolve();
   /** Target Directory */
   dir?: string;
   /** Force writing into an existing directory */

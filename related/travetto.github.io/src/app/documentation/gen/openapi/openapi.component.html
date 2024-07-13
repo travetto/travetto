@@ -27,10 +27,12 @@ All of the high level configurations can be found in the following structure:
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/openapi/src/config.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ServerObject<span class="token punctuation">,</span> ContactObject<span class="token punctuation">,</span> LicenseObject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'openapi3-ts/oas31'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> path <span class="token keyword">from</span> <span class="token string">'node:path'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ServerObject<span class="token punctuation">,</span> ContactObject<span class="token punctuation">,</span> LicenseObject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'openapi3-ts/oas31'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/config'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> path<span class="token punctuation">,</span> RuntimeIndex<span class="token punctuation">,</span> RuntimeContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/manifest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RuntimeIndex<span class="token punctuation">,</span> RuntimeContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/manifest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Required <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/schema'</span><span class="token punctuation">;</span>
 

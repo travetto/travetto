@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
+import path from 'node:path';
 
-import { RuntimeContext, RuntimeIndex, path } from '@travetto/manifest';
+import { RuntimeContext, RuntimeIndex } from '@travetto/manifest';
 
 export async function buildEslintConfig(): Promise<string> {
   const root = RuntimeIndex.getModule('@travetto/eslint')!.sourcePath;

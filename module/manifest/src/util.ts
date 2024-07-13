@@ -69,8 +69,8 @@ export class ManifestUtil {
     const manifest: ManifestRoot = ManifestFileUtil.readAsJsonSync(file);
     // Support packaged environments, by allowing empty manifest.build.outputFolder
     if (manifest.build.outputFolder === '$$PRODUCTION$$') {
-      manifest.build.outputFolder = path.cwd();
-      manifest.workspace.path = path.cwd();
+      manifest.build.outputFolder = path.resolve();
+      manifest.workspace.path = path.resolve();
     }
     return manifest;
   }

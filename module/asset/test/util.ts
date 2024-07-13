@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import assert from 'node:assert';
+import path from 'node:path';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
-import { path } from '@travetto/manifest';
 
 import { AssetUtil } from '../src/util';
 

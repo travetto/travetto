@@ -1,7 +1,9 @@
+import path from 'node:path';
+
 import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas31';
 
 import { Config } from '@travetto/config';
-import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 import { Required } from '@travetto/schema';
 

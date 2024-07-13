@@ -19,7 +19,6 @@ type FileShape = {
   action: WatchAction;
 };
 
-
 /**
  * Watch support, based on compiler state and manifest details
  */

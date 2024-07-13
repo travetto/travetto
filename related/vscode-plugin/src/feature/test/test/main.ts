@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 import rl from 'node:readline/promises';
 
-import { IndexedModule, ManifestModule, path } from '@travetto/manifest';
+import { path, IndexedModule, ManifestModule } from '@travetto/manifest';
 import { Env, Util } from '@travetto/base';
 import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
 
