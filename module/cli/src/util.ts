@@ -30,7 +30,7 @@ export class CliUtil {
    */
   static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T, ipc?: boolean): Promise<unknown> | undefined {
     if (ipc && process.connected) {
-      ExecUtil.exitOnDisconnect();
+      process.once('disconnect', () => process.exit());
     }
     if (Env.TRV_CAN_RESTART.isFalse || !(cmd.canRestart ?? !Env.production)) {
       Env.TRV_CAN_RESTART.clear();

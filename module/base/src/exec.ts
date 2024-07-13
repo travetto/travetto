@@ -22,15 +22,15 @@ interface ExecutionBaseResult {
 /**
  * Result of an execution
  */
-export interface ExecutionResult extends ExecutionBaseResult {
+export interface ExecutionResult<T extends string | Buffer = string | Buffer> extends ExecutionBaseResult {
   /**
-   * Stdout as a string
+   * Stdout
    */
-  stdout: string;
+  stdout: T;
   /**
-   * Stderr as a string
+   * Stderr
    */
-  stderr: string;
+  stderr: T;
 }
 
 /**
@@ -39,11 +39,6 @@ export interface ExecutionResult extends ExecutionBaseResult {
 export class ExecUtil {
 
   static RESTART_EXIT_CODE = 200;
-
-  /** Listen for disconnect, and exit if needed */
-  static exitOnDisconnect(): void {
-    process.once('disconnect', () => process.exit());
-  }
 
   /**
    * Run with automatic restart support
@@ -92,11 +87,12 @@ export class ExecUtil {
    * @param proc The process to enhance
    * @param options The options to use to enhance the process
    */
-  static getResult(
-    proc: ChildProcess & { [RESULT]?: Promise<ExecutionResult> },
-    options: { catch?: boolean } = {}
-  ): Promise<ExecutionResult> {
-    const res = proc[RESULT] ??= new Promise<ExecutionResult>(resolve => {
+  static getResult(proc: ChildProcess): Promise<ExecutionResult<string>>;
+  static getResult(proc: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
+  static getResult(proc: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
+  static getResult<T extends string | Buffer>(proc: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const res = (proc as unknown as { [RESULT]: Promise<ExecutionResult> })[RESULT] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let done = false;
@@ -106,9 +102,14 @@ export class ExecUtil {
         }
         done = true;
 
+        const buffers = {
+          stdout: Buffer.concat(stdout),
+          stderr: Buffer.concat(stderr),
+        };
+
         const final = {
-          stdout: Buffer.concat(stdout).toString('utf8'),
-          stderr: Buffer.concat(stderr).toString('utf8'),
+          stdout: options.binary ? buffers.stdout : buffers.stdout.toString('utf8'),
+          stderr: options.binary ? buffers.stderr : buffers.stderr.toString('utf8'),
           ...result
         };
 
@@ -132,12 +133,13 @@ export class ExecUtil {
       }
     });
 
-    return options.catch ? res : res.then(v => {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return (options.catch ? res : res.then(v => {
       if (v.valid) {
         return v;
       } else {
         throw new Error(v.message);
       }
-    });
+    })) as Promise<ExecutionResult<T>>;
   }
 }
