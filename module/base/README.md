@@ -248,7 +248,7 @@ Simple functions for providing a minimal facsimile to [lodash](https://lodash.co
    *  `isPromise(a)` determines if `a` is a promise
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L17) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L19) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
    *  `hash(text: string, size?: number)` produces a full sha512 hash.

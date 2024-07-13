@@ -1,7 +1,9 @@
 import crypto from 'node:crypto';
 import timers from 'node:timers/promises';
+import fs from 'node:fs/promises';
 
-import { ManifestFileUtil } from '@travetto/manifest';
+import { path } from '@travetto/manifest';
+
 
 type PromiseWithResolvers<T> = {
   resolve: (v: T) => void;
@@ -83,8 +85,11 @@ export class Util {
   /**
    * Write file and copy over when ready
    */
-  static async bufferedFileWrite(file: string, content: string | object): Promise<string> {
-    return ManifestFileUtil.bufferedFileWrite(file, content);
+  static async bufferedFileWrite(file: string, content: string): Promise<void> {
+    const temp = path.resolve(path.dirname(file), `.${process.hrtime()[0]}.${path.basename(file)}`);
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.writeFile(temp, content, 'utf8');
+    await fs.rename(temp, file);
   }
 
   /**

@@ -98,7 +98,7 @@ export class PackageUtil {
             break;
           }
         }
-        await ManifestFileUtil.bufferedFileWrite(cache, out);
+        await ManifestFileUtil.bufferedFileWrite(cache, JSON.stringify(out));
         return out;
       });
   }

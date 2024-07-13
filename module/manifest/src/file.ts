@@ -1,4 +1,3 @@
-import os from 'node:os';
 import fs from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 
@@ -8,15 +7,11 @@ export class ManifestFileUtil {
   /**
    * Write file and copy over when ready
    */
-  static async bufferedFileWrite(file: string, content: string | object): Promise<string> {
-    const ext = path.extname(file);
-    const tempName = `${path.basename(file, ext)}.${process.ppid}.${process.pid}.${Date.now()}.${Math.random()}${ext}`;
+  static async bufferedFileWrite(file: string, content: string): Promise<void> {
+    const temp = path.resolve(path.dirname(file), `.${process.hrtime()[0]}.${path.basename(file)}`);
     await fs.mkdir(path.dirname(file), { recursive: true });
-    const temp = path.resolve(os.tmpdir(), tempName);
-    await fs.writeFile(temp, typeof content === 'string' ? content : JSON.stringify(content), 'utf8');
-    await fs.copyFile(temp, file);
-    fs.unlink(temp); // Don't wait for completion
-    return file;
+    await fs.writeFile(temp, content, 'utf8');
+    await fs.rename(temp, file);
   }
 
   /**
