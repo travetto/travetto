@@ -16,11 +16,6 @@ const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
 class $ConsoleManager {
 
   /**
-   * Stack of nested listeners
-   */
-  #stack: ConsoleListener[] = [];
-
-  /**
    * The current listener
    */
   #listener: ConsoleListener;
@@ -31,7 +26,7 @@ class $ConsoleManager {
   #filters: Partial<Record<LogLevel, (x: ConsoleEvent) => boolean>> = {};
 
   constructor(listener: ConsoleListener) {
-    this.set(listener, true);
+    this.set(listener);
     this.enhanceDebug(true);
     this.debug(false);
     util.inspect.defaultOptions.depth = Math.max(util.inspect.defaultOptions.depth ?? 0, 4);
@@ -110,25 +105,17 @@ class $ConsoleManager {
   }
 
   /**
-   * Set a new console listener, works as a stack to allow for nesting
+   * Set a new console listener
    */
-  set(cons: ConsoleListener, replace = false): void {
-    if (!replace) {
-      this.#stack.unshift(cons);
-    } else {
-      this.#stack[0] = cons;
-    }
-    this.#listener = this.#stack[0];
+  set(cons: ConsoleListener): void {
+    this.#listener = cons;
   }
 
   /**
-   * Pop off the logging stack
+   * Get the listener
    */
-  clear(): void {
-    if (this.#stack.length > 1) {
-      this.#stack.shift();
-      this.#listener = this.#stack[0];
-    }
+  get(): ConsoleListener {
+    return this.#listener;
   }
 }
 

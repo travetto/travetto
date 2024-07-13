@@ -29,8 +29,7 @@ export class LogService implements ConsoleListener, AutoCreate {
 
     this.#decorators = await DependencyRegistry.getCandidateInstances<LogDecorator>(LogDecoratorTarget);
 
-    // Take over
-    ConsoleManager.set(this, true);
+    ConsoleManager.set(this);
   }
 
   /**

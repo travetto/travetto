@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { ConsoleEvent, ConsoleManager } from '@travetto/base';
+import { ConsoleEvent, ConsoleListener, ConsoleManager } from '@travetto/base';
 
 /**
  * Console capturer.  Hooks into the Console manager, and collects the
@@ -9,9 +9,11 @@ import { ConsoleEvent, ConsoleManager } from '@travetto/base';
 export class ConsoleCapture {
 
   static out: Record<string, string[]>;
+  static #listener: ConsoleListener;
 
   static start(): void {
     this.out = {};
+    this.#listener ??= ConsoleManager.get();
     ConsoleManager.set(this);
   }
 
@@ -26,7 +28,7 @@ export class ConsoleCapture {
   static end(): Record<string, string> {
     const ret = this.out ?? {};
     this.out = {};
-    ConsoleManager.clear();
+    ConsoleManager.set(this.#listener);
     return Object.fromEntries(Object.entries(ret).map(([k, v]) => [k, v.join('\n')]));
   }
 }

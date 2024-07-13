@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
-import { ConsoleManager } from '@travetto/base';
+import { ConsoleListener, ConsoleManager } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
@@ -35,6 +35,8 @@ class Decorator implements LogDecorator {
 @Suite('Suite')
 class LoggerTest {
 
+  mgr: ConsoleListener;
+
   @BeforeAll()
   init() {
     return RootRegistry.init();
@@ -42,7 +44,12 @@ class LoggerTest {
 
   @BeforeEach()
   async reset() {
+    this.mgr = ConsoleManager.get();
     (await DependencyRegistry.getInstance(CustomLogger)).reset();
+  }
+
+  restConsole(): void {
+    ConsoleManager.set(this.mgr);
   }
 
   @Test('Should Log')
@@ -52,7 +59,7 @@ class LoggerTest {
 
     console.log('Hello', { args: [1, 2, 3] });
 
-    ConsoleManager.clear();
+    this.restConsole();
 
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
@@ -74,7 +81,8 @@ class LoggerTest {
 
     ConsoleManager.set(svc);
     console.log('Hello', { otherSecret: true });
-    ConsoleManager.clear();
+    this.restConsole();
+
 
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
@@ -90,7 +98,8 @@ class LoggerTest {
 
     ConsoleManager.set(svc);
     console.log('Hello', { secret: true });
-    ConsoleManager.clear();
+    this.restConsole();
+
 
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
@@ -108,7 +117,8 @@ class LoggerTest {
     console.log('Hello', 'Roger', { secret: true });
     console.error(svc);
     console.error(logger);
-    ConsoleManager.clear();
+    this.restConsole();
+
 
     assert(logger.values.length === 3);
     assert(logger.values[0].message === 'Hello');
