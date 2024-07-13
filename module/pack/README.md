@@ -29,7 +29,7 @@ $ trv pack --help
 Usage: pack [options]
 
 Options:
-  -w, --workspace <string>             Workspace for building (default: "/tmp/<temp-folder>")
+  -b, --build-dir <string>             Workspace for building (default: "/tmp/<temp-folder>")
   --clean, --no-clean                  Clean workspace (default: true)
   -o, --output <string>                Output location
   --main-scripts, --no-main-scripts    Create entry scripts (default: true)
@@ -94,7 +94,7 @@ $ trv pack:zip --help
 Usage: pack:zip [options]
 
 Options:
-  -w, --workspace <string>             Workspace for building (default: "/tmp/<temp-folder>")
+  -b, --build-dir <string>             Workspace for building (default: "/tmp/<temp-folder>")
   --clean, --no-clean                  Clean workspace (default: true)
   -o, --output <string>                Output location (default: "travetto_pack.zip")
   --main-scripts, --no-main-scripts    Create entry scripts (default: true)
@@ -122,7 +122,7 @@ $ trv pack:docker --help
 Usage: pack:docker [options]
 
 Options:
-  -w, --workspace <string>               Workspace for building (default: "/tmp/<temp-folder>")
+  -b, --build-dir <string>               Workspace for building (default: "/tmp/<temp-folder>")
   --clean, --no-clean                    Clean workspace (default: true)
   -o, --output <string>                  Output location
   --main-scripts, --no-main-scripts      Create entry scripts (default: true)
@@ -186,6 +186,7 @@ echo "NODE_ENV=production" > $DIST/.env
 echo "TRV_MANIFEST=manifest.json" >> $DIST/.env
 echo "TRV_MODULE=$MOD" >> $DIST/.env
 echo "TRV_CLI_IPC=" >> $DIST/.env
+echo "TRV_RESOURCE_OVERRIDES=@#resources=@@#resources/" >> $DIST/.env
 
 # Writing package.json 
 
@@ -206,8 +207,7 @@ chmod 755 $DIST/todo-app.sh
 
 echo "Writing entry scripts todo-app.cmd args=(run:rest)"
 
-echo "" > $DIST/todo-app.cmd
-echo "cd %~p0" >> $DIST/todo-app.cmd
+echo "cd %~p0" > $DIST/todo-app.cmd
 echo "node todo-app.js run:rest %*" >> $DIST/todo-app.cmd
 chmod 755 $DIST/todo-app.cmd
 
@@ -215,7 +215,7 @@ chmod 755 $DIST/todo-app.cmd
 
 echo "Copying over module resources"
 
-cp -r -p $ROOT/resources $DIST/resources
+cp -r -p $ROOT/resources/* $DIST/resources
 
 # Writing Manifest manifest.json 
 

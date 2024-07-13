@@ -30,7 +30,7 @@ export class DockerPackOperation {
    * Write Docker File
    */
   static async* writeDockerFile(cfg: DockerPackConfig): AsyncIterable<string[]> {
-    const dockerFile = path.resolve(cfg.workspace, 'Dockerfile');
+    const dockerFile = path.resolve(cfg.buildDir, 'Dockerfile');
 
     const factory = RuntimeIndex.getFromImport(cfg.dockerFactory);
     if (!factory) {
@@ -76,11 +76,11 @@ export class DockerPackOperation {
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Building Docker Container' }} ${{ param: cfg.dockerTag?.join(',') }}`);
 
     if (cfg.ejectFile) {
-      yield ActiveShellCommand.chdir(cfg.workspace);
+      yield ActiveShellCommand.chdir(cfg.buildDir);
       yield cmd;
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
-      await PackUtil.runCommand(cmd, { cwd: cfg.workspace, stdio: [0, 'pipe', 2] });
+      await PackUtil.runCommand(cmd, { cwd: cfg.buildDir, stdio: [0, 'pipe', 2] });
       const [image] = JSON.parse(await PackUtil.runCommand(['docker', 'inspect', cfg.dockerImage]));
       yield [cliTpl`${{ title: 'Built Docker Container  ' }} ${{ identifier: 'sizeMb' }}=${{ param: Math.trunc(image.Size / 2 ** 20) }}`];
     }

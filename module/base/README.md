@@ -27,7 +27,7 @@ Base is the foundation of all [Travetto](https://travetto.dev) applications.  It
    *  Shutdown Management
 
 ## Environment Support
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
 
 **Code: Base Known Environment Flags**
 ```typescript
@@ -57,6 +57,11 @@ interface TravettoEnv {
      * The folders to use for resource lookup
      */
     TRV_RESOURCES: string[];
+    /** 
+     * Resource path overrides
+     * @private
+     */
+    TRV_RESOURCE_OVERRIDES: Record<string, string>;
     /** 
      * The max time to wait for shutdown to finish after initial SIGINT, 
      * @default 2s
@@ -93,6 +98,8 @@ export class EnvProp<T> {
   get val(): string | undefined;
   /** Read value as list */
   get list(): string[] | undefined;
+  /** Read value as object */
+  get object(): Record<string, string> | undefined;
   /** Add values to list */
   add(...items: string[]): void;
   /** Read value as int  */
@@ -111,7 +118,7 @@ export class EnvProp<T> {
 ```
 
 ### Runtime Flags
-[Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105) also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to `process.env` values with a little bit of logic sprinkled in.
+[Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123) also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to `process.env` values with a little bit of logic sprinkled in.
 
 **Code: Provided Flags**
 ```typescript
@@ -142,9 +149,9 @@ export const Env = delegate({
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L13) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
 
-The [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10) extends [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) and utilizes the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10) extends [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L13) and utilizes the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Standard Error Support
 While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
@@ -233,7 +240,7 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
 ```
 
 ## Object Utilities
-Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [ObjectUtil](https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L10) includes:
+Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [ObjectUtil](https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L9) includes:
    *  `isPrimitive(el)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
    *  `isPlainObject(obj)` determines if the obj is a simple object
    *  `isFunction(o)` determines if `o` is a simple `Function`
@@ -242,7 +249,7 @@ Simple functions for providing a minimal facsimile to [lodash](https://lodash.co
    *  `isPromise(a)` determines if `a` is a promise
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L13) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L18) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
    *  `naiveHash(text: string)` produces a fast, and simplistic hash.  No guarantees are made, but performs more than adequately for framework purposes.

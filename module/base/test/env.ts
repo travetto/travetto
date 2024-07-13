@@ -36,6 +36,22 @@ export class EnvTest {
   }
 
   @Test()
+  verifyGetObject() {
+    process.env.age = 'name=20,height=30';
+
+    assert.deepStrictEqual(new EnvProp('age').object, { name: '20', height: '30' });
+    assert(new EnvProp('age2').object === undefined);
+
+    process.env.missing = '';
+    assert.deepStrictEqual(new EnvProp('missing').object, undefined);
+
+    assert.deepStrictEqual(
+      new EnvProp('age').export({ name: 20, height: 30 }),
+      { age: 'name=20,height=30' }
+    );
+  }
+
+  @Test()
   verifyGetList() {
     process.env.names = 'a,b,c,d,e';
 

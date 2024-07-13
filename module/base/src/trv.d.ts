@@ -32,6 +32,11 @@ declare global {
      */
     TRV_RESOURCES: string[];
     /** 
+     * Resource path overrides
+     * @private
+     */
+    TRV_RESOURCE_OVERRIDES: Record<string, string>;
+    /** 
      * The max time to wait for shutdown to finish after initial SIGINT, 
      * @default 2s
      */

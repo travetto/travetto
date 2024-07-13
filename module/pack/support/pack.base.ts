@@ -26,8 +26,8 @@ export abstract class BasePackCommand implements CliCommandShape {
   @Ignore()
   _parsed: ParsedState;
 
-  @CliFlag({ desc: 'Workspace for building', short: 'w' })
-  workspace: string = path.resolve(os.tmpdir(), RuntimeIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
+  @CliFlag({ desc: 'Workspace for building', short: 'b' })
+  buildDir: string = path.resolve(os.tmpdir(), RuntimeIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
 
   @CliFlag({ desc: 'Clean workspace' })
   clean = true;
@@ -81,6 +81,9 @@ export abstract class BasePackCommand implements CliCommandShape {
   @Ignore()
   entryArguments: string[] = [];
 
+  @Ignore()
+  workspaceResourceFolder: string = 'resources-workspace';
+
   getOperations(): PackOperationShape<this>[] {
     return [
       PackOperation.clean,
@@ -109,7 +112,7 @@ export abstract class BasePackCommand implements CliCommandShape {
     // Resolve all files to absolute paths
     this.output = this.output ? path.resolve(this.output) : undefined!;
     this.ejectFile = this.ejectFile ? path.resolve(this.ejectFile) : undefined;
-    this.workspace = path.resolve(this.workspace);
+    this.buildDir = path.resolve(this.buildDir);
 
     // Update entry points
     this.entryArguments = [...this.entryArguments ?? [], ...args, ...this._parsed.unknown];
@@ -121,7 +124,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
     // Eject to file
     if (this.ejectFile) {
-      await PackUtil.writeEjectOutput(this.workspace, this.module, stream, this.ejectFile);
+      await PackUtil.writeEjectOutput(this.buildDir, this.module, stream, this.ejectFile);
     } else {
       const start = Date.now();
       const term = new Terminal();

@@ -16,9 +16,7 @@ const escapedArgs = (args: string[]): string[] => args.map(x =>
 export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
   win32: {
     var: (name: string) => `%${name}%`,
-    scriptOpen: () => [],
-    chdirScript: () => ['cd', '%~p0'],
-    callCommandWithAllArgs: (cmd, ...args) => [cmd, ...escapedArgs(args), '%*'],
+    callCommandWithAllArgs: (cmd, ...args) => [[cmd, ...escapedArgs(args), '%*'].join(' ')],
     createFile: (file, text) => [
       ['@echo', 'off'],
       ...text.map((line, i) =>
@@ -34,13 +32,18 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     chdir: (dest) => ['cd', dest],
     comment: (message) => ['\nREM', util.stripVTControlCharacters(message), '\n'],
     echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
-    zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile]
+    zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile],
+    script: (lines: string[], changeDir: boolean = false) => ({
+      ext: '.cmd',
+      contents: [
+        ...(changeDir ? ['cd %~p0'] : []),
+        ...lines,
+      ]
+    })
   },
   posix: {
     var: (name: string) => `$${name}`,
-    scriptOpen: () => ['#!/bin/sh'],
-    chdirScript: () => ['cd', '$(dirname "$0")'],
-    callCommandWithAllArgs: (cmd, ...args) => [cmd, ...escapedArgs(args), '$@'],
+    callCommandWithAllArgs: (cmd, ...args) => [[cmd, ...escapedArgs(args), '$@'].join(' ')],
     createFile: (file, text, mode) => [
       ...text.map((line, i) =>
         ['echo', `"${escape(line)}"`, i === 0 ? '>' : '>>', file]),
@@ -55,7 +58,15 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     chdir: (dest) => ['cd', dest],
     comment: (message) => ['\n#', util.stripVTControlCharacters(message), '\n'],
     echo: (message) => ['echo', `"${escape(util.stripVTControlCharacters(message))}"\n`],
-    zip: (outputFile) => ['zip', '-r', outputFile, '.']
+    zip: (outputFile) => ['zip', '-r', outputFile, '.'],
+    script: (lines: string[], changeDir: boolean = false) => ({
+      ext: '.sh',
+      contents: [
+        '#!/bin/sh',
+        ...(changeDir ? ['cd $(dirname "$0")'] : []),
+        ...lines,
+      ]
+    })
   },
 };
 

@@ -31,7 +31,7 @@ Base is the foundation of all <a target="_blank" class="external-link" href="htt
 
 <h2 id="environment-support">Environment Support</h2>
 
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
 
   <figure class="code">
     <figcaption class="code">Base Known Environment Flags
@@ -64,6 +64,11 @@ The functionality we support for testing and retrieving environment information 
    * The folders to use for resource lookup
    */</span>
   <span class="token constant">TRV_RESOURCES</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Resource path overrides
+   * &#64;private
+   */</span>
+  <span class="token constant">TRV_RESOURCE_OVERRIDES</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * The max time to wait for shutdown to finish after initial SIGINT,
    * &#64;default 2s
@@ -104,6 +109,8 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
   <span class="token keyword">get</span> <span class="token function">val</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
   <span class="token comment">/** Read value as list */</span>
   <span class="token keyword">get</span> <span class="token function">list</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Read value as object */</span>
+  <span class="token keyword">get</span> <span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
   <span class="token comment">/** Add values to list */</span>
   <span class="token function">add</span><span class="token punctuation">(</span><span class="token operator">...</span>items<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
   <span class="token comment">/** Read value as int  */</span>
@@ -123,11 +130,11 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
 
 <h3 id="runtime-flags">Runtime Flags</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105">Env</a> also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to <code class="item field">process.env</code> values with a little bit of logic sprinkled in.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123">Env</a> also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to <code class="item field">process.env</code> values with a little bit of logic sprinkled in.
 
   <figure class="code">
     <figcaption class="code">Provided Flags
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">const</span> Env <span class="token operator">=</span> <span class="token function">delegate</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
@@ -157,8 +164,8 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
 <h2 id="resource-access">Resource Access</h2>
 
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" routerLink="/docs/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.<br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> with a category of 'notfound'.  <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10">ResourceLoader</a> extends <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12">FileLoader</a> and utilizes the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L105">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L13">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> with a category of 'notfound'.  <br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10">ResourceLoader</a> extends <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L13">FileLoader</a> and utilizes the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
 
 <h2 id="standard-error-support">Standard Error Support</h2>
 
@@ -259,7 +266,7 @@ $ <span class="token assign-left variable">DEBUG</span><span class="token operat
 
 <h2 id="object-utilities">Object Utilities</h2>
 
-Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L10">ObjectUtil</a> includes:
+Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L9">ObjectUtil</a> includes:
 <ul> <li><code class="item method">isPrimitive(el)</code> determines if <code class="item input">el</code> is a <code class="item input">string</code>, <code class="item input">boolean</code>, <code class="item input">number</code> or <code class="item input">RegExp</code></li>
 <li><code class="item method">isPlainObject(obj)</code> determines if the obj is a simple object</li>
 <li><code class="item method">isFunction(o)</code> determines if <code class="item input">o</code> is a simple <code class="item input">Function</code></li>
@@ -270,7 +277,7 @@ Simple functions for providing a minimal facsimile to <a target="_blank" class="
 
 <h2 id="common-utilities">Common Utilities</h2>
 
-Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L13">Util</a> includes:
+Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L18">Util</a> includes:
 <ul> <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
 <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
 <li><code class="item method">naiveHash(text: string)</code> produces a fast, and simplistic hash.  No guarantees are made, but performs more than adequately for framework purposes.</li>

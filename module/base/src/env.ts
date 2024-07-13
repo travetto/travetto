@@ -25,7 +25,18 @@ export class EnvProp<T> {
 
   /** Export value */
   export(val: T | undefined): Record<string, string> {
-    return val === undefined || val === '' ? { [this.key]: '' } : { [this.key]: Array.isArray(val) ? `${val.join(',')}` : `${val}` };
+    let out: string;
+    if (val === undefined || val === '' || val === null) {
+      out = '';
+    } else if (Array.isArray(val)) {
+      out = val.join(',');
+    } else if (typeof val === 'object') {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      out = Object.entries(val as Record<string, string>).map(([k, v]) => `${k}=${v}`).join(',');
+    } else {
+      out = `${val}`;
+    }
+    return { [this.key]: out };
   }
 
   /** Read value as string */
@@ -36,6 +47,12 @@ export class EnvProp<T> {
     const val = this.val;
     return (val === undefined || val === '') ?
       undefined : val.split(/[, ]+/g).map(x => x.trim()).filter(x => !!x);
+  }
+
+  /** Read value as object */
+  get object(): Record<string, string> | undefined {
+    const items = this.list;
+    return items ? Object.fromEntries(items.map(x => x.split(/[:=]/g))) : undefined;
   }
 
   /** Add values to list */
@@ -81,6 +98,7 @@ export class EnvProp<T> {
 type AllType = {
   [K in keyof TravettoEnv]: Pick<EnvProp<TravettoEnv[K]>, 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
     (TravettoEnv[K] extends unknown[] ? 'list' | 'add' : never) |
+    (Extract<TravettoEnv[K], object> extends never ? never : 'object') |
     (Extract<TravettoEnv[K], number> extends never ? never : 'int') |
     (Extract<TravettoEnv[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse') |
     (Extract<TravettoEnv[K], TimeSpan> extends never ? never : 'time')

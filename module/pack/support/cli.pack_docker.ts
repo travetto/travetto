@@ -6,9 +6,7 @@ import { DockerPackOperation } from './bin/docker-operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
 import { DockerPackConfig } from '../src/types';
 
-const NODE_MAJOR = +process.version.match(/\d+/)![0];
-const DEFAULT_USER_ID = 2000;
-const DEFAULT_USER = 'app';
+const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
 
 /**
  * Standard docker support for pack
@@ -40,6 +38,15 @@ export class PackDockerCommand extends BasePackCommand {
   @Ignore()
   dockerRuntime: DockerPackConfig['dockerRuntime'];
 
+  @Ignore()
+  appFolder = 'app';
+
+  @Ignore()
+  defaultUser = this.appFolder;
+
+  @Ignore()
+  defaultUserId = 2000;
+
   async validate(...args: string[]): Promise<CliValidationError[] | undefined> {
     const errs: CliValidationError[] = [];
     if (this.dockerPort?.length) {
@@ -65,11 +72,11 @@ export class PackDockerCommand extends BasePackCommand {
     const groupIsNum = /^\d+$/.test(groupOrGid);
     const userIsNum = /^\d+$/.test(userOrUid);
 
-    const uid = userIsNum ? +userOrUid : DEFAULT_USER_ID;
-    const gid = groupIsNum ? +groupOrGid : DEFAULT_USER_ID;
-    const group = (!groupIsNum ? groupOrGid : undefined) || DEFAULT_USER;
-    const user = (!userIsNum ? userOrUid : undefined) || DEFAULT_USER;
-    this.dockerRuntime = { user, uid, group, gid, folder: `/${DEFAULT_USER}`, packages: this.dockerRuntimePackages };
+    const uid = userIsNum ? +userOrUid : this.defaultUserId;
+    const gid = groupIsNum ? +groupOrGid : this.defaultUserId;
+    const group = (!groupIsNum ? groupOrGid : undefined) || this.defaultUser;
+    const user = (!userIsNum ? userOrUid : undefined) || this.defaultUser;
+    this.dockerRuntime = { user, uid, group, gid, folder: `/${this.appFolder}`, packages: this.dockerRuntimePackages };
   }
 
   preHelp(): void {

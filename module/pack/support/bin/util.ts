@@ -20,17 +20,17 @@ export class PackUtil {
    * Remove directory, determine if errors should be ignored
    * @param src The folder to copy
    * @param dest The folder to copy to
-   * @param ignore Should errors be ignored
    */
-  static async copyRecursive(src: string, dest: string, inclusive: boolean = false, ignore = false): Promise<void> {
+  static async copyRecursive(src: string, dest: string, inclusive: boolean = false, ignoreFailure = false): Promise<void> {
     try {
-      if (inclusive) {
-        await fs.cp(src, dest, { recursive: true });
-      } else {
-        await fs.cp(src, path.resolve(dest, path.basename(src)), { recursive: true });
+      let final = dest;
+      if (!inclusive) {
+        final = path.resolve(dest, path.basename(src));
       }
+      await fs.mkdir(final, { recursive: true });
+      await fs.cp(src, final, { recursive: true });
     } catch (err) {
-      if (!ignore) {
+      if (!ignoreFailure) {
         throw new Error(`Failed to copy ${src} to ${dest}`);
       }
     }
@@ -45,10 +45,9 @@ export class PackUtil {
     const replaceArgs = (text: string): string => Object.entries(vars)
       .reduce((str, [k, v]) => str.replaceAll(v, ActiveShellCommand.var(k)), text);
 
-    const preamble = [
-      ActiveShellCommand.scriptOpen(),
-      ...Object.entries(vars).map(([k, v]) => ActiveShellCommand.export(k, v).join(' ')),
-    ].join('\n');
+    const preamble = ActiveShellCommand.script(
+      Object.entries(vars).map(([k, v]) => ActiveShellCommand.export(k, v).join(' ')),
+    ).contents;
 
     let stream: fs.FileHandle | undefined;
 
@@ -60,7 +59,9 @@ export class PackUtil {
 
     const write = (text: string): Promise<unknown> | unknown => stream ? stream.write(`${text}\n`) : process.stdout.write(`${text}\n`);
 
-    await write(preamble);
+    for (const line of preamble) {
+      write(line);
+    }
     for await (const line of output) {
       await write(replaceArgs(line));
     }

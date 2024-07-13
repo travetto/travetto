@@ -30,20 +30,20 @@ export class PackOperation {
       return;
     }
 
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Cleaning Output' }} ${{ path: cfg.workspace }}`);
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Cleaning Output' }} ${{ path: cfg.buildDir }}`);
 
     if (cfg.ejectFile) {
-      yield ActiveShellCommand.rmRecursive(cfg.workspace);
+      yield ActiveShellCommand.rmRecursive(cfg.buildDir);
       if (cfg.output) {
         yield ActiveShellCommand.rmRecursive(cfg.output);
       }
-      yield ActiveShellCommand.mkdir(cfg.workspace);
+      yield ActiveShellCommand.mkdir(cfg.buildDir);
     } else {
-      await fs.rm(cfg.workspace, { recursive: true, force: true });
+      await fs.rm(cfg.buildDir, { recursive: true, force: true });
       if (cfg.output) {
         await fs.rm(cfg.output, { recursive: true, force: true });
       }
-      await fs.mkdir(cfg.workspace, { recursive: true });
+      await fs.mkdir(cfg.buildDir, { recursive: true });
     }
   }
 
@@ -65,7 +65,7 @@ export class PackOperation {
         ['BUNDLE_COMPRESS', cfg.minify],
         ['BUNDLE_SOURCEMAP', cfg.sourcemap],
         ['BUNDLE_SOURCES', cfg.includeSources],
-        ['BUNDLE_OUTPUT', cfg.workspace],
+        ['BUNDLE_OUTPUT', cfg.buildDir],
         ['BUNDLE_FORMAT', RuntimeContext.workspace.type],
         ['BUNDLE_ENV_FILE', cfg.envFile]
       ] as const)
@@ -89,7 +89,7 @@ export class PackOperation {
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
       await PackUtil.runCommand(bundleCommand, { cwd, env: { ...process.env, ...env } });
-      const stat = await fs.stat(path.resolve(cfg.workspace, cfg.mainFile));
+      const stat = await fs.stat(path.resolve(cfg.buildDir, cfg.mainFile));
       yield [cliTpl`${{ title: 'Bundled Output ' }} ${{ identifier: 'sizeKb' }}=${{ param: Math.trunc(stat.size / 2 ** 10) }}`];
     }
   }
@@ -105,12 +105,12 @@ export class PackOperation {
 
     if (cfg.ejectFile) {
       yield* ActiveShellCommand.createFile(
-        path.resolve(cfg.workspace, file),
+        path.resolve(cfg.buildDir, file),
         [JSON.stringify(pkg)]
       );
     } else {
       await PackUtil.writeRawFile(
-        path.resolve(cfg.workspace, file),
+        path.resolve(cfg.buildDir, file),
         [JSON.stringify(pkg, null, 2)]
       );
     }
@@ -120,24 +120,30 @@ export class PackOperation {
    * Define .env.js file to control manifest location
    */
   static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const file = path.resolve(cfg.workspace, cfg.envFile);
+    const file = path.resolve(cfg.buildDir, cfg.envFile);
     const env = {
       ...Env.NODE_ENV.export('production'),
       ...Env.TRV_MANIFEST.export(cfg.manifestFile),
       ...Env.TRV_MODULE.export(cfg.module),
-      ...Env.TRV_CLI_IPC.export(undefined)
+      ...Env.TRV_CLI_IPC.export(undefined),
+      ...Env.TRV_RESOURCE_OVERRIDES.export({
+        '@#resources': '@@#resources',
+        ...(cfg.includeWorkspaceResources ? {
+          '@@#resources': `@@#${cfg.workspaceResourceFolder}`
+        } : {})
+      })
     };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
 
     if (cfg.ejectFile) {
       yield* ActiveShellCommand.createFile(
-        path.resolve(cfg.workspace, file),
+        path.resolve(cfg.buildDir, file),
         PackUtil.buildEnvFile(env)
       );
     } else {
       await PackUtil.writeRawFile(
-        path.resolve(cfg.workspace, file),
+        path.resolve(cfg.buildDir, file),
         PackUtil.buildEnvFile(env)
       );
     }
@@ -152,27 +158,21 @@ export class PackOperation {
     }
 
     const title = 'Writing entry scripts';
+    for (const sh of [ShellCommands.posix, ShellCommands.win32]) {
+      const { ext, contents } = sh.script(
 
-    const files = ([['posix', 'sh'], ['win32', 'cmd']] as const)
-      .map(([type, ext]) => ({
-        fileTitle: cliTpl`${{ title }} ${{ path: `${cfg.mainName}.${ext}` }} args=(${{ param: cfg.entryArguments.join(' ') }})`,
-        file: `${cfg.mainName}.${ext}`,
-        text: [
-          ShellCommands[type].scriptOpen(),
-          ShellCommands[type].chdirScript(),
-          ShellCommands[type].callCommandWithAllArgs('node', cfg.mainFile, ...cfg.entryArguments),
-        ].map(x => x.join(' '))
-      }));
+        sh.callCommandWithAllArgs('node', cfg.mainFile, ...cfg.entryArguments), true
+      );
+      const file = `${cfg.mainName}${ext}`;
+      const args = cfg.entryArguments.join(' ');
 
-    if (cfg.ejectFile) {
-      for (const { fileTitle, text, file } of files) {
-        yield* PackOperation.title(cfg, fileTitle);
-        yield* ActiveShellCommand.createFile(path.resolve(cfg.workspace, file), text, '755');
-      }
-    } else {
-      for (const { fileTitle, text, file } of files) {
-        yield* PackOperation.title(cfg, fileTitle);
-        await PackUtil.writeRawFile(path.resolve(cfg.workspace, file), text, '755');
+      yield* PackOperation.title(cfg, cliTpl`${{ title }} ${{ path: file }} args=(${{ param: args }})`);
+
+      if (cfg.ejectFile) {
+        yield* ActiveShellCommand.createFile(path.resolve(cfg.buildDir, file), contents, '755');
+
+      } else {
+        await PackUtil.writeRawFile(path.resolve(cfg.buildDir, file), contents, '755');
       }
     }
   }
@@ -187,13 +187,12 @@ export class PackOperation {
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Copying over workspace resources' }}`);
 
-    const dest = path.resolve(cfg.workspace, 'workspace-resources');
+    const dest = path.resolve(cfg.buildDir, cfg.workspaceResourceFolder);
     const src = RuntimeContext.workspaceRelative('resources');
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.copyRecursive(src, dest, true);
     } else {
-      await fs.mkdir(dest, { recursive: true });
       await PackUtil.copyRecursive(src, dest, true);
     }
   }
@@ -205,19 +204,18 @@ export class PackOperation {
     const resources = {
       count: RuntimeIndex.mainModule.files.resources?.length ?? 0,
       src: path.resolve(RuntimeIndex.mainModule.sourcePath, 'resources'),
-      dest: path.resolve(cfg.workspace, 'resources')
+      dest: path.resolve(cfg.buildDir, 'resources')
     };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Copying over module resources' }}`);
 
     if (cfg.ejectFile) {
       if (resources.count) {
-        yield ActiveShellCommand.copyRecursive(resources.src, path.resolve(cfg.workspace, 'resources'));
+        yield ActiveShellCommand.copyRecursive(resources.src, path.resolve(cfg.buildDir, 'resources'), true);
       }
     } else {
       if (resources.count) {
-        await fs.mkdir(path.dirname(resources.dest), { recursive: true });
-        await PackUtil.copyRecursive(resources.src, resources.dest);
+        await PackUtil.copyRecursive(resources.src, resources.dest, true);
       }
     }
   }
@@ -226,7 +224,7 @@ export class PackOperation {
    * Produce the output manifest, only including prod dependencies
    */
   static async * writeManifest(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const out = path.resolve(cfg.workspace, cfg.manifestFile);
+    const out = path.resolve(cfg.buildDir, cfg.manifestFile);
     const cmd = ['npx', 'trvc', 'manifest', '--prod', out];
     const env = { ...Env.TRV_MODULE.export(cfg.module) };
 
@@ -247,13 +245,13 @@ export class PackOperation {
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Compressing' }} ${{ path: cfg.output }}`);
 
     if (cfg.ejectFile) {
-      yield ActiveShellCommand.chdir(cfg.workspace);
       await ActiveShellCommand.mkdir(path.dirname(cfg.output));
+      yield ActiveShellCommand.chdir(cfg.buildDir);
       yield ActiveShellCommand.zip(cfg.output);
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
       await fs.mkdir(path.dirname(cfg.output), { recursive: true });
-      await PackUtil.runCommand(ActiveShellCommand.zip(cfg.output), { cwd: cfg.workspace });
+      await PackUtil.runCommand(ActiveShellCommand.zip(cfg.output), { cwd: cfg.buildDir });
     }
   }
 }

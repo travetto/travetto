@@ -38,7 +38,7 @@ export class MainCommand implements CliCommandShape {
       res = await mod.main(...args, ...this._parsed.unknown);
     } catch (err) {
       res = err;
-      process.exitCode = Math.max(process.exitCode ?? 1, 1);
+      process.exitCode = Math.max(process.exitCode ? +process.exitCode : 1, 1);
     }
 
     if (res !== undefined) {

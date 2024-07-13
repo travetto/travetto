@@ -2,7 +2,7 @@ import { type OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
 export type CommonPackConfig = {
-  workspace: string;
+  buildDir: string;
   output: string;
   clean: boolean;
   ejectFile?: string;
@@ -13,6 +13,7 @@ export type CommonPackConfig = {
   envFile: string;
   env?: string;
   manifestFile: string;
+  workspaceResourceFolder: string;
 
   // Bundle
   rollupConfiguration: string;
@@ -49,8 +50,6 @@ export type DockerPackConfig = {
 export type ShellCommandImpl = {
   var(name: string): string;
   createFile(file: string, text: string[], mode?: string): string[][];
-  scriptOpen(): string[];
-  chdirScript(): string[];
   callCommandWithAllArgs(cmd: string, ...args: string[]): string[];
   copy(src: string, dest: string): string[];
   copyRecursive(src: string, dest: string, inclusive?: boolean): string[];
@@ -61,6 +60,7 @@ export type ShellCommandImpl = {
   comment(message: string): string[];
   echo(text: string): string[];
   zip(output: string): string[];
+  script(lines: string[], chdir?: boolean): { ext: string, contents: string[] };
 };
 
 export type DockerPackFactory = (cfg: DockerPackConfig) => (string | Promise<string>);

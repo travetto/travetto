@@ -33,7 +33,7 @@ There are three primary cli commands for packing your code:
 Usage: pack <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>             Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
+  -b, --build-dir <span class="token operator">&lt;</span>string<span class="token operator">></span>             Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
   --clean, --no-clean                  Clean workspace <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Output location
   --main-scripts, --no-main-scripts    Create entry scripts <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
@@ -104,7 +104,7 @@ This command is nearly identical to the standard <code class="item input">pack</
 Usage: pack:zip <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>             Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
+  -b, --build-dir <span class="token operator">&lt;</span>string<span class="token operator">></span>             Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
   --clean, --no-clean                  Clean workspace <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Output location <span class="token punctuation">(</span>default: <span class="token string">"travetto_pack.zip"</span><span class="token punctuation">)</span>
   --main-scripts, --no-main-scripts    Create entry scripts <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
@@ -135,7 +135,7 @@ This command starts off identical to the standard <code class="item input">pack<
 Usage: pack:docker <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>               Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
+  -b, --build-dir <span class="token operator">&lt;</span>string<span class="token operator">></span>               Workspace <span class="token keyword">for</span> building <span class="token punctuation">(</span>default: <span class="token string">"/tmp/&lt;temp-folder>"</span><span class="token punctuation">)</span>
   --clean, --no-clean                    Clean workspace <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                  Output location
   --main-scripts, --no-main-scripts      Create entry scripts <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
@@ -202,6 +202,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 <span class="token builtin class-name">echo</span> <span class="token string">"TRV_MANIFEST=manifest.json"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env
 <span class="token builtin class-name">echo</span> <span class="token string">"TRV_MODULE=<span class="token variable">$MOD</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env
 <span class="token builtin class-name">echo</span> <span class="token string">"TRV_CLI_IPC="</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env
+<span class="token builtin class-name">echo</span> <span class="token string">"TRV_RESOURCE_OVERRIDES=@#resources=@@#resources/"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env
 
 <span class="token comment"># Writing package.json</span>
 
@@ -222,8 +223,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token builtin class-name">echo</span> <span class="token string">"Writing entry scripts todo-app.cmd args=(run:rest)"</span>
 
-<span class="token builtin class-name">echo</span> <span class="token string">""</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/todo-app.cmd
-<span class="token builtin class-name">echo</span> <span class="token string">"cd %~p0"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.cmd
+<span class="token builtin class-name">echo</span> <span class="token string">"cd %~p0"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/todo-app.cmd
 <span class="token builtin class-name">echo</span> <span class="token string">"node todo-app.js run:rest %*"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.cmd
 <span class="token function">chmod</span> <span class="token number">755</span> <span class="token variable">$DIST</span>/todo-app.cmd
 
@@ -231,7 +231,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token builtin class-name">echo</span> <span class="token string">"Copying over module resources"</span>
 
-<span class="token function">cp</span> <span class="token parameter variable">-r</span> <span class="token parameter variable">-p</span> <span class="token variable">$ROOT</span>/resources <span class="token variable">$DIST</span>/resources
+<span class="token function">cp</span> <span class="token parameter variable">-r</span> <span class="token parameter variable">-p</span> <span class="token variable">$ROOT</span>/resources/* <span class="token variable">$DIST</span>/resources
 
 <span class="token comment"># Writing Manifest manifest.json</span>
 
