@@ -149,9 +149,9 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async queryComplexDateList() {
     const service = await this.service;
 
-    await service.create(User4, User4.from({ child: { name: 'bob', age: 40 }, createdDate: TimeUtil.timeFromNow('3d'), color: 'blue' }));
-    await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, createdDate: TimeUtil.timeFromNow('2d'), color: 'red' }));
-    await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, createdDate: TimeUtil.timeFromNow('-1d'), color: 'green' }));
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 40 }, createdDate: TimeUtil.fromNow('3d'), color: 'blue' }));
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, createdDate: TimeUtil.fromNow('2d'), color: 'red' }));
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, createdDate: TimeUtil.fromNow('-1d'), color: 'green' }));
 
     const arr = await this.toArray(service.listByIndex(User4, 'nameCreated', { child: { name: 'bob' } }));
 

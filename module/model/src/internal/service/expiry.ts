@@ -34,7 +34,7 @@ export class ModelExpiryUtil {
     const cullable = ModelRegistry.getClasses().filter(cls => !!ModelRegistry.get(cls).expiresAt);
     if (svc.deleteExpired && cullable.length) {
       const running = new AbortController();
-      const cullInterval = TimeUtil.timeToMs(svc.config?.cullRate ?? '10m');
+      const cullInterval = TimeUtil.asMillis(svc.config?.cullRate ?? '10m');
 
       ShutdownManager.onGracefulShutdown(async () => running.abort(), this);
 

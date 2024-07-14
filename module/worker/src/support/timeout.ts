@@ -13,7 +13,7 @@ export class Timeout extends ExecutionError {
 
   constructor(duration: number | TimeSpan, op: string = 'Operation') {
     super(`${op} timed out after ${duration}${typeof duration === 'number' ? 'ms' : ''}`);
-    this.#duration = TimeUtil.timeToMs(duration);
+    this.#duration = TimeUtil.asMillis(duration);
   }
 
   /**

@@ -33,8 +33,10 @@ export class TimeUtil {
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static timeToMs(amount: number | TimeSpan, unit?: TimeUnit): number {
-    if (typeof amount === 'string') {
+  static asMillis(amount: Date | number | TimeSpan, unit?: TimeUnit): number {
+    if (amount instanceof Date) {
+      return amount.getTime();
+    } else if (typeof amount === 'string') {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const { groups } = (amount.match(this.#timePattern) as { groups: { amount?: string, unit?: TimeUnit } });
       const amountStr = groups?.amount ?? `${amount}`;
@@ -48,14 +50,30 @@ export class TimeUtil {
   }
 
   /**
+   * Returns the time converted to seconds
+   * @param date The date to convert
+   */
+  static asSeconds(date: Date | number | TimeSpan, unit?: TimeUnit): number {
+    return Math.trunc(this.asMillis(date, unit) / 1000);
+  }
+
+  /**
+   * Returns the time converted to a Date
+   * @param date The date to convert
+   */
+  static asDate(date: Date | number | TimeSpan, unit?: TimeUnit): Date {
+    return new Date(this.asMillis(date, unit));
+  }
+
+  /**
    * Resolve time or span to possible time
    */
-  static resolveInput(value: number | string | undefined): number | undefined {
+  static coerceValue(value: number | string | undefined): number | undefined {
     if (value === undefined) {
       return value;
     }
     const val = (typeof value === 'string' && /\d+[a-z]+$/i.test(value)) ?
-      (this.isTimeSpan(value) ? this.timeToMs(value) : undefined) :
+      (this.isTimeSpan(value) ? this.asMillis(value) : undefined) :
       (typeof value === 'string' ? parseInt(value, 10) : value);
     return Number.isNaN(val) ? undefined : val;
   }
@@ -65,14 +83,14 @@ export class TimeUtil {
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static timeFromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date {
-    return new Date(Date.now() + this.timeToMs(amount, unit));
+  static fromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date {
+    return new Date(Date.now() + this.asMillis(amount, unit));
   }
 
   /**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */
-  static prettyDeltaSinceTime(time: number, unit?: TimeUnit): string {
+  static prettyDeltaSince(time: number, unit?: TimeUnit): string {
     return this.prettyDelta(Date.now() - time, unit);
   }
 

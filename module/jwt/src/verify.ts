@@ -2,6 +2,7 @@ import type jws from 'jws';
 
 import { JWTError } from './error';
 import { VerifyOptions, Payload, AlgType, KeyItem } from './types';
+import { TimeUtil } from '@travetto/base';
 
 const RSA: AlgType[] = ['RS256', 'RS384', 'RS512'];
 const ES: AlgType[] = ['ES256', 'ES384', 'ES512'];
@@ -39,7 +40,7 @@ export class JWTVerifier {
    */
   static verifyTimes(payload: Payload, options: VerifyOptions): void {
     const timestamp = options.clock?.timestamp;
-    const timestampSeconds = typeof timestamp === 'number' ? timestamp : Math.trunc((timestamp ?? new Date()).getTime() / 1000);
+    const timestampSeconds = typeof timestamp === 'number' ? timestamp : TimeUtil.asSeconds(timestamp ?? new Date());
 
     const clock = {
       tolerance: 0,
@@ -57,13 +58,13 @@ export class JWTVerifier {
     if (payload.nbf !== undefined && !ignore.nbf &&
       payload.nbf > clock.timestamp + clock.tolerance
     ) {
-      throw new JWTError('Token is not active', { date: new Date(payload.nbf * 1000) }, 'permissions');
+      throw new JWTError('Token is not active', { date: TimeUtil.asDate(payload.nbf, 's') }, 'permissions');
     }
 
     if (payload.exp !== undefined && !ignore.exp &&
       clock.timestamp >= payload.exp + clock.tolerance
     ) {
-      throw new JWTError('Token is expired', { expiredAt: new Date(payload.exp * 1000) }, 'permissions');
+      throw new JWTError('Token is expired', { expiredAt: TimeUtil.asDate(payload.exp, 's') }, 'permissions');
     }
 
     if (options.maxAgeSec) {
@@ -74,7 +75,7 @@ export class JWTVerifier {
       const maxAgeTimestamp = options.maxAgeSec + payload.iat;
 
       if (clock.timestamp >= maxAgeTimestamp + (clock.tolerance || 0)) {
-        throw new JWTError('Token maxAge exceeded', { date: new Date(maxAgeTimestamp * 1000) });
+        throw new JWTError('Token maxAge exceeded', { date: TimeUtil.asDate(maxAgeTimestamp, 's') });
       }
     }
   }

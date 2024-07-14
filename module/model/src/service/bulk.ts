@@ -44,7 +44,7 @@ export class BulkProcessError extends AppError {
   constructor(public errors: { idx: number, error: ValidationResultError }[]) {
     super('Bulk processing errors have occurred', 'data', {
       errors: errors.map(x => {
-        const { message, type, errors: subErrors, details } = x.error;
+        const { message, type, details: { errors: subErrors } = {}, details } = x.error;
         return { message, type, errors: subErrors ?? details, idx: x.idx };
       })
     });

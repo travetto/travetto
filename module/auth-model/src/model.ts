@@ -34,8 +34,7 @@ export interface RegisteredPrincipal extends Principal {
  */
 export class ModelAuthService<T extends ModelType> implements
   Authenticator<T, RegisteredPrincipal>,
-  Authorizer<RegisteredPrincipal>
-{
+  Authorizer<RegisteredPrincipal> {
 
   #modelService: ModelCrudSupport;
   #cls: Class<T>;
@@ -163,7 +162,7 @@ export class ModelAuthService<T extends ModelType> implements
     const salt = await Util.uuid();
 
     ident.resetToken = await AuthUtil.generateHash(Util.uuid(), salt, 25000, 32);
-    ident.resetExpires = TimeUtil.timeFromNow('1h');
+    ident.resetExpires = TimeUtil.fromNow(1, 'h');
 
     Object.assign(user, this.fromPrincipal(ident));
 

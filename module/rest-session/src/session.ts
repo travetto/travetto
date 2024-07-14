@@ -1,3 +1,4 @@
+import { TimeUtil } from '@travetto/base';
 import { ContextProvider } from '@travetto/rest';
 
 /**
@@ -132,7 +133,7 @@ export class Session<T extends SessionData = SessionData> {
    */
   refresh(): void {
     if (this.maxAge) {
-      this.expiresAt = new Date(this.maxAge + Date.now());
+      this.expiresAt = TimeUtil.fromNow(this.maxAge);
     }
   }
 

@@ -42,7 +42,7 @@ export class Runner {
       buildStandardTestManager.bind(null, consumer),
       files,
       {
-        idleTimeoutMillis: TimeUtil.timeToMs('10s'),
+        idleTimeoutMillis: TimeUtil.asMillis(10, 's'),
         min: 1,
         max: this.#state.concurrency,
       });

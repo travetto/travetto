@@ -254,7 +254,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async verifyDateRange() {
     const service = await this.service;
     await this.saveAll(Aged, (['-5d', '-4d', '-3d', '-2d', '-1d', '0d', '1d', '2d', '3d', '4d', '5d'] as const).map(delta =>
-      Aged.from({ createdAt: TimeUtil.timeFromNow(delta) })
+      Aged.from({ createdAt: TimeUtil.fromNow(delta) })
     ));
 
     const simple = await service.queryCount(Aged, {
@@ -290,8 +290,8 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const simple4 = await service.queryCount(Aged, {
       where: {
         createdAt: {
-          $gt: TimeUtil.timeFromNow('-0.1d'),
-          $lt: TimeUtil.timeFromNow('2.9d')
+          $gt: TimeUtil.fromNow('-0.1d'),
+          $lt: TimeUtil.fromNow('2.9d')
         }
       }
     });

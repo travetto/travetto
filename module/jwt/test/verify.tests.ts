@@ -2,6 +2,7 @@ import { sign } from 'jws';
 import assert from 'node:assert';
 
 import { Suite, Test, ShouldThrow, TestFixtures } from '@travetto/test';
+import { TimeUtil } from '@travetto/base';
 
 import { JWTUtil } from '../src/util';
 import { JWTError } from '../src/error';
@@ -130,9 +131,9 @@ class VerifyExpirationSuite {
     } catch (err: unknown) {
       assert(err instanceof JWTError);
       assert(err.message === 'Token is expired');
-      assert(!!err.details);
-      assert(!!err.details.expiredAt);
-      assert(+(err.details as { expiredAt: number }).expiredAt === 1437018592000);
+      assert(err.details);
+      assert(err.details.expiredAt);
+      assert(TimeUtil.asSeconds(err.details.expiredAt) === 1437018592);
     }
   }
 
@@ -166,11 +167,11 @@ class VerifyExpirationSuite {
   @Test('option: maxAge and clockTimestamp')
   async testMaxAge() {
     // { foo: 'bar', iat: 1437018582, exp: 1437018800 } exp = iat + 218s
+    const issuedAt = 1437018582;
+    const maxAgeSec = TimeUtil.asSeconds(218, 's');
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE0MzcwMTg1ODIsImV4cCI6MTQzNzAxODgwMH0.AVOsNC7TiT-XVSpCpkwB1240izzCIJ33Lp07gjnXVpA';
     const clockTimestamp = 1437018900;  // iat + 318s (exp: iat + 218s)
-    const options = {
-      key: this.key, alg: 'HS256', clock: { timestamp: clockTimestamp }, maxAgeSec: 60 * 60 * 24 * 365 * 1000
-    } as const;
+    const options = { key: this.key, alg: 'HS256', clock: { timestamp: clockTimestamp }, maxAgeSec } as const;
 
     try {
       await JWTUtil.verify(token, options);
@@ -178,7 +179,8 @@ class VerifyExpirationSuite {
       // maxAge not exceeded, but still expired
       assert(err instanceof JWTError);
       assert(err.message === 'Token is expired');
-      assert(+(err.details as { expiredAt: string }).expiredAt === 1437018800000);
+      assert(err.details.expiredAt);
+      assert(TimeUtil.asSeconds(err.details.expiredAt) === (issuedAt + maxAgeSec));
     }
   }
 }
