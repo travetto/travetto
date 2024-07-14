@@ -48,7 +48,7 @@ where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/modu
 ```typescript
 import type mongo from 'mongodb';
 
-import { RuntimeResources, Env, TimeSpan } from '@travetto/base';
+import { RuntimeResources, Env, TimeSpan, TimeUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
@@ -152,7 +152,7 @@ export class MongoModelConfig {
     }
 
     if (!Env.production) {
-      opts.waitQueueTimeoutMS ??= 1000 * 60 * 60 * 24; // Wait a day in dev mode
+      opts.waitQueueTimeoutMS ??= TimeUtil.asMillis(1, 'd'); // Wait a day in dev mode
     }
   }
 

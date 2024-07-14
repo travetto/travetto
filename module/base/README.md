@@ -278,21 +278,31 @@ export class TimeUtil {
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static timeToMs(amount: number | TimeSpan, unit?: TimeUnit): number;
+  static asMillis(amount: Date | number | TimeSpan, unit?: TimeUnit): number;
+  /**
+   * Returns the time converted to seconds
+   * @param date The date to convert
+   */
+  static asSeconds(date: Date | number | TimeSpan, unit?: TimeUnit): number;
+  /**
+   * Returns the time converted to a Date
+   * @param date The date to convert
+   */
+  static asDate(date: Date | number | TimeSpan, unit?: TimeUnit): Date;
   /**
    * Resolve time or span to possible time
    */
-  static resolveInput(value: number | string | undefined): number | undefined;
+  static coerceValue(value: number | string | undefined): number | undefined;
   /**
    * Returns a new date with `amount` units into the future
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static timeFromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date;
+  static fromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date;
   /**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */
-  static prettyDeltaSinceTime(time: number, unit?: TimeUnit): string;
+  static prettyDeltaSince(time: number, unit?: TimeUnit): string;
   /**
    * Pretty print a delta, with auto-detection of largest unit
    * @param delta The number of milliseconds in the delta

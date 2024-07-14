@@ -17,13 +17,13 @@ One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-re
 
 The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. 
 
-The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L48) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L46) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
 
 **Code: JWTPrincipalEncoder**
 ```typescript
 import { Principal } from '@travetto/auth';
 import { AuthService, PrincipalEncoder } from '@travetto/auth-rest';
-import { AppError, Env, TimeUtil } from '@travetto/base';
+import { AppError, Env, TimeSpan, TimeUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { FilterContext } from '@travetto/rest';
@@ -37,7 +37,7 @@ export class RestJWTConfig {
   cookie = 'trv.auth';
   signingKey?: string;
   headerPrefix = 'Bearer';
-  maxAge: string | number = '1h';
+  maxAge: TimeSpan | number = '1h';
   rollingRenew: boolean = false;
 
   @Ignore()
@@ -52,15 +52,13 @@ export class RestJWTConfig {
   }
 
   postConstruct(): void {
+    this.maxAgeMs = TimeUtil.asMillis(this.maxAge);
 
-    this.maxAgeMs = typeof this.maxAge === 'string' ? TimeUtil.timeToMs(this.maxAge as '1y') : this.maxAge;
+    if (!this.signingKey && Env.production) {
+      throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.jwt.signingKey');
 
-    if (!this.signingKey) {
-      if (Env.production) {
-        throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.jwt.signingKey');
-      }
-      this.signingKey = 'dummy';
     }
+    this.signingKey ??= 'dummy';
   }
 }
 
@@ -77,8 +75,8 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   auth: AuthService;
 
   toJwtPayload(p: Principal): Payload {
-    const exp = Math.trunc(p.expiresAt!.getTime() / 1000);
-    const iat = Math.trunc(p.issuedAt!.getTime() / 1000);
+    const exp = TimeUtil.asSeconds(p.expiresAt!);
+    const iat = TimeUtil.asSeconds(p.issuedAt!);
     return {
       auth: {
         ...p,
@@ -143,7 +141,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
         res.setHeader(this.config.header, [this.config.headerPrefix, token].join(' ').trimStart());
       }
     } else if (this.config.cookieMode) {
-      res.cookies.set(this.config.cookie, '', { expires: new Date(Date.now() - 1000 * 60 * 60) }); // Clear out cookie
+      res.cookies.set(this.config.cookie, '', { expires: TimeUtil.fromNow(-1, 'h') }); // Clear out cookie
     }
   }
 
@@ -151,7 +149,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
    * Run before encoding, allowing for session extending if needed
    */
   preEncode(p: Principal): void {
-    p.expiresAt ??= new Date(Date.now() + this.config.maxAgeMs);
+    p.expiresAt ??= TimeUtil.fromNow(this.config.maxAgeMs);
     p.issuedAt ??= new Date();
 
     if (this.config.rollingRenew) {
@@ -159,7 +157,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
       const midPoint = end - this.config.maxAgeMs / 2;
       if (Date.now() > midPoint) { // If we are past the half way mark, renew the token
         p.issuedAt = new Date();
-        p.expiresAt = new Date(Date.now() + this.config.maxAgeMs); // This will trigger a re-send
+        p.expiresAt = TimeUtil.fromNow(this.config.maxAgeMs); // This will trigger a re-send
       }
     }
   }

@@ -56,7 +56,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token class-name">mongo</span> <span class="token keyword">from</span> <span class="token string">'mongodb'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RuntimeResources<span class="token punctuation">,</span> Env<span class="token punctuation">,</span> TimeSpan <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RuntimeResources<span class="token punctuation">,</span> Env<span class="token punctuation">,</span> TimeSpan<span class="token punctuation">,</span> TimeUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Field <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
@@ -160,7 +160,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
     <span class="token punctuation">{{'}'}}</span>
 
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>Env<span class="token punctuation">.</span>production<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      opts<span class="token punctuation">.</span>waitQueueTimeoutMS <span class="token operator">??=</span> <span class="token number">1000</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">24</span><span class="token punctuation">;</span> <span class="token comment">// Wait a day in dev mode</span>
+      opts<span class="token punctuation">.</span>waitQueueTimeoutMS <span class="token operator">??=</span> TimeUtil<span class="token punctuation">.</span><span class="token function">asMillis</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'d'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Wait a day in dev mode</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 

@@ -23,7 +23,7 @@ This is a module that adds session support to the <a class="module-link" routerL
 <li><a class="module-link" routerLink="/docs/model-dynamodb" title="DynamoDB backing for the travetto model module.">DynamoDB Model Support</a></li>
 <li><a class="module-link" routerLink="/docs/model-elasticsearch" title="Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.">Elasticsearch Model Source</a></li>
 </ul>
-A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38">&#64;Context</a> parameter as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L17">Session</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L7">SessionData</a> respectively.  Iit can also be accessed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest-session/src/trv.d.ts#L7">TravettoRequest</a> as a session property.
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38">&#64;Context</a> parameter as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L18">Session</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L8">SessionData</a> respectively.  Iit can also be accessed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest-session/src/trv.d.ts#L7">TravettoRequest</a> as a session property.
 
   <figure class="code">
     <figcaption class="code">Sample Session Usage
@@ -78,7 +78,7 @@ The module supports a general set of configuration that should cover the majorit
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest-session/src/config.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError<span class="token punctuation">,</span> Env <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/base'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError<span class="token punctuation">,</span> Env<span class="token punctuation">,</span> TimeUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/config'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Secret <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/schema'</span><span class="token punctuation">;</span>
 
@@ -94,7 +94,7 @@ The module supports a general set of configuration that should cover the majorit
   <span class="token comment">/**
    * Max age for a given session
    */</span>
-  maxAge <span class="token operator">=</span> <span class="token number">30</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">;</span> <span class="token comment">// Half hour</span>
+  maxAge <span class="token operator">=</span> TimeUtil<span class="token punctuation">.</span><span class="token function">asMillis</span><span class="token punctuation">(</span><span class="token number">30</span><span class="token punctuation">,</span> <span class="token string">'m'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Half hour</span>
   <span class="token comment">/**
    * Can the session be renewed
    */</span>
