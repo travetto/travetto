@@ -60,7 +60,7 @@ export class JWTUtil {
       throw new JWTError('malformed token');
     }
 
-    const decoded: TypedSig<T> = decode(jwt);
+    const decoded: TypedSig<T> | null = decode(jwt);
 
     if (!decoded) {
       throw new JWTError('invalid token', { token: jwt });
