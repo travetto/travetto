@@ -1,5 +1,7 @@
 import { sign, Header, decode, verify } from 'jws';
 
+import { TimeUtil } from '@travetto/base';
+
 import { JWTError } from './error';
 import { Payload, SignOptions, SignHeader, TypedSig, VerifyOptions } from './types';
 import { JWTVerifier } from './verify';
@@ -17,7 +19,7 @@ export class JWTUtil {
 
     payload = { ...payload };
 
-    const now = Math.trunc(Date.now() / 1000);
+    const now = TimeUtil.asSeconds(Date.now());
 
     if (options.iatExclude) {
       delete payload.iat;

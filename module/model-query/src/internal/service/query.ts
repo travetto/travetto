@@ -19,9 +19,8 @@ export class ModelQueryUtil {
    * @returns
    */
   static resolveComparator(val: unknown): unknown {
-    if (typeof val === 'string') {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return TimeUtil.timeFromNow(val as '1m');
+    if (typeof val === 'string' && TimeUtil.isTimeSpan(val)) {
+      return TimeUtil.fromNow(val);
     } else {
       return val;
     }

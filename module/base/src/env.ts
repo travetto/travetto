@@ -75,7 +75,7 @@ export class EnvProp<T> {
 
   /** Read value as a time value */
   get time(): number | undefined {
-    return TimeUtil.resolveInput(this.val);
+    return TimeUtil.coerceValue(this.val);
   }
 
   /** Determine if the underlying value is truthy */

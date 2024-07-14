@@ -1,7 +1,7 @@
 import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
-import { AppError, Env } from '@travetto/base';
+import { AppError, Env, TimeUtil } from '@travetto/base';
 import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 import { CacheError } from './error';
@@ -10,7 +10,7 @@ import { CacheAware, CacheConfigⲐ, EvictConfigⲐ } from './internal/types';
 
 export const CacheModelⲐ = Symbol.for('@travetto/cache:model');
 
-const INFINITE_MAX_AGE = '5000-01-01';
+const INFINITE_MAX_AGE = TimeUtil.asMillis(10, 'y');
 
 @Index({
   name: 'keySpace',
@@ -68,7 +68,7 @@ export class CacheService {
       if (delta < threshold) {
         await this.#modelService.updatePartial(CacheRecord, {
           id,
-          expiresAt: new Date(Date.now() + maxAge),
+          expiresAt: TimeUtil.fromNow(maxAge),
           issuedAt: new Date()
         }); // Do not wait
       }
@@ -91,7 +91,7 @@ export class CacheService {
         id,
         entry: entryText!,
         keySpace,
-        expiresAt: new Date(maxAge ? maxAge + Date.now() : INFINITE_MAX_AGE),
+        expiresAt: TimeUtil.fromNow(maxAge || INFINITE_MAX_AGE),
         issuedAt: new Date()
       }),
     );

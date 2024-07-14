@@ -141,7 +141,7 @@ export class TapEmitter implements TestConsumer {
       `${this.#enhancer.total(summary.failed)}`,
       'skipped',
       this.#enhancer.total(summary.skipped),
-      `# (Total Test Time: ${TimeUtil.prettyDelta(summary.duration)}, Total Run Time: ${TimeUtil.prettyDeltaSinceTime(this.#start)})`
+      `# (Total Test Time: ${TimeUtil.prettyDelta(summary.duration)}, Total Run Time: ${TimeUtil.prettyDeltaSince(this.#start)})`
     ].join(' '));
   }
 }

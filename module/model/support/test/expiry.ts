@@ -23,11 +23,11 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   delayFactor: number = 1;
 
   async wait(n: number | TimeSpan) {
-    await timers.setTimeout(TimeUtil.timeToMs(n) * this.delayFactor);
+    await timers.setTimeout(TimeUtil.asMillis(n) * this.delayFactor);
   }
 
   timeFromNow(v: number | TimeSpan, unit?: TimeUnit) {
-    return new Date(Date.now() + TimeUtil.timeToMs(v, unit) * this.delayFactor);
+    return TimeUtil.fromNow(TimeUtil.asMillis(v, unit) * this.delayFactor);
   }
 
   @Test()

@@ -3,7 +3,7 @@ import {
   KeySchemaElement, PutItemCommandInput, PutItemCommandOutput
 } from '@aws-sdk/client-dynamodb';
 
-import { ShutdownManager, type Class } from '@travetto/base';
+import { ShutdownManager, TimeUtil, type Class } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
@@ -80,7 +80,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     if (config.expiresAt) {
       const { expiresAt } = ModelExpiryUtil.getExpiryState(cls, item);
       if (expiresAt) {
-        expiry = Math.trunc(Math.ceil(expiresAt.getTime() / 1000)); // Convert to seconds
+        expiry = TimeUtil.asSeconds(expiresAt);
       }
     }
 

@@ -48,9 +48,9 @@ type HeaderSet = ReturnType<typeof SetHeaders>;
  * @param unit The unit of measurement
  */
 export function CacheControl(value: number | TimeSpan): HeaderSet {
-  const delta = Math.trunc(TimeUtil.timeToMs(value) / 1000);
+  const delta = TimeUtil.asSeconds(value);
   return SetHeaders({
-    Expires: delta === 0 ? '-1' : (): string => new Date(delta * 1000 + Date.now()).toUTCString(),
+    Expires: delta === 0 ? '-1' : (): string => TimeUtil.fromNow(delta, 's').toUTCString(),
     'Cache-Control': () => delta === 0 ? 'max-age=0,no-cache' : `max-age=${delta}`
   });
 }

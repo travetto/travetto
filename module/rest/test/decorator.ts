@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { ObjectUtil } from '@travetto/base';
+import { ObjectUtil, TimeUtil } from '@travetto/base';
 
 import { ControllerRegistry } from '../src/registry/controller';
 import { Controller } from '../src/decorator/controller';
@@ -37,7 +37,7 @@ export class ConfigureTest {
 
     const expires = ControllerRegistry.get(TestController).endpoints[0].headers['expires'];
     assert(ObjectUtil.isFunction(expires));
-    assert(expires() === new Date(1000 + Date.now()).toUTCString());
+    assert(expires() === TimeUtil.fromNow('1s').toUTCString());
   }
 
   @Test()

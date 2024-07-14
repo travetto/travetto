@@ -1,4 +1,4 @@
-import { AppError, Env } from '@travetto/base';
+import { AppError, Env, TimeUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 
@@ -14,7 +14,7 @@ export class SessionConfig {
   /**
    * Max age for a given session
    */
-  maxAge = 30 * 60 * 1000; // Half hour
+  maxAge = TimeUtil.asMillis(30, 'm'); // Half hour
   /**
    * Can the session be renewed
    */

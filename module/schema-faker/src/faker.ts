@@ -1,9 +1,7 @@
 import { faker } from '@faker-js/faker';
 
-import { Class } from '@travetto/base';
+import { Class, TimeUtil } from '@travetto/base';
 import { BindUtil, SchemaRegistry, FieldConfig, CommonRegExp } from '@travetto/schema';
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Provide a faker utility for generating content
@@ -55,8 +53,8 @@ export class SchemaFaker {
 
   static #between(fromDays: number, toDays: number): Date {
     return faker.date.between({
-      from: new Date(Date.now() + fromDays * DAY_IN_MS),
-      to: new Date(Date.now() + toDays * DAY_IN_MS)
+      from: TimeUtil.fromNow(fromDays, 'd'),
+      to: TimeUtil.fromNow(toDays, 'd')
     });
   }
 
@@ -120,7 +118,7 @@ export class SchemaFaker {
     const max = cfg.max && typeof cfg.max.n !== 'number' ? cfg.max.n : undefined;
 
     if (min !== undefined || max !== undefined) {
-      return faker.date.between({ from: min || new Date(Date.now() - (50 * DAY_IN_MS)), to: max || new Date() });
+      return faker.date.between({ from: min || TimeUtil.fromNow(-50, 'd'), to: max || new Date() });
     } else {
       for (const [re, fn] of this.#namesToType.date) {
         if (re.test(name)) {
