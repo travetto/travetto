@@ -1,8 +1,9 @@
 import type jws from 'jws';
 
+import { TimeUtil } from '@travetto/base';
+
 import { JWTError } from './error';
 import { VerifyOptions, Payload, AlgType, KeyItem } from './types';
-import { TimeUtil } from '@travetto/base';
 
 const RSA: AlgType[] = ['RS256', 'RS384', 'RS512'];
 const ES: AlgType[] = ['ES256', 'ES384', 'ES512'];
