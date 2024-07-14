@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 import { Log, Logger } from '../log';
 import { CommonUtil } from '../util';
+import { path } from '../path-lite';
 
 export class ProcessHandle {
 

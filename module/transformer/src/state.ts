@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { ManifestIndex, path } from '@travetto/manifest';
+import { ManifestIndex, toPosix } from '@travetto/manifest';
 
 import { ManagedType, AnyType, ForeignType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, ModuleNameⲐ } from './types/visitor';
@@ -45,8 +45,7 @@ export class TransformerState implements State {
     this.#manifestIndex = manifestIndex;
     this.#resolver = new SimpleResolver(checker, manifestIndex);
     this.#imports = new ImportManager(source, factory, this.#resolver);
-    this.file = path.toPosix(this.source.fileName);
-
+    this.file = toPosix(this.source.fileName);
     this.importName = this.#resolver.getFileImportName(this.file, true);
   }
 

@@ -3,8 +3,9 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import os from 'node:os';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import path from 'node:path/trv';
 
-import { path, RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 import { Class, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';

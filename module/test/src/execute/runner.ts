@@ -1,4 +1,6 @@
-import { RuntimeContext, RuntimeIndex, path } from '@travetto/manifest';
+import path from 'node:path/trv';
+
+import { RuntimeContext, RuntimeIndex, toPosix } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { WorkPool } from '@travetto/worker';
 
@@ -21,7 +23,7 @@ export class Runner {
   }
 
   get patterns(): RegExp[] {
-    return this.#state.args.map(x => new RegExp(path.toPosix(x)));
+    return this.#state.args.map(x => new RegExp(toPosix(x)));
   }
 
   /**

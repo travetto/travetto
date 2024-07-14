@@ -1,6 +1,5 @@
 // @trv-no-transform
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
@@ -10,6 +9,8 @@ import { CompilerSetup } from './setup';
 import { CompilerServer } from './server/server';
 import { CompilerRunner } from './server/runner';
 import { CompilerClient } from './server/client';
+import { path } from './path-lite';
+
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {

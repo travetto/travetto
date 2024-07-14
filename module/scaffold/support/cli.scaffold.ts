@@ -1,6 +1,7 @@
+import path from 'node:path/trv';
+
 import { prompt } from 'enquirer';
 
-import { path } from '@travetto/manifest';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
 

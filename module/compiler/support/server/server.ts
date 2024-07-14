@@ -1,6 +1,5 @@
 import http from 'node:http';
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
@@ -10,6 +9,7 @@ import { Log } from '../log';
 import { CommonUtil } from '../util';
 import { CompilerClient } from './client';
 import { ProcessHandle } from './process-handle';
+import { path } from '../path-lite';
 
 const log = Log.scoped('server');
 

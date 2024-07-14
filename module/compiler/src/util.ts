@@ -1,6 +1,8 @@
 import ts from 'typescript';
 
-import { ManifestContext, ManifestModuleFileType, ManifestModuleUtil, ManifestRoot, Package, path } from '@travetto/manifest';
+import { path } from '../support/path-lite';
+
+import { ManifestContext, ManifestModuleFileType, ManifestModuleUtil, ManifestRoot, Package } from '@travetto/manifest';
 
 type OutputToSource = (outputFile: string) => ({ sourceFile: string } | undefined);
 

@@ -1,9 +1,9 @@
 import cp from 'node:child_process';
-import path from 'node:path';
 import { rmSync } from 'node:fs';
 
 import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
 
+import { path } from '../path-lite';
 import type { CompilerEvent, CompilerMode } from '../types';
 import { AsyncQueue } from '../queue';
 import { Log } from '../log';

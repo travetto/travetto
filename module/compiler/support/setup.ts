@@ -1,4 +1,3 @@
-import path from 'node:path';
 import { createRequire } from 'node:module';
 import fs from 'node:fs/promises';
 
@@ -7,6 +6,7 @@ import { type DeltaEvent, type ManifestContext, type Package } from '@travetto/m
 import { Log } from './log';
 import { CommonUtil } from './util';
 import { TypescriptUtil } from './ts-util';
+import { path } from './path-lite';
 
 type ModFile = { input: string, output: string, stale: boolean };
 

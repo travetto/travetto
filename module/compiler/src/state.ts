@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
+import { ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
 import { TypescriptUtil } from '../support/ts-util';
@@ -8,6 +8,7 @@ import { TypescriptUtil } from '../support/ts-util';
 import { CompilerUtil } from './util';
 import { CompileEmitError, CompileStateEntry } from './types';
 import { CommonUtil } from '../support/util';
+import { path } from '../support/path-lite';
 
 function folderMapper(root: string, prefix: string): { dir: string, translate: (val: string) => string } {
   let matched: string = '~~';

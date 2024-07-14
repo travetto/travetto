@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import { ChildProcess, spawn, execSync } from 'node:child_process';
 import { rmSync, mkdirSync } from 'node:fs';
+import path from 'node:path/trv';
 
-import { path } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/base';
 
 /**

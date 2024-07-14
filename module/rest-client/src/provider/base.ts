@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/quotes */
 import fs from 'node:fs/promises';
-import { relative } from 'node:path';
+import path from 'node:path/trv';
 
 import { Class, Util } from '@travetto/base';
-import { RuntimeIndex, path } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
@@ -220,7 +220,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     }
     const line = (method ? meta.methods?.[method]?.lines[0] : undefined) ?? meta?.lines[0] ?? 1;
     const output = path.resolve(this.#output, this.subFolder || '.');
-    return `@see file://./${relative(output, meta.source)}#${line}`;
+    return `@see file://./${path.relative(output, meta.source)}#${line}`;
   }
 
   renderDoc(parts: (string | undefined)[], pad = ''): string[] {

@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 import rl from 'node:readline/promises';
 
-import { IndexedModule, ManifestModule, path } from '@travetto/manifest';
+import { IndexedModule, ManifestModule, toPosix } from '@travetto/manifest';
 import { Env, Util } from '@travetto/base';
 import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
 
@@ -138,7 +138,7 @@ class TestRunnerFeature extends BaseFeature {
     }
 
     line ??= (editor.selection.start.line + 1);
-    const file = path.toPosix(editor.document.fileName ?? '');
+    const file = toPosix(editor.document.fileName ?? '');
     const prettyFile = file.replace(`${Workspace.path}/`, '');
     const mod = Workspace.workspaceIndex.findModuleForArbitraryFile(file)!;
 

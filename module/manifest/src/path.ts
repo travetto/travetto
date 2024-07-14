@@ -1,28 +1,37 @@
-import type * as pathMod from 'node:path';
-import { extname, dirname, basename, resolve, join } from 'node:path/posix';
-import { resolve as nativeResolve, join as nativeJoin } from 'node:path';
+import posix from 'node:path/posix';
+import win32 from 'node:path/win32';
+import native from 'node:path';
 
-/**
- * Converts a given file name by replace all slashes, with forward slashes
- */
-const toPosix = (file: string): string => file.replaceAll('\\', '/');
-
+export const toPosix = (file: string): string => file.replaceAll('\\', '/');
 const cwd = (): string => toPosix(process.cwd());
 
-type PathModType =
-  { toPosix: typeof toPosix } &
-  Pick<typeof pathMod, 'basename' | 'dirname' | 'extname' | 'join' | 'resolve'>;
-
-export const path: PathModType = {
-  toPosix,
-  basename: (file, suffix) => basename(toPosix(file), suffix),
-  extname: file => extname(toPosix(file)),
-  dirname: file => dirname(toPosix(file)),
-  resolve: (...args) => resolve(cwd(), ...args.map(toPosix)),
-  join: (...args) => join(...args.map(toPosix)),
+export const path: posix.PlatformPath = {
+  sep: posix.sep,
+  delimiter: posix.delimiter,
+  posix,
+  win32,
+  basename: (file, suffix) => posix.basename(toPosix(file), suffix),
+  extname: file => posix.extname(toPosix(file)),
+  dirname: file => posix.dirname(toPosix(file)),
+  ...process.platform === 'win32' ? {
+    resolve: (...args) => toPosix(native.resolve(cwd(), ...args.map(toPosix))),
+    join: (root, ...args) => toPosix(native.join(toPosix(root), ...args.map(toPosix))),
+    relative: (from, to) => toPosix(native.relative(toPosix(from), toPosix(to))),
+    isAbsolute: (file) => native.isAbsolute(toPosix(file)),
+    normalize: (file) => toPosix(native.normalize(toPosix(file))),
+    parse: (file) => native.parse(toPosix(file)),
+    format: (obj) => toPosix(native.format(obj)),
+    toNamespacedPath: (file) => toPosix(native.toNamespacedPath(toPosix(file))),
+  } : {
+    relative: (from, to) => posix.relative(toPosix(from), toPosix(to)),
+    resolve: (...args) => posix.resolve(cwd(), ...args.map(toPosix)),
+    join: (...args) => posix.join(...args.map(toPosix)),
+    isAbsolute: file => posix.isAbsolute(toPosix(file)),
+    normalize: file => posix.normalize(toPosix(file)),
+    parse: file => posix.parse(toPosix(file)),
+    format: obj => posix.format(obj),
+    toNamespacedPath: file => toPosix(file),
+  }
 };
 
-if (process.platform === 'win32') {
-  path.resolve = (...args: string[]): string => toPosix(nativeResolve(cwd(), ...args.map(toPosix)));
-  path.join = (root: string, ...args: string[]): string => toPosix(nativeJoin(toPosix(root), ...args.map(toPosix)));
-}
+export default path;

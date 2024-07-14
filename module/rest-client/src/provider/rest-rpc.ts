@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
-import { relative } from 'node:path';
+import path from 'node:path/trv';
 
 import { ControllerConfig } from '@travetto/rest';
 import { Class } from '@travetto/base';
-import { RuntimeIndex, path } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import type { ClientGenerator } from './types';
 import { restRpcClientFactory } from './shared/rest-rpc.js';
@@ -50,7 +50,7 @@ export class RestRpcClientGenerator implements ClientGenerator {
     await fs.writeFile(path.resolve(this.output, 'factory.js'), `
 ${coreContents}
 
-${[...this.classes.entries()].map(([n, s]) => `/** @typedef {import('${relative(this.output, s)}').${n}} ${n} */`).join('\n')}
+${[...this.classes.entries()].map(([n, s]) => `/** @typedef {import('${path.relative(this.output, s)}').${n}} ${n} */`).join('\n')}
 /** @type {import('./rest-rpc.d.ts').RestRpcClientFactory<{${[...this.classes.keys()].map(x => `${x}: ${x}`).join(', ')}}>} */
 export const factory = ${restRpcClientFactory.name}();
 `.trim(), 'utf8');

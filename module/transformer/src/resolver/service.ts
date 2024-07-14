@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { ManifestIndex, ManifestModuleUtil, path } from '@travetto/manifest';
+import { ManifestIndex, ManifestModuleUtil, toPosix } from '@travetto/manifest';
 
 import type { AnyType, TransformResolver } from './types';
 import { TypeCategorize, TypeBuilder } from './builder';
@@ -32,7 +32,7 @@ export class SimpleResolver implements TransformResolver {
    * Resolve an import name (e.g. @module/path/file) for a file
    */
   getFileImportName(file: string, removeExt?: boolean): string {
-    let sourceFile = path.toPosix(file);
+    let sourceFile = toPosix(file);
 
     const type = ManifestModuleUtil.getFileType(file);
 

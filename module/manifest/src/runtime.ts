@@ -1,4 +1,4 @@
-import { path } from './path';
+import { path, toPosix } from './path';
 import { ManifestIndex } from './manifest-index';
 
 import type { FunctionMetadata, FunctionMetadataTag } from './types/common';
@@ -27,7 +27,7 @@ class $RuntimeIndex extends ManifestIndex {
    * Get internal id from file name and optionally, class name
    */
   getId(filename: string, clsName?: string): string {
-    filename = path.toPosix(filename);
+    filename = toPosix(filename);
     const id = this.getEntry(filename)?.id ?? filename;
     return clsName ? `${id}￮${clsName}` : id;
   }

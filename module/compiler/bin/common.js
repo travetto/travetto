@@ -29,7 +29,7 @@ const getTranspiler = async (/** @type {Ctx} */ ctx) => {
     ts.transpile(content, { target: ts.ScriptTarget.ES2022, module, esModuleInterop: true, allowSyntheticDefaultImports: true })
       .replace(/from '([.][^']+)'/g, (_, i) => `from '${i.replace(/[.]js$/, '')}.js'`)
       .replace(/from '(@travetto\/(.*?))'/g, (_, i, s) =>
-        `from '${path.resolve(ctx.workspace.path, ctx.build.compilerFolder, `${i}${s.includes('/') ? '.js' : '/__index__.js'}`)}'`);
+        `from '${path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', `${i}${s.includes('/') ? '.js' : '/__index__.js'}`)}'`);
 };
 
 /** @returns {Promise<import('@travetto/compiler/support/entry.trvc')>} */

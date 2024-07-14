@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
+import path from 'node:path/trv';
+
 import { CliCommand, CliCommandShape } from '@travetto/cli';
-import { path, RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 
 const page = (f: string): string => path.resolve(RuntimeContext.workspace.path, '..', 'travetto.github.io/src', f);
 

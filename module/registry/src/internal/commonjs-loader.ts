@@ -6,7 +6,6 @@ import { Env } from '@travetto/base';
 
 import { RetargettingProxy } from '../proxy';
 
-
 declare module 'module' {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   function _resolveFilename(req: string, parent: typeof Module): string;

@@ -24,7 +24,7 @@ npm install @travetto/model-{provider}
 yarn add @travetto/model-{provider}
 ```
 Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) support:
-   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L49), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)
+   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") - [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L50), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)
    *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.")
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")
 If you are using more than one [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:

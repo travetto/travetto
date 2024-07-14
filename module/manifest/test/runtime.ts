@@ -1,7 +1,7 @@
 import assert from 'node:assert';
+import path from 'node:path/trv';
 
 import { Suite, Test } from '@travetto/test';
-import { path } from '@travetto/manifest';
 
 import { RuntimeIndex } from '../src/runtime';
 

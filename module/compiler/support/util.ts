@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import { setMaxListeners } from 'node:events';
 import timers from 'node:timers/promises';
 
 import { Log } from './log';
+import { path } from './path-lite';
 
 export class CommonUtil {
   /**

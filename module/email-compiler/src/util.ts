@@ -1,9 +1,9 @@
 import util from 'node:util';
 import { buffer as toBuffer } from 'node:stream/consumers';
+import path from 'node:path/trv';
 
 import { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
 import { ImageConverter } from '@travetto/image';
-import { path } from '@travetto/manifest';
 
 type Tokenized = {
   text: string;

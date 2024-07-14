@@ -1,4 +1,4 @@
-import path from 'node:path';
+import path from 'node:path/trv';
 import fs from 'node:fs/promises';
 
 import { LoadResult, Plugin, PluginContext } from 'rollup';

@@ -1,10 +1,10 @@
 import fs from 'node:fs/promises';
+import path from 'node:path/trv';
 
 import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { Env } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { path } from '@travetto/manifest';
 
 /**
  * CLI for outputting the open api spec to a local file

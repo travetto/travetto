@@ -1,8 +1,10 @@
 import assert from 'node:assert';
 import winPath from 'node:path/win32';
+import path from 'node:path/trv';
 
 import { Suite, Test } from '@travetto/test';
-import { path } from '@travetto/manifest';
+
+import { toPosix } from '../src/path';
 
 @Suite()
 class PathTests {
@@ -29,8 +31,8 @@ class PathTests {
 
   @Test()
   verifyWin32Paths() {
-    const winResolve = (...args: string[]): string => path.toPosix(winPath.resolve(path.resolve(), ...args.map(path.toPosix)));
-    const winJoin = (root: string, ...args: string[]): string => path.toPosix(winPath.join(path.toPosix(root), ...args.map(path.toPosix)));
+    const winResolve = (...args: string[]): string => toPosix(winPath.resolve(path.resolve(), ...args.map(toPosix)));
+    const winJoin = (root: string, ...args: string[]): string => toPosix(winPath.join(toPosix(root), ...args.map(toPosix)));
 
 
     assert(winResolve('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');

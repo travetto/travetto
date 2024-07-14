@@ -1,4 +1,6 @@
-import { path, RuntimeIndex } from '@travetto/manifest';
+import path from 'node:path/trv';
+
+import { RuntimeIndex } from '@travetto/manifest';
 import { CliCommand, CliFlag, CliUtil, CliValidationError } from '@travetto/cli';
 import { Ignore, Required } from '@travetto/schema';
 

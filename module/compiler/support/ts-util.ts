@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import { ManifestContext } from '@travetto/manifest';
+
+import { path } from './path-lite';
 
 const OPT_CACHE: Record<string, import('typescript').CompilerOptions> = {};
 

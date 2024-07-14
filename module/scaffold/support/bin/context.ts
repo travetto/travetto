@@ -1,12 +1,13 @@
 import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import rl from 'node:readline/promises';
+import path from 'node:path/trv';
 
-import { render } from 'mustache';
+import mustache from 'mustache';
 
 import { ExecUtil, Util } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
-import { path, RuntimeIndex, NodePackageManager, PackageUtil } from '@travetto/manifest';
+import { RuntimeIndex, NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
 
 import { Feature } from './features';
@@ -133,7 +134,7 @@ export class Context {
   async template(file: string, { rename }: ListingEntry): Promise<void> {
     const contents = await fs.readFile(this.source(file), 'utf-8');
     const out = this.destination(rename ?? file);
-    const rendered = render(
+    const rendered = mustache.render(
       contents
         .replaceAll('$_', '{{{')
         .replaceAll('_$', '}}}'),

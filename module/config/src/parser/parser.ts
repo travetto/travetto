@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
+import path from 'node:path/trv';
 
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { AppError } from '@travetto/base';
-import { path } from '@travetto/manifest';
 
 import { ConfigParserTarget } from '../internal/types';
 import { ConfigData, ConfigParser } from './types';

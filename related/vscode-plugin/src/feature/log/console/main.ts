@@ -1,8 +1,7 @@
 import vscode from 'vscode';
 import fs from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-
-import { path } from '@travetto/manifest';
+import path from 'node:path/trv';
 
 import { Activatible } from '../../../core/activation';
 import { Workspace } from '../../../core/workspace';

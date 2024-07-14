@@ -1,4 +1,4 @@
-import type { ManifestContext } from '../src/types';
+import type { ManifestContext } from '../src/types/context';
 
 declare namespace ManifestBootstrap {
   /**

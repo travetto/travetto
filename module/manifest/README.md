@@ -85,7 +85,9 @@ Once the manifest is created, the application runtime can now read this manifest
    *  Providing contextual information when provided a filename, import name, etc (e.g. logging, testing output)
 
 ## Path Normalization
-By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up [path](https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L21) as an equivalent to [Node](https://nodejs.org)'s [http](https://nodejs.org/api/path.html) library.  This allows for consistent behavior across all file-interactions, and also allows for easy analysis if [Node](https://nodejs.org)'s [http](https://nodejs.org/api/path.html) library is ever imported.
+By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up [path](https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L5) as an equivalent to [Node](https://nodejs.org)'s [http](https://nodejs.org/api/path.html) library.  This allows for consistent behavior across all file-interactions.
+
+imports pointing at $`node:path/trv` and $`path/trv` are rewritten at compile time to point to the implementation provided by the module.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.
 
 ## Anatomy of a Manifest
 
@@ -151,7 +153,8 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
           [ "test/fixtures/simple.ts", "fixture", 1868155200000, "test" ]
         ],
         "$transformer": [
-          [ "support/transformer.function-metadata.ts", "ts", 1868155200000, "compile" ]
+          [ "support/transformer.function-metadata.ts", "ts", 1868155200000, "compile" ],
+          [ "support/transformer.rewrite-path-import.ts", "ts", 1868155200000, "compile" ]
         ],
         "src": [
           [ "src/delta.ts", "ts", 1868155200000 ],

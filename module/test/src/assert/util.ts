@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeContext, toPosix } from '@travetto/manifest';
 import { Class, ClassInstance, ObjectUtil } from '@travetto/base';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
@@ -42,7 +42,7 @@ export class AssertUtil {
    */
   static getPositionOfError(err: Error, filename: string): { file: string, line: number } {
     const cwd = RuntimeIndex.mainModule.sourcePath;
-    const lines = path.toPosix(err.stack ?? new Error().stack!)
+    const lines = toPosix(err.stack ?? new Error().stack!)
       .split('\n')
       // Exclude node_modules, target self
       .filter(x => x.includes(cwd) && (!x.includes('node_modules') || x.includes('/support/')));

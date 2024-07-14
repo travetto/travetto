@@ -1,8 +1,10 @@
 import fs from 'node:fs/promises';
+import path from 'node:path/trv';
+
 import sqlDb, { type Database, Options } from 'better-sqlite3';
 import { Pool, createPool } from 'generic-pool';
 
-import { RuntimeContext, path } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 import { ShutdownManager, Util } from '@travetto/base';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';

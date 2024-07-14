@@ -1,6 +1,6 @@
 import { createElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
 
-import { PackageUtil, path, RuntimeIndex } from '@travetto/manifest';
+import { PackageUtil, RuntimeIndex, toPosix } from '@travetto/manifest';
 
 import { JSXElementByFn, c } from '../jsx';
 import { DocResolveUtil, ResolvedCode, ResolvedRef, ResolvedSnippetLink } from '../util/resolve';
@@ -37,7 +37,7 @@ export class RenderContext {
 
     const manifestPkg = PackageUtil.readPackage(RuntimeIndex.getModule('@travetto/manifest')!.sourcePath);
 
-    this.file = path.toPosix(file);
+    this.file = toPosix(file);
     this.baseUrl = baseUrl;
     this.repoRoot = repoRoot;
     this.travettoBaseUrl = repoRoot.includes('travetto.github') ? repoRoot : manifestPkg.travetto!.doc!.baseUrl!;

@@ -1,6 +1,6 @@
 import os from 'node:os';
 
-import { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, RuntimeIndex, path } from '@travetto/manifest';
+import { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, RuntimeIndex, path, toPosix } from '@travetto/manifest';
 
 import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';
@@ -18,7 +18,6 @@ type FileShape = {
   moduleFile: string;
   action: WatchAction;
 };
-
 
 /**
  * Watch support, based on compiler state and manifest details
@@ -66,7 +65,7 @@ export class CompilerWatcher {
         q.throw(err instanceof Error ? err : new Error((err as Error).message));
         return;
       }
-      q.add(events.map(ev => ({ action: ev.type, file: path.toPosix(ev.path) })));
+      q.add(events.map(ev => ({ action: ev.type, file: toPosix(ev.path) })));
     }, { ignore });
 
     if (this.#signal.aborted) { // If already aborted, can happen async

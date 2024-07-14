@@ -2,7 +2,7 @@ import os from 'node:os';
 import util from 'node:util';
 import { spawn, ChildProcess } from 'node:child_process';
 
-import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeContext, toPosix } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/base';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
@@ -49,7 +49,7 @@ export class DocRunUtil {
    * Clean run output
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
-    const cwd = path.toPosix((cfg.module ? RuntimeIndex.getModule(cfg.module)! : RuntimeIndex.mainModule).sourcePath);
+    const cwd = toPosix((cfg.module ? RuntimeIndex.getModule(cfg.module)! : RuntimeIndex.mainModule).sourcePath);
     text = util.stripVTControlCharacters(text.trim())
       .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
@@ -76,7 +76,7 @@ export class DocRunUtil {
    */
   static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
     return spawn(cmd, args, {
-      cwd: path.toPosix(config.cwd ?? (config.module ? RuntimeIndex.getModule(config.module)! : RuntimeIndex.mainModule).sourcePath),
+      cwd: toPosix(config.cwd ?? (config.module ? RuntimeIndex.getModule(config.module)! : RuntimeIndex.mainModule).sourcePath),
       shell: '/bin/bash',
       env: {
         ...process.env,

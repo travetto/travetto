@@ -5,9 +5,10 @@ import { fork, spawn } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import timers from 'node:timers/promises';
+import path from 'node:path/trv';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { RuntimeContext, RuntimeIndex, path } from '@travetto/manifest';
+import { RuntimeContext, RuntimeIndex } from '@travetto/manifest';
 
 import { ExecUtil } from '../src/exec';
 

@@ -1,9 +1,10 @@
 import { createWriteStream, WriteStream, mkdirSync, openSync, appendFileSync } from 'node:fs';
+import path from 'node:path/trv';
 
 import { Env } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
-import { path, RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 
 import { LogAppender, LogEvent } from '../types';
 

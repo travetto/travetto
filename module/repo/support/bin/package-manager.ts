@@ -1,4 +1,4 @@
-import path from 'node:path';
+import path from 'node:path/trv';
 import { spawn, ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 

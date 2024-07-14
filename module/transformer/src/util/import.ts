@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { ManifestModuleUtil, PackageUtil, path } from '@travetto/manifest';
+import { path, ManifestModuleUtil, PackageUtil, toPosix } from '@travetto/manifest';
 
 import { Import } from '../types/shared';
 
@@ -33,7 +33,7 @@ export class ImportUtil {
    */
   static collectImports(src: ts.SourceFile): Map<string, Import> {
     // TODO: Replace with manifest reverse lookup
-    const base = path.toPosix(src.fileName);
+    const base = toPosix(src.fileName);
 
     const imports = new Map<string, Import>();
 

@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import path from 'node:path/trv';
 
-import { RuntimeContext, path } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 import { Env, ResourceLoader } from '@travetto/base';
 
 import { ImageConverter } from './convert';
