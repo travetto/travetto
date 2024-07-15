@@ -140,5 +140,10 @@ export const Env = delegate({
   get debug(): false | string {
     const val = process.env.DEBUG ?? '';
     return (!val && prod()) || IS_FALSE.test(val) ? false : val;
-  }
+  },
+
+  /** Get resource paths */
+  get resourcePaths(): string[] {
+    return [...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'];
+  },
 });

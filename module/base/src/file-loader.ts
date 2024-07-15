@@ -9,7 +9,7 @@ import { AppError } from './error';
 import { Env } from './env';
 
 /**
- * File loader that will search for relative paths across the provided search paths
+ * File loader that will search for files across the provided search paths
  */
 export class FileLoader {
 
@@ -21,6 +21,11 @@ export class FileLoader {
   }
 
   constructor(paths: string[]) {
+    this.computePaths(paths);
+  }
+
+  /** @private */
+  protected computePaths(paths: string[]): void {
     this.#searchPaths = Object.freeze(FileLoader.resolvePaths(paths));
   }
 

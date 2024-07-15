@@ -4,19 +4,19 @@ import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
 import { RuntimeContext } from '@travetto/manifest';
-import { Env, ResourceLoader } from '@travetto/base';
+import { Env, FileLoader } from '@travetto/base';
 
 import { ImageConverter } from './convert';
 
 /**
  * Resource provider for images that allows for real-time optimization
  */
-export class ImageOptimizingResourceLoader extends ResourceLoader {
+export class ImageOptimizingResourceLoader extends FileLoader {
 
   #cacheRoot: string;
 
   constructor(paths: string[] = [], cacheRoot?: string) {
-    super(paths);
+    super([...paths, ...Env.resourcePaths]);
 
     this.#cacheRoot = cacheRoot ?? path.resolve(Env.TRV_IMAGE_CACHE.val || RuntimeContext.toolPath('image_cache'));
   }
