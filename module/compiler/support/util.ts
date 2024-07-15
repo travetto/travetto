@@ -98,6 +98,9 @@ export class CommonUtil {
     return timers.setImmediate(undefined);
   }
 
+  /**
+   * Resolve path for workspace, ensuring posix compliant slashes
+   */
   static resolveWorkspace(ctx: ManifestContext, ...args: string[]): string {
     const all = [process.cwd(), ctx.workspace.path, ...args].map(toPosix);
     return process.platform === 'win32' ? toPosix(native.resolve(...all)) : posix.resolve(...all);
