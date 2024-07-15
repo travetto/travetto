@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { ErrorCategory, AppError, ObjectUtil } from '@travetto/base';
+import { ErrorCategory, AppError } from '@travetto/base';
 
 import { HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
@@ -23,10 +23,9 @@ const categoryToCode: Record<ErrorCategory, number> = {
  * Utilities for serializing output
  */
 export class SerializeUtil {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  static isRenderable = (o: unknown): o is Renderable => !!o && !ObjectUtil.isPrimitive(o) && 'render' in (o as object);
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  static isStream = (o: unknown): o is Readable => !!o && 'pipe' in (o as object) && 'on' in (o as object);
+  static isRenderable = (o: unknown): o is Renderable => !!o && (typeof o === 'object' || typeof o === 'function') && 'render' in o;
+  static isStream = (o: unknown): o is Readable => !!o && typeof o === 'object' && 'pipe' in o && 'on' in o;
+  static hasToJSON = (o: unknown): o is { toJSON: () => object } => typeof o === 'object' && !!o && 'toJSON' in o && typeof o.toJSON === 'function';
 
   /**
    * Determine the error status for a given error, with special provisions for AppError
@@ -63,7 +62,7 @@ export class SerializeUtil {
    * Standard json
    */
   static serializeJSON(req: Request, res: Response, output: unknown): void {
-    const payload = ObjectUtil.hasToJSON(output) ? output.toJSON() : output;
+    const payload = this.hasToJSON(output) ? output.toJSON() : output;
     this.setContentTypeIfUndefined(res, 'application/json');
     res.send(JSON.stringify(payload, undefined, '__pretty' in req.query ? 2 : 0));
   }
@@ -135,7 +134,7 @@ export class SerializeUtil {
     res.statusError = error;
     res.setHeader('Content-Type', 'application/json');
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const out = ObjectUtil.hasToJSON(error) ? error.toJSON() as object : { message: error.message };
+    const out = this.hasToJSON(error) ? error.toJSON() as object : { message: error.message };
     res.send(JSON.stringify({ ...out, status }));
   }
 

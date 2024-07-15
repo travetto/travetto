@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { RuntimeIndex } from '@travetto/manifest';
-import { ObjectUtil, AppError, ClassInstance, Class } from '@travetto/base';
+import { AppError, ClassInstance, Class } from '@travetto/base';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
 import { AssertCapture, CaptureAssert } from './capture';
@@ -30,6 +30,7 @@ export class AssertCheck {
    * @param args The arguments passed in
    */
   static check(assertion: CaptureAssert, positive: boolean, ...args: unknown[]): void {
+    /* eslint-disable @typescript-eslint/consistent-type-assertions */
     assertion.file = RuntimeIndex.getSourceFile(assertion.file);
 
     let fn = assertion.operator;
@@ -46,40 +47,31 @@ export class AssertCheck {
     // Check fn to call
     if (fn === 'fail') {
       if (args.length > 1) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         [assertion.actual, assertion.expected, assertion.message, assertion.operator] = args as [unknown, unknown, string, string];
       } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         [assertion.message] = args as [string];
       }
     } else if (/throw|reject/i.test(fn)) {
       assertion.operator = fn;
       if (typeof args[1] !== 'string') {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         [, assertion.expected, assertion.message] = args as [unknown, unknown, string];
       } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         [, assertion.message] = args as [unknown, string];
       }
     } else if (fn === 'ok' || fn === 'assert') {
       fn = assertion.operator = 'ok';
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       [assertion.actual, assertion.message] = args as [unknown, string];
       assertion.expected = { toClean: (): string => positive ? 'truthy' : 'falsy' };
       common.state = 'should be';
     } else if (fn === 'includes') {
       assertion.operator = fn;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       [assertion.actual, assertion.expected, assertion.message] = args as [unknown, unknown, string];
     } else if (fn === 'instanceof') {
       assertion.operator = fn;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       [assertion.actual, assertion.expected, assertion.message] = args as [unknown, unknown, string];
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       assertion.actual = (assertion.actual as ClassInstance)?.constructor;
     } else { // Handle unknown
       assertion.operator = fn ?? '';
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       [assertion.actual, assertion.expected, assertion.message] = args as [unknown, unknown, string];
     }
 
@@ -93,36 +85,24 @@ export class AssertCheck {
         assertion.expected = AssertUtil.cleanValue(assertion.expected);
       }
 
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const [actual, expected, message] = args as [unknown, unknown, string];
 
       // Actually run the assertion
       switch (fn) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'includes': assertFn((actual as unknown[]).includes(expected), message); break;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'test': assertFn((expected as RegExp).test(actual as string), message); break;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'instanceof': assertFn(actual instanceof (expected as Class), message); break;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'in': assertFn((actual as string) in (expected as object), message); break;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'lessThan': assertFn((actual as number) < (expected as number), message); break;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'lessThanEqual': assertFn((actual as number) <= (expected as number), message); break;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'greaterThan': assertFn((actual as number) > (expected as number), message); break;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'greaterThanEqual': assertFn((actual as number) >= (expected as number), message); break;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'ok': assertFn(...args as [unknown, string]); break;
         default:
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           if (fn && assert[fn as keyof typeof assert]) { // Assert call
             if (/not/i.test(fn)) {
               common.state = 'should not';
             }
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             assert[fn as 'ok'].apply(null, args as [boolean, string | undefined]);
           }
       }
@@ -144,6 +124,7 @@ export class AssertCheck {
       }
       throw err;
     }
+    /* eslint-enable @typescript-eslint/consistent-type-assertions */
   }
 
   /**
@@ -205,7 +186,7 @@ export class AssertCheck {
     shouldThrow: ThrowableError | undefined,
     assertion: CaptureAssert
   ): void {
-    if (ObjectUtil.isPrimitive(err)) {
+    if (!(err instanceof Error)) {
       err = new Error(`${err}`);
     }
     if (!(err instanceof Error)) {
@@ -244,8 +225,8 @@ export class AssertCheck {
     try {
       action();
       if (!positive) {
-        if (!ObjectUtil.isPrimitive(shouldThrow)) {
-          shouldThrow = shouldThrow?.name;
+        if (typeof shouldThrow === 'function') {
+          shouldThrow = shouldThrow.name;
         }
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'}`));
       }
@@ -282,8 +263,8 @@ export class AssertCheck {
         await action();
       }
       if (!positive) {
-        if (!ObjectUtil.isPrimitive(shouldThrow)) {
-          shouldThrow = shouldThrow?.name;
+        if (typeof shouldThrow === 'function') {
+          shouldThrow = shouldThrow.name;
         }
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'} `));
       }

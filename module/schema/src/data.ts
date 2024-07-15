@@ -1,4 +1,6 @@
-import { Class, ClassInstance, TypedObject, ObjectUtil } from '@travetto/base';
+import { isNumberObject as isNum, isBooleanObject as isBool, isStringObject as isStr } from 'node:util/types';
+
+import { Class, ClassInstance, TypedObject } from '@travetto/base';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 
@@ -7,13 +9,44 @@ const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
  */
 export class DataUtil {
 
+  /**
+   * Is a value a plain JS object, created using {}
+   * @param obj Object to check
+   */
+  static isPlainObject(obj: unknown): obj is Record<string, unknown> {
+    return typeof obj === 'object' // separate from primitives
+      && obj !== undefined
+      && obj !== null         // is obvious
+      && obj.constructor === Object // separate instances (Array, DOM, ...)
+      && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
+  }
+
+  /**
+   * Is a value of primitive type
+   * @param el Value to check
+   */
+  static isPrimitive(el: unknown): el is (string | boolean | number | RegExp) {
+    switch (typeof el) {
+      case 'string': case 'boolean': case 'number': case 'bigint': return true;
+      case 'object': return !!el && (el instanceof RegExp || el instanceof Date || isStr(el) || isNum(el) || isBool(el));
+      default: return false;
+    }
+  }
+
+  /**
+   * Is simple, as a primitive, function or class
+   */
+  static isSimpleValue(a: unknown): a is Function | Class | string | number | RegExp | Date {
+    return this.isPrimitive(a) || typeof a === 'function';
+  }
+
   static #deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): unknown {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;
     const isArrA = Array.isArray(a);
     const isArrB = Array.isArray(b);
-    const isSimpA = !isEmptyA && ObjectUtil.isSimple(a);
-    const isSimpB = !isEmptyB && ObjectUtil.isSimple(b);
+    const isSimpA = !isEmptyA && this.isSimpleValue(a);
+    const isSimpB = !isEmptyB && this.isSimpleValue(b);
 
     let ret: unknown;
 
@@ -154,7 +187,7 @@ export class DataUtil {
         }
       }
       case Object: {
-        if (!strict || ObjectUtil.isPlainObject(input)) {
+        if (!strict || this.isPlainObject(input)) {
           return input;
         } else {
           throw new Error('Invalid object type');
@@ -163,7 +196,7 @@ export class DataUtil {
       case undefined:
       case String: return `${input}`;
     }
-    if (!strict || ObjectUtil.isPlainObject(input)) {
+    if (!strict || this.isPlainObject(input)) {
       return input;
     } else {
       throw new Error(`Unknown type ${type.name}`);
@@ -176,7 +209,7 @@ export class DataUtil {
    */
   static shallowClone<T = unknown>(a: T): T {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (Array.isArray(a) ? a.slice(0) : (ObjectUtil.isSimple(a) ? a : { ...(a as {}) })) as T;
+    return (Array.isArray(a) ? a.slice(0) : (this.isSimpleValue(a) ? a : { ...(a as {}) })) as T;
   }
 
   /**
@@ -186,7 +219,7 @@ export class DataUtil {
    * @param mode How the assignment should be handled
    */
   static deepAssign<T, U>(a: T, b: U, mode: | 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
-    if (!a || ObjectUtil.isSimple(a)) {
+    if (!a || this.isSimpleValue(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

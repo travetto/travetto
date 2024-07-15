@@ -1,8 +1,7 @@
 import assert from 'node:assert';
 
-import { ObjectUtil } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
-import { Schema } from '@travetto/schema';
+import { DataUtil, Schema } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import type { WhereClause } from '@travetto/model-query';
 
@@ -55,11 +54,11 @@ type MustType = {
 };
 
 function isBool(o: unknown): o is { bool: { must: [MustType], ['must_not']: unknown, ['should_not']: unknown } } {
-  return ObjectUtil.isPlainObject(o) && 'bool' in o;
+  return DataUtil.isPlainObject(o) && 'bool' in o;
 }
 
 function isRegexp(o: unknown): o is { regexp: { name: string } } {
-  return ObjectUtil.isPlainObject(o) && 'regexp' in o;
+  return DataUtil.isPlainObject(o) && 'regexp' in o;
 }
 
 

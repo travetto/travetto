@@ -1,5 +1,5 @@
 import { inspect, type InspectOptions } from 'node:util';
-import { ObjectUtil } from '@travetto/base';
+import { DataUtil } from '@travetto/schema';
 import { LogEvent } from '../types';
 
 export class LogFormatUtil {
@@ -9,7 +9,7 @@ export class LogFormatUtil {
   static getContext(ev: LogEvent): Record<string, unknown> | undefined {
     const out: Record<string, unknown> = {};
     for (const o of ev.args ?? []) {
-      if (ObjectUtil.isPlainObject(o)) {
+      if (DataUtil.isPlainObject(o)) {
         Object.assign(out, o);
       }
     }

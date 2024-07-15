@@ -19,7 +19,6 @@ Base is the foundation of all [Travetto](https://travetto.dev) applications.  It
    *  Console Management
    *  Resource Access
    *  Standard Error Support
-   *  Object Utilities
    *  Common Utilities
    *  Time Utilities
    *  Process Execution
@@ -242,15 +241,6 @@ Additionally, the logging framework will merge [debug](https://www.npmjs.com/pac
 # Debug
 $ DEBUG=express:*,@travetto/rest npx trv run rest
 ```
-
-## Object Utilities
-Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [ObjectUtil](https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L9) includes:
-   *  `isPrimitive(el)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
-   *  `isPlainObject(obj)` determines if the obj is a simple object
-   *  `isFunction(o)` determines if `o` is a simple `Function`
-   *  `isClass(o)` determines if `o` is a class constructor
-   *  `isSimple(a)` determines if `a` is a simple value
-   *  `isPromise(a)` determines if `a` is a promise
 
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L17) includes:

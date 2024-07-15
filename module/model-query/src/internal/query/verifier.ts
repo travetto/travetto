@@ -1,5 +1,5 @@
-import { SchemaRegistry, ValidationResultError, ValidationError } from '@travetto/schema';
-import { Class, ObjectUtil } from '@travetto/base';
+import { DataUtil, SchemaRegistry, ValidationResultError, ValidationError } from '@travetto/schema';
+import { Class } from '@travetto/base';
 
 import { ModelQuery, Query, PageableModelQuery } from '../../model/query';
 
@@ -120,7 +120,7 @@ export class QueryVerifier {
       }
     }
 
-    if (!ObjectUtil.isPlainObject(value)) {
+    if (!DataUtil.isPlainObject(value)) {
       // Handle literal
       const actualType = TypeUtil.getActualType(value);
       if (!this.typesMatch(declaredType, actualType)) {
@@ -196,7 +196,7 @@ export class QueryVerifier {
             return true;
           }
         } else if (firstKey === '$not') {
-          if (ObjectUtil.isPlainObject(sub)) {
+          if (DataUtil.isPlainObject(sub)) {
             this.processWhereClause(state, cls, sub);
             return true;
           } else {

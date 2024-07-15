@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 
-import { Class, ObjectUtil, Util } from '@travetto/base';
-import { SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
+import { Class, Util } from '@travetto/base';
+import { DataUtil, SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
 import { ModelIdSource, ModelType, OptionalId } from '../../types/model';
@@ -77,7 +77,7 @@ export class ModelCrudUtil {
       item.id = provider.idSource.create();
     }
 
-    if (ObjectUtil.isPlainObject(item)) {
+    if (DataUtil.isPlainObject(item)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       item = cls.from(item as object);
     }
@@ -118,7 +118,7 @@ export class ModelCrudUtil {
    * @param getExisting How to fetch an existing item
    */
   static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, view: undefined | string, getExisting: () => Promise<T>): Promise<T> {
-    if (ObjectUtil.isPlainObject(item)) {
+    if (DataUtil.isPlainObject(item)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       item = cls.from(item as object);
     }

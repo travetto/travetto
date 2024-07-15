@@ -1,6 +1,6 @@
 import { Binary, ObjectId } from 'mongodb';
 
-import { Class, ObjectUtil } from '@travetto/base';
+import { Class } from '@travetto/base';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
 import type { ModelType, IndexField } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
@@ -116,7 +116,7 @@ export class MongoUtil {
       return this.uuid(v);
     } else if (Array.isArray(v)) {
       return v.map(x => this.replaceId(x));
-    } else if (ObjectUtil.isPlainObject(v)) {
+    } else if (DataUtil.isPlainObject(v)) {
       const out: Record<string, Binary> = {};
       for (const [k, el] of Object.entries(v)) {
         const found = this.replaceId(el);
@@ -146,7 +146,7 @@ export class MongoUtil {
       if (subpath === 'id') { // Handle ids directly
         out._id = this.replaceId(v);
       } else {
-        const isPlain = v && ObjectUtil.isPlainObject(v);
+        const isPlain = v && DataUtil.isPlainObject(v);
         const firstKey = isPlain ? Object.keys(v)[0] : '';
 
         if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.Ⲑid) {

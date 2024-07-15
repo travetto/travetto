@@ -8,6 +8,5 @@ export * from './src/resource';
 export * from './src/shutdown';
 export * from './src/time';
 export * from './src/types';
-export * from './src/object';
 export * from './src/watch';
 export * from './src/util';

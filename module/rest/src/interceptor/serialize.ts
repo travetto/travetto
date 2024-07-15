@@ -1,5 +1,6 @@
-import { AppError, ObjectUtil } from '@travetto/base';
+import { AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
+import { DataUtil } from '@travetto/schema';
 
 import { RestInterceptor } from './types';
 import { LoggingInterceptor } from './logging';
@@ -47,7 +48,7 @@ export class SerializeInterceptor implements RestInterceptor {
       }
     } catch (err) {
       const resolved = err instanceof Error ? err : (
-        ObjectUtil.isPlainObject(err) ?
+        DataUtil.isPlainObject(err) ?
           new AppError(`${err['message'] || 'Unexpected error'}`, 'general', err) :
           new AppError(`${err}`, 'general')
       );
