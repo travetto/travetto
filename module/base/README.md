@@ -141,7 +141,12 @@ export const Env = delegate({
   get debug(): false | string {
     const val = process.env.DEBUG ?? '';
     return (!val && prod()) || IS_FALSE.test(val) ? false : val;
-  }
+  },
+
+  /** Get resource paths */
+  get resourcePaths(): string[] {
+    return [...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'];
+  },
 });
 ```
 
@@ -150,7 +155,7 @@ The primary access patterns for resources, is to directly request a file, and to
 
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
 
-The [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10) extends [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14) and utilizes the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Standard Error Support
 While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
@@ -278,21 +283,31 @@ export class TimeUtil {
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static timeToMs(amount: number | TimeSpan, unit?: TimeUnit): number;
+  static asMillis(amount: Date | number | TimeSpan, unit?: TimeUnit): number;
+  /**
+   * Returns the time converted to seconds
+   * @param date The date to convert
+   */
+  static asSeconds(date: Date | number | TimeSpan, unit?: TimeUnit): number;
+  /**
+   * Returns the time converted to a Date
+   * @param date The date to convert
+   */
+  static asDate(date: Date | number | TimeSpan, unit?: TimeUnit): Date;
   /**
    * Resolve time or span to possible time
    */
-  static resolveInput(value: number | string | undefined): number | undefined;
+  static coerceValue(value: number | string | undefined): number | undefined;
   /**
    * Returns a new date with `amount` units into the future
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static timeFromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date;
+  static fromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date;
   /**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */
-  static prettyDeltaSinceTime(time: number, unit?: TimeUnit): string;
+  static prettyDeltaSince(time: number, unit?: TimeUnit): string;
   /**
    * Pretty print a delta, with auto-detection of largest unit
    * @param delta The number of milliseconds in the delta

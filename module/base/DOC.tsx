@@ -1,9 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { c, d } from '@travetto/doc';
-import {
-  ExecUtil, AppError, ObjectUtil, Util,
-  FileLoader, TimeUtil, ResourceLoader, EnvProp
-} from '@travetto/base';
+import { ExecUtil, AppError, ObjectUtil, Util, FileLoader, TimeUtil, EnvProp } from '@travetto/base';
 import { RuntimeIndex } from '@travetto/manifest';
 
 const ConsoleManager = d.codeLink('ConsoleManager', 'src/console.ts', /(class|function)\s*[$]ConsoleManager/);
@@ -49,7 +46,7 @@ export const text = <>
 
     The {FileLoader} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {AppError} with a category of 'notfound'.  <br />
 
-    The {ResourceLoader} extends {FileLoader} and utilizes the {EnvLink}'s {d.field('TRV_RESOURCES')} information on where to attempt to find a requested resource.
+    The {FileLoader} also supports tying itself to {EnvLink}'s {d.field('TRV_RESOURCES')} information on where to attempt to find a requested resource.
   </c.Section>
 
   <c.Section title='Standard Error Support'>

@@ -20,7 +20,7 @@ This is a module that adds session support to the [RESTful API](https://github.c
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")
    *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.")
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")
-A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) parameter as [Session](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L17) and [SessionData](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L7) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest-session/src/trv.d.ts#L7) as a session property.
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) parameter as [Session](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L18) and [SessionData](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L8) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest-session/src/trv.d.ts#L7) as a session property.
 
 **Code: Sample Session Usage**
 ```typescript
@@ -69,7 +69,7 @@ The module supports a general set of configuration that should cover the majorit
 
 **Code: Session Config**
 ```typescript
-import { AppError, Env } from '@travetto/base';
+import { AppError, Env, TimeUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 
@@ -85,7 +85,7 @@ export class SessionConfig {
   /**
    * Max age for a given session
    */
-  maxAge = 30 * 60 * 1000; // Half hour
+  maxAge = TimeUtil.asMillis(30, 'm'); // Half hour
   /**
    * Can the session be renewed
    */

@@ -48,7 +48,7 @@ where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/modu
 ```typescript
 import type mongo from 'mongodb';
 
-import { RuntimeResources, Env, TimeSpan } from '@travetto/base';
+import { RuntimeResources, Env, TimeSpan, TimeUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
@@ -152,7 +152,7 @@ export class MongoModelConfig {
     }
 
     if (!Env.production) {
-      opts.waitQueueTimeoutMS ??= 1000 * 60 * 60 * 24; // Wait a day in dev mode
+      opts.waitQueueTimeoutMS ??= TimeUtil.asMillis(1, 'd'); // Wait a day in dev mode
     }
   }
 
@@ -174,4 +174,4 @@ export class MongoModelConfig {
 }
 ```
 
-Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") resolution paths.The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10) path or just a standard file path.
+Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") resolution paths.The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a resource path (will attempt to lookup using [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L4)) or just a standard file path.
