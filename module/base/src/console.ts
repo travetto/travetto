@@ -23,7 +23,7 @@ export type ConsoleEvent = {
 };
 
 export interface ConsoleListener {
-  onLog(ev: ConsoleEvent): void;
+  log(ev: ConsoleEvent): void;
 }
 
 const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
@@ -79,7 +79,7 @@ class $ConsoleManager implements ConsoleListener {
         args.unshift(this.namespace);
         args.push(debug.humanize(this.diff));
       };
-      debug.log = (modulePath, ...args: string[]): void => this.onLog({
+      debug.log = (modulePath, ...args: string[]): void => this.log({
         level: 'debug', module: '@npm:debug', modulePath,
         args: [util.format(...args)], line: 0, source: '', timestamp: new Date()
       });
@@ -106,7 +106,7 @@ class $ConsoleManager implements ConsoleListener {
   /**
    * Handle direct call in lieu of the console.* commands
    */
-  onLog(ev: ConsoleEvent): void {
+  log(ev: ConsoleEvent): void {
     // Resolve input to source file
     const source = ev.source ? RuntimeIndex.getSourceFile(ev.source) : RuntimeIndex.mainModule.outputPath;
     const mod = RuntimeIndex.getModuleFromSource(source);
@@ -121,7 +121,7 @@ class $ConsoleManager implements ConsoleListener {
     if (this.#filters[outEv.level] && !this.#filters[outEv.level]!(outEv)) {
       return; // Do nothing
     } else {
-      return this.#listener.onLog(outEv);
+      return this.#listener.log(outEv);
     }
   }
 
@@ -140,5 +140,5 @@ class $ConsoleManager implements ConsoleListener {
   }
 }
 
-export const ConsoleManager = new $ConsoleManager({ onLog: (ev): void => { console![ev.level](...ev.args); } });
-export const log = ConsoleManager.onLog.bind(ConsoleManager);
+export const ConsoleManager = new $ConsoleManager({ log: (ev): void => { console![ev.level](...ev.args); } });
+export const log = ConsoleManager.log.bind(ConsoleManager);

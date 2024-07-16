@@ -38,9 +38,9 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       const file = RuntimeContext.toolPath(`test-worker.${process.pid}.log`);
       const stdout = createWriteStream(file, { flags: 'a' });
       const c = new console.Console({ stdout, inspectOptions: { depth: 4, colors: false } });
-      ConsoleManager.set({ onLog: (ev) => c[ev.level](process.pid, ...ev.args) });
+      ConsoleManager.set({ log: (ev) => c[ev.level](process.pid, ...ev.args) });
     } else {
-      ConsoleManager.set({ onLog: () => { } });
+      ConsoleManager.set({ log: () => { } });
     }
 
     RunnerUtil.registerCleanup('worker');
