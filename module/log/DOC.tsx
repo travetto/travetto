@@ -15,7 +15,7 @@ const ConsolEvent = d.codeLink('ConsoleEvent', '@travetto/base/src/console.ts', 
 
 const ConsoleManager = d.ref('ConsoleManager', '@travetto/base/src/console.ts');
 
-export const text = <>f
+export const text = <>
   <c.StdHeader />
   This module provides logging functionality, building upon {ConsoleManager} in the {d.mod('Base')} module.  This is all ultimately built upon {d.library('Console')} operations. The logging infrastructure is built upon the {d.mod('Di')} system, and so new loggers can be created that rely upon dependency injected services and sources.
 
