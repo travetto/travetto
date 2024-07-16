@@ -73,7 +73,7 @@ export type ConsoleEvent = {
   /** Time of event */
   timestamp: Date;
   /** The level of the console event */
-  level: LogLevel;
+  level: 'info' | 'warn' | 'debug' | 'error';
   /** The source file of the event */
   source: string;
   /** The line number the console event was triggered from */
@@ -89,7 +89,7 @@ export type ConsoleEvent = {
 };
 ```
 
-The [LogEvent](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8) is an extension of the [ConsoleEvent](https://github.com/travetto/travetto/tree/main/module/base/src/types.ts#L12) with the addition of two fields:
+The [LogEvent](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8) is an extension of the [ConsoleEvent](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L6) with the addition of two fields:
    *  `message` - This is the primary argument passed to the console statement, if it happens to be a string, otherwise the field is left empty
    *  `context` - This is the final argument passed to the console statement, if it happens to be a simple object.  This is useful for external loggers that allow for searching/querying by complex data
 

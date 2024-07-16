@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 
-import { Env, TypedObject, Primitive } from '@travetto/base';
+import { Env, TypedObject } from '@travetto/base';
 
-type TemplatePrim = Primitive | RegExp;
+type TemplatePrim = number | string | bigint | boolean | RegExp;
 type Color = `#${string}`;
 export type TermStyleInput = Color | { text: Color, background?: Color, inverse?: boolean, bold?: boolean, italic?: boolean, underline?: boolean };
 type TermStylePairInput = TermStyleInput | [dark: TermStyleInput, light: TermStyleInput];

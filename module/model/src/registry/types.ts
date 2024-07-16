@@ -1,4 +1,5 @@
-import { Primitive, Class } from '@travetto/base';
+import { Class } from '@travetto/base';
+import { Primitive } from '@travetto/schema';
 
 import { ModelType } from '../types/model';
 

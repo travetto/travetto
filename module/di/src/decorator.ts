@@ -1,4 +1,4 @@
-import type { MethodDescriptor, Class, ClassInstance } from '@travetto/base';
+import type { Class, ClassInstance } from '@travetto/base';
 
 import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry, ResolutionType } from './registry';
@@ -72,7 +72,7 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
  * @augments `@travetto/di:InjectableFactory`
  */
 export function InjectableFactory(first?: Partial<InjectableFactoryConfig> | symbol, ...args: (Partial<InjectableFactoryConfig> | undefined)[]) {
-  return <T extends Class>(target: T, property: string | symbol, descriptor: MethodDescriptor): void => {
+  return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<(..._: unknown[]) => unknown>): void => {
     const config: InjectableFactoryConfig = collapseConfig(first, ...args);
     DependencyRegistry.registerFactory({
       ...config,

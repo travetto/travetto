@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { Primitive } from '@travetto/base';
+import { Primitive } from '@travetto/schema';
 
 import { cliTpl } from './color';
 import { CliCommandShape } from './types';

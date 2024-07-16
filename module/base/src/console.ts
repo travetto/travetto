@@ -3,7 +3,28 @@ import debug from 'debug';
 
 import { RuntimeIndex } from '@travetto/manifest';
 
-import type { ConsoleListener, ConsoleEvent, LogLevel } from './types';
+export type ConsoleEvent = {
+  /** Time of event */
+  timestamp: Date;
+  /** The level of the console event */
+  level: 'info' | 'warn' | 'debug' | 'error';
+  /** The source file of the event */
+  source: string;
+  /** The line number the console event was triggered from */
+  line: number;
+  /** The module name for the source file */
+  module: string;
+  /** The module path  for the source file*/
+  modulePath: string;
+  /** The computed scope for the console. statement.  */
+  scope?: string;
+  /** Arguments passed to the console call*/
+  args: unknown[];
+};
+
+export interface ConsoleListener {
+  onLog(ev: ConsoleEvent): void;
+}
 
 const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
 
@@ -13,7 +34,7 @@ const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
  * The transpiler will replace all console.* calls in the typescript files for the framework and those provided by the user.
  * Any console.log statements elsewhere will not be affected.
  */
-class $ConsoleManager {
+class $ConsoleManager implements ConsoleListener {
 
   /**
    * The current listener
@@ -23,7 +44,7 @@ class $ConsoleManager {
   /**
    * List of logging filters
    */
-  #filters: Partial<Record<LogLevel, (x: ConsoleEvent) => boolean>> = {};
+  #filters: Partial<Record<ConsoleEvent['level'], (x: ConsoleEvent) => boolean>> = {};
 
   constructor(listener: ConsoleListener) {
     this.set(listener);
@@ -36,7 +57,7 @@ class $ConsoleManager {
    * Add exclusion
    * @private
    */
-  filter(level: LogLevel, filter?: boolean | ((ctx: ConsoleEvent) => boolean)): void {
+  filter(level: ConsoleEvent['level'], filter?: boolean | ((ctx: ConsoleEvent) => boolean)): void {
     if (filter !== undefined) {
       if (typeof filter === 'boolean') {
         const v = filter;
@@ -58,7 +79,7 @@ class $ConsoleManager {
         args.unshift(this.namespace);
         args.push(debug.humanize(this.diff));
       };
-      debug.log = (modulePath, ...args: string[]): void => this.invoke({
+      debug.log = (modulePath, ...args: string[]): void => this.onLog({
         level: 'debug', module: '@npm:debug', modulePath,
         args: [util.format(...args)], line: 0, source: '', timestamp: new Date()
       });
@@ -85,7 +106,7 @@ class $ConsoleManager {
   /**
    * Handle direct call in lieu of the console.* commands
    */
-  invoke(ev: ConsoleEvent): void {
+  onLog(ev: ConsoleEvent): void {
     // Resolve input to source file
     const source = ev.source ? RuntimeIndex.getSourceFile(ev.source) : RuntimeIndex.mainModule.outputPath;
     const mod = RuntimeIndex.getModuleFromSource(source);
@@ -120,4 +141,4 @@ class $ConsoleManager {
 }
 
 export const ConsoleManager = new $ConsoleManager({ onLog: (ev): void => { console![ev.level](...ev.args); } });
-export const log = ConsoleManager.invoke.bind(ConsoleManager);
+export const log = ConsoleManager.onLog.bind(ConsoleManager);
