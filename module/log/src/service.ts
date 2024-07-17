@@ -52,7 +52,7 @@ export class LogService implements ConsoleListener, AutoCreate {
     }
 
     for (const l of this.#listeners) {
-      l.onLog(outEvent);
+      l.log(outEvent);
     }
   }
 }

@@ -137,7 +137,7 @@ export class TestExecutor {
       })
     );
 
-    ConsoleCapture.start(); // Capture all output from transpiled code
+    const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
     // Run method and get result
     let error = await this.#executeTestMethod(test);
@@ -158,7 +158,7 @@ export class TestExecutor {
 
     Object.assign(result, {
       status: error ? 'failed' : 'passed',
-      output: ConsoleCapture.end(),
+      output: consoleCapture.end(),
       assertions: getAssertions(),
       duration: Date.now() - startTime,
       ...(error ? { error } : {})

@@ -15,7 +15,7 @@ class CustomLogger implements Logger {
 
   values: LogEvent[] = [];
 
-  onLog(ev: LogEvent): void {
+  log(ev: LogEvent): void {
     this.values.push(ev);
   }
 

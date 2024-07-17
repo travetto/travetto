@@ -6,18 +6,18 @@ import { ConsoleEvent, ConsoleListener, ConsoleManager } from '@travetto/base';
  * Console capturer.  Hooks into the Console manager, and collects the
  * output into a map for test results
  */
-export class ConsoleCapture {
+export class ConsoleCapture implements ConsoleListener {
+  static #listener: ConsoleListener = ConsoleManager.get();
 
-  static out: Record<string, string[]>;
-  static #listener: ConsoleListener;
+  out: Record<string, string[]>;
 
-  static start(): void {
+  start(): this {
     this.out = {};
-    this.#listener ??= ConsoleManager.get();
     ConsoleManager.set(this);
+    return this;
   }
 
-  static onLog({ level, args }: ConsoleEvent): void {
+  log({ level, args }: ConsoleEvent): void {
     (this.out[level] = this.out[level] ?? []).push(
       args
         .map((x => typeof x === 'string' ? x : util.inspect(x, false, 5)))
@@ -25,10 +25,10 @@ export class ConsoleCapture {
     );
   }
 
-  static end(): Record<string, string> {
+  end(): Record<string, string> {
     const ret = this.out ?? {};
     this.out = {};
-    ConsoleManager.set(this.#listener);
+    ConsoleManager.set(ConsoleCapture.#listener);
     return Object.fromEntries(Object.entries(ret).map(([k, v]) => [k, v.join('\n')]));
   }
 }

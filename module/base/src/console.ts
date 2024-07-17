@@ -73,8 +73,8 @@ class $ConsoleManager implements ConsoleListener {
    * Enable/disable enhanced debugging
    */
   enhanceDebug(active: boolean): void {
+    Error.stackTraceLimit = active ? 50 : 10;
     if (active) {
-      Error.stackTraceLimit = 50;
       debug.formatArgs = function (args: string[]): void {
         args.unshift(this.namespace);
         args.push(debug.humanize(this.diff));
@@ -84,7 +84,6 @@ class $ConsoleManager implements ConsoleListener {
         args: [util.format(...args)], line: 0, source: '', timestamp: new Date()
       });
     } else {
-      Error.stackTraceLimit = 10;
       debug.formatArgs = DEBUG_OG.formatArgs;
       debug.log = DEBUG_OG.log;
     }
@@ -140,5 +139,5 @@ class $ConsoleManager implements ConsoleListener {
   }
 }
 
-export const ConsoleManager = new $ConsoleManager({ log: (ev): void => { console![ev.level](...ev.args); } });
+export const ConsoleManager = new $ConsoleManager({ log(ev): void { console![ev.level](...ev.args); } });
 export const log = ConsoleManager.log.bind(ConsoleManager);

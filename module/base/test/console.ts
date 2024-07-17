@@ -1,8 +1,7 @@
 import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 
-import { ConsoleEvent } from '../src/types';
-import { ConsoleManager } from '../src/console';
+import { ConsoleEvent, ConsoleManager } from '../src/console';
 
 @Suite()
 export class ConsoleManagerTest {
