@@ -52,7 +52,7 @@ export class ShutdownManager {
       }));
 
       await Promise.race([
-        Util.nonBlockingTimeout(TimeUtil.coerceValue(Env.TRV_SHUTDOWN_WAIT.val) ?? 2000), // Wait 2s and then force finish
+        Util.nonBlockingTimeout(TimeUtil.fromValue(Env.TRV_SHUTDOWN_WAIT.val) ?? 2000), // Wait 2s and then force finish
         handlers,
       ]);
 

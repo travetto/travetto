@@ -66,13 +66,14 @@ export class TimeUtil {
   /**
    * Resolve time or span to possible time
    */
-  static coerceValue(value: number | string | undefined): number | undefined {
+  static fromValue(value: Date | number | string | undefined): number | undefined {
     if (value === undefined) {
       return value;
     }
-    const val = (typeof value === 'string' && /\d+[a-z]+$/i.test(value)) ?
+    const val = (typeof value === 'string' && /\d+[a-z]$/i.test(value)) ?
       (this.isTimeSpan(value) ? this.asMillis(value) : undefined) :
-      (typeof value === 'string' ? parseInt(value, 10) : value);
+      (typeof value === 'string' ? parseInt(value, 10) :
+        (value instanceof Date ? value.getTime() : value));
     return Number.isNaN(val) ? undefined : val;
   }
 
@@ -92,8 +93,9 @@ export class TimeUtil {
   static asClock(time: number): string {
     const s = Math.trunc(time / 1000);
     return [
-      `${Math.trunc(s / 60).toString().padStart(2, '0')}m`,
+      s > 3600 ? `${Math.trunc(s / 3600).toString().padStart(2, '0')}h` : '',
+      s > 60 ? `${Math.trunc((s % 3600) / 60).toString().padStart(2, '0')}m` : '',
       `${(s % 60).toString().padStart(2, '0')}s`
-    ].join(' ');
+    ].filter(x => !!x).slice(0, 2).join(' ');
   }
 }

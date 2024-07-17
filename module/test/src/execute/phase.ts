@@ -8,7 +8,7 @@ import { TestResult } from '../model/test';
 
 class TestBreakout extends Error { }
 
-const TEST_PHASE_TIMEOUT = TimeUtil.coerceValue(Env.TRV_TEST_PHASE_TIMEOUT.val) ?? 15000;
+const TEST_PHASE_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_PHASE_TIMEOUT.val) ?? 15000;
 
 /**
  * Test Phase Execution Manager.
