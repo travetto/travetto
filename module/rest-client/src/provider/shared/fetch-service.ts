@@ -41,9 +41,7 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
       try {
         // @ts-ignore
         const { AppError } = await import('@travetto/base');
-        if (AppError.isErrorLike(err)) {
-          return AppError.fromErrorLike(err);
-        }
+        return AppError.fromJSON(err) ?? err;
       } catch { }
       return err;
     } else if (isResponse(err)) {

@@ -72,7 +72,8 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
  * @augments `@travetto/di:InjectableFactory`
  */
 export function InjectableFactory(first?: Partial<InjectableFactoryConfig> | symbol, ...args: (Partial<InjectableFactoryConfig> | undefined)[]) {
-  return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<(..._: unknown[]) => unknown>): void => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<((..._: any[]) => any)>): void => {
     const config: InjectableFactoryConfig = collapseConfig(first, ...args);
     DependencyRegistry.registerFactory({
       ...config,

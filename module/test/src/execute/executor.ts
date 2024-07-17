@@ -2,7 +2,7 @@ import { AssertionError } from 'node:assert';
 import path from 'node:path';
 
 import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env } from '@travetto/base';
+import { Env, TimeUtil } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -16,7 +16,7 @@ import { TestPhaseManager } from './phase';
 import { PromiseCapturer } from './promise';
 import { AssertUtil } from '../assert/util';
 
-const TEST_TIMEOUT = Env.TRV_TEST_TIMEOUT.time ?? 5000;
+const TEST_TIMEOUT = TimeUtil.coerceValue(Env.TRV_TEST_TIMEOUT.val) ?? 5000;
 
 /**
  * Support execution of the tests

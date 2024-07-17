@@ -193,7 +193,8 @@ export class AssertCheck {
       throw err;
     }
     if (positive) {
-      missed = new AppError('Error thrown, but expected no errors', 'general', {}, err.stack);
+      missed = new AppError('Error thrown, but expected no errors');
+      missed.stack = err.stack;
     }
 
     const resolvedErr = (missed && err) ?? this.checkError(shouldThrow, err);
