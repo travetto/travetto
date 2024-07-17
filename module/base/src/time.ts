@@ -89,7 +89,7 @@ export class TimeUtil {
    * Returns a pretty timestamp
    * @param time Time in milliseconds
    */
-  static prettyClock(time: number): string {
+  static asClock(time: number): string {
     const s = Math.trunc(time / 1000);
     return [
       `${Math.trunc(s / 60).toString().padStart(2, '0')}m`,

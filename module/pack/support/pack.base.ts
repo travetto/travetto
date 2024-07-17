@@ -132,7 +132,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
       await term.streamLines(stream);
 
-      let msg = cliTpl`${{ success: 'Success' }} (${{ identifier: TimeUtil.prettyClock(Date.now() - start) }}) ${{ subtitle: 'module' }}=${{ param: this.module }}`;
+      let msg = cliTpl`${{ success: 'Success' }} (${{ identifier: TimeUtil.asClock(Date.now() - start) }}) ${{ subtitle: 'module' }}=${{ param: this.module }}`;
       if (this.output) {
         msg = cliTpl`${msg} ${{ subtitle: 'output' }}=${{ path: this.output }}`;
       }

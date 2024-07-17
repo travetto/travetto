@@ -19,18 +19,18 @@ class TimeSuite {
 
   @Test()
   verifyPrettyDelta() {
-    assert(TimeUtil.prettyClock(1000) === '00m 01s');
-    assert(TimeUtil.prettyClock(1000 * 10) === '00m 10s');
+    assert(TimeUtil.asClock(1000) === '00m 01s');
+    assert(TimeUtil.asClock(1000 * 10) === '00m 10s');
 
-    assert(TimeUtil.prettyClock(1000 * 10 + 300) === '00m 10s');
+    assert(TimeUtil.asClock(1000 * 10 + 300) === '00m 10s');
 
-    assert(TimeUtil.prettyClock(1000 * 60 * 10 + 300) === '10m 00s');
-    assert(TimeUtil.prettyClock(1000 * 60 * 10 + 3 * 1000) === '10m 03s');
+    assert(TimeUtil.asClock(1000 * 60 * 10 + 300) === '10m 00s');
+    assert(TimeUtil.asClock(1000 * 60 * 10 + 3 * 1000) === '10m 03s');
 
-    assert(TimeUtil.prettyClock(1000 * 60 * 60 * 10 + 3 * 1000) === '600m 03s');
-    assert(TimeUtil.prettyClock(1000 * 60 * 60 * 10 + 3 * 1000 * 60) === '603m 00s');
+    assert(TimeUtil.asClock(1000 * 60 * 60 * 10 + 3 * 1000) === '600m 03s');
+    assert(TimeUtil.asClock(1000 * 60 * 60 * 10 + 3 * 1000 * 60) === '603m 00s');
 
-    assert(TimeUtil.prettyClock(1000 * 60 * 1.5) === '01m 30s');
-    assert(TimeUtil.prettyClock(1000 * 60 * 1.2) === '01m 12s');
+    assert(TimeUtil.asClock(1000 * 60 * 1.5) === '01m 30s');
+    assert(TimeUtil.asClock(1000 * 60 * 1.2) === '01m 12s');
   }
 }
