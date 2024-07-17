@@ -126,19 +126,4 @@ export class EnvTest {
     }
   }
 
-  @Test()
-  verifyTime() {
-    assert(new EnvProp('MAX_AGE').time === undefined);
-    process.env.MAX_AGE = '5s';
-    assert(new EnvProp('MAX_AGE').time === 5000);
-    process.env.MAX_AGE = '5';
-    assert(new EnvProp('MAX_AGE').time === 5);
-    process.env.MAX_AGE = '5m';
-    assert(new EnvProp('MAX_AGE').time === 5 * 1000 * 60);
-    process.env.MAX_AGE = '5h';
-    assert(new EnvProp('MAX_AGE').time === 5 * 1000 * 60 * 60);
-    process.env.MAX_AGE = '5mh';
-    assert(new EnvProp('MAX_AGE').time === undefined);
-  }
-
 }

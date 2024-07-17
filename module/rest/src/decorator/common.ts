@@ -50,8 +50,8 @@ type HeaderSet = ReturnType<typeof SetHeaders>;
 export function CacheControl(value: number | TimeSpan): HeaderSet {
   const delta = TimeUtil.asSeconds(value);
   return SetHeaders({
-    Expires: delta === 0 ? '-1' : (): string => TimeUtil.fromNow(delta, 's').toUTCString(),
-    'Cache-Control': () => delta === 0 ? 'max-age=0,no-cache' : `max-age=${delta}`
+    Expires: delta === 0 ? '-1' : ((): string => TimeUtil.fromNow(delta, 's').toUTCString()),
+    'Cache-Control': delta === 0 ? 'max-age=0,no-cache' : `max-age=${delta}`
   });
 }
 

@@ -32,8 +32,8 @@ export class ConfigureTest {
   @Test()
   async verifyMaxAge() {
     const cacher = ControllerRegistry.get(TestController).endpoints[0].headers['cache-control'];
-    assert(typeof cacher === 'function');
-    assert(cacher() === 'max-age=1');
+    assert(typeof cacher !== 'function');
+    assert(cacher === 'max-age=1');
 
     const expires = ControllerRegistry.get(TestController).endpoints[0].headers['expires'];
     assert(typeof expires === 'function');
@@ -43,11 +43,11 @@ export class ConfigureTest {
   @Test()
   async verifyBadMaxAge() {
     const cacher = ControllerRegistry.get(TestController).endpoints[1].headers['cache-control'];
-    assert(typeof cacher === 'function');
-    assert(cacher() === 'max-age=0,no-cache');
+    assert(typeof cacher !== 'function');
+    assert(cacher === 'max-age=0,no-cache');
 
     const expires = ControllerRegistry.get(TestController).endpoints[1].headers['expires'];
-    assert(!(typeof expires === 'function'));
+    assert(typeof expires === 'string');
     assert(expires === '-1');
   }
 
