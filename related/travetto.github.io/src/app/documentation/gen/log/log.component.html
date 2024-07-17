@@ -65,7 +65,7 @@ The default pattern for logging is to create a <a target="_blank" class="source-
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Logger</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token function">onLog</span><span class="token punctuation">(</span>ev<span class="token operator">:</span> LogEvent<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">;</span>
+  <span class="token function">log</span><span class="token punctuation">(</span>ev<span class="token operator">:</span> LogEvent<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -122,7 +122,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomLogger</span> <span class="token keyword">implements</span> <span class="token class-name">Logger</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token function">onLog</span><span class="token punctuation">(</span>ev<span class="token operator">:</span> LogEvent<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">log</span><span class="token punctuation">(</span>ev<span class="token operator">:</span> LogEvent<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> headers <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Headers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     headers<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'Content-Type'</span><span class="token punctuation">,</span> <span class="token string">'application/json'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">const</span> body <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>ev<span class="token punctuation">)</span><span class="token punctuation">;</span>

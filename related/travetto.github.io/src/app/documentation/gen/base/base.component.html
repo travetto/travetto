@@ -29,7 +29,7 @@ Base is the foundation of all <a target="_blank" class="external-link" href="htt
 
 <h2 id="environment-support">Environment Support</h2>
 
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
 
   <figure class="code">
     <figcaption class="code">Base Known Environment Flags
@@ -90,11 +90,11 @@ The functionality we support for testing and retrieving environment information 
 
 <h3 id="environment-property">Environment Property</h3>
 
-For a given <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9">EnvProp</a>, we support the ability to access different properties as a means to better facilitate environment variable usage.
+For a given <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8">EnvProp</a>, we support the ability to access different properties as a means to better facilitate environment variable usage.
 
   <figure class="code">
     <figcaption class="code">EnvProp Shape
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">EnvProp<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
@@ -115,8 +115,6 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
   <span class="token keyword">get</span> <span class="token function">int</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
   <span class="token comment">/** Read value as boolean */</span>
   <span class="token keyword">get</span> <span class="token function">bool</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
-  <span class="token comment">/** Read value as a time value */</span>
-  <span class="token keyword">get</span> <span class="token function">time</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
   <span class="token comment">/** Determine if the underlying value is truthy */</span>
   <span class="token keyword">get</span> <span class="token function">isTrue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/** Determine if the underlying value is falsy */</span>
@@ -128,11 +126,11 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
 
 <h3 id="runtime-flags">Runtime Flags</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123">Env</a> also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to <code class="item field">process.env</code> values with a little bit of logic sprinkled in.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116">Env</a> also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to <code class="item field">process.env</code> values with a little bit of logic sprinkled in.
 
   <figure class="code">
     <figcaption class="code">Provided Flags
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">const</span> Env <span class="token operator">=</span> <span class="token function">delegate</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
@@ -168,7 +166,7 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
 
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" routerLink="/docs/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.<br><br>
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> with a category of 'notfound'.  <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
 
 <h2 id="standard-error-support">Standard Error Support</h2>
 
@@ -288,11 +286,11 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 
 <h2 id="time-utilities">Time Utilities</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L19">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L17">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
   <figure class="code">
     <figcaption class="code">Time Utilities
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L19">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L17">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TimeUtil</span> <span class="token punctuation">{{'{'}}</span>
@@ -320,7 +318,7 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
   <span class="token comment">/**
    * Resolve time or span to possible time
    */</span>
-  <span class="token keyword">static</span> <span class="token function">coerceValue</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">fromValue</span><span class="token punctuation">(</span>value<span class="token operator">:</span> Date <span class="token operator">|</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Returns a new date with `amount` units into the future
    * &#64;param amount Number of units to extend
@@ -328,18 +326,10 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
    */</span>
   <span class="token keyword">static</span> <span class="token function">fromNow</span><span class="token punctuation">(</span>amount<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">)</span><span class="token operator">:</span> Date<span class="token punctuation">;</span>
   <span class="token comment">/**
-   * Pretty print a delta between now and `time`, with auto-detection of largest unit
+   * Returns a pretty timestamp
+   * &#64;param time Time in milliseconds
    */</span>
-  <span class="token keyword">static</span> <span class="token function">prettyDeltaSince</span><span class="token punctuation">(</span>time<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> unit<span class="token operator">?</span><span class="token operator">:</span> TimeUnit<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Pretty print a delta, with auto-detection of largest unit
-   * &#64;param delta The number of milliseconds in the delta
-   */</span>
-  <span class="token keyword">static</span> <span class="token function">prettyDelta</span><span class="token punctuation">(</span>delta<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> unit<span class="token operator">?</span><span class="token operator">:</span> TimeUnit<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Determine the number of units between two dates
-   */</span>
-  <span class="token keyword">static</span> <span class="token function">unitsBetween</span><span class="token punctuation">(</span>startDate<span class="token operator">:</span> Date <span class="token operator">|</span> <span class="token builtin">number</span><span class="token punctuation">,</span> endDate<span class="token operator">:</span> Date <span class="token operator">|</span> <span class="token builtin">number</span><span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">asClock</span><span class="token punctuation">(</span>time<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 

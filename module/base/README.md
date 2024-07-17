@@ -25,7 +25,7 @@ Base is the foundation of all [Travetto](https://travetto.dev) applications.  It
    *  Shutdown Management
 
 ## Environment Support
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
 
 **Code: Base Known Environment Flags**
 ```typescript
@@ -82,7 +82,7 @@ interface TravettoEnv {
 ```
 
 ### Environment Property
-For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L9), we support the ability to access different properties as a means to better facilitate environment variable usage.
+For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8), we support the ability to access different properties as a means to better facilitate environment variable usage.
 
 **Code: EnvProp Shape**
 ```typescript
@@ -104,8 +104,6 @@ export class EnvProp<T> {
   get int(): number | undefined;
   /** Read value as boolean */
   get bool(): boolean | undefined;
-  /** Read value as a time value */
-  get time(): number | undefined;
   /** Determine if the underlying value is truthy */
   get isTrue(): boolean;
   /** Determine if the underlying value is falsy */
@@ -116,7 +114,7 @@ export class EnvProp<T> {
 ```
 
 ### Runtime Flags
-[Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123) also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to `process.env` values with a little bit of logic sprinkled in.
+[Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116) also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to `process.env` values with a little bit of logic sprinkled in.
 
 **Code: Provided Flags**
 ```typescript
@@ -154,7 +152,7 @@ The primary access patterns for resources, is to directly request a file, and to
 
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L123)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Standard Error Support
 While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
@@ -258,7 +256,7 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 ```
 
 ## Time Utilities
-[TimeUtil](https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L19) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+[TimeUtil](https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L17) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
 **Code: Time Utilities**
 ```typescript
@@ -287,7 +285,7 @@ export class TimeUtil {
   /**
    * Resolve time or span to possible time
    */
-  static coerceValue(value: number | string | undefined): number | undefined;
+  static fromValue(value: Date | number | string | undefined): number | undefined;
   /**
    * Returns a new date with `amount` units into the future
    * @param amount Number of units to extend
@@ -295,18 +293,10 @@ export class TimeUtil {
    */
   static fromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date;
   /**
-   * Pretty print a delta between now and `time`, with auto-detection of largest unit
+   * Returns a pretty timestamp
+   * @param time Time in milliseconds
    */
-  static prettyDeltaSince(time: number, unit?: TimeUnit): string;
-  /**
-   * Pretty print a delta, with auto-detection of largest unit
-   * @param delta The number of milliseconds in the delta
-   */
-  static prettyDelta(delta: number, unit?: TimeUnit): string;
-  /**
-   * Determine the number of units between two dates
-   */
-  static unitsBetween(startDate: Date | number, endDate: Date | number, unit: TimeUnit): number;
+  static asClock(time: number): string;
 }
 ```
 

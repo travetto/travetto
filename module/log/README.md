@@ -53,7 +53,7 @@ The default pattern for logging is to create a [Logger](https://github.com/trave
 **Code: Logger Shape**
 ```typescript
 export interface Logger {
-  onLog(ev: LogEvent): unknown;
+  log(ev: LogEvent): unknown;
 }
 ```
 
@@ -100,7 +100,7 @@ import { LogEvent, Logger } from '@travetto/log';
 
 @Injectable()
 export class CustomLogger implements Logger {
-  onLog(ev: LogEvent): void {
+  log(ev: LogEvent): void {
     const headers = new Headers();
     headers.set('Content-Type', 'application/json');
     const body = JSON.stringify(ev);
