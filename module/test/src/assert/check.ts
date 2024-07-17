@@ -8,12 +8,6 @@ import { AssertCapture, CaptureAssert } from './capture';
 import { AssertUtil } from './util';
 import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types';
 
-declare module 'assert' {
-  interface AssertionError {
-    toJSON(): Record<string, unknown>;
-  }
-}
-
 type StringFields<T> = {
   [K in Extract<keyof T, string>]:
   (T[K] extends string ? K : never)

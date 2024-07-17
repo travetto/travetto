@@ -1,4 +1,4 @@
-import { TypedObject } from '@travetto/base';
+import { AppError, TypedObject } from '@travetto/base';
 
 import { TestEvent, } from '../model/event';
 
@@ -10,9 +10,6 @@ function isSerialized(e: unknown): e is SerializedError {
 }
 
 export class ErrorUtil {
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static hasToJSON = (o: unknown): o is { toJSON: () => any } => typeof o === 'object' && !!o && 'toJSON' in o && typeof o.toJSON === 'function';
 
   /**
    *  Prepare error for transmission
@@ -28,7 +25,7 @@ export class ErrorUtil {
         error[k] = e[k];
       }
       error.name = e.name;
-      if (this.hasToJSON(e)) {
+      if (e instanceof AppError) {
         Object.assign(error, e.toJSON());
       }
       error.message ||= e.message;
