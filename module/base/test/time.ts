@@ -19,32 +19,18 @@ class TimeSuite {
 
   @Test()
   verifyPrettyDelta() {
-    assert(TimeUtil.prettyDelta(1000, 's') === '1s');
-    assert(TimeUtil.prettyDelta(1000) === '1000ms');
-    assert(TimeUtil.prettyDelta(1000 * 10) === '10s');
+    assert(TimeUtil.prettyClock(1000) === '00m 01s');
+    assert(TimeUtil.prettyClock(1000 * 10) === '00m 10s');
 
-    assert(TimeUtil.prettyDelta(1000 * 10 + 300) === '10s 300ms');
+    assert(TimeUtil.prettyClock(1000 * 10 + 300) === '00m 10s');
 
-    assert(TimeUtil.prettyDelta(1000 * 60 * 10 + 300) === '10m');
-    assert(TimeUtil.prettyDelta(1000 * 60 * 10 + 3 * 1000) === '10m 3s');
+    assert(TimeUtil.prettyClock(1000 * 60 * 10 + 300) === '10m 00s');
+    assert(TimeUtil.prettyClock(1000 * 60 * 10 + 3 * 1000) === '10m 03s');
 
-    assert(TimeUtil.prettyDelta(1000 * 60 * 60 * 10 + 3 * 1000) === '10h');
-    assert(TimeUtil.prettyDelta(1000 * 60 * 60 * 10 + 3 * 1000 * 60) === '10h 3m');
+    assert(TimeUtil.prettyClock(1000 * 60 * 60 * 10 + 3 * 1000) === '600m 03s');
+    assert(TimeUtil.prettyClock(1000 * 60 * 60 * 10 + 3 * 1000 * 60) === '603m 00s');
 
-    assert(TimeUtil.prettyDelta(1000 * 60 * 1.5) === '1m 30s');
-    assert(TimeUtil.prettyDelta(1000 * 60 * 1.2) === '72s');
-  }
-
-  @Test()
-  verifyTimeBetween() {
-    const now = Date.now();
-    assert(TimeUtil.unitsBetween(now - 1000 * 60 * 60 * 24 * 5, now, 'd') === 5);
-    assert(TimeUtil.unitsBetween(now - 1000 * 60 * 60 * 24 * 5.5, now, 'd') === 5.5);
-    assert(TimeUtil.unitsBetween(now - 1000 * 60 * 60 * 5, now, 'h') === 5);
-    assert(TimeUtil.unitsBetween(now - 1000 * 60 * 5, now, 'm') === 5);
-    assert(TimeUtil.unitsBetween(now - 1000 * 60 * 5.25, now, 'm') === 5.25);
-    assert(TimeUtil.unitsBetween(now - 1000 * 5, now, 's') === 5);
-    assert(TimeUtil.unitsBetween(now - 5, now, 'ms') === 5);
-    assert(TimeUtil.unitsBetween(now, now - 1000 * 60 * 5.25, 'm') === -5.25);
+    assert(TimeUtil.prettyClock(1000 * 60 * 1.5) === '01m 30s');
+    assert(TimeUtil.prettyClock(1000 * 60 * 1.2) === '01m 12s');
   }
 }
