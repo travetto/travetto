@@ -3,7 +3,7 @@ import { LogEvent, Logger } from '@travetto/log';
 
 @Injectable()
 export class CustomLogger implements Logger {
-  onLog(ev: LogEvent): void {
+  log(ev: LogEvent): void {
     const headers = new Headers();
     headers.set('Content-Type', 'application/json');
     const body = JSON.stringify(ev);

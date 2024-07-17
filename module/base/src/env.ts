@@ -1,7 +1,6 @@
 /// <reference path="./trv.d.ts" />
 
 import { RuntimeContext } from '@travetto/manifest';
-import { TimeSpan, TimeUtil } from './time';
 
 const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;
@@ -73,11 +72,6 @@ export class EnvProp<T> {
     return (val === undefined || val === '') ? undefined : IS_TRUE.test(val);
   }
 
-  /** Read value as a time value */
-  get time(): number | undefined {
-    return TimeUtil.coerceValue(this.val);
-  }
-
   /** Determine if the underlying value is truthy */
   get isTrue(): boolean {
     return IS_TRUE.test(this.val ?? '');
@@ -100,8 +94,7 @@ type AllType = {
     (TravettoEnv[K] extends unknown[] ? 'list' | 'add' : never) |
     (Extract<TravettoEnv[K], object> extends never ? never : 'object') |
     (Extract<TravettoEnv[K], number> extends never ? never : 'int') |
-    (Extract<TravettoEnv[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse') |
-    (Extract<TravettoEnv[K], TimeSpan> extends never ? never : 'time')
+    (Extract<TravettoEnv[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse')
   >
 };
 

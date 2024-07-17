@@ -35,7 +35,7 @@ export class LogService implements ConsoleListener, AutoCreate {
   /**
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
-  onLog(ev: ConsoleEvent): void {
+  log(ev: ConsoleEvent): void {
     const args = [...ev.args];
     let message: string | undefined;
     if (typeof args[0] === 'string') {
@@ -52,7 +52,7 @@ export class LogService implements ConsoleListener, AutoCreate {
     }
 
     for (const l of this.#listeners) {
-      l.onLog(outEvent);
+      l.log(outEvent);
     }
   }
 }

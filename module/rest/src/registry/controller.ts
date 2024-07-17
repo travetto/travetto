@@ -1,6 +1,7 @@
 import { DependencyRegistry } from '@travetto/di';
-import { Primitive, Class, ClassInstance } from '@travetto/base';
+import { Class, ClassInstance } from '@travetto/base';
 import { MetadataRegistry } from '@travetto/registry';
+import { Primitive } from '@travetto/schema';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator } from './types';
 import { Filter, RouteHandler, ParamConfig } from '../types';

@@ -1,4 +1,3 @@
-import type { MethodDescriptor } from '@travetto/base';
 import { Connection, TransactionType } from './base';
 
 /**
@@ -12,7 +11,7 @@ export interface ConnectionAware<C = unknown> {
  * Decorator to ensure a method runs with a valid connection
  */
 export function Connected<T extends ConnectionAware>() {
-  return function (target: T, prop: string | symbol, desc: MethodDescriptor): void {
+  return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(...params: unknown[]) => Promise<unknown>>): void {
     const og = desc.value!;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     desc.value = async function (this: T, ...args: unknown[]) {
@@ -25,7 +24,7 @@ export function Connected<T extends ConnectionAware>() {
  * Decorator to ensure a method runs with a valid connection
  */
 export function ConnectedIterator<T extends ConnectionAware>() {
-  return function (target: T, prop: string | symbol, desc: MethodDescriptor): void {
+  return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(...params: unknown[]) => AsyncGenerator<unknown>>): void {
     const og = desc.value!;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     desc.value = async function* (this: T, ...args: unknown[]) {
@@ -38,7 +37,7 @@ export function ConnectedIterator<T extends ConnectionAware>() {
  * Decorator to ensure a method runs with a valid transaction
  */
 export function Transactional<T extends ConnectionAware>(mode: TransactionType = 'required') {
-  return function (target: T, prop: string | symbol, desc: MethodDescriptor): void {
+  return function (target: T, prop: string | symbol, desc: TypedPropertyDescriptor<(...params: unknown[]) => Promise<unknown>>): void {
     const og = desc.value!;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     desc.value = function (this: T, ...args: unknown[]) {

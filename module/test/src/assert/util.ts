@@ -1,7 +1,6 @@
 import util from 'node:util';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Class, ClassInstance, ObjectUtil } from '@travetto/base';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
@@ -19,22 +18,25 @@ export class AssertUtil {
    * Clean a value for displaying in the output
    */
   static cleanValue(val: unknown): unknown {
-    if (isCleanable(val)) {
-      return val.toClean();
-    } else if (val === null || val === undefined
-      || (!(val instanceof RegExp) && ObjectUtil.isPrimitive(val))
-      || ObjectUtil.isPlainObject(val) || Array.isArray(val)
-    ) {
-      return JSON.stringify(val);
-    } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const subV = val as (Class | ClassInstance);
-      if (subV.Ⲑid || !subV.constructor || (!subV.constructor.Ⲑid && ObjectUtil.isFunction(subV))) { // If a function, show name
-        return subV.name;
-      } else { // Else inspect
-        return util.inspect(val, false, 1).replace(/\n/g, ' ');
+    switch (typeof val) {
+      case 'object': {
+        if (isCleanable(val)) {
+          return val.toClean();
+        } else if (val === null || val.constructor === Object || Array.isArray(val) || val instanceof Date) {
+          return JSON.stringify(val);
+        }
+        break;
+      }
+      case 'undefined': case 'string': case 'number': case 'bigint': case 'boolean': return JSON.stringify(val);
+      case 'function': {
+        if (val.Ⲑid || !val.constructor) {
+          return val.name;
+        }
+        break;
       }
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return util.inspect(val, false, 1).replace(/\n/g, ' ');
   }
 
   /**

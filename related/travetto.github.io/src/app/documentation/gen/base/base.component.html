@@ -21,7 +21,6 @@ Base is the foundation of all <a target="_blank" class="external-link" href="htt
 <li>Console Management</li>
 <li>Resource Access</li>
 <li>Standard Error Support</li>
-<li>Object Utilities</li>
 <li>Common Utilities</li>
 <li>Time Utilities</li>
 <li>Process Execution</li>
@@ -200,7 +199,7 @@ The supported operations are:
 
 <h2 id="how-logging-is-instrumented">How Logging is Instrumented</h2>
 
-All of the logging instrumentation occurs at transpilation time.  All <code class="item method">console.*</code> methods are replaced with a call to a globally defined variable that delegates to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L16">ConsoleManager</a>.  This module, hooks into the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L16">ConsoleManager</a> and receives all logging events from all files compiled by the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>. <br><br>
+All of the logging instrumentation occurs at transpilation time.  All <code class="item method">console.*</code> methods are replaced with a call to a globally defined variable that delegates to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L37">ConsoleManager</a>.  This module, hooks into the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L37">ConsoleManager</a> and receives all logging events from all files compiled by the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>. <br><br>
 A sample of the instrumentation would be:
 
   <figure class="code">
@@ -267,17 +266,6 @@ Additionally, the logging framework will merge <a target="_blank" class="externa
     <pre><code class="language-bash"><span class="token comment"># Debug</span>
 $ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>express:*,&#64;travetto/rest npx trv run rest</code></pre>
   </figure>
-
-<h2 id="object-utilities">Object Utilities</h2>
-
-Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L9">ObjectUtil</a> includes:
-<ul> <li><code class="item method">isPrimitive(el)</code> determines if <code class="item input">el</code> is a <code class="item input">string</code>, <code class="item input">boolean</code>, <code class="item input">number</code> or <code class="item input">RegExp</code></li>
-<li><code class="item method">isPlainObject(obj)</code> determines if the obj is a simple object</li>
-<li><code class="item method">isFunction(o)</code> determines if <code class="item input">o</code> is a simple <code class="item input">Function</code></li>
-<li><code class="item method">isClass(o)</code> determines if <code class="item input">o</code> is a class constructor</li>
-<li><code class="item method">isSimple(a)</code> determines if <code class="item input">a</code> is a simple value</li>
-<li><code class="item method">isPromise(a)</code> determines if <code class="item input">a</code> is a promise</li>
-</ul>
 
 <h2 id="common-utilities">Common Utilities</h2>
 

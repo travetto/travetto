@@ -12,18 +12,20 @@ export type ErrorCategory =
  */
 export class AppError<T = unknown> extends Error {
 
-  /** Is the object in the shape of an error */
-  static isErrorLike(val: unknown): val is AppError {
-    return !!val && (typeof val === 'object' || typeof val === 'function') &&
-      'message' in val && 'category' in val && 'type' in val && 'at' in val;
-  }
-
   /** Convert from JSON object */
-  static fromErrorLike(e: AppError): AppError {
-    const err = new AppError(e.message, e.category, e.details);
-    err.at = e.at;
-    err.type = e.type;
-    return err;
+  static fromJSON(e: unknown): AppError | undefined {
+    if (!!e && typeof e === 'object' &&
+      ('message' in e && typeof e.message === 'string') &&
+      ('category' in e && typeof e.category === 'string') &&
+      ('type' in e && typeof e.type === 'string') &&
+      ('at' in e && typeof e.at === 'number')
+    ) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const err = new AppError(e.message, e.category as ErrorCategory, 'details' in e ? e.details : undefined);
+      err.at = new Date(e.at);
+      err.type = e.type;
+      return err;
+    }
   }
 
   type: string;
@@ -36,24 +38,20 @@ export class AppError<T = unknown> extends Error {
    * @param message The error message
    * @param category The error category, can be mapped to HTTP statuses
    * @param details Optional error payload
-   * @param stack A stack to override if needed
    */
   constructor(
     message: string,
     public category: ErrorCategory = 'general',
-    details?: T,
-    stack?: string
+    details?: T
 
   ) {
     super(message);
     this.type = this.constructor.name;
-    this.stack = stack || this.stack;
     this.details = details!;
   }
 
   /**
    * The format of the JSON output
-   * @param extra Extra data to build into the context
    */
   toJSON(): unknown {
     return {

@@ -34,7 +34,7 @@ export class CommonLogger implements Logger {
     this.appender ??= await DependencyRegistry.getInstance(this.config.output !== 'console' ? FileLogAppender : ConsoleLogAppender);
   }
 
-  onLog(ev: LogEvent): void {
+  log(ev: LogEvent): void {
     this.appender.append(ev, this.formatter.format(ev));
   }
 }

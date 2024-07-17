@@ -1,6 +1,6 @@
 import { RuntimeIndex } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
-import { ObjectUtil, TimeUtil } from '@travetto/base';
+import { AppError, TimeUtil } from '@travetto/base';
 import { stringify } from 'yaml';
 
 import { TestEvent } from '../../model/event';
@@ -103,7 +103,7 @@ export class TapEmitter implements TestConsumer {
       if (test.status === 'failed') {
         if (test.error && test.error.name !== 'AssertionError') {
           const err = ErrorUtil.deserializeError(test.error);
-          this.logMeta({ error: ObjectUtil.hasToJSON(err) ? err.toJSON() : err });
+          this.logMeta({ error: err instanceof AppError ? err.toJSON() : err });
         }
       }
 
@@ -127,8 +127,7 @@ export class TapEmitter implements TestConsumer {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        this.log(this.#enhancer.failure(ObjectUtil.hasToJSON(err) ? err.toJSON() as string : `${err}`));
+        this.log(this.#enhancer.failure(err instanceof AppError ? JSON.stringify(err.toJSON(), null, 2) : `${err}`));
       }
     }
 
@@ -141,7 +140,7 @@ export class TapEmitter implements TestConsumer {
       `${this.#enhancer.total(summary.failed)}`,
       'skipped',
       this.#enhancer.total(summary.skipped),
-      `# (Total Test Time: ${TimeUtil.prettyDelta(summary.duration)}, Total Run Time: ${TimeUtil.prettyDeltaSince(this.#start)})`
+      `# (Total Test Time: ${TimeUtil.asClock(summary.duration)}, Total Run Time: ${TimeUtil.asClock(Date.now() - this.#start)})`
     ].join(' '));
   }
 }

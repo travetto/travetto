@@ -11,8 +11,6 @@ const TIME_UNITS = {
   ms: 1
 };
 
-const ORDER = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'] as const;
-
 export type TimeSpan = `${number}${keyof typeof TIME_UNITS}`;
 export type TimeUnit = keyof typeof TIME_UNITS;
 
@@ -68,13 +66,14 @@ export class TimeUtil {
   /**
    * Resolve time or span to possible time
    */
-  static coerceValue(value: number | string | undefined): number | undefined {
+  static fromValue(value: Date | number | string | undefined): number | undefined {
     if (value === undefined) {
       return value;
     }
-    const val = (typeof value === 'string' && /\d+[a-z]+$/i.test(value)) ?
+    const val = (typeof value === 'string' && /\d+[a-z]$/i.test(value)) ?
       (this.isTimeSpan(value) ? this.asMillis(value) : undefined) :
-      (typeof value === 'string' ? parseInt(value, 10) : value);
+      (typeof value === 'string' ? parseInt(value, 10) :
+        (value instanceof Date ? value.getTime() : value));
     return Number.isNaN(val) ? undefined : val;
   }
 
@@ -88,56 +87,15 @@ export class TimeUtil {
   }
 
   /**
-   * Pretty print a delta between now and `time`, with auto-detection of largest unit
+   * Returns a pretty timestamp
+   * @param time Time in milliseconds
    */
-  static prettyDeltaSince(time: number, unit?: TimeUnit): string {
-    return this.prettyDelta(Date.now() - time, unit);
-  }
-
-  /**
-   * Pretty print a delta, with auto-detection of largest unit
-   * @param delta The number of milliseconds in the delta
-   */
-  static prettyDelta(delta: number, unit?: TimeUnit): string {
-    if (delta === 0) {
-      return `0${unit}`;
-    } else if (delta < 0) {
-      return `-${this.prettyDelta(-delta, unit)}`;
-    }
-
-    let idx: number = 0;
-    if (!unit) {
-      let i = 0;
-      while (delta > TIME_UNITS[ORDER[i]]) {
-        i += 1;
-      }
-      idx = i - 1;
-    } else {
-      idx = ORDER.indexOf(unit);
-    }
-    const majorUnit = TIME_UNITS[ORDER[idx]];
-    const minorUnit = TIME_UNITS[ORDER[idx - 1]];
-    const value = delta / majorUnit;
-    const major = Math.trunc(value);
-    if (unit === undefined && value < 1.25 && idx > 0) {
-      return this.prettyDelta(delta, ORDER[idx - 1]);
-    }
-    const sub = value - major;
-    const out: (string | number)[] = [major, ORDER[idx]];
-    if (idx > 0 && sub > .01) {
-      const minor = Math.trunc(sub * (majorUnit / minorUnit));
-      out.push(' ', minor, ORDER[idx - 1]);
-    }
-    return out.join('');
-  }
-
-  /**
-   * Determine the number of units between two dates
-   */
-  static unitsBetween(startDate: Date | number, endDate: Date | number, unit: TimeUnit): number {
-    const delta =
-      (typeof endDate === 'number' ? endDate : endDate.getTime()) -
-      (typeof startDate === 'number' ? startDate : startDate.getTime());
-    return delta / TIME_UNITS[unit];
+  static asClock(time: number): string {
+    const s = Math.trunc(time / 1000);
+    return [
+      s > 3600 ? `${Math.trunc(s / 3600).toString().padStart(2, '0')}h` : '',
+      s > 60 ? `${Math.trunc((s % 3600) / 60).toString().padStart(2, '0')}m` : '',
+      `${(s % 60).toString().padStart(2, '0')}s`
+    ].filter(x => !!x).slice(0, 2).join(' ');
   }
 }

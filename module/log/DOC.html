@@ -84,14 +84,14 @@ The default pattern for logging is to create a <a target="_blank" class="source-
 
   <figure class="code">
     <figcaption class="code">Console Event
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/types.ts#L12">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L6">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">ConsoleEvent</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/** Time of event */</span>
   timestamp<span class="token operator">:</span> Date<span class="token punctuation">;</span>
   <span class="token comment">/** The level of the console event */</span>
-  level<span class="token operator">:</span> LogLevel<span class="token punctuation">;</span>
+  level<span class="token operator">:</span> <span class="token string">'info'</span> <span class="token operator">|</span> <span class="token string">'warn'</span> <span class="token operator">|</span> <span class="token string">'debug'</span> <span class="token operator">|</span> <span class="token string">'error'</span><span class="token punctuation">;</span>
   <span class="token comment">/** The source file of the event */</span>
   source<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token comment">/** The line number the console event was triggered from */</span>
@@ -107,7 +107,7 @@ The default pattern for logging is to create a <a target="_blank" class="source-
 <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>
   </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8">LogEvent</a> is an extension of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/types.ts#L12">ConsoleEvent</a> with the addition of two fields:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8">LogEvent</a> is an extension of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L6">ConsoleEvent</a> with the addition of two fields:
 <ul> <li><code class="item field">message</code> - This is the primary argument passed to the console statement, if it happens to be a string, otherwise the field is left empty</li>
 <li><code class="item field">context</code> - This is the final argument passed to the console statement, if it happens to be a simple object.  This is useful for external loggers that allow for searching/querying by complex data</li>
 </ul>

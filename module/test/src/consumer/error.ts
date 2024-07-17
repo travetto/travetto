@@ -1,4 +1,4 @@
-import { TypedObject, ObjectUtil } from '@travetto/base';
+import { AppError, TypedObject } from '@travetto/base';
 
 import { TestEvent, } from '../model/event';
 
@@ -25,7 +25,7 @@ export class ErrorUtil {
         error[k] = e[k];
       }
       error.name = e.name;
-      if (ObjectUtil.hasToJSON(e)) {
+      if (e instanceof AppError) {
         Object.assign(error, e.toJSON());
       }
       error.message ||= e.message;

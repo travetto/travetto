@@ -11,7 +11,7 @@ const LogDecorator = d.codeLink('Logger', 'src/types.ts', /interface LogDecorato
 const LogFormatter = d.codeLink('LogFormatter', 'src/types.ts', /interface LogFormatter/);
 const LogAppender = d.codeLink('LogAppender', 'src/types.ts', /interface LogAppender/);
 const LogEvent = d.codeLink('LogEvent', 'src/types.ts', /interface LogEvent/);
-const ConsolEvent = d.codeLink('ConsoleEvent', '@travetto/base/src/types.ts', /type ConsoleEvent/);
+const ConsolEvent = d.codeLink('ConsoleEvent', '@travetto/base/src/console.ts', /type ConsoleEvent/);
 
 const ConsoleManager = d.ref('ConsoleManager', '@travetto/base/src/console.ts');
 
@@ -38,7 +38,7 @@ export const text = <>
 
     <c.Code title='Log Event' src='src/types.ts' startRe={/interface LogEvent/} endRe={/^[}]/} />
 
-    <c.Code title='Console Event' src='@travetto/base/src/types.ts' startRe={/type ConsoleEvent/} endRe={/^[}]/} />
+    <c.Code title='Console Event' src='@travetto/base/src/console.ts' startRe={/type ConsoleEvent/} endRe={/^[}]/} />
 
     The {LogEvent} is an extension of the {ConsolEvent} with the addition of two fields:
 

@@ -163,4 +163,60 @@ class DataUtilTests {
       { name: 'bob', age: 20, child: { name: 'gob', age: 11 } }
     );
   }
+
+  @Test()
+  verifySimple() {
+    assert(DataUtil.isSimpleValue(5));
+    assert(DataUtil.isSimpleValue(Number(5)));
+    assert(DataUtil.isSimpleValue(Boolean(5)));
+    assert(DataUtil.isSimpleValue(Function));
+    assert(DataUtil.isSimpleValue(() => { }));
+    assert(DataUtil.isSimpleValue(class { }));
+    assert(!DataUtil.isSimpleValue(new class { }()));
+  }
+
+  @Test()
+  testPrimitive() {
+    for (const v of [1, '1', true, false, 0.0, /ab/g, new Date()]) {
+      assert(DataUtil.isPrimitive(v));
+    }
+
+    for (const v of [[], {}, () => { }, new class { }(), null, undefined]) {
+      assert(!DataUtil.isPrimitive(v));
+    }
+  }
+
+
+  @Test()
+  verifyPrimitive() {
+    assert(DataUtil.isPrimitive(5));
+    // eslint-disable-next-line no-new-wrappers
+    assert(DataUtil.isPrimitive(new String('5')));
+    assert(DataUtil.isPrimitive(String('5')));
+    assert(DataUtil.isPrimitive('5'));
+    // eslint-disable-next-line no-new-wrappers
+    assert(DataUtil.isPrimitive(new Number(5)));
+    assert(DataUtil.isPrimitive(Number(5)));
+
+    assert(DataUtil.isPrimitive(false));
+    // eslint-disable-next-line no-new-wrappers
+    assert(DataUtil.isPrimitive(new Boolean('true')));
+    assert(DataUtil.isPrimitive(Boolean('false')));
+
+    assert(DataUtil.isPrimitive(new Date()));
+    assert(DataUtil.isPrimitive(/./));
+    assert(DataUtil.isPrimitive(new RegExp('.')));
+    assert(!DataUtil.isPrimitive(Function));
+    assert(!DataUtil.isPrimitive(class { }));
+    assert(!DataUtil.isPrimitive(new class { }()));
+  }
+
+  @Test()
+  verifyObject() {
+    assert(DataUtil.isPlainObject({}));
+    assert(DataUtil.isPlainObject(Object.create({})));
+    assert(DataUtil.isPlainObject(Object.create(null)) !== true);
+    assert(DataUtil.isPlainObject(Object.create(Function)) !== true);
+    assert(DataUtil.isPlainObject(new class { }()) !== true);
+  }
 }

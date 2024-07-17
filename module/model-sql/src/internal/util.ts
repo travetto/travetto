@@ -1,7 +1,7 @@
-import { Class, TypedObject, ObjectUtil } from '@travetto/base';
+import { Class, TypedObject } from '@travetto/base';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
-import { SchemaRegistry, ClassConfig, FieldConfig } from '@travetto/schema';
+import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
@@ -45,7 +45,7 @@ export class SQLUtil {
   static cleanResults<T, U = T>(dct: DialectState, o: T | T[]): U | U[] {
     if (Array.isArray(o)) {
       return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x));
-    } else if (!ObjectUtil.isSimple(o)) {
+    } else if (!DataUtil.isSimpleValue(o)) {
       for (const k of TypedObject.keys(o)) {
         if (o[k] === null || o[k] === undefined || k === dct.parentPathField.name || k === dct.pathField.name || k === dct.idxField.name) {
           delete o[k];
@@ -236,7 +236,7 @@ export class SQLUtil {
     for (const [k, v] of TypedObject.entries(select)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const sk = k as string;
-      if (!ObjectUtil.isPlainObject(select[k]) && localMap[sk]) {
+      if (!DataUtil.isPlainObject(select[k]) && localMap[sk]) {
         if (!v) {
           if (toGet.size === 0) {
             toGet = new Set(SchemaRegistry.get(cls).views[AllViewⲐ].fields);
@@ -262,7 +262,7 @@ export class SQLUtil {
         const key = Object.keys(cl)[0];
         const val = cl[key];
         const field = { ...schema.views[AllViewⲐ].schema[key] };
-        if (ObjectUtil.isPrimitive(val)) {
+        if (DataUtil.isPrimitive(val)) {
           stack.push(field);
           found = { stack, asc: val === 1 };
         } else {

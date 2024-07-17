@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { ObjectUtil } from '@travetto/base';
+import { DataUtil } from '@travetto/schema';
 import { Controller, Get, Post, Request, Response } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
@@ -266,7 +266,7 @@ export abstract class AssetRestUploadServerSuite extends BaseRestSuite {
     });
 
     assert(itemRanged3.status === 400);
-    assert(ObjectUtil.isPlainObject(itemRanged3.body));
+    assert(DataUtil.isPlainObject(itemRanged3.body));
     assert('message' in itemRanged3.body);
     assert(typeof itemRanged3.body.message === 'string');
     assert(itemRanged3.body.message.includes('out of range'));

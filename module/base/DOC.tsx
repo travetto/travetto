@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, ObjectUtil, Util, FileLoader, TimeUtil, EnvProp } from '@travetto/base';
+import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp } from '@travetto/base';
 import { RuntimeIndex } from '@travetto/manifest';
 
 const ConsoleManager = d.codeLink('ConsoleManager', 'src/console.ts', /(class|function)\s*[$]ConsoleManager/);
@@ -17,7 +17,6 @@ export const text = <>
     <li>Console Management</li>
     <li>Resource Access</li>
     <li>Standard Error Support</li>
-    <li>Object Utilities</li>
     <li>Common Utilities</li>
     <li>Time Utilities</li>
     <li>Process Execution</li>
@@ -112,19 +111,6 @@ $ DEBUG=@travetto/*,-@travetto/model npx trv run app
 $ DEBUG=express:*,@travetto/rest npx trv run rest
 `} />
     </c.SubSection>
-  </c.Section>
-
-  <c.Section title='Object Utilities'>
-    Simple functions for providing a minimal facsimile to {d.library('Lodash')}, but without all the weight. Currently {ObjectUtil} includes:
-
-    <ul>
-      <li>{d.method('isPrimitive(el)')} determines if {d.input('el')} is a {d.input('string')}, {d.input('boolean')}, {d.input('number')} or {d.input('RegExp')}</li>
-      <li>{d.method('isPlainObject(obj)')} determines if the obj is a simple object</li>
-      <li>{d.method('isFunction(o)')} determines if {d.input('o')} is a simple {d.input('Function')}</li>
-      <li>{d.method('isClass(o)')} determines if {d.input('o')} is a class constructor</li>
-      <li>{d.method('isSimple(a)')} determines if {d.input('a')} is a simple value</li>
-      <li>{d.method('isPromise(a)')} determines if {d.input('a')} is a promise</li>
-    </ul>
   </c.Section>
 
   <c.Section title='Common Utilities'>

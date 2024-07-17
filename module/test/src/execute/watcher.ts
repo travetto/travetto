@@ -1,7 +1,6 @@
 import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, WorkQueue } from '@travetto/worker';
 import { RuntimeIndex } from '@travetto/manifest';
-import { ObjectUtil } from '@travetto/base';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
@@ -12,7 +11,7 @@ import { RunnerUtil } from './util';
 import { TestEvent } from '../model/event';
 
 function isRunEvent(ev: unknown): ev is RunEvent {
-  return ObjectUtil.isPlainObject(ev) && 'type' in ev && typeof ev.type === 'string' && ev.type === 'run-test';
+  return typeof ev === 'object' && !!ev && 'type' in ev && typeof ev.type === 'string' && ev.type === 'run-test';
 }
 
 export type TestWatchEvent =

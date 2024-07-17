@@ -2,7 +2,7 @@ import { AssertionError } from 'node:assert';
 import path from 'node:path';
 
 import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env } from '@travetto/base';
+import { Env, TimeUtil } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -16,7 +16,7 @@ import { TestPhaseManager } from './phase';
 import { PromiseCapturer } from './promise';
 import { AssertUtil } from '../assert/util';
 
-const TEST_TIMEOUT = Env.TRV_TEST_TIMEOUT.time ?? 5000;
+const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.val) ?? 5000;
 
 /**
  * Support execution of the tests
@@ -137,7 +137,7 @@ export class TestExecutor {
       })
     );
 
-    ConsoleCapture.start(); // Capture all output from transpiled code
+    const consoleCapture = new ConsoleCapture().start(); // Capture all output from transpiled code
 
     // Run method and get result
     let error = await this.#executeTestMethod(test);
@@ -158,7 +158,7 @@ export class TestExecutor {
 
     Object.assign(result, {
       status: error ? 'failed' : 'passed',
-      output: ConsoleCapture.end(),
+      output: consoleCapture.end(),
       assertions: getAssertions(),
       duration: Date.now() - startTime,
       ...(error ? { error } : {})

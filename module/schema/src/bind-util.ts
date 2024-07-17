@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, TypedObject, ObjectUtil } from '@travetto/base';
+import { Class, ConcreteClass, TypedObject } from '@travetto/base';
 
 import { DataUtil } from './data';
 import { AllViewⲐ } from './internal/types';
@@ -50,7 +50,7 @@ export class BindUtil {
     const out: Record<string, unknown> = {};
     for (const k of Object.keys(obj)) {
       const objK = obj[k];
-      const val = ObjectUtil.isPlainObject(objK) ? this.expandPaths(objK) : objK;
+      const val = DataUtil.isPlainObject(objK) ? this.expandPaths(objK) : objK;
       const parts = k.split('.');
       const last = parts.pop()!;
       let sub = out;
@@ -77,7 +77,7 @@ export class BindUtil {
       const arr = last.indexOf('[') > 0;
 
       if (!arr) {
-        if (sub[last] && ObjectUtil.isPlainObject(val)) {
+        if (sub[last] && DataUtil.isPlainObject(val)) {
           sub[last] = DataUtil.deepAssign(sub[last], val, 'coerce');
         } else {
           sub[last] = val;
@@ -95,7 +95,7 @@ export class BindUtil {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           key = arrSub.length as number;
         }
-        if (arrSub[key] && ObjectUtil.isPlainObject(val) && ObjectUtil.isPlainObject(arrSub[key])) {
+        if (arrSub[key] && DataUtil.isPlainObject(val) && DataUtil.isPlainObject(arrSub[key])) {
           arrSub[key] = DataUtil.deepAssign(arrSub[key], val, 'coerce');
         } else {
           arrSub[key] = val;
@@ -114,13 +114,13 @@ export class BindUtil {
     const out: Record<string, V> = {};
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;
-      if (ObjectUtil.isPlainObject(value)) {
+      if (DataUtil.isPlainObject(value)) {
         Object.assign(out, this.flattenPaths(value, `${pre}.`)
         );
       } else if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
           const v = value[i];
-          if (ObjectUtil.isPlainObject(v)) {
+          if (DataUtil.isPlainObject(v)) {
             Object.assign(out, this.flattenPaths(v, `${pre}[${i}].`));
           } else {
             out[`${pre}[${i}]`] = v ?? '';
@@ -179,7 +179,7 @@ export class BindUtil {
     const view = cfg.view ?? AllViewⲐ; // Does not convey
     delete cfg.view;
 
-    if (!!data && !ObjectUtil.isPrimitive(data)) {
+    if (!!data && !DataUtil.isPrimitive(data)) {
       const conf = SchemaRegistry.get(cons);
 
       // If no configuration

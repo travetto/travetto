@@ -1,6 +1,6 @@
 import { RuntimeIndex } from '@travetto/manifest';
 import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
-import { Class, ObjectUtil, AppError, TypedObject } from '@travetto/base';
+import { Class, AppError, TypedObject } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
@@ -424,7 +424,7 @@ export abstract class SQLDialect implements DialectState {
       }
       const sPath = this.resolveName(sStack);
 
-      if (ObjectUtil.isPlainObject(top)) {
+      if (DataUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
           const inner = this.getWhereFieldSQL(sStack, top);
@@ -731,7 +731,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     const fields: [string, boolean][] = idx.fields.map(x => {
       const key = TypedObject.keys(x)[0];
       const val = x[key];
-      if (ObjectUtil.isPlainObject(val)) {
+      if (DataUtil.isPlainObject(val)) {
         throw new Error('Unable to supported nested fields for indices');
       }
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
