@@ -1,5 +1,4 @@
 import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
 
 import { CommandOperation } from '@travetto/command';
 import { castTo } from '@travetto/runtime';
@@ -74,14 +73,16 @@ export class ImageConverter {
    */
   static async resize<T extends ImageType>(image: T, options: ImageOptions): Promise<T> {
     const dims = [options.w, options.h].map(d => (d && options.strictResolution !== false) ? d : d);
-    const pipe = (Buffer.isBuffer(image) ? sharp(image) : sharp())
+    const output = (Buffer.isBuffer(image) ? sharp(image) : sharp())
       .resize({ width: dims[0], height: dims[1], fit: options.strictResolution !== false ? 'fill' : 'inside' });
 
     if (Buffer.isBuffer(image)) {
-      return pipe.toBuffer() as Promise<T>;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return output.toBuffer() as Promise<T>;
     } else {
-      pipeline(image, pipe);
-      return pipe as unknown as Promise<T>;
+      image.pipe(output);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return output as unknown as Promise<T>;
     }
   }
 
@@ -92,20 +93,24 @@ export class ImageConverter {
     switch (format) {
       case 'png': {
         if (Buffer.isBuffer(image)) {
-          return sharp(image).toFormat('png', { quality: 80, }).toBuffer() as Promise<T>
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          return sharp(image).toFormat('png', { quality: 80 }).toBuffer() as Promise<T>;
         } else {
-          const pipe = sharp().toFormat('png', { quality: 80, });
-          pipeline(image, pipe);
-          return pipe as unknown as Promise<T>;
+          const output = sharp().toFormat('png', { quality: 80 });
+          image.pipe(output);
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          return output as unknown as Promise<T>;
         }
       }
       case 'jpeg': {
         if (Buffer.isBuffer(image)) {
-          return sharp(image).toFormat('jpg', { quality: 70, }).toBuffer() as Promise<T>
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          return sharp(image).toFormat('jpg', { quality: 70, }).toBuffer() as Promise<T>;
         } else {
-          const pipe = sharp().toFormat('jpg', { quality: 70 });
-          pipeline(image, pipe);
-          return pipe as unknown as Promise<T>;
+          const output = sharp().toFormat('jpg', { quality: 70 });
+          image.pipe(output);
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          return output as unknown as Promise<T>;
         }
       }
     }
