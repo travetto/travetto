@@ -53,13 +53,14 @@ export class AppError<T = unknown> extends Error {
   /**
    * The format of the JSON output
    */
-  toJSON(): unknown {
+  toJSON(): { message: string, category: string, type: string, at: number, details?: Record<string, unknown> } {
     return {
       message: this.message,
       category: this.category,
       type: this.type,
-      at: this.at,
-      details: this.details,
+      at: this.at.getTime(),
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      details: this.details as Record<string, unknown>,
     };
   }
 }

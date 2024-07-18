@@ -25,7 +25,6 @@ const categoryToCode: Record<ErrorCategory, number> = {
 export class SerializeUtil {
   static isRenderable = (o: unknown): o is Renderable => !!o && (typeof o === 'object' || typeof o === 'function') && 'render' in o;
   static isStream = (o: unknown): o is Readable => !!o && typeof o === 'object' && 'pipe' in o && 'on' in o;
-  static hasToJSON = (o: unknown): o is { toJSON: () => object } => typeof o === 'object' && !!o && 'toJSON' in o && typeof o.toJSON === 'function';
 
   /**
    * Determine the error status for a given error, with special provisions for AppError
@@ -62,9 +61,12 @@ export class SerializeUtil {
    * Standard json
    */
   static serializeJSON(req: Request, res: Response, output: unknown): void {
-    const payload = this.hasToJSON(output) ? output.toJSON() : output;
+    let val = output;
+    if (typeof val === 'object' && !!val && 'toJSON' in val && typeof val.toJSON === 'function') {
+      val = val.toJSON();
+    }
     this.setContentTypeIfUndefined(res, 'application/json');
-    res.send(JSON.stringify(payload, undefined, '__pretty' in req.query ? 2 : 0));
+    res.send(JSON.stringify(val, undefined, '__pretty' in req.query ? 2 : 0));
   }
 
   /**
@@ -133,8 +135,7 @@ export class SerializeUtil {
     res.status(status);
     res.statusError = error;
     res.setHeader('Content-Type', 'application/json');
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const out = this.hasToJSON(error) ? error.toJSON() as object : { message: error.message };
+    const out = error instanceof AppError ? error.toJSON() : { message: error.message };
     res.send(JSON.stringify({ ...out, status }));
   }
 

@@ -9,22 +9,19 @@ import { TestConsumer } from '../consumer/types';
 import { ErrorUtil } from '../consumer/error';
 import { TestEvent } from '../model/event';
 
-function buildEvent(ev: string): RunEvent {
-  if (ev.includes('#')) {
-    const [file, cls, method] = ev.split('#');
-    return { file, class: cls, method };
-  } else {
-    return { file: ev };
-  }
-}
-
 /**
  *  Produce a handler for the child worker
  */
 export async function buildStandardTestManager(consumer: TestConsumer, file: string): Promise<void> {
   process.send?.({ type: 'log', message: `Worker Executing ${file}` });
 
-  const event = buildEvent(file);
+  let event: RunEvent;
+  if (file.includes('#')) {
+    const [f, cls, method] = file.split('#');
+    event = { file: f, class: cls, method };
+  } else {
+    event = { file };
+  }
 
   const { module } = RuntimeIndex.getEntry(event.file!)!;
   const cwd = RuntimeIndex.getModule(module)!.sourcePath;
