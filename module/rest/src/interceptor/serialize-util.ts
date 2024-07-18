@@ -23,8 +23,8 @@ const categoryToCode: Record<ErrorCategory, number> = {
  * Utilities for serializing output
  */
 export class SerializeUtil {
-  static isRenderable = (o: unknown): o is Renderable => !!o && (typeof o === 'object' || typeof o === 'function') && 'render' in o;
-  static isStream = (o: unknown): o is Readable => !!o && typeof o === 'object' && 'pipe' in o && 'on' in o;
+  static isRenderable = (o: unknown): o is Renderable => !!o && (typeof o === 'object' || typeof o === 'function') && 'render' in o && typeof o.render === 'function';
+  static isStream = (o: unknown): o is Readable => !!o && typeof o === 'object' && 'pipe' in o && 'on' in o && typeof o.pipe === 'function';
 
   /**
    * Determine the error status for a given error, with special provisions for AppError

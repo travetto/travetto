@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { Util } from '@travetto/base';
 
 import { CoreCacheConfig } from './types';
 
@@ -35,6 +35,6 @@ export class CacheUtil {
     const input = config.params?.(params) ?? params;
     const keyParams = config.key?.(...input) ?? input;
     const key = `${config.keySpace!}_${this.toSafeJSON(keyParams)}`;
-    return crypto.createHash('sha1').update(key).digest('hex').substring(0, 32); // Force to uuid
+    return Util.hash(key, 32);
   }
 }
