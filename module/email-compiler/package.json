@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email-compiler",
-  "version": "4.1.2",
+  "version": "5.0.0-rc.0",
   "description": "Email compiling module",
   "keywords": [
     "email",
@@ -26,12 +26,12 @@
     "directory": "module/email-compiler"
   },
   "dependencies": {
-    "@travetto/base": "^4.1.2",
-    "@travetto/config": "^4.1.2",
-    "@travetto/di": "^4.1.1",
-    "@travetto/email": "^4.1.1",
-    "@travetto/image": "^4.1.1",
-    "@travetto/worker": "^4.1.1",
+    "@travetto/base": "^5.0.0-rc.0",
+    "@travetto/config": "^5.0.0-rc.0",
+    "@travetto/di": "^5.0.0-rc.0",
+    "@travetto/email": "^5.0.0-rc.0",
+    "@travetto/image": "^5.0.0-rc.0",
+    "@travetto/worker": "^5.0.0-rc.0",
     "@types/inline-css": "^3.0.3",
     "html-entities": "^2.5.2",
     "inline-css": "^4.0.2",
@@ -39,7 +39,7 @@
     "sass": "^1.77.6"
   },
   "peerDependencies": {
-    "@travetto/cli": "^4.1.2"
+    "@travetto/cli": "^5.0.0-rc.0"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
