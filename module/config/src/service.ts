@@ -22,7 +22,7 @@ export class ConfigurationService {
 
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
   #specs: ConfigSpecSimple[] = [];
-  #secrets: (RegExp | string)[] = [/secure(-|_|[a-z])|password|private|secret|salt|(api(-|_)?key)/i];
+  #secrets: (RegExp | string)[] = [/secure(-|_|[a-z])|password|private|secret|salt|(\bkey|key\b)|serviceAccount|(api(-|_)?key)/i];
 
   /**
    * Get a sub tree of the config, or everything if namespace is not passed
