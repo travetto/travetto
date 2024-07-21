@@ -23,14 +23,6 @@ class $MetadataIndex {
   }
 
   /**
-  * Get source file from import location
-  * @param outputFile
-  */
-  getSourceFile(importFile: string): string {
-    return RuntimeIndex.getFromImport(importFile)?.sourceFile ?? importFile;
-  }
-
-  /**
    * Initialize the meta data for a function/class
    * @param cls Class
    * @param `file` Filename
@@ -45,7 +37,7 @@ class $MetadataIndex {
     cls: Function, fileOrImport: string, tag: FunctionMetadataTag,
     methods?: Record<string, FunctionMetadataTag>, abstract?: boolean, synthetic?: boolean
   ): boolean {
-    const source = this.getSourceFile(fileOrImport);
+    const source = RuntimeIndex.getSourceFile(fileOrImport);
     const id = this.getId(source, cls.name);
     Object.defineProperty(cls, 'Ⲑid', { value: id });
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

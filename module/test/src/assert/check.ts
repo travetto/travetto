@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { MetadataIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { AppError, ClassInstance, Class } from '@travetto/base';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
@@ -25,7 +25,7 @@ export class AssertCheck {
    */
   static check(assertion: CaptureAssert, positive: boolean, ...args: unknown[]): void {
     /* eslint-disable @typescript-eslint/consistent-type-assertions */
-    assertion.file = MetadataIndex.getSourceFile(assertion.file);
+    assertion.file = RuntimeIndex.getSourceFile(assertion.file);
 
     let fn = assertion.operator;
     assertion.operator = ASSERT_FN_OPERATOR[fn];
@@ -215,7 +215,7 @@ export class AssertCheck {
   ): void {
     let missed: Error | undefined;
 
-    assertion.file = MetadataIndex.getSourceFile(assertion.file);
+    assertion.file = RuntimeIndex.getSourceFile(assertion.file);
 
     try {
       action();
@@ -249,7 +249,7 @@ export class AssertCheck {
   ): Promise<void> {
     let missed: Error | undefined;
 
-    assertion.file = MetadataIndex.getSourceFile(assertion.file);
+    assertion.file = RuntimeIndex.getSourceFile(assertion.file);
 
     try {
       if ('then' in action) {

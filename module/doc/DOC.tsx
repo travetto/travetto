@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-import { MetadataIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { c, d, DocJSXElement } from '@travetto/doc';
 
 function NodeList({ src }: { src: string }): DocJSXElement {
@@ -22,7 +22,7 @@ function NodeList({ src }: { src: string }): DocJSXElement {
 }
 
 export const text = async () => {
-  const nodeContents = await fs.readFile(MetadataIndex.getSourceFile('@travetto/doc/src/jsx.ts'), 'utf8');
+  const nodeContents = await fs.readFile(RuntimeIndex.getSourceFile('@travetto/doc/src/jsx.ts'), 'utf8');
 
   return <>
     <c.StdHeader />

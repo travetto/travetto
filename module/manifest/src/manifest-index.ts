@@ -204,6 +204,14 @@ export class ManifestIndex {
   }
 
   /**
+  * Get source file from import location
+  * @param outputFile
+  */
+  getSourceFile(importFile: string): string {
+    return this.getFromImport(importFile)?.sourceFile ?? importFile;
+  }
+
+  /**
    * Get module from source file
    * @param source
    */
