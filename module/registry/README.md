@@ -112,8 +112,8 @@ As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module
           changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });
         } else {
-          const prevMeta = Runtime.describeFunction(prev.get(k), false);
-          const nextMeta = Runtime.describeFunction(next.get(k), false);
+          const prevMeta = RuntimeContext.describeFunction(prev.get(k), false);
+          const nextMeta = RuntimeContext.describeFunction(next.get(k), false);
           if (prevMeta?.hash !== nextMeta?.hash) {
             changes += 1;
             this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });

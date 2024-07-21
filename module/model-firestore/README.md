@@ -39,7 +39,7 @@ where the [FirestoreModelConfig](https://github.com/travetto/travetto/tree/main/
 
 **Code: Structure of FirestoreModelConfig**
 ```typescript
-import { Runtime } from '@travetto/base';
+import { RuntimeContext } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('model.firestore')
@@ -62,7 +62,7 @@ export class FirestoreModelConfig {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }
     if (this.credentialsFile && !this.credentials) {
-      this.credentials = JSON.parse(await Runtime.resources.read(this.credentialsFile));
+      this.credentials = JSON.parse(await RuntimeContext.resources.read(this.credentialsFile));
     }
   }
 }
