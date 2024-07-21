@@ -42,7 +42,7 @@ export class TestWatcher {
 
     new MethodSource(RootRegistry).on(e => {
       const [cls, method] = (e.prev ?? e.curr ?? []);
-      if (!cls || RuntimeContext.describeFunction(cls)?.abstract) {
+      if (!cls || RuntimeContext.getFunctionMetadata(cls)?.abstract) {
         return;
       }
       if (!method) {
@@ -60,7 +60,7 @@ export class TestWatcher {
           type: 'removeTest',
           method: method?.name,
           classId: cls?.Ⲑid,
-          file: RuntimeContext.describeFunction(cls)?.source
+          file: RuntimeContext.getFunctionMetadata(cls)?.source
         });
       }
     });

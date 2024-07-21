@@ -59,7 +59,7 @@ export const RuntimeContext = build({
   /**
    * Describe a function
    */
-  describeFunction(fn?: Function, live = true): FunctionMetadata | undefined {
+  getFunctionMetadata(fn?: Function, live = true): FunctionMetadata | undefined {
     return live ?
       RuntimeIndex.getFunctionMetadata(fn) :
       RuntimeIndex.getFunctionMetadataFromClass(fn);

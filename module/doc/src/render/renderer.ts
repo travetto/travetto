@@ -94,7 +94,7 @@ export class DocRenderer {
         case 'bigint':
         case 'boolean': return `${node}`;
         default: {
-          const meta = (typeof node === 'function' ? RuntimeContext.describeFunction(node) : undefined);
+          const meta = (typeof node === 'function' ? RuntimeContext.getFunctionMetadata(node) : undefined);
           if (meta && typeof node === 'function') {
             const title = (await DocFileUtil.isDecorator(node.name, meta.source)) ? `@${node.name}` : node.name;
             const el = this.#support.createElement('CodeLink', {

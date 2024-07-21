@@ -187,7 +187,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       class: cls,
       validators: [],
       subTypeField: 'type',
-      baseType: RuntimeContext.describeFunction(cls)?.abstract,
+      baseType: RuntimeContext.getFunctionMetadata(cls)?.abstract,
       metadata: {},
       methods: {},
       views: {

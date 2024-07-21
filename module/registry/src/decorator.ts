@@ -11,7 +11,7 @@ class $PendingRegister {
    * Register class as pending
    */
   add(cls: Class): void {
-    const src = RuntimeContext.describeFunction(cls)!.source;
+    const src = RuntimeContext.getFunctionMetadata(cls)!.source;
     if (!this.map.has(src)) {
       const sub: Class[] = [];
       this.map.set(src, sub);

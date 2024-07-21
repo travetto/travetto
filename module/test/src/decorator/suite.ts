@@ -26,7 +26,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const decorator = ((target: Class) => {
     const cfg = { description: descriptionString, ...extra };
-    if (RuntimeContext.describeFunction(target)?.abstract) {
+    if (RuntimeContext.getFunctionMetadata(target)?.abstract) {
       cfg.skip = true;
     }
     SuiteRegistry.register(target, cfg);

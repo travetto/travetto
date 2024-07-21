@@ -13,11 +13,11 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    * Find all valid tests (ignoring abstract)
    */
   getValidClasses(): Class[] {
-    return this.getClasses().filter(c => !RuntimeContext.describeFunction(c)?.abstract);
+    return this.getClasses().filter(c => !RuntimeContext.getFunctionMetadata(c)?.abstract);
   }
 
   createPending(cls: Class): Partial<SuiteConfig> {
-    const meta = RuntimeContext.describeFunction(cls)!;
+    const meta = RuntimeContext.getFunctionMetadata(cls)!;
     return {
       class: cls,
       module: RuntimeContext.main.name,
@@ -34,7 +34,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   }
 
   override createPendingField(cls: Class, fn: Function): Partial<TestConfig> {
-    const meta = RuntimeContext.describeFunction(cls)!;
+    const meta = RuntimeContext.getFunctionMetadata(cls)!;
     const meth = meta.methods![fn.name];
     return {
       class: cls,
@@ -97,7 +97,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);
-      const suites = this.getValidClasses().filter(cls => RuntimeContext.describeFunction(cls)!.source === file).map(x => this.get(x)).filter(x => !x.skip);
+      const suites = this.getValidClasses().filter(cls => RuntimeContext.getFunctionMetadata(cls)!.source === file).map(x => this.get(x)).filter(x => !x.skip);
       const suite = suites.find(x => line >= x.lineStart && line <= x.lineEnd);
 
       if (suite) {
@@ -119,7 +119,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       } else {
         const suites = this.getValidClasses()
           .map(x => this.get(x))
-          .filter(x => !RuntimeContext.describeFunction(x.class)?.abstract);  // Do not run abstract suites
+          .filter(x => !RuntimeContext.getFunctionMetadata(x.class)?.abstract);  // Do not run abstract suites
         return { suites };
       }
     }
