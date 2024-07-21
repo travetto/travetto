@@ -1,3 +1,4 @@
+import { RuntimeIndex } from '@travetto/manifest';
 import { AutoCreate, Inject, Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 import { ControllerRegistry, ControllerVisitUtil } from '@travetto/rest';
@@ -22,7 +23,7 @@ export class RestClientGeneratorService implements AutoCreate {
 
   buildGenerator({ type, output, moduleName, options }: RestClientProvider): ClientGenerator {
     output = Runtime.workspaceRelative(
-      output.startsWith('@') ? Runtime.mainModule.sourceFolder : '.',
+      output.startsWith('@') ? RuntimeIndex.mainModule.sourceFolder : '.',
       output
     );
 

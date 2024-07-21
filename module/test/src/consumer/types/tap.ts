@@ -70,7 +70,7 @@ export class TapEmitter implements TestConsumer {
             this.#enhancer.assertNumber(++subCount),
             '-',
             this.#enhancer.assertDescription(text),
-            `${this.#enhancer.assertFile(asrt.file.replace(Runtime.mainModule.sourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
+            `${this.#enhancer.assertFile(asrt.file.replace(Runtime.mainSourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
           ].join(' ');
 
           if (asrt.error) {

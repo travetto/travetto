@@ -13,11 +13,11 @@ class FileLoaderSuite {
   @Test()
   async simpleTest() {
     const loader = new FileLoader(['@#test/fixtures']);
-    assert(loader.searchPaths.includes(path.resolve(Runtime.mainModule.sourcePath, 'test/fixtures')));
+    assert(loader.searchPaths.includes(path.resolve(Runtime.mainSourcePath, 'test/fixtures')));
 
     await assert.doesNotReject(() => loader.resolve('logo.png'));
     const loc = await loader.resolve('logo.png');
-    assert(loc.startsWith(Runtime.mainModule.sourcePath));
+    assert(loc.startsWith(Runtime.mainSourcePath));
 
     const stat = await fs.stat(loc);
     assert((await loader.read('logo.png', true)).length === stat.size);

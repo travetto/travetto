@@ -11,9 +11,9 @@ export class PackAppSuite {
   async testPack() {
     const tag = `tag-${Math.random()}`.replace(/[0][.]/, '');
     const imageName = 'travetto-test_pack_app';
-    assert(Runtime.mainModule.sourcePath.endsWith('pack_app'));
+    assert(Runtime.mainSourcePath.endsWith('pack_app'));
     const proc = spawn('npx', ['trv', 'pack:docker', '-dt', tag, 'run:double'], {
-      cwd: Runtime.mainModule.sourcePath,
+      cwd: Runtime.mainSourcePath,
       shell: false,
       env: { PATH: process.env.PATH, ...Env.TRV_DYNAMIC.export(false) }
     });

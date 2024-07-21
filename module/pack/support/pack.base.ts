@@ -28,7 +28,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   _parsed: ParsedState;
 
   @CliFlag({ desc: 'Workspace for building', short: 'b' })
-  buildDir: string = path.resolve(os.tmpdir(), Runtime.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
+  buildDir: string = path.resolve(os.tmpdir(), Runtime.mainSourcePath.replace(/[\/\\: ]/g, '_'));
 
   @CliFlag({ desc: 'Clean workspace' })
   clean = true;

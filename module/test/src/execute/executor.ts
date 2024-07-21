@@ -71,7 +71,7 @@ export class TestExecutor {
     const classId = MetadataIndex.getId(file, name);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const suite = { class: { name }, classId, duration: 0, lineStart: 1, lineEnd: 1, file, } as SuiteConfig & SuiteResult;
-    err.message = err.message.replaceAll(Runtime.mainModule.sourcePath, '.');
+    err.message = err.message.replaceAll(Runtime.mainSourcePath, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
     consumer.onEvent({ type: 'test', phase: 'before', test: res.testConfig });

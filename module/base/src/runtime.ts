@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { IndexedModule, ManifestContext, MetadataIndex, RuntimeIndex } from '@travetto/manifest';
+import { type ManifestContext, MetadataIndex, RuntimeIndex } from '@travetto/manifest';
 
 import { Env } from './env';
 import { FileLoader } from './file-loader';
@@ -31,10 +31,10 @@ export const Runtime = {
   context: buildCtx(['main', 'workspace']),
 
   /**
-   * Main module
+   * Main source path
    */
-  get mainModule(): IndexedModule {
-    return RuntimeIndex.mainModule;
+  get mainSourcePath(): string {
+    return RuntimeIndex.mainModule.sourcePath;
   },
   /**
    * Produce a workspace relative path

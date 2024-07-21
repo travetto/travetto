@@ -72,7 +72,7 @@ export class ApiSpecConfig {
     if (!this.output || this.output === '-') {
       this.persist = false;
     } else {
-      this.output = path.resolve(Runtime.mainModule.sourcePath, this.output);
+      this.output = path.resolve(Runtime.mainSourcePath, this.output);
       this.persist ??= Env.dynamic;
     }
     if (this.persist) {
