@@ -19,7 +19,7 @@ import { CliCommand } from '@travetto/cli';
 const Request = d.codeLink('TravettoRequest', 'src/trv.d.ts', /interface TravettoRequest/);
 const Response = d.codeLink('TravettoResponse', 'src/trv.d.ts', /interface TravettoResponse/);
 const RestInterceptor = d.codeLink('RestInterceptor', 'src/interceptor/types.ts', /interface RestInterceptor/);
-const RuntimeContext = d.codeLink('RuntimeContext', '@travetto/base/src/runtime.ts', /RuntimeContext/);
+const RuntimeResources = d.codeLink('RuntimeResources', '@travetto/base/src/runtime.ts', /RuntimeResources/);
 
 export const text = <>
   <c.StdHeader />
@@ -241,7 +241,7 @@ export const text = <>
 
     This is useful for local development where you implicitly trust the cert. <br />
 
-    SSL support can be enabled by setting {d.input('rest.ssl.active: true')} in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by {RuntimeContext} resources.
+    SSL support can be enabled by setting {d.input('rest.ssl.active: true')} in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by {RuntimeResources}.
   </c.Section>
 
   <c.Section title='Full Config'>

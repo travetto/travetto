@@ -6,7 +6,7 @@ import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.suppo
 import { MongoModelConfig } from './src/config';
 import { MongoModelService } from './src/service';
 
-const RuntimeContext = d.codeLink('RuntimeContext', '@travetto/base/src/runtime.ts', /RuntimeContext/);
+const RuntimeResources = d.codeLink('RuntimeResources', '@travetto/base/src/runtime.ts', /RuntimeResources/);
 
 export const text = <>
   <c.StdHeader />
@@ -20,5 +20,5 @@ export const text = <>
 
   <ModelCustomConfig cfg={MongoModelConfig} />
 
-  The SSL file options in {d.input('clientOptions')} will automatically be resolved to files when given a path.  This path can be a resource path (will attempt to lookup using {RuntimeContext}'s resources') or just a standard file path.
+  The SSL file options in {d.input('clientOptions')} will automatically be resolved to files when given a path.  This path can be a resource path (will attempt to lookup using {RuntimeResources}) or just a standard file path.
 </>;

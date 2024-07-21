@@ -1,4 +1,4 @@
-import { AppError, RuntimeContext, Env } from '@travetto/base';
+import { AppError, RuntimeContext, Env, RuntimeResources } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
 import { PackageUtil } from '@travetto/manifest';
 import { Secret } from '@travetto/schema';
@@ -77,8 +77,8 @@ export class RestSslConfig {
       return RestSslConfig.generateSslKeyPair();
     } else {
       if (this.keys.key.length < 100) {
-        this.keys.key = (await RuntimeContext.resources.read(this.keys.key, true)).toString('utf8');
-        this.keys.cert = (await RuntimeContext.resources.read(this.keys.cert, true)).toString('utf8');
+        this.keys.key = (await RuntimeResources.read(this.keys.key, true)).toString('utf8');
+        this.keys.cert = (await RuntimeResources.read(this.keys.cert, true)).toString('utf8');
       }
       return this.keys;
     }

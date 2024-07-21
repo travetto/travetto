@@ -5,14 +5,6 @@ import { type FunctionMetadata, ManifestContext, RuntimeIndex } from '@travetto/
 import { Env } from './env';
 import { FileLoader } from './file-loader';
 
-const build = <T extends object, K extends keyof ManifestContext>(inp: T, props: K[]): T & Pick<ManifestContext, K> => {
-  for (const prop of props) {
-    Object.defineProperty(inp, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
-  }
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return inp as T & ManifestContext;
-};
-
 class $RuntimeResources extends FileLoader {
   #env: string;
   override get searchPaths(): readonly string[] {
@@ -23,6 +15,17 @@ class $RuntimeResources extends FileLoader {
     return super.searchPaths;
   }
 }
+
+export const RuntimeResources = new $RuntimeResources(Env.resourcePaths)
+
+const build = <T extends object, K extends keyof ManifestContext>(inp: T, props: K[]): T & Pick<ManifestContext, K> => {
+  for (const prop of props) {
+    Object.defineProperty(inp, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
+  }
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return inp as T & ManifestContext;
+};
+
 
 export const RuntimeContext = build({
   /**
@@ -61,9 +64,4 @@ export const RuntimeContext = build({
       RuntimeIndex.getFunctionMetadata(fn) :
       RuntimeIndex.getFunctionMetadataFromClass(fn);
   },
-
-  /**
-   * Access to runtime resources
-   */
-  resources: new $RuntimeResources(Env.resourcePaths)
 }, ['main', 'workspace']);

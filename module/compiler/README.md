@@ -39,7 +39,7 @@ In addition to the normal output, the compiler supports an environment variable 
 ```bash
 $ TRV_BUILD=debug trvc build
 
-2029-03-14T04:00:00.618Z debug [process-handle.server] Is not running 13196
+2029-03-14T04:00:00.618Z debug [process-handle.server] Is not running 16488
 2029-03-14T04:00:00.837Z info  [server         ] Starting server http://127.0.0.1:25539
 2029-03-14T04:00:01.510Z debug [main           ] Start Server
 2029-03-14T04:00:02.450Z debug [event-stream   ] Started event stream

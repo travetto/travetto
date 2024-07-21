@@ -1,4 +1,4 @@
-import { Env, RuntimeContext } from '@travetto/base';
+import { Env, RuntimeResources } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { EmailCompiled, EmailOptions, SentEmail } from './types';
@@ -32,9 +32,9 @@ export class MailService {
   async getCompiled(key: string): Promise<EmailCompiled> {
     if (Env.dynamic || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
-        RuntimeContext.resources.read(`${key}.compiled.html`),
-        RuntimeContext.resources.read(`${key}.compiled.text`),
-        RuntimeContext.resources.read(`${key}.compiled.subject`)
+        RuntimeResources.read(`${key}.compiled.html`),
+        RuntimeResources.read(`${key}.compiled.text`),
+        RuntimeResources.read(`${key}.compiled.subject`)
       ].map(x => x.then(MailUtil.purgeBrand)));
 
       this.#compiled.set(key, { html, text, subject });
