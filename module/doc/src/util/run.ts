@@ -75,22 +75,21 @@ export class DocRunUtil {
 
   /** Spawn command with appropriate environment, and cwd */
   static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
-    return spawn(cmd, args, {
-      cwd: this.cwd(config),
-      shell: '/bin/bash',
-      env: {
-        ...process.env,
-        ...Env.DEBUG.export(false),
-        ...Env.TRV_CAN_RESTART.export(false),
-        ...Env.TRV_CLI_IPC.export(undefined),
-        ...Env.TRV_MANIFEST.export(''),
-        ...Env.TRV_BUILD.export('none'),
-        ...Env.TRV_ROLE.export(undefined),
-        ...Env.TRV_MODULE.export(config.module ?? ''),
-        ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
-        ...config.env
-      }
-    });
+    const cwd = this.cwd(config);
+    const env = {
+      ...process.env,
+      ...Env.DEBUG.export(false),
+      ...Env.TRV_CAN_RESTART.export(false),
+      ...Env.TRV_CLI_IPC.export(undefined),
+      ...Env.TRV_MANIFEST.export(''),
+      ...Env.TRV_BUILD.export('none'),
+      ...Env.TRV_BUILD_REENTRANT.export(true),
+      ...Env.TRV_ROLE.export(undefined),
+      ...Env.TRV_MODULE.export(config.module ?? ''),
+      ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
+      ...config.env
+    };
+    return spawn('npx', [cmd, ...args], { cwd, shell: '/bin/bash', env });
   }
 
   /**
@@ -101,9 +100,6 @@ export class DocRunUtil {
     try {
       const proc = this.spawn(cmd, args, config);
       const res = await ExecUtil.getResult(proc, { catch: true });
-      if (!res.valid) {
-        throw new Error(res.stderr);
-      }
       final = util.stripVTControlCharacters(res.stdout).trim() || util.stripVTControlCharacters(res.stderr).trim();
     } catch (err) {
       if (err instanceof Error) {

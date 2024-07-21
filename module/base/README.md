@@ -78,6 +78,10 @@ interface TravettoEnv {
      * trvc log level
      */
     TRV_BUILD: 'none' | 'info' | 'debug' | 'error' | 'warn',
+    /**
+     * trvc build re-entrant (allow npx calling npx)
+     */
+    TRV_BUILD_REENTRANT: boolean
   }
 ```
 

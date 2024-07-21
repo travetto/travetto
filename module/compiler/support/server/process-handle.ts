@@ -17,10 +17,8 @@ export class ProcessHandle {
 
   async writePid(pid: number): Promise<void> {
     const current = await this.getPid();
-    if (current && pid !== current && current > 0) {
-      try {
-        process.kill(current); // Kill before write
-      } catch { }
+    if (!process.env.TRV_BUILD_REENTRANT && current && pid !== current && current > 0) {
+      await this.kill(false);
     }
     await fs.mkdir(path.dirname(this.#file), { recursive: true });
     return fs.writeFile(this.#file, JSON.stringify(pid), 'utf8');
@@ -31,24 +29,24 @@ export class ProcessHandle {
       .then(v => +v > 0 ? +v : undefined, () => undefined);
   }
 
-  async isRunning(): Promise<boolean> {
+  async isRunning(log = true): Promise<boolean> {
     const pid = await this.getPid();
     if (!pid) { return false; }
     try {
       process.kill(pid, 0); // See if process is still running
-      this.#log.debug('Is running', pid);
+      log && this.#log.debug('Is running', pid);
       return true;
     } catch {
-      this.#log.debug('Is not running', pid);
+      log && this.#log.debug('Is not running', pid);
     }
     return false; // Not running
   }
 
-  async kill(): Promise<boolean> {
+  async kill(log = true): Promise<boolean> {
     const pid = await this.getPid();
-    if (pid && await this.isRunning()) {
+    if (pid && await this.isRunning(log)) {
       try {
-        this.#log.debug('Killing', pid);
+        log && this.#log.debug('Killing', pid);
         return process.kill(pid);
       } catch { }
     }
