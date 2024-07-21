@@ -3,8 +3,8 @@ import path from 'node:path';
 import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas31';
 
 import { Config } from '@travetto/config';
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env } from '@travetto/base';
+import { RuntimeIndex } from '@travetto/manifest';
+import { Env, RuntimeContext } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 /**

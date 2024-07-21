@@ -1,6 +1,7 @@
 import util from 'node:util';
 
-import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
+import { path, RuntimeIndex } from '@travetto/manifest';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';

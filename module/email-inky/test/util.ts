@@ -1,4 +1,4 @@
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
 import { JSXElement } from '@travetto/email-inky/jsx-runtime';
 
 import { InkyRenderer } from '../src/render/renderer';

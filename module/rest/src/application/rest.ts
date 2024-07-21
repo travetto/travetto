@@ -1,5 +1,4 @@
-import { RuntimeContext } from '@travetto/manifest';
-import { Class, AppError, Env } from '@travetto/base';
+import { Class, AppError, Env, RuntimeContext } from '@travetto/base';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';

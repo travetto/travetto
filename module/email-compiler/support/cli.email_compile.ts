@@ -1,7 +1,6 @@
 import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-import { Env } from '@travetto/base';
-import { RuntimeContext } from '@travetto/manifest';
+import { Env, RuntimeContext } from '@travetto/base';
 
 import { EmailCompiler } from '../src/compiler';
 

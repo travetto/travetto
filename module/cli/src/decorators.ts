@@ -1,5 +1,5 @@
-import { Class, ClassInstance, Env } from '@travetto/base';
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { Class, ClassInstance, Env, RuntimeContext } from '@travetto/base';
+import { RuntimeIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { CliCommandShape, CliCommandShapeFields } from './types';

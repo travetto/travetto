@@ -1,6 +1,6 @@
 /// <reference path="./trv.d.ts" />
 
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from './runtime';
 
 const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;

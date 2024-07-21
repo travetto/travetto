@@ -1,5 +1,5 @@
-import { ManifestModuleUtil, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { watchCompiler, FullWatchEvent, WatchEvent } from '@travetto/base';
+import { ManifestModuleUtil, RuntimeIndex } from '@travetto/manifest';
+import { watchCompiler, WatchEvent, RuntimeContext } from '@travetto/base';
 
 interface ModuleLoader {
   init?(): Promise<void>;
@@ -19,7 +19,7 @@ class $DynamicFileLoader {
   #loader: ModuleLoader;
   #initialized = false;
 
-  async dispatch(ev: FullWatchEvent): Promise<void> {
+  async dispatch(ev: WatchEvent): Promise<void> {
     if (ev.action === 'update' || ev.action === 'delete') {
       await this.#loader.unload(ev.output);
     }
@@ -66,7 +66,7 @@ class $DynamicFileLoader {
 
     // Fire off, and let it run in the bg. Restart on exit
     (async (): Promise<void> => {
-      for await (const ev of watchCompiler<FullWatchEvent>({ restartOnExit: true })) {
+      for await (const ev of watchCompiler({ restartOnExit: true })) {
         if (ev.file && RuntimeIndex.hasModule(ev.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(ev.file))) {
           await this.dispatch(ev);
         }

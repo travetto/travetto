@@ -8,7 +8,8 @@ import timers from 'node:timers/promises';
 import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { RuntimeContext, RuntimeIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
+import { RuntimeContext } from '../src/runtime';
 
 import { ExecUtil } from '../src/exec';
 

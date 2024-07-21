@@ -1,8 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Env, RuntimeResources } from '@travetto/base';
-import { RuntimeContext } from '@travetto/manifest';
+import { Env, RuntimeResources, RuntimeContext } from '@travetto/base';
 
 import { ConfigSource, ConfigSpec } from './types';
 import { ParserManager } from '../parser/parser';

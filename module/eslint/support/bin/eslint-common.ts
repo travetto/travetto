@@ -1,6 +1,6 @@
 import * as parser from '@typescript-eslint/parser';
 
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
 
 export const RULE_COMMON = {
   languageOptions: {

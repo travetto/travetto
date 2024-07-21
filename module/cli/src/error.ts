@@ -1,5 +1,5 @@
-import { AppError } from '@travetto/base';
-import { PackageUtil, RuntimeContext } from '@travetto/manifest';
+import { AppError, RuntimeContext } from '@travetto/base';
+import { PackageUtil } from '@travetto/manifest';
 import { cliTpl } from './color';
 import { CliValidationError, CliCommandShape } from './types';
 

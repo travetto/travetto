@@ -71,10 +71,9 @@ export const main = (ctx: ManifestContext) => {
 
     /** Stream events */
     events: async (type: string, handler: (ev: unknown) => unknown): Promise<void> => {
-      if (type === 'change' || type === 'log' || type === 'progress' || type === 'state') {
-        for await (const ev of client.fetchEvents(type)) { await handler(ev); }
-      } else if (type === 'all') {
-        for await (const ev of client.fetchEvents(type)) { await handler(ev); }
+      if (type === 'change' || type === 'log' || type === 'progress' || type === 'state' || type === 'all') {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        for await (const ev of client.fetchEvents(type as 'change')) { await handler(ev); }
       } else {
         throw new Error(`Unknown event type: ${type}`);
       }

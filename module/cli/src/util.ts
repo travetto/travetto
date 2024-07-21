@@ -1,7 +1,6 @@
 import { spawn } from 'node:child_process';
 
-import { Env, ExecUtil, ShutdownManager } from '@travetto/base';
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext, Env, ExecUtil, ShutdownManager } from '@travetto/base';
 
 import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
 

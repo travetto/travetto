@@ -1,7 +1,6 @@
-import { RuntimeContext } from '@travetto/manifest';
+import { Util, RuntimeContext } from '@travetto/base';
 
 import { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types';
-import { Util } from '@travetto/base';
 
 /**
  * Utilities for email

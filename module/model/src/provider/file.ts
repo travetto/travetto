@@ -5,8 +5,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { RuntimeContext } from '@travetto/manifest';
-import { Class, TimeSpan } from '@travetto/base';
+import { Class, TimeSpan, RuntimeContext } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';

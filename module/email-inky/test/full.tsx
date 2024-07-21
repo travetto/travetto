@@ -3,7 +3,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
 import { Container, If, Unless, Summary, Title, Value, InkyTemplate, prepare } from '../__index__';
 
 @Suite('InkyTemplate')

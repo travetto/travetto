@@ -1,8 +1,8 @@
 import { AssertionError } from 'node:assert';
 import path from 'node:path';
 
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env, TimeUtil } from '@travetto/base';
+import { RuntimeIndex } from '@travetto/manifest';
+import { Env, TimeUtil, RuntimeContext } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';

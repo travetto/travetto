@@ -1,6 +1,6 @@
-import { AppError, RuntimeResources, Env } from '@travetto/base';
+import { AppError, RuntimeResources, RuntimeContext, Env } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
-import { PackageUtil, RuntimeContext } from '@travetto/manifest';
+import { PackageUtil } from '@travetto/manifest';
 import { Secret } from '@travetto/schema';
 
 @Config('rest.ssl')

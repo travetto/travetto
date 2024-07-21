@@ -2,7 +2,7 @@
 import path from 'node:path';
 
 import { d, c } from '@travetto/doc';
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
 
 export const text = <>
   <c.StdHeader />

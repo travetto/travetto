@@ -1,8 +1,8 @@
 import util from 'node:util';
 
-import { AppError, Class, ClassInstance, Env, RuntimeResources } from '@travetto/base';
+import { AppError, Class, ClassInstance, Env, RuntimeResources, RuntimeContext } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ConfigSourceTarget, ConfigTarget } from './internal/types';

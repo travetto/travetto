@@ -3,8 +3,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { RuntimeContext } from '@travetto/manifest';
-import { Env, FileLoader } from '@travetto/base';
+import { Env, FileLoader, RuntimeContext } from '@travetto/base';
 
 import { ImageConverter } from './convert';
 
