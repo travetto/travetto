@@ -26,12 +26,12 @@ export class ActionStorage<T> {
   }
 
   async init(): Promise<void> {
-    const val = await this.#workspaceState.get<Record<string, TimeEntry<T>>>(`${this.#scope}.storage`);
+    const val = await this.#context.workspaceState.get<Record<string, TimeEntry<T>>>(`${this.#scope}.storage`);
     this.#storage = val ?? {};
   }
 
   async persist(): Promise<void> {
-    await this.#workspaceState.update(`${this.#scope}.storage`, this.#storage);
+    await this.#context.workspaceState.update(`${this.#scope}.storage`, this.#storage);
   }
 
   /**
