@@ -9,10 +9,9 @@ import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { RuntimeIndex } from '@travetto/manifest';
+
 import { Runtime } from '../src/runtime';
-
 import { ExecUtil } from '../src/exec';
-
 
 @Suite()
 export class ExecUtilTest {
