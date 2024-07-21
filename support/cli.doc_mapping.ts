@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { PackageUtil, RuntimeIndex } from '@travetto/manifest';
-import { RuntimeContext } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
 type DocModMapping = { simpleName: string, name: string, displayName: string, folder: string, description?: string };
@@ -18,7 +18,7 @@ export class DocModuleMapping {
   async main(): Promise<void> {
     const out: DocModMapping[] = [];
     for (const module of RuntimeIndex.getManifestModules()) {
-      const pkg = PackageUtil.readPackage(RuntimeContext.workspaceRelative(module.sourceFolder));
+      const pkg = PackageUtil.readPackage(Runtime.context.workspaceRelative(module.sourceFolder));
       if (pkg?.travetto?.displayName === undefined) {
         continue;
       }

@@ -1,4 +1,4 @@
-import { Class, ClassInstance, Env, RuntimeContext } from '@travetto/base';
+import { Class, ClassInstance, Env, Runtime } from '@travetto/base';
 import { RuntimeIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -14,7 +14,7 @@ import { CliParseUtil } from './parse';
  */
 export function CliCommand(cfg: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
-    const meta = RuntimeContext.getFunctionMetadata(target);
+    const meta = Runtime.metadata.get(target);
     if (!meta || meta.abstract) {
       return;
     }
@@ -47,7 +47,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
         aliases: ['m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
         description: 'Module to run for',
         specifiers: ['module'],
-        required: { active: RuntimeContext.monoRoot }
+        required: { active: Runtime.context.monoRoot }
       });
     }
 
@@ -55,10 +55,10 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       (pendingCls.validators ??= []).push(async item => {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const { module: mod } = item as CliCommandShapeFields;
-        const runModule = (runtimeModule === 'command' ? commandModule : mod) || RuntimeContext.main.name;
+        const runModule = (runtimeModule === 'command' ? commandModule : mod) || Runtime.context.main.name;
 
         // If we need to run as a specific module
-        if (runModule !== RuntimeContext.main.name) {
+        if (runModule !== Runtime.context.main.name) {
           try {
             RuntimeIndex.reinitForModule(runModule);
           } catch (err) {

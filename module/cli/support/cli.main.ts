@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { RuntimeContext } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, ParsedState } from '@travetto/cli';
 import { RuntimeIndex } from '@travetto/manifest';
 import { Ignore } from '@travetto/schema';
@@ -19,7 +19,7 @@ export class MainCommand implements CliCommandShape {
     // If referenced file exists
     let file = fileOrImport;
     if (await (fs.stat(path.resolve(fileOrImport)).then(() => true, () => false))) {
-      file = path.join(RuntimeContext.main.name, fileOrImport);
+      file = path.join(Runtime.context.main.name, fileOrImport);
     }
 
     return RuntimeIndex.getFromImport(file)?.import;

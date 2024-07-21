@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 import path from 'node:path';
 
 import { PackageUtil, RuntimeIndex } from '@travetto/manifest';
-import { ExecUtil, Env, watchCompiler, RuntimeContext } from '@travetto/base';
+import { ExecUtil, Env, watchCompiler, Runtime } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, CliUtil } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
@@ -32,7 +32,7 @@ export class DocCommand implements CliCommandShape {
   }
 
   preBind(): void {
-    const workspacePkg = PackageUtil.readPackage(RuntimeContext.workspace.path);
+    const workspacePkg = PackageUtil.readPackage(Runtime.context.workspace.path);
     this.outputs = workspacePkg.travetto?.doc?.outputs ?? ['README.md'];
   }
 
@@ -68,7 +68,7 @@ export class DocCommand implements CliCommandShape {
 
   async render(): Promise<void> {
     const { DocRenderer } = await import('../src/render/renderer');
-    const ctx = await DocRenderer.get(this.input, RuntimeContext);
+    const ctx = await DocRenderer.get(this.input, Runtime);
     const outputs = this.outputs.map(output =>
       output.includes('.') ? [path.extname(output).replace('.', ''), path.resolve(output)] :
         [output, null] as const

@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { RuntimeIndex } from '@travetto/manifest';
-import { Class, RuntimeContext, Util } from '@travetto/base';
+import { Class, Runtime, Util } from '@travetto/base';
 import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
@@ -62,7 +62,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
 
   constructor(output: string, moduleName?: string, config: Partial<C> = {}) {
     this.#output = output;
-    this.moduleName = moduleName ?? `${RuntimeContext.main.name}-client`;
+    this.moduleName = moduleName ?? `${Runtime.context.main.name}-client`;
     this.config = config;
     this.init?.();
   }
@@ -214,7 +214,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
   }
 
   buildSee(cls: Class, method?: string): string {
-    const meta = RuntimeIndex.getFunctionMetadataFromClass(cls);
+    const meta = Runtime.metadata.getFromClass(cls);
     if (!meta) {
       return '';
     }
@@ -313,7 +313,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
         classId: schema.class.Ⲑid,
       };
       this.#schemaContent.set(schema.class.Ⲑid, baseResult);
-      this.#files.add(RuntimeIndex.getFunctionMetadataFromClass(schema.class)!.source);
+      this.#files.add(Runtime.metadata.getFromClass(schema.class)!.source);
       return baseResult;
     }
 
@@ -357,14 +357,14 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     };
 
     this.#schemaContent.set(schema.class.Ⲑid, result);
-    this.#files.add(RuntimeIndex.getFunctionMetadataFromClass(schema.class)!.source);
+    this.#files.add(Runtime.metadata.getFromClass(schema.class)!.source);
 
     return result;
   }
 
   async finalize(): Promise<void> {
     for (const [file, cls] of this.commonFiles) {
-      await this.writeContent(file, await fs.readFile(typeof cls === 'string' ? cls : RuntimeContext.getFunctionMetadata(cls)!.source, 'utf8'));
+      await this.writeContent(file, await fs.readFile(typeof cls === 'string' ? cls : Runtime.metadata.get(cls)!.source, 'utf8'));
     }
 
     const files = [
@@ -396,7 +396,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     if (cfg.documented !== false) {
       const result = this.renderController(cfg);
       this.#controllerContent.set(result.classId, result);
-      this.#files.add(RuntimeIndex.getFunctionMetadataFromClass(cfg.class)!.source);
+      this.#files.add(Runtime.metadata.getFromClass(cfg.class)!.source);
     }
   }
 

@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { ExecUtil, Util, RuntimeContext } from '@travetto/base';
+import { ExecUtil, Util, Runtime } from '@travetto/base';
 import { TestFixtures } from '@travetto/test';
 
 import { RestClientGeneratorService } from '../../src/service';
@@ -13,7 +13,7 @@ const fixtures = new TestFixtures(['@travetto/rest-client']);
 export class RestClientTestUtil {
 
   static get rootFolder(): string {
-    return RuntimeContext.toolPath('rest-client-puppeteer');
+    return Runtime.context.toolPath('rest-client-puppeteer');
   }
 
   static get clientFile(): string {
@@ -37,7 +37,7 @@ export class RestClientTestUtil {
       await fixtures.resolve(`tsconfig.${mode}.json`),
       path.resolve(folder, 'tsconfig.json'),
     );
-    const tsc = path.resolve(RuntimeContext.workspace.path, 'node_modules', '.bin', 'tsc');
+    const tsc = path.resolve(Runtime.context.workspace.path, 'node_modules', '.bin', 'tsc');
     await ExecUtil.getResult(spawn(tsc, ['-p', folder]));
   }
 

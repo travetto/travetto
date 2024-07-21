@@ -1,4 +1,4 @@
-import { Class, AppError, Env, RuntimeContext } from '@travetto/base';
+import { Class, AppError, Env, Runtime } from '@travetto/base';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
@@ -41,8 +41,8 @@ export class RestApplication<T = unknown> {
 
   async postConstruct(): Promise<void> {
     this.info = {
-      module: RuntimeContext.main.name,
-      version: RuntimeContext.main.version,
+      module: Runtime.context.main.name,
+      version: Runtime.context.main.version,
       env: Env.name
     };
 

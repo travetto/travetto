@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { RuntimeContext } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 import { PackageUtil, RuntimeIndex } from '@travetto/manifest';
 
 import { RenderProvider } from '../types';
@@ -109,7 +109,7 @@ ${context.cleanText(content.text)}
   Header: async ({ props }) => `# ${props.title}\n${props.description ? `## ${props.description}\n` : ''}\n`,
 
   StdHeader: async state => {
-    const mod = state.el.props.mod ?? RuntimeContext.main.name;
+    const mod = state.el.props.mod ?? Runtime.context.main.name;
     const pkg = PackageUtil.readPackage(RuntimeIndex.getModule(mod)!.sourcePath);
     const title = pkg.travetto?.displayName ?? pkg.name;
     const desc = pkg.description;

@@ -1,4 +1,4 @@
-import { RuntimeResources } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('model.firestore')
@@ -21,7 +21,7 @@ export class FirestoreModelConfig {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }
     if (this.credentialsFile && !this.credentials) {
-      this.credentials = JSON.parse(await RuntimeResources.read(this.credentialsFile));
+      this.credentials = JSON.parse(await Runtime.resources.read(this.credentialsFile));
     }
   }
 }

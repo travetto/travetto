@@ -1,7 +1,7 @@
 import { createWriteStream, WriteStream, mkdirSync, openSync, appendFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { Env, RuntimeContext } from '@travetto/base';
+import { Env, Runtime } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 
@@ -16,7 +16,7 @@ export class FileLogAppenderConfig {
 
   postConstruct(): void {
     if (!this.output || this.output === 'file' || this.output === 'console') {
-      this.output = RuntimeContext.toolPath('@', 'output.log');
+      this.output = Runtime.context.toolPath('@', 'output.log');
     }
   }
 }

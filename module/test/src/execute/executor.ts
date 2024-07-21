@@ -2,7 +2,7 @@ import { AssertionError } from 'node:assert';
 import path from 'node:path';
 
 import { RuntimeIndex } from '@travetto/manifest';
-import { Env, TimeUtil, RuntimeContext } from '@travetto/base';
+import { Env, TimeUtil, Runtime } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -110,7 +110,7 @@ export class TestExecutor {
 
     const result: TestResult = {
       methodName: test.methodName,
-      module: RuntimeContext.main.name,
+      module: Runtime.context.main.name,
       description: test.description,
       classId: test.classId,
       lineStart: test.lineStart,

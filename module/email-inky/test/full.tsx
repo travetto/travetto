@@ -3,7 +3,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { RuntimeContext } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 import { Container, If, Unless, Summary, Title, Value, InkyTemplate, prepare } from '../__index__';
 
 @Suite('InkyTemplate')
@@ -21,7 +21,7 @@ class ContainerTest {
 
     const module = await prepare(input, {
       file: 'test',
-      module: RuntimeContext.main.name,
+      module: Runtime.context.main.name,
     });
 
     assert(input);
@@ -55,7 +55,7 @@ class ContainerTest {
 
     const wrapper = await prepare(input, {
       file: 'test',
-      module: RuntimeContext.main.name,
+      module: Runtime.context.main.name,
     });
 
     const output = await wrapper.html();
@@ -75,7 +75,7 @@ class ContainerTest {
 
     const wrapper = await prepare(input, {
       file: 'test',
-      module: RuntimeContext.main.name
+      module: Runtime.context.main.name
     });
 
     const output = await wrapper.html();

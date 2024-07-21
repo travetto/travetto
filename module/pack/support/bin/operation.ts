@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { RuntimeIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
-import { Env, RuntimeContext } from '@travetto/base';
+import { Env, Runtime } from '@travetto/base';
 
 import { CommonPackConfig } from '../../src/types';
 import { PackUtil } from './util';
@@ -67,7 +67,7 @@ export class PackOperation {
         ['BUNDLE_SOURCEMAP', cfg.sourcemap],
         ['BUNDLE_SOURCES', cfg.includeSources],
         ['BUNDLE_OUTPUT', cfg.buildDir],
-        ['BUNDLE_FORMAT', RuntimeContext.workspace.type],
+        ['BUNDLE_FORMAT', Runtime.context.workspace.type],
         ['BUNDLE_ENV_FILE', cfg.envFile]
       ] as const)
         .filter(x => x[1] === false || x[1])
@@ -100,7 +100,7 @@ export class PackOperation {
    */
   static async * writePackageJson(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = 'package.json';
-    const pkg = { type: RuntimeContext.workspace.type, main: cfg.mainFile };
+    const pkg = { type: Runtime.context.workspace.type, main: cfg.mainFile };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
 
@@ -189,7 +189,7 @@ export class PackOperation {
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Copying over workspace resources' }}`);
 
     const dest = path.resolve(cfg.buildDir, cfg.workspaceResourceFolder);
-    const src = RuntimeContext.workspaceRelative('resources');
+    const src = Runtime.context.workspaceRelative('resources');
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.copyRecursive(src, dest, true);

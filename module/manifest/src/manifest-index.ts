@@ -50,6 +50,15 @@ export class ManifestIndex {
     this.#index();
   }
 
+  /**
+   * **WARNING**: This is a destructive operation, and should only be called before loading any code
+   * @private
+   */
+  reinitForModule(module: string): void {
+    this.init(`${this.outputRoot}/node_modules/${module}`);
+  }
+
+
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([f, type, ts, role = 'std']) => {
       const isSource = type === 'ts' || type === 'js';
@@ -266,4 +275,39 @@ export class ManifestIndex {
     );
     return lookup(file.replace(`${base}/`, '').split('/'));
   }
+
+  /**
+   * Get main module for manifest
+   */
+  get mainModule(): IndexedModule {
+    return this.getModule(this.manifest.main.name)!;
+  }
+
+  /**
+   * Resolve module path to folder, with support for main module and monorepo support
+   */
+  resolveModulePath(modulePath: string): string {
+    const main = this.manifest.main.name;
+    const workspace = this.manifest.workspace.path;
+    const [base, sub] = modulePath
+      .replace(/^(@@?)(#|$)/g, (_, v, r) => `${v === '@' ? main : workspace}${r}`)
+      .split('#');
+    return path.resolve(this.hasModule(base) ? this.getModule(base)!.sourcePath : base, sub ?? '.');
+  }
+
+  /**
+   * Get manifest module by name
+   */
+  getManifestModule(mod: string): ManifestModule {
+    return this.manifest.modules[mod];
+  }
+
+  /**
+   * Get manifest modules
+   */
+  getManifestModules(): ManifestModule[] {
+    return Object.values(this.manifest.modules);
+  }
 }
+
+export const RuntimeIndex = new ManifestIndex(process.env.TRV_MANIFEST!);

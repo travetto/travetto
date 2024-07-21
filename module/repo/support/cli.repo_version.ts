@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { CliModuleUtil, CliCommandShape, CliCommand, CliScmUtil, CliValidationError } from '@travetto/cli';
-import { RuntimeContext } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 
 import { PackageManager, SemverLevel } from './bin/package-manager';
 
@@ -46,7 +46,7 @@ export class RepoVersionCommand implements CliCommandShape {
       throw new Error('No modules available for versioning');
     }
 
-    await PackageManager.version(RuntimeContext, modules, level, prefix);
+    await PackageManager.version(Runtime, modules, level, prefix);
 
     const versions = await PackageManager.synchronizeVersions();
     if (this.commit) {
@@ -57,7 +57,7 @@ export class RepoVersionCommand implements CliCommandShape {
       }
 
       // Touch package when done to trigger restart of compiler
-      await fs.utimes(RuntimeContext.workspaceRelative('package.json'), Date.now(), Date.now());
+      await fs.utimes(Runtime.context.workspaceRelative('package.json'), Date.now(), Date.now());
     }
   }
 }
