@@ -1,7 +1,7 @@
 import mustache from 'mustache';
 
 import { Injectable } from '@travetto/di';
-import { Runtime } from '@travetto/base';
+import { RuntimeContext } from '@travetto/base';
 
 /**
  * Mail interpolation engine
@@ -30,7 +30,7 @@ export class MustacheInterpolator implements MailInterpolator {
     const promises: Promise<string>[] = [];
     template = template.replace(/[{]{2,3}>\s+(\S+)([.]html)?\s*[}]{2,3}/g, (all: string, name: string) => {
       promises.push(
-        Runtime.resources.read(`${name}.html`) // Ensure html file
+        RuntimeContext.resources.read(`${name}.html`) // Ensure html file
           .then(contents => this.resolveNested(contents))
       );
       return `$%${promises.length - 1}%$`;

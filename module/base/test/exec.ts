@@ -10,7 +10,7 @@ import path from 'node:path';
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { RuntimeIndex } from '@travetto/manifest';
 
-import { Runtime } from '../src/runtime';
+import { RuntimeContext } from '../src/runtime';
 import { ExecUtil } from '../src/exec';
 
 @Suite()
@@ -88,7 +88,7 @@ export class ExecUtilTest {
 
   @Test()
   async testImmediateFail() {
-    const proc = spawn('npm', ['run', 'zork'], { cwd: Runtime.workspace.path });
+    const proc = spawn('npm', ['run', 'zork'], { cwd: RuntimeContext.workspace.path });
     await timers.setTimeout(600);
     const failure = await ExecUtil.getResult(proc, { catch: true });
     assert(!failure.valid);

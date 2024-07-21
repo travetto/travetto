@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, Runtime } from '@travetto/base';
+import { Class, ConcreteClass, RuntimeContext } from '@travetto/base';
 import { MetadataRegistry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite';
@@ -13,14 +13,14 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    * Find all valid tests (ignoring abstract)
    */
   getValidClasses(): Class[] {
-    return this.getClasses().filter(c => !Runtime.describeFunction(c)?.abstract);
+    return this.getClasses().filter(c => !RuntimeContext.describeFunction(c)?.abstract);
   }
 
   createPending(cls: Class): Partial<SuiteConfig> {
-    const meta = Runtime.describeFunction(cls)!;
+    const meta = RuntimeContext.describeFunction(cls)!;
     return {
       class: cls,
-      module: Runtime.main.name,
+      module: RuntimeContext.main.name,
       classId: cls.Ⲑid,
       file: meta.source,
       lineStart: meta.lines[0],
@@ -34,11 +34,11 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   }
 
   override createPendingField(cls: Class, fn: Function): Partial<TestConfig> {
-    const meta = Runtime.describeFunction(cls)!;
+    const meta = RuntimeContext.describeFunction(cls)!;
     const meth = meta.methods![fn.name];
     return {
       class: cls,
-      module: Runtime.main.name,
+      module: RuntimeContext.main.name,
       file: meta.source,
       lineStart: meth?.lines[0],
       lineEnd: meth?.lines[1],
@@ -97,7 +97,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);
-      const suites = this.getValidClasses().filter(cls => Runtime.describeFunction(cls)!.source === file).map(x => this.get(x)).filter(x => !x.skip);
+      const suites = this.getValidClasses().filter(cls => RuntimeContext.describeFunction(cls)!.source === file).map(x => this.get(x)).filter(x => !x.skip);
       const suite = suites.find(x => line >= x.lineStart && line <= x.lineEnd);
 
       if (suite) {
@@ -119,7 +119,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       } else {
         const suites = this.getValidClasses()
           .map(x => this.get(x))
-          .filter(x => !Runtime.describeFunction(x.class)?.abstract);  // Do not run abstract suites
+          .filter(x => !RuntimeContext.describeFunction(x.class)?.abstract);  // Do not run abstract suites
         return { suites };
       }
     }

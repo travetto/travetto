@@ -24,7 +24,7 @@ class $RuntimeResources extends FileLoader {
   }
 }
 
-export const Runtime = build({
+export const RuntimeContext = build({
   /**
    * Produce a workspace relative path
    * @param rel The relative path

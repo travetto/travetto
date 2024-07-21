@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 
 import { type FindConfig, RuntimeIndex } from '@travetto/manifest';
-import { Class, Env, Runtime } from '@travetto/base';
+import { Class, Env, RuntimeContext } from '@travetto/base';
 
 import { DynamicFileLoader } from '../internal/file-loader';
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
@@ -83,8 +83,8 @@ export class ClassSource implements ChangeSource<Class> {
           changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });
         } else {
-          const prevMeta = Runtime.describeFunction(prev.get(k), false);
-          const nextMeta = Runtime.describeFunction(next.get(k), false);
+          const prevMeta = RuntimeContext.describeFunction(prev.get(k), false);
+          const nextMeta = RuntimeContext.describeFunction(next.get(k), false);
           if (prevMeta?.hash !== nextMeta?.hash) {
             changes += 1;
             this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });

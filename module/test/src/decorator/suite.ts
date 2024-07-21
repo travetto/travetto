@@ -1,4 +1,4 @@
-import { Class, ClassInstance, Runtime } from '@travetto/base';
+import { Class, ClassInstance, RuntimeContext } from '@travetto/base';
 
 import { SuiteRegistry } from '../registry/suite';
 import { SuiteConfig } from '../model/suite';
@@ -26,7 +26,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const decorator = ((target: Class) => {
     const cfg = { description: descriptionString, ...extra };
-    if (Runtime.describeFunction(target)?.abstract) {
+    if (RuntimeContext.describeFunction(target)?.abstract) {
       cfg.skip = true;
     }
     SuiteRegistry.register(target, cfg);

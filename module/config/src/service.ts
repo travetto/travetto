@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { AppError, Class, ClassInstance, Env, Runtime } from '@travetto/base';
+import { AppError, Class, ClassInstance, Env, RuntimeContext } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
@@ -126,7 +126,7 @@ export class ConfigurationService {
           const ogMessage = err.message;
           err.message = `Failed to construct ${cls.Ⲑid} as validation errors have occurred`;
           err.stack = err.stack?.replace(ogMessage, err.message);
-          const file = Runtime.describeFunction(cls)!.source;
+          const file = RuntimeContext.describeFunction(cls)!.source;
           Object.defineProperty(err, 'details', { value: { class: cls.Ⲑid, file, ...(err.details ?? {}) } });
         }
         throw err;
@@ -144,15 +144,15 @@ export class ConfigurationService {
 
     console.log('Initialized', {
       manifest: {
-        main: Runtime.main,
-        workspace: Runtime.workspace
+        main: RuntimeContext.main,
+        workspace: RuntimeContext.workspace
       },
       env: {
         name: Env.name,
         debug: Env.debug,
         production: Env.production,
         dynamic: Env.dynamic,
-        resourcePaths: Runtime.resources.searchPaths,
+        resourcePaths: RuntimeContext.resources.searchPaths,
         profiles: Env.TRV_PROFILES.list ?? []
       },
       config: await this.exportActive()

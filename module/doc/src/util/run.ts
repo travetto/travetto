@@ -3,7 +3,7 @@ import util from 'node:util';
 import { spawn, ChildProcess } from 'node:child_process';
 
 import { path, RuntimeIndex } from '@travetto/manifest';
-import { Env, ExecUtil, Runtime } from '@travetto/base';
+import { Env, ExecUtil, RuntimeContext } from '@travetto/base';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
 
@@ -53,7 +53,7 @@ export class DocRunUtil {
     text = util.stripVTControlCharacters(text.trim())
       .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
-      .replaceAll(Runtime.workspace.path, '<workspace-root>')
+      .replaceAll(RuntimeContext.workspace.path, '<workspace-root>')
       .replace(/[/]tmp[/][a-z_A-Z0-9\/\-]+/g, '/tmp/<temp-folder>')
       .replace(/^(\s*framework:\s*')(\d+[.]\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x${post}`)
       .replace(/^(\s*nodeVersion:\s*'v)(\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x.x${post}`)

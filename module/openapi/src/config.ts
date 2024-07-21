@@ -4,7 +4,7 @@ import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas
 
 import { Config } from '@travetto/config';
 import { RuntimeIndex } from '@travetto/manifest';
-import { Env, Runtime } from '@travetto/base';
+import { Env, RuntimeContext } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 /**
@@ -26,9 +26,9 @@ export class ApiInfoConfig {
   version: string;
 
   postConstruct(): void {
-    this.title ??= Runtime.main.name;
-    this.version ??= Runtime.main.version;
-    this.description ??= Runtime.main.description;
+    this.title ??= RuntimeContext.main.name;
+    this.version ??= RuntimeContext.main.version;
+    this.description ??= RuntimeContext.main.description;
   }
 }
 
