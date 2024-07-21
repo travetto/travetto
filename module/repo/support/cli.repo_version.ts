@@ -57,7 +57,7 @@ export class RepoVersionCommand implements CliCommandShape {
       }
 
       // Touch package when done to trigger restart of compiler
-      await fs.utimes(Runtime.context.workspaceRelative('package.json'), Date.now(), Date.now());
+      await fs.utimes(Runtime.workspaceRelative('package.json'), Date.now(), Date.now());
     }
   }
 }

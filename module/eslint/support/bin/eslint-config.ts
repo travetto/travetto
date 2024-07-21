@@ -20,7 +20,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
     }
   }
 
-  const overrides = Runtime.context.workspaceRelative('eslint-overrides.json');
+  const overrides = Runtime.workspaceRelative('eslint-overrides.json');
 
   const extra: (typeof STD_RULES)[] = existsSync(overrides) ? JSON.parse(readFileSync(overrides, 'utf8')) : [];
 

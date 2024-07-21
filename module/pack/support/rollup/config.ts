@@ -29,7 +29,7 @@ export function getOutput(): OutputOptions {
     format,
     interop: format === 'commonjs' ? 'auto' : undefined,
     sourcemapPathTransform: (src, map): string =>
-      Runtime.context.stripWorkspacePath(path.resolve(path.dirname(map), src)),
+      Runtime.stripWorkspacePath(path.resolve(path.dirname(map), src)),
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,
     sourcemapExcludeSources: !(new EnvProp('BUNDLE_SOURCES').bool ?? false),
     compact: new EnvProp('BUNDLE_COMPRESS').bool ?? true,

@@ -16,46 +16,47 @@ class $RuntimeResources extends FileLoader {
   }
 }
 
-const buildCtx = <T extends object, K extends keyof ManifestContext>(inp: T, props: K[]): T & Pick<ManifestContext, K> => {
+const buildCtx = <K extends keyof ManifestContext>(props: K[]): Pick<ManifestContext, K> => {
+  const out = {};
   for (const prop of props) {
-    Object.defineProperty(inp, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
+    Object.defineProperty(out, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
   }
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return inp as T & ManifestContext;
+  return out as ManifestContext;
 };
 
 export const Runtime = {
   resources: new $RuntimeResources(Env.resourcePaths),
   metadata: MetadataIndex,
-  context: buildCtx({
-    /**
-     * Produce a workspace relative path
-     * @param rel The relative path
-     */
-    workspaceRelative(...rel: string[]): string {
-      return path.resolve(RuntimeIndex.manifest.workspace.path, ...rel);
-    },
-    /**
-     * Strip off the workspace path from a file
-     * @param full A full path
-     */
-    stripWorkspacePath(full: string): string {
-      return full === RuntimeIndex.manifest.workspace.path ? '' : full.replace(`${RuntimeIndex.manifest.workspace.path}/`, '');
-    },
-    /**
-     * Produce a workspace path for tooling, with '@' being replaced by node_module/name folder
-     * @param rel The relative path
-     */
-    toolPath(...rel: string[]): string {
-      rel = rel.flatMap(x => x === '@' ? ['node_modules', RuntimeIndex.manifest.main.name] : [x]);
-      return path.resolve(RuntimeIndex.manifest.workspace.path, RuntimeIndex.manifest.build.toolFolder, ...rel);
-    },
-    /**
-     * Are we running from a mono-root?
-     */
-    get monoRoot(): boolean {
-      return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
-    }
-  }, ['main', 'workspace'])
+  context: buildCtx(['main', 'workspace']),
+  /**
+   * Produce a workspace relative path
+   * @param rel The relative path
+   */
+  workspaceRelative(...rel: string[]): string {
+    return path.resolve(RuntimeIndex.manifest.workspace.path, ...rel);
+  },
+  /**
+   * Strip off the workspace path from a file
+   * @param full A full path
+   */
+  stripWorkspacePath(full: string): string {
+    return full === RuntimeIndex.manifest.workspace.path ? '' : full.replace(`${RuntimeIndex.manifest.workspace.path}/`, '');
+  },
+  /**
+   * Produce a workspace path for tooling, with '@' being replaced by node_module/name folder
+   * @param rel The relative path
+   */
+  toolPath(...rel: string[]): string {
+    rel = rel.flatMap(x => x === '@' ? ['node_modules', RuntimeIndex.manifest.main.name] : [x]);
+    return path.resolve(RuntimeIndex.manifest.workspace.path, RuntimeIndex.manifest.build.toolFolder, ...rel);
+  },
+  /**
+   * Are we running from a mono-root?
+   */
+  get monoRoot(): boolean {
+    return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
+  }
+
 };
 

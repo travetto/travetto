@@ -16,7 +16,7 @@ export class FileLogAppenderConfig {
 
   postConstruct(): void {
     if (!this.output || this.output === 'file' || this.output === 'console') {
-      this.output = Runtime.context.toolPath('@', 'output.log');
+      this.output = Runtime.toolPath('@', 'output.log');
     }
   }
 }

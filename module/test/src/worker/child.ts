@@ -34,7 +34,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    */
   async activate(): Promise<void> {
     if (/\b@travetto[/]test\b/.test(Env.DEBUG.val ?? '')) {
-      const file = Runtime.context.toolPath(`test-worker.${process.pid}.log`);
+      const file = Runtime.toolPath(`test-worker.${process.pid}.log`);
       const stdout = createWriteStream(file, { flags: 'a' });
       const c = new console.Console({ stdout, inspectOptions: { depth: 4, colors: false } });
       ConsoleManager.set({ log: (ev) => c[ev.level](process.pid, ...ev.args) });

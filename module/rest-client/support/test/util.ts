@@ -13,7 +13,7 @@ const fixtures = new TestFixtures(['@travetto/rest-client']);
 export class RestClientTestUtil {
 
   static get rootFolder(): string {
-    return Runtime.context.toolPath('rest-client-puppeteer');
+    return Runtime.toolPath('rest-client-puppeteer');
   }
 
   static get clientFile(): string {

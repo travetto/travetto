@@ -47,7 +47,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
         aliases: ['m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
         description: 'Module to run for',
         specifiers: ['module'],
-        required: { active: Runtime.context.monoRoot }
+        required: { active: Runtime.monoRoot }
       });
     }
 

@@ -38,7 +38,7 @@ export class LintCommand implements CliCommandShape {
     const res = await ExecUtil.getResult(spawn('npx', [
       'eslint',
       '--cache',
-      '--cache-location', Runtime.context.toolPath('.eslintcache'),
+      '--cache-location', Runtime.toolPath('.eslintcache'),
       ...(this.format ? ['--format', this.format] : []),
       ...(this.fix ? ['--fix'] : []),
       ...files

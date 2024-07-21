@@ -11,7 +11,7 @@ import { cliTpl } from '@travetto/cli';
 export class OpenApiClientHelp {
 
   static async getListOfFormats(dockerImage: string): Promise<string[]> {
-    const formatCache = Runtime.context.toolPath('openapi-formats.json');
+    const formatCache = Runtime.toolPath('openapi-formats.json');
     if (!await fs.stat(formatCache).catch(() => false)) {
       const { stdout } = await ExecUtil.getResult(spawn('docker', ['run', '--rm', dockerImage, 'list'], { shell: false }));
       const lines = stdout

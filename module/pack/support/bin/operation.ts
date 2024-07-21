@@ -189,7 +189,7 @@ export class PackOperation {
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Copying over workspace resources' }}`);
 
     const dest = path.resolve(cfg.buildDir, cfg.workspaceResourceFolder);
-    const src = Runtime.context.workspaceRelative('resources');
+    const src = Runtime.workspaceRelative('resources');
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.copyRecursive(src, dest, true);

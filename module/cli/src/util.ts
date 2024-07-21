@@ -17,7 +17,7 @@ export class CliUtil {
     const simple = (module ?? Runtime.context.main.name).replace(/[\/]/, '_').replace(/@/, '');
     if (!simple) {
       return placeholder;
-    } else if (!module && Runtime.context.monoRoot) {
+    } else if (!module && Runtime.monoRoot) {
       return placeholder;
     } else {
       return placeholder.replace('<module>', simple);

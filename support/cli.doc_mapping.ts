@@ -18,7 +18,7 @@ export class DocModuleMapping {
   async main(): Promise<void> {
     const out: DocModMapping[] = [];
     for (const module of RuntimeIndex.getManifestModules()) {
-      const pkg = PackageUtil.readPackage(Runtime.context.workspaceRelative(module.sourceFolder));
+      const pkg = PackageUtil.readPackage(Runtime.workspaceRelative(module.sourceFolder));
       if (pkg?.travetto?.displayName === undefined) {
         continue;
       }

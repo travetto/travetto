@@ -42,7 +42,7 @@ export class FileConfigSource implements ConfigSource {
               data,
               priority: priority + i++,
               source: `file://${profile}`,
-              detail: Runtime.context.stripWorkspacePath(full)
+              detail: Runtime.stripWorkspacePath(full)
             })));
           }
         }

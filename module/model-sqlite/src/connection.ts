@@ -44,7 +44,7 @@ export class SqliteConnection extends Connection<Database> {
   }
 
   async #create(): Promise<Database> {
-    const file = path.resolve(this.#config.options.file ?? Runtime.context.toolPath('@', 'sqlite_db'));
+    const file = path.resolve(this.#config.options.file ?? Runtime.toolPath('@', 'sqlite_db'));
     await fs.mkdir(path.dirname(file), { recursive: true });
     const db = new sqlDb(file, this.#config.options);
     await db.pragma('foreign_keys = ON');

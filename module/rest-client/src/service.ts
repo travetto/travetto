@@ -22,7 +22,7 @@ export class RestClientGeneratorService implements AutoCreate {
   providers: ClientGenerator[];
 
   buildGenerator({ type, output, moduleName, options }: RestClientProvider): ClientGenerator {
-    output = Runtime.context.workspaceRelative(
+    output = Runtime.workspaceRelative(
       output.startsWith('@') ? RuntimeIndex.mainModule.sourceFolder : '.',
       output
     );
