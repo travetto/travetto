@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/quotes */
-import { Package } from '@travetto/manifest';
+import type { Package } from '@travetto/manifest';
 import { Class, RuntimeContext } from '@travetto/base';
 import { ControllerConfig } from '@travetto/rest';
 

@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { ExecUtil, RuntimeContext } from '@travetto/base';
-import { IndexedModule, RuntimeIndex } from '@travetto/manifest';
+import { type IndexedModule, RuntimeIndex } from '@travetto/manifest';
 
 export class CliScmUtil {
   /**

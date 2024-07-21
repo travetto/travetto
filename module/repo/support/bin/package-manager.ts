@@ -3,7 +3,7 @@ import { spawn, ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
 import { ExecUtil, ExecutionResult } from '@travetto/base';
-import { IndexedModule, ManifestContext, Package, PackageUtil } from '@travetto/manifest';
+import { type IndexedModule, type ManifestContext, type Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor' | 'preminor' | 'prepatch';
@@ -34,7 +34,7 @@ export class PackageManager {
   /**
    * Validate published result
    */
-  static validatePublishedResult(ctx: Ctx, mod: IndexedModule, result: ExecutionResult): boolean {
+  static validatePublishedResult(ctx: Ctx, mod: IndexedModule, result: ExecutionResult<string>): boolean {
     switch (ctx.workspace.manager) {
       case 'npm': {
         if (!result.valid && !result.stderr.includes('E404')) {

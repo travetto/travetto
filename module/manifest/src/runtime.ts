@@ -80,7 +80,7 @@ class $RuntimeIndex extends ManifestIndex {
   /**
    * Retrieve function metadata by function, or function id
    */
-  getFunctionMetadata(clsId: string | Function): FunctionMetadata | undefined {
+  getFunctionMetadata(clsId?: string | Function): FunctionMetadata | undefined {
     const id = clsId === undefined ? '' : typeof clsId === 'string' ? clsId : clsId.Ⲑid;
     return this.#metadata.get(id);
   }

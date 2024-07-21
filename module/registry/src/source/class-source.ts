@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { FindConfig, RuntimeIndex } from '@travetto/manifest';
+import { type FindConfig, RuntimeIndex } from '@travetto/manifest';
 import { Class, Env, RuntimeContext } from '@travetto/base';
 
 import { DynamicFileLoader } from '../internal/file-loader';

@@ -3,7 +3,7 @@ import { createReadStream } from 'node:fs';
 import readline from 'node:readline';
 
 import { Env, ExecUtil, ShutdownManager, Util } from '@travetto/base';
-import { IndexedFile, RuntimeIndex } from '@travetto/manifest';
+import { type IndexedFile, RuntimeIndex } from '@travetto/manifest';
 
 /**
  * Simple Test Utilities
