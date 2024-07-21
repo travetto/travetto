@@ -104,7 +104,7 @@ export class Test {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TEST = void 0;
 const tslib_1 = require("tslib");
-const Ⲑ_metadata_1 = tslib_1.__importStar(require("@travetto/manifest/src/metadata"));
+const Ⲑ_metadata_1 = tslib_1.__importStar(require("@travetto/manifest/src/metadata.js"));
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 var ᚕf = "@travetto/transformer/doc/upper.js";
 let TEST = class TEST {

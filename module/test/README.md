@@ -81,7 +81,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const Ⲑ_util_1 = tslib_1.__importStar(require("@travetto/test/src/execute/util.js"));
 const Ⲑ_check_1 = tslib_1.__importStar(require("@travetto/test/src/assert/check.js"));
-const Ⲑ_metadata_1 = tslib_1.__importStar(require("@travetto/manifest/src/metadata"));
+const Ⲑ_metadata_1 = tslib_1.__importStar(require("@travetto/manifest/src/metadata.js"));
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 var ᚕf = "@travetto/test/doc/assert-example.js";
 const node_assert_1 = tslib_1.__importDefault(require("node:assert"));
