@@ -1,5 +1,4 @@
 import { RuntimeIndex } from '@travetto/manifest';
-
 import { ClassConfig } from './service/types';
 
 const SYN_RE = /(__)(\d+)Ⲑsyn$/;
