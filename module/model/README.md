@@ -226,7 +226,7 @@ The `id` is the only required field for a model, as this is a hard requirement o
 |[S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
 |[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L50)|X|X| |X|X|X|
+|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L49)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.

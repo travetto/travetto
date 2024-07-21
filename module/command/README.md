@@ -114,14 +114,6 @@ $ trv service status
 
 Service          Version    Status
 -------------------------------------------------
-dynamodb           2.0.0    Running 93af422e793a
-elasticsearch      8.9.1    Running ed76ee063d13
-firestore         latest    Running feec2e5e95b4
-mongodb              7.0    Running 5513eba6734e
-mysql                8.0    Running 307bc66d442a
-postgresql          15.4    Running e78291e71040
-redis                7.2    Running 77ba279b4e30
-s3                 3.1.0    Running fdacfc55b9e3
 ```
 
 ### Defining new Services

@@ -304,7 +304,7 @@ npx trv run:rest
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:146] Initialized {
+2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:145] Initialized {
   manifest: {
     main: {
       name: '@travetto/todo-app',
@@ -425,13 +425,11 @@ npx trv run:rest
         renew: true,
         rolling: false,
         sign: true,
-        keyName: 'trv_sid',
         transport: 'cookie'
       }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:193] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 
@@ -457,23 +455,13 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/create-todo.ts <key> <port>
 
-{
-  message: 'Validation errors have occurred',
-  category: 'data',
-  type: 'ValidationResultError',
-  at: '2029-03-14T04:00:01.510Z',
-  details: {
-    errors: [
-      {
-        kind: 'required',
-        active: true,
-        message: 'Missing query: todo',
-        path: 'todo'
-      }
-    ]
-  },
-  status: 400
-}
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:13178:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.main (./doc/create-todo.ts:2:15)
+    at MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:40:13)
+    at Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:58:20)
+    at Function.run (<workspace-root>/module/cli/src/execute.ts:75:9)
 ```
 
 Now create `support/list-todo.ts` with the following contents:
@@ -490,5 +478,11 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-[]
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:13178:13
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.main (./doc/list-todo.ts:2:15)
+    at MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:40:13)
+    at Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:58:20)
+    at Function.run (<workspace-root>/module/cli/src/execute.ts:75:9)
 ```

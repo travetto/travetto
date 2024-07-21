@@ -332,7 +332,7 @@ First we must start the application:
     <figcaption class="terminal">Application Startup
 
 </figcaption>
-    <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@travetto/config:src/service.ts:146<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@travetto/config:src/service.ts:145<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
     main: <span class="token punctuation">{{'{'}}</span>
       name: <span class="token string">'@travetto/todo-app'</span>,
@@ -453,13 +453,11 @@ First we must start the application:
         renew: true,
         rolling: false,
         sign: true,
-        keyName: <span class="token string">'trv_sid'</span>,
         transport: <span class="token string">'cookie'</span>
       <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span>
-<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@travetto/rest:src/application/rest.ts:193<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
+<span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://nodejs.org/api/globals.html#fetch">fetch</a> requests to interact with the new api. <br><br>
@@ -489,23 +487,13 @@ Create <code class="item path">support/create-todo.ts</code> with the following 
 </figcaption>
     <pre><code class="language-bash">$ trv main support/create-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
-<span class="token punctuation">{{'{'}}</span>
-  message: <span class="token string">'Validation errors have occurred'</span>,
-  category: <span class="token string">'data'</span>,
-  type: <span class="token string">'ValidationResultError'</span>,
-  at: <span class="token string">'2029-03-14T04:00:01.510Z'</span>,
-  details: <span class="token punctuation">{{'{'}}</span>
-    errors: <span class="token punctuation">[</span>
-      <span class="token punctuation">{{'{'}}</span>
-        kind: <span class="token string">'required'</span>,
-        active: true,
-        message: <span class="token string">'Missing query: todo'</span>,
-        path: <span class="token string">'todo'</span>
-      <span class="token punctuation">{{'}'}}</span>
-    <span class="token punctuation">]</span>
-  <span class="token punctuation">{{'}'}}</span>,
-  status: <span class="token number">400</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:13178:13
+    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:95:5<span class="token punctuation">)</span>
+    at Object.main <span class="token punctuation">(</span>./doc/create-todo.ts:2:15<span class="token punctuation">)</span>
+    at MainCommand.main <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/cli.main.ts:40:13<span class="token punctuation">)</span>
+    at Function.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:58:20)</span>
+    at Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:75:9<span class="token punctuation">)</span></code></pre>
   </figure>
 
 Now create <code class="item path">support/list-todo.ts</code> with the following contents:
@@ -527,5 +515,11 @@ Now create <code class="item path">support/list-todo.ts</code> with the followin
 </figcaption>
     <pre><code class="language-bash">$ trv main support/list-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
-<span class="token punctuation">[</span><span class="token punctuation">]</span></code></pre>
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:13178:13
+    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:95:5<span class="token punctuation">)</span>
+    at Object.main <span class="token punctuation">(</span>./doc/list-todo.ts:2:15<span class="token punctuation">)</span>
+    at MainCommand.main <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/cli.main.ts:40:13<span class="token punctuation">)</span>
+    at Function.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:58:20)</span>
+    at Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:75:9<span class="token punctuation">)</span></code></pre>
   </figure>
