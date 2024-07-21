@@ -1,7 +1,7 @@
 import util from 'node:util';
 import debug from 'debug';
 
-import { RuntimeIndex } from '@travetto/manifest';
+import { MetadataIndex, RuntimeIndex } from '@travetto/manifest';
 
 export type ConsoleEvent = {
   /** Time of event */
@@ -107,7 +107,7 @@ class $ConsoleManager implements ConsoleListener {
    */
   log(ev: ConsoleEvent): void {
     // Resolve input to source file
-    const source = ev.source ? RuntimeIndex.getSourceFile(ev.source) : RuntimeIndex.mainModule.outputPath;
+    const source = ev.source ? MetadataIndex.getSourceFile(ev.source) : RuntimeIndex.mainModule.outputPath;
     const mod = RuntimeIndex.getModuleFromSource(source);
     const outEv = {
       ...ev,
