@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
-import { ExecUtil, RuntimeContext } from '@travetto/base';
+import { ExecUtil, Runtime } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
 
 /**
@@ -11,7 +11,7 @@ import { cliTpl } from '@travetto/cli';
 export class OpenApiClientHelp {
 
   static async getListOfFormats(dockerImage: string): Promise<string[]> {
-    const formatCache = RuntimeContext.toolPath('openapi-formats.json');
+    const formatCache = Runtime.toolPath('openapi-formats.json');
     if (!await fs.stat(formatCache).catch(() => false)) {
       const { stdout } = await ExecUtil.getResult(spawn('docker', ['run', '--rm', dockerImage, 'list'], { shell: false }));
       const lines = stdout

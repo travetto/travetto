@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Env, RuntimeResources, RuntimeContext } from '@travetto/base';
+import { Env, Runtime } from '@travetto/base';
 
 import { ConfigSource, ConfigSpec } from './types';
 import { ParserManager } from '../parser/parser';
@@ -19,7 +19,7 @@ export class FileConfigSource implements ConfigSource {
 
   constructor(parser: ParserManager) {
     this.#parser = parser;
-    this.#searchPaths = RuntimeResources.searchPaths.slice().reverse();
+    this.#searchPaths = Runtime.resources.searchPaths.slice().reverse();
     this.#profiles = ([
       ['application', 100],
       [Env.name!, 200],
@@ -42,7 +42,7 @@ export class FileConfigSource implements ConfigSource {
               data,
               priority: priority + i++,
               source: `file://${profile}`,
-              detail: RuntimeContext.stripWorkspacePath(full)
+              detail: Runtime.stripWorkspacePath(full)
             })));
           }
         }

@@ -1,4 +1,4 @@
-import { Util, RuntimeContext } from '@travetto/base';
+import { Util, Runtime } from '@travetto/base';
 
 import { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types';
 
@@ -15,7 +15,7 @@ export class MailUtil {
   static buildBrand(file: string, content: string, compile?: string): string {
     const out = [
       'WARNING: Do not modify.',
-      `File is generated from "${file.replace(RuntimeContext.workspace.path, '.')}"`,
+      `File is generated from "${file.replace(Runtime.workspace.path, '.')}"`,
       compile ? `Run \`${compile.replaceAll('\n', ' ')}\` to regenerate` : ''
     ];
     return `<!-- ${out.join(' ').trim()}   -->\n${content}`;

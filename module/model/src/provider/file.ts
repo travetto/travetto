@@ -5,7 +5,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { Class, TimeSpan, RuntimeContext } from '@travetto/base';
+import { Class, TimeSpan, Runtime } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
@@ -36,7 +36,7 @@ export class FileModelConfig {
   cullRate?: number | TimeSpan;
 
   async postConstruct(): Promise<void> {
-    this.folder ??= path.resolve(os.tmpdir(), `trv_file_${RuntimeContext.main.name.replace(/[^a-z]/ig, '_')}`);
+    this.folder ??= path.resolve(os.tmpdir(), `trv_file_${Runtime.main.name.replace(/[^a-z]/ig, '_')}`);
   }
 }
 

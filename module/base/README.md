@@ -121,7 +121,7 @@ export class EnvProp<T> {
 export const Env = delegate({
   /** Get name */
   get name(): string | undefined {
-    return process.env.TRV_ENV || (!prod() ? RuntimeContext.workspace.defaultEnv : undefined);
+    return process.env.TRV_ENV || (!prod() ? Runtime.workspace.defaultEnv : undefined);
   },
 
   /** Are we in development mode */

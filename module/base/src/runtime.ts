@@ -2,6 +2,9 @@ import path from 'node:path';
 
 import { type FunctionMetadata, ManifestContext, RuntimeIndex } from '@travetto/manifest';
 
+import { Env } from './env';
+import { FileLoader } from './file-loader';
+
 const build = <T extends object, K extends keyof ManifestContext>(inp: T, props: K[]): T & Pick<ManifestContext, K> => {
   for (const prop of props) {
     Object.defineProperty(inp, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
@@ -10,7 +13,18 @@ const build = <T extends object, K extends keyof ManifestContext>(inp: T, props:
   return inp as T & ManifestContext;
 };
 
-export const RuntimeContext = build({
+class $RuntimeResources extends FileLoader {
+  #env: string;
+  override get searchPaths(): readonly string[] {
+    if (this.#env !== Env.TRV_RESOURCES.val) {
+      this.#env = Env.TRV_RESOURCES.val!;
+      this.computePaths(Env.resourcePaths);
+    }
+    return super.searchPaths;
+  }
+}
+
+export const Runtime = build({
   /**
    * Produce a workspace relative path
    * @param rel The relative path
@@ -46,5 +60,10 @@ export const RuntimeContext = build({
     return live ?
       RuntimeIndex.getFunctionMetadata(fn) :
       RuntimeIndex.getFunctionMetadataFromClass(fn);
-  }
+  },
+
+  /**
+   * Access to runtime resources
+   */
+  resources: new $RuntimeResources(Env.resourcePaths)
 }, ['main', 'workspace']);

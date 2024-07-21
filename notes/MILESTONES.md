@@ -535,7 +535,7 @@ Release 4.0 - 2024-2-12
 * Redefined how we built up the context
 * Reworked how we navigate the modules for painting/role assignment
 * Exposed:
-   - RuntimeContext - The runtime manifest context.  This is the preferred usage for anyone that needs runtime manifest info
+   - Runtime - The runtime manifest context.  This is the preferred usage for anyone that needs runtime manifest info
    - RuntimeIndex - The runtime manifest index.  This is necessary when interrogating the source at runtime
 * Manifest Index is gone
 

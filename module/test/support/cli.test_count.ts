@@ -1,5 +1,5 @@
 import { CliCommand } from '@travetto/cli';
-import { Env, RuntimeContext } from '@travetto/base';
+import { Env, Runtime } from '@travetto/base';
 
 import { SuiteRegistry } from '../src/registry/suite';
 import { RunnerUtil } from '../src/execute/util';
@@ -30,7 +30,7 @@ export class TestCountCommand {
     const suites = SuiteRegistry.getClasses();
     const total = suites
       .map(c => SuiteRegistry.get(c))
-      .filter(c => !RuntimeContext.describeFunction(c.class)?.abstract)
+      .filter(c => !Runtime.describeFunction(c.class)?.abstract)
       .reduce((acc, c) => acc + (c.tests?.length ?? 0), 0);
 
     console.log(total);

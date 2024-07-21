@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { RuntimeContext } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 import { path, RuntimeIndex } from '@travetto/manifest';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
@@ -97,7 +97,7 @@ export class AssertUtil {
 
     const msg = error.message.split(/\n/)[0];
 
-    const core = { file, classId: suite.classId, methodName, module: RuntimeContext.main.name };
+    const core = { file, classId: suite.classId, methodName, module: Runtime.main.name };
     const coreAll = { ...core, description: msg, lineStart: line, lineEnd: line, lineBodyStart: line };
 
     const assert: Assertion = {

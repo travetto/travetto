@@ -29,7 +29,7 @@ import path from 'node:path';
 import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas31';
 
 import { Config } from '@travetto/config';
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex, Runtime } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
@@ -52,9 +52,9 @@ export class ApiInfoConfig {
   version: string;
 
   postConstruct(): void {
-    this.title ??= RuntimeContext.main.name;
-    this.version ??= RuntimeContext.main.version;
-    this.description ??= RuntimeContext.main.description;
+    this.title ??= Runtime.main.name;
+    this.version ??= Runtime.main.version;
+    this.description ??= Runtime.main.description;
   }
 }
 
