@@ -3,8 +3,8 @@ import assert from 'node:assert';
 import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
-import { FileLoader } from '../src/file-loader';
 
+import { FileLoader } from '../src/file-loader';
 import { Runtime } from '../src/runtime';
 
 @Suite()
