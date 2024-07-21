@@ -8,7 +8,6 @@ import timers from 'node:timers/promises';
 import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { RuntimeIndex } from '@travetto/manifest';
 
 import { Runtime } from '../src/runtime';
 import { ExecUtil } from '../src/exec';
@@ -21,7 +20,7 @@ export class ExecUtilTest {
   @Test()
   async spawn() {
     const proc = spawn('ls', ['-ls'], {
-      cwd: RuntimeIndex.mainModule.outputPath
+      cwd: Runtime.context.workspace.path
     });
     const result = await ExecUtil.getResult(proc);
     assert(result.stdout.includes('package.json'));
@@ -32,7 +31,7 @@ export class ExecUtilTest {
   @Test()
   async spawnBad() {
     const proc = spawn('ls', ['xxxx'], {
-      cwd: RuntimeIndex.mainModule.outputPath,
+      cwd: Runtime.context.workspace.path
     });
     const result = await ExecUtil.getResult(proc, { catch: true });
     assert(result.stderr.includes('xxxx'));
