@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { ControllerConfig } from '@travetto/rest';
-import { RuntimeIndex } from '@travetto/manifest';
 import { Class, Runtime } from '@travetto/base';
 
 import type { ClientGenerator } from './types';

@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { ManifestContext, MetadataIndex, RuntimeIndex } from '@travetto/manifest';
+import { IndexedModule, ManifestContext, MetadataIndex, RuntimeIndex } from '@travetto/manifest';
 
 import { Env } from './env';
 import { FileLoader } from './file-loader';
@@ -29,6 +29,14 @@ export const Runtime = {
   resources: new $RuntimeResources(Env.resourcePaths),
   metadata: MetadataIndex,
   context: buildCtx(['main', 'workspace']),
+
+  /**
+   * Main module
+   */
+  get mainModule(): IndexedModule {
+    return RuntimeIndex.mainModule;
+  },
+
   /**
    * Produce a workspace relative path
    * @param rel The relative path
@@ -57,6 +65,5 @@ export const Runtime = {
   get monoRoot(): boolean {
     return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
   }
-
 };
 

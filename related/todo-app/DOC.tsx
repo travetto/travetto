@@ -1,12 +1,11 @@
 /** @jsxImportSource @travetto/doc */
-import { RuntimeIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';
-import { Env, ShutdownManager, Util } from '@travetto/base';
+import { Env, Runtime, ShutdownManager, Util } from '@travetto/base';
 
 const ModelType = d.codeLink('ModelType', '@travetto/model/src/types/model.ts', /./);
-const TodoRoot = d.ref('Todo App', RuntimeIndex.mainModule.outputPath);
+const TodoRoot = d.ref('Todo App', Runtime.mainModule.outputPath);
 
 const port = 12555;
 

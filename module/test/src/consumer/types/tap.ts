@@ -1,6 +1,5 @@
-import { RuntimeIndex } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
-import { AppError, TimeUtil } from '@travetto/base';
+import { AppError, TimeUtil, Runtime } from '@travetto/base';
 import { stringify } from 'yaml';
 
 import { TestEvent } from '../../model/event';
@@ -71,7 +70,7 @@ export class TapEmitter implements TestConsumer {
             this.#enhancer.assertNumber(++subCount),
             '-',
             this.#enhancer.assertDescription(text),
-            `${this.#enhancer.assertFile(asrt.file.replace(RuntimeIndex.mainModule.sourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
+            `${this.#enhancer.assertFile(asrt.file.replace(Runtime.mainModule.sourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
           ].join(' ');
 
           if (asrt.error) {

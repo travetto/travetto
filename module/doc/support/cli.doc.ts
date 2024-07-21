@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
-import { PackageUtil, RuntimeIndex } from '@travetto/manifest';
+import { PackageUtil } from '@travetto/manifest';
 import { ExecUtil, Env, watchCompiler, Runtime } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, CliUtil } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
@@ -56,7 +56,7 @@ export class DocCommand implements CliCommandShape {
     for await (const { action, file } of watchCompiler({ restartOnExit: true })) {
       if (action === 'update' && file === this.input) {
         const proc = spawn('npx', ['trv', ...args], {
-          cwd: RuntimeIndex.mainModule.sourcePath,
+          cwd: Runtime.mainModule.sourcePath,
           shell: false,
           env: { ...process.env, ...Env.TRV_QUIET.export(true) },
           stdio: 'inherit'

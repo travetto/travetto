@@ -3,7 +3,6 @@ import { spawn } from 'node:child_process';
 import path from 'node:path';
 
 import { Env, ExecUtil, Runtime } from '@travetto/base';
-import { RuntimeIndex } from '@travetto/manifest';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
 
@@ -51,8 +50,8 @@ export class DocAngularCommand {
           progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
           filter: mod => mods.has(mod)
         });
-      await ExecUtil.getResult(spawn('trv', ['doc'], { env: { ...process.env, ...Env.TRV_MANIFEST.export('') }, cwd: RuntimeIndex.mainModule.sourcePath }));
-      mods.add(RuntimeIndex.mainModule);
+      await ExecUtil.getResult(spawn('trv', ['doc'], { env: { ...process.env, ...Env.TRV_MANIFEST.export('') }, cwd: Runtime.mainModule.sourcePath }));
+      mods.add(Runtime.mainModule);
     } else {
       await ExecUtil.getResult(spawn('trv', ['doc'], {
         env: { ...process.env, ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },

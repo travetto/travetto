@@ -49,7 +49,7 @@ export class DocRunUtil {
    * Clean run output
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
-    const cwd = path.toPosix((cfg.module ? RuntimeIndex.getModule(cfg.module)! : RuntimeIndex.mainModule).sourcePath);
+    const cwd = path.toPosix((cfg.module ? RuntimeIndex.getModule(cfg.module)! : Runtime.mainModule).sourcePath);
     text = util.stripVTControlCharacters(text.trim())
       .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
@@ -76,7 +76,7 @@ export class DocRunUtil {
    */
   static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
     return spawn(cmd, args, {
-      cwd: path.toPosix(config.cwd ?? (config.module ? RuntimeIndex.getModule(config.module)! : RuntimeIndex.mainModule).sourcePath),
+      cwd: path.toPosix(config.cwd ?? (config.module ? RuntimeIndex.getModule(config.module)! : Runtime.mainModule).sourcePath),
       shell: '/bin/bash',
       env: {
         ...process.env,
