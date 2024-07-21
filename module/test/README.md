@@ -87,7 +87,7 @@ var ᚕf = "@travetto/test/doc/assert-example.js";
 const node_assert_1 = tslib_1.__importDefault(require("node:assert"));
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
-    static Ⲑinit = Ⲑ_metadata_1.MetadataIndex.registerFunction(SimpleTest, ᚕf, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11] } }, false, false);
+    static Ⲑinit = Ⲑ_metadata_1.MetadataIndex.register(SimpleTest, ᚕf, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11] } }, false, false);
     async test() {
         if (Ⲑ_util_1.RunnerUtil.tryDebugger)
             debugger;

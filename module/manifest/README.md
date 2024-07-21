@@ -54,7 +54,7 @@ const Ⲑ_metadata_1 = tslib_1.__importStar(require("@travetto/manifest/src/meta
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 var ᚕf = "@travetto/manifest/doc/test-class.js";
 let TestClass = class TestClass {
-    static Ⲑinit = Ⲑ_metadata_1.MetadataIndex.registerFunction(TestClass, ᚕf, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
+    static Ⲑinit = Ⲑ_metadata_1.MetadataIndex.register(TestClass, ᚕf, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
     async doStuff() { }
 };
 exports.TestClass = TestClass;

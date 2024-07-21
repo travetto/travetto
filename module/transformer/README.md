@@ -108,7 +108,7 @@ const Ⲑ_metadata_1 = tslib_1.__importStar(require("@travetto/manifest/src/meta
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 var ᚕf = "@travetto/transformer/doc/upper.js";
 let TEST = class TEST {
-    static Ⲑinit = Ⲑ_metadata_1.MetadataIndex.registerFunction(TEST, ᚕf, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8] } }, false, false);
+    static Ⲑinit = Ⲑ_metadata_1.MetadataIndex.register(TEST, ᚕf, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8] } }, false, false);
     NAME;
     AGE;
     DOB;
