@@ -47,7 +47,7 @@ export class DocRunUtil {
 
   /** Build cwd from config */
   static cwd(cfg: RunConfig): string {
-    return path.toPosix(cfg.cwd ?? (cfg.module ? RuntimeIndex.getModule(cfg.module)?.sourcePath! : Runtime.mainSourcePath));
+    return path.toPosix(cfg.module ? RuntimeIndex.getModule(cfg.module)?.sourcePath! : Runtime.mainSourcePath);
   }
 
   /** Clean run output */
@@ -75,7 +75,7 @@ export class DocRunUtil {
 
   /** Spawn command with appropriate environment, and cwd */
   static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
-    const cwd = this.cwd(config);
+    const cwd = config.cwd ?? this.cwd(config);
     const env = {
       ...process.env,
       ...Env.DEBUG.export(false),
@@ -89,7 +89,7 @@ export class DocRunUtil {
       ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
       ...config.env
     };
-    return spawn('npx', [cmd, ...args], { cwd, shell: '/bin/bash', env });
+    return spawn(cmd, args, { cwd, shell: '/bin/bash', env });
   }
 
   /**
@@ -100,6 +100,9 @@ export class DocRunUtil {
     try {
       const proc = this.spawn(cmd, args, config);
       const res = await ExecUtil.getResult(proc, { catch: true });
+      if (!res.valid) {
+        throw new Error(res.stderr);
+      }
       final = util.stripVTControlCharacters(res.stdout).trim() || util.stripVTControlCharacters(res.stderr).trim();
     } catch (err) {
       if (err instanceof Error) {

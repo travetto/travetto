@@ -168,7 +168,7 @@ $ trv pack:docker -x /dev/stdout run:rest
 #!/bin/sh
 export DIST=/tmp/<temp-folder>
 export TRV_OUT=<workspace-root>/.trv/output
-export ROOT=.
+export ROOT=<workspace-root>/related/todo-app
 export MOD=@travetto/todo-app
 
 # Cleaning Output $DIST 

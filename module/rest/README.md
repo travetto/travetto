@@ -243,7 +243,7 @@ Initialized {
     main: { name: '@travetto-doc/rest', folder: '' },
     workspace: {
       name: '@travetto-doc/rest',
-      path: '<workspace-root>/module/rest/doc-exec',
+      path: './doc-exec',
       mono: false,
       manager: 'npm',
       type: 'commonjs',
@@ -255,7 +255,7 @@ Initialized {
     debug: false,
     production: false,
     dynamic: false,
-    resourcePaths: [ '<workspace-root>/module/rest/doc-exec/resources' ],
+    resourcePaths: [ './doc-exec/resources' ],
     profiles: []
   },
   config: {
@@ -328,7 +328,7 @@ Initialized {
     main: { name: '@travetto-doc/rest', folder: '' },
     workspace: {
       name: '@travetto-doc/rest',
-      path: '<workspace-root>/module/rest/doc-exec',
+      path: './doc-exec',
       mono: false,
       manager: 'npm',
       type: 'commonjs',
@@ -340,7 +340,7 @@ Initialized {
     debug: false,
     production: true,
     dynamic: false,
-    resourcePaths: [ '<workspace-root>/module/rest/doc-exec/resources' ],
+    resourcePaths: [ './doc-exec/resources' ],
     profiles: []
   },
   config: {
