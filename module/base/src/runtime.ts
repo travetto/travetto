@@ -36,7 +36,6 @@ export const Runtime = {
   get mainModule(): IndexedModule {
     return RuntimeIndex.mainModule;
   },
-
   /**
    * Produce a workspace relative path
    * @param rel The relative path

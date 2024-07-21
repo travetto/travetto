@@ -33,7 +33,7 @@ class $MetadataIndex {
    * @param `synthetic` Is this code generated at build time
    * @private
    */
-  registerFunction(
+  register(
     cls: Function, fileOrImport: string, tag: FunctionMetadataTag,
     methods?: Record<string, FunctionMetadataTag>, abstract?: boolean, synthetic?: boolean
   ): boolean {

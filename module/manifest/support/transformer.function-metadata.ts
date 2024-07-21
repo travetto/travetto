@@ -84,7 +84,7 @@ export class RegisterTransformer {
     const name = node.name?.escapedText.toString() ?? '';
 
     const meta = state.factory.createCallExpression(
-      state.createAccess(ident, 'registerFunction'),
+      state.createAccess(ident, 'register'),
       [],
       [
         state.createIdentifier(name),
@@ -127,7 +127,7 @@ export class RegisterTransformer {
       const ident = state.createAccess(state[metadataIdx].ident, METADATA_IDX_CLS);
       const tag = this.#tag(state, node);
       const meta = state.factory.createCallExpression(
-        state.createAccess(ident, 'registerFunction'),
+        state.createAccess(ident, 'register'),
         [],
         [
           state.createIdentifier(node.name),
