@@ -18,7 +18,9 @@ export class ProcessHandle {
   async writePid(pid: number): Promise<void> {
     const current = await this.getPid();
     if (current && pid !== current && current > 0) {
-      process.kill(current); // Kill before write
+      try {
+        process.kill(current); // Kill before write
+      } catch { }
     }
     await fs.mkdir(path.dirname(this.#file), { recursive: true });
     return fs.writeFile(this.#file, JSON.stringify(pid), 'utf8');
