@@ -3,7 +3,7 @@ import rl from 'node:readline/promises';
 
 import { ExecutionResult, Env, Util, ExecUtil } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
-import { IndexedModule } from '@travetto/manifest';
+import type { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 

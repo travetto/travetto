@@ -1,9 +1,8 @@
 import os from 'node:os';
 import util from 'node:util';
-import path from 'node:path';
 import { spawn, ChildProcess } from 'node:child_process';
 
-import { RuntimeIndex } from '@travetto/manifest';
+import { path, RuntimeIndex } from '@travetto/manifest';
 import { Env, ExecUtil, RuntimeContext } from '@travetto/base';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();

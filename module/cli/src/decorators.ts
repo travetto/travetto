@@ -14,7 +14,7 @@ import { CliParseUtil } from './parse';
  */
 export function CliCommand(cfg: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
-    const meta = RuntimeIndex.getFunctionMetadata(target);
+    const meta = RuntimeContext.describeFunction(target);
     if (!meta || meta.abstract) {
       return;
     }

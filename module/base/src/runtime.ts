@@ -1,7 +1,6 @@
 import path from 'node:path';
 
-import { ManifestContext, RuntimeIndex } from '@travetto/manifest';
-
+import { type FunctionMetadata, ManifestContext, RuntimeIndex } from '@travetto/manifest';
 
 const build = <T extends object, K extends keyof ManifestContext>(inp: T, props: K[]): T & Pick<ManifestContext, K> => {
   for (const prop of props) {
@@ -39,5 +38,11 @@ export const RuntimeContext = build({
    */
   get monoRoot(): boolean {
     return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
+  },
+  /**
+   * Describe a function
+   */
+  describeFunction(fn?: Function, live = true): FunctionMetadata | undefined {
+    return RuntimeIndex.getFunctionMetadataFromClass(fn);
   }
 }, ['main', 'workspace']);

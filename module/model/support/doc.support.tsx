@@ -1,9 +1,9 @@
 /** @jsxImportSource @travetto/doc */
 import { readFileSync } from 'node:fs';
 
-import { RuntimeIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement } from '@travetto/doc';
 import { Config } from '@travetto/config';
+import { RuntimeContext } from '@travetto/base';
 
 export const Links = {
   Basic: d.codeLink('Basic', '@travetto/model/src/service/basic.ts', /export interface/),
@@ -16,7 +16,7 @@ export const Links = {
 
 export const ModelTypes = (file: string | Function): DocJSXElement[] => {
   if (typeof file !== 'string') {
-    file = RuntimeIndex.getFunctionMetadata(file)!.source;
+    file = RuntimeContext.describeFunction(file)!.source;
   }
   const contents = readFileSync(file, 'utf8');
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
@@ -31,7 +31,7 @@ export const ModelTypes = (file: string | Function): DocJSXElement[] => {
   return found.map(v => <li>{v}</li>);
 };
 
-export const ModelCustomConfig = ({ cfg }: { cfg: Function }): JSXElement => <>
+export const ModelCustomConfig = ({ cfg }: { cfg: Function }): DocJSXElement => <>
   Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source
   or config, you can override and register it with the {d.mod('Di')} module.
 

@@ -1,4 +1,4 @@
-import { ManifestModuleRole } from '@travetto/manifest';
+import type { ManifestModuleRole } from '@travetto/manifest';
 
 import type { TimeSpan } from './time';
 

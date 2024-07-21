@@ -1,6 +1,6 @@
-import { RuntimeIndex } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
 import { TestClass } from './test-class';
 
 export function main(): void {
-  console.log(RuntimeIndex.getFunctionMetadata(TestClass));
+  console.log(RuntimeContext.describeFunction(TestClass));
 }

@@ -1,5 +1,4 @@
-import { RuntimeIndex } from '@travetto/manifest';
-import { Class, AppError } from '@travetto/base';
+import { Class, AppError, RuntimeContext } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig } from './types';
@@ -188,7 +187,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       class: cls,
       validators: [],
       subTypeField: 'type',
-      baseType: RuntimeIndex.getFunctionMetadata(cls)?.abstract,
+      baseType: RuntimeContext.describeFunction(cls)?.abstract,
       metadata: {},
       methods: {},
       views: {
