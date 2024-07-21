@@ -14,11 +14,11 @@ export class RepoPublishCommand implements CliCommandShape {
   dryRun = true;
 
   async main(): Promise<void> {
-    const published = await RepoExecUtil.execOnModules('all', mod => PackageManager.isPublished(Runtime, mod), {
+    const published = await RepoExecUtil.execOnModules('all', mod => PackageManager.isPublished(Runtime.context, mod), {
       filter: mod => !!mod.workspace && !mod.internal,
       progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,
       showStderr: false,
-      transformResult: (mod, res) => PackageManager.validatePublishedResult(Runtime, mod, res),
+      transformResult: (mod, res) => PackageManager.validatePublishedResult(Runtime.context, mod, res),
     });
 
     if (this.dryRun) {
@@ -26,7 +26,7 @@ export class RepoPublishCommand implements CliCommandShape {
     }
 
     await RepoExecUtil.execOnModules(
-      'all', mod => PackageManager.publish(Runtime, mod, this.dryRun),
+      'all', mod => PackageManager.publish(Runtime.context, mod, this.dryRun),
       {
         progressMessage: (mod) => `Published [%idx/%total] -- ${mod?.name}`,
         showStdout: false,
