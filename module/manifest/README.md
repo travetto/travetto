@@ -35,7 +35,7 @@ During the compilation process, it is helpful to know how the output content dif
 ## Class and Function Metadata
 For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every `class` is decorated with an additional field of `Ⲑid`.  `Ⲑid` represents a computed id that is tied to the file/class combination. 
 
-`Ⲑid` is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the [RuntimeIndex](https://github.com/travetto/travetto/tree/main/module/manifest/src/runtime.ts#L13) using the `getFunctionMetadata` method.
+`Ⲑid` is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the [MetadataIndex](https://github.com/travetto/travetto/tree/main/module/manifest/src/metadata.ts#L12) using the `get` method.
 
 **Code: Test Class**
 ```typescript
@@ -50,11 +50,11 @@ export class TestClass {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TestClass = void 0;
 const tslib_1 = require("tslib");
-const Ⲑ_runtime_1 = tslib_1.__importStar(require("@travetto/manifest/src/runtime.js"));
+const Ⲑ_metadata_1 = tslib_1.__importStar(require("@travetto/manifest/src/metadata"));
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 var ᚕf = "@travetto/manifest/doc/test-class.js";
 let TestClass = class TestClass {
-    static Ⲑinit = Ⲑ_runtime_1.RuntimeIndex.registerFunction(TestClass, ᚕf, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
+    static Ⲑinit = Ⲑ_metadata_1.MetadataIndex.registerFunction(TestClass, ᚕf, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
     async doStuff() { }
 };
 exports.TestClass = TestClass;
@@ -166,10 +166,10 @@ Imports pointing at $`node:path` and $`path` are rewritten at compile time to po
           [ "src/file.ts", "ts", 1868155200000 ],
           [ "src/global.d.ts", "typings", 1868155200000 ],
           [ "src/manifest-index.ts", "ts", 1868155200000 ],
+          [ "src/metadata.ts", "ts", 1868155200000 ],
           [ "src/module.ts", "ts", 1868155200000 ],
           [ "src/package.ts", "ts", 1868155200000 ],
           [ "src/path.ts", "ts", 1868155200000 ],
-          [ "src/runtime.ts", "ts", 1868155200000 ],
           [ "src/util.ts", "ts", 1868155200000 ],
           [ "src/types/common.ts", "ts", 1868155200000 ],
           [ "src/types/context.ts", "ts", 1868155200000 ],

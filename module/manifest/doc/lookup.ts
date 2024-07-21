@@ -1,6 +1,6 @@
-import { Runtime } from '@travetto/base';
+import { MetadataIndex } from '@travetto/manifest';
 import { TestClass } from './test-class';
 
 export function main(): void {
-  console.log(Runtime.metadata.get(TestClass));
+  console.log(MetadataIndex.get(TestClass));
 }

@@ -68,7 +68,7 @@ export class DocCommand implements CliCommandShape {
 
   async render(): Promise<void> {
     const { DocRenderer } = await import('../src/render/renderer');
-    const ctx = await DocRenderer.get(this.input, Runtime);
+    const ctx = await DocRenderer.get(this.input, Runtime.context);
     const outputs = this.outputs.map(output =>
       output.includes('.') ? [path.extname(output).replace('.', ''), path.resolve(output)] :
         [output, null] as const
