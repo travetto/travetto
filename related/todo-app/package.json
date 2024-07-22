@@ -33,7 +33,7 @@
     "vue": "^3.4.30"
   },
   "devDependencies": {
-    "@travetto/compiler": "^5.0.0-rc.1",
+    "@travetto/compiler": "^5.0.0-rc.2",
     "@travetto/email-compiler": "^5.0.0-rc.1",
     "@travetto/pack": "^5.0.0-rc.1",
     "@travetto/rest-client": "^5.0.0-rc.1"

@@ -5,7 +5,7 @@
     "@travetto/cli": "^5.0.0-rc.1"
   },
   "devDependencies": {
-    "@travetto/compiler": "^5.0.0-rc.1",
+    "@travetto/compiler": "^5.0.0-rc.2",
     "@travetto/pack": "^5.0.0-rc.1"
   },
   "travetto": {},
