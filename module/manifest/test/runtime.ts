@@ -3,8 +3,7 @@ import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
 
-import { MetadataIndex } from '../src/metadata';
-import { RuntimeIndex } from '../src/manifest-index';
+import { RuntimeIndex } from '../src/runtime';
 
 @Suite()
 class RuntimeIndexTests {
@@ -21,13 +20,13 @@ class RuntimeIndexTests {
 
     const { outputPath } = location;
 
-    const modId = MetadataIndex.getId(path.resolve(outputPath, 'test', 'runtime.js'));
+    const modId = RuntimeIndex.getId(path.resolve(outputPath, 'test', 'runtime.js'));
     assert(modId === '@travetto/manifest:test/runtime');
 
-    const modId2 = MetadataIndex.getId(path.resolve(RuntimeIndex.getModule('@travetto/test')!.outputPath, 'src', 'assert', 'util.js'));
+    const modId2 = RuntimeIndex.getId(path.resolve(RuntimeIndex.getModule('@travetto/test')!.outputPath, 'src', 'assert', 'util.js'));
     assert(modId2 === '@travetto/test:src/assert/util');
 
-    const modId3 = MetadataIndex.getId(path.resolve(outputPath, 'test', 'fixtures', 'simple.ts'));
+    const modId3 = RuntimeIndex.getId(path.resolve(outputPath, 'test', 'fixtures', 'simple.ts'));
     assert(modId3 === '@travetto/manifest:test/fixtures/simple.ts');
   }
 

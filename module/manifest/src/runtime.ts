@@ -1,15 +1,11 @@
 import { path } from './path';
-import { RuntimeIndex } from './manifest-index';
-
-import type { FunctionMetadata, FunctionMetadataTag } from './types/common';
+import type { FunctionMetadata, FunctionMetadataTag, ManifestModule } from '../__index__';
+import { ManifestIndex } from './manifest-index';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
 
-/**
- * Extended manifest index geared for application execution
- */
-class $MetadataIndex {
+class $RuntimeIndex extends ManifestIndex {
 
   #metadata = new Map<string, FunctionMetadata>();
 
@@ -18,7 +14,7 @@ class $MetadataIndex {
    */
   getId(filename: string, clsName?: string): string {
     filename = path.toPosix(filename);
-    const id = RuntimeIndex.getEntry(filename)?.id ?? filename;
+    const id = this.getEntry(filename)?.id ?? filename;
     return clsName ? `${id}￮${clsName}` : id;
   }
 
@@ -33,17 +29,31 @@ class $MetadataIndex {
    * @param `synthetic` Is this code generated at build time
    * @private
    */
-  register(
+  registerFunction(
     cls: Function, fileOrImport: string, tag: FunctionMetadataTag,
     methods?: Record<string, FunctionMetadataTag>, abstract?: boolean, synthetic?: boolean
   ): boolean {
-    const source = RuntimeIndex.getSourceFile(fileOrImport);
+    const source = this.getSourceFile(fileOrImport);
     const id = this.getId(source, cls.name);
     Object.defineProperty(cls, 'Ⲑid', { value: id });
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     (cls as unknown as Metadated)[METADATA] = { id, source, ...tag, methods, abstract, synthetic };
     this.#metadata.set(id, { id, source, ...tag, methods, abstract, synthetic });
     return true;
+  }
+
+  /**
+   * Get manifest module by name
+   */
+  getManifestModule(mod: string): ManifestModule {
+    return this.manifest.modules[mod];
+  }
+
+  /**
+   * Get manifest modules
+   */
+  getManifestModules(): ManifestModule[] {
+    return Object.values(this.manifest.modules);
   }
 
   /**
@@ -61,6 +71,18 @@ class $MetadataIndex {
     const id = clsId === undefined ? '' : typeof clsId === 'string' ? clsId : clsId.Ⲑid;
     return this.#metadata.get(id);
   }
+
+  /**
+   * Resolve module path to folder, with support for main module and monorepo support
+   */
+  resolveModulePath(modulePath: string): string {
+    const main = this.manifest.main.name;
+    const workspace = this.manifest.workspace.path;
+    const [base, sub] = modulePath
+      .replace(/^(@@?)(#|$)/g, (_, v, r) => `${v === '@' ? main : workspace}${r}`)
+      .split('#');
+    return path.resolve(this.hasModule(base) ? this.getModule(base)!.sourcePath : base, sub ?? '.');
+  }
 }
 
-export const MetadataIndex = new $MetadataIndex();
+export const RuntimeIndex = new $RuntimeIndex(process.env.TRV_MANIFEST!);

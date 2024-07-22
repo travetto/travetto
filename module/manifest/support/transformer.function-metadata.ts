@@ -11,23 +11,23 @@ const MANIFEST_MOD = '@travetto/manifest';
 const MANIFEST_MOD_SRC = `${MANIFEST_MOD}/src`;
 const MANIFEST_IDX = `${MANIFEST_MOD}/__index__`;
 
-const METADATA_IDX_IMPORT = `${MANIFEST_MOD_SRC}/metadata`;
-const METADATA_IDX_CLS = 'MetadataIndex';
+const RUNTIME_IDX_IMPORT = `${MANIFEST_MOD_SRC}/runtime`;
+const RUNTIME_IDX_CLS = 'RuntimeIndex';
 
 const methods = Symbol.for(`${MANIFEST_MOD}:methods`);
 const cls = Symbol.for(`${MANIFEST_MOD}:class`);
 const fn = Symbol.for(`${MANIFEST_MOD}:function`);
-const metadataIdx = Symbol.for(`${MANIFEST_MOD}:metadataIndex`);
+const runtimeIdx = Symbol.for(`${MANIFEST_MOD}:runtimeIndex`);
 
 interface MetadataInfo {
-  [metadataIdx]?: Import;
+  [runtimeIdx]?: Import;
   [methods]?: Record<string, FunctionMetadataTag>;
   [cls]?: FunctionMetadataTag;
   [fn]?: number;
 }
 
 /**
- * Providing metadata for classes
+ * Providing runtime for classes
  */
 export class RegisterTransformer {
 
@@ -70,7 +70,7 @@ export class RegisterTransformer {
   }
 
   /**
-   * After visiting each class, register all the collected metadata
+   * After visiting each class, register all the collected runtime
    */
   @AfterClass()
   static registerClassMetadata(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
@@ -78,13 +78,13 @@ export class RegisterTransformer {
       return node;
     }
 
-    state[metadataIdx] ??= state.importFile(METADATA_IDX_IMPORT);
-    const ident = state.createAccess(state[metadataIdx].ident, METADATA_IDX_CLS);
+    state[runtimeIdx] ??= state.importFile(RUNTIME_IDX_IMPORT);
+    const ident = state.createAccess(state[runtimeIdx].ident, RUNTIME_IDX_CLS);
 
     const name = node.name?.escapedText.toString() ?? '';
 
     const meta = state.factory.createCallExpression(
-      state.createAccess(ident, 'register'),
+      state.createAccess(ident, 'registerFunction'),
       [],
       [
         state.createIdentifier(name),
@@ -123,11 +123,11 @@ export class RegisterTransformer {
 
     if (ts.isFunctionDeclaration(node) && node.name && node.parent && ts.isSourceFile(node.parent)) {
       // If we have a class like function
-      state[metadataIdx] ??= state.importFile(METADATA_IDX_IMPORT);
-      const ident = state.createAccess(state[metadataIdx].ident, METADATA_IDX_CLS);
+      state[runtimeIdx] ??= state.importFile(RUNTIME_IDX_IMPORT);
+      const ident = state.createAccess(state[runtimeIdx].ident, RUNTIME_IDX_CLS);
       const tag = this.#tag(state, node);
       const meta = state.factory.createCallExpression(
-        state.createAccess(ident, 'register'),
+        state.createAccess(ident, 'registerFunction'),
         [],
         [
           state.createIdentifier(node.name),

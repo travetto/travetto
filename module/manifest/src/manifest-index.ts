@@ -44,6 +44,13 @@ export class ManifestIndex {
     return this.#outputRoot;
   }
 
+  /**
+   * Get main module for manifest
+   */
+  get mainModule(): IndexedModule {
+    return this.getModule(this.manifest.main.name)!;
+  }
+
   init(manifestInput: string): void {
     this.#manifest = ManifestUtil.readManifestSync(manifestInput);
     this.#outputRoot = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
@@ -283,39 +290,4 @@ export class ManifestIndex {
     );
     return lookup(file.replace(`${base}/`, '').split('/'));
   }
-
-  /**
-   * Get main module for manifest
-   */
-  get mainModule(): IndexedModule {
-    return this.getModule(this.manifest.main.name)!;
-  }
-
-  /**
-   * Resolve module path to folder, with support for main module and monorepo support
-   */
-  resolveModulePath(modulePath: string): string {
-    const main = this.manifest.main.name;
-    const workspace = this.manifest.workspace.path;
-    const [base, sub] = modulePath
-      .replace(/^(@@?)(#|$)/g, (_, v, r) => `${v === '@' ? main : workspace}${r}`)
-      .split('#');
-    return path.resolve(this.hasModule(base) ? this.getModule(base)!.sourcePath : base, sub ?? '.');
-  }
-
-  /**
-   * Get manifest module by name
-   */
-  getManifestModule(mod: string): ManifestModule {
-    return this.manifest.modules[mod];
-  }
-
-  /**
-   * Get manifest modules
-   */
-  getManifestModules(): ManifestModule[] {
-    return Object.values(this.manifest.modules);
-  }
 }
-
-export const RuntimeIndex = new ManifestIndex(process.env.TRV_MANIFEST!);

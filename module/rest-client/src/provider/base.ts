@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { MetadataIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { Class, RuntimeContext, Util } from '@travetto/base';
 import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
@@ -214,7 +214,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
   }
 
   buildSee(cls: Class, method?: string): string {
-    const meta = MetadataIndex.getFromClass(cls);
+    const meta = RuntimeIndex.getFromClass(cls);
     if (!meta) {
       return '';
     }
@@ -313,7 +313,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
         classId: schema.class.Ⲑid,
       };
       this.#schemaContent.set(schema.class.Ⲑid, baseResult);
-      this.#files.add(MetadataIndex.getFromClass(schema.class)!.source);
+      this.#files.add(RuntimeIndex.getFromClass(schema.class)!.source);
       return baseResult;
     }
 
@@ -357,14 +357,14 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     };
 
     this.#schemaContent.set(schema.class.Ⲑid, result);
-    this.#files.add(MetadataIndex.getFromClass(schema.class)!.source);
+    this.#files.add(RuntimeIndex.getFromClass(schema.class)!.source);
 
     return result;
   }
 
   async finalize(): Promise<void> {
     for (const [file, cls] of this.commonFiles) {
-      await this.writeContent(file, await fs.readFile(typeof cls === 'string' ? cls : MetadataIndex.get(cls)!.source, 'utf8'));
+      await this.writeContent(file, await fs.readFile(typeof cls === 'string' ? cls : RuntimeIndex.get(cls)!.source, 'utf8'));
     }
 
     const files = [
@@ -396,7 +396,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     if (cfg.documented !== false) {
       const result = this.renderController(cfg);
       this.#controllerContent.set(result.classId, result);
-      this.#files.add(MetadataIndex.getFromClass(cfg.class)!.source);
+      this.#files.add(RuntimeIndex.getFromClass(cfg.class)!.source);
     }
   }
 

@@ -3,7 +3,7 @@ import { RetargettingProxy } from '@travetto/registry';
 
 import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
 import type { ClassTarget, InjectableConfig } from '../src/types';
-import { MetadataIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 /**
  * Wraps the Dependency Registry to support proxying instances
@@ -69,7 +69,7 @@ class $DynamicDependencyRegistry {
     const classId = cls.Ⲑid;
 
     if (
-      !MetadataIndex.get(cls)?.abstract &&
+      !RuntimeIndex.get(cls)?.abstract &&
       this.#proxies.has(classId) &&
       this.#proxies.get(classId)!.has(config.qualifier)
     ) {
