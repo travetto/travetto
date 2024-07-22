@@ -52,8 +52,9 @@ export class DocRunUtil {
 
   /** Clean run output */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
+    const cwd = this.cwd(cfg);
     text = util.stripVTControlCharacters(text.trim())
-      .replaceAll(this.cwd(cfg), '.')
+      .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
       .replaceAll(RuntimeContext.workspace.path, '<workspace-root>')
       .replace(/[/]tmp[/][a-z_A-Z0-9\/\-]+/g, '/tmp/<temp-folder>')
@@ -73,23 +74,27 @@ export class DocRunUtil {
     return text;
   }
 
-  /** Spawn command with appropriate environment, and cwd */
+  /**
+   * Spawn command with appropriate environment, and cwd
+   */
   static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
-    const cwd = config.cwd ?? this.cwd(config);
-    const env = {
-      ...process.env,
-      ...Env.DEBUG.export(false),
-      ...Env.TRV_CAN_RESTART.export(false),
-      ...Env.TRV_CLI_IPC.export(undefined),
-      ...Env.TRV_MANIFEST.export(''),
-      ...Env.TRV_BUILD.export('none'),
-      ...Env.TRV_BUILD_REENTRANT.export(true),
-      ...Env.TRV_ROLE.export(undefined),
-      ...Env.TRV_MODULE.export(config.module ?? ''),
-      ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
-      ...config.env
-    };
-    return spawn(cmd, args, { cwd, shell: '/bin/bash', env });
+    return spawn(cmd, args, {
+      cwd: config.cwd ?? this.cwd(config),
+      shell: '/bin/bash',
+      env: {
+        ...process.env,
+        ...Env.DEBUG.export(false),
+        ...Env.TRV_CAN_RESTART.export(false),
+        ...Env.TRV_CLI_IPC.export(undefined),
+        ...Env.TRV_MANIFEST.export(''),
+        ...Env.TRV_BUILD.export('none'),
+        ...Env.TRV_BUILD_REENTRANT.export(true),
+        ...Env.TRV_ROLE.export(undefined),
+        ...Env.TRV_MODULE.export(config.module ?? ''),
+        ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
+        ...config.env
+      }
+    });
   }
 
   /**
