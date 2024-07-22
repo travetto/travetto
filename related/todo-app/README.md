@@ -326,11 +326,28 @@ npx trv run:rest
     debug: false,
     production: false,
     dynamic: false,
-    resourcePaths: [],
+    resourcePaths: [
+      './resources',
+      '<workspace-root>/resources'
+    ],
     profiles: []
   },
   config: {
-    sources: [ { priority: 999, source: 'memory://override' } ],
+    sources: [
+      { priority: 100, source: 'file://application', detail: 'resources/application.yaml' },
+      {
+        priority: 101,
+        source: 'file://application',
+        detail: 'related/todo-app/resources/application.yml'
+      },
+      { priority: 200, source: 'file://local', detail: 'resources/local.yml' },
+      {
+        priority: 201,
+        source: 'file://local',
+        detail: 'related/todo-app/resources/local.yml'
+      },
+      { priority: 999, source: 'memory://override' }
+    ],
     active: {
       ApiHostConfig: { openapi: '3.0.0' },
       ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
@@ -379,7 +396,12 @@ npx trv run:rest
       RestAuthLoginConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
-      RestClientConfig: { providers: {} },
+      RestClientConfig: {
+        providers: {
+          '0': { type: 'fetch', output: 'related/todo-app/api-client' },
+          '1': { type: 'rest-rpc', output: 'related/todo-app/resources/ui/js/api-client' }
+        }
+      },
       RestConfig: {
         serve: true,
         port: 12555,

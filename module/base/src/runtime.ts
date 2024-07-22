@@ -25,7 +25,7 @@ const buildCtx = <T extends object, K extends keyof ManifestContext>(inp: T, pro
 };
 
 /** Runtime resources */
-export const RuntimeResources = new $RuntimeResources([]);
+export const RuntimeResources = new $RuntimeResources(Env.resourcePaths);
 
 /** Constrained version of {@type ManifestContext} */
 export const RuntimeContext = buildCtx({
