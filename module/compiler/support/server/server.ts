@@ -191,6 +191,10 @@ export class CompilerServer {
       if (ev.type === 'state') {
         this.info.state = ev.payload.state;
         if (ev.payload.state === 'init' && ev.payload.extra && 'pid' in ev.payload.extra && typeof ev.payload.extra.pid === 'number') {
+          if (this.info.mode === 'watch' && !this.info.compilerPid) {
+            // Ensure we are killing in watch mode on first set
+            await this.#handle.compiler.kill();
+          }
           this.info.compilerPid = ev.payload.extra.pid;
           await this.#handle.compiler.writePid(this.info.compilerPid);
         }
