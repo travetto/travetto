@@ -27,7 +27,7 @@ interface MetadataInfo {
 }
 
 /**
- * Providing runtime for classes
+ * Providing metadata for classes
  */
 export class RegisterTransformer {
 
@@ -70,7 +70,7 @@ export class RegisterTransformer {
   }
 
   /**
-   * After visiting each class, register all the collected runtime
+   * After visiting each class, register all the collected metadata
    */
   @AfterClass()
   static registerClassMetadata(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
