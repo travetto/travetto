@@ -3,9 +3,9 @@ import assert from 'node:assert';
 import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
+import { FileLoader } from '../src/file-loader';
 import { RuntimeIndex } from '@travetto/manifest';
 
-import { FileLoader } from '../src/file-loader';
 
 @Suite()
 class FileLoaderSuite {
