@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { AppError, Class, ClassInstance, Env, Runtime } from '@travetto/base';
+import { AppError, Class, ClassInstance, Env, RuntimeContext, RuntimeResources } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
@@ -10,6 +10,7 @@ import { ConfigData } from './parser/types';
 import { ConfigSource, ConfigSpec } from './source/types';
 import { FileConfigSource } from './source/file';
 import { OverrideConfigSource } from './source/override';
+import { MetadataIndex } from '@travetto/manifest';
 
 type ConfigSpecSimple = Omit<ConfigSpec, 'data'>;
 
@@ -126,7 +127,7 @@ export class ConfigurationService {
           const ogMessage = err.message;
           err.message = `Failed to construct ${cls.Ⲑid} as validation errors have occurred`;
           err.stack = err.stack?.replace(ogMessage, err.message);
-          const file = Runtime.metadata.get(cls)!.source;
+          const file = MetadataIndex.get(cls)!.source;
           Object.defineProperty(err, 'details', { value: { class: cls.Ⲑid, file, ...(err.details ?? {}) } });
         }
         throw err;
@@ -144,15 +145,15 @@ export class ConfigurationService {
 
     console.log('Initialized', {
       manifest: {
-        main: Runtime.context.main,
-        workspace: Runtime.context.workspace
+        main: RuntimeContext.main,
+        workspace: RuntimeContext.workspace
       },
       env: {
         name: Env.name,
         debug: Env.debug,
         production: Env.production,
         dynamic: Env.dynamic,
-        resourcePaths: Runtime.resources.searchPaths,
+        resourcePaths: RuntimeResources.searchPaths,
         profiles: Env.TRV_PROFILES.list ?? []
       },
       config: await this.exportActive()

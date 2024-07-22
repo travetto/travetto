@@ -1,8 +1,9 @@
 import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { AppError, Class, Runtime } from '@travetto/base';
+import { AppError, Class } from '@travetto/base';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
+import { MetadataIndex } from '@travetto/manifest';
 
 import { IndexConfig, IndexType, ModelOptions } from './types';
 import { NotFoundError } from '../error/not-found';
@@ -51,7 +52,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
-    return { class: cls, indices: [], autoCreate: true, baseType: Runtime.metadata.get(cls)?.abstract, postLoad: [], prePersist: [] };
+    return { class: cls, indices: [], autoCreate: true, baseType: MetadataIndex.get(cls)?.abstract, postLoad: [], prePersist: [] };
   }
 
   registerDataHandlers(cls: Class, pConfig?: Partial<ModelOptions<ModelType>>): void {

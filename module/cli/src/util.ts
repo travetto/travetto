@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 
-import { Runtime, Env, ExecUtil, ShutdownManager } from '@travetto/base';
+import { Env, ExecUtil, ShutdownManager, RuntimeContext } from '@travetto/base';
 
 import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
 
@@ -14,10 +14,10 @@ export class CliUtil {
    * @returns
    */
   static getSimpleModuleName(placeholder: string, module?: string): string {
-    const simple = (module ?? Runtime.context.main.name).replace(/[\/]/, '_').replace(/@/, '');
+    const simple = (module ?? RuntimeContext.main.name).replace(/[\/]/, '_').replace(/@/, '');
     if (!simple) {
       return placeholder;
-    } else if (!module && Runtime.monoRoot) {
+    } else if (!module && RuntimeContext.monoRoot) {
       return placeholder;
     } else {
       return placeholder.replace('<module>', simple);
@@ -64,7 +64,7 @@ export class CliUtil {
       data: {
         name: cmd._cfg!.name, env,
         commandModule: cmd._cfg!.commandModule,
-        module: Runtime.context.main.name,
+        module: RuntimeContext.main.name,
         args: process.argv.slice(3),
       }
     };

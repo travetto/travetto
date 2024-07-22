@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { ExecUtil, Runtime } from '@travetto/base';
+import { ExecUtil, RuntimeContext } from '@travetto/base';
 import { type IndexedModule, RuntimeIndex } from '@travetto/manifest';
 
 export class CliScmUtil {
@@ -35,7 +35,7 @@ export class CliScmUtil {
    * @returns
    */
   static async findLastRelease(): Promise<string | undefined> {
-    const result = await ExecUtil.getResult(spawn('git', ['log', '--pretty=oneline'], { cwd: Runtime.context.workspace.path }));
+    const result = await ExecUtil.getResult(spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspace.path }));
     return result.stdout
       .split(/\n/)
       .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
@@ -47,7 +47,7 @@ export class CliScmUtil {
    * @returns
    */
   static async findChangedFiles(fromHash: string, toHash: string = 'HEAD', emptyOnFail = false): Promise<string[]> {
-    const ws = Runtime.context.workspace.path;
+    const ws = RuntimeContext.workspace.path;
     const res = await ExecUtil.getResult(spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }), { catch: true });
     if (!res.valid && emptyOnFail) {
       console.warn('Unable to detect changes between', fromHash, toHash, 'with', (res.stderr || res.stdout));

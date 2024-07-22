@@ -1,4 +1,4 @@
-import { Runtime } from '@travetto/base';
+import { RuntimeContext } from '@travetto/base';
 import { type IndexedModule, RuntimeIndex } from '@travetto/manifest';
 
 import { CliScmUtil } from './scm';
@@ -48,7 +48,7 @@ export class CliModuleUtil {
     return (mode === 'changed' ?
       await this.findChangedModulesRecursive(fromHash, toHash, emptyOnFail) :
       [...RuntimeIndex.getModuleList('all')].map(x => RuntimeIndex.getModule(x)!)
-    ).filter(x => x.sourcePath !== Runtime.context.workspace.path);
+    ).filter(x => x.sourcePath !== RuntimeContext.workspace.path);
   }
 
   /**

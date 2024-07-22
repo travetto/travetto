@@ -1,5 +1,6 @@
-import { Class, ClassInstance, ConcreteClass, Env, Runtime } from '@travetto/base';
+import { Class, ClassInstance, ConcreteClass, Env } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
+import { MetadataIndex } from '@travetto/manifest';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
@@ -434,7 +435,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     let parentClass = config.factory ? config.target : Object.getPrototypeOf(cls);
 
     if (config.factory) {
-      while (Runtime.metadata.get(Object.getPrototypeOf(parentClass))?.abstract) {
+      while (MetadataIndex.get(Object.getPrototypeOf(parentClass))?.abstract) {
         parentClass = Object.getPrototypeOf(parentClass);
       }
       if (!this.targetToClass.has(classId)) {
@@ -464,7 +465,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
-    if (Runtime.metadata.get(cls)?.abstract) { // Skip out early, only needed to inherit
+    if (MetadataIndex.get(cls)?.abstract) { // Skip out early, only needed to inherit
       return config;
     }
 
@@ -499,7 +500,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // If targeting self (default @Injectable behavior)
-    if ((classId === targetId || config.factory) && (parentConfig || Runtime.metadata.get(parentClass)?.abstract)) {
+    if ((classId === targetId || config.factory) && (parentConfig || MetadataIndex.get(parentClass)?.abstract)) {
       const parentId = parentClass.Ⲑid;
 
       if (!this.targetToClass.has(parentId)) {

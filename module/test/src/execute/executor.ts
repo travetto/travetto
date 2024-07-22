@@ -2,7 +2,7 @@ import { AssertionError } from 'node:assert';
 import path from 'node:path';
 
 import { MetadataIndex, RuntimeIndex } from '@travetto/manifest';
-import { Env, TimeUtil, Runtime } from '@travetto/base';
+import { Env, TimeUtil, RuntimeContext } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -71,7 +71,7 @@ export class TestExecutor {
     const classId = MetadataIndex.getId(file, name);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const suite = { class: { name }, classId, duration: 0, lineStart: 1, lineEnd: 1, file, } as SuiteConfig & SuiteResult;
-    err.message = err.message.replaceAll(Runtime.mainSourcePath, '.');
+    err.message = err.message.replaceAll(RuntimeContext.mainSourcePath, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
     consumer.onEvent({ type: 'test', phase: 'before', test: res.testConfig });
@@ -110,7 +110,7 @@ export class TestExecutor {
 
     const result: TestResult = {
       methodName: test.methodName,
-      module: Runtime.context.main.name,
+      module: RuntimeContext.main.name,
       description: test.description,
       classId: test.classId,
       lineStart: test.lineStart,

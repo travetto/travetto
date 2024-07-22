@@ -1,5 +1,5 @@
 import { Terminal } from '@travetto/terminal';
-import { AppError, TimeUtil, Runtime } from '@travetto/base';
+import { AppError, TimeUtil, RuntimeContext } from '@travetto/base';
 import { stringify } from 'yaml';
 
 import { TestEvent } from '../../model/event';
@@ -70,7 +70,7 @@ export class TapEmitter implements TestConsumer {
             this.#enhancer.assertNumber(++subCount),
             '-',
             this.#enhancer.assertDescription(text),
-            `${this.#enhancer.assertFile(asrt.file.replace(Runtime.mainSourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
+            `${this.#enhancer.assertFile(asrt.file.replace(RuntimeContext.mainSourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
           ].join(' ');
 
           if (asrt.error) {

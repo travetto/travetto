@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas31';
 
 import { Config } from '@travetto/config';
-import { Env, Runtime } from '@travetto/base';
+import { Env, RuntimeContext } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 /**
@@ -25,9 +25,9 @@ export class ApiInfoConfig {
   version: string;
 
   postConstruct(): void {
-    this.title ??= Runtime.context.main.name;
-    this.version ??= Runtime.context.main.version;
-    this.description ??= Runtime.context.main.description;
+    this.title ??= RuntimeContext.main.name;
+    this.version ??= RuntimeContext.main.version;
+    this.description ??= RuntimeContext.main.description;
   }
 }
 
@@ -72,7 +72,7 @@ export class ApiSpecConfig {
     if (!this.output || this.output === '-') {
       this.persist = false;
     } else {
-      this.output = path.resolve(Runtime.mainSourcePath, this.output);
+      this.output = path.resolve(RuntimeContext.mainSourcePath, this.output);
       this.persist ??= Env.dynamic;
     }
     if (this.persist) {

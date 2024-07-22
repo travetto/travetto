@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { type ManifestContext, MetadataIndex, RuntimeIndex } from '@travetto/manifest';
+import { type ManifestContext, RuntimeIndex } from '@travetto/manifest';
 
 import { Env } from './env';
 import { FileLoader } from './file-loader';
@@ -16,20 +16,25 @@ class $RuntimeResources extends FileLoader {
   }
 }
 
-const buildCtx = <K extends keyof ManifestContext>(props: K[]): Pick<ManifestContext, K> => {
-  const out = {};
+const buildCtx = <T extends object, K extends keyof ManifestContext>(inp: T, props: K[]): T & Pick<ManifestContext, K> => {
   for (const prop of props) {
-    Object.defineProperty(out, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
+    Object.defineProperty(inp, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
   }
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return out as ManifestContext;
+  return inp as T & ManifestContext;
 };
 
-export const Runtime = {
-  resources: new $RuntimeResources(Env.resourcePaths),
-  metadata: MetadataIndex,
-  context: buildCtx(['main', 'workspace']),
+/** Runtime resources */
+export const RuntimeResources = new $RuntimeResources([]);
 
+/** Constrained version of {@type ManifestContext} */
+export const RuntimeContext = buildCtx({
+  /**
+   * Are we running from a mono-root?
+   */
+  get monoRoot(): boolean {
+    return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
+  },
   /**
    * Main source path
    */
@@ -57,12 +62,6 @@ export const Runtime = {
   toolPath(...rel: string[]): string {
     rel = rel.flatMap(x => x === '@' ? ['node_modules', RuntimeIndex.manifest.main.name] : [x]);
     return path.resolve(RuntimeIndex.manifest.workspace.path, RuntimeIndex.manifest.build.toolFolder, ...rel);
-  },
-  /**
-   * Are we running from a mono-root?
-   */
-  get monoRoot(): boolean {
-    return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
   }
-};
+}, ['main', 'workspace']);
 
