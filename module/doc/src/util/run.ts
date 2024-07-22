@@ -50,7 +50,9 @@ export class DocRunUtil {
     return path.toPosix(cfg.module ? RuntimeIndex.getModule(cfg.module)?.sourcePath! : RuntimeContext.mainSourcePath);
   }
 
-  /** Clean run output */
+  /**
+   * Clean run output
+   */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
     const cwd = this.cwd(cfg);
     text = util.stripVTControlCharacters(text.trim())
