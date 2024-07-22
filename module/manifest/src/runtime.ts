@@ -43,20 +43,6 @@ class $RuntimeIndex extends ManifestIndex {
   }
 
   /**
-   * Get manifest module by name
-   */
-  getManifestModule(mod: string): ManifestModule {
-    return this.manifest.modules[mod];
-  }
-
-  /**
-   * Get manifest modules
-   */
-  getManifestModules(): ManifestModule[] {
-    return Object.values(this.manifest.modules);
-  }
-
-  /**
    * Retrieve function metadata by function, or function id
    */
   getFunctionMetadataFromClass(cls: Function | undefined): FunctionMetadata | undefined {
@@ -82,6 +68,20 @@ class $RuntimeIndex extends ManifestIndex {
       .replace(/^(@@?)(#|$)/g, (_, v, r) => `${v === '@' ? main : workspace}${r}`)
       .split('#');
     return path.resolve(this.hasModule(base) ? this.getModule(base)!.sourcePath : base, sub ?? '.');
+  }
+
+  /**
+   * Get manifest module by name
+   */
+  getManifestModule(mod: string): ManifestModule {
+    return this.manifest.modules[mod];
+  }
+
+  /**
+   * Get manifest modules
+   */
+  getManifestModules(): ManifestModule[] {
+    return Object.values(this.manifest.modules);
   }
 }
 
