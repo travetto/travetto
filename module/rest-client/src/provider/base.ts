@@ -2,8 +2,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { RuntimeIndex } from '@travetto/manifest';
 import { Class, RuntimeContext, Util } from '@travetto/base';
+import { RuntimeIndex } from '@travetto/manifest';
 import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';

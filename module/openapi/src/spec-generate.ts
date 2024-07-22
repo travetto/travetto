@@ -5,8 +5,8 @@ import type {
 } from 'openapi3-ts/oas31';
 
 import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
-import { Class } from '@travetto/base';
 import { RuntimeIndex } from '@travetto/manifest';
+import { Class } from '@travetto/base';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
