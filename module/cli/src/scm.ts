@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { ExecUtil, RuntimeContext } from '@travetto/base';
+import { AppError, ExecUtil, RuntimeContext } from '@travetto/base';
 import { type IndexedModule, RuntimeIndex } from '@travetto/manifest';
 
 export class CliScmUtil {
@@ -46,12 +46,11 @@ export class CliScmUtil {
    * @param fromHash
    * @returns
    */
-  static async findChangedFiles(fromHash: string, toHash: string = 'HEAD', emptyOnFail = false): Promise<string[]> {
+  static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
     const ws = RuntimeContext.workspace.path;
     const res = await ExecUtil.getResult(spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }), { catch: true });
-    if (!res.valid && emptyOnFail) {
-      console.warn('Unable to detect changes between', fromHash, toHash, 'with', (res.stderr || res.stdout));
-      return [];
+    if (!res.valid) {
+      throw new AppError('Unable to detect changes between', 'data', { fromHash, toHash, output: (res.stderr || res.stdout) });
     }
     const out = new Set<string>();
     for (const line of res.stdout.split(/\n/g)) {
