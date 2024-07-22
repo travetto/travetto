@@ -1,9 +1,9 @@
 import { Class, ClassInstance } from '@travetto/base';
+import { RuntimeIndex } from '@travetto/manifest';
 import { RetargettingProxy } from '@travetto/registry';
 
 import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
 import type { ClassTarget, InjectableConfig } from '../src/types';
-import { RuntimeIndex } from '@travetto/manifest';
 
 /**
  * Wraps the Dependency Registry to support proxying instances
