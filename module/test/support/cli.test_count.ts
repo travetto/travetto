@@ -1,5 +1,5 @@
-import { RuntimeIndex } from '@travetto/manifest';
 import { CliCommand } from '@travetto/cli';
+import { RuntimeIndex } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 
 import { SuiteRegistry } from '../src/registry/suite';

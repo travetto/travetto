@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { RuntimeIndex } from '@travetto/manifest';
 import { ControllerConfig } from '@travetto/rest';
 import { Class } from '@travetto/base';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import type { ClientGenerator } from './types';
 import { restRpcClientFactory } from './shared/rest-rpc.js';
