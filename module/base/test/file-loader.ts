@@ -6,7 +6,6 @@ import { Suite, Test } from '@travetto/test';
 import { FileLoader } from '../src/file-loader';
 import { RuntimeIndex } from '@travetto/manifest';
 
-
 @Suite()
 class FileLoaderSuite {
 
