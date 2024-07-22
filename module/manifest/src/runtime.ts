@@ -1,5 +1,5 @@
 import { path } from './path';
-import type { FunctionMetadata, FunctionMetadataTag, ManifestModule } from '../__index__';
+import type { FunctionMetadata, FunctionMetadataTag, IndexedModule, ManifestModule } from '../__index__';
 import { ManifestIndex } from './manifest-index';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
@@ -10,12 +10,27 @@ class $RuntimeIndex extends ManifestIndex {
   #metadata = new Map<string, FunctionMetadata>();
 
   /**
+   * **WARNING**: This is a destructive operation, and should only be called before loading any code
+   * @private
+   */
+  reinitForModule(module: string): void {
+    this.init(`${this.outputRoot}/node_modules/${module}`);
+  }
+
+  /**
    * Get internal id from file name and optionally, class name
    */
   getId(filename: string, clsName?: string): string {
     filename = path.toPosix(filename);
     const id = this.getEntry(filename)?.id ?? filename;
     return clsName ? `${id}￮${clsName}` : id;
+  }
+
+  /**
+   * Get main module for manifest
+   */
+  get mainModule(): IndexedModule {
+    return this.getModule(this.manifest.main.name)!;
   }
 
   /**

@@ -44,27 +44,11 @@ export class ManifestIndex {
     return this.#outputRoot;
   }
 
-  /**
-   * Get main module for manifest
-   */
-  get mainModule(): IndexedModule {
-    return this.getModule(this.manifest.main.name)!;
-  }
-
   init(manifestInput: string): void {
     this.#manifest = ManifestUtil.readManifestSync(manifestInput);
     this.#outputRoot = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#index();
   }
-
-  /**
-   * **WARNING**: This is a destructive operation, and should only be called before loading any code
-   * @private
-   */
-  reinitForModule(module: string): void {
-    this.init(`${this.outputRoot}/node_modules/${module}`);
-  }
-
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([f, type, ts, role = 'std']) => {
