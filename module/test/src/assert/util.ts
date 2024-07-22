@@ -1,6 +1,7 @@
 import util from 'node:util';
 
-import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
+import { path } from '@travetto/manifest';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
@@ -43,7 +44,7 @@ export class AssertUtil {
    * Determine file location for a given error and the stack trace
    */
   static getPositionOfError(err: Error, filename: string): { file: string, line: number } {
-    const cwd = RuntimeIndex.mainModule.sourcePath;
+    const cwd = RuntimeContext.mainSourcePath;
     const lines = path.toPosix(err.stack ?? new Error().stack!)
       .split('\n')
       // Exclude node_modules, target self

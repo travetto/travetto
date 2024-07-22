@@ -4,7 +4,7 @@ export * from './src/error';
 export * from './src/exec';
 export * from './src/env';
 export * from './src/file-loader';
-export * from './src/resource';
+export * from './src/runtime';
 export * from './src/shutdown';
 export * from './src/time';
 export * from './src/types';

@@ -3,8 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { ExecUtil, Util } from '@travetto/base';
-import { RuntimeContext } from '@travetto/manifest';
+import { ExecUtil, Util, RuntimeContext } from '@travetto/base';
 import { TestFixtures } from '@travetto/test';
 
 import { RestClientGeneratorService } from '../../src/service';

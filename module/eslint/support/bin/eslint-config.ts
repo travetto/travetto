@@ -5,7 +5,7 @@ import unused from 'eslint-plugin-unused-imports';
 import { configs } from '@eslint/js';
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
 
 import { IGNORES, RULE_COMMON } from './eslint-common';
 import { STD_RULES } from './eslint-std-rules';

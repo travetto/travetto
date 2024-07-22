@@ -16,12 +16,19 @@ export class ProcessHandle {
   }
 
   async writePid(pid: number): Promise<void> {
+    const current = await this.getPid();
+    if (!process.env.TRV_BUILD_REENTRANT && current && pid !== current && current > 0) {
+      try {
+        process.kill(current);
+      } catch { }
+    }
     await fs.mkdir(path.dirname(this.#file), { recursive: true });
     return fs.writeFile(this.#file, JSON.stringify(pid), 'utf8');
   }
 
   getPid(): Promise<number | undefined> {
-    return fs.readFile(this.#file, 'utf8').then(v => +v, () => undefined);
+    return fs.readFile(this.#file, 'utf8')
+      .then(v => +v > 0 ? +v : undefined, () => undefined);
   }
 
   async isRunning(): Promise<boolean> {

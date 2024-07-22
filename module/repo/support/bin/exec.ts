@@ -3,7 +3,7 @@ import rl from 'node:readline/promises';
 
 import { ExecutionResult, Env, Util, ExecUtil } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
-import { IndexedModule } from '@travetto/manifest';
+import type { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
@@ -15,10 +15,10 @@ const COLORS = ([
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 ]).sort((a, b) => Math.random() < .5 ? -1 : 1).map(x => StyleUtil.getStyle(x as `#${string}`));
 
-type ModuleRunConfig<T = ExecutionResult> = {
+type ModuleRunConfig<T = ExecutionResult<string>> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
   filter?: (mod: IndexedModule) => boolean | Promise<boolean>;
-  transformResult?: (mod: IndexedModule, result: ExecutionResult) => T;
+  transformResult?: (mod: IndexedModule, result: ExecutionResult<string>) => T;
   workerCount?: number;
   prefixOutput?: boolean;
   showStdout?: boolean;

@@ -31,7 +31,7 @@ export const ModelTypes = (file: string | Function): DocJSXElement[] => {
   return found.map(v => <li>{v}</li>);
 };
 
-export const ModelCustomConfig = ({ cfg }: { cfg: Function }): JSXElement => <>
+export const ModelCustomConfig = ({ cfg }: { cfg: Function }): DocJSXElement => <>
   Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source
   or config, you can override and register it with the {d.mod('Di')} module.
 

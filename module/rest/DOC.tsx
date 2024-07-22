@@ -19,7 +19,7 @@ import { CliCommand } from '@travetto/cli';
 const Request = d.codeLink('TravettoRequest', 'src/trv.d.ts', /interface TravettoRequest/);
 const Response = d.codeLink('TravettoResponse', 'src/trv.d.ts', /interface TravettoResponse/);
 const RestInterceptor = d.codeLink('RestInterceptor', 'src/interceptor/types.ts', /interface RestInterceptor/);
-const RuntimeResources = d.codeLink('RuntimeResources', '@travetto/base/src/resource.ts', /RuntimeResources/);
+const RuntimeResources = d.codeLink('RuntimeResources', '@travetto/base/src/runtime.ts', /RuntimeResources/);
 
 export const text = <>
   <c.StdHeader />

@@ -1,5 +1,5 @@
 import { CliCommandShape, CliCommand } from '@travetto/cli';
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
 
 import { PackageManager } from './bin/package-manager';
 import { RepoExecUtil } from './bin/exec';

@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
 
 import { JSXElement } from '@travetto/doc/jsx-runtime';
-import { RuntimeIndex, PackageUtil, RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
+import { RuntimeIndex, PackageUtil } from '@travetto/manifest';
 
 import { highlight } from './code-highlight';
 import { RenderProvider, RenderState } from '../types';

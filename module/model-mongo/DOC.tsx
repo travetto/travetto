@@ -6,7 +6,7 @@ import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.suppo
 import { MongoModelConfig } from './src/config';
 import { MongoModelService } from './src/service';
 
-const RuntimeResources = d.codeLink('RuntimeResources', '@travetto/base/src/resource.ts', /RuntimeResources/);
+const RuntimeResources = d.codeLink('RuntimeResources', '@travetto/base/src/runtime.ts', /RuntimeResources/);
 
 export const text = <>
   <c.StdHeader />

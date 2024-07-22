@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { CliModuleUtil, CliCommandShape, CliCommand, CliScmUtil, CliValidationError } from '@travetto/cli';
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
 
 import { PackageManager, SemverLevel } from './bin/package-manager';
 

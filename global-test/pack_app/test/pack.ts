@@ -1,8 +1,7 @@
 import { spawn } from 'node:child_process';
 import assert from 'node:assert';
 
-import { ExecUtil, Env } from '@travetto/base';
-import { RuntimeIndex } from '@travetto/manifest';
+import { ExecUtil, Env, RuntimeContext } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
@@ -12,9 +11,9 @@ export class PackAppSuite {
   async testPack() {
     const tag = `tag-${Math.random()}`.replace(/[0][.]/, '');
     const imageName = 'travetto-test_pack_app';
-    assert(RuntimeIndex.mainModule.sourcePath.endsWith('pack_app'));
+    assert(RuntimeContext.mainSourcePath.endsWith('pack_app'));
     const proc = spawn('npx', ['trv', 'pack:docker', '-dt', tag, 'run:double'], {
-      cwd: RuntimeIndex.mainModule.sourcePath,
+      cwd: RuntimeContext.mainSourcePath,
       shell: false,
       env: { PATH: process.env.PATH, ...Env.TRV_DYNAMIC.export(false) }
     });

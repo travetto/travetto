@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { CliCommandShape, CliCommand } from '@travetto/cli';
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
 
 import { buildEslintConfig } from './bin/eslint-config-file';
 

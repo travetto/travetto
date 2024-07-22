@@ -2,8 +2,8 @@ import os from 'node:os';
 import util from 'node:util';
 import { spawn, ChildProcess } from 'node:child_process';
 
-import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env, ExecUtil } from '@travetto/base';
+import { path, RuntimeIndex } from '@travetto/manifest';
+import { Env, ExecUtil, RuntimeContext } from '@travetto/base';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
 
@@ -45,11 +45,16 @@ class DocState {
 export class DocRunUtil {
   static #docState = new DocState();
 
+  /** Build cwd from config */
+  static cwd(cfg: RunConfig): string {
+    return path.toPosix(cfg.module ? RuntimeIndex.getModule(cfg.module)?.sourcePath! : RuntimeContext.mainSourcePath);
+  }
+
   /**
    * Clean run output
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
-    const cwd = path.toPosix((cfg.module ? RuntimeIndex.getModule(cfg.module)! : RuntimeIndex.mainModule).sourcePath);
+    const cwd = this.cwd(cfg);
     text = util.stripVTControlCharacters(text.trim())
       .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
@@ -76,7 +81,7 @@ export class DocRunUtil {
    */
   static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
     return spawn(cmd, args, {
-      cwd: path.toPosix(config.cwd ?? (config.module ? RuntimeIndex.getModule(config.module)! : RuntimeIndex.mainModule).sourcePath),
+      cwd: config.cwd ?? this.cwd(config),
       shell: '/bin/bash',
       env: {
         ...process.env,
@@ -85,6 +90,7 @@ export class DocRunUtil {
         ...Env.TRV_CLI_IPC.export(undefined),
         ...Env.TRV_MANIFEST.export(''),
         ...Env.TRV_BUILD.export('none'),
+        ...Env.TRV_BUILD_REENTRANT.export(true),
         ...Env.TRV_ROLE.export(undefined),
         ...Env.TRV_MODULE.export(config.module ?? ''),
         ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),

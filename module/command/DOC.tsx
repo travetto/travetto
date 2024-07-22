@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc */
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/base';
 import { d, c } from '@travetto/doc';
 
 import { CommandOperation } from '@travetto/command/src/command';

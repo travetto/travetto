@@ -1,6 +1,6 @@
-import { Class, ConcreteClass } from '@travetto/base';
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { Class, ConcreteClass, RuntimeContext } from '@travetto/base';
 import { MetadataRegistry } from '@travetto/registry';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import { SuiteConfig } from '../model/suite';
 import { TestConfig } from '../model/test';

@@ -1,6 +1,6 @@
 /// <reference path="./trv.d.ts" />
 
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;
@@ -116,7 +116,7 @@ const prod = (): boolean => process.env.NODE_ENV === 'production';
 export const Env = delegate({
   /** Get name */
   get name(): string | undefined {
-    return process.env.TRV_ENV || (!prod() ? RuntimeContext.workspace.defaultEnv : undefined);
+    return process.env.TRV_ENV || (!prod() ? RuntimeIndex.manifest.workspace.defaultEnv : undefined);
   },
 
   /** Are we in development mode */

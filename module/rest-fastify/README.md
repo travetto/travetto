@@ -13,7 +13,7 @@ npm install @travetto/rest-fastify
 yarn add @travetto/rest-fastify
 ```
 
-The module is an [fastify](https://www.fastify.io/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L20) for automatic injection in the default Rest server.
+The module is an [fastify](https://www.fastify.io/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19) for automatic injection in the default Rest server.
 
 ## Customizing Rest App
 

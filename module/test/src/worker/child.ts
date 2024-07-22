@@ -1,7 +1,6 @@
 import { createWriteStream } from 'node:fs';
 
-import { RuntimeContext } from '@travetto/manifest';
-import { ConsoleManager, Env, Util } from '@travetto/base';
+import { ConsoleManager, Env, Util, RuntimeContext } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
 import { ErrorUtil } from '../consumer/error';

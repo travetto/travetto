@@ -232,7 +232,7 @@ Per the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme
 Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module supports typing requests and request bodies for run-time validation of requests.
 
 ## Running an App
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) for [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L20) that will follow default behaviors, and spin up the REST server.
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) for [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19) that will follow default behaviors, and spin up the REST server.
 
 **Terminal: Standard application**
 ```bash
@@ -621,7 +621,7 @@ Additionally the framework supports SSL out of the box, by allowing you to speci
    *  No keys provided
 This is useful for local development where you implicitly trust the cert. 
 
-SSL support can be enabled by setting `rest.ssl.active: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L4).
+SSL support can be enabled by setting `rest.ssl.active: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L8).
 
 ## Full Config
 The entire [RestConfig](https://github.com/travetto/travetto/tree/main/module/rest/src/application/config.ts#L12) which will show the full set of valid configuration parameters for the rest module.

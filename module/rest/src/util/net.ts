@@ -42,7 +42,7 @@ export class RestNetUtil {
       return;
     }
     const [pid] = result.stdout.trim().split(/\n/g);
-    if (pid) {
+    if (pid && +pid > 0) {
       process.kill(+pid);
     }
   }

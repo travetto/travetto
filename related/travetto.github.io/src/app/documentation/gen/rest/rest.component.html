@@ -260,7 +260,7 @@ Additionally, the <a class="module-link" routerLink="/docs/schema" title="Data t
 
 <h2 id="running-an-app">Running an App</h2>
 
-By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15">&#64;CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L20">RestApplication</a> that will follow default behaviors, and spin up the REST server.
+By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15">&#64;CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19">RestApplication</a> that will follow default behaviors, and spin up the REST server.
 
   <figure class="terminal">
     <figcaption class="terminal">Standard application
@@ -701,7 +701,7 @@ Additionally the framework supports SSL out of the box, by allowing you to speci
 <li>No keys provided</li>
 </ul>
 This is useful for local development where you implicitly trust the cert. <br><br>
-SSL support can be enabled by setting <code class="item input">rest.ssl.active: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L4">RuntimeResources</a>.
+SSL support can be enabled by setting <code class="item input">rest.ssl.active: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L8">RuntimeResources</a>.
 
 <h2 id="full-config">Full Config</h2>
 

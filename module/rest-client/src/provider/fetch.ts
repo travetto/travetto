@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/quotes */
-import { Package, RuntimeContext } from '@travetto/manifest';
-import { Class } from '@travetto/base';
+import type { Package } from '@travetto/manifest';
+import { Class, RuntimeContext } from '@travetto/base';
 import { ControllerConfig } from '@travetto/rest';
 
 import { BaseClientGenerator } from './base';

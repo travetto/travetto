@@ -1,6 +1,6 @@
 import type mongo from 'mongodb';
 
-import { RuntimeResources, Env, TimeSpan, TimeUtil } from '@travetto/base';
+import { Env, TimeSpan, TimeUtil, RuntimeResources } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 

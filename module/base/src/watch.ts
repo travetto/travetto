@@ -4,10 +4,9 @@ import { ExecUtil } from './exec';
 import { ShutdownManager } from './shutdown';
 import { Util } from './util';
 
-export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete' };
-export type FullWatchEvent = WatchEvent & { output: string, module: string, time: number };
+export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete', output: string, module: string, time: number };
 
-export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit?: boolean, signal?: AbortSignal }): AsyncIterable<T> {
+export async function* watchCompiler(cfg?: { restartOnExit?: boolean, signal?: AbortSignal }): AsyncIterable<WatchEvent> {
   // Load at runtime
   const { CompilerClient } = await import('@travetto/compiler/support/server/client');
 
@@ -28,10 +27,7 @@ export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit
       await Util.nonBlockingTimeout(1000 * 60);
     }
   } else {
-    for await (const ev of client.fetchEvents('change', { signal: ctrl.signal, enforceIteration: true })) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      yield ev as unknown as T;
-    }
+    yield* client.fetchEvents('change', { signal: ctrl.signal, enforceIteration: true });
   }
 
   remove();

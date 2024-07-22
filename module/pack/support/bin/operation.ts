@@ -1,9 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
-import { Env } from '@travetto/base';
+import { Env, RuntimeContext } from '@travetto/base';
 
 import { CommonPackConfig } from '../../src/types';
 import { PackUtil } from './util';
@@ -204,7 +204,7 @@ export class PackOperation {
   static async * copyResources(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const resources = {
       count: RuntimeIndex.mainModule.files.resources?.length ?? 0,
-      src: path.resolve(RuntimeIndex.mainModule.sourcePath, 'resources'),
+      src: path.resolve(RuntimeContext.mainSourcePath, 'resources'),
       dest: path.resolve(cfg.buildDir, 'resources')
     };
 

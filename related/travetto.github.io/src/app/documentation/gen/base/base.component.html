@@ -85,6 +85,10 @@ The functionality we support for testing and retrieving environment information 
    * trvc log level
    */</span>
   <span class="token constant">TRV_BUILD</span><span class="token operator">:</span> <span class="token string">'none'</span> <span class="token operator">|</span> <span class="token string">'info'</span> <span class="token operator">|</span> <span class="token string">'debug'</span> <span class="token operator">|</span> <span class="token string">'error'</span> <span class="token operator">|</span> <span class="token string">'warn'</span><span class="token punctuation">,</span>
+  <span class="token comment">/**
+   * trvc build re-entrant (allow npx calling npx)
+   */</span>
+  <span class="token constant">TRV_BUILD_REENTRANT</span><span class="token operator">:</span> <span class="token builtin">boolean</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -136,7 +140,7 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">const</span> Env <span class="token operator">=</span> <span class="token function">delegate</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/** Get name */</span>
   <span class="token keyword">get</span> <span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_ENV</span> <span class="token operator">||</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">prod</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">?</span> RuntimeContext<span class="token punctuation">.</span>workspace<span class="token punctuation">.</span>defaultEnv <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_ENV</span> <span class="token operator">||</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">prod</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">?</span> RuntimeIndex<span class="token punctuation">.</span>manifest<span class="token punctuation">.</span>workspace<span class="token punctuation">.</span>defaultEnv <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
 
   <span class="token comment">/** Are we in development mode */</span>

@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Class, Util } from '@travetto/base';
+import { Class, RuntimeContext, Util } from '@travetto/base';
 import { RuntimeIndex } from '@travetto/manifest';
 import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
@@ -62,7 +62,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
 
   constructor(output: string, moduleName?: string, config: Partial<C> = {}) {
     this.#output = output;
-    this.moduleName = moduleName ?? `${RuntimeIndex.mainModule.name}-client`;
+    this.moduleName = moduleName ?? `${RuntimeContext.main.name}-client`;
     this.config = config;
     this.init?.();
   }

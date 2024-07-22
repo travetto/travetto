@@ -190,9 +190,9 @@ export class CompilerServer {
 
       if (ev.type === 'state') {
         this.info.state = ev.payload.state;
-        await this.#handle.compiler.writePid(this.info.compilerPid);
         if (ev.payload.state === 'init' && ev.payload.extra && 'pid' in ev.payload.extra && typeof ev.payload.extra.pid === 'number') {
           this.info.compilerPid = ev.payload.extra.pid;
+          await this.#handle.compiler.writePid(this.info.compilerPid);
         }
         log.info(`State changed: ${this.info.state}`);
       } else if (ev.type === 'log') {

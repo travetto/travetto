@@ -3,8 +3,8 @@ import path from 'node:path';
 import type { OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
-import { ManifestModule, ManifestModuleUtil, NodeModuleType, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { EnvProp } from '@travetto/base';
+import { type ManifestModule, ManifestModuleUtil, type NodeModuleType, RuntimeIndex } from '@travetto/manifest';
+import { EnvProp, RuntimeContext } from '@travetto/base';
 import { CoreRollupConfig } from '../../src/types';
 
 function getFilesFromModule(m: ManifestModule): string[] {

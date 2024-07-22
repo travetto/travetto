@@ -1,9 +1,7 @@
 import { path } from './path';
 import { ManifestIndex } from './manifest-index';
-
 import type { FunctionMetadata, FunctionMetadataTag } from './types/common';
 import type { IndexedModule, ManifestModule } from './types/manifest';
-import type { ManifestContext } from './types/context';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
@@ -40,9 +38,9 @@ class $RuntimeIndex extends ManifestIndex {
   }
 
   /**
-  * Get source file from import location
-  * @param outputFile
-  */
+   * Get source file from import location
+   * @param outputFile
+   */
   getSourceFile(importFile: string): string {
     return this.getFromImport(importFile)?.sourceFile ?? importFile;
   }
@@ -56,6 +54,7 @@ class $RuntimeIndex extends ManifestIndex {
    * @param `methods` Methods and their hashes
    * @param `abstract` Is the class abstract
    * @param `synthetic` Is this code generated at build time
+   * @private
    */
   registerFunction(
     cls: Function, fileOrImport: string, tag: FunctionMetadataTag,
@@ -81,7 +80,7 @@ class $RuntimeIndex extends ManifestIndex {
   /**
    * Retrieve function metadata by function, or function id
    */
-  getFunctionMetadata(clsId: string | Function): FunctionMetadata | undefined {
+  getFunctionMetadata(clsId?: string | Function): FunctionMetadata | undefined {
     const id = clsId === undefined ? '' : typeof clsId === 'string' ? clsId : clsId.Ⲑid;
     return this.#metadata.get(id);
   }
@@ -114,42 +113,3 @@ class $RuntimeIndex extends ManifestIndex {
 }
 
 export const RuntimeIndex = new $RuntimeIndex(process.env.TRV_MANIFEST!);
-
-const build = <T extends object, K extends keyof ManifestContext>(inp: T, props: K[]): T & Pick<ManifestContext, K> => {
-  for (const prop of props) {
-    Object.defineProperty(inp, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
-  }
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return inp as T & ManifestContext;
-};
-
-export const RuntimeContext = build({
-  /**
-   * Produce a workspace relative path
-   * @param rel The relative path
-   */
-  workspaceRelative(...rel: string[]): string {
-    return path.resolve(RuntimeIndex.manifest.workspace.path, ...rel);
-  },
-  /**
-   * Strip off the workspace path from a file
-   * @param full A full path
-   */
-  stripWorkspacePath(full: string): string {
-    return full === RuntimeIndex.manifest.workspace.path ? '' : full.replace(`${RuntimeIndex.manifest.workspace.path}/`, '');
-  },
-  /**
-   * Produce a workspace path for tooling, with '@' being replaced by node_module/name folder
-   * @param rel The relative path
-   */
-  toolPath(...rel: string[]): string {
-    rel = rel.flatMap(x => x === '@' ? ['node_modules', RuntimeIndex.manifest.main.name] : [x]);
-    return path.resolve(RuntimeIndex.manifest.workspace.path, RuntimeIndex.manifest.build.toolFolder, ...rel);
-  },
-  /**
-   * Are we running from a mono-root?
-   */
-  get monoRoot(): boolean {
-    return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
-  }
-}, ['main', 'workspace']);
