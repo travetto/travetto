@@ -19,6 +19,14 @@ class $RuntimeIndex extends ManifestIndex {
   }
 
   /**
+   * Get source file from import location
+   * @param outputFile
+   */
+  getSourceFile(importFile: string): string {
+    return this.getFromImport(importFile)?.sourceFile ?? importFile;
+  }
+
+  /**
    * Initialize the meta data for a function/class
    * @param cls Class
    * @param `file` Filename
