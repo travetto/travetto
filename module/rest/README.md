@@ -255,7 +255,7 @@ Initialized {
     debug: false,
     production: false,
     dynamic: false,
-    resourcePaths: [ './doc-exec/resources' ],
+    resourcePaths: [],
     profiles: []
   },
   config: {
@@ -340,7 +340,7 @@ Initialized {
     debug: false,
     production: true,
     dynamic: false,
-    resourcePaths: [ './doc-exec/resources' ],
+    resourcePaths: [],
     profiles: []
   },
   config: {

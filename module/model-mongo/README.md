@@ -48,7 +48,7 @@ where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/modu
 ```typescript
 import type mongo from 'mongodb';
 
-import { Env, TimeSpan, TimeUtil, Runtime } from '@travetto/base';
+import { Env, TimeSpan, TimeUtil, RuntimeResources } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 

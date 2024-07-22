@@ -39,7 +39,7 @@ where the [FirestoreModelConfig](https://github.com/travetto/travetto/tree/main/
 
 **Code: Structure of FirestoreModelConfig**
 ```typescript
-import { Runtime } from '@travetto/base';
+import { RuntimeResources } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('model.firestore')

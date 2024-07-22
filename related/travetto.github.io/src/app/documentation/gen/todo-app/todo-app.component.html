@@ -335,7 +335,7 @@ First we must start the application:
     <figcaption class="terminal">Application Startup
 
 </figcaption>
-    <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>&#64;travetto/config:src/service.ts:145<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>&#64;travetto/config:src/service.ts:146<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
     main: <span class="token punctuation">{{'{'}}</span>
       name: <span class="token string">'&#64;travetto/todo-app'</span>,
@@ -357,28 +357,11 @@ First we must start the application:
     debug: false,
     production: false,
     dynamic: false,
-    resourcePaths: <span class="token punctuation">[</span>
-      <span class="token string">'./resources'</span>,
-      <span class="token string">'&lt;workspace-root>/resources'</span>
-    <span class="token punctuation">]</span>,
+    resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
     profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
-    sources: <span class="token punctuation">[</span>
-      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">100</span>, source: <span class="token string">'file://application'</span>, detail: <span class="token string">'resources/application.yaml'</span> <span class="token punctuation">{{'}'}}</span>,
-      <span class="token punctuation">{{'{'}}</span>
-        priority: <span class="token number">101</span>,
-        source: <span class="token string">'file://application'</span>,
-        detail: <span class="token string">'related/todo-app/resources/application.yml'</span>
-      <span class="token punctuation">{{'}'}}</span>,
-      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">200</span>, source: <span class="token string">'file://local'</span>, detail: <span class="token string">'resources/local.yml'</span> <span class="token punctuation">{{'}'}}</span>,
-      <span class="token punctuation">{{'{'}}</span>
-        priority: <span class="token number">201</span>,
-        source: <span class="token string">'file://local'</span>,
-        detail: <span class="token string">'related/todo-app/resources/local.yml'</span>
-      <span class="token punctuation">{{'}'}}</span>,
-      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
-    <span class="token punctuation">]</span>,
+    sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
       ApiHostConfig: <span class="token punctuation">{{'{'}}</span> openapi: <span class="token string">'3.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
       ApiInfoConfig: <span class="token punctuation">{{'{'}}</span> description: <span class="token string">''</span>, title: <span class="token string">'&#64;travetto/todo-app'</span>, version: <span class="token string">'0.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
@@ -427,12 +410,7 @@ First we must start the application:
       RestAuthLoginConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> permissions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-      RestClientConfig: <span class="token punctuation">{{'{'}}</span>
-        providers: <span class="token punctuation">{{'{'}}</span>
-          <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token punctuation">{{'{'}}</span> type: <span class="token string">'fetch'</span>, output: <span class="token string">'related/todo-app/api-client'</span> <span class="token punctuation">{{'}'}}</span>,
-          <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token punctuation">{{'{'}}</span> type: <span class="token string">'rest-rpc'</span>, output: <span class="token string">'related/todo-app/resources/ui/js/api-client'</span> <span class="token punctuation">{{'}'}}</span>
-        <span class="token punctuation">{{'}'}}</span>
-      <span class="token punctuation">{{'}'}}</span>,
+      RestClientConfig: <span class="token punctuation">{{'{'}}</span> providers: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">12555</span>,

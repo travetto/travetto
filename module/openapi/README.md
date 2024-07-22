@@ -29,7 +29,7 @@ import path from 'node:path';
 import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas31';
 
 import { Config } from '@travetto/config';
-import { Env, Runtime } from '@travetto/base';
+import { Env, RuntimeContext } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 /**
