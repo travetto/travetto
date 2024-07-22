@@ -52,7 +52,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
-    return { class: cls, indices: [], autoCreate: true, baseType: RuntimeIndex.get(cls)?.abstract, postLoad: [], prePersist: [] };
+    return { class: cls, indices: [], autoCreate: true, baseType: RuntimeIndex.getFunctionMetadata(cls)?.abstract, postLoad: [], prePersist: [] };
   }
 
   registerDataHandlers(cls: Class, pConfig?: Partial<ModelOptions<ModelType>>): void {

@@ -22,11 +22,11 @@ export class RestRpcClientGenerator implements ClientGenerator {
   }
 
   onControllerStart(cfg: ControllerConfig): void {
-    this.classes.set(cfg.class.name, RuntimeIndex.getFromClass(cfg.class)!.source);
+    this.classes.set(cfg.class.name, RuntimeIndex.getFunctionMetadataFromClass(cfg.class)!.source);
   }
 
   onControllerAdd(cls: Class): void {
-    this.classes.set(cls.name, RuntimeIndex.getFromClass(cls)!.source);
+    this.classes.set(cls.name, RuntimeIndex.getFunctionMetadataFromClass(cls)!.source);
     this.flush();
   }
 
@@ -41,7 +41,7 @@ export class RestRpcClientGenerator implements ClientGenerator {
 
   async flush(): Promise<void> {
     await fs.mkdir(this.output, { recursive: true });
-    const base = RuntimeIndex.getFromClass(this.constructor)!;
+    const base = RuntimeIndex.getFunctionMetadataFromClass(this.constructor)!;
     const coreFile = path.resolve(path.dirname(base.source), 'shared/rest-rpc.js');
     const dtsFile = path.resolve(path.dirname(base.source), 'shared/rest-rpc.d.ts');
     const coreContents = await fs.readFile(coreFile, 'utf8');

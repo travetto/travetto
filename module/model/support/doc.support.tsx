@@ -16,7 +16,7 @@ export const Links = {
 
 export const ModelTypes = (file: string | Function): DocJSXElement[] => {
   if (typeof file !== 'string') {
-    file = RuntimeIndex.get(file)!.source;
+    file = RuntimeIndex.getFunctionMetadata(file)!.source;
   }
   const contents = readFileSync(file, 'utf8');
   const found: DocJSXElementByFn<'CodeLink'>[] = [];

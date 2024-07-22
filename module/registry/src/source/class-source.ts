@@ -43,7 +43,7 @@ export class ClassSource implements ChangeSource<Class> {
       }
       this.#classes.set(file, new Map());
       for (const cls of classes) {
-        const src = RuntimeIndex.get(cls)!.source;
+        const src = RuntimeIndex.getFunctionMetadata(cls)!.source;
         this.#classes.get(src)!.set(cls.Ⲑid, cls);
         this.emit({ type: 'added', curr: cls });
       }
@@ -83,8 +83,8 @@ export class ClassSource implements ChangeSource<Class> {
           changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });
         } else {
-          const prevMeta = RuntimeIndex.getFromClass(prev.get(k));
-          const nextMeta = RuntimeIndex.getFromClass(next.get(k));
+          const prevMeta = RuntimeIndex.getFunctionMetadataFromClass(prev.get(k));
+          const nextMeta = RuntimeIndex.getFunctionMetadataFromClass(next.get(k));
           if (prevMeta?.hash !== nextMeta?.hash) {
             changes += 1;
             this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });

@@ -52,7 +52,7 @@ class $CliCommandRegistry {
    * Registers a cli command
    */
   registerClass(cls: Class, cfg: Partial<CliCommandConfig>): CliCommandConfig {
-    const source = RuntimeIndex.get(cls)!.source;
+    const source = RuntimeIndex.getFunctionMetadata(cls)!.source;
     this.#commands.set(cls, {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: cls as ConcreteClass,

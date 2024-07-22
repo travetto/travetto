@@ -127,7 +127,7 @@ export class ConfigurationService {
           const ogMessage = err.message;
           err.message = `Failed to construct ${cls.Ⲑid} as validation errors have occurred`;
           err.stack = err.stack?.replace(ogMessage, err.message);
-          const file = RuntimeIndex.get(cls)!.source;
+          const file = RuntimeIndex.getFunctionMetadata(cls)!.source;
           Object.defineProperty(err, 'details', { value: { class: cls.Ⲑid, file, ...(err.details ?? {}) } });
         }
         throw err;

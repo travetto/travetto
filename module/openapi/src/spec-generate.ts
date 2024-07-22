@@ -218,11 +218,11 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         }
 
         const extra: Record<string, unknown> = {};
-        if (RuntimeIndex.get(cls)?.abstract) {
+        if (RuntimeIndex.getFunctionMetadata(cls)?.abstract) {
           const map = SchemaRegistry.getSubTypesForClass(cls);
           if (map) {
             extra.oneOf = map
-              .filter(x => !RuntimeIndex.get(x)?.abstract)
+              .filter(x => !RuntimeIndex.getFunctionMetadata(x)?.abstract)
               .map(c => {
                 this.onSchema(SchemaRegistry.get(c));
                 return this.#getType(c);

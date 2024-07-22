@@ -31,7 +31,7 @@ export class TestCountCommand {
     const suites = SuiteRegistry.getClasses();
     const total = suites
       .map(c => SuiteRegistry.get(c))
-      .filter(c => !RuntimeIndex.get(c.class)?.abstract)
+      .filter(c => !RuntimeIndex.getFunctionMetadata(c.class)?.abstract)
       .reduce((acc, c) => acc + (c.tests?.length ?? 0), 0);
 
     console.log(total);

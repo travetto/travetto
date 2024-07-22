@@ -435,7 +435,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     let parentClass = config.factory ? config.target : Object.getPrototypeOf(cls);
 
     if (config.factory) {
-      while (RuntimeIndex.get(Object.getPrototypeOf(parentClass))?.abstract) {
+      while (RuntimeIndex.getFunctionMetadata(Object.getPrototypeOf(parentClass))?.abstract) {
         parentClass = Object.getPrototypeOf(parentClass);
       }
       if (!this.targetToClass.has(classId)) {
@@ -465,7 +465,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
-    if (RuntimeIndex.get(cls)?.abstract) { // Skip out early, only needed to inherit
+    if (RuntimeIndex.getFunctionMetadata(cls)?.abstract) { // Skip out early, only needed to inherit
       return config;
     }
 
@@ -500,7 +500,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // If targeting self (default @Injectable behavior)
-    if ((classId === targetId || config.factory) && (parentConfig || RuntimeIndex.get(parentClass)?.abstract)) {
+    if ((classId === targetId || config.factory) && (parentConfig || RuntimeIndex.getFunctionMetadata(parentClass)?.abstract)) {
       const parentId = parentClass.Ⲑid;
 
       if (!this.targetToClass.has(parentId)) {
