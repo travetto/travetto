@@ -1,10 +1,14 @@
 import { path } from './path';
-import type { FunctionMetadata, FunctionMetadataTag, IndexedModule, ManifestModule } from '../__index__';
 import { ManifestIndex } from './manifest-index';
+import type { FunctionMetadata, FunctionMetadataTag } from './types/common';
+import type { IndexedModule, ManifestModule } from './types/manifest';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
 
+/**
+ * Extended manifest index geared for application execution
+ */
 class $RuntimeIndex extends ManifestIndex {
 
   #metadata = new Map<string, FunctionMetadata>();
