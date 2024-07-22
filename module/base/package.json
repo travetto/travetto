@@ -1,6 +1,6 @@
 {
   "name": "@travetto/base",
-  "version": "5.0.0-rc.0",
+  "version": "5.0.0-rc.1",
   "description": "Environment config and common utilities for travetto applications.",
   "keywords": [
     "console-manager",
@@ -24,13 +24,13 @@
     "directory": "module/base"
   },
   "dependencies": {
-    "@travetto/manifest": "^5.0.0-rc.0",
+    "@travetto/manifest": "^5.0.0-rc.1",
     "@types/debug": "^4.1.12",
     "@types/node": "^20.14.10",
     "debug": "^4.3.5"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^5.0.0-rc.0"
+    "@travetto/transformer": "^5.0.0-rc.1"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {
