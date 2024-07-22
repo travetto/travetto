@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc */
 import { readFileSync } from 'node:fs';
 
-import { d, DocJSXElementByFn, DocJSXElement } from '@travetto/doc';
 import { RuntimeIndex } from '@travetto/manifest';
+import { d, DocJSXElementByFn, DocJSXElement } from '@travetto/doc';
 
 export const Links = {
   QueryCrud: d.codeLink('Query Crud', '@travetto/model-query/src/service/crud.ts', /export interface/),

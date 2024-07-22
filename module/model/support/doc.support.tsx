@@ -1,9 +1,9 @@
 /** @jsxImportSource @travetto/doc */
 import { readFileSync } from 'node:fs';
 
+import { RuntimeIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement } from '@travetto/doc';
 import { Config } from '@travetto/config';
-import { RuntimeIndex } from '@travetto/manifest';
 
 export const Links = {
   Basic: d.codeLink('Basic', '@travetto/model/src/service/basic.ts', /export interface/),

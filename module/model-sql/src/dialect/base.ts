@@ -1,3 +1,4 @@
+import { RuntimeIndex } from '@travetto/manifest';
 import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
 import { Class, AppError, TypedObject } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
@@ -5,7 +6,6 @@ import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelType } from '@travetto/model/src/types/model';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { RuntimeIndex } from '@travetto/manifest';
 
 import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';

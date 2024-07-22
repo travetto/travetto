@@ -1,9 +1,9 @@
+import { RuntimeIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, Class } from '@travetto/base';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
-import { RuntimeIndex } from '@travetto/manifest';
 
 import { IndexConfig, IndexType, ModelOptions } from './types';
 import { NotFoundError } from '../error/not-found';
