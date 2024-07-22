@@ -90,7 +90,6 @@ export class DocRunUtil {
         ...Env.TRV_CLI_IPC.export(undefined),
         ...Env.TRV_MANIFEST.export(''),
         ...Env.TRV_BUILD.export('none'),
-        ...Env.TRV_BUILD_REENTRANT.export(true),
         ...Env.TRV_ROLE.export(undefined),
         ...Env.TRV_MODULE.export(config.module ?? ''),
         ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
