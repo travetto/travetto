@@ -1,5 +1,6 @@
 import util from 'node:util';
 
+import { MetadataIndex } from '@travetto/manifest';
 import { AppError, Class, ClassInstance, Env, RuntimeContext, RuntimeResources } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
@@ -10,7 +11,6 @@ import { ConfigData } from './parser/types';
 import { ConfigSource, ConfigSpec } from './source/types';
 import { FileConfigSource } from './source/file';
 import { OverrideConfigSource } from './source/override';
-import { MetadataIndex } from '@travetto/manifest';
 
 type ConfigSpecSimple = Omit<ConfigSpec, 'data'>;
 
