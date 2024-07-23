@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
 
-import { RuntimeIndex } from '../src/runtime';
+import { RuntimeIndex } from '../src/manifest-index';
 
 @Suite()
 class RuntimeIndexTests {
