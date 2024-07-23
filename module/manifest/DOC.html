@@ -41,7 +41,7 @@ During the compilation process, it is helpful to know how the output content dif
 <h2 id="class-and-function-metadata">Class and Function Metadata</h2>
 
 For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every <code class="item input">class</code> is decorated with an additional field of <code class="item input">Ⲑid</code>.  <code class="item input">Ⲑid</code> represents a computed id that is tied to the file/class combination. <br><br>
-<code class="item input">Ⲑid</code> is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/runtime.ts#L12">RuntimeIndex</a> using the <code class="item method">getFunctionMetadata</code> method.
+<code class="item input">Ⲑid</code> is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/runtime.ts#L10">RuntimeIndex</a> using the <code class="item method">getFunctionMetadata</code> method.
 
   <figure class="code">
     <figcaption class="code">Test Class

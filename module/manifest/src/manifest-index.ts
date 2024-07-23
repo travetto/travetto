@@ -28,7 +28,7 @@ export class ManifestIndex {
   #sourceToEntry = new Map<string, IndexedFile>();
   #importToEntry = new Map<string, IndexedFile>();
 
-  constructor(manifest: string) {
+  constructor(manifest: string = process.env.TRV_MANIFEST!) {
     this.init(manifest);
   }
 
@@ -48,6 +48,14 @@ export class ManifestIndex {
     this.#manifest = ManifestUtil.readManifestSync(manifestInput);
     this.#outputRoot = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#index();
+  }
+
+  /**
+   * **WARNING**: This is a destructive operation, and should only be called before loading any code
+   * @private
+   */
+  reinitForModule(module: string): void {
+    this.init(`${this.outputRoot}/node_modules/${module}`);
   }
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
@@ -106,6 +114,15 @@ export class ManifestIndex {
         this.#modulesByName[p]?.children.add(mod.name);
       }
     }
+  }
+
+  /**
+   * Get internal id from file name and optionally, class name
+   */
+  getId(filename: string, clsName?: string): string {
+    filename = path.toPosix(filename);
+    const id = this.getEntry(filename)?.id ?? filename;
+    return clsName ? `${id}￮${clsName}` : id;
   }
 
   /**
@@ -265,5 +282,34 @@ export class ManifestIndex {
         !existsSync(path.resolve(base, ...sub, '.git'))
     );
     return lookup(file.replace(`${base}/`, '').split('/'));
+  }
+
+  /**
+   * Get manifest module by name
+   */
+  getManifestModule(mod: string): ManifestModule {
+    return this.manifest.modules[mod];
+  }
+
+  /**
+   * Get manifest modules
+   */
+  getManifestModules(): ManifestModule[] {
+    return Object.values(this.manifest.modules);
+  }
+
+  /**
+   * Get main module for manifest
+   */
+  get mainModule(): IndexedModule {
+    return this.getModule(this.manifest.main.name)!;
+  }
+
+  /**
+   * Get source file from import location
+   * @param outputFile
+   */
+  getSourceFile(importFile: string): string {
+    return this.getFromImport(importFile)?.sourceFile ?? importFile;
   }
 }

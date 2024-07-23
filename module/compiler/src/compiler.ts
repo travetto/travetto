@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { setMaxListeners } from 'node:events';
 
-import { ManifestModuleUtil, RuntimeIndex } from '@travetto/manifest';
+import { ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -24,7 +24,7 @@ export class Compiler {
    */
   static async main(): Promise<void> {
     const [dirty, watch] = process.argv.slice(2);
-    const state = await CompilerState.get(RuntimeIndex);
+    const state = await CompilerState.get(new ManifestIndex());
     log.debug('Running compiler with dirty file', dirty);
     const dirtyFiles = ManifestModuleUtil.getFileType(dirty) === 'ts' ? [dirty] : (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
     await new Compiler(state, dirtyFiles, watch === 'true').run();

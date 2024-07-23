@@ -3,10 +3,7 @@ import { Readable } from 'node:stream';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { RuntimeIndex } from '@travetto/manifest';
-
 import { AppError } from './error';
-import { Env } from './env';
 
 /**
  * File loader that will search for files across the provided search paths
@@ -15,18 +12,8 @@ export class FileLoader {
 
   #searchPaths: readonly string[];
 
-  static resolvePaths(paths: string[]): string[] {
-    const overrides = Env.TRV_RESOURCE_OVERRIDES.object ?? {};
-    return [...new Set(paths.map(x => RuntimeIndex.resolveModulePath(overrides[x] ?? x)))];
-  }
-
   constructor(paths: string[]) {
-    this.computePaths(paths);
-  }
-
-  /** @private */
-  protected computePaths(paths: string[]): void {
-    this.#searchPaths = Object.freeze(FileLoader.resolvePaths(paths));
+    this.#searchPaths = paths;
   }
 
   /**

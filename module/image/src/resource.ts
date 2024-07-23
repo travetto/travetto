@@ -15,7 +15,7 @@ export class ImageOptimizingResourceLoader extends FileLoader {
   #cacheRoot: string;
 
   constructor(paths: string[] = [], cacheRoot?: string) {
-    super([...paths, ...Env.resourcePaths]);
+    super(RuntimeContext.resourcePaths(paths));
 
     this.#cacheRoot = cacheRoot ?? path.resolve(Env.TRV_IMAGE_CACHE.val || RuntimeContext.toolPath('image_cache'));
   }

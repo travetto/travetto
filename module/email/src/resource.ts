@@ -1,4 +1,4 @@
-import { AppError, Env, FileLoader } from '@travetto/base';
+import { AppError, Env, FileLoader, RuntimeContext } from '@travetto/base';
 import { RuntimeIndex } from '@travetto/manifest';
 
 /** Build a resource loader that looks into a module and it's dependencies */
@@ -8,12 +8,12 @@ export class EmailResourceLoader extends FileLoader {
     if (!mod) {
       throw new AppError(`Unknown module - ${module}`, 'notfound', { module });
     }
-    super([
+    super(RuntimeContext.modulePaths([
       ...Env.TRV_RESOURCES.list ?? [],
       `${module}#resources`,
       ...RuntimeIndex.getDependentModules(mod, 'children').map(x => `${x.name}#resources`),
       '@@#resources',
       ...globalResources ?? []
-    ]);
+    ]));
   }
 }

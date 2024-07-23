@@ -1,6 +1,6 @@
 import os from 'node:os';
 
-import { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, RuntimeIndex, path } from '@travetto/manifest';
+import { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';
@@ -88,13 +88,13 @@ export class CompilerWatcher {
     const mods = [...new Set(events.map(v => v.entry.module.name))];
 
     const moduleToFiles = new Map(mods.map(m => [m, {
-      context: ManifestUtil.getModuleContext(this.#state.manifest, RuntimeIndex.getManifestModule(m)!.sourceFolder),
+      context: ManifestUtil.getModuleContext(this.#state.manifest, this.#state.manifestIndex.getManifestModule(m)!.sourceFolder),
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       files: [] as FileShape[]
     }] as const));
 
     const parents = new Map<string, string[]>(
-      mods.map(m => [m, RuntimeIndex.getDependentModules(m, 'parents').map(x => x.name)])
+      mods.map(m => [m, this.#state.manifestIndex.getDependentModules(m, 'parents').map(x => x.name)])
     );
 
     const allFiles = events.map(ev => {

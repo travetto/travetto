@@ -139,20 +139,15 @@ export const Env = delegate({
     const val = process.env.DEBUG ?? '';
     return (!val && prod()) || IS_FALSE.test(val) ? false : val;
   },
-
-  /** Get resource paths */
-  get resourcePaths(): string[] {
-    return [...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'];
-  },
 });
 ```
 
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L14) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Standard Error Support
 While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
