@@ -313,3 +313,5 @@ export class ManifestIndex {
     return this.getFromImport(importFile)?.sourceFile ?? importFile;
   }
 }
+
+export const RuntimeIndex = new ManifestIndex();

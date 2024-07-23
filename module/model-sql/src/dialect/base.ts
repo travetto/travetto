@@ -1,4 +1,4 @@
-import { RuntimeIndex } from '@travetto/manifest';
+import { MetadataIndex } from '@travetto/manifest';
 import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
 import { Class, AppError, TypedObject } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
@@ -647,7 +647,7 @@ ${this.getLimitSQL(cls, query)}`;
     const parent = stack.length > 1;
     const array = parent && config.array;
 
-    if (config.type && RuntimeIndex.getFunctionMetadata(config.type)?.synthetic) {
+    if (config.type && MetadataIndex.get(config.type)?.synthetic) {
       throw new AppError(`Cannot create SQL tables for synthetic types, please convert ${SQLUtil.buildPath(stack)} to a concrete class`);
     }
 

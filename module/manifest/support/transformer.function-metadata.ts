@@ -11,16 +11,16 @@ const MANIFEST_MOD = '@travetto/manifest';
 const MANIFEST_MOD_SRC = `${MANIFEST_MOD}/src`;
 const MANIFEST_IDX = `${MANIFEST_MOD}/__index__`;
 
-const RUNTIME_IDX_IMPORT = `${MANIFEST_MOD_SRC}/runtime`;
-const RUNTIME_IDX_CLS = 'RuntimeIndex';
+const METADATA_IDX_IMPORT = `${MANIFEST_MOD_SRC}/metadata`;
+const METADATA_IDX_CLS = 'MetadataIndex';
 
 const methods = Symbol.for(`${MANIFEST_MOD}:methods`);
 const cls = Symbol.for(`${MANIFEST_MOD}:class`);
 const fn = Symbol.for(`${MANIFEST_MOD}:function`);
-const runtimeIdx = Symbol.for(`${MANIFEST_MOD}:runtimeIndex`);
+const metadataIdx = Symbol.for(`${MANIFEST_MOD}:metadataIndex`);
 
 interface MetadataInfo {
-  [runtimeIdx]?: Import;
+  [metadataIdx]?: Import;
   [methods]?: Record<string, FunctionMetadataTag>;
   [cls]?: FunctionMetadataTag;
   [fn]?: number;
@@ -78,13 +78,13 @@ export class RegisterTransformer {
       return node;
     }
 
-    state[runtimeIdx] ??= state.importFile(RUNTIME_IDX_IMPORT);
-    const ident = state.createAccess(state[runtimeIdx].ident, RUNTIME_IDX_CLS);
+    state[metadataIdx] ??= state.importFile(METADATA_IDX_IMPORT);
+    const ident = state.createAccess(state[metadataIdx].ident, METADATA_IDX_CLS);
 
     const name = node.name?.escapedText.toString() ?? '';
 
     const meta = state.factory.createCallExpression(
-      state.createAccess(ident, 'registerFunction'),
+      state.createAccess(ident, 'register'),
       [],
       [
         state.createIdentifier(name),
@@ -123,11 +123,11 @@ export class RegisterTransformer {
 
     if (ts.isFunctionDeclaration(node) && node.name && node.parent && ts.isSourceFile(node.parent)) {
       // If we have a class like function
-      state[runtimeIdx] ??= state.importFile(RUNTIME_IDX_IMPORT);
-      const ident = state.createAccess(state[runtimeIdx].ident, RUNTIME_IDX_CLS);
+      state[metadataIdx] ??= state.importFile(METADATA_IDX_IMPORT);
+      const ident = state.createAccess(state[metadataIdx].ident, METADATA_IDX_CLS);
       const tag = this.#tag(state, node);
       const meta = state.factory.createCallExpression(
-        state.createAccess(ident, 'registerFunction'),
+        state.createAccess(ident, 'register'),
         [],
         [
           state.createIdentifier(node.name),

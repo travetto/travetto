@@ -1,4 +1,4 @@
-import { RuntimeIndex } from '@travetto/manifest';
+import { MetadataIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
@@ -52,7 +52,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
-    return { class: cls, indices: [], autoCreate: true, baseType: RuntimeIndex.getFunctionMetadata(cls)?.abstract, postLoad: [], prePersist: [] };
+    return { class: cls, indices: [], autoCreate: true, baseType: MetadataIndex.get(cls)?.abstract, postLoad: [], prePersist: [] };
   }
 
   registerDataHandlers(cls: Class, pConfig?: Partial<ModelOptions<ModelType>>): void {

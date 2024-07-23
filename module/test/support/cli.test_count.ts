@@ -1,5 +1,5 @@
 import { CliCommand } from '@travetto/cli';
-import { RuntimeIndex } from '@travetto/manifest';
+import { MetadataIndex } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 
 import { SuiteRegistry } from '../src/registry/suite';
@@ -31,7 +31,7 @@ export class TestCountCommand {
     const suites = SuiteRegistry.getClasses();
     const total = suites
       .map(c => SuiteRegistry.get(c))
-      .filter(c => !RuntimeIndex.getFunctionMetadata(c.class)?.abstract)
+      .filter(c => !MetadataIndex.get(c.class)?.abstract)
       .reduce((acc, c) => acc + (c.tests?.length ?? 0), 0);
 
     console.log(total);

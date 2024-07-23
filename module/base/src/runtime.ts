@@ -23,50 +23,39 @@ const resolveModulePath = (modulePath: string): string => {
 
 /** Constrained version of {@type ManifestContext} */
 export const RuntimeContext = buildCtx({
-  /**
-   * Are we running from a mono-root?
-   */
+  /** Are we running from a mono-root? */
   get monoRoot(): boolean {
     return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
   },
-  /**
-   * Main source path
-   */
+
+  /** Main source path */
   get mainSourcePath(): string {
     return RuntimeIndex.mainModule.sourcePath;
   },
-  /**
-   * Produce a workspace relative path
-   * @param rel The relative path
-   */
+
+  /** Produce a workspace relative path */
   workspaceRelative(...rel: string[]): string {
     return path.resolve(RuntimeIndex.manifest.workspace.path, ...rel);
   },
-  /**
-   * Strip off the workspace path from a file
-   * @param full A full path
-   */
+
+  /** Strip off the workspace path from a file */
   stripWorkspacePath(full: string): string {
     return full === RuntimeIndex.manifest.workspace.path ? '' : full.replace(`${RuntimeIndex.manifest.workspace.path}/`, '');
   },
-  /**
-   * Produce a workspace path for tooling, with '@' being replaced by node_module/name folder
-   * @param rel The relative path
-   */
+
+  /** Produce a workspace path for tooling, with '@' being replaced by node_module/name folder */
   toolPath(...rel: string[]): string {
     rel = rel.flatMap(x => x === '@' ? ['node_modules', RuntimeIndex.manifest.main.name] : [x]);
     return path.resolve(RuntimeIndex.manifest.workspace.path, RuntimeIndex.manifest.build.toolFolder, ...rel);
   },
-  /**
-   * Resolve module paths
-   */
+
+  /** Resolve module paths */
   modulePaths(paths: string[]): string[] {
     const overrides = Env.TRV_RESOURCE_OVERRIDES.object ?? {};
     return [...new Set(paths.map(x => resolveModulePath(overrides[x] ?? x)))];
   },
-  /**
-   * Resolve resource paths
-   */
+
+  /** Resolve resource paths */
   resourcePaths(paths: string[] = []): string[] {
     return this.modulePaths([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources']);
   },

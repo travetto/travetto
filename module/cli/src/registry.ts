@@ -1,5 +1,5 @@
 import { Class, ConcreteClass, Env } from '@travetto/base';
-import { RuntimeIndex } from '@travetto/manifest';
+import { MetadataIndex, RuntimeIndex } from '@travetto/manifest';
 
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
@@ -52,7 +52,7 @@ class $CliCommandRegistry {
    * Registers a cli command
    */
   registerClass(cls: Class, cfg: Partial<CliCommandConfig>): CliCommandConfig {
-    const source = RuntimeIndex.getFunctionMetadata(cls)!.source;
+    const source = MetadataIndex.get(cls)!.source;
     this.#commands.set(cls, {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: cls as ConcreteClass,

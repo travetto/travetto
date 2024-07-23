@@ -1,5 +1,5 @@
 import { Class, ClassInstance } from '@travetto/base';
-import { RuntimeIndex } from '@travetto/manifest';
+import { MetadataIndex } from '@travetto/manifest';
 import { RetargettingProxy } from '@travetto/registry';
 
 import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
@@ -69,7 +69,7 @@ class $DynamicDependencyRegistry {
     const classId = cls.Ⲑid;
 
     if (
-      !RuntimeIndex.getFunctionMetadata(cls)?.abstract &&
+      !MetadataIndex.get(cls)?.abstract &&
       this.#proxies.has(classId) &&
       this.#proxies.get(classId)!.has(config.qualifier)
     ) {

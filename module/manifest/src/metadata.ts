@@ -1,13 +1,13 @@
-import { ManifestIndex } from './manifest-index';
+import { RuntimeIndex } from './manifest-index';
 import type { FunctionMetadata, FunctionMetadataTag } from './types/common';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
 
 /**
- * Extended manifest index geared for application execution
+ * Metadata index for functions
  */
-class $RuntimeIndex extends ManifestIndex {
+class $MetadataIndex {
 
   #metadata = new Map<string, FunctionMetadata>();
 
@@ -22,12 +22,12 @@ class $RuntimeIndex extends ManifestIndex {
    * @param `synthetic` Is this code generated at build time
    * @private
    */
-  registerFunction(
+  register(
     cls: Function, fileOrImport: string, tag: FunctionMetadataTag,
     methods?: Record<string, FunctionMetadataTag>, abstract?: boolean, synthetic?: boolean
   ): boolean {
-    const source = this.getSourceFile(fileOrImport);
-    const id = this.getId(source, cls.name);
+    const source = RuntimeIndex.getSourceFile(fileOrImport);
+    const id = RuntimeIndex.getId(source, cls.name);
     Object.defineProperty(cls, 'Ⲑid', { value: id });
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     (cls as unknown as Metadated)[METADATA] = { id, source, ...tag, methods, abstract, synthetic };
@@ -38,7 +38,7 @@ class $RuntimeIndex extends ManifestIndex {
   /**
    * Retrieve function metadata by function, or function id
    */
-  getFunctionMetadataFromClass(cls: Function | undefined): FunctionMetadata | undefined {
+  getFromClass(cls: Function | undefined): FunctionMetadata | undefined {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return (cls as unknown as Metadated)?.[METADATA];
   }
@@ -46,10 +46,10 @@ class $RuntimeIndex extends ManifestIndex {
   /**
    * Retrieve function metadata by function, or function id
    */
-  getFunctionMetadata(clsId?: string | Function): FunctionMetadata | undefined {
+  get(clsId?: string | Function): FunctionMetadata | undefined {
     const id = clsId === undefined ? '' : typeof clsId === 'string' ? clsId : clsId.Ⲑid;
     return this.#metadata.get(id);
   }
 }
 
-export const RuntimeIndex = new $RuntimeIndex();
+export const MetadataIndex = new $MetadataIndex();
