@@ -1,7 +1,7 @@
 import util from 'node:util';
 
 import { MetadataIndex } from '@travetto/manifest';
-import { AppError, Class, ClassInstance, Env, RuntimeContext, RuntimeResources } from '@travetto/base';
+import { AppError, Class, ClassInstance, Env, RuntimeContext, RuntimeIndex, RuntimeResources } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
@@ -127,7 +127,7 @@ export class ConfigurationService {
           const ogMessage = err.message;
           err.message = `Failed to construct ${cls.Ⲑid} as validation errors have occurred`;
           err.stack = err.stack?.replace(ogMessage, err.message);
-          const file = MetadataIndex.get(cls)!.source;
+          const file = RuntimeIndex.getSourceFile(MetadataIndex.get(cls)!);
           Object.defineProperty(err, 'details', { value: { class: cls.Ⲑid, file, ...(err.details ?? {}) } });
         }
         throw err;
@@ -149,7 +149,7 @@ export class ConfigurationService {
         workspace: RuntimeContext.workspace
       },
       env: {
-        name: Env.name,
+        name: RuntimeContext.envName,
         debug: Env.debug,
         production: Env.production,
         dynamic: Env.dynamic,

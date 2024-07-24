@@ -1,8 +1,7 @@
-import { RuntimeIndex } from '@travetto/manifest';
 import { AutoCreate, Inject, Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 import { ControllerRegistry, ControllerVisitUtil } from '@travetto/rest';
-import { Env, Util, RuntimeContext } from '@travetto/base';
+import { Env, Util, RuntimeContext, RuntimeIndex } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 
 import { RestClientConfig, RestClientProvider } from './config';

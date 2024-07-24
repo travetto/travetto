@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Class, RuntimeContext, Util } from '@travetto/base';
+import { Class, RuntimeContext, RuntimeIndex, Util } from '@travetto/base';
 import { MetadataIndex } from '@travetto/manifest';
 import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
@@ -220,7 +220,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     }
     const line = (method ? meta.methods?.[method]?.lines[0] : undefined) ?? meta?.lines[0] ?? 1;
     const output = path.resolve(this.#output, this.subFolder || '.');
-    return `@see file://./${path.relative(output, meta.source)}#${line}`;
+    return `@see file://./${path.relative(output, RuntimeIndex.getSourceFile(meta))}#${line}`;
   }
 
   renderDoc(parts: (string | undefined)[], pad = ''): string[] {
@@ -313,7 +313,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
         classId: schema.class.Ⲑid,
       };
       this.#schemaContent.set(schema.class.Ⲑid, baseResult);
-      this.#files.add(MetadataIndex.getFromClass(schema.class)!.source);
+      this.#files.add(RuntimeIndex.getSourceFile(MetadataIndex.getFromClass(schema.class)!));
       return baseResult;
     }
 
@@ -357,14 +357,16 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     };
 
     this.#schemaContent.set(schema.class.Ⲑid, result);
-    this.#files.add(MetadataIndex.getFromClass(schema.class)!.source);
+    this.#files.add(RuntimeIndex.getSourceFile(MetadataIndex.getFromClass(schema.class)!));
 
     return result;
   }
 
   async finalize(): Promise<void> {
     for (const [file, cls] of this.commonFiles) {
-      await this.writeContent(file, await fs.readFile(typeof cls === 'string' ? cls : MetadataIndex.get(cls)!.source, 'utf8'));
+      await this.writeContent(file,
+        await fs.readFile(typeof cls === 'string' ?
+          cls : RuntimeIndex.getSourceFile(MetadataIndex.get(cls)!), 'utf8'));
     }
 
     const files = [
@@ -396,7 +398,9 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     if (cfg.documented !== false) {
       const result = this.renderController(cfg);
       this.#controllerContent.set(result.classId, result);
-      this.#files.add(MetadataIndex.getFromClass(cfg.class)!.source);
+      this.#files.add(
+        RuntimeIndex.getSourceFile(MetadataIndex.getFromClass(cfg.class)!)
+      );
     }
   }
 

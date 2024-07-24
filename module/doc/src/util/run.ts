@@ -1,9 +1,9 @@
 import os from 'node:os';
 import util from 'node:util';
 import { spawn, ChildProcess } from 'node:child_process';
+import path from 'node:path';
 
-import { path, RuntimeIndex } from '@travetto/manifest';
-import { Env, ExecUtil, RuntimeContext } from '@travetto/base';
+import { Env, ExecUtil, RuntimeContext, RuntimeIndex } from '@travetto/base';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
 
@@ -47,7 +47,7 @@ export class DocRunUtil {
 
   /** Build cwd from config */
   static cwd(cfg: RunConfig): string {
-    return path.toPosix(cfg.module ? RuntimeIndex.getModule(cfg.module)?.sourcePath! : RuntimeContext.mainSourcePath);
+    return path.resolve(cfg.module ? RuntimeIndex.getModule(cfg.module)?.sourcePath! : RuntimeContext.mainSourcePath);
   }
 
   /**

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { RuntimeIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell';

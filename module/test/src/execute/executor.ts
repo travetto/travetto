@@ -1,8 +1,7 @@
 import { AssertionError } from 'node:assert';
 import path from 'node:path';
 
-import { RuntimeIndex } from '@travetto/manifest';
-import { Env, TimeUtil, RuntimeContext } from '@travetto/base';
+import { Env, TimeUtil, RuntimeContext, RuntimeIndex } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -68,7 +67,7 @@ export class TestExecutor {
    */
   static failFile(consumer: TestConsumer, file: string, err: Error): void {
     const name = path.basename(file);
-    const classId = RuntimeIndex.getId(file, name);
+    const classId = `${RuntimeIndex.getEntry(file)?.id}￮${name}`;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const suite = { class: { name }, classId, duration: 0, lineStart: 1, lineEnd: 1, file, } as SuiteConfig & SuiteResult;
     err.message = err.message.replaceAll(RuntimeContext.mainSourcePath, '.');

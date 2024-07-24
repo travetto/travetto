@@ -1,7 +1,7 @@
 import path from 'node:path';
 
-import { path as mp, RuntimeIndex } from '@travetto/manifest';
-import { TimeUtil, RuntimeContext } from '@travetto/base';
+import { path as mp } from '@travetto/manifest';
+import { TimeUtil, RuntimeContext, RuntimeIndex } from '@travetto/base';
 import { WorkPool } from '@travetto/worker';
 
 import { buildStandardTestManager } from '../worker/standard';

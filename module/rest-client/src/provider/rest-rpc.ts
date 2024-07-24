@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { ControllerConfig } from '@travetto/rest';
-import { Class } from '@travetto/base';
+import { Class, RuntimeIndex } from '@travetto/base';
 import { MetadataIndex } from '@travetto/manifest';
 
 import type { ClientGenerator } from './types';
@@ -22,11 +22,11 @@ export class RestRpcClientGenerator implements ClientGenerator {
   }
 
   onControllerStart(cfg: ControllerConfig): void {
-    this.classes.set(cfg.class.name, MetadataIndex.getFromClass(cfg.class)!.source);
+    this.classes.set(cfg.class.name, RuntimeIndex.getSourceFile(MetadataIndex.getFromClass(cfg.class)!));
   }
 
   onControllerAdd(cls: Class): void {
-    this.classes.set(cls.name, MetadataIndex.getFromClass(cls)!.source);
+    this.classes.set(cls.name, RuntimeIndex.getSourceFile(MetadataIndex.getFromClass(cls)!));
     this.flush();
   }
 
@@ -42,8 +42,9 @@ export class RestRpcClientGenerator implements ClientGenerator {
   async flush(): Promise<void> {
     await fs.mkdir(this.output, { recursive: true });
     const base = MetadataIndex.getFromClass(this.constructor)!;
-    const coreFile = path.resolve(path.dirname(base.source), 'shared/rest-rpc.js');
-    const dtsFile = path.resolve(path.dirname(base.source), 'shared/rest-rpc.d.ts');
+    const source = RuntimeIndex.getSourceFile(base);
+    const coreFile = path.resolve(path.dirname(source), 'shared/rest-rpc.js');
+    const dtsFile = path.resolve(path.dirname(source), 'shared/rest-rpc.d.ts');
     const coreContents = await fs.readFile(coreFile, 'utf8');
     const dtsContents = await fs.readFile(dtsFile, 'utf8');
     await fs.writeFile(path.resolve(this.output, path.basename(dtsFile)), dtsContents, 'utf8');

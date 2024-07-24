@@ -1,28 +1,24 @@
 import path from 'node:path';
 
-import { type ManifestContext, RuntimeIndex } from '@travetto/manifest';
+import { type ManifestContext, ManifestIndex } from '@travetto/manifest';
 import { Env } from './env';
 import { FileLoader } from './file-loader';
 
-const buildCtx = <T extends object, K extends keyof ManifestContext>(inp: T, props: K[]): T & Pick<ManifestContext, K> => {
-  for (const prop of props) {
-    Object.defineProperty(inp, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
-  }
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return inp as T & ManifestContext;
-};
-
-const resolveModulePath = (modulePath: string): string => {
-  const main = RuntimeIndex.manifest.main.name;
-  const workspace = RuntimeIndex.manifest.workspace.path;
-  const [base, sub] = modulePath
-    .replace(/^(@@?)(#|$)/g, (_, v, r) => `${v === '@' ? main : workspace}${r}`)
-    .split('#');
-  return path.resolve(RuntimeIndex.hasModule(base) ? RuntimeIndex.getModule(base)!.sourcePath : base, sub ?? '.');
-};
+/** Runtime manifest index */
+export const RuntimeIndex = new ManifestIndex();
 
 /** Constrained version of {@type ManifestContext} */
-export const RuntimeContext = buildCtx({
+export const RuntimeContext = {
+  /** Manifest main */
+  get main(): ManifestContext['main'] {
+    return RuntimeIndex.manifest.main
+  },
+
+  /** Manifest workspace */
+  get workspace(): ManifestContext['workspace'] {
+    return RuntimeIndex.manifest.workspace
+  },
+
   /** Are we running from a mono-root? */
   get monoRoot(): boolean {
     return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
@@ -52,14 +48,19 @@ export const RuntimeContext = buildCtx({
   /** Resolve module paths */
   modulePaths(paths: string[]): string[] {
     const overrides = Env.TRV_RESOURCE_OVERRIDES.object ?? {};
-    return [...new Set(paths.map(x => resolveModulePath(overrides[x] ?? x)))];
+    return [...new Set(paths.map(x => RuntimeIndex.resolveModulePath(overrides[x] ?? x)))];
   },
 
   /** Resolve resource paths */
   resourcePaths(paths: string[] = []): string[] {
     return this.modulePaths([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources']);
   },
-}, ['main', 'workspace']);
+
+  /** Get env name, with support for the default env */
+  get envName(): string | undefined {
+    return Env.name || (!Env.production ? RuntimeIndex.manifest.workspace.defaultEnv : undefined);
+  }
+};
 
 /**
  * Environment aware file loader

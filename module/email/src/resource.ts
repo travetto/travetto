@@ -1,5 +1,4 @@
-import { AppError, Env, FileLoader, RuntimeContext } from '@travetto/base';
-import { RuntimeIndex } from '@travetto/manifest';
+import { AppError, Env, FileLoader, RuntimeContext, RuntimeIndex } from '@travetto/base';
 
 /** Build a resource loader that looks into a module and it's dependencies */
 export class EmailResourceLoader extends FileLoader {

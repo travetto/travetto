@@ -114,7 +114,7 @@ export class LineLogFormatter implements LogFormatter {
       out.push(level);
     }
 
-    if (ev.source && this.opts.location) {
+    if (ev.modulePath && this.opts.location) {
       const ns = `${ev.module}:${ev.modulePath}`;
       let loc = ev.line ? `${ns}:${ev.line}` : ns;
       if (this.opts.colorize) {

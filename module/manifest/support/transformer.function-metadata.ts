@@ -88,7 +88,7 @@ export class RegisterTransformer {
       [],
       [
         state.createIdentifier(name),
-        state.getFilenameIdentifier(),
+        state.getModuleIdentifier(),
         state.fromLiteral(state[cls]),
         state.extendObjectLiteral(state[methods] || {}),
         state.fromLiteral(CoreUtil.isAbstract(node)),
@@ -131,7 +131,7 @@ export class RegisterTransformer {
         [],
         [
           state.createIdentifier(node.name),
-          state.getFilenameIdentifier(),
+          state.getModuleIdentifier(),
           state.fromLiteral(tag),
         ]
       );

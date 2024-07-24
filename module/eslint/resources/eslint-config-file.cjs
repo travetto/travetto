@@ -1,7 +1,7 @@
 process.env.TRV_MANIFEST = '%MANIFEST_FILE%';
 
 const { buildConfig } = require('@travetto/eslint/support/bin/eslint-config');
-const { RuntimeIndex } = require('@travetto/manifest/__index__');
+const { RuntimeIndex } = require('@travetto/base/__index__');
 
 const pluginFiles = RuntimeIndex.find({ folder: f => f === 'support', file: f => /support\/eslint[.]/.test(f) });
 const plugins = pluginFiles.map(x => require(x.outputFile));

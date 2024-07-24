@@ -1,4 +1,3 @@
-import { RuntimeIndex } from './manifest-index';
 import type { FunctionMetadata, FunctionMetadataTag } from './types/common';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
@@ -23,15 +22,18 @@ class $MetadataIndex {
    * @private
    */
   register(
-    cls: Function, fileOrImport: string, tag: FunctionMetadataTag,
+    cls: Function, module: [string, string], tag: FunctionMetadataTag,
     methods?: Record<string, FunctionMetadataTag>, abstract?: boolean, synthetic?: boolean
   ): boolean {
-    const source = RuntimeIndex.getSourceFile(fileOrImport);
-    const id = RuntimeIndex.getId(source, cls.name);
+    let id = module.join(':');
+    if (cls.name) {
+      id = `${id}￮${cls.name}`;
+    }
     Object.defineProperty(cls, 'Ⲑid', { value: id });
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    (cls as unknown as Metadated)[METADATA] = { id, source, ...tag, methods, abstract, synthetic };
-    this.#metadata.set(id, { id, source, ...tag, methods, abstract, synthetic });
+    this.#metadata.set(id, (cls as unknown as Metadated)[METADATA] = {
+      id, import: module.join('/'), ...tag, methods, abstract, synthetic
+    });
     return true;
   }
 

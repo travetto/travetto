@@ -2,8 +2,7 @@ import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
-import { RuntimeIndex } from '@travetto/manifest';
-import { Env, ExecUtil, RuntimeContext } from '@travetto/base';
+import { Env, ExecUtil, RuntimeContext, RuntimeIndex } from '@travetto/base';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
 

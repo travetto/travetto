@@ -3,7 +3,7 @@ import { d, c } from '@travetto/doc';
 import { InjectableFactory } from '@travetto/di';
 import { Context } from '@travetto/rest';
 import { AuthService, Authenticate, Unauthenticated, Authenticated } from '@travetto/auth-rest';
-import { RuntimeIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/base';
 
 const Principal = d.codeLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
 const Request = d.codeLink('TravettoRequest', `${RuntimeIndex.getModule('@travetto/rest')?.sourcePath}/src/trv.d.ts`, /interface TravettoRequest/);

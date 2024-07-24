@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { RuntimeIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/base';
 
 import { Suite } from './src/decorator/suite';
 import { Test } from './src/decorator/test';

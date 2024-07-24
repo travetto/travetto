@@ -1,5 +1,5 @@
-import { RuntimeContext } from '@travetto/base';
-import { type IndexedModule, RuntimeIndex } from '@travetto/manifest';
+import { RuntimeContext, RuntimeIndex } from '@travetto/base';
+import type { IndexedModule } from '@travetto/manifest';
 
 import { CliScmUtil } from './scm';
 

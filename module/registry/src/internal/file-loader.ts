@@ -1,5 +1,5 @@
-import { ManifestModuleUtil, RuntimeIndex } from '@travetto/manifest';
-import { watchCompiler, WatchEvent, RuntimeContext } from '@travetto/base';
+import { ManifestModuleUtil } from '@travetto/manifest';
+import { watchCompiler, WatchEvent, RuntimeContext, RuntimeIndex } from '@travetto/base';
 
 interface ModuleLoader {
   init?(): Promise<void>;

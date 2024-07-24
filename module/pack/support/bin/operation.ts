@@ -1,9 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { RuntimeIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
-import { Env, RuntimeContext } from '@travetto/base';
+import { Env, RuntimeContext, RuntimeIndex } from '@travetto/base';
 
 import { CommonPackConfig } from '../../src/types';
 import { PackUtil } from './util';

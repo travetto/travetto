@@ -1,6 +1,6 @@
 import os from 'node:os';
 
-import { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { type ManifestModuleFileType, type ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';

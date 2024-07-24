@@ -83,15 +83,15 @@ const Ⲑ_util_1 = tslib_1.__importStar(require("@travetto/test/src/execute/util
 const Ⲑ_check_1 = tslib_1.__importStar(require("@travetto/test/src/assert/check.js"));
 const Ⲑ_metadata_1 = tslib_1.__importStar(require("@travetto/manifest/src/metadata.js"));
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
-var ᚕf = "@travetto/test/doc/assert-example.js";
+var ᚕm = ["@travetto/test", "doc/assert-example"];
 const node_assert_1 = tslib_1.__importDefault(require("node:assert"));
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
-    static Ⲑinit = Ⲑ_metadata_1.MetadataIndex.register(SimpleTest, ᚕf, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11] } }, false, false);
+    static Ⲑinit = Ⲑ_metadata_1.MetadataIndex.register(SimpleTest, ᚕm, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11] } }, false, false);
     async test() {
         if (Ⲑ_util_1.RunnerUtil.tryDebugger)
             debugger;
-        Ⲑ_check_1.AssertCheck.check({ file: ᚕf, line: 10, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
+        Ⲑ_check_1.AssertCheck.check({ module: ᚕm, line: 10, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
     }
 };
 tslib_1.__decorate([

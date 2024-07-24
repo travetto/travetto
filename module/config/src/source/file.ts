@@ -22,7 +22,7 @@ export class FileConfigSource implements ConfigSource {
     this.#searchPaths = RuntimeResources.searchPaths.slice().reverse();
     this.#profiles = ([
       ['application', 100],
-      [Env.name!, 200],
+      [RuntimeContext.envName!, 200],
       ...(Env.TRV_PROFILES.list ?? [])
         .map((p, i) => [p, 300 + i * 10] as const)
     ] as const).filter(x => !!x[0]);

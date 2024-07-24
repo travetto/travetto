@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, RuntimeContext } from '@travetto/base';
+import { Class, ConcreteClass, RuntimeContext, RuntimeIndex } from '@travetto/base';
 import { MetadataRegistry } from '@travetto/registry';
 import { MetadataIndex } from '@travetto/manifest';
 
@@ -23,7 +23,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       class: cls,
       module: RuntimeContext.main.name,
       classId: cls.Ⲑid,
-      file: meta.source,
+      file: RuntimeIndex.getSourceFile(meta),
       lineStart: meta.lines[0],
       lineEnd: meta.lines[1],
       tests: [],
@@ -40,7 +40,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     return {
       class: cls,
       module: RuntimeContext.main.name,
-      file: meta.source,
+      file: RuntimeIndex.getSourceFile(meta),
       lineStart: meth?.lines[0],
       lineEnd: meth?.lines[1],
       methodName: fn.name
@@ -98,7 +98,9 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);
-      const suites = this.getValidClasses().filter(cls => MetadataIndex.get(cls)!.source === file).map(x => this.get(x)).filter(x => !x.skip);
+      const suites = this.getValidClasses()
+        .filter(cls => RuntimeIndex.getSourceFile(MetadataIndex.get(cls)!) === file)
+        .map(x => this.get(x)).filter(x => !x.skip);
       const suite = suites.find(x => line >= x.lineStart && line <= x.lineEnd);
 
       if (suite) {

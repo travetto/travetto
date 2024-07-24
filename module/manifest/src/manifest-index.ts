@@ -4,7 +4,7 @@ import { ManifestModuleUtil } from './module';
 import { path } from './path';
 import { ManifestUtil } from './util';
 
-import type { ManifestModuleFolderType } from './types/common';
+import type { FunctionMetadata, ManifestModuleFolderType } from './types/common';
 import type { ManifestModule, ManifestRoot, ManifestModuleFile, IndexedModule, IndexedFile, FindConfig } from './types/manifest';
 
 const TypedObject: {
@@ -114,15 +114,6 @@ export class ManifestIndex {
         this.#modulesByName[p]?.children.add(mod.name);
       }
     }
-  }
-
-  /**
-   * Get internal id from file name and optionally, class name
-   */
-  getId(filename: string, clsName?: string): string {
-    filename = path.toPosix(filename);
-    const id = this.getEntry(filename)?.id ?? filename;
-    return clsName ? `${id}￮${clsName}` : id;
   }
 
   /**
@@ -307,11 +298,22 @@ export class ManifestIndex {
 
   /**
    * Get source file from import location
-   * @param outputFile
+   * @param importFile
    */
-  getSourceFile(importFile: string): string {
+  getSourceFile(importFile: string | FunctionMetadata | [string, string]): string {
+    importFile = Array.isArray(importFile) ? importFile.join('/') : (typeof importFile === 'string' ? importFile : importFile.import!);
     return this.getFromImport(importFile)?.sourceFile ?? importFile;
   }
-}
 
-export const RuntimeIndex = new ManifestIndex();
+  /**
+   * Resolve a module path, expanding @ and @@ to workspace values
+   */
+  resolveModulePath = (modulePath: string): string => {
+    const main = this.manifest.main.name;
+    const workspace = this.manifest.workspace.path;
+    const [base, sub] = modulePath
+      .replace(/^(@@?)(#|$)/g, (_, v, r) => `${v === '@' ? main : workspace}${r}`)
+      .split('#');
+    return path.resolve(this.hasModule(base) ? this.getModule(base)!.sourcePath : base, sub ?? '.');
+  }
+}

@@ -1,15 +1,13 @@
 import util from 'node:util';
 import debug from 'debug';
 
-import { RuntimeIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/base';
 
 export type ConsoleEvent = {
   /** Time of event */
   timestamp: Date;
   /** The level of the console event */
   level: 'info' | 'warn' | 'debug' | 'error';
-  /** The source file of the event */
-  source: string;
   /** The line number the console event was triggered from */
   line: number;
   /** The module name for the source file */
@@ -81,7 +79,7 @@ class $ConsoleManager implements ConsoleListener {
       };
       debug.log = (modulePath, ...args: string[]): void => this.log({
         level: 'debug', module: '@npm:debug', modulePath,
-        args: [util.format(...args)], line: 0, source: '', timestamp: new Date()
+        args: [util.format(...args)], line: 0, timestamp: new Date()
       });
     } else {
       debug.formatArgs = DEBUG_OG.formatArgs;
@@ -105,16 +103,12 @@ class $ConsoleManager implements ConsoleListener {
   /**
    * Handle direct call in lieu of the console.* commands
    */
-  log(ev: ConsoleEvent): void {
-    // Resolve input to source file
-    const source = ev.source ? RuntimeIndex.getSourceFile(ev.source) : RuntimeIndex.mainModule.outputPath;
-    const mod = RuntimeIndex.getModuleFromSource(source);
+  log(ev: ConsoleEvent & { import?: [string, string] }): void {
     const outEv = {
       ...ev,
       timestamp: new Date(),
-      source,
-      module: ev.module ?? mod?.name,
-      modulePath: ev.modulePath ?? (mod ? source.split(`${mod.sourceFolder}/`)[1] : '')
+      module: ev.module ?? ev.import?.[0],
+      modulePath: ev.modulePath ?? ev.import?.[1]
     };
 
     if (this.#filters[outEv.level] && !this.#filters[outEv.level]!(outEv)) {

@@ -1,9 +1,8 @@
 import assert from 'node:assert';
-import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
 
-import { RuntimeIndex } from '../src/manifest-index';
+import { RuntimeIndex } from '../src/runtime';
 
 @Suite()
 class RuntimeIndexTests {
@@ -11,23 +10,6 @@ class RuntimeIndexTests {
   testFind() {
     const files = RuntimeIndex.find({ folder: f => f === 'test' });
     assert(files.some(x => x.outputFile.endsWith('test/runtime.js')));
-  }
-
-  @Test()
-  async getId() {
-    const location = RuntimeIndex.getModule('@travetto/manifest');
-    assert(location);
-
-    const { outputPath } = location;
-
-    const modId = RuntimeIndex.getId(path.resolve(outputPath, 'test', 'runtime.js'));
-    assert(modId === '@travetto/manifest:test/runtime');
-
-    const modId2 = RuntimeIndex.getId(path.resolve(RuntimeIndex.getModule('@travetto/test')!.outputPath, 'src', 'assert', 'util.js'));
-    assert(modId2 === '@travetto/test:src/assert/util');
-
-    const modId3 = RuntimeIndex.getId(path.resolve(outputPath, 'test', 'fixtures', 'simple.ts'));
-    assert(modId3 === '@travetto/manifest:test/fixtures/simple.ts');
   }
 
   @Test()

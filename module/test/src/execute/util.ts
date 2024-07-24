@@ -2,8 +2,8 @@ import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import readline from 'node:readline';
 
-import { Env, ExecUtil, ShutdownManager, Util } from '@travetto/base';
-import { type IndexedFile, RuntimeIndex } from '@travetto/manifest';
+import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex } from '@travetto/base';
+import type { IndexedFile } from '@travetto/manifest';
 
 /**
  * Simple Test Utilities

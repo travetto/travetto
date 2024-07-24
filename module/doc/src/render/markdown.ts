@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
-import { RuntimeContext } from '@travetto/base';
-import { PackageUtil, RuntimeIndex } from '@travetto/manifest';
+import { RuntimeContext, RuntimeIndex } from '@travetto/base';
+import { PackageUtil } from '@travetto/manifest';
 
 import { RenderProvider } from '../types';
 import { c, getComponentName } from '../jsx';

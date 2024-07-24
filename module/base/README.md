@@ -25,7 +25,7 @@ Base is the foundation of all [Travetto](https://travetto.dev) applications.  It
    *  Shutdown Management
 
 ## Environment Support
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L114) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L6), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
 
 **Code: Base Known Environment Flags**
 ```typescript
@@ -82,7 +82,7 @@ interface TravettoEnv {
 ```
 
 ### Environment Property
-For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8), we support the ability to access different properties as a means to better facilitate environment variable usage.
+For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L6), we support the ability to access different properties as a means to better facilitate environment variable usage.
 
 **Code: EnvProp Shape**
 ```typescript
@@ -114,14 +114,14 @@ export class EnvProp<T> {
 ```
 
 ### Runtime Flags
-[Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116) also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to `process.env` values with a little bit of logic sprinkled in.
+[Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L114) also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to `process.env` values with a little bit of logic sprinkled in.
 
 **Code: Provided Flags**
 ```typescript
 export const Env = delegate({
   /** Get name */
   get name(): string | undefined {
-    return process.env.TRV_ENV || (!prod() ? RuntimeIndex.manifest.workspace.defaultEnv : undefined);
+    return process.env.TRV_ENV;
   },
 
   /** Are we in development mode */
@@ -147,7 +147,7 @@ The primary access patterns for resources, is to directly request a file, and to
 
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L116)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L114)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Standard Error Support
 While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
@@ -175,7 +175,7 @@ The supported operations are:
 **Note**: All other console methods are excluded, specifically `trace`, `inspect`, `dir`, `time`/`timeEnd`
 
 ## How Logging is Instrumented
-All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L37).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L37) and receives all logging events from all files compiled by the [Travetto](https://travetto.dev). 
+All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L35).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L35) and receives all logging events from all files compiled by the [Travetto](https://travetto.dev). 
 
 A sample of the instrumentation would be:
 
@@ -200,16 +200,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.work = work;
 const tslib_1 = require("tslib");
 const ᚕ_c = tslib_1.__importStar(require("@travetto/base/src/console.js"));
-var ᚕf = "@travetto/base/doc/transpile.js";
+var ᚕm = ["@travetto/base", "doc/transpile"];
 function work() {
-    ᚕ_c.log({ level: "debug", source: ᚕf, line: 2, scope: "work", args: ['Start Work'] });
+    ᚕ_c.log({ level: "debug", import: ᚕm, line: 2, scope: "work", args: ['Start Work'] });
     try {
         1 / 0;
     }
     catch (err) {
-        ᚕ_c.log({ level: "error", source: ᚕf, line: 7, scope: "work", args: ['Divide by zero', { error: err }] });
+        ᚕ_c.log({ level: "error", import: ᚕm, line: 7, scope: "work", args: ['Divide by zero', { error: err }] });
     }
-    ᚕ_c.log({ level: "debug", source: ᚕf, line: 9, scope: "work", args: ['End Work'] });
+    ᚕ_c.log({ level: "debug", import: ᚕm, line: 9, scope: "work", args: ['End Work'] });
 }
 ```
 

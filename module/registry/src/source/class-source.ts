@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 
-import { type FindConfig, MetadataIndex, RuntimeIndex } from '@travetto/manifest';
-import { Class, Env } from '@travetto/base';
+import { type FindConfig, MetadataIndex } from '@travetto/manifest';
+import { Class, Env, RuntimeIndex } from '@travetto/base';
 
 import { DynamicFileLoader } from '../internal/file-loader';
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
@@ -43,7 +43,7 @@ export class ClassSource implements ChangeSource<Class> {
       }
       this.#classes.set(file, new Map());
       for (const cls of classes) {
-        const src = MetadataIndex.get(cls)!.source;
+        const src = RuntimeIndex.getSourceFile(MetadataIndex.get(cls)!);
         this.#classes.get(src)!.set(cls.Ⲑid, cls);
         this.emit({ type: 'added', curr: cls });
       }

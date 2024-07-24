@@ -74,8 +74,6 @@ export type ConsoleEvent = {
   timestamp: Date;
   /** The level of the console event */
   level: 'info' | 'warn' | 'debug' | 'error';
-  /** The source file of the event */
-  source: string;
   /** The line number the console event was triggered from */
   line: number;
   /** The module name for the source file */

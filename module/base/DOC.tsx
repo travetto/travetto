@@ -1,7 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp } from '@travetto/base';
-import { RuntimeIndex } from '@travetto/manifest';
+import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex } from '@travetto/base';
 
 const ConsoleManager = d.codeLink('ConsoleManager', 'src/console.ts', /(class|function)\s*[$]ConsoleManager/);
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);

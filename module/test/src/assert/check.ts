@@ -1,7 +1,6 @@
 import assert from 'node:assert';
 
-import { RuntimeIndex } from '@travetto/manifest';
-import { AppError, ClassInstance, Class } from '@travetto/base';
+import { AppError, ClassInstance, Class, RuntimeIndex } from '@travetto/base';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
 import { AssertCapture, CaptureAssert } from './capture';
@@ -25,7 +24,7 @@ export class AssertCheck {
    */
   static check(assertion: CaptureAssert, positive: boolean, ...args: unknown[]): void {
     /* eslint-disable @typescript-eslint/consistent-type-assertions */
-    assertion.file = RuntimeIndex.getSourceFile(assertion.file);
+    assertion.file = RuntimeIndex.getSourceFile(assertion.module);
 
     let fn = assertion.operator;
     assertion.operator = ASSERT_FN_OPERATOR[fn];
@@ -215,7 +214,7 @@ export class AssertCheck {
   ): void {
     let missed: Error | undefined;
 
-    assertion.file = RuntimeIndex.getSourceFile(assertion.file);
+    assertion.file = RuntimeIndex.getSourceFile(assertion.module);
 
     try {
       action();
@@ -249,7 +248,7 @@ export class AssertCheck {
   ): Promise<void> {
     let missed: Error | undefined;
 
-    assertion.file = RuntimeIndex.getSourceFile(assertion.file);
+    assertion.file = RuntimeIndex.getSourceFile(assertion.module);
 
     try {
       if ('then' in action) {
@@ -279,7 +278,9 @@ export class AssertCheck {
       line = test.lineStart;
     }
 
+    const entry = RuntimeIndex.getFromSource(test.file)!;
     AssertCapture.add({
+      module: [entry.module, entry.relativeFile],
       file: test.file,
       line,
       operator: 'throws',

@@ -4,7 +4,7 @@ import timers from 'node:timers/promises';
 import posix from 'node:path/posix';
 import native from 'node:path';
 
-import { type ManifestContext } from '@travetto/manifest';
+import type { ManifestContext } from '@travetto/manifest';
 
 import { Log } from './log';
 

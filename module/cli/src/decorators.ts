@@ -1,5 +1,5 @@
-import { Class, ClassInstance, Env, RuntimeContext } from '@travetto/base';
-import { MetadataIndex, RuntimeIndex } from '@travetto/manifest';
+import { Class, ClassInstance, Env, RuntimeContext, RuntimeIndex } from '@travetto/base';
+import { MetadataIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { CliCommandShape, CliCommandShapeFields } from './types';
@@ -27,7 +27,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       runTarget: cfg.runTarget,
       preMain: async (cmd: CliCommandShape & { env?: string }) => {
         if (addEnv) {
-          Env.TRV_ENV.set(cmd.env || Env.name);
+          Env.TRV_ENV.set(cmd.env || RuntimeContext.envName);
         }
       }
     });

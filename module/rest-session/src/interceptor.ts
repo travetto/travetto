@@ -1,7 +1,6 @@
-import { Class } from '@travetto/base';
+import { Class, RuntimeIndex } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
-import { RuntimeIndex } from '@travetto/manifest';
 import { CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext, FilterReturn } from '@travetto/rest';
 
 import { SessionService, SessionⲐ } from './service';
