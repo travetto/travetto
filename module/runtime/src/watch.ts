@@ -1,5 +1,4 @@
-import { RuntimeIndex } from '@travetto/manifest';
-
+import { RuntimeIndex } from './manifest-index';
 import { ExecUtil } from './exec';
 import { ShutdownManager } from './shutdown';
 import { Util } from './util';

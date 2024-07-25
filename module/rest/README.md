@@ -226,13 +226,13 @@ The module provides standard structure for rendering content on the response.  T
    *  JSON
    *  String responses
    *  Files
-Per the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module, the following types automatically have rest support as well:
+Per the [Base](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Environment config and common utilities for travetto applications.") module, the following types automatically have rest support as well:
    *  `Error` - Serializes to a standard object, with status, and the error message.
    *  `AppError` - Serializes like `Error` but translates the error category to an HTTP status
 Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module supports typing requests and request bodies for run-time validation of requests.
 
 ## Running an App
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) for [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19) that will follow default behaviors, and spin up the REST server.
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L14) for [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19) that will follow default behaviors, and spin up the REST server.
 
 **Terminal: Standard application**
 ```bash
@@ -250,7 +250,7 @@ Initialized {
       defaultEnv: 'local'
     }
   },
-  env: {
+  context: {
     name: 'local',
     debug: false,
     production: false,
@@ -286,11 +286,11 @@ Listening { port: 3000 }
 ```
 
 ### Creating a Custom CLI Entry Point
-To customize a REST server, you may need to construct an entry point using the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) decorator. This could look like:
+To customize a REST server, you may need to construct an entry point using the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L14) decorator. This could look like:
 
 **Code: Application entry point for Rest Applications**
 ```typescript
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -335,7 +335,7 @@ Initialized {
       defaultEnv: 'local'
     }
   },
-  env: {
+  context: {
     name: 'prod',
     debug: false,
     production: true,
@@ -621,7 +621,7 @@ Additionally the framework supports SSL out of the box, by allowing you to speci
    *  No keys provided
 This is useful for local development where you implicitly trust the cert. 
 
-SSL support can be enabled by setting `rest.ssl.active: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L67).
+SSL support can be enabled by setting `rest.ssl.active: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8).
 
 ## Full Config
 The entire [RestConfig](https://github.com/travetto/travetto/tree/main/module/rest/src/application/config.ts#L12) which will show the full set of valid configuration parameters for the rest module.

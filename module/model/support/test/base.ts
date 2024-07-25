@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
-import { AppError, Class } from '@travetto/base';
+import { AppError, Class } from '@travetto/runtime';
 
 import { isBulkSupported, isCrudSupported } from '../../src/internal/service/common';
 import { ModelType } from '../../src/types/model';

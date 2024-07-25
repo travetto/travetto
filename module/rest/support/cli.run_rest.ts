@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { Runtime } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape, CliUtil } from '@travetto/cli';
 
@@ -37,7 +37,7 @@ export class RunRestCommand implements CliCommandShape {
     try {
       return await DependencyRegistry.runInstance(RestApplication);
     } catch (err) {
-      if (RestNetUtil.isInuseError(err) && !Env.production && this.killConflict) {
+      if (RestNetUtil.isInuseError(err) && !Runtime.production && this.killConflict) {
         await RestNetUtil.freePort(err.port);
         return await DependencyRegistry.runInstance(RestApplication);
       }

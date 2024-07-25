@@ -35,7 +35,7 @@ During the compilation process, it is helpful to know how the output content dif
 ## Class and Function Metadata
 For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every `class` is decorated with an additional field of `Ⲑid`.  `Ⲑid` represents a computed id that is tied to the file/class combination. 
 
-`Ⲑid` is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the [RuntimeIndex](https://github.com/travetto/travetto/tree/main/module/manifest/src/manifest-index.ts#L317) using the `getFunctionMetadata` method.
+`Ⲑid` is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup associated data by the id.
 
 **Code: Test Class**
 ```typescript
@@ -50,32 +50,17 @@ export class TestClass {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TestClass = void 0;
 const tslib_1 = require("tslib");
-const Ⲑ_metadata_1 = tslib_1.__importStar(require("@travetto/manifest/src/metadata.js"));
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
-var ᚕf = "@travetto/manifest/doc/test-class.js";
+const Ⲑ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
+var ᚕm = ["@travetto/manifest", "doc/test-class"];
 let TestClass = class TestClass {
-    static Ⲑinit = Ⲑ_metadata_1.MetadataIndex.register(TestClass, ᚕf, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
+    static Ⲑinit = Ⲑ_function_1.register(TestClass, ᚕm, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
     async doStuff() { }
 };
 exports.TestClass = TestClass;
 exports.TestClass = TestClass = tslib_1.__decorate([
     Ⲑ_decorator_1.Register()
 ], TestClass);
-```
-
-**Terminal: Index Lookup at Runtime**
-```bash
-$ trv main ./doc/lookup.ts
-
-{
-  id: '@travetto/manifest:doc/test-class￮TestClass',
-  source: './doc/test-class.ts',
-  hash: 197152026,
-  lines: [ 1, 3 ],
-  methods: { doStuff: { hash: 51337554, lines: [ 2, 2 ] } },
-  abstract: false,
-  synthetic: false
-}
 ```
 
 ## Module Indexing
@@ -140,7 +125,6 @@ Imports pointing at $`node:path` and $`path` are rewritten at compile time to po
         ],
         "doc": [
           [ "DOC.tsx", "ts", 1868155200000, "doc" ],
-          [ "doc/lookup.ts", "ts", 1868155200000, "doc" ],
           [ "doc/test-class.ts", "ts", 1868155200000, "doc" ]
         ],
         "$index": [
@@ -150,23 +134,16 @@ Imports pointing at $`node:path` and $`path` are rewritten at compile time to po
           [ "package.json", "package-json", 1868155200000 ]
         ],
         "test": [
-          [ "test/path.ts", "ts", 1868155200000, "test" ],
-          [ "test/runtime.ts", "ts", 1868155200000, "test" ]
+          [ "test/path.ts", "ts", 1868155200000, "test" ]
         ],
         "test/fixtures": [
           [ "test/fixtures/simple.ts", "fixture", 1868155200000, "test" ]
-        ],
-        "$transformer": [
-          [ "support/transformer.function-metadata.ts", "ts", 1868155200000, "compile" ],
-          [ "support/transformer.rewrite-path-import.ts", "ts", 1868155200000, "compile" ]
         ],
         "src": [
           [ "src/delta.ts", "ts", 1868155200000 ],
           [ "src/dependencies.ts", "ts", 1868155200000 ],
           [ "src/file.ts", "ts", 1868155200000 ],
-          [ "src/global.d.ts", "typings", 1868155200000 ],
           [ "src/manifest-index.ts", "ts", 1868155200000 ],
-          [ "src/metadata.ts", "ts", 1868155200000 ],
           [ "src/module.ts", "ts", 1868155200000 ],
           [ "src/package.ts", "ts", 1868155200000 ],
           [ "src/path.ts", "ts", 1868155200000 ],

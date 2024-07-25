@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 
 import { JSXElement } from '@travetto/doc/jsx-runtime';
-import { RuntimeContext } from '@travetto/base';
-import { RuntimeIndex, PackageUtil } from '@travetto/manifest';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { PackageUtil } from '@travetto/manifest';
 
 import { highlight } from './code-highlight';
 import { RenderProvider, RenderState } from '../types';
@@ -145,7 +145,7 @@ yarn add ${el.props.pkg}
   Header: async ({ props }) => `<h1>${props.title} ${props.description ? `\n<small>${props.description}</small>\n` : ''}</h1>\n`,
 
   StdHeader: async state => {
-    const mod = state.el.props.mod ?? RuntimeContext.main.name;
+    const mod = state.el.props.mod ?? Runtime.main.name;
     const pkg = PackageUtil.readPackage(RuntimeIndex.getModule(mod)!.sourcePath);
     const title = pkg.travetto?.displayName ?? pkg.name;
     const desc = pkg.description;

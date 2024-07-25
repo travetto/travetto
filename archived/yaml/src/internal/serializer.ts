@@ -1,4 +1,4 @@
-import { ObjectUtil } from '@travetto/base';
+import { ObjectUtil } from '@travetto/runtime';
 
 type SerializableType = (Error & { stack: SerializableType }) | RegExp | Function | Set<unknown> | Map<string, unknown> | number | boolean | null | string | object;
 type SerializeConfig = {

@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
-import { Class, ClassInstance } from '@travetto/base';
+import { Class, ClassInstance } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 import { Primitive } from '@travetto/schema';
 

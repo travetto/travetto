@@ -13,7 +13,7 @@ npm install @travetto/log
 yarn add @travetto/log
 ```
 
-This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts) in the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. The logging infrastructure is built upon the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") system, and so new loggers can be created that rely upon dependency injected services and sources.
+This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts) in the [Base](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Environment config and common utilities for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. The logging infrastructure is built upon the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") system, and so new loggers can be created that rely upon dependency injected services and sources.
 
 ## Extending the Common Logger
 By default, the system ships with the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L12), and by default will leverage the [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L37) and the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7). The configuration [CommonLoggerConfig](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L12) provides two configuration variables that allows for switching out [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L37) for the [JsonLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/json.ts#L16), depending on the value of `CommonLoggerConfig.format`.  Additionally the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7) can be swapped out for the [FileLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/file.ts#L11) depending on the value of `CommonLoggerConfig.output`.
@@ -74,8 +74,6 @@ export type ConsoleEvent = {
   timestamp: Date;
   /** The level of the console event */
   level: 'info' | 'warn' | 'debug' | 'error';
-  /** The source file of the event */
-  source: string;
   /** The line number the console event was triggered from */
   line: number;
   /** The module name for the source file */
@@ -89,7 +87,7 @@ export type ConsoleEvent = {
 };
 ```
 
-The [LogEvent](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8) is an extension of the [ConsoleEvent](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L6) with the addition of two fields:
+The [LogEvent](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8) is an extension of the [ConsoleEvent](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L6) with the addition of two fields:
    *  `message` - This is the primary argument passed to the console statement, if it happens to be a string, otherwise the field is left empty
    *  `context` - This is the final argument passed to the console statement, if it happens to be a simple object.  This is useful for external loggers that allow for searching/querying by complex data
 

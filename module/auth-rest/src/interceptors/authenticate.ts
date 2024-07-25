@@ -1,4 +1,4 @@
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 import { RestCommonUtil, RestInterceptor, ManagedInterceptorConfig, FilterContext } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';

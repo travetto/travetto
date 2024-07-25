@@ -1,5 +1,5 @@
 import { spawn, ChildProcess } from 'node:child_process';
-import { Env, ExecUtil } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/runtime';
 
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';

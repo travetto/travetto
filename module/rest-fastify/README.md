@@ -23,7 +23,7 @@ import { FastifyPluginAsync } from 'fastify';
 
 import { Injectable } from '@travetto/di';
 import { FastifyRestServer } from '@travetto/rest-fastify';
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 
 declare let rateLimit: (config: { windowMs: number, max: number }) => FastifyPluginAsync;
 

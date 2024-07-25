@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { ManifestModuleUtil, RuntimeIndex } from '@travetto/manifest';
+import { ManifestModuleUtil } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/runtime';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/g;
 const ENV_KEY = /Env.([^.]+)[.]key/g;

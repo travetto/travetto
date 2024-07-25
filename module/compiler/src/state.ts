@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
+import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
 import { TypescriptUtil } from '../support/ts-util';

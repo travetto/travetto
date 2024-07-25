@@ -120,7 +120,7 @@ The [AuthUtil](https://github.com/travetto/travetto/tree/main/module/auth/src/ut
 ```typescript
 import crypto from 'node:crypto';
 import util from 'node:util';
-import { AppError, Util } from '@travetto/base';
+import { AppError, Util } from '@travetto/runtime';
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 /**
  * Standard auth utilities
@@ -147,7 +147,7 @@ export class AuthUtil {
 }
 ```
 
-`roleMatcher` is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.")'s Util class. 
+`roleMatcher` is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from [Base](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Environment config and common utilities for travetto applications.")'s Util class. 
 
 An example of role checks could be:
    *  Admin

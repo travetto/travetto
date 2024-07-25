@@ -1,11 +1,11 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { RuntimeContext } from '@travetto/base';
+import { Runtime } from '@travetto/runtime';
 import { Max, Min, Schema, Match, Enum, Integer, Float, Precision, MinLength, MaxLength } from '@travetto/schema';
 
 import { CliCommand } from './src/decorators';
 
-const EnvLink = d.codeLink('Runtime', '@travetto/base/src/env.ts', /const Env/);
+const EnvLink = d.codeLink('Runtime', '@travetto/runtime/src/env.ts', /const Env/);
 
 const cfg = { cwd: './doc-exec' };
 
@@ -13,7 +13,7 @@ export const text = <>
   <c.StdHeader />
   The cli module represents the primary entry point for execution within the framework. One of the main goals for this module is extensibility, as adding new entry points is meant to be trivial. The framework leverages this module for exposing all executable tools and entry points.  To see a high level listing of all supported commands, invoke {d.input('trv --help')}
 
-  <c.Execution title='General Usage' cmd='trv' args={['--help']} config={{ cwd: RuntimeContext.workspace.path }} />
+  <c.Execution title='General Usage' cmd='trv' args={['--help']} config={{ cwd: Runtime.workspace.path }} />
 
   This listing is from the {d.library('Travetto')} monorepo, and represents the majority of tools that can be invoked from the command line. <br />
 

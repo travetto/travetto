@@ -1,4 +1,4 @@
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 import { Token, TokenizeState, TokenType } from './types';
 
 const OPEN_PARENS = 0x28, CLOSE_PARENS = 0x29, OPEN_BRACKET = 0x5b, CLOSE_BRACKET = 0x5d, COMMA = 0x2c;

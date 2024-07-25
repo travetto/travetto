@@ -5,7 +5,7 @@ import {
   OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction
 } from '@travetto/transformer';
 
-const CONSOLE_IMPORT = '@travetto/base/src/console';
+const CONSOLE_IMPORT = '@travetto/runtime/src/console';
 const MANIFEST_MOD = '@travetto/manifest';
 
 type CustomState = TransformerState & {
@@ -99,7 +99,7 @@ export class ConsoleLogTransformer {
         [
           LiteralUtil.fromLiteral(state.factory, {
             level: state.factory.createStringLiteral(VALID_LEVELS[level]),
-            source: state.getFilenameIdentifier(), // Translated by ConsoleManager
+            import: state.getModuleIdentifier(),
             line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
             scope: state.scope?.map(x => x.name).join(':'),
             args: node.arguments.slice(0)

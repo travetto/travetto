@@ -5,22 +5,19 @@ import {
   AfterFunction, CoreUtil, SystemUtil, Import
 } from '@travetto/transformer';
 
-import type { FunctionMetadataTag } from '../src/types/common';
+import type { FunctionMetadataTag } from '../src/function';
 
-const MANIFEST_MOD = '@travetto/manifest';
-const MANIFEST_MOD_SRC = `${MANIFEST_MOD}/src`;
-const MANIFEST_IDX = `${MANIFEST_MOD}/__index__`;
+const RUNTIME_MOD = '@travetto/runtime';
+const RUNTIME_MOD_SRC = `${RUNTIME_MOD}/src`;
+const REGISTER_IMPORT = `${RUNTIME_MOD_SRC}/function`;
 
-const METADATA_IDX_IMPORT = `${MANIFEST_MOD_SRC}/metadata`;
-const METADATA_IDX_CLS = 'MetadataIndex';
-
-const methods = Symbol.for(`${MANIFEST_MOD}:methods`);
-const cls = Symbol.for(`${MANIFEST_MOD}:class`);
-const fn = Symbol.for(`${MANIFEST_MOD}:function`);
-const metadataIdx = Symbol.for(`${MANIFEST_MOD}:metadataIndex`);
+const methods = Symbol.for(`${RUNTIME_MOD}:methods`);
+const cls = Symbol.for(`${RUNTIME_MOD}:class`);
+const fn = Symbol.for(`${RUNTIME_MOD}:function`);
+const registerImport = Symbol.for(`${RUNTIME_MOD}:registerImport`);
 
 interface MetadataInfo {
-  [metadataIdx]?: Import;
+  [registerImport]?: Import;
   [methods]?: Record<string, FunctionMetadataTag>;
   [cls]?: FunctionMetadataTag;
   [fn]?: number;
@@ -42,7 +39,7 @@ export class RegisterTransformer {
   }
 
   static #valid({ importName: imp }: TransformerState): boolean {
-    return !imp.startsWith(MANIFEST_MOD_SRC) && imp !== MANIFEST_IDX;
+    return !imp.startsWith(REGISTER_IMPORT);
   }
 
   /**
@@ -78,17 +75,16 @@ export class RegisterTransformer {
       return node;
     }
 
-    state[metadataIdx] ??= state.importFile(METADATA_IDX_IMPORT);
-    const ident = state.createAccess(state[metadataIdx].ident, METADATA_IDX_CLS);
+    state[registerImport] ??= state.importFile(REGISTER_IMPORT);
 
     const name = node.name?.escapedText.toString() ?? '';
 
     const meta = state.factory.createCallExpression(
-      state.createAccess(ident, 'register'),
+      state.createAccess(state[registerImport].ident, 'register'),
       [],
       [
         state.createIdentifier(name),
-        state.getFilenameIdentifier(),
+        state.getModuleIdentifier(),
         state.fromLiteral(state[cls]),
         state.extendObjectLiteral(state[methods] || {}),
         state.fromLiteral(CoreUtil.isAbstract(node)),
@@ -123,15 +119,14 @@ export class RegisterTransformer {
 
     if (ts.isFunctionDeclaration(node) && node.name && node.parent && ts.isSourceFile(node.parent)) {
       // If we have a class like function
-      state[metadataIdx] ??= state.importFile(METADATA_IDX_IMPORT);
-      const ident = state.createAccess(state[metadataIdx].ident, METADATA_IDX_CLS);
+      state[registerImport] ??= state.importFile(REGISTER_IMPORT);
       const tag = this.#tag(state, node);
       const meta = state.factory.createCallExpression(
-        state.createAccess(ident, 'register'),
+        state.createAccess(state[registerImport].ident, 'register'),
         [],
         [
           state.createIdentifier(node.name),
-          state.getFilenameIdentifier(),
+          state.getModuleIdentifier(),
           state.fromLiteral(tag),
         ]
       );

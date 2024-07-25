@@ -1,7 +1,7 @@
 import { ExtensionContext } from 'vscode';
 import http from 'node:http';
 
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 import type { } from '@travetto/cli';
 
 import { TargetEvent } from './types';

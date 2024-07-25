@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 import { isIndexedSupported } from '@travetto/model/src/internal/service/common';
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import { Cache, EvictCache } from '../../src/decorator';

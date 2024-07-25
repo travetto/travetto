@@ -1,4 +1,4 @@
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { ModelAuthService } from '@travetto/auth-model';
 

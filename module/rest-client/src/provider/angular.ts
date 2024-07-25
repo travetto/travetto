@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/quotes */
 
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { ControllerConfig } from '@travetto/rest';
 
 import { BaseClientGenerator } from './base';

@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 
-import { Env, TypedObject } from '@travetto/base';
+import { Env, TypedObject } from '@travetto/runtime';
 
 type TemplatePrim = number | string | bigint | boolean | RegExp;
 type Color = `#${string}`;

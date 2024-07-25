@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { type ManifestContext } from '@travetto/manifest';
+import type { ManifestContext } from '@travetto/manifest';
 import { CommonUtil } from './util';
 
 const OPT_CACHE: Record<string, import('typescript').CompilerOptions> = {};

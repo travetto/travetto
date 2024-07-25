@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { Util } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkQueue } from '@travetto/worker';
 

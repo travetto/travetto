@@ -1,5 +1,5 @@
 import { createElement, JSXElement, JSXComponentFunction as CompFn } from '@travetto/doc/jsx-runtime';
-import { TypedObject } from '@travetto/base';
+import { TypedObject } from '@travetto/runtime';
 
 import { LIB_MAPPING } from './mapping/lib-mapping';
 import { MOD_MAPPING } from './mapping/mod-mapping';

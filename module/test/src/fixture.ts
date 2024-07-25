@@ -1,8 +1,8 @@
-import { FileLoader, RuntimeContext } from '@travetto/base';
+import { FileLoader, Runtime } from '@travetto/runtime';
 
 export class TestFixtures extends FileLoader {
   constructor(modules: string[] = []) {
-    super(RuntimeContext.modulePaths([
+    super(Runtime.modulePaths([
       '@#test/fixtures',
       ...['@', ...modules.flat(), '@@'].map(x => `${x}#support/fixtures`)
     ]));

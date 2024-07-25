@@ -2,8 +2,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
-import { RuntimeIndex } from '@travetto/manifest';
-import { TimeUtil, RuntimeContext } from '@travetto/base';
+import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { Terminal } from '@travetto/terminal';
 import { Ignore, Required, Schema } from '@travetto/schema';
 
@@ -28,7 +27,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   _parsed: ParsedState;
 
   @CliFlag({ desc: 'Workspace for building', short: 'b' })
-  buildDir: string = path.resolve(os.tmpdir(), RuntimeContext.mainSourcePath.replace(/[\/\\: ]/g, '_'));
+  buildDir: string = path.resolve(os.tmpdir(), Runtime.mainSourcePath.replace(/[\/\\: ]/g, '_'));
 
   @CliFlag({ desc: 'Clean workspace' })
   clean = true;
@@ -117,7 +116,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
     // Update entry points
     this.entryArguments = [...this.entryArguments ?? [], ...args, ...this._parsed.unknown];
-    this.module ||= RuntimeContext.main.name;
+    this.module ||= Runtime.main.name;
     this.mainName ??= path.basename(this.module);
     this.mainFile = `${this.mainName}.js`;
 

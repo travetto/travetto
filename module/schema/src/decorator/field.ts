@@ -1,4 +1,4 @@
-import { ClassInstance } from '@travetto/base';
+import { ClassInstance } from '@travetto/runtime';
 
 import { SchemaRegistry } from '../service/registry';
 import { CommonRegExp } from '../validate/regexp';

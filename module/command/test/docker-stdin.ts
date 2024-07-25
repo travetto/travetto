@@ -3,7 +3,7 @@ import { pipeline } from 'node:stream/promises';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
-import { ExecUtil } from '@travetto/base';
+import { ExecUtil } from '@travetto/runtime';
 
 import { DockerContainer } from '../src/docker';
 

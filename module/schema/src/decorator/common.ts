@@ -1,4 +1,4 @@
-import { Class, ClassInstance } from '@travetto/base';
+import { Class, ClassInstance } from '@travetto/runtime';
 
 import { DescribableConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';

@@ -1,4 +1,4 @@
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/runtime';
 
 export function registerShutdownHandler() {
   ShutdownManager.onGracefulShutdown(async () => {

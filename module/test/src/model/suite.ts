@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/base';
+import type { Class } from '@travetto/runtime';
 
 import { TestConfig, TestResult } from './test';
 import { Skip, SuiteCore } from './common';

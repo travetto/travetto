@@ -2,7 +2,7 @@ import { ChildProcess, spawn } from 'node:child_process';
 import rl from 'node:readline/promises';
 import vscode from 'vscode';
 
-import { Util } from '@travetto/base';
+import { Util } from '@travetto/runtime';
 import type { EditorResponse } from '@travetto/email-compiler/support/bin/types';
 import type { EmailCompiled } from '@travetto/email';
 

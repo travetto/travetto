@@ -1,4 +1,4 @@
-import { FileLoader } from '@travetto/base';
+import { FileLoader } from '@travetto/runtime';
 import { Readable } from 'node:stream';
 import { Url } from 'node:url';
 

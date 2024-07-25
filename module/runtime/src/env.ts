@@ -1,7 +1,3 @@
-/// <reference path="./trv.d.ts" />
-
-import { RuntimeIndex } from '@travetto/manifest';
-
 const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;
 
@@ -109,29 +105,5 @@ function delegate<T extends object>(base: T): AllType & T {
   });
 }
 
-const prod = (): boolean => process.env.NODE_ENV === 'production';
-
-
 /** Basic utils for reading known environment variables */
-export const Env = delegate({
-  /** Get name */
-  get name(): string | undefined {
-    return process.env.TRV_ENV || (!prod() ? RuntimeIndex.manifest.workspace.defaultEnv : undefined);
-  },
-
-  /** Are we in development mode */
-  get production(): boolean {
-    return prod();
-  },
-
-  /** Is the app in dynamic mode? */
-  get dynamic(): boolean {
-    return IS_TRUE.test(process.env.TRV_DYNAMIC!);
-  },
-
-  /** Get debug value */
-  get debug(): false | string {
-    const val = process.env.DEBUG ?? '';
-    return (!val && prod()) || IS_FALSE.test(val) ? false : val;
-  },
-});
+export const Env = delegate({});

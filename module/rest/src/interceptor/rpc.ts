@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 
 import { FilterContext, FilterNext, RouteConfig } from '../types';
 

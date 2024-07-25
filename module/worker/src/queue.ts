@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { Util } from '@travetto/runtime';
 
 /**
  * WorkQueue, a manual async iterator.  Items are added manually, and consumed asynchronously

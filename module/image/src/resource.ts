@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { Env, FileLoader, RuntimeContext } from '@travetto/base';
+import { Env, FileLoader, Runtime } from '@travetto/runtime';
 
 import { ImageConverter } from './convert';
 
@@ -15,9 +15,9 @@ export class ImageOptimizingResourceLoader extends FileLoader {
   #cacheRoot: string;
 
   constructor(paths: string[] = [], cacheRoot?: string) {
-    super(RuntimeContext.resourcePaths(paths));
+    super(Runtime.resourcePaths(paths));
 
-    this.#cacheRoot = cacheRoot ?? path.resolve(Env.TRV_IMAGE_CACHE.val || RuntimeContext.toolPath('image_cache'));
+    this.#cacheRoot = cacheRoot ?? path.resolve(Env.TRV_IMAGE_CACHE.val || Runtime.toolPath('image_cache'));
   }
 
   async #openFile(pth: string): Promise<fs.FileHandle> {

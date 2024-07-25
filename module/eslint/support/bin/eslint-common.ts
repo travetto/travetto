@@ -1,11 +1,11 @@
 import * as parser from '@typescript-eslint/parser';
 
-import { RuntimeContext } from '@travetto/base';
+import { Runtime } from '@travetto/runtime';
 
 export const RULE_COMMON = {
   languageOptions: {
     ecmaVersion: 'latest',
-    sourceType: RuntimeContext.workspace.type,
+    sourceType: Runtime.workspace.type,
     globals: {
       AbortController: false,
       AbortSignal: false,

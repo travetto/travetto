@@ -12,7 +12,7 @@ import {
   StreamRange
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError } from '@travetto/base';
+import { Class, AppError } from '@travetto/runtime';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';

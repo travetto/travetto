@@ -1,4 +1,4 @@
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model';
 import { Field, SchemaRegistry } from '@travetto/schema';
 import { ControllerRegistry } from '@travetto/rest';

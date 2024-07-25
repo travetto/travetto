@@ -3,7 +3,7 @@ import path from 'node:path';
 import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 
 import { EditorService } from './bin/editor';
 

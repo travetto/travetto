@@ -1,6 +1,9 @@
+import path from 'node:path';
+
 import { createElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
 
-import { path, PackageUtil, RuntimeIndex, MetadataIndex } from '@travetto/manifest';
+import { PackageUtil } from '@travetto/manifest';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { JSXElementByFn, c } from '../jsx';
 import { DocResolveUtil, ResolvedCode, ResolvedRef, ResolvedSnippetLink } from '../util/resolve';
@@ -37,7 +40,7 @@ export class RenderContext {
 
     const manifestPkg = PackageUtil.readPackage(RuntimeIndex.getModule('@travetto/manifest')!.sourcePath);
 
-    this.file = path.toPosix(file);
+    this.file = path.resolve(file);
     this.baseUrl = baseUrl;
     this.repoRoot = repoRoot;
     this.travettoBaseUrl = repoRoot.includes('travetto.github') ? repoRoot : manifestPkg.travetto!.doc!.baseUrl!;
@@ -105,7 +108,7 @@ export class RenderContext {
    * Resolve code link
    */
   async resolveCodeLink(node: JSXElementByFn<'CodeLink'>): Promise<ResolvedSnippetLink> {
-    const src = typeof node.props.src === 'string' ? node.props.src : MetadataIndex.get(node.props.src)!.source;
+    const src = typeof node.props.src === 'string' ? node.props.src : Runtime.getSource(node.props.src);
     return DocResolveUtil.resolveCodeLink(src, node.props.startRe);
   }
 
@@ -113,7 +116,7 @@ export class RenderContext {
    * Resolve code/config
    */
   async resolveCode(node: JSXElementByFn<'Code' | 'Config'>): Promise<ResolvedCode> {
-    const src = typeof node.props.src === 'string' ? node.props.src : MetadataIndex.get(node.props.src)!.source;
+    const src = typeof node.props.src === 'string' ? node.props.src : Runtime.getSource(node.props.src);
     return node.props.startRe ?
       DocResolveUtil.resolveSnippet(src, node.props.startRe, node.props.endRe, node.props.outline) :
       DocResolveUtil.resolveCode(src, node.props.language, node.props.outline);

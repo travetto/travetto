@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry } from '@travetto/test';
 

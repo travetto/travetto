@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { Plugin } from 'rollup';
 
-import { RuntimeIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/runtime';
 
 import { CoreRollupConfig } from '../../src/types';
 

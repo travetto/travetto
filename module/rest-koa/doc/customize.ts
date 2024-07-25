@@ -2,7 +2,7 @@ import { Middleware } from 'koa';
 
 import { Injectable } from '@travetto/di';
 import { KoaRestServer } from '@travetto/rest-koa';
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 
 declare let rateLimit: (config: { windowMs: number, max: number }) => Middleware;
 

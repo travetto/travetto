@@ -27,7 +27,7 @@ This flow ensures all files are loaded and processed before application starts. 
 
 **Code: Sample Registry**
 ```typescript
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
 interface Group {
@@ -112,9 +112,9 @@ As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module
           changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });
         } else {
-          const prevMeta = MetadataIndex.getFromClass(prev.get(k));
-          const nextMeta = MetadataIndex.getFromClass(next.get(k));
-          if (prevMeta?.hash !== nextMeta?.hash) {
+          const prevHash = describeFunction(prev.get(k)!)?.hash;
+          const nextHash = describeFunction(next.get(k)!)?.hash;
+          if (prevHash !== nextHash) {
             changes += 1;
             this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
           }

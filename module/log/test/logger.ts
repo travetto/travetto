@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
-import { ConsoleListener, ConsoleManager } from '@travetto/base';
+import { ConsoleListener, ConsoleManager } from '@travetto/runtime';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 

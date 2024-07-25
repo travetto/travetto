@@ -1,4 +1,4 @@
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 
 export type ClassTarget<T = unknown> = Class<T> | Function;
 

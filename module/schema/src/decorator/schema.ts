@@ -1,4 +1,4 @@
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 
 import { BindUtil } from '../bind-util';
 import { SchemaRegistry } from '../service/registry';

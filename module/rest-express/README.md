@@ -19,7 +19,7 @@ The module is an [express](https://expressjs.com) provider for the [RESTful API]
 
 **Code: Customizing the Express App**
 ```typescript
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { ExpressRestServer } from '@travetto/rest-express';
 

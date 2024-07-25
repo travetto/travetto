@@ -1,7 +1,7 @@
 import path from 'node:path';
 
-import { path as mp, RuntimeIndex } from '@travetto/manifest';
-import { TimeUtil, RuntimeContext } from '@travetto/base';
+import { path as mp } from '@travetto/manifest';
+import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
 import { buildStandardTestManager } from '../worker/standard';
@@ -55,7 +55,7 @@ export class Runner {
    */
   async runSingle(): Promise<boolean> {
     const mod = RuntimeIndex.getEntry(path.resolve(this.#state.args[0]))!;
-    if (mod.module !== RuntimeContext.main.name) {
+    if (mod.module !== Runtime.main.name) {
       RuntimeIndex.reinitForModule(mod.module);
     }
 

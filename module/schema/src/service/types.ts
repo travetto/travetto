@@ -1,4 +1,4 @@
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { Primitive } from '@travetto/schema';
 
 import { AllViewⲐ } from '../internal/types';

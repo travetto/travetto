@@ -215,7 +215,7 @@ export const PAGES = [
     path: 'foundation', title: 'Foundation', subs: [
       {
         path: 'base', title: 'Base',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/base/base.component').then(m => m.BaseComponent)
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/runtime/runtime.component').then(m => m.BaseComponent)
       },
       {
         path: 'schema', title: 'Schema',

@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -114,7 +114,7 @@ export class LineLogFormatter implements LogFormatter {
       out.push(level);
     }
 
-    if (ev.source && this.opts.location) {
+    if (ev.modulePath && this.opts.location) {
       const ns = `${ev.module}:${ev.modulePath}`;
       let loc = ev.line ? `${ns}:${ev.line}` : ns;
       if (this.opts.colorize) {

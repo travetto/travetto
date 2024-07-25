@@ -4,7 +4,7 @@ import path from 'node:path';
 import sqlDb, { type Database, Options } from 'better-sqlite3';
 import { Pool, createPool } from 'generic-pool';
 
-import { ShutdownManager, Util, RuntimeContext } from '@travetto/base';
+import { ShutdownManager, Util, Runtime } from '@travetto/runtime';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { SQLModelConfig, Connection } from '@travetto/model-sql';
@@ -44,7 +44,7 @@ export class SqliteConnection extends Connection<Database> {
   }
 
   async #create(): Promise<Database> {
-    const file = path.resolve(this.#config.options.file ?? RuntimeContext.toolPath('@', 'sqlite_db'));
+    const file = path.resolve(this.#config.options.file ?? Runtime.toolPath('@', 'sqlite_db'));
     await fs.mkdir(path.dirname(file), { recursive: true });
     const db = new sqlDb(file, this.#config.options);
     await db.pragma('foreign_keys = ON');

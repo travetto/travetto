@@ -34,7 +34,7 @@ export const RpcRequestUtil = {
   async getError(payload) {
     try {
       // @ts-ignore
-      const { AppError } = await import('@travetto/base');
+      const { AppError } = await import('@travetto/runtime');
       if (AppError.isErrorLike(payload)) {
         return AppError.fromErrorLike(payload);
       }

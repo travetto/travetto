@@ -117,15 +117,6 @@ export class ManifestIndex {
   }
 
   /**
-   * Get internal id from file name and optionally, class name
-   */
-  getId(filename: string, clsName?: string): string {
-    filename = path.toPosix(filename);
-    const id = this.getEntry(filename)?.id ?? filename;
-    return clsName ? `${id}￮${clsName}` : id;
-  }
-
-  /**
    * Get entry by file (input or output)
    */
   getEntry(file: string): IndexedFile | undefined {
@@ -307,11 +298,22 @@ export class ManifestIndex {
 
   /**
    * Get source file from import location
-   * @param outputFile
+   * @param importFile
    */
-  getSourceFile(importFile: string): string {
+  getSourceFile(importFile: string | [string, string]): string {
+    importFile = Array.isArray(importFile) ? importFile.join('/') : importFile;
     return this.getFromImport(importFile)?.sourceFile ?? importFile;
   }
-}
 
-export const RuntimeIndex = new ManifestIndex();
+  /**
+   * Resolve a module path, expanding @ and @@ to workspace values
+   */
+  resolveModulePath(modulePath: string): string {
+    const main = this.manifest.main.name;
+    const workspace = this.manifest.workspace.path;
+    const [base, sub] = modulePath
+      .replace(/^(@@?)(#|$)/g, (_, v, r) => `${v === '@' ? main : workspace}${r}`)
+      .split('#');
+    return path.resolve(this.hasModule(base) ? this.getModule(base)!.sourcePath : base, sub ?? '.');
+  }
+}

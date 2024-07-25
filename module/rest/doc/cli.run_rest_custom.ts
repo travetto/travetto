@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';

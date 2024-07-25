@@ -1,7 +1,7 @@
 import mustache from 'mustache';
 
 import { Injectable } from '@travetto/di';
-import { RuntimeResources } from '@travetto/base';
+import { RuntimeResources } from '@travetto/runtime';
 
 /**
  * Mail interpolation engine

@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 
-import { Env, ExecUtil, ShutdownManager, RuntimeContext } from '@travetto/base';
+import { Env, ExecUtil, ShutdownManager, Runtime } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
 
@@ -14,10 +14,10 @@ export class CliUtil {
    * @returns
    */
   static getSimpleModuleName(placeholder: string, module?: string): string {
-    const simple = (module ?? RuntimeContext.main.name).replace(/[\/]/, '_').replace(/@/, '');
+    const simple = (module ?? Runtime.main.name).replace(/[\/]/, '_').replace(/@/, '');
     if (!simple) {
       return placeholder;
-    } else if (!module && RuntimeContext.monoRoot) {
+    } else if (!module && Runtime.monoRoot) {
       return placeholder;
     } else {
       return placeholder.replace('<module>', simple);
@@ -31,7 +31,7 @@ export class CliUtil {
     if (ipc && process.connected) {
       process.once('disconnect', () => process.exit());
     }
-    if (Env.TRV_CAN_RESTART.isFalse || !(cmd.canRestart ?? !Env.production)) {
+    if (Env.TRV_CAN_RESTART.isFalse || !(cmd.canRestart ?? !Runtime.production)) {
       Env.TRV_CAN_RESTART.clear();
       return;
     }
@@ -64,7 +64,7 @@ export class CliUtil {
       data: {
         name: cmd._cfg!.name, env,
         commandModule: cmd._cfg!.commandModule,
-        module: RuntimeContext.main.name,
+        module: Runtime.main.name,
         args: process.argv.slice(3),
       }
     };
@@ -79,7 +79,7 @@ export class CliUtil {
    * Debug if IPC available
    */
   static async debugIfIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<boolean> {
-    return (cmd.debugIpc ?? !Env.production) && this.triggerIpc('run', cmd);
+    return (cmd.debugIpc ?? !Runtime.production) && this.triggerIpc('run', cmd);
   }
 
   /**

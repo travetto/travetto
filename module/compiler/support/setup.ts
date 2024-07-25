@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { type DeltaEvent, type ManifestContext, type Package } from '@travetto/manifest';
+import type { DeltaEvent, ManifestContext, Package } from '@travetto/manifest';
 
 import { Log } from './log';
 import { CommonUtil } from './util';

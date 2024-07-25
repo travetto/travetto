@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 
 /** Test child worker target */

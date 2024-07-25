@@ -1,4 +1,4 @@
-import { Class, ClassInstance, TimeSpan, TimeUtil } from '@travetto/base';
+import { Class, ClassInstance, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { HeaderMap, RouteHandler } from '../types';
 import { ControllerRegistry } from '../registry/controller';

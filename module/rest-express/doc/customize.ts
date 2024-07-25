@@ -1,4 +1,4 @@
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { ExpressRestServer } from '@travetto/rest-express';
 

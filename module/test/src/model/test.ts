@@ -1,4 +1,4 @@
-import type { Class, TimeSpan } from '@travetto/base';
+import type { Class, TimeSpan } from '@travetto/runtime';
 import { Skip, TestCore } from './common';
 
 export type ThrowableError = string | RegExp | Function;

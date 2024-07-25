@@ -23,7 +23,7 @@
     "directory": "module/auth"
   },
   "dependencies": {
-    "@travetto/base": "^5.0.0-rc.1"
+    "@travetto/runtime": "^5.0.0-rc.1"
   },
   "travetto": {
     "displayName": "Authentication"

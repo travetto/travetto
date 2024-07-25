@@ -1,7 +1,6 @@
 import { fork } from 'node:child_process';
 
-import { RuntimeIndex } from '@travetto/manifest';
-import { Env } from '@travetto/base';
+import { Env, RuntimeIndex } from '@travetto/runtime';
 import { ParentCommChannel } from '@travetto/worker';
 
 import { Events, RunEvent } from './types';

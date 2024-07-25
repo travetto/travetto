@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { Util } from '@travetto/runtime';
 import { AsyncContext } from '@travetto/context';
 
 const ContextActiveⲐ: unique symbol = Symbol.for('@travetto/model:sql-active');

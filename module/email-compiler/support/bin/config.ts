@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { Util, RuntimeContext } from '@travetto/base';
+import { Util, Runtime } from '@travetto/runtime';
 import { parse, stringify } from 'yaml';
 
 import { EditorConfigType } from './types';
@@ -35,7 +35,7 @@ export class EditorConfig {
   static async get(): Promise<EditorConfigType>;
   static async get<K extends keyof EditorConfigType>(key?: K): Promise<EditorConfigType | EditorConfigType[K]> {
     try {
-      const resolved = RuntimeContext.workspaceRelative(CONFIG_FILE);
+      const resolved = Runtime.workspaceRelative(CONFIG_FILE);
       const content = await fs.readFile(resolved, 'utf8');
       const data: EditorConfigType = parse(content) ?? {};
       return key ? data[key] : data;
@@ -50,7 +50,7 @@ export class EditorConfig {
   }
 
   static async ensureConfig(): Promise<string> {
-    const resolved = RuntimeContext.workspaceRelative(CONFIG_FILE);
+    const resolved = Runtime.workspaceRelative(CONFIG_FILE);
     if (!(await fs.stat(resolved).catch(() => { }))) {
       await Util.bufferedFileWrite(resolved, this.getDefaultConfig());
     }

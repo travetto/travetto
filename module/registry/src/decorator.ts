@@ -1,5 +1,4 @@
-import { Class } from '@travetto/base';
-import { MetadataIndex } from '@travetto/manifest';
+import { Class, Runtime } from '@travetto/runtime';
 
 /**
  * Register a class as pending
@@ -12,7 +11,7 @@ class $PendingRegister {
    * Register class as pending
    */
   add(cls: Class): void {
-    const src = MetadataIndex.get(cls)!.source;
+    const src = Runtime.getSource(cls);
     if (!this.map.has(src)) {
       const sub: Class[] = [];
       this.map.set(src, sub);

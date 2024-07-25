@@ -3,7 +3,7 @@ import http from 'node:http';
 import net from 'node:net';
 import { spawn } from 'node:child_process';
 
-import { ExecUtil, Util } from '@travetto/base';
+import { ExecUtil, Util } from '@travetto/runtime';
 
 /**
  * Utilities to support command execution

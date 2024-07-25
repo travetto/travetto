@@ -1,7 +1,7 @@
 import { createHook, executionAsyncId } from 'node:async_hooks';
 
 import { ExecutionError } from '@travetto/worker';
-import { Util } from '@travetto/base';
+import { Util } from '@travetto/runtime';
 
 /**
  * Promise watcher, to catch any unfinished promises

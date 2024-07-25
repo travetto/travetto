@@ -32,7 +32,7 @@ export const MOD_MAPPING = {
     description: 'Rest authentication session integration support for the Travetto framework'
   },
   Base: {
-    name: '@travetto/base', folder: '@travetto/base', displayName: 'Base',
+    name: '@travetto/runtime', folder: '@travetto/runtime', displayName: 'Base',
     description: 'Environment config and common utilities for travetto applications.'
   },
   Cache: {

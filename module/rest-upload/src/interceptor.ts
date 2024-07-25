@@ -6,7 +6,7 @@ import {
   RestInterceptor, SerializeInterceptor, MimeUtil
 } from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
 import { RestUploadUtil } from './util';

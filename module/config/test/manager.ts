@@ -4,7 +4,7 @@ import { Test, Suite, BeforeEach } from '@travetto/test';
 import { ValidationResultError } from '@travetto/schema';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 
 import { ConfigurationService } from '../src/service';
 import { Config } from '../src/decorator';

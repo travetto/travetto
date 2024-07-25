@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 
 import { runTests } from './bin/run';

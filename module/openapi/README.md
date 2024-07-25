@@ -29,7 +29,7 @@ import path from 'node:path';
 import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas31';
 
 import { Config } from '@travetto/config';
-import { Env, RuntimeContext } from '@travetto/base';
+import { Runtime } from '@travetto/runtime';
 import { Required } from '@travetto/schema';
 
 /**
@@ -51,9 +51,9 @@ export class ApiInfoConfig {
   version: string;
 
   postConstruct(): void {
-    this.title ??= RuntimeContext.main.name;
-    this.version ??= RuntimeContext.main.version;
-    this.description ??= RuntimeContext.main.description;
+    this.title ??= Runtime.main.name;
+    this.version ??= Runtime.main.version;
+    this.description ??= Runtime.main.description;
   }
 }
 
@@ -98,8 +98,8 @@ export class ApiSpecConfig {
     if (!this.output || this.output === '-') {
       this.persist = false;
     } else {
-      this.output = path.resolve(RuntimeContext.mainSourcePath, this.output);
-      this.persist ??= Env.dynamic;
+      this.output = path.resolve(Runtime.mainSourcePath, this.output);
+      this.persist ??= Runtime.dynamic;
     }
     if (this.persist) {
       if (!/[.](json|ya?ml) $/.test(this.output)) { // Assume a folder

@@ -1,6 +1,6 @@
 import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, WorkQueue } from '@travetto/worker';
-import { MetadataIndex } from '@travetto/manifest';
+import { Runtime, describeFunction } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
@@ -42,7 +42,7 @@ export class TestWatcher {
 
     new MethodSource(RootRegistry).on(e => {
       const [cls, method] = (e.prev ?? e.curr ?? []);
-      if (!cls || MetadataIndex.get(cls)?.abstract) {
+      if (!cls || describeFunction(cls).abstract) {
         return;
       }
       if (!method) {
@@ -60,7 +60,7 @@ export class TestWatcher {
           type: 'removeTest',
           method: method?.name,
           classId: cls?.Ⲑid,
-          file: MetadataIndex.get(cls)?.source
+          file: Runtime.getSource(cls)
         });
       }
     });

@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import { spawn } from 'child_process';
 
-import { ExecUtil, Env } from '@travetto/base';
+import { ExecUtil, Env } from '@travetto/runtime';
 
 import { RunChoice, ResolvedRunChoice } from './types';
 import { Workspace } from '../../../core/workspace';

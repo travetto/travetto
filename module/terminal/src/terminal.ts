@@ -1,6 +1,6 @@
 import tty from 'node:tty';
 
-import { Env, Util } from '@travetto/base';
+import { Env, Util } from '@travetto/runtime';
 
 import { TerminalWriter } from './writer';
 

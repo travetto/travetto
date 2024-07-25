@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import vscode from 'vscode';
 
-import { TypedObject } from '@travetto/base';
+import { TypedObject } from '@travetto/runtime';
 
 import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
 import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig } from '@travetto/test';

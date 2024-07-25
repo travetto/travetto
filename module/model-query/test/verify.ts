@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { RootRegistry } from '@travetto/registry';
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { Model, ModelType } from '@travetto/model';

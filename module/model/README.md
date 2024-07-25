@@ -235,7 +235,7 @@ In addition to the provided contracts, the module also provides common utilities
 ```typescript
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
-import { Class, TimeSpan } from '@travetto/base';
+import { Class, TimeSpan } from '@travetto/runtime';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';

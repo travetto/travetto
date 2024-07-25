@@ -1,4 +1,4 @@
-import { AppError, Class } from '@travetto/base';
+import { AppError, Class } from '@travetto/runtime';
 import { ModelType, ModelRegistry } from '@travetto/model';
 import { Field, Schema } from '@travetto/schema';
 import { ControllerRegistry } from '@travetto/rest';

@@ -1,6 +1,6 @@
 import { Principal } from '@travetto/auth';
 import { AuthService, PrincipalEncoder } from '@travetto/auth-rest';
-import { AppError, Env, TimeSpan, TimeUtil } from '@travetto/base';
+import { AppError, Runtime, TimeSpan, TimeUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { FilterContext } from '@travetto/rest';
@@ -31,7 +31,7 @@ export class RestJWTConfig {
   postConstruct(): void {
     this.maxAgeMs = TimeUtil.asMillis(this.maxAge);
 
-    if (!this.signingKey && Env.production) {
+    if (!this.signingKey && Runtime.production) {
       throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.jwt.signingKey');
 
     }

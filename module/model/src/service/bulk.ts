@@ -1,4 +1,4 @@
-import { Class, AppError } from '@travetto/base';
+import { Class, AppError } from '@travetto/runtime';
 import { ValidationResultError } from '@travetto/schema';
 
 import { ModelCrudSupport } from './crud';

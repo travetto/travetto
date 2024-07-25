@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 
 import { FieldConfig, ClassConfig } from './types';

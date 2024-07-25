@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 import { Config, EnvVar } from '@travetto/config';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 

@@ -4,6 +4,7 @@ import type { TimeSpan } from './time';
 
 type Role = Exclude<ManifestModuleRole, 'std' | 'compile'>;
 
+
 declare global {
   interface TravettoEnv {
     /** 

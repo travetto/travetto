@@ -3,7 +3,7 @@ import { ChildProcess, spawn, execSync } from 'node:child_process';
 import { rmSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 
-import { Env, ExecUtil } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/runtime';
 
 /**
  * Simple docker wrapper for launching and interacting with a container

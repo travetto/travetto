@@ -5,7 +5,7 @@ import path from 'node:path';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
-import { Util } from '@travetto/base';
+import { Util } from '@travetto/runtime';
 import { Inject } from '@travetto/di';
 
 import { RestClientGeneratorService } from '../../src/service';

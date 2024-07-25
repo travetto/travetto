@@ -1,9 +1,8 @@
-/// <reference path="./src/global.d.ts" />
+/// <reference path="../runtime/src/global.d.ts" />
 
 export * from './src/module';
 export * from './src/delta';
 export * from './src/manifest-index';
-export * from './src/metadata';
 export * from './src/package';
 export * from './src/util';
 export * from './src/file';

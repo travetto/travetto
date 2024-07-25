@@ -1,4 +1,4 @@
-import { Class, ClassInstance } from '@travetto/base';
+import { Class, ClassInstance } from '@travetto/runtime';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry } from '@travetto/test';
 

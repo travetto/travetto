@@ -1,7 +1,7 @@
 
 import assert from 'node:assert';
 
-import { ObjectUtil } from '@travetto/base';
+import { ObjectUtil } from '@travetto/runtime';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
 import { SimpleObject } from '../src/internal/type/common';

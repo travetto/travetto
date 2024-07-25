@@ -9,7 +9,7 @@ import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
-import { RuntimeContext } from '../src/runtime';
+import { Runtime } from '../src/context';
 import { ExecUtil } from '../src/exec';
 
 @Suite()
@@ -20,7 +20,7 @@ export class ExecUtilTest {
   @Test()
   async spawn() {
     const proc = spawn('ls', ['-ls'], {
-      cwd: RuntimeContext.workspace.path
+      cwd: Runtime.workspace.path
     });
     const result = await ExecUtil.getResult(proc);
     assert(result.stdout.includes('package.json'));
@@ -31,7 +31,7 @@ export class ExecUtilTest {
   @Test()
   async spawnBad() {
     const proc = spawn('ls', ['xxxx'], {
-      cwd: RuntimeContext.workspace.path
+      cwd: Runtime.workspace.path
     });
     const result = await ExecUtil.getResult(proc, { catch: true });
     assert(result.stderr.includes('xxxx'));
@@ -87,7 +87,7 @@ export class ExecUtilTest {
 
   @Test()
   async testImmediateFail() {
-    const proc = spawn('npm', ['run', 'zork'], { cwd: RuntimeContext.workspace.path });
+    const proc = spawn('npm', ['run', 'zork'], { cwd: Runtime.workspace.path });
     await timers.setTimeout(600);
     const failure = await ExecUtil.getResult(proc, { catch: true });
     assert(!failure.valid);

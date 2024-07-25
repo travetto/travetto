@@ -53,7 +53,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config<span class="token punctuation">,</span> EnvVar <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/config'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Field<span class="token punctuation">,</span> Required <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/schema'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Runtime <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * S3 Support as an Asset Source
@@ -108,7 +108,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
     <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
     <span class="token comment">// We are in localhost and not in prod, turn on forcePathStyle</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>Env<span class="token punctuation">.</span>production <span class="token operator">&amp;&amp;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>endpoint<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'localhost'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>Runtime<span class="token punctuation">.</span>production <span class="token operator">&amp;&amp;</span> <span class="token keyword">this</span><span class="token punctuation">.</span>endpoint<span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'localhost'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>forcePathStyle <span class="token operator">??=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>

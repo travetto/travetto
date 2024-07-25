@@ -1,4 +1,4 @@
-import { AppError, Class } from '@travetto/base';
+import { AppError, Class } from '@travetto/runtime';
 
 import { ModelType } from '../../types/model';
 import { StreamRange } from '../../service/stream';

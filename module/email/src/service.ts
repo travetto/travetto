@@ -1,4 +1,4 @@
-import { Env, RuntimeResources } from '@travetto/base';
+import { Runtime, RuntimeResources } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
 import { EmailCompiled, EmailOptions, SentEmail } from './types';
@@ -30,7 +30,7 @@ export class MailService {
    * Get compiled content by key
    */
   async getCompiled(key: string): Promise<EmailCompiled> {
-    if (Env.dynamic || !this.#compiled.has(key)) {
+    if (Runtime.dynamic || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         RuntimeResources.read(`${key}.compiled.html`),
         RuntimeResources.read(`${key}.compiled.text`),

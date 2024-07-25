@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { Inject } from '@travetto/di';
 import { NotFoundError } from '@travetto/model';
 import { InjectableSuite } from '@travetto/di/support/test/suite';

@@ -1,9 +1,9 @@
 /** @jsxImportSource @travetto/doc */
 import { readFileSync } from 'node:fs';
 
-import { MetadataIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement } from '@travetto/doc';
 import { Config } from '@travetto/config';
+import { Runtime } from '@travetto/runtime';
 
 export const Links = {
   Basic: d.codeLink('Basic', '@travetto/model/src/service/basic.ts', /export interface/),
@@ -16,7 +16,7 @@ export const Links = {
 
 export const ModelTypes = (file: string | Function): DocJSXElement[] => {
   if (typeof file !== 'string') {
-    file = MetadataIndex.get(file)!.source;
+    file = Runtime.getSource(file);
   }
   const contents = readFileSync(file, 'utf8');
   const found: DocJSXElementByFn<'CodeLink'>[] = [];

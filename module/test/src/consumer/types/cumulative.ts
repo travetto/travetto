@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 
 import { TestConsumer } from '../types';
 import { TestEvent } from '../../model/event';

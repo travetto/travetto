@@ -1,7 +1,8 @@
 import path from 'node:path';
 
-import { type ManifestContext, MetadataIndex, PackageUtil, RuntimeIndex } from '@travetto/manifest';
+import { type ManifestContext, PackageUtil } from '@travetto/manifest';
 import { isJSXElement, JSXElement, JSXFragmentType } from '@travetto/doc/jsx-runtime';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../jsx';
 import { DocumentShape, RenderProvider, RenderState } from '../types';
@@ -93,11 +94,11 @@ export class DocRenderer {
         case 'bigint':
         case 'boolean': return `${node}`;
         default: {
-          const meta = (typeof node === 'function' ? MetadataIndex.get(node) : undefined);
-          if (meta && typeof node === 'function') {
-            const title = (await DocFileUtil.isDecorator(node.name, meta.source)) ? `@${node.name}` : node.name;
+          const source = typeof node === 'function' ? Runtime.getSource(node) : undefined;
+          if (source && typeof node === 'function') {
+            const title = (await DocFileUtil.isDecorator(node.name, source)) ? `@${node.name}` : node.name;
             const el = this.#support.createElement('CodeLink', {
-              src: meta.source,
+              src: source,
               startRe: new RegExp(`(class|function)\\s+(${node.name})`),
               title
             });

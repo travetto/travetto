@@ -1,9 +1,10 @@
 {
-  "name": "@travetto/base",
+  "name": "@travetto/runtime",
   "version": "5.0.0-rc.1",
-  "description": "Environment config and common utilities for travetto applications.",
+  "description": "Runtime for travetto applications.",
   "keywords": [
     "console-manager",
+    "runtime",
     "travetto",
     "typescript"
   ],
@@ -21,7 +22,7 @@
   "main": "__index__.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/base"
+    "directory": "module/runtime"
   },
   "dependencies": {
     "@travetto/manifest": "^5.0.0-rc.1",
@@ -38,7 +39,7 @@
     }
   },
   "travetto": {
-    "displayName": "Base"
+    "displayName": "Runtime"
   },
   "private": false,
   "publishConfig": {

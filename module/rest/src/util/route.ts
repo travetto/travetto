@@ -1,6 +1,6 @@
 import { isPromise } from 'node:util/types';
 
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 
 import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';

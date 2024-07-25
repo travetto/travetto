@@ -1,4 +1,4 @@
-import { ConsoleListener, ConsoleManager, ConsoleEvent } from '@travetto/base';
+import { ConsoleListener, ConsoleManager, ConsoleEvent } from '@travetto/runtime';
 import { AutoCreate, DependencyRegistry, Injectable } from '@travetto/di';
 
 import { LogDecorator, LogEvent, Logger } from './types';

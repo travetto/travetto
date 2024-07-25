@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { path, ManifestIndex } from '@travetto/manifest';
+import { path, ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
 
 import { ManagedType, AnyType, ForeignType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, ModuleNameⲐ } from './types/visitor';
@@ -33,7 +33,7 @@ export class TransformerState implements State {
 
   #resolver: SimpleResolver;
   #imports: ImportManager;
-  #fileIdent: ts.Identifier;
+  #modIdent: ts.Identifier;
   #manifestIndex: ManifestIndex;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
@@ -261,17 +261,18 @@ export class TransformerState implements State {
   /**
    * Get filename identifier, regardless of module system
    */
-  getFilenameIdentifier(): ts.Expression {
-    if (this.#fileIdent === undefined) {
-      this.#fileIdent = this.createIdentifier('ᚕf');
-      const decl = this.factory.createVariableDeclaration(this.#fileIdent, undefined, undefined,
-        this.fromLiteral(this.#resolver.getFileImportName(this.source.fileName) ?? this.source.fileName)
+  getModuleIdentifier(): ts.Expression {
+    if (this.#modIdent === undefined) {
+      this.#modIdent = this.createIdentifier('ᚕm');
+      const entry = this.#resolver.getFileImport(this.source.fileName);
+      const decl = this.factory.createVariableDeclaration(this.#modIdent, undefined, undefined,
+        this.fromLiteral([entry?.module, ManifestModuleUtil.sourceToBlankExt(entry?.relativeFile ?? '')])
       );
       this.addStatements([
         this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([decl]))
       ], -1);
     }
-    return this.#fileIdent;
+    return this.#modIdent;
   }
 
   /**

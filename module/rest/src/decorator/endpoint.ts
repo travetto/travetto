@@ -1,4 +1,4 @@
-import { ClassInstance } from '@travetto/base';
+import { ClassInstance } from '@travetto/runtime';
 
 import { MethodOrAll, RouteHandler } from '../types';
 

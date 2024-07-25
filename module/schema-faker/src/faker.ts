@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { Class, TimeUtil } from '@travetto/base';
+import { Class, TimeUtil } from '@travetto/runtime';
 import { BindUtil, SchemaRegistry, FieldConfig, CommonRegExp } from '@travetto/schema';
 
 /**
