@@ -76,8 +76,6 @@ Once the manifest is created, the application runtime can now read this manifest
 ## Path Normalization
 By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up [path](https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L9) as an equivalent to [Node](https://nodejs.org)'s [http](https://nodejs.org/api/path.html) library.  This allows for consistent behavior across all file-interactions.
 
-Imports pointing at $`node:path` and $`path` are rewritten at compile time to point to the implementation provided by the module.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.
-
 ## Anatomy of a Manifest
 
 **Code: Manifest for @travetto/manifest**

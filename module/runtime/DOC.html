@@ -25,6 +25,7 @@ Runtime is the foundation of all <a target="_blank" class="external-link" href="
 <li>Time Utilities</li>
 <li>Process Execution</li>
 <li>Shutdown Management</li>
+<li>Path behavior</li>
 </ul>
 
 <h2 id="environment-support">Environment Support</h2>
@@ -333,3 +334,7 @@ As a registered shutdown handler, you can do.
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
+
+<h2 id="path-behavior">Path Behavior</h2>
+
+To ensure consistency in path usage throughout the framework, imports pointing at $<code class="item input">node:path</code> and $<code class="item input">path</code> are rewritten at compile time.  These imports are pointing towards <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s <code class="item input">path</code>  implementation.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.

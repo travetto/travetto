@@ -23,6 +23,7 @@ Runtime is the foundation of all [Travetto](https://travetto.dev) applications. 
    *  Time Utilities
    *  Process Execution
    *  Shutdown Management
+   *  Path behavior
 
 ## Environment Support
 The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L4), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
@@ -298,3 +299,6 @@ export function registerShutdownHandler() {
   });
 }
 ```
+
+## Path Behavior
+To ensure consistency in path usage throughout the framework, imports pointing at $`node:path` and $`path` are rewritten at compile time.  These imports are pointing towards [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s `path`  implementation.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.

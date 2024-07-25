@@ -340,12 +340,12 @@ npx trv run:rest
         source: 'file://application',
         detail: 'related/todo-app/resources/application.yml'
       },
-      { priority: 200, source: 'file://local', detail: 'resources/local.yml' },
       {
-        priority: 201,
+        priority: 200,
         source: 'file://local',
         detail: 'related/todo-app/resources/local.yml'
       },
+      { priority: 201, source: 'file://local', detail: 'resources/local.yml' },
       { priority: 999, source: 'memory://override' }
     ],
     active: {
