@@ -1,6 +1,8 @@
 import path from 'node:path';
 
 import { type ManifestContext, ManifestIndex } from '@travetto/manifest';
+import { describeFunction } from '@travetto/manifest/src/function';
+
 import { Env } from './env';
 import { FileLoader } from './file-loader';
 
@@ -59,6 +61,11 @@ export const RuntimeContext = {
   /** Get env name, with support for the default env */
   get envName(): string | undefined {
     return Env.name || (!Env.production ? RuntimeIndex.manifest.workspace.defaultEnv : undefined);
+  },
+
+  /** Get source for function */
+  getSource(fn: Function): string {
+    return RuntimeIndex.getFromImport(describeFunction(fn).import)!.sourceFile;
   }
 };
 

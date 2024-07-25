@@ -4,6 +4,7 @@ import { TransformerState, AfterClass, DecoratorUtil } from '@travetto/transform
 
 const REGISTER_MOD = '@travetto/registry/src/decorator';
 const SKIP_SRC = /^@travetto\/(base|manifest)\/(src|support)/;
+const SKIP_FUNCTION = /^@travetto\/registry\/src\/function/;
 
 /**
  * Registration of all classes to support the registry
@@ -17,7 +18,8 @@ export class RegisterTransformer {
   static registerClass(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     if (
       state.importName === REGISTER_MOD ||
-      SKIP_SRC.test(state.importName)
+      SKIP_SRC.test(state.importName) ||
+      SKIP_FUNCTION.test(state.importName)
     ) {  // Cannot process self
       return node;
     }

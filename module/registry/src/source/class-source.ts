@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 
-import { type FindConfig, MetadataIndex } from '@travetto/manifest';
-import { Class, Env, RuntimeIndex } from '@travetto/base';
+import { type FindConfig } from '@travetto/manifest';
+import { Class, Env, RuntimeContext, RuntimeIndex, describeFunction } from '@travetto/base';
 
 import { DynamicFileLoader } from '../internal/file-loader';
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
@@ -43,7 +43,7 @@ export class ClassSource implements ChangeSource<Class> {
       }
       this.#classes.set(file, new Map());
       for (const cls of classes) {
-        const src = RuntimeIndex.getSourceFile(MetadataIndex.get(cls)!);
+        const src = RuntimeContext.getSource(cls);
         this.#classes.get(src)!.set(cls.Ⲑid, cls);
         this.emit({ type: 'added', curr: cls });
       }
@@ -83,9 +83,9 @@ export class ClassSource implements ChangeSource<Class> {
           changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });
         } else {
-          const prevMeta = MetadataIndex.getFromClass(prev.get(k));
-          const nextMeta = MetadataIndex.getFromClass(next.get(k));
-          if (prevMeta?.hash !== nextMeta?.hash) {
+          const prevHash = describeFunction(prev.get(k)!)?.hash;
+          const nextHash = describeFunction(next.get(k)!)?.hash;
+          if (prevHash !== nextHash) {
             changes += 1;
             this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
           }

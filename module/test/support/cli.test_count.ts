@@ -1,6 +1,5 @@
 import { CliCommand } from '@travetto/cli';
-import { MetadataIndex } from '@travetto/manifest';
-import { Env } from '@travetto/base';
+import { Env, describeFunction } from '@travetto/base';
 
 import { SuiteRegistry } from '../src/registry/suite';
 import { RunnerUtil } from '../src/execute/util';
@@ -31,7 +30,7 @@ export class TestCountCommand {
     const suites = SuiteRegistry.getClasses();
     const total = suites
       .map(c => SuiteRegistry.get(c))
-      .filter(c => !MetadataIndex.get(c.class)?.abstract)
+      .filter(c => !describeFunction(c.class).abstract)
       .reduce((acc, c) => acc + (c.tests?.length ?? 0), 0);
 
     console.log(total);

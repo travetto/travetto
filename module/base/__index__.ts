@@ -10,3 +10,4 @@ export * from './src/time';
 export * from './src/types';
 export * from './src/watch';
 export * from './src/util';
+export * from '@travetto/manifest/src/function';

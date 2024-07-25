@@ -9,12 +9,3 @@ export type ManifestModuleFolderType =
   '$other' | '$transformer';
 
 export type ManifestModuleRole = 'std' | 'test' | 'doc' | 'compile' | 'build';
-
-export type FunctionMetadataTag = { hash: number, lines: [number, number] };
-export type FunctionMetadata = FunctionMetadataTag & {
-  id: string;
-  import: string;
-  methods?: Record<string, FunctionMetadataTag>;
-  synthetic?: boolean;
-  abstract?: boolean;
-};

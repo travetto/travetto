@@ -4,7 +4,7 @@ import { ManifestModuleUtil } from './module';
 import { path } from './path';
 import { ManifestUtil } from './util';
 
-import type { FunctionMetadata, ManifestModuleFolderType } from './types/common';
+import type { ManifestModuleFolderType } from './types/common';
 import type { ManifestModule, ManifestRoot, ManifestModuleFile, IndexedModule, IndexedFile, FindConfig } from './types/manifest';
 
 const TypedObject: {
@@ -300,15 +300,15 @@ export class ManifestIndex {
    * Get source file from import location
    * @param importFile
    */
-  getSourceFile(importFile: string | FunctionMetadata | [string, string]): string {
-    importFile = Array.isArray(importFile) ? importFile.join('/') : (typeof importFile === 'string' ? importFile : importFile.import!);
+  getSourceFile(importFile: string | [string, string]): string {
+    importFile = Array.isArray(importFile) ? importFile.join('/') : importFile;
     return this.getFromImport(importFile)?.sourceFile ?? importFile;
   }
 
   /**
    * Resolve a module path, expanding @ and @@ to workspace values
    */
-  resolveModulePath = (modulePath: string): string => {
+  resolveModulePath(modulePath: string): string {
     const main = this.manifest.main.name;
     const workspace = this.manifest.workspace.path;
     const [base, sub] = modulePath

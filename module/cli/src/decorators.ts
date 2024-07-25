@@ -1,5 +1,4 @@
-import { Class, ClassInstance, Env, RuntimeContext, RuntimeIndex } from '@travetto/base';
-import { MetadataIndex } from '@travetto/manifest';
+import { Class, ClassInstance, Env, RuntimeContext, RuntimeIndex, describeFunction } from '@travetto/base';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { CliCommandShape, CliCommandShapeFields } from './types';
@@ -14,8 +13,7 @@ import { CliParseUtil } from './parse';
  */
 export function CliCommand(cfg: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
-    const meta = MetadataIndex.get(target);
-    if (!meta || meta.abstract) {
+    if (!target.Ⲑid || describeFunction(target).abstract) {
       return;
     }
 

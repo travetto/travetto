@@ -1,7 +1,9 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "cSpell.words": [
-    "direnv"
+    "direnv",
+    "Ⲑabstract",
+    "Ⲑsynthetic"
   ],
   "files.exclude": {
     "**/.trv/**": true,
