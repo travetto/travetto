@@ -321,7 +321,7 @@ npx trv run:rest
       defaultEnv: 'local'
     }
   },
-  context: {
+  runtime: {
     name: 'local',
     debug: false,
     production: false,

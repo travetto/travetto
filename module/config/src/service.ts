@@ -147,7 +147,7 @@ export class ConfigurationService {
         main: Runtime.main,
         workspace: Runtime.workspace
       },
-      context: {
+      runtime: {
         name: Runtime.name,
         debug: Runtime.debug,
         production: Runtime.production,

@@ -250,7 +250,7 @@ Initialized {
       defaultEnv: 'local'
     }
   },
-  context: {
+  runtime: {
     name: 'local',
     debug: false,
     production: false,
@@ -335,7 +335,7 @@ Initialized {
       defaultEnv: 'local'
     }
   },
-  context: {
+  runtime: {
     name: 'prod',
     debug: false,
     production: true,
