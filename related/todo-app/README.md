@@ -304,7 +304,7 @@ npx trv run:rest
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/config:src/service:146] Initialized {
+2029-03-14T04:00:00.618Z info  [@travetto/config:src/service:145] Initialized {
   manifest: {
     main: {
       name: '@travetto/todo-app',
@@ -321,7 +321,7 @@ npx trv run:rest
       defaultEnv: 'local'
     }
   },
-  env: {
+  context: {
     name: 'local',
     debug: false,
     production: false,

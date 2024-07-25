@@ -1,6 +1,6 @@
 import { sign, Header, decode, verify } from 'jws';
 
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 
 import { JWTError } from './error';
 import { Payload, SignOptions, SignHeader, TypedSig, VerifyOptions } from './types';

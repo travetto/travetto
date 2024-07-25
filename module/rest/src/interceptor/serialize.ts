@@ -1,4 +1,4 @@
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { DataUtil } from '@travetto/schema';
 

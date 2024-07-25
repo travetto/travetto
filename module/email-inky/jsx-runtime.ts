@@ -1,4 +1,4 @@
-import { ConcreteClass } from '@travetto/base';
+import { ConcreteClass } from '@travetto/runtime';
 import { EmailTemplateModule, EmailTemplateLocation } from '@travetto/email';
 
 export type JSXChild = JSXElement | number | bigint | boolean | object | string;

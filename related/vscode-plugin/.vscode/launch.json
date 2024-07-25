@@ -22,7 +22,7 @@
         "<node_internals>/**",
         "node:internals/**",
         "**/vs/*/api/**",
-        "**/@travetto/base/src/console.js",
+        "**/@travetto/runtime/src/console.js",
         "**/tslib/**"
       ],
       "pauseForSourceMap": true,
@@ -48,7 +48,7 @@
         "<node_internals>/**",
         "node:internals/**",
         "**/vs/*/api/**",
-        "**/@travetto/base/src/console.js",
+        "**/@travetto/runtime/src/console.js",
         "**/tslib/**"
       ],
       "pauseForSourceMap": true,

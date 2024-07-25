@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/base';
+import type { Class } from '@travetto/runtime';
 import type { DeepPartial } from './types';
 
 declare global {

@@ -2,7 +2,7 @@ import { ModelQueryCrudSupport } from '@travetto/model-query/src/service/crud';
 import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
 import { ModelQueryFacetSupport } from '@travetto/model-query/src/service/facet';
 import { ValidStringFields } from '@travetto/model-query/src/model/where-clause';
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { ModelType, OptionalId } from '@travetto/model';
 import { ModelQuery, PageableModelQuery } from '@travetto/model-query/src/model/query';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';

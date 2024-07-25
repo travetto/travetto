@@ -1,4 +1,4 @@
-import { ShutdownManager, Class, TimeSpan, TimeUtil, Util } from '@travetto/base';
+import { ShutdownManager, Class, TimeSpan, TimeUtil, Util } from '@travetto/runtime';
 
 import { ModelRegistry } from '../../registry/model';
 import { ModelExpirySupport } from '../../service/expiry';

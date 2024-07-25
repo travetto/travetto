@@ -1,4 +1,4 @@
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 
 import { Registry } from '../registry';
 import { ClassSource } from '../source/class-source';

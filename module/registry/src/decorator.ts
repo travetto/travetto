@@ -1,4 +1,4 @@
-import { Class, RuntimeContext } from '@travetto/base';
+import { Class, Runtime } from '@travetto/runtime';
 
 /**
  * Register a class as pending
@@ -11,7 +11,7 @@ class $PendingRegister {
    * Register class as pending
    */
   add(cls: Class): void {
-    const src = RuntimeContext.getSource(cls);
+    const src = Runtime.getSource(cls);
     if (!this.map.has(src)) {
       const sub: Class[] = [];
       this.map.set(src, sub);

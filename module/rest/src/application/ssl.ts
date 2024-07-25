@@ -1,4 +1,4 @@
-import { AppError, Env, RuntimeContext, RuntimeResources } from '@travetto/base';
+import { AppError, Runtime, RuntimeResources } from '@travetto/runtime';
 import { Config, EnvVar } from '@travetto/config';
 import { PackageUtil } from '@travetto/manifest';
 import { Secret } from '@travetto/schema';
@@ -15,7 +15,7 @@ export class RestSslConfig {
     try {
       forge = (await import('node-forge')).default;
     } catch {
-      const install = PackageUtil.getInstallCommand(RuntimeContext, 'node-forge');
+      const install = PackageUtil.getInstallCommand(Runtime, 'node-forge');
       throw new Error(`In order to generate SSL keys, you must install node-forge, "${install}"`);
     }
 
@@ -71,7 +71,7 @@ export class RestSslConfig {
       return;
     }
     if (!this.keys) {
-      if (Env.production) {
+      if (Runtime.production) {
         throw new AppError('Default ssl keys are only valid for development use, please specify a config value at rest.ssl.keys', 'permissions');
       }
       return RestSslConfig.generateSslKeyPair();

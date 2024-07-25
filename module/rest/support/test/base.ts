@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, ConcreteClass, Util } from '@travetto/base';
+import { AppError, ConcreteClass, Util } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 

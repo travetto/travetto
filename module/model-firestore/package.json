@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@google-cloud/firestore": "^7.9.0",
-    "@travetto/base": "^5.0.0-rc.1",
+    "@travetto/runtime": "^5.0.0-rc.1",
     "@travetto/config": "^5.0.0-rc.1",
     "@travetto/model": "^5.0.0-rc.1"
   },

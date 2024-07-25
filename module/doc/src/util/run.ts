@@ -3,7 +3,7 @@ import util from 'node:util';
 import { spawn, ChildProcess } from 'node:child_process';
 import path from 'node:path';
 
-import { Env, ExecUtil, RuntimeContext, RuntimeIndex } from '@travetto/base';
+import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
 
@@ -47,7 +47,7 @@ export class DocRunUtil {
 
   /** Build cwd from config */
   static cwd(cfg: RunConfig): string {
-    return path.resolve(cfg.module ? RuntimeIndex.getModule(cfg.module)?.sourcePath! : RuntimeContext.mainSourcePath);
+    return path.resolve(cfg.module ? RuntimeIndex.getModule(cfg.module)?.sourcePath! : Runtime.mainSourcePath);
   }
 
   /**
@@ -58,7 +58,7 @@ export class DocRunUtil {
     text = util.stripVTControlCharacters(text.trim())
       .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
-      .replaceAll(RuntimeContext.workspace.path, '<workspace-root>')
+      .replaceAll(Runtime.workspace.path, '<workspace-root>')
       .replace(/[/]tmp[/][a-z_A-Z0-9\/\-]+/g, '/tmp/<temp-folder>')
       .replace(/^(\s*framework:\s*')(\d+[.]\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x${post}`)
       .replace(/^(\s*nodeVersion:\s*'v)(\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x.x${post}`)

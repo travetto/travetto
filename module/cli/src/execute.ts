@@ -1,4 +1,4 @@
-import { ConsoleManager, Env, ShutdownManager } from '@travetto/base';
+import { ConsoleManager, Runtime, ShutdownManager } from '@travetto/runtime';
 
 import { HelpUtil } from './help';
 import { CliCommandRegistry } from './registry';
@@ -54,7 +54,7 @@ export class ExecutionManager {
     await command._cfg!.preMain?.(command);
     await command.preMain?.();
 
-    ConsoleManager.debug(Env.debug);
+    ConsoleManager.debug(Runtime.debug);
     const result = await command.main(...boundArgs);
     await CliUtil.listenForResponse(result);
   }

@@ -1,4 +1,4 @@
-import { Class, RuntimeIndex } from '@travetto/base';
+import { Class, RuntimeIndex } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext, FilterReturn } from '@travetto/rest';

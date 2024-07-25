@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
-import { TimeSpan, TimeUnit, TimeUtil } from '@travetto/base';
+import { TimeSpan, TimeUnit, TimeUtil } from '@travetto/runtime';
 
 import { ExpiresAt, Model } from '../../src/registry/decorator';
 import { ModelExpirySupport } from '../../src/service/expiry';

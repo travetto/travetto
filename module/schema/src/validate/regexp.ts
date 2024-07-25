@@ -1,4 +1,4 @@
-import { TypedObject } from '@travetto/base';
+import { TypedObject } from '@travetto/runtime';
 import { Messages } from './messages';
 
 declare global {

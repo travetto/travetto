@@ -1,4 +1,4 @@
-import { Class, AppError } from '@travetto/base';
+import { Class, AppError } from '@travetto/runtime';
 
 /**
  * Represents when a model of cls and id cannot be found

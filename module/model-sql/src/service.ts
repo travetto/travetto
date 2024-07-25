@@ -4,7 +4,7 @@ import {
   NotFoundError, ModelRegistry, ExistsError, OptionalId,
   ModelIdSource
 } from '@travetto/model';
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { DataUtil, SchemaChange } from '@travetto/schema';
 import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';

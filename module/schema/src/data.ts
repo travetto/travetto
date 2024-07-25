@@ -1,6 +1,6 @@
 import { isNumberObject as isNum, isBooleanObject as isBool, isStringObject as isStr } from 'node:util/types';
 
-import { Class, ClassInstance, TypedObject } from '@travetto/base';
+import { Class, ClassInstance, TypedObject } from '@travetto/runtime';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 

@@ -1,4 +1,4 @@
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 import { ClassTarget } from './types';
 
 function getName(symbol: symbol): string {

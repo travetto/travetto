@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { Class, describeFunction } from '@travetto/base';
+import { Class, describeFunction } from '@travetto/runtime';
 
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 

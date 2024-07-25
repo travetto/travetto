@@ -1,4 +1,4 @@
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { ControllerRegistry } from '../registry/controller';
 
 /**

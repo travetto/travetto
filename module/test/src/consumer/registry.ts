@@ -1,4 +1,4 @@
-import type { Class, ConcreteClass } from '@travetto/base';
+import type { Class, ConcreteClass } from '@travetto/runtime';
 import { TestConsumer } from './types';
 
 /**

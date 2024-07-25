@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/base';
+import type { Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import type { RouteConfig, Filter } from '../types';

@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { RuntimeIndex } from '@travetto/base';
+import { RuntimeIndex } from '@travetto/runtime';
 
 import { Assertion, TestConfig } from '../model/test';
 

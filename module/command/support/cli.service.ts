@@ -1,6 +1,6 @@
 import { CliCommandShape, CliCommand, cliTpl, CliValidationError } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
-import { Util } from '@travetto/base';
+import { Util } from '@travetto/runtime';
 
 import { CommandService } from '../src/types';
 

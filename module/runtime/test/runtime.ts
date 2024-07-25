@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { RuntimeIndex } from '../src/runtime';
+import { RuntimeIndex } from '../src/manifest-index';
 
 @Suite()
 class RuntimeIndexTests {
@@ -17,35 +17,35 @@ class RuntimeIndexTests {
 
     const found = RuntimeIndex.getModuleList('workspace');
     assert(found.size >= 1);
-    assert(found.has('@travetto/base'));
+    assert(found.has('@travetto/runtime'));
 
     let found2 = RuntimeIndex.getModuleList('all');
     assert(found2.size > 1);
-    assert(found2.has('@travetto/base'));
+    assert(found2.has('@travetto/runtime'));
     assert(found2.has('@travetto/manifest'));
 
     found2 = RuntimeIndex.getModuleList('workspace', '*');
     assert(found2.size > 1);
-    assert(found2.has('@travetto/base'));
+    assert(found2.has('@travetto/runtime'));
     assert(found2.has('@travetto/manifest'));
 
     found2 = RuntimeIndex.getModuleList('workspace', '@travetto/*');
     assert(found2.size > 1);
-    assert(found2.has('@travetto/base'));
+    assert(found2.has('@travetto/runtime'));
     assert(found2.has('@travetto/manifest'));
 
-    let found3 = RuntimeIndex.getModuleList('workspace', '-@travetto/base');
+    let found3 = RuntimeIndex.getModuleList('workspace', '-@travetto/runtime');
     assert(found3.size === found.size - 1);
-    assert(!found3.has('@travetto/base'));
+    assert(!found3.has('@travetto/runtime'));
 
-    found3 = RuntimeIndex.getModuleList('workspace', '*,-@travetto/base');
+    found3 = RuntimeIndex.getModuleList('workspace', '*,-@travetto/runtime');
     assert(found3.size === found2.size - 1);
-    assert(!found3.has('@travetto/base'));
+    assert(!found3.has('@travetto/runtime'));
     assert(found3.has('@travetto/manifest'));
 
     found3 = RuntimeIndex.getModuleList('workspace', '*,-@travetto/*');
     assert(!found3.size);
-    assert(!found3.has('@travetto/base'));
+    assert(!found3.has('@travetto/runtime'));
     assert(!found3.has('@travetto/manifest'));
   }
 }

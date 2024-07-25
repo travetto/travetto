@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
-import { Env, Util } from '@travetto/base';
+import { Runtime, Util } from '@travetto/runtime';
 import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Request, Response } from '@travetto/rest';
@@ -58,7 +58,7 @@ export class SessionService {
    * Initialize service if none defined
    */
   async postConstruct(): Promise<void> {
-    if (isStorageSupported(this.#modelService) && Env.dynamic) {
+    if (isStorageSupported(this.#modelService) && Runtime.dynamic) {
       await this.#modelService.createModel?.(SessionEntry);
     }
   }

@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 
 import { Index, Model } from '../../src/registry/decorator';
 import { ModelIndexedSupport } from '../../src/service/indexed';

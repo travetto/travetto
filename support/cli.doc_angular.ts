@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 
-import { Env, ExecUtil, RuntimeContext, RuntimeIndex } from '@travetto/base';
+import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
 
@@ -15,7 +15,7 @@ const page = (f: string): string => path.resolve('related/travetto.github.io/src
 @CliCommand()
 export class DocAngularCommand {
   async main(target?: string): Promise<void> {
-    const root = RuntimeContext.workspace.path;
+    const root = Runtime.workspace.path;
 
     if (target && target.startsWith(root)) {
       target = target.replace(root, '').split('/').pop()!;
@@ -50,7 +50,7 @@ export class DocAngularCommand {
           progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
           filter: mod => mods.has(mod)
         });
-      await ExecUtil.getResult(spawn('trv', ['doc'], { env: { ...process.env, ...Env.TRV_MANIFEST.export('') }, cwd: RuntimeContext.mainSourcePath }));
+      await ExecUtil.getResult(spawn('trv', ['doc'], { env: { ...process.env, ...Env.TRV_MANIFEST.export('') }, cwd: Runtime.mainSourcePath }));
       mods.add(RuntimeIndex.mainModule);
     } else {
       await ExecUtil.getResult(spawn('trv', ['doc'], {

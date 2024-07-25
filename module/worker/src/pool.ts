@@ -1,7 +1,7 @@
 import os from 'node:os';
 import { Options, Pool, createPool } from 'generic-pool';
 
-import { Env, Util } from '@travetto/base';
+import { Env, Util } from '@travetto/runtime';
 
 import { WorkQueue } from './queue';
 

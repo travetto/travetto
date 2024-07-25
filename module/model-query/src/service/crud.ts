@@ -1,4 +1,4 @@
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { ModelCrudSupport, ModelType } from '@travetto/model';
 
 import { ModelQuerySupport } from './query';

@@ -1,4 +1,4 @@
-import { Class, AppError, ClassInstance } from '@travetto/base';
+import { Class, AppError, ClassInstance } from '@travetto/runtime';
 import { ControllerRegistry, ParamConfig, Param, RouteHandler } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 import { RequestTarget } from '@travetto/rest/src/internal/types';

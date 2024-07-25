@@ -1,4 +1,4 @@
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 
 /**
  * Represents an execution error

@@ -1,4 +1,4 @@
-import { Class, ClassInstance, describeFunction } from '@travetto/base';
+import { Class, ClassInstance, describeFunction } from '@travetto/runtime';
 import { RetargettingProxy } from '@travetto/registry';
 
 import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
@@ -68,7 +68,7 @@ class $DynamicDependencyRegistry {
     const classId = cls.Ⲑid;
 
     if (
-      !describeFunction(cls).abstract &&
+      !describeFunction(cls)?.abstract &&
       this.#proxies.has(classId) &&
       this.#proxies.get(classId)!.has(config.qualifier)
     ) {

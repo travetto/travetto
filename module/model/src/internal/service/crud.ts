@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-import { Class, Util } from '@travetto/base';
+import { Class, Util } from '@travetto/runtime';
 import { DataUtil, SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';

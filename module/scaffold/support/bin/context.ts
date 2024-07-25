@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import mustache from 'mustache';
 
-import { ExecUtil, Util, RuntimeIndex } from '@travetto/base';
+import { ExecUtil, Util, RuntimeIndex } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 import { NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';

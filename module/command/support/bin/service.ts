@@ -1,4 +1,4 @@
-import { ExecUtil, RuntimeIndex, Util } from '@travetto/base';
+import { ExecUtil, RuntimeIndex, Util } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 
 import { CommandUtil } from '../../src/util';

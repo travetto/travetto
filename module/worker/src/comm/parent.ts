@@ -1,6 +1,6 @@
 import { ChildProcess } from 'node:child_process';
 
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/runtime';
 
 import { ProcessCommChannel } from './channel';
 

@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 
 import { TestConfig } from './shared';
 

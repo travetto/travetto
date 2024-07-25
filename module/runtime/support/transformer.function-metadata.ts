@@ -7,16 +7,14 @@ import {
 
 import type { FunctionMetadataTag } from '../src/function';
 
-const MANIFEST_MOD = '@travetto/manifest';
-const MANIFEST_MOD_SRC = `${MANIFEST_MOD}/src`;
-const MANIFEST_IDX = `${MANIFEST_MOD}/__index__`;
+const RUNTIME_MOD = '@travetto/runtime';
+const RUNTIME_MOD_SRC = `${RUNTIME_MOD}/src`;
+const REGISTER_IMPORT = `${RUNTIME_MOD_SRC}/function`;
 
-const REGISTER_IMPORT = `${MANIFEST_MOD_SRC}/function.js`;
-
-const methods = Symbol.for(`${MANIFEST_MOD}:methods`);
-const cls = Symbol.for(`${MANIFEST_MOD}:class`);
-const fn = Symbol.for(`${MANIFEST_MOD}:function`);
-const registerImport = Symbol.for(`${MANIFEST_MOD}:registerImport`);
+const methods = Symbol.for(`${RUNTIME_MOD}:methods`);
+const cls = Symbol.for(`${RUNTIME_MOD}:class`);
+const fn = Symbol.for(`${RUNTIME_MOD}:function`);
+const registerImport = Symbol.for(`${RUNTIME_MOD}:registerImport`);
 
 interface MetadataInfo {
   [registerImport]?: Import;
@@ -41,7 +39,7 @@ export class RegisterTransformer {
   }
 
   static #valid({ importName: imp }: TransformerState): boolean {
-    return !imp.startsWith(MANIFEST_MOD_SRC) && imp !== MANIFEST_IDX;
+    return !imp.startsWith(REGISTER_IMPORT);
   }
 
   /**

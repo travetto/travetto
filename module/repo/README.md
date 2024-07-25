@@ -124,7 +124,6 @@ module/auth-rest
 module/auth-rest-jwt
 module/auth-rest-passport
 module/auth-rest-session
-module/base
 module/cache
 module/cli
 module/command
@@ -171,6 +170,7 @@ module/rest-model
 module/rest-model-query
 module/rest-session
 module/rest-upload
+module/runtime
 module/scaffold
 module/schema
 module/schema-faker
@@ -224,7 +224,6 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
           module/auth-rest-jwt <workspace-root>/module/auth-rest-jwt
      module/auth-rest-passport <workspace-root>/module/auth-rest-passport
       module/auth-rest-session <workspace-root>/module/auth-rest-session
-                   module/base <workspace-root>/module/base
                   module/cache <workspace-root>/module/cache
                     module/cli <workspace-root>/module/cli
                 module/command <workspace-root>/module/command
@@ -271,6 +270,7 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
        module/rest-model-query <workspace-root>/module/rest-model-query
            module/rest-session <workspace-root>/module/rest-session
             module/rest-upload <workspace-root>/module/rest-upload
+                module/runtime <workspace-root>/module/runtime
                module/scaffold <workspace-root>/module/scaffold
                  module/schema <workspace-root>/module/schema
            module/schema-faker <workspace-root>/module/schema-faker

@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { ErrorCategory, AppError } from '@travetto/base';
+import { ErrorCategory, AppError } from '@travetto/runtime';
 
 import { HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';

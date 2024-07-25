@@ -1,4 +1,4 @@
-import { TimeSpan } from '@travetto/base';
+import { TimeSpan } from '@travetto/runtime';
 import { Primitive } from '@travetto/schema';
 
 /**

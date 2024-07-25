@@ -1,6 +1,6 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ModelRegistry } from '@travetto/model';
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 import { SchemaChange } from '@travetto/schema';
 

@@ -1,4 +1,4 @@
-import { ConcreteClass } from '@travetto/base';
+import { ConcreteClass } from '@travetto/runtime';
 
 type JSXChild = JSXElement | number | bigint | boolean | object | string;
 type JSXProps = { children?: JSXChild | JSXChild[] | null };

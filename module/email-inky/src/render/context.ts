@@ -1,5 +1,5 @@
 import { createElement } from '@travetto/email-inky/jsx-runtime';
-import { FileLoader } from '@travetto/base';
+import { FileLoader } from '@travetto/runtime';
 import { EmailTemplateLocation, EmailResourceLoader } from '@travetto/email';
 
 import { JSXElementByFn, c } from '../components';

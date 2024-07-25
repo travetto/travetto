@@ -7,7 +7,7 @@ import {
   RestServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
 } from '@travetto/rest/support/test/server-support/base';
-import { Util } from '@travetto/base';
+import { Util } from '@travetto/runtime';
 
 import { AwsLambdaRestApplication } from '../../src/server';
 

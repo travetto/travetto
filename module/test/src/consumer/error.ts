@@ -1,4 +1,4 @@
-import { AppError, TypedObject } from '@travetto/base';
+import { AppError, TypedObject } from '@travetto/runtime';
 
 import { TestEvent, } from '../model/event';
 

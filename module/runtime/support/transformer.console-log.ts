@@ -5,7 +5,7 @@ import {
   OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction
 } from '@travetto/transformer';
 
-const CONSOLE_IMPORT = '@travetto/base/src/console';
+const CONSOLE_IMPORT = '@travetto/runtime/src/console';
 const MANIFEST_MOD = '@travetto/manifest';
 
 type CustomState = TransformerState & {

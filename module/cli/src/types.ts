@@ -1,4 +1,4 @@
-import { ConcreteClass } from '@travetto/base';
+import { ConcreteClass } from '@travetto/runtime';
 
 type OrProm<T> = T | Promise<T>;
 

@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, Env, RuntimeContext, RuntimeIndex } from '@travetto/base';
+import { Class, ConcreteClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
@@ -36,7 +36,7 @@ class $CliCommandRegistry {
     if (!this.#fileMapping) {
       const all = new Map<string, string>();
       for (const e of RuntimeIndex.find({
-        module: m => !Env.production || m.prod,
+        module: m => !Runtime.production || m.prod,
         folder: f => f === 'support',
         file: f => f.role === 'std' && CLI_FILE_REGEX.test(f.sourceFile)
       })) {
@@ -51,7 +51,7 @@ class $CliCommandRegistry {
    * Registers a cli command
    */
   registerClass(cls: Class, cfg: Partial<CliCommandConfig>): CliCommandConfig {
-    const source = RuntimeContext.getSource(cls);
+    const source = Runtime.getSource(cls);
     this.#commands.set(cls, {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: cls as ConcreteClass,

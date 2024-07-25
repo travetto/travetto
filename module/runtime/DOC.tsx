@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex } from '@travetto/base';
+import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex } from '@travetto/runtime';
 
 const ConsoleManager = d.codeLink('ConsoleManager', 'src/console.ts', /(class|function)\s*[$]ConsoleManager/);
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
@@ -8,11 +8,11 @@ const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
 export const text = <>
   <c.StdHeader />
 
-  Base is the foundation of all {d.library('Travetto')} applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
+  Runtime is the foundation of all {d.library('Travetto')} applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
   <ul>
     <li>Environment Support</li>
-    <li>Runtime Flags</li>
+    <li>Runtime Context</li>
     <li>Console Management</li>
     <li>Resource Access</li>
     <li>Standard Error Support</li>
@@ -29,13 +29,7 @@ export const text = <>
 
     <c.SubSection title='Environment Property'>
       For a given {EnvProp}, we support the ability to access different properties as a means to better facilitate environment variable usage.
-      <c.Code title='EnvProp Shape' src='@travetto/base/src/env.ts' startRe={/export class EnvProp/} endRe={/^[}]/} outline={true} />
-    </c.SubSection>
-
-    <c.SubSection title='Runtime Flags'>
-      {EnvLink} also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to {d.field('process.env')} values with a little bit of logic sprinkled in.
-
-      <c.Code title='Provided Flags' src='./src/env.ts' startRe={/const Env/} endRe={/[}][)]/}></c.Code>
+      <c.Code title='EnvProp Shape' src='@travetto/runtime/src/env.ts' startRe={/export class EnvProp/} endRe={/^[}]/} outline={true} />
     </c.SubSection>
   </c.Section>
 
@@ -89,7 +83,7 @@ export const text = <>
 
     <c.Code title='Sample logging at various levels' src='doc/transpile.ts' />
 
-    <c.Code title='Sample After Transpilation' src={RuntimeIndex.resolveFileImport('@travetto/base/doc/transpile.ts')} language='javascript' />
+    <c.Code title='Sample After Transpilation' src={RuntimeIndex.resolveFileImport('@travetto/runtime/doc/transpile.ts')} language='javascript' />
 
     <c.SubSection title='Filtering Debug'>
 

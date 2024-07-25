@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/base';
+import type { Class } from '@travetto/runtime';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 import type { ModelType } from '@travetto/model/src/types/model';
 

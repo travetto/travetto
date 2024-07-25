@@ -1,4 +1,4 @@
-import { AppError, Class } from '@travetto/base';
+import { AppError, Class } from '@travetto/runtime';
 import { FilterContext, Request } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { Principal, Authorizer, Authenticator } from '@travetto/auth';

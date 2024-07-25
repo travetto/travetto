@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { Util } from '@travetto/runtime';
 
 import { CoreCacheConfig } from './types';
 

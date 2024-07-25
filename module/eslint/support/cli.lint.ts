@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 
-import { Env, ExecUtil, RuntimeContext } from '@travetto/base';
+import { Env, ExecUtil, Runtime } from '@travetto/runtime';
 import { CliCommandShape, CliCommand, CliModuleUtil, CliScmUtil } from '@travetto/cli';
 
 /**
@@ -45,12 +45,12 @@ export class LintCommand implements CliCommandShape {
     const res = await ExecUtil.getResult(spawn('npx', [
       'eslint',
       '--cache',
-      '--cache-location', RuntimeContext.toolPath('.eslintcache'),
+      '--cache-location', Runtime.toolPath('.eslintcache'),
       ...(this.format ? ['--format', this.format] : []),
       ...(this.fix ? ['--fix'] : []),
       ...files
     ], {
-      cwd: RuntimeContext.workspace.path,
+      cwd: Runtime.workspace.path,
       stdio: 'inherit',
       shell: false
     }), { catch: true });

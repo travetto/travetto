@@ -1,4 +1,4 @@
-import { Class, AppError, TimeUtil } from '@travetto/base';
+import { Class, AppError, TimeUtil } from '@travetto/runtime';
 import { ModelRegistry, NotFoundError } from '@travetto/model';
 import { ModelType } from '@travetto/model/src/types/model';
 import { SchemaRegistry } from '@travetto/schema';

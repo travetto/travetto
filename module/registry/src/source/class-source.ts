@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 
 import { type FindConfig } from '@travetto/manifest';
-import { Class, Env, RuntimeContext, RuntimeIndex, describeFunction } from '@travetto/base';
+import { Class, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
 
 import { DynamicFileLoader } from '../internal/file-loader';
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
@@ -11,7 +11,7 @@ const moduleFindConfig: FindConfig = {
   module: (m) => {
     const role = Env.TRV_ROLE.val;
     return m.roles.includes('std') && (
-      !Env.production || m.prod ||
+      !Runtime.production || m.prod ||
       ((role === 'doc' || role === 'test') && m.roles.includes(role))
     );
   },
@@ -43,7 +43,7 @@ export class ClassSource implements ChangeSource<Class> {
       }
       this.#classes.set(file, new Map());
       for (const cls of classes) {
-        const src = RuntimeContext.getSource(cls);
+        const src = Runtime.getSource(cls);
         this.#classes.get(src)!.set(cls.Ⲑid, cls);
         this.emit({ type: 'added', curr: cls });
       }
@@ -111,7 +111,7 @@ export class ClassSource implements ChangeSource<Class> {
    * Initialize
    */
   async init(): Promise<void> {
-    if (Env.dynamic) {
+    if (Runtime.dynamic) {
       DynamicFileLoader.onLoadEvent(ev => {
         for (const [file, classes] of PendingRegister.flush(true)) {
           this.#handleFileChanges(file, classes);

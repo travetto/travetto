@@ -1,4 +1,4 @@
-import { AppError, ErrorCategory } from '@travetto/base';
+import { AppError, ErrorCategory } from '@travetto/runtime';
 
 type JWTDetails = {
   expiredAt?: Date;

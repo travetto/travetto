@@ -2,7 +2,7 @@
 
 import fs from 'node:fs/promises';
 
-import { RuntimeIndex } from '@travetto/base';
+import { RuntimeIndex } from '@travetto/runtime';
 import { c, d, DocJSXElement } from '@travetto/doc';
 
 function NodeList({ src }: { src: string }): DocJSXElement {

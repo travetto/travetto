@@ -1,6 +1,6 @@
 import vscode from 'vscode';
 
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 
 import { EnvDict, LaunchConfig } from './types';
 import { Workspace } from './workspace';
@@ -63,7 +63,7 @@ export class RunUtil {
         '<node_internals>/**',
         'node:internals/**',
         'internal/**',
-        '**/@travetto/base/src/console.*',
+        '**/@travetto/runtime/src/console.*',
         '**/@travetto/registry/src/proxy.*',
         '**/@travetto/log/src/**',
         '**/@travetto/context/src/service.*',

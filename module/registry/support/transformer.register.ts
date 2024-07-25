@@ -3,7 +3,7 @@ import ts from 'typescript';
 import { TransformerState, AfterClass, DecoratorUtil } from '@travetto/transformer';
 
 const REGISTER_MOD = '@travetto/registry/src/decorator';
-const SKIP_SRC = /^@travetto\/(base|manifest)\/(src|support)/;
+const SKIP_SRC = /^@travetto\/(runtime|manifest)\/(src|support)/;
 const SKIP_FUNCTION = /^@travetto\/registry\/src\/function/;
 
 /**

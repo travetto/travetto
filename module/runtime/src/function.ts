@@ -7,7 +7,7 @@ export type FunctionMetadata = FunctionMetadataTag & {
   abstract?: boolean;
 };
 
-const METADATA = Symbol.for('@travetto/manifest:function-metadata');
+const METADATA = Symbol.for('@travetto/runtime:function-metadata');
 
 /**
  * Initialize the meta data for a function/class

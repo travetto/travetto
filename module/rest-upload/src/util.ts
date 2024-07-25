@@ -5,7 +5,7 @@ import stream, { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { AppError, Util } from '@travetto/base';
+import { AppError, Util } from '@travetto/runtime';
 
 import { LocalFile } from './file';
 

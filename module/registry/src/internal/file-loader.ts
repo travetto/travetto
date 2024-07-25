@@ -1,5 +1,5 @@
 import { ManifestModuleUtil } from '@travetto/manifest';
-import { watchCompiler, WatchEvent, RuntimeContext, RuntimeIndex } from '@travetto/base';
+import { watchCompiler, WatchEvent, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 interface ModuleLoader {
   init?(): Promise<void>;
@@ -24,7 +24,7 @@ class $DynamicFileLoader {
       await this.#loader.unload(ev.output);
     }
     if (ev.action === 'create' || ev.action === 'delete') {
-      RuntimeIndex.reinitForModule(RuntimeContext.main.name);
+      RuntimeIndex.reinitForModule(Runtime.main.name);
     }
     if (ev.action === 'create' || ev.action === 'update') {
       await this.#loader.load(ev.output);

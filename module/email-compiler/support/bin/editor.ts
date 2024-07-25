@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@travetto/di';
 import { MailUtil, EmailCompiled, MailInterpolator } from '@travetto/email';
-import { AppError, TypedObject } from '@travetto/base';
+import { AppError, TypedObject } from '@travetto/runtime';
 
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';

@@ -1,7 +1,7 @@
 import { ChildProcess } from 'node:child_process';
 import rl from 'node:readline/promises';
 
-import { ExecutionResult, Env, Util, ExecUtil } from '@travetto/base';
+import { ExecutionResult, Env, Util, ExecUtil } from '@travetto/runtime';
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';

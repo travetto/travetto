@@ -2,7 +2,7 @@ import { createWriteStream, createReadStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 
 import { CommandOperation } from '@travetto/command';
-import { ExecUtil } from '@travetto/base';
+import { ExecUtil } from '@travetto/runtime';
 
 export class ImageCompressor {
   converter = new CommandOperation({

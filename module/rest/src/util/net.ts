@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 
-import { ExecUtil } from '@travetto/base';
+import { ExecUtil } from '@travetto/runtime';
 
 import { ServerHandle } from '../types';
 

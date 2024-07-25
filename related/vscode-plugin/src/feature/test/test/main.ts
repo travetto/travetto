@@ -4,7 +4,7 @@ import path from 'node:path';
 import rl from 'node:readline/promises';
 
 import type { IndexedModule, ManifestModule } from '@travetto/manifest';
-import { Env, Util } from '@travetto/base';
+import { Env, Util } from '@travetto/runtime';
 import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
 
 import { Workspace } from '../../../core/workspace';

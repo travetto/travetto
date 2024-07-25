@@ -1,15 +1,13 @@
 import { AutoCreate, Inject, Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 import { ControllerRegistry, ControllerVisitUtil } from '@travetto/rest';
-import { Env, Util, RuntimeContext, RuntimeIndex } from '@travetto/base';
+import { Util, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { RootRegistry } from '@travetto/registry';
 
 import { RestClientConfig, RestClientProvider } from './config';
-
 import { AngularClientGenerator } from './provider/angular';
 import { FetchClientGenerator } from './provider/fetch';
 import { RestRpcClientGenerator } from './provider/rest-rpc';
-
 import type { ClientGenerator } from './provider/types';
 
 @Injectable()
@@ -21,7 +19,7 @@ export class RestClientGeneratorService implements AutoCreate {
   providers: ClientGenerator[];
 
   buildGenerator({ type, output, moduleName, options }: RestClientProvider): ClientGenerator {
-    output = RuntimeContext.workspaceRelative(
+    output = Runtime.workspaceRelative(
       output.startsWith('@') ? RuntimeIndex.mainModule.sourceFolder : '.',
       output
     );
@@ -40,7 +38,7 @@ export class RestClientGeneratorService implements AutoCreate {
   }
 
   async postConstruct(): Promise<void> {
-    if (!Env.dynamic || !this.config.providers.length) {
+    if (!Runtime.dynamic || !this.config.providers.length) {
       return;
     }
 

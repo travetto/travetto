@@ -1,5 +1,5 @@
 import { ModelRegistry, ModelType } from '@travetto/model';
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { PageableModelQuery, Query } from '../../model/query';

@@ -1,6 +1,6 @@
 import mysql, { OkPacket, ResultSetHeader } from 'mysql2';
 
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/runtime';
 import { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, SQLModelConfig } from '@travetto/model-sql';

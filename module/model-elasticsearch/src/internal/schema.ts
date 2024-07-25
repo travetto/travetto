@@ -1,6 +1,6 @@
 import { InlineScript, MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { ModelRegistry } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';

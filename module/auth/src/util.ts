@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import util from 'node:util';
 
-import { AppError, Util } from '@travetto/base';
+import { AppError, Util } from '@travetto/runtime';
 
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 

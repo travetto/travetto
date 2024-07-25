@@ -1,4 +1,4 @@
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { DeepPartial } from '@travetto/schema';
 
 import { ModelType, OptionalId } from '../types/model';

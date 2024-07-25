@@ -1,6 +1,6 @@
 import { Pool, PoolClient } from 'pg';
 
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/runtime';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 

@@ -1,24 +1,44 @@
 import path from 'node:path';
 
-import { type ManifestContext, ManifestIndex } from '@travetto/manifest';
-import { describeFunction } from '@travetto/manifest/src/function';
+import { type ManifestContext } from '@travetto/manifest';
 
 import { Env } from './env';
-import { FileLoader } from './file-loader';
+import { RuntimeIndex } from './manifest-index';
+import { describeFunction } from './function';
 
-/** Runtime manifest index */
-export const RuntimeIndex = new ManifestIndex();
+const prod = (): boolean => process.env.NODE_ENV === 'production';
 
 /** Constrained version of {@type ManifestContext} */
-export const RuntimeContext = {
+export const Runtime = {
+  /** Get env name, with support for the default env */
+  get name(): string | undefined {
+    return Env.TRV_ENV.val || (!prod() ? RuntimeIndex.manifest.workspace.defaultEnv : undefined);
+  },
+
+  /** Are we in development mode */
+  get production(): boolean {
+    return prod();
+  },
+
+  /** Is the app in dynamic mode? */
+  get dynamic(): boolean {
+    return Env.TRV_DYNAMIC.isTrue;
+  },
+
+  /** Get debug value */
+  get debug(): false | string {
+    const val = Env.DEBUG.val ?? '';
+    return (!val && prod()) || Env.DEBUG.isFalse ? false : val;
+  },
+
   /** Manifest main */
   get main(): ManifestContext['main'] {
-    return RuntimeIndex.manifest.main
+    return RuntimeIndex.manifest.main;
   },
 
   /** Manifest workspace */
   get workspace(): ManifestContext['workspace'] {
-    return RuntimeIndex.manifest.workspace
+    return RuntimeIndex.manifest.workspace;
   },
 
   /** Are we running from a mono-root? */
@@ -58,36 +78,8 @@ export const RuntimeContext = {
     return this.modulePaths([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources']);
   },
 
-  /** Get env name, with support for the default env */
-  get envName(): string | undefined {
-    return Env.name || (!Env.production ? RuntimeIndex.manifest.workspace.defaultEnv : undefined);
-  },
-
   /** Get source for function */
   getSource(fn: Function): string {
-    return RuntimeIndex.getFromImport(describeFunction(fn).import)!.sourceFile;
+    return RuntimeIndex.getFromImport(describeFunction(fn).import)?.sourceFile!;
   }
 };
-
-/**
- * Environment aware file loader
- */
-class $RuntimeResources extends FileLoader {
-  #computed: string[];
-  #env: string;
-
-  constructor() {
-    super(RuntimeContext.resourcePaths());
-  }
-
-  override get searchPaths(): readonly string[] {
-    if (this.#env !== Env.TRV_RESOURCES.val) {
-      this.#env = Env.TRV_RESOURCES.val!;
-      this.#computed = RuntimeContext.resourcePaths();
-    }
-    return this.#computed ?? super.searchPaths;
-  }
-}
-
-/** Runtime resources */
-export const RuntimeResources = new $RuntimeResources();

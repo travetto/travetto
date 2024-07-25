@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 import path from 'node:path';
 
 import { StreamMeta, StreamRange } from '@travetto/model';
-import { TypedObject } from '@travetto/base';
+import { TypedObject } from '@travetto/runtime';
 
 const FIELD_TO_HEADER: Record<keyof StreamMeta, string> = {
   contentType: 'content-type',

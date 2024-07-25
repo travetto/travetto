@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { AppError, ClassInstance, Class, RuntimeIndex } from '@travetto/base';
+import { AppError, ClassInstance, Class, RuntimeIndex } from '@travetto/runtime';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
 import { AssertCapture, CaptureAssert } from './capture';

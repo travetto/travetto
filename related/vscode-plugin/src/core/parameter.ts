@@ -5,7 +5,7 @@ import rl from 'node:readline/promises';
 import path from 'node:path';
 
 import { CliCommandInput } from '@travetto/cli';
-import { ExecUtil, Util } from '@travetto/base';
+import { ExecUtil, Util } from '@travetto/runtime';
 
 import { Workspace } from './workspace';
 

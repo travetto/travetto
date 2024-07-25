@@ -5,7 +5,7 @@ import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 import { Authenticator } from '@travetto/auth';
 
 import { AuthService, Authenticate, Authenticated } from '@travetto/auth-rest';

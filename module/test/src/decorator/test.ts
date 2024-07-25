@@ -1,4 +1,4 @@
-import { ClassInstance } from '@travetto/base';
+import { ClassInstance } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig } from '../model/test';

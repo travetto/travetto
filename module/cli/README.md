@@ -59,7 +59,7 @@ This module also has a tight integration with the [VSCode plugin](https://market
 At it's heart, a cli command is the contract defined by what flags, and what arguments the command supports. Within the framework this requires three criteria to be met:
    *  The file must be located in the `support/` folder, and have a name that matches `cli.*.ts`
    *  The file must be a class that has a main method
-   *  The class must use the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) decorator
+   *  The class must use the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L14) decorator
 
 **Code: Basic Command**
 ```typescript
@@ -93,7 +93,7 @@ Examples of mappings:
 The pattern is that underscores(_) translate to colons (:), and the `cli.` prefix, and `.ts` suffix are dropped.
 
 ## Binding Flags
-[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class. The fields of the class represent the flags that are available to the command.
+[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L14) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L14) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class. The fields of the class represent the flags that are available to the command.
 
 **Code: Basic Command with Flag**
 ```typescript
@@ -130,7 +130,7 @@ $ trv basic:flag --loud
 HELLO
 ```
 
-The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) supports the following data types for flags:
+The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L14) supports the following data types for flags:
    *  Boolean values
    *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L172), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L178), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L166), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117) decorators help provide additional validation.
    *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L78) provide additional constraints
@@ -388,7 +388,7 @@ npx trv call:db --host localhost --port 3306 --username app --password <custom>
 ```
 
 ## VSCode Integration
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") does expose a cli target `run:rest` that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) decorator.  This means the target will be visible within the editor tooling.
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") does expose a cli target `run:rest` that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L14) decorator.  This means the target will be visible within the editor tooling.
 
 **Code: Simple Run Target**
 ```typescript
@@ -459,7 +459,7 @@ If the goal is to run a more complex application, which may include depending on
 
 **Code: Simple Run Target**
 ```typescript
-import { Env } from '@travetto/base';
+import { Runtime } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape, CliUtil } from '@travetto/cli';
 
@@ -498,7 +498,7 @@ export class RunRestCommand implements CliCommandShape {
     try {
       return await DependencyRegistry.runInstance(RestApplication);
     } catch (err) {
-      if (RestNetUtil.isInuseError(err) && !Env.production && this.killConflict) {
+      if (RestNetUtil.isInuseError(err) && !Runtime.production && this.killConflict) {
         await RestNetUtil.freePort(err.port);
         return await DependencyRegistry.runInstance(RestApplication);
       }
@@ -508,7 +508,7 @@ export class RunRestCommand implements CliCommandShape {
 }
 ```
 
-As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L114) `name` defined in the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module. 
+As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109) `name` defined in the [Base](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Environment config and common utilities for travetto applications.") module. 
 
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 

@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 
 import { CliCommand } from '../src/decorators';
 import { CliCommandSchema, CliCommandShape, CliValidationError } from '../src/types';

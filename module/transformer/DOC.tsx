@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 
 import { d, c } from '@travetto/doc';
-import { RuntimeIndex } from '@travetto/base';
+import { RuntimeIndex } from '@travetto/runtime';
 
 export const text = async () => {
 

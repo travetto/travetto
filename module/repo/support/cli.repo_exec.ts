@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 
 import { CliCommand, CliCommandShape, ParsedState } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 import { Ignore, Max, Min } from '@travetto/schema';
 
 import { RepoExecUtil } from './bin/exec';

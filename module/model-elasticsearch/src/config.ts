@@ -1,4 +1,4 @@
-import { TimeSpan } from '@travetto/base';
+import { TimeSpan } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 

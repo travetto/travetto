@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 
 import { Controller, Get, Produces, Request, Undocumented } from '@travetto/rest';
-import { RuntimeResources } from '@travetto/base';
+import { RuntimeResources } from '@travetto/runtime';
 
 @Controller('/ui')
 @Undocumented()

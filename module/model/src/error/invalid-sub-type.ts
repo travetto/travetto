@@ -1,4 +1,4 @@
-import { Class, AppError } from '@travetto/base';
+import { Class, AppError } from '@travetto/runtime';
 
 /**
  * Represents when a model subtype class is unable to be used directly

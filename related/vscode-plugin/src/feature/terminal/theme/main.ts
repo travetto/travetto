@@ -1,6 +1,6 @@
 import vscode from 'vscode';
 
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 
 import { Activatible } from '../../../core/activation';
 import { BaseFeature } from '../../base';

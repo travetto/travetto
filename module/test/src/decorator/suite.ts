@@ -1,4 +1,4 @@
-import { Class, ClassInstance, describeFunction } from '@travetto/base';
+import { Class, ClassInstance, describeFunction } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
 import { SuiteConfig } from '../model/suite';

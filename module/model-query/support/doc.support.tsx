@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 
 import { d, DocJSXElementByFn, DocJSXElement } from '@travetto/doc';
-import { RuntimeContext } from '@travetto/base';
+import { Runtime } from '@travetto/runtime';
 
 export const Links = {
   QueryCrud: d.codeLink('Query Crud', '@travetto/model-query/src/service/crud.ts', /export interface/),
@@ -13,7 +13,7 @@ export const Links = {
 
 export const ModelQueryTypes = (file: string | Function): DocJSXElement[] => {
   if (typeof file !== 'string') {
-    file = RuntimeContext.getSource(file);
+    file = Runtime.getSource(file);
   }
   const contents = readFileSync(file, 'utf8');
   const found: DocJSXElementByFn<'CodeLink'>[] = [];

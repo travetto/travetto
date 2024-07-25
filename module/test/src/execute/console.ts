@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { ConsoleEvent, ConsoleListener, ConsoleManager } from '@travetto/base';
+import { ConsoleEvent, ConsoleListener, ConsoleManager } from '@travetto/runtime';
 
 /**
  * Console capturer.  Hooks into the Console manager, and collects the

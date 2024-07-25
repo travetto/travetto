@@ -1,7 +1,7 @@
 import { Module } from 'node:module';
 
 import { path } from '@travetto/manifest';
-import { Env, RuntimeIndex } from '@travetto/base';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { RetargettingProxy } from '../proxy';
 
@@ -32,7 +32,7 @@ export class DynamicCommonjsLoader {
         mod = moduleLoad.apply(null, [request, parent]);
       } catch (err: unknown) {
         const name = Module._resolveFilename!(request, parent);
-        if (err instanceof Error && Env.dynamic && !name.startsWith('test/')) {
+        if (err instanceof Error && Runtime.dynamic && !name.startsWith('test/')) {
           const errMsg = err.message;
           console.debug(`Unable to load ${name}: stubbing out with error proxy.`, errMsg);
           const e = (): never => { throw new Error(errMsg); };

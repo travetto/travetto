@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 
 import { ControllerRegistry } from '../src/registry/controller';
 import { Controller } from '../src/decorator/controller';

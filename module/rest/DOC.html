@@ -252,7 +252,7 @@ The module provides standard structure for rendering content on the response.  T
 <li>String responses</li>
 <li>Files</li>
 </ul>
-Per the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/base" title="Environment config and common utilities for travetto applications.">Base</a> module, the following types automatically have rest support as well:
+Per the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/runtime" title="Environment config and common utilities for travetto applications.">Base</a> module, the following types automatically have rest support as well:
 <ul> <li><code class="item input">Error</code> - Serializes to a standard object, with status, and the error message.</li>
 <li><code class="item input">AppError</code> - Serializes like <code class="item input">Error</code> but translates the error category to an HTTP status</li>
 </ul>
@@ -260,7 +260,7 @@ Additionally, the <a class="module-link" href="https://github.com/travetto/trave
 
 <h2 id="running-an-app">Running an App</h2>
 
-By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15">@CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19">RestApplication</a> that will follow default behaviors, and spin up the REST server.
+By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L14">@CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19">RestApplication</a> that will follow default behaviors, and spin up the REST server.
 
   <figure class="terminal">
     <figcaption class="terminal">Standard application
@@ -280,7 +280,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       defaultEnv: <span class="token string">'local'</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
-  env: <span class="token punctuation">{{'{'}}</span>
+  context: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'local'</span>,
     debug: false,
     production: false,
@@ -317,14 +317,14 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 
 <h3 id="creating-a-custom-cli-entry-point">Creating a Custom CLI Entry Point</h3>
 
-To customize a REST server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15">@CliCommand</a> decorator. This could look like:
+To customize a REST server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L14">@CliCommand</a> decorator. This could look like:
 
   <figure class="code">
     <figcaption class="code">Application entry point for Rest Applications
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/cli.run_rest_custom.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RootRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
@@ -371,7 +371,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       defaultEnv: <span class="token string">'local'</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
-  env: <span class="token punctuation">{{'{'}}</span>
+  context: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'prod'</span>,
     debug: false,
     production: true,
@@ -701,7 +701,7 @@ Additionally the framework supports SSL out of the box, by allowing you to speci
 <li>No keys provided</li>
 </ul>
 This is useful for local development where you implicitly trust the cert. <br><br>
-SSL support can be enabled by setting <code class="item input">rest.ssl.active: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L68">RuntimeResources</a>.
+SSL support can be enabled by setting <code class="item input">rest.ssl.active: true</code> in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8">RuntimeResources</a>.
 
 <h2 id="full-config">Full Config</h2>
 

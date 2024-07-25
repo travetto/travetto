@@ -47,7 +47,7 @@ export const cliTpl = StyleUtil.getTemplate({
 });
 ```
 
-When the color palette is combined with [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.")'s Util.makeTemplate, you produce a string template function that will automatically colorize:
+When the color palette is combined with [Base](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Environment config and common utilities for travetto applications.")'s Util.makeTemplate, you produce a string template function that will automatically colorize:
 
 **Code: Sample Template Usage**
 ```typescript

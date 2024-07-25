@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import readline from 'node:readline';
 
-import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex } from '@travetto/base';
+import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex } from '@travetto/runtime';
 import type { IndexedFile } from '@travetto/manifest';
 
 /**

@@ -1,4 +1,4 @@
-import '@travetto/base';
+import '@travetto/runtime';
 
 declare global {
   interface TravettoEnv {

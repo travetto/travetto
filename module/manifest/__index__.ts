@@ -1,4 +1,4 @@
-/// <reference path="./src/global.d.ts" />
+/// <reference path="../runtime/src/global.d.ts" />
 
 export * from './src/module';
 export * from './src/delta';

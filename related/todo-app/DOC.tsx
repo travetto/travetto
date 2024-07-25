@@ -2,7 +2,7 @@
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';
-import { Env, ShutdownManager, Util, RuntimeIndex } from '@travetto/base';
+import { Env, ShutdownManager, Util, RuntimeIndex } from '@travetto/runtime';
 
 const ModelType = d.codeLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 const TodoRoot = d.ref('Todo App', RuntimeIndex.mainModule.outputPath);

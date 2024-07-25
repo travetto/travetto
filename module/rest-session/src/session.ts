@@ -1,4 +1,4 @@
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 import { ContextProvider } from '@travetto/rest';
 
 /**

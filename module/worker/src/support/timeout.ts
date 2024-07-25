@@ -1,5 +1,5 @@
 import timers from 'node:timers/promises';
-import { TimeSpan, TimeUtil, Util } from '@travetto/base';
+import { TimeSpan, TimeUtil, Util } from '@travetto/runtime';
 import { ExecutionError } from './error';
 
 /**

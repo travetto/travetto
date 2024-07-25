@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 import { CliCommand, CliCommandShape, CliValidationResultError } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';

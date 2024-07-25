@@ -1,4 +1,4 @@
-import { Class, ClassInstance } from '@travetto/base';
+import { Class, ClassInstance } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 

@@ -2,7 +2,7 @@ import { sign } from 'jws';
 import assert from 'node:assert';
 
 import { Suite, Test, ShouldThrow, TestFixtures } from '@travetto/test';
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 
 import { JWTUtil } from '../src/util';
 import { JWTError } from '../src/error';

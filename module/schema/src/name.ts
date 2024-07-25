@@ -1,4 +1,4 @@
-import { describeFunction } from '@travetto/base';
+import { describeFunction } from '@travetto/runtime';
 import { ClassConfig } from './service/types';
 
 const SYN_RE = /(__)(\d+)Ⲑsyn$/;

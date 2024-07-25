@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, TypedObject } from '@travetto/base';
+import { Class, ConcreteClass, TypedObject } from '@travetto/runtime';
 
 import { DataUtil } from './data';
 import { AllViewⲐ } from './internal/types';

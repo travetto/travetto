@@ -3,7 +3,7 @@ import rawBody from 'raw-body';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 
 import { NodeEntityⲐ } from '../internal/symbol';
 import { RouteConfig, Request, FilterContext, FilterNext } from '../types';

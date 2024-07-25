@@ -19,7 +19,7 @@ Within the framework, we expose CLI actions through the various modules.  These 
 
 ## Main Invocation
 
-This is assumed that the caller knows what they are doing. The user is required to invoke `node @travetto/boot/bin/main {file}`.  The entry target must have an exported method `main` for this to work.  One can also use `node @travetto/base/bin/main {file}` to have the bootstrapping phase automatically completed before the script executes.
+This is assumed that the caller knows what they are doing. The user is required to invoke `node @travetto/boot/bin/main {file}`.  The entry target must have an exported method `main` for this to work.  One can also use `node @travetto/runtime/bin/main {file}` to have the bootstrapping phase automatically completed before the script executes.
 
 ## Inventory 
 t = typescript, i = init, r = run, a = await

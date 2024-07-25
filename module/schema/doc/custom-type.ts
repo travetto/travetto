@@ -1,4 +1,4 @@
-import { DataUtil } from '@travetto/base';
+import { DataUtil } from '@travetto/runtime';
 
 /**
  * @concrete #PointImpl

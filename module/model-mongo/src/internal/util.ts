@@ -1,6 +1,6 @@
 import { Binary, ObjectId } from 'mongodb';
 
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
 import type { ModelType, IndexField } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';

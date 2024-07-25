@@ -24,7 +24,7 @@
     "directory": "module/yaml"
   },
   "dependencies": {
-    "@travetto/base": "^4.1.2"
+    "@travetto/runtime": "^4.1.2"
   },
   "travetto": {
     "displayName": "YAML"

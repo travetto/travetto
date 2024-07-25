@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { ControllerConfig } from '@travetto/rest';
-import { Class, RuntimeContext } from '@travetto/base';
+import { Class, Runtime } from '@travetto/runtime';
 
 import type { ClientGenerator } from './types';
 import { restRpcClientFactory } from './shared/rest-rpc.js';
@@ -21,11 +21,11 @@ export class RestRpcClientGenerator implements ClientGenerator {
   }
 
   onControllerStart(cfg: ControllerConfig): void {
-    this.classes.set(cfg.class.name, RuntimeContext.getSource(cfg.class));
+    this.classes.set(cfg.class.name, Runtime.getSource(cfg.class));
   }
 
   onControllerAdd(cls: Class): void {
-    this.classes.set(cls.name, RuntimeContext.getSource(cls));
+    this.classes.set(cls.name, Runtime.getSource(cls));
     this.flush();
   }
 
@@ -40,7 +40,7 @@ export class RestRpcClientGenerator implements ClientGenerator {
 
   async flush(): Promise<void> {
     await fs.mkdir(this.output, { recursive: true });
-    const source = RuntimeContext.getSource(this.constructor);
+    const source = Runtime.getSource(this.constructor);
     const coreFile = path.resolve(path.dirname(source), 'shared/rest-rpc.js');
     const dtsFile = path.resolve(path.dirname(source), 'shared/rest-rpc.d.ts');
     const coreContents = await fs.readFile(coreFile, 'utf8');

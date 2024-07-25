@@ -313,7 +313,7 @@ This feature is meant to allow for simple Typescript types to be able to be back
 
 **Code: Simple Custom Type**
 ```typescript
-import { DataUtil } from '@travetto/base';
+import { DataUtil } from '@travetto/runtime';
 
 /**
  * @concrete #PointImpl

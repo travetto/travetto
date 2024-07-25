@@ -1,4 +1,4 @@
-import { RuntimeIndex } from './runtime';
+import { RuntimeIndex } from './manifest-index';
 import { ExecUtil } from './exec';
 import { ShutdownManager } from './shutdown';
 import { Util } from './util';

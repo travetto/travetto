@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';

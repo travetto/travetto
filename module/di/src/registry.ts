@@ -1,4 +1,4 @@
-import { Class, ClassInstance, ConcreteClass, Env, describeFunction } from '@travetto/base';
+import { Class, ClassInstance, ConcreteClass, Runtime, describeFunction } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
@@ -236,7 +236,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   override async init(): Promise<void> {
     await super.init();
-    if (Env.dynamic) {
+    if (Runtime.dynamic) {
       const { DependencyRegistration } = await import('../support/dynamic.injection');
       DependencyRegistration.init(this);
     }
@@ -434,7 +434,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     let parentClass: Function = config.factory ? config.target : Object.getPrototypeOf(cls);
 
     if (config.factory) {
-      while (describeFunction(Object.getPrototypeOf(parentClass)).abstract) {
+      while (describeFunction(Object.getPrototypeOf(parentClass))?.abstract) {
         parentClass = Object.getPrototypeOf(parentClass);
       }
       if (!this.targetToClass.has(classId)) {
@@ -464,7 +464,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
-    if (describeFunction(cls).abstract) { // Skip out early, only needed to inherit
+    if (describeFunction(cls)?.abstract) { // Skip out early, only needed to inherit
       return config;
     }
 
@@ -499,7 +499,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // If targeting self (default @Injectable behavior)
-    if ((classId === targetId || config.factory) && (parentConfig || describeFunction(parentClass).abstract)) {
+    if ((classId === targetId || config.factory) && (parentConfig || describeFunction(parentClass)?.abstract)) {
       const parentId = parentClass.Ⲑid;
 
       if (!this.targetToClass.has(parentId)) {

@@ -2,7 +2,7 @@ import { ChildProcess } from 'node:child_process';
 
 const MINUTE = (1000 * 60);
 
-const RESULT = Symbol.for('@travetto/base:exec-result');
+const RESULT = Symbol.for('@travetto/runtime:exec-result');
 
 interface ExecutionBaseResult {
   /**

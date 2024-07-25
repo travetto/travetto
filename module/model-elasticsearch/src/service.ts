@@ -8,7 +8,7 @@ import {
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
   OptionalId
 } from '@travetto/model';
-import { ShutdownManager, type Class, AppError } from '@travetto/base';
+import { ShutdownManager, type Class, AppError } from '@travetto/runtime';
 import { SchemaChange, DeepPartial, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {

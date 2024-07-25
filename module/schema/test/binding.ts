@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 
 import { BindUtil } from '../src/bind-util';
 import { Address } from './models/address';

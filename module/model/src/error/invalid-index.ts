@@ -1,4 +1,4 @@
-import { Class, AppError } from '@travetto/base';
+import { Class, AppError } from '@travetto/runtime';
 
 import { IndexConfig } from '../registry/types';
 import { ModelType } from '../types/model';

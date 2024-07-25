@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { Authorizer } from '../src/types/authorizer';

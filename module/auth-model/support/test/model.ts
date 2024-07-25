@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { AppError, Class } from '@travetto/base';
+import { AppError, Class } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { ModelCrudSupport, Model } from '@travetto/model';

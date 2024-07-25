@@ -4,7 +4,7 @@ import type { OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
 import { type ManifestModule, ManifestModuleUtil, type NodeModuleType } from '@travetto/manifest';
-import { EnvProp, RuntimeContext, RuntimeIndex } from '@travetto/base';
+import { EnvProp, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CoreRollupConfig } from '../../src/types';
 
@@ -30,7 +30,7 @@ export function getOutput(): OutputOptions {
     format,
     interop: format === 'commonjs' ? 'auto' : undefined,
     sourcemapPathTransform: (src, map): string =>
-      RuntimeContext.stripWorkspacePath(path.resolve(path.dirname(map), src)),
+      Runtime.stripWorkspacePath(path.resolve(path.dirname(map), src)),
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,
     sourcemapExcludeSources: !(new EnvProp('BUNDLE_SOURCES').bool ?? false),
     compact: new EnvProp('BUNDLE_COMPRESS').bool ?? true,

@@ -1,6 +1,6 @@
 import tty from 'node:tty';
 
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/runtime';
 
 type State = { output: tty.WriteStream, height: number, width: number };
 type TermCoord = { x: number, y: number };

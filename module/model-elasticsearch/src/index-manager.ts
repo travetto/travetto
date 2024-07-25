@@ -1,7 +1,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { ReindexRequest } from '@elastic/elasticsearch/lib/api/types';
 
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { ModelRegistry, ModelType } from '@travetto/model';
 import { ModelStorageSupport } from '@travetto/model/src/service/storage';
 import { SchemaChange } from '@travetto/schema';

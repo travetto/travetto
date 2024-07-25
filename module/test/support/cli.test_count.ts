@@ -1,5 +1,5 @@
 import { CliCommand } from '@travetto/cli';
-import { Env, describeFunction } from '@travetto/base';
+import { Env, describeFunction } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../src/registry/suite';
 import { RunnerUtil } from '../src/execute/util';

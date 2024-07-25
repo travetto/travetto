@@ -1,4 +1,4 @@
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
 interface Group {

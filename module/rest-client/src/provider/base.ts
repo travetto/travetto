@@ -2,7 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Class, RuntimeContext, Util, describeFunction } from '@travetto/base';
+import { Class, Runtime, Util, describeFunction } from '@travetto/runtime';
 import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
@@ -61,7 +61,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
 
   constructor(output: string, moduleName?: string, config: Partial<C> = {}) {
     this.#output = output;
-    this.moduleName = moduleName ?? `${RuntimeContext.main.name}-client`;
+    this.moduleName = moduleName ?? `${Runtime.main.name}-client`;
     this.config = config;
     this.init?.();
   }
@@ -219,7 +219,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     }
     const line = lines[0] ?? 1;
     const output = path.resolve(this.#output, this.subFolder || '.');
-    return `@see file://./${path.relative(output, RuntimeContext.getSource(cls))}#${line}`;
+    return `@see file://./${path.relative(output, Runtime.getSource(cls))}#${line}`;
   }
 
   renderDoc(parts: (string | undefined)[], pad = ''): string[] {
@@ -312,7 +312,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
         classId: schema.class.Ⲑid,
       };
       this.#schemaContent.set(schema.class.Ⲑid, baseResult);
-      this.#files.add(RuntimeContext.getSource(schema.class));
+      this.#files.add(Runtime.getSource(schema.class));
       return baseResult;
     }
 
@@ -356,7 +356,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     };
 
     this.#schemaContent.set(schema.class.Ⲑid, result);
-    this.#files.add(RuntimeContext.getSource(schema.class));
+    this.#files.add(Runtime.getSource(schema.class));
 
     return result;
   }
@@ -365,7 +365,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     for (const [file, cls] of this.commonFiles) {
       await this.writeContent(file,
         await fs.readFile(typeof cls === 'string' ?
-          cls : RuntimeContext.getSource(cls), 'utf8'));
+          cls : Runtime.getSource(cls), 'utf8'));
     }
 
     const files = [
@@ -397,7 +397,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     if (cfg.documented !== false) {
       const result = this.renderController(cfg);
       this.#controllerContent.set(result.classId, result);
-      this.#files.add(RuntimeContext.getSource(cfg.class));
+      this.#files.add(Runtime.getSource(cfg.class));
     }
   }
 

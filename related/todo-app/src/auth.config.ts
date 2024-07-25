@@ -1,6 +1,6 @@
 import { Authenticator, Principal } from '@travetto/auth';
 import { InjectableFactory } from '@travetto/di';
-import { AppError } from '@travetto/base';
+import { AppError } from '@travetto/runtime';
 import { SessionModelⲐ } from '@travetto/rest-session';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
 

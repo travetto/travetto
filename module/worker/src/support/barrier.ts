@@ -1,4 +1,4 @@
-import { TimeSpan, Util } from '@travetto/base';
+import { TimeSpan, Util } from '@travetto/runtime';
 
 import { Timeout } from './timeout';
 

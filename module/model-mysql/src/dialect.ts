@@ -2,7 +2,7 @@ import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 import { ModelType } from '@travetto/model';
 import { SQLModelConfig, SQLDialect } from '@travetto/model-sql';
 import { VisitStack } from '@travetto/model-sql/src/internal/util';

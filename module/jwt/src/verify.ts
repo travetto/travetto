@@ -1,6 +1,6 @@
 import type jws from 'jws';
 
-import { TimeUtil } from '@travetto/base';
+import { TimeUtil } from '@travetto/runtime';
 
 import { JWTError } from './error';
 import { VerifyOptions, Payload, AlgType, KeyItem } from './types';

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { RuntimeContext, RuntimeIndex } from '@travetto/base';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { CliCommandInput, CliCommandSchema, ParsedState } from './types';
 
 type ParsedInput = ParsedState['all'][number];
@@ -86,7 +86,7 @@ export class CliParseUtil {
 
     // We have a file
     const rel = (key.includes('/') ? key : `@/support/pack.${key}.flags`)
-      .replace('@@/', `${RuntimeContext.workspace.path}/`)
+      .replace('@@/', `${Runtime.workspace.path}/`)
       .replace('@/', `${mod}/`)
       .replace(/^(@[^\/]+\/[^\/]+)(\/.*)$/, (_, imp, rest) => {
         const val = RuntimeIndex.getModule(imp);
@@ -145,7 +145,7 @@ export class CliParseUtil {
     const mod = args.reduce(
       (m, x, i, arr) =>
         (i < SEP ? check(arr[i - 1], x) ?? check(...x.split('=')) : undefined) ?? m,
-      process.env[ENV_KEY] || RuntimeContext.main.name
+      process.env[ENV_KEY] || Runtime.main.name
     );
     return (await Promise.all(args.map((x, i) =>
       x.startsWith(CONFIG_PRE) && (i < SEP || SEP < 0) ? this.readFlagFile(x, mod) : x))).flat();

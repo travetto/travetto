@@ -1,5 +1,5 @@
 import { DataUtil, SchemaRegistry, ValidationResultError, ValidationError } from '@travetto/schema';
-import { Class } from '@travetto/base';
+import { Class } from '@travetto/runtime';
 
 import { ModelQuery, Query, PageableModelQuery } from '../../model/query';
 

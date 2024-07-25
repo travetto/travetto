@@ -1,4 +1,4 @@
-import { Class, ClassInstance, Env, RuntimeContext, RuntimeIndex, describeFunction } from '@travetto/base';
+import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { CliCommandShape, CliCommandShapeFields } from './types';
@@ -13,7 +13,7 @@ import { CliParseUtil } from './parse';
  */
 export function CliCommand(cfg: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
-    if (!target.Ⲑid || describeFunction(target).abstract) {
+    if (!target.Ⲑid || describeFunction(target)?.abstract) {
       return;
     }
 
@@ -25,7 +25,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       runTarget: cfg.runTarget,
       preMain: async (cmd: CliCommandShape & { env?: string }) => {
         if (addEnv) {
-          Env.TRV_ENV.set(cmd.env || RuntimeContext.envName);
+          Env.TRV_ENV.set(cmd.env || Runtime.name);
         }
       }
     });
@@ -45,7 +45,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
         aliases: ['m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
         description: 'Module to run for',
         specifiers: ['module'],
-        required: { active: RuntimeContext.monoRoot }
+        required: { active: Runtime.monoRoot }
       });
     }
 
@@ -53,10 +53,10 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       (pendingCls.validators ??= []).push(async item => {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const { module: mod } = item as CliCommandShapeFields;
-        const runModule = (runtimeModule === 'command' ? commandModule : mod) || RuntimeContext.main.name;
+        const runModule = (runtimeModule === 'command' ? commandModule : mod) || Runtime.main.name;
 
         // If we need to run as a specific module
-        if (runModule !== RuntimeContext.main.name) {
+        if (runModule !== Runtime.main.name) {
           try {
             RuntimeIndex.reinitForModule(runModule);
           } catch (err) {

@@ -1,5 +1,5 @@
 import { Barrier } from '@travetto/worker';
-import { Env, TimeUtil } from '@travetto/base';
+import { Env, TimeUtil } from '@travetto/runtime';
 
 import { TestConsumer } from '../consumer/types';
 import { SuiteConfig, SuiteResult } from '../model/suite';

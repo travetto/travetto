@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { Env } from '@travetto/base';
+import { Env } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
