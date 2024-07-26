@@ -22,7 +22,6 @@ export class ManifestIndex {
   #manifest: ManifestRoot;
   #modules: IndexedModule[];
   #modulesByName: Record<string, IndexedModule> = {};
-  #modulesByFolder: Record<string, IndexedModule> = {};
   #outputRoot: string;
   #outputToEntry = new Map<string, IndexedFile>();
   #sourceToEntry = new Map<string, IndexedFile>();
@@ -106,7 +105,6 @@ export class ManifestIndex {
       }
     }
     this.#modulesByName = Object.fromEntries(this.#modules.map(x => [x.name, x]));
-    this.#modulesByFolder = Object.fromEntries(this.#modules.map(x => [x.sourceFolder, x]));
 
     // Store child information
     for (const mod of this.#modules) {
@@ -171,13 +169,6 @@ export class ManifestIndex {
   }
 
   /**
-   * Get module by folder
-   */
-  getModuleByFolder(folder: string): IndexedModule | undefined {
-    return this.#modulesByFolder[folder];
-  }
-
-  /**
    * Resolve import
    */
   resolveFileImport(name: string): string {
@@ -208,15 +199,6 @@ export class ManifestIndex {
    */
   getModuleFromSource(source: string): IndexedModule | undefined {
     const name = this.getFromSource(source)?.module;
-    return name ? this.getModule(name) : undefined;
-  }
-
-  /**
-   * Get module from import name
-   * @param importName
-   */
-  getModuleFromImport(importName: string): IndexedModule | undefined {
-    const name = this.getFromImport(importName)?.module;
     return name ? this.getModule(name) : undefined;
   }
 
@@ -303,17 +285,5 @@ export class ManifestIndex {
   getSourceFile(importFile: string | [string, string]): string {
     importFile = Array.isArray(importFile) ? importFile.join('/') : importFile;
     return this.getFromImport(importFile)?.sourceFile ?? importFile;
-  }
-
-  /**
-   * Resolve a module path, expanding @ and @@ to workspace values
-   */
-  resolveModulePath(modulePath: string): string {
-    const main = this.manifest.main.name;
-    const workspace = this.manifest.workspace.path;
-    const [base, sub] = modulePath
-      .replace(/^(@@?)(#|$)/g, (_, v, r) => `${v === '@' ? main : workspace}${r}`)
-      .split('#');
-    return path.resolve(this.hasModule(base) ? this.getModule(base)!.sourcePath : base, sub ?? '.');
   }
 }

@@ -8,6 +8,20 @@ import { describeFunction } from './function';
 
 const prod = (): boolean => process.env.NODE_ENV === 'production';
 
+const OVERRIDES = Env.TRV_RESOURCE_OVERRIDES.object ?? {};
+
+const MODULE_ALIASES: Record<string, string> = {
+  '@': RuntimeIndex.manifest.main.name,
+  '@@': RuntimeIndex.manifest.workspace.path,
+};
+
+const resolveModulePath = (modulePath: string): string => {
+  const [base, sub] = (OVERRIDES[modulePath] ?? modulePath)
+    .replace(/^([^#]*)(#|$)/g, (_, v, r) => `${MODULE_ALIASES[v] ?? v}${r}`)
+    .split('#');
+  return path.resolve(RuntimeIndex.getModule(base)?.sourcePath ?? base, sub ?? '.');
+};
+
 /** Constrained version of {@type ManifestContext} */
 export const Runtime = {
   /** Get env name, with support for the default env */
@@ -69,8 +83,7 @@ export const Runtime = {
 
   /** Resolve module paths */
   modulePaths(paths: string[]): string[] {
-    const overrides = Env.TRV_RESOURCE_OVERRIDES.object ?? {};
-    return [...new Set(paths.map(x => RuntimeIndex.resolveModulePath(overrides[x] ?? x)))];
+    return [...new Set(paths.map(resolveModulePath))];
   },
 
   /** Resolve resource paths */
