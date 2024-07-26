@@ -1,11 +1,10 @@
 import vscode from 'vscode';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
-import rl from 'node:readline/promises';
 import path from 'node:path';
 
 import { CliCommandInput } from '@travetto/cli';
-import { ExecUtil, Util } from '@travetto/runtime';
+import { ExecUtil } from '@travetto/runtime';
 
 import { Workspace } from './workspace';
 
@@ -152,7 +151,7 @@ export class ParameterSelector {
             const proc = spawn(rgPath, args, { stdio: [0, 'pipe', 2], shell: true, cwd, });
 
             if (proc.stdout) {
-              Util.consumeAsyncItr(rl.createInterface(proc.stdout),
+              ExecUtil.readLines(proc.stdout,
                 item => items.push({ label: item, description: path.resolve(cwd, item.trim()) }));
             }
             await ExecUtil.getResult(proc, { catch: true });

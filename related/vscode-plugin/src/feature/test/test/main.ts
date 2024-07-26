@@ -1,10 +1,9 @@
 import vscode from 'vscode';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 import path from 'node:path';
-import rl from 'node:readline/promises';
 
 import type { IndexedModule, ManifestModule } from '@travetto/manifest';
-import { Env, Util } from '@travetto/runtime';
+import { Env, ExecUtil } from '@travetto/runtime';
 import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
 
 import { Workspace } from '../../../core/workspace';
@@ -69,10 +68,10 @@ class TestRunnerFeature extends BaseFeature {
       });
 
     if (this.#server.stderr) {
-      Util.consumeAsyncItr(rl.createInterface(this.#server.stderr), (line) => this.log.debug(`> stderr > ${line.trimEnd()}`));
+      ExecUtil.readLines(this.#server.stderr, (line) => this.log.debug(`> stderr > ${line.trimEnd()}`));
     }
     if (this.#server.stdout) {
-      Util.consumeAsyncItr(rl.createInterface(this.#server.stdout), (line) => this.log.debug(`> stdout > ${line.trimEnd()}`));
+      ExecUtil.readLines(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line.trimEnd()}`));
     }
   }
 

@@ -1,4 +1,6 @@
 import { ChildProcess } from 'node:child_process';
+import { Readable } from 'node:stream';
+import { createInterface } from 'node:readline/promises';
 
 const MINUTE = (1000 * 60);
 
@@ -141,5 +143,14 @@ export class ExecUtil {
         throw new Error(v.message);
       }
     })) as Promise<ExecutionResult<T>>;
+  }
+
+  /**
+   * Consume lines
+   */
+  static async readLines(stream: Readable, handler: (input: string) => unknown | Promise<unknown>): Promise<void> {
+    for await (const item of createInterface(stream)) {
+      await handler(item);
+    }
   }
 }

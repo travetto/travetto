@@ -1,11 +1,10 @@
 import fs from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import rl from 'node:readline/promises';
 import path from 'node:path';
 
 import mustache from 'mustache';
 
-import { ExecUtil, Util, RuntimeIndex } from '@travetto/runtime';
+import { ExecUtil, RuntimeIndex } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 import { NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
@@ -64,7 +63,7 @@ export class Context {
     });
 
     if (proc.stderr) {
-      Util.consumeAsyncItr(rl.createInterface(proc.stderr),
+      ExecUtil.readLines(proc.stderr,
         line => term.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line.trimEnd()}`).commit());
     }
 

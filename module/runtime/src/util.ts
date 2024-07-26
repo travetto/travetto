@@ -72,15 +72,6 @@ export class Util {
   }
 
   /**
-   * Consume an async iterator without the need for declaring a function
-   */
-  static async consumeAsyncItr<T>(source: AsyncIterable<T>, handler: (input: T) => unknown | Promise<unknown>): Promise<void> {
-    for await (const item of source) {
-      await handler(item);
-    }
-  }
-
-  /**
    * Write file and copy over when ready
    */
   static async bufferedFileWrite(file: string, content: string): Promise<void> {

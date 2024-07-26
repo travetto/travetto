@@ -1,5 +1,4 @@
 import vscode from 'vscode';
-import { createInterface } from 'node:readline/promises';
 import { ChildProcess, spawn } from 'node:child_process';
 
 import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
@@ -80,11 +79,11 @@ export class CompilerWatchFeature extends BaseFeature {
     });
 
     if (debug && proc.stderr) {
-      Util.consumeAsyncItr(createInterface(proc.stderr), line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
+      ExecUtil.readLines(proc.stderr, line => this.#log.error(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
     }
 
     if (debug && proc.stdout) {
-      Util.consumeAsyncItr(createInterface(proc.stdout), line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
+      ExecUtil.readLines(proc.stdout, line => this.#log.info(`> ${line.trimEnd().replace(SUB_LOG_RE, '')}`));
     }
 
     return proc;
@@ -112,14 +111,14 @@ export class CompilerWatchFeature extends BaseFeature {
           connected = true;
           this.#log.info('Connected', state);
           const proc = this.run('event', ['all'], ctrl.signal);
-          for await (const line of createInterface(proc.stdout!)) {
+          await ExecUtil.readLines(proc.stdout!, line => {
             const { type, payload }: CompilerEvent = JSON.parse(line);
             switch (type) {
               case 'log': this.#ongLogEvent(payload); break;
               case 'state': this.#onStateEvent(payload); break;
               case 'progress': this.#onProgressEvent(payload, ctrl.signal); break;
             }
-          }
+          });
         }
       } catch (err) {
         this.#log.info('Failed to connect', `${err} `);

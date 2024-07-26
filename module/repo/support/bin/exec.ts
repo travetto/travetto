@@ -1,5 +1,4 @@
 import { ChildProcess } from 'node:child_process';
-import rl from 'node:readline/promises';
 
 import { ExecutionResult, Env, Util, ExecUtil } from '@travetto/runtime';
 import { CliModuleUtil } from '@travetto/cli';
@@ -73,12 +72,12 @@ export class RepoExecUtil {
           processes.set(mod, proc);
 
           if (config.showStdout && proc.stdout) {
-            Util.consumeAsyncItr(rl.createInterface(proc.stdout), line =>
+            ExecUtil.readLines(proc.stdout, line =>
               stdoutTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
             );
           }
           if (config.showStderr && proc.stderr) {
-            Util.consumeAsyncItr(rl.createInterface(proc.stderr), line =>
+            ExecUtil.readLines(proc.stderr, line =>
               stderrTerm.writer.writeLine(`${prefix}${line.trimEnd()}`).commit()
             );
           }
