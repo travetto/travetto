@@ -29,7 +29,7 @@ export function register(
     id = `${id}￮${fn.name}`;
   }
   const value = { id, import: module.join('/'), ...tag, methods, abstract, synthetic };
-  Object.defineProperties(fn, { 'Ⲑid': { value: id }, [METADATA]: { value } });
+  Object.defineProperties(fn, { Ⲑid: { value: id }, [METADATA]: { value } });
 }
 
 /**
@@ -37,5 +37,6 @@ export function register(
  */
 export function describeFunction(fn: Function): FunctionMetadata;
 export function describeFunction(fn?: Function): FunctionMetadata | undefined {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return (fn as unknown as { [METADATA]: FunctionMetadata })?.[METADATA];
 }
