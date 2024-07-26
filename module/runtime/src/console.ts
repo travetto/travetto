@@ -92,7 +92,7 @@ class $ConsoleManager implements ConsoleListener {
    */
   debug(value: false | string): void {
     if (value !== false) {
-      const active = RuntimeIndex.getModuleList('workspace', value || '@');
+      const active = RuntimeIndex.getModuleList('workspace', value);
       active.add('@npm:debug');
       this.filter('debug', ctx => active.has(ctx.module));
     } else {

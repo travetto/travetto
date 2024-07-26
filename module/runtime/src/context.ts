@@ -15,12 +15,6 @@ const MODULE_ALIASES: Record<string, string> = {
   '@@': RuntimeIndex.manifest.workspace.path,
 };
 
-const resolveModulePath = (modulePath: string): string => {
-  const [base, sub] = (OVERRIDES[modulePath] ?? modulePath)
-    .replace(/^([^#]*)(#|$)/g, (_, v, r) => `${MODULE_ALIASES[v] ?? v}${r}`)
-    .split('#');
-  return path.resolve(RuntimeIndex.getModule(base)?.sourcePath ?? base, sub ?? '.');
-};
 
 /** Constrained version of {@type ManifestContext} */
 export const Runtime = {
@@ -81,9 +75,17 @@ export const Runtime = {
     return path.resolve(RuntimeIndex.manifest.workspace.path, RuntimeIndex.manifest.build.toolFolder, ...rel);
   },
 
+  /** Resolve single module path */
+  modulePath(modulePath: string): string {
+    const [base, sub] = (OVERRIDES[modulePath] ?? modulePath)
+      .replace(/^([^#]*)(#|$)/g, (_, v, r) => `${MODULE_ALIASES[v] ?? v}${r}`)
+      .split('#');
+    return path.resolve(RuntimeIndex.getModule(base)?.sourcePath ?? base, sub ?? '.');
+  },
+
   /** Resolve module paths */
   modulePaths(paths: string[]): string[] {
-    return [...new Set(paths.map(resolveModulePath))];
+    return [...new Set(paths.map(this.modulePath))];
   },
 
   /** Resolve resource paths */

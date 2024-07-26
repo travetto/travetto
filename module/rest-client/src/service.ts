@@ -1,7 +1,7 @@
 import { AutoCreate, Inject, Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 import { ControllerRegistry, ControllerVisitUtil } from '@travetto/rest';
-import { Util, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Util, Runtime } from '@travetto/runtime';
 import { RootRegistry } from '@travetto/registry';
 
 import { RestClientConfig, RestClientProvider } from './config';
@@ -19,10 +19,7 @@ export class RestClientGeneratorService implements AutoCreate {
   providers: ClientGenerator[];
 
   buildGenerator({ type, output, moduleName, options }: RestClientProvider): ClientGenerator {
-    output = Runtime.workspaceRelative(
-      output.startsWith('@') ? RuntimeIndex.mainModule.sourceFolder : '.',
-      output
-    );
+    output = Runtime.workspaceRelative(Runtime.modulePath(output));
 
     switch (type) {
       case 'angular': return new AngularClientGenerator(output, moduleName, options);

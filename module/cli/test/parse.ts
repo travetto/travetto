@@ -42,28 +42,28 @@ export class ParseSuite {
   @Test()
   async testExpand() {
     assert.deepStrictEqual(
-      await expand(['bob', 'hello world', '+=@travetto/cli/test/fixtures/random.flags']),
+      await expand(['bob', 'hello world', '+=@travetto/cli#test/fixtures/random.flags']),
       ['hello world', '--hello', "goodbye's moon", '-b', '20']
     );
 
     assert.deepStrictEqual(
-      await expand(['bob', 'hello world', '--module', '@travetto/cli', '+=@/test/fixtures/random.flags']),
+      await expand(['bob', 'hello world', '--module', '@travetto/cli', '+=@#test/fixtures/random.flags']),
       ['hello world', '--module', '@travetto/cli', '--hello', "goodbye's moon", '-b', '20']
     );
 
     assert.deepStrictEqual(
-      await expand(['bob', 'hello world', '--module=@travetto/cli', '+=@/test/fixtures/random.flags']),
+      await expand(['bob', 'hello world', '--module=@travetto/cli', '+=@#test/fixtures/random.flags']),
       ['hello world', '--module=@travetto/cli', '--hello', "goodbye's moon", '-b', '20']
     );
 
     assert.deepStrictEqual(
-      await expand(['bob', 'hello world', '-m', '@travetto/cli', '+=@/test/fixtures/random.flags']),
+      await expand(['bob', 'hello world', '-m', '@travetto/cli', '+=@#test/fixtures/random.flags']),
       ['hello world', '-m', '@travetto/cli', '--hello', "goodbye's moon", '-b', '20']
     );
 
     Env.TRV_MODULE.set('@travetto/cli');
     assert.deepStrictEqual(
-      await expand(['bob', 'hello world', '+=@/test/fixtures/random.flags']),
+      await expand(['bob', 'hello world', '+=@#test/fixtures/random.flags']),
       ['hello world', '--hello', "goodbye's moon", '-b', '20']
     );
   }

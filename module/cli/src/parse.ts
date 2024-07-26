@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Runtime } from '@travetto/runtime';
 import { CliCommandInput, CliCommandSchema, ParsedState } from './types';
 
 type ParsedInput = ParsedState['all'][number];
@@ -85,16 +85,8 @@ export class CliParseUtil {
     const key = flag.replace(CONFIG_PRE, '');
 
     // We have a file
-    const rel = (key.includes('/') ? key : `@/support/pack.${key}.flags`)
-      .replace('@@/', `${Runtime.workspace.path}/`)
-      .replace('@/', `${mod}/`)
-      .replace(/^(@[^\/]+\/[^\/]+)(\/.*)$/, (_, imp, rest) => {
-        const val = RuntimeIndex.getModule(imp);
-        if (!val) {
-          throw new Error(`Unknown module file: ${_}, unable to proceed`);
-        }
-        return `${val.sourcePath}${rest}`;
-      });
+    const rel = (key.includes('/') ? key : `@#support/pack.${key}.flags`)
+      .replace(/^(@[^#]*)#(.*)$/, (_, imp, rest) => `${Runtime.modulePath(imp)}/${rest}`);
 
     const file = path.resolve(rel);
 

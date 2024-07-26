@@ -12,7 +12,7 @@ export const text = <>
 
   The code will only be generated during development (when {d.field('TRV_DYNAMIC')} is true-ish).  This is the same pattern the {d.mod('Model')}  and {d.mod('Rest')} take for responding to code changes, in realtime. <br />
 
-  By default the output is relative to the workspace root, which is helpful when generated clients are centralized within a monorepo.  If the goal is to have the output relative to the module itself, then use {d.path('@/relative/path')} as a convention.
+  By default the output is relative to the workspace root, which is helpful when generated clients are centralized within a monorepo.  If the goal is to have the output relative to the module itself, then use {d.path('@#relative/path')} as a convention.
 
 
   <c.Section title='CLI - rest:client'>
