@@ -1,6 +1,6 @@
 {
   "name": "@travetto/compiler",
-  "version": "5.0.0-rc.2",
+  "version": "5.0.0-rc.3",
   "description": "The compiler infrastructure for the Travetto framework",
   "keywords": [
     "compiler",
@@ -31,12 +31,12 @@
   },
   "dependencies": {
     "@parcel/watcher": "^2.4.1",
-    "@travetto/manifest": "^5.0.0-rc.1",
-    "@travetto/transformer": "^5.0.0-rc.1",
+    "@travetto/manifest": "^5.0.0-rc.2",
+    "@travetto/transformer": "^5.0.0-rc.2",
     "@types/node": "^20.14.10"
   },
   "peerDependencies": {
-    "@travetto/cli": "^5.0.0-rc.1"
+    "@travetto/cli": "^5.0.0-rc.2"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

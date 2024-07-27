@@ -1,6 +1,6 @@
 {
   "name": "@travetto/log",
-  "version": "5.0.0-rc.1",
+  "version": "5.0.0-rc.2",
   "description": "Logging framework that integrates at the console.log level.",
   "keywords": [
     "typescript",
@@ -23,9 +23,9 @@
     "directory": "module/log"
   },
   "dependencies": {
-    "@travetto/config": "^5.0.0-rc.1",
-    "@travetto/di": "^5.0.0-rc.1",
-    "@travetto/terminal": "^5.0.0-rc.1"
+    "@travetto/config": "^5.0.0-rc.2",
+    "@travetto/di": "^5.0.0-rc.2",
+    "@travetto/terminal": "^5.0.0-rc.2"
   },
   "travetto": {
     "displayName": "Logging"
