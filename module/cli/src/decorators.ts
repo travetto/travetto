@@ -25,7 +25,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       runTarget: cfg.runTarget,
       preMain: async (cmd: CliCommandShape & { env?: string }) => {
         if (addEnv) {
-          Env.TRV_ENV.set(cmd.env || Runtime.name);
+          Env.TRV_ENV.set(cmd.env || Runtime.envName);
         }
       }
     });

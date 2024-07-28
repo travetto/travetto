@@ -35,7 +35,7 @@ While running any code within the framework, there are common patterns/goals for
 class $Runtime {
   constructor(idx: ManifestIndex, resourceOverrides?: Record<string, string>);
   /** Get env name, with support for the default env */
-  get name(): string | undefined;
+  get envName(): string | undefined;
   /** Are we in development mode */
   get production(): boolean;
   /** Is the app in dynamic mode? */
