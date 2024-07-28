@@ -69,6 +69,9 @@ export class AssetUtil {
     if (typeof input === 'string' && matched?.mime === 'video/mp4' && input.endsWith('.m4a')) {
       return { ext: '.m4a', mime: 'audio/mpeg' };
     }
+    if (matched && matched.ext.toString() === 'mpga') {
+      return { ext: '.mp3', mime: matched.mime };
+    }
     return matched;
   }
 
@@ -95,7 +98,11 @@ export class AssetUtil {
    * @param contentType
    */
   static getExtension(contentType: string): string | undefined {
-    return getExtension(contentType)!;
+    const res = getExtension(contentType)!;
+    if (res === 'mpga') {
+      return 'mp3';
+    }
+    return res;
   }
 
   /**
