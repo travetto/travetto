@@ -29,10 +29,20 @@ export class UtilTest {
     assert(fileType2.ext === 'gif');
     assert(fileType2.mime === 'image/gif');
 
-    const m4aBuff = await this.fixture.read('/logo', true);
-    const fileType3 = await AssetUtil.detectFileType(m4aBuff);
+    const unnamed = await this.fixture.read('/logo', true);
+    const fileType3 = await AssetUtil.detectFileType(unnamed);
     assert(fileType3!.ext === 'png');
     assert(fileType3!.mime === 'image/png');
+
+    const mp3Buff = await this.fixture.read('/small-audio.mp3', true);
+    const fileType4 = await AssetUtil.detectFileType(mp3Buff);
+    assert(fileType4!.ext === 'mp3');
+    assert(fileType4!.mime === 'audio/mpeg');
+
+    const mp3UnnamedBuff = await this.fixture.read('/small-audio', true);
+    const fileType5 = await AssetUtil.detectFileType(mp3UnnamedBuff);
+    assert(fileType5!.ext === 'mp3');
+    assert(fileType5!.mime === 'audio/mpeg');
   }
 
   @Test()
@@ -44,6 +54,14 @@ export class UtilTest {
     const file2 = await this.fixture.resolve('/empty.m4a');
     const result2 = await AssetUtil.resolveFileType(file2);
     assert(result2 === 'audio/mp4');
+
+    const file3 = await this.fixture.resolve('/small-audio.mp3');
+    const result3 = await AssetUtil.resolveFileType(file3);
+    assert(result3 === 'audio/mpeg');
+
+    const file4 = await this.fixture.resolve('/small-audio');
+    const result4 = await AssetUtil.resolveFileType(file4);
+    assert(result4 === 'audio/mpeg');
   }
 
   @Test()
