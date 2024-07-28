@@ -13,7 +13,7 @@ export class FileLoader {
   #searchPaths: readonly string[];
 
   constructor(paths: string[]) {
-    this.#searchPaths = paths;
+    this.#searchPaths = [...new Set(paths)]; // Dedupe
   }
 
   /**

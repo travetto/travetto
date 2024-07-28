@@ -1,100 +1,101 @@
 import path from 'node:path';
 
-import { type ManifestContext } from '@travetto/manifest';
+import type { ManifestIndex, ManifestContext } from '@travetto/manifest';
 
 import { Env } from './env';
 import { RuntimeIndex } from './manifest-index';
 import { describeFunction } from './function';
 
-const prod = (): boolean => process.env.NODE_ENV === 'production';
-
-const OVERRIDES = Env.TRV_RESOURCE_OVERRIDES.object ?? {};
-
-const MODULE_ALIASES: Record<string, string> = {
-  '@': RuntimeIndex.manifest.main.name,
-  '@@': RuntimeIndex.manifest.workspace.path,
-};
-
-
 /** Constrained version of {@type ManifestContext} */
-export const Runtime = {
+class $Runtime {
+
+  #idx: ManifestIndex;
+  #moduleAliases: Record<string, string>;
+  #resourceOverrides?: Record<string, string>;
+
+  constructor(idx: ManifestIndex, resourceOverrides?: Record<string, string>) {
+    this.#idx = idx;
+    this.#moduleAliases = {
+      '@': idx.manifest.main.name,
+      '@@': idx.manifest.workspace.path,
+    };
+    this.#resourceOverrides = resourceOverrides;
+  }
+
   /** Get env name, with support for the default env */
   get name(): string | undefined {
-    return Env.TRV_ENV.val || (!prod() ? RuntimeIndex.manifest.workspace.defaultEnv : undefined);
-  },
+    return Env.TRV_ENV.val || (!this.production ? this.#idx.manifest.workspace.defaultEnv : undefined);
+  }
 
   /** Are we in development mode */
   get production(): boolean {
-    return prod();
-  },
+    return process.env.NODE_ENV === 'production';
+  }
 
   /** Is the app in dynamic mode? */
   get dynamic(): boolean {
     return Env.TRV_DYNAMIC.isTrue;
-  },
+  }
 
   /** Get debug value */
   get debug(): false | string {
     const val = Env.DEBUG.val ?? '';
-    return (!val && prod()) || Env.DEBUG.isFalse ? false : val;
-  },
+    return (!val && this.production) || Env.DEBUG.isFalse ? false : val;
+  }
 
   /** Manifest main */
   get main(): ManifestContext['main'] {
-    return RuntimeIndex.manifest.main;
-  },
+    return this.#idx.manifest.main;
+  }
 
   /** Manifest workspace */
   get workspace(): ManifestContext['workspace'] {
-    return RuntimeIndex.manifest.workspace;
-  },
+    return this.#idx.manifest.workspace;
+  }
 
   /** Are we running from a mono-root? */
   get monoRoot(): boolean {
-    return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
-  },
+    return !!this.workspace.mono && !this.main.folder;
+  }
 
   /** Main source path */
   get mainSourcePath(): string {
-    return RuntimeIndex.mainModule.sourcePath;
-  },
+    return this.#idx.mainModule.sourcePath;
+  }
 
   /** Produce a workspace relative path */
   workspaceRelative(...rel: string[]): string {
-    return path.resolve(RuntimeIndex.manifest.workspace.path, ...rel);
-  },
+    return path.resolve(this.workspace.path, ...rel);
+  }
 
   /** Strip off the workspace path from a file */
   stripWorkspacePath(full: string): string {
-    return full === RuntimeIndex.manifest.workspace.path ? '' : full.replace(`${RuntimeIndex.manifest.workspace.path}/`, '');
-  },
+    return full === this.workspace.path ? '' : full.replace(`${this.workspace.path}/`, '');
+  }
 
   /** Produce a workspace path for tooling, with '@' being replaced by node_module/name folder */
   toolPath(...rel: string[]): string {
-    rel = rel.flatMap(x => x === '@' ? ['node_modules', RuntimeIndex.manifest.main.name] : [x]);
-    return path.resolve(RuntimeIndex.manifest.workspace.path, RuntimeIndex.manifest.build.toolFolder, ...rel);
-  },
+    rel = rel.flatMap(x => x === '@' ? ['node_modules', this.#idx.manifest.main.name] : [x]);
+    return path.resolve(this.workspace.path, this.#idx.manifest.build.toolFolder, ...rel);
+  }
 
   /** Resolve single module path */
   modulePath(modulePath: string): string {
-    const [base, sub] = (OVERRIDES[modulePath] ?? modulePath)
-      .replace(/^([^#]*)(#|$)/g, (_, v, r) => `${MODULE_ALIASES[v] ?? v}${r}`)
+    const [base, sub] = (this.#resourceOverrides?.[modulePath] ?? modulePath)
+      .replace(/^([^#]*)(#|$)/g, (_, v, r) => `${this.#moduleAliases[v] ?? v}${r}`)
       .split('#');
-    return path.resolve(RuntimeIndex.getModule(base)?.sourcePath ?? base, sub ?? '.');
-  },
-
-  /** Resolve module paths */
-  modulePaths(paths: string[]): string[] {
-    return [...new Set(paths.map(this.modulePath))];
-  },
+    return path.resolve(this.#idx.getModule(base)?.sourcePath ?? base, sub ?? '.');
+  }
 
   /** Resolve resource paths */
   resourcePaths(paths: string[] = []): string[] {
-    return this.modulePaths([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources']);
-  },
+    return [...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'].map(v => this.modulePath(v));
+  }
 
   /** Get source for function */
   getSource(fn: Function): string {
-    return RuntimeIndex.getFromImport(describeFunction(fn).import)?.sourceFile!;
+    return this.#idx.getFromImport(describeFunction(fn).import)?.sourceFile!;
   }
-};
+}
+
+export const Runtime = new $Runtime(RuntimeIndex, Env.TRV_RESOURCE_OVERRIDES.object);

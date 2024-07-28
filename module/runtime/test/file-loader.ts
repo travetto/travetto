@@ -12,7 +12,7 @@ class FileLoaderSuite {
 
   @Test()
   async simpleTest() {
-    const loader = new FileLoader(Runtime.modulePaths(['@#test/fixtures']));
+    const loader = new FileLoader([Runtime.modulePath('@#test/fixtures')]);
     assert(loader.searchPaths.includes(path.resolve(Runtime.mainSourcePath, 'test/fixtures')));
 
     await assert.doesNotReject(() => loader.resolve('logo.png'));

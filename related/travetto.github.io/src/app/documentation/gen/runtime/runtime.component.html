@@ -16,17 +16,62 @@
   </figure>
 
 Runtime is the foundation of all <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
-<ul> <li>Environment Support</li>
-<li>Runtime Context</li>
+<ul> <li>Runtime Context</li>
+<li>Environment Support</li>
+<li>Standard Error Support</li>
 <li>Console Management</li>
 <li>Resource Access</li>
-<li>Standard Error Support</li>
 <li>Common Utilities</li>
 <li>Time Utilities</li>
 <li>Process Execution</li>
 <li>Shutdown Management</li>
 <li>Path behavior</li>
 </ul>
+
+<h2 id="runtime-context">Runtime Context</h2>
+
+While running any code within the framework, there are common patterns/goals for interacting with the underlying code repository.  These include:
+<ul> <li>Determining attributes of the running environment (e.g., name, debug information, production flags)</li>
+<li>Resolving paths within the workspace (e.g. standard, tooling, resourcing, modules)</li>
+</ul>
+
+  <figure class="code">
+    <figcaption class="code">Runtime Shape
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/context.ts#L10">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">$Runtime</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span>idx<span class="token operator">:</span> ManifestIndex<span class="token punctuation">,</span> resourceOverrides<span class="token operator">?</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Get env name, with support for the default env */</span>
+  <span class="token keyword">get</span> <span class="token function">name</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Are we in development mode */</span>
+  <span class="token keyword">get</span> <span class="token function">production</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Is the app in dynamic mode? */</span>
+  <span class="token keyword">get</span> <span class="token function">dynamic</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Get debug value */</span>
+  <span class="token keyword">get</span> <span class="token function">debug</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token boolean">false</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Manifest main */</span>
+  <span class="token keyword">get</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> ManifestContext<span class="token punctuation">[</span><span class="token string">'main'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Manifest workspace */</span>
+  <span class="token keyword">get</span> <span class="token function">workspace</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> ManifestContext<span class="token punctuation">[</span><span class="token string">'workspace'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Are we running from a mono-root? */</span>
+  <span class="token keyword">get</span> <span class="token function">monoRoot</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Main source path */</span>
+  <span class="token keyword">get</span> <span class="token function">mainSourcePath</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Produce a workspace relative path */</span>
+  <span class="token function">workspaceRelative</span><span class="token punctuation">(</span><span class="token operator">...</span>rel<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Strip off the workspace path from a file */</span>
+  <span class="token function">stripWorkspacePath</span><span class="token punctuation">(</span>full<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Produce a workspace path for tooling, with '&#64;' being replaced by node_module/name folder */</span>
+  <span class="token function">toolPath</span><span class="token punctuation">(</span><span class="token operator">...</span>rel<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Resolve single module path */</span>
+  <span class="token function">modulePath</span><span class="token punctuation">(</span>modulePath<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Resolve resource paths */</span>
+  <span class="token function">resourcePaths</span><span class="token punctuation">(</span>paths<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Get source for function */</span>
+  <span class="token function">getSource</span><span class="token punctuation">(</span>fn<span class="token operator">:</span> <span class="token builtin">Function</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
 
 <h2 id="environment-support">Environment Support</h2>
 
@@ -125,12 +170,6 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<h2 id="resource-access">Resource Access</h2>
-
-The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" routerLink="/docs/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.<br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L13">AppError</a> with a category of 'notfound'.  <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
-
 <h2 id="standard-error-support">Standard Error Support</h2>
 
 While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L13">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes). <br><br>
@@ -158,7 +197,7 @@ The supported operations are:
 
 <p class="note"><strong>Note</strong> All other console methods are excluded, specifically <code class="item method">trace</code>, <code class="item method">inspect</code>, <code class="item method">dir</code>, <code class="item method">time</code>/<code class="item method">timeEnd</code></p>
 
-<h2 id="how-logging-is-instrumented">How Logging is Instrumented</h2>
+<h3 id="how-logging-is-instrumented">How Logging is Instrumented</h3>
 
 All of the logging instrumentation occurs at transpilation time.  All <code class="item method">console.*</code> methods are replaced with a call to a globally defined variable that delegates to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L35">ConsoleManager</a>.  This module, hooks into the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L35">ConsoleManager</a> and receives all logging events from all files compiled by the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>. <br><br>
 A sample of the instrumentation would be:
@@ -203,7 +242,7 @@ exports<span class="token punctuation">.</span>work <span class="token operator"
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<h3 id="filtering-debug">Filtering Debug</h3>
+<h4 id="filtering-debug">Filtering Debug</h4>
 
 The <code class="item input">debug</code> messages can be filtered using the patterns from the <a target="_blank" class="external-link" href="https://www.npmjs.com/package/debug">debug</a>.  You can specify wild cards to only <code class="item input">DEBUG</code> specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
 
@@ -227,6 +266,12 @@ Additionally, the logging framework will merge <a target="_blank" class="externa
     <pre><code class="language-bash"><span class="token comment"># Debug</span>
 $ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>express:*,&#64;travetto/rest npx trv run rest</code></pre>
   </figure>
+
+<h2 id="resource-access">Resource Access</h2>
+
+The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" routerLink="/docs/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.<br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L13">AppError</a> with a category of 'notfound'.  <br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
 
 <h2 id="common-utilities">Common Utilities</h2>
 
@@ -298,7 +343,7 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 
 <h2 id="process-execution">Process Execution</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L39">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
 A simple example would be:
 
   <figure class="code">

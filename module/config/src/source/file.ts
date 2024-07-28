@@ -31,16 +31,18 @@ export class FileConfigSource implements ConfigSource {
   async get(): Promise<ConfigSpec[]> {
     const cache: Record<string, Promise<string[]>> = {};
     const configs: Promise<ConfigSpec>[] = [];
+
     for (const [profile, priority] of this.#profiles) {
-      let i = 0;
+      let i = priority;
       for (const folder of this.#searchPaths) {
         const files = await (cache[folder] ??= fs.readdir(folder).catch(() => []));
         for (const file of files) {
           if (this.#parser.matches(file) && path.basename(file, path.extname(file)) === profile) {
             const full = path.resolve(folder, file);
+            const configPriority = i++;
             configs.push(this.#parser.parse(full).then(data => ({
               data,
-              priority: priority + i++,
+              priority: configPriority,
               source: `file://${profile}`,
               detail: Runtime.stripWorkspacePath(full)
             })));

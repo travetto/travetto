@@ -14,16 +14,56 @@ yarn add @travetto/runtime
 ```
 
 Runtime is the foundation of all [Travetto](https://travetto.dev) applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
-   *  Environment Support
    *  Runtime Context
+   *  Environment Support
+   *  Standard Error Support
    *  Console Management
    *  Resource Access
-   *  Standard Error Support
    *  Common Utilities
    *  Time Utilities
    *  Process Execution
    *  Shutdown Management
    *  Path behavior
+
+## Runtime Context
+While running any code within the framework, there are common patterns/goals for interacting with the underlying code repository.  These include:
+   *  Determining attributes of the running environment (e.g., name, debug information, production flags)
+   *  Resolving paths within the workspace (e.g. standard, tooling, resourcing, modules)
+
+**Code: Runtime Shape**
+```typescript
+class $Runtime {
+  constructor(idx: ManifestIndex, resourceOverrides?: Record<string, string>);
+  /** Get env name, with support for the default env */
+  get name(): string | undefined;
+  /** Are we in development mode */
+  get production(): boolean;
+  /** Is the app in dynamic mode? */
+  get dynamic(): boolean;
+  /** Get debug value */
+  get debug(): false | string;
+  /** Manifest main */
+  get main(): ManifestContext['main'];
+  /** Manifest workspace */
+  get workspace(): ManifestContext['workspace'];
+  /** Are we running from a mono-root? */
+  get monoRoot(): boolean;
+  /** Main source path */
+  get mainSourcePath(): string;
+  /** Produce a workspace relative path */
+  workspaceRelative(...rel: string[]): string;
+  /** Strip off the workspace path from a file */
+  stripWorkspacePath(full: string): string;
+  /** Produce a workspace path for tooling, with '@' being replaced by node_module/name folder */
+  toolPath(...rel: string[]): string;
+  /** Resolve single module path */
+  modulePath(modulePath: string): string;
+  /** Resolve resource paths */
+  resourcePaths(paths: string[] = []): string[];
+  /** Get source for function */
+  getSource(fn: Function): string;
+}
+```
 
 ## Environment Support
 The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L4), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
@@ -114,13 +154,6 @@ export class EnvProp<T> {
 }
 ```
 
-## Resource Access
-The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
-
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L13) with a category of 'notfound'.  
-
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
-
 ## Standard Error Support
 While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
 
@@ -146,7 +179,7 @@ The supported operations are:
 
 **Note**: All other console methods are excluded, specifically `trace`, `inspect`, `dir`, `time`/`timeEnd`
 
-## How Logging is Instrumented
+### How Logging is Instrumented
 All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L35).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/runtime/src/console.ts#L35) and receives all logging events from all files compiled by the [Travetto](https://travetto.dev). 
 
 A sample of the instrumentation would be:
@@ -185,7 +218,7 @@ function work() {
 }
 ```
 
-### Filtering Debug
+#### Filtering Debug
 The `debug` messages can be filtered using the patterns from the [debug](https://www.npmjs.com/package/debug).  You can specify wild cards to only `DEBUG` specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
 
 **Terminal: Sample environment flags**
@@ -206,6 +239,13 @@ Additionally, the logging framework will merge [debug](https://www.npmjs.com/pac
 # Debug
 $ DEBUG=express:*,@travetto/rest npx trv run rest
 ```
+
+## Resource Access
+The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
+
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L13) with a category of 'notfound'.  
+
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L17) includes:
@@ -268,7 +308,7 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L39) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 

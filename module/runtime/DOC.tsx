@@ -11,17 +11,27 @@ export const text = <>
   Runtime is the foundation of all {d.library('Travetto')} applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
   <ul>
-    <li>Environment Support</li>
     <li>Runtime Context</li>
+    <li>Environment Support</li>
+    <li>Standard Error Support</li>
     <li>Console Management</li>
     <li>Resource Access</li>
-    <li>Standard Error Support</li>
     <li>Common Utilities</li>
     <li>Time Utilities</li>
     <li>Process Execution</li>
     <li>Shutdown Management</li>
     <li>Path behavior</li>
   </ul>
+
+  <c.Section title='Runtime Context'>
+    While running any code within the framework, there are common patterns/goals for interacting with the underlying code repository.  These include:
+    <ul>
+      <li>Determining attributes of the running environment (e.g., name, debug information, production flags)</li>
+      <li>Resolving paths within the workspace (e.g. standard, tooling, resourcing, modules)</li>
+    </ul>
+
+    <c.Code title='Runtime Shape' src='./src/context.ts' startRe={/class [$]Runtime/} endRe={/^[}]/} outline={true} />
+  </c.Section>
 
   <c.Section title='Environment Support'>
     The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the {EnvLink} object, and will return a scoped {EnvProp}, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports {d.input('true')} or {d.input('false')}
@@ -30,16 +40,8 @@ export const text = <>
 
     <c.SubSection title='Environment Property'>
       For a given {EnvProp}, we support the ability to access different properties as a means to better facilitate environment variable usage.
-      <c.Code title='EnvProp Shape' src='@travetto/runtime/src/env.ts' startRe={/export class EnvProp/} endRe={/^[}]/} outline={true} />
+      <c.Code title='EnvProp Shape' src='./src/env.ts' startRe={/class EnvProp/} endRe={/^[}]/} outline={true} />
     </c.SubSection>
-  </c.Section>
-
-  <c.Section title='Resource Access'>
-    The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the {d.mod('Manifest')}'s data for what resources were found at manifesting time.<br />
-
-    The {FileLoader} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {AppError} with a category of 'notfound'.  <br />
-
-    The {FileLoader} also supports tying itself to {EnvLink}'s {d.field('TRV_RESOURCES')} information on where to attempt to find a requested resource.
   </c.Section>
 
   <c.Section title='Standard Error Support'>
@@ -74,23 +76,22 @@ export const text = <>
     <c.Note>
       All other console methods are excluded, specifically {d.method('trace')}, {d.method('inspect')}, {d.method('dir')}, {d.method('time')}/{d.method('timeEnd')}
     </c.Note>
-  </c.Section>
 
-  <c.Section title='How Logging is Instrumented'>
+    <c.SubSection title='How Logging is Instrumented'>
 
-    All of the logging instrumentation occurs at transpilation time.  All {d.method('console.*')} methods are replaced with a call to a globally defined variable that delegates to the {ConsoleManager}.  This module, hooks into the {ConsoleManager} and receives all logging events from all files compiled by the {d.library('Travetto')}. <br />
+      All of the logging instrumentation occurs at transpilation time.  All {d.method('console.*')} methods are replaced with a call to a globally defined variable that delegates to the {ConsoleManager}.  This module, hooks into the {ConsoleManager} and receives all logging events from all files compiled by the {d.library('Travetto')}. <br />
 
-    A sample of the instrumentation would be:
+      A sample of the instrumentation would be:
 
-    <c.Code title='Sample logging at various levels' src='doc/transpile.ts' />
+      <c.Code title='Sample logging at various levels' src='doc/transpile.ts' />
 
-    <c.Code title='Sample After Transpilation' src={RuntimeIndex.resolveFileImport('@travetto/runtime/doc/transpile.ts')} language='javascript' />
+      <c.Code title='Sample After Transpilation' src={RuntimeIndex.resolveFileImport('@travetto/runtime/doc/transpile.ts')} language='javascript' />
 
-    <c.SubSection title='Filtering Debug'>
+      <c.SubSubSection title='Filtering Debug'>
 
-      The {d.input('debug')} messages can be filtered using the patterns from the {d.library('Debug')}.  You can specify wild cards to only {d.input('DEBUG')} specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
+        The {d.input('debug')} messages can be filtered using the patterns from the {d.library('Debug')}.  You can specify wild cards to only {d.input('DEBUG')} specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
 
-      <c.Terminal title='Sample environment flags' src={`
+        <c.Terminal title='Sample environment flags' src={`
 # Debug
 $ DEBUG=-@travetto/model npx trv run app
 $ DEBUG=-@travetto/registry npx trv run app
@@ -98,13 +99,22 @@ $ DEBUG=@travetto/rest npx trv run app
 $ DEBUG=@travetto/*,-@travetto/model npx trv run app
 `} />
 
-      Additionally, the logging framework will merge {d.library('Debug')} into the output stream, and supports the standard usage
+        Additionally, the logging framework will merge {d.library('Debug')} into the output stream, and supports the standard usage
 
-      <c.Terminal title='Sample environment flags for standard usage' src={`
+        <c.Terminal title='Sample environment flags for standard usage' src={`
 # Debug
 $ DEBUG=express:*,@travetto/rest npx trv run rest
 `} />
+      </c.SubSubSection>
     </c.SubSection>
+  </c.Section>
+
+  <c.Section title='Resource Access'>
+    The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the {d.mod('Manifest')}'s data for what resources were found at manifesting time.<br />
+
+    The {FileLoader} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {AppError} with a category of 'notfound'.  <br />
+
+    The {FileLoader} also supports tying itself to {EnvLink}'s {d.field('TRV_RESOURCES')} information on where to attempt to find a requested resource.
   </c.Section>
 
   <c.Section title='Common Utilities'>
@@ -124,6 +134,7 @@ tpl\`{{age:20}} {{name: 'bob'}}\</>;
 '**age: 20** **name: bob**'
 `} />
   </c.Section>
+
   <c.Section title='Time Utilities'>
 
     {TimeUtil} contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
@@ -139,6 +150,7 @@ tpl\`{{age:20}} {{name: 'bob'}}\</>;
     <c.Code title='Running a directory listing via ls' src='doc/exec.ts' />
 
   </c.Section>
+
   <c.Section title='Shutdown Management'>
 
     Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on graceful shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code intercepts {d.input('SIGTERM')} and {d.input('SIGUSR2')}, with a default threshold of 2 seconds. These events will start the shutdown process, but also clear out the pending queue. If a kill signal is sent again, it will complete immediately. <br />

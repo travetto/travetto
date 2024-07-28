@@ -7,12 +7,12 @@ export class EmailResourceLoader extends FileLoader {
     if (!mod) {
       throw new AppError(`Unknown module - ${module}`, 'notfound', { module });
     }
-    super(Runtime.modulePaths([
+    super([
       ...Env.TRV_RESOURCES.list ?? [],
       `${module}#resources`,
       ...RuntimeIndex.getDependentModules(mod, 'children').map(x => `${x.name}#resources`),
       '@@#resources',
       ...globalResources ?? []
-    ]));
+    ].map(v => Runtime.modulePath(v)));
   }
 }
