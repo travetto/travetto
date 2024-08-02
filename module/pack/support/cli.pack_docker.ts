@@ -13,7 +13,7 @@ const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
 /**
  * Standard docker support for pack
  */
-@CliCommand({ addModule: true })
+@CliCommand({ with: { module: true } })
 export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Factory source', short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
   dockerFactory = '@travetto/pack/support/pack.dockerfile';

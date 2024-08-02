@@ -6,7 +6,7 @@ import { BasePackCommand, PackOperationShape } from './pack.base';
 /**
  * Standard zip support for pack
  */
-@CliCommand({ addModule: true })
+@CliCommand({ with: { module: true } })
 export class PackZipCommand extends BasePackCommand {
 
   preMain(): void {

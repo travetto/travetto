@@ -21,15 +21,15 @@ const METADATA = Symbol.for('@travetto/runtime:function-metadata');
  * @private
  */
 export function register(
-  fn: Function, module: [string, string], tag: FunctionMetadataTag,
+  fn: Function, [pkg, pth]: [string, string], tag: FunctionMetadataTag,
   methods?: Record<string, FunctionMetadataTag>, abstract?: boolean, synthetic?: boolean
 ): void {
-  let id = module.join(':');
-  if (fn.name) {
-    id = `${id}￮${fn.name}`;
-  }
-  const value = { id, import: module.join('/'), ...tag, methods, abstract, synthetic };
-  Object.defineProperties(fn, { Ⲑid: { value: id }, [METADATA]: { value } });
+  const metadata = {
+    id: fn.name ? `${pkg}:${pth}￮${fn.name}` : `${pkg}:${pth}`,
+    import: `${pkg}/${pth}`,
+    ...tag, methods, abstract, synthetic
+  };
+  Object.defineProperties(fn, { Ⲑid: { value: metadata.id }, [METADATA]: { value: metadata } });
 }
 
 /**

@@ -1,6 +1,6 @@
 import { Runtime } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
-import { CliCommand, CliCommandShape, CliUtil } from '@travetto/cli';
+import { CliCommand, CliCommandShape } from '@travetto/cli';
 
 import { ServerHandle } from '../src/types';
 import { RestNetUtil } from '../src/util/net';
@@ -8,14 +8,8 @@ import { RestNetUtil } from '../src/util/net';
 /**
  * Run a rest server as an application
  */
-@CliCommand({ runTarget: true, addModule: true, addEnv: true })
+@CliCommand({ runTarget: true, with: { debugIpc: true, canRestart: true, module: true, env: true } })
 export class RunRestCommand implements CliCommandShape {
-
-  /** IPC debug is enabled */
-  debugIpc?: boolean;
-
-  /** Should the server be able to run with restart*/
-  canRestart?: boolean;
 
   /** Port to run on */
   port?: number;
@@ -30,9 +24,6 @@ export class RunRestCommand implements CliCommandShape {
   }
 
   async main(): Promise<ServerHandle | void> {
-    if (await CliUtil.debugIfIpc(this) || await CliUtil.runWithRestart(this)) {
-      return;
-    }
     const { RestApplication } = await import('../src/application/rest');
     try {
       return await DependencyRegistry.runInstance(RestApplication);
