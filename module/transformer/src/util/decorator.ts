@@ -6,20 +6,31 @@ import { CoreUtil } from './core';
  */
 export class DecoratorUtil {
 
+  static #getIdentFromExpression(e: ts.Expression): ts.Identifier {
+    if (ts.isCallExpression(e) && ts.isIdentifier(e.expression)) {
+      return e.expression;
+    } else if (ts.isIdentifier(e)) {
+      return e;
+    } else if (ts.isCallExpression(e) && ts.isPropertyAccessExpression(e.expression) && ts.isIdentifier(e.expression.expression)) {
+      return e.expression.expression;
+    } else if (ts.isPropertyAccessExpression(e) && ts.isCallExpression(e.expression) && ts.isIdentifier(e.expression.expression)) {
+      return e.expression.expression;
+    } else if (ts.isParenthesizedExpression(e)) {
+      return this.#getIdentFromExpression(e);
+    } else {
+      throw new Error('No Identifier');
+    }
+  }
+
   /**
    * Get identifier for a decorator
    */
   static getDecoratorIdent(d: ts.Decorator): ts.Identifier {
-    if (ts.isCallExpression(d.expression) && ts.isIdentifier(d.expression.expression)) {
-      return d.expression.expression;
-    } else if (ts.isIdentifier(d.expression)) {
-      return d.expression;
-    } else if (ts.isCallExpression(d.expression) && ts.isPropertyAccessExpression(d.expression.expression) && ts.isIdentifier(d.expression.expression.expression)) {
-      return d.expression.expression.expression;
-    } else if (ts.isPropertyAccessExpression(d.expression) && ts.isCallExpression(d.expression.expression) && ts.isIdentifier(d.expression.expression.expression)) {
-      return d.expression.expression.expression;
-    } else {
+    const ident = this.#getIdentFromExpression(d.expression);
+    if (!ident) {
       throw new Error('No Identifier');
+    } else {
+      return ident;
     }
   }
 
