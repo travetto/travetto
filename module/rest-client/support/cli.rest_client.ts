@@ -12,7 +12,7 @@ import { RestClientGeneratorService } from '../src/service';
 /**
  * Run client rest operation
  */
-@CliCommand({ addModule: true, addEnv: true })
+@CliCommand({ with: { env: true, module: true } })
 export class CliRestClientCommand implements CliCommandShape {
 
   @Ignore()

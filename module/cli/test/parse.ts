@@ -8,7 +8,7 @@ import { CliCommand, CliCommandSchemaUtil, CliParseUtil } from '../__index__';
 /**
  * My command
  */
-@CliCommand({ addModule: true })
+@CliCommand({ with: { module: true } })
 class WithModule {
   main() { }
 }

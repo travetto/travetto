@@ -10,7 +10,7 @@ import { EditorService } from './bin/editor';
 /**
  * CLI Entry point for running the email server
  */
-@CliCommand({ addEnv: true })
+@CliCommand({ with: { env: true } })
 export class EmailTestCommand implements CliCommandShape {
 
   preMain(): void {

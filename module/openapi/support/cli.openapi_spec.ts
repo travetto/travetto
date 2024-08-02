@@ -9,7 +9,7 @@ import { DependencyRegistry } from '@travetto/di';
 /**
  * CLI for outputting the open api spec to a local file
  */
-@CliCommand({ addModule: true })
+@CliCommand({ with: { module: true } })
 export class OpenApiSpecCommand implements CliCommandShape {
 
   /** Output files */

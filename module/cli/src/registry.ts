@@ -3,16 +3,6 @@ import { Class, ConcreteClass, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
 
-export type CliCommandConfigOptions = {
-  hidden?: boolean;
-  runTarget?: boolean;
-  addModule?: boolean;
-  addEnv?: boolean;
-  runtimeModule?: 'current' | 'command';
-  /** @deprecated */
-  fields?: ('module' | 'env')[];
-};
-
 const CLI_FILE_REGEX = /\/cli[.](?<name>.*)[.]tsx?$/;
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
 

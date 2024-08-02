@@ -1,10 +1,81 @@
 import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
-import { SchemaRegistry } from '@travetto/schema';
+import { FieldConfig, SchemaRegistry } from '@travetto/schema';
 
 import { CliCommandShape, CliCommandShapeFields } from './types';
-import { CliCommandRegistry, CliCommandConfigOptions } from './registry';
+import { CliCommandRegistry } from './registry';
 import { CliModuleUtil } from './module';
 import { CliParseUtil } from './parse';
+import { CliUtil } from './util';
+
+type Cmd = CliCommandShape & { env?: string };
+
+type CliCommandConfigOptions = {
+  hidden?: boolean;
+  runTarget?: boolean;
+  runtimeModule?: 'current' | 'command';
+  with?: {
+    /** Application environment */
+    env?: boolean;
+    /** Module to run for */
+    module?: boolean;
+    /** Should debug invocation trigger via ipc */
+    debugIpc?: boolean;
+    /** Should the invocation automatically restart on exit */
+    canRestart?: boolean;
+  };
+};
+
+const FIELD_CONFIG: {
+  name: keyof Exclude<CliCommandConfigOptions['with'], undefined>;
+  field: Partial<FieldConfig>;
+  run: (cmd: Cmd) => (Promise<unknown> | unknown);
+}[] =
+  [
+    {
+      name: 'env',
+      run: cmd => Env.TRV_ENV.set(cmd.env || Runtime.envName),
+      field: {
+        type: String,
+        aliases: ['e', CliParseUtil.toEnvField(Env.TRV_ENV.key)],
+        description: 'Application environment',
+        required: { active: false },
+      },
+    },
+    {
+      name: 'module',
+      run: (): void => { },
+      field: {
+        type: String,
+        aliases: ['m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
+        description: 'Module to run for',
+        specifiers: ['module'],
+        required: { active: Runtime.monoRoot },
+      },
+    },
+    {
+      name: 'debugIpc',
+      run: cmd => CliUtil.debugIfIpc(cmd).then((v) => v && process.exit(0)),
+      field: {
+        type: Boolean,
+        aliases: ['di'],
+        description: 'Should debug invocation trigger via ipc',
+        default: true,
+        required: { active: false },
+      },
+    },
+    {
+      name: 'canRestart',
+      run: cmd => CliUtil.runWithRestart(cmd)?.then((v) => v && process.exit(0)),
+      field: {
+        type: Boolean,
+        aliases: ['cr'],
+        description: 'Should the invocation automatically restart on exit',
+        default: false,
+        required: { active: false },
+      },
+    }
+  ];
+
 
 /**
  * Decorator to register a CLI command
@@ -17,37 +88,25 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       return;
     }
 
-    const addModule = cfg.addModule === true || cfg.fields?.includes('module');
-    const runtimeModule = cfg.runtimeModule ?? (cfg.addModule ? 'current' : undefined);
-    const addEnv = cfg.addEnv ?? cfg.fields?.includes('env');
+    const VALID_FIELDS = FIELD_CONFIG.filter(f => !!cfg.with?.[f.name]);
+
     const { commandModule } = CliCommandRegistry.registerClass(target, {
       hidden: cfg.hidden,
       runTarget: cfg.runTarget,
-      preMain: async (cmd: CliCommandShape & { env?: string }) => {
-        if (addEnv) {
-          Env.TRV_ENV.set(cmd.env || Runtime.envName);
+      preMain: async (cmd: Cmd) => {
+        for (const field of VALID_FIELDS) {
+          await field.run(cmd);
         }
       }
     });
 
     const pendingCls = SchemaRegistry.getOrCreatePending(target);
 
-    if (addEnv) {
-      SchemaRegistry.registerPendingFieldConfig(target, 'env', String, {
-        aliases: ['e', CliParseUtil.toEnvField(Env.TRV_ENV.key)],
-        description: 'Application environment',
-        required: { active: false }
-      });
+    for (const { name, field: { type, ...field } } of VALID_FIELDS) {
+      SchemaRegistry.registerPendingFieldConfig(target, name, type!, field);
     }
 
-    if (addModule) {
-      SchemaRegistry.registerPendingFieldConfig(target, 'module', String, {
-        aliases: ['m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
-        description: 'Module to run for',
-        specifiers: ['module'],
-        required: { active: Runtime.monoRoot }
-      });
-    }
+    const runtimeModule = cfg.runtimeModule ?? (cfg.with?.module ? 'current' : undefined);
 
     if (runtimeModule) { // Validate module
       (pendingCls.validators ??= []).push(async item => {
