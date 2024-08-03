@@ -54,9 +54,9 @@ export class Runner {
    * Run a single file
    */
   async runSingle(): Promise<boolean> {
-    const mod = RuntimeIndex.getEntry(path.resolve(this.#state.args[0]))!;
-    if (mod.module !== Runtime.main.name) {
-      RuntimeIndex.reinitForModule(mod.module);
+    const entry = RuntimeIndex.getEntry(path.resolve(this.#state.args[0]))!;
+    if (entry.module !== Runtime.main.name) {
+      RuntimeIndex.reinitForModule(entry.module);
     }
 
     const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
@@ -64,7 +64,7 @@ export class Runner {
     const [, ...args] = this.#state.args;
 
     await consumer.onStart({});
-    await TestExecutor.execute(consumer, mod.import, ...args);
+    await TestExecutor.execute(consumer, entry.import, ...args);
     return consumer.summarizeAsBoolean();
   }
 
