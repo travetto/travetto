@@ -15,10 +15,12 @@ export async function buildStandardTestManager(consumer: TestConsumer, imp: stri
   process.send?.({ type: 'log', message: `Worker Executing ${imp}` });
 
   let event: RunEvent;
-  if (typeof imp !== 'string') {
+  if (typeof imp === 'string') {
+    event = { import: imp };
+  } else if ('file' in imp) {
     event = { import: RuntimeIndex.getFromSource(imp.file)?.sourceFile!, class: imp.class, method: imp.method };
   } else {
-    event = { import: imp };
+    event = imp;
   }
 
   const { module } = RuntimeIndex.getFromImport(event.import!)!;

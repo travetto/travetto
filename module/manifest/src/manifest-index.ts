@@ -258,18 +258,6 @@ export class ManifestIndex {
   }
 
   /**
-   * Find the module for an arbitrary source file, if it falls under a given workspace module
-   */
-  findImportForArbitraryFile(file: string): string | undefined {
-    const module = this.findModuleForArbitraryFile(file);
-    if (module) {
-      const rel = file.replace(`${this.#manifest.workspace.path}/`, '').replace(`${module.sourceFolder}/`, '');
-      return `${module.name}/${rel}`;
-    }
-    return;
-  }
-
-  /**
    * Get manifest module by name
    */
   getManifestModule(mod: string): ManifestModule {

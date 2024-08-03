@@ -14,7 +14,7 @@ function isRunRequest(ev: unknown): ev is RunRequest {
   return typeof ev === 'object' && !!ev && 'type' in ev && typeof ev.type === 'string' && ev.type === 'run-test';
 }
 
-type RemoveTestEvent = { type: 'removeTest', method: string, file: string, classId: string };
+type RemoveTestEvent = { type: 'removeTest', method: string, import: string, classId: string };
 
 export type TestWatchEvent =
   TestEvent |
@@ -54,7 +54,7 @@ export class TestWatcher {
       const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
       if (e.type !== 'removing') {
         if (conf) {
-          const key = `${conf.import}#${conf.class.name}#${conf.methodName}`;
+          const key = { import: conf.import, class: conf.class.name, method: conf.methodName };
           itr.add(key, true); // Shift to front
         }
       } else {
@@ -62,7 +62,7 @@ export class TestWatcher {
           type: 'removeTest',
           method: method?.name,
           classId: cls?.Ⲑid,
-          file: Runtime.getSource(cls)
+          import: Runtime.getImport(cls)
         } satisfies RemoveTestEvent);
       }
     });

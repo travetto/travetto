@@ -67,13 +67,13 @@ export class WorkspaceResultsManager {
     let file: string | undefined;
     if ('fileName' in target) {
       file = target.fileName;
-    } else if ('file' in target) {
-      file = target.file;
+    } else if ('import' in target) {
+      file = Workspace.resolveImport(target.import);
     } else {
       switch (target.type) {
-        case 'test': file = target.test.file; break;
-        case 'suite': file = target.suite.file; break;
-        case 'assertion': file = target.assertion.file; break;
+        case 'test': file = Workspace.resolveImport(target.test.import); break;
+        case 'suite': file = Workspace.resolveImport(target.suite.import); break;
+        case 'assertion': file = Workspace.resolveImport(target.assertion.import); break;
       }
     }
 

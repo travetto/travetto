@@ -64,10 +64,6 @@ export interface SuiteResult extends Counts {
    */
   import: string;
   /**
-   * File suite is in
-   */
-  file: string;
-  /**
    * Start of the suite
    */
   lineStart: number;

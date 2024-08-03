@@ -5,6 +5,10 @@ export type RunRequest = {
   file: string;
   class?: string;
   method?: string;
+} | {
+  import: string;
+  class?: string;
+  method?: string;
 };
 
 /**

@@ -85,7 +85,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       await new Runner({
         format: 'exec',
         mode: 'single',
-        args: [event.import!, event.class!, event.method!],
+        args: [event.import, event.class!, event.method!],
         concurrency: 1
       }).run();
     } finally {

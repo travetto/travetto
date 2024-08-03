@@ -22,7 +22,6 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       class: cls,
       classId: cls.Ⲑid,
       import: Runtime.getImport(cls),
-      file: Runtime.getSource(cls),
       lineStart: lines?.[0],
       lineEnd: lines?.[1],
       tests: [],
@@ -38,7 +37,6 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     return {
       class: cls,
       import: Runtime.getImport(cls),
-      file: Runtime.getSource(cls),
       lineStart: lines?.[0],
       lineEnd: lines?.[1],
       methodName: fn.name
