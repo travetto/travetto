@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
+import fs from 'node:fs/promises';
 import readline from 'node:readline';
 
 import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex } from '@travetto/runtime';
@@ -36,13 +37,21 @@ export class RunnerUtil {
   /**
    * Find all valid test files given the globs
    */
-  static async getTestImports(globs?: RegExp[]): Promise<string[]> {
+  static async getTestImports(globs?: string[]): Promise<string[]> {
+    const files = new Set<string>();
+    // Collect globs
+    if (globs) {
+      for await (const item of fs.glob(globs)) {
+        files.add(item);
+      }
+    }
+
     const found = RuntimeIndex.find({
       module: m => m.roles.includes('test') || m.roles.includes('std'),
       folder: f => f === 'test',
       file: f => f.role === 'test'
     })
-      .filter(f => globs?.some(g => g.test(f.sourceFile)) ?? true);
+      .filter(f => files.size === 0 || files.has(f.sourceFile));
 
     const validImports = found
       .map(f => this.isTestFile(f.sourceFile).then(valid => ({ import: f.import, valid })));

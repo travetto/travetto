@@ -13,8 +13,7 @@ export class TestCountCommand {
   }
 
   async main(patterns: string[]) {
-    const regexes = patterns.map(x => new RegExp(x));
-    const imports = await RunnerUtil.getTestImports(regexes);
+    const imports = await RunnerUtil.getTestImports(patterns);
 
     // Load all tests
     for (const imp of imports) {

@@ -11,11 +11,8 @@ export const Links = {
   Query: d.codeLink('Query', '@travetto/model-query/src/service/query.ts', /export interface/),
 };
 
-export const ModelQueryTypes = (file: string | Function): DocJSXElement[] => {
-  if (typeof file !== 'string') {
-    file = Runtime.getSource(file);
-  }
-  const contents = readFileSync(file, 'utf8');
+export const ModelQueryTypes = (fn: Function): DocJSXElement[] => {
+  const contents = readFileSync(Runtime.getSourceFile(fn), 'utf8');
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
   const seen = new Set();
   for (const [, key] of contents.matchAll(/Model(Query(Suggest|Facet|Crud)?)Support/g)) {

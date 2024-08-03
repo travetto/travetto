@@ -108,7 +108,7 @@ export class RenderContext {
    * Resolve code link
    */
   async resolveCodeLink(node: JSXElementByFn<'CodeLink'>): Promise<ResolvedSnippetLink> {
-    const src = typeof node.props.src === 'string' ? node.props.src : Runtime.getSource(node.props.src);
+    const src = typeof node.props.src === 'string' ? node.props.src : Runtime.getSourceFile(node.props.src);
     return DocResolveUtil.resolveCodeLink(src, node.props.startRe);
   }
 
@@ -116,7 +116,7 @@ export class RenderContext {
    * Resolve code/config
    */
   async resolveCode(node: JSXElementByFn<'Code' | 'Config'>): Promise<ResolvedCode> {
-    const src = typeof node.props.src === 'string' ? node.props.src : Runtime.getSource(node.props.src);
+    const src = typeof node.props.src === 'string' ? node.props.src : Runtime.getSourceFile(node.props.src);
     return node.props.startRe ?
       DocResolveUtil.resolveSnippet(src, node.props.startRe, node.props.endRe, node.props.outline) :
       DocResolveUtil.resolveCode(src, node.props.language, node.props.outline);

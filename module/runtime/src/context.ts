@@ -93,7 +93,7 @@ class $Runtime {
   }
 
   /** Get source for function */
-  getSource(fn: Function): string {
+  getSourceFile(fn: Function): string {
     return this.#idx.getFromImport(this.getImport(fn))?.sourceFile!;
   }
 

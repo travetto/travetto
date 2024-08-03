@@ -219,7 +219,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     }
     const line = lines[0] ?? 1;
     const output = path.resolve(this.#output, this.subFolder || '.');
-    return `@see file://./${path.relative(output, Runtime.getSource(cls))}#${line}`;
+    return `@see file://./${path.relative(output, Runtime.getSourceFile(cls))}#${line}`;
   }
 
   renderDoc(parts: (string | undefined)[], pad = ''): string[] {
@@ -365,7 +365,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     for (const [file, cls] of this.commonFiles) {
       await this.writeContent(file,
         await fs.readFile(typeof cls === 'string' ?
-          cls : Runtime.getSource(cls), 'utf8'));
+          cls : Runtime.getSourceFile(cls), 'utf8'));
     }
 
     const files = [

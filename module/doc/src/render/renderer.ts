@@ -94,7 +94,7 @@ export class DocRenderer {
         case 'bigint':
         case 'boolean': return `${node}`;
         default: {
-          const source = typeof node === 'function' ? Runtime.getSource(node) : undefined;
+          const source = typeof node === 'function' ? Runtime.getSourceFile(node) : undefined;
           if (source && typeof node === 'function') {
             const title = (await DocFileUtil.isDecorator(node.name, source)) ? `@${node.name}` : node.name;
             const el = this.#support.createElement('CodeLink', {

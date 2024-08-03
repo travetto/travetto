@@ -40,7 +40,7 @@ export class RestRpcClientGenerator implements ClientGenerator {
 
   async flush(): Promise<void> {
     await fs.mkdir(this.output, { recursive: true });
-    const source = Runtime.getSource(this.constructor);
+    const source = Runtime.getSourceFile(this.constructor);
     const coreFile = path.resolve(path.dirname(source), 'shared/rest-rpc.js');
     const dtsFile = path.resolve(path.dirname(source), 'shared/rest-rpc.d.ts');
     const coreContents = await fs.readFile(coreFile, 'utf8');

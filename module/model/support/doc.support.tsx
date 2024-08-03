@@ -14,11 +14,8 @@ export const Links = {
   Stream: d.codeLink('Streaming', '@travetto/model/src/service/stream.ts', /export interface/),
 };
 
-export const ModelTypes = (file: string | Function): DocJSXElement[] => {
-  if (typeof file !== 'string') {
-    file = Runtime.getSource(file);
-  }
-  const contents = readFileSync(file, 'utf8');
+export const ModelTypes = (fn: | Function): DocJSXElement[] => {
+  const contents = readFileSync(Runtime.getSourceFile(fn), 'utf8');
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
   const seen = new Set();
   for (const [, key] of contents.matchAll(/Model(Crud|Expiry|Indexed|Bulk|Stream)Support/g)) {
