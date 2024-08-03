@@ -1,8 +1,6 @@
 import vscode from 'vscode';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
-import path from 'node:path';
 
-import type { IndexedModule, ManifestModule } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/runtime';
 import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
 
@@ -75,33 +73,31 @@ class TestRunnerFeature extends BaseFeature {
     }
   }
 
-  #getTestModule(file?: string): IndexedModule | ManifestModule | undefined {
-    if (!file) {
+  #getTestImport(doc?: vscode.TextDocument | vscode.TextEditor): string | undefined {
+    if (!doc) {
       return;
     }
-    const mod = Workspace.workspaceIndex.getModuleFromSource(file);
-    if (mod) {
-      const entry = Workspace.workspaceIndex.getEntry(file);
+    const imp = this.#consumer.getImport(doc);
+    if (imp) {
+      const entry = Workspace.workspaceIndex.getFromImport(imp);
       if (entry && entry.role === 'test' && (entry.type === 'ts' || entry.type === 'js')) {
-        return mod;
+        return imp;
+      } else if (/test\/.*[.][tj]sx?$/.test(imp)) {
+        return imp;
       }
-      return;
     }
-    if (/test\/.*[.][tj]sx?$/.test(file)) {
-      return Workspace.workspaceIndex.findModuleForArbitraryFile(file);
-    }
+    return;
   }
 
   #isTestDoc(doc: vscode.TextEditor | vscode.TextDocument | undefined): boolean {
-    const file = doc ? ('fileName' in doc ? doc.fileName : doc.document.fileName) : undefined;
-    return Workspace.isCompilerWatching && !!this.#getTestModule(file);
+    return Workspace.isCompilerWatching && !!this.#getTestImport(doc);
   }
 
-  #runFile(file: string): void {
-    const mod = this.#getTestModule(file);
+  #runFile(doc: vscode.TextDocument): void {
+    const imp = this.#getTestImport(doc);
 
-    if (!mod) {
-      this.log.error('Unknown file', file, 'skipping');
+    if (!imp) {
+      this.log.error('Unknown import', imp, 'skipping');
       return;
     }
 
@@ -111,7 +107,7 @@ class TestRunnerFeature extends BaseFeature {
     }
 
 
-    this.#server.send({ type: 'run-test', file });
+    this.#server.send({ type: 'run-test', import: imp });
   }
 
   #rerunActive(): void {
@@ -119,7 +115,7 @@ class TestRunnerFeature extends BaseFeature {
     if (this.#isTestDoc(editor)) {
       this.#startServer();
       this.#consumer.reset(editor);
-      this.#runFile(editor!.document.fileName);
+      this.#runFile(editor!.document);
     }
   }
 
@@ -138,15 +134,14 @@ class TestRunnerFeature extends BaseFeature {
     }
 
     line ??= (editor.selection.start.line + 1);
-    const file = path.resolve(editor.document.fileName ?? '');
-    const prettyFile = file.replace(`${Workspace.path}/`, '');
-    const mod = Workspace.workspaceIndex.findModuleForArbitraryFile(file)!;
+    const imp = this.#consumer.getImport(editor);
+    const mod = Workspace.workspaceIndex.findModuleForArbitraryFile(editor.document.fileName)!;
 
     await RunUtil.debug({
       useCli: true,
-      name: `Debug Travetto Test - ${prettyFile}`,
+      name: `Debug Travetto Test - ${imp}`,
       main: 'test:direct',
-      args: [prettyFile, `${line}`],
+      args: [imp!, `${line}`],
       cliModule: mod.name,
       env: {
         ...Env.TRV_TEST_PHASE_TIMEOUT.export('5m'),
@@ -178,7 +173,7 @@ class TestRunnerFeature extends BaseFeature {
       this.#startServer();
       this.#consumer.trackEditor(editor);
       if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
-        this.#runFile(editor.document.fileName);
+        this.#runFile(editor.document);
       }
     }
   }

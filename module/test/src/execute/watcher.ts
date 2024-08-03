@@ -16,7 +16,7 @@ function isRunEvent(ev: unknown): ev is RunEvent {
 
 export type TestWatchEvent =
   TestEvent |
-  { type: 'removeTest', method: string, file: string, classId: string } |
+  { type: 'removeTest', method: string, import: string, classId: string } |
   { type: 'ready' } |
   { type: 'log', message: string };
 
