@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { type ManifestContext, PackageUtil } from '@travetto/manifest';
 import { isJSXElement, JSXElement, JSXFragmentType } from '@travetto/doc/jsx-runtime';
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { RuntimeIndex } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../jsx';
 import { DocumentShape, RenderProvider, RenderState } from '../types';
@@ -93,12 +93,12 @@ export class DocRenderer {
         case 'number':
         case 'bigint':
         case 'boolean': return `${node}`;
-        default: {
-          const source = typeof node === 'function' ? Runtime.getSource(node) : undefined;
-          if (source && typeof node === 'function') {
-            const title = (await DocFileUtil.isDecorator(node.name, source)) ? `@${node.name}` : node.name;
+        case 'function': {
+          const source = DocFileUtil.readSource(node);
+          if (source.file) {
+            const title = (await DocFileUtil.isDecorator(node.name, source.file)) ? `@${node.name}` : node.name;
             const el = this.#support.createElement('CodeLink', {
-              src: source,
+              src: source.file,
               startRe: new RegExp(`(class|function)\\s+(${node.name})`),
               title
             });
@@ -110,9 +110,10 @@ export class DocRenderer {
             state.createState = (key, props) => this.createState(state, key, props);
             return await renderer.CodeLink(state);
           }
-          throw new Error(`Unknown object type: ${typeof node}`);
+          break;
         }
       }
+      throw new Error(`Unknown object type: ${typeof node}`);
     }
   }
 

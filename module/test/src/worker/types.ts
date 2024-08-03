@@ -1,8 +1,21 @@
 /**
+ * Test Run Request
+ */
+export type RunRequest = {
+  file: string;
+  class?: string;
+  method?: string;
+} | {
+  import: string;
+  class?: string;
+  method?: string;
+};
+
+/**
  * Test Run Event
  */
 export type RunEvent = {
-  file?: string;
+  import: string;
   error?: unknown;
   class?: string;
   method?: string;

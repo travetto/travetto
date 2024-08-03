@@ -60,9 +60,9 @@ export interface SuiteResult extends Counts {
    */
   classId: string;
   /**
-   * File suite is in
+   * Import for the suite
    */
-  file: string;
+  import: string;
   /**
    * Start of the suite
    */

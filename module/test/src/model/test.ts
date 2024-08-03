@@ -62,9 +62,9 @@ export interface Assertion {
    */
   error?: Error;
   /**
-   * File of assertion
+   * Import of assertion
    */
-  file: string;
+  import: string;
   /**
    * Line number
    */

@@ -9,7 +9,7 @@ import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 
 export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {
   idSource = ModelCrudUtil.uuidSource();
-  get client(): unknown { // @doc-exclude
+  get client(): unknown {
     return undefined;
   }
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {

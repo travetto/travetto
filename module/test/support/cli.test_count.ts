@@ -13,15 +13,14 @@ export class TestCountCommand {
   }
 
   async main(patterns: string[]) {
-    const regexes = patterns.map(x => new RegExp(x));
-    const files = await RunnerUtil.getTestFiles(regexes);
+    const imports = await RunnerUtil.getTestImports(patterns);
 
     // Load all tests
-    for (const file of files) {
+    for (const imp of imports) {
       try {
-        await import(file.import);
+        await import(imp);
       } catch (err) {
-        console.error('Failed to import', file.sourceFile, err);
+        console.error('Failed to import', imp, err);
       }
     }
 

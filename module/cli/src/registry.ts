@@ -1,9 +1,9 @@
-import { Class, ConcreteClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Class, ConcreteClass, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
 
-const CLI_FILE_REGEX = /\/cli[.](?<name>.*)[.]tsx?$/;
+const CLI_FILE_REGEX = /\/cli[.](?<name>.*?)([.]tsx?)?$/;
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
 
 class $CliCommandRegistry {
@@ -41,12 +41,12 @@ class $CliCommandRegistry {
    * Registers a cli command
    */
   registerClass(cls: Class, cfg: Partial<CliCommandConfig>): CliCommandConfig {
-    const source = Runtime.getSource(cls);
+    const meta = describeFunction(cls);
     this.#commands.set(cls, {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: cls as ConcreteClass,
-      name: getName(source),
-      commandModule: RuntimeIndex.getModuleFromSource(source)!.name,
+      name: getName(meta.import),
+      commandModule: meta.module,
       ...cfg,
     });
     return this.#commands.get(cls)!;

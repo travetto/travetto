@@ -79,13 +79,13 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   async onRunCommand(event: RunEvent): Promise<void> {
     console.debug('Run');
 
-    console.debug('Running', { file: event.file });
+    console.debug('Running', { import: event.import });
 
     try {
       await new Runner({
         format: 'exec',
         mode: 'single',
-        args: [event.file!, event.class!, event.method!],
+        args: [event.import, event.class!, event.method!],
         concurrency: 1
       }).run();
     } finally {

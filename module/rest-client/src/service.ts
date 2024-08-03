@@ -31,7 +31,7 @@ export class RestClientGeneratorService implements AutoCreate {
   }
 
   async renderClient(provider: RestClientProvider | ClientGenerator): Promise<void> {
-    await ControllerVisitUtil.visit('seenFile' in provider ? provider : this.buildGenerator(provider));
+    await ControllerVisitUtil.visit('seenImport' in provider ? provider : this.buildGenerator(provider));
   }
 
   async postConstruct(): Promise<void> {
@@ -80,10 +80,10 @@ export class RestClientGeneratorService implements AutoCreate {
     });
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    RootRegistry.onNonClassChanges(async file => {
+    RootRegistry.onNonClassChanges(async imp => {
       // Initial render
       for (const p of this.providers) {
-        if (p.seenFile(file)) {
+        if (p.seenImport(imp)) {
           await this.renderClient(p);
         }
       }

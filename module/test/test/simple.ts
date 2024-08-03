@@ -158,8 +158,7 @@ class Simple {
   @Test({ shouldThrow: ExecutionError, skip: true })
   async testUnhandledPromise() {
     for (let i = 0; i < 100; i += 1) {
-      new Promise((_, r) => setTimeout(r, 10, new Error('Timeout')));
+      timers.setTimeout(10);
     }
-    // await new Promise(r => setTimeout(r, 10));
   }
 }

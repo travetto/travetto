@@ -6,17 +6,19 @@ import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
 import { TestConsumerRegistry } from '../consumer/registry';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
-import { RunEvent } from '../worker/types';
+import { RunRequest } from '../worker/types';
 import { RunnerUtil } from './util';
 import { TestEvent } from '../model/event';
 
-function isRunEvent(ev: unknown): ev is RunEvent {
+function isRunRequest(ev: unknown): ev is RunRequest {
   return typeof ev === 'object' && !!ev && 'type' in ev && typeof ev.type === 'string' && ev.type === 'run-test';
 }
 
+type RemoveTestEvent = { type: 'removeTest', method: string, import: string, classId: string };
+
 export type TestWatchEvent =
   TestEvent |
-  { type: 'removeTest', method: string, file: string, classId: string } |
+  RemoveTestEvent |
   { type: 'ready' } |
   { type: 'log', message: string };
 
@@ -33,7 +35,7 @@ export class TestWatcher {
   static async watch(format: string, runAllOnStart = true): Promise<void> {
     console.debug('Listening for changes');
 
-    const itr = new WorkQueue<string>();
+    const itr = new WorkQueue<string | RunRequest>();
 
     await SuiteRegistry.init();
     SuiteRegistry.listen(RootRegistry);
@@ -52,7 +54,7 @@ export class TestWatcher {
       const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
       if (e.type !== 'removing') {
         if (conf) {
-          const key = `${conf.file}#${conf.class.name}#${conf.methodName}`;
+          const key = { import: conf.import, class: conf.class.name, method: conf.methodName };
           itr.add(key, true); // Shift to front
         }
       } else {
@@ -60,29 +62,29 @@ export class TestWatcher {
           type: 'removeTest',
           method: method?.name,
           classId: cls?.Ⲑid,
-          file: Runtime.getSource(cls)
-        });
+          import: Runtime.getImport(cls)
+        } satisfies RemoveTestEvent);
       }
     });
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    RootRegistry.onNonClassChanges(file => itr.add(file));
+    RootRegistry.onNonClassChanges(imp => itr.add(imp));
 
     await RootRegistry.init();
 
     process.on('message', ev => {
-      if (isRunEvent(ev)) {
+      if (isRunRequest(ev)) {
         console.debug('Manually triggered', ev);
-        itr.add([ev.file, ev.class, ev.method].filter(x => !!x).join('#'), true);
+        itr.add(ev, true);
       }
     });
 
     process.send?.({ type: 'ready' });
 
     if (runAllOnStart) {
-      for (const test of await RunnerUtil.getTestFiles()) {
-        await import(test.import);
-        itr.add(test.sourceFile);
+      for (const imp of await RunnerUtil.getTestImports()) {
+        await import(imp);
+        itr.add(imp);
       }
     }
 

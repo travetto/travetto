@@ -20,9 +20,8 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     const lines = describeFunction(cls)?.lines;
     return {
       class: cls,
-      module: Runtime.main.name,
       classId: cls.Ⲑid,
-      file: Runtime.getSource(cls),
+      import: Runtime.getImport(cls),
       lineStart: lines?.[0],
       lineEnd: lines?.[1],
       tests: [],
@@ -37,8 +36,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     const lines = describeFunction(cls)?.methods?.[fn.name].lines;
     return {
       class: cls,
-      module: Runtime.main.name,
-      file: Runtime.getSource(cls),
+      import: Runtime.getImport(cls),
       lineStart: lines?.[0],
       lineEnd: lines?.[1],
       methodName: fn.name
@@ -93,11 +91,11 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   /**
    * Get run parameters from provided input
    */
-  getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
+  getRunParams(imp: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);
       const suites = this.getValidClasses()
-        .filter(cls => Runtime.getSource(cls) === file)
+        .filter(cls => Runtime.getImport(cls) === imp)
         .map(x => this.get(x)).filter(x => !x.skip);
       const suite = suites.find(x => line >= x.lineStart && line <= x.lineEnd);
 

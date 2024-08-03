@@ -3,7 +3,7 @@ import { fork } from 'node:child_process';
 import { Env, RuntimeIndex } from '@travetto/runtime';
 import { ParentCommChannel } from '@travetto/worker';
 
-import { Events, RunEvent } from './types';
+import { Events, RunEvent, RunRequest } from './types';
 import { TestConsumer } from '../consumer/types';
 import { ErrorUtil } from '../consumer/error';
 import { TestEvent } from '../model/event';
@@ -11,28 +11,29 @@ import { TestEvent } from '../model/event';
 /**
  *  Produce a handler for the child worker
  */
-export async function buildStandardTestManager(consumer: TestConsumer, file: string): Promise<void> {
-  process.send?.({ type: 'log', message: `Worker Executing ${file}` });
+export async function buildStandardTestManager(consumer: TestConsumer, imp: string | RunRequest): Promise<void> {
+  process.send?.({ type: 'log', message: `Worker Executing ${imp}` });
 
   let event: RunEvent;
-  if (file.includes('#')) {
-    const [f, cls, method] = file.split('#');
-    event = { file: f, class: cls, method };
+  if (typeof imp === 'string') {
+    event = { import: imp };
+  } else if ('file' in imp) {
+    event = { import: RuntimeIndex.getFromSource(imp.file)?.sourceFile!, class: imp.class, method: imp.method };
   } else {
-    event = { file };
+    event = imp;
   }
 
-  const { module } = RuntimeIndex.getEntry(event.file!)!;
-  const cwd = RuntimeIndex.getModule(module)!.sourcePath;
+  const { module } = RuntimeIndex.getFromImport(event.import!)!;
+  const suiteMod = RuntimeIndex.getModule(module);
 
   const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
     fork(
       RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'), ['test:child'],
       {
-        cwd,
+        cwd: suiteMod!.sourcePath,
         env: {
           ...process.env,
-          ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(module)!.outputPath),
+          ...Env.TRV_MANIFEST.export(suiteMod!.outputPath),
           ...Env.TRV_QUIET.export(true)
         },
         stdio: ['ignore', 'ignore', 2, 'ipc']
@@ -63,7 +64,7 @@ export async function buildStandardTestManager(consumer: TestConsumer, file: str
   // Kill on complete
   await channel.destroy();
 
-  process.send?.({ type: 'log', message: `Worker Finished ${file}` });
+  process.send?.({ type: 'log', message: `Worker Finished ${imp}` });
 
   // If we received an error, throw it
   if (error) {

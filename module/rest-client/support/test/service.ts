@@ -1,3 +1,5 @@
+import timers from 'node:timers/promises';
+
 import { Controller, Post, Get, Delete, Put } from '@travetto/rest';
 import { Specifier } from '@travetto/schema';
 
@@ -39,7 +41,7 @@ export class TodoController {
   @Post('/timeouts')
   async getLong(value: string): Promise<{ message: string }> {
     const start = Date.now();
-    await new Promise(res => setTimeout(res, 200));
+    await timers.setTimeout(200);
     return {
       message: [
         'LONG TIME',

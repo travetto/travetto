@@ -1,6 +1,5 @@
 import path from 'node:path';
 
-import { path as mp } from '@travetto/manifest';
 import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
@@ -22,25 +21,21 @@ export class Runner {
     this.#state = state;
   }
 
-  get patterns(): RegExp[] {
-    return this.#state.args.map(x => new RegExp(mp.toPosix(x)));
-  }
-
   /**
    * Run all files
    */
   async runFiles(): Promise<boolean> {
     const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
 
-    const files = (await RunnerUtil.getTestFiles(this.patterns)).map(f => f.sourceFile);
+    const imports = await RunnerUtil.getTestImports(this.#state.args);
 
-    console.debug('Running', { files, patterns: this.patterns });
+    console.debug('Running', { imports, patterns: this.#state.args });
 
     const testCount = await RunnerUtil.getTestCount(this.#state.args);
     await consumer.onStart({ testCount });
     await WorkPool.run(
       buildStandardTestManager.bind(null, consumer),
-      files,
+      imports,
       {
         idleTimeoutMillis: TimeUtil.asMillis(10, 's'),
         min: 1,
@@ -54,17 +49,23 @@ export class Runner {
    * Run a single file
    */
   async runSingle(): Promise<boolean> {
-    const mod = RuntimeIndex.getEntry(path.resolve(this.#state.args[0]))!;
-    if (mod.module !== Runtime.main.name) {
-      RuntimeIndex.reinitForModule(mod.module);
+    let imp = RuntimeIndex.getFromImport(this.#state.args[0])?.import;
+
+    if (!imp) {
+      imp = RuntimeIndex.getFromSource(path.resolve(this.#state.args[0]))?.import;
+    }
+
+    const entry = RuntimeIndex.getFromImport(imp!)!;
+    if (entry.module !== Runtime.main.name) {
+      RuntimeIndex.reinitForModule(entry.module);
     }
 
     const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
 
-    const [file, ...args] = this.#state.args;
+    const [, ...args] = this.#state.args;
 
     await consumer.onStart({});
-    await TestExecutor.execute(consumer, file, ...args);
+    await TestExecutor.execute(consumer, imp!, ...args);
     return consumer.summarizeAsBoolean();
   }
 

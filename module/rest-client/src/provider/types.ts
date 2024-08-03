@@ -9,7 +9,7 @@ export type RenderContent = Imp & {
 };
 
 export type ClientGenerator = ControllerVisitor & {
-  seenFile(file: string): boolean;
+  seenImport(imp: string): boolean;
 };
 
 export type EndpointDesc = {

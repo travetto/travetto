@@ -139,10 +139,9 @@ export class Context {
         .replaceAll('_$', '}}}'),
       this.templateContext(),
     )
-      .replace(/\/\/\s*@ts-expect-error.*$/gm, '')
-      .replace(/(\/\/.*@doc-exclude.*)$/gm, '')
-      .replace(/\s*(\/\/.*@doc-exclude.*)/gm, '')
-      .replace(/^\s*(\/\/\s*)\n/gsm, '');
+      .replace(/[ ]*[/][/][ ]*@ts-expect-error[^\n]*\n/gsm, '') // Excluding errors
+      .replace(/^[ ]*[/][/][ ]*[{][{][^\n]*\n/gsm, '') // Excluding conditional comments, full-line
+      .replace(/[ ]*[/][/][ ]*[{][{][^\n]*/gsm, ''); // Excluding conditional comments
     await fs.mkdir(path.dirname(out), { recursive: true });
     await fs.writeFile(out, rendered, 'utf8');
   }

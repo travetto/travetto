@@ -1,11 +1,9 @@
 import { EventEmitter } from 'node:events';
-import { RuntimeIndex } from '@travetto/runtime';
 
 import { Assertion, TestConfig } from '../model/test';
 
 export interface CaptureAssert extends Partial<Assertion> {
-  module: [string, string];
-  file: string;
+  module?: [string, string];
   line: number;
   text: string;
   operator: string;
@@ -28,9 +26,9 @@ class $AssertCapture {
 
     // Emit and collect, every assertion as it occurs
     const handler = (a: CaptureAssert): void => {
-      const assrt = {
+      const assrt: Assertion = {
         ...a,
-        file: RuntimeIndex.getSourceFile(a.module),
+        import: a.import ?? a.module!.join('/'),
         classId: test.classId,
         methodName: test.methodName
       };

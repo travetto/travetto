@@ -29,11 +29,14 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/compiler"
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@parcel/watcher": "^2.4.1",
     "@travetto/manifest": "^5.0.0-rc.2",
     "@travetto/transformer": "^5.0.0-rc.2",
-    "@types/node": "^20.14.10"
+    "@types/node": "^22.1.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^5.0.0-rc.3"

@@ -1,9 +1,6 @@
 /** @jsxImportSource @travetto/doc */
-import { readFileSync } from 'node:fs';
-
-import { d, c, DocJSXElementByFn, DocJSXElement } from '@travetto/doc';
+import { d, c, DocJSXElementByFn, DocJSXElement, DocFileUtil } from '@travetto/doc';
 import { Config } from '@travetto/config';
-import { Runtime } from '@travetto/runtime';
 
 export const Links = {
   Basic: d.codeLink('Basic', '@travetto/model/src/service/basic.ts', /export interface/),
@@ -14,14 +11,11 @@ export const Links = {
   Stream: d.codeLink('Streaming', '@travetto/model/src/service/stream.ts', /export interface/),
 };
 
-export const ModelTypes = (file: string | Function): DocJSXElement[] => {
-  if (typeof file !== 'string') {
-    file = Runtime.getSource(file);
-  }
-  const contents = readFileSync(file, 'utf8');
+export const ModelTypes = (fn: | Function): DocJSXElement[] => {
+  const { content } = DocFileUtil.readSource(fn);
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
   const seen = new Set();
-  for (const [, key] of contents.matchAll(/Model(Crud|Expiry|Indexed|Bulk|Stream)Support/g)) {
+  for (const [, key] of content.matchAll(/Model(Crud|Expiry|Indexed|Bulk|Stream)Support/g)) {
     if (!seen.has(key)) {
       seen.add(key);
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

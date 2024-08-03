@@ -20,16 +20,16 @@ export class CliCommandTransformer {
     }
 
     // Find runnable method
-    const runMethod = node.members
+    const mainMethod = node.members
       .find((x): x is ts.MethodDeclaration =>
         ts.isMethodDeclaration(x) && x.name!.getText() === 'main'
       );
 
-    if (!runMethod) {
+    if (!mainMethod) {
       return node;
     }
 
-    const members = node.members.map(x => ts.isMethodDeclaration(x) && x === runMethod ?
+    const members = node.members.map(x => ts.isMethodDeclaration(x) && x === mainMethod ?
       state.factory.updateMethodDeclaration(
         x,
         x.modifiers,

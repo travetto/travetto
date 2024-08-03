@@ -16,7 +16,7 @@ export class DecoratorUtil {
     } else if (ts.isPropertyAccessExpression(e) && ts.isCallExpression(e.expression) && ts.isIdentifier(e.expression.expression)) {
       return e.expression.expression;
     } else if (ts.isParenthesizedExpression(e)) {
-      return this.#getIdentFromExpression(e);
+      return this.#getIdentFromExpression(e.expression);
     } else {
       throw new Error('No Identifier');
     }

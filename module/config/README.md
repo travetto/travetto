@@ -206,7 +206,7 @@ $ trv main doc/dbconfig-run.ts
   at: '2029-03-14T04:00:00.618Z',
   details: {
     class: '@travetto/config:doc/dbconfig￮DBConfig',
-    file: './doc/dbconfig.ts',
+    import: '@travetto/config/doc/dbconfig',
     errors: [
       {
         kind: 'required',

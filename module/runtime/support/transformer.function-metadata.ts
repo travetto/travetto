@@ -15,6 +15,7 @@ const methods = Symbol.for(`${RUNTIME_MOD}:methods`);
 const cls = Symbol.for(`${RUNTIME_MOD}:class`);
 const fn = Symbol.for(`${RUNTIME_MOD}:function`);
 const registerImport = Symbol.for(`${RUNTIME_MOD}:registerImport`);
+const registerFn = 'registerFunction';
 
 interface MetadataInfo {
   [registerImport]?: Import;
@@ -80,7 +81,7 @@ export class RegisterTransformer {
     const name = node.name?.escapedText.toString() ?? '';
 
     const meta = state.factory.createCallExpression(
-      state.createAccess(state[registerImport].ident, 'register'),
+      state.createAccess(state[registerImport].ident, registerFn),
       [],
       [
         state.createIdentifier(name),
@@ -122,7 +123,7 @@ export class RegisterTransformer {
       state[registerImport] ??= state.importFile(REGISTER_IMPORT);
       const tag = this.#tag(state, node);
       const meta = state.factory.createCallExpression(
-        state.createAccess(state[registerImport].ident, 'register'),
+        state.createAccess(state[registerImport].ident, registerFn),
         [],
         [
           state.createIdentifier(node.name),

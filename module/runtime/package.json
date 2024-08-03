@@ -24,10 +24,13 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/runtime"
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@travetto/manifest": "^5.0.0-rc.2",
     "@types/debug": "^4.1.12",
-    "@types/node": "^20.14.10",
+    "@types/node": "^22.1.0",
     "debug": "^4.3.5"
   },
   "peerDependencies": {

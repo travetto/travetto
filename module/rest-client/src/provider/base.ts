@@ -46,7 +46,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
   #schemaContent = new Map<string, RenderContent>();
   #controllerContent = new Map<string, RenderContent>();
   #otherContent = new Map<string, RenderContent>();
-  #files = new Set<string>();
+  #imports = new Set<string>();
   #nameResolver = new SchemaNameResolver();
 
   abstract get commonFiles(): [string, Class | string][];
@@ -213,13 +213,14 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
   }
 
   buildSee(cls: Class, method?: string): string {
-    const lines = method ? describeFunction(cls)?.methods?.[method].lines : describeFunction(cls)?.lines;
+    const meta = describeFunction(cls);
+    const lines = method ? meta?.methods?.[method].lines : meta?.lines;
     if (!lines) {
       return '';
     }
     const line = lines[0] ?? 1;
     const output = path.resolve(this.#output, this.subFolder || '.');
-    return `@see file://./${path.relative(output, Runtime.getSource(cls))}#${line}`;
+    return `@see file://./${path.relative(output, Runtime.getSourceFile(cls))}#${line}`;
   }
 
   renderDoc(parts: (string | undefined)[], pad = ''): string[] {
@@ -312,7 +313,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
         classId: schema.class.Ⲑid,
       };
       this.#schemaContent.set(schema.class.Ⲑid, baseResult);
-      this.#files.add(Runtime.getSource(schema.class));
+      this.#imports.add(Runtime.getImport(schema.class));
       return baseResult;
     }
 
@@ -356,7 +357,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     };
 
     this.#schemaContent.set(schema.class.Ⲑid, result);
-    this.#files.add(Runtime.getSource(schema.class));
+    this.#imports.add(Runtime.getImport(schema.class));
 
     return result;
   }
@@ -365,7 +366,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     for (const [file, cls] of this.commonFiles) {
       await this.writeContent(file,
         await fs.readFile(typeof cls === 'string' ?
-          cls : Runtime.getSource(cls), 'utf8'));
+          cls : Runtime.getSourceFile(cls), 'utf8'));
     }
 
     const files = [
@@ -397,7 +398,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     if (cfg.documented !== false) {
       const result = this.renderController(cfg);
       this.#controllerContent.set(result.classId, result);
-      this.#files.add(Runtime.getSource(cfg.class));
+      this.#imports.add(Runtime.getImport(cfg.class));
     }
   }
 
@@ -421,7 +422,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     return this.#schemaContent.delete(cls.Ⲑid);
   }
 
-  seenFile(file: string): boolean {
-    return this.#files.has(file);
+  seenImport(imp: string): boolean {
+    return this.#imports.has(imp);
   }
 }

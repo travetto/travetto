@@ -2,6 +2,8 @@ import { Writable } from 'node:stream';
 
 import { stringify } from 'yaml';
 
+import { RuntimeIndex } from '@travetto/runtime';
+
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
@@ -85,7 +87,7 @@ export class XunitEmitter implements TestConsumer {
     failures="${suite.failed}"
     errors="${suite.failed}"
     skipped="${suite.skipped}"
-    file="${suite.file}"
+    file="${RuntimeIndex.getFromImport(suite.import)!.sourceFile}"
   >
       ${testBodies.join('\n')}
       </testsuite>
@@ -101,7 +103,7 @@ export class XunitEmitter implements TestConsumer {
     this.#stream.write(`
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites
-  name="${summary.suites.length ? summary.suites[0].file : 'nameless'}"
+  name="${summary.suites.length ? RuntimeIndex.getFromImport(summary.suites[0].import)?.sourceFile : 'nameless'}"
   time="${summary.duration}"
   tests="${summary.total}"
   failures="${summary.failed}"

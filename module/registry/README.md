@@ -82,32 +82,30 @@ As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module
 **Code: Sample Class Diffing**
 ```typescript
 
-#handleFileChanges(file: string, classes: Class[] = []): void {
+#handleFileChanges(importFile: string, classes: Class[] = []): number {
     const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
 
     let prev = new Map<string, Class>();
-    if (this.#classes.has(file)) {
-      prev = new Map(this.#classes.get(file)!.entries());
+    if (this.#classes.has(importFile)) {
+      prev = new Map(this.#classes.get(importFile)!.entries());
     }
 
     const keys = new Set([...Array.from(prev.keys()), ...Array.from(next.keys())]);
 
-    if (!this.#classes.has(file)) {
-      this.#classes.set(file, new Map());
+    if (!this.#classes.has(importFile)) {
+      this.#classes.set(importFile, new Map());
     }
 
     let changes = 0;
 
-    /**
-     * Determine delta based on the various classes (if being added, removed or updated)
-     */
+    // Determine delta based on the various classes (if being added, removed or updated)
     for (const k of keys) {
       if (!next.has(k)) {
         changes += 1;
         this.emit({ type: 'removing', prev: prev.get(k)! });
-        this.#classes.get(file)!.delete(k);
+        this.#classes.get(importFile)!.delete(k);
       } else {
-        this.#classes.get(file)!.set(k, next.get(k)!);
+        this.#classes.get(importFile)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
           changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });
@@ -121,8 +119,6 @@ As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module
         }
       }
     }
-    if (!changes) {
-      this.#emitter.emit('unchanged-file', file);
-    }
+    return changes;
   }
 ```

@@ -1,8 +1,5 @@
 /** @jsxImportSource @travetto/doc */
-import { readFileSync } from 'node:fs';
-
-import { d, DocJSXElementByFn, DocJSXElement } from '@travetto/doc';
-import { Runtime } from '@travetto/runtime';
+import { d, DocJSXElementByFn, DocJSXElement, DocFileUtil } from '@travetto/doc';
 
 export const Links = {
   QueryCrud: d.codeLink('Query Crud', '@travetto/model-query/src/service/crud.ts', /export interface/),
@@ -11,14 +8,11 @@ export const Links = {
   Query: d.codeLink('Query', '@travetto/model-query/src/service/query.ts', /export interface/),
 };
 
-export const ModelQueryTypes = (file: string | Function): DocJSXElement[] => {
-  if (typeof file !== 'string') {
-    file = Runtime.getSource(file);
-  }
-  const contents = readFileSync(file, 'utf8');
+export const ModelQueryTypes = (fn: Function): DocJSXElement[] => {
+  const { content } = DocFileUtil.readSource(fn);
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
   const seen = new Set();
-  for (const [, key] of contents.matchAll(/Model(Query(Suggest|Facet|Crud)?)Support/g)) {
+  for (const [, key] of content.matchAll(/Model(Query(Suggest|Facet|Crud)?)Support/g)) {
     if (!seen.has(key)) {
       seen.add(key);
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

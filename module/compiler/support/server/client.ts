@@ -93,7 +93,6 @@ export class CompilerClient {
   }
 
   /** Fetch compiler events */
-  /** Fetch compiler events */
   fetchEvents<
     V extends CompilerEventType,
     T extends (CompilerEvent & { type: V })['payload']

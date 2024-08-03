@@ -3,7 +3,7 @@ import path from 'node:path';
 import { createElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
 
 import { PackageUtil } from '@travetto/manifest';
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { RuntimeIndex } from '@travetto/runtime';
 
 import { JSXElementByFn, c } from '../jsx';
 import { DocResolveUtil, ResolvedCode, ResolvedRef, ResolvedSnippetLink } from '../util/resolve';
@@ -108,18 +108,16 @@ export class RenderContext {
    * Resolve code link
    */
   async resolveCodeLink(node: JSXElementByFn<'CodeLink'>): Promise<ResolvedSnippetLink> {
-    const src = typeof node.props.src === 'string' ? node.props.src : Runtime.getSource(node.props.src);
-    return DocResolveUtil.resolveCodeLink(src, node.props.startRe);
+    return DocResolveUtil.resolveCodeLink(node.props.src, node.props.startRe);
   }
 
   /**
    * Resolve code/config
    */
   async resolveCode(node: JSXElementByFn<'Code' | 'Config'>): Promise<ResolvedCode> {
-    const src = typeof node.props.src === 'string' ? node.props.src : Runtime.getSource(node.props.src);
     return node.props.startRe ?
-      DocResolveUtil.resolveSnippet(src, node.props.startRe, node.props.endRe, node.props.outline) :
-      DocResolveUtil.resolveCode(src, node.props.language, node.props.outline);
+      DocResolveUtil.resolveSnippet(node.props.src, node.props.startRe, node.props.endRe, node.props.outline) :
+      DocResolveUtil.resolveCode(node.props.src, node.props.language, node.props.outline);
   }
 
   /**

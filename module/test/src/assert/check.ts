@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { AppError, ClassInstance, Class, RuntimeIndex } from '@travetto/runtime';
+import { AppError, ClassInstance, Class } from '@travetto/runtime';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
 import { AssertCapture, CaptureAssert } from './capture';
@@ -23,9 +23,6 @@ export class AssertCheck {
    * @param args The arguments passed in
    */
   static check(assertion: CaptureAssert, positive: boolean, ...args: unknown[]): void {
-    /* eslint-disable @typescript-eslint/consistent-type-assertions */
-    assertion.file = RuntimeIndex.getSourceFile(assertion.module);
-
     let fn = assertion.operator;
     assertion.operator = ASSERT_FN_OPERATOR[fn];
 
@@ -37,6 +34,7 @@ export class AssertCheck {
     // Invert check for negative
     const assertFn = positive ? assert : (x: unknown, msg?: string): unknown => assert(!x, msg);
 
+    /* eslint-disable @typescript-eslint/consistent-type-assertions */
     // Check fn to call
     if (fn === 'fail') {
       if (args.length > 1) {
@@ -214,8 +212,6 @@ export class AssertCheck {
   ): void {
     let missed: Error | undefined;
 
-    assertion.file = RuntimeIndex.getSourceFile(assertion.module);
-
     try {
       action();
       if (!positive) {
@@ -248,8 +244,6 @@ export class AssertCheck {
   ): Promise<void> {
     let missed: Error | undefined;
 
-    assertion.file = RuntimeIndex.getSourceFile(assertion.module);
-
     try {
       if ('then' in action) {
         await action;
@@ -273,15 +267,13 @@ export class AssertCheck {
    * Look for any unhandled exceptions
    */
   static checkUnhandled(test: TestConfig, err: Error | assert.AssertionError): void {
-    let line = AssertUtil.getPositionOfError(err, test.file).line;
+    let line = AssertUtil.getPositionOfError(err, test.import).line;
     if (line === 1) {
       line = test.lineStart;
     }
 
-    const entry = RuntimeIndex.getFromSource(test.file)!;
     AssertCapture.add({
-      module: [entry.module, entry.relativeFile],
-      file: test.file,
+      import: test.import,
       line,
       operator: 'throws',
       error: err,
