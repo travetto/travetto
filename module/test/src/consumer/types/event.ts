@@ -18,9 +18,6 @@ export class EventStreamer implements TestConsumer {
 
   onEvent(event: TestEvent): void {
     const out = { ...event };
-    if ('import' in out) {
-
-    }
     ErrorUtil.serializeTestErrors(out);
     this.#stream.write(`${JSON.stringify(out)}\n`);
   }
