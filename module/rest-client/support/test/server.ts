@@ -18,18 +18,20 @@ import { TodoApi } from '${from}';
 const api = new TodoApi({ baseUrl: 'http://localhost:${port}', timeout: 100 });
   
 async function go() {
-const items = [];
-const log = v => items.push(v);
-log(await api.listTodo(200, 50, ['a','b','c'], 'green-2'));
-log(await api.createTodo({id: '10', text:'todo', priority: 11}));
-log(await api.getName('Roger'));
-try {
-  const result = await api.getLong(''+api.timeout);
-  log('FAILED TO ERROR');
-} catch (err) {
-  log(err.message);
-}
-return JSON.stringify(items);
+  const items = [];
+  const log = v => items.push(v);
+  log(await api.listTodo(200, 50, ['a','b','c'], 'green-2'));
+  log(await api.createTodo({id: '10', text:'todo', priority: 11}));
+  log(await api.getName('Roger'));
+
+  try {
+    const result = await api.getLong(''+api.timeout);
+    log('FAILED TO ERROR');
+  } catch (err) {
+    log(err.message);
+  }
+
+  return JSON.stringify(items);
 }
 `;
 }
