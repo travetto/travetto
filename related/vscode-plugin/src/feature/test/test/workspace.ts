@@ -63,22 +63,19 @@ export class WorkspaceResultsManager {
    * Get test results
    * @param target
    */
-  getLocation(target: vscode.TextDocument | TestWatchEvent): string | undefined {
-    let file: string | undefined;
-    if ('fileName' in target) {
-      file = target.fileName;
+  getLocation(target: vscode.TextDocument | TestWatchEvent | string): string | undefined {
+    if (typeof target === 'string') {
+      return Workspace.resolveImport(target);
+    } else if ('fileName' in target) {
+      return target.fileName;
     } else if ('import' in target) {
-      file = Workspace.resolveImport(target.import);
+      return this.getLocation(target.import);
     } else {
       switch (target.type) {
-        case 'test': file = Workspace.resolveImport(target.test.import); break;
-        case 'suite': file = Workspace.resolveImport(target.suite.import); break;
-        case 'assertion': file = Workspace.resolveImport(target.assertion.import); break;
+        case 'test': return this.getLocation(target.test.import);
+        case 'suite': return this.getLocation(target.suite.import);
+        case 'assertion': return this.getLocation(target.assertion.import);
       }
-    }
-
-    if (file) {
-      return file;
     }
   }
 
