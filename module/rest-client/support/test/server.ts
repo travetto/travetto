@@ -34,7 +34,6 @@ return JSON.stringify(items);
 `;
 }
 
-
 @InjectableSuite()
 @Suite()
 export abstract class RestClientServerSuite extends BaseRestSuite {
