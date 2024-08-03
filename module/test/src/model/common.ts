@@ -18,6 +18,10 @@ export interface SuiteCore {
    */
   import: string;
   /**
+   * Filename for the suite
+   */
+  file: string;
+  /**
    * The first line of the unit
    */
   lineStart: number;

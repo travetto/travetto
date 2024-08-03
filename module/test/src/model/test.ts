@@ -66,6 +66,10 @@ export interface Assertion {
    */
   import: string;
   /**
+   * Filename for assertion
+   */
+  file: string;
+  /**
    * Line number
    */
   line: number;

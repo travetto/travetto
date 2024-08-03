@@ -14,9 +14,11 @@ function isRunRequest(ev: unknown): ev is RunRequest {
   return typeof ev === 'object' && !!ev && 'type' in ev && typeof ev.type === 'string' && ev.type === 'run-test';
 }
 
+type RemoveTestEvent = { type: 'removeTest', method: string, file: string, classId: string };
+
 export type TestWatchEvent =
   TestEvent |
-  { type: 'removeTest', method: string, import: string, classId: string } |
+  RemoveTestEvent |
   { type: 'ready' } |
   { type: 'log', message: string };
 
@@ -61,7 +63,7 @@ export class TestWatcher {
           method: method?.name,
           classId: cls?.Ⲑid,
           file: Runtime.getSource(cls)
-        });
+        } satisfies RemoveTestEvent);
       }
     });
 

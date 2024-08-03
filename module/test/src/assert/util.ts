@@ -42,9 +42,8 @@ export class AssertUtil {
   /**
    * Determine file location for a given error and the stack trace
    */
-  static getPositionOfError(err: Error, imp: string): { import: string, line: number } {
+  static getPositionOfError(err: Error, filename: string): { file: string, line: number } {
     const cwd = Runtime.mainSourcePath;
-    const filename = RuntimeIndex.getFromImport(imp)!.sourceFile;
     const lines = (err.stack ?? new Error().stack!)
       .replace(/[\\/]/g, '/')
       .split('\n')
@@ -58,12 +57,12 @@ export class AssertUtil {
     }
 
     if (!best) {
-      return { import: imp, line: 1 };
+      return { file: filename, line: 1 };
     }
 
     const pth = best.trim().split(/\s+/g).slice(1).pop()!;
     if (!pth) {
-      return { import: imp, line: 1 };
+      return { file: filename, line: 1 };
     }
 
     const [file, lineNo] = pth
@@ -80,14 +79,16 @@ export class AssertUtil {
 
     const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
 
-    return { import: RuntimeIndex.getFromSource(outFile)?.import!, line };
+    const res = { file: outFile, line };
+
+    return res;
   }
 
   /**
    * Generate a suite error given a suite config, and an error
    */
   static generateSuiteError(suite: SuiteConfig, methodName: string, error: Error): { assert: Assertion, testResult: TestResult, testConfig: TestConfig } {
-    const { import: imp, ...pos } = this.getPositionOfError(error, suite.import);
+    const { file, ...pos } = this.getPositionOfError(error, suite.file);
     let line = pos.line;
 
     if (line === 1 && suite.lineStart) {
@@ -96,7 +97,8 @@ export class AssertUtil {
 
     const msg = error.message.split(/\n/)[0];
 
-    const core = { import: imp, classId: suite.classId, methodName, module: Runtime.main.name };
+    const imp = RuntimeIndex.getFromSource(file)?.import!;
+    const core = { import: imp, file, classId: suite.classId, methodName, module: Runtime.main.name };
     const coreAll = { ...core, description: msg, lineStart: line, lineEnd: line, lineBodyStart: line };
 
     const assert: Assertion = {

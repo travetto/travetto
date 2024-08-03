@@ -60,44 +60,25 @@ export class WorkspaceResultsManager {
   }
 
   /**
-   * Get test import location
+   * Get test results
+   * @param target
    */
-  getImport(target: vscode.TextDocument | vscode.TextEditor | TestWatchEvent): string {
-    if ('document' in target) {
-      return this.getImport(target.document);
-    } else if ('fileName' in target) {
-      return Workspace.workspaceIndex.findImportForArbitraryFile(target.fileName)!;
-    } else if ('import' in target) {
-      return target.import;
+  getLocation(target: vscode.TextDocument | TestWatchEvent): string | undefined {
+    let file: string | undefined;
+    if ('fileName' in target) {
+      file = target.fileName;
+    } else if ('file' in target) {
+      file = target.file;
     } else {
       switch (target.type) {
-        case 'test': return target.test.import;
-        case 'suite': return target.suite.import;
-        case 'assertion': return target.assertion.import;
-        default: throw new Error('Unknown target');
+        case 'test': file = target.test.file; break;
+        case 'suite': file = target.suite.file; break;
+        case 'assertion': file = target.assertion.file; break;
       }
     }
-  }
 
-  /**
-   * Get test uri
-   */
-  getUri(target: vscode.TextDocument | vscode.TextEditor | TestWatchEvent | string): vscode.Uri {
-    if (typeof target === 'string') {
-      return vscode.Uri.file(Workspace.workspaceIndex.getFromImport(target)!.sourceFile);
-    } else if ('document' in target) {
-      return this.getUri(target.document);
-    } else if ('fileName' in target) {
-      return target.uri;
-    } else if ('import' in target) {
-      return this.getUri(target.import);
-    } else {
-      switch (target.type) {
-        case 'test': return this.getUri(target.test.import);
-        case 'suite': return this.getUri(target.suite.import);
-        case 'assertion': return this.getUri(target.assertion.import);
-        default: throw new Error('Unknown target');
-      }
+    if (file) {
+      return file;
     }
   }
 
@@ -106,14 +87,14 @@ export class WorkspaceResultsManager {
    * @param target
    */
   getResults(target: vscode.TextDocument | TestWatchEvent): DocumentResultsManager | undefined {
-    const imp = this.getImport(target);
-    if (imp) {
-      if (!this.#results.has(imp)) {
-        const rm = new DocumentResultsManager(imp, this.getUri(target)!);
-        this.#log.debug('Generating results manager', { imp });
-        this.#results.set(imp, rm);
+    const file = this.getLocation(target);
+    if (file) {
+      if (!this.#results.has(file)) {
+        const rm = new DocumentResultsManager(file);
+        this.#log.debug('Generating results manager', { file });
+        this.#results.set(file, rm);
       }
-      return this.#results.get(imp)!;
+      return this.#results.get(file)!;
     }
   }
 
@@ -147,6 +128,8 @@ export class WorkspaceResultsManager {
     for (const [, v] of entries) {
       v.dispose();
     }
+    // Clear out all diagnostics
+    // testDiagnostics.clear();
   }
 
   /**
@@ -157,7 +140,7 @@ export class WorkspaceResultsManager {
     if (editor && editor.document) {
       try {
         this.getResults(editor.document)?.addEditor(editor);
-        this.#log.info('Tracking', this.getImport(editor.document));
+        this.#log.info('Tracking', editor.document.fileName);
       } catch (err) {
         if (err instanceof Error) {
           this.#log.error(err.message, err);
@@ -173,13 +156,10 @@ export class WorkspaceResultsManager {
    */
   untrackEditor(editor: vscode.TextEditor | vscode.TextDocument | undefined): void {
     editor = Workspace.getDocumentEditor(editor);
-    if (editor) {
-      const imp = this.getImport(editor.document);
-      if (imp && this.#results.has(imp)) {
-        this.#results.get(imp)!.dispose();
-        this.#results.delete(imp);
-        this.#log.info('Untracking', imp);
-      }
+    if (editor && this.#results.has(editor.document.fileName)) {
+      this.#results.get(editor.document.fileName)!.dispose();
+      this.#results.delete(editor.document.fileName);
+      this.#log.info('Untracking', editor.document.fileName);
     }
   }
 

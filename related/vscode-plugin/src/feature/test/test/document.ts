@@ -8,7 +8,6 @@ import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig } from
 
 import { Decorations } from './decoration';
 import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown } from './types';
-import { Workspace } from '../../../core/workspace';
 
 export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 
@@ -46,13 +45,11 @@ export class DocumentResultsManager {
   #diagnostics: vscode.Diagnostic[] = [];
   #editors = new Set<vscode.TextEditor>();
   #document: vscode.TextDocument;
-  #import: string;
-  #uri: vscode.Uri;
+  #file: string;
   active = false;
 
-  constructor(imp: string, uri: vscode.Uri) {
-    this.#import = imp;
-    this.#uri = uri;
+  constructor(file: string) {
+    this.#file = file;
   }
 
   /**
@@ -114,7 +111,7 @@ export class DocumentResultsManager {
       for (const style of Object.values(test.styles)) { style.dispose(); }
       for (const style of Object.values(test.assertStyles)) { style.dispose(); }
     }
-    testDiagnostics.set(this.#uri, []);
+    testDiagnostics.set(vscode.Uri.file(this.#file), []);
   }
 
   refreshTest(test: TestState | string): void {
@@ -148,8 +145,8 @@ export class DocumentResultsManager {
     }
   }
 
-  findDocument(imp: string): LineAtDoc {
-    const content = readFileSync(Workspace.workspaceIndex.getFromImport(imp)!.sourceFile, 'utf8');
+  findDocument(file: string): LineAtDoc {
+    const content = readFileSync(file, 'utf8');
     const lines = content.split(/\n/g);
     const self: LineAtDoc = {
       lineAt(line: number | vscode.Position) {
@@ -186,7 +183,7 @@ export class DocumentResultsManager {
           const { bodyFirst } = Decorations.buildErrorHover(as.src);
           const rng = as.decoration!.range;
 
-          document ??= this.findDocument(this.#import);
+          document ??= this.findDocument(this.#file);
 
           const diagRng = new vscode.Range(
             new vscode.Position(rng.start.line,
@@ -199,7 +196,7 @@ export class DocumentResultsManager {
           acc.push(diag);
         }
         if (ts.status === 'failed' && ts.assertions.length === 0) {
-          document ??= this.findDocument(this.#import);
+          document ??= this.findDocument(this.#file);
           const rng = ts.decoration!.range!;
           const diagRng = new vscode.Range(
             new vscode.Position(rng.start?.line,
@@ -216,7 +213,7 @@ export class DocumentResultsManager {
         }
         return acc;
       }, []);
-    testDiagnostics.set(this.#uri, this.#diagnostics);
+    testDiagnostics.set(vscode.Uri.file(this.#file), this.#diagnostics);
   }
 
   /**
