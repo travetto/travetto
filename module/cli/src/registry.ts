@@ -41,12 +41,12 @@ class $CliCommandRegistry {
    * Registers a cli command
    */
   registerClass(cls: Class, cfg: Partial<CliCommandConfig>): CliCommandConfig {
-    const source = Runtime.getSource(cls);
+    const imp = Runtime.getImport(cls);
     this.#commands.set(cls, {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: cls as ConcreteClass,
-      name: getName(source),
-      commandModule: RuntimeIndex.getModuleFromSource(source)!.name,
+      name: getName(imp),
+      commandModule: Runtime.getModule(cls),
       ...cfg,
     });
     return this.#commands.get(cls)!;

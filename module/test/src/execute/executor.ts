@@ -65,11 +65,11 @@ export class TestExecutor {
   /**
    * Fail an entire file, marking the whole file as failed
    */
-  static failFile(consumer: TestConsumer, file: string, err: Error): void {
-    const name = path.basename(file);
-    const classId = `${RuntimeIndex.getEntry(file)?.id}￮${name}`;
+  static failFile(consumer: TestConsumer, imp: string, err: Error): void {
+    const name = path.basename(imp);
+    const classId = `${RuntimeIndex.getFromImport(imp)?.id}￮${name}`;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const suite = { class: { name }, classId, duration: 0, lineStart: 1, lineEnd: 1, file, } as SuiteConfig & SuiteResult;
+    const suite = { class: { name }, classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp, } as SuiteConfig & SuiteResult;
     err.message = err.message.replaceAll(Runtime.mainSourcePath, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
@@ -90,7 +90,7 @@ export class TestExecutor {
       total: 0,
       lineStart: suite.lineStart,
       lineEnd: suite.lineEnd,
-      file: suite.file,
+      import: suite.import,
       classId: suite.classId,
       duration: 0,
       tests: []
@@ -109,13 +109,12 @@ export class TestExecutor {
 
     const result: TestResult = {
       methodName: test.methodName,
-      module: Runtime.main.name,
       description: test.description,
       classId: test.classId,
       lineStart: test.lineStart,
       lineEnd: test.lineEnd,
       lineBodyStart: test.lineBodyStart,
-      file: test.file,
+      import: test.import,
       status: 'skipped',
       assertions: [],
       duration: 0,
@@ -258,19 +257,15 @@ export class TestExecutor {
   /**
    * Handle executing a suite's test/tests based on command line inputs
    */
-  static async execute(consumer: TestConsumer, file: string, ...args: string[]): Promise<void> {
-
-    file = path.resolve(file);
-
-    const entry = RuntimeIndex.getEntry(file)!;
+  static async execute(consumer: TestConsumer, imp: string, ...args: string[]): Promise<void> {
 
     try {
-      await import(entry.import);
+      await import(imp);
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;
       }
-      this.failFile(consumer, file, err);
+      this.failFile(consumer, imp, err);
       return;
     }
 
@@ -278,7 +273,7 @@ export class TestExecutor {
     await SuiteRegistry.init();
 
     // Convert inbound arguments to specific tests to run
-    const params = SuiteRegistry.getRunParams(file, ...args);
+    const params = SuiteRegistry.getRunParams(imp, ...args);
 
     // If running specific suites
     if ('suites' in params) {

@@ -62,7 +62,7 @@ export interface SuiteResult extends Counts {
   /**
    * File suite is in
    */
-  file: string;
+  import: string;
   /**
    * Start of the suite
    */

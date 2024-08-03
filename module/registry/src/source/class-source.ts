@@ -36,18 +36,12 @@ export class ClassSource implements ChangeSource<Class> {
    */
   trace = Env.DEBUG.val?.includes('@travetto/registry');
 
-  #getClasses(): Class[] {
-    return flushPendingFunctions().filter(isClass).filter(x =>
-      describeFunction(x)?.module !== '@travetto/registry'
-    );
-  }
-
   /**
    * Flush classes
    */
   #flush(): void {
     for (const cls of flushPendingFunctions().filter(isClass)) {
-      const src = Runtime.getSource(cls);
+      const src = Runtime.getImport(cls);
       if (!this.#classes.has(src)) {
         this.#classes.set(src, new Map());
       }
@@ -105,7 +99,7 @@ export class ClassSource implements ChangeSource<Class> {
   #handleChanges(classes: Class[] = []): void {
     const classesByFile = new Map<string, Class[]>();
     for (const el of classes) {
-      const imp = describeFunction(el).import;
+      const imp = Runtime.getImport(el);
       if (!classesByFile.has(imp)) {
         classesByFile.set(imp, []);
       }

@@ -6,10 +6,6 @@ export type Skip = boolean | ((instance: unknown) => boolean | Promise<boolean>)
  */
 export interface SuiteCore {
   /**
-   * The module the test is declared in
-   */
-  module: string;
-  /**
    * The class id
    */
   classId: string;
@@ -18,9 +14,9 @@ export interface SuiteCore {
    */
   description: string;
   /**
-   * It's file
+   * The import location for the suite
    */
-  file: string;
+  import: string;
   /**
    * The first line of the unit
    */

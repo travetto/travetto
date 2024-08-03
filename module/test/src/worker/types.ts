@@ -2,7 +2,7 @@
  * Test Run Event
  */
 export type RunEvent = {
-  file?: string;
+  import?: string;
   error?: unknown;
   class?: string;
   method?: string;

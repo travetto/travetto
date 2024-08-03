@@ -3,7 +3,6 @@ import { createReadStream } from 'node:fs';
 import readline from 'node:readline';
 
 import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex } from '@travetto/runtime';
-import type { IndexedFile } from '@travetto/manifest';
 
 /**
  * Simple Test Utilities
@@ -37,20 +36,20 @@ export class RunnerUtil {
   /**
    * Find all valid test files given the globs
    */
-  static async getTestFiles(globs?: RegExp[]): Promise<IndexedFile[]> {
-    const files = RuntimeIndex.find({
+  static async getTestImports(globs?: RegExp[]): Promise<string[]> {
+    const found = RuntimeIndex.find({
       module: m => m.roles.includes('test') || m.roles.includes('std'),
       folder: f => f === 'test',
       file: f => f.role === 'test'
     })
       .filter(f => globs?.some(g => g.test(f.sourceFile)) ?? true);
 
-    const validFiles = files
-      .map(f => this.isTestFile(f.sourceFile).then(valid => ({ file: f, valid })));
+    const validImports = found
+      .map(f => this.isTestFile(f.sourceFile).then(valid => ({ import: f.import, valid })));
 
-    return (await Promise.all(validFiles))
+    return (await Promise.all(validImports))
       .filter(x => x.valid)
-      .map(x => x.file);
+      .map(x => x.import);
   }
 
   /**

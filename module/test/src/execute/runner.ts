@@ -32,15 +32,15 @@ export class Runner {
   async runFiles(): Promise<boolean> {
     const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
 
-    const files = (await RunnerUtil.getTestFiles(this.patterns)).map(f => f.sourceFile);
+    const imports = await RunnerUtil.getTestImports(this.patterns);
 
-    console.debug('Running', { files, patterns: this.patterns });
+    console.debug('Running', { imports, patterns: this.patterns });
 
     const testCount = await RunnerUtil.getTestCount(this.#state.args);
     await consumer.onStart({ testCount });
     await WorkPool.run(
       buildStandardTestManager.bind(null, consumer),
-      files,
+      imports,
       {
         idleTimeoutMillis: TimeUtil.asMillis(10, 's'),
         min: 1,
@@ -61,10 +61,10 @@ export class Runner {
 
     const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
 
-    const [file, ...args] = this.#state.args;
+    const [, ...args] = this.#state.args;
 
     await consumer.onStart({});
-    await TestExecutor.execute(consumer, file, ...args);
+    await TestExecutor.execute(consumer, mod.import, ...args);
     return consumer.summarizeAsBoolean();
   }
 

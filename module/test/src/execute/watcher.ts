@@ -1,6 +1,6 @@
 import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, WorkQueue } from '@travetto/worker';
-import { Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
+import { Runtime, describeFunction } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
@@ -52,7 +52,7 @@ export class TestWatcher {
       const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
       if (e.type !== 'removing') {
         if (conf) {
-          const key = `${conf.file}#${conf.class.name}#${conf.methodName}`;
+          const key = `${conf.import}#${conf.class.name}#${conf.methodName}`;
           itr.add(key, true); // Shift to front
         }
       } else {
@@ -60,29 +60,29 @@ export class TestWatcher {
           type: 'removeTest',
           method: method?.name,
           classId: cls?.Ⲑid,
-          file: Runtime.getSource(cls)
+          import: Runtime.getImport(cls)
         });
       }
     });
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    RootRegistry.onNonClassChanges(imp => itr.add(RuntimeIndex.getFromImport(imp)!.sourceFile));
+    RootRegistry.onNonClassChanges(imp => itr.add(imp));
 
     await RootRegistry.init();
 
     process.on('message', ev => {
       if (isRunEvent(ev)) {
         console.debug('Manually triggered', ev);
-        itr.add([ev.file, ev.class, ev.method].filter(x => !!x).join('#'), true);
+        itr.add([ev.import, ev.class, ev.method].filter(x => !!x).join('#'), true);
       }
     });
 
     process.send?.({ type: 'ready' });
 
     if (runAllOnStart) {
-      for (const test of await RunnerUtil.getTestFiles()) {
-        await import(test.import);
-        itr.add(test.sourceFile);
+      for (const imp of await RunnerUtil.getTestImports()) {
+        await import(imp);
+        itr.add(imp);
       }
     }
 

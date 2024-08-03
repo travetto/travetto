@@ -1,5 +1,5 @@
 import { Terminal } from '@travetto/terminal';
-import { AppError, TimeUtil, Runtime } from '@travetto/runtime';
+import { AppError, TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { stringify } from 'yaml';
 
 import { TestEvent } from '../../model/event';
@@ -66,11 +66,12 @@ export class TapEmitter implements TestConsumer {
         let subCount = 0;
         for (const asrt of test.assertions) {
           const text = asrt.message ? `${asrt.text} (${this.#enhancer.failure(asrt.message)})` : asrt.text;
+          const pth = RuntimeIndex.getFromImport(asrt.import)!.sourceFile.replace(Runtime.mainSourcePath, '.');
           let subMessage = [
             this.#enhancer.assertNumber(++subCount),
             '-',
             this.#enhancer.assertDescription(text),
-            `${this.#enhancer.assertFile(asrt.file.replace(Runtime.mainSourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
+            `${this.#enhancer.assertFile(pth)}:${this.#enhancer.assertLine(asrt.line)}`
           ].join(' ');
 
           if (asrt.error) {

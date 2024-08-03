@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 
-import { Class } from '@travetto/runtime';
+import { Class, RuntimeIndex } from '@travetto/runtime';
 
 import { TestConsumer } from '../types';
 import { TestEvent } from '../../model/event';
@@ -28,7 +28,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    */
   summarizeSuite(test: TestResult): SuiteResult {
     // Was only loading to verify existence (TODO: double-check)
-    if (existsSync(test.file)) {
+    if (existsSync(RuntimeIndex.getFromImport(test.import)!.sourceFile)) {
       this.#state[test.classId] = this.#state[test.classId] ?? {};
       this.#state[test.classId][test.methodName] = test.status;
       const SuiteCls = SuiteRegistry.getClasses().find(x =>
@@ -50,7 +50,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
   removeClass(clsId: string): SuiteResult {
     this.#state[clsId] = {};
     return {
-      classId: clsId, passed: 0, failed: 0, skipped: 0, total: 0, tests: [], duration: 0, file: '', lines: { start: 0, end: 0 }
+      classId: clsId, passed: 0, failed: 0, skipped: 0, total: 0, tests: [], duration: 0, import: '', lineStart: 0, lineEnd: 0
     };
   }
 
@@ -70,8 +70,9 @@ export class CumulativeSummaryConsumer implements TestConsumer {
       passed: total.passed,
       failed: total.failed,
       skipped: total.skipped,
-      file: suite.file,
-      lines: suite.lines,
+      import: suite.import,
+      lineStart: suite.lineStart,
+      lineEnd: suite.lineEnd,
       total: total.failed + total.passed,
       tests: [],
       duration: 0

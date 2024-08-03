@@ -312,7 +312,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
         classId: schema.class.Ⲑid,
       };
       this.#schemaContent.set(schema.class.Ⲑid, baseResult);
-      this.#imports.add(describeFunction(schema.class).import);
+      this.#imports.add(Runtime.getImport(schema.class));
       return baseResult;
     }
 
@@ -356,7 +356,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     };
 
     this.#schemaContent.set(schema.class.Ⲑid, result);
-    this.#imports.add(describeFunction(schema.class).import);
+    this.#imports.add(Runtime.getImport(schema.class));
 
     return result;
   }
@@ -397,7 +397,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     if (cfg.documented !== false) {
       const result = this.renderController(cfg);
       this.#controllerContent.set(result.classId, result);
-      this.#imports.add(describeFunction(cfg.class).import);
+      this.#imports.add(Runtime.getImport(cfg.class));
     }
   }
 
