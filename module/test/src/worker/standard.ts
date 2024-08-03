@@ -3,7 +3,7 @@ import { fork } from 'node:child_process';
 import { Env, RuntimeIndex } from '@travetto/runtime';
 import { ParentCommChannel } from '@travetto/worker';
 
-import { Events, RunEvent } from './types';
+import { Events, RunEvent, RunRequest } from './types';
 import { TestConsumer } from '../consumer/types';
 import { ErrorUtil } from '../consumer/error';
 import { TestEvent } from '../model/event';
@@ -11,13 +11,12 @@ import { TestEvent } from '../model/event';
 /**
  *  Produce a handler for the child worker
  */
-export async function buildStandardTestManager(consumer: TestConsumer, imp: string): Promise<void> {
+export async function buildStandardTestManager(consumer: TestConsumer, imp: string | RunRequest): Promise<void> {
   process.send?.({ type: 'log', message: `Worker Executing ${imp}` });
 
   let event: RunEvent;
-  if (imp.includes('#')) {
-    const [i, cls, method] = imp.split('#');
-    event = { import: i, class: cls, method };
+  if (typeof imp !== 'string') {
+    event = { import: RuntimeIndex.getFromSource(imp.file)?.sourceFile!, class: imp.class, method: imp.method };
   } else {
     event = { import: imp };
   }

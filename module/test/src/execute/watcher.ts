@@ -6,11 +6,11 @@ import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
 import { TestConsumerRegistry } from '../consumer/registry';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
-import { RunEvent } from '../worker/types';
+import { RunRequest } from '../worker/types';
 import { RunnerUtil } from './util';
 import { TestEvent } from '../model/event';
 
-function isRunEvent(ev: unknown): ev is RunEvent {
+function isRunRequest(ev: unknown): ev is RunRequest {
   return typeof ev === 'object' && !!ev && 'type' in ev && typeof ev.type === 'string' && ev.type === 'run-test';
 }
 
@@ -33,7 +33,7 @@ export class TestWatcher {
   static async watch(format: string, runAllOnStart = true): Promise<void> {
     console.debug('Listening for changes');
 
-    const itr = new WorkQueue<string>();
+    const itr = new WorkQueue<string | RunRequest>();
 
     await SuiteRegistry.init();
     SuiteRegistry.listen(RootRegistry);
@@ -60,7 +60,7 @@ export class TestWatcher {
           type: 'removeTest',
           method: method?.name,
           classId: cls?.Ⲑid,
-          import: Runtime.getImport(cls)
+          file: Runtime.getSource(cls)
         });
       }
     });
@@ -71,9 +71,9 @@ export class TestWatcher {
     await RootRegistry.init();
 
     process.on('message', ev => {
-      if (isRunEvent(ev)) {
+      if (isRunRequest(ev)) {
         console.debug('Manually triggered', ev);
-        itr.add([ev.import, ev.class, ev.method].filter(x => !!x).join('#'), true);
+        itr.add(ev, true);
       }
     });
 
