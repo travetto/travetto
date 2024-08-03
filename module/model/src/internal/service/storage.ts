@@ -20,7 +20,6 @@ export class ModelStorageUtil {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     target = target ?? storage.constructor as Class<ModelStorageSupport>;
 
-
     const checkType = (cls: Class, enforceBase = true): boolean => {
       if (enforceBase && ModelRegistry.getBaseModel(cls) !== cls) {
         return false;
