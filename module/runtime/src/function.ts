@@ -4,10 +4,13 @@ export type FunctionMetadata = FunctionMetadataTag & {
   import: string;
   methods?: Record<string, FunctionMetadataTag>;
   synthetic?: boolean;
+  class?: boolean;
   abstract?: boolean;
 };
 
 const METADATA = Symbol.for('@travetto/runtime:function-metadata');
+
+const pending = new Set<Function>([]);
 
 /**
  * Initialize the meta data for a function/class
@@ -20,16 +23,26 @@ const METADATA = Symbol.for('@travetto/runtime:function-metadata');
  * @param `synthetic` Is this code generated at build time
  * @private
  */
-export function register(
+export function registerFunction(
   fn: Function, [pkg, pth]: [string, string], tag: FunctionMetadataTag,
   methods?: Record<string, FunctionMetadataTag>, abstract?: boolean, synthetic?: boolean
 ): void {
   const metadata = {
     id: fn.name ? `${pkg}:${pth}￮${fn.name}` : `${pkg}:${pth}`,
     import: `${pkg}/${pth}`,
-    ...tag, methods, abstract, synthetic
+    ...tag, methods, abstract, synthetic, class: abstract !== undefined
   };
+  pending.add(fn);
   Object.defineProperties(fn, { Ⲑid: { value: metadata.id }, [METADATA]: { value: metadata } });
+}
+
+/**
+ * Flush all pending function registers
+ */
+export function flushPendingFunctions(): Function[] {
+  const fns = [...pending];
+  pending.clear();
+  return fns;
 }
 
 /**
