@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { ManifestModuleUtil } from '@travetto/manifest';
-import { RuntimeIndex } from '@travetto/runtime';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/g;
 const ENV_KEY = /Env.([^.]+)[.]key/g;
@@ -64,7 +65,6 @@ export class DocFileUtil {
           .replace(ESLINT_PATTERN, '')
           .replace(ENV_KEY, (_, k) => `'${k}'`)
         )
-        .filter(x => !x.includes('@doc-exclude'))
         .join('\n');
     }
 
@@ -142,5 +142,12 @@ export class DocFileUtil {
       .join('\n');
 
     return code;
+  }
+
+  /**
+   * Read file source for a given function
+   */
+  static readSource(fn: Function): string {
+    return readFileSync(Runtime.getSourceFile(fn), 'utf8');
   }
 }

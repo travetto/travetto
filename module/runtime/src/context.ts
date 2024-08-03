@@ -101,11 +101,6 @@ class $Runtime {
   getImport(fn: Function): string {
     return describeFunction(fn).import;
   }
-
-  /** Get import for function */
-  getModule(fn: Function): string {
-    return describeFunction(fn).module;
-  }
 }
 
 export const Runtime = new $Runtime(RuntimeIndex, Env.TRV_RESOURCE_OVERRIDES.object);

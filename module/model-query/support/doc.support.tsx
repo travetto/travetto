@@ -1,8 +1,5 @@
 /** @jsxImportSource @travetto/doc */
-import { readFileSync } from 'node:fs';
-
-import { d, DocJSXElementByFn, DocJSXElement } from '@travetto/doc';
-import { Runtime } from '@travetto/runtime';
+import { d, DocJSXElementByFn, DocJSXElement, DocFileUtil } from '@travetto/doc';
 
 export const Links = {
   QueryCrud: d.codeLink('Query Crud', '@travetto/model-query/src/service/crud.ts', /export interface/),
@@ -12,7 +9,7 @@ export const Links = {
 };
 
 export const ModelQueryTypes = (fn: Function): DocJSXElement[] => {
-  const contents = readFileSync(Runtime.getSourceFile(fn), 'utf8');
+  const contents = DocFileUtil.readSource(fn);
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
   const seen = new Set();
   for (const [, key] of contents.matchAll(/Model(Query(Suggest|Facet|Crud)?)Support/g)) {

@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Class, ConcreteClass, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
@@ -41,12 +41,12 @@ class $CliCommandRegistry {
    * Registers a cli command
    */
   registerClass(cls: Class, cfg: Partial<CliCommandConfig>): CliCommandConfig {
-    const imp = Runtime.getImport(cls);
+    const meta = describeFunction(cls);
     this.#commands.set(cls, {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: cls as ConcreteClass,
-      name: getName(imp),
-      commandModule: Runtime.getModule(cls),
+      name: getName(meta.import),
+      commandModule: meta.module,
       ...cfg,
     });
     return this.#commands.get(cls)!;

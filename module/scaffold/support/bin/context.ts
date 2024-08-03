@@ -140,8 +140,8 @@ export class Context {
       this.templateContext(),
     )
       .replace(/\/\/\s*@ts-expect-error.*$/gm, '')
-      .replace(/(\/\/.*@doc-exclude.*)$/gm, '')
-      .replace(/\s*(\/\/.*@doc-exclude.*)/gm, '')
+      .replace(/(\/\/.*\{\{.*)$/gm, '')
+      .replace(/\s*(\/\/.*\{\{.*)/gm, '')
       .replace(/^\s*(\/\/\s*)\n/gsm, '');
     await fs.mkdir(path.dirname(out), { recursive: true });
     await fs.writeFile(out, rendered, 'utf8');
