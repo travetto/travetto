@@ -213,7 +213,8 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
   }
 
   buildSee(cls: Class, method?: string): string {
-    const lines = method ? describeFunction(cls)?.methods?.[method].lines : describeFunction(cls)?.lines;
+    const meta = describeFunction(cls);
+    const lines = method ? meta?.methods?.[method].lines : meta?.lines;
     if (!lines) {
       return '';
     }
