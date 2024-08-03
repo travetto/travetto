@@ -29,7 +29,7 @@ export class DocFileUtil {
     let content: string | undefined;
 
     if (typeof src === 'string') {
-      if (src.includes('\n')) {
+      if (src.includes('\n') || src.includes(' ')) {
         content = src;
       } else {
         const resolved = path.resolve(src);
@@ -53,8 +53,10 @@ export class DocFileUtil {
           .replace(ENV_KEY, (_, k) => `'${k}'`)
         )
         .join('\n')
-        .replace(/^\/\/# sourceMap.*$/gm, '');
-
+        .replace(/^\/\/# sourceMap.*$/gsm, '')
+        .replace(/[ ]*[/][/][ ]*@ts-expect-error[^\n]*\n/gsm, '') // Excluding errors
+        .replace(/^[ ]*[/][/][ ]*[{][{][^\n]*\n/gsm, '') // Excluding conditional comments, full-line
+        .replace(/[ ]*[/][/][ ]*[{][{][^\n]*/gsm, ''); // Excluding conditional comments
     }
 
     if (file !== undefined) {

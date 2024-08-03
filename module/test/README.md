@@ -81,13 +81,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const Ⲑ_util_1 = tslib_1.__importStar(require("@travetto/test/src/execute/util.js"));
 const Ⲑ_check_1 = tslib_1.__importStar(require("@travetto/test/src/assert/check.js"));
-const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 const Ⲑ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
 var ᚕm = ["@travetto/test", "doc/assert-example"];
 const node_assert_1 = tslib_1.__importDefault(require("node:assert"));
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
-    static Ⲑinit = Ⲑ_function_1.register(SimpleTest, ᚕm, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11] } }, false, false);
+    static Ⲑinit = Ⲑ_function_1.registerFunction(SimpleTest, ᚕm, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11] } }, false, false);
     async test() {
         if (Ⲑ_util_1.RunnerUtil.tryDebugger)
             debugger;
@@ -98,7 +97,6 @@ tslib_1.__decorate([
     (0, test_1.Test)({ ident: "@Test()", lineBodyStart: 10 })
 ], SimpleTest.prototype, "test", null);
 SimpleTest = tslib_1.__decorate([
-    Ⲑ_decorator_1.Register(),
     (0, test_1.Suite)({ ident: "@Suite()" })
 ], SimpleTest);
 ```

@@ -129,12 +129,10 @@ import { CacheModelⲐ } from '@travetto/cache';
 class Config {
   @InjectableFactory(CacheModelⲐ)
   static getModel(): ModelExpirySupport {
-    // @ts-expect-error
     return new CustomAwesomeModelService();
   }
 }
 
-// @ts-expect-error
 class CustomAwesomeModelService implements ModelExpirySupport {
   // Implement all the things
 }

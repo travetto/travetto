@@ -104,20 +104,16 @@ export class Test {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TEST = void 0;
 const tslib_1 = require("tslib");
-const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 const Ⲑ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
 var ᚕm = ["@travetto/transformer", "doc/upper"];
-let TEST = class TEST {
-    static Ⲑinit = Ⲑ_function_1.register(TEST, ᚕm, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8] } }, false, false);
+class TEST {
+    static Ⲑinit = Ⲑ_function_1.registerFunction(TEST, ᚕm, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8] } }, false, false);
     NAME;
     AGE;
     DOB;
     COMPUTEAGE() {
         this['AGE'] = (Date.now() - this.DOB.getTime());
     }
-};
+}
 exports.TEST = TEST;
-exports.TEST = TEST = tslib_1.__decorate([
-    Ⲑ_decorator_1.Register()
-], TEST);
 ```

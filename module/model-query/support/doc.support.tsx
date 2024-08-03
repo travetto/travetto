@@ -9,10 +9,10 @@ export const Links = {
 };
 
 export const ModelQueryTypes = (fn: Function): DocJSXElement[] => {
-  const contents = DocFileUtil.readSource(fn);
+  const { content } = DocFileUtil.readSource(fn);
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
   const seen = new Set();
-  for (const [, key] of contents.matchAll(/Model(Query(Suggest|Facet|Crud)?)Support/g)) {
+  for (const [, key] of content.matchAll(/Model(Query(Suggest|Facet|Crud)?)Support/g)) {
     if (!seen.has(key)) {
       seen.add(key);
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

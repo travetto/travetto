@@ -62,6 +62,7 @@ export class Todo implements ModelType {
   id: string;
   text: string;
   completed?: boolean;
+  userId?: string;
 }
 ```
 
