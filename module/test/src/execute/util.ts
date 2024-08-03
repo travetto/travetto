@@ -1,9 +1,9 @@
 import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
-import readline from 'node:readline';
+import readline from 'node:readline/promises';
 
-import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex } from '@travetto/runtime';
+import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime } from '@travetto/runtime';
 
 /**
  * Simple Test Utilities
@@ -19,19 +19,15 @@ export class RunnerUtil {
   /**
    * Determine if a given file path is a valid test file
    */
-  static isTestFile(file: string): Promise<boolean> {
-    return new Promise<boolean>((resolve) => {
-      const input = createReadStream(file);
-      const reader = readline.createInterface({ input })
-        .on('line', line => {
-          if (line.includes('@Suite')) {
-            resolve(true);
-            reader.close();
-          }
-        })
-        .on('end', resolve.bind(null, false))
-        .on('close', resolve.bind(null, false));
-    });
+  static async isTestFile(file: string): Promise<boolean> {
+    const reader = readline.createInterface({ input: createReadStream(file) });
+    for await (const line of reader) {
+      if (line.includes('@Suite')) {
+        reader.close();
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -42,7 +38,7 @@ export class RunnerUtil {
     // Collect globs
     if (globs) {
       for await (const item of fs.glob(globs)) {
-        files.add(item);
+        files.add(Runtime.workspaceRelative(item));
       }
     }
 

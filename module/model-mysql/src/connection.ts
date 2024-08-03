@@ -1,9 +1,10 @@
-import mysql, { OkPacket, ResultSetHeader } from 'mysql2';
+import { createPool } from 'mysql2';
 
 import { ShutdownManager } from '@travetto/runtime';
 import { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, SQLModelConfig } from '@travetto/model-sql';
+import { PoolConnection, Pool, OkPacket, ResultSetHeader } from 'mysql2/promise';
 
 function isSimplePacket(o: unknown): o is OkPacket | ResultSetHeader {
   return o !== null && o !== undefined && typeof o === 'object' && 'constructor' in o && (
@@ -14,9 +15,9 @@ function isSimplePacket(o: unknown): o is OkPacket | ResultSetHeader {
 /**
  * Connection support for mysql
  */
-export class MySQLConnection extends Connection<mysql.PoolConnection> {
+export class MySQLConnection extends Connection<PoolConnection> {
 
-  #pool: mysql.Pool;
+  #pool: Pool;
   #config: SQLModelConfig;
 
   constructor(
@@ -28,7 +29,7 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
   }
 
   async init(): Promise<void> {
-    this.#pool = mysql.createPool({
+    this.#pool = createPool({
       user: this.#config.user,
       password: this.#config.password,
       database: this.#config.database,
@@ -37,10 +38,10 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
       timezone: '+00:00',
       typeCast: this.typeCast.bind(this),
       ...(this.#config.options || {})
-    });
+    }).promise();
 
     // Close mysql
-    ShutdownManager.onGracefulShutdown(() => new Promise<void>(r => this.#pool.end(() => r())), this);
+    ShutdownManager.onGracefulShutdown(() => this.#pool.end(), this);
   }
 
   /**
@@ -58,39 +59,35 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
     return res;
   }
 
-  async execute<T = unknown>(conn: mysql.Connection, query: string): Promise<{ count: number, records: T[] }> {
-    return new Promise<{ count: number, records: T[] }>((res, rej) => {
-      console.debug('Executing Query', { query });
-      conn.query(query, (err, results, fields) => {
-        if (err) {
-          console.debug('Failed query', { error: err, query });
-          if (err.message.startsWith('Duplicate entry')) {
-            rej(new ExistsError('query', query));
-          } else {
-            rej(err);
-          }
-        } else {
-          if (isSimplePacket(results)) {
-            return res({ records: [], count: results.affectedRows });
-          } else {
-            if (isSimplePacket(results[0])) {
-              return res({ records: [], count: results[0].affectedRows });
-            }
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            const records: T[] = [...results].map(v => ({ ...v }) as T);
-            return res({ records, count: records.length });
-          }
+  async execute<T = unknown>(conn: PoolConnection, query: string): Promise<{ count: number, records: T[] }> {
+    console.debug('Executing Query', { query });
+    try {
+      const [results,] = await conn.query(query);
+      if (isSimplePacket(results)) {
+        return { records: [], count: results.affectedRows };
+      } else {
+        if (isSimplePacket(results[0])) {
+          return { records: [], count: results[0].affectedRows };
         }
-      });
-    });
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const records: T[] = [...results].map(v => ({ ...v }) as T);
+        return { records, count: records.length };
+      }
+    } catch (err) {
+      console.debug('Failed query', { error: err, query });
+      if (err instanceof Error && err.message.startsWith('Duplicate entry')) {
+        throw new ExistsError('query', query);
+      } else {
+        throw err;
+      }
+    }
   }
 
-  acquire(): Promise<mysql.PoolConnection> {
-    return new Promise<mysql.PoolConnection>((res, rej) =>
-      this.#pool.getConnection((err, conn) => err ? rej(err) : res(conn)));
+  acquire(): Promise<PoolConnection> {
+    return this.#pool.getConnection();
   }
 
-  release(conn: mysql.PoolConnection): void {
+  release(conn: PoolConnection): void {
     conn.release();
   }
 }

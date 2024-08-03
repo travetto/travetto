@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema, Text, Precision, Required, } from '@travetto/schema';
@@ -224,7 +225,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(res.createdDate instanceof Date);
     assert(res.updatedDate instanceof Date);
 
-    await new Promise(r => setTimeout(r, 100));
+    await timers.setTimeout(100);
 
     const final = await service.updatePartial(Dated, { id: res.id });
     assert(final.createdDate instanceof Date);
