@@ -46,7 +46,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
   #schemaContent = new Map<string, RenderContent>();
   #controllerContent = new Map<string, RenderContent>();
   #otherContent = new Map<string, RenderContent>();
-  #files = new Set<string>();
+  #imports = new Set<string>();
   #nameResolver = new SchemaNameResolver();
 
   abstract get commonFiles(): [string, Class | string][];
@@ -312,7 +312,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
         classId: schema.class.Ⲑid,
       };
       this.#schemaContent.set(schema.class.Ⲑid, baseResult);
-      this.#files.add(Runtime.getSource(schema.class));
+      this.#imports.add(describeFunction(schema.class).import);
       return baseResult;
     }
 
@@ -356,7 +356,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     };
 
     this.#schemaContent.set(schema.class.Ⲑid, result);
-    this.#files.add(Runtime.getSource(schema.class));
+    this.#imports.add(describeFunction(schema.class).import);
 
     return result;
   }
@@ -397,7 +397,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     if (cfg.documented !== false) {
       const result = this.renderController(cfg);
       this.#controllerContent.set(result.classId, result);
-      this.#files.add(Runtime.getSource(cfg.class));
+      this.#imports.add(describeFunction(cfg.class).import);
     }
   }
 
@@ -421,7 +421,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     return this.#schemaContent.delete(cls.Ⲑid);
   }
 
-  seenFile(file: string): boolean {
-    return this.#files.has(file);
+  seenImport(imp: string): boolean {
+    return this.#imports.has(imp);
   }
 }

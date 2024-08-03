@@ -2,6 +2,8 @@ export type FunctionMetadataTag = { hash: number, lines: [number, number] };
 export type FunctionMetadata = FunctionMetadataTag & {
   id: string;
   import: string;
+  module: string;
+  modulePath: string;
   methods?: Record<string, FunctionMetadataTag>;
   synthetic?: boolean;
   class?: boolean;
@@ -30,6 +32,8 @@ export function registerFunction(
   const metadata = {
     id: fn.name ? `${pkg}:${pth}￮${fn.name}` : `${pkg}:${pth}`,
     import: `${pkg}/${pth}`,
+    module: pkg,
+    modulePath: pth,
     ...tag, methods, abstract, synthetic, class: abstract !== undefined
   };
   pending.add(fn);

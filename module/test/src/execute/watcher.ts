@@ -1,6 +1,6 @@
 import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, WorkQueue } from '@travetto/worker';
-import { Runtime, describeFunction } from '@travetto/runtime';
+import { Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
@@ -66,7 +66,7 @@ export class TestWatcher {
     });
 
     // If a file is changed, but doesn't emit classes, re-run whole file
-    RootRegistry.onNonClassChanges(file => itr.add(file));
+    RootRegistry.onNonClassChanges(imp => itr.add(RuntimeIndex.getFromImport(imp)!.sourceFile));
 
     await RootRegistry.init();
 

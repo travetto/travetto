@@ -16,7 +16,7 @@ export class RestRpcClientGenerator implements ClientGenerator {
     this.output = output;
   }
 
-  seenFile(file: string): boolean {
+  seenImport(imp: string): boolean {
     return false;
   }
 
