@@ -1,8 +1,6 @@
-import fs from 'node:fs/promises';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
-import { ManifestModuleUtil } from '@travetto/manifest';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/g;
@@ -26,57 +24,54 @@ export class DocFileUtil {
     return /^[@:A-Za-z0-9\/\\\-_.]+[.]([a-z]{2,10})$/.test(src);
   }
 
-  /**
-   * Resolve file
-   * @param file
-   * @returns
-   */
-  static async resolveFile(file: string): Promise<string> {
-    let resolved = path.resolve(file);
-    if (!(await fs.stat(resolved).catch(() => false))) {
-      if (ManifestModuleUtil.getFileType(file) === 'ts') {
-        resolved = RuntimeIndex.getSourceFile(file);
+  static readSource(src: string | Function): { content: string, language: string, file: string } {
+    let file: string | undefined;
+    let content: string | undefined;
+
+    if (typeof src === 'string') {
+      if (src.includes('\n')) {
+        content = src;
+      } else {
+        const resolved = path.resolve(src);
+        if (existsSync(resolved)) {
+          content = readFileSync(resolved, 'utf8');
+          file = resolved;
+        } else {
+          file = RuntimeIndex.getSourceFile(src);
+          content = readFileSync(file, 'utf8');
+        }
       }
-      if (!(await fs.stat(resolved).catch(() => false))) {
-        throw new Error(`Unknown file to resolve: ${file}`);
-      }
+    } else {
+      file = Runtime.getSourceFile(src);
+      content = readFileSync(file, 'utf8');
     }
-    return resolved;
-  }
 
-  /**
-   * Read file
-   *
-   * @param file
-   * @returns
-   */
-  static async read(file: string): Promise<{ content: string, language: string, file: string }> {
-    file = await this.resolveFile(file);
-
-    const ext = path.extname(file);
-    const language = this.#extToLang[ext] ?? ext.replace('.', '');
-
-    let text: string | undefined;
-    if (language) {
-      text = await fs.readFile(file, 'utf8');
-
-      text = text.split(/\n/)
+    if (content) {
+      content = content.split(/\n/)
         .map(x => x
           .replace(ESLINT_PATTERN, '')
           .replace(ENV_KEY, (_, k) => `'${k}'`)
         )
-        .join('\n');
+        .join('\n')
+        .replace(/^\/\/# sourceMap.*$/gm, '');
+
     }
 
-    return { content: text ?? '', language, file };
+    if (file !== undefined) {
+      const ext = path.extname(file);
+      const language = this.#extToLang[ext] ?? ext.replace('.', '');
+      return { content, file, language };
+    } else {
+      return { content, file: '', language: '' };
+    }
   }
 
-  static async readCodeSnippet(file: string, startPattern: RegExp): Promise<{ file: string, startIdx: number, lines: string[], language: string }> {
-    const res = await this.read(file);
-    const lines = res.content.split(/\n/g);
+  static async readCodeSnippet(src: string | Function, startPattern: RegExp): Promise<{ file: string, startIdx: number, lines: string[], language: string }> {
+    const res = this.readSource(src);
+    const lines = res.content.split(/\n/);
     const startIdx = lines.findIndex(l => startPattern.test(l));
     if (startIdx < 0) {
-      throw new Error(`Pattern ${startPattern.source} not found in ${file}`);
+      throw new Error(`Pattern ${startPattern.source} not found in ${src}`);
     }
     return { file: res.file, startIdx, lines, language: res.language };
   }
@@ -85,15 +80,14 @@ export class DocFileUtil {
    * Determine if a file is a decorator
    */
   static async isDecorator(name: string, file: string): Promise<boolean> {
-    file = await this.resolveFile(file);
 
     const key = `${name}:${file}`;
     if (key in this.#decCache) {
       return this.#decCache[key];
     }
 
-    const text = (await fs.readFile(file, 'utf8'))
-      .split(/\n/g);
+    const res = await this.readSource(file);
+    const text = res.content.split(/\n/g);
 
     const start = text.findIndex(x => new RegExp(`function ${name}\\b`).test(x));
     let ret = false;
@@ -142,12 +136,5 @@ export class DocFileUtil {
       .join('\n');
 
     return code;
-  }
-
-  /**
-   * Read file source for a given function
-   */
-  static readSource(fn: Function): string {
-    return readFileSync(Runtime.getSourceFile(fn), 'utf8');
   }
 }

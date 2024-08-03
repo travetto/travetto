@@ -13,7 +13,7 @@ export class DocResolveUtil {
   static async resolveRef(title: string, file: string): Promise<ResolvedRef> {
 
     let line = 0;
-    const res = await DocFileUtil.read(file);
+    const res = await DocFileUtil.readSource(file);
     file = res.file;
 
     if (res.content) {
@@ -31,22 +31,22 @@ export class DocResolveUtil {
     return { title, file, line };
   }
 
-  static async resolveCode(content: string, language?: string, outline = false): Promise<ResolvedCode> {
+  static async resolveCode(content: string | Function, language?: string, outline = false): Promise<ResolvedCode> {
+    const res = DocFileUtil.readSource(content);
+    let text = res.content;
+
     let file: string | undefined;
-    if (DocFileUtil.isFile(content)) {
-      const res = await DocFileUtil.read(content);
+    if (res.file) {
       language = res.language;
       file = res.file;
-      content = res.content;
       if (outline) {
-        content = DocFileUtil.buildOutline(content);
+        text = DocFileUtil.buildOutline(text);
       }
     }
-    content = content.replace(/^\/\/# sourceMap.*$/gm, '');
-    return { text: content, language: language!, file };
+    return { text, language: language!, file };
   }
 
-  static async resolveSnippet(file: string, startPattern: RegExp, endPattern?: RegExp, outline = false): Promise<ResolvedSnippet> {
+  static async resolveSnippet(file: Function | string, startPattern: RegExp, endPattern?: RegExp, outline = false): Promise<ResolvedSnippet> {
     const { lines, startIdx, language, file: resolvedFile } = await DocFileUtil.readCodeSnippet(file, startPattern);
 
     const endIdx = endPattern ? lines.findIndex((l, i) => i > startIdx && endPattern.test(l)) : lines.length;
@@ -59,7 +59,7 @@ export class DocResolveUtil {
     return { text, language, line: startIdx + 1, file: resolvedFile };
   }
 
-  static async resolveCodeLink(file: string, startPattern: RegExp): Promise<ResolvedSnippetLink> {
+  static async resolveCodeLink(file: Function | string, startPattern: RegExp): Promise<ResolvedSnippetLink> {
     const { startIdx, file: resolvedFile } = await DocFileUtil.readCodeSnippet(file, startPattern);
     return { file: resolvedFile, line: startIdx + 1 };
   }
