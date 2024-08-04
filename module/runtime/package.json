@@ -1,6 +1,6 @@
 {
   "name": "@travetto/runtime",
-  "version": "5.0.0-rc.3",
+  "version": "5.0.0-rc.4",
   "description": "Runtime for travetto applications.",
   "keywords": [
     "console-manager",
@@ -34,7 +34,7 @@
     "debug": "^4.3.5"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^5.0.0-rc.2"
+    "@travetto/transformer": "^5.0.0-rc.3"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {
