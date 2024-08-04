@@ -53,7 +53,12 @@ export class SchemaTransformUtil {
                 ), { type: v, root })
               )
           );
-          cls.getText = (): string => '';
+          cls.getText = (): string => [
+            `class ${uniqueId} {`,
+            ...Object.entries(type.fieldTypes)
+              .map(([k, v]) => `  ${k}${v.nullable ? '?' : ''}: ${v.name};`),
+            '}'
+          ].join('\n');
           state.addStatements([cls], root || node);
         }
         return id;
