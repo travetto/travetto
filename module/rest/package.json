@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest",
-  "version": "5.0.0-rc.5",
+  "version": "5.0.0-rc.6",
   "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
   "keywords": [
     "rest",
@@ -26,12 +26,12 @@
     "directory": "module/rest"
   },
   "dependencies": {
-    "@travetto/runtime": "^5.0.0-rc.5",
-    "@travetto/config": "^5.0.0-rc.5",
-    "@travetto/context": "^5.0.0-rc.5",
-    "@travetto/di": "^5.0.0-rc.5",
-    "@travetto/registry": "^5.0.0-rc.5",
-    "@travetto/schema": "^5.0.0-rc.5",
+    "@travetto/runtime": "^5.0.0-rc.6",
+    "@travetto/config": "^5.0.0-rc.6",
+    "@travetto/context": "^5.0.0-rc.6",
+    "@travetto/di": "^5.0.0-rc.6",
+    "@travetto/registry": "^5.0.0-rc.6",
+    "@travetto/schema": "^5.0.0-rc.6",
     "@types/cookies": "^0.9.0",
     "@types/express-serve-static-core": "^4.19.5",
     "@types/inflation": "^2.0.4",
@@ -42,9 +42,9 @@
     "raw-body": "^2.5.2"
   },
   "peerDependencies": {
-    "@travetto/cli": "^5.0.0-rc.5",
-    "@travetto/test": "^5.0.0-rc.5",
-    "@travetto/transformer": "^5.0.0-rc.3"
+    "@travetto/cli": "^5.0.0-rc.6",
+    "@travetto/test": "^5.0.0-rc.6",
+    "@travetto/transformer": "^5.0.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {
