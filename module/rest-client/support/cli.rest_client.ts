@@ -20,7 +20,7 @@ export class CliRestClientCommand implements CliCommandShape {
 
   preMain(): void {
     Env.DEBUG.set(false);
-    Env.TRV_DYNAMIC.set(true);
+    Env.TRV_DYNAMIC.set(false);
   }
 
   get #service(): Promise<RestClientGeneratorService> {

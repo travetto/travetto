@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
+import os from 'node:os';
 
 import { path } from './path';
 
@@ -8,9 +9,9 @@ export class ManifestFileUtil {
    * Write file and copy over when ready
    */
   static async bufferedFileWrite(file: string, content: string): Promise<void> {
-    const temp = path.resolve(path.dirname(file), `.${process.hrtime()[0]}.${path.basename(file)}`);
-    await fs.mkdir(path.dirname(file), { recursive: true });
+    const temp = path.resolve(os.tmpdir(), `${process.hrtime()[1]}.${path.basename(file)}`);
     await fs.writeFile(temp, content, 'utf8');
+    await fs.mkdir(path.dirname(file), { recursive: true });
     await fs.rename(temp, file);
   }
 

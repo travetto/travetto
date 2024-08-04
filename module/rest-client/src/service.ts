@@ -20,7 +20,6 @@ export class RestClientGeneratorService implements AutoCreate {
 
   buildGenerator({ type, output, moduleName, options }: RestClientProvider): ClientGenerator {
     output = Runtime.workspaceRelative(output.includes('#') ? Runtime.modulePath(output) : output);
-
     switch (type) {
       case 'angular': return new AngularClientGenerator(output, moduleName, options);
       case 'fetch':
@@ -35,13 +34,13 @@ export class RestClientGeneratorService implements AutoCreate {
   }
 
   async postConstruct(): Promise<void> {
-    if (!Runtime.dynamic || !this.config.providers.length) {
+    if (!this.config.providers.length) {
       return;
     }
 
     this.providers = this.config.providers.map(x => this.buildGenerator(x)).filter(x => !!x);
 
-    if (!this.providers.length) {
+    if (!this.providers.length || !Runtime.dynamic) {
       return;
     }
 
