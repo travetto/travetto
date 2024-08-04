@@ -5,6 +5,17 @@ export type ClassInstance<T = any> = T & {
   constructor: ConcreteClass<T> & { Ⲑid: string };
 };
 
+export type AnyMap = {
+  [key: string]: any
+};
+
+export type Primitive = number | bigint | boolean | string | Date;
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: (T[P] extends (Primitive | undefined) ? (T[P] | undefined) :
+    (T[P] extends any[] ? (DeepPartial<T[P][number]> | null | undefined)[] : DeepPartial<T[P]>));
+};
+
 export const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;

@@ -1,14 +1,11 @@
-import { TimeUtil } from '@travetto/runtime';
+import { AnyMap, TimeUtil } from '@travetto/runtime';
 import { ContextProvider } from '@travetto/rest';
 
 /**
  * @concrete ./internal/types#SessionDataTarget
  * @augments `@travetto/rest:Context`
  */
-export interface SessionData {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-}
+export interface SessionData extends AnyMap { }
 
 /**
  * Full session object, with metadata

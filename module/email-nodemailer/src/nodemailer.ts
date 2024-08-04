@@ -12,7 +12,13 @@ type Transport = TransportType | json.Options | smtp.Options | ses.Options | sen
  * Nodemailer transport, takes in a transport factory as the input
  */
 export class NodemailerTransport implements MailTransport {
-  #transport: Transporter;
+  #transport: Transporter<SentEmail & {
+    envelope?: Record<string, string>;
+    accepted?: string[];
+    rejected?: string[];
+    pending?: string[];
+    response?: string;
+  }>;
 
   /**
    * Force content into alternative slots
@@ -37,15 +43,7 @@ export class NodemailerTransport implements MailTransport {
 
     mail = this.#forceContentToAlternative(mail);
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const res = await this.#transport.sendMail(mail) as {
-      messageId?: string;
-      envelope?: Record<string, string>;
-      accepted?: string[];
-      rejected?: string[];
-      pending?: string[];
-      response?: string;
-    };
+    const res = await this.#transport.sendMail(mail);
 
     if (res.rejected?.length) {
       console.error('Unable to send emails', { recipientCount: res.rejected?.length });

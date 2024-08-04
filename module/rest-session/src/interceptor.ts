@@ -19,8 +19,7 @@ export class RestSessionConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class SessionReadInterceptor implements RestInterceptor {
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  after: Class<RestInterceptor<any>>[] = [CookiesInterceptor];
+  after: Class<RestInterceptor>[] = [CookiesInterceptor];
 
   @Inject()
   service: SessionService;

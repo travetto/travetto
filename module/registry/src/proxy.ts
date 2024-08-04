@@ -1,5 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ConcreteClass<T = any> = new (...args: any[]) => T;
+import { ConcreteClass } from '@travetto/runtime';
+
 const ProxyTargetⲐ = Symbol.for('@travetto/runtime:proxy-target');
 
 const AsyncGeneratorFunction = Object.getPrototypeOf(async function* () { });

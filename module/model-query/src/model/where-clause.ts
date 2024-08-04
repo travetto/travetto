@@ -1,5 +1,4 @@
-import { TimeSpan } from '@travetto/runtime';
-import { Primitive } from '@travetto/schema';
+import type { Primitive, TimeSpan } from '@travetto/runtime';
 
 /**
  * Point as [number,number] with validation and binding support

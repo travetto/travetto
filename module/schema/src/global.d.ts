@@ -1,5 +1,4 @@
-import type { Class } from '@travetto/runtime';
-import type { DeepPartial } from './types';
+import type { Class, DeepPartial } from '@travetto/runtime';
 
 declare global {
   interface Function {

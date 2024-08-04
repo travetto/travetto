@@ -24,9 +24,8 @@ export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
 /**
  * Defines an index on a model
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function Index<T>(...indices: IndexConfig<any>[]) {
-  return function (target: Class<T>): void {
+export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
+  return function (target: Class<T>) {
     ModelRegistry.getOrCreatePending(target).indices!.push(...indices);
   };
 }

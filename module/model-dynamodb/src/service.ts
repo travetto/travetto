@@ -3,8 +3,7 @@ import {
   KeySchemaElement, PutItemCommandInput, PutItemCommandOutput
 } from '@aws-sdk/client-dynamodb';
 
-import { ShutdownManager, TimeUtil, type Class } from '@travetto/runtime';
-import { DeepPartial } from '@travetto/schema';
+import { ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,

@@ -1,9 +1,8 @@
-import { Class } from '@travetto/runtime';
+import { Class, DeepPartial } from '@travetto/runtime';
 
 import { BindUtil } from '../bind-util';
 import { SchemaRegistry } from '../service/registry';
 import { ClassConfig, ViewFieldsConfig } from '../service/types';
-import { DeepPartial } from '../types';
 import { ValidatorFn } from '../validate/types';
 
 /**

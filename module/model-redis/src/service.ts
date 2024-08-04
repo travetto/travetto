@@ -1,7 +1,6 @@
 import { createClient } from 'redis';
 
-import { ShutdownManager, type Class } from '@travetto/runtime';
-import { DeepPartial } from '@travetto/schema';
+import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
   NotFoundError, ExistsError, ModelIndexedSupport, OptionalId

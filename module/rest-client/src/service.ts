@@ -19,7 +19,7 @@ export class RestClientGeneratorService implements AutoCreate {
   providers: ClientGenerator[];
 
   buildGenerator({ type, output, moduleName, options }: RestClientProvider): ClientGenerator {
-    output = Runtime.workspaceRelative(Runtime.modulePath(output));
+    output = Runtime.workspaceRelative(output.includes('#') ? Runtime.modulePath(output) : output);
 
     switch (type) {
       case 'angular': return new AngularClientGenerator(output, moduleName, options);

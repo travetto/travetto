@@ -1,8 +1,7 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { Class, TimeSpan } from '@travetto/runtime';
-import { DeepPartial } from '@travetto/schema';
+import { Class, TimeSpan, DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 

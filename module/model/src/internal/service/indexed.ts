@@ -1,5 +1,4 @@
-import { Class } from '@travetto/runtime';
-import { DeepPartial } from '@travetto/schema';
+import { Class, DeepPartial } from '@travetto/runtime';
 
 import { IndexNotSupported } from '../../error/invalid-index';
 import { NotFoundError } from '../../error/not-found';

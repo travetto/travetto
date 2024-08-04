@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/runtime';
+import type { AnyMap, Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import type { RouteConfig, Filter } from '../types';
@@ -25,7 +25,7 @@ export abstract class ManagedInterceptorConfig {
  *
  * @concrete ../internal/types#RestInterceptorTarget
  */
-export interface RestInterceptor<C = unknown> {
+export interface RestInterceptor<C = AnyMap> {
 
   /**
    * Config for interceptor
@@ -35,14 +35,12 @@ export interface RestInterceptor<C = unknown> {
   /**
    * This interceptor must run after these
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  after?: Class<RestInterceptor<any>>[];
+  after?: Class<RestInterceptor>[];
 
   /**
    * This interceptor must run before these
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  before?: Class<RestInterceptor<any>>[];
+  before?: Class<RestInterceptor>[];
 
   /**
    * Determines the current route is applicable for the interceptor

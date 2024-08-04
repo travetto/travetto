@@ -1,4 +1,4 @@
-import { MailService, EmailOptions, SentEmail } from '@travetto/email';
+import { MailService, EmailOptions } from '@travetto/email';
 import { MailTransportTarget } from '@travetto/email/src/internal/types';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 
@@ -45,13 +45,19 @@ export class EditorSendService {
     try {
       console.log('Sending email', { to });
       const svc = await this.service();
-      const info = await svc.send<{ host?: string } & SentEmail>(message);
-      console.log('Sent email', { to });
-
-      return this.ethereal ? {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any
-        url: (await import('nodemailer')).getTestMessageUrl(info as any)
-      } : {};
+      if (this.ethereal) {
+        const { getTestMessageUrl } = await import('nodemailer');
+        const { default: smtp } = await import('nodemailer/lib/smtp-transport/index');
+        type SendMessage = Parameters<Parameters<(typeof smtp)['prototype']['send']>[1]>[1];
+        const info = await svc.send<SendMessage>(message);
+        const url = getTestMessageUrl(info);
+        console.log('Sent email', { to, url });
+        return { url };
+      } else {
+        await svc.send(message);
+        console.log('Sent email', { to });
+        return {};
+      }
     } catch (err) {
       console.warn('Failed to send email', { to, error: err });
       throw err;

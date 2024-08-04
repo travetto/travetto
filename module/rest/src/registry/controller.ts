@@ -1,7 +1,6 @@
 import { DependencyRegistry } from '@travetto/di';
-import { Class, ClassInstance } from '@travetto/runtime';
+import type { Primitive, Class, ClassInstance } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
-import { Primitive } from '@travetto/schema';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator } from './types';
 import { Filter, RouteHandler, ParamConfig } from '../types';
@@ -113,8 +112,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param param The param config
    * @param index The parameter index
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  registerEndpointInterceptorConfig<T extends RestInterceptor<any>>(target: Class, handler: RouteHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
+  registerEndpointInterceptorConfig<T extends RestInterceptor>(target: Class, handler: RouteHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const endpointConfig = this.getOrCreateEndpointConfig(target, handler);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     (endpointConfig.interceptors ??= []).push([interceptorCls as Class<T>, { disabled: false, ...config }]);
@@ -152,8 +150,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param cls The interceptor to register data for
    * @param cfg The partial config override
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createInterceptorConfigDecorator<T extends RestInterceptor<any>>(
+  createInterceptorConfigDecorator<T extends RestInterceptor>(
     cls: Class<T>,
     cfg: Partial<Omit<RetainFields<T['config']>, 'paths'>>
   ): EndpointDecorator {
