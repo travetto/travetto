@@ -8,17 +8,19 @@ import { FileLoader } from './file-loader';
 class $RuntimeResources extends FileLoader {
   #computed: string[];
   #env: string;
+  #mod: string;
 
   constructor() {
-    super(Runtime.resourcePaths());
+    super([]);
   }
 
   override get searchPaths(): readonly string[] {
-    if (this.#env !== Env.TRV_RESOURCES.val) {
+    if (!this.#computed || this.#env !== Env.TRV_RESOURCES.val || this.#mod !== Env.TRV_MODULE.val) {
       this.#env = Env.TRV_RESOURCES.val!;
+      this.#mod = Env.TRV_MODULE.val!;
       this.#computed = Runtime.resourcePaths();
     }
-    return this.#computed ?? super.searchPaths;
+    return this.#computed;
   }
 }
 

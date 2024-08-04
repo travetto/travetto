@@ -10,16 +10,18 @@ import { describeFunction } from './function';
 class $Runtime {
 
   #idx: ManifestIndex;
-  #moduleAliases: Record<string, string>;
   #resourceOverrides?: Record<string, string>;
 
   constructor(idx: ManifestIndex, resourceOverrides?: Record<string, string>) {
     this.#idx = idx;
-    this.#moduleAliases = {
-      '@': idx.manifest.main.name,
-      '@@': idx.manifest.workspace.path,
-    };
     this.#resourceOverrides = resourceOverrides;
+  }
+
+  get #moduleAliases(): Record<string, string> {
+    return {
+      '@': this.#idx.mainModule.sourcePath,
+      '@@': this.#idx.manifest.workspace.path,
+    };
   }
 
   /** Get env name, with support for the default env */
