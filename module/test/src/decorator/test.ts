@@ -15,6 +15,7 @@ export function AssertCheck(): MethodDecorator {
  * @param description The test description
  * @augments `@travetto/test:Test`
  * @augments `@travetto/test:AssertCheck`
+ * @augments `@travetto/runtime:DebugBreak`
  */
 export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;

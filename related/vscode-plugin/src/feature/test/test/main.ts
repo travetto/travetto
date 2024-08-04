@@ -151,7 +151,7 @@ class TestRunnerFeature extends BaseFeature {
       env: {
         ...Env.TRV_TEST_PHASE_TIMEOUT.export('5m'),
         ...Env.TRV_TEST_TIMEOUT.export('1h'),
-        ...Env.TRV_TEST_BREAK_ENTRY.export(true)
+        ...Env.TRV_DEBUG_BREAK.export(true)
       }
     });
   }

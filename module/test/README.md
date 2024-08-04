@@ -21,7 +21,7 @@ This module provides unit testing functionality that integrates with the framewo
 **Note**: All tests should be under the `test/.*` folders.  The pattern for tests is defined as a regex and not standard globbing.
 
 ## Definition
-A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L19) decorator.  All tests intrinsically support `async`/`await`. 
+A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L20) decorator.  All tests intrinsically support `async`/`await`. 
 
 A simple example would be:
 
@@ -79,25 +79,25 @@ would translate to:
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
-const Ⲑ_util_1 = tslib_1.__importStar(require("@travetto/test/src/execute/util.js"));
+const Ⲑ_debug_1 = tslib_1.__importStar(require("@travetto/runtime/src/debug.js"));
 const Ⲑ_check_1 = tslib_1.__importStar(require("@travetto/test/src/assert/check.js"));
 const Ⲑ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
 var ᚕm = ["@travetto/test", "doc/assert-example"];
 const node_assert_1 = tslib_1.__importDefault(require("node:assert"));
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
-    static Ⲑinit = Ⲑ_function_1.registerFunction(SimpleTest, ᚕm, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11] } }, false, false);
+    static Ⲑinit = Ⲑ_function_1.registerFunction(SimpleTest, ᚕm, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11, 10] } }, false, false);
     async test() {
-        if (Ⲑ_util_1.RunnerUtil.tryDebugger)
+        if (Ⲑ_debug_1.tryDebugger)
             debugger;
         Ⲑ_check_1.AssertCheck.check({ module: ᚕm, line: 10, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
     }
 };
 tslib_1.__decorate([
-    (0, test_1.Test)({ ident: "@Test()", lineBodyStart: 10 })
+    (0, test_1.Test)()
 ], SimpleTest.prototype, "test", null);
 SimpleTest = tslib_1.__decorate([
-    (0, test_1.Suite)({ ident: "@Suite()" })
+    (0, test_1.Suite)()
 ], SimpleTest);
 ```
 

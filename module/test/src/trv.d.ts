@@ -12,9 +12,5 @@ declare global {
      * @default 5s
      */
     TRV_TEST_TIMEOUT: TimeSpan | number;
-    /**
-     * Should the test break on the first line of debugging
-     */
-    TRV_TEST_BREAK_ENTRY: boolean;
   }
 }

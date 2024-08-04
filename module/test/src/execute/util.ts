@@ -21,8 +21,11 @@ export class RunnerUtil {
    */
   static async isTestFile(file: string): Promise<boolean> {
     const reader = readline.createInterface({ input: createReadStream(file) });
+    const state = { imp: false, suite: false };
     for await (const line of reader) {
-      if (line.includes('@Suite')) {
+      state.imp ||= line.includes('@travetto/test');
+      state.suite ||= line.includes('Suite'); // Decorator or name
+      if (state.imp && state.suite) {
         reader.close();
         return true;
       }
@@ -73,12 +76,5 @@ export class RunnerUtil {
       throw new Error(countRes.stderr);
     }
     return countRes.valid ? +countRes.stdout : 0;
-  }
-
-  /**
-   * Determine if we should invoke the debugger
-   */
-  static get tryDebugger(): boolean {
-    return Env.TRV_TEST_BREAK_ENTRY.isTrue;
   }
 }

@@ -107,7 +107,7 @@ const tslib_1 = require("tslib");
 const Ⲑ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
 var ᚕm = ["@travetto/transformer", "doc/upper"];
 class TEST {
-    static Ⲑinit = Ⲑ_function_1.registerFunction(TEST, ᚕm, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8] } }, false, false);
+    static Ⲑinit = Ⲑ_function_1.registerFunction(TEST, ᚕm, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8, 7] } }, false, false);
     NAME;
     AGE;
     DOB;

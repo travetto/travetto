@@ -2,6 +2,7 @@
 /// <reference path="./src/global.d.ts" />
 export * from './src/console';
 export * from './src/context';
+export * from './src/debug';
 export * from './src/error';
 export * from './src/exec';
 export * from './src/env';

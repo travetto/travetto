@@ -1,4 +1,4 @@
-export type FunctionMetadataTag = { hash: number, lines: [number, number] };
+export type FunctionMetadataTag = { hash: number, lines: [start: number, end: number, bodyStart?: number] };
 export type FunctionMetadata = FunctionMetadataTag & {
   id: string;
   import: string;

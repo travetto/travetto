@@ -2,9 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { ExecutionError } from '@travetto/worker';
-
-import { Test } from '../src/decorator/test';
-import { Suite, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../src/decorator/suite';
+import { Suite, BeforeAll, AfterEach, AfterAll, BeforeEach, Test } from '@travetto/test';
 
 let a: unknown = 0; a = 1;
 

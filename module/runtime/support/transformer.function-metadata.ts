@@ -33,6 +33,12 @@ export class RegisterTransformer {
     const hash = SystemUtil.naiveHash(node.getText());
     try {
       const range = CoreUtil.getRangeOf(state.source, node) ?? [0, 0];
+      if (ts.isMethodDeclaration(node) || ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
+        const bodyStart = CoreUtil.getRangeOf(state.source, node?.body?.statements[0])?.[0];
+        if (bodyStart) {
+          range.push(bodyStart);
+        }
+      }
       return { hash, lines: range };
     } catch (err) {
       return { hash, lines: [0, 0] };

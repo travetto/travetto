@@ -39,6 +39,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       import: Runtime.getImport(cls),
       lineStart: lines?.[0],
       lineEnd: lines?.[1],
+      lineBodyStart: lines?.[2],
       methodName: fn.name
     };
   }
