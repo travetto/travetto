@@ -105,13 +105,13 @@ class $Runtime {
     return describeFunction(fn).import;
   }
 
-  /** Import from import path */
+  /** Resolve importable location from path */
   resolveImport(imp: string): string {
     const file = path.resolve(this.#idx.mainModule.sourcePath, imp);
     if (existsSync(file)) {
-      imp = this.#idx.getSourceFile(file);
+      imp = this.#idx.getFromSource(file)?.import!;
     }
-    return ManifestModuleUtil.sourceToOutputExt(this.#idx.getFromImport(imp)!.import);
+    return ManifestModuleUtil.sourceToOutputExt(imp);
   }
 }
 
