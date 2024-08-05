@@ -1,5 +1,5 @@
+import { existsSync } from 'node:fs';
 import path from 'node:path';
-import fs from 'node:fs/promises';
 
 import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@travetto/manifest';
 
@@ -106,12 +106,14 @@ class $Runtime {
   }
 
   /** Import from import path */
-  async import<T = unknown>(imp: string): Promise<T> {
+  resolveImport(imp: string): string {
     const file = path.resolve(imp);
-    if (await fs.stat(file).catch(() => false)) {
+    if (existsSync(file)) {
       imp = file;
+    } else {
+      imp = RuntimeIndex.getFromImport(imp)?.outputFile!;
     }
-    return import(ManifestModuleUtil.sourceToOutputExt(imp));
+    return ManifestModuleUtil.sourceToOutputExt(imp);
   }
 }
 

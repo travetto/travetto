@@ -18,7 +18,7 @@ export class TestCountCommand {
     // Load all tests
     for (const imp of imports) {
       try {
-        await Runtime.import(imp);
+        await import(Runtime.resolveImport(imp));
       } catch (err) {
         console.error('Failed to import', imp, err);
       }

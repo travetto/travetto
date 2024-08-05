@@ -83,7 +83,7 @@ export class TestWatcher {
 
     if (runAllOnStart) {
       for (const imp of await RunnerUtil.getTestImports()) {
-        await Runtime.import(imp);
+        await import(Runtime.resolveImport(imp));
         itr.add(imp);
       }
     }

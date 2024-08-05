@@ -16,7 +16,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   await Workspace.init(context, ctx, folder);
 
   for (const ext of RuntimeIndex.find({ file: f => /.*\/feature.*?\/main[.]/.test(f.sourceFile) })) {
-    await Runtime.import(ext.import);
+    await import(Runtime.resolveImport(ext.import));
   }
 
   await ActivationManager.init();

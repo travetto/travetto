@@ -24,7 +24,7 @@ export class DocRenderer {
     if (!imp) {
       throw new Error(`Unable to render ${file}, not in the manifest`);
     }
-    const res = await Runtime.import<DocumentShape>(imp);
+    const res: DocumentShape = await import(Runtime.resolveImport(imp));
 
     const pkg = PackageUtil.readPackage(manifest.workspace.path);
     const repoBaseUrl = pkg.travetto?.doc?.baseUrl ?? manifest.workspace.path;

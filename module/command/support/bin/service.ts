@@ -153,8 +153,7 @@ export class ServiceUtil {
         folder: f => f === 'support',
         file: f => /support\/service[.]/.test(f.sourceFile)
       })
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        .map(x => Runtime.import<{ service: CommandService }>(x.import).then(v => v.service))
+        .map(x => import(Runtime.resolveImport(x.import)).then((v: { service: CommandService }) => v.service))
     ))
       .filter(x => !!x);
   }

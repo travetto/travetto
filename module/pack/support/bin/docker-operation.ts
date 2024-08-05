@@ -37,7 +37,7 @@ export class DockerPackOperation {
     if (!factory) {
       throw new Error(`Unable to resolve docker factory at ${cfg.dockerFactory}`);
     }
-    const mod = await Runtime.import<DockerPackFactoryModule>(factory.import);
+    const mod: DockerPackFactoryModule = await import(Runtime.resolveImport(factory.import));
     const content = (await mod.factory(cfg)).trim();
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: cfg.dockerFactory }}`);

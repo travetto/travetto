@@ -34,7 +34,7 @@ export class MainCommand implements CliCommandShape {
   async main(fileOrImport: string, args: string[] = []): Promise<void> {
     let res: unknown;
     try {
-      const mod = await Runtime.import<{ main(..._: unknown[]): Promise<unknown> }>(fileOrImport!);
+      const mod: { main(..._: unknown[]): Promise<unknown> } = await import(Runtime.resolveImport(fileOrImport!));
       res = await mod.main(...args, ...this._parsed.unknown);
     } catch (err) {
       res = err;

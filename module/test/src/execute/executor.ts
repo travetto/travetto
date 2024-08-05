@@ -260,7 +260,7 @@ export class TestExecutor {
   static async execute(consumer: TestConsumer, imp: string, ...args: string[]): Promise<void> {
 
     try {
-      await Runtime.import(imp);
+      await import(Runtime.resolveImport(imp));
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;
