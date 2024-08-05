@@ -37,11 +37,12 @@ While running any code within the framework, there are common patterns/goals for
 
   <figure class="code">
     <figcaption class="code">Runtime Shape
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/context.ts#L10">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/context.ts#L11">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">$Runtime</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token function">constructor</span><span class="token punctuation">(</span>idx<span class="token operator">:</span> ManifestIndex<span class="token punctuation">,</span> resourceOverrides<span class="token operator">?</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">get</span> <span class="token function">#moduleAliases</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/** Get env name, with support for the default env */</span>
   <span class="token keyword">get</span> <span class="token function">envName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
   <span class="token comment">/** Are we in development mode */</span>
@@ -72,6 +73,8 @@ While running any code within the framework, there are common patterns/goals for
   <span class="token function">getSourceFile</span><span class="token punctuation">(</span>fn<span class="token operator">:</span> <span class="token builtin">Function</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token comment">/** Get import for function */</span>
   <span class="token function">getImport</span><span class="token punctuation">(</span>fn<span class="token operator">:</span> <span class="token builtin">Function</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Import from import path */</span>
+  <span class="token function">resolveImport</span><span class="token punctuation">(</span>imp<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -236,7 +239,7 @@ Object<span class="token punctuation">.</span><span class="token function">defin
 exports<span class="token punctuation">.</span>work <span class="token operator">=</span> work<span class="token punctuation">;</span>
 <span class="token keyword">const</span> tslib_1 <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"tslib"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> ᚕ_c <span class="token operator">=</span> tslib_1<span class="token punctuation">.</span><span class="token function">__importStar</span><span class="token punctuation">(</span><span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"&#64;travetto/runtime/src/console.js"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">var</span> ᚕm <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">"&#64;travetto/runtime"</span><span class="token punctuation">,</span> <span class="token string">"doc/transpile"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">var</span> ᚕm <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">"&#64;travetto/runtime"</span><span class="token punctuation">,</span> <span class="token string">"doc/transpile.ts"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token keyword">function</span> <span class="token function">work</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     ᚕ_c<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> <span class="token literal-property property">level</span><span class="token operator">:</span> <span class="token string">"debug"</span><span class="token punctuation">,</span> <span class="token keyword">import</span><span class="token operator">:</span> ᚕm<span class="token punctuation">,</span> <span class="token literal-property property">line</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token literal-property property">scope</span><span class="token operator">:</span> <span class="token string">"work"</span><span class="token punctuation">,</span> <span class="token literal-property property">args</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'Start Work'</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
@@ -282,7 +285,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="common-utilities">Common Utilities</h2>
 
-Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L17">Util</a> includes:
+Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L18">Util</a> includes:
 <ul> <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
 <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
 <li><code class="item method">hash(text: string, size?: number)</code> produces a full sha512 hash.</li>

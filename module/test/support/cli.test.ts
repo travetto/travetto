@@ -39,7 +39,7 @@ export class TestCommand implements CliCommandShape {
     return (await this.isFirstFile(first)) && rest.length === 0 ? 'single' : this.mode;
   }
 
-  async validate(first: string = 'test/.*', rest: string[]): Promise<CliValidationError | undefined> {
+  async validate(first: string = '**/*', rest: string[]): Promise<CliValidationError | undefined> {
 
     const mode = await this.resolvedMode(first, rest);
 
@@ -48,7 +48,7 @@ export class TestCommand implements CliCommandShape {
     }
   }
 
-  async main(first: string = 'test/.*', regexes: string[] = []): Promise<void> {
+  async main(first: string = '**/*', regexes: string[] = []): Promise<void> {
     const { runTests } = await import('./bin/run');
 
     return runTests({

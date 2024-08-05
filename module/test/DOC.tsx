@@ -15,7 +15,7 @@ export const text = <>
     <li>{d.library('XUnit')}, standard format for CI/CD systems e.g. Jenkins, Bamboo, etc.</li>
   </ul>
 
-  <c.Note>All tests should be under the {d.path('test/.*')} folders.  The pattern for tests is defined as a regex and not standard globbing.</c.Note>
+  <c.Note>All tests should be under the {d.path('**/*')} folders.  The pattern for tests is defined as as a standard glob using {d.library('Node')}'s built in globbing support.</c.Note>
 
   <c.Section title='Definition'>
 

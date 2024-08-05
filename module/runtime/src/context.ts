@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-import type { ManifestIndex, ManifestContext } from '@travetto/manifest';
+import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@travetto/manifest';
 
 import { Env } from './env';
 import { RuntimeIndex } from './manifest-index';
@@ -92,7 +92,7 @@ class $Runtime {
 
   /** Resolve resource paths */
   resourcePaths(paths: string[] = []): string[] {
-    return [...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'].map(v => this.modulePath(v));
+    return [...new Set([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'].map(v => this.modulePath(v)))];
   }
 
   /** Get source for function */
@@ -109,11 +109,9 @@ class $Runtime {
   resolveImport(imp: string): string {
     const file = path.resolve(this.#idx.mainModule.sourcePath, imp);
     if (existsSync(file)) {
-      imp = this.#idx.getFromSource(file)?.outputFile!;
-    } else {
-      imp = this.#idx.getFromImport(imp)?.outputFile!;
+      imp = this.#idx.getSourceFile(file);
     }
-    return imp;
+    return ManifestModuleUtil.sourceToOutputExt(this.#idx.getFromImport(imp)!.import);
   }
 }
 

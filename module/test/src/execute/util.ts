@@ -55,7 +55,7 @@ export class RunnerUtil {
       }
     } else {
       for await (const match of all) {
-        if (match && await this.isTestFile(match.sourceFile)) {
+        if (await this.isTestFile(match.sourceFile)) {
           yield match.import;
         }
       }
