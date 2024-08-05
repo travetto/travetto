@@ -1,6 +1,7 @@
 import path from 'node:path';
+import fs from 'node:fs/promises';
 
-import type { ManifestIndex, ManifestContext } from '@travetto/manifest';
+import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@travetto/manifest';
 
 import { Env } from './env';
 import { RuntimeIndex } from './manifest-index';
@@ -105,10 +106,12 @@ class $Runtime {
   }
 
   /** Import from import path */
-  import<T = unknown>(imp: string): Promise<T> {
-    imp = imp.endsWith('.ts') ? imp.replace(/[.]ts$/, '') : imp;
-    imp = !imp.endsWith('.js') ? `${imp}.js` : imp;
-    return import(imp);
+  async import<T = unknown>(imp: string): Promise<T> {
+    const file = path.resolve(imp);
+    if (await fs.stat(file).catch(() => false)) {
+      imp = file;
+    }
+    return import(ManifestModuleUtil.sourceToOutputExt(imp));
   }
 }
 

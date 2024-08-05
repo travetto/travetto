@@ -83,8 +83,8 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     content = Array.isArray(content) ? content.join('') : content;
 
     await Util.bufferedFileWrite(
-      this.writeContentFilter(content),
       path.resolve(this.#output, this.subFolder, file),
+      this.writeContentFilter(content),
       true
     );
   }
