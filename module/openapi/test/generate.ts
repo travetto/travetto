@@ -105,7 +105,7 @@ export class GenerateSuite {
     assert(param.name === 'name');
     assert(param.in === 'query');
 
-    assert(config.paths['/test/user'].get.responses['200']);
+    assert(config.paths['/test/user'].get.responses?.['200']);
     assert.deepStrictEqual(config.paths['/test/user'].get.responses['200'], {
       content: {
         'application/json': {
@@ -127,7 +127,7 @@ export class GenerateSuite {
     assert(param.name === 'name');
     assert(param.in === 'query');
 
-    assert(config.paths['/test/users'].get.responses['200']);
+    assert(config.paths['/test/users'].get.responses?.['200']);
     assert.deepStrictEqual(config.paths['/test/users'].get.responses['200'], {
       content: {
         'application/json': {
@@ -144,7 +144,7 @@ export class GenerateSuite {
     assert(config.paths['/test/names'].put);
     assert(config.paths['/test/names'].put.parameters?.length === 1);
 
-    assert(config.paths['/test/names'].put.responses['200']);
+    assert(config.paths['/test/names'].put.responses?.['200']);
     assert.deepStrictEqual(config.paths['/test/names'].put.responses['200'], {
       content: {
         'application/json': {
@@ -166,7 +166,7 @@ export class GenerateSuite {
   async verifyPatchWho() {
     const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/who'].patch);
-    assert(config.paths['/test/who'].patch.responses['200']);
+    assert(config.paths['/test/who'].patch.responses?.['200']);
     assert.deepStrictEqual(config.paths['/test/who'].patch.responses['200'], {
       content: {
         'application/json': {
@@ -183,13 +183,13 @@ export class GenerateSuite {
       content: {
         'application/json': {
           schema: {
-            $ref: '#/components/schemas/who__90998'
+            $ref: '#/components/schemas/who__77409'
           }
         }
       },
       description: '__type'
     });
-    assert.deepStrictEqual(config.components.schemas['who__90998'], {
+    assert.deepStrictEqual(config.components.schemas['who__77409'], {
       description: '__type',
       example: undefined,
       properties: {
@@ -214,7 +214,7 @@ export class GenerateSuite {
   async verifyDeleteOne() {
     const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/{id}'].delete);
-    assert(config.paths['/test/{id}'].delete.responses['201']);
+    assert(config.paths['/test/{id}'].delete.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/{id}'].delete.responses['201'], {
       content: {},
       description: ''
@@ -234,7 +234,7 @@ export class GenerateSuite {
   async verifyDeleteAll() {
     const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/all/{id}'].delete);
-    assert(config.paths['/test/all/{id}'].delete.responses['201']);
+    assert(config.paths['/test/all/{id}'].delete.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/all/{id}'].delete.responses['201'], {
       content: {},
       description: ''
@@ -273,7 +273,7 @@ export class GenerateSuite {
   async verifyHeadAll() {
     const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/all/{id}'].head);
-    assert(config.paths['/test/all/{id}'].head.responses['201']);
+    assert(config.paths['/test/all/{id}'].head.responses?.['201']);
     assert.deepStrictEqual(config.paths['/test/all/{id}'].head.responses['201'], {
       content: {},
       description: ''
@@ -311,7 +311,7 @@ export class GenerateSuite {
   async verifyDownload() {
     const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/download'].get);
-    assert(config.paths['/test/download'].get.responses['200']);
+    assert(config.paths['/test/download'].get.responses?.['200']);
     assert.deepStrictEqual(config.paths['/test/download'].get.responses['200'], {
       content: {
         'application/octet-stream': { schema: { type: 'string', format: 'binary' } }

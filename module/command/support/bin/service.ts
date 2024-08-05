@@ -1,4 +1,4 @@
-import { ExecUtil, RuntimeIndex, Util } from '@travetto/runtime';
+import { ExecUtil, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 
 import { CommandUtil } from '../../src/util';
@@ -154,7 +154,7 @@ export class ServiceUtil {
         file: f => /support\/service[.]/.test(f.sourceFile)
       })
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        .map(async x => (await import(x.import)).service as CommandService)
+        .map(x => Runtime.import<{ service: CommandService }>(x.import).then(v => v.service))
     ))
       .filter(x => !!x);
   }

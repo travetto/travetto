@@ -75,7 +75,14 @@ export class Util {
   /**
    * Write file and copy over when ready
    */
-  static async bufferedFileWrite(file: string, content: string): Promise<void> {
+  static async bufferedFileWrite(file: string, content: string, checkHash = false): Promise<void> {
+    if (checkHash) {
+      const current = await fs.readFile(file, 'utf8').catch(() => '');
+      if (Util.hash(current) === Util.hash(content)) {
+        return;
+      }
+    }
+
     const temp = path.resolve(os.tmpdir(), `${process.hrtime()[1]}.${path.basename(file)}`);
     await fs.writeFile(temp, content, 'utf8');
     await fs.mkdir(path.dirname(file), { recursive: true });

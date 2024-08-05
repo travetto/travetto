@@ -65,7 +65,7 @@ export class WorkspaceResultsManager {
    */
   getLocation(target: vscode.TextDocument | TestWatchEvent | string): string | undefined {
     if (typeof target === 'string') {
-      return Workspace.resolveImport(target);
+      return Workspace.workspaceIndex.getSourceFile(target);
     } else if ('fileName' in target) {
       return target.fileName;
     } else if ('import' in target) {
@@ -85,6 +85,7 @@ export class WorkspaceResultsManager {
    */
   getResults(target: vscode.TextDocument | TestWatchEvent): DocumentResultsManager | undefined {
     const file = this.getLocation(target);
+    this.#log.debug('Results manager', { file, target: 'fileName' in target ? target.fileName : undefined });
     if (file) {
       if (!this.#results.has(file)) {
         const rm = new DocumentResultsManager(file);
@@ -125,8 +126,6 @@ export class WorkspaceResultsManager {
     for (const [, v] of entries) {
       v.dispose();
     }
-    // Clear out all diagnostics
-    // testDiagnostics.clear();
   }
 
   /**

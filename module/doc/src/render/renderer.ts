@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { type ManifestContext, PackageUtil } from '@travetto/manifest';
 import { isJSXElement, JSXElement, JSXFragmentType } from '@travetto/doc/jsx-runtime';
-import { RuntimeIndex } from '@travetto/runtime';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../jsx';
 import { DocumentShape, RenderProvider, RenderState } from '../types';
@@ -20,11 +20,11 @@ const providers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
 export class DocRenderer {
 
   static async get(file: string, manifest: Pick<ManifestContext, 'workspace'>): Promise<DocRenderer> {
-    const mod = RuntimeIndex.getFromSource(file)?.import;
-    if (!mod) {
+    const imp = RuntimeIndex.getFromSource(file)?.import;
+    if (!imp) {
       throw new Error(`Unable to render ${file}, not in the manifest`);
     }
-    const res: DocumentShape = await import(mod);
+    const res = await Runtime.import<DocumentShape>(imp);
 
     const pkg = PackageUtil.readPackage(manifest.workspace.path);
     const repoBaseUrl = pkg.travetto?.doc?.baseUrl ?? manifest.workspace.path;

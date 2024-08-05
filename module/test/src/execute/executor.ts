@@ -66,7 +66,7 @@ export class TestExecutor {
    * Fail an entire file, marking the whole file as failed
    */
   static failFile(consumer: TestConsumer, imp: string, err: Error): void {
-    const name = path.basename(imp);
+    const name = path.basename(imp).replace(/[.]js$/, '.ts');
     const classId = `${RuntimeIndex.getFromImport(imp)?.id}￮${name}`;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const suite = { class: { name }, classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp, } as SuiteConfig & SuiteResult;
@@ -260,7 +260,7 @@ export class TestExecutor {
   static async execute(consumer: TestConsumer, imp: string, ...args: string[]): Promise<void> {
 
     try {
-      await import(imp);
+      await Runtime.import(imp);
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;

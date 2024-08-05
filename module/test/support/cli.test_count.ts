@@ -1,5 +1,5 @@
 import { CliCommand } from '@travetto/cli';
-import { Env, describeFunction } from '@travetto/runtime';
+import { Env, Runtime, describeFunction } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../src/registry/suite';
 import { RunnerUtil } from '../src/execute/util';
@@ -18,7 +18,7 @@ export class TestCountCommand {
     // Load all tests
     for (const imp of imports) {
       try {
-        await import(imp);
+        await Runtime.import(imp);
       } catch (err) {
         console.error('Failed to import', imp, err);
       }

@@ -63,8 +63,8 @@ export class ManifestIndex {
       const sourceFile = path.resolve(this.#manifest.workspace.path, m.sourceFolder, f);
       const js = isSource ? ManifestModuleUtil.sourceToOutputExt(f) : f;
       const outputFile = this.#resolveOutput(m.outputFolder, js);
-      const modImport = `${m.name}/${js}`;
-      let id = modImport.replace(`${m.name}/`, _ => _.replace(/[/]$/, ':'));
+      const modImport = `${m.name}/${ManifestModuleUtil.sourceToBlankExt(f)}`;
+      let id = `${m.name}:${f}`;
       if (isSource) {
         id = ManifestModuleUtil.sourceToBlankExt(id);
       }
@@ -100,7 +100,8 @@ export class ManifestIndex {
           this.#outputToEntry.set(entry.outputFile, entry);
           this.#sourceToEntry.set(entry.sourceFile, entry);
           this.#importToEntry.set(entry.import, entry);
-          this.#importToEntry.set(entry.import.replace(/[.]js$/, ''), entry);
+          this.#importToEntry.set(`${entry.import}.js`, entry);
+          this.#importToEntry.set(`${entry.import}.ts`, entry);
         }
       }
     }

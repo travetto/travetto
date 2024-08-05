@@ -81,9 +81,11 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
 
   async writeContent(file: string, content: string | string[]): Promise<void> {
     content = Array.isArray(content) ? content.join('') : content;
+
     await Util.bufferedFileWrite(
+      this.writeContentFilter(content),
       path.resolve(this.#output, this.subFolder, file),
-      this.writeContentFilter(content)
+      true
     );
   }
 

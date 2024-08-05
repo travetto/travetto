@@ -25,7 +25,7 @@ export class TransformerManager {
 
     for (const file of transformerFiles) { // Exclude based on blacklist
       const entry = manifestIndex.getEntry(file)!;
-      transformers.push(...getAllTransformers(await import(entry.import), entry.module));
+      transformers.push(...getAllTransformers(await import(`${entry.import}.js`), entry.module));
     }
 
     for (const x of transformers) {

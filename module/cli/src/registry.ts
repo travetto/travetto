@@ -3,7 +3,7 @@ import { Class, ConcreteClass, describeFunction, Runtime, RuntimeIndex } from '@
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
 
-const CLI_FILE_REGEX = /\/cli[.](?<name>.*?)([.]tsx?)?$/;
+const CLI_FILE_REGEX = /\/cli[.](?<name>.*?)([.][tj]sx?)?$/;
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
 
 class $CliCommandRegistry {
@@ -76,7 +76,7 @@ class $CliCommandRegistry {
   async getInstance(name: string, failOnMissing = false): Promise<CliCommandShape | undefined> {
     const found = this.getCommandMapping().get(name);
     if (found) {
-      const values = Object.values<Class>(await import(found));
+      const values = Object.values<Class>(await Runtime.import(found));
       for (const v of values) {
         const cfg = this.getByClass(v);
         if (cfg) {

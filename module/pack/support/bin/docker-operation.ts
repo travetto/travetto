@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { RuntimeIndex } from '@travetto/runtime';
+import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell';
@@ -37,7 +37,7 @@ export class DockerPackOperation {
     if (!factory) {
       throw new Error(`Unable to resolve docker factory at ${cfg.dockerFactory}`);
     }
-    const mod: DockerPackFactoryModule = await import(factory.import);
+    const mod = await Runtime.import<DockerPackFactoryModule>(factory.import);
     const content = (await mod.factory(cfg)).trim();
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: cfg.dockerFactory }}`);

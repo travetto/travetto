@@ -103,6 +103,13 @@ class $Runtime {
   getImport(fn: Function): string {
     return describeFunction(fn).import;
   }
+
+  /** Import from import path */
+  import<T = unknown>(imp: string): Promise<T> {
+    imp = imp.endsWith('.ts') ? imp.replace(/[.]ts$/, '') : imp;
+    imp = !imp.endsWith('.js') ? `${imp}.js` : imp;
+    return import(imp);
+  }
 }
 
 export const Runtime = new $Runtime(RuntimeIndex, Env.TRV_RESOURCE_OVERRIDES.object);

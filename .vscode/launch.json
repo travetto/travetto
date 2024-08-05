@@ -83,6 +83,31 @@
         "-f",
         "tap-streamed"
       ]
-    }
+    },
+    {
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/related/vscode-plugin",
+        "${workspaceFolder}/../platform-v2"
+      ],
+      "name": "Launch Extension",
+      "runtimeExecutable": "${execPath}",
+      "outFiles": [
+        "${workspaceFolder}/related/vscode-plugin/out/**/*.js"
+      ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/related/vscode-plugin/out/**/*.js"
+      ],
+      "skipFiles": [
+        "<node_internals>/**",
+        "node:internals/**",
+        "**/vs/*/api/**",
+        "**/@travetto/runtime/src/console.js",
+        "**/tslib/**"
+      ],
+      "pauseForSourceMap": true,
+      "sourceMaps": true,
+      "request": "launch",
+      "type": "extensionHost"
+    },
   ]
 }
