@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@travetto/manifest';
+import type { ManifestIndex, ManifestContext } from '@travetto/manifest';
 
 import { Env } from './env';
 import { RuntimeIndex } from './manifest-index';
@@ -113,7 +113,7 @@ class $Runtime {
     } else {
       imp = this.#idx.getFromImport(imp)?.outputFile!;
     }
-    return ManifestModuleUtil.sourceToOutputExt(imp);
+    return imp;
   }
 }
 

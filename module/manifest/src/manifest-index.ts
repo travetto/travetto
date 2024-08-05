@@ -63,7 +63,7 @@ export class ManifestIndex {
       const sourceFile = path.resolve(this.#manifest.workspace.path, m.sourceFolder, f);
       const js = isSource ? ManifestModuleUtil.sourceToOutputExt(f) : f;
       const outputFile = this.#resolveOutput(m.outputFolder, js);
-      const modImport = `${m.name}/${ManifestModuleUtil.sourceToBlankExt(f)}`;
+      const modImport = `${m.name}/${f}`;
       let id = `${m.name}:${f}`;
       if (isSource) {
         id = ManifestModuleUtil.sourceToBlankExt(id);
