@@ -100,8 +100,8 @@ export class ManifestIndex {
           this.#outputToEntry.set(entry.outputFile, entry);
           this.#sourceToEntry.set(entry.sourceFile, entry);
           this.#importToEntry.set(entry.import, entry);
-          this.#importToEntry.set(`${entry.import}.js`, entry);
-          this.#importToEntry.set(`${entry.import}.ts`, entry);
+          this.#importToEntry.set(ManifestModuleUtil.sourceToBlankExt(entry.import), entry);
+          this.#importToEntry.set(ManifestModuleUtil.sourceToOutputExt(entry.import), entry);
         }
       }
     }

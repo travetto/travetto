@@ -29,7 +29,7 @@ export class Runner {
 
     const imports = await RunnerUtil.getTestImports(this.#state.args);
 
-    console.debug('Running', { imports, patterns: this.#state.args });
+    console.debug('Running', { patterns: this.#state.args });
 
     const testCount = await RunnerUtil.getTestCount(this.#state.args);
     await consumer.onStart({ testCount });

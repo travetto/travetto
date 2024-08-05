@@ -111,7 +111,7 @@ class $Runtime {
     if (existsSync(file)) {
       imp = file;
     } else {
-      imp = RuntimeIndex.getFromImport(imp)?.outputFile!;
+      imp = this.#idx.getFromImport(imp)?.outputFile!;
     }
     return ManifestModuleUtil.sourceToOutputExt(imp);
   }

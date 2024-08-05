@@ -30,7 +30,7 @@ export function registerFunction(
   methods?: Record<string, FunctionMetadataTag>, abstract?: boolean, synthetic?: boolean
 ): void {
   const metadata = {
-    id: fn.name ? `${pkg}:${pth}￮${fn.name}` : `${pkg}:${pth}`,
+    id: (fn.name ? `${pkg}:${pth}￮${fn.name}` : `${pkg}:${pth}`).replace(/[.][cm]?[tj]sx?$/, ''),
     import: `${pkg}/${pth}`,
     module: pkg,
     modulePath: pth,

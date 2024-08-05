@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { path, ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
+import { path, ManifestIndex } from '@travetto/manifest';
 
 import { ManagedType, AnyType, ForeignType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, ModuleNameⲐ } from './types/visitor';
@@ -266,7 +266,7 @@ export class TransformerState implements State {
       this.#modIdent = this.createIdentifier('ᚕm');
       const entry = this.#resolver.getFileImport(this.source.fileName);
       const decl = this.factory.createVariableDeclaration(this.#modIdent, undefined, undefined,
-        this.fromLiteral([entry?.module, ManifestModuleUtil.sourceToBlankExt(entry?.relativeFile ?? '')])
+        this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])
       );
       this.addStatements([
         this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([decl]))

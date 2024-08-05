@@ -13,10 +13,8 @@ export class TestCountCommand {
   }
 
   async main(patterns: string[]) {
-    const imports = await RunnerUtil.getTestImports(patterns);
-
     // Load all tests
-    for (const imp of imports) {
+    for await (const imp of await RunnerUtil.getTestImports(patterns)) {
       try {
         await import(Runtime.resolveImport(imp));
       } catch (err) {

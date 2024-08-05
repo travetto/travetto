@@ -36,28 +36,30 @@ export class RunnerUtil {
   /**
    * Find all valid test files given the globs
    */
-  static async getTestImports(globs?: string[]): Promise<string[]> {
-    const files = new Set<string>();
-    // Collect globs
-    if (globs) {
-      for await (const item of fs.glob(globs)) {
-        files.add(Runtime.workspaceRelative(item));
-      }
-    }
-
-    const found = RuntimeIndex.find({
+  static async* getTestImports(globs?: string[]): AsyncIterable<string> {
+    const all = RuntimeIndex.find({
       module: m => m.roles.includes('test') || m.roles.includes('std'),
       folder: f => f === 'test',
       file: f => f.role === 'test'
-    })
-      .filter(f => files.size === 0 || files.has(f.sourceFile));
+    });
 
-    const validImports = found
-      .map(f => this.isTestFile(f.sourceFile).then(valid => ({ import: f.import, valid })));
-
-    return (await Promise.all(validImports))
-      .filter(x => x.valid)
-      .map(x => x.import);
+    // Collect globs
+    if (globs?.length) {
+      const allFiles = new Map(all.map(x => [x.sourceFile, x]));
+      for await (const item of fs.glob(globs)) {
+        const src = Runtime.workspaceRelative(item);
+        const match = allFiles.get(src);
+        if (match && await this.isTestFile(match.sourceFile)) {
+          yield match.import;
+        }
+      }
+    } else {
+      for await (const match of all) {
+        if (match && await this.isTestFile(match.sourceFile)) {
+          yield match.import;
+        }
+      }
+    }
   }
 
   /**
