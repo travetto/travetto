@@ -107,9 +107,9 @@ class $Runtime {
 
   /** Import from import path */
   resolveImport(imp: string): string {
-    const file = path.resolve(imp);
+    const file = path.resolve(this.#idx.mainModule.sourcePath, imp);
     if (existsSync(file)) {
-      imp = file;
+      imp = this.#idx.getFromSource(file)?.outputFile!;
     } else {
       imp = this.#idx.getFromImport(imp)?.outputFile!;
     }
