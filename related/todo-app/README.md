@@ -322,7 +322,7 @@ npx trv run:rest
     }
   },
   runtime: {
-    name: 'local',
+    env: 'local',
     debug: false,
     production: false,
     dynamic: false,

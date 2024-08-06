@@ -26,7 +26,7 @@ class $Runtime {
   }
 
   /** Get env name, with support for the default env */
-  get envName(): string | undefined {
+  get env(): string | undefined {
     return Env.TRV_ENV.val || (!this.production ? this.#idx.manifest.workspace.defaultEnv : undefined);
   }
 

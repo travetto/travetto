@@ -33,7 +33,7 @@ const FIELD_CONFIG: {
   [
     {
       name: 'env',
-      run: cmd => Env.TRV_ENV.set(cmd.env || Runtime.envName),
+      run: cmd => Env.TRV_ENV.set(cmd.env || Runtime.env),
       field: {
         type: String,
         aliases: ['e', CliParseUtil.toEnvField(Env.TRV_ENV.key)],

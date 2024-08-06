@@ -251,7 +251,7 @@ Initialized {
     }
   },
   runtime: {
-    name: 'local',
+    env: 'local',
     debug: false,
     production: false,
     dynamic: false,
@@ -336,7 +336,7 @@ Initialized {
     }
   },
   runtime: {
-    name: 'prod',
+    env: 'prod',
     debug: false,
     production: true,
     dynamic: false,

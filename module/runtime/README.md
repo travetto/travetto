@@ -36,7 +36,7 @@ class $Runtime {
   constructor(idx: ManifestIndex, resourceOverrides?: Record<string, string>);
   get #moduleAliases(): Record<string, string>;
   /** Get env name, with support for the default env */
-  get envName(): string | undefined;
+  get env(): string | undefined;
   /** Are we in development mode */
   get production(): boolean;
   /** Is the app in dynamic mode? */

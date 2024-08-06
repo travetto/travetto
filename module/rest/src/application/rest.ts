@@ -43,7 +43,7 @@ export class RestApplication<T = unknown> {
     this.info = {
       module: Runtime.main.name,
       version: Runtime.main.version,
-      env: Runtime.envName
+      env: Runtime.env
     };
 
     // Log on startup, before DI finishes
