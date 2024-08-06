@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, describeFunction, Runtime, RuntimeIndex, TypedObject } from '@travetto/runtime';
+import { Class, ConcreteClass, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
@@ -76,7 +76,7 @@ class $CliCommandRegistry {
   async getInstance(name: string, failOnMissing = false): Promise<CliCommandShape | undefined> {
     const found = this.getCommandMapping().get(name);
     if (found) {
-      const values = TypedObject.values(await Runtime.importFrom<Record<string, Class>>(found));
+      const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
       for (const v of values) {
         const cfg = this.getByClass(v);
         if (cfg) {
