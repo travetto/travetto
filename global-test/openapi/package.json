@@ -2,8 +2,8 @@
   "name": "@travetto-test/openapi",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/openapi": "^5.0.0-rc.7",
-    "@travetto/rest": "^5.0.0-rc.7"
+    "@travetto/openapi": "^5.0.0-rc.8",
+    "@travetto/rest": "^5.0.0-rc.8"
   },
   "travetto": {},
   "private": true
