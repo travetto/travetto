@@ -65,8 +65,8 @@ class $Runtime {
   getSourceFile(fn: Function): string;
   /** Get import for function */
   getImport(fn: Function): string;
-  /** Import from import path */
-  resolveImport(imp: string): string;
+  /** Import from a given path */
+  importFrom<T = unknown>(imp?: string): Promise<T>;
 }
 ```
 

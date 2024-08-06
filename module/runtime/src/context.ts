@@ -105,13 +105,17 @@ class $Runtime {
     return describeFunction(fn).import;
   }
 
-  /** Resolve importable location from path */
-  resolveImport(imp: string): string {
-    const file = path.resolve(this.#idx.mainModule.sourcePath, imp);
+  /** Import from a given path */
+  importFrom<T = unknown>(imp?: string): Promise<T> {
+    const file = path.resolve(this.#idx.mainModule.sourcePath, imp!);
     if (existsSync(file)) {
-      imp = this.#idx.getFromSource(file)?.import!;
+      imp = this.#idx.getFromSource(file)?.import;
     }
-    return ManifestModuleUtil.sourceToOutputExt(imp);
+    if (!imp) {
+      throw new Error(`Unable to find ${imp}, not in the manifest`);
+    }
+    imp = ManifestModuleUtil.sourceToOutputExt(imp);
+    return import(imp);
   }
 }
 

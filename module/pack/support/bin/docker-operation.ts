@@ -32,12 +32,7 @@ export class DockerPackOperation {
    */
   static async* writeDockerFile(cfg: DockerPackConfig): AsyncIterable<string[]> {
     const dockerFile = path.resolve(cfg.buildDir, 'Dockerfile');
-
-    const factory = Runtime.resolveImport(cfg.dockerFactory);
-    if (!factory) {
-      throw new Error(`Unable to resolve docker factory at ${cfg.dockerFactory}`);
-    }
-    const mod: DockerPackFactoryModule = await import(factory);
+    const mod: DockerPackFactoryModule = await Runtime.importFrom(cfg.dockerFactory);
     const content = (await mod.factory(cfg)).trim();
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: cfg.dockerFactory }}`);

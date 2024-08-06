@@ -12,8 +12,9 @@ export class MainCommand implements CliCommandShape {
   _parsed: ParsedState;
 
   async validate(fileOrImport: string): Promise<CliValidationError | undefined> {
-    const imp = Runtime.resolveImport(fileOrImport);
-    if (!imp) {
+    try {
+      await Runtime.importFrom(fileOrImport);
+    } catch {
       return { message: `Unknown file: ${fileOrImport}` };
     }
   }
@@ -21,8 +22,7 @@ export class MainCommand implements CliCommandShape {
   async main(fileOrImport: string, args: string[] = []): Promise<void> {
     let res: unknown;
     try {
-      const main = Runtime.resolveImport(fileOrImport!);
-      const mod: { main(..._: unknown[]): Promise<unknown> } = await import(main);
+      const mod = await Runtime.importFrom<{ main(..._: unknown[]): Promise<unknown> }>(fileOrImport);
       res = await mod.main(...args, ...this._parsed.unknown);
     } catch (err) {
       res = err;

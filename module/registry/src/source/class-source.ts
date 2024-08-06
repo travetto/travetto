@@ -140,7 +140,7 @@ export class ClassSource implements ChangeSource<Class> {
 
     // Ensure everything is loaded
     for (const entry of RuntimeIndex.find(moduleFindConfig)) {
-      await import(Runtime.resolveImport(entry.import));
+      await Runtime.importFrom(entry.import);
     }
 
     // Flush all load events

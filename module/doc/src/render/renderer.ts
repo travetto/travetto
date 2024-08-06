@@ -20,12 +20,7 @@ const providers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
 export class DocRenderer {
 
   static async get(file: string, manifest: Pick<ManifestContext, 'workspace'>): Promise<DocRenderer> {
-    const imp = Runtime.resolveImport(file);
-    if (!imp) {
-      throw new Error(`Unable to render ${file}, not in the manifest`);
-    }
-    const res: DocumentShape = await import(imp);
-
+    const res = await Runtime.importFrom<DocumentShape>(file);
     const pkg = PackageUtil.readPackage(manifest.workspace.path);
     const repoBaseUrl = pkg.travetto?.doc?.baseUrl ?? manifest.workspace.path;
     return new DocRenderer(res,

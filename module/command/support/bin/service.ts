@@ -153,7 +153,7 @@ export class ServiceUtil {
         folder: f => f === 'support',
         file: f => /support\/service[.]/.test(f.sourceFile)
       })
-        .map(x => import(Runtime.resolveImport(x.import)).then((v: { service: CommandService }) => v.service))
+        .map(x => Runtime.importFrom<{ service: CommandService }>(x.import).then(v => v.service))
     ))
       .filter(x => !!x);
   }

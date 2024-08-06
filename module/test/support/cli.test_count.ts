@@ -16,7 +16,7 @@ export class TestCountCommand {
     // Load all tests
     for await (const imp of await RunnerUtil.getTestImports(patterns)) {
       try {
-        await import(Runtime.resolveImport(imp));
+        await Runtime.importFrom(imp);
       } catch (err) {
         console.error('Failed to import', imp, err);
       }
