@@ -31,7 +31,7 @@ export class CompilerUtil {
    */
   static rewriteSourceMap(ctx: ManifestContext, text: string, outputToSource: OutputToSource): string {
     const data: { sourceRoot?: string, sources: string[] } = JSON.parse(text);
-    const output = ManifestModuleUtil.sourceToOutputExt(path.resolve(ctx.workspace.path, ctx.build.outputFolder, data.sources[0]));
+    const output = ManifestModuleUtil.withOutputExtension(path.resolve(ctx.workspace.path, ctx.build.outputFolder, data.sources[0]));
     const { sourceFile } = outputToSource(output) ?? {};
 
     if (sourceFile) {
@@ -76,10 +76,10 @@ export class CompilerUtil {
   static rewritePackageJSON(manifest: ManifestRoot, text: string): string {
     const pkg: Package = JSON.parse(text);
     if (pkg.files) {
-      pkg.files = pkg.files.map(x => ManifestModuleUtil.sourceToOutputExt(x));
+      pkg.files = pkg.files.map(x => ManifestModuleUtil.withOutputExtension(x));
     }
     if (pkg.main) {
-      pkg.main = ManifestModuleUtil.sourceToOutputExt(pkg.main);
+      pkg.main = ManifestModuleUtil.withOutputExtension(pkg.main);
     }
     pkg.type = manifest.workspace.type;
     for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {

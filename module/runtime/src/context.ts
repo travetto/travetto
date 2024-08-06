@@ -114,7 +114,7 @@ class $Runtime {
     if (!imp) {
       throw new Error(`Unable to find ${imp}, not in the manifest`);
     }
-    imp = ManifestModuleUtil.sourceToOutputExt(imp);
+    imp = ManifestModuleUtil.withOutputExtension(imp);
     return import(imp);
   }
 }

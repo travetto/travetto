@@ -61,12 +61,12 @@ export class ManifestIndex {
     return files.map(([f, type, ts, role = 'std']) => {
       const isSource = type === 'ts' || type === 'js';
       const sourceFile = path.resolve(this.#manifest.workspace.path, m.sourceFolder, f);
-      const js = isSource ? ManifestModuleUtil.sourceToOutputExt(f) : f;
+      const js = isSource ? ManifestModuleUtil.withOutputExtension(f) : f;
       const outputFile = this.#resolveOutput(m.outputFolder, js);
       const modImport = `${m.name}/${f}`;
       let id = `${m.name}:${f}`;
       if (isSource) {
-        id = ManifestModuleUtil.sourceToBlankExt(id);
+        id = ManifestModuleUtil.withoutSourceExtension(id);
       }
 
       return { id, type, sourceFile, outputFile, import: modImport, role, relativeFile: f, module: m.name };
@@ -100,8 +100,8 @@ export class ManifestIndex {
           this.#outputToEntry.set(entry.outputFile, entry);
           this.#sourceToEntry.set(entry.sourceFile, entry);
           this.#importToEntry.set(entry.import, entry);
-          this.#importToEntry.set(ManifestModuleUtil.sourceToBlankExt(entry.import), entry);
-          this.#importToEntry.set(ManifestModuleUtil.sourceToOutputExt(entry.import), entry);
+          this.#importToEntry.set(ManifestModuleUtil.withoutSourceExtension(entry.import), entry);
+          this.#importToEntry.set(ManifestModuleUtil.withOutputExtension(entry.import), entry);
         }
       }
     }
@@ -190,7 +190,7 @@ export class ManifestIndex {
    */
   getFromImport(imp: string): IndexedFile | undefined {
     // Strip ext
-    imp = ManifestModuleUtil.sourceToBlankExt(imp);
+    imp = ManifestModuleUtil.withoutSourceExtension(imp);
     return this.#importToEntry.get(imp);
   }
 

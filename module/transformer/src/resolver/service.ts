@@ -41,14 +41,15 @@ export class SimpleResolver implements TransformResolver {
     }
 
     return this.#manifestIndex.getEntry(ManifestModuleUtil.getFileType(sourceFile) === 'ts' ? sourceFile : `${sourceFile}.js`) ??
-      this.#manifestIndex.getFromImport(ManifestModuleUtil.sourceToBlankExt(sourceFile).replace(/^.*node_modules\//, ''));
+      this.#manifestIndex.getFromImport(ManifestModuleUtil.withoutSourceExtension(sourceFile).replace(/^.*node_modules\//, ''));
   }
+
   /**
    * Resolve an import name (e.g. @module/path/file) for a file
    */
   getFileImportName(file: string, removeExt?: boolean): string {
     const imp = this.getFileImport(file)?.import ?? file;
-    return removeExt ? ManifestModuleUtil.sourceToBlankExt(imp) : imp;
+    return removeExt ? ManifestModuleUtil.withoutSourceExtension(imp) : imp;
   }
 
   /**

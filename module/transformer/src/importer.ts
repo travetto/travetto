@@ -105,7 +105,7 @@ export class ImportManager {
     file = this.#resolver.getFileImportName(file);
 
     if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
-      file = ManifestModuleUtil.sourceToOutputExt(file);
+      file = ManifestModuleUtil.withOutputExtension(file);
     }
 
     // Allow for node classes to be imported directly
