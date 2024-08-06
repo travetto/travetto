@@ -12,16 +12,18 @@ import { TestEvent } from '../model/event';
  *  Produce a handler for the child worker
  */
 export async function buildStandardTestManager(consumer: TestConsumer, imp: string | RunRequest): Promise<void> {
-  process.send?.({ type: 'log', message: `Worker Executing ${imp}` });
-
   let event: RunEvent;
+  process.send?.({ type: 'log', message: `Worker Input ${JSON.stringify(imp)}` });
+
   if (typeof imp === 'string') {
     event = { import: imp };
   } else if ('file' in imp) {
-    event = { import: RuntimeIndex.getFromSource(imp.file)?.sourceFile!, class: imp.class, method: imp.method };
+    event = { import: RuntimeIndex.getFromSource(imp.file)?.import!, class: imp.class, method: imp.method };
   } else {
     event = imp;
   }
+
+  process.send?.({ type: 'log', message: `Worker Executing ${event.import}` });
 
   const { module } = RuntimeIndex.getFromImport(event.import!)!;
   const suiteMod = RuntimeIndex.getModule(module);
@@ -64,7 +66,7 @@ export async function buildStandardTestManager(consumer: TestConsumer, imp: stri
   // Kill on complete
   await channel.destroy();
 
-  process.send?.({ type: 'log', message: `Worker Finished ${imp}` });
+  process.send?.({ type: 'log', message: `Worker Finished ${event.import}` });
 
   // If we received an error, throw it
   if (error) {

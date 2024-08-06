@@ -8,6 +8,7 @@ import { ValidatorFn } from '../validate/types';
 /**
  * Register a class as a Schema
  *
+ *
  * @augments `@travetto/schema:Schema`
  */
 export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeField' | 'baseType'>>) { // Auto is used during compilation

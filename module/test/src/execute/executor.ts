@@ -258,9 +258,8 @@ export class TestExecutor {
    * Handle executing a suite's test/tests based on command line inputs
    */
   static async execute(consumer: TestConsumer, imp: string, ...args: string[]): Promise<void> {
-
     try {
-      await import(imp);
+      await Runtime.importFrom(imp);
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;

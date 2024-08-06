@@ -40,14 +40,14 @@ export class ManifestDeltaUtil {
           const type = ManifestModuleUtil.getFileType(x);
           return VALID_SOURCE_TYPE.has(type);
         })
-        .map(x => ManifestModuleUtil.sourceToBlankExt(x.replace(`${root}/`, '')))
+        .map(x => ManifestModuleUtil.withoutSourceExtension(x.replace(`${root}/`, '')))
     );
 
     for (const el of Object.keys(left.files)) {
-      const output = ManifestModuleUtil.sourceToOutputExt(`${outputFolder}/${left.outputFolder}/${el}`);
+      const output = ManifestModuleUtil.withOutputExtension(`${outputFolder}/${left.outputFolder}/${el}`);
       const [, , leftTs] = left.files[el];
       const stat = await fs.stat(output).catch(() => undefined);
-      right.delete(ManifestModuleUtil.sourceToBlankExt(el));
+      right.delete(ManifestModuleUtil.withoutSourceExtension(el));
 
       if (!stat) {
         add(el, 'added');

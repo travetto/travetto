@@ -76,7 +76,7 @@ class $CliCommandRegistry {
   async getInstance(name: string, failOnMissing = false): Promise<CliCommandShape | undefined> {
     const found = this.getCommandMapping().get(name);
     if (found) {
-      const values = Object.values<Class>(await import(found));
+      const values = Object.values(await Runtime.importFrom<Record<string, Class>>(found));
       for (const v of values) {
         const cfg = this.getByClass(v);
         if (cfg) {

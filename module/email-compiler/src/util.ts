@@ -140,7 +140,7 @@ export class EmailCompileUtil {
         const output = await ImageConverter.optimize(
           ext === '.png' ? 'png' : 'jpeg', await opts.loader.readStream(src)
         );
-        const buffer = toBuffer(output);
+        const buffer = await toBuffer(output);
         pendingImages.push([token, ext, buffer]);
       } else {
         pendingImages.push([token, ext, opts.loader.read(src, true)]);

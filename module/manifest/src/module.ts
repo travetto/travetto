@@ -48,7 +48,7 @@ export class ManifestModuleUtil {
   /**
    * Replace a source file's extension with a given value
    */
-  static #sourceToExtension(inputFile: string, ext: string): string {
+  static #pathToExtension(inputFile: string, ext: string): string {
     return inputFile.replace(/[.][tj]sx?$/, ext);
   }
 
@@ -227,14 +227,14 @@ export class ManifestModuleUtil {
   /**
    * Get the output file name for a given input
    */
-  static sourceToOutputExt(inputFile: string): string {
-    return this.#sourceToExtension(inputFile, '.js');
+  static withOutputExtension(inputFile: string): string {
+    return this.#pathToExtension(inputFile, '.js');
   }
 
   /**
    * Get the file without an extension
    */
-  static sourceToBlankExt(inputFile: string): string {
-    return this.#sourceToExtension(inputFile, '');
+  static withoutSourceExtension(inputFile: string): string {
+    return this.#pathToExtension(inputFile, '');
   }
 }

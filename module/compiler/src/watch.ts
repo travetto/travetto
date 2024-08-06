@@ -87,15 +87,15 @@ export class CompilerWatcher {
 
     const mods = [...new Set(events.map(v => v.entry.module.name))];
 
-    const moduleToFiles = new Map(mods.map(m => [m, {
+    const parents = new Map<string, string[]>(
+      mods.map(m => [m, this.#state.manifestIndex.getDependentModules(m, 'parents').map(x => x.name)])
+    );
+
+    const moduleToFiles = new Map([...mods, ...parents.values()].flat().map(m => [m, {
       context: ManifestUtil.getModuleContext(this.#state.manifest, this.#state.manifestIndex.getManifestModule(m)!.sourceFolder),
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       files: [] as FileShape[]
     }] as const));
-
-    const parents = new Map<string, string[]>(
-      mods.map(m => [m, this.#state.manifestIndex.getDependentModules(m, 'parents').map(x => x.name)])
-    );
 
     const allFiles = events.map(ev => {
       const modRoot = ev.entry.module.sourceFolder || this.#state.manifest.workspace.path;
@@ -109,7 +109,7 @@ export class CompilerWatcher {
       for (const parent of parents.get(file.mod)!) {
         const mod = moduleToFiles.get(parent);
         if (!mod || !mod.files) {
-          this.#reset({ action: file.action, file: file.moduleFile });
+          this.#reset({ action: file.action, file: `${file.mod}/${file.moduleFile}` });
         }
         mod.files.push(file);
       }

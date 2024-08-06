@@ -29,11 +29,13 @@ export function registerFunction(
   fn: Function, [pkg, pth]: [string, string], tag: FunctionMetadataTag,
   methods?: Record<string, FunctionMetadataTag>, abstract?: boolean, synthetic?: boolean
 ): void {
-  const metadata = {
-    id: fn.name ? `${pkg}:${pth}￮${fn.name}` : `${pkg}:${pth}`,
+  const modulePath = pth.replace(/[.][cm]?[tj]sx?$/, '');
+
+  const metadata: FunctionMetadata = {
+    id: (fn.name ? `${pkg}:${modulePath}￮${fn.name}` : `${pkg}:${modulePath}`),
     import: `${pkg}/${pth}`,
     module: pkg,
-    modulePath: pth,
+    modulePath,
     ...tag, methods, abstract, synthetic, class: abstract !== undefined
   };
   pending.add(fn);

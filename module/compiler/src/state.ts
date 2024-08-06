@@ -161,7 +161,7 @@ export class CompilerState implements ts.CompilerHost {
     const fileType = ManifestModuleUtil.getFileType(moduleFile);
     const outputFile = fileType === 'typings' ?
       undefined :
-      path.resolve(this.#outputPath, ManifestModuleUtil.sourceToOutputExt(relativeInput));
+      path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeInput));
 
     const entry = { sourceFile, inputFile, outputFile, module };
 

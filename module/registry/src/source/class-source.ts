@@ -139,8 +139,8 @@ export class ClassSource implements ChangeSource<Class> {
     }
 
     // Ensure everything is loaded
-    for (const mod of RuntimeIndex.find(moduleFindConfig)) {
-      await import(mod.import);
+    for (const entry of RuntimeIndex.find(moduleFindConfig)) {
+      await Runtime.importFrom(entry.import);
     }
 
     // Flush all load events

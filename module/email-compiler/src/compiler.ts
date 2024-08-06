@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { TypedObject, Util, RuntimeIndex, watchCompiler } from '@travetto/runtime';
+import { TypedObject, Util, RuntimeIndex, watchCompiler, Runtime } from '@travetto/runtime';
 import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
 
 import { EmailCompileUtil } from './util';
@@ -15,13 +15,9 @@ export class EmailCompiler {
    * Load Template
    */
   static async loadTemplate(file: string): Promise<EmailTemplateModule> {
-    const entry = RuntimeIndex.getEntry(file);
-    const mod = entry ? RuntimeIndex.getModule(entry.module) : undefined;
-    if (!entry || !mod) {
-      throw new Error(`Unable to find template for ${file}`);
-    }
-    const root: EmailTemplateImport = (await import(entry.outputFile)).default;
-    return await root.prepare({ file, module: mod.name });
+    const root = (await Runtime.importFrom<{ default: EmailTemplateImport }>(file)).default;
+    const entry = RuntimeIndex.getEntry(file)!;
+    return await root.prepare({ file, module: entry.module });
   }
 
   /**

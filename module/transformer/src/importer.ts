@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { PackageUtil, path } from '@travetto/manifest';
+import { ManifestModuleUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { AnyType, TransformResolver, ManagedType } from './resolver/types';
 import { ImportUtil } from './util/import';
@@ -103,6 +103,10 @@ export class ImportManager {
    */
   importFile(file: string, name?: string): Import {
     file = this.#resolver.getFileImportName(file);
+
+    if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
+      file = ManifestModuleUtil.withOutputExtension(file);
+    }
 
     // Allow for node classes to be imported directly
     if (/@types\/node/.test(file)) {

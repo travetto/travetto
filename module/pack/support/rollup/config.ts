@@ -18,7 +18,7 @@ function getFilesFromModule(m: ManifestModule): string[] {
   ]
     .filter(([, t]) => t === 'ts' || t === 'js' || t === 'json')
     .filter(f => (f[3] ?? 'std') === 'std') // Only include standard files
-    .map(([f]) => ManifestModuleUtil.sourceToOutputExt(path.resolve(m.outputFolder, f)));
+    .map(([f]) => ManifestModuleUtil.withOutputExtension(path.resolve(m.outputFolder, f)));
 }
 
 export function getOutput(): OutputOptions {

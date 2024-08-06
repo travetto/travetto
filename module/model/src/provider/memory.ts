@@ -25,6 +25,7 @@ const STREAM_META = `${STREAMS}_meta`;
 
 type StoreType = Map<string, Buffer>;
 
+
 @Config('model.memory')
 export class MemoryModelConfig {
   autoCreate?: boolean = true;

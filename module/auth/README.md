@@ -26,7 +26,7 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
 
 **Code: Principal Structure**
 ```typescript
-export interface Principal<D = { [key: string]: any }> {
+export interface Principal<D = AnyMap> {
   /**
    * Primary identifier for a user
    */

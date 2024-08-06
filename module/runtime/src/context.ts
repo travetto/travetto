@@ -1,6 +1,7 @@
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-import type { ManifestIndex, ManifestContext } from '@travetto/manifest';
+import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@travetto/manifest';
 
 import { Env } from './env';
 import { RuntimeIndex } from './manifest-index';
@@ -91,7 +92,7 @@ class $Runtime {
 
   /** Resolve resource paths */
   resourcePaths(paths: string[] = []): string[] {
-    return [...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'].map(v => this.modulePath(v));
+    return [...new Set([...paths, ...Env.TRV_RESOURCES.list ?? [], '@#resources', '@@#resources'].map(v => this.modulePath(v)))];
   }
 
   /** Get source for function */
@@ -102,6 +103,19 @@ class $Runtime {
   /** Get import for function */
   getImport(fn: Function): string {
     return describeFunction(fn).import;
+  }
+
+  /** Import from a given path */
+  importFrom<T = unknown>(imp?: string): Promise<T> {
+    const file = path.resolve(this.#idx.mainModule.sourcePath, imp!);
+    if (existsSync(file)) {
+      imp = this.#idx.getFromSource(file)?.import;
+    }
+    if (!imp) {
+      throw new Error(`Unable to find ${imp}, not in the manifest`);
+    }
+    imp = ManifestModuleUtil.withOutputExtension(imp);
+    return import(imp);
   }
 }
 

@@ -1,7 +1,4 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Runtime } from '@travetto/runtime';
 import { CliCommandShape, CliCommand, CliValidationError, ParsedState } from '@travetto/cli';
 import { Ignore } from '@travetto/schema';
 
@@ -14,19 +11,10 @@ export class MainCommand implements CliCommandShape {
   @Ignore()
   _parsed: ParsedState;
 
-  async #getImport(fileOrImport: string): Promise<string | undefined> {
-    // If referenced file exists
-    let file = fileOrImport;
-    if (await (fs.stat(path.resolve(fileOrImport)).then(() => true, () => false))) {
-      file = path.join(Runtime.main.name, fileOrImport);
-    }
-
-    return RuntimeIndex.getFromImport(file)?.import;
-  }
-
   async validate(fileOrImport: string): Promise<CliValidationError | undefined> {
-    const imp = await this.#getImport(fileOrImport);
-    if (!imp) {
+    try {
+      await Runtime.importFrom(fileOrImport);
+    } catch {
       return { message: `Unknown file: ${fileOrImport}` };
     }
   }
@@ -34,8 +22,7 @@ export class MainCommand implements CliCommandShape {
   async main(fileOrImport: string, args: string[] = []): Promise<void> {
     let res: unknown;
     try {
-      const imp = await this.#getImport(fileOrImport);
-      const mod = await import(imp!);
+      const mod = await Runtime.importFrom<{ main(..._: unknown[]): Promise<unknown> }>(fileOrImport);
       res = await mod.main(...args, ...this._parsed.unknown);
     } catch (err) {
       res = err;
