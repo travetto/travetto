@@ -107,8 +107,8 @@ class $ConsoleManager implements ConsoleListener {
     const outEv = {
       ...ev,
       timestamp: new Date(),
-      module: ev.module ?? ev.import?.[0]!,
-      modulePath: ev.modulePath ?? ev.import?.[1],
+      module: ev.module ?? ev.import?.[0],
+      modulePath: ev.modulePath ?? ev.import?.[1]
     };
 
     if (this.#filters[outEv.level] && !this.#filters[outEv.level]!(outEv)) {
