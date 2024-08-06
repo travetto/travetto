@@ -3,7 +3,7 @@ import { TimeSpan, Util } from '@travetto/runtime';
 import { Timeout } from './timeout';
 
 function canCancel(o: unknown): o is { cancel(): unknown } {
-  return !!o && (typeof o === 'object') && 'cancel' in o;
+  return !!o && (typeof o === 'object') && 'cancel' in o && typeof o.cancel === 'function';
 }
 
 /**

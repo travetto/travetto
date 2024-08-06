@@ -6,7 +6,7 @@ import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
 
 function isCleanable(o: unknown): o is { toClean(): unknown } {
-  return !!o && typeof o === 'object' && 'toClean' in o;
+  return !!o && typeof o === 'object' && 'toClean' in o && typeof o.toClean === 'function';
 }
 
 /**
