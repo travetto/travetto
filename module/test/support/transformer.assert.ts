@@ -153,7 +153,7 @@ export class AssertTransformer {
   static doAssert(state: TransformerState & AssertState, node: ts.CallExpression, cmd: Command): ts.CallExpression {
     this.initState(state);
 
-    const first = CoreUtil.getArgument<ts.CallExpression>(node);
+    const first = CoreUtil.findArgument(node, e => ts.isCallExpression(e));
     const firstText = first!.getText();
 
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
@@ -175,7 +175,7 @@ export class AssertTransformer {
    * Convert `assert.(throws|rejects|doesNotThrow|doesNotReject)` to the appropriate structure
    */
   static doThrows(state: TransformerState & AssertState, node: ts.CallExpression, key: string, args: ts.Expression[]): ts.CallExpression {
-    const first = CoreUtil.getArgument<ts.CallExpression>(node);
+    const first = CoreUtil.findArgument(node, e => ts.isCallExpression(e));
     const firstText = first!.getText();
 
     this.initState(state);

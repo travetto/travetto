@@ -13,17 +13,16 @@ export class Barrier {
   /**
    * Listen for an unhandled event, as a promise
    */
-  static listenForUnhandled(): Promise<unknown> & { cancel: () => void } {
-    const uncaught = Util.resolvablePromise<unknown>();
+  static listenForUnhandled(): Promise<unknown> & { cancel?: () => void } {
+    const uncaught = Util.resolvablePromise<Promise<unknown> & { cancel?: () => void }>();
     const onError = (err: Error): void => { Util.queueMacroTask().then(() => uncaught.reject(err)); };
     process.on('unhandledRejection', onError).on('uncaughtException', onError);
     const cancel = (): void => {
       process.off('unhandledRejection', onError).off('unhandledException', onError);
-      uncaught.resolve(undefined); // Close the promise
+      uncaught.resolve(undefined!); // Close the promise
     };
     Object.defineProperty(uncaught.promise, 'cancel', { value: cancel });
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return uncaught.promise as unknown as ReturnType<(typeof Barrier)['listenForUnhandled']>;
+    return uncaught.promise;
   }
 
   #support: string[] = [];
