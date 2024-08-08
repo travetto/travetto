@@ -8,6 +8,12 @@ export type ClassInstance<T = any> = T & {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type MethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<(this: V, ...params: any[]) => R>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AsyncMethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<(this: V, ...params: any[]) => Promise<R>>;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AsyncItrMethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<(this: V, ...params: any[]) => AsyncIterable<R>>;
+
 export type AnyMap = {
   [key: string]: any;
 };

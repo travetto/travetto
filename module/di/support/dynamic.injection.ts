@@ -1,4 +1,4 @@
-import { Class, ClassInstance, describeFunction } from '@travetto/runtime';
+import { Class, describeFunction } from '@travetto/runtime';
 import { RetargettingProxy } from '@travetto/registry';
 
 import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';

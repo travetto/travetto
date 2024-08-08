@@ -14,13 +14,11 @@ export type ResolutionType = 'strict' | 'loose' | 'any';
 const PrimaryCandidateⲐ = Symbol.for('@travetto/di:primary');
 
 function hasPostConstruct(o: unknown): o is { postConstruct: () => Promise<unknown> } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['postConstruct'];
+  return !!o && typeof o === 'object' && 'postConstruct' in o && typeof o.postConstruct === 'function';
 }
 
 function hasPreDestroy(o: unknown): o is { preDestroy: () => unknown } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['preDestroy'];
+  return !!o && typeof o === 'object' && 'preDestroy' in o && typeof o.preDestroy === 'function';
 }
 
 /**

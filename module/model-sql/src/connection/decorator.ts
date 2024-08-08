@@ -1,4 +1,4 @@
-import { MethodDescriptor } from '@travetto/runtime';
+import { AsyncItrMethodDescriptor, AsyncMethodDescriptor } from '@travetto/runtime';
 import { Connection, TransactionType } from './base';
 
 /**
@@ -13,7 +13,7 @@ export interface ConnectionAware<C = unknown> {
  */
 export function Connected() {
   return function <T extends { conn?: Connection }>(
-    target: T, prop: string | symbol, desc: MethodDescriptor<T>
+    target: T, prop: string | symbol, desc: AsyncMethodDescriptor<T>
   ): void {
     const og = desc.value!;
     desc.value = function (...args: unknown[]): ReturnType<typeof og> {
@@ -27,7 +27,7 @@ export function Connected() {
  */
 export function ConnectedIterator() {
   return function <T extends { conn?: Connection }>(
-    target: T, prop: string | symbol, desc: MethodDescriptor<T>
+    target: T, prop: string | symbol, desc: AsyncItrMethodDescriptor<T>
   ): void {
     const og = desc.value!;
     desc.value = async function* (...args: unknown[]): ReturnType<typeof og> {
@@ -41,7 +41,7 @@ export function ConnectedIterator() {
  */
 export function Transactional(mode: TransactionType = 'required') {
   return function <T extends { conn?: Connection }>(
-    target: unknown, prop: string | symbol, desc: MethodDescriptor<T>
+    target: unknown, prop: string | symbol, desc: AsyncMethodDescriptor<T>
   ): void {
     const og = desc.value!;
     desc.value = function (...args: unknown[]): ReturnType<typeof og> {
