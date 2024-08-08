@@ -52,8 +52,7 @@ export class CliCommandSchemaUtil {
    * Get schema for a given command
    */
   static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = 'main' in src ? src.constructor as Class : src;
+    const cls = 'main' in src ? src.constructor : src;
     if (this.#schemas.has(cls)) {
       return this.#schemas.get(cls)!;
     }
@@ -150,8 +149,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = cmd.constructor as Class<CliCommandShape>;
+    const cls = cmd.constructor;
     BindUtil.bindSchemaToObject(cls, cmd, template);
     return BindUtil.coerceMethodParams(cls, 'main', bound);
   }
@@ -160,8 +158,7 @@ export class CliCommandSchemaUtil {
    * Validate command shape with the given arguments
    */
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = cmd.constructor as Class<CliCommandShape>;
+    const cls = cmd.constructor;
 
     const paramNames = SchemaRegistry.getMethodSchema(cls, 'main').map(x => x.name);
 

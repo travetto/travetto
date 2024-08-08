@@ -15,8 +15,7 @@ class $CliCommandRegistry {
   }
 
   #getClass(cmd: CliCommandShape): Class<CliCommandShape> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return cmd.constructor as Class;
+    return cmd.constructor;
   }
 
   /**

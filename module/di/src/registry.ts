@@ -297,7 +297,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Get all available candidate types for the target
    */
-  getCandidateTypes<T>(target: Class<T>): InjectableConfig<T>[] {
+  getCandidateTypes<T, U = T>(target: Class<U>): InjectableConfig<T>[] {
     const targetId = target.Ⲑid;
     const qualifiers = this.targetToClass.get(targetId)!;
     const uniqueQualifiers = qualifiers ? Array.from(new Set(qualifiers.values())) : [];

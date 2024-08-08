@@ -83,9 +83,12 @@ class $RootLogger extends Logger {
 
   /** Set level for operation */
   initLevel(defaultLevel: CompilerLogLevel | 'none'): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const build = process.env.TRV_BUILD as CompilerLogLevel | 'none';
-    this.level = (build !== 'none' && process.env.TRV_QUIET !== 'true') ? (build || defaultLevel) : 'none';
+    const val = process.env.TRV_QUIET !== 'true' ? process.env.TRV_BUILD : 'none';
+    switch (val) {
+      case 'debug': case 'warn': case 'error': case 'info': this.level = val; break;
+      case undefined: this.level = defaultLevel; break;
+      case 'none': default: this.level = 'none';
+    }
   }
 
   /** Produce a scoped logger */

@@ -5,8 +5,11 @@ export type ClassInstance<T = any> = T & {
   constructor: ConcreteClass<T> & { Ⲑid: string };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type MethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<(this: V, ...params: any[]) => R>;
+
 export type AnyMap = {
-  [key: string]: any
+  [key: string]: any;
 };
 
 export type Primitive = number | bigint | boolean | string | Date;

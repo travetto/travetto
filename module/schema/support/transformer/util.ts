@@ -183,6 +183,7 @@ export class SchemaTransformUtil {
       state.createDecorator(FIELD_MOD, 'Field', ...params)
     ];
 
+    let ret: unknown;
     if (ts.isPropertyDeclaration(node)) {
       const comments = DocUtil.describeDocs(node);
       if (comments.description) {
@@ -191,22 +192,20 @@ export class SchemaTransformUtil {
         })));
       }
 
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return state.factory.updatePropertyDeclaration(node as Exclude<typeof node, T>,
-        newModifiers, node.name, node.questionToken, node.type, node.initializer) as T;
+      ret = state.factory.updatePropertyDeclaration(node,
+        newModifiers, node.name, node.questionToken, node.type, node.initializer);
     } else if (ts.isParameter(node)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return state.factory.updateParameterDeclaration(node as Exclude<typeof node, T>,
-        newModifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer) as T;
+      ret = state.factory.updateParameterDeclaration(node,
+        newModifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
     } else if (ts.isGetAccessorDeclaration(node)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return state.factory.updateGetAccessorDeclaration(node as Exclude<typeof node, T>,
-        newModifiers, node.name, node.parameters, node.type, node.body) as T;
+      ret = state.factory.updateGetAccessorDeclaration(node,
+        newModifiers, node.name, node.parameters, node.type, node.body);
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return state.factory.updateSetAccessorDeclaration(node as Exclude<typeof node, T>,
-        newModifiers, node.name, node.parameters, node.body) as T;
+      ret = state.factory.updateSetAccessorDeclaration(node,
+        newModifiers, node.name, node.parameters, node.body);
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return ret as T;
   }
 
   /**

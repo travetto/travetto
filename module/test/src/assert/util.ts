@@ -34,7 +34,6 @@ export class AssertUtil {
         break;
       }
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return util.inspect(val, false, 1).replace(/\n/g, ' ');
   }
 

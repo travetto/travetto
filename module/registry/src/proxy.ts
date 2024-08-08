@@ -130,8 +130,8 @@ export class RetargettingProxy<T> {
     return this.#handler.target;
   }
 
-  get(): T {
+  get<V extends T>(): V {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.#instance as T;
+    return this.#instance as V;
   }
 }

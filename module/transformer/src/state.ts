@@ -15,14 +15,12 @@ import { CoreUtil } from './util/core';
 import { LiteralUtil } from './util/literal';
 import { SystemUtil } from './util/system';
 
-function hasOriginal(n: unknown): n is { original: ts.Node } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!n && !(n as { parent?: unknown }).parent && !!(n as { original: unknown }).original;
+function hasOriginal(n: ts.Node): n is ts.Node & { original: ts.Node } {
+  return !!n && !!n.parent && 'original' in n;
 }
 
-function hasEscapedName(n: unknown): n is { name: { escapedText: string } } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!n && !!(n as { name?: { escapedText?: string } }).name?.escapedText;
+function hasEscapedName(n: ts.Node): n is ts.Node & { name: { escapedText: string } } {
+  return !!n && 'name' in n && typeof n.name === 'object' && !!n.name && 'escapedText' in n.name;
 }
 
 /**

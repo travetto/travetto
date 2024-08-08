@@ -4,8 +4,7 @@ import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry, ResolutionType } from './registry';
 
 function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Partial<InjectConfig> | undefined)[]): T {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  let out = {} as T;
+  let out: Partial<T> = {};
   if (args) {
     if (Array.isArray(args)) {
       for (const arg of args) {
@@ -16,11 +15,11 @@ function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Par
         }
       }
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      out = args as T;
+      out = args;
     }
   }
-  return out;
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return out as T;
 }
 
 /**
@@ -43,8 +42,7 @@ export type InjectConfig = { qualifier?: symbol, optional?: boolean, resolution?
 
 export function InjectArgs(configs?: InjectConfig[][]) {
   return <T extends Class>(target: T): void => {
-    DependencyRegistry.registerConstructor(target,
-      configs?.map(x => collapseConfig(...x)));
+    DependencyRegistry.registerConstructor(target, configs?.map(x => collapseConfig(...x)));
   };
 }
 

@@ -10,12 +10,12 @@ import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
 import { Connection } from '../connection/base';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$not' in (o as object);
+const has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) =>
+  !!o && typeof o === 'object' && '$and' in o;
+const has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) =>
+  !!o && typeof o === 'object' && '$or' in o;
+const has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) =>
+  !!o && typeof o === 'object' && '$not' in o;
 
 interface Alias {
   alias: string;
