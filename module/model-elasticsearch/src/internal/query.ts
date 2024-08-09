@@ -1,6 +1,6 @@
-import { QueryDslQueryContainer, SearchRequest, SearchResponse, Sort, SortOptions } from '@elastic/elasticsearch/lib/api/types';
+import { DeleteByQueryRequest, QueryDslQueryContainer, SearchRequest, SearchResponse, Sort, SortOptions } from '@elastic/elasticsearch/lib/api/types';
 
-import { Class } from '@travetto/runtime';
+import { asT, Class, TypedObject } from '@travetto/runtime';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
 import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
@@ -11,13 +11,6 @@ import { ModelType } from '@travetto/model/src/types/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types';
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$not' in (o as object);
 
 /**
  * Support tools for dealing with elasticsearch specific requirements
@@ -34,8 +27,7 @@ export class ElasticsearchQueryUtil {
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subPath = `${path}${key}`;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      if (DataUtil.isPlainObject(sub[key]) && !Object.keys(sub[key] as Record<string, unknown>)[0].startsWith('$')) {
+      if (DataUtil.isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
         Object.assign(out, this.extractSimple(sub[key], `${subPath}.`));
       } else {
         out[subPath] = sub[key];
@@ -53,8 +45,7 @@ export class ElasticsearchQueryUtil {
     const exclude: string[] = [];
     for (const k of Object.keys(simp)) {
       const nk = k === 'id' ? '_id' : k;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const v = simp[k] as (1 | 0 | boolean);
+      const v = asT<1 | 0 | boolean>(simp[k]);
       if (v === 0 || v === false) {
         exclude.push(nk);
       } else {
@@ -71,8 +62,7 @@ export class ElasticsearchQueryUtil {
     return sort.map<SortOptions>(x => {
       const o = this.extractSimple(x);
       const k = Object.keys(o)[0];
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const v = o[k] as (boolean | -1 | 1);
+      const v = asT<boolean | -1 | 1>(o[k]);
       return { [k]: { order: v === 1 || v === true ? 'asc' : 'desc' } };
     });
   }
@@ -84,8 +74,7 @@ export class ElasticsearchQueryUtil {
     const items = [];
     const schema = SchemaRegistry.getViewSchema(cls).schema;
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    for (const key of Object.keys(o) as (keyof typeof o)[]) {
+    for (const key of TypedObject.keys(o)) {
       const top = o[key];
       const declaredSchema = schema[key];
       const declaredType = declaredSchema.type;
@@ -157,8 +146,7 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$regex': {
-              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              const pattern = DataUtil.toRegex(v as string);
+              const pattern = DataUtil.toRegex(asT<string>(v));
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
                   `${sPath}.text_cs` :
@@ -183,9 +171,8 @@ export class ElasticsearchQueryUtil {
             case '$near': {
               let dist = top.$maxDistance;
               let unit = top.$unit ?? 'm';
-              if (unit === 'rad') {
-                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-                dist = 6378.1 * (dist as number);
+              if (unit === 'rad' && typeof dist === 'number') {
+                dist = 6378.1 * dist;
                 unit = 'km';
               }
               items.push({
@@ -218,11 +205,11 @@ export class ElasticsearchQueryUtil {
    * Build query from the where clause
    */
   static extractWhereQuery<T>(cls: Class<T>, o: WhereClause<T>, config?: EsSchemaConfig): Record<string, unknown> {
-    if (has$And(o)) {
+    if (ModelQueryUtil.has$And(o)) {
       return { bool: { must: o.$and.map(x => this.extractWhereQuery<T>(cls, x, config)) } };
-    } else if (has$Or(o)) {
+    } else if (ModelQueryUtil.has$Or(o)) {
       return { bool: { should: o.$or.map(x => this.extractWhereQuery<T>(cls, x, config)), ['minimum_should_match']: 1 } };
-    } else if (has$Not(o)) {
+    } else if (ModelQueryUtil.has$Not(o)) {
       return { bool: { ['must_not']: this.extractWhereQuery<T>(cls, o.$not, config) } };
     } else {
       return this.extractWhereTermQuery(cls, o, config);
@@ -265,13 +252,14 @@ export class ElasticsearchQueryUtil {
   /**
    * Build a base search object from a class and a query
    */
-  static getSearchObject<T extends ModelType>(cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, checkExpiry = true): SearchRequest {
+  static getSearchObject<T extends ModelType>(
+    cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, checkExpiry = true
+  ): SearchRequest & Omit<DeleteByQueryRequest, 'index' | 'sort'> {
     query.where = query.where ? (typeof query.where === 'string' ? QueryLanguageParser.parseToQuery(query.where) : query.where) : {};
     QueryVerifier.verify(cls, query); // Verify
 
-    const search: SearchRequest = {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      query: this.getSearchQuery(cls, this.extractWhereQuery(cls, query.where as WhereClause<T>, config), checkExpiry)
+    const search: (SearchRequest & Omit<DeleteByQueryRequest, 'index' | 'sort'>) = {
+      query: this.getSearchQuery(cls, this.extractWhereQuery(cls, query.where, config), checkExpiry)
     };
 
     const sort = query.sort;
@@ -320,8 +308,7 @@ export class ElasticsearchQueryUtil {
     for (const r of results.hits.hits) {
       const obj = r._source!;
       if (includeId) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        (obj as unknown as { _id: string })._id = r._id!;
+        asT<{ _id: string }>(obj)._id = r._id!;
       }
       out.push(obj);
     }
