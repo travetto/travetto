@@ -37,3 +37,7 @@ export function impartial<T>(input: Partial<T>): T {
 export function clsInstance<T>(cls: Class<T>, args: unknown[] = []): ClassInstance<T> {
   return new (cls as ConcreteClass)(...args);
 }
+
+export function asT<T>(input: unknown): T {
+  return input as T;
+}

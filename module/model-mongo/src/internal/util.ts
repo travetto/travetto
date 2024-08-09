@@ -1,6 +1,6 @@
 import { Binary, ObjectId } from 'mongodb';
 
-import { Class } from '@travetto/runtime';
+import { asT, Class, TypedObject } from '@travetto/runtime';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
 import type { ModelType, IndexField } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
@@ -29,13 +29,11 @@ export class MongoUtil {
   static toIndex<T extends ModelType>(f: IndexField<T>): Record<string, number> {
     const keys = [];
     while (typeof f !== 'number' && typeof f !== 'boolean' && Object.keys(f)) {
-      const key = Object.keys(f)[0];
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      f = f[key as keyof typeof f] as IndexField<T>;
+      const key = TypedObject.keys(f)[0];
+      f = asT<IndexField<T>>(f[key]);
       keys.push(key);
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const rf = f as unknown as (number | boolean);
+    const rf = asT<number | boolean>(f);
     return {
       [keys.join('.')]: typeof rf === 'boolean' ? (rf ? 1 : 0) : rf
     };
@@ -64,8 +62,7 @@ export class MongoUtil {
 
   static preInsertId<T extends ModelType>(item: T): T {
     if (item && item.id) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const itemWithId = item as WithId<T>;
+      const itemWithId = asT<WithId<T>>(item);
       itemWithId._id = this.uuid(item.id);
     }
     return item;
@@ -82,22 +79,15 @@ export class MongoUtil {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) => !!o && '$and' in (o as object);
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  static has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) => !!o && '$or' in (o as object);
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  static has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$not' in (o as object);
-
   /**
    * Build mongo where clause
    */
   static extractWhereClause<T>(cls: Class<T>, o: WhereClause<T>): Record<string, unknown> {
-    if (this.has$And(o)) {
+    if (ModelQueryUtil.has$And(o)) {
       return { $and: o.$and.map(x => this.extractWhereClause<T>(cls, x)) };
-    } else if (this.has$Or(o)) {
+    } else if (ModelQueryUtil.has$Or(o)) {
       return { $or: o.$or.map(x => this.extractWhereClause<T>(cls, x)) };
-    } else if (this.has$Not(o)) {
+    } else if (ModelQueryUtil.has$Not(o)) {
       return { $nor: [this.extractWhereClause<T>(cls, o.$not)] };
     } else {
       return this.extractSimple(cls, o);
@@ -134,13 +124,11 @@ export class MongoUtil {
   static extractSimple<T>(base: Class<T> | undefined, o: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
     const schema = base ? SchemaRegistry.get(base) : undefined;
     const out: Record<string, unknown> = {};
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const sub = o as Record<string, unknown>;
+    const sub = o;
     const keys = Object.keys(sub);
     for (const key of keys) {
       const subpath = `${path}${key}`;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const v = sub[key] as Record<string, unknown>;
+      const v = asT<Record<string, unknown>>(sub[key]);
       const subField = schema?.views[AllViewⲐ].schema[key];
 
       if (subpath === 'id') { // Handle ids directly
@@ -170,18 +158,14 @@ export class MongoUtil {
               v.$nin = [null, []];
             }
           } else if (firstKey === '$regex') {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            v.$regex = DataUtil.toRegex(v.$regex as string | RegExp);
+            v.$regex = DataUtil.toRegex(asT<string | RegExp>(v.$regex));
           } else if (firstKey && '$near' in v) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            const dist = v.$maxDistance as number;
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            const distance = dist / RADIANS_TO[(v.$unit as DistanceUnit ?? 'km')];
+            const dist = asT<number>(v.$maxDistance);
+            const distance = dist / RADIANS_TO[(asT<DistanceUnit>(v.$unit) ?? 'km')];
             v.$maxDistance = distance;
             delete v.$unit;
           } else if (firstKey && '$geoWithin' in v) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            const coords = v.$geoWithin as [number, number][];
+            const coords = asT<[number, number][]>(v.$geoWithin);
             const first = coords[0];
             const last = coords[coords.length - 1];
             // Connect if not

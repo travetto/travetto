@@ -93,4 +93,11 @@ export class ModelQueryUtil {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return query as U & { where: WhereClause<T> & { id: string } };
   }
+
+  static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) =>
+    !!o && typeof o === 'object' && '$and' in o;
+  static has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) =>
+    !!o && typeof o === 'object' && '$or' in o;
+  static has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) =>
+    !!o && typeof o === 'object' && '$not' in o;
 }

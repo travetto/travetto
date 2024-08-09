@@ -10,13 +10,6 @@ import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
 import { Connection } from '../connection/base';
 
-const has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) =>
-  !!o && typeof o === 'object' && '$and' in o;
-const has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) =>
-  !!o && typeof o === 'object' && '$or' in o;
-const has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) =>
-  !!o && typeof o === 'object' && '$not' in o;
-
 interface Alias {
   alias: string;
   path: VisitStack[];
@@ -536,11 +529,11 @@ export abstract class SQLDialect implements DialectState {
   getWhereGroupingSQL<T>(cls: Class<T>, o: WhereClause<T>): string {
     const SQL_OPS = this.SQL_OPS;
 
-    if (has$And(o)) {
+    if (ModelQueryUtil.has$And(o)) {
       return `(${o.$and.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$and} `)})`;
-    } else if (has$Or(o)) {
+    } else if (ModelQueryUtil.has$Or(o)) {
       return `(${o.$or.map(x => this.getWhereGroupingSQL<T>(cls, x)).join(` ${SQL_OPS.$or} `)})`;
-    } else if (has$Not(o)) {
+    } else if (ModelQueryUtil.has$Not(o)) {
       return `${SQL_OPS.$not} (${this.getWhereGroupingSQL<T>(cls, o.$not)})`;
     } else {
       return this.getWhereFieldSQL(SQLUtil.classToStack(cls), o);
