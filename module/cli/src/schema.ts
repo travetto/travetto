@@ -52,7 +52,7 @@ export class CliCommandSchemaUtil {
    * Get schema for a given command
    */
   static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
-    const cls = 'main' in src ? src.constructor : src;
+    const cls = 'main' in src ? CliCommandRegistry.getClass(src) : src;
     if (this.#schemas.has(cls)) {
       return this.#schemas.get(cls)!;
     }
@@ -149,7 +149,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const cls = cmd.constructor;
+    const cls = CliCommandRegistry.getClass(cmd);
     BindUtil.bindSchemaToObject(cls, cmd, template);
     return BindUtil.coerceMethodParams(cls, 'main', bound);
   }
@@ -158,8 +158,7 @@ export class CliCommandSchemaUtil {
    * Validate command shape with the given arguments
    */
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
-    const cls = cmd.constructor;
-
+    const cls = CliCommandRegistry.getClass(cmd);
     const paramNames = SchemaRegistry.getMethodSchema(cls, 'main').map(x => x.name);
 
     const validators = [

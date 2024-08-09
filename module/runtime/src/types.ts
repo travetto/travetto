@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 export type Class<T = any> = abstract new (...args: any[]) => T;
 export type ConcreteClass<T = any> = new (...args: any[]) => T;
 export type ClassInstance<T = any> = T & {
@@ -39,6 +39,11 @@ export const TypedObject: {
 export function impartialArray<T>(input: Partial<T>[]): T[] {
   return input as unknown as T[];
 }
+
 export function impartial<T>(input: Partial<T>): T {
   return input as unknown as T;
+}
+
+export function clsInstance<T>(cls: Class<T>): ClassInstance<T> {
+  return new (cls as ConcreteClass)();
 }

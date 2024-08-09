@@ -50,8 +50,6 @@ export type CliValidationError = {
  */
 export interface CliCommandShape<T extends unknown[] = unknown[]> {
 
-  constructor: Class<CliCommandShape>;
-
   /**
    * Parsed state
    */

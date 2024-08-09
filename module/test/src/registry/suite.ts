@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, Runtime, describeFunction, impartial, impartialArray } from '@travetto/runtime';
+import { Class, Runtime, clsInstance, describeFunction, impartial, impartialArray } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite';
@@ -74,8 +74,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       })));
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    config.instance = new (config.class as ConcreteClass)();
+    config.instance = clsInstance(config.class);
     config.tests = impartialArray(tests!);
 
     if (!config.description) {

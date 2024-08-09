@@ -14,8 +14,9 @@ class $CliCommandRegistry {
     return this.#commands.get(cls);
   }
 
-  #getClass(cmd: CliCommandShape): Class<CliCommandShape> {
-    return cmd.constructor;
+  getClass(cmd: CliCommandShape): Class<CliCommandShape> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return cmd.constructor as Class<CliCommandShape>;
   }
 
   /**
@@ -55,7 +56,7 @@ class $CliCommandRegistry {
    * Get config for a given instance
    */
   getConfig(cmd: CliCommandShape): CliCommandConfig {
-    return this.getByClass(this.#getClass(cmd))!;
+    return this.getByClass(this.getClass(cmd))!;
   }
 
   /**
