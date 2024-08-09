@@ -46,8 +46,7 @@ export class TodoController {
    */
   @Post('/')
   async create(todo: TodoRequest): Promise<Todo> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return await this._svc.add(todo as Todo);
+    return await this._svc.add({ ...todo, id: undefined! });
   }
 
   /**

@@ -63,9 +63,7 @@ export class CompilerClient {
 
   /** Get server information, if server is running */
   info(): Promise<CompilerServerInfo | undefined> {
-    return this.#fetch('/info', { timeout: 200 }, false).then(v => JSON.parse(v.text), () => undefined)
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      .then(v => v as CompilerServerInfo);
+    return this.#fetch('/info', { timeout: 200 }, false).then(v => JSON.parse(v.text), () => undefined);
   }
 
   async isWatching(): Promise<boolean> {

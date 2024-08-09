@@ -1,6 +1,6 @@
 import os from 'node:os';
 
-import { type ManifestModuleFileType, type ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { ManifestContext, type ManifestModuleFileType, type ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';
@@ -61,8 +61,7 @@ export class CompilerWatcher {
 
     const cleanup = await lib.subscribe(rootPath, (err, events) => {
       if (err) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        q.throw(err instanceof Error ? err : new Error((err as Error).message));
+        q.throw(err instanceof Error ? err : new Error(`${err}`));
         return;
       }
       q.add(events.map(ev => ({ action: ev.type, file: path.toPosix(ev.path) })));
@@ -91,11 +90,12 @@ export class CompilerWatcher {
       mods.map(m => [m, this.#state.manifestIndex.getDependentModules(m, 'parents').map(x => x.name)])
     );
 
-    const moduleToFiles = new Map([...mods, ...parents.values()].flat().map(m => [m, {
-      context: ManifestUtil.getModuleContext(this.#state.manifest, this.#state.manifestIndex.getManifestModule(m)!.sourceFolder),
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      files: [] as FileShape[]
-    }] as const));
+    const moduleToFiles = new Map<string, { context: ManifestContext, files: FileShape[] }>(
+      [...mods, ...parents.values()].flat().map(m => [m, {
+        context: ManifestUtil.getModuleContext(this.#state.manifest, this.#state.manifestIndex.getManifestModule(m)!.sourceFolder),
+        files: []
+      }])
+    );
 
     const allFiles = events.map(ev => {
       const modRoot = ev.entry.module.sourceFolder || this.#state.manifest.workspace.path;

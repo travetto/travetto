@@ -9,16 +9,14 @@ export class CoreUtil {
    * See if inbound node has an original property
    */
   static hasOriginal(o: ts.Node): o is (ts.Node & { original: ts.Node }) {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return 'original' in o && !!(o as { original?: ts.Node }).original;
+    return 'original' in o && !!o.original;
   }
 
   /**
    * See if type has target
    */
   static hasTarget(o: ts.Type): o is (ts.Type & { target: ts.Type }) {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return 'target' in o && !!(o as { target?: ts.Type }).target;
+    return 'target' in o && !!o.target;
   }
 
   /**
@@ -36,12 +34,19 @@ export class CoreUtil {
   /**
    * Find the primary argument of a call expression, or decorator.
    */
-  static getArgument<T extends ts.Expression = ts.Expression>(node: ts.CallExpression | undefined, position = 0): T | undefined {
-    if (node && node!.arguments && node!.arguments.length >= position + 1) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return node.arguments[position] as T;
+  static findArgument<T extends ts.Expression = ts.Expression>(node: ts.CallExpression | undefined, pred: (x: ts.Expression) => x is T): T | undefined {
+    if (node && node.arguments && node.arguments.length) {
+      return node.arguments.find(pred);
     }
-    return;
+  }
+
+  /**
+   * Find the first argument of a call expression, or decorator.
+   */
+  static firstArgument(node: ts.CallExpression | undefined): ts.Expression | undefined {
+    if (node && node!.arguments && node!.arguments.length) {
+      return node.arguments[0];
+    }
   }
 
   /**

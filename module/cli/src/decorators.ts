@@ -109,9 +109,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
     const runtimeModule = cfg.runtimeModule ?? (cfg.with?.module ? 'current' : undefined);
 
     if (runtimeModule) { // Validate module
-      (pendingCls.validators ??= []).push(async item => {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const { module: mod } = item as CliCommandShapeFields;
+      (pendingCls.validators ??= []).push(async ({ module: mod }: Partial<CliCommandShapeFields>) => {
         const runModule = (runtimeModule === 'command' ? commandModule : mod) || Runtime.main.name;
 
         // If we need to run as a specific module

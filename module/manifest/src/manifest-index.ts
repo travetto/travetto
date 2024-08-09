@@ -4,7 +4,6 @@ import { ManifestModuleUtil } from './module';
 import { path } from './path';
 import { ManifestUtil } from './util';
 
-import type { ManifestModuleFolderType } from './types/common';
 import type { ManifestModule, ManifestRoot, ManifestModuleFile, IndexedModule, IndexedFile, FindConfig } from './types/manifest';
 
 const TypedObject: {
@@ -88,10 +87,9 @@ export class ManifestIndex {
         outputPath: this.#resolveOutput(m.outputFolder),
         sourcePath: path.resolve(this.#manifest.workspace.path, m.sourceFolder),
         children: new Set(),
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        files: Object.fromEntries(
-          Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
-        ) as Record<ManifestModuleFolderType, IndexedFile[]>
+        files: TypedObject.fromEntries(
+          TypedObject.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
+        )
       }));
 
     for (const mod of this.#modules) {

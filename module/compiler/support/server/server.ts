@@ -164,8 +164,13 @@ export class CompilerServer {
     let out: unknown;
     let close = false;
     switch (action) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      case 'event': return this.#addListener(subAction as 'change', res);
+      case 'event': {
+        switch (subAction) {
+          case 'change': case 'log': case 'progress': case 'state': case 'all':
+            return this.#addListener(subAction, res);
+          default: return;
+        }
+      }
       case 'clean': out = await this.#clean(); break;
       case 'stop': out = JSON.stringify({ closing: true }); close = true; break;
       case 'info':

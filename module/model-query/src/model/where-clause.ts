@@ -88,4 +88,3 @@ export type ValidStringFields<T> = {
   [K in Extract<keyof T, string>]:
   (T[K] extends (String | string | string[] | String[] | undefined) ? K : never)
 }[Extract<keyof T, string>];
-

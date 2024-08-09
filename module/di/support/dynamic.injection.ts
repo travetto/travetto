@@ -1,4 +1,4 @@
-import { Class, ClassInstance, describeFunction } from '@travetto/runtime';
+import { Class, describeFunction } from '@travetto/runtime';
 import { RetargettingProxy } from '@travetto/registry';
 
 import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
@@ -20,7 +20,7 @@ class $DynamicDependencyRegistry {
    */
   proxyInstance<T>(target: ClassTarget<T>, qual: symbol | undefined, instance: T): T {
     const { qualifier, id: classId } = this.#registryResolveTarget(target, qual);
-    let proxy: RetargettingProxy<T>;
+    let proxy: RetargettingProxy<unknown>;
 
     if (!this.#proxies.has(classId)) {
       this.#proxies.set(classId, new Map());
@@ -33,18 +33,16 @@ class $DynamicDependencyRegistry {
         console.debug('Registering proxy', { id: target.Ⲑid, qualifier: qualifier.toString() });
       }
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      proxy = this.#proxies.get(classId)!.get(qualifier) as RetargettingProxy<T>;
+      proxy = this.#proxies.get(classId)!.get(qualifier)!;
       proxy.setTarget(instance);
       if (this.#registry.trace) {
         console.debug('Updating target', {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          id: target.Ⲑid, qualifier: qualifier.toString(), instanceType: (instance as unknown as ClassInstance<T>).constructor.name as string
+          id: target.Ⲑid, qualifier: qualifier.toString(), instanceType: target.name
         });
       }
     }
 
-    return proxy.get();
+    return proxy.get<T>();
   }
 
   /**

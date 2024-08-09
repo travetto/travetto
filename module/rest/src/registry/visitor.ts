@@ -45,7 +45,6 @@ export class ControllerVisitUtil {
     for (const cls of ControllerRegistry.getClasses()) {
       await this.visitController(visitor, cls, options);
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return await visitor.onComplete?.() ?? undefined as T;
+    return await visitor.onComplete?.() ?? undefined!;
   }
 }

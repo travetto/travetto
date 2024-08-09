@@ -15,6 +15,8 @@ const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 't
 const VALID_OUTPUT_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
 const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>([...VALID_OUTPUT_TYPE, 'typings']);
 
+const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(o: T): K[] } & ObjectConstructor = Object;
+
 /**
  * Produce delta for the manifest
  */
@@ -72,8 +74,7 @@ export class ManifestDeltaUtil {
    */
   static #flattenModuleFiles(m: ManifestModule): Record<string, ManifestModuleFile> {
     const out: Record<string, ManifestModuleFile> = {};
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    for (const key of Object.keys(m.files) as (ManifestModuleFolderType[])) {
+    for (const key of TypedObject.keys(m.files)) {
       if (!VALID_SOURCE_FOLDERS.has(key)) {
         continue;
       }

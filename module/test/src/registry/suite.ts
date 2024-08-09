@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, Runtime, describeFunction } from '@travetto/runtime';
+import { Class, Runtime, clsInstance, describeFunction, impartial, impartialArray } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite';
@@ -57,8 +57,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    * a full projection of all listeners and tests.
    */
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const config = this.getOrCreatePending(cls) as SuiteConfig;
+    const config = impartial(this.getOrCreatePending(cls));
     const tests = [...this.pendingFields.get(cls.Ⲑid)!.values()];
 
     const parent = this.getParentClass(cls);
@@ -75,10 +74,8 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       })));
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    config.instance = new (config.class as ConcreteClass)();
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    config.tests = tests as TestConfig[];
+    config.instance = clsInstance(config.class);
+    config.tests = impartialArray(tests!);
 
     if (!config.description) {
       config.description = config.classId;

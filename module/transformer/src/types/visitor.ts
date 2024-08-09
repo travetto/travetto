@@ -42,6 +42,6 @@ export interface NodeTransformer<S extends State = State, T extends TransformerT
   type: T;
   key: string;
   target?: string[];
-  before?(state: S, node: N, dm?: DecoratorMeta): ts.Node | undefined;
-  after?(state: S, node: N, dm?: DecoratorMeta): ts.Node | undefined;
+  before?<Z extends ts.Node = ts.Node>(state: S, node: N, dm?: DecoratorMeta): Z | undefined;
+  after?<Z extends ts.Node = ts.Node>(state: S, node: N, dm?: DecoratorMeta): Z | undefined;
 }

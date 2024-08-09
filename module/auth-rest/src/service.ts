@@ -1,4 +1,4 @@
-import { AppError, Class } from '@travetto/runtime';
+import { AppError } from '@travetto/runtime';
 import { FilterContext, Request } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { Principal, Authorizer, Authenticator } from '@travetto/auth';
@@ -24,10 +24,7 @@ export class AuthService {
 
   async postConstruct(): Promise<void> {
     // Find all identity sources
-    for (const source of DependencyRegistry.getCandidateTypes<Authenticator>(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      AuthenticatorTarget as unknown as Class<Authenticator>
-    )) {
+    for (const source of DependencyRegistry.getCandidateTypes<Authenticator, AuthenticatorTarget>(AuthenticatorTarget)) {
       const dep = DependencyRegistry.getInstance<Authenticator>(AuthenticatorTarget, source.qualifier);
       this.#authenticators.set(source.qualifier, dep);
     }

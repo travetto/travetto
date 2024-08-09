@@ -1,3 +1,4 @@
+import { impartial } from '@travetto/runtime';
 import { Response, Request } from '../types';
 import { RequestCore } from './internal/request';
 import { ResponseCore } from './internal/response';
@@ -22,8 +23,7 @@ export class RestServerUtil {
     if (!('files' in req)) { req.files = undefined; }
     if (!('auth' in req)) { req.auth = undefined; }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return req as T;
+    return impartial<T>(req);
   }
 
   /**
@@ -32,7 +32,6 @@ export class RestServerUtil {
    */
   static decorateResponse<T extends Response>(res: Partial<T> & Record<string, unknown>): T {
     Object.setPrototypeOf(res, ResponseCore.prototype);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return res as T;
+    return impartial<T>(res);
   }
 }

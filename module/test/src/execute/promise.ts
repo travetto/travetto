@@ -1,4 +1,5 @@
 import { createHook, executionAsyncId } from 'node:async_hooks';
+import { isPromise } from 'node:util/types';
 
 import { ExecutionError } from '@travetto/worker';
 import { Util } from '@travetto/runtime';
@@ -11,9 +12,8 @@ export class PromiseCapturer {
   #id: number = 0;
 
   #init(id: number, type: string, triggerId: number, resource: unknown): void {
-    if (this.#id && type === 'PROMISE' && triggerId === this.#id) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      this.#pending.set(id, resource as Promise<unknown>);
+    if (this.#id && type === 'PROMISE' && triggerId === this.#id && isPromise(resource)) {
+      this.#pending.set(id, resource);
     }
   }
 

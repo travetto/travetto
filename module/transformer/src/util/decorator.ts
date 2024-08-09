@@ -56,15 +56,14 @@ export class DecoratorUtil {
   /**
    * Find the primary argument of a call expression, or decorator.
    */
-  static getPrimaryArgument<T extends ts.Expression = ts.Expression>(node: ts.Decorator | undefined): T | undefined {
-    return CoreUtil.getArgument(node && ts.isCallExpression(node.expression) ? node.expression : undefined);
+  static getPrimaryArgument(node: ts.Decorator | undefined): ts.Expression | undefined {
+    return CoreUtil.firstArgument(node && ts.isCallExpression(node.expression) ? node.expression : undefined);
   }
 
   /**
    * Find the primary argument of a call expression, or decorator.
    */
-  static getArguments<T extends ts.Expression = ts.Expression>(node: ts.Decorator | undefined): T[] | undefined {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return node && ts.isCallExpression(node.expression) ? [...node.expression.arguments] as T[] : undefined;
+  static getArguments(node: ts.Decorator | undefined): ts.Expression[] | undefined {
+    return node && ts.isCallExpression(node.expression) ? [...node.expression.arguments] : undefined;
   }
 }

@@ -13,8 +13,7 @@ export class ModelQuerySuggestSupportTarget { }
  * @param o
  */
 export function isQuerySupported(o: unknown): o is ModelQuerySupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['query'];
+  return !!o && typeof o === 'object' && 'query' in o && !!o.query;
 }
 
 /**
@@ -22,8 +21,7 @@ export function isQuerySupported(o: unknown): o is ModelQuerySupport {
  * @param o
  */
 export function isQueryCrudSupported(o: unknown): o is ModelQueryCrudSupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['deleteByQuery'];
+  return !!o && typeof o === 'object' && 'deleteByQuery' in o && !!o.deleteByQuery;
 }
 
 /**
@@ -31,8 +29,7 @@ export function isQueryCrudSupported(o: unknown): o is ModelQueryCrudSupport {
  * @param o
  */
 export function isQueryFacetSupported(o: unknown): o is ModelQueryFacetSupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['facet'];
+  return !!o && typeof o === 'object' && 'facet' in o && !!o.facet;
 }
 
 /**
@@ -40,6 +37,5 @@ export function isQueryFacetSupported(o: unknown): o is ModelQueryFacetSupport {
  * @param o
  */
 export function isQuerySuggestSupported(o: unknown): o is ModelQuerySuggestSupport {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['suggest'];
+  return !!o && typeof o === 'object' && 'suggest' in o && !!o.suggest;
 }

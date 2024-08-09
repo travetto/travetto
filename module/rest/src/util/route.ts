@@ -18,9 +18,8 @@ function hasDisabled(o: unknown): o is { disabled: boolean } {
   return !!o && typeof o === 'object' && 'disabled' in o;
 }
 
-function hasPaths(o: unknown): o is { paths: string[] } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && typeof o === 'object' && 'paths' in o && Array.isArray((o as Record<string, unknown>)['paths']);
+function hasPaths(o: unknown): o is { paths: string[], [RouteChecker]: RouteApplies } {
+  return !!o && typeof o === 'object' && 'paths' in o && Array.isArray(o['paths']);
 }
 
 /**
@@ -79,8 +78,7 @@ export class RouteUtil {
 
     // Verify if route applies matches, let it override interceptor-level applies
     if (hasPaths(config) && config.paths.length) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const applies = (config as unknown as { [RouteChecker]: RouteApplies })[RouteChecker] ??= RouteCheckUtil.matcher(config.paths);
+      const applies = config[RouteChecker] ??= RouteCheckUtil.matcher(config.paths);
       const result = applies(route, router);
       console.log('Verifying paths', interceptor.constructor.name, router?.basePath, route.path, config.paths, result);
       if (result === false) {
@@ -121,7 +119,7 @@ export class RouteUtil {
       if (inst.config) {
         let resolved =
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          inst.resolveConfig?.(values) as unknown as LightweightConfig ??
+          inst.resolveConfig?.(values) as LightweightConfig ??
           Object.assign({}, inst.config, ...values);
 
         if (inst.finalizeConfig) {

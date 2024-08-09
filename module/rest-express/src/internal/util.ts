@@ -47,9 +47,8 @@ export class ExpressServerUtil {
         }
       },
       send(data): void {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const contentType: string = (res.getHeader('Content-Type') as string) ?? '';
-        if (contentType.includes('json') && typeof data === 'string') {
+        const contentType = res.getHeader('Content-Type');
+        if (typeof contentType === 'string' && contentType.includes('json') && typeof data === 'string') {
           data = Buffer.from(data);
         }
         res.send(data);

@@ -1,11 +1,8 @@
-import { TimeSpan, TimeUtil } from '@travetto/runtime';
+import { MethodDescriptor, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { CacheService } from './service';
 import { CoreCacheConfig, CacheConfig } from './types';
 import { CacheAware, CacheConfigⲐ, EvictConfigⲐ } from './internal/types';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type MethodDescriptor<R = any, V = unknown> = TypedPropertyDescriptor<(this: V, ...params: any[]) => R>;
 
 /**
  * Indicates a method is intended to cache.  The return type must be properly serializable

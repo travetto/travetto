@@ -14,9 +14,9 @@ export class ErrorUtil {
   /**
    *  Prepare error for transmission
    */
-  static serializeError(e: Error | SerializedError): SerializedError;
+  static serializeError(e: Error | SerializedError): Error;
   static serializeError(e: undefined): undefined;
-  static serializeError(e: Error | SerializedError | undefined): SerializedError | undefined {
+  static serializeError(e: Error | SerializedError | undefined): Error | undefined {
     let error: SerializedError | undefined;
 
     if (e) {
@@ -66,13 +66,11 @@ export class ErrorUtil {
     if (out.phase === 'after') {
       if (out.type === 'test') {
         if (out.test.error) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          out.test.error = this.serializeError(out.test.error) as Error;
+          out.test.error = this.serializeError(out.test.error);
         }
       } else if (out.type === 'assertion') {
         if (out.assertion.error) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          out.assertion.error = this.serializeError(out.assertion.error) as Error;
+          out.assertion.error = this.serializeError(out.assertion.error);
         }
       }
     }

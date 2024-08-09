@@ -46,14 +46,16 @@ export class ModelCrudUtil {
    * @param input Input as string or plain object
    */
   static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
+    let resolvedInput: object;
     if (typeof input === 'string') {
-      input = JSON.parse(input);
+      resolvedInput = JSON.parse(input);
     } else if (input instanceof Buffer) {
-      input = JSON.parse(input.toString('utf8'));
+      resolvedInput = JSON.parse(input.toString('utf8'));
+    } else {
+      resolvedInput = input;
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const result = ModelRegistry.getBaseModel(cls).from(input as object) as T;
+    const result = ModelRegistry.getBaseModel(cls).from(resolvedInput);
 
     if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
       if (onTypeMismatch === 'notfound') {

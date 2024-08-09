@@ -76,10 +76,9 @@ export class SqliteConnection extends Connection<Database> {
     return this.#withRetries(async () => {
       console.debug('Executing query', { query });
       try {
-        const out = await conn.prepare(query)[query.trim().startsWith('SELECT') ? 'all' : 'run']();
+        const out = await conn.prepare<unknown[], T>(query)[query.trim().startsWith('SELECT') ? 'all' : 'run']();
         if (Array.isArray(out)) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const records: T[] = [...out as T[]].map(v => ({ ...v }));
+          const records: T[] = out.map(v => ({ ...v }));
           return { count: out.length, records };
         } else {
           return { count: out.changes, records: [] };

@@ -35,10 +35,9 @@ export class TimeUtil {
     if (amount instanceof Date) {
       return amount.getTime();
     } else if (typeof amount === 'string') {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { groups } = (amount.match(this.#timePattern) as { groups: { amount?: string, unit?: TimeUnit } });
-      const amountStr = groups?.amount ?? `${amount}`;
-      unit = groups?.unit ?? unit ?? 'ms';
+      const groups: { amount?: string, unit?: TimeUnit } = amount.match(this.#timePattern)?.groups ?? {};
+      const amountStr = groups.amount ?? `${amount}`;
+      unit = groups.unit ?? unit ?? 'ms';
       if (!TIME_UNITS[unit]) {
         return NaN;
       }

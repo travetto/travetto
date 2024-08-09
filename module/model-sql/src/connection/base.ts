@@ -95,7 +95,7 @@ export abstract class Connection<C = unknown> {
    * @param op
    * @param args
    */
-  async * iterateWithActive<R>(op: () => AsyncGenerator<R>): AsyncIterable<R> {
+  async * iterateWithActive<R>(op: () => AsyncIterable<R>): AsyncIterable<R> {
     if (this.active) {
       yield* op();
     }
@@ -117,7 +117,7 @@ export abstract class Connection<C = unknown> {
   /**
    * Run a function within a valid sql transaction.  Relies on @travetto/context.
    */
-  async runWithTransaction<R>(mode: TransactionType, op: () => R): Promise<R> {
+  async runWithTransaction<R>(mode: TransactionType, op: () => Promise<R>): Promise<R> {
     if (this.activeTx) {
       if (mode === 'isolated' || mode === 'force') {
         const txId = mode === 'isolated' ? `tx${Util.uuid()}` : undefined;

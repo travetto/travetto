@@ -62,8 +62,7 @@ export class DynamicCommonjsLoader {
     } else {
       this.#modules.get(file)!.setTarget(mod);
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.#modules.get(file)!.get() as T;
+    return this.#modules.get(file)!.get<T>();
   }
 
   async init(): Promise<void> {

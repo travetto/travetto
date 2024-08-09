@@ -89,9 +89,8 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unk
   async destroy(): Promise<void> {
     if (this.#proc) {
       console.debug('Killing', { pid: this.#parentId, id: this.id });
-      if (this.#proc !== process) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        (this.#proc as ChildProcess).kill();
+      if (!('argv' in this.#proc)) {
+        this.#proc.kill();
       }
       this.#proc = undefined;
     }

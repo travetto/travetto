@@ -1,4 +1,4 @@
-import type { AnyMap, Class } from '@travetto/runtime';
+import type { Any, Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import type { RouteConfig, Filter } from '../types';
@@ -25,7 +25,7 @@ export abstract class ManagedInterceptorConfig {
  *
  * @concrete ../internal/types#RestInterceptorTarget
  */
-export interface RestInterceptor<C = AnyMap> {
+export interface RestInterceptor<C = Any> {
 
   /**
    * Config for interceptor

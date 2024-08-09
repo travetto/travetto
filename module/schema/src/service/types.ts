@@ -1,4 +1,4 @@
-import { Class, Primitive } from '@travetto/runtime';
+import { Any, Class, Primitive } from '@travetto/runtime';
 
 import { AllViewⲐ } from '../internal/types';
 import { ValidatorFn } from '../validate/types';
@@ -65,7 +65,7 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * Global validators
    */
-  validators: ValidatorFn<unknown, unknown>[];
+  validators: ValidatorFn<Any, unknown>[];
   /**
    * Is the class a base type
    */

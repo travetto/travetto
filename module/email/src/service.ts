@@ -48,7 +48,7 @@ export class MailService {
    * @param ctx
    * @returns
    */
-  async renderMessage(keyOrMessage: string | EmailCompiled, ctx: Record<string, unknown>): Promise<EmailCompiled> {
+  async renderMessage(keyOrMessage: string | EmailCompiled | EmailOptions, ctx: Record<string, unknown>): Promise<EmailCompiled> {
     const tpl = (typeof keyOrMessage === 'string' ? await this.getCompiled(keyOrMessage) : keyOrMessage);
 
     const [html, text, subject] = await Promise.all([
@@ -78,8 +78,7 @@ export class MailService {
   ): Promise<S> {
     const keyOrMessage = key ?? ('html' in message ? message : '') ?? '';
     const context = ctx ?? (('context' in message) ? message.context : {}) ?? {};
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const compiled = await this.renderMessage(keyOrMessage as EmailCompiled, context);
+    const compiled = await this.renderMessage(keyOrMessage, context);
 
     const final = { ...base, ...message, ...compiled, context };
 

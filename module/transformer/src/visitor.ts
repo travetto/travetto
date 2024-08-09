@@ -126,8 +126,7 @@ export class VisitorFactory<S extends State = State> {
     }
 
     for (const all of set[phase]!.get('ALL') ?? []) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      node = (all[phase]!(state, node) as T) ?? node;
+      node = all[phase]!<T>(state, node) ?? node;
     }
     return node;
   }
@@ -160,8 +159,7 @@ export class VisitorFactory<S extends State = State> {
 
       // For all matching handlers, execute
       for (const item of values) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        node = (item[phase]!(state, node, dec) as T) ?? node;
+        node = item[phase]!<T>(state, node, dec) ?? node;
       }
     }
     return node;

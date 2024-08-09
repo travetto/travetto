@@ -60,25 +60,10 @@ export class ImageConverter {
     localCheck: ['jpegoptim', ['-h']]
   });
 
-  static async #stream<T extends ImageType>(proc: ChildProcess, input: T): Promise<T> {
-    if (Buffer.isBuffer(input)) {
-      const [_, output] = await Promise.all([
-        pipeline(Readable.from(input), proc.stdin!),
-        toBuffer(proc.stdout!)
-      ]);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return output as T;
-    } else {
-      input.pipe(proc.stdin!); // Start the process
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return proc.stdout! as T;
-    }
-  }
-
   /**
    * Resize image using imagemagick
    */
-  static async resize<T extends ImageType>(image: T, options: ImageOptions): Promise<T> {
+  static async #resize(options: ImageOptions): Promise<ChildProcess> {
     const dims = [options.w, options.h].map(d => (d && options.strictResolution !== false) ? `${d}!` : d).join('x');
 
     const proc = await this.CONVERTER.exec(
@@ -86,13 +71,13 @@ export class ImageConverter {
       ...(options.optimize ? ['-strip', '-quality', '86'] : []),
       '-', '-');
 
-    return this.#stream(proc, image);
+    return proc;
   }
 
   /**
    * Optimize png using pngquant
    */
-  static async optimize<T extends ImageType>(format: 'png' | 'jpeg', image: T): Promise<T> {
+  static async #optimize(format: 'png' | 'jpeg'): Promise<ChildProcess> {
     let proc: ChildProcess;
     switch (format) {
       case 'png': {
@@ -105,7 +90,43 @@ export class ImageConverter {
         break;
       }
     }
-    return this.#stream(proc, image);
+    return proc;
+  }
+
+  /**
+   * Resize image using imagemagick
+   */
+  static async resizeBuffer(image: Buffer, options: ImageOptions): Promise<Buffer> {
+    const proc = await this.#resize(options);
+    Readable.from(image).pipe(proc.stdin!);
+    return toBuffer(proc.stdout!);
+  }
+
+  /**
+   * Resize image using imagemagick
+   */
+  static async resizeStream(image: Readable, options: ImageOptions): Promise<Readable> {
+    const proc = await this.#resize(options);
+    image.pipe(proc.stdin!); // Start the process
+    return proc.stdout!;
+  }
+
+  /**
+   * Optimize image
+   */
+  static async optimizeBuffer(format: 'png' | 'jpeg', image: Buffer): Promise<Buffer> {
+    const proc = await this.#optimize(format);
+    Readable.from(image).pipe(proc.stdin!);
+    return toBuffer(proc.stdout!);
+  }
+
+  /**
+   * Optimize image
+   */
+  static async optimizeStream(format: 'png' | 'jpeg', image: Readable): Promise<Readable> {
+    const proc = await this.#optimize(format);
+    image.pipe(proc.stdin!); // Start the process
+    return proc.stdout!;
   }
 
   /**

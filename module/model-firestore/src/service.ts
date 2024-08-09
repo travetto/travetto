@@ -1,4 +1,4 @@
-import { DocumentData, FieldValue, Firestore, PartialWithFieldValue, Query, UpdateData } from '@google-cloud/firestore';
+import { DocumentData, FieldValue, Firestore, PartialWithFieldValue, Query } from '@google-cloud/firestore';
 
 import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
@@ -74,8 +74,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    await this.#getCollection(cls).doc(item.id).update(clone(prepped) as unknown as UpdateData<DocumentData>);
+    await this.#getCollection(cls).doc(item.id).update(clone<DocumentData>(prepped));
     return prepped;
   }
 

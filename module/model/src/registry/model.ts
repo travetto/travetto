@@ -103,7 +103,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   /**
    * Find base class for a given model
    */
-  getBaseModel(cls: Class): Class<ModelType> {
+  getBaseModel<T extends ModelType>(cls: Class<T>): Class<T> {
     if (!this.baseModels.has(cls)) {
       let conf = this.get(cls) ?? this.getOrCreatePending(cls);
       let parent = cls;

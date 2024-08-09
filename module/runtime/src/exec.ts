@@ -93,8 +93,8 @@ export class ExecUtil {
   static getResult(proc: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
   static getResult(proc: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
   static getResult<T extends string | Buffer>(proc: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const res = (proc as unknown as { [RESULT]: Promise<ExecutionResult> })[RESULT] ??= new Promise<ExecutionResult>(resolve => {
+    const _proc: ChildProcess & { [RESULT]?: Promise<ExecutionResult> } = proc;
+    const res = _proc[RESULT] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let done = false;

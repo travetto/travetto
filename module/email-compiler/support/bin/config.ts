@@ -40,8 +40,7 @@ export class EditorConfig {
       const data: EditorConfigType = parse(content) ?? {};
       return key ? data[key] : data;
     } catch {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return {} as EditorConfigType;
+      return { to: undefined!, from: undefined! };
     }
   }
 

@@ -6,13 +6,12 @@ import type { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
-const COLORS = ([
+const COLORS = ([...[
   '#8787ff', '#87afff', '#87d7ff', '#87ff87', '#87ffaf', '#87ffd7', '#87ffff', '#af87ff', '#afafd7', '#afafff', '#afd7af', '#afd7d7', '#afd7ff', '#afff87', '#afffaf',
   '#afffd7', '#afffff', '#d787ff', '#d7afaf', '#d7afd7', '#d7afff', '#d7d7af', '#d7d7d7', '#d7d7ff', '#d7ff87', '#d7ffaf', '#d7ffd7', '#d7ffff', '#ff8787', '#ff87af',
   '#ff87d7', '#ff87ff', '#ffaf87', '#ffafaf', '#ffafd7', '#ffafff', '#ffd787', '#ffd7af', '#ffd7d7', '#ffd7ff', '#ffff87', '#ffffaf', '#ffffd7', '#ffffff', '#bcbcbc',
   '#c6c6c6', '#d0d0d0', '#dadada', '#e4e4e4', '#eeeeee'
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-]).sort((a, b) => Math.random() < .5 ? -1 : 1).map(x => StyleUtil.getStyle(x as `#${string}`));
+] as const]).sort((a, b) => Math.random() < .5 ? -1 : 1).map(x => StyleUtil.getStyle(x));
 
 type ModuleRunConfig<T = ExecutionResult<string>> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
@@ -53,6 +52,8 @@ export class RepoExecUtil {
 
     config.showStdout = config.showStdout ?? (Env.DEBUG.isSet && !Env.DEBUG.isFalse);
     config.showStderr = config.showStderr ?? true;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const transform = config.transformResult ?? ((mod, result): T => result as T);
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
 
@@ -83,9 +84,7 @@ export class RepoExecUtil {
           }
 
           const result = await ExecUtil.getResult(proc, { catch: true });
-
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const output = (config.transformResult ? config.transformResult(mod, result) : result) as T;
+          const output = transform(mod, result);
           results.set(mod, output);
         }
         return config.progressMessage?.(mod) ?? mod.name;

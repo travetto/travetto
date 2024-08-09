@@ -32,8 +32,7 @@ export function Upload(
     // Register field
     SchemaRegistry.registerPendingParamConfig(inst.constructor, prop, idx, Object, { specifiers: ['file'] });
     ControllerRegistry.registerEndpointInterceptorConfig(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      inst.constructor, inst[prop] as RouteHandler, RestAssetInterceptor,
+      inst.constructor, inst[prop], RestAssetInterceptor,
       {
         maxSize: finalConf.maxSize,
         types: finalConf.types,
