@@ -1,4 +1,4 @@
-import type { Class, ConcreteClass } from '@travetto/runtime';
+import { clsInstance, type Class } from '@travetto/runtime';
 import { TestConsumer } from './types';
 
 /**
@@ -45,8 +45,7 @@ class $TestConsumerRegistry {
     await this.manualInit();
 
     return typeof consumer === 'string' ?
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      new ((this.get(consumer) ?? this.#primary) as ConcreteClass)() :
+      clsInstance(this.get(consumer) ?? this.#primary) :
       consumer;
   }
 }

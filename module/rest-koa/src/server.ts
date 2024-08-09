@@ -57,8 +57,10 @@ export class KoaRestServer implements RestServer<koa> {
 
   async unregisterRoutes(key: string | symbol): Promise<void> {
     // Delete previous
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const pos = this.raw.middleware.findIndex(x => (x as Keyed).key === key);
+    const pos = this.raw.middleware.findIndex(x => {
+      const _x: (typeof x) & { key?: string } = x;
+      return _x.key === key;
+    });
     if (pos >= 0) {
       this.raw.middleware.splice(pos, 1);
     }
@@ -70,8 +72,7 @@ export class KoaRestServer implements RestServer<koa> {
     // Register all routes to extract the proper request/response for the framework
     for (const route of routes) {
       const routePath = route.path.replaceAll('*', '(.*)');
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      router[route.method as 'get'](routePath, async (ctx) => {
+      router[route.method](routePath, async (ctx) => {
         const [req, res] = ctx[TravettoEntityⲐ] ??= [
           KoaServerUtil.getRequest(ctx),
           KoaServerUtil.getResponse(ctx)

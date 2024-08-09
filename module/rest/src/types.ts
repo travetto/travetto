@@ -8,7 +8,7 @@ export type Request = TravettoRequest;
 export type Response = TravettoResponse;
 export type ByteRange = TravettoByteRange;
 
-export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'trace' | 'all';
+export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 
 export type FilterReturn = void | unknown | Promise<void | unknown>;
 export type FilterNext = () => FilterReturn;

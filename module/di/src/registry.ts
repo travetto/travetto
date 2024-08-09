@@ -1,4 +1,4 @@
-import { Class, ClassInstance, ConcreteClass, Runtime, describeFunction } from '@travetto/runtime';
+import { Class, ClassInstance, Runtime, clsInstance, describeFunction, impartial } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
@@ -161,8 +161,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // Create instance
     const inst = managed.factory ?
       managed.factory(...consValues) :
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      new (managed.class as ConcreteClass<T>)(...consValues);
+      clsInstance(managed.class, consValues);
 
     // And auto-wire fields
     await this.resolveFieldDependencies(managed, inst);
@@ -198,7 +197,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     if (this.instancePromises.get(classId)!.has(qualifier)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return this.instancePromises.get(classId)!.get(qualifier) as unknown as T;
+      return this.instancePromises.get(classId)!.get(qualifier) as Promise<T>;
     }
 
     const instancePromise = this.construct(target, qualifier);
@@ -307,8 +306,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Get candidate instances by target type, with an optional filter
    */
   getCandidateInstances<T>(target: Class, predicate?: (cfg: InjectableConfig<T>) => boolean): Promise<T[]> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const inputs = this.getCandidateTypes<T>(target as Class<T>).filter(x => !predicate || predicate(x));
+    const inputs = this.getCandidateTypes<T>(target).filter(x => !predicate || predicate(x));
     return Promise.all(inputs.map(l => this.getInstance<T>(l.class, l.qualifier)));
   }
 
@@ -351,9 +349,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
     if (pConfig.dependencies) {
       config.dependencies = {
-        fields: {},
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        ...pConfig.dependencies as Omit<InjectableConfig['dependencies'], 'fields'>
+        ...pConfig.dependencies,
+        fields: {
+          ...pConfig.dependencies.fields
+        }
       };
     }
   }
@@ -386,8 +385,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Create mock cls for DI purposes
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = { Ⲑid: config.id } as Class;
+    const cls = impartial<Class>({ Ⲑid: config.id });
 
     finalConfig.class = cls;
 
@@ -397,8 +395,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.factories.set(config.src.Ⲑid, new Map());
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.factories.get(config.src.Ⲑid)!.set(cls, finalConfig as InjectableConfig);
+    this.factories.get(config.src.Ⲑid)!.set(cls, impartial(finalConfig));
   }
 
   /**
@@ -555,8 +552,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Inject fields into instance
    */
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor as Class<T>): Promise<void> {
+  async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<void> {
     this.verifyInitialized();
     // Compute fields to be auto-wired
     return await this.resolveFieldDependencies(this.get(cls), o);

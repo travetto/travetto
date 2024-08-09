@@ -61,8 +61,7 @@ export class CompilerWatcher {
 
     const cleanup = await lib.subscribe(rootPath, (err, events) => {
       if (err) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        q.throw(err instanceof Error ? err : new Error((err as Error).message));
+        q.throw(err instanceof Error ? err : new Error(`${err}`));
         return;
       }
       q.add(events.map(ev => ({ action: ev.type, file: path.toPosix(ev.path) })));

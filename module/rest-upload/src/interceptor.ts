@@ -1,4 +1,4 @@
-import busboy, { type BusboyHeaders } from '@fastify/busboy';
+import busboy from '@fastify/busboy';
 
 import { Inject, Injectable } from '@travetto/di';
 import {
@@ -51,8 +51,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
 
     console.log('Starting multipart upload', req.header('content-length'));
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const uploader = busboy({ headers: req.headers as BusboyHeaders, limits: { fileSize: largestMax } })
+    const uploader = busboy({ headers: { ...req.headers, 'content-type': req.getContentType()?.type! }, limits: { fileSize: largestMax } })
       .on('file', (field, stream, filename) =>
         uploads.push(
           RestUploadUtil.convertToBlob(stream, filename, config.files![field]?.maxSize ?? largestMax)
@@ -70,8 +69,11 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
         uploader.on('finish', () => res(undefined)).on('error', res);
         req.pipe(uploader);
       } catch (err2) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        res(err2 as Error);
+        if (err2 instanceof Error) {
+          res(err2);
+        } else {
+          res(new Error(`${err2}`));
+        }
       }
     });
 
