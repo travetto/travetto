@@ -16,11 +16,11 @@ import { LiteralUtil } from './util/literal';
 import { SystemUtil } from './util/system';
 
 function hasOriginal(n: ts.Node): n is ts.Node & { original: ts.Node } {
-  return !!n && !!n.parent && 'original' in n;
+  return !!n && !n.parent && 'original' in n && !!n.original;
 }
 
 function hasEscapedName(n: ts.Node): n is ts.Node & { name: { escapedText: string } } {
-  return !!n && 'name' in n && typeof n.name === 'object' && !!n.name && 'escapedText' in n.name;
+  return !!n && 'name' in n && typeof n.name === 'object' && !!n.name && 'escapedText' in n.name && !!n.name.escapedText;
 }
 
 /**

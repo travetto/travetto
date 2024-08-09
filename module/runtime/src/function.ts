@@ -56,6 +56,6 @@ export function flushPendingFunctions(): Function[] {
  */
 export function describeFunction(fn: Function): FunctionMetadata;
 export function describeFunction(fn?: Function): FunctionMetadata | undefined {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return (fn as unknown as { [METADATA]: FunctionMetadata })?.[METADATA];
+  const _fn: (Function & { [METADATA]?: FunctionMetadata }) | undefined = fn;
+  return _fn?.[METADATA];
 }

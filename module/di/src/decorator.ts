@@ -1,4 +1,4 @@
-import type { Class, ClassInstance } from '@travetto/runtime';
+import { impartial, type Class, type ClassInstance } from '@travetto/runtime';
 
 import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry, ResolutionType } from './registry';
@@ -18,8 +18,7 @@ function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Par
       out = args;
     }
   }
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return out as T;
+  return impartial(out);
 }
 
 /**

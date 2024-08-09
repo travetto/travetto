@@ -35,7 +35,7 @@ export class CoreUtil {
    * Find the primary argument of a call expression, or decorator.
    */
   static findArgument<T extends ts.Expression = ts.Expression>(node: ts.CallExpression | undefined, pred: (x: ts.Expression) => x is T): T | undefined {
-    if (node && node!.arguments && node!.arguments.length) {
+    if (node && node.arguments && node.arguments.length) {
       return node.arguments.find(pred);
     }
   }

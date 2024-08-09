@@ -26,8 +26,7 @@ export class EnvProp<T> {
     } else if (Array.isArray(val)) {
       out = val.join(',');
     } else if (typeof val === 'object') {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      out = Object.entries(val as Record<string, string>).map(([k, v]) => `${k}=${v}`).join(',');
+      out = Object.entries(val).map(([k, v]) => `${k}=${v}`).join(',');
     } else {
       out = `${val}`;
     }

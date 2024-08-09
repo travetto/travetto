@@ -14,9 +14,14 @@ export type AsyncMethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<(t
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsyncItrMethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<(this: V, ...params: any[]) => AsyncIterable<R>>;
 
+export type ClassTDecorator<T extends Class = Class> = (target: T) => T | void;
+
 export type AnyMap = {
   [key: string]: any;
 };
+
+export type Any = any;
+
 
 export type Primitive = number | bigint | boolean | string | Date;
 
@@ -30,3 +35,10 @@ export const TypedObject: {
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;
   entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
 } & ObjectConstructor = Object;
+
+export function impartialArray<T>(input: Partial<T>[]): T[] {
+  return input as unknown as T[];
+}
+export function impartial<T>(input: Partial<T>): T {
+  return input as unknown as T;
+}
