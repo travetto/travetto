@@ -61,10 +61,20 @@ export class ImageConverter {
     localCheck: ['jpegoptim', ['-h']]
   });
 
+  static async #stream<T extends ImageType>(proc: ChildProcess, input: T): Promise<T> {
+    if (Buffer.isBuffer(input)) {
+      Readable.from(input).pipe(proc.stdin!);
+      return castTo(toBuffer(proc.stdout!));
+    } else {
+      input.pipe(proc.stdin!); // Start the process
+      return castTo(proc.stdout);
+    }
+  }
+
   /**
    * Resize image using imagemagick
    */
-  static async resize<T extends Buffer | Readable>(image: T, options: ImageOptions): Promise<T> {
+  static async resize<T extends ImageType>(image: T, options: ImageOptions): Promise<T> {
     const dims = [options.w, options.h].map(d => (d && options.strictResolution !== false) ? `${d}!` : d).join('x');
 
     const proc = await this.CONVERTER.exec(
@@ -72,20 +82,13 @@ export class ImageConverter {
       ...(options.optimize ? ['-strip', '-quality', '86'] : []),
       '-', '-');
 
-
-    if (Buffer.isBuffer(image)) {
-      Readable.from(image).pipe(proc.stdin!);
-      return castTo(toBuffer(proc.stdout!));
-    } else {
-      image.pipe(proc.stdin!); // Start the process
-      return castTo(proc.stdout!);
-    }
+    return this.#stream(proc, image);
   }
 
   /**
    * Optimize image
    */
-  static async optimize<T extends Buffer | Readable>(format: 'png' | 'jpeg', image: T): Promise<T> {
+  static async optimize<T extends ImageType>(format: 'png' | 'jpeg', image: T): Promise<T> {
     let proc: ChildProcess;
     switch (format) {
       case 'png': {
@@ -98,13 +101,7 @@ export class ImageConverter {
         break;
       }
     }
-    if (Buffer.isBuffer(image)) {
-      Readable.from(image).pipe(proc.stdin!);
-      return castTo(toBuffer(proc.stdout!));
-    } else {
-      image.pipe(proc.stdin!); // Start the process
-      return castTo(proc.stdout!);
-    }
+    return this.#stream(proc, image);
   }
 
   /**
