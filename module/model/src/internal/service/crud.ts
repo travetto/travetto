@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-import { asClass, castTo, Class, asFull, Util } from '@travetto/runtime';
+import { castTo, Class, asFull, Util, asConstructable } from '@travetto/runtime';
 import { DataUtil, SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
@@ -83,7 +83,7 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = ModelRegistry.get(asClass(item.constructor));
+    const config = ModelRegistry.get(asConstructable(item).constructor);
     if (config.subType) { // Sub-typing, assign type
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
@@ -121,7 +121,7 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = ModelRegistry.get(asClass(item.constructor));
+    const config = ModelRegistry.get(asConstructable(item).constructor);
     if (config.subType) { // Sub-typing, assign type
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }

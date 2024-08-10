@@ -1,4 +1,4 @@
-import { asClass, Class, classConstruct, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asConstructable, Class, classConstruct, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
@@ -15,7 +15,7 @@ class $CliCommandRegistry {
   }
 
   getClass(cmd: CliCommandShape): Class<CliCommandShape> {
-    return asClass(cmd.constructor);
+    return asConstructable<CliCommandShape>(cmd).constructor;
   }
 
   /**

@@ -1,6 +1,6 @@
 import { isPromise } from 'node:util/types';
 
-import { asClass, castTo, Class } from '@travetto/runtime';
+import { asConstructable, castTo, Class } from '@travetto/runtime';
 
 import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
@@ -112,7 +112,7 @@ export class RouteUtil {
 
     const resolvedConfig = new Map<Class, LightweightConfig>();
     for (const inst of interceptors) {
-      const cls = asClass(inst.constructor);
+      const cls = asConstructable(inst).constructor;
       const values = resolvedConfigs.get(cls) ?? [];
       if (inst.config) {
         let resolved =
@@ -129,7 +129,7 @@ export class RouteUtil {
     }
     return interceptors.map(inst => [
       inst,
-      resolvedConfig.get(asClass(inst.constructor))
+      resolvedConfig.get(asConstructable(inst).constructor)
     ] as const);
   }
 

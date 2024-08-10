@@ -33,9 +33,7 @@ export function castTo<T>(input: unknown): T {
 }
 
 export const castKey = <T>(input: string | number | symbol): keyof T => castTo(input);
-export const asFullArray = <T>(input: Partial<T>[]): T[] => castTo(input);
 export const asFull = <T>(input: Partial<T>): T => castTo(input);
-export const asClass = <T = unknown>(input: Function | Class): Class<T> => castTo(input);
 export const asConstructable = <Z = unknown>(input: Class | unknown): { constructor: Class<Z> } => castTo(input);
 
 export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassInstance<T> {

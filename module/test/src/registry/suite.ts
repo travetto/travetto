@@ -1,4 +1,4 @@
-import { Class, Runtime, classConstruct, describeFunction, asFull, asFullArray } from '@travetto/runtime';
+import { Class, Runtime, classConstruct, describeFunction, asFull } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite';
@@ -75,7 +75,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     }
 
     config.instance = classConstruct(config.class);
-    config.tests = asFullArray(tests!);
+    config.tests = tests!.map(x => asFull(x));
 
     if (!config.description) {
       config.description = config.classId;

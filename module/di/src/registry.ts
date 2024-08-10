@@ -1,4 +1,4 @@
-import { Class, Runtime, asClass, asConstructable, castTo, classConstruct, describeFunction, asFull, castKey, TypedFunction } from '@travetto/runtime';
+import { Class, Runtime, asConstructable, castTo, classConstruct, describeFunction, asFull, castKey, TypedFunction } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
@@ -67,7 +67,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
           } else if (filtered.length > 1) {
             // If dealing with sub types, prioritize exact matches
             const exact = this
-              .getCandidateTypes(asClass(target))
+              .getCandidateTypes(castTo<Class>(target))
               .filter(x => x.class === target);
             if (exact.length === 1) {
               qualifier = exact[0].qualifier;
