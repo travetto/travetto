@@ -3,14 +3,12 @@ import { configure } from '@codegenie/serverless-express';
 import { Inject, Injectable } from '@travetto/di';
 import { ServerHandle } from '@travetto/rest';
 import {
-  AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ,
+  AwsLambdaHandle, AwsLambdaRestServer, AwsLambdaⲐ,
   RestAwsConfig, LambdaContext, LambdaAPIGatewayProxyEvent
 } from '@travetto/rest-aws-lambda';
 
 import { ExpressRestServer } from '@travetto/rest-express';
 import { castTo, asFull } from '@travetto/runtime';
-
-type AwsLambdaHandle = AwsLambdaHandler['handle'];
 
 /**
  * Aws Lambda Rest Server
