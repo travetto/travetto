@@ -1,4 +1,4 @@
-import { castKey, Class, ClassInstance, TypedObject } from '@travetto/runtime';
+import { castKey, castTo, Class, ClassInstance, TypedObject } from '@travetto/runtime';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
@@ -181,7 +181,7 @@ export class SchemaValidator {
       criteria.push(['maxlength', field.maxlength]);
     }
 
-    if (field.enum && (typeof value !== 'string' || !field.enum.values.includes(value))) {
+    if (field.enum && !field.enum.values.includes(castTo(value))) {
       criteria.push(['enum', field.enum]);
     }
 

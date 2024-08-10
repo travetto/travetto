@@ -5,6 +5,7 @@ import { ChildProcess } from 'node:child_process';
 import { pipeline } from 'node:stream/promises';
 
 import { CommandOperation } from '@travetto/command';
+import { castTo } from '@travetto/runtime';
 
 /**
  * Image output options
@@ -96,37 +97,29 @@ export class ImageConverter {
   /**
    * Resize image using imagemagick
    */
-  static async resizeBuffer(image: Buffer, options: ImageOptions): Promise<Buffer> {
+  static async resize<T extends Buffer | Readable>(image: T, options: ImageOptions): Promise<T> {
     const proc = await this.#resize(options);
-    Readable.from(image).pipe(proc.stdin!);
-    return toBuffer(proc.stdout!);
-  }
-
-  /**
-   * Resize image using imagemagick
-   */
-  static async resizeStream(image: Readable, options: ImageOptions): Promise<Readable> {
-    const proc = await this.#resize(options);
-    image.pipe(proc.stdin!); // Start the process
-    return proc.stdout!;
+    if (Buffer.isBuffer(image)) {
+      Readable.from(image).pipe(proc.stdin!);
+      return castTo(toBuffer(proc.stdout!));
+    } else {
+      image.pipe(proc.stdin!); // Start the process
+      return castTo(proc.stdout!);
+    }
   }
 
   /**
    * Optimize image
    */
-  static async optimizeBuffer(format: 'png' | 'jpeg', image: Buffer): Promise<Buffer> {
+  static async optimize<T extends Buffer | Readable>(format: 'png' | 'jpeg', image: T): Promise<T> {
     const proc = await this.#optimize(format);
-    Readable.from(image).pipe(proc.stdin!);
-    return toBuffer(proc.stdout!);
-  }
-
-  /**
-   * Optimize image
-   */
-  static async optimizeStream(format: 'png' | 'jpeg', image: Readable): Promise<Readable> {
-    const proc = await this.#optimize(format);
-    image.pipe(proc.stdin!); // Start the process
-    return proc.stdout!;
+    if (Buffer.isBuffer(image)) {
+      Readable.from(image).pipe(proc.stdin!);
+      return castTo(toBuffer(proc.stdout!));
+    } else {
+      image.pipe(proc.stdin!); // Start the process
+      return castTo(proc.stdout!);
+    }
   }
 
   /**
