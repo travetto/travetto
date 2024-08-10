@@ -1,4 +1,4 @@
-import { Util } from '@travetto/runtime';
+import { castTo, Util } from '@travetto/runtime';
 import { AsyncContext } from '@travetto/context';
 
 const ContextActiveⲐ: unique symbol = Symbol.for('@travetto/model:sql-active');
@@ -100,8 +100,7 @@ export abstract class Connection<C = unknown> {
       yield* op();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
+    const self = castTo<Connection>(this);
     yield* this.context.iterate(async function* () {
       try {
         self.context.set(ContextActiveⲐ, await self.acquire());

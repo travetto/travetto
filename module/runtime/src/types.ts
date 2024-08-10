@@ -4,9 +4,11 @@ export type ClassInstance<T = any> = T & {
   constructor: Class<T> & { Ⲑid: string };
 };
 
-export type MethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<(this: V, ...params: any[]) => R>;
-export type AsyncMethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<(this: V, ...params: any[]) => Promise<R>>;
-export type AsyncItrMethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<(this: V, ...params: any[]) => AsyncIterable<R>>;
+export type TypedFunction<R = any, V = unknown> = (this: V, ...args: any[]) => R;
+
+export type MethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<TypedFunction<R, V>>;
+export type AsyncMethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<TypedFunction<Promise<R>, V>>;
+export type AsyncItrMethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<TypedFunction<AsyncIterable<R>, V>>;
 export type ClassTDecorator<T extends Class = Class> = (target: T) => T | void;
 
 export type AnyMap = { [key: string]: any };

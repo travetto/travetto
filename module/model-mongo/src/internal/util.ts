@@ -18,9 +18,8 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
   rad: 1
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type WithId<T> = T & { _id?: any };
-const isWithId = <T extends ModelType>(o: T): o is WithId<T> => o && '_id' in o;
+export type WithId<T, I = unknown> = T & { _id?: I };
+const isWithId = <T extends ModelType, I = unknown>(o: T): o is WithId<T, I> => o && '_id' in o;
 
 /**
  * Basic mongo utils for conforming to the model module

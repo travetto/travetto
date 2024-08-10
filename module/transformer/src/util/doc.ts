@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { castToTrv, DeclDocumentation } from '../types/shared';
+import { TransformCast, DeclDocumentation } from '../types/shared';
 import { CoreUtil } from './core';
 import { DeclarationUtil } from './declaration';
 
@@ -38,7 +38,7 @@ export class DocUtil {
     if (node) {
       const tags = ts.getJSDocTags(node);
       while (!this.hasJSDoc(node) && CoreUtil.hasOriginal(node)) {
-        node = castToTrv<ts.Declaration>(node.original);
+        node = TransformCast<ts.Declaration>(node.original);
       }
 
       const docs = this.hasJSDoc(node) ? node.jsDoc : undefined;

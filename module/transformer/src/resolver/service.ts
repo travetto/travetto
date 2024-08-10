@@ -7,7 +7,7 @@ import { TypeCategorize, TypeBuilder } from './builder';
 import { VisitCache } from './cache';
 import { DocUtil } from '../util/doc';
 import { DeclarationUtil } from '../util/declaration';
-import { castToTrv } from '../types/shared';
+import { TransformCast } from '../types/shared';
 
 /**
  * Implementation of TransformResolver
@@ -81,7 +81,7 @@ export class SimpleResolver implements TransformResolver {
    * Fetch all type arguments for a give type
    */
   getAllTypeArguments(ref: ts.Type): ts.Type[] {
-    return castToTrv(this.#tsChecker.getTypeArguments(castToTrv(ref)));
+    return TransformCast(this.#tsChecker.getTypeArguments(TransformCast(ref)));
   }
 
   /**
@@ -148,7 +148,7 @@ export class SimpleResolver implements TransformResolver {
           delete result.tsSubTypes;
         }
         if (finalize) {
-          result = finalize(castToTrv(result));
+          result = finalize(TransformCast(result));
         }
       }
 

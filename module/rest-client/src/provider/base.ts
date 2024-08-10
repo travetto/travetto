@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/quotes */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -265,12 +264,12 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     }, null, 2)
       .replace(/^[  ]/gm, '   ')
       .replace(/^}/gm, '  }')
-      .replace('"this"', `this`)
-      .replaceAll('"', `'`)
+      .replace('"this"', 'this')
+      .replaceAll('"', '\'')
       .replace(/'([^']+)':/gms, (_, v) => `${v}:`);
 
     const paramNames = paramConfigs.map(x => x.sourceText ?? x.name!);
-    const paramArr = JSON.stringify(paramNames).replaceAll(`"`, '').replace(/,/g, ', ');
+    const paramArr = JSON.stringify(paramNames).replaceAll('"', '').replace(/,/g, ', ');
 
     imports.push(...[...this.endpointResponseWrapper].filter(x => typeof x !== 'string'));
     const opts: Imp = { name: 'RequestDefinition', file: './shared/types.ts', classId: '_common' };
@@ -279,9 +278,9 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
       imports,
       method: [
         ...this.renderEndpointDoc(endpoint, paramConfigs),
-        `  ${endpoint.handlerName}(`, ...paramInputs, `): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
-        `    return this.makeRequest<`, ...returnType, `>(${paramArr}, this.${requestField});\n`,
-        `  }\n\n`,
+        `  ${endpoint.handlerName}(`, ...paramInputs, '): ', ...this.endpointResponseWrapper, '<', ...returnType, '> {\n',
+        '    return this.makeRequest<', ...returnType, `>(${paramArr}, this.${requestField});\n`,
+        '  }\n\n',
       ],
       config: [`  ${requestField}: `, opts, ` = ${requestShape.trimEnd()};\n\n`,]
     };
@@ -335,9 +334,9 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
 
       fields.push(
         (field.title || field.description) ? `  /** ${field.title ?? ''}\n${field.description ?? ''} */\n` : '',
-        `  `,
+        '  ',
         ...rendered.content,
-        `;\n`
+        ';\n'
       );
     }
 
@@ -350,9 +349,9 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
       name,
       content: [
         `export interface ${name}`,
-        ...parent ? [' extends ', parent] : [], ` {\n`,
+        ...parent ? [' extends ', parent] : [], ' {\n',
         ...fields,
-        `}\n`,
+        '}\n',
       ]
     };
 

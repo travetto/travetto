@@ -54,8 +54,7 @@ export class RequestCore implements Partial<Request> {
    * Get the fully parsed content type
    */
   getContentType(this: Request): ContentType | undefined {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self: Request & Partial<RequestCore> = this;
+    const self: Request & Partial<RequestCore> = castTo(this);
     return self[ParsedType] ??= MimeUtil.parse(this.headerFirst('content-type'));
   }
 
@@ -63,8 +62,7 @@ export class RequestCore implements Partial<Request> {
    * Attempt to read the remote IP address of the connection
    */
   getIp(this: Request): string | undefined {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self: Request & Partial<RequestCore> = this;
+    const self: Request & Partial<RequestCore> = castTo(this);
     const raw = self[NodeEntityⲐ];
     return self.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
   }

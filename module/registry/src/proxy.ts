@@ -1,4 +1,4 @@
-import { castTo, clsInstance } from '@travetto/runtime';
+import { Any, castTo, clsInstance } from '@travetto/runtime';
 
 const ProxyTargetⲐ = Symbol.for('@travetto/runtime:proxy-target');
 
@@ -14,8 +14,7 @@ function isFunction(o: unknown): o is Function {
 /**
  * Handler for for proxying modules while watching
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class RetargettingHandler<T> implements ProxyHandler<any> {
+export class RetargettingHandler<T> implements ProxyHandler<Any> {
   constructor(public target: T) { }
 
   isExtensible(target: T): boolean {
@@ -50,8 +49,7 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
     return Object.getPrototypeOf(this.target);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get(target: T, prop: PropertyKey, receiver: unknown): any {
+  get(target: T, prop: PropertyKey, receiver: unknown): Any {
     if (prop === ProxyTargetⲐ) {
       return this.target;
     }

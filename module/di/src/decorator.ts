@@ -1,4 +1,4 @@
-import { castTo, impartial, type Class, type ClassInstance } from '@travetto/runtime';
+import { castTo, impartial, TypedFunction, type Class, type ClassInstance } from '@travetto/runtime';
 
 import { InjectableFactoryConfig, InjectableConfig } from './types';
 import { DependencyRegistry, ResolutionType } from './registry';
@@ -68,8 +68,7 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
  * @augments `@travetto/di:InjectableFactory`
  */
 export function InjectableFactory(first?: Partial<InjectableFactoryConfig> | symbol, ...args: (Partial<InjectableFactoryConfig> | undefined)[]) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<((..._: any[]) => any)>): void => {
+  return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<TypedFunction>): void => {
     const config: InjectableFactoryConfig = collapseConfig(first, ...args);
     DependencyRegistry.registerFactory({
       ...config,

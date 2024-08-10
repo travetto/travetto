@@ -1,7 +1,8 @@
 // Wildcard import needed here due to packaging issues
 import {
   type Db, GridFSBucket, MongoClient, type Sort, type CreateIndexesOptions,
-  type GridFSFile, type IndexSpecification, type Collection, ObjectId
+  type GridFSFile, type IndexSpecification, type Collection, ObjectId,
+  Binary
 } from 'mongodb';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -180,11 +181,11 @@ export class MongoModelService implements
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned: WithId<T> = castTo(await ModelCrudUtil.preStore(cls, item, this));
+    const cleaned: WithId<T, Binary> = castTo(await ModelCrudUtil.preStore(cls, item, this));
     cleaned._id = MongoUtil.uuid(cleaned.id);
 
     const store = await this.getStore(cls);
-    const result = await store.insertOne(cleaned);
+    const result = await store.insertOne(castTo(cleaned));
     if (!result.insertedId) {
       throw new ExistsError(cls, cleaned.id);
     }

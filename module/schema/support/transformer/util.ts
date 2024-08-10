@@ -1,8 +1,7 @@
 import ts from 'typescript';
 import {
   type AnyType, DeclarationUtil, LiteralUtil,
-  DecoratorUtil, DocUtil, ParamDocumentation, TransformerState,
-  castToTrv
+  DecoratorUtil, DocUtil, ParamDocumentation, TransformerState, TransformCast
 } from '@travetto/transformer';
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
@@ -205,7 +204,7 @@ export class SchemaTransformUtil {
       ret = state.factory.updateSetAccessorDeclaration(node,
         newModifiers, node.name, node.parameters, node.body);
     }
-    return castToTrv(ret);
+    return TransformCast(ret);
   }
 
   /**

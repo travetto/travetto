@@ -1,5 +1,5 @@
 import { BaseRemoteService, IRemoteServiceConfig, PostResponseHandler, PreRequestHandler, RequestDefinition } from './types';
-import { CommonUtil } from './util';
+import { CommonUtil, RestCast } from './util';
 
 function isResponse(v: unknown): v is Response {
   // @ts-expect-error
@@ -76,8 +76,7 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
         console.debug('Making request:', req.url.pathname);
       }
 
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const fetchInit = req as RequestInit;
+      const fetchInit: RequestInit = RestCast(req);
       fetchInit.credentials = req.withCredentials ? 'include' : 'same-origin';
       if (req.timeout) {
         const controller = new AbortController();
@@ -125,12 +124,10 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
           try {
             return this.consumeJSON<T>(text);
           } catch {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            return text as unknown as Promise<T>;
+            return RestCast(text);
           }
         } else {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          return text as unknown as Promise<T>;
+          return RestCast(text);
         }
       } else {
         let res;

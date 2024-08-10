@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/quotes */
-
 import { Class } from '@travetto/runtime';
 import { ControllerConfig } from '@travetto/rest';
 
@@ -55,25 +53,25 @@ export class AngularClientGenerator extends BaseClientGenerator {
       file: './module.ts',
       imports: [ngModule, ngModWithProv, skipSelf, optional, httpClient, config],
       content: [
-        `\n`,
-        `@`, ngModule, `({ imports: [], declarations: [], exports: [], providers: [] })\n`,
-        `export class `, self, ` {\n`,
-        `  public static forRoot(factory: () => `, config, `): `, ngModWithProv, `<`, self, `> {\n`,
-        `    return {\n`,
-        `      ngModule: `, self, `,\n`,
-        `      providers: [{ provide: `, config, `, useFactory: factory }]\n`,
-        `    };\n`,
-        `  }\n\n`,
-        `  constructor(@`, optional, `() @`, skipSelf, `() parentModule: `, self, `, @`, optional, `() http: `, httpClient, `) {\n`,
-        `    if(parentModule) {\n`,
-        `      throw new Error('${self.name} is already loaded.Import in your base AppModule only.');\n`,
-        `    }\n`,
-        `    if(!http) {\n`,
-        `      throw new Error('You need to import the HttpClientModule in your AppModule!');\n`,
-        `    }\n`,
-        `  }\n`,
-        `}\n\n`,
-        `export const RestClientConfig = `, config, `;\n`
+        '\n',
+        '@', ngModule, '({ imports: [], declarations: [], exports: [], providers: [] })\n',
+        'export class ', self, ' {\n',
+        '  public static forRoot(factory: () => ', config, '): ', ngModWithProv, '<', self, '> {\n',
+        '    return {\n',
+        '      ngModule: ', self, ',\n',
+        '      providers: [{ provide: ', config, ', useFactory: factory }]\n',
+        '    };\n',
+        '  }\n\n',
+        '  constructor(@', optional, '() @', skipSelf, '() parentModule: ', self, ', @', optional, '() http: ', httpClient, ') {\n',
+        '    if(parentModule) {\n',
+        `      throw new Error("${self.name} is already loaded.Import in your base AppModule only.");\n`,
+        '    }\n',
+        '    if(!http) {\n',
+        '      throw new Error("You need to import the HttpClientModule in your AppModule!");\n',
+        '    }\n',
+        '  }\n',
+        '}\n\n',
+        'export const RestClientConfig = ', config, ';\n'
       ]
     };
   }
@@ -100,22 +98,22 @@ export class AngularClientGenerator extends BaseClientGenerator {
     const imports = [base, httpClient, injectable, optional, options, ...results.flatMap(x => x.imports)];
 
     const contents = [
-      `\n`,
+      '\n',
       ...this.renderControllerDoc(controller),
-      `@`, injectable, `({ providedIn: 'root' })\n`,
-      `export class ${service}Service extends `, base, ` {\n\n`,
+      '@', injectable, '({ providedIn: "root" })\n',
+      `export class ${service}Service extends `, base, ' {\n\n',
       `  routePath = '${controller.basePath}';\n`,
       ...results.flatMap(f => f.config),
-      `\n`,
-      `  constructor(public client: `, httpClient, `, @`, optional, `() options: `, options, `) {\n`,
-      `    super(options);\n`,
-      `  }\n`,
-      `\n`,
-      `  transform = <T>(): `, operatorFn, `<unknown, T> => `, map, `(o => this.${CommonUtil.consumeJSON.name}<T>(o));\n`,
-      `  timer = <T>(delay: number): `, operatorFn, `<T, T> => `, timeout, `(delay);\n`,
-      `\n`,
+      '\n',
+      '  constructor(public client: ', httpClient, ', @', optional, '() options: ', options, ') {\n',
+      '    super(options);\n',
+      '  }\n',
+      '\n',
+      '  transform = <T>(): ', operatorFn, '<unknown, T> => ', map, `(o => this.${CommonUtil.consumeJSON.name}<T>(o));\n`,
+      '  timer = <T>(delay: number): ', operatorFn, '<T, T> => ', timeout, '(delay);\n',
+      '\n',
       ...results.flatMap(f => f.method),
-      `}\n\n`
+      '}\n\n'
     ];
 
     return {

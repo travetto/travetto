@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/quotes */
 import type { Package } from '@travetto/manifest';
 import { Class, Runtime } from '@travetto/runtime';
 import { ControllerConfig } from '@travetto/rest';
@@ -61,11 +60,11 @@ export class FetchClientGenerator extends BaseClientGenerator<{ node?: boolean }
 
     const contents = [
       ...this.renderControllerDoc(controller),
-      `export class ${service}Api extends `, baseFetchService, ` {\n\n`,
+      `export class ${service}Api extends `, baseFetchService, ' {\n\n',
       ...results.flatMap(f => f.config),
       `  routePath = '${controller.basePath}';\n\n`,
       ...results.flatMap(f => f.method),
-      `}\n\n`
+      '}\n\n'
     ];
 
     return {

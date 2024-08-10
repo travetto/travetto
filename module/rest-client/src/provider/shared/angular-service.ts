@@ -4,7 +4,7 @@ import type { HttpResponse, HttpEvent, HttpClient } from '@angular/common/http';
 import type { Observable, OperatorFunction } from 'rxjs';
 
 import { BaseRemoteService, IRemoteService, RequestDefinition, RequestOptions } from './types';
-import { CommonUtil } from './util';
+import { CommonUtil, RestCast } from './util';
 
 export type AngularResponse<T> = Observable<T> & { events: Observable<HttpEvent<T>>, response: Observable<HttpResponse<T>> };
 
@@ -16,7 +16,7 @@ export class Configuration implements IAngularServiceConfig {
   }
 }
 
-export abstract class BaseAngularService extends BaseRemoteService<RequestInit, Response>  {
+export abstract class BaseAngularService extends BaseRemoteService<RequestInit, Response> {
   abstract get transform(): <T>() => OperatorFunction<T, T>;
   abstract get client(): HttpClient;
 
@@ -27,8 +27,7 @@ export abstract class BaseAngularService extends BaseRemoteService<RequestInit, 
   }
 
   invoke<T>(req: RequestOptions, observe: 'response' | 'events' | 'body'): AngularResponse<T> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    let ngReq = this.client.request(req.method.toLowerCase() as 'get', req.url.toString(), {
+    let ngReq = this.client.request(RestCast(req.method.toLowerCase()), req.url.toString(), {
       observe, reportProgress: observe === 'events',
       withCredentials: req.withCredentials,
       headers: req.headers, body: req.body,
@@ -38,8 +37,7 @@ export abstract class BaseAngularService extends BaseRemoteService<RequestInit, 
       ngReq = ngReq.pipe(this.timer<T>(req.timeout));
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return ngReq.pipe(this.transform<T>()) as AngularResponse<T>;
+    return RestCast(ngReq.pipe(this.transform<T>()));
   }
 
   makeRequest<T>(params: unknown[], opts: RequestDefinition): AngularResponse<T> {
@@ -50,7 +48,6 @@ export abstract class BaseAngularService extends BaseRemoteService<RequestInit, 
       response: { get: () => this.invoke(req, 'response'), configurable: false }
     });
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return res as AngularResponse<T>;
+    return RestCast(res);
   }
 }
