@@ -11,7 +11,10 @@ export const text = async () => {
     (await DocRunUtil.run('npx', ['trvc', 'help']))
       .split('\n')
       .filter(x => x.trim().startsWith('*'))
-      .map(x => x.split(' - ') as [string, string])
+      .map<[string, string]>(x => {
+        const [a, b] = x.split(' - ');
+        return [a, b];
+      })
       .filter(x => x.length > 1)
       .map(x => <li>{d.method(x[0].replace('*', '').trim())} - {x[1].trim()}</li>);
 

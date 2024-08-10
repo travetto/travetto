@@ -190,7 +190,7 @@ export class SQLModelService implements
 
   @Connected()
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
-    const res = await this.query(cls, castTo({ id }));
+    const res = await this.query(cls, { where: castTo({ id }) });
     if (res.length === 1) {
       return await ModelCrudUtil.load(cls, res[0]);
     }
@@ -275,8 +275,9 @@ export class SQLModelService implements
   @Transactional()
   async updateOneWithQuery<T extends ModelType>(cls: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
     await QueryVerifier.verify(cls, query);
-    query = ModelQueryUtil.getQueryWithId(cls, item, query);
-    await this.#deleteRaw(cls, item.id, query.where, true);
+    const where = ModelQueryUtil.getWhereClause(cls, query.where);
+    where.id = item.id;
+    await this.#deleteRaw(cls, item.id, where, true);
     return await this.create(cls, item);
   }
 
@@ -325,7 +326,7 @@ export class SQLModelService implements
       this.#dialect.getFromSQL(cls),
     ];
     q.push(
-      this.#dialect.getWhereSQL(cls, ModelQueryUtil.getWhereClause(cls, query?.where ?? {}))
+      this.#dialect.getWhereSQL(cls, ModelQueryUtil.getWhereClause(cls, query?.where))
     );
     q.push(
       `GROUP BY ${col}`,

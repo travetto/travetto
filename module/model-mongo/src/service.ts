@@ -500,9 +500,10 @@ export class MongoModelService implements
 
     const col = await this.getStore(cls);
     const item = await ModelCrudUtil.preStore(cls, data, this);
-    query = ModelQueryUtil.getQueryWithId(cls, data, query);
+    const where = ModelQueryUtil.getWhereClause(cls, query.where);
+    where.id = item.id;
 
-    const filter = MongoUtil.extractWhereFilter(cls, query.where);
+    const filter = MongoUtil.extractWhereFilter(cls, where);
     const res = await col.replaceOne(filter, item);
     if (res.matchedCount === 0) {
       throw new NotFoundError(cls, item.id);

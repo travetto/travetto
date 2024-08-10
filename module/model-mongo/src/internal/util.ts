@@ -40,7 +40,7 @@ export class MongoUtil {
   }
 
   static uuid(val: string): Binary {
-    return new Binary(Buffer.from(val.replace(/-/g, ''), 'hex'), Binary.SUBTYPE_UUID);
+    return new Binary(Buffer.from(val.replaceAll('-', ''), 'hex'), Binary.SUBTYPE_UUID);
   }
 
   static idToString(id: string | ObjectId | Binary): string {
@@ -88,32 +88,6 @@ export class MongoUtil {
     }
   }
 
-  /**
-   * Convert ids from '_id' to 'id'
-   */
-  static replaceId(v: Record<string, unknown>): Record<string, Binary>;
-  static replaceId(v: string[]): Binary[];
-  static replaceId(v: string): Binary;
-  static replaceId(v: unknown): undefined;
-  static replaceId(v: string | string[] | Record<string, unknown> | unknown): unknown {
-    if (typeof v === 'string') {
-      return this.uuid(v);
-    } else if (Array.isArray(v)) {
-      return v.map(x => this.replaceId(x));
-    } else if (DataUtil.isPlainObject(v)) {
-      const out: Record<string, Binary> = {};
-      for (const [k, el] of Object.entries(v)) {
-        const found = this.replaceId(el);
-        if (found) {
-          out[k] = found;
-        }
-      }
-      return out;
-    } else {
-      return v;
-    }
-  }
-
   /**/
   static extractSimple<T>(base: Class<T> | undefined, o: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
     const schema = base ? SchemaRegistry.get(base) : undefined;
@@ -126,7 +100,7 @@ export class MongoUtil {
       const subField = schema?.views[AllViewⲐ].schema[key];
 
       if (subpath === 'id') { // Handle ids directly
-        out._id = this.replaceId(v);
+        out._id = typeof v === 'string' ? this.uuid(v) : v;
       } else {
         const isPlain = v && DataUtil.isPlainObject(v);
         const firstKey = isPlain ? Object.keys(v)[0] : '';

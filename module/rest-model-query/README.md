@@ -13,7 +13,7 @@ npm install @travetto/rest-model-query
 yarn add @travetto/rest-model-query
 ```
 
-[Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/main/module/rest-model-query/src/model-query.ts#L39). This provides listing by query as well as an endpoint to facilitate suggestion behaviors.
+[Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/main/module/rest-model-query/src/model-query.ts#L46). This provides listing by query as well as an endpoint to facilitate suggestion behaviors.
 
 **Code: ModelQueryRoutes example**
 ```typescript
@@ -37,10 +37,10 @@ is a shorthand that is equal to:
 **Code: Comparable UserController, built manually**
 ```typescript
 import { Inject } from '@travetto/di';
-import { ModelQuerySupport, SortClause, ValidStringFields } from '@travetto/model-query';
+import { ModelQuerySupport, ValidStringFields } from '@travetto/model-query';
 import { isQuerySuggestSupported } from '@travetto/model-query/src/internal/service/common';
 import { Controller, Get } from '@travetto/rest';
-import { convertInput, RestModelQuery, RestModelSuggestQuery } from '@travetto/rest-model-query';
+import { RestModelQuery, RestModelSuggestQuery } from '@travetto/rest-model-query';
 
 import { User } from './user';
 
@@ -52,12 +52,7 @@ class UserQueryController {
 
   @Get('')
   async getAllUser(query: RestModelQuery) {
-    return this.service.query(User, {
-      limit: query.limit,
-      offset: query.offset,
-      sort: convertInput<SortClause<User>[]>(query.sort),
-      where: convertInput(query.where, true)
-    });
+    return this.service.query(User, query.finalize());
   }
 
   @Get('/suggest/:field')

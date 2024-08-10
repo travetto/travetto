@@ -2,7 +2,7 @@
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';
-import { Env, ShutdownManager, Util, RuntimeIndex } from '@travetto/runtime';
+import { Env, ShutdownManager, Util, RuntimeIndex, castTo } from '@travetto/runtime';
 
 const ModelType = d.codeLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 const TodoRoot = d.ref('Todo App', RuntimeIndex.mainModule.outputPath);
@@ -36,7 +36,7 @@ function TableOfContents({ root }: { root: () => DocJSXElement }) {
   const children = root().props.children ?? [];
   const final = Array.isArray(children) ? children : [children];
   const sections: DocJSXElementByFn<'Section'>[] =
-    final.filter(x => isDocJSXElement(x) && x.type === c.Section && (x as unknown as DocJSXElementByFn<'Section'>).props.title !== 'Overview');
+    final.filter(x => isDocJSXElement(x) && x.type === c.Section && castTo<DocJSXElementByFn<'Section'>>(x).props.title !== 'Overview');
   return <ol>
     {...sections.map(v => <li><c.Anchor title={v.props.title} href={v.props.title} /></li>)}
   </ol>;

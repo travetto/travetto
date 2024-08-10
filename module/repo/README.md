@@ -203,7 +203,7 @@ The standard format includes prefixed output to help identify which module produ
 
 **Terminal: List execution of Monorepo**
 ```bash
-$ trv repo:exec pwd
+$ trv repo:exec -w 1 pwd
 
 global-test/asset-rest-upload <workspace-root>/global-test/asset-rest-upload
          global-test/auth-rest <workspace-root>/global-test/auth-rest
@@ -237,8 +237,8 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
          module/email-compiler <workspace-root>/module/email-compiler
              module/email-inky <workspace-root>/module/email-inky
        module/email-nodemailer <workspace-root>/module/email-nodemailer
-                  module/image <workspace-root>/module/image
                  module/eslint <workspace-root>/module/eslint
+                  module/image <workspace-root>/module/image
                     module/jwt <workspace-root>/module/jwt
                     module/log <workspace-root>/module/log
                module/manifest <workspace-root>/module/manifest

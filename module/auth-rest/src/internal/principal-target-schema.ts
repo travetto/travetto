@@ -1,15 +1,19 @@
-import { SchemaRegistry } from '@travetto/schema';
+import { ClassList, SchemaRegistry } from '@travetto/schema';
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
+import { Class, TypedObject } from '@travetto/runtime';
 
-const optional = (): { required: { active: false } } => ({ required: { active: false } });
-SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, 'id', String, { required: { active: true } });
-SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, 'expiresAt', Date, optional());
-SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, 'issuedAt', Date, optional());
-SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, 'maxAge', Number, optional());
-SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, 'issuer', String, optional());
-SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, 'permissions', [String], optional());
-SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, 'details', Object, optional());
+const FIELDS: Record<keyof PrincipalTarget, Class | ClassList> = {
+  id: String,
+  expiresAt: Date,
+  issuedAt: Date,
+  maxAge: Number,
+  issuer: String,
+  permissions: [String],
+  details: Object,
+};
 
-SchemaRegistry.register(PrincipalTarget, {
-  class: PrincipalTarget,
-});
+for (const [field, type] of TypedObject.entries(FIELDS)) {
+  SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, field, type, { required: { active: field === 'id' } });
+}
+
+SchemaRegistry.register(PrincipalTarget, { class: PrincipalTarget });

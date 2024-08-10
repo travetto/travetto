@@ -3,7 +3,6 @@ import { ModelRegistry, NotFoundError } from '@travetto/model';
 import { ModelType } from '@travetto/model/src/types/model';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ModelQuery, Query } from '../../model/query';
 import { WhereClause, WhereClauseRaw } from '../../model/where-clause';
 
 /**
@@ -60,19 +59,6 @@ export class ModelQueryUtil {
       q = clauses[0];
     }
     return q!;
-  }
-
-  /**
-   * Get query with an id enforced
-   */
-  static getQueryWithId<T extends ModelType, U extends Query<T> | ModelQuery<T>>(
-    cls: Class<T>,
-    item: T,
-    query: U
-  ): U & { where: WhereClause<T> & { id: string } } {
-    const q = this.getWhereClause<ModelType>(cls, query.where);
-    q.id = item.id!;
-    return castTo(q);
   }
 
   static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) =>

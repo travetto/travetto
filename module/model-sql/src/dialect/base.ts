@@ -279,7 +279,7 @@ export abstract class SQLDialect implements DialectState {
    * Get the count for a given query
    */
   async getCountForQuery<T>(cls: Class<T>, query: Query<T>): Promise<number> {
-    const { records } = await this.executeSQL<{ total: number }>(this.getQueryCountSQL(cls, query));
+    const { records } = await this.executeSQL<{ total: number }>(this.getQueryCountSQL(cls, query.where));
     const [record] = records;
     return Total.from(record).total;
   }

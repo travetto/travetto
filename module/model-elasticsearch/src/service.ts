@@ -438,7 +438,9 @@ export class ElasticsearchModelService implements
     const item = await ModelCrudUtil.preStore(cls, data, this);
     const id = item.id;
 
-    query = ModelQueryUtil.getQueryWithId(cls, data, query);
+    const where = ModelQueryUtil.getWhereClause(cls, query.where);
+    where.id = item.id;
+    query.where = where;
 
     if (ModelRegistry.get(cls).expiresAt) {
       await this.get(cls, id);
@@ -526,9 +528,7 @@ export class ElasticsearchModelService implements
 
   // Facet
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
-    if (query) {
-      await QueryVerifier.verify(cls, query);
-    }
+    await QueryVerifier.verify(cls, query);
 
     const q = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
 
