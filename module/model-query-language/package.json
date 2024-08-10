@@ -1,0 +1,47 @@
+{
+  "name": "@travetto/model-query-language",
+  "version": "5.0.0-rc.8",
+  "description": "Datastore query language.",
+  "keywords": [
+    "datastore",
+    "schema",
+    "typescript",
+    "travetto",
+    "query-language"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src",
+    "support"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/model-query"
+  },
+  "dependencies": {
+    "@travetto/model-query": "^5.0.0-rc.8",
+    "@travetto/model": "^5.0.0-rc.8",
+    "@travetto/schema": "^5.0.0-rc.8"
+  },
+  "peerDependencies": {
+    "@travetto/test": "^5.0.0-rc.8"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "travetto": {
+    "displayName": "Data Model Query Language"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

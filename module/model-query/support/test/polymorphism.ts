@@ -12,6 +12,7 @@ import { ModelQueryFacetSupport } from '../../src/service/facet';
 import { ModelQuerySuggestSupport } from '../../src/service/suggest';
 
 import { isQueryCrudSupported, isQueryFacetSupported, isQuerySuggestSupported } from '../../src/internal/service/common';
+import { castTo } from '@travetto/runtime';
 
 @Suite()
 export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {
@@ -33,9 +34,9 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     assert((await svc.query(Doctor, {})).length === 2);
     assert((await svc.query(Engineer, {})).length === 1);
 
-    assert(await svc.queryCount(Worker, { where: 'name == "bob"' }) === 1);
-    assert(await svc.queryCount(Doctor, { where: 'name == "bob"' }) === 1);
-    assert(await svc.queryCount(Engineer, { where: 'name == "bob"' }) === 0);
+    assert(await svc.queryCount(Worker, { where: { name: 'bob' } }) === 1);
+    assert(await svc.queryCount(Doctor, { where: { name: 'bob' } }) === 1);
+    assert(await svc.queryCount(Engineer, { where: { name: 'bob' } }) === 0);
 
     assert((await svc.queryOne(Worker, { where: { name: 'bob' } })) instanceof Doctor);
     await assert.rejects(() => svc.queryOne(Firefighter, { where: { name: 'bob' } }), NotFoundError);
@@ -43,7 +44,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
 
   @Test({ skip: ModelQueryPolymorphismSuite.ifNot(isQueryCrudSupported) })
   async testCrudQuery() {
-    const svc = await this.service as unknown as ModelQueryCrudSupport & ModelQuerySupport;
+    const svc: ModelQueryCrudSupport & ModelQuerySupport = castTo(await this.service);
     const [doc, doc2, fire, eng] = [
       Doctor.from({ name: 'bob', specialty: 'feet' }),
       Doctor.from({ name: 'nob', specialty: 'eyes' }),
@@ -69,7 +70,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
 
   @Test({ skip: ModelQueryPolymorphismSuite.ifNot(isQuerySuggestSupported) })
   async testSuggestQuery() {
-    const svc = await this.service as unknown as ModelQuerySuggestSupport & ModelQuerySupport;
+    const svc: ModelQuerySuggestSupport & ModelQuerySupport = castTo(await this.service);
     const [doc, doc2, fire, eng] = [
       Doctor.from({ name: 'bob', specialty: 'eyes' }),
       Doctor.from({ name: 'nob', specialty: 'eyes' }),
@@ -93,7 +94,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
 
   @Test({ skip: ModelQueryPolymorphismSuite.ifNot(isQueryFacetSupported) })
   async testFacetQuery() {
-    const svc = await this.service as unknown as ModelQueryFacetSupport & ModelQuerySupport;
+    const svc: ModelQueryFacetSupport & ModelQuerySupport = castTo(await this.service);
     const [doc, doc2, fire, eng] = [
       Doctor.from({ name: 'bob', specialty: 'eyes' }),
       Doctor.from({ name: 'nob', specialty: 'eyes' }),

@@ -1,5 +1,5 @@
-import { Class, AppError, ClassInstance } from '@travetto/runtime';
-import { ControllerRegistry, ParamConfig, Param, RouteHandler } from '@travetto/rest';
+import { AppError, asConstructable, AsyncMethodDescriptor, ClassInstance } from '@travetto/runtime';
+import { ControllerRegistry, ParamConfig, Param } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 import { RequestTarget } from '@travetto/rest/src/internal/types';
 
@@ -32,8 +32,7 @@ export function Upload(
     // Register field
     SchemaRegistry.registerPendingParamConfig(inst.constructor, prop, idx, Object, { specifiers: ['file'] });
     ControllerRegistry.registerEndpointInterceptorConfig(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      inst.constructor, inst[prop] as RouteHandler, RestAssetInterceptor,
+      inst.constructor, inst[prop], RestAssetInterceptor,
       {
         maxSize: finalConf.maxSize,
         types: finalConf.types,
@@ -62,23 +61,21 @@ export function Upload(
  * @augments `@travetto/rest:Endpoint`
  */
 export function UploadAll(config: Partial<ParamConfig> & UploadConfig = {}) {
-  return function (target: ClassInstance, propertyKey: string): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const targetClass = target.constructor as Class;
+  return function <T>(target: T, propertyKey: string, desc: AsyncMethodDescriptor): void {
+    const targetClass = asConstructable(target).constructor;
 
-    const { params } = ControllerRegistry.getOrCreatePendingField(targetClass, target[propertyKey]);
+    const { params } = ControllerRegistry.getOrCreatePendingField(targetClass, desc.value!);
 
     // Find the request object, and mark it as a file param
     params?.some((el, i) => {
       if (el.contextType === RequestTarget) {
-        SchemaRegistry.registerPendingParamConfig(target.constructor, propertyKey, i, Object, { specifiers: ['file'] });
+        SchemaRegistry.registerPendingParamConfig(targetClass, propertyKey, i, Object, { specifiers: ['file'] });
         return true;
       }
     });
 
     ControllerRegistry.registerEndpointInterceptorConfig(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      target.constructor, target[propertyKey] as RouteHandler,
+      targetClass, desc.value!,
       RestAssetInterceptor,
       {
         maxSize: config.maxSize,

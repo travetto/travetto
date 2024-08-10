@@ -1,3 +1,5 @@
+import { castKey, castTo } from './types';
+
 const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;
 
@@ -26,8 +28,7 @@ export class EnvProp<T> {
     } else if (Array.isArray(val)) {
       out = val.join(',');
     } else if (typeof val === 'object') {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      out = Object.entries(val as Record<string, string>).map(([k, v]) => `${k}=${v}`).join(',');
+      out = Object.entries(val).map(([k, v]) => `${k}=${v}`).join(',');
     } else {
       out = `${val}`;
     }
@@ -52,8 +53,7 @@ export class EnvProp<T> {
 
   /** Add values to list */
   add(...items: string[]): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.set([... new Set([...this.list ?? [], ...items])] as T);
+    process.env[this.key] = [... new Set([...this.list ?? [], ...items])].join(',');
   }
 
   /** Read value as int  */
@@ -95,12 +95,12 @@ type AllType = {
 };
 
 function delegate<T extends object>(base: T): AllType & T {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return new Proxy(base as AllType & T, {
+  return new Proxy(castTo(base), {
     get(target, prop): unknown {
       return typeof prop !== 'string' ? undefined :
-        // @ts-expect-error
-        (prop in base ? base[prop] : target[prop] ??= new EnvProp(prop));
+        (prop in base ? base[castKey(prop)] :
+          target[castKey<typeof target>(prop)] ??= castTo(new EnvProp(prop))
+        );
     }
   });
 }

@@ -1,6 +1,20 @@
 import ts from 'typescript';
 
-import { TemplateLiteral } from '../types/shared';
+import { transformCast, TemplateLiteral } from '../types/shared';
+
+const TypedObject: {
+  keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
+} & ObjectConstructor = Object;
+
+function isNode(n: unknown): n is ts.Node {
+  return !!n && typeof n === 'object' && 'kind' in n;
+}
+
+const KNOWN_FNS = new Set<unknown>([String, Number, Boolean, Date, RegExp]);
+
+function isKnownFn(n: unknown): n is Function {
+  return KNOWN_FNS.has(n);
+}
 
 /**
  * Utilities for dealing with literals
@@ -27,10 +41,8 @@ export class LiteralUtil {
   static fromLiteral(factory: ts.NodeFactory, val: unknown[]): ts.ArrayLiteralExpression;
   static fromLiteral(factory: ts.NodeFactory, val: string | boolean | number): ts.LiteralExpression;
   static fromLiteral(factory: ts.NodeFactory, val: unknown): ts.Node {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if (val && (val as ts.Expression).kind) { // If already a node
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return val as ts.Node;
+    if (isNode(val)) { // If already a node
+      return val;
     } else if (Array.isArray(val)) {
       val = factory.createArrayLiteralExpression(val.map(v => this.fromLiteral(factory, v)));
     } else if (val === undefined) {
@@ -45,15 +57,12 @@ export class LiteralUtil {
       val = val ? factory.createTrue() : factory.createFalse();
     } else if (val instanceof RegExp) {
       val = factory.createRegularExpressionLiteral(`/${val.source}/${val.flags ?? ''}`);
-    } else if (val === String || val === Number || val === Boolean || val === Date || val === RegExp) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      val = factory.createIdentifier((val as Function).name);
+    } else if (isKnownFn(val)) {
+      val = factory.createIdentifier(val.name);
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const ov = val as object;
+      const ov = val;
       const pairs: ts.PropertyAssignment[] = [];
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      for (const k of Object.keys(ov) as (keyof typeof ov)[]) {
+      for (const k of TypedObject.keys(ov)) {
         if (ov[k] !== undefined) {
           pairs.push(
             factory.createPropertyAssignment(k, this.fromLiteral(factory, ov[k]))
@@ -62,8 +71,7 @@ export class LiteralUtil {
       }
       return factory.createObjectLiteralExpression(pairs);
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return val as ts.Expression;
+    return transformCast(val);
   }
 
   /**
@@ -164,8 +172,7 @@ export class LiteralUtil {
       } else if (typeof el === 'string' || typeof el === 'number' || typeof el === 'boolean') {
         out.push(`${el}`);
       } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        out.push(`(?:${this.templateLiteralToRegex(el as TemplateLiteral, false)})`);
+        out.push(`(?:${this.templateLiteralToRegex(transformCast(el), false)})`);
       }
     }
     const body = out.join(template.op === 'and' ? '' : '|');

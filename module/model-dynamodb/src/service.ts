@@ -3,7 +3,7 @@ import {
   KeySchemaElement, PutItemCommandInput, PutItemCommandOutput
 } from '@aws-sdk/client-dynamodb';
 
-import { ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
+import { asFull, ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
@@ -24,13 +24,12 @@ function simpleName(idx: string): string {
   return idx.replace(/[^A-Za-z0-9]/g, '');
 }
 
-function toValue(val: string | number | boolean | Date | undefined | null, forceString?: boolean): AttributeValue;
-function toValue(val: unknown, forceString?: boolean): AttributeValue | undefined {
+function toValue(val: string | number | boolean | Date | undefined | null): AttributeValue;
+function toValue(val: unknown): AttributeValue | undefined {
   if (val === undefined || val === null || val === '') {
     return { NULL: true };
-  } else if (typeof val === 'string' || forceString) {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return { S: val as string };
+  } else if (typeof val === 'string') {
+    return { S: val };
   } else if (typeof val === 'number') {
     return { N: `${val}` };
   } else if (typeof val === 'boolean') {
@@ -310,8 +309,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, (): Promise<T> => this.get(cls, id));
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const itemAsT = item as T;
+    const itemAsT = asFull<T>(item);
     await this.#putItem(cls, id, itemAsT, 'update');
     return itemAsT;
   }

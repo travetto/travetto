@@ -49,8 +49,7 @@ export type JSXElements = { [K in keyof C]: JSXElementByFn<K>; };
 
 export const EMPTY_ELEMENT = EMPTY;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const invertedC = new Map<Function, string>(TypedObject.entries(c).map(p => [p[1], p[0]] as [CompFn, string]));
+const invertedC = new Map<Function, string>(TypedObject.entries(c).map(p => [p[1], p[0]] as const));
 
 export function getComponentName(fn: Function | string): string {
   if (typeof fn === 'string') {

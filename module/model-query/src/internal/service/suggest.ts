@@ -1,5 +1,5 @@
 import { ModelRegistry, ModelType } from '@travetto/model';
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { PageableModelQuery, Query } from '../../model/query';
@@ -35,8 +35,7 @@ export class ModelQuerySuggestUtil {
     }
 
     if (query?.where) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      clauses.push(query.where! as WhereClauseRaw<ModelType>);
+      clauses.push(castTo(query.where));
     }
 
     return {
@@ -59,12 +58,11 @@ export class ModelQuerySuggestUtil {
   ): U[] {
     const pattern = this.getSuggestRegex(prefix);
 
-    const out: [string, U][] = [];
+    const out: ([string, U] | readonly [string, U])[] = [];
     for (const r of results) {
       const val = r[field];
       if (Array.isArray(val)) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        out.push(...val.filter(f => pattern.test(f)).map((f: string) => [f, transform(f, r)] as [string, U]));
+        out.push(...val.filter(f => pattern.test(f)).map((f: string) => [f, transform(f, r)] as const));
       } else if (typeof val === 'string') {
         out.push([val, transform(val, r)]);
       }
@@ -81,10 +79,9 @@ export class ModelQuerySuggestUtil {
    */
   static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Query<T> {
     const config = ModelRegistry.get(cls);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.getSuggestQuery<ModelType>(cls, field as ValidStringFields<ModelType>, prefix, {
+    return this.getSuggestQuery<T>(cls, castTo(field), prefix, {
       ...(query ?? {}),
-      select: { [field]: true, ...(config.subType ? { [SchemaRegistry.get(cls).subTypeField]: true } : {}) }
-    }) as Query<T>;
+      select: castTo({ [field]: true, ...(config.subType ? { [SchemaRegistry.get(cls).subTypeField]: true } : {}) })
+    });
   }
 }

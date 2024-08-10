@@ -21,9 +21,11 @@ export class InjectableTransformer {
       return [];
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const callExpr = existing?.expression as ts.CallExpression;
-    const args: ts.Expression[] = [...(callExpr?.arguments ?? [])];
+    const args: ts.Expression[] = [];
+
+    if (existing && ts.isCallExpression(existing.expression)) {
+      args.push(...existing.expression.arguments);
+    }
 
     const payload: { target?: unknown, qualifier?: unknown, optional?: boolean } = {};
 
@@ -140,6 +142,11 @@ export class InjectableTransformer {
       return node;
     }
 
+    const parent = node.parent;
+    if (ts.isObjectLiteralExpression(parent)) {
+      return node;
+    }
+
     const dec = dm?.dec;
 
     // Extract config
@@ -148,8 +155,7 @@ export class InjectableTransformer {
     // Read target from config or resolve
     const config: { dependencies: unknown[], target?: unknown, qualifier?: unknown, src?: unknown } = {
       dependencies,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      src: (node.parent as ts.ClassDeclaration).name,
+      src: parent.name,
     };
     let ret = state.resolveReturnType(node);
     if (ret.key === 'literal' && ret.ctor === Promise && ret.typeArguments) {

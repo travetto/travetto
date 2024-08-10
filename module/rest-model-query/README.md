@@ -13,7 +13,7 @@ npm install @travetto/rest-model-query
 yarn add @travetto/rest-model-query
 ```
 
-[Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/main/module/rest-model-query/src/model-query.ts#L38). This provides listing by query as well as an endpoint to facilitate suggestion behaviors.
+[Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/main/module/rest-model-query/src/model-query.ts#L39). This provides listing by query as well as an endpoint to facilitate suggestion behaviors.
 
 **Code: ModelQueryRoutes example**
 ```typescript
@@ -40,11 +40,9 @@ import { Inject } from '@travetto/di';
 import { ModelQuerySupport, SortClause, ValidStringFields } from '@travetto/model-query';
 import { isQuerySuggestSupported } from '@travetto/model-query/src/internal/service/common';
 import { Controller, Get } from '@travetto/rest';
-import { RestModelQuery, RestModelSuggestQuery } from '@travetto/rest-model-query';
+import { convertInput, RestModelQuery, RestModelSuggestQuery } from '@travetto/rest-model-query';
 
 import { User } from './user';
-
-const convert = <T>(k?: string) => k && typeof k === 'string' && /^[\{\[]/.test(k) ? JSON.parse(k) as T : k;
 
 @Controller('/user')
 class UserQueryController {
@@ -57,8 +55,8 @@ class UserQueryController {
     return this.service.query(User, {
       limit: query.limit,
       offset: query.offset,
-      sort: convert(query.sort) as SortClause<User>[],
-      where: convert(query.where)
+      sort: convertInput<SortClause<User>[]>(query.sort),
+      where: convertInput(query.where, true)
     });
   }
 

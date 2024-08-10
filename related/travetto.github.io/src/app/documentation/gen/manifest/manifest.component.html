@@ -36,7 +36,7 @@ Additionally, once the code has been compiled (or even bundled after that), the 
 
 <h2 id="manifest-delta">Manifest Delta</h2>
 
-During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L21">ManifestDeltaUtil</a> provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the <a class="module-link" routerLink="/docs/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a>'s incremental behavior to know when a file has changed and needs to be recompiled.
+During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L23">ManifestDeltaUtil</a> provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the <a class="module-link" routerLink="/docs/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a>'s incremental behavior to know when a file has changed and needs to be recompiled.
 
 <h2 id="class-and-function-metadata">Class and Function Metadata</h2>
 

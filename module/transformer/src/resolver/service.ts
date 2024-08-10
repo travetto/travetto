@@ -7,6 +7,7 @@ import { TypeCategorize, TypeBuilder } from './builder';
 import { VisitCache } from './cache';
 import { DocUtil } from '../util/doc';
 import { DeclarationUtil } from '../util/declaration';
+import { transformCast } from '../types/shared';
 
 /**
  * Implementation of TransformResolver
@@ -80,8 +81,7 @@ export class SimpleResolver implements TransformResolver {
    * Fetch all type arguments for a give type
    */
   getAllTypeArguments(ref: ts.Type): ts.Type[] {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.#tsChecker.getTypeArguments(ref as ts.TypeReference) as ts.Type[];
+    return transformCast(this.#tsChecker.getTypeArguments(transformCast(ref)));
   }
 
   /**
@@ -148,8 +148,7 @@ export class SimpleResolver implements TransformResolver {
           delete result.tsSubTypes;
         }
         if (finalize) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          result = finalize(result as never);
+          result = finalize(transformCast(result));
         }
       }
 

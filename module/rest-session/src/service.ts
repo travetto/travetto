@@ -127,11 +127,11 @@ export class SessionService {
    * Get or recreate session
    */
   ensureCreated(req: Request): Session {
-    if (req[SessionⲐ]?.action === 'destroy') {
-      // @ts-expect-error
-      req[SessionⲐ] = undefined;
+    const sub: Request | { [SessionⲐ]?: Session } = req;
+    if (sub[SessionⲐ]?.action === 'destroy') {
+      sub[SessionⲐ] = undefined;
     }
-    return req[SessionⲐ] ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
+    return sub[SessionⲐ] ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
   }
 
   /**

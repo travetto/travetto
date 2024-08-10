@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
-import type { Primitive, Class, ClassInstance } from '@travetto/runtime';
+import { type Primitive, type Class, asFull, castTo, asConstructable } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator } from './types';
@@ -65,8 +65,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   getOrCreateEndpointConfig<T>(cls: Class<T>, handler: RouteHandler): EndpointConfig {
     const fieldConf = this.getOrCreatePendingField(cls, handler);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return fieldConf as EndpointConfig;
+    return asFull(fieldConf);
   }
 
   /**
@@ -114,8 +113,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   registerEndpointInterceptorConfig<T extends RestInterceptor>(target: Class, handler: RouteHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const endpointConfig = this.getOrCreateEndpointConfig(target, handler);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    (endpointConfig.interceptors ??= []).push([interceptorCls as Class<T>, { disabled: false, ...config }]);
+    (endpointConfig.interceptors ??= []).push([interceptorCls, { disabled: false, ...config }]);
   }
 
   /**
@@ -136,11 +134,9 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   createFilterDecorator(fn: Filter): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>): void => {
       if (prop) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        this.registerEndpointFilter((target as unknown as ClassInstance).constructor, descriptor!.value!, fn);
+        this.registerEndpointFilter(asConstructable(target).constructor, descriptor!.value!, fn);
       } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        this.registerControllerFilter(target as Class, fn);
+        this.registerControllerFilter(castTo(target), fn);
       }
     };
   }
@@ -156,11 +152,9 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   ): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>): void => {
       if (prop && descriptor) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        this.registerEndpointInterceptorConfig((target as unknown as ClassInstance).constructor, descriptor!.value!, cls, cfg as Partial<T['config']>);
+        this.registerEndpointInterceptorConfig(asConstructable(target).constructor, descriptor!.value!, cls, castTo(cfg));
       } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        this.registerControllerInterceptorConfig((target as unknown as Class), cls, cfg as Partial<T['config']>);
+        this.registerControllerInterceptorConfig(castTo(target), cls, castTo(cfg));
       }
     };
   }
@@ -225,8 +219,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * Finalize routes, removing duplicates based on ids
    */
   onInstallFinalize(cls: Class): ControllerConfig {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const final = this.getOrCreatePending(cls) as ControllerConfig;
+    const final = asFull(this.getOrCreatePending(cls));
 
     // Handle duplicates, take latest
     const foundRoutes = new Set<string>();

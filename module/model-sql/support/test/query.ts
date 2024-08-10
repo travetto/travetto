@@ -6,6 +6,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base';
 
 import { VisitStack } from '../../src/internal/util';
 import { SQLModelService } from '../../src/service';
+import { castTo } from '@travetto/runtime';
 
 @Schema()
 class User {
@@ -66,8 +67,8 @@ export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
 
     const dct = await this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
-      const field = stack[stack.length - 1] as FieldConfig;
-      const parent = stack[stack.length - 2] as FieldConfig;
+      const field: FieldConfig = castTo(stack[stack.length - 1]);
+      const parent: FieldConfig = castTo(stack[stack.length - 2]);
       return `${field.owner ? field.owner.name : parent.name}.${field.name}`;
     };
 
@@ -79,7 +80,7 @@ export abstract class BaseSQLTest extends BaseModelSuite<SQLModelService> {
   async testRegEx() {
     const dct = await this.dialect;
     dct.resolveName = (stack: VisitStack[]) => {
-      const field = stack[stack.length - 1] as FieldConfig;
+      const field: FieldConfig = castTo(stack[stack.length - 1]);
       return `${field.owner?.name}.${field.name}`;
     };
 

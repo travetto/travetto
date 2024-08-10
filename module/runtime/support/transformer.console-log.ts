@@ -22,8 +22,7 @@ const VALID_LEVELS: Record<string, string> = {
 };
 
 /**
- * Allows for removal of debug log messages depending on whether app is running
- * in prod mode.
+ * Logging support with code-location aware messages.
  */
 export class ConsoleLogTransformer {
 

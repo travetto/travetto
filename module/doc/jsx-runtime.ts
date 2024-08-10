@@ -1,4 +1,4 @@
-import { ConcreteClass } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 
 type JSXChild = JSXElement | number | bigint | boolean | object | string;
 type JSXProps = { children?: JSXChild | JSXChild[] | null };
@@ -12,7 +12,7 @@ let id = 0;
 
 /** Simple JSX Element */
 export interface JSXElement<
-  T extends string | ConcreteClass | JSXComponentFunction<P> = string | ConcreteClass | JSXComponentFunction,
+  T extends string | Class | JSXComponentFunction<P> = string | Class | JSXComponentFunction,
   P extends {} = {},
 > {
   [JSXRuntimeTag]?: { id: number };
@@ -37,7 +37,7 @@ declare global {
 
 let createFrag: Function | undefined = undefined;
 
-export function createElement<T extends string | ConcreteClass | JSXComponentFunction<P>, P extends {}>(
+export function createElement<T extends string | Class | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps
 ): JSXElement<T, P> {
   type = (type === createFrag ? JSXFragmentType : type) as T;

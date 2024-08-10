@@ -100,7 +100,7 @@ export interface AssetNamingStrategy {
 }
 ```
 
-By extending this, and making it [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31), the naming strategy will become the default for the system.
+By extending this, and making it [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29), the naming strategy will become the default for the system.
 
 ## Advanced Usage
 In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the [Asset](https://github.com/travetto/travetto/tree/main/module/asset/src/types.ts#L10) looks like:

@@ -1,4 +1,4 @@
-import { Class } from '@travetto/runtime';
+import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelType } from '../types/model';
@@ -25,7 +25,7 @@ export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
  * Defines an index on a model
  */
 export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
-  return function (target: Class<T>) {
+  return function (target: Class<T>): void {
     ModelRegistry.getOrCreatePending(target).indices!.push(...indices);
   };
 }
@@ -36,8 +36,7 @@ export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
  */
 export function ExpiresAt() {
   return <K extends string, T extends Partial<Record<K, Date>>>(tgt: T, prop: K): void => {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    ModelRegistry.register(tgt.constructor as Class<T>, { expiresAt: prop });
+    ModelRegistry.register(asConstructable(tgt).constructor, { expiresAt: prop });
   };
 }
 
@@ -49,8 +48,7 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
     ModelRegistry.registerDataHandlers(tgt, {
       prePersist: [{
         scope,
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        handler: handler as DataHandler
+        handler: castTo(handler)
       }]
     });
   };
@@ -61,13 +59,11 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
  */
 export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(tgt: C, prop: K): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    ModelRegistry.registerDataHandlers(tgt.constructor as Class<C>, {
+    ModelRegistry.registerDataHandlers(asConstructable(tgt).constructor, {
       prePersist: [{
         scope,
         handler: (inst): void => {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const cInst = (inst as unknown as Record<K, T>);
+          const cInst: Record<K, T> = castTo(inst);
           cInst[prop] = handler(cInst[prop]);
         }
       }]
@@ -81,7 +77,6 @@ export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PreP
  */
 export function PostLoad<T>(handler: DataHandler<T>) {
   return function (tgt: Class<T>): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    ModelRegistry.registerDataHandlers(tgt, { postLoad: [handler as DataHandler] });
+    ModelRegistry.registerDataHandlers(tgt, { postLoad: [castTo(handler)] });
   };
 }

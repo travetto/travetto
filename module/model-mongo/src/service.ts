@@ -1,7 +1,8 @@
 // Wildcard import needed here due to packaging issues
 import {
   type Db, GridFSBucket, MongoClient, type Sort, type CreateIndexesOptions,
-  type GridFSFile, type IndexSpecification, type Collection, type ObjectId, type Filter, type Document
+  type GridFSFile, type IndexSpecification, type Collection, ObjectId,
+  Binary
 } from 'mongodb';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -19,7 +20,7 @@ import {
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
-import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject } from '@travetto/runtime';
+import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
@@ -40,8 +41,7 @@ import { MongoModelConfig } from './config';
 
 const IdxFieldsⲐ = Symbol.for('@travetto/model-mongo:idx');
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const asFielded = <T extends ModelType>(cfg: IndexConfig<T>): { [IdxFieldsⲐ]: Sort } => (cfg as unknown as { [IdxFieldsⲐ]: Sort });
+const asFielded = (cfg: IndexConfig<ModelType>): { [IdxFieldsⲐ]: Sort } => castTo(cfg);
 
 type IdxCfg = CreateIndexesOptions;
 
@@ -66,8 +66,7 @@ export class MongoModelService implements
   constructor(public readonly config: MongoModelConfig) { }
 
   async #describeStreamRaw(location: string): Promise<StreamRaw> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const files: StreamRaw[] = (await this.#bucket.find({ filename: location }, { limit: 1 }).toArray()) as StreamRaw[];
+    const files: StreamRaw[] = castTo(await this.#bucket.find({ filename: location }, { limit: 1 }).toArray());
 
     if (!files?.length) {
       throw new NotFoundError(STREAMS, location);
@@ -123,8 +122,7 @@ export class MongoModelService implements
       ...indices.map((idx): [IndexSpecification, IdxCfg] => {
         const combined = asFielded(idx)[IdxFieldsⲐ] ??= Object.assign({}, ...idx.fields.map(x => MongoUtil.toIndex(x)));
         return [
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          combined as IndexSpecification,
+          castTo(combined),
           (idx.type === 'unique' ? { unique: true } : {})
         ];
       }),
@@ -183,17 +181,15 @@ export class MongoModelService implements
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preStore(cls, item, this);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    (cleaned as WithId<T>)._id = MongoUtil.uuid(cleaned.id);
+    const cleaned: WithId<T, Binary> = castTo(await ModelCrudUtil.preStore(cls, item, this));
+    cleaned._id = MongoUtil.uuid(cleaned.id);
 
     const store = await this.getStore(cls);
-    const result = await store.insertOne(cleaned);
+    const result = await store.insertOne(castTo(cleaned));
     if (!result.insertedId) {
       throw new ExistsError(cls, cleaned.id);
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    delete (cleaned as { _id?: unknown })._id;
+    delete cleaned._id;
     return cleaned;
   }
 
@@ -240,15 +236,14 @@ export class MongoModelService implements
     const items = MongoUtil.extractSimple(cls, final, undefined, false);
     final = Object
       .entries(items)
-      .reduce<Record<string, unknown>>((acc, [k, v]) => {
+      .reduce<Partial<{
+        $unset?: Record<string, unknown>;
+        $set?: Record<string, unknown>;
+      }>>((acc, [k, v]) => {
         if (v === null || v === undefined) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const o = (acc.$unset ??= {}) as Record<string, unknown>;
-          o[k] = v;
+          (acc.$unset ??= {})[k] = v;
         } else {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const o = (acc.$set ??= {}) as Record<string, unknown>;
-          o[k] = v;
+          (acc.$set ??= {})[k] = v;
         }
         return acc;
       }, {});
@@ -350,8 +345,7 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        bulk.insert(MongoUtil.preInsertId(op.insert as T));
+        bulk.insert(MongoUtil.preInsertId(asFull(op.insert)));
       } else if (op.upsert) {
         bulk.find({ _id: MongoUtil.uuid(op.upsert.id!) }).upsert().updateOne({ $set: op.upsert });
       } else if (op.update) {
@@ -365,13 +359,11 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        MongoUtil.postLoadId(op.insert as T);
+        MongoUtil.postLoadId(asFull(op.insert));
       }
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    for (const [index, _id] of TypedObject.entries(res.upsertedIds) as [number, ObjectId][]) {
-      out.insertedIds.set(+index, MongoUtil.idToString(_id));
+    for (const [index, _id] of TypedObject.entries(res.upsertedIds)) {
+      out.insertedIds.set(+index, MongoUtil.idToString(castTo(_id)));
     }
 
     if (out.counts) {
@@ -385,8 +377,7 @@ export class MongoModelService implements
       out.errors = res.getWriteErrors();
       for (const err of out.errors) {
         const op = operations[err.index];
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const k = Object.keys(op)[0] as keyof BulkResponse['counts'];
+        const k = TypedObject.keys(op)[0];
         out.counts[k] -= 1;
       }
       out.counts.error = out.errors.length;
@@ -407,8 +398,7 @@ export class MongoModelService implements
     const result = await store.findOne(
       this.getWhere(
         cls,
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        ModelIndexedUtil.projectIndex(cls, idx, body) as WhereClause<T>
+        castTo(ModelIndexedUtil.projectIndex(cls, idx, body))
       )
     );
     if (!result) {
@@ -423,8 +413,7 @@ export class MongoModelService implements
     const result = await store.deleteOne(
       this.getWhere(
         cls,
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        ModelIndexedUtil.projectIndex(cls, idx, body) as WhereClause<T>
+        castTo(ModelIndexedUtil.projectIndex(cls, idx, body))
       )
     );
     if (result.deletedCount) {
@@ -445,18 +434,15 @@ export class MongoModelService implements
       throw new AppError('Cannot list on unique indices', 'data');
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const where = this.getWhere(
       cls,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }) as WhereClause<T>
-    ) as Filter<Document>;
+      castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
+    );
 
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(asFielded(idxCfg)[IdxFieldsⲐ]);
 
     for await (const el of cursor) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      yield (await MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el))) as T;
+      yield (await MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el)));
     }
   }
 
@@ -528,15 +514,14 @@ export class MongoModelService implements
     const col = await this.getStore(cls);
 
     const items = MongoUtil.extractSimple(cls, data);
-    const final = Object.entries(items).reduce<Record<string, unknown>>((acc, [k, v]) => {
+    const final = Object.entries(items).reduce<{
+      $unset?: Record<string, unknown>;
+      $set?: Record<string, unknown>;
+    }>((acc, [k, v]) => {
       if (v === null || v === undefined) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const o = (acc.$unset = acc.$unset ?? {}) as Record<string, unknown>;
-        o[k] = v;
+        (acc.$unset ??= {})[k] = v;
       } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const o = (acc.$set = acc.$set ?? {}) as Record<string, unknown>;
-        o[k] = v;
+        (acc.$set ??= {})[k] = v;
       }
       return acc;
     }, {});
@@ -551,8 +536,7 @@ export class MongoModelService implements
     const col = await this.getStore(cls);
     const aggs: object[] = [{
       $group: {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        _id: `$${field as string}`,
+        _id: `$${field}`,
         count: {
           $sum: 1
         }
@@ -567,8 +551,7 @@ export class MongoModelService implements
 
     aggs.unshift({ $match: q });
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const result = (await col.aggregate(aggs).toArray()) as { _id: ObjectId, count: number }[];
+    const result = await col.aggregate<{ _id: ObjectId, count: number }>(aggs).toArray();
 
     return result.map(val => ({
       key: MongoUtil.idToString(val._id),

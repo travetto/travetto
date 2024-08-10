@@ -1,4 +1,4 @@
-import { ConcreteClass } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 
 type OrProm<T> = T | Promise<T>;
 
@@ -19,7 +19,7 @@ export type CliCommandConfig = {
   name: string;
   commandModule: string;
   runTarget?: boolean;
-  cls: ConcreteClass<CliCommandShape>;
+  cls: Class<CliCommandShape>;
   hidden?: boolean;
   preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 };
@@ -49,6 +49,7 @@ export type CliValidationError = {
  * CLI Command Contract
  */
 export interface CliCommandShape<T extends unknown[] = unknown[]> {
+
   /**
    * Parsed state
    */
@@ -116,7 +117,7 @@ export type CliCommandShapeFields = {
 /**
  * CLI Command argument/flag shape
  */
-export type CliCommandInput = {
+export type CliCommandInput<K extends string = string> = {
   name: string;
   description?: string;
   type: 'string' | 'file' | 'number' | 'boolean' | 'date' | 'regex' | 'module';
@@ -125,19 +126,19 @@ export type CliCommandInput = {
   required?: boolean;
   array?: boolean;
   default?: unknown;
-  flagNames?: string[];
+  flagNames?: K[];
   envVars?: string[];
 };
 
 /**
  * CLI Command schema shape
  */
-export type CliCommandSchema = {
+export interface CliCommandSchema<K extends string = string> {
   name: string;
   title: string;
   commandModule: string;
   runTarget?: boolean;
   description?: string;
   args: CliCommandInput[];
-  flags: CliCommandInput[];
-};
+  flags: CliCommandInput<K>[];
+}

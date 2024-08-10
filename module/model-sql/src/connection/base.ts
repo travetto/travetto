@@ -1,4 +1,4 @@
-import { Util } from '@travetto/runtime';
+import { castTo, Util } from '@travetto/runtime';
 import { AsyncContext } from '@travetto/context';
 
 const ContextActiveⲐ: unique symbol = Symbol.for('@travetto/model:sql-active');
@@ -95,13 +95,12 @@ export abstract class Connection<C = unknown> {
    * @param op
    * @param args
    */
-  async * iterateWithActive<R>(op: () => AsyncGenerator<R>): AsyncIterable<R> {
+  async * iterateWithActive<R>(op: () => AsyncIterable<R>): AsyncIterable<R> {
     if (this.active) {
       yield* op();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
+    const self = castTo<Connection>(this);
     yield* this.context.iterate(async function* () {
       try {
         self.context.set(ContextActiveⲐ, await self.acquire());
@@ -117,7 +116,7 @@ export abstract class Connection<C = unknown> {
   /**
    * Run a function within a valid sql transaction.  Relies on @travetto/context.
    */
-  async runWithTransaction<R>(mode: TransactionType, op: () => R): Promise<R> {
+  async runWithTransaction<R>(mode: TransactionType, op: () => Promise<R>): Promise<R> {
     if (this.activeTx) {
       if (mode === 'isolated' || mode === 'force') {
         const txId = mode === 'isolated' ? `tx${Util.uuid()}` : undefined;

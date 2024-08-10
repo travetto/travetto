@@ -54,7 +54,7 @@ export class CoreRestServerSupport implements RestServerSupport {
 
     let q = '';
     if (query && Object.keys(query).length) {
-      const pairs = Object.entries(query).map(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`] as [string, string]);
+      const pairs = Object.entries(query).map<[string, string]>(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`]);
       q = `?${new URLSearchParams(pairs).toString()}`;
     }
 

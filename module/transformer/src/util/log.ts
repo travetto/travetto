@@ -5,6 +5,8 @@ const exclude = new Set([
   'nextContainer', 'modifierFlagsCache', 'declaredProperties'
 ]);
 
+const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(o: T): K[] } & ObjectConstructor = Object;
+
 /**
  * Utilities for logging typescript nodes
  */
@@ -33,11 +35,9 @@ export class LogUtil {
     if (Array.isArray(x)) {
       return x.map(v => this.collapseNode(v, cache));
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const ox = x as object;
+      const ox = x;
       const out: Record<string, unknown> = {};
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      for (const key of Object.keys(ox) as (keyof typeof ox)[]) {
+      for (const key of TypedObject.keys(ox)) {
         if (Object.getPrototypeOf(ox[key]) === Function.prototype || exclude.has(key) || ox[key] === undefined) {
           continue;
         }

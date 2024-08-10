@@ -72,8 +72,7 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
         sub = `${path}/${route.path}`;
       }
       sub = sub.replace(/\/+/g, '/').replace(/\/+$/, '');
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      this.raw[route.method as 'get'](sub, async (req, reply) => {
+      this.raw[route.method](sub, async (req, reply) => {
         await route.handlerFinalized!(
           req[TravettoEntityⲐ] ??= FastifyServerUtil.getRequest(req),
           reply[TravettoEntityⲐ] ??= FastifyServerUtil.getResponse(reply)

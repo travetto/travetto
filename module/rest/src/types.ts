@@ -1,4 +1,4 @@
-import type { Class } from '@travetto/runtime';
+import type { Any, Class, TypedFunction } from '@travetto/runtime';
 
 import type { RestInterceptor } from './interceptor/types';
 
@@ -8,13 +8,12 @@ export type Request = TravettoRequest;
 export type Response = TravettoResponse;
 export type ByteRange = TravettoByteRange;
 
-export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'trace' | 'all';
+export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 
 export type FilterReturn = void | unknown | Promise<void | unknown>;
 export type FilterNext = () => FilterReturn;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type RouteHandler = (...args: any[]) => any;
+export type RouteHandler = TypedFunction<Any, Any>;
 export type FilterContext<C = unknown> = { req: Request, res: Response, config: C };
 export type Filter<C = unknown> = (context: FilterContext<C>, next: FilterNext) => FilterReturn;
 export type RequestResponseHandler = (req: Request, res: Response) => FilterReturn;

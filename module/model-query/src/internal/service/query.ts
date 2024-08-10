@@ -1,11 +1,10 @@
-import { Class, AppError, TimeUtil } from '@travetto/runtime';
+import { Class, AppError, TimeUtil, castTo } from '@travetto/runtime';
 import { ModelRegistry, NotFoundError } from '@travetto/model';
 import { ModelType } from '@travetto/model/src/types/model';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelQuery, Query } from '../../model/query';
 import { WhereClause, WhereClauseRaw } from '../../model/where-clause';
-import { QueryLanguageParser } from '../query/parser';
 import { QueryVerifier } from '../query/verifier';
 
 /**
@@ -40,24 +39,21 @@ export class ModelQueryUtil {
   /**
    * Get a where clause with type
    */
-  static getWhereClause<T extends ModelType>(cls: Class<T>, o: WhereClause<T> | string | undefined, checkExpiry = true): WhereClause<T> {
-    let q: WhereClause<T> | undefined = o ? (typeof o === 'string' ? QueryLanguageParser.parseToQuery(o) : o) : undefined;
+  static getWhereClause<T extends ModelType>(cls: Class<T>, q: WhereClause<T> | undefined, checkExpiry = true): WhereClause<T> {
     const clauses: WhereClauseRaw<T>[] = (q ? [q] : []);
 
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
       const { subTypeField, subTypeName } = SchemaRegistry.get(cls);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      clauses.push({ [subTypeField]: subTypeName } as WhereClauseRaw<T>);
+      clauses.push(castTo({ [subTypeField]: subTypeName }));
     }
     if (checkExpiry && conf.expiresAt) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      clauses.push({
+      clauses.push(castTo({
         $or: [
           { [conf.expiresAt]: { $exists: false } },
           { [conf.expiresAt]: { $gte: new Date() } },
         ]
-      } as WhereClauseRaw<T>);
+      }));
     }
     if (clauses.length > 1) {
       q = { $and: clauses };
@@ -75,8 +71,7 @@ export class ModelQueryUtil {
   ): U & { where: WhereClause<T> } {
     query.where = this.getWhereClause(cls, query.where, checkExpiry);
     QueryVerifier.verify(cls, query);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return query as U & { where: WhereClause<T> };
+    return castTo(query);
   }
 
   /**
@@ -88,9 +83,14 @@ export class ModelQueryUtil {
     query: U
   ): U & { where: WhereClause<T> & { id: string } } {
     query.where = this.getWhereClause(cls, query.where);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    (query.where as WhereClauseRaw<ModelType>).id = item.id;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return query as U & { where: WhereClause<T> & { id: string } };
+    castTo<WhereClauseRaw<ModelType>>(query.where).id = item.id;
+    return castTo(query);
   }
+
+  static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) =>
+    !!o && typeof o === 'object' && '$and' in o;
+  static has$Or = (o: unknown): o is ({ $or: WhereClause<unknown>[] }) =>
+    !!o && typeof o === 'object' && '$or' in o;
+  static has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) =>
+    !!o && typeof o === 'object' && '$not' in o;
 }

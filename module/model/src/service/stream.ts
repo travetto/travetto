@@ -12,11 +12,11 @@ export interface StreamMeta {
   /**
    * Hash of the file contents.  Different files with the same name, will have the same hash
    */
-  hash: string;
+  hash?: string;
   /**
    * The original base filename of the file
    */
-  filename: string;
+  filename?: string;
   /**
    * Filenames title, optional for elements like images, audio, videos
    */

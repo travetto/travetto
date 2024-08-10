@@ -2,6 +2,7 @@ import type express from 'express';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
 import { NodeEntityⲐ, ProviderEntityⲐ } from '@travetto/rest/src/internal/symbol';
+import { castTo } from '@travetto/runtime';
 
 /**
  * Provide a mapping between express request/response and the framework analogs
@@ -14,10 +15,8 @@ export class ExpressServerUtil {
     return RestServerUtil.decorateRequest<Request>({
       [ProviderEntityⲐ]: req,
       [NodeEntityⲐ]: req,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      protocol: req.protocol as 'http',
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      method: req.method as Request['method'],
+      protocol: castTo(req.protocol),
+      method: castTo(req.method),
       url: req.originalUrl,
       query: req.query,
       params: req.params,
@@ -47,9 +46,8 @@ export class ExpressServerUtil {
         }
       },
       send(data): void {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const contentType: string = (res.getHeader('Content-Type') as string) ?? '';
-        if (contentType.includes('json') && typeof data === 'string') {
+        const contentType = res.getHeader('Content-Type');
+        if (typeof contentType === 'string' && contentType.includes('json') && typeof data === 'string') {
           data = Buffer.from(data);
         }
         res.send(data);
@@ -62,8 +60,7 @@ export class ExpressServerUtil {
         res.end();
       },
       setHeader: res.setHeader.bind(res),
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      getHeader: res.getHeader.bind(res) as (key: string) => string | string[] | undefined, // NOTE: Forcing type, may be incorrect
+      getHeader: castTo(res.getHeader.bind(res)), // NOTE: Forcing type, may be incorrect
       removeHeader: res.removeHeader.bind(res),
       write: res.write.bind(res)
     });

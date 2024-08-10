@@ -1,3 +1,5 @@
+import { castTo } from './types';
+
 export type ErrorCategory =
   'general' |
   'notfound' |
@@ -20,8 +22,7 @@ export class AppError<T = unknown> extends Error {
       ('type' in e && typeof e.type === 'string') &&
       ('at' in e && typeof e.at === 'number')
     ) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const err = new AppError(e.message, e.category as ErrorCategory, 'details' in e ? e.details : undefined);
+      const err = new AppError(e.message, castTo(e.category), 'details' in e ? e.details : undefined);
       err.at = new Date(e.at);
       err.type = e.type;
       return err;
@@ -59,8 +60,7 @@ export class AppError<T = unknown> extends Error {
       category: this.category,
       type: this.type,
       at: this.at.toISOString(),
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      details: this.details as Record<string, unknown>,
+      details: castTo(this.details),
     };
   }
 }

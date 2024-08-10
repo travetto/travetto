@@ -1,11 +1,8 @@
-import { TimeSpan, TimeUtil } from '@travetto/runtime';
+import { castTo, MethodDescriptor, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { CacheService } from './service';
 import { CoreCacheConfig, CacheConfig } from './types';
 import { CacheAware, CacheConfigⲐ, EvictConfigⲐ } from './internal/types';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type MethodDescriptor<R = any, V = unknown> = TypedPropertyDescriptor<(this: V, ...params: any[]) => R>;
 
 /**
  * Indicates a method is intended to cache.  The return type must be properly serializable
@@ -25,12 +22,11 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
       config = cfg;
     }
   }
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const dec = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[CacheConfigⲐ] ??= {})[propertyKey] = config;
-  } as MethodDecorator;
-  return dec;
+  };
+  return castTo(dec);
 }
 
 /**

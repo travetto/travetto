@@ -22,8 +22,13 @@ export class DockerPackOperation {
     // Read os before writing
     cfg.dockerRuntime.os = await PackUtil.runCommand(
       ['docker', 'run', '--entrypoint', '/bin/sh', cfg.dockerImage, '-c', 'cat /etc/*release*']
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    ).then(out => out.match(/\b(?:debian|alpine|centos)\b/i)?.[0].toLowerCase() as 'alpine' ?? 'unknown');
+    ).then(out => {
+      const found = out.match(/\b(?:debian|alpine|centos)\b/i)?.[0].toLowerCase();
+      switch (found) {
+        case 'debian': case 'alpine': case 'centos': return found;
+        default: return 'unknown';
+      }
+    });
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Detected Image OS' }} ${{ param: cfg.dockerImage }} as ${{ param: cfg.dockerRuntime.os }}`);
   }
 

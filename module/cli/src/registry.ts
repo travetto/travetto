@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asConstructable, Class, classConstruct, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
@@ -14,9 +14,8 @@ class $CliCommandRegistry {
     return this.#commands.get(cls);
   }
 
-  #getClass(cmd: CliCommandShape): Class<CliCommandShape> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return cmd.constructor as Class;
+  getClass(cmd: CliCommandShape): Class<CliCommandShape> {
+    return asConstructable<CliCommandShape>(cmd).constructor;
   }
 
   /**
@@ -40,11 +39,10 @@ class $CliCommandRegistry {
   /**
    * Registers a cli command
    */
-  registerClass(cls: Class, cfg: Partial<CliCommandConfig>): CliCommandConfig {
+  registerClass<T extends CliCommandShape>(cls: Class<T>, cfg: Partial<CliCommandConfig>): CliCommandConfig {
     const meta = describeFunction(cls);
     this.#commands.set(cls, {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      cls: cls as ConcreteClass,
+      cls,
       name: getName(meta.import),
       commandModule: meta.module,
       ...cfg,
@@ -56,7 +54,7 @@ class $CliCommandRegistry {
    * Get config for a given instance
    */
   getConfig(cmd: CliCommandShape): CliCommandConfig {
-    return this.getByClass(this.#getClass(cmd))!;
+    return this.getByClass(this.getClass(cmd))!;
   }
 
   /**
@@ -80,7 +78,7 @@ class $CliCommandRegistry {
       for (const v of values) {
         const cfg = this.getByClass(v);
         if (cfg) {
-          const inst = new cfg.cls();
+          const inst = classConstruct(cfg.cls);
           if (!inst.isActive || inst.isActive()) {
             inst._cfg = this.getConfig(inst);
             return inst;

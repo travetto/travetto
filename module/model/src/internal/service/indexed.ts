@@ -1,4 +1,4 @@
-import { Class, DeepPartial } from '@travetto/runtime';
+import { castTo, Class, DeepPartial, TypedObject } from '@travetto/runtime';
 
 import { IndexNotSupported } from '../../error/invalid-index';
 import { NotFoundError } from '../../error/not-found';
@@ -44,38 +44,30 @@ export class ModelIndexedUtil {
       const parts = [];
 
       while (o !== undefined && o !== null) {
-        const k = Object.keys(f)[0];
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        o = (o[k] as Record<string, unknown>);
+        const k = TypedObject.keys(f)[0];
+        o = castTo(o[k]);
         parts.push(k);
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const fk = k as (keyof typeof f);
-        if (typeof f[fk] === 'boolean' || typeof f[fk] === 'number') {
+        if (typeof f[k] === 'boolean' || typeof f[k] === 'number') {
           if (cfg.type === 'sorted') {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            sortDir = f[fk] === true ? 1 : f[fk] as number;
+            sortDir = f[k] === true ? 1 : f[k] === false ? 0 : f[k];
           }
           break; // At the bottom
         } else {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          f = f[fk] as Record<string, unknown>;
+          f = castTo(f[k]);
         }
       }
       if (field === sortField) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        sorted = { path: parts, dir: sortDir, value: o as unknown as number | Date };
+        sorted = { path: parts, dir: sortDir, value: castTo(o) };
       }
       if (o === undefined || o === null) {
         const empty = field === sortField ? opts.emptySortValue : opts.emptyValue;
         if (empty === undefined || empty === Error) {
           throw new IndexNotSupported(cls, cfg, `Missing field value for ${parts.join('.')}`);
         }
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        o = empty as Record<string, unknown>;
+        o = castTo(empty!);
       } else {
         if (field !== sortField || (opts.includeSortInFields ?? true)) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          fields.push({ path: parts, value: o as unknown as string | boolean | Date | number });
+          fields.push({ path: parts, value: castTo(o) });
         }
       }
     }
@@ -92,12 +84,11 @@ export class ModelIndexedUtil {
   static projectIndex<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, item?: DeepPartial<T>, cfg?: ComputeConfig): Record<string, unknown> {
     const res: Record<string, unknown> = {};
     for (const { path, value } of this.computeIndexParts(cls, idx, item ?? {}, cfg).fields) {
-      let sub = res;
+      let sub: Record<string, unknown> = res;
       const all = path.slice(0);
       const last = all.pop()!;
       for (const k of all) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        sub = (sub[k] ??= {}) as typeof res;
+        sub = castTo(sub[k] ??= {});
       }
       sub[last] = value;
     }
@@ -134,11 +125,9 @@ export class ModelIndexedUtil {
     cls: Class<T>, idx: string, body: OptionalId<T>
   ): Promise<T> {
     try {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { id } = await service.getByIndex(cls, idx, body as DeepPartial<T>);
+      const { id } = await service.getByIndex(cls, idx, castTo(body));
       body.id = id;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return await service.update(cls, body as T);
+      return await service.update(cls, castTo(body));
     } catch (err) {
       if (err instanceof NotFoundError) {
         return await service.create(cls, body);

@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { AppError, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
+import { AppError, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
@@ -33,8 +33,7 @@ export class ConfigurationService {
 
     while (parts.length && sub) {
       const next = parts.shift()!;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      sub = sub[next] as Record<string, unknown>;
+      sub = castTo(sub[next]);
     }
 
     return sub;

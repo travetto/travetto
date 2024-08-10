@@ -1,19 +1,17 @@
 import { Client, errors } from '@elastic/elasticsearch';
-import {
-  AggregationsStringTermsAggregate, AggregationsStringTermsBucket, DeleteByQueryRequest, SearchRequest, SearchResponse, UpdateByQueryResponse
-} from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsStringTermsAggregate, SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
   OptionalId
 } from '@travetto/model';
-import { ShutdownManager, type DeepPartial, type Class, AppError } from '@travetto/runtime';
+import { ShutdownManager, type DeepPartial, type Class, AppError, castTo, asFull, TypedObject, asConstructable } from '@travetto/runtime';
 import { SchemaChange, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
-  ModelQuerySupport, PageableModelQuery, Query, SelectClause, ValidStringFields
+  ModelQuerySupport, PageableModelQuery, Query, ValidStringFields
 } from '@travetto/model-query';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -107,8 +105,7 @@ export class ElasticsearchModelService implements
     await this.client.cluster.health({});
     this.manager = new IndexManager(this.config, this.client);
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    await ModelStorageUtil.registerModelChangeListener(this.manager, this.constructor as Class);
+    await ModelStorageUtil.registerModelChangeListener(this.manager);
     ShutdownManager.onGracefulShutdown(() => this.client.close(), this);
     ModelExpiryUtil.registerCull(this);
   }
@@ -124,8 +121,7 @@ export class ElasticsearchModelService implements
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     try {
       const res = await this.client.get({ ...this.manager.getIdentity(cls), id });
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return this.postLoad(cls, res._source as T);
+      return this.postLoad(cls, castTo(res._source));
     } catch {
       throw new NotFoundError(cls, id);
     }
@@ -270,18 +266,15 @@ export class ElasticsearchModelService implements
 
     const body = operations.reduce<(T | Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>> | { doc: T })[]>((acc, op) => {
 
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const esIdent = this.manager.getIdentity((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls }).constructor as Class);
+      const esIdent = this.manager.getIdentity(asConstructable<T>((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls })).constructor);
       const ident: { _index: string, _type?: unknown } = { _index: esIdent.index };
 
       if (op.delete) {
         acc.push({ delete: { ...ident, _id: op.delete.id } });
       } else if (op.insert) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        acc.push({ create: { ...ident, _id: op.insert.id } }, op.insert as T);
+        acc.push({ create: { ...ident, _id: op.insert.id } }, castTo(op.insert));
       } else if (op.upsert) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        acc.push({ index: { ...ident, _id: op.upsert.id } }, op.upsert as T);
+        acc.push({ index: { ...ident, _id: op.upsert.id } }, castTo(op.upsert));
       } else if (op.update) {
         acc.push({ update: { ...ident, _id: op.update.id } }, { doc: op.update });
       }
@@ -309,10 +302,9 @@ export class ElasticsearchModelService implements
 
     for (let i = 0; i < res.items.length; i++) {
       const item = res.items[i];
-      const [k] = Object.keys(item);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const v = item[k as keyof typeof item]!;
-      if (k === 'error') {
+      const [k] = TypedObject.keys(item);
+      const v = item[k]!;
+      if (v.error) {
         out.errors.push({
           reason: v.error!.reason!,
           type: v.error!.type
@@ -320,13 +312,13 @@ export class ElasticsearchModelService implements
         out.counts.error += 1;
       } else {
         let sk: Count;
-        if (k === 'create') {
-          sk = 'insert';
-        } else if (k === 'index') {
-          sk = operations[i].insert ? 'insert' : 'upsert';
-        } else {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          sk = k as Count;
+        switch (k) {
+          case 'create': sk = 'insert'; break;
+          case 'index': sk = operations[i].insert ? 'insert' : 'upsert'; break;
+          case 'delete': case 'update': sk = k; break;
+          default: {
+            throw new Error(`Unknown response key: ${k}`);
+          }
         }
 
         if (v.result === 'created') {
@@ -446,8 +438,7 @@ export class ElasticsearchModelService implements
 
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const copy = BindUtil.bindSchemaToObject(cls, {} as T, item);
+    const copy = BindUtil.bindSchemaToObject(cls, asFull<T>({}), item);
 
     try {
       const res = await this.client.updateByQuery({
@@ -455,16 +446,14 @@ export class ElasticsearchModelService implements
         refresh: true,
         query: search.query,
         max_docs: 1,
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        script: ElasticsearchSchemaUtil.generateReplaceScript(copy as {})
+        script: ElasticsearchSchemaUtil.generateReplaceScript(castTo(copy))
       });
 
       if (res.version_conflicts || res.updated === undefined || res.updated === 0) {
         throw new NotFoundError(cls, id);
       }
     } catch (err) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      if (err instanceof errors.ResponseError && (err.body as UpdateByQueryResponse).version_conflicts) {
+      if (err instanceof errors.ResponseError && 'version_conflicts' in err.body) {
         throw new NotFoundError(cls, id);
       } else {
         throw err;
@@ -475,10 +464,10 @@ export class ElasticsearchModelService implements
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
+    const { sort: _, ...q } = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, false);
     const res = await this.client.deleteByQuery({
       ...this.manager.getIdentity(cls),
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      ...ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, false) as DeleteByQueryRequest,
+      ...q,
       refresh: true,
     });
     return res.deleted ?? 0;
@@ -510,11 +499,8 @@ export class ElasticsearchModelService implements
   }
 
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const select: SelectClause<T> = { [field]: 1 } as SelectClause<T>;
-
     const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
-      select,
+      select: castTo({ [field]: 1 }),
       ...query
     });
     const search = ElasticsearchQueryUtil.getSearchObject(cls, q);
@@ -536,10 +522,8 @@ export class ElasticsearchModelService implements
     };
 
     const res = await this.execSearch(cls, search);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const { buckets } = res.aggregations![field] as AggregationsStringTermsAggregate;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const out = (buckets as AggregationsStringTermsBucket[]).map(b => ({ key: b.key, count: b.doc_count }));
+    const { buckets } = castTo<AggregationsStringTermsAggregate>('buckets' in res.aggregations![field] ? res.aggregations![field] : { buckets: [] });
+    const out = Array.isArray(buckets) ? buckets.map(b => ({ key: b.key, count: b.doc_count })) : [];
     return out;
   }
 }

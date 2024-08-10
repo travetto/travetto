@@ -2,13 +2,12 @@ import { configure } from '@codegenie/serverless-express';
 
 import { Inject, Injectable } from '@travetto/di';
 import {
-  AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ,
+  AwsLambdaHandle, AwsLambdaRestServer, AwsLambdaⲐ,
   RestAwsConfig, LambdaContext, LambdaAPIGatewayProxyEvent
 } from '@travetto/rest-aws-lambda';
 import type { ServerHandle } from '@travetto/rest';
 import { KoaRestServer } from '@travetto/rest-koa';
-
-type AwsLambdaHandle = AwsLambdaHandler['handle'];
+import { castTo, asFull } from '@travetto/runtime';
 
 /**
  * Aws Lambda Rest Server
@@ -30,14 +29,12 @@ export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRe
 
   override async init(): Promise<this['raw']> {
     const ret = await super.init();
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.#handler = configure({ app: ret.callback(), ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandle;
+    this.#handler = castTo(configure({ app: ret.callback(), ...this.awsConfig.toJSON() }));
     return ret;
   }
 
   override async listen(): Promise<ServerHandle> {
     this.listening = true;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return {} as ServerHandle;
+    return asFull<ServerHandle>({});
   }
 }

@@ -14,7 +14,6 @@ export interface MailTransport {
  */
 export class NullTransport implements MailTransport {
   async send<S extends SentEmail = SentEmail>(mail: EmailOptions): Promise<S> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return {} as S;
+    return undefined! ?? {};
   }
 }

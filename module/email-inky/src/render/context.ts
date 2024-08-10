@@ -1,5 +1,5 @@
 import { createElement } from '@travetto/email-inky/jsx-runtime';
-import { FileLoader } from '@travetto/runtime';
+import { castTo, FileLoader } from '@travetto/runtime';
 import { EmailTemplateLocation, EmailResourceLoader } from '@travetto/email';
 
 import { JSXElementByFn, c } from '../components';
@@ -25,8 +25,6 @@ export class RenderContext implements RenderContextInit {
    * Create a new element from a given JSX factory
    */
   createElement<K extends keyof typeof c>(name: K, props: JSXElementByFn<K>['props']): JSXElementByFn<K> {
-    // @ts-expect-error
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return createElement(c[name], props) as JSXElementByFn<K>;
+    return castTo(createElement(castTo<Record<string, string>>(c)[name], props));
   }
 }

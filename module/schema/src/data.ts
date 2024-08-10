@@ -1,6 +1,6 @@
 import { isNumberObject as isNum, isBooleanObject as isBool, isStringObject as isStr } from 'node:util/types';
 
-import { Class, ClassInstance, TypedObject } from '@travetto/runtime';
+import { asConstructable, castTo, Class, asFull, TypedObject } from '@travetto/runtime';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 
@@ -62,15 +62,13 @@ export class DataUtil {
       if (isArrA !== isArrB || isSimpA !== isSimpB) {
         throw new Error(`Cannot merge differing types ${a} and ${b}`);
       }
-      if (isArrB) { // Arrays
+      if (Array.isArray(b)) { // Arrays
         ret = a; // Write onto A
         if (mode === 'replace') {
           ret = b;
         } else {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const retArr = ret as unknown[];
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const bArr = b as unknown[];
+          const retArr: unknown[] = castTo(ret);
+          const bArr = b;
           for (let i = 0; i < bArr.length; i++) {
             retArr[i] = this.#deepAssignRaw(retArr[i], bArr[i], mode);
           }
@@ -83,16 +81,13 @@ export class DataUtil {
           if (mode === 'strict') { // Bail on strict
             throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
           } else if (mode === 'coerce') { // Force on coerce
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            ret = this.coerceType(b, (a as ClassInstance).constructor, false);
+            ret = this.coerceType(b, asConstructable(a).constructor, false);
           }
         }
       } else { // Object merge
         ret = a;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const bObj = b as Record<string, unknown>;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const retObj = ret as Record<string, unknown>;
+        const bObj: Record<string, unknown> = castTo(b);
+        const retObj: Record<string, unknown> = castTo(ret);
 
         for (const key of Object.keys(bObj)) {
           retObj[key] = this.#deepAssignRaw(retObj[key], bObj[key], mode);
@@ -128,8 +123,8 @@ export class DataUtil {
   static coerceType(input: unknown, type: typeof Boolean, strict?: boolean): boolean;
   static coerceType(input: unknown, type: typeof Date, strict?: boolean): Date;
   static coerceType(input: unknown, type: typeof RegExp, strict?: boolean): RegExp;
-  static coerceType<T>(input: unknown, type: Class<T>, strict?: boolean): T;
-  static coerceType(input: unknown, type: Class<unknown>, strict = true): unknown {
+  static coerceType<T>(input: unknown, type: Class<T> | Function, strict?: boolean): T;
+  static coerceType(input: unknown, type: Class<unknown> | Function, strict = true): unknown {
     // Do nothing
     if (input === null || input === undefined) {
       return input;
@@ -143,14 +138,17 @@ export class DataUtil {
       case Date: {
         let res: Date | undefined;
         if (typeof input === 'object' && 'toDate' in input && typeof input.toDate === 'function') {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          res = input.toDate() as Date;
+          res = castTo(input.toDate());
         } else {
-          res = typeof input === 'number' || /^[-]?\d+$/.test(`${input}`) ?
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            new Date(parseInt(input as string, 10)) : new Date(input as Date);
+          res = input instanceof Date ?
+            input :
+            typeof input === 'number' ?
+              new Date(input) :
+              (typeof input === 'string' && /^[-]?\d+$/.test(input)) ?
+                new Date(parseInt(input, 10)) :
+                new Date(input.toString());
         }
-        if (strict && Number.isNaN(res.getTime())) {
+        if (strict && res && Number.isNaN(res.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
         }
         return res;
@@ -207,9 +205,8 @@ export class DataUtil {
    * Clone top level properties to a new object
    * @param o Object to clone
    */
-  static shallowClone<T = unknown>(a: T): T {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (Array.isArray(a) ? a.slice(0) : (this.isSimpleValue(a) ? a : { ...(a as {}) })) as T;
+  static shallowClone<T>(a: T): T {
+    return castTo(Array.isArray(a) ? a.slice(0) : (this.isSimpleValue(a) ? a : { ...castTo<object>(a) }));
   }
 
   /**
@@ -222,8 +219,7 @@ export class DataUtil {
     if (!a || this.isSimpleValue(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.#deepAssignRaw(a, b, mode) as T & U;
+    return castTo(this.#deepAssignRaw(a, b, mode));
   }
 
   /**
@@ -245,8 +241,7 @@ export class DataUtil {
           }
         }
       }
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return out as T;
+      return asFull(out);
     } else {
       return obj;
     }

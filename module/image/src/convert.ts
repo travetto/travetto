@@ -5,6 +5,7 @@ import { ChildProcess } from 'node:child_process';
 import { pipeline } from 'node:stream/promises';
 
 import { CommandOperation } from '@travetto/command';
+import { castTo } from '@travetto/runtime';
 
 /**
  * Image output options
@@ -62,16 +63,11 @@ export class ImageConverter {
 
   static async #stream<T extends ImageType>(proc: ChildProcess, input: T): Promise<T> {
     if (Buffer.isBuffer(input)) {
-      const [_, output] = await Promise.all([
-        pipeline(Readable.from(input), proc.stdin!),
-        toBuffer(proc.stdout!)
-      ]);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return output as T;
+      Readable.from(input).pipe(proc.stdin!);
+      return castTo(toBuffer(proc.stdout!));
     } else {
       input.pipe(proc.stdin!); // Start the process
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return proc.stdout! as T;
+      return castTo(proc.stdout);
     }
   }
 
@@ -90,7 +86,7 @@ export class ImageConverter {
   }
 
   /**
-   * Optimize png using pngquant
+   * Optimize image
    */
   static async optimize<T extends ImageType>(format: 'png' | 'jpeg', image: T): Promise<T> {
     let proc: ChildProcess;

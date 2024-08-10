@@ -111,7 +111,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     assert(await svc.queryCount(Person, {}) === 3);
 
-    const c2 = await svc.deleteByQuery(Person, { where: 'age <= 3' });
+    const c2 = await svc.deleteByQuery(Person, { where: { age: { $lte: 3 } } });
 
     assert(c2 === 3);
 
@@ -135,7 +135,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     assert(count === 5);
 
-    assert(await svc.queryCount(Person, { where: 'gender == "m"' }) === 5);
+    assert(await svc.queryCount(Person, { where: { gender: 'm' } }) === 5);
 
     const c = await svc.updateByQuery(Person, { where: { age: { $gt: 3 } } }, { gender: 'f' });
 
@@ -145,12 +145,12 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     assert(await svc.queryCount(Person, { where: { gender: 'm' } }) === 3);
 
-    const c2 = await svc.updateByQuery(Person, { where: 'gender == "m"' }, { gender: 'f' });
+    const c2 = await svc.updateByQuery(Person, { where: { gender: 'm' } }, { gender: 'f' });
 
     assert(c2 === 3);
 
     assert(await svc.queryCount(Person, { where: { gender: 'f' } }) === 5);
-    assert(await svc.queryCount(Person, { where: 'gender == "m"' }) === 0);
+    assert(await svc.queryCount(Person, { where: { gender: 'm' } }) === 0);
 
   }
 }

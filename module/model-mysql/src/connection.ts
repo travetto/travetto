@@ -1,6 +1,6 @@
 import { createPool } from 'mysql2';
 
-import { ShutdownManager } from '@travetto/runtime';
+import { castTo, ShutdownManager } from '@travetto/runtime';
 import { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, SQLModelConfig } from '@travetto/model-sql';
@@ -69,8 +69,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
         if (isSimplePacket(results[0])) {
           return { records: [], count: results[0].affectedRows };
         }
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const records: T[] = [...results].map(v => ({ ...v }) as T);
+        const records: T[] = [...results].map(v => castTo({ ...v }));
         return { records, count: records.length };
       }
     } catch (err) {

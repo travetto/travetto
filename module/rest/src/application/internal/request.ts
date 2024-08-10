@@ -2,6 +2,7 @@ import { IncomingHttpHeaders } from 'node:http';
 
 import { getExtension } from 'mime';
 
+import { castTo } from '@travetto/runtime';
 
 import { Request, ContentType, ByteRange } from '../../types';
 import { MimeUtil } from '../../util/mime';
@@ -22,9 +23,8 @@ export class RequestCore implements Partial<Request> {
    * Get the inbound request header as a string
    * @param key The header to get
    */
-  header<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | undefined {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.headers[(key as string).toLowerCase() as K] as string | undefined;
+  header<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | string[] | undefined {
+    return this.headers[castTo<string>(key).toLowerCase()];
   }
   /**
    * Get the inbound request header as a string[]
@@ -54,17 +54,15 @@ export class RequestCore implements Partial<Request> {
    * Get the fully parsed content type
    */
   getContentType(this: Request): ContentType | undefined {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const self = (this as RequestCore);
+    const self: Request & Partial<RequestCore> = castTo(this);
     return self[ParsedType] ??= MimeUtil.parse(this.headerFirst('content-type'));
   }
 
   /**
    * Attempt to read the remote IP address of the connection
    */
-  getIp(): string | undefined {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const self = (this as unknown as Request);
+  getIp(this: Request): string | undefined {
+    const self: Request & Partial<RequestCore> = castTo(this);
     const raw = self[NodeEntityⲐ];
     return self.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
   }

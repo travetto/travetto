@@ -7,7 +7,7 @@ import {
   RestServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
 } from '@travetto/rest/support/test/server-support/base';
-import { Util } from '@travetto/runtime';
+import { asFull, castTo, Util } from '@travetto/runtime';
 
 import { AwsLambdaRestApplication } from '../../src/server';
 
@@ -17,7 +17,7 @@ const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParam
   stageVariables: {},
 };
 
-const baseLambdaContext = {
+const baseLambdaContext = asFull<lambda.APIGatewayProxyEvent['requestContext']>({
   accountId: Util.uuid(),
   resourceId: Util.uuid(),
   requestId: Util.uuid(),
@@ -36,7 +36,7 @@ const baseLambdaContext = {
     userAgent: '', userArn: ''
   },
   stage: '',
-} as lambda.APIGatewayProxyEvent['requestContext'];
+});
 
 const baseContext: lambda.Context = {
   awsRequestId: baseLambdaContext.requestId,
@@ -81,11 +81,11 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
       ...baseLambdaEvent,
       path,
       httpMethod: method,
-      queryStringParameters: (query ?? {}) as Record<string, string>,
+      queryStringParameters: castTo(query ?? {}),
       headers: valuesToShape.single(headers ?? {}),
       isBase64Encoded: true,
       body: body ? body.toString('base64') : body ?? null,
-      multiValueQueryStringParameters: valuesToShape.multi((query ?? {}) as Record<string, string>),
+      multiValueQueryStringParameters: valuesToShape.multi(castTo(query ?? {})),
       multiValueHeaders,
       requestContext: { ...baseLambdaContext, path, httpMethod: method },
     }, { ...baseContext }));
@@ -93,10 +93,10 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
     return {
       status: res.statusCode,
       body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
-      headers: valuesToShape.multi({
-        ...(res.headers ?? {}) as Record<string, string>,
-        ...(res.multiValueHeaders ?? {}) as Record<string, string | string[]>
-      })
+      headers: valuesToShape.multi(castTo({
+        ...(res.headers ?? {}),
+        ...(res.multiValueHeaders ?? {})
+      }))
     };
   }
 }

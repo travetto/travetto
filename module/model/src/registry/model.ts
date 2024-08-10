@@ -1,7 +1,7 @@
 import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { AppError, Class, describeFunction } from '@travetto/runtime';
+import { AppError, castTo, Class, describeFunction, asFull } from '@travetto/runtime';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { IndexConfig, IndexType, ModelOptions } from './types';
@@ -71,8 +71,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const config = this.pending.get(cls.Ⲑid)! as ModelOptions<ModelType>;
+    const config = asFull(this.pending.get(cls.Ⲑid)!);
 
     const schema = SchemaRegistry.get(cls);
     const view = schema.views[AllViewⲐ].schema;
@@ -103,7 +102,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   /**
    * Find base class for a given model
    */
-  getBaseModel(cls: Class): Class<ModelType> {
+  getBaseModel<T extends ModelType>(cls: Class<T>): Class<T> {
     if (!this.baseModels.has(cls)) {
       let conf = this.get(cls) ?? this.getOrCreatePending(cls);
       let parent = cls;
@@ -208,12 +207,12 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
    * Get expiry field
    * @param cls
    */
-  getExpiry(cls: Class): string {
+  getExpiry<T extends ModelType>(cls: Class<T>): keyof T {
     const expiry = this.get(cls).expiresAt;
     if (!expiry) {
       throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`, 'general');
     }
-    return expiry;
+    return castTo(expiry);
   }
 }
 

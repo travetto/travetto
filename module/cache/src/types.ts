@@ -1,3 +1,5 @@
+import { TypedFunction } from '@travetto/runtime';
+
 /**
  * A minimal config for a cache operation
  */
@@ -5,13 +7,11 @@ export interface CoreCacheConfig {
   /**
    * A method for converting the input params into the final set of param keys
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  params?: (...params: any[]) => unknown[];
+  params?: TypedFunction<unknown[]>;
   /**
    * Takes in a set of params and produce the unique cache key
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  key?: (...params: any[]) => string;
+  key?: TypedFunction<string>;
   /**
    * A namespace for the specific cache operation
    */

@@ -134,8 +134,7 @@ export class QueryLanguageTokenizer {
       pos: 0,
       start: 0,
       text,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      mode: undefined! as TokenType
+      mode: undefined!
     };
     const len = text.length;
     // Loop through each char

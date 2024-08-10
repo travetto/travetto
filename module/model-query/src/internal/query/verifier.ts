@@ -287,26 +287,26 @@ export class QueryVerifier {
 
     // Check all the clauses
     for (const [key, fn] of this.#mapping) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const queryKey = key as keyof typeof query;
+      if (key === 'sort') {
+        continue;
+      }
 
       if (!(key in query)
-        || query[queryKey] === undefined
-        || query[queryKey] === null
+        || query[key] === undefined
+        || query[key] === null
       ) {
         continue;
       }
 
-      const val = query[queryKey];
+      const val = query[key];
       const subState = state.extend(key);
 
       if (Array.isArray(val)) {
         for (const el of val) {
           this[fn](subState, cls, el);
         }
-      } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        this[fn](subState, cls, val as object);
+      } else if (typeof val !== 'string') {
+        this[fn](subState, cls, val);
       }
     }
 

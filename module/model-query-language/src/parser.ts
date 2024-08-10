@@ -1,4 +1,5 @@
-import { WhereClauseRaw } from '../../model/where-clause';
+import { castTo } from '@travetto/runtime';
+import { WhereClauseRaw } from '@travetto/model-query';
 import { QueryLanguageTokenizer } from './tokenizer';
 import { Token, Literal, GroupNode, OP_TRANSLATION, ArrayNode, AllNode } from './types';
 
@@ -6,8 +7,7 @@ import { Token, Literal, GroupNode, OP_TRANSLATION, ArrayNode, AllNode } from '.
  * Determine if a token is boolean
  */
 function isBoolean(o: unknown): o is Token & { type: 'boolean' } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && (o as { type: string }).type === 'boolean';
+  return !!o && typeof o === 'object' && 'type' in o && o.type === 'boolean';
 }
 
 /**
@@ -19,12 +19,9 @@ export class QueryLanguageParser {
    * Handle all clauses
    */
   static handleClause(nodes: (AllNode | Token)[]): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const val = nodes.pop()! as Token | ArrayNode;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const op = nodes.pop()! as Token;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const ident = nodes.pop()! as Token;
+    const val: Token | ArrayNode = castTo(nodes.pop());
+    const op: Token & { value: string } = castTo(nodes.pop());
+    const ident: Token & { value: string } = castTo(nodes.pop());
 
     // value isn't a literal or a list, bail
     if (val.type !== 'literal' && val.type !== 'list') {
@@ -37,16 +34,15 @@ export class QueryLanguageParser {
     }
 
     // If operator is not known, bail
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const finalOp = OP_TRANSLATION[op.value as string];
+    const finalOp = OP_TRANSLATION[op.value];
+
     if (!finalOp) {
       throw new Error(`Unexpected operator: ${op.value}`);
     }
 
     nodes.push({
       type: 'clause',
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      field: ident.value as string,
+      field: ident.value,
       op: finalOp,
       value: val.value
     });
@@ -65,13 +61,10 @@ export class QueryLanguageParser {
     let second = nodes[nodes.length - 2];
 
     while (isBoolean(second) && second.value === op) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const right = nodes.pop()! as AllNode;
+      const right: AllNode = castTo(nodes.pop());
       nodes.pop()!;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const left = nodes.pop()! as AllNode;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const rg = right as GroupNode;
+      const left: AllNode = castTo(nodes.pop());
+      const rg: GroupNode = castTo(right);
       if (rg.type === 'group' && rg.op === op) {
         rg.value.unshift(left);
         nodes.push(rg);
@@ -91,16 +84,14 @@ export class QueryLanguageParser {
    * (((5))) => 5
    */
   static unary(nodes: (AllNode | Token)[]): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const second = nodes[nodes.length - 2] as Token;
+    const second = nodes[nodes.length - 2];
     if (second && second.type === 'unary' && second.value === 'not') {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const node = nodes.pop()! as AllNode;
+      const node = nodes.pop();
       nodes.pop();
       nodes.push({
         type: 'unary',
         op: 'not',
-        value: node
+        value: castTo(node)
       });
     }
   }
@@ -160,8 +151,7 @@ export class QueryLanguageParser {
 
     this.condense(top, 'or');
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return top[0] as AllNode;
+    return castTo(top[0]);
   }
 
   /**
@@ -170,12 +160,10 @@ export class QueryLanguageParser {
   static convert<T = unknown>(node: AllNode): WhereClauseRaw<T> {
     switch (node.type) {
       case 'unary': {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        return { [`$${node.op!}`]: this.convert(node.value) } as WhereClauseRaw<T>;
+        return castTo({ [`$${node.op!}`]: this.convert(node.value) });
       }
       case 'group': {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        return { [`$${node.op!}`]: node.value.map(x => this.convert(x)) } as WhereClauseRaw<T>;
+        return castTo({ [`$${node.op!}`]: node.value.map(x => this.convert(x)) });
       }
       case 'clause': {
         const parts = node.field!.split('.');

@@ -17,6 +17,8 @@ export interface AwsLambdaHandler {
   handle(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): Promise<LambdaAPIGatewayProxyResult>;
 }
 
+export type AwsLambdaHandle = AwsLambdaHandler['handle'];
+
 export class AwsLambdaRestServerTarget { }
 
 /**

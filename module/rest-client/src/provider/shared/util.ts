@@ -2,6 +2,11 @@ import { IRemoteService, ParamConfig, RequestDefinition, RequestOptions } from '
 
 type BodyPart = { param: unknown, config: ParamConfig };
 
+export function restCast<T>(input: unknown): T {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return input as T;
+}
+
 export class CommonUtil {
   static isPlainObject(obj: unknown): obj is Record<string, unknown> {
     return typeof obj === 'object' // separate from primitives
@@ -62,11 +67,9 @@ export class CommonUtil {
       const pName = config.name;
       if (config.binary) {
         if (config.array) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          parts.push(...(param as Blob[]).map((uc, i) => ({ name: `${pName}[${i}]`, blob: uc })));
+          parts.push(...(restCast<Blob[]>(param)).map((uc, i) => ({ name: `${pName}[${i}]`, blob: uc })));
         } else {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          parts.push({ name: pName, blob: param as Blob });
+          parts.push({ name: pName, blob: restCast(param) });
         }
       } else {
         parts.push({ name: pName, blob: new Blob([JSON.stringify(param)], { type: 'application/json' }) });
@@ -75,8 +78,7 @@ export class CommonUtil {
     if (body.length === 1) {
       const blob: Blob = parts[0].blob;
       return {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        body: blob as T,
+        body: restCast(blob),
         headers: 'name' in blob ? {
           'Content-Disposition': `inline; filename="${blob.name}"`
         } : {}
@@ -86,8 +88,7 @@ export class CommonUtil {
       for (const { name, blob } of parts) {
         form.append(name, blob, 'name' in blob && typeof blob.name === 'string' ? blob.name : undefined);
       }
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return { body: form as T, headers: {} };
+      return { body: restCast(form), headers: {} };
     }
   }
 
@@ -104,8 +105,7 @@ export class CommonUtil {
         const sub = this.flattenPaths(
           (prefix || !complex) ?
             { [prefix ?? name]: params[i] } :
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            params[i] as Record<string, unknown>,
+            restCast(params[i]),
           '',
           loc === 'header'
         );
@@ -130,14 +130,13 @@ export class CommonUtil {
 
     const { headers: requestHeaders, body: requestBody } = this.requestBody<T>(body) || {};
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return {
+    return restCast({
       headers: { ...headers, ...requestHeaders },
       url,
       method,
       body: requestBody,
       withCredentials: svc.withCredentials,
       timeout: svc.timeout
-    } as RequestOptions<T>;
+    });
   }
 }

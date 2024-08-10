@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { DeclDocumentation } from '../types/shared';
+import { transformCast, DeclDocumentation } from '../types/shared';
 import { CoreUtil } from './core';
 import { DeclarationUtil } from './declaration';
 
@@ -38,8 +38,7 @@ export class DocUtil {
     if (node) {
       const tags = ts.getJSDocTags(node);
       while (!this.hasJSDoc(node) && CoreUtil.hasOriginal(node)) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        node = node.original as ts.Declaration;
+        node = transformCast<ts.Declaration>(node.original);
       }
 
       const docs = this.hasJSDoc(node) ? node.jsDoc : undefined;

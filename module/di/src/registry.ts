@@ -1,4 +1,4 @@
-import { Class, ClassInstance, ConcreteClass, Runtime, describeFunction } from '@travetto/runtime';
+import { Class, Runtime, asConstructable, castTo, classConstruct, describeFunction, asFull, castKey, TypedFunction } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
@@ -14,13 +14,11 @@ export type ResolutionType = 'strict' | 'loose' | 'any';
 const PrimaryCandidateⲐ = Symbol.for('@travetto/di:primary');
 
 function hasPostConstruct(o: unknown): o is { postConstruct: () => Promise<unknown> } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['postConstruct'];
+  return !!o && typeof o === 'object' && 'postConstruct' in o && typeof o.postConstruct === 'function';
 }
 
 function hasPreDestroy(o: unknown): o is { preDestroy: () => unknown } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as Record<string, unknown>)['preDestroy'];
+  return !!o && typeof o === 'object' && 'preDestroy' in o && typeof o.preDestroy === 'function';
 }
 
 /**
@@ -69,8 +67,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
           } else if (filtered.length > 1) {
             // If dealing with sub types, prioritize exact matches
             const exact = this
-              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              .getCandidateTypes(target as Class)
+              .getCandidateTypes(castTo<Class>(target))
               .filter(x => x.class === target);
             if (exact.length === 1) {
               qualifier = exact[0].qualifier;
@@ -98,8 +95,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const config = this.get(cls!) as InjectableConfig<T>;
+    const config: InjectableConfig<T> = castTo(this.get(cls!));
     return {
       qualifier,
       config,
@@ -138,15 +134,13 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    */
   protected async resolveFieldDependencies<T>(config: InjectableConfig<T>, instance: T): Promise<void> {
     const keys = Object.keys(config.dependencies.fields ?? {})
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      .filter(k => instance[k as keyof T] === undefined); // Filter out already set ones
+      .filter(k => instance[castKey<T>(k)] === undefined); // Filter out already set ones
 
     // And auto-wire
     if (keys.length) {
       const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]));
       for (let i = 0; i < keys.length; i++) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        instance[keys[i] as keyof T] = deps[i] as T[keyof T];
+        instance[castKey<T>(keys[i])] = castTo(deps[i]);
       }
     }
   }
@@ -163,16 +157,14 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // Create instance
     const inst = managed.factory ?
       managed.factory(...consValues) :
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      new (managed.class as ConcreteClass<T>)(...consValues);
+      classConstruct(managed.class, consValues);
 
     // And auto-wire fields
     await this.resolveFieldDependencies(managed, inst);
 
     // If factory with field properties on the sub class
     if (managed.factory) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const resolved = this.get((inst as ClassInstance<T>).constructor);
+      const resolved = this.get(asConstructable(inst).constructor);
 
       if (resolved) {
         await this.resolveFieldDependencies(resolved, inst);
@@ -199,8 +191,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     if (this.instancePromises.get(classId)!.has(qualifier)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return this.instancePromises.get(classId)!.get(qualifier) as unknown as T;
+      return castTo(this.instancePromises.get(classId)!.get(qualifier));
     }
 
     const instancePromise = this.construct(target, qualifier);
@@ -290,27 +281,24 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     if (!this.instances.has(classId) || !this.instances.get(classId)!.has(qualifier)) {
       await this.createInstance(target, qualifier); // Wait for proxy
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.instances.get(classId)!.get(qualifier)! as T;
+    return castTo(this.instances.get(classId)!.get(qualifier));
   }
 
   /**
    * Get all available candidate types for the target
    */
-  getCandidateTypes<T>(target: Class<T>): InjectableConfig<T>[] {
+  getCandidateTypes<T, U = T>(target: Class<U>): InjectableConfig<T>[] {
     const targetId = target.Ⲑid;
     const qualifiers = this.targetToClass.get(targetId)!;
     const uniqueQualifiers = qualifiers ? Array.from(new Set(qualifiers.values())) : [];
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return uniqueQualifiers.map(id => this.get(id)! as InjectableConfig<T>);
+    return castTo(uniqueQualifiers.map(id => this.get(id)));
   }
 
   /**
    * Get candidate instances by target type, with an optional filter
    */
   getCandidateInstances<T>(target: Class, predicate?: (cfg: InjectableConfig<T>) => boolean): Promise<T[]> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const inputs = this.getCandidateTypes<T>(target as Class<T>).filter(x => !predicate || predicate(x));
+    const inputs = this.getCandidateTypes<T>(target).filter(x => !predicate || predicate(x));
     return Promise.all(inputs.map(l => this.getInstance<T>(l.class, l.qualifier)));
   }
 
@@ -353,9 +341,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
     if (pConfig.dependencies) {
       config.dependencies = {
-        fields: {},
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        ...pConfig.dependencies as Omit<InjectableConfig['dependencies'], 'fields'>
+        ...pConfig.dependencies,
+        fields: {
+          ...pConfig.dependencies.fields
+        }
       };
     }
   }
@@ -366,7 +355,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   registerFactory(config: Omit<InjectableFactoryConfig, 'qualifier'> & {
     id: string;
     qualifier?: undefined | symbol;
-    fn: (...args: unknown[]) => unknown;
+    fn: TypedFunction;
   }): void {
     const finalConfig: Partial<InjectableConfig> = {};
 
@@ -388,8 +377,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Create mock cls for DI purposes
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = { Ⲑid: config.id } as Class;
+    const cls = asFull<Class>({ Ⲑid: config.id });
 
     finalConfig.class = cls;
 
@@ -399,8 +387,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.factories.set(config.src.Ⲑid, new Map());
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.factories.get(config.src.Ⲑid)!.set(cls, finalConfig as InjectableConfig);
+    this.factories.get(config.src.Ⲑid)!.set(cls, asFull(finalConfig));
   }
 
   /**
@@ -423,8 +410,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   onInstallFinalize<T>(cls: Class<T>): InjectableConfig<T> {
     const classId = cls.Ⲑid;
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const config = this.getOrCreatePending(cls) as InjectableConfig<T>;
+    const config: InjectableConfig<T> = castTo(this.getOrCreatePending(cls));
 
     if (!(typeof config.enabled === 'boolean' ? config.enabled : config.enabled())) {
       return config; // Do not setup if disabled
@@ -557,8 +543,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Inject fields into instance
    */
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor as Class<T>): Promise<void> {
+  async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor): Promise<void> {
     this.verifyInitialized();
     // Compute fields to be auto-wired
     return await this.resolveFieldDependencies(this.get(cls), o);
@@ -572,8 +557,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   ): Promise<Awaited<ReturnType<T['run']>>> {
     await RootRegistry.init();
     const inst = await this.getInstance<T>(cls);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return inst.run(...args) as Awaited<ReturnType<T['run']>>;
+    return castTo<Awaited<ReturnType<T['run']>>>(inst.run(...args));
   }
 }
 

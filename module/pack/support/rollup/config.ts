@@ -21,9 +21,16 @@ function getFilesFromModule(m: ManifestModule): string[] {
     .map(([f]) => ManifestModuleUtil.withOutputExtension(path.resolve(m.outputFolder, f)));
 }
 
+function getFormat(value: string = 'commonjs'): NodeModuleType {
+  switch (value) {
+    case 'module':
+    case 'commonjs': return value;
+    default: return 'commonjs';
+  }
+}
+
 export function getOutput(): OutputOptions {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  const format = (process.env.BUNDLE_FORMAT ?? 'commonjs') as NodeModuleType;
+  const format = getFormat(process.env.BUNDLE_FORMAT);
   const dir = process.env.BUNDLE_OUTPUT!;
   const mainFile = process.env.BUNDLE_MAIN_FILE!;
   return {

@@ -7,8 +7,7 @@
     "decorators",
     "schema",
     "typescript",
-    "travetto",
-    "query-language"
+    "travetto"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",

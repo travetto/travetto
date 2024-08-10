@@ -1,4 +1,4 @@
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model';
 import { Field, SchemaRegistry } from '@travetto/schema';
 import { ControllerRegistry } from '@travetto/rest';
@@ -15,8 +15,7 @@ type Svc = { source: ModelCrudSupport };
  */
 export function ModelRoutes<T extends ModelType>(cls: Class<T>): (target: Class<Svc>) => void {
   function getCls(): Class<T> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return ModelRegistry.get(cls).class as Class<T>;
+    return castTo(ModelRegistry.get(cls).class);
   }
 
   return (target: Class<Svc>): void => {

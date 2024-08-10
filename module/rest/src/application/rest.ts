@@ -83,9 +83,7 @@ export class RestApplication<T = unknown> {
    */
   async getInterceptors(): Promise<RestInterceptor[]> {
     const instances = await DependencyRegistry.getCandidateInstances<RestInterceptor>(RestInterceptorTarget);
-
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const ordered = instances.map(x => ({ key: x.constructor as Class, before: x.before, after: x.after, target: x }));
+    const ordered = instances.map(x => ({ key: x.constructor, before: x.before, after: x.after, target: x }));
     const sorted = RestCommonUtil.ordered(ordered).map(x => x.target);
 
     console.debug('Sorting interceptors', { count: sorted.length, names: sorted.map(x => x.constructor.name) });

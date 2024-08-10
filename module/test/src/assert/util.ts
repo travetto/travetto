@@ -6,8 +6,7 @@ import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
 
 function isCleanable(o: unknown): o is { toClean(): unknown } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !!(o as { toClean: unknown }).toClean;
+  return !!o && typeof o === 'object' && 'toClean' in o && typeof o.toClean === 'function';
 }
 
 /**
@@ -35,7 +34,6 @@ export class AssertUtil {
         break;
       }
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return util.inspect(val, false, 1).replace(/\n/g, ' ');
   }
 

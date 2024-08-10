@@ -1,4 +1,4 @@
-import { Class, ClassInstance, TimeSpan, TimeUtil } from '@travetto/runtime';
+import { asConstructable, castTo, Class, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { HeaderMap, RouteHandler } from '../types';
 import { ControllerRegistry } from '../registry/controller';
@@ -8,11 +8,9 @@ import { AcceptsInterceptor } from '../interceptor/accepts';
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) {
     if (descriptor) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return ControllerRegistry.registerPendingEndpoint((target as ClassInstance).constructor, descriptor, config);
+      return ControllerRegistry.registerPendingEndpoint(asConstructable(target).constructor, descriptor, config);
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return ControllerRegistry.registerPending(target as Class, config);
+      return ControllerRegistry.registerPending(castTo(target), config);
     }
   };
 }

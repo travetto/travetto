@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, TypedObject } from '@travetto/runtime';
+import { castTo, Class, classConstruct, asFull, TypedObject, castKey } from '@travetto/runtime';
 
 import { DataUtil } from './data';
 import { AllViewⲐ } from './internal/types';
@@ -10,6 +10,10 @@ type BindConfig = {
   filterField?: (field: FieldConfig) => boolean;
   filterValue?: (value: unknown, field: FieldConfig) => boolean;
 };
+
+function isInstance<T>(o: unknown): o is T {
+  return !!o && !DataUtil.isPrimitive(o);
+}
 
 /**
  * Utilities for binding objects to schemas
@@ -35,8 +39,7 @@ export class BindUtil {
         }
       }
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return val as T;
+    return castTo(val);
   }
 
   /**
@@ -64,13 +67,11 @@ export class BindUtil {
         if (!(name in sub)) {
           sub[name] = typeof key === 'number' ? [] : {};
         }
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        sub = sub[name] as Record<string, unknown>;
+        sub = castTo(sub[name]);
 
         if (idx && key !== undefined) {
           sub[key] ??= {};
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          sub = sub[key] as Record<string, unknown>;
+          sub = castTo(sub[key]);
         }
       }
 
@@ -89,11 +90,9 @@ export class BindUtil {
         let key = (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined));
         sub[name] ??= (typeof key === 'string') ? {} : [];
 
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const arrSub = sub[name] as Record<string, unknown>;
+        const arrSub: Record<string, unknown> & { length: number } = castTo(sub[name]);
         if (key === undefined) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          key = arrSub.length as number;
+          key = arrSub.length;
         }
         if (arrSub[key] && DataUtil.isPlainObject(val) && DataUtil.isPlainObject(arrSub[key])) {
           arrSub[key] = DataUtil.deepAssign(arrSub[key], val, 'coerce');
@@ -127,8 +126,7 @@ export class BindUtil {
           }
         }
       } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        out[pre] = (value ?? '') as V;
+        out[pre] = castTo(value ?? '');
       }
     }
     return out;
@@ -147,24 +145,19 @@ export class BindUtil {
     if (data === null || data === undefined) {
       return data;
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = SchemaRegistry.resolveInstanceType<T>(cons, data as T);
+    const cls = SchemaRegistry.resolveInstanceType<T>(cons, asFull<T>(data));
     if (data instanceof cls) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return data as T;
+      return castTo(data);
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const tgt = new (cls as ConcreteClass<T>)() as T;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      SchemaRegistry.ensureInstanceTypeField(cls, tgt as T & { type?: string });
+      const tgt = classConstruct<T & { type?: string }>(cls);
+      SchemaRegistry.ensureInstanceTypeField(cls, tgt);
 
       for (const k of TypedObject.keys(tgt)) { // Do not retain undefined fields
         if (tgt[k] === undefined) {
           delete tgt[k];
         }
       }
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return this.bindSchemaToObject(cls, tgt, data as object, cfg);
+      return this.bindSchemaToObject(cls, tgt, data, cfg);
     }
   }
 
@@ -179,14 +172,13 @@ export class BindUtil {
     const view = cfg.view ?? AllViewⲐ; // Does not convey
     delete cfg.view;
 
-    if (!!data && !DataUtil.isPrimitive(data)) {
+    if (!!data && isInstance<T>(data)) {
       const conf = SchemaRegistry.get(cons);
 
       // If no configuration
       if (!conf) {
         for (const k of TypedObject.keys(data)) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          obj[k] = data[k as keyof typeof data];
+          obj[k] = data[k];
         }
       } else {
 
@@ -217,8 +209,7 @@ export class BindUtil {
             continue;
           }
 
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          let v: unknown = data[inboundField as keyof typeof data];
+          let v: unknown = data[castKey<T>(inboundField)];
 
           // Filtering values
           if (cfg.filterValue && !cfg.filterValue(v, field)) {
@@ -248,8 +239,7 @@ export class BindUtil {
             }
           }
 
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          obj[schemaFieldName as keyof typeof obj] = v as (typeof obj)[keyof typeof obj];
+          obj[castKey<T>(schemaFieldName)] = castTo(v);
 
           if (field.accessor) {
             Object.defineProperty(obj, schemaFieldName, {

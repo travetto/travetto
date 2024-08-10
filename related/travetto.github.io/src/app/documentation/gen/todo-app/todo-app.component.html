@@ -284,8 +284,7 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
    */</span>
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Post</span></span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">create</span><span class="token punctuation">(</span>todo<span class="token operator">:</span> TodoRequest<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Todo<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>todo <span class="token keyword">as</span> Todo<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> <span class="token operator">...</span>todo<span class="token punctuation">,</span> id<span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token operator">!</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
@@ -335,7 +334,7 @@ First we must start the application:
     <figcaption class="terminal">Application Startup
 
 </figcaption>
-    <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>&#64;travetto/config:src/service.ts:145<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>&#64;travetto/config:src/service.ts:144<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
     main: <span class="token punctuation">{{'{'}}</span>
       name: <span class="token string">'&#64;travetto/todo-app'</span>,
@@ -461,7 +460,7 @@ First we must start the application:
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/rest:src/application/rest.ts:192<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
+<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/rest:src/application/rest.ts:190<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://nodejs.org/api/globals.html#fetch">fetch</a> requests to interact with the new api. <br><br>

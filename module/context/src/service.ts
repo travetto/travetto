@@ -1,10 +1,10 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 import { Injectable } from '@travetto/di';
-import { AppError } from '@travetto/runtime';
+import { AppError, castTo } from '@travetto/runtime';
 
 
-type Ctx = Record<string | symbol, unknown>;
+type Ctx<T = unknown> = Record<string | symbol, T>;
 
 /**
  * Async context using `asyncHooks`
@@ -12,7 +12,7 @@ type Ctx = Record<string | symbol, unknown>;
 @Injectable()
 export class AsyncContext {
 
-  alStorage = new AsyncLocalStorage<{ value: Ctx }>();
+  alStorage = new AsyncLocalStorage<{ value?: Ctx }>();
   active = 0;
 
   constructor() {
@@ -20,19 +20,17 @@ export class AsyncContext {
     this.iterate = this.iterate.bind(this);
   }
 
-  #store(setAs?: Ctx | null): Ctx {
+  #store<T = unknown>(setAs?: Ctx<T> | null): Ctx<T> {
     const val = this.alStorage.getStore();
     if (!val) {
       throw new AppError('Context is not initialized', 'general');
     }
     if (setAs) {
       val.value = setAs;
-    } else {
-      if (!val.value) {
-        val.value = {};
-      }
+    } else if (!val.value) {
+      val.value = {};
     }
-    return val.value;
+    return castTo(val.value);
   }
 
   /**
@@ -41,10 +39,9 @@ export class AsyncContext {
   get<T = unknown>(key: string | symbol): T;
   get(): Ctx;
   get<T>(key?: string | symbol): Ctx | T {
-    const root = this.#store();
+    const root = this.#store<T>();
     if (key) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return root[key as string] as T;
+      return root[key];
     } else {
       return root;
     }
@@ -75,8 +72,7 @@ export class AsyncContext {
     try {
       return await fn();
     } finally {
-      // @ts-expect-error
-      delete this.alStorage.getStore().value;
+      delete this.alStorage.getStore()?.value;
       if ((this.active -= 1) === 0) {
         this.alStorage.disable();
       }
@@ -95,8 +91,7 @@ export class AsyncContext {
     try {
       return yield* fn();
     } finally {
-      // @ts-expect-error
-      delete this.alStorage.getStore().value;
+      delete this.alStorage.getStore()?.value;
       if ((this.active -= 1) === 0) {
         this.alStorage.disable();
       }

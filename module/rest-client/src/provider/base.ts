@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/quotes */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Class, Runtime, Util, describeFunction } from '@travetto/runtime';
+import { Class, Runtime, Util, castTo, describeFunction } from '@travetto/runtime';
 import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
@@ -29,8 +28,7 @@ const recreateTemplateLiteral = (template: TemplateLiteral, escape = false): str
     } else if (typeof el === 'string' || typeof el === 'number' || typeof el === 'boolean') {
       out.push(`${el}`);
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      out.push(`(${recreateTemplateLiteral(el as TemplateLiteral, true)})`);
+      out.push(`(${recreateTemplateLiteral(castTo(el), true)})`);
     }
   }
   const body = (template.op === 'or') ? out.join('|') : out.join('');
@@ -194,8 +192,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     paramInputs.pop();
 
     const paramConfigs = paramsWithSchemas.map(({ param: x, schema: s }) => ({
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      location: x.location as 'body',
+      location: castTo<'body'>(x.location),
       name: x.name!,
       description: s.description,
       sourceText: x.sourceText,
@@ -267,12 +264,12 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     }, null, 2)
       .replace(/^[  ]/gm, '   ')
       .replace(/^}/gm, '  }')
-      .replace('"this"', `this`)
-      .replaceAll('"', `'`)
+      .replace('"this"', 'this')
+      .replaceAll('"', '\'')
       .replace(/'([^']+)':/gms, (_, v) => `${v}:`);
 
     const paramNames = paramConfigs.map(x => x.sourceText ?? x.name!);
-    const paramArr = JSON.stringify(paramNames).replaceAll(`"`, '').replace(/,/g, ', ');
+    const paramArr = JSON.stringify(paramNames).replaceAll('"', '').replace(/,/g, ', ');
 
     imports.push(...[...this.endpointResponseWrapper].filter(x => typeof x !== 'string'));
     const opts: Imp = { name: 'RequestDefinition', file: './shared/types.ts', classId: '_common' };
@@ -281,9 +278,9 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
       imports,
       method: [
         ...this.renderEndpointDoc(endpoint, paramConfigs),
-        `  ${endpoint.handlerName}(`, ...paramInputs, `): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
-        `    return this.makeRequest<`, ...returnType, `>(${paramArr}, this.${requestField});\n`,
-        `  }\n\n`,
+        `  ${endpoint.handlerName}(`, ...paramInputs, '): ', ...this.endpointResponseWrapper, '<', ...returnType, '> {\n',
+        '    return this.makeRequest<', ...returnType, `>(${paramArr}, this.${requestField});\n`,
+        '  }\n\n',
       ],
       config: [`  ${requestField}: `, opts, ` = ${requestShape.trimEnd()};\n\n`,]
     };
@@ -337,9 +334,9 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
 
       fields.push(
         (field.title || field.description) ? `  /** ${field.title ?? ''}\n${field.description ?? ''} */\n` : '',
-        `  `,
+        '  ',
         ...rendered.content,
-        `;\n`
+        ';\n'
       );
     }
 
@@ -352,9 +349,9 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
       name,
       content: [
         `export interface ${name}`,
-        ...parent ? [' extends ', parent] : [], ` {\n`,
+        ...parent ? [' extends ', parent] : [], ' {\n',
         ...fields,
-        `}\n`,
+        '}\n',
       ]
     };
 

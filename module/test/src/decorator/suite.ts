@@ -1,4 +1,4 @@
-import { Class, ClassInstance, describeFunction } from '@travetto/runtime';
+import { castTo, Class, ClassInstance, describeFunction } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
 import { SuiteConfig } from '../model/suite';
@@ -23,17 +23,16 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
     Object.assign(extra, r);
   }
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  const decorator = ((target: Class) => {
+  const dec = (target: Class): typeof target => {
     const cfg = { description: descriptionString, ...extra };
     if (describeFunction(target).abstract) {
       cfg.skip = true;
     }
     SuiteRegistry.register(target, cfg);
     return target;
-  }) as ClassDecorator;
+  };
 
-  return decorator;
+  return castTo(dec);
 }
 
 function listener(phase: SuitePhase) {

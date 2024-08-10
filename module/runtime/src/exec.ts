@@ -1,6 +1,7 @@
 import { ChildProcess } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
+import { castTo } from './types';
 
 const MINUTE = (1000 * 60);
 
@@ -93,8 +94,8 @@ export class ExecUtil {
   static getResult(proc: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
   static getResult(proc: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
   static getResult<T extends string | Buffer>(proc: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const res = (proc as unknown as { [RESULT]: Promise<ExecutionResult> })[RESULT] ??= new Promise<ExecutionResult>(resolve => {
+    const _proc: ChildProcess & { [RESULT]?: Promise<ExecutionResult> } = proc;
+    const res = _proc[RESULT] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let done = false;
@@ -135,14 +136,13 @@ export class ExecUtil {
       }
     });
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (options.catch ? res : res.then(v => {
+    return castTo(options.catch ? res : res.then(v => {
       if (v.valid) {
         return v;
       } else {
         throw new Error(v.message);
       }
-    })) as Promise<ExecutionResult<T>>;
+    }));
   }
 
   /**

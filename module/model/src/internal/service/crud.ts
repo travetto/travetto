@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-import { Class, Util } from '@travetto/runtime';
+import { castTo, Class, asFull, Util, asConstructable } from '@travetto/runtime';
 import { DataUtil, SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
@@ -46,14 +46,16 @@ export class ModelCrudUtil {
    * @param input Input as string or plain object
    */
   static async load<T extends ModelType>(cls: Class<T>, input: Buffer | string | object, onTypeMismatch: 'notfound' | 'exists' = 'notfound'): Promise<T> {
+    let resolvedInput: object;
     if (typeof input === 'string') {
-      input = JSON.parse(input);
+      resolvedInput = JSON.parse(input);
     } else if (input instanceof Buffer) {
-      input = JSON.parse(input.toString('utf8'));
+      resolvedInput = JSON.parse(input.toString('utf8'));
+    } else {
+      resolvedInput = input;
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const result = ModelRegistry.getBaseModel(cls).from(input as object) as T;
+    const result = ModelRegistry.getBaseModel(cls).from(resolvedInput);
 
     if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
       if (onTypeMismatch === 'notfound') {
@@ -78,12 +80,10 @@ export class ModelCrudUtil {
     }
 
     if (DataUtil.isPlainObject(item)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      item = cls.from(item as object);
+      item = cls.from(castTo(item));
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const config = ModelRegistry.get(item.constructor as Class<T>);
+    const config = ModelRegistry.get(asConstructable(item).constructor);
     if (config.subType) { // Sub-typing, assign type
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
@@ -106,8 +106,7 @@ export class ModelCrudUtil {
     if (errors.length) {
       throw new ValidationResultError(errors);
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return item as T;
+    return castTo(item);
   }
 
   /**
@@ -119,12 +118,10 @@ export class ModelCrudUtil {
    */
   static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, view: undefined | string, getExisting: () => Promise<T>): Promise<T> {
     if (DataUtil.isPlainObject(item)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      item = cls.from(item as object);
+      item = cls.from(castTo(item));
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const config = ModelRegistry.get(item.constructor as Class<T>);
+    const config = ModelRegistry.get(asConstructable(item).constructor);
     if (config.subType) { // Sub-typing, assign type
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
@@ -139,8 +136,7 @@ export class ModelCrudUtil {
 
     item = await this.prePersist(cls, item, 'partial');
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return item as T;
+    return asFull(item);
   }
 
   /**
@@ -159,8 +155,7 @@ export class ModelCrudUtil {
     const config = ModelRegistry.get(cls);
     for (const state of (config.prePersist ?? [])) {
       if (state.scope === scope || scope === 'all' || state.scope === 'all') {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const handler = state.handler as unknown as DataHandler<T>;
+        const handler: DataHandler<T> = castTo(state.handler);
         item = await handler(item) ?? item;
       }
     }
@@ -175,8 +170,7 @@ export class ModelCrudUtil {
    */
   static async postLoad<T>(cls: Class<T>, item: T): Promise<T> {
     const config = ModelRegistry.get(cls);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    for (const handler of (config.postLoad ?? []) as unknown as DataHandler<T>[]) {
+    for (const handler of castTo<DataHandler<T>[]>(config.postLoad ?? [])) {
       item = await handler(item) ?? item;
     }
     if (typeof item === 'object' && item && 'postLoad' in item && typeof item['postLoad'] === 'function') {

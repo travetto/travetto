@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 import { isIndexedSupported } from '@travetto/model/src/internal/service/common';
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import { Cache, EvictCache } from '../../src/decorator';
@@ -58,7 +58,7 @@ class SampleService {
     return { length: Object.keys(config).length, size };
   }
 
-  @Cache('source', { keySpace: 'user.id', reinstate: x => User.from(x as User) })
+  @Cache('source', { keySpace: 'user.id', reinstate: x => User.from(castTo(x)) })
   async getUser(userId: string) {
     await timers.setTimeout(100);
 

@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/rest</code></pre>
   </figure>
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L140">TravettoResponse</a> objects). This module is built upon the <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L31">&#64;Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">&#64;Schema</a> class.
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L140">TravettoResponse</a> objects). This module is built upon the <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L30">&#64;Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">&#64;Schema</a> class.
 <h2 id="routes-controller">Routes: Controller</h2>
 
 To define a route, you must first declare a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/controller.ts#L9">&#64;Controller</a> which is only allowed on classes. Controllers can be configured with:
@@ -42,13 +42,13 @@ Additionally, the module is predicated upon <a class="module-link" routerLink="/
 
 Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported. <br><br>
 The HTTP methods that are supported via:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L33">&#64;Get</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L40">&#64;Post</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L47">&#64;Put</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L60">&#64;Delete</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L54">&#64;Patch</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L66">&#64;Head</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L72">&#64;Options</a></li>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L32">&#64;Get</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L39">&#64;Post</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L46">&#64;Put</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L59">&#64;Delete</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L53">&#64;Patch</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L65">&#64;Head</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L71">&#64;Options</a></li>
 </ul>
 Each endpoint decorator handles the following config:
 <ul> <li><code class="item input">title</code> - The definition of the endpoint</li>
@@ -495,7 +495,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 <h3 id="cookiesinterceptor">CookiesInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L74">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L73">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
   <figure class="code">
     <figcaption class="code">Cookies Config

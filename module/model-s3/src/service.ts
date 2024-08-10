@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { buffer as toBuffer } from 'node:stream/consumers';
+import { buffer as toBuffer, text as toText } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
 import { S3, CompletedPart, type CreateMultipartUploadRequest } from '@aws-sdk/client-s3';
@@ -12,7 +12,7 @@ import {
   StreamRange
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError } from '@travetto/runtime';
+import { Class, AppError, castTo, asFull } from '@travetto/runtime';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
@@ -77,8 +77,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return key;
   }
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  #q<U extends object>(cls: string | Class, id: string, extra: U = {} as U): (U & { Key: string, Bucket: string }) {
+  #q<U extends object>(cls: string | Class, id: string, extra: U = asFull({})): (U & { Key: string, Bucket: string }) {
     const key = this.#resolveKey(cls, id);
     return { Key: key, Bucket: this.config.bucket, ...extra };
   }
@@ -203,8 +202,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     try {
       const result = await this.client.getObject(this.#q(cls, id));
       if (result.Body) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const body = (await toBuffer(result.Body as Readable)).toString('utf8');
+        const body = await toText(castTo(result.Body));
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
           const { expiresAt } = ModelRegistry.get(cls);
@@ -230,8 +228,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async store<T extends ModelType>(cls: Class<T>, item: OptionalId<T>, preStore = true): Promise<T> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    let prepped: T = item as T;
+    let prepped: T = castTo(item);
     if (preStore) {
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
@@ -323,13 +320,11 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
 
     if (typeof res.Body === 'string') { // string
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return Readable.from(res.Body, { encoding: (res.Body as string).endsWith('=') ? 'base64' : 'utf8' });
+      return Readable.from(res.Body, { encoding: castTo<string>(res.Body).endsWith('=') ? 'base64' : 'utf8' });
     } else if (res.Body instanceof Buffer) { // Buffer
       return Readable.from(res.Body);
     } else if ('pipe' in res.Body) { // Stream
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return res.Body as Readable;
+      return castTo<Readable>(res.Body);
     }
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }
@@ -339,8 +334,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       const meta = await this.describeStream(location);
       range = enforceRange(range, meta.size);
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.#getObject(location, range as Required<StreamRange>);
+    return this.#getObject(location, castTo(range));
   }
 
   async headStream(location: string): Promise<{ Metadata?: Partial<StreamMeta>, ContentLength?: number }> {
@@ -362,10 +356,8 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
     if (obj) {
       const ret: StreamMeta = {
-        // @ts-expect-error
         contentType: '',
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        ...obj.Metadata as StreamMeta,
+        ...obj.Metadata,
         size: obj.ContentLength!,
       };
       if (hasContentType(ret)) {

@@ -1,4 +1,4 @@
-import { Class, DeepPartial } from '@travetto/runtime';
+import { castTo, Class, DeepPartial } from '@travetto/runtime';
 
 import { BindUtil } from '../bind-util';
 import { SchemaRegistry } from '../service/registry';
@@ -28,8 +28,7 @@ export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeF
  */
 export function Validator<T>(fn: ValidatorFn<T, string>) {
   return (target: Class<T>): void => {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    SchemaRegistry.getOrCreatePending(target).validators!.push(fn as ValidatorFn<unknown, unknown>);
+    SchemaRegistry.getOrCreatePending(target).validators!.push(castTo(fn));
   };
 }
 

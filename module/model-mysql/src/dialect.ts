@@ -2,7 +2,7 @@ import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { ModelType } from '@travetto/model';
 import { SQLModelConfig, SQLDialect } from '@travetto/model-sql';
 import { VisitStack } from '@travetto/model-sql/src/internal/util';
@@ -80,8 +80,7 @@ export class MySQLDialect extends SQLDialect {
    * Define column modification
    */
   getModifyColumnSQL(stack: VisitStack[]): string {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const field = stack[stack.length - 1] as FieldConfig;
+    const field: FieldConfig = castTo(stack[stack.length - 1]);
     return `ALTER TABLE ${this.parentTable(stack)} MODIFY COLUMN ${this.getColumnDefinition(field)};`;
   }
 

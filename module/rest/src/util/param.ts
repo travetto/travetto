@@ -15,6 +15,10 @@ declare global {
   }
 }
 
+function isClass(o: unknown): o is Class {
+  return !!o && typeof o === 'function' && 'Ⲑid' in o;
+}
+
 /**
  * Parameter utils
  */
@@ -63,12 +67,10 @@ class $ParamExtractor {
    * @param fn Optional extraction function
    */
   registerContext(finalType: Class, fnOrTypeOverride: ExtractFn | Class, fn?: ExtractFn): void {
-    if (fn) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      this.#typeExtractors.set(fnOrTypeOverride as Class, fn);
+    if (isClass(fnOrTypeOverride)) {
+      this.#typeExtractors.set(fnOrTypeOverride, fn!);
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      this.#typeExtractors.set(finalType, fnOrTypeOverride as ExtractFn);
+      this.#typeExtractors.set(finalType, fnOrTypeOverride);
     }
   }
 

@@ -13,7 +13,7 @@ npm install @travetto/model-query
 yarn add @travetto/model-query
 ```
 
-This module provides an enhanced query contract for [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
+This module provides an enhanced query contract for [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.
 
 ## Contracts
 
@@ -207,33 +207,6 @@ export class UserSearch {
 ```
 
 This would find all users who are over `35` and that have the `contact` field specified.
-
-## Query Language
-In addition to the standard query interface, the module also supports querying by query language to facilitate end - user queries.This is meant to act as an interface that is simpler to write than the default object structure. The language itself is fairly simple, boolean logic, with parenthetical support.The operators supported are:
-   *  `<`, `<=` - Less than, and less than or equal to
-   *  `>`, `>=` - Greater than, and greater than or equal to
-   *  `!=`, `==` - Not equal to, and equal to
-   *  `~` - Matches regular expression, supports the `i` flag to trigger case insensitive searches
-   *  `!`, `not` - Negates a clause
-   *  `in`, `not-in` - Supports checking if a field is in a list of literal values
-   *  `and`, `&&` - Intersection of clauses
-   *  `or`, `||` - Union of clauses
-All sub fields are dot separated for access, e.g. `user.address.city`.A query language version of the previous query could look like:
-
-**Code: Query language with boolean checks and exists check**
-```sql
-not (age < 35) and contact != null
-```
-
-A more complex query would look like:
-
-**Code: Query language with more complex needs**
-```sql
-user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')
-```
-
-### Regular Expression
-When querying with regular expressions, patterns can be specified as `'strings'` or as `/patterns/`.  The latter allows for the case insensitive modifier: `/pattern/i`.  Supporting the insensitive flag is up to the underlying model implementation.
 
 ## Custom Model Query Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance(this was an intentional design decision).This allows for all the [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") implementations to completely own the functionality and also to be able to provide additional / unique functionality that goes beyond the interface. To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.

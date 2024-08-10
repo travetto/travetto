@@ -2,7 +2,8 @@ import ts from 'typescript';
 
 import {
   TransformerState, OnMethod, OnClass, AfterClass,
-  AfterFunction, CoreUtil, SystemUtil, Import
+  CoreUtil, SystemUtil, Import,
+  OnFunction
 } from '@travetto/transformer';
 
 import type { FunctionMetadataTag } from '../src/function';
@@ -118,7 +119,7 @@ export class RegisterTransformer {
   /**
    * Give proper functions a file name
    */
-  @AfterFunction()
+  @OnFunction()
   static registerFunctionMetadata(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     if (!this.#valid(state)) {
       return node;

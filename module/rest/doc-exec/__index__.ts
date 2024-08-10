@@ -1,15 +1,15 @@
 '@Application';
 import { InjectableFactory } from '@travetto/di';
-import { RestServer } from '@travetto/rest';
+import { RestServer, ServerHandle } from '@travetto/rest';
+import { asFull } from '@travetto/runtime';
 
 class Config {
   @InjectableFactory()
   static target(): RestServer<unknown> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return {
+    return asFull<RestServer>({
       init: () => { },
-      listen: () => { },
-      registerRoutes: () => { }
-    } as unknown as RestServer;
+      listen: () => asFull<ServerHandle>({}),
+      registerRoutes: async () => { }
+    });
   }
 }

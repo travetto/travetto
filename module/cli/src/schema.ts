@@ -1,4 +1,4 @@
-import { Class } from '@travetto/runtime';
+import { castKey, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { CliCommandRegistry } from './registry';
@@ -52,8 +52,7 @@ export class CliCommandSchemaUtil {
    * Get schema for a given command
    */
   static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = 'main' in src ? src.constructor as Class : src;
+    const cls = 'main' in src ? CliCommandRegistry.getClass(src) : src;
     if (this.#schemas.has(cls)) {
       return this.#schemas.get(cls)!;
     }
@@ -127,22 +126,18 @@ export class CliCommandSchemaUtil {
     for (const arg of state.all) {
       switch (arg.type) {
         case 'flag': {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const key = arg.fieldName as keyof T;
+          const key = castKey<T>(arg.fieldName);
           const value = arg.value!;
           if (arg.array) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            ((template[key] as unknown[]) ??= []).push(value);
+            castTo<unknown[]>(template[key] ??= castTo([])).push(value);
           } else {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            template[key] = value as unknown as T[typeof key];
+            template[key] = castTo(value);
           }
           break;
         }
         case 'arg': {
           if (arg.array) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            ((bound[arg.index] ??= []) as unknown[]).push(arg.input);
+            castTo<unknown[]>(bound[arg.index] ??= []).push(arg.input);
           } else {
             bound[arg.index] = arg.input;
           }
@@ -150,8 +145,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = cmd.constructor as Class<CliCommandShape>;
+    const cls = CliCommandRegistry.getClass(cmd);
     BindUtil.bindSchemaToObject(cls, cmd, template);
     return BindUtil.coerceMethodParams(cls, 'main', bound);
   }
@@ -160,9 +154,7 @@ export class CliCommandSchemaUtil {
    * Validate command shape with the given arguments
    */
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = cmd.constructor as Class<CliCommandShape>;
-
+    const cls = CliCommandRegistry.getClass(cmd);
     const paramNames = SchemaRegistry.getMethodSchema(cls, 'main').map(x => x.name);
 
     const validators = [

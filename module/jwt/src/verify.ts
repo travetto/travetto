@@ -16,22 +16,19 @@ export class JWTVerifier {
   /**
    * Verify signature types
    */
-  static verifyTypes<T = unknown>(o: T): T {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const p = o as unknown as Payload;
-
+  static verifyTypes<T extends Payload = Payload>(o: T): T {
     for (const [t, f] of [
       ['string', ['iss', 'sub', 'jti', 'kid']],
       ['number', ['iat', 'nbf', 'exp']]
     ]) {
       for (const k of f) {
-        if (k in p && typeof p[k] !== t) {
-          throw new JWTError(`invalid payload claim, "${k}" should be of type ${t}, but was ${typeof p[k]}`);
+        if (k in o && typeof o[k] !== t) {
+          throw new JWTError(`invalid payload claim, "${k}" should be of type ${t}, but was ${typeof o[k]}`);
         }
       }
     }
-    if ('aud' in p && !((typeof p.aud === 'string') || Array.isArray(p.aud))) {
-      throw new JWTError(`invalid payload claim, "aud" should be of type string|string[], but was ${typeof p.aud}`);
+    if ('aud' in o && !((typeof o.aud === 'string') || Array.isArray(o.aud))) {
+      throw new JWTError(`invalid payload claim, "aud" should be of type string|string[], but was ${typeof o.aud}`);
     }
     return o;
   }

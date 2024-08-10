@@ -77,16 +77,14 @@ export class Session<T extends SessionData = SessionData> {
    * Get session value
    */
   getValue<V>(key: string): V | undefined {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.data && key in this.data ? this.data[key] as V : undefined;
+    return this.data && key in this.data ? this.data[key] : undefined;
   }
 
   /**
    * Set session value
    */
   setValue<V>(key: string, value: V): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const data = (this.data as Record<string, unknown>) ??= {};
+    const data = this.data ??= {};
     data[key] = value;
   }
 

@@ -149,6 +149,7 @@ module/model-mongo
 module/model-mysql
 module/model-postgres
 module/model-query
+module/model-query-language
 module/model-redis
 module/model-s3
 module/model-sql
@@ -236,8 +237,8 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
          module/email-compiler <workspace-root>/module/email-compiler
              module/email-inky <workspace-root>/module/email-inky
        module/email-nodemailer <workspace-root>/module/email-nodemailer
-                 module/eslint <workspace-root>/module/eslint
                   module/image <workspace-root>/module/image
+                 module/eslint <workspace-root>/module/eslint
                     module/jwt <workspace-root>/module/jwt
                     module/log <workspace-root>/module/log
                module/manifest <workspace-root>/module/manifest
@@ -249,6 +250,7 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
             module/model-mysql <workspace-root>/module/model-mysql
          module/model-postgres <workspace-root>/module/model-postgres
             module/model-query <workspace-root>/module/model-query
+   module/model-query-language <workspace-root>/module/model-query-language
             module/model-redis <workspace-root>/module/model-redis
                module/model-s3 <workspace-root>/module/model-s3
               module/model-sql <workspace-root>/module/model-sql

@@ -49,7 +49,7 @@ export class ModelAuthService<T extends ModelType> implements
   constructor(
     modelService: ModelCrudSupport,
     cls: Class<T>,
-    public toPrincipal: (t: T) => RegisteredPrincipal,
+    public toPrincipal: (t: OptionalId<T>) => RegisteredPrincipal,
     public fromPrincipal: (t: Partial<RegisteredPrincipal>) => Partial<T>,
   ) {
     this.#modelService = modelService;
@@ -101,8 +101,7 @@ export class ModelAuthService<T extends ModelType> implements
    * @param user The user to register
    */
   async register(user: OptionalId<T>): Promise<T> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const ident = this.toPrincipal(user as T);
+    const ident = this.toPrincipal(user);
 
     try {
       if (ident.id) {
