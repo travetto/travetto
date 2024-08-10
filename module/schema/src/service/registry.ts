@@ -231,7 +231,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (!this.#pendingViews.has(target)) {
       this.#pendingViews.set(target, new Map());
     }
-    const generalConfig = castTo<ViewFieldsConfig<unknown>>(fields);
+    const generalConfig: ViewFieldsConfig<unknown> = castTo(fields);
     this.#pendingViews.get(target)!.set(view, generalConfig);
   }
 

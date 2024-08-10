@@ -32,25 +32,11 @@ export function castTo<T>(input: unknown): T {
   return input as T;
 }
 
-export function castKey<T>(input: string | number | symbol): keyof T {
-  return castTo(input);
-}
-
-export function asFullArray<T>(input: Partial<T>[]): T[] {
-  return castTo(input);
-}
-
-export function asFull<T>(input: Partial<T>): T {
-  return castTo(input);
-}
-
-export function asClass<T = unknown>(input: Function | Class): Class<T> {
-  return castTo(input);
-}
-
-export function asConstructable<Z = unknown, T = unknown>(input: Class | T): { constructor: Class<Z> } {
-  return castTo(input);
-}
+export const castKey = <T>(input: string | number | symbol): keyof T => castTo(input);
+export const asFullArray = <T>(input: Partial<T>[]): T[] => castTo(input);
+export const asFull = <T>(input: Partial<T>): T => castTo(input);
+export const asClass = <T = unknown>(input: Function | Class): Class<T> => castTo(input);
+export const asConstructable = <Z = unknown>(input: Class | unknown): { constructor: Class<Z> } => castTo(input);
 
 export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassInstance<T> {
   const cons: { new(..._args: Any[]): T } = castTo(cls);
