@@ -5,7 +5,6 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelQuery, Query } from '../../model/query';
 import { WhereClause, WhereClauseRaw } from '../../model/where-clause';
-import { QueryLanguageParser } from '../query/parser';
 import { QueryVerifier } from '../query/verifier';
 
 /**
@@ -40,8 +39,7 @@ export class ModelQueryUtil {
   /**
    * Get a where clause with type
    */
-  static getWhereClause<T extends ModelType>(cls: Class<T>, o: WhereClause<T> | string | undefined, checkExpiry = true): WhereClause<T> {
-    let q: WhereClause<T> | undefined = o ? (typeof o === 'string' ? QueryLanguageParser.parseToQuery(o) : o) : undefined;
+  static getWhereClause<T extends ModelType>(cls: Class<T>, q: WhereClause<T> | undefined, checkExpiry = true): WhereClause<T> {
     const clauses: WhereClauseRaw<T>[] = (q ? [q] : []);
 
     const conf = ModelRegistry.get(cls);

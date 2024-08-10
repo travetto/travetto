@@ -34,9 +34,9 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     assert((await svc.query(Doctor, {})).length === 2);
     assert((await svc.query(Engineer, {})).length === 1);
 
-    assert(await svc.queryCount(Worker, { where: 'name == "bob"' }) === 1);
-    assert(await svc.queryCount(Doctor, { where: 'name == "bob"' }) === 1);
-    assert(await svc.queryCount(Engineer, { where: 'name == "bob"' }) === 0);
+    assert(await svc.queryCount(Worker, { where: { name: 'bob' } }) === 1);
+    assert(await svc.queryCount(Doctor, { where: { name: 'bob' } }) === 1);
+    assert(await svc.queryCount(Engineer, { where: { name: 'bob' } }) === 0);
 
     assert((await svc.queryOne(Worker, { where: { name: 'bob' } })) instanceof Doctor);
     await assert.rejects(() => svc.queryOne(Firefighter, { where: { name: 'bob' } }), NotFoundError);

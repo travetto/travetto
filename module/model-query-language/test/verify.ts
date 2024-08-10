@@ -5,10 +5,10 @@ import { Class } from '@travetto/runtime';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { Model, ModelType } from '@travetto/model';
+import { Query, ModelQuery } from '@travetto/model-query';
+import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
 
-import { ModelQuery, Query } from '../src/model/query';
-import { QueryLanguageParser } from '../src/internal/query/parser';
-import { QueryVerifier } from '../src/internal/query/verifier';
+import { QueryLanguageParser } from '../src/parser';
 
 @Schema()
 class Preferences {

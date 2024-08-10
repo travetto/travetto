@@ -7,6 +7,7 @@ import {
   SortClause, ValidStringFields, PropWhereClause
 } from '@travetto/model-query';
 import { isQuerySuggestSupported, isQuerySupported } from '@travetto/model-query/src/internal/service/common';
+import { QueryLanguageParser } from '@travetto/model-query-language';
 
 
 type Svc = { source: Partial<ModelQuerySupport & ModelQuerySuggestSupport & ModelQueryFacetSupport> };
@@ -26,8 +27,8 @@ export class RestModelSuggestQuery {
   offset?: number;
 }
 
-const convert = <T>(k?: string): T | undefined =>
-  k && typeof k === 'string' && /^[\{\[]/.test(k) ? JSON.parse(k) : undefined;
+export const convertInput = <T>(k?: string, query?: boolean): T | undefined =>
+  !k || typeof k !== 'string' ? undefined : (/^[\{\[]/.test(k) ? JSON.parse(k) : (query ? QueryLanguageParser.parseToQuery(k) : undefined));
 
 /**
  * Provides a basic query controller for a given model:
@@ -48,8 +49,8 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>): (target: C
         return this.source.query(getCls(), {
           limit: full.limit,
           offset: full.offset,
-          sort: convert<SortClause<T>[]>(full.sort),
-          where: convert<PropWhereClause<T>>(full.where)
+          sort: convertInput<SortClause<T>[]>(full.sort),
+          where: convertInput<PropWhereClause<T>>(full.where, true)
         });
       } else {
         throw new AppError(`${this.source.constructor.Ⲑid} does not support querying`);

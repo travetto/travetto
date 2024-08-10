@@ -1,13 +1,13 @@
 {
-  "name": "@travetto/model-query",
+  "name": "@travetto/model-query-language",
   "version": "5.0.0-rc.8",
-  "description": "Datastore abstraction for advanced query support.",
+  "description": "Datastore query language.",
   "keywords": [
     "datastore",
-    "decorators",
     "schema",
     "typescript",
-    "travetto"
+    "travetto",
+    "query-language"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
@@ -26,7 +26,7 @@
     "directory": "module/model-query"
   },
   "dependencies": {
-    "@travetto/di": "^5.0.0-rc.8",
+    "@travetto/model-query": "^5.0.0-rc.8",
     "@travetto/model": "^5.0.0-rc.8",
     "@travetto/schema": "^5.0.0-rc.8"
   },
@@ -39,7 +39,7 @@
     }
   },
   "travetto": {
-    "displayName": "Data Model Querying"
+    "displayName": "Data Model Query Language"
   },
   "publishConfig": {
     "access": "public"

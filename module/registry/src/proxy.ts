@@ -97,8 +97,8 @@ export class RetargettingProxy<T> {
   /**
    * Unwrap proxy
    */
-  static unwrap<U>(el: U & { [ProxyTargetⲐ]?: unknown }): U {
-    return castTo(el ? (el[ProxyTargetⲐ] ?? el) : el);
+  static unwrap<U>(el: U): U {
+    return castTo<{ [ProxyTargetⲐ]: U }>(el)?.[ProxyTargetⲐ] ?? el;
   }
 
   #handler: RetargettingHandler<T>;

@@ -22,7 +22,7 @@ type QueryOptionsRaw<T> = {
 
 type QueryMain<T> = {
   select?: SelectClauseRaw<T>;
-  where?: WhereClauseRaw<T> | string;
+  where?: WhereClauseRaw<T>;
   // TODO: Add grouping in later
   // group?: GroupClauseRaw<T>;
 };

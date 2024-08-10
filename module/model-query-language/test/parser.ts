@@ -2,9 +2,9 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { WhereClause } from '../src/model/where-clause';
-import { QueryLanguageParser } from '../src/internal/query/parser';
-import { QueryLanguageTokenizer } from '../src/internal/query/tokenizer';
+import { WhereClause } from '@travetto/model-query';
+import { QueryLanguageParser } from '../src/parser';
+import { QueryLanguageTokenizer } from '../src/tokenizer';
 
 type UserType<R = string> = { user: { address: { state: String, city: string }, role: R } };
 
