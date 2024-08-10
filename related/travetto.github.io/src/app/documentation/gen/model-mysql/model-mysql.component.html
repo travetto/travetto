@@ -46,7 +46,7 @@ Out of the box, by installing the module, everything should be wired up by defau
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/config.ts#L7">SQLModelConfig</a> is defined by:
+where the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model-sql/src/config.ts#L8">SQLModelConfig</a> is defined by:
 
   <figure class="code">
     <figcaption class="code">Structure of SQLModelConfig
@@ -54,6 +54,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/config'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> asFull <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * SQL Model Config
@@ -95,8 +96,7 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   <span class="token comment">/**
    * Raw client options
    */</span>
-
-  options<span class="token operator">:</span> <span class="token constant">T</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token keyword">as</span> <span class="token constant">T</span><span class="token punctuation">;</span>
+  options<span class="token operator">:</span> <span class="token constant">T</span> <span class="token operator">=</span> <span class="token function">asFull</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 

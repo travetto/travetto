@@ -45,7 +45,7 @@ Currently, the following are packages that provide <a target="_blank" class="sou
 
 The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into <a target="_blank" class="external-link" href="https://www.json.org">JSON</a>.  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.<br><br>
 Additionally, to use the decorators you will need to have a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35">CacheService</a> object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.<br><br>
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L16">@Cache</a> is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. <a target="_blank" class="external-link" href="https://redis.io">redis</a>, <a target="_blank" class="external-link" href="https://memcached.org">memcached</a>), only asynchronous methods are supported.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L13">@Cache</a> is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. <a target="_blank" class="external-link" href="https://redis.io">redis</a>, <a target="_blank" class="external-link" href="https://memcached.org">memcached</a>), only asynchronous methods are supported.
 
   <figure class="code">
     <figcaption class="code">Using decorators to cache expensive async call
@@ -77,7 +77,7 @@ Additionally, to use the decorators you will need to have a <a target="_blank" c
 
 <h3 id="cache">Cache</h3>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L16">@Cache</a> decorator supports configurations on:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L13">@Cache</a> decorator supports configurations on:
 <ul> <li><code class="item input">name</code> the field name of the current class which points to the desired cache source.</li>
 <li><code class="item input">config</code> the additional/optional config options, on a per invocation basis</li>
 
@@ -93,7 +93,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h3 id="evictcache">EvictCache</h3>
 
-Additionally, there is support for planned eviction via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L43">@EvictCache</a> decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same <code class="item input">keySpace</code> and <code class="item input">key</code> to compute the expected key.
+Additionally, there is support for planned eviction via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L39">@EvictCache</a> decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same <code class="item input">keySpace</code> and <code class="item input">key</code> to compute the expected key.
 
   <figure class="code">
     <figcaption class="code">Using decorators to cache/evict user access

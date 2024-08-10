@@ -42,11 +42,12 @@ export class Init {
 }
 ```
 
-where the [SQLModelConfig](https://github.com/travetto/travetto/tree/main/module/model-sql/src/config.ts#L7) is defined by:
+where the [SQLModelConfig](https://github.com/travetto/travetto/tree/main/module/model-sql/src/config.ts#L8) is defined by:
 
 **Code: Structure of SQLModelConfig**
 ```typescript
 import { Config } from '@travetto/config';
+import { asFull } from '@travetto/runtime';
 
 /**
  * SQL Model Config
@@ -88,8 +89,7 @@ export class SQLModelConfig<T extends {} = {}> {
   /**
    * Raw client options
    */
-
-  options: T = {} as T;
+  options: T = asFull({});
 }
 ```
 

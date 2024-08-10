@@ -71,7 +71,7 @@ class $Runtime {
 ```
 
 ## Environment Support
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L108) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L4), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L6), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
 
 **Code: Base Known Environment Flags**
 ```typescript
@@ -133,7 +133,7 @@ interface TravettoEnv {
 ```
 
 ### Environment Property
-For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L4), we support the ability to access different properties as a means to better facilitate environment variable usage.
+For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L6), we support the ability to access different properties as a means to better facilitate environment variable usage.
 
 **Code: EnvProp Shape**
 ```typescript
@@ -165,9 +165,9 @@ export class EnvProp<T> {
 ```
 
 ## Standard Error Support
-While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
+While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L15) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
 
-The [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L13) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+The [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L15) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
    *  `general` - General purpose errors
    *  `system` - Synonym for `general`
    *  `data` - Data format, content, etc are incorrect. Generally correlated to bad input.
@@ -214,6 +214,7 @@ export function work() {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.work = work;
 const tslib_1 = require("tslib");
+const Ⲑ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
 const ᚕ_c = tslib_1.__importStar(require("@travetto/runtime/src/console.js"));
 var ᚕm = ["@travetto/runtime", "doc/transpile.ts"];
 function work() {
@@ -226,6 +227,7 @@ function work() {
     }
     ᚕ_c.log({ level: "debug", import: ᚕm, line: 9, scope: "work", args: ['End Work'] });
 }
+Ⲑ_function_1.registerFunction(work, ᚕm, { hash: 1030247697, lines: [1, 10, 2] });
 ```
 
 #### Filtering Debug
@@ -253,12 +255,12 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L13) with a category of 'notfound'.  
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L15) with a category of 'notfound'.  
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L108)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L18) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L19) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
    *  `hash(text: string, size?: number)` produces a full sha512 hash.
@@ -318,7 +320,7 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L41) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/runtime/src/exec.ts#L42) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 

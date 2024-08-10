@@ -132,9 +132,9 @@ HELLO
 
 The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L85) supports the following data types for flags:
    *  Boolean values
-   *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L172), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L178), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L166), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117) decorators help provide additional validation.
-   *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L78) provide additional constraints
-   *  Date values. The [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117) decorators help provide additional validation.
+   *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L171), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L177), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L165), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L106) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L116) decorators help provide additional validation.
+   *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L106), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L116), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L98) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L77) provide additional constraints
+   *  Date values. The [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L106) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L116) decorators help provide additional validation.
    *  String lists. Same as String, but allowing multiple values.
    *  Numeric lists. Same as Number, but allowing multiple values.
 
@@ -411,6 +411,7 @@ export class RunCommand {
 **Code: Anatomy of a Command**
 ```typescript
 export interface CliCommandShape<T extends unknown[] = unknown[]> {
+
   /**
    * Parsed state
    */
@@ -499,7 +500,7 @@ export class RunRestCommand implements CliCommandShape {
 }
 ```
 
-As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L108) `name` defined in the [Base](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Environment config and common utilities for travetto applications.") module. 
+As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109) `name` defined in the [Base](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Environment config and common utilities for travetto applications.") module. 
 
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 

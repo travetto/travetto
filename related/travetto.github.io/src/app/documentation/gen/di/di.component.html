@@ -18,7 +18,7 @@
 <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Dependency_injection">Dependency injection</a> is a framework primitive.  When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> and type erasure of interfaces, dependency injection only supports <code class="item input">class</code>es as a type signifier. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.
 <h2 id="declaration">Declaration</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">&#64;Injectable</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L74">&#64;InjectableFactory</a> decorators provide the registration of dependencies.   Dependency declaration revolves around exposing <code class="item input">class</code>es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various implementation.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29">&#64;Injectable</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70">&#64;InjectableFactory</a> decorators provide the registration of dependencies.   Dependency declaration revolves around exposing <code class="item input">class</code>es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various implementation.
 
   <figure class="code">
     <figcaption class="code">Example Injectable
@@ -88,7 +88,7 @@ As you can see, the <code class="item input">target</code> field is also set, wh
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-In this scenario, <code class="item input">SpecificService</code> is a valid candidate for <code class="item input">BaseService</code> due to the abstract inheritance. Sometimes, you may want to provide a slight variation to  a dependency without extending a class.  To this end, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L74">&#64;InjectableFactory</a> decorator denotes a <code class="item input">static</code> class method that produces an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">&#64;Injectable</a>.
+In this scenario, <code class="item input">SpecificService</code> is a valid candidate for <code class="item input">BaseService</code> due to the abstract inheritance. Sometimes, you may want to provide a slight variation to  a dependency without extending a class.  To this end, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70">&#64;InjectableFactory</a> decorator denotes a <code class="item input">static</code> class method that produces an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29">&#64;Injectable</a>.
 
   <figure class="code">
     <figcaption class="code">Example InjectableFactory
@@ -142,12 +142,12 @@ Given the <code class="item input">static</code> method <code class="item input"
 
 In this example, the enabled flag is specified in relationship to the deployment environment.  When coupled with optional properties, and optional chaining, allows for seamless inclusion of optional dependencies at runtime.
 
-<p class="note"><strong>Note</strong> Other modules are able to provide aliases to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">&#64;Injectable</a> that also provide additional functionality.  For example, the <a class="module-link" routerLink="/docs/config" title="Configuration support">Configuration</a> module &#64;Config or the <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module &#64;Controller decorator registers the associated class as an injectable element.</p>
+<p class="note"><strong>Note</strong> Other modules are able to provide aliases to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29">&#64;Injectable</a> that also provide additional functionality.  For example, the <a class="module-link" routerLink="/docs/config" title="Configuration support">Configuration</a> module &#64;Config or the <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module &#64;Controller decorator registers the associated class as an injectable element.</p>
 
 <h2 id="injection">Injection</h2>
 
-Once all of your necessary dependencies are defined, now is the time to provide those <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">&#64;Injectable</a> instances to your code.  There are three primary methods for injection: <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">&#64;Inject</a> decorator, which denotes a desire to inject a value directly.  These will be set post construction. <br><br>
+Once all of your necessary dependencies are defined, now is the time to provide those <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29">&#64;Injectable</a> instances to your code.  There are three primary methods for injection: <br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29">&#64;Inject</a> decorator, which denotes a desire to inject a value directly.  These will be set post construction. <br><br>
 
   <figure class="code">
     <figcaption class="code">Example Injectable with dependencies as Inject fields
@@ -168,7 +168,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">&#64;Injectable</a> constructor params, which will be provided as the instance is being constructed.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29">&#64;Injectable</a> constructor params, which will be provided as the instance is being constructed.
 
   <figure class="code">
     <figcaption class="code">Example Injectable with dependencies in constructor
@@ -188,7 +188,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-Via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L74">&#64;InjectableFactory</a> params, which are comparable to constructor params
+Via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70">&#64;InjectableFactory</a> params, which are comparable to constructor params
 
   <figure class="code">
     <figcaption class="code">Example InjectableFactory with parameters as dependencies
@@ -257,8 +257,8 @@ By default, if there is only one candidate without qualification, then that cand
 
 <h2 id="non-framework-dependencies">Non-Framework Dependencies</h2>
 
-The module is built around the framework's management of class registration, and being able to decorate the code with <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">&#64;Injectable</a> decorators. There may also be a desire to leverage external code and pull it into the dependency injection framework.  This could easily be achieved using a wrapper class that is owned by the framework. <br><br>
-It is also possible to directly reference external types, and they will be converted into unique symbols.  These symbols cannot be used manually, but can be leveraged using <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">&#64;Inject</a> decorators.
+The module is built around the framework's management of class registration, and being able to decorate the code with <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29">&#64;Injectable</a> decorators. There may also be a desire to leverage external code and pull it into the dependency injection framework.  This could easily be achieved using a wrapper class that is owned by the framework. <br><br>
+It is also possible to directly reference external types, and they will be converted into unique symbols.  These symbols cannot be used manually, but can be leveraged using <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29">&#64;Inject</a> decorators.
 
   <figure class="code">
     <figcaption class="code">Example External Dependencies

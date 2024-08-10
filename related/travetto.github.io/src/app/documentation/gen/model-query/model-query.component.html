@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/model-query</code></pre>
   </figure>
 
-This module provides an enhanced query contract for <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.
+This module provides an enhanced query contract for <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.
 <h2 id="contracts">Contracts</h2>
 
 <h3 id="query">Query</h3>
@@ -254,40 +254,6 @@ A sample query for <code class="item input">User</code>'s might be:
   </figure>
 
 This would find all users who are over <code class="item input">35</code> and that have the <code class="item input">contact</code> field specified.
-
-<h2 id="query-language">Query Language</h2>
-
-In addition to the standard query interface, the module also supports querying by query language to facilitate end - user queries.This is meant to act as an interface that is simpler to write than the default object structure. The language itself is fairly simple, boolean logic, with parenthetical support.The operators supported are:
-<ul> <li><code class="item input">&lt;</code>, <code class="item input">&lt;=</code> - Less than, and less than or equal to</li>
-<li><code class="item input">&gt;</code>, <code class="item input">&gt;=</code> - Greater than, and greater than or equal to</li>
-<li><code class="item input">!=</code>, <code class="item input">==</code> - Not equal to, and equal to</li>
-<li><code class="item input">~</code> - Matches regular expression, supports the <code class="item input">i</code> flag to trigger case insensitive searches</li>
-<li><code class="item input">!</code>, <code class="item input">not</code> - Negates a clause</li>
-<li><code class="item input">in</code>, <code class="item input">not-in</code> - Supports checking if a field is in a list of literal values</li>
-<li><code class="item input">and</code>, <code class="item input">&amp;&amp;</code> - Intersection of clauses</li>
-<li><code class="item input">or</code>, <code class="item input">||</code> - Union of clauses</li>
-</ul>
-All sub fields are dot separated for access, e.g. <code class="item field">user.address.city</code>.A query language version of the previous query could look like:
-
-  <figure class="code">
-    <figcaption class="code">Query language with boolean checks and exists check
-
-</figcaption>
-    <pre><code class="language-sql"><span class="token operator">not</span> <span class="token punctuation">(</span>age <span class="token operator">&lt;</span> <span class="token number">35</span><span class="token punctuation">)</span> <span class="token operator">and</span> contact <span class="token operator">!=</span> <span class="token boolean">null</span></code></pre>
-  </figure>
-
-A more complex query would look like:
-
-  <figure class="code">
-    <figcaption class="code">Query language with more complex needs
-
-</figcaption>
-    <pre><code class="language-sql"><span class="token keyword">user</span><span class="token punctuation">.</span>role <span class="token operator">in</span> <span class="token punctuation">[</span><span class="token string">'admin'</span><span class="token punctuation">,</span> <span class="token string">'root'</span><span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span><span class="token keyword">user</span><span class="token punctuation">.</span>address<span class="token punctuation">.</span>state <span class="token operator">=</span><span class="token operator">=</span> <span class="token string">'VA'</span> <span class="token operator">||</span> <span class="token keyword">user</span><span class="token punctuation">.</span>address<span class="token punctuation">.</span>city <span class="token operator">=</span><span class="token operator">=</span> <span class="token string">'Springfield'</span><span class="token punctuation">)</span></code></pre>
-  </figure>
-
-<h3 id="regular-expression">Regular Expression</h3>
-
-When querying with regular expressions, patterns can be specified as <code class="item input">'strings'</code> or as <code class="item input">/patterns/</code>.  The latter allows for the case insensitive modifier: <code class="item input">/pattern/i</code>.  Supporting the insensitive flag is up to the underlying model implementation.
 
 <h2 id="custom-model-query-service">Custom Model Query Service</h2>
 

@@ -13,7 +13,7 @@ npm install @travetto/rest
 yarn add @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L140) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L31) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class.
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L140) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L30) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class.
 
 ## Routes: Controller
 To define a route, you must first declare a [@Controller](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/controller.ts#L9) which is only allowed on classes. Controllers can be configured with:
@@ -37,13 +37,13 @@ class SimpleController {
 Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported. 
 
 The HTTP methods that are supported via:
-   *  [@Get](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L33)
-   *  [@Post](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L40)
-   *  [@Put](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L47)
-   *  [@Delete](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L60)
-   *  [@Patch](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L54)
-   *  [@Head](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L66)
-   *  [@Options](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L72)
+   *  [@Get](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L32)
+   *  [@Post](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L39)
+   *  [@Put](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L46)
+   *  [@Delete](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L59)
+   *  [@Patch](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L53)
+   *  [@Head](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L65)
+   *  [@Options](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/endpoint.ts#L71)
 Each endpoint decorator handles the following config:
    *  `title` - The definition of the endpoint
    *  `description` - High level description fo the endpoint
@@ -446,7 +446,7 @@ export class RestCorsConfig extends ManagedInterceptorConfig {
 ```
 
 ### CookiesInterceptor
-[CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L74) is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+[CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L73) is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
 **Code: Cookies Config**
 ```typescript
