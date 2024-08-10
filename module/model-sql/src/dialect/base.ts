@@ -188,8 +188,7 @@ export abstract class SQLDialect implements DialectState {
         const src = DataUtil.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
         return this.quote(src);
       } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        return this.quote(value as string);
+        return this.quote(castTo(value));
       }
     } else if (conf.type === Boolean) {
       return `${value ? 'TRUE' : 'FALSE'}`;
@@ -271,8 +270,7 @@ export abstract class SQLDialect implements DialectState {
    * Delete query and return count removed
    */
   async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>): Promise<number> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const { count } = await this.executeSQL(this.getDeleteSQL(SQLUtil.classToStack(cls), query.where as WhereClause<T>));
+    const { count } = await this.executeSQL<T>(this.getDeleteSQL(SQLUtil.classToStack(cls), castTo(query.where)));
     return count;
   }
 
@@ -450,8 +448,7 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$regex': {
-              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              const re = DataUtil.toRegex(v as string);
+              const re = DataUtil.toRegex(castTo(v));
               const src = re.source;
               const ins = re.flags && re.flags.includes('i');
 
@@ -500,8 +497,7 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$lt': case '$gt': case '$gte': case '$lte': {
-              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              const subItems = TypedObject.keys(top as typeof SQL_OPS)
+              const subItems = TypedObject.keys(castTo<typeof SQL_OPS>(top))
                 .map(ssk => `${sPath} ${SQL_OPS[ssk]} ${resolve(top[ssk])}`);
               items.push(subItems.length > 1 ? `(${subItems.join(` ${SQL_OPS.$and} `)})` : subItems[0]);
               break;
@@ -548,8 +544,7 @@ export abstract class SQLDialect implements DialectState {
   getWhereSQL<T>(cls: Class<T>, where?: WhereClause<T>): string {
     return !where || !Object.keys(where).length ?
       '' :
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      `WHERE ${this.getWhereGroupingSQL(cls, where as WhereClause<T>)}`;
+      `WHERE ${this.getWhereGroupingSQL(cls, castTo(where))}`;
   }
 
   /**
@@ -625,8 +620,7 @@ LEFT OUTER JOIN ${from} ON
         .map(x => this.resolveName(x.stack))
         .join(', ');
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const where = query.where as WhereClause<T>;
+    const where: WhereClause<T> = castTo(query.where);
     return `
 ${this.getSelectSQL(cls, query.select)}
 ${this.getFromSQL(cls)}
@@ -647,8 +641,7 @@ ${this.getLimitSQL(cls, query)}`;
 
     const fields = SchemaRegistry.has(config.type) ?
       [...SQLUtil.getFieldsByLocation(stack).local] :
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      (array ? [config as FieldConfig] : []);
+      (array ? [castTo<FieldConfig>(config)] : []);
 
     if (!parent) {
       let idField = fields.find(x => x.name === this.idField.name);
@@ -728,8 +721,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       if (DataUtil.isPlainObject(val)) {
         throw new Error('Unable to supported nested fields for indices');
       }
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return [key as string, typeof val === 'number' ? val === 1 : (!!val)];
+      return [castTo(key), typeof val === 'number' ? val === 1 : (!!val)];
     });
     const constraint = `idx_${table}_${fields.map(([f]) => f).join('_')}`;
     return `CREATE ${idx.type === 'unique' ? 'UNIQUE ' : ''}INDEX ${constraint} ON ${this.ident(table)} (${fields
@@ -803,8 +795,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, (inst.value as Record<string, string>)[c.name])));
+    const matrix = instances.map(inst => columns.map(c => this.resolveValue(c, castTo<Record<string, unknown>>(inst.value)[c.name])));
 
     columnNames.push(this.pathField.name);
     if (hasParent) {
@@ -895,8 +886,7 @@ ${orderBy};`;
    * Get COUNT(1) query
    */
   getQueryCountSQL<T>(cls: Class<T>, query: Query<T>): string {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const where = query.where as WhereClause<T>;
+    const where: WhereClause<T> = castTo(query.where);
     return `
 SELECT COUNT(DISTINCT ${this.rootAlias}.id) as total
 ${this.getFromSQL(cls)}
@@ -921,15 +911,12 @@ ${this.getWhereSQL(cls, where)}`;
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
         const selectTop = selectStack[selectStack.length - 1];
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const fieldKey = config.name as keyof RetainFields<T>;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const subSelectTop: SelectClause<T> | undefined = selectTop?.[fieldKey] as SelectClause<T> | undefined;
+        const fieldKey: keyof RetainFields<T> = castTo(config.name);
+        const subSelectTop: SelectClause<T> | undefined = castTo(selectTop?.[fieldKey]);
 
         // See if a selection exists at all
         const sel: FieldConfig[] = subSelectTop ? fields
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          .filter(f => typeof subSelectTop === 'object' && subSelectTop[f.name as typeof fieldKey] === 1)
+          .filter(f => typeof subSelectTop === 'object' && subSelectTop[castTo<typeof fieldKey>(f.name)] === 1)
           : [];
 
         if (sel.length) {
@@ -1012,12 +999,10 @@ ${this.getWhereSQL(cls, where)}`;
 
       await Promise.all([
         ...upserts.filter(x => x.stack.length === 1).map(i =>
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          this.deleteByIds(i.stack, i.records.map(v => (v.value as Record<string, string>)[idx]))
+          this.deleteByIds(i.stack, i.records.map(v => castTo<Record<string, string>>(v.value)[idx]))
         ),
         ...updates.filter(x => x.stack.length === 1).map(i =>
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          this.deleteByIds(i.stack, i.records.map(v => (v.value as Record<string, string>)[idx]))
+          this.deleteByIds(i.stack, i.records.map(v => castTo<Record<string, string>>(v.value)[idx]))
         ),
       ]);
     }

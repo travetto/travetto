@@ -1,4 +1,4 @@
-import { Class, AppError, TimeUtil } from '@travetto/runtime';
+import { Class, AppError, TimeUtil, castTo } from '@travetto/runtime';
 import { ModelRegistry, NotFoundError } from '@travetto/model';
 import { ModelType } from '@travetto/model/src/types/model';
 import { SchemaRegistry } from '@travetto/schema';
@@ -47,17 +47,15 @@ export class ModelQueryUtil {
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
       const { subTypeField, subTypeName } = SchemaRegistry.get(cls);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      clauses.push({ [subTypeField]: subTypeName } as WhereClauseRaw<T>);
+      clauses.push(castTo({ [subTypeField]: subTypeName }));
     }
     if (checkExpiry && conf.expiresAt) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      clauses.push({
+      clauses.push(castTo({
         $or: [
           { [conf.expiresAt]: { $exists: false } },
           { [conf.expiresAt]: { $gte: new Date() } },
         ]
-      } as WhereClauseRaw<T>);
+      }));
     }
     if (clauses.length > 1) {
       q = { $and: clauses };
@@ -75,8 +73,7 @@ export class ModelQueryUtil {
   ): U & { where: WhereClause<T> } {
     query.where = this.getWhereClause(cls, query.where, checkExpiry);
     QueryVerifier.verify(cls, query);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return query as U & { where: WhereClause<T> };
+    return castTo(query);
   }
 
   /**
@@ -88,10 +85,8 @@ export class ModelQueryUtil {
     query: U
   ): U & { where: WhereClause<T> & { id: string } } {
     query.where = this.getWhereClause(cls, query.where);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    (query.where as WhereClauseRaw<ModelType>).id = item.id;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return query as U & { where: WhereClause<T> & { id: string } };
+    castTo<WhereClauseRaw<ModelType>>(query.where).id = item.id;
+    return castTo(query);
   }
 
   static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) =>

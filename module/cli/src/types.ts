@@ -1,4 +1,4 @@
-import { Class, ConcreteClass } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 
 type OrProm<T> = T | Promise<T>;
 
@@ -19,7 +19,7 @@ export type CliCommandConfig = {
   name: string;
   commandModule: string;
   runTarget?: boolean;
-  cls: ConcreteClass<CliCommandShape>;
+  cls: Class<CliCommandShape>;
   hidden?: boolean;
   preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 };

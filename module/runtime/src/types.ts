@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 export type Class<T = any> = abstract new (...args: any[]) => T;
-export type ConcreteClass<T = any> = new (...args: any[]) => T;
 export type ClassInstance<T = any> = T & {
-  constructor: ConcreteClass<T> & { Ⲑid: string };
+  constructor: Class<T> & { Ⲑid: string };
 };
 
 export type MethodDescriptor<V = any, R = any> = TypedPropertyDescriptor<(this: V, ...params: any[]) => R>;
@@ -34,10 +33,10 @@ export function impartial<T>(input: Partial<T>): T {
   return input as unknown as T;
 }
 
-export function clsInstance<T>(cls: Class<T>, args: unknown[] = []): ClassInstance<T> {
-  return new (cls as ConcreteClass)(...args);
-}
-
 export function castTo<T>(input: unknown): T {
   return input as T;
+}
+
+export function clsInstance<T>(cls: Class<T>, args: unknown[] = []): ClassInstance<T> {
+  return castTo(new (cls as { new(..._args: any[]): T })(...args));
 }

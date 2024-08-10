@@ -4,13 +4,13 @@ import {
   NotFoundError, ModelRegistry, ExistsError, OptionalId,
   ModelIdSource
 } from '@travetto/model';
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { DataUtil, SchemaChange } from '@travetto/schema';
 import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClause, WhereClauseRaw,
+  PageableModelQuery, ValidStringFields, WhereClauseRaw,
 } from '@travetto/model-query';
 
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
@@ -95,8 +95,7 @@ export class SQLModelService implements
   }
 
   async #deleteRaw<T extends ModelType>(cls: Class<T>, id: string, where?: WhereClauseRaw<T>, checkExpiry = true): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    ((where ??= {}) as WhereClauseRaw<ModelType>).id = id;
+    castTo<WhereClauseRaw<ModelType>>(where ??= {}).id = id;
 
     const count = await this.#dialect.deleteAndGetCount<ModelType>(cls, {
       where: ModelQueryUtil.getWhereClause(cls, where, checkExpiry)
@@ -275,8 +274,7 @@ export class SQLModelService implements
   @Transactional()
   async updateOneWithQuery<T extends ModelType>(cls: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
     query = ModelQueryUtil.getQueryWithId(cls, item, query);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    await this.#deleteRaw(cls, item.id, query.where as WhereClause<T>, true);
+    await this.#deleteRaw(cls, item.id, castTo(query.where), true);
     return await this.create(cls, item);
   }
 
@@ -306,8 +304,7 @@ export class SQLModelService implements
     const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
     const results = await this.query(cls, q);
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const modelTypeField = field as ValidStringFields<ModelType>;
+    const modelTypeField: ValidStringFields<ModelType> = castTo(field);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, modelTypeField, prefix, results, x => x, query?.limit);
   }
 

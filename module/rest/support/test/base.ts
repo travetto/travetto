@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, ConcreteClass, Util } from '@travetto/runtime';
+import { AppError, Class, clsInstance, Util } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
@@ -22,7 +22,7 @@ export abstract class BaseRestSuite {
   #handle?: ServerHandle;
   #support: RestServerSupport;
 
-  type: ConcreteClass<RestServerSupport>;
+  type: Class<RestServerSupport>;
   qualifier?: symbol;
 
   @BeforeAll()
@@ -32,7 +32,7 @@ export abstract class BaseRestSuite {
       const uniqueId = Math.abs(Buffer.from(this.constructor.Ⲑid).reduce((a, v) => (a * 33) ^ v, 5381));
       this.#support = new CoreRestServerSupport((uniqueId % 60000) + 2000);
     } else {
-      this.#support = new this.type();
+      this.#support = clsInstance(this.type);
     }
     await RootRegistry.init();
     this.#handle = await this.#support.init(this.qualifier);

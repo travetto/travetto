@@ -1,4 +1,5 @@
 import { Config } from '@travetto/config';
+import { impartial } from '@travetto/runtime';
 
 /**
  * SQL Model Config
@@ -40,6 +41,5 @@ export class SQLModelConfig<T extends {} = {}> {
   /**
    * Raw client options
    */
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  options: T = {} as T;
+  options: T = impartial({});
 }

@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 import { Injectable } from '@travetto/di';
-import { AppError } from '@travetto/runtime';
+import { AppError, castTo } from '@travetto/runtime';
 
 
 type Ctx<T = unknown> = Record<string | symbol, T>;
@@ -30,8 +30,7 @@ export class AsyncContext {
     } else if (!val.value) {
       val.value = {};
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return val.value as Ctx<T>;
+    return castTo(val.value);
   }
 
   /**

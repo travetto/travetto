@@ -1,4 +1,4 @@
-import { ConcreteClass } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 import { EmailTemplateModule, EmailTemplateLocation } from '@travetto/email';
 
 export type JSXChild = JSXElement | number | bigint | boolean | object | string;
@@ -13,7 +13,7 @@ let id = 0;
 
 /** Simple JSX Element */
 export interface JSXElement<
-  T extends string | ConcreteClass | JSXComponentFunction<P> = string | ConcreteClass | JSXComponentFunction,
+  T extends string | Class | JSXComponentFunction<P> = string | Class | JSXComponentFunction,
   P extends {} = {},
 > {
   [JSXRuntimeTag]?: { id: number };
@@ -57,7 +57,7 @@ declare global {
 
 let createFrag: Function | undefined = undefined;
 
-export function createElement<T extends string | ConcreteClass | JSXComponentFunction<P>, P extends {}>(
+export function createElement<T extends string | Class | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps
 ): JSXElement<T, P> {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -65,7 +65,7 @@ export function createElement<T extends string | ConcreteClass | JSXComponentFun
   return { [JSXRuntimeTag]: { id: (id += 1) }, type, key: '', props };
 }
 
-export function createRootElement<T extends string | ConcreteClass | JSXComponentFunction<P>, P extends {}>(
+export function createRootElement<T extends string | Class | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps
 ): JSXElement<T, P> {
   const res = createElement(type, props);

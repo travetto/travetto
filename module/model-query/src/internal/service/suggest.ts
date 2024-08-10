@@ -35,8 +35,7 @@ export class ModelQuerySuggestUtil {
     }
 
     if (query?.where) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      clauses.push(query.where! as WhereClauseRaw<ModelType>);
+      clauses.push(castTo(query.where));
     }
 
     return {
@@ -63,8 +62,7 @@ export class ModelQuerySuggestUtil {
     for (const r of results) {
       const val = r[field];
       if (Array.isArray(val)) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        out.push(...val.filter(f => pattern.test(f)).map((f: string) => [f, transform(f, r)] as [string, U]));
+        out.push(...val.filter(f => pattern.test(f)).map((f: string) => castTo<[string, U]>([f, transform(f, r)])));
       } else if (typeof val === 'string') {
         out.push([val, transform(val, r)]);
       }

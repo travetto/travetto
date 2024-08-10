@@ -1,6 +1,6 @@
-import { impartial, type Class, type ClassInstance } from '@travetto/runtime';
+import { castTo, impartial, type Class, type ClassInstance } from '@travetto/runtime';
 
-import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
+import { InjectableFactoryConfig, InjectableConfig } from './types';
 import { DependencyRegistry, ResolutionType } from './registry';
 
 function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Partial<InjectConfig> | undefined)[]): T {
@@ -56,8 +56,7 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
       const config: InjectConfig = collapseConfig(first, ...args);
 
       DependencyRegistry.registerProperty(
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        (target as ClassInstance).constructor, propertyKey!, config as Dependency
+        castTo<ClassInstance>(target).constructor, propertyKey!, castTo(config)
       );
     }
   };

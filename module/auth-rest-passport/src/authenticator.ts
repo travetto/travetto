@@ -6,13 +6,12 @@ import { LoginContextⲐ } from '@travetto/auth-rest/src/internal/types';
 import { LoginContext } from '@travetto/auth-rest';
 
 import { PassportUtil } from './util';
+import { castTo } from '@travetto/runtime';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
 
 type Handler = (req: Request, res: Response, next: Function) => unknown;
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const authenticator = (passport as unknown as passport.Authenticator<Handler>);
+const authenticator: passport.Authenticator<Handler> = castTo(passport);
 
 /**
  * Authenticator via passport

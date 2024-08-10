@@ -1,4 +1,4 @@
-import { ConcreteClass } from '@travetto/runtime';
+import { castTo, clsInstance } from '@travetto/runtime';
 
 const ProxyTargetⲐ = Symbol.for('@travetto/runtime:proxy-target');
 
@@ -35,18 +35,15 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   apply(target: T, thisArg: T, argArray?: unknown[]): unknown {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (this.target as unknown as Function).apply(this.target, argArray);
+    return castTo<Function>(this.target).apply(this.target, argArray);
   }
 
   construct(target: T, argArray: unknown[], newTarget?: unknown): object {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return new (this.target as unknown as ConcreteClass)(...argArray);
+    return clsInstance(castTo(this.target), argArray);
   }
 
   setPrototypeOf(target: T, v: unknown): boolean {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return Object.setPrototypeOf(this.target, v as Record<string, unknown>);
+    return Object.setPrototypeOf(this.target, castTo(v));
   }
 
   getPrototypeOf(target: T): object | null {
@@ -58,8 +55,7 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
     if (prop === ProxyTargetⲐ) {
       return this.target;
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    let ret = this.target[prop as keyof T];
+    let ret = this.target[castTo<keyof T>(prop)];
     if (isFunction(ret) && !/^class\s/.test(Function.prototype.toString.call(ret))) {
       // Bind class members to class instance instead of proxy propagating
       ret = ret.bind(this.target);
@@ -68,13 +64,11 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   has(target: T, prop: PropertyKey): boolean {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (this.target as Object).hasOwnProperty(prop);
+    return castTo<object>(this.target).hasOwnProperty(prop);
   }
 
   set(target: T, prop: PropertyKey, value: unknown): boolean {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions
-    this.target[prop as keyof T] = value as any;
+    this.target[castTo<keyof T>(prop)] = castTo(value);
     return true;
   }
 
@@ -86,8 +80,7 @@ export class RetargettingHandler<T> implements ProxyHandler<any> {
   }
 
   deleteProperty(target: T, p: PropertyKey): boolean {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return delete this.target[p as keyof T];
+    return delete this.target[castTo<keyof T>(p)];
   }
 
   defineProperty(target: T, p: PropertyKey, attributes: PropertyDescriptor): boolean {
@@ -106,9 +99,8 @@ export class RetargettingProxy<T> {
   /**
    * Unwrap proxy
    */
-  static unwrap<U>(el: U): U {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions
-    return (el ? ((el as any)[ProxyTargetⲐ] ?? el) : el) as U;
+  static unwrap<U>(el: U & { [ProxyTargetⲐ]?: unknown }): U {
+    return castTo(el ? (el[ProxyTargetⲐ] ?? el) : el);
   }
 
   #handler: RetargettingHandler<T>;
@@ -116,8 +108,7 @@ export class RetargettingProxy<T> {
 
   constructor(initial: T) {
     this.#handler = new RetargettingHandler(initial);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.#instance = new Proxy({}, this.#handler as ProxyHandler<object>);
+    this.#instance = new Proxy({}, castTo(this.#handler));
   }
 
   setTarget(next: T): void {
@@ -131,7 +122,6 @@ export class RetargettingProxy<T> {
   }
 
   get<V extends T>(): V {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.#instance as V;
+    return castTo(this.#instance);
   }
 }
