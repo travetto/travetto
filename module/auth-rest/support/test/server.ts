@@ -24,7 +24,7 @@ class AuthorizationEncoder implements PrincipalEncoder {
   async decode({ req }: FilterContext) {
     try {
       if (req.headers.authorization) {
-        const p = JSON.parse(Buffer.from(req.headers.authorization as string, 'base64').toString('utf8'));
+        const p = JSON.parse(Buffer.from(req.headers.authorization, 'base64').toString('utf8'));
         if (p) {
           return p;
         }

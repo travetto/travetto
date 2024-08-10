@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, Class, classConstruct, Util } from '@travetto/runtime';
+import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
@@ -55,7 +55,7 @@ export abstract class BaseRestSuite {
 
   async getOutput<T>(t: Buffer): Promise<T | string> {
     try {
-      return JSON.parse(t.toString('utf8')) as T;
+      return JSON.parse(t.toString('utf8'));
     } catch {
       return t.toString('utf8');
     }
@@ -105,7 +105,7 @@ export abstract class BaseRestSuite {
     cfg: FullRequest = {}
   ): Promise<MakeRequestResponse<T>> {
 
-    method = method.toUpperCase() as Request['method'];
+    method = castTo<Request['method']>(method.toUpperCase());
 
     cfg.headers ??= {};
 
@@ -117,7 +117,7 @@ export abstract class BaseRestSuite {
       } else if (typeof body === 'string') {
         buffer = Buffer.from(body);
       } else if ('stream' in body) {
-        buffer = await toBuffer(body.stream as Readable);
+        buffer = await toBuffer(castTo(body.stream));
       } else {
         buffer = Buffer.from(JSON.stringify(body));
         cfg.headers['Content-Type'] = cfg.headers['Content-Type'] ?? 'application/json';
@@ -144,7 +144,7 @@ export abstract class BaseRestSuite {
     }
     return {
       status: resp.status,
-      body: out as T,
+      body: castTo(out),
       headers: Object.fromEntries(Object.entries(resp.headers).map(([k, v]) => [k.toLowerCase(), v]))
     };
   }

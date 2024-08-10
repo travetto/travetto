@@ -12,6 +12,7 @@ import { isIndexedSupported } from '../../src/internal/service/common';
 import { ExistsError } from '../../src/error/exists';
 
 import { BaseModelSuite } from './base';
+import { castTo } from '@travetto/runtime';
 
 @Model({ baseType: true })
 export class Worker {
@@ -70,7 +71,7 @@ export class IndexedEngineer extends IndexedWorker {
 }
 
 async function collect<T>(iterable: AsyncIterable<T>): Promise<T[]> {
-  const out = [] as T[];
+  const out: T[] = [];
   for await (const el of iterable) {
     out.push(el);
   }
@@ -116,12 +117,12 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
 
     const fire3 = all.find(x => x instanceof Firefighter);
     assert(fire3 instanceof Firefighter);
-    assert((fire3 as Firefighter).firehouse === 20);
+    assert(fire3.firehouse === 20);
     assert(fire3.name === 'rob');
 
     const eng3 = all.find(x => x instanceof Engineer);
     assert(eng3 instanceof Engineer);
-    assert((eng3 as Engineer).major === 'oranges');
+    assert(eng3.major === 'oranges');
     assert(eng3.name === 'cob');
 
     const engineers = await collect(service.list(Engineer));
@@ -161,7 +162,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     );
 
     await assert.rejects(
-      () => service.update(Engineer, Doctor.from({ ...doc }) as unknown as Engineer),
+      () => service.update(Engineer, castTo(Doctor.from({ ...doc }))),
       (e: Error) => (e instanceof NotFoundError || e instanceof SubTypeNotSupportedError || e instanceof TypeMismatchError) ? undefined : e);
 
     await timers.setTimeout(15);
@@ -205,7 +206,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
 
   @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(isIndexedSupported) })
   async polymorphicIndexGet() {
-    const service = (await this.service) as unknown as ModelIndexedSupport;
+    const service: ModelIndexedSupport = castTo(await this.service);
     const now = 30;
     const [doc, fire, eng] = [
       IndexedDoctor.from({ name: 'bob', specialty: 'feet', age: now }),
@@ -235,7 +236,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
 
   @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(isIndexedSupported) })
   async polymorphicIndexDelete() {
-    const service = (await this.service) as unknown as ModelIndexedSupport;
+    const service: ModelIndexedSupport = castTo(await this.service);
     const now = 30;
     const [doc, fire, eng] = [
       IndexedDoctor.from({ name: 'bob', specialty: 'feet', age: now }),

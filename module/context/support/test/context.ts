@@ -26,7 +26,7 @@ export function WithSuiteContext(data: Record<string, unknown> = {}) {
           await RootRegistry.init();
           const ctx = await DependencyRegistry.getInstance(AsyncContext);
           for (const t of SuiteRegistry.get(target).tests) {
-            const fn = wrapped(ctx, this[t.methodName] as Function);
+            const fn = wrapped(ctx, this[t.methodName]);
             Object.defineProperty(fn, 'name', { value: t.methodName });
             this[t.methodName] = fn;
           }

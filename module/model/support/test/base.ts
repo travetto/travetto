@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
-import { AppError, Class } from '@travetto/runtime';
+import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
 
 import { isBulkSupported, isCrudSupported } from '../../src/internal/service/common';
 import { ModelType } from '../../src/types/model';
@@ -11,7 +11,7 @@ type ServiceClass = { serviceClass: { new(): unknown } };
 export abstract class BaseModelSuite<T> {
 
   static ifNot(pred: (svc: unknown) => boolean): (x: unknown) => Promise<boolean> {
-    return async (x: unknown) => !pred(new (x as ServiceClass).serviceClass());
+    return async (x: unknown) => !pred(classConstruct(castTo<ServiceClass>(x).serviceClass));
   }
 
   serviceClass: Class<T>;
@@ -36,7 +36,7 @@ export abstract class BaseModelSuite<T> {
       const res = await svc.processBulk(cls, items.map(x => ({ insert: x })));
       return res.counts.insert;
     } else if (isCrudSupported(svc)) {
-      const out = [] as Promise<M>[];
+      const out: Promise<M>[] = [];
       for (const el of items) {
         out.push(svc.create(cls, el));
       }

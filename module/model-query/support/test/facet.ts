@@ -7,9 +7,9 @@ import { Suite, Test } from '@travetto/test';
 import { Person } from './types';
 import { ModelQueryFacetSupport } from '../../src/service/facet';
 
-const pick = <T>(arr: T[]): T => arr[Math.trunc(Math.random() * arr.length)]!;
+const pick = <T>(arr: T[] | readonly T[]): T => arr[Math.trunc(Math.random() * arr.length)]!;
 
-const GENDERS = ['m', 'f'] as ['m', 'f'];
+const GENDERS = ['m', 'f'] as const;
 const FNAME = ['Bob', 'Tom', 'Sarah', 'Leo', 'Alice', 'Jennifer', 'Tommy', 'George', 'Paula', 'Sam'];
 const LNAME = ['Smith', 'Sampson', 'Thompson', 'Oscar', 'Washington', 'Jefferson', 'Samuels'];
 const AGES = new Array(100).fill(0).map((x, i) => i + 10);

@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { buffer as toBuffer } from 'node:stream/consumers';
+import { buffer as toBuffer, text as toText } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
 import { S3, CompletedPart, type CreateMultipartUploadRequest } from '@aws-sdk/client-s3';
@@ -202,7 +202,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     try {
       const result = await this.client.getObject(this.#q(cls, id));
       if (result.Body) {
-        const body = (await toBuffer(castTo(result.Body))).toString('utf8');
+        const body = await toText(castTo(result.Body));
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
           const { expiresAt } = ModelRegistry.get(cls);
