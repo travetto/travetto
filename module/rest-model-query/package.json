@@ -26,6 +26,7 @@
   "dependencies": {
     "@travetto/model": "^5.0.0-rc.8",
     "@travetto/model-query": "^5.0.0-rc.8",
+    "@travetto/model-query-language": "^5.0.0-rc.8",
     "@travetto/rest": "^5.0.0-rc.8",
     "@travetto/schema": "^5.0.0-rc.8"
   },

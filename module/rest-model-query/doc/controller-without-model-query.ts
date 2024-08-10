@@ -2,11 +2,9 @@ import { Inject } from '@travetto/di';
 import { ModelQuerySupport, SortClause, ValidStringFields } from '@travetto/model-query';
 import { isQuerySuggestSupported } from '@travetto/model-query/src/internal/service/common';
 import { Controller, Get } from '@travetto/rest';
-import { RestModelQuery, RestModelSuggestQuery } from '@travetto/rest-model-query';
-import { QueryLanguageParser } from '@travetto/model-query-language';
+import { convertInput, RestModelQuery, RestModelSuggestQuery } from '@travetto/rest-model-query';
 
 import { User } from './user';
-const convert = <T>(k?: string): T => !k || typeof k !== 'string' ? undefined : (/^[\{\[]/.test(k) ? JSON.parse(k) : QueryLanguageParser.parseToQuery(k));
 
 @Controller('/user')
 class UserQueryController {
@@ -19,8 +17,8 @@ class UserQueryController {
     return this.service.query(User, {
       limit: query.limit,
       offset: query.offset,
-      sort: convert<SortClause<User>[]>(query.sort),
-      where: convert(query.where)
+      sort: convertInput<SortClause<User>[]>(query.sort),
+      where: convertInput(query.where, true)
     });
   }
 
