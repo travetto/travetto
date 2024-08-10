@@ -207,7 +207,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
    * Get expiry field
    * @param cls
    */
-  getExpiry<T>(cls: Class<T>): keyof T {
+  getExpiry<T extends ModelType>(cls: Class<T>): keyof T {
     const expiry = this.get(cls).expiresAt;
     if (!expiry) {
       throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`, 'general');
