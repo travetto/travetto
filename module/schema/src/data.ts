@@ -67,7 +67,7 @@ export class DataUtil {
         if (mode === 'replace') {
           ret = b;
         } else {
-          const retArr = castTo<unknown[]>(ret);
+          const retArr: unknown[] = castTo(ret);
           const bArr = b;
           for (let i = 0; i < bArr.length; i++) {
             retArr[i] = this.#deepAssignRaw(retArr[i], bArr[i], mode);
@@ -86,8 +86,8 @@ export class DataUtil {
         }
       } else { // Object merge
         ret = a;
-        const bObj = castTo<Record<string, unknown>>(b);
-        const retObj = castTo<Record<string, unknown>>(ret);
+        const bObj: Record<string, unknown> = castTo(b);
+        const retObj: Record<string, unknown> = castTo(ret);
 
         for (const key of Object.keys(bObj)) {
           retObj[key] = this.#deepAssignRaw(retObj[key], bObj[key], mode);
@@ -206,7 +206,7 @@ export class DataUtil {
    * @param o Object to clone
    */
   static shallowClone<T>(a: T): T {
-    return castTo<T>(Array.isArray(a) ? a.slice(0) : (this.isSimpleValue(a) ? a : { ...castTo<object>(a) }));
+    return castTo(Array.isArray(a) ? a.slice(0) : (this.isSimpleValue(a) ? a : { ...castTo<object>(a) }));
   }
 
   /**

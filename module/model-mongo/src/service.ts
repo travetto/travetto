@@ -180,7 +180,7 @@ export class MongoModelService implements
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = castTo<WithId<T>>(await ModelCrudUtil.preStore(cls, item, this));
+    const cleaned: WithId<T> = castTo(await ModelCrudUtil.preStore(cls, item, this));
     cleaned._id = MongoUtil.uuid(cleaned.id);
 
     const store = await this.getStore(cls);

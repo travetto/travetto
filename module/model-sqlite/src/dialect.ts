@@ -56,7 +56,7 @@ export class SqliteDialect extends SQLDialect {
    * Define column modification
    */
   getModifyColumnSQL(stack: VisitStack[]): string {
-    const field = castTo<FieldConfig>(stack[stack.length - 1]);
+    const field: FieldConfig = castTo(stack[stack.length - 1]);
     const type = this.getColumnType(field);
     const ident = this.ident(field.name);
     return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${ident} TYPE ${type} USING (${ident}::${type});`;

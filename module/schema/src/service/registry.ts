@@ -71,9 +71,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    */
   ensureInstanceTypeField<T>(cls: Class, o: T): void {
     const schema = this.get(cls);
-    const typeField = castTo<keyof T>(schema.subTypeField);
+    const typeField: keyof T = castTo(schema.subTypeField);
     if (schema.subTypeName && typeField in schema.views[AllViewⲐ].schema && !o[typeField]) {  // Do we have a type field defined
-      o[typeField] = castTo<T[keyof T]>(schema.subTypeName); // Assign if missing
+      o[typeField] = castTo(schema.subTypeName); // Assign if missing
     }
   }
 

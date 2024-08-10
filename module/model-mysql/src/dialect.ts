@@ -80,7 +80,7 @@ export class MySQLDialect extends SQLDialect {
    * Define column modification
    */
   getModifyColumnSQL(stack: VisitStack[]): string {
-    const field = castTo<FieldConfig>(stack[stack.length - 1]);
+    const field: FieldConfig = castTo(stack[stack.length - 1]);
     return `ALTER TABLE ${this.parentTable(stack)} MODIFY COLUMN ${this.getColumnDefinition(field)};`;
   }
 

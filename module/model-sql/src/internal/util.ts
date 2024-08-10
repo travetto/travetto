@@ -71,7 +71,7 @@ export class SQLUtil {
     }
 
     if (!cls) { // If a simple type, it is it's own field
-      const field = castTo<FieldConfig>({ ...top });
+      const field: FieldConfig = castTo({ ...top });
       return {
         local: [field], localMap: { [field.name]: field },
         foreign: [], foreignMap: {}
@@ -181,7 +181,7 @@ export class SQLUtil {
       },
       onSub: (config) => {
         const { config: field } = config;
-        const topObj = castTo<Record<string, unknown>>(pathObj[pathObj.length - 1]);
+        const topObj: Record<string, unknown> = castTo(pathObj[pathObj.length - 1]);
         const top = config.path[config.path.length - 1];
 
         if (field.name in topObj) {
@@ -209,7 +209,7 @@ export class SQLUtil {
       },
       onSimple: (config) => {
         const { config: field } = config;
-        const topObj = castTo<Record<string, unknown>>(pathObj[pathObj.length - 1]);
+        const topObj: Record<string, unknown> = castTo(pathObj[pathObj.length - 1]);
         const value = topObj[field.name];
         return handler.onSimple({ ...config, value });
       }
@@ -275,9 +275,9 @@ export class SQLUtil {
     if (field) {
       const isSimple = SchemaRegistry.has(field.type);
       for (const el of v) {
-        const parentKey = castTo<string>(el[castTo<keyof T>(dct.parentPathField.name)]);
+        const parentKey: string = castTo(el[castTo<keyof T>(dct.parentPathField.name)]);
         const root = castTo<Record<string, Record<string, unknown>>>(parent)[parentKey];
-        const fieldKey = castTo<keyof T & string>(field.name);
+        const fieldKey: keyof T & string = castTo(field.name);
         if (field.array) {
           if (!root[fieldKey]) {
             root[fieldKey] = [isSimple ? el : el[fieldKey]];

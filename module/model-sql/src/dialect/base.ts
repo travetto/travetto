@@ -297,7 +297,7 @@ export abstract class SQLDialect implements DialectState {
    * Add a sql column
    */
   getAddColumnSQL(stack: VisitStack[]): string {
-    const field = castTo<FieldConfig>(stack[stack.length - 1]);
+    const field: FieldConfig = castTo(stack[stack.length - 1]);
     return `ALTER TABLE ${this.parentTable(stack)} ADD COLUMN ${this.getColumnDefinition(field)};`;
   }
 

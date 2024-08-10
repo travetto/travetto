@@ -15,7 +15,7 @@ export class ModelExpiryUtil {
    */
   static getExpiryState<T extends ModelType>(cls: Class<T>, item: T): { expiresAt?: Date, expired?: boolean } {
     const expKey = ModelRegistry.getExpiry(cls);
-    const expiresAt = castTo<Date>(item[expKey]);
+    const expiresAt: Date = castTo(item[expKey]);
 
     return {
       expiresAt,

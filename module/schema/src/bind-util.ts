@@ -90,7 +90,7 @@ export class BindUtil {
         let key = (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined));
         sub[name] ??= (typeof key === 'string') ? {} : [];
 
-        const arrSub = castTo<Record<string, unknown> & { length: number }>(sub[name]);
+        const arrSub: Record<string, unknown> & { length: number } = castTo(sub[name]);
         if (key === undefined) {
           key = arrSub.length;
         }

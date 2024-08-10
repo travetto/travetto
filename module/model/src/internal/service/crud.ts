@@ -155,7 +155,7 @@ export class ModelCrudUtil {
     const config = ModelRegistry.get(cls);
     for (const state of (config.prePersist ?? [])) {
       if (state.scope === scope || scope === 'all' || state.scope === 'all') {
-        const handler = castTo<DataHandler<T>>(state.handler);
+        const handler: DataHandler<T> = castTo(state.handler);
         item = await handler(item) ?? item;
       }
     }

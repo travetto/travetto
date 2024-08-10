@@ -11,7 +11,7 @@ import { SchemaChange, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
-  ModelQuerySupport, PageableModelQuery, Query, SelectClause, ValidStringFields
+  ModelQuerySupport, PageableModelQuery, Query, ValidStringFields
 } from '@travetto/model-query';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -121,7 +121,7 @@ export class ElasticsearchModelService implements
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     try {
       const res = await this.client.get({ ...this.manager.getIdentity(cls), id });
-      return this.postLoad(cls, castTo<T>(res._source));
+      return this.postLoad(cls, castTo(res._source));
     } catch {
       throw new NotFoundError(cls, id);
     }
@@ -446,7 +446,7 @@ export class ElasticsearchModelService implements
         refresh: true,
         query: search.query,
         max_docs: 1,
-        script: ElasticsearchSchemaUtil.generateReplaceScript(castTo<{}>(copy))
+        script: ElasticsearchSchemaUtil.generateReplaceScript(castTo(copy))
       });
 
       if (res.version_conflicts || res.updated === undefined || res.updated === 0) {
@@ -499,10 +499,8 @@ export class ElasticsearchModelService implements
   }
 
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
-    const select = castTo<SelectClause<T>>({ [field]: 1 });
-
     const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
-      select,
+      select: castTo({ [field]: 1 }),
       ...query
     });
     const search = ElasticsearchQueryUtil.getSearchObject(cls, q);

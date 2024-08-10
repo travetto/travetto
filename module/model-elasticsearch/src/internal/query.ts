@@ -43,7 +43,7 @@ export class ElasticsearchQueryUtil {
     const exclude: string[] = [];
     for (const k of Object.keys(simp)) {
       const nk = k === 'id' ? '_id' : k;
-      const v = castTo<1 | 0 | boolean>(simp[k]);
+      const v: 1 | 0 | boolean = castTo(simp[k]);
       if (v === 0 || v === false) {
         exclude.push(nk);
       } else {
@@ -60,7 +60,7 @@ export class ElasticsearchQueryUtil {
     return sort.map<SortOptions>(x => {
       const o = this.extractSimple(x);
       const k = Object.keys(o)[0];
-      const v = castTo<boolean | -1 | 1>(o[k]);
+      const v: boolean | -1 | 1 = castTo(o[k]);
       return { [k]: { order: v === 1 || v === true ? 'asc' : 'desc' } };
     });
   }
@@ -144,7 +144,7 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$regex': {
-              const pattern = DataUtil.toRegex(castTo<string>(v));
+              const pattern = DataUtil.toRegex(castTo(v));
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
                   `${sPath}.text_cs` :

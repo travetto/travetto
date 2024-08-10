@@ -36,7 +36,7 @@ export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
  */
 export function ExpiresAt() {
   return <K extends string, T extends Partial<Record<K, Date>>>(tgt: T, prop: K): void => {
-    ModelRegistry.register(castTo<Class<T>>(tgt.constructor), { expiresAt: prop });
+    ModelRegistry.register(castTo(tgt.constructor), { expiresAt: prop });
   };
 }
 
@@ -63,7 +63,7 @@ export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PreP
       prePersist: [{
         scope,
         handler: (inst): void => {
-          const cInst = castTo<Record<K, T>>(inst);
+          const cInst: Record<K, T> = castTo(inst);
           cInst[prop] = handler(cInst[prop]);
         }
       }]

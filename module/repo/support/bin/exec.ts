@@ -52,7 +52,7 @@ export class RepoExecUtil {
 
     config.showStdout = config.showStdout ?? (Env.DEBUG.isSet && !Env.DEBUG.isFalse);
     config.showStderr = config.showStderr ?? true;
-    const transform = config.transformResult ?? ((mod, result): T => castTo<T>(result));
+    const transform = config.transformResult ?? ((mod, result): T => castTo(result));
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
 

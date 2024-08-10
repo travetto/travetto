@@ -67,7 +67,7 @@ export class ModelIndexedUtil {
         o = castTo(empty!);
       } else {
         if (field !== sortField || (opts.includeSortInFields ?? true)) {
-          fields.push({ path: parts, value: castTo<string>(o) });
+          fields.push({ path: parts, value: castTo(o) });
         }
       }
     }
