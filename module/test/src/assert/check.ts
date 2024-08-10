@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { AppError, ClassInstance, Class } from '@travetto/runtime';
+import { AppError, Class, castTo, castKey, asConstructable } from '@travetto/runtime';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
 import { AssertCapture, CaptureAssert } from './capture';
@@ -34,36 +34,35 @@ export class AssertCheck {
     // Invert check for negative
     const assertFn = positive ? assert : (x: unknown, msg?: string): unknown => assert(!x, msg);
 
-    /* eslint-disable @typescript-eslint/consistent-type-assertions */
     // Check fn to call
     if (fn === 'fail') {
       if (args.length > 1) {
-        [assertion.actual, assertion.expected, assertion.message, assertion.operator] = args as [unknown, unknown, string, string];
+        [assertion.actual, assertion.expected, assertion.message, assertion.operator] = castTo(args);
       } else {
-        [assertion.message] = args as [string];
+        [assertion.message] = castTo(args);
       }
     } else if (/throw|reject/i.test(fn)) {
       assertion.operator = fn;
       if (typeof args[1] !== 'string') {
-        [, assertion.expected, assertion.message] = args as [unknown, unknown, string];
+        [, assertion.expected, assertion.message] = castTo(args);
       } else {
-        [, assertion.message] = args as [unknown, string];
+        [, assertion.message] = castTo(args);
       }
     } else if (fn === 'ok' || fn === 'assert') {
       fn = assertion.operator = 'ok';
-      [assertion.actual, assertion.message] = args as [unknown, string];
+      [assertion.actual, assertion.message] = castTo(args);
       assertion.expected = { toClean: (): string => positive ? 'truthy' : 'falsy' };
       common.state = 'should be';
     } else if (fn === 'includes') {
       assertion.operator = fn;
-      [assertion.actual, assertion.expected, assertion.message] = args as [unknown, unknown, string];
+      [assertion.actual, assertion.expected, assertion.message] = castTo(args);
     } else if (fn === 'instanceof') {
       assertion.operator = fn;
-      [assertion.actual, assertion.expected, assertion.message] = args as [unknown, unknown, string];
-      assertion.actual = (assertion.actual as ClassInstance)?.constructor;
+      [assertion.actual, assertion.expected, assertion.message] = castTo(args);
+      assertion.actual = asConstructable(assertion.actual)?.constructor;
     } else { // Handle unknown
       assertion.operator = fn ?? '';
-      [assertion.actual, assertion.expected, assertion.message] = args as [unknown, unknown, string];
+      [assertion.actual, assertion.expected, assertion.message] = castTo(args);
     }
 
     try {
@@ -76,25 +75,25 @@ export class AssertCheck {
         assertion.expected = AssertUtil.cleanValue(assertion.expected);
       }
 
-      const [actual, expected, message] = args as [unknown, unknown, string];
+      const [actual, expected, message]: [unknown, unknown, string] = castTo(args);
 
       // Actually run the assertion
       switch (fn) {
-        case 'includes': assertFn((actual as unknown[]).includes(expected), message); break;
-        case 'test': assertFn((expected as RegExp).test(actual as string), message); break;
-        case 'instanceof': assertFn(actual instanceof (expected as Class), message); break;
-        case 'in': assertFn((actual as string) in (expected as object), message); break;
-        case 'lessThan': assertFn((actual as number) < (expected as number), message); break;
-        case 'lessThanEqual': assertFn((actual as number) <= (expected as number), message); break;
-        case 'greaterThan': assertFn((actual as number) > (expected as number), message); break;
-        case 'greaterThanEqual': assertFn((actual as number) >= (expected as number), message); break;
-        case 'ok': assertFn(...args as [unknown, string]); break;
+        case 'includes': assertFn(castTo<unknown[]>(actual).includes(expected), message); break;
+        case 'test': assertFn(castTo<RegExp>(expected).test(castTo(actual)), message); break;
+        case 'instanceof': assertFn(actual instanceof castTo<Class>(expected), message); break;
+        case 'in': assertFn(castTo<string>(actual) in castTo<object>(expected), message); break;
+        case 'lessThan': assertFn(castTo<number>(actual) < castTo<number>(expected), message); break;
+        case 'lessThanEqual': assertFn(castTo<number>(actual) <= castTo<number>(expected), message); break;
+        case 'greaterThan': assertFn(castTo<number>(actual) > castTo<number>(expected), message); break;
+        case 'greaterThanEqual': assertFn(castTo<number>(actual) >= castTo<number>(expected), message); break;
+        case 'ok': assertFn(...castTo<Parameters<typeof assertFn>>(args)); break;
         default:
-          if (fn && assert[fn as keyof typeof assert]) { // Assert call
+          if (fn && assert[castKey<typeof assert>(fn)]) { // Assert call
             if (/not/i.test(fn)) {
               common.state = 'should not';
             }
-            assert[fn as 'ok'].apply(null, args as [boolean, string | undefined]);
+            assert[castTo<'ok'>(fn)].apply(null, castTo(args));
           }
       }
 
@@ -115,7 +114,6 @@ export class AssertCheck {
       }
       throw err;
     }
-    /* eslint-enable @typescript-eslint/consistent-type-assertions */
   }
 
   /**

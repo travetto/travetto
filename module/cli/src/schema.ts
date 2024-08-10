@@ -129,8 +129,7 @@ export class CliCommandSchemaUtil {
           const key = castKey<T>(arg.fieldName);
           const value = arg.value!;
           if (arg.array) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            ((template[key] as unknown[]) ??= []).push(value);
+            castTo<unknown[]>(template[key] ??= castTo([])).push(value);
           } else {
             template[key] = castTo(value);
           }
@@ -138,8 +137,7 @@ export class CliCommandSchemaUtil {
         }
         case 'arg': {
           if (arg.array) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            ((bound[arg.index] ??= []) as unknown[]).push(arg.input);
+            castTo<unknown[]>(bound[arg.index] ??= []).push(arg.input);
           } else {
             bound[arg.index] = arg.input;
           }

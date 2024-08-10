@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/indent */
 import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
 import { Class, AppError, TypedObject, describeFunction, TimeUtil, castTo, castKey } from '@travetto/runtime';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
@@ -661,7 +662,6 @@ ${this.getLimitSQL(cls, query)}`;
       .filter(x => !!x.trim())
       .join(',\n  ');
 
-    /* eslint-disable @typescript-eslint/indent */
     const out = `
 CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   ${fieldSql}${fieldSql.length ? ',' : ''}

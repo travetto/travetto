@@ -13,7 +13,7 @@ export class TypeHelpersTransformer {
     if (
       ts.isIdentifier(node.expression) &&
       node.arguments.length === 1 &&
-      /as(Class|Constructable|Full)|castTo/.test(node.expression.escapedText.toString())
+      /as(Class|Constructable|Full)|cast(To|Key)/.test(node.expression.escapedText.toString())
     ) {
       const type = state.resolveType(node.expression);
       if (type.key === 'unknown' && 'importName' in type && type.importName === SRC) {
