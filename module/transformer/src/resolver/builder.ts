@@ -7,7 +7,7 @@ import { DocUtil } from '../util/doc';
 import { CoreUtil } from '../util/core';
 import { DeclarationUtil } from '../util/declaration';
 import { LiteralUtil } from '../util/literal';
-import { TemplateLiteralPart } from '../types/shared';
+import { castToTrv, TemplateLiteralPart } from '../types/shared';
 
 import { Type, AnyType, UnionType, TransformResolver, TemplateType } from './types';
 import { CoerceUtil } from './coerce';
@@ -165,8 +165,7 @@ export const TypeBuilder: {
 
       if (name in GLOBAL_SIMPLE) {
         const cons = GLOBAL_SIMPLE[name];
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const ret = LiteralUtil.isLiteralType(type) ? CoerceUtil.coerce(type.value, cons as typeof String, false) :
+        const ret = LiteralUtil.isLiteralType(type) ? CoerceUtil.coerce(type.value, castToTrv(cons), false) :
           undefined;
 
         return {
@@ -225,8 +224,7 @@ export const TypeBuilder: {
           ctor: String,
           nullable: type.nullable,
           undefinable: type.undefinable,
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          template: { op: 'or', values: subTypes.map(x => (x as TemplateType).template!) }
+          template: { op: 'or', values: subTypes.map(x => castToTrv<TemplateType>(x).template!) }
         };
       } else if (subTypes.length === 1) {
         return { undefinable, nullable, ...first };

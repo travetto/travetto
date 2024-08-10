@@ -1,4 +1,4 @@
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { EmailTemplateModule, EmailTemplateLocation } from '@travetto/email';
 
 export type JSXChild = JSXElement | number | bigint | boolean | object | string;
@@ -60,8 +60,7 @@ let createFrag: Function | undefined = undefined;
 export function createElement<T extends string | Class | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps
 ): JSXElement<T, P> {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  type = (type === createFrag ? JSXFragmentType : type) as T;
+  type = castTo(type === createFrag ? JSXFragmentType : type);
   return { [JSXRuntimeTag]: { id: (id += 1) }, type, key: '', props };
 }
 
@@ -72,8 +71,7 @@ export function createRootElement<T extends string | Class | JSXComponentFunctio
 
   Object.assign(res, {
     prepare(loc: EmailTemplateLocation): Promise<EmailTemplateModule> {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return import('@travetto/email-inky/src/wrapper').then(v => v.prepare(res as JSXElement, loc));
+      return import('@travetto/email-inky/src/wrapper').then(v => v.prepare(castTo(res), loc));
     }
   });
 

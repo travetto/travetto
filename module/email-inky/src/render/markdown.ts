@@ -1,6 +1,7 @@
 import { JSXElement } from '@travetto/email-inky/jsx-runtime';
 import { RenderProvider, RenderState } from '../types';
 import { RenderContext } from './context';
+import { castTo } from '@travetto/runtime';
 
 const visit = ({ recurse }: RenderState<JSXElement, RenderContext>): Promise<string> => recurse();
 const ignore = async ({ recurse: _ }: RenderState<JSXElement, RenderContext>): Promise<string> => '';
@@ -42,8 +43,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   h2: async ({ recurse }) => `\n## ${await recurse()}\n\n`,
   h3: async ({ recurse }) => `\n### ${await recurse()}\n\n`,
   h4: async ({ recurse }) => `\n#### ${await recurse()}\n\n`,
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  a: async ({ recurse, props }) => `\n[${await recurse()}](${(props as { href: string }).href})\n`,
+  a: async ({ recurse, props }) => `\n[${await recurse()}](${(castTo<{ href: string }>(props)).href})\n`,
   Button: async ({ recurse, props }) => `\n[${await recurse()}](${props.href})\n`,
 
   InkyTemplate: visit,

@@ -3,6 +3,7 @@ import { isJSXElement, JSXElement, createFragment, JSXFragmentType, JSXChild } f
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../components';
 import { RenderProvider, RenderState } from '../types';
 import { RenderContext, RenderContextInit } from './context';
+import { castTo } from '@travetto/runtime';
 
 /**
  * Inky Renderer
@@ -70,8 +71,7 @@ export class InkyRenderer {
     // @ts-expect-error
   ): RenderState<JSXElementByFn<K>, RenderContext> {
     const el = ctx.createElement(key, props);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const newStack = [...state.stack, el] as JSXElement[];
+    const newStack: JSXElement[] = castTo([...state.stack, el]);
     return { ...state, el, props: el.props, recurse: () => this.#render(ctx, renderer, el.props.children ?? [], newStack) };
   }
 

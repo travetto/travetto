@@ -1,7 +1,8 @@
 import ts from 'typescript';
 import {
   type AnyType, DeclarationUtil, LiteralUtil,
-  DecoratorUtil, DocUtil, ParamDocumentation, TransformerState
+  DecoratorUtil, DocUtil, ParamDocumentation, TransformerState,
+  castToTrv
 } from '@travetto/transformer';
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
@@ -204,8 +205,7 @@ export class SchemaTransformUtil {
       ret = state.factory.updateSetAccessorDeclaration(node,
         newModifiers, node.name, node.parameters, node.body);
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return ret as T;
+    return castToTrv(ret);
   }
 
   /**

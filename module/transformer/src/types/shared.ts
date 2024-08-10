@@ -30,3 +30,8 @@ export type Import = {
 /** Template Literal Types */
 export type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
 export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
+
+export function castToTrv<T>(input: unknown): T {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return input as T;
+}
