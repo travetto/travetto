@@ -64,7 +64,7 @@ export class ImageConverter {
   /**
    * Resize image using imagemagick
    */
-  static async #resize(options: ImageOptions): Promise<ChildProcess> {
+  static async resize<T extends Buffer | Readable>(image: T, options: ImageOptions): Promise<T> {
     const dims = [options.w, options.h].map(d => (d && options.strictResolution !== false) ? `${d}!` : d).join('x');
 
     const proc = await this.CONVERTER.exec(
@@ -72,33 +72,7 @@ export class ImageConverter {
       ...(options.optimize ? ['-strip', '-quality', '86'] : []),
       '-', '-');
 
-    return proc;
-  }
 
-  /**
-   * Optimize png using pngquant
-   */
-  static async #optimize(format: 'png' | 'jpeg'): Promise<ChildProcess> {
-    let proc: ChildProcess;
-    switch (format) {
-      case 'png': {
-        proc = await this.PNG_COMPRESSOR.exec(
-          'pngquant', '--quality', '40-80', '--speed', '1', '--force', '-');
-        break;
-      }
-      case 'jpeg': {
-        proc = await this.JPEG_COMPRESSOR.exec('jpegoptim', '-m70', '-s', '--stdin', '--stdout');
-        break;
-      }
-    }
-    return proc;
-  }
-
-  /**
-   * Resize image using imagemagick
-   */
-  static async resize<T extends Buffer | Readable>(image: T, options: ImageOptions): Promise<T> {
-    const proc = await this.#resize(options);
     if (Buffer.isBuffer(image)) {
       Readable.from(image).pipe(proc.stdin!);
       return castTo(toBuffer(proc.stdout!));
@@ -112,7 +86,18 @@ export class ImageConverter {
    * Optimize image
    */
   static async optimize<T extends Buffer | Readable>(format: 'png' | 'jpeg', image: T): Promise<T> {
-    const proc = await this.#optimize(format);
+    let proc: ChildProcess;
+    switch (format) {
+      case 'png': {
+        proc = await this.PNG_COMPRESSOR.exec(
+          'pngquant', '--quality', '40-80', '--speed', '1', '--force', '-');
+        break;
+      }
+      case 'jpeg': {
+        proc = await this.JPEG_COMPRESSOR.exec('jpegoptim', '-m70', '-s', '--stdin', '--stdout');
+        break;
+      }
+    }
     if (Buffer.isBuffer(image)) {
       Readable.from(image).pipe(proc.stdin!);
       return castTo(toBuffer(proc.stdout!));
