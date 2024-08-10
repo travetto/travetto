@@ -92,7 +92,7 @@ export class CommonUtil {
   }
 
   /**
-   * Queue new macrotask
+   * Queue new macro task
    */
   static queueMacroTask(): Promise<void> {
     return timers.setImmediate(undefined);

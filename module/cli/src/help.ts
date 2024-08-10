@@ -41,7 +41,7 @@ export class HelpUtil {
     }
 
     const params: string[] = [];
-    const descs: string[] = [];
+    const descriptions: string[] = [];
 
     for (const flag of flags) {
       const key = castKey<CliCommandShape>(flag.name);
@@ -66,11 +66,11 @@ export class HelpUtil {
       if (key !== 'help' && flagVal !== null && flagVal !== undefined && flagVal !== '') {
         desc.push(cliTpl`(default: ${{ input: JSON.stringify(flagVal) }})`);
       }
-      descs.push(desc.join(' '));
+      descriptions.push(desc.join(' '));
     }
 
     const paramWidths = params.map(x => util.stripVTControlCharacters(x).length);
-    const descWidths = descs.map(x => util.stripVTControlCharacters(x).length);
+    const descWidths = descriptions.map(x => util.stripVTControlCharacters(x).length);
 
     const paramWidth = Math.max(...paramWidths);
     const descWidth = Math.max(...descWidths);
@@ -85,7 +85,7 @@ export class HelpUtil {
       '',
       cliTpl`${{ title: 'Options:' }}`,
       ...params.map((_, i) =>
-        `  ${params[i]}${' '.repeat((paramWidth - paramWidths[i]))}  ${descs[i].padEnd(descWidth)}${' '.repeat((descWidth - descWidths[i]))}`
+        `  ${params[i]}${' '.repeat((paramWidth - paramWidths[i]))}  ${descriptions[i].padEnd(descWidth)}${' '.repeat((descWidth - descWidths[i]))}`
       ),
       '',
       ...helpText

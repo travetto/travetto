@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
+import { asFull, castTo } from '@travetto/runtime';
 
 import { Query, Header, Path, Context } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
@@ -10,6 +11,7 @@ import { Controller } from '../src/decorator/controller';
 import { ControllerRegistry } from '../src/registry/controller';
 import { MethodOrAll, Request, Response } from '../src/types';
 import { ParamExtractor } from '../src/util/param';
+import { EndpointConfig } from '../__index__';
 
 class User {
   name: string;
@@ -42,7 +44,7 @@ class ParamController {
   async jobOutput(@Path() jobId: string, @Required(false) @Query() time: Date) { }
 
   @Get('/job/output-min/:jobId')
-  async jobOutputMin(@Path() jobId: string, @Min(10).Param @Query() age: number) { }
+  async jobOutputMin(@Path() jobId: string, @(Min(10).Param) @Query() age: number) { }
 
   @Get('/job/output2')
   async jobOutput2(@Query({ name: 'optional' }) time?: Date) { }
@@ -87,6 +89,10 @@ export class ParameterTest {
     return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.method === method)!;
   }
 
+  static async extract(ep: EndpointConfig, req: Partial<Request>, res: Partial<Response> = {}): Promise<unknown[]> {
+    return await ParamExtractor.extract(ep, asFull(req), asFull(res));
+  }
+
   @BeforeAll()
   async init() {
     await RootRegistry.init();
@@ -96,21 +102,21 @@ export class ParameterTest {
   async simpleParameters() {
     const ep = ParameterTest.getEndpoint('/:name', 'post');
     await assert.doesNotReject(() =>
-      ParamExtractor.extract(ep, {
+      ParameterTest.extract(ep, {
         params: { name: 'bob' },
         query: {
           age: '20'
         }
-      } as unknown as Request, {} as Response)
+      })
     );
 
     await assert.rejects(() =>
-      ParamExtractor.extract(ep, {
+      ParameterTest.extract(ep, {
         params: { name: 'bob' },
         query: {
           age: 'blue'
         }
-      } as unknown as Request, {} as Response)
+      })
     );
   }
 
@@ -119,15 +125,15 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/login', 'post');
 
     await assert.doesNotReject(() =>
-      ParamExtractor.extract(ep, {
-        header: (key: string) => key
-      } as unknown as Request, {} as Response)
+      ParameterTest.extract(ep, {
+        header: castTo((key: string): string => key)
+      })
     );
 
     await assert.rejects(() =>
-      ParamExtractor.extract(ep, {
-        header: (key: string) => { }
-      } as unknown as Request, {} as Response)
+      ParameterTest.extract(ep, {
+        header: castTo(() => { })
+      })
     );
 
   }
@@ -137,23 +143,23 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/user/:id', 'post');
 
     await assert.doesNotReject(() =>
-      ParamExtractor.extract(ep, {
+      ParameterTest.extract(ep, {
         query: {},
         params: { id: '5' }
-      } as unknown as Request, {} as Response)
+      })
     );
 
     await assert.rejects(() =>
-      ParamExtractor.extract(ep, {
+      ParameterTest.extract(ep, {
         query: { age: 'blue' },
         params: { id: '5' }
-      } as unknown as Request, {} as Response), ValidationResultError
+      }), ValidationResultError
     );
 
     await assert.rejects(() =>
-      ParamExtractor.extract(ep, {
+      ParameterTest.extract(ep, {
         params: {}, query: {}
-      } as unknown as Request, {} as Response), ValidationResultError
+      }), ValidationResultError
     );
   }
 
@@ -161,8 +167,8 @@ export class ParameterTest {
   async testReqRes() {
     const ep = ParameterTest.getEndpoint('/req/res', 'post');
     const req = { path: '/path' };
-    const res = { status: 200 };
-    const items = await ParamExtractor.extract(ep, req as unknown as Request, res as unknown as Response);
+    const res = { statusCode: 200 };
+    const items = await ParameterTest.extract(ep, req, res);
 
     assert(req === items[0]);
     assert(res === items[1]);
@@ -174,8 +180,8 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/alias', 'post');
     const params = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
     assert(params[0].description === 'User name');
-    assert.deepStrictEqual(await ParamExtractor.extract(ep, { query: { nm: 'blue' } } as unknown as Request, {} as Response), ['green']);
-    assert.deepStrictEqual(await ParamExtractor.extract(ep, { query: { name: 'blue' } } as unknown as Request, {} as Response), ['blue']);
+    assert.deepStrictEqual(await ParameterTest.extract(ep, { query: { nm: 'blue' } }), ['green']);
+    assert.deepStrictEqual(await ParameterTest.extract(ep, { query: { name: 'blue' } }), ['blue']);
 
     const ep2 = ParameterTest.getEndpoint('/alias2', 'post');
     const params2 = SchemaRegistry.getMethodSchema(ep2.class, ep2.handlerName);
@@ -193,65 +199,66 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/array', 'post');
     const ep2 = ParameterTest.getEndpoint('/array2', 'post');
 
-    assert.deepStrictEqual(await ParamExtractor.extract(ep2, { query: { values: 'no' } } as unknown as Request, {} as Response), [[false]]);
-    assert.deepStrictEqual(await ParamExtractor.extract(ep2, { query: { values: ['no', 'yes'] } } as unknown as Request, {} as Response), [[false, true]]);
+    assert.deepStrictEqual(await ParameterTest.extract(ep2, { query: { values: 'no' } }), [[false]]);
+    assert.deepStrictEqual(await ParameterTest.extract(ep2, { query: { values: ['no', 'yes'] } }), [[false, true]]);
 
-    assert.deepStrictEqual(await ParamExtractor.extract(ep, { query: { values: '0' } } as unknown as Request, {} as Response), [[0]]);
-    assert.deepStrictEqual(await ParamExtractor.extract(ep, { query: { values: ['5', '3'] } } as unknown as Request, {} as Response), [[5, 3]]);
+    assert.deepStrictEqual(await ParameterTest.extract(ep, { query: { values: '0' } }), [[0]]);
+    assert.deepStrictEqual(await ParameterTest.extract(ep, { query: { values: ['5', '3'] } }), [[5, 3]]);
   }
 
   @Test()
   async realWorld() {
     const ep = ParameterTest.getEndpoint('/job/output/:jobId', 'get');
-    await assert.doesNotReject(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: {} } as unknown as Request, {} as Response));
-    await assert.rejects(() => ParamExtractor.extract(ep, { params: {}, query: {} } as unknown as Request, {} as Response), ValidationResultError);
-    await assert.rejects(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { time: 'blue' } } as unknown as Request, {} as Response), ValidationResultError);
+    await assert.doesNotReject(() => ParameterTest.extract(ep, { params: { jobId: '5' }, query: {} }));
+    await assert.rejects(() => ParameterTest.extract(ep, { params: {}, query: {} }), ValidationResultError);
+    await assert.rejects(() => ParameterTest.extract(ep, { params: { jobId: '5' }, query: { time: 'blue' } }), ValidationResultError);
   }
 
   @Test()
   async realWorldMin() {
     const ep = ParameterTest.getEndpoint('/job/output-min/:jobId', 'get');
-    await assert.doesNotReject(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { age: '20' } } as unknown as Request, {} as Response));
-    await assert.rejects(() => ParamExtractor.extract(ep, { params: {}, query: {} } as unknown as Request, {} as Response), ValidationResultError);
-    await assert.rejects(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { age: 'blue' } } as unknown as Request, {} as Response), ValidationResultError);
-    await assert.rejects(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { age: 9 } } as unknown as Request, {} as Response), ValidationResultError);
+    await assert.doesNotReject(() => ParameterTest.extract(ep, { params: { jobId: '5' }, query: { age: '20' } }));
+    await assert.rejects(() => ParameterTest.extract(ep, { params: {}, query: {} }), ValidationResultError);
+    await assert.rejects(() => ParameterTest.extract(ep, { params: { jobId: '5' }, query: { age: 'blue' } }), ValidationResultError);
+    await assert.rejects(() => ParameterTest.extract(ep, { params: { jobId: '5' }, query: { age: 9 } }), ValidationResultError);
   }
 
 
   @Test()
   async realWorldQueryArrayOptional() {
     const ep = ParameterTest.getEndpoint('/array/names', 'get');
-    await assert.doesNotReject(() => ParamExtractor.extract(ep, { query: {} } as unknown as Request, {} as Response));
+    await assert.doesNotReject(() => ParameterTest.extract(ep, { query: {} }));
 
-    assert.deepStrictEqual(await ParamExtractor.extract(ep, { query: { values: 'no' } } as unknown as Request, {} as Response), [['no']]);
+    assert.deepStrictEqual(await ParameterTest.extract(ep, { query: { values: 'no' } }), [['no']]);
 
-    assert.deepStrictEqual(await ParamExtractor.extract(ep, { query: { values: [1, 2, 3] } } as unknown as Request, {} as Response), [['1', '2', '3']]);
+    assert.deepStrictEqual(await ParameterTest.extract(ep, { query: { values: [1, 2, 3] } }), [['1', '2', '3']]);
   }
 
   @Test()
   async realWorldListTodo() {
     const ep = ParameterTest.getEndpoint('/list/todo', 'get');
-    await assert.rejects(() => ParamExtractor.extract(ep, { query: {} } as unknown as Request, {} as Response));
+    await assert.rejects(() => ParameterTest.extract(ep, { query: {} }));
 
     assert.deepStrictEqual(
-      await ParamExtractor.extract(
+      await ParameterTest.extract(
         ep,
-        { query: { limit: 1, offset: 0, categories: [1, 2, 3] } } as unknown as Request, {} as Response
+        { query: { limit: 1, offset: 0, categories: [1, 2, 3] } }
       ),
       [1, 0, ['1', '2', '3']]
     );
 
     assert.deepStrictEqual(
-      await ParamExtractor.extract(
+      await ParameterTest.extract(
         ep,
-        { query: { limit: 1, offset: 0, categories: [] } } as unknown as Request, {} as Response),
+        { query: { limit: 1, offset: 0, categories: [] } }),
       [1, 0, []]
     );
 
     assert.deepStrictEqual(
-      await ParamExtractor.extract(
+      await ParameterTest.extract(
         ep,
-        { query: { limit: 1, offset: 0 } } as unknown as Request, {} as Response),
+        { query: { limit: 1, offset: 0 } }
+      ),
       [1, 0, undefined]
     );
   }
@@ -261,15 +268,11 @@ export class ParameterTest {
     await RootRegistry.init();
 
     const ep = ParameterTest.getEndpoint('/interface-prefix', 'get');
-    await assert.rejects(() => ParamExtractor.extract(
-      ep,
-      { query: {} } as unknown as Request,
-      {} as Response)
-    );
+    await assert.rejects(() => ParameterTest.extract(ep, { query: {} }));
 
-    const extracted = await ParamExtractor.extract(
+    const extracted = await ParameterTest.extract(
       ep,
-      { query: { user1: { name: 'bob' }, name: 'rob' } } as unknown as Request, {} as Response
+      { query: { user1: { name: 'bob' }, name: 'rob' } }
     );
 
     // @ts-expect-error

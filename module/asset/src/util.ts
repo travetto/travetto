@@ -20,14 +20,14 @@ export class AssetUtil {
    * Compute hash from a file location on disk or a blob
    */
   static async computeHash(input: string | Blob | Buffer): Promise<string> {
-    const hasher = crypto.createHash('sha256').setEncoding('hex');
+    const hash = crypto.createHash('sha256').setEncoding('hex');
     const str = typeof input === 'string' ?
       createReadStream(input) :
       Buffer.isBuffer(input) ?
         Readable.from(input) :
         Readable.fromWeb(input.stream());
-    await pipeline(str, hasher);
-    return hasher.read().toString();
+    await pipeline(str, hash);
+    return hash.read().toString();
   }
 
   /**

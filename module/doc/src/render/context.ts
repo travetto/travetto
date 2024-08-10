@@ -3,7 +3,7 @@ import path from 'node:path';
 import { createElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
 
 import { PackageUtil } from '@travetto/manifest';
-import { RuntimeIndex } from '@travetto/runtime';
+import { castTo, RuntimeIndex } from '@travetto/runtime';
 
 import { JSXElementByFn, c } from '../jsx';
 import { DocResolveUtil, ResolvedCode, ResolvedRef, ResolvedSnippetLink } from '../util/resolve';
@@ -125,6 +125,6 @@ export class RenderContext {
    */
   createElement<K extends keyof typeof c>(name: K, props: JSXElementByFn<K>['props']): JSXElementByFn<K> {
     // @ts-expect-error
-    return createElement(c[name], props) as JSXElementByFn<K>;
+    return castTo(createElement(c[name], props));
   }
 }

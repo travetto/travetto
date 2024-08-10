@@ -40,7 +40,7 @@ export class RegisterTransformer {
         }
       }
       return { hash, lines: range };
-    } catch (err) {
+    } catch {
       return { hash, lines: [0, 0] };
     }
   }

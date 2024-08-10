@@ -1,10 +1,10 @@
-import { ClassInstance } from '@travetto/runtime';
+import { Any, castTo, ClassInstance } from '@travetto/runtime';
 
 import { SchemaRegistry } from '../service/registry';
 import { CommonRegExp } from '../validate/regexp';
 import { ClassList, FieldConfig } from '../service/types';
 
-type PropType<V> = (<T extends Partial<Record<K, V>>, K extends string>(t: T, k: K, idx?: number) => void) & {
+type PropType<V> = (<T extends Partial<Record<K, V>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void) & {
   Param: (t: unknown, k: string, idx: number) => void;
 };
 
@@ -18,7 +18,7 @@ function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
   };
   fn.Param = fn;
 
-  return fn;
+  return castTo(fn);
 }
 
 /**

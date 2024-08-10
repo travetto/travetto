@@ -8,7 +8,7 @@ import { CoreCacheConfig } from './types';
 export class CacheUtil {
 
   /**
-   * Convert value to safe JSON for persistance
+   * Convert value to safe JSON for persistence
    * @param value The value to make safe for storage
    * @param all Should functions and regex be included
    */

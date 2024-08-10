@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/indent */
+/* eslint-disable @stylistic/indent */
 import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
 import { Class, AppError, TypedObject, describeFunction, TimeUtil, castTo, castKey } from '@travetto/runtime';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';

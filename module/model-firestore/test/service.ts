@@ -14,7 +14,6 @@ export class FirestoreBasicSuite extends ModelBasicSuite {
   configClass = FirestoreModelConfig;
 }
 
-
 @Suite()
 export class FirestoreCrudSuite extends ModelCrudSuite {
   serviceClass = FirestoreModelService;

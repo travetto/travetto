@@ -29,7 +29,7 @@ export class PackUtil {
       }
       await fs.mkdir(final, { recursive: true });
       await fs.cp(src, final, { recursive: true });
-    } catch (err) {
+    } catch {
       if (!ignoreFailure) {
         throw new Error(`Failed to copy ${src} to ${dest}`);
       }

@@ -2,6 +2,7 @@ import { EventEmitter } from 'node:events';
 import { Writable } from 'node:stream';
 
 import { Inject, Injectable, InjectableFactory } from '@travetto/di';
+import { asFull } from '@travetto/runtime';
 
 class Source {
   @InjectableFactory()
@@ -11,12 +12,12 @@ class Source {
 
   @InjectableFactory(Symbol.for('custom-1'))
   static writable(): Writable {
-    return {} as Writable;
+    return asFull({});
   }
 
   @InjectableFactory(Symbol.for('custom-2'))
   static writableAlt(): Writable {
-    return {} as Writable;
+    return asFull({});
   }
 }
 

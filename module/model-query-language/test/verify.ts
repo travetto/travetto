@@ -1,12 +1,11 @@
 import assert from 'node:assert';
 
 import { RootRegistry } from '@travetto/registry';
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { Model, ModelType } from '@travetto/model';
-import { Query, ModelQuery } from '@travetto/model-query';
-import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
+import { QueryVerifier, Query, ModelQuery } from '@travetto/model-query';
 
 import { QueryLanguageParser } from '../src/parser';
 
@@ -39,15 +38,15 @@ export class VerifyTest {
 
   @Test()
   async verifyModelCore() {
-    const test = <T>(cls: Class<T>) => {
-      const t: Query<ModelType> = {
-        where: {
+    const test = <T extends ModelType>(cls: Class<T>) => {
+      const t: Query<T> = {
+        where: castTo({
           id: {
             $eq: '5'
           }
-        }
+        })
       };
-      QueryVerifier.verify(cls, t as Query<T>);
+      QueryVerifier.verify(cls, t);
     };
 
     assert.doesNotThrow(() => test(ModelUser));
@@ -73,20 +72,20 @@ export class VerifyTest {
   @Test()
   async verifyQueryString() {
     const test = <T>(cls: Class<T>) => {
-      const t: Query<ModelType> = {
+      const t: Query<T> = {
         where: QueryLanguageParser.parseToQuery('id == "5"')
       };
-      QueryVerifier.verify(cls, t as Query<T>);
+      QueryVerifier.verify(cls, t);
     };
 
     assert.doesNotThrow(() => test(ModelUser));
     assert.doesNotThrow(() => test(User));
 
-    const test2 = <T>(cls: Class<T>) => {
-      const t: Query<ModelType> = {
+    const test2 = <T extends ModelType>(cls: Class<T>) => {
+      const t: Query<T> = {
         where: QueryLanguageParser.parseToQuery('email ~ /bob.*/')
       };
-      QueryVerifier.verify(cls, t as Query<T>);
+      QueryVerifier.verify(cls, t);
     };
 
     assert.doesNotThrow(() => test2(ModelUser));

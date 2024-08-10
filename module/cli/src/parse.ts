@@ -191,7 +191,7 @@ export class CliParseUtil {
       } else {
         const field = schema.args[argIdx];
         out.push(getInput({ field, input, index: argIdx }));
-        // Move argIdx along if not in a vararg situation
+        // Move argIdx along if not in a var arg situation
         if (!field?.array) {
           argIdx += 1;
         }

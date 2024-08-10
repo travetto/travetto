@@ -130,7 +130,7 @@ class DataBinding {
 
   @Test('Should handle polymorphic structure')
   validatePolymorphism() {
-    const items: (Poly1 | Poly2)[] = [
+    const items: BasePoly[] = [
       {
         type: 'poly1',
         name: 'bob',
@@ -143,7 +143,7 @@ class DataBinding {
         names: ['1', '2', '3'],
         age: 30
       }
-    ].map(v => BasePoly.from(v) as Poly1);
+    ].map(v => BasePoly.from(v));
 
     assert(items);
     assert(items.length === 2);

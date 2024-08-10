@@ -13,6 +13,7 @@ import {
   CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque, TemplateLit
 } from './models/validation';
 import { Accessors } from './models/binding';
+import { asFull, castTo } from '@travetto/runtime';
 
 function findError(errors: ValidationError[], path: string, message: string) {
   return errors.find(x => x.path === path && x.message.includes(message));
@@ -365,7 +366,7 @@ class Validation {
 
   @Test()
   async verifyAccessors() {
-    await assert.rejects(() => SchemaValidator.validate(Accessors, {} as unknown),
+    await assert.rejects(() => SchemaValidator.validate(Accessors, asFull({})),
       err => {
         assert(err instanceof ValidationResultError);
         assert(err.details!.errors.length === 2);
@@ -376,13 +377,13 @@ class Validation {
       });
 
     await assert.doesNotReject(() =>
-      SchemaValidator.validate(Accessors, { color: 'green', area: '5' } as unknown)
+      SchemaValidator.validate(Accessors, asFull({ color: 'green', area: '5' }))
     );
   }
 
   @Test()
   async verifyTemplateLiteral() {
-    await assert.rejects(() => SchemaValidator.validate(TemplateLit, {} as unknown),
+    await assert.rejects(() => SchemaValidator.validate(TemplateLit, asFull({})),
       err => {
         assert(err instanceof ValidationResultError);
         assert(err.details!.errors.length === 1);
@@ -392,7 +393,7 @@ class Validation {
     );
 
     for (const age of ['bob', '19-s', '19-es', 'z-y', '19-y']) {
-      await assert.rejects(() => SchemaValidator.validate(TemplateLit, { age: age as '19-ys' }),
+      await assert.rejects(() => SchemaValidator.validate(TemplateLit, castTo({ age })),
         err => {
           assert(err instanceof ValidationResultError);
           assert(err.details!.errors.length === 1);
@@ -403,18 +404,18 @@ class Validation {
     }
 
     await assert.doesNotReject(() =>
-      SchemaValidator.validate(TemplateLit, { age: '19-ys' } as unknown)
+      SchemaValidator.validate(TemplateLit, asFull({ age: '19-ys' }))
     );
   }
 
   @Test()
   async verifyTemplateLiteralArray() {
     await assert.doesNotReject(() =>
-      SchemaValidator.validate(TemplateLit, { age: '19-ys', height: ['10ft', '9m'] } as unknown)
+      SchemaValidator.validate(TemplateLit, castTo({ age: '19-ys', height: ['10ft', '9m'] }))
     );
 
-    for (const heights of [['bob'], ['19-s'], ['19-es'], ['z-y'], ['19-y'], ['8mm', '10ft']] as unknown as ('10ft'[][])) {
-      await assert.rejects(() => SchemaValidator.validate(TemplateLit, { age: '19-ys', heights }),
+    for (const heights of [['bob'], ['19-s'], ['19-es'], ['z-y'], ['19-y'], ['8mm', '10ft']] as const) {
+      await assert.rejects(() => SchemaValidator.validate(TemplateLit, castTo({ age: '19-ys', heights })),
         err => {
           assert(err instanceof ValidationResultError);
           assert(err.details!.errors.length === 1);

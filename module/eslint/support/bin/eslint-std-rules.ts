@@ -1,6 +1,5 @@
 export const STD_RULES = {
   'no-loss-of-precision': 0,
-  'unused-imports/no-unused-imports': 'error',
   'no-unused-vars': 0,
   'no-dupe-class-members': 0,
   '@typescript-eslint/array-type': 'error',
@@ -9,7 +8,7 @@ export const STD_RULES = {
   '@typescript-eslint/no-explicit-any': 'warn',
   '@typescript-eslint/explicit-member-accessibility': [0, { accessibility: 'explicit' }],
   indent: 0,
-  '@typescript-eslint/indent': [
+  '@stylistic/indent': [
     'error',
     2,
     {
@@ -24,7 +23,7 @@ export const STD_RULES = {
       SwitchCase: 1
     }
   ],
-  '@typescript-eslint/member-delimiter-style': [
+  '@stylistic/member-delimiter-style': [
     'error',
     {
       multiline: { delimiter: 'semi', requireLast: true },
@@ -65,12 +64,12 @@ export const STD_RULES = {
     'error',
     { varsIgnorePattern: '^(_|[A-Z])[A-Za-z0-9]*', args: 'none' }
   ],
-  '@typescript-eslint/quotes': [
+  '@stylistic/quotes': [
     'error',
     'single',
     { avoidEscape: true, allowTemplateLiterals: false }
   ],
-  '@typescript-eslint/semi': [
+  '@stylistic/semi': [
     'error',
     'always'
   ],
@@ -83,7 +82,7 @@ export const STD_RULES = {
   'no-ex-assign': 0,
   '@typescript-eslint/ban-types': 0,
   '@typescript-eslint/ban-ts-comment': 0,
-  '@typescript-eslint/type-annotation-spacing': 'error',
+  '@stylistic/type-annotation-spacing': 'error',
   '@typescript-eslint/explicit-module-boundary-types': 0,
   'arrow-body-style': ['error', 'as-needed'],
   '@typescript-eslint/naming-convention': [

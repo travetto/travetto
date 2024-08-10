@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Class } from '@travetto/runtime';
+import { asFull, Class } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
@@ -12,7 +12,7 @@ import { Controller } from '../src/decorator/controller';
 import { Get } from '../src/decorator/endpoint';
 import { ManagedInterceptorConfig, RestInterceptor } from '../src/interceptor/types';
 import { ControllerRegistry } from '../src/registry/controller';
-import { FilterContext, Request, Response, RouteConfig, ServerHandle } from '../src/types';
+import { Response, FilterContext, RouteConfig, ServerHandle } from '../src/types';
 import { RestServer } from '../src/application/server';
 import { RestApplication } from '../src/application/rest';
 import { CorsInterceptor } from '../src/interceptor/cors';
@@ -52,7 +52,7 @@ class CustomInterceptor implements RestInterceptor<CustomInterceptorConfig> {
   }
 
   intercept(ctx: FilterContext<CustomInterceptorConfig>) {
-    (ctx.res as unknown as { name: string }).name = ctx.config.name;
+    Object.assign(ctx.res, { name: ctx.config.name });
   }
 }
 
@@ -107,8 +107,8 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const res = { name: undefined, status: () => { }, send: () => { } };
-    await endpoint.handlerFinalized!({} as unknown as Request, res as unknown as Response);
+    const res = asFull<Response & { name: string }>({ name: undefined, status: () => 200, send: () => { } });
+    await endpoint.handlerFinalized!(asFull({}), res);
     return res.name;
   }
 

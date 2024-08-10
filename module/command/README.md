@@ -62,7 +62,7 @@ import { ExecUtil } from '@travetto/runtime';
 
 export class ImageCompressor {
   converter = new CommandOperation({
-    containerImage: 'agregad/pngquant',
+    containerImage: 'agregad/pngquant:latest',
     localCheck: ['pngquant', ['-h']]
   });
 

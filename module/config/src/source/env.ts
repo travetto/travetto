@@ -16,7 +16,7 @@ export class EnvConfigSource implements ConfigSource {
     try {
       const data = JSON.parse(process.env[this.#envKey] || '{}');
       return { data, priority: this.#priority, source: `env://${this.#envKey}` };
-    } catch (e) {
+    } catch {
       console.error(`env.${this.#envKey} is an invalid format`, { text: process.env[this.#envKey] });
     }
   }

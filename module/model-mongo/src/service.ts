@@ -117,7 +117,7 @@ export class MongoModelService implements
     return out;
   }
 
-  getIndicies<T extends ModelType>(cls: Class<T>): ([IndexSpecification] | [IndexSpecification, IdxCfg])[] {
+  getIndices<T extends ModelType>(cls: Class<T>): ([IndexSpecification] | [IndexSpecification, IdxCfg])[] {
     const indices = ModelRegistry.get(cls).indices ?? [];
     return [
       ...indices.map((idx): [IndexSpecification, IdxCfg] => {
@@ -133,7 +133,7 @@ export class MongoModelService implements
 
   async establishIndices<T extends ModelType>(cls: Class<T>): Promise<void> {
     const col = await this.getStore(cls);
-    const creating = this.getIndicies(cls);
+    const creating = this.getIndices(cls);
     if (creating.length) {
       console.debug('Creating indexes', { indices: creating });
       for (const el of creating) {
@@ -237,10 +237,7 @@ export class MongoModelService implements
     const items = MongoUtil.extractSimple(cls, final, undefined, false);
     final = Object
       .entries(items)
-      .reduce<Partial<{
-        $unset?: Record<string, unknown>;
-        $set?: Record<string, unknown>;
-      }>>((acc, [k, v]) => {
+      .reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((acc, [k, v]) => {
         if (v === null || v === undefined) {
           (acc.$unset ??= {})[k] = v;
         } else {
@@ -525,17 +522,15 @@ export class MongoModelService implements
 
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, data);
-    const final = Object.entries(items).reduce<{
-      $unset?: Record<string, unknown>;
-      $set?: Record<string, unknown>;
-    }>((acc, [k, v]) => {
-      if (v === null || v === undefined) {
-        (acc.$unset ??= {})[k] = v;
-      } else {
-        (acc.$set ??= {})[k] = v;
-      }
-      return acc;
-    }, {});
+    const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>(
+      (acc, [k, v]) => {
+        if (v === null || v === undefined) {
+          (acc.$unset ??= {})[k] = v;
+        } else {
+          (acc.$set ??= {})[k] = v;
+        }
+        return acc;
+      }, {});
 
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
     const res = await col.updateMany(filter, final);
@@ -557,7 +552,7 @@ export class MongoModelService implements
       q = { $and: [q, MongoUtil.extractWhereFilter(cls, query.where)] };
     }
 
-    const aggs: object[] = [
+    const aggregations: object[] = [
       { $match: q },
       {
         $group: {
@@ -569,7 +564,7 @@ export class MongoModelService implements
       }
     ];
 
-    const result = await col.aggregate<{ _id: ObjectId, count: number }>(aggs).toArray();
+    const result = await col.aggregate<{ _id: ObjectId, count: number }>(aggregations).toArray();
 
     return result.map(val => ({
       key: MongoUtil.idToString(val._id),

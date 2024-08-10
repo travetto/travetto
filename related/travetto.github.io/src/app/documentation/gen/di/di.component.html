@@ -269,6 +269,7 @@ It is also possible to directly reference external types, and they will be conve
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Writable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'node:stream'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject<span class="token punctuation">,</span> Injectable<span class="token punctuation">,</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> asFull <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">Source</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -278,12 +279,12 @@ It is also possible to directly reference external types, and they will be conve
 
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span>Symbol<span class="token punctuation">.</span><span class="token function">for</span><span class="token punctuation">(</span><span class="token string">'custom-1'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">writable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Writable <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token keyword">as</span> Writable<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token function">asFull</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span>Symbol<span class="token punctuation">.</span><span class="token function">for</span><span class="token punctuation">(</span><span class="token string">'custom-2'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">writableAlt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Writable <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token keyword">as</span> Writable<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token function">asFull</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 

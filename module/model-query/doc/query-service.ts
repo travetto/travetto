@@ -2,7 +2,7 @@ import { ModelQueryCrudSupport } from '@travetto/model-query/src/service/crud';
 import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
 import { ModelQueryFacetSupport } from '@travetto/model-query/src/service/facet';
 import { ValidStringFields } from '@travetto/model-query/src/model/where-clause';
-import { Class } from '@travetto/runtime';
+import { asFull, Class } from '@travetto/runtime';
 import { ModelType, OptionalId } from '@travetto/model';
 import { ModelQuery, PageableModelQuery } from '@travetto/model-query/src/model/query';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -13,36 +13,36 @@ export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacet
     return undefined;
   }
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
-    return {} as T;
+    return asFull({});
   }
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
   }
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    return {} as T;
+    return asFull({});
   }
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string | undefined): Promise<T> {
-    return {} as T;
+    return asFull({});
   }
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    return {} as T;
+    return asFull({});
   }
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     yield* [];
   }
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    return {} as T;
+    return asFull({});
   }
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
-    return [] as T[];
+    return [];
   }
   async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean | undefined): Promise<T> {
-    return {} as T;
+    return asFull({});
   }
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     return 0;
   }
   async updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
-    return {} as T;
+    return asFull({});
   }
   async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     return 0;

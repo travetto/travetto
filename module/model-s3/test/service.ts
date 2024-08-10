@@ -11,6 +11,7 @@ import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphis
 
 import { S3ModelConfig } from '../src/config';
 import { S3ModelService } from '../src/service';
+import { castTo } from '@travetto/runtime';
 
 @Suite()
 export class S3BasicSuite extends ModelBasicSuite {
@@ -43,7 +44,7 @@ export class S3StreamSuite extends ModelStreamSuite {
 
   @Test({ timeout: 15000 })
   async largeFile() {
-    const service = (await this.service) as S3ModelService;
+    const service: S3ModelService = castTo(await this.service);
     const buffer = Buffer.alloc(1.5 * service['config'].chunkSize);
     for (let i = 0; i < buffer.length; i++) {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);

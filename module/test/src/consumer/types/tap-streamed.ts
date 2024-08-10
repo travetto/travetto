@@ -30,7 +30,7 @@ export class TapStreamedEmitter implements TestConsumer {
     this.#consumer.onStart();
 
     let failed = 0;
-    const succ = StyleUtil.getStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
+    const success = StyleUtil.getStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
     const fail = StyleUtil.getStyle({ text: '#e5e5e5', background: '#8b0000' }); // White on dark red
     this.#progress = this.#terminal.streamToBottom(
       Util.mapAsyncItr(
@@ -39,7 +39,7 @@ export class TapStreamedEmitter implements TestConsumer {
           failed += (value.status === 'failed' ? 1 : 0);
           return { value: `Tests %idx/%total [${failed} failed] -- ${value.classId}`, total: state.testCount, idx };
         },
-        TerminalUtil.progressBarUpdater(this.#terminal, { style: () => ({ complete: failed ? fail : succ }) })
+        TerminalUtil.progressBarUpdater(this.#terminal, { style: () => ({ complete: failed ? fail : success }) })
       ),
       { minDelay: 100 }
     );

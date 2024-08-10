@@ -72,7 +72,7 @@ While docker containers provide a high level of flexibility, performance can be 
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ImageCompressor</span> <span class="token punctuation">{{'{'}}</span>
   converter <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">CommandOperation</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
-    containerImage<span class="token operator">:</span> <span class="token string">'agregad/pngquant'</span><span class="token punctuation">,</span>
+    containerImage<span class="token operator">:</span> <span class="token string">'agregad/pngquant:latest'</span><span class="token punctuation">,</span>
     localCheck<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'pngquant'</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token string">'-h'</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 

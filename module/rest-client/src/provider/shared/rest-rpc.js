@@ -31,12 +31,14 @@ export const RpcRequestUtil = {
     return payload;
   },
 
+  /** @returns {Promise<Error>} */
   async getError(payload) {
     try {
       // @ts-ignore
       const { AppError } = await import('@travetto/runtime');
-      if (AppError.isErrorLike(payload)) {
-        return AppError.fromErrorLike(payload);
+      const res = AppError.fromJSON(payload);
+      if (res) {
+        return res;
       }
     } catch { }
     if (payload instanceof Error) {
@@ -115,7 +117,6 @@ export function restRpcClientFactory() {
  * @template T
  * @returns {T}
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function RPC_IGNORE() {
   /** @type {T} */
   // @ts-ignore

@@ -1,13 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs';
 
-// @ts-expect-error
-import unused from 'eslint-plugin-unused-imports';
 import { configs } from '@eslint/js';
 import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
+import stylisticPlugin from '@stylistic/eslint-plugin';
 
 import { Runtime } from '@travetto/runtime';
 
-import { IGNORES, RULE_COMMON } from './eslint-common';
+import { IGNORES, GLOBALS, TS_OPTIONS } from './eslint-common';
 import { STD_RULES } from './eslint-std-rules';
 import { TrvEslintPlugin } from './types';
 
@@ -28,14 +27,14 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
     configs.recommended,
     { ignores: IGNORES, },
     {
-      ...RULE_COMMON,
-      files: ['**/*.ts', '**/*.tsx', '**/*.js'],
+      ...TS_OPTIONS,
+      files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
       plugins: {
+        '@stylistic': {
+          rules: stylisticPlugin.rules
+        },
         '@typescript-eslint': {
           rules: tsEslintPlugin.rules,
-        },
-        'unused-imports': {
-          rules: unused.rules,
         },
         ...(Object.fromEntries(plugins.map(x => [x.name, x])))
       },
@@ -45,7 +44,21 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       }
     },
     {
-      ...RULE_COMMON,
+      languageOptions: {
+        globals: GLOBALS,
+        ecmaVersion: 'latest',
+      },
+      files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+      plugins: {
+        '@stylistic': {
+          rules: stylisticPlugin.rules
+        }
+      },
+      rules: {
+        ...Object.fromEntries(Object.entries(STD_RULES).filter(x => !x[0].startsWith('@typescript'))),
+      }
+    },
+    {
       files: ['**/*.ts', '**/*.tsx'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': 'warn',
@@ -53,7 +66,6 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       }
     },
     {
-      ...RULE_COMMON,
       files: ['**/DOC.ts', '**/DOC.tsx', '**/doc/**/*.ts', '**/doc/**/*.tsx'],
       rules: {
         'max-len': 0,
@@ -62,7 +74,6 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       }
     },
     {
-      ...RULE_COMMON,
       files: [
         'module/compiler/**/*.ts', 'module/transformer/**/*.ts',
         '**/support/transformer/**/*.ts', '**/support/transformer/**/*.tsx',
@@ -73,7 +84,6 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       }
     },
     {
-      ...RULE_COMMON,
       files: ['**/test/**/*.ts', '**/test/**/*.tsx', '**/support/test/**/*.ts', '**/support/test/**/*.tsx'],
       ignores: [...IGNORES, 'module/test/src/**'],
       rules: {
@@ -81,7 +91,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       }
     },
     ...extra.map(ex => ({
-      ...RULE_COMMON,
+      ...TS_OPTIONS,
       ...ex
     }))
   ] as const;

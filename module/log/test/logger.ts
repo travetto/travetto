@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
-import { ConsoleListener, ConsoleManager } from '@travetto/runtime';
+import { castTo, ConsoleListener, ConsoleManager } from '@travetto/runtime';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
@@ -72,7 +72,7 @@ class LoggerTest {
   async shouldFormat() {
     const formatter = new JsonLogFormatter({});
     const now = new Date();
-    assert(formatter.format({ level: 'error', timestamp: now } as LogEvent) === `{"level":"error","timestamp":"${now.toISOString()}"}`);
+    assert(formatter.format(castTo({ level: 'error', timestamp: now })) === `{"level":"error","timestamp":"${now.toISOString()}"}`);
   }
 
   @Test('Decorator')

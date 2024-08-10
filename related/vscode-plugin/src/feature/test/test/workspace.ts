@@ -155,7 +155,7 @@ export class WorkspaceResultsManager {
     if (editor && this.#results.has(editor.document.fileName)) {
       this.#results.get(editor.document.fileName)!.dispose();
       this.#results.delete(editor.document.fileName);
-      this.#log.info('Untracking', editor.document.fileName);
+      this.#log.info('Untrack', editor.document.fileName);
     }
   }
 

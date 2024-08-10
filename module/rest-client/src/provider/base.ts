@@ -14,7 +14,7 @@ export const TYPE_MAPPING: Record<string, string> = {
   Number: 'number',
   Date: 'Date',
   Boolean: 'boolean',
-  Object: 'object',
+  Object: 'Record<string, unknown>',
 };
 
 /**
@@ -126,11 +126,11 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
             a.localeCompare(b) :
             a.startsWith('.') ? 1 : a.localeCompare(b)
         )
-        .map(([f, vals]) => {
-          if (vals.join(', ').length > 60) {
-            return `import {\n  ${vals.sort().join(',\n  ')}\n} from '${f}';\n`;
+        .map(([f, values]) => {
+          if (values.join(', ').length > 60) {
+            return `import {\n  ${values.sort().join(',\n  ')}\n} from '${f}';\n`;
           } else {
-            return `import { ${vals.sort().join(', ')} } from '${f}';\n`;
+            return `import { ${values.sort().join(', ')} } from '${f}';\n`;
           }
         }),
       '\n\n',

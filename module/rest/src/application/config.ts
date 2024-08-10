@@ -53,7 +53,7 @@ export class RestConfig {
   postConstruct(): void {
     if (!this.bindAddress) {
       const useIPv4 = !![...Object.values(os.networkInterfaces())]
-        .find(nics => nics?.find(nic => nic.family === 'IPv4'));
+        .find(interfaces => interfaces?.find(nic => nic.family === 'IPv4'));
 
       this.bindAddress = useIPv4 ? '0.0.0.0' : '::';
     }

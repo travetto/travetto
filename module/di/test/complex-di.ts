@@ -5,6 +5,7 @@ import { RootRegistry } from '@travetto/registry';
 
 import { DependencyRegistry } from '../src/registry';
 import { Injectable, InjectableFactory } from '../src/decorator';
+import { asFull } from '@travetto/runtime';
 
 abstract class Common { }
 @Injectable()
@@ -51,7 +52,7 @@ class SubPrimaryWithFactoryA extends PrimaryWithFactory { }
 class PrimaryFactory {
   @InjectableFactory({ primary: true })
   static getPrimaryFactory(): PrimaryWithFactory {
-    return {} as PrimaryWithFactory;
+    return asFull({});
   }
 }
 

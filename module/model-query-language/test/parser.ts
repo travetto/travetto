@@ -2,7 +2,6 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { WhereClause } from '@travetto/model-query';
 import { QueryLanguageParser } from '../src/parser';
 import { QueryLanguageTokenizer } from '../src/tokenizer';
 
@@ -68,13 +67,7 @@ export class QueryStringTest {
         },
         { e: { $eq: 10 } }
       ]
-    } as WhereClause<{
-      A?: number;
-      B?: number;
-      C?: number;
-      d?: number;
-      e?: number;
-    }>);
+    });
   }
 
   @Test('Parse Complex Boolean')
@@ -105,14 +98,7 @@ export class QueryStringTest {
         },
         { e: { $eq: 10 } }
       ]
-    } as WhereClause<{
-      A?: number;
-      B?: number;
-      C?: number;
-      G?: number;
-      d?: number;
-      e?: number;
-    }>);
+    });
   }
 
   @Test('Parse Negation')
@@ -123,10 +109,7 @@ export class QueryStringTest {
         { A: { $eq: 5 } },
         { $not: { B: { $eq: 6 } } }
       ]
-    } as WhereClause<{
-      A?: number;
-      B?: number;
-    }>);
+    });
   }
 
   @Test('Parse Dotted Fields')
@@ -142,11 +125,7 @@ export class QueryStringTest {
           ]
         }
       ]
-    } as WhereClause<{
-      A?: { b?: { c?: number } };
-      B?: { z?: number };
-      c?: string;
-    }>);
+    });
   }
 
   @Test('Parse Unique Outputs')
@@ -154,22 +133,22 @@ export class QueryStringTest {
     const res = QueryLanguageParser.parseToQuery('a.b.c in [1,2,-3]');
     assert.deepStrictEqual(res, {
       a: { b: { c: { $in: [1, 2, -3] } } }
-    } as WhereClause<unknown>);
+    });
 
     const res3 = QueryLanguageParser.parseToQuery('a.b.c not-in [1,2,3]');
     assert.deepStrictEqual(res3, {
       a: { b: { c: { $nin: [1, 2, 3] } } }
-    } as WhereClause<unknown>);
+    });
 
     const res1 = QueryLanguageParser.parseToQuery('a.b.c == null');
     assert.deepStrictEqual(res1, {
       a: { b: { c: { $exists: false } } }
-    } as WhereClause<unknown>);
+    });
 
     const res2 = QueryLanguageParser.parseToQuery('a.b.c != null');
     assert.deepStrictEqual(res2, {
       a: { b: { c: { $exists: true } } }
-    } as WhereClause<unknown>);
+    });
   }
 
   @Test('Parse complex')

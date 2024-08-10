@@ -29,7 +29,7 @@ export class EditorSendService {
         DependencyRegistry.install(cls, { curr: cls, type: 'added' });
 
         this.ethereal = !!senderConfig.host?.includes('ethereal.email');
-      } catch (err) {
+      } catch {
         console.error('A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport');
         throw new Error('A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport');
       }
@@ -47,8 +47,8 @@ export class EditorSendService {
       const svc = await this.service();
       if (this.ethereal) {
         const { getTestMessageUrl } = await import('nodemailer');
-        const { default: smtp } = await import('nodemailer/lib/smtp-transport/index');
-        type SendMessage = Parameters<Parameters<(typeof smtp)['prototype']['send']>[1]>[1];
+        const { default: _smtp } = await import('nodemailer/lib/smtp-transport/index');
+        type SendMessage = Parameters<Parameters<(typeof _smtp)['prototype']['send']>[1]>[1];
         const info = await svc.send<SendMessage>(message);
         const url = getTestMessageUrl(info);
         console.log('Sent email', { to, url });

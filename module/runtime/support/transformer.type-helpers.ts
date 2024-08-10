@@ -17,7 +17,7 @@ export class TypeHelpersTransformer {
     ) {
       const type = state.resolveType(node.expression);
       if (type.key === 'unknown' && 'importName' in type && type.importName === SRC) {
-        return node.arguments[0];
+        // return node.arguments[0];
       }
     }
     return node;

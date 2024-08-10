@@ -38,47 +38,43 @@ export class QueryTest {
         { g: { z: 'a' } },
         { a: { d: { $gt: 20 } } }
       ]
-    }) as {
+    });
+
+    assert.deepEqual(out2, {
       $and: [
-        { ['a.b.c']: number },
-        { ['d.e']: boolean },
-        { $or: [{ name: number }, { age: number }] },
-        { ['g.z']: string },
-        { ['a.d']: { $gt: number } },
-      ];
-    };
-
-    assert(out2.$and[0]['a.b.c'] === 5);
-
-    assert(out2.$and[1]['d.e'] === true);
-
-    assert(out2.$and[2].$or[0]['name'] === 5);
-
-    assert(out2.$and[2].$or[1]['age'] === 10);
-
-    assert(out2.$and[4]['a.d'].$gt === 20);
-
-    assert(out2.$and[3]['g.z'] === 'a');
+        { ['a.b.c']: 5 },
+        { ['d.e']: true },
+        { $or: [{ name: 5 }, { age: 10 }] },
+        { ['g.z']: 'a' },
+        { ['a.d']: { $gt: 20 } },
+      ]
+    });
   }
 
   @Test()
   async translateIds() {
+    const ids = ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)];
     const out = MongoUtil.extractWhereClause(User, {
       $and: [
-        { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
+        { id: { $in: ids } }
       ]
-    }) as { $and: [{ _id: string }] };
+    });
 
-    assert(!!out.$and[0]._id);
+    assert.deepStrictEqual(out, {
+      $and: [{
+        _id: { $in: ids }
+      }]
+    });
   }
 
   @Test()
   async translateRegex() {
     const out = MongoUtil.extractWhereClause(User, {
       name: { $regex: '/google.$/' }
-    }) as { name: { $regex: RegExp } };
+    });
 
-    assert(out.name.$regex instanceof RegExp);
-    assert(out.name.$regex.source === 'google.$');
+    assert.deepStrictEqual(out, {
+      name: { $regex: /google.$/ }
+    });
   }
 }

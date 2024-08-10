@@ -4,8 +4,8 @@
       "**/api-client/**/*.ts"
     ],
     "rules": {
-      "@typescript-eslint/indent": 0,
-      "@typescript-eslint/type-annotation-spacing": 0
+      "@stylistic/indent": 0,
+      "@stylistic/ts/type-annotation-spacing": 0
     }
   }
 ]

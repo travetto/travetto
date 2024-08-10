@@ -1,6 +1,5 @@
 import assert from 'node:assert';
 import { Readable } from 'node:stream';
-import { ParameterObject } from 'openapi3-ts/oas31';
 
 import { RootRegistry } from '@travetto/registry';
 import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Put, Query, Undocumented } from '@travetto/rest';
@@ -100,7 +99,8 @@ export class GenerateSuite {
     assert(config.paths['/test/user'].get);
     assert(config.paths['/test/user'].get.parameters?.length === 1);
 
-    const param = (config.paths['/test/user'].get.parameters?.[0] as ParameterObject);
+    const param = config.paths['/test/user'].get.parameters?.[0];
+    assert('name' in param);
     assert(param.required);
     assert(param.name === 'name');
     assert(param.in === 'query');
@@ -122,7 +122,8 @@ export class GenerateSuite {
     assert(config.paths['/test/users'].get);
     assert(config.paths['/test/users'].get.parameters?.length === 1);
 
-    const param = (config.paths['/test/users'].get.parameters?.[0] as ParameterObject);
+    const param = config.paths['/test/users'].get.parameters?.[0];
+    assert('name' in param);
     assert(param.required);
     assert(param.name === 'name');
     assert(param.in === 'query');
@@ -154,7 +155,8 @@ export class GenerateSuite {
       description: ''
     });
 
-    const param = (config.paths['/test/names'].put.parameters?.[0] as ParameterObject);
+    const param = config.paths['/test/names'].put.parameters?.[0];
+    assert('name' in param);
     assert(param.required);
     assert(param.in === 'query');
     assert(param.name === 'names');
@@ -223,7 +225,8 @@ export class GenerateSuite {
     assert(config.paths['/test/{id}'].delete.parameters?.length === 1);
     assert(!config.paths['/test/{id}'].delete.requestBody);
 
-    const param = (config.paths['/test/{id}'].delete.parameters?.[0] as ParameterObject);
+    const param = config.paths['/test/{id}'].delete.parameters?.[0];
+    assert('name' in param);
     assert(param.required);
     assert(param.in === 'path');
     assert(param.name === 'id');
@@ -243,25 +246,29 @@ export class GenerateSuite {
     assert(config.paths['/test/all/{id}'].delete.parameters?.length === 4);
     assert(!config.paths['/test/all/{id}'].delete.requestBody);
 
-    const param = (config.paths['/test/all/{id}'].delete.parameters?.[0] as ParameterObject);
+    const param = config.paths['/test/all/{id}'].delete.parameters?.[0];
+    assert('name' in param);
     assert(param.required);
     assert(param.in === 'path');
     assert(param.name === 'id');
     assert.deepStrictEqual(param.schema, { type: 'string' });
 
-    const param2 = (config.paths['/test/all/{id}'].delete.parameters?.[1] as ParameterObject);
+    const param2 = config.paths['/test/all/{id}'].delete.parameters?.[1];
+    assert('name' in param2);
     assert(param2.required);
     assert(param2.in === 'query');
     assert(param2.name === 'age');
     assert.deepStrictEqual(param2.schema, { type: 'number' });
 
-    const param3 = (config.paths['/test/all/{id}'].delete.parameters?.[2] as ParameterObject);
+    const param3 = config.paths['/test/all/{id}'].delete.parameters?.[2];
+    assert('name' in param3);
     assert(param3.required);
     assert(param3.in === 'query');
     assert(param3.name === 'name');
     assert.deepStrictEqual(param3.schema, { type: 'string' });
 
-    const param4 = (config.paths['/test/all/{id}'].delete.parameters?.[3] as ParameterObject);
+    const param4 = config.paths['/test/all/{id}'].delete.parameters?.[3];
+    assert('name' in param4);
     assert(param4.required);
     assert(param4.in === 'query');
     assert(param4.name === 'salary');
@@ -282,25 +289,29 @@ export class GenerateSuite {
     assert(config.paths['/test/all/{id}'].head.parameters?.length === 4);
     assert(!config.paths['/test/all/{id}'].head.requestBody);
 
-    const param = (config.paths['/test/all/{id}'].head.parameters?.[0] as ParameterObject);
+    const param = config.paths['/test/all/{id}'].head.parameters?.[0];
+    assert('name' in param);
     assert(param.required);
     assert(param.in === 'path');
     assert(param.name === 'id');
     assert.deepStrictEqual(param.schema, { type: 'string' });
 
-    const param2 = (config.paths['/test/all/{id}'].head.parameters?.[1] as ParameterObject);
+    const param2 = config.paths['/test/all/{id}'].head.parameters?.[1];
+    assert('name' in param2);
     assert(!param2.required);
     assert(param2.in === 'query');
     assert(param2.name === 'age');
     assert.deepStrictEqual(param2.schema, { type: 'number' });
 
-    const param3 = (config.paths['/test/all/{id}'].head.parameters?.[2] as ParameterObject);
+    const param3 = config.paths['/test/all/{id}'].head.parameters?.[2];
+    assert('name' in param3);
     assert(!param3.required);
     assert(param3.in === 'query');
     assert(param3.name === 'name');
     assert.deepStrictEqual(param3.schema, { type: 'string' });
 
-    const param4 = (config.paths['/test/all/{id}'].head.parameters?.[3] as ParameterObject);
+    const param4 = config.paths['/test/all/{id}'].head.parameters?.[3];
+    assert('name' in param4);
     assert(!param4.required);
     assert(param4.in === 'query');
     assert(param4.name === 'salary');
@@ -319,7 +330,9 @@ export class GenerateSuite {
       description: ''
     });
 
-    const param = (config.paths['/test/download'].get.parameters?.[0] as ParameterObject);
+    const param = config.paths['/test/download'].get.parameters?.[0];
+    assert(param);
+    assert('name' in param);
     assert(!param.required);
     assert(param.in === 'query');
     assert(param.name === 'size');

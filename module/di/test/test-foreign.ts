@@ -4,6 +4,7 @@ import { Writable } from 'node:stream';
 import { DefaultContextExtends, HttpError } from 'koa';
 
 import { Suite, Test } from '@travetto/test';
+import { castTo } from '@travetto/runtime';
 
 import { DependencyRegistry } from '../src/registry';
 import { Inject, Injectable, InjectableFactory } from '../__index__';
@@ -39,12 +40,12 @@ class Source {
 
   @InjectableFactory(Symbol.for('custom-1'))
   static writable(): Writable {
-    return { writable: false } as Writable;
+    return castTo({ writable: false });
   }
 
   @InjectableFactory(Symbol.for('custom-2'))
   static async writableAlt(): Promise<Writable> {
-    return { writable: true } as Writable;
+    return castTo({ writable: true });
   }
 
 }

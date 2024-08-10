@@ -1,9 +1,9 @@
 export async function main() {
   console.log('Hello World');
 
-  console.log('Woah!', { a: { b: { c: { d: 10 } } } });
+  console.log('Whoa!', { a: { b: { c: { d: 10 } } } });
 
-  console.info('Woah!');
+  console.info('Whoa!');
 
   console.debug('Test');
 }

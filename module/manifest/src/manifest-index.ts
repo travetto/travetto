@@ -211,8 +211,8 @@ export class ManifestIndex {
     for (const expr of exprList.split(/\s*,\s*/g)) {
       const [, neg, mod] = expr.match(/(-|[+])?([^+\- ]+)$/) ?? [];
       if (mod) {
-        const patt = new RegExp(`^${mod.replace(/[*]/g, '.*')}$`);
-        for (const m of allMods.filter(x => patt.test(x))) {
+        const pattern = new RegExp(`^${mod.replace(/[*]/g, '.*')}$`);
+        for (const m of allMods.filter(x => pattern.test(x))) {
           active[neg ? 'delete' : 'add'](m);
         }
       }

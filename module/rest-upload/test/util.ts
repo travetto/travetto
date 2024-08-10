@@ -4,9 +4,10 @@ import { Test, Suite } from '@travetto/test';
 import { MimeUtil, Request } from '@travetto/rest';
 
 import { RestUploadUtil } from '../src/util';
+import { castTo } from '@travetto/runtime';
 
 function makeRequest(filename: string | undefined, type: string): Request {
-  return {
+  return castTo({
     getContentType() {
       return MimeUtil.parse(type);
     },
@@ -19,7 +20,7 @@ function makeRequest(filename: string | undefined, type: string): Request {
     getFilename() {
       return filename;
     },
-  } as Request;
+  });
 }
 
 @Suite()

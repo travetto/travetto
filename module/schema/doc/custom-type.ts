@@ -1,4 +1,4 @@
-import { DataUtil } from '@travetto/runtime';
+import { DataUtil } from '@travetto/schema';
 
 /**
  * @concrete #PointImpl
@@ -15,7 +15,8 @@ export class PointImpl {
 
   static bindSchema(input: unknown): [number, number] | typeof INVALID | undefined {
     if (Array.isArray(input) && input.length === 2) {
-      return input.map(x => DataUtil.coerceType(x, Number, false)) as [number, number];
+      const [a, b] = input.map(x => DataUtil.coerceType(x, Number, false));
+      return [a, b];
     } else {
       return INVALID;
     }

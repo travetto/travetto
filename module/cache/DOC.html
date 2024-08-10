@@ -141,17 +141,17 @@ By design, the <a target="_blank" class="source-link" href="https://github.com/t
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelExpirySupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MemoryModelService<span class="token punctuation">,</span> ModelExpirySupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CacheModelⲐ <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cache'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span>CacheModelⲐ<span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getModel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> ModelExpirySupport <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">CustomAwesomeModelService</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">CustomAwesomeModelService</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 
-<span class="token keyword">class</span> <span class="token class-name">CustomAwesomeModelService</span> <span class="token keyword">implements</span> <span class="token class-name">ModelExpirySupport</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">class</span> <span class="token class-name">CustomAwesomeModelService</span> <span class="token keyword">extends</span> <span class="token class-name">MemoryModelService</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">// Implement all the things</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

@@ -74,7 +74,7 @@ export class PackConfigUtil {
   }
 
   /**
-   * Docker app files copied and permissioned
+   * Docker app files copied with proper permissions
    */
   static dockerAppFiles(cfg: DockerPackConfig): string {
     const { user, group, folder } = cfg.dockerRuntime;

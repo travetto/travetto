@@ -125,11 +125,11 @@ export class TestExecutor {
     }
 
     // Emit every assertion as it occurs
-    const getAssertions = AssertCapture.collector(test, assrt =>
+    const getAssertions = AssertCapture.collector(test, asrt =>
       consumer.onEvent({
         type: 'assertion',
         phase: 'after',
-        assertion: assrt
+        assertion: asrt
       })
     );
 

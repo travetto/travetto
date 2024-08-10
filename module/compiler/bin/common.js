@@ -37,7 +37,7 @@ const getTranspiler = async (/** @type {Ctx} */ ctx) => {
 };
 
 /** @returns {Promise<import('@travetto/compiler/support/entry.trvc')>} */
-async function imp(f = '') { try { return require(f); } catch (err) { return import(f); } }
+async function imp(f = '') { try { return require(f); } catch { return import(f); } }
 
 export async function getEntry() {
   process.setSourceMapsEnabled(true); // Ensure source map during compilation/development

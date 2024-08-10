@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
+    "module": "ES2022",
     "target": "esnext",
     "moduleResolution": "Bundler",
     "lib": [

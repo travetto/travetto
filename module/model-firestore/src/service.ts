@@ -4,7 +4,7 @@ import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelRegistry, ModelStorageSupport,
-  ModelIndexedSupport, ModelType, NotFoundError, OptionalId
+  ModelIndexedSupport, ModelType, NotFoundError, OptionalId,
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';

@@ -1,4 +1,4 @@
-import { ClassInstance } from '@travetto/base';
+import { ClassInstance } from '@travetto/runtime';
 import type { ModelBulkSupport } from '../../service/bulk';
 import { ModelCrudSupport } from '../../service/crud';
 import type { ModelExpirySupport } from '../../service/expiry';
@@ -31,7 +31,7 @@ export function isCrudSupported(o: ClassInstance): o is ModelCrudSupport {
 }
 
 /**
- * Type guard for determining if model is expirable
+ * Type guard for determining if model supports expiry
  * @param o
  */
 export function isExpirySupported(o: ClassInstance): o is ModelExpirySupport {

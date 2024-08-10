@@ -49,7 +49,7 @@ export class ImageConverter {
    * Compressor
    */
   static PNG_COMPRESSOR = new CommandOperation({
-    containerImage: 'agregad/pngquant',
+    containerImage: 'agregad/pngquant:latest',
     localCheck: ['pngquant', ['-h']]
   });
 

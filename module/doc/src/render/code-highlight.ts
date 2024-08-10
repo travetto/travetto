@@ -1,4 +1,4 @@
-import { default as prismjs } from 'prismjs';
+import { default as prismJs } from 'prismjs';
 
 import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace.js';
 import 'prismjs/components/prism-typescript.js';
@@ -12,20 +12,20 @@ import 'prismjs/components/prism-sql.js';
 import 'prismjs/components/prism-properties.js';
 import 'prismjs/components/prism-bash.js';
 
-prismjs.plugins.NormalizeWhitespace.setDefaults({
+prismJs.plugins.NormalizeWhitespace.setDefaults({
   'remove-trailing': true,
   'remove-indent': true,
   'left-trim': true,
   'right-trim': true
 });
 
-const nw = prismjs.plugins.NormalizeWhitespace;
+const nw = prismJs.plugins.NormalizeWhitespace;
 
 const tokenMapping: { [key: string]: string } = {
-  gt: '>',
-  lt: '<',
-  quot: '"',
-  apos: "'"
+  '&gt;': '>',
+  '&lt;': '<',
+  '&quot;': '"',
+  '&apos;': "'"
 };
 
 export function highlight(text: string, lang: string): string | undefined {
@@ -35,10 +35,10 @@ export function highlight(text: string, lang: string): string | undefined {
 
   text = text
     .replace(/&#(\d+);/g, (x, code) => String.fromCharCode(code))
-    .replace(/&([a-z][^;]*);/g, (a, k) => tokenMapping[k] || a);
+    .replace(/&[a-z][^;]*;/g, a => tokenMapping[a] || a);
 
   try {
-    return prismjs.highlight(text, prismjs.languages[lang], lang)
+    return prismJs.highlight(text, prismJs.languages[lang], lang)
       .replace(/(@\s*<span[^>]*)function("\s*>)/g, (a, pre, post) => `${pre}meta${post}`)
       .replace(/[{}]/g, a => `{{'${a}'}}`);
   } catch (err) {

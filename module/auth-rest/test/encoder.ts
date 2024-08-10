@@ -2,13 +2,14 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable } from '@travetto/di';
-import { FilterContext, Request, Response } from '@travetto/rest';
+import { FilterContext, Response } from '@travetto/rest';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 import { Principal } from '@travetto/auth/src/types/principal';
 import { Config } from '@travetto/config';
 
 import { PrincipalEncoder } from '../src/encoder';
+import { asFull } from '@travetto/runtime';
 
 @Config('stateless')
 class StatelessEncoderConfig {
@@ -70,12 +71,12 @@ export class EncoderTest {
 
     await this.instance.encode(
       {
-        req: {} as Request,
-        res: {
+        req: asFull({}),
+        res: asFull<Response>({
           setHeader(key: string, value: string) {
             headers[key] = value;
           }
-        } as Response,
+        }),
         config: {}
       },
       {
@@ -96,13 +97,12 @@ export class EncoderTest {
     const headers: Record<string, string> = {};
 
     await this.instance.encode({
-      req: {} as Request,
-      res: {
+      req: asFull({}),
+      res: asFull<Response>({
         setHeader(key: string, value: string) {
           headers[key] = value;
-
         }
-      } as Response,
+      }),
       config: {}
     }, undefined);
 

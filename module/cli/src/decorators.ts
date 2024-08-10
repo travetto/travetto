@@ -116,7 +116,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
         if (runModule !== Runtime.main.name) {
           try {
             RuntimeIndex.reinitForModule(runModule);
-          } catch (err) {
+          } catch {
             return { source: 'flag', message: `${runModule} is an unknown module`, kind: 'custom', path: '.' };
           }
         }

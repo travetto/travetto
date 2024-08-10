@@ -1,5 +1,5 @@
 import { createElement, JSXElement, JSXComponentFunction as CompFn } from '@travetto/doc/jsx-runtime';
-import { TypedObject } from '@travetto/runtime';
+import { castTo, TypedObject } from '@travetto/runtime';
 
 import { LIB_MAPPING } from './mapping/lib-mapping';
 import { MOD_MAPPING } from './mapping/mod-mapping';
@@ -65,7 +65,7 @@ export type JSXElements = { [K in keyof C]: JSXElementByFn<K>; };
 
 export const EMPTY_ELEMENT = EMPTY;
 
-const invertedC = new Map<Function, string>(TypedObject.entries(c).map(p => [p[1], p[0]] as [CompFn, string]));
+const invertedC = new Map<Function, string>(TypedObject.entries(c).map<[Function, string]>(p => [p[1], p[0]]));
 
 export function getComponentName(fn: Function | string): string {
   if (typeof fn === 'string') {
@@ -81,7 +81,7 @@ function CodeLinker(titleOrNode: string | JSXElement, src?: string, startRe?: Re
   if (typeof titleOrNode === 'string') {
     props = { title: titleOrNode, src: src!, startRe: startRe! };
   } else if (titleOrNode.type === Code) {
-    const node = titleOrNode as unknown as JSXElementByFn<'Code'>;
+    const node: JSXElementByFn<'Code'> = castTo(titleOrNode);
     props = {
       title: node.props.title,
       src: node.props.src,
@@ -90,7 +90,7 @@ function CodeLinker(titleOrNode: string | JSXElement, src?: string, startRe?: Re
   } else {
     throw new Error(`Unsupported element type: ${titleOrNode.type}`);
   }
-  return createElement(c.CodeLink, props) as JSXElementByFn<'CodeLink'>;
+  return createElement(c.CodeLink, props);
 }
 
 export const d = {
