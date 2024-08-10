@@ -1,7 +1,7 @@
 import { Binary, ObjectId } from 'mongodb';
 
 import { castTo, Class, TypedObject } from '@travetto/runtime';
-import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
+import { DistanceUnit, WhereClause } from '@travetto/model-query';
 import type { ModelType, IndexField } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
@@ -68,15 +68,9 @@ export class MongoUtil {
     return item;
   }
 
-  static prepareQuery<T extends ModelType, U extends Query<T> | ModelQuery<T>>(cls: Class<T>, query: U, checkExpiry = true): {
-    query: U & { where: WhereClause<T> };
-    filter: Record<string, unknown>;
-  } {
-    const q = ModelQueryUtil.getQueryAndVerify(cls, query, checkExpiry);
-    return {
-      query: q,
-      filter: q.where ? this.extractWhereClause(cls, q.where) : {}
-    };
+  static extractWhereFilter<T extends ModelType, U extends WhereClause<T>>(cls: Class<T>, where?: U, checkExpiry = true): Record<string, unknown> {
+    where = castTo(ModelQueryUtil.getWhereClause(cls, where, checkExpiry));
+    return where ? this.extractWhereClause(cls, where) : {};
   }
 
   /**

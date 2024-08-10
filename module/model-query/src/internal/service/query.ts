@@ -5,7 +5,6 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelQuery, Query } from '../../model/query';
 import { WhereClause, WhereClauseRaw } from '../../model/where-clause';
-import { QueryVerifier } from '../query/verifier';
 
 /**
  * Common model utils, that should be usable by end users
@@ -64,17 +63,6 @@ export class ModelQueryUtil {
   }
 
   /**
-   * Enrich query where clause, and verify query is correct
-   */
-  static getQueryAndVerify<T extends ModelType, U extends Query<T> | ModelQuery<T>>(
-    cls: Class<T>, query: U, checkExpiry = true
-  ): U & { where: WhereClause<T> } {
-    query.where = this.getWhereClause(cls, query.where, checkExpiry);
-    QueryVerifier.verify(cls, query);
-    return castTo(query);
-  }
-
-  /**
    * Get query with an id enforced
    */
   static getQueryWithId<T extends ModelType, U extends Query<T> | ModelQuery<T>>(
@@ -82,9 +70,9 @@ export class ModelQueryUtil {
     item: T,
     query: U
   ): U & { where: WhereClause<T> & { id: string } } {
-    query.where = this.getWhereClause(cls, query.where);
-    castTo<WhereClauseRaw<ModelType>>(query.where).id = item.id;
-    return castTo(query);
+    const q = this.getWhereClause<ModelType>(cls, query.where);
+    q.id = item.id!;
+    return castTo(q);
   }
 
   static has$And = (o: unknown): o is ({ $and: WhereClause<unknown>[] }) =>

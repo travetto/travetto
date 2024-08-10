@@ -11,7 +11,8 @@ import { SchemaChange, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
-  ModelQuerySupport, PageableModelQuery, Query, ValidStringFields
+  ModelQuerySupport, PageableModelQuery, Query, ValidStringFields,
+  QueryVerifier
 } from '@travetto/model-query';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -407,6 +408,8 @@ export class ElasticsearchModelService implements
 
   // Query
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
+    await QueryVerifier.verify(cls, query);
+
     const req = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
     const results = await this.execSearch(cls, req);
     const items = ElasticsearchQueryUtil.cleanIdRemoval(req, results);
@@ -414,10 +417,14 @@ export class ElasticsearchModelService implements
   }
 
   async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T> {
+    await QueryVerifier.verify(cls, query);
+
     return ModelQueryUtil.verifyGetSingleCounts(cls, await this.query<T>(cls, { ...query, limit: failOnMany ? 2 : 1 }));
   }
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
+    await QueryVerifier.verify(cls, query);
+
     const req = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig);
     const res: number | { value: number } = (await this.execSearch(cls, req)).hits.total || { value: 0 };
     return typeof res !== 'number' ? res.value : res;
@@ -426,6 +433,7 @@ export class ElasticsearchModelService implements
   // Query Crud
   async updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
+    await QueryVerifier.verify(cls, query);
 
     const item = await ModelCrudUtil.preStore(cls, data, this);
     const id = item.id;
@@ -464,6 +472,8 @@ export class ElasticsearchModelService implements
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
+    await QueryVerifier.verify(cls, query);
+
     const { sort: _, ...q } = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, false);
     const res = await this.client.deleteByQuery({
       ...this.manager.getIdentity(cls),
@@ -474,6 +484,7 @@ export class ElasticsearchModelService implements
   }
 
   async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
+    await QueryVerifier.verify(cls, query);
 
     const script = ElasticsearchSchemaUtil.generateUpdateScript(data);
 
@@ -490,6 +501,8 @@ export class ElasticsearchModelService implements
 
   // Query Facet
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    await QueryVerifier.verify(cls, query);
+
     const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const search = ElasticsearchQueryUtil.getSearchObject(cls, q);
     const res = await this.execSearch(cls, search);
@@ -499,6 +512,8 @@ export class ElasticsearchModelService implements
   }
 
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    await QueryVerifier.verify(cls, query);
+
     const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
       select: castTo({ [field]: 1 }),
       ...query
@@ -511,6 +526,10 @@ export class ElasticsearchModelService implements
 
   // Facet
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+    if (query) {
+      await QueryVerifier.verify(cls, query);
+    }
+
     const q = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);
 
     const search = {

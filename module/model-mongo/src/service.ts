@@ -17,7 +17,8 @@ import {
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport
+  PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport,
+  QueryVerifier
 } from '@travetto/model-query';
 
 import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull } from '@travetto/runtime';
@@ -87,8 +88,8 @@ export class MongoModelService implements
     ModelExpiryUtil.registerCull(this);
   }
 
-  getWhere<T extends ModelType>(cls: Class<T>, where: WhereClause<T>, checkExpiry = true): Record<string, unknown> {
-    return MongoUtil.prepareQuery(cls, { where }, checkExpiry).filter;
+  getWhereFilter<T extends ModelType>(cls: Class<T>, where: WhereClause<T>, checkExpiry = true): Record<string, unknown> {
+    return MongoUtil.extractWhereFilter(cls, where, checkExpiry);
   }
 
   // Storage
@@ -170,7 +171,7 @@ export class MongoModelService implements
   // Crud
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const store = await this.getStore(cls);
-    const result = await store.findOne(this.getWhere<ModelType>(cls, { id }), {});
+    const result = await store.findOne(this.getWhereFilter<ModelType>(cls, { id }), {});
     if (result) {
       const res = await ModelCrudUtil.load(cls, result);
       if (res) {
@@ -196,7 +197,7 @@ export class MongoModelService implements
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     item = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
-    const res = await store.replaceOne(this.getWhere<ModelType>(cls, { id: item.id }), item);
+    const res = await store.replaceOne(this.getWhereFilter<ModelType>(cls, { id: item.id }), item);
     if (res.matchedCount === 0) {
       throw new NotFoundError(cls, item.id);
     }
@@ -208,7 +209,7 @@ export class MongoModelService implements
     const store = await this.getStore(cls);
     try {
       await store.updateOne(
-        this.getWhere<ModelType>(cls, { id: cleaned.id }, false),
+        this.getWhereFilter<ModelType>(cls, { id: cleaned.id }, false),
         { $set: cleaned },
         { upsert: true }
       );
@@ -251,7 +252,7 @@ export class MongoModelService implements
     const id = item.id;
 
     const res = await store.findOneAndUpdate(
-      this.getWhere<ModelType>(cls, { id }),
+      this.getWhereFilter<ModelType>(cls, { id }),
       final,
       { returnDocument: 'after', includeResultMetadata: true }
     );
@@ -265,7 +266,7 @@ export class MongoModelService implements
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     const store = await this.getStore(cls);
-    const result = await store.deleteOne(this.getWhere<ModelType>(cls, { id }, false));
+    const result = await store.deleteOne(this.getWhereFilter<ModelType>(cls, { id }, false));
     if (result.deletedCount === 0) {
       throw new NotFoundError(cls, id);
     }
@@ -273,7 +274,7 @@ export class MongoModelService implements
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
     const store = await this.getStore(cls);
-    const cursor = store.find(this.getWhere(cls, {}), { timeout: true }).batchSize(100);
+    const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true }).batchSize(100);
     for await (const el of cursor) {
       try {
         yield MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el));
@@ -396,7 +397,7 @@ export class MongoModelService implements
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const store = await this.getStore(cls);
     const result = await store.findOne(
-      this.getWhere(
+      this.getWhereFilter(
         cls,
         castTo(ModelIndexedUtil.projectIndex(cls, idx, body))
       )
@@ -411,7 +412,7 @@ export class MongoModelService implements
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const store = await this.getStore(cls);
     const result = await store.deleteOne(
-      this.getWhere(
+      this.getWhereFilter(
         cls,
         castTo(ModelIndexedUtil.projectIndex(cls, idx, body))
       )
@@ -434,7 +435,7 @@ export class MongoModelService implements
       throw new AppError('Cannot list on unique indices', 'data');
     }
 
-    const where = this.getWhere(
+    const where = this.getWhereFilter(
       cls,
       castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
     );
@@ -448,8 +449,10 @@ export class MongoModelService implements
 
   // Query
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
+    await QueryVerifier.verify(cls, query);
+
     const col = await this.getStore(cls);
-    const { filter } = MongoUtil.prepareQuery(cls, query);
+    const filter = MongoUtil.extractWhereFilter(cls, query.where);
     let cursor = col.find<T>(filter, {});
     if (query.select) {
       const selectKey = Object.keys(query.select)[0];
@@ -479,8 +482,10 @@ export class MongoModelService implements
   }
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
+    await QueryVerifier.verify(cls, query);
+
     const col = await this.getStore(cls);
-    const { filter } = MongoUtil.prepareQuery(cls, query);
+    const filter = MongoUtil.extractWhereFilter(cls, query.where);
     return col.countDocuments(filter);
   }
 
@@ -491,11 +496,13 @@ export class MongoModelService implements
 
   // Query Crud
   async updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
+    await QueryVerifier.verify(cls, query);
+
     const col = await this.getStore(cls);
     const item = await ModelCrudUtil.preStore(cls, data, this);
     query = ModelQueryUtil.getQueryWithId(cls, data, query);
 
-    const { filter } = MongoUtil.prepareQuery(cls, query);
+    const filter = MongoUtil.extractWhereFilter(cls, query.where);
     const res = await col.replaceOne(filter, item);
     if (res.matchedCount === 0) {
       throw new NotFoundError(cls, item.id);
@@ -504,15 +511,18 @@ export class MongoModelService implements
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
+    await QueryVerifier.verify(cls, query);
+
     const col = await this.getStore(cls);
-    const { filter } = MongoUtil.prepareQuery(cls, query, false);
+    const filter = MongoUtil.extractWhereFilter(cls, query.where, false);
     const res = await col.deleteMany(filter);
     return res.deletedCount ?? 0;
   }
 
   async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
-    const col = await this.getStore(cls);
+    await QueryVerifier.verify(cls, query);
 
+    const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, data);
     const final = Object.entries(items).reduce<{
       $unset?: Record<string, unknown>;
@@ -526,30 +536,37 @@ export class MongoModelService implements
       return acc;
     }, {});
 
-    const { filter } = MongoUtil.prepareQuery(cls, query);
+    const filter = MongoUtil.extractWhereFilter(cls, query.where);
     const res = await col.updateMany(filter, final);
     return res.matchedCount;
   }
 
   // Facet
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+    await QueryVerifier.verify(cls, query);
+
     const col = await this.getStore(cls);
-    const aggs: object[] = [{
-      $group: {
-        _id: `$${field}`,
-        count: {
-          $sum: 1
-        }
-      }
-    }];
+    if (query) {
+      await QueryVerifier.verify(cls, query);
+    }
 
     let q: Record<string, unknown> = { [field]: { $exists: true } };
 
     if (query?.where) {
-      q = { $and: [q, MongoUtil.prepareQuery(cls, query).filter] };
+      q = { $and: [q, MongoUtil.extractWhereFilter(cls, query.where)] };
     }
 
-    aggs.unshift({ $match: q });
+    const aggs: object[] = [
+      { $match: q },
+      {
+        $group: {
+          _id: `$${field}`,
+          count: {
+            $sum: 1
+          }
+        }
+      }
+    ];
 
     const result = await col.aggregate<{ _id: ObjectId, count: number }>(aggs).toArray();
 
@@ -561,12 +578,14 @@ export class MongoModelService implements
 
   // Suggest
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    await QueryVerifier.verify(cls, query);
     const q = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, q);
     return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, (a) => a, query && query.limit);
   }
 
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    await QueryVerifier.verify(cls, query);
     const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, q);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (_, b) => b, query && query.limit);

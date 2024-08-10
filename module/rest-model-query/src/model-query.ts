@@ -2,15 +2,16 @@ import { AppError, castTo, Class } from '@travetto/runtime';
 import { ModelType, ModelRegistry } from '@travetto/model';
 import { Field, Schema } from '@travetto/schema';
 import { ControllerRegistry } from '@travetto/rest';
-import {
-  ModelQueryFacetSupport, ModelQuerySupport, ModelQuerySuggestSupport,
-  SortClause, ValidStringFields, PropWhereClause
-} from '@travetto/model-query';
+import { ModelQueryFacetSupport, ModelQuerySupport, ModelQuerySuggestSupport, ValidStringFields, PageableModelQuery } from '@travetto/model-query';
 import { isQuerySuggestSupported, isQuerySupported } from '@travetto/model-query/src/internal/service/common';
 import { QueryLanguageParser } from '@travetto/model-query-language';
 
 
 type Svc = { source: Partial<ModelQuerySupport & ModelQuerySuggestSupport & ModelQueryFacetSupport> };
+
+const convert = <T>(k?: string, query?: boolean): T | undefined =>
+  !k || typeof k !== 'string' ? undefined : (/^[\{\[]/.test(k) ? JSON.parse(k) : (query ? QueryLanguageParser.parseToQuery(k) : undefined));
+
 
 @Schema()
 export class RestModelQuery {
@@ -18,6 +19,15 @@ export class RestModelQuery {
   sort?: string;
   limit?: number;
   offset?: number;
+
+  finalize<T>(): PageableModelQuery<T> {
+    return {
+      ...(this.limit ? { limit: this.limit } : {}),
+      ...(this.offset ? { offset: this.offset } : {}),
+      ...(this.sort ? { sort: convert(this.sort) } : {}),
+      ...(this.where ? { where: convert(this.where, true) } : {}),
+    };
+  }
 }
 
 @Schema()
@@ -26,9 +36,6 @@ export class RestModelSuggestQuery {
   limit?: number;
   offset?: number;
 }
-
-export const convertInput = <T>(k?: string, query?: boolean): T | undefined =>
-  !k || typeof k !== 'string' ? undefined : (/^[\{\[]/.test(k) ? JSON.parse(k) : (query ? QueryLanguageParser.parseToQuery(k) : undefined));
 
 /**
  * Provides a basic query controller for a given model:
@@ -46,12 +53,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>): (target: C
 
     function getAll(this: Svc, full: RestModelQuery): Promise<T[]> {
       if (isQuerySupported(this.source)) {
-        return this.source.query(getCls(), {
-          limit: full.limit,
-          offset: full.offset,
-          sort: convertInput<SortClause<T>[]>(full.sort),
-          where: convertInput<PropWhereClause<T>>(full.where, true)
-        });
+        return this.source.query(getCls(), full.finalize());
       } else {
         throw new AppError(`${this.source.constructor.Ⲑid} does not support querying`);
       }

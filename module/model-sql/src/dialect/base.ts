@@ -271,7 +271,7 @@ export abstract class SQLDialect implements DialectState {
    * Delete query and return count removed
    */
   async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>): Promise<number> {
-    const { count } = await this.executeSQL<T>(this.getDeleteSQL(SQLUtil.classToStack(cls), castTo(query.where)));
+    const { count } = await this.executeSQL<T>(this.getDeleteSQL(SQLUtil.classToStack(cls), query.where));
     return count;
   }
 
@@ -614,14 +614,13 @@ LEFT OUTER JOIN ${from} ON
   /**
    * Generate full query
    */
-  getQuerySQL<T>(cls: Class<T>, query: Query<T>): string {
+  getQuerySQL<T>(cls: Class<T>, query: Query<T>, where?: WhereClause<T>): string {
     const sortFields = !query.sort ?
       '' :
       SQLUtil.orderBy(cls, query.sort)
         .map(x => this.resolveName(x.stack))
         .join(', ');
 
-    const where: WhereClause<T> = castTo(query.where);
     return `
 ${this.getSelectSQL(cls, query.select)}
 ${this.getFromSQL(cls)}
@@ -885,12 +884,11 @@ ${orderBy};`;
   /**
    * Get COUNT(1) query
    */
-  getQueryCountSQL<T>(cls: Class<T>, query: Query<T>): string {
-    const where: WhereClause<T> = castTo(query.where);
+  getQueryCountSQL<T>(cls: Class<T>, where?: WhereClause<T>): string {
     return `
 SELECT COUNT(DISTINCT ${this.rootAlias}.id) as total
 ${this.getFromSQL(cls)}
-${this.getWhereSQL(cls, where)}`;
+${this.getWhereSQL(cls, where!)}`;
   }
 
   async fetchDependents<T>(cls: Class<T>, items: T[], select?: SelectClause<T>): Promise<T[]> {

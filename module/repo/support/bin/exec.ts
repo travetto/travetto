@@ -21,6 +21,7 @@ type ModuleRunConfig<T = ExecutionResult<string>> = {
   prefixOutput?: boolean;
   showStdout?: boolean;
   showStderr?: boolean;
+  stableOutput?: boolean;
 };
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);

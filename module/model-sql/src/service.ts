@@ -10,7 +10,7 @@ import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClauseRaw,
+  PageableModelQuery, ValidStringFields, WhereClauseRaw, QueryVerifier
 } from '@travetto/model-query';
 
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
@@ -190,8 +190,7 @@ export class SQLModelService implements
 
   @Connected()
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
-    const where: WhereClauseRaw<ModelType> = { id };
-    const res = await this.query(cls, { where });
+    const res = await this.query(cls, castTo({ id }));
     if (res.length === 1) {
       return await ModelCrudUtil.load(cls, res[0]);
     }
@@ -249,7 +248,8 @@ export class SQLModelService implements
 
   @Connected()
   async query<T extends ModelType>(cls: Class<T>, query: PageableModelQuery<T>): Promise<T[]> {
-    const { records: res } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query)));
+    await QueryVerifier.verify(cls, query);
+    const { records: res } = await this.#exec<T>(this.#dialect.getQuerySQL(cls, query, ModelQueryUtil.getWhereClause(cls, query.where)));
     if (ModelRegistry.has(cls)) {
       await this.#dialect.fetchDependents(cls, res, query && query.select);
     }
@@ -266,34 +266,39 @@ export class SQLModelService implements
 
   @Connected()
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
-    const { records } = await this.#exec<{ total: string | number }>(this.#dialect.getQueryCountSQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query)));
+    await QueryVerifier.verify(cls, query);
+    const { records } = await this.#exec<{ total: string | number }>(this.#dialect.getQueryCountSQL(cls, ModelQueryUtil.getWhereClause(cls, query.where)));
     return +records[0].total;
   }
 
   @Connected()
   @Transactional()
   async updateOneWithQuery<T extends ModelType>(cls: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
+    await QueryVerifier.verify(cls, query);
     query = ModelQueryUtil.getQueryWithId(cls, item, query);
-    await this.#deleteRaw(cls, item.id, castTo(query.where), true);
+    await this.#deleteRaw(cls, item.id, query.where, true);
     return await this.create(cls, item);
   }
 
   @Connected()
   @Transactional()
   async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
-    const { count } = await this.#exec(this.#dialect.getUpdateSQL(SQLUtil.classToStack(cls), data, ModelQueryUtil.getQueryAndVerify(cls, query).where));
+    await QueryVerifier.verify(cls, query);
+    const { count } = await this.#exec(this.#dialect.getUpdateSQL(SQLUtil.classToStack(cls), data, ModelQueryUtil.getWhereClause(cls, query.where)));
     return count;
   }
 
   @Connected()
   @Transactional()
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
-    const { count } = await this.#exec(this.#dialect.getDeleteSQL(SQLUtil.classToStack(cls), ModelQueryUtil.getQueryAndVerify(cls, query, false).where));
+    await QueryVerifier.verify(cls, query);
+    const { count } = await this.#exec(this.#dialect.getDeleteSQL(SQLUtil.classToStack(cls), ModelQueryUtil.getWhereClause(cls, query.where, false)));
     return count;
   }
 
   @Connected()
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
+    await QueryVerifier.verify(cls, query);
     const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, q);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query?.limit);
@@ -301,6 +306,7 @@ export class SQLModelService implements
 
   @Connected()
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
+    await QueryVerifier.verify(cls, query);
     const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
     const results = await this.query(cls, q);
 
@@ -310,6 +316,7 @@ export class SQLModelService implements
 
   @Connected()
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+    await QueryVerifier.verify(cls, query);
     const col = this.#dialect.ident(field);
     const ttl = this.#dialect.ident('count');
     const key = this.#dialect.ident('key');
@@ -318,7 +325,7 @@ export class SQLModelService implements
       this.#dialect.getFromSQL(cls),
     ];
     q.push(
-      this.#dialect.getWhereSQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query ?? {}).where)
+      this.#dialect.getWhereSQL(cls, ModelQueryUtil.getWhereClause(cls, query?.where ?? {}))
     );
     q.push(
       `GROUP BY ${col}`,

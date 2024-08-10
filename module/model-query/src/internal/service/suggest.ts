@@ -35,7 +35,7 @@ export class ModelQuerySuggestUtil {
     }
 
     if (query?.where) {
-      clauses.push(castTo(query.where));
+      clauses.push(query.where);
     }
 
     return {

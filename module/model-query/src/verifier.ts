@@ -1,9 +1,9 @@
 import { DataUtil, SchemaRegistry, ValidationResultError, ValidationError } from '@travetto/schema';
 import { Class } from '@travetto/runtime';
 
-import { ModelQuery, Query, PageableModelQuery } from '../../model/query';
+import { ModelQuery, Query, PageableModelQuery } from './model/query';
 
-import { TypeUtil } from '../util/types';
+import { TypeUtil } from './internal/util/types';
 
 
 type SimpleType = keyof typeof TypeUtil.OPERATORS;
@@ -269,7 +269,11 @@ export class QueryVerifier {
   /**
    * Verify the query
    */
-  static verify<T>(cls: Class<T>, query: ModelQuery<T> | Query<T> | PageableModelQuery<T>): void {
+  static verify<T>(cls: Class<T>, query?: ModelQuery<T> | Query<T> | PageableModelQuery<T>): void {
+    if (!query) {
+      return;
+    }
+
     const errors: ValidationError[] = [];
 
     const state = {

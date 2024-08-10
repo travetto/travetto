@@ -2,7 +2,6 @@ import { DeleteByQueryRequest, QueryDslQueryContainer, SearchRequest, SearchResp
 
 import { castTo, Class, TypedObject } from '@travetto/runtime';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
-import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { ModelRegistry } from '@travetto/model/src/registry/model';
 import { IndexConfig } from '@travetto/model/src/registry/types';
@@ -252,8 +251,6 @@ export class ElasticsearchQueryUtil {
   static getSearchObject<T extends ModelType>(
     cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, checkExpiry = true
   ): SearchRequest & Omit<DeleteByQueryRequest, 'index' | 'sort'> {
-    QueryVerifier.verify(cls, query); // Verify
-
     const search: (SearchRequest & Omit<DeleteByQueryRequest, 'index' | 'sort'>) = {
       query: this.getSearchQuery(cls, this.extractWhereQuery(cls, query.where ?? {}, config), checkExpiry)
     };
