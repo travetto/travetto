@@ -2,8 +2,7 @@ import ts from 'typescript';
 
 import {
   TransformerState, OnMethod, OnClass, AfterClass,
-  CoreUtil, SystemUtil, Import,
-  OnFunction
+  CoreUtil, SystemUtil, Import, OnFunction
 } from '@travetto/transformer';
 
 import type { FunctionMetadataTag } from '../src/function';

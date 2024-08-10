@@ -4,9 +4,9 @@ import { Authenticator, Principal } from '@travetto/auth';
 import { FilterContext, Request, Response } from '@travetto/rest';
 import { LoginContextⲐ } from '@travetto/auth-rest/src/internal/types';
 import { LoginContext } from '@travetto/auth-rest';
+import { castTo } from '@travetto/runtime';
 
 import { PassportUtil } from './util';
-import { castTo } from '@travetto/runtime';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
 
