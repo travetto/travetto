@@ -1,6 +1,6 @@
 import { Pool, PoolClient } from 'pg';
 
-import { ShutdownManager } from '@travetto/runtime';
+import { castTo, ShutdownManager } from '@travetto/runtime';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 
@@ -33,8 +33,9 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
       database: this.#config.database,
       host: this.#config.host,
       port: this.#config.port,
-      // @ts-expect-error
-      parseInputDatesAsUTC: true,
+      ...castTo({
+        parseInputDatesAsUTC: true,
+      }),
       ...(this.#config.options || {})
     });
 

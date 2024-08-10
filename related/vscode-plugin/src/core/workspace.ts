@@ -75,8 +75,8 @@ export class Workspace {
   static async init(context: vscode.ExtensionContext, manifestContext: ManifestContext, folder: vscode.WorkspaceFolder): Promise<void> {
     this.#context = context;
     this.#manifestContext = manifestContext;
-    // @ts-expect-error
-    this.folder = folder;
+    // Overwrite "const"
+    Object.assign(this, { folder });
   }
 
   /** Find full path for a resource */

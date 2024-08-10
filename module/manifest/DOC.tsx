@@ -11,9 +11,8 @@ const DeltaRef = d.codeLink('ManifestDeltaUtil', 'src/delta.ts', /class Manifest
 
 
 const manifest = () => {
-  const obj: ManifestRoot = JSON.parse(readFileSync(path.resolve(RuntimeIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json'), 'utf8'));
-  const modules = Object.fromEntries(Object.entries(obj.modules).filter(([k]) => k === '@travetto/manifest'));
-  // @ts-expect-error
+  const obj: Partial<Pick<ManifestRoot, 'modules'>> & Omit<ManifestRoot, 'modules'> = JSON.parse(readFileSync(path.resolve(RuntimeIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json'), 'utf8'));
+  const modules = Object.fromEntries(Object.entries(obj.modules!).filter(([k]) => k === '@travetto/manifest'));
   delete obj.modules;
   obj.workspace.path = '<generated>';
   obj.generated = COMMON_DATE;

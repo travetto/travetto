@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import mustache from 'mustache';
 
-import { ExecUtil, RuntimeIndex } from '@travetto/runtime';
+import { castKey, castTo, ExecUtil, RuntimeIndex } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 import { NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
@@ -165,8 +165,7 @@ export class Context {
       }
     }
     if (feat.field) {
-      // @ts-expect-error
-      this[feat.field] = feat.value!;
+      this[castKey(feat.field)] = castTo(feat.value);
     }
     if (feat.context) {
       this.#featureContexts.push(feat.context);

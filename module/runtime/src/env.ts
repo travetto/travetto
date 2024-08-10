@@ -1,4 +1,4 @@
-import { castTo } from './types';
+import { castKey, castTo } from './types';
 
 const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;
@@ -98,8 +98,9 @@ function delegate<T extends object>(base: T): AllType & T {
   return new Proxy(castTo(base), {
     get(target, prop): unknown {
       return typeof prop !== 'string' ? undefined :
-        // @ts-expect-error
-        (prop in base ? base[prop] : target[prop] ??= new EnvProp(prop));
+        (prop in base ? base[castKey(prop)] :
+          target[castKey<typeof target>(prop)] ??= castTo(new EnvProp(prop))
+        );
     }
   });
 }

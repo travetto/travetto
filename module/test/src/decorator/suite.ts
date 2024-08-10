@@ -1,4 +1,4 @@
-import { Class, ClassInstance, ClassTDecorator, describeFunction } from '@travetto/runtime';
+import { castTo, Class, ClassInstance, describeFunction } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
 import { SuiteConfig } from '../model/suite';
@@ -10,10 +10,10 @@ export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
  * @param description The Suite description
  * @augments `@travetto/test:Suite`
  */
-export function Suite(): ClassTDecorator;
-export function Suite(...rest: Partial<SuiteConfig>[]): ClassTDecorator;
-export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassTDecorator;
-export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Partial<SuiteConfig>[]): ClassTDecorator {
+export function Suite(): ClassDecorator;
+export function Suite(...rest: Partial<SuiteConfig>[]): ClassDecorator;
+export function Suite(description: string, ...rest: Partial<SuiteConfig>[]): ClassDecorator;
+export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Partial<SuiteConfig>[]): ClassDecorator {
   const extra: Partial<SuiteConfig> = {};
   const descriptionString = description && typeof description !== 'string' ?
     Object.assign(extra, description).description :
@@ -23,7 +23,7 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
     Object.assign(extra, r);
   }
 
-  return (target: Class) => {
+  const dec = (target: Class): typeof target => {
     const cfg = { description: descriptionString, ...extra };
     if (describeFunction(target).abstract) {
       cfg.skip = true;
@@ -31,6 +31,8 @@ export function Suite(description?: string | Partial<SuiteConfig>, ...rest: Part
     SuiteRegistry.register(target, cfg);
     return target;
   };
+
+  return castTo(dec);
 }
 
 function listener(phase: SuitePhase) {

@@ -2,8 +2,7 @@ import { BaseRemoteService, IRemoteServiceConfig, PostResponseHandler, PreReques
 import { CommonUtil, restCast } from './util';
 
 function isResponse(v: unknown): v is Response {
-  // @ts-expect-error
-  return v && v.status && v.headers;
+  return !!v && typeof v === 'object' && 'status' in v && !!v.status && 'headers' in v && !!v.headers;
 }
 
 export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Response> {

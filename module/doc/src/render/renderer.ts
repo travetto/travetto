@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { type ManifestContext, PackageUtil } from '@travetto/manifest';
 import { isJSXElement, JSXElement, JSXFragmentType } from '@travetto/doc/jsx-runtime';
-import { Runtime } from '@travetto/runtime';
+import { castTo, Runtime } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../jsx';
 import { DocumentShape, RenderProvider, RenderState } from '../types';
@@ -55,8 +55,7 @@ export class DocRenderer {
       let final: JSXElement = node;
       // Render simple element if needed
       if (typeof node.type === 'function' && node.type !== JSXFragmentType) {
-        // @ts-expect-error
-        const out = node.type(node.props);
+        const out = castTo<Function>(node.type)(node.props);
         final = out !== EMPTY_ELEMENT ? out : final;
       }
 
