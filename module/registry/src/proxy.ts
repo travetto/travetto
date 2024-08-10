@@ -1,4 +1,4 @@
-import { Any, castTo, classConstruct } from '@travetto/runtime';
+import { Any, castKey, castTo, classConstruct } from '@travetto/runtime';
 
 const ProxyTargetⲐ = Symbol.for('@travetto/runtime:proxy-target');
 
@@ -53,7 +53,7 @@ export class RetargettingHandler<T> implements ProxyHandler<Any> {
     if (prop === ProxyTargetⲐ) {
       return this.target;
     }
-    let ret = this.target[castTo<keyof T>(prop)];
+    let ret = this.target[castKey<T>(prop)];
     if (isFunction(ret) && !/^class\s/.test(Function.prototype.toString.call(ret))) {
       // Bind class members to class instance instead of proxy propagating
       ret = ret.bind(this.target);
@@ -66,7 +66,7 @@ export class RetargettingHandler<T> implements ProxyHandler<Any> {
   }
 
   set(target: T, prop: PropertyKey, value: unknown): boolean {
-    this.target[castTo<keyof T>(prop)] = castTo(value);
+    this.target[castKey<T>(prop)] = castTo(value);
     return true;
   }
 
@@ -78,7 +78,7 @@ export class RetargettingHandler<T> implements ProxyHandler<Any> {
   }
 
   deleteProperty(target: T, p: PropertyKey): boolean {
-    return delete this.target[castTo<keyof T>(p)];
+    return delete this.target[castKey<T>(p)];
   }
 
   defineProperty(target: T, p: PropertyKey, attributes: PropertyDescriptor): boolean {

@@ -1,5 +1,5 @@
 import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
-import { Class, AppError, TypedObject, describeFunction, TimeUtil, castTo } from '@travetto/runtime';
+import { Class, AppError, TypedObject, describeFunction, TimeUtil, castTo, castKey } from '@travetto/runtime';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
@@ -911,7 +911,7 @@ ${this.getWhereSQL(cls, where)}`;
         const top = stack[stack.length - 1];
         const ids = Object.keys(top);
         const selectTop = selectStack[selectStack.length - 1];
-        const fieldKey: keyof RetainFields<T> = castTo(config.name);
+        const fieldKey = castKey<RetainFields<T>>(config.name);
         const subSelectTop: SelectClause<T> | undefined = castTo(selectTop?.[fieldKey]);
 
         // See if a selection exists at all

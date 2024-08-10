@@ -1,6 +1,6 @@
-import { asConstructable, castTo, asFull, TypedFunction, type Class } from '@travetto/runtime';
+import { asConstructable, asFull, TypedFunction, type Class } from '@travetto/runtime';
 
-import { InjectableFactoryConfig, InjectableConfig } from './types';
+import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry, ResolutionType } from './registry';
 
 function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Partial<InjectConfig> | undefined)[]): T {
@@ -53,10 +53,10 @@ export function InjectArgs(configs?: InjectConfig[][]) {
 export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | undefined)[]) {
   return (target: unknown, propertyKey?: string, idx?: number | PropertyDescriptor): void => {
     if (typeof idx !== 'number') { // Only register if on property
-      const config: InjectConfig = collapseConfig(first, ...args);
+      const config = collapseConfig<Dependency>(first, ...args);
 
       DependencyRegistry.registerProperty(
-        asConstructable(target).constructor, propertyKey!, castTo(config)
+        asConstructable(target).constructor, propertyKey!, config
       );
     }
   };

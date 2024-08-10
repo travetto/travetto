@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { castTo, Primitive } from '@travetto/runtime';
+import { castKey, castTo, Primitive } from '@travetto/runtime';
 
 import { cliTpl } from './color';
 import { CliCommandShape } from './types';
@@ -44,7 +44,7 @@ export class HelpUtil {
     const descs: string[] = [];
 
     for (const flag of flags) {
-      const key: keyof CliCommandShape = castTo(flag.name);
+      const key = castKey<CliCommandShape>(flag.name);
       const flagVal: Primitive = castTo(command[key]);
 
       let aliases = flag.flagNames ?? [];

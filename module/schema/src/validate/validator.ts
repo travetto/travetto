@@ -1,4 +1,4 @@
-import { castTo, Class, ClassInstance, TypedObject } from '@travetto/runtime';
+import { castKey, Class, ClassInstance, TypedObject } from '@travetto/runtime';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
@@ -50,7 +50,7 @@ export class SchemaValidator {
     const fields = TypedObject.keys<SchemaConfig>(schema);
     for (const field of fields) {
       if (schema[field].access !== 'readonly') { // Do not validate readonly fields
-        errors = errors.concat(this.#validateFieldSchema(schema[field], o[castTo<keyof T>(field)], relative));
+        errors = errors.concat(this.#validateFieldSchema(schema[field], o[castKey<T>(field)], relative));
       }
     }
 

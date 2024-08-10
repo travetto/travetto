@@ -1,4 +1,4 @@
-import { castTo, Class } from '@travetto/runtime';
+import { castKey, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { CliCommandRegistry } from './registry';
@@ -126,7 +126,7 @@ export class CliCommandSchemaUtil {
     for (const arg of state.all) {
       switch (arg.type) {
         case 'flag': {
-          const key: keyof T = castTo(arg.fieldName);
+          const key = castKey<T>(arg.fieldName);
           const value = arg.value!;
           if (arg.array) {
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

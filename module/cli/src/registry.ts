@@ -1,4 +1,4 @@
-import { asClass, castTo, Class, classConstruct, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asClass, Class, classConstruct, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
@@ -39,10 +39,10 @@ class $CliCommandRegistry {
   /**
    * Registers a cli command
    */
-  registerClass(cls: Class, cfg: Partial<CliCommandConfig>): CliCommandConfig {
+  registerClass<T extends CliCommandShape>(cls: Class<T>, cfg: Partial<CliCommandConfig>): CliCommandConfig {
     const meta = describeFunction(cls);
     this.#commands.set(cls, {
-      cls: castTo(cls),
+      cls,
       name: getName(meta.import),
       commandModule: meta.module,
       ...cfg,

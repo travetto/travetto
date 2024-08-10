@@ -32,6 +32,11 @@ export function castTo<T>(input: unknown): T {
   return input as T;
 }
 
+export function castKey<T>(input: string | number | symbol): keyof T {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return castTo(input);
+}
+
 export function asFullArray<T>(input: Partial<T>[]): T[] {
   return castTo(input);
 }

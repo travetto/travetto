@@ -1,4 +1,4 @@
-import { Class, Runtime, asClass, asConstructable, castTo, classConstruct, describeFunction, asFull } from '@travetto/runtime';
+import { Class, Runtime, asClass, asConstructable, castTo, classConstruct, describeFunction, asFull, castKey, TypedFunction } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
@@ -134,13 +134,13 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    */
   protected async resolveFieldDependencies<T>(config: InjectableConfig<T>, instance: T): Promise<void> {
     const keys = Object.keys(config.dependencies.fields ?? {})
-      .filter(k => instance[castTo<keyof T>(k)] === undefined); // Filter out already set ones
+      .filter(k => instance[castKey<T>(k)] === undefined); // Filter out already set ones
 
     // And auto-wire
     if (keys.length) {
       const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]));
       for (let i = 0; i < keys.length; i++) {
-        instance[castTo<keyof T>(keys[i])] = castTo(deps[i]);
+        instance[castKey<T>(keys[i])] = castTo(deps[i]);
       }
     }
   }
@@ -355,7 +355,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   registerFactory(config: Omit<InjectableFactoryConfig, 'qualifier'> & {
     id: string;
     qualifier?: undefined | symbol;
-    fn: (...args: unknown[]) => unknown;
+    fn: TypedFunction;
   }): void {
     const finalConfig: Partial<InjectableConfig> = {};
 

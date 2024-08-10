@@ -1,4 +1,4 @@
-import { castTo, Class, TypedObject } from '@travetto/runtime';
+import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
@@ -275,9 +275,9 @@ export class SQLUtil {
     if (field) {
       const isSimple = SchemaRegistry.has(field.type);
       for (const el of v) {
-        const parentKey: string = castTo(el[castTo<keyof T>(dct.parentPathField.name)]);
+        const parentKey: string = castTo(el[castKey<T>(dct.parentPathField.name)]);
         const root = castTo<Record<string, Record<string, unknown>>>(parent)[parentKey];
-        const fieldKey: keyof T & string = castTo(field.name);
+        const fieldKey = castKey<(typeof root) | T>(field.name);
         if (field.array) {
           if (!root[fieldKey]) {
             root[fieldKey] = [isSimple ? el : el[fieldKey]];
@@ -292,7 +292,7 @@ export class SQLUtil {
 
     const mapping: Record<string, T> = {};
     for (const el of v) {
-      const key = el[castTo<keyof T>(dct.pathField.name)];
+      const key = el[castKey<T>(dct.pathField.name)];
       if (typeof key === 'string') {
         mapping[key] = el;
       }

@@ -1,4 +1,4 @@
-import { Class, AppError, describeFunction, castTo, classConstruct, asFull } from '@travetto/runtime';
+import { Class, AppError, describeFunction, castTo, classConstruct, asFull, castKey } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig } from './types';
@@ -71,7 +71,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    */
   ensureInstanceTypeField<T>(cls: Class, o: T): void {
     const schema = this.get(cls);
-    const typeField: keyof T = castTo(schema.subTypeField);
+    const typeField = castKey<T>(schema.subTypeField);
     if (schema.subTypeName && typeField in schema.views[AllViewⲐ].schema && !o[typeField]) {  // Do we have a type field defined
       o[typeField] = castTo(schema.subTypeName); // Assign if missing
     }
@@ -108,7 +108,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     const baseSchema = this.get(base);
 
     if (clsSchema.subTypeName || baseSchema.baseType) { // We have a sub type
-      const type = castTo<string>(o[castTo<keyof T>(baseSchema.subTypeField)]) ?? clsSchema.subTypeName ?? baseSchema.subTypeName;
+      const type = castTo<string>(o[castKey<T>(baseSchema.subTypeField)]) ?? clsSchema.subTypeName ?? baseSchema.subTypeName;
       const ret = this.#subTypes.get(base)!.get(type)!;
       if (ret && !(classConstruct(ret) instanceof cls)) {
         throw new AppError(`Resolved class ${ret.name} is not assignable to ${cls.name}`);

@@ -1,4 +1,4 @@
-import { castTo, Class, classConstruct, asFull, TypedObject } from '@travetto/runtime';
+import { castTo, Class, classConstruct, asFull, TypedObject, castKey } from '@travetto/runtime';
 
 import { DataUtil } from './data';
 import { AllViewⲐ } from './internal/types';
@@ -209,7 +209,7 @@ export class BindUtil {
             continue;
           }
 
-          let v: unknown = data[castTo<keyof T>(inboundField)];
+          let v: unknown = data[castKey<T>(inboundField)];
 
           // Filtering values
           if (cfg.filterValue && !cfg.filterValue(v, field)) {
@@ -239,7 +239,7 @@ export class BindUtil {
             }
           }
 
-          obj[castTo<keyof T>(schemaFieldName)] = castTo(v);
+          obj[castKey<T>(schemaFieldName)] = castTo(v);
 
           if (field.accessor) {
             Object.defineProperty(obj, schemaFieldName, {
