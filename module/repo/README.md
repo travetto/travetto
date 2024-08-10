@@ -237,8 +237,8 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
          module/email-compiler <workspace-root>/module/email-compiler
              module/email-inky <workspace-root>/module/email-inky
        module/email-nodemailer <workspace-root>/module/email-nodemailer
-                 module/eslint <workspace-root>/module/eslint
                   module/image <workspace-root>/module/image
+                 module/eslint <workspace-root>/module/eslint
                     module/jwt <workspace-root>/module/jwt
                     module/log <workspace-root>/module/log
                module/manifest <workspace-root>/module/manifest

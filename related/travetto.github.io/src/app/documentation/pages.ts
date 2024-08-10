@@ -42,6 +42,10 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-query/model-query.component').then(m => m.ModelQueryComponent)
       },
       {
+        path: 'model-query-language', title: 'Query Language',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-query-language/model-query-language.component').then(m => m.ModelQueryLanguageComponent)
+      },
+      {
         path: 'model-dynamodb', title: 'DynamoDB',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-dynamodb/model-dynamodb.component').then(m => m.ModelDynamodbComponent)
       },
@@ -116,6 +120,10 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-fastify-lambda/rest-fastify-lambda.component').then(m => m.RestFastifyLambdaComponent)
       },
       {
+        path: 'rest-upload', title: 'Upload',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-upload/rest-upload.component').then(m => m.RestUploadComponent)
+      },
+      {
         path: 'rest-session', title: 'Session',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-session/rest-session.component').then(m => m.RestSessionComponent)
       },
@@ -132,12 +140,6 @@ export const PAGES = [
   {
     path: 'asset', title: 'Asset',
     loadComponent: (): Promise<Type<unknown>> => import('./gen/asset/asset.component').then(m => m.AssetComponent),
-    subs: [
-      {
-        path: 'asset-rest', title: 'Rest',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/asset-rest/asset-rest.component').then(m => m.AssetRestComponent)
-      }
-    ]
   },
   {
     path: 'auth', title: 'Auth',
