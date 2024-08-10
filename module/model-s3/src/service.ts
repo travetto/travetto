@@ -12,7 +12,7 @@ import {
   StreamRange
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError, castTo, impartial } from '@travetto/runtime';
+import { Class, AppError, castTo, asFull } from '@travetto/runtime';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
@@ -77,7 +77,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return key;
   }
 
-  #q<U extends object>(cls: string | Class, id: string, extra: U = impartial({})): (U & { Key: string, Bucket: string }) {
+  #q<U extends object>(cls: string | Class, id: string, extra: U = asFull({})): (U & { Key: string, Bucket: string }) {
     const key = this.#resolveKey(cls, id);
     return { Key: key, Bucket: this.config.bucket, ...extra };
   }

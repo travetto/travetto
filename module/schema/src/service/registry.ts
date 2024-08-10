@@ -1,4 +1,4 @@
-import { Class, AppError, describeFunction, castTo, clsInstance, impartial } from '@travetto/runtime';
+import { Class, AppError, describeFunction, castTo, classConstruct, asFull } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig } from './types';
@@ -110,7 +110,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (clsSchema.subTypeName || baseSchema.baseType) { // We have a sub type
       const type = castTo<string>(o[castTo<keyof T>(baseSchema.subTypeField)]) ?? clsSchema.subTypeName ?? baseSchema.subTypeName;
       const ret = this.#subTypes.get(base)!.get(type)!;
-      if (ret && !(clsInstance(ret) instanceof cls)) {
+      if (ret && !(classConstruct(ret) instanceof cls)) {
         throw new AppError(`Resolved class ${ret.name} is not assignable to ${cls.name}`);
       }
       return ret;
@@ -279,7 +279,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (!allViewConf.schema[prop]) {
       allViewConf.fields.push(prop);
       // Partial config while building
-      allViewConf.schema[prop] = impartial<FieldConfig>({});
+      allViewConf.schema[prop] = asFull<FieldConfig>({});
     }
     if (config.aliases) {
       config.aliases = [...allViewConf.schema[prop].aliases ?? [], ...config.aliases];

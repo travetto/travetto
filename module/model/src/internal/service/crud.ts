@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-import { castTo, Class, impartial, Util } from '@travetto/runtime';
+import { asClass, castTo, Class, asFull, Util } from '@travetto/runtime';
 import { DataUtil, SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
@@ -83,7 +83,7 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = ModelRegistry.get(castTo(item.constructor));
+    const config = ModelRegistry.get(asClass(item.constructor));
     if (config.subType) { // Sub-typing, assign type
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
@@ -121,7 +121,7 @@ export class ModelCrudUtil {
       item = cls.from(castTo(item));
     }
 
-    const config = ModelRegistry.get(castTo(item.constructor));
+    const config = ModelRegistry.get(asClass(item.constructor));
     if (config.subType) { // Sub-typing, assign type
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
@@ -136,7 +136,7 @@ export class ModelCrudUtil {
 
     item = await this.prePersist(cls, item, 'partial');
 
-    return impartial(item);
+    return asFull(item);
   }
 
   /**

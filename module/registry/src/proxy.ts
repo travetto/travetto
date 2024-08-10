@@ -1,4 +1,4 @@
-import { Any, castTo, clsInstance } from '@travetto/runtime';
+import { Any, castTo, classConstruct } from '@travetto/runtime';
 
 const ProxyTargetⲐ = Symbol.for('@travetto/runtime:proxy-target');
 
@@ -38,7 +38,7 @@ export class RetargettingHandler<T> implements ProxyHandler<Any> {
   }
 
   construct(target: T, argArray: unknown[], newTarget?: unknown): object {
-    return clsInstance(castTo(this.target), argArray);
+    return classConstruct(castTo(this.target), argArray);
   }
 
   setPrototypeOf(target: T, v: unknown): boolean {

@@ -4,7 +4,7 @@ import type { HttpResponse, HttpEvent, HttpClient } from '@angular/common/http';
 import type { Observable, OperatorFunction } from 'rxjs';
 
 import { BaseRemoteService, IRemoteService, RequestDefinition, RequestOptions } from './types';
-import { CommonUtil, RestCast } from './util';
+import { CommonUtil, restCast } from './util';
 
 export type AngularResponse<T> = Observable<T> & { events: Observable<HttpEvent<T>>, response: Observable<HttpResponse<T>> };
 
@@ -27,7 +27,7 @@ export abstract class BaseAngularService extends BaseRemoteService<RequestInit, 
   }
 
   invoke<T>(req: RequestOptions, observe: 'response' | 'events' | 'body'): AngularResponse<T> {
-    let ngReq = this.client.request(RestCast(req.method.toLowerCase()), req.url.toString(), {
+    let ngReq = this.client.request(restCast(req.method.toLowerCase()), req.url.toString(), {
       observe, reportProgress: observe === 'events',
       withCredentials: req.withCredentials,
       headers: req.headers, body: req.body,
@@ -37,7 +37,7 @@ export abstract class BaseAngularService extends BaseRemoteService<RequestInit, 
       ngReq = ngReq.pipe(this.timer<T>(req.timeout));
     }
 
-    return RestCast(ngReq.pipe(this.transform<T>()));
+    return restCast(ngReq.pipe(this.transform<T>()));
   }
 
   makeRequest<T>(params: unknown[], opts: RequestDefinition): AngularResponse<T> {
@@ -48,6 +48,6 @@ export abstract class BaseAngularService extends BaseRemoteService<RequestInit, 
       response: { get: () => this.invoke(req, 'response'), configurable: false }
     });
 
-    return RestCast(res);
+    return restCast(res);
   }
 }

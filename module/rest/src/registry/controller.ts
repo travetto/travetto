@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
-import { type Primitive, type Class, type ClassInstance, impartial, castTo } from '@travetto/runtime';
+import { type Primitive, type Class, asFull, castTo, asConstructable } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator } from './types';
@@ -65,7 +65,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   getOrCreateEndpointConfig<T>(cls: Class<T>, handler: RouteHandler): EndpointConfig {
     const fieldConf = this.getOrCreatePendingField(cls, handler);
-    return impartial(fieldConf);
+    return asFull(fieldConf);
   }
 
   /**
@@ -134,7 +134,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   createFilterDecorator(fn: Filter): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>): void => {
       if (prop) {
-        this.registerEndpointFilter(castTo<ClassInstance>(target).constructor, descriptor!.value!, fn);
+        this.registerEndpointFilter(asConstructable(target).constructor, descriptor!.value!, fn);
       } else {
         this.registerControllerFilter(castTo(target), fn);
       }
@@ -152,7 +152,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   ): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>): void => {
       if (prop && descriptor) {
-        this.registerEndpointInterceptorConfig(castTo<ClassInstance>(target).constructor, descriptor!.value!, cls, castTo(cfg));
+        this.registerEndpointInterceptorConfig(asConstructable(target).constructor, descriptor!.value!, cls, castTo(cfg));
       } else {
         this.registerControllerInterceptorConfig(castTo(target), cls, castTo(cfg));
       }
@@ -219,7 +219,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * Finalize routes, removing duplicates based on ids
    */
   onInstallFinalize(cls: Class): ControllerConfig {
-    const final = impartial(this.getOrCreatePending(cls));
+    const final = asFull(this.getOrCreatePending(cls));
 
     // Handle duplicates, take latest
     const foundRoutes = new Set<string>();

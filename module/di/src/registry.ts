@@ -1,4 +1,4 @@
-import { Class, ClassInstance, Runtime, castTo, clsInstance, describeFunction, impartial } from '@travetto/runtime';
+import { Class, Runtime, asClass, asConstructable, castTo, classConstruct, describeFunction, asFull } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
@@ -67,7 +67,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
           } else if (filtered.length > 1) {
             // If dealing with sub types, prioritize exact matches
             const exact = this
-              .getCandidateTypes(castTo<Class>(target))
+              .getCandidateTypes(asClass(target))
               .filter(x => x.class === target);
             if (exact.length === 1) {
               qualifier = exact[0].qualifier;
@@ -95,7 +95,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
-    const config = castTo<InjectableConfig<T>>(this.get(cls!));
+    const config: InjectableConfig<T> = castTo(this.get(cls!));
     return {
       qualifier,
       config,
@@ -157,14 +157,14 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // Create instance
     const inst = managed.factory ?
       managed.factory(...consValues) :
-      clsInstance(managed.class, consValues);
+      classConstruct(managed.class, consValues);
 
     // And auto-wire fields
     await this.resolveFieldDependencies(managed, inst);
 
     // If factory with field properties on the sub class
     if (managed.factory) {
-      const resolved = this.get(castTo<ClassInstance<T>>(inst).constructor);
+      const resolved = this.get(asConstructable(inst).constructor);
 
       if (resolved) {
         await this.resolveFieldDependencies(resolved, inst);
@@ -377,7 +377,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Create mock cls for DI purposes
-    const cls = impartial<Class>({ Ⲑid: config.id });
+    const cls = asFull<Class>({ Ⲑid: config.id });
 
     finalConfig.class = cls;
 
@@ -387,7 +387,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.factories.set(config.src.Ⲑid, new Map());
     }
 
-    this.factories.get(config.src.Ⲑid)!.set(cls, impartial(finalConfig));
+    this.factories.get(config.src.Ⲑid)!.set(cls, asFull(finalConfig));
   }
 
   /**
@@ -410,7 +410,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   onInstallFinalize<T>(cls: Class<T>): InjectableConfig<T> {
     const classId = cls.Ⲑid;
 
-    const config = castTo<InjectableConfig<T>>(this.getOrCreatePending(cls));
+    const config: InjectableConfig<T> = castTo(this.getOrCreatePending(cls));
 
     if (!(typeof config.enabled === 'boolean' ? config.enabled : config.enabled())) {
       return config; // Do not setup if disabled

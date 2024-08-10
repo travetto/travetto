@@ -1,4 +1,4 @@
-import { Class, Runtime, clsInstance, describeFunction, impartial, impartialArray } from '@travetto/runtime';
+import { Class, Runtime, classConstruct, describeFunction, asFull, asFullArray } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite';
@@ -57,7 +57,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    * a full projection of all listeners and tests.
    */
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
-    const config = impartial(this.getOrCreatePending(cls));
+    const config = asFull(this.getOrCreatePending(cls));
     const tests = [...this.pendingFields.get(cls.Ⲑid)!.values()];
 
     const parent = this.getParentClass(cls);
@@ -74,8 +74,8 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       })));
     }
 
-    config.instance = clsInstance(config.class);
-    config.tests = impartialArray(tests!);
+    config.instance = classConstruct(config.class);
+    config.tests = asFullArray(tests!);
 
     if (!config.description) {
       config.description = config.classId;

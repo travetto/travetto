@@ -1,7 +1,7 @@
 import { AssertionError } from 'node:assert';
 import path from 'node:path';
 
-import { Env, TimeUtil, Runtime, RuntimeIndex, castTo, impartial, Class } from '@travetto/runtime';
+import { Env, TimeUtil, Runtime, RuntimeIndex, castTo, asFull, Class } from '@travetto/runtime';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -67,7 +67,7 @@ export class TestExecutor {
   static failFile(consumer: TestConsumer, imp: string, err: Error): void {
     const name = path.basename(imp);
     const classId = `${RuntimeIndex.getFromImport(imp)?.id}￮${name}`;
-    const suite = impartial<SuiteConfig & SuiteResult>({ class: impartial<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp, });
+    const suite = asFull<SuiteConfig & SuiteResult>({ class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp, });
     err.message = err.message.replaceAll(Runtime.mainSourcePath, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });

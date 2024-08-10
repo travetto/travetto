@@ -1,4 +1,4 @@
-import { AppError, AsyncMethodDescriptor, castTo, ClassInstance } from '@travetto/runtime';
+import { AppError, asConstructable, AsyncMethodDescriptor, ClassInstance } from '@travetto/runtime';
 import { ControllerRegistry, ParamConfig, Param } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 import { RequestTarget } from '@travetto/rest/src/internal/types';
@@ -62,21 +62,20 @@ export function Upload(
  */
 export function UploadAll(config: Partial<ParamConfig> & UploadConfig = {}) {
   return function <T>(target: T, propertyKey: string, desc: AsyncMethodDescriptor): void {
-    const inst = castTo<ClassInstance<T>>(target);
-    const targetClass = inst.constructor;
+    const targetClass = asConstructable(target).constructor;
 
     const { params } = ControllerRegistry.getOrCreatePendingField(targetClass, desc.value!);
 
     // Find the request object, and mark it as a file param
     params?.some((el, i) => {
       if (el.contextType === RequestTarget) {
-        SchemaRegistry.registerPendingParamConfig(inst.constructor, propertyKey, i, Object, { specifiers: ['file'] });
+        SchemaRegistry.registerPendingParamConfig(targetClass, propertyKey, i, Object, { specifiers: ['file'] });
         return true;
       }
     });
 
     ControllerRegistry.registerEndpointInterceptorConfig(
-      inst.constructor, desc.value!,
+      targetClass, desc.value!,
       RestAssetInterceptor,
       {
         maxSize: config.maxSize,

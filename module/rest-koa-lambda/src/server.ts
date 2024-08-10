@@ -7,7 +7,7 @@ import {
 } from '@travetto/rest-aws-lambda';
 import type { ServerHandle } from '@travetto/rest';
 import { KoaRestServer } from '@travetto/rest-koa';
-import { castTo, impartial } from '@travetto/runtime';
+import { castTo, asFull } from '@travetto/runtime';
 
 type AwsLambdaHandle = AwsLambdaHandler['handle'];
 
@@ -37,6 +37,6 @@ export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRe
 
   override async listen(): Promise<ServerHandle> {
     this.listening = true;
-    return impartial<ServerHandle>({});
+    return asFull<ServerHandle>({});
   }
 }

@@ -1,4 +1,4 @@
-import { castTo, Class, clsInstance, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asClass, castTo, Class, classConstruct, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
@@ -15,7 +15,7 @@ class $CliCommandRegistry {
   }
 
   getClass(cmd: CliCommandShape): Class<CliCommandShape> {
-    return castTo(cmd.constructor);
+    return asClass(cmd.constructor);
   }
 
   /**
@@ -78,7 +78,7 @@ class $CliCommandRegistry {
       for (const v of values) {
         const cfg = this.getByClass(v);
         if (cfg) {
-          const inst = clsInstance(cfg.cls);
+          const inst = classConstruct(cfg.cls);
           if (!inst.isActive || inst.isActive()) {
             inst._cfg = this.getConfig(inst);
             return inst;

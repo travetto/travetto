@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformCast, TemplateLiteral } from '../types/shared';
+import { transformCast, TemplateLiteral } from '../types/shared';
 
 const TypedObject: {
   keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
@@ -71,7 +71,7 @@ export class LiteralUtil {
       }
       return factory.createObjectLiteralExpression(pairs);
     }
-    return TransformCast(val);
+    return transformCast(val);
   }
 
   /**
@@ -172,7 +172,7 @@ export class LiteralUtil {
       } else if (typeof el === 'string' || typeof el === 'number' || typeof el === 'boolean') {
         out.push(`${el}`);
       } else {
-        out.push(`(?:${this.templateLiteralToRegex(TransformCast(el), false)})`);
+        out.push(`(?:${this.templateLiteralToRegex(transformCast(el), false)})`);
       }
     }
     const body = out.join(template.op === 'and' ? '' : '|');

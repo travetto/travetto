@@ -1,5 +1,5 @@
 import { Config } from '@travetto/config';
-import { impartial } from '@travetto/runtime';
+import { asFull } from '@travetto/runtime';
 
 /**
  * SQL Model Config
@@ -41,5 +41,5 @@ export class SQLModelConfig<T extends {} = {}> {
   /**
    * Raw client options
    */
-  options: T = impartial({});
+  options: T = asFull({});
 }

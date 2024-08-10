@@ -1,4 +1,4 @@
-import { castTo, impartial } from '@travetto/runtime';
+import { castTo, asFull } from '@travetto/runtime';
 import { Response, Request } from '../types';
 import { RequestCore } from './internal/request';
 import { ResponseCore } from './internal/response';
@@ -21,7 +21,7 @@ export class RestServerUtil {
     if (!('files' in req)) { req.files = undefined; }
     if (!('auth' in req)) { req.auth = undefined; }
 
-    return impartial<T>(req);
+    return asFull<T>(req);
   }
 
   /**
@@ -30,6 +30,6 @@ export class RestServerUtil {
    */
   static decorateResponse<T extends Response>(res: Partial<T> & Record<string, unknown>): T {
     Object.setPrototypeOf(res, ResponseCore.prototype);
-    return impartial<T>(res);
+    return asFull<T>(res);
   }
 }

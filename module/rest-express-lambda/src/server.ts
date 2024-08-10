@@ -8,7 +8,7 @@ import {
 } from '@travetto/rest-aws-lambda';
 
 import { ExpressRestServer } from '@travetto/rest-express';
-import { castTo, impartial } from '@travetto/runtime';
+import { castTo, asFull } from '@travetto/runtime';
 
 type AwsLambdaHandle = AwsLambdaHandler['handle'];
 
@@ -38,6 +38,6 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
 
   override async listen(): Promise<ServerHandle> {
     this.listening = true;
-    return impartial({});
+    return asFull({});
   }
 }

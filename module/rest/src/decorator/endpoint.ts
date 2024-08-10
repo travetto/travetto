@@ -1,4 +1,4 @@
-import { castTo, ClassInstance } from '@travetto/runtime';
+import { asConstructable } from '@travetto/runtime';
 
 import { MethodOrAll, RouteHandler } from '../types';
 
@@ -11,7 +11,7 @@ type RouteDecorator = <T>(target: T, prop: symbol | string, descriptor: RouteDes
 function Endpoint(method: MethodOrAll, path: string = '/', extra: Partial<EndpointConfig> = {}): RouteDecorator {
   return function <T>(target: T, prop: symbol | string, descriptor: RouteDescriptor): RouteDescriptor {
     const ret = ControllerRegistry.registerPendingEndpoint(
-      castTo<ClassInstance<T>>(target).constructor, descriptor, { method, path, ...extra }
+      asConstructable(target).constructor, descriptor, { method, path, ...extra }
     );
     return ret;
   };
@@ -76,7 +76,7 @@ export function Options(path?: string): RouteDecorator { return Endpoint('option
  */
 export function ResponseType(responseType: EndpointIOType): RouteDecorator {
   return function <T>(target: T, property: string | symbol, descriptor: RouteDescriptor) {
-    return ControllerRegistry.registerPendingEndpoint(castTo<ClassInstance<T>>(target).constructor, descriptor, { responseType });
+    return ControllerRegistry.registerPendingEndpoint(asConstructable(target).constructor, descriptor, { responseType });
   };
 }
 
@@ -86,6 +86,6 @@ export function ResponseType(responseType: EndpointIOType): RouteDecorator {
  */
 export function RequestType(requestType: EndpointIOType): RouteDecorator {
   return function <T>(target: T, property: string | symbol, descriptor: RouteDescriptor) {
-    return ControllerRegistry.registerPendingEndpoint(castTo<ClassInstance<T>>(target).constructor, descriptor, { requestType });
+    return ControllerRegistry.registerPendingEndpoint(asConstructable(target).constructor, descriptor, { requestType });
   };
 }

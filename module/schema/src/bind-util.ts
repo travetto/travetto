@@ -1,4 +1,4 @@
-import { castTo, Class, clsInstance, impartial, TypedObject } from '@travetto/runtime';
+import { castTo, Class, classConstruct, asFull, TypedObject } from '@travetto/runtime';
 
 import { DataUtil } from './data';
 import { AllViewⲐ } from './internal/types';
@@ -145,11 +145,11 @@ export class BindUtil {
     if (data === null || data === undefined) {
       return data;
     }
-    const cls = SchemaRegistry.resolveInstanceType<T>(cons, impartial<T>(data));
+    const cls = SchemaRegistry.resolveInstanceType<T>(cons, asFull<T>(data));
     if (data instanceof cls) {
       return castTo(data);
     } else {
-      const tgt = clsInstance<T & { type?: string }>(cls);
+      const tgt = classConstruct<T & { type?: string }>(cls);
       SchemaRegistry.ensureInstanceTypeField(cls, tgt);
 
       for (const k of TypedObject.keys(tgt)) { // Do not retain undefined fields
@@ -239,7 +239,7 @@ export class BindUtil {
             }
           }
 
-          obj[castTo<keyof T>(schemaFieldName)] = castTo<T[keyof T]>(v);
+          obj[castTo<keyof T>(schemaFieldName)] = castTo(v);
 
           if (field.accessor) {
             Object.defineProperty(obj, schemaFieldName, {

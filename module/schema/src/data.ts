@@ -1,6 +1,6 @@
 import { isNumberObject as isNum, isBooleanObject as isBool, isStringObject as isStr } from 'node:util/types';
 
-import { castTo, Class, impartial, TypedObject } from '@travetto/runtime';
+import { asConstructable, castTo, Class, asFull, TypedObject } from '@travetto/runtime';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 
@@ -81,7 +81,7 @@ export class DataUtil {
           if (mode === 'strict') { // Bail on strict
             throw new Error(`Cannot merge ${a} [${typeof a}] with ${b} [${typeof b}]`);
           } else if (mode === 'coerce') { // Force on coerce
-            ret = this.coerceType(b, castTo<string>(a).constructor, false);
+            ret = this.coerceType(b, asConstructable(a).constructor, false);
           }
         }
       } else { // Object merge
@@ -241,7 +241,7 @@ export class DataUtil {
           }
         }
       }
-      return impartial(out);
+      return asFull(out);
     } else {
       return obj;
     }

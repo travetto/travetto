@@ -20,7 +20,7 @@ import {
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
-import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, impartial } from '@travetto/runtime';
+import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
@@ -345,7 +345,7 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
-        bulk.insert(MongoUtil.preInsertId(impartial(op.insert)));
+        bulk.insert(MongoUtil.preInsertId(asFull(op.insert)));
       } else if (op.upsert) {
         bulk.find({ _id: MongoUtil.uuid(op.upsert.id!) }).upsert().updateOne({ $set: op.upsert });
       } else if (op.update) {
@@ -359,7 +359,7 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
-        MongoUtil.postLoadId(impartial(op.insert));
+        MongoUtil.postLoadId(asFull(op.insert));
       }
     }
     for (const [index, _id] of TypedObject.entries(res.upsertedIds)) {

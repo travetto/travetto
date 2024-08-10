@@ -1,4 +1,4 @@
-import { Class, ClassInstance } from '@travetto/runtime';
+import { castTo, Class, ClassInstance } from '@travetto/runtime';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry } from '@travetto/test';
 
@@ -11,9 +11,9 @@ export function InjectableSuite() {
   return (target: Class) => {
     SuiteRegistry.registerPendingListener(
       target,
-      async function (this: Record<string, Function>) {
+      async function (this: unknown) {
         await RootRegistry.init();
-        await DependencyRegistry.injectFields(this as ClassInstance, target);
+        await DependencyRegistry.injectFields(castTo<ClassInstance>(this), target);
       },
       'beforeEach'
     );

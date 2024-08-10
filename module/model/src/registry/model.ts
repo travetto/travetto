@@ -1,7 +1,7 @@
 import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { AppError, castTo, Class, describeFunction, impartial } from '@travetto/runtime';
+import { AppError, castTo, Class, describeFunction, asFull } from '@travetto/runtime';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { IndexConfig, IndexType, ModelOptions } from './types';
@@ -71,7 +71,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {
-    const config = impartial(this.pending.get(cls.Ⲑid)!);
+    const config = asFull(this.pending.get(cls.Ⲑid)!);
 
     const schema = SchemaRegistry.get(cls);
     const view = schema.views[AllViewⲐ].schema;

@@ -1,4 +1,4 @@
-import { castTo, impartial, TypedFunction, type Class, type ClassInstance } from '@travetto/runtime';
+import { asConstructable, castTo, asFull, TypedFunction, type Class } from '@travetto/runtime';
 
 import { InjectableFactoryConfig, InjectableConfig } from './types';
 import { DependencyRegistry, ResolutionType } from './registry';
@@ -18,7 +18,7 @@ function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Par
       out = args;
     }
   }
-  return impartial(out);
+  return asFull(out);
 }
 
 /**
@@ -56,7 +56,7 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
       const config: InjectConfig = collapseConfig(first, ...args);
 
       DependencyRegistry.registerProperty(
-        castTo<ClassInstance>(target).constructor, propertyKey!, castTo(config)
+        asConstructable(target).constructor, propertyKey!, castTo(config)
       );
     }
   };

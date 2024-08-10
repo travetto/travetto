@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type Class<T = any> = abstract new (...args: any[]) => T;
 export type ClassInstance<T = any> = T & {
   constructor: Class<T> & { Ⲑid: string };
@@ -27,18 +27,28 @@ export const TypedObject: {
   entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
 } & ObjectConstructor = Object;
 
-export function impartialArray<T>(input: Partial<T>[]): T[] {
-  return input as unknown as T[];
-}
-
-export function impartial<T>(input: Partial<T>): T {
-  return input as unknown as T;
-}
-
 export function castTo<T>(input: unknown): T {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return input as T;
 }
 
-export function clsInstance<T>(cls: Class<T>, args: unknown[] = []): ClassInstance<T> {
-  return castTo(new (cls as { new(..._args: any[]): T })(...args));
+export function asFullArray<T>(input: Partial<T>[]): T[] {
+  return castTo(input);
+}
+
+export function asFull<T>(input: Partial<T>): T {
+  return castTo(input);
+}
+
+export function asClass<T = unknown>(input: Function | Class): Class<T> {
+  return castTo(input);
+}
+
+export function asConstructable<Z = unknown, T = unknown>(input: Class | T): { constructor: Class<Z> } {
+  return castTo(input);
+}
+
+export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassInstance<T> {
+  const cons: { new(..._args: any[]): T } = castTo(cls);
+  return castTo(new cons(...args));
 }

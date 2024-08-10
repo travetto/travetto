@@ -5,7 +5,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { Class, TimeSpan, Runtime, impartial } from '@travetto/runtime';
+import { Class, TimeSpan, Runtime, asFull } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
@@ -153,7 +153,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
     const file = await this.#resolveName(cls, '.json', item.id);
     await fs.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
-    return impartial<T>(item);
+    return asFull<T>(item);
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {

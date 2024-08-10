@@ -6,7 +6,7 @@ import {
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
   OptionalId
 } from '@travetto/model';
-import { ShutdownManager, type DeepPartial, type Class, AppError, castTo, impartial, TypedObject } from '@travetto/runtime';
+import { ShutdownManager, type DeepPartial, type Class, AppError, castTo, asFull, TypedObject, asConstructable } from '@travetto/runtime';
 import { SchemaChange, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
@@ -266,7 +266,7 @@ export class ElasticsearchModelService implements
 
     const body = operations.reduce<(T | Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>> | { doc: T })[]>((acc, op) => {
 
-      const esIdent = this.manager.getIdentity(castTo<Class>((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls }).constructor));
+      const esIdent = this.manager.getIdentity(asConstructable<T>((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls })).constructor);
       const ident: { _index: string, _type?: unknown } = { _index: esIdent.index };
 
       if (op.delete) {
@@ -438,7 +438,7 @@ export class ElasticsearchModelService implements
 
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
 
-    const copy = BindUtil.bindSchemaToObject(cls, impartial<T>({}), item);
+    const copy = BindUtil.bindSchemaToObject(cls, asFull<T>({}), item);
 
     try {
       const res = await this.client.updateByQuery({

@@ -1,5 +1,5 @@
 import { BaseRemoteService, IRemoteServiceConfig, PostResponseHandler, PreRequestHandler, RequestDefinition } from './types';
-import { CommonUtil, RestCast } from './util';
+import { CommonUtil, restCast } from './util';
 
 function isResponse(v: unknown): v is Response {
   // @ts-expect-error
@@ -76,7 +76,7 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
         console.debug('Making request:', req.url.pathname);
       }
 
-      const fetchInit: RequestInit = RestCast(req);
+      const fetchInit: RequestInit = restCast(req);
       fetchInit.credentials = req.withCredentials ? 'include' : 'same-origin';
       if (req.timeout) {
         const controller = new AbortController();
@@ -124,10 +124,10 @@ export abstract class BaseFetchService extends BaseRemoteService<RequestInit, Re
           try {
             return this.consumeJSON<T>(text);
           } catch {
-            return RestCast(text);
+            return restCast(text);
           }
         } else {
-          return RestCast(text);
+          return restCast(text);
         }
       } else {
         let res;

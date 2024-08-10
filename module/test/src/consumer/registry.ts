@@ -1,4 +1,4 @@
-import { clsInstance, type Class } from '@travetto/runtime';
+import { classConstruct, type Class } from '@travetto/runtime';
 import { TestConsumer } from './types';
 
 /**
@@ -45,7 +45,7 @@ class $TestConsumerRegistry {
     await this.manualInit();
 
     return typeof consumer === 'string' ?
-      clsInstance(this.get(consumer) ?? this.#primary) :
+      classConstruct(this.get(consumer) ?? this.#primary) :
       consumer;
   }
 }

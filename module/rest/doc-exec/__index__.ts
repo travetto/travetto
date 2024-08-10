@@ -1,14 +1,14 @@
 '@Application';
 import { InjectableFactory } from '@travetto/di';
 import { RestServer, ServerHandle } from '@travetto/rest';
-import { impartial } from '@travetto/runtime';
+import { asFull } from '@travetto/runtime';
 
 class Config {
   @InjectableFactory()
   static target(): RestServer<unknown> {
-    return impartial<RestServer>({
+    return asFull<RestServer>({
       init: () => { },
-      listen: () => impartial<ServerHandle>({}),
+      listen: () => asFull<ServerHandle>({}),
       registerRoutes: async () => { }
     });
   }

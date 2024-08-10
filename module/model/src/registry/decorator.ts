@@ -1,4 +1,4 @@
-import { castTo, Class } from '@travetto/runtime';
+import { asClass, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelType } from '../types/model';
@@ -36,7 +36,7 @@ export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
  */
 export function ExpiresAt() {
   return <K extends string, T extends Partial<Record<K, Date>>>(tgt: T, prop: K): void => {
-    ModelRegistry.register(castTo(tgt.constructor), { expiresAt: prop });
+    ModelRegistry.register(asClass(tgt.constructor), { expiresAt: prop });
   };
 }
 
@@ -59,7 +59,7 @@ export function PrePersist<T>(handler: DataHandler<T>, scope: PrePersistScope = 
  */
 export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PrePersistScope = 'all') {
   return function <K extends string, C extends Partial<Record<K, T>>>(tgt: C, prop: K): void {
-    ModelRegistry.registerDataHandlers(castTo(tgt.constructor), {
+    ModelRegistry.registerDataHandlers(asClass(tgt.constructor), {
       prePersist: [{
         scope,
         handler: (inst): void => {

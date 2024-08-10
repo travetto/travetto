@@ -2,7 +2,7 @@ import { IRemoteService, ParamConfig, RequestDefinition, RequestOptions } from '
 
 type BodyPart = { param: unknown, config: ParamConfig };
 
-export function RestCast<T>(input: unknown): T {
+export function restCast<T>(input: unknown): T {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return input as T;
 }
@@ -67,9 +67,9 @@ export class CommonUtil {
       const pName = config.name;
       if (config.binary) {
         if (config.array) {
-          parts.push(...(RestCast<Blob[]>(param)).map((uc, i) => ({ name: `${pName}[${i}]`, blob: uc })));
+          parts.push(...(restCast<Blob[]>(param)).map((uc, i) => ({ name: `${pName}[${i}]`, blob: uc })));
         } else {
-          parts.push({ name: pName, blob: RestCast(param) });
+          parts.push({ name: pName, blob: restCast(param) });
         }
       } else {
         parts.push({ name: pName, blob: new Blob([JSON.stringify(param)], { type: 'application/json' }) });
@@ -78,7 +78,7 @@ export class CommonUtil {
     if (body.length === 1) {
       const blob: Blob = parts[0].blob;
       return {
-        body: RestCast(blob),
+        body: restCast(blob),
         headers: 'name' in blob ? {
           'Content-Disposition': `inline; filename="${blob.name}"`
         } : {}
@@ -88,7 +88,7 @@ export class CommonUtil {
       for (const { name, blob } of parts) {
         form.append(name, blob, 'name' in blob && typeof blob.name === 'string' ? blob.name : undefined);
       }
-      return { body: RestCast(form), headers: {} };
+      return { body: restCast(form), headers: {} };
     }
   }
 
@@ -105,7 +105,7 @@ export class CommonUtil {
         const sub = this.flattenPaths(
           (prefix || !complex) ?
             { [prefix ?? name]: params[i] } :
-            RestCast(params[i]),
+            restCast(params[i]),
           '',
           loc === 'header'
         );
@@ -130,7 +130,7 @@ export class CommonUtil {
 
     const { headers: requestHeaders, body: requestBody } = this.requestBody<T>(body) || {};
 
-    return RestCast({
+    return restCast({
       headers: { ...headers, ...requestHeaders },
       url,
       method,
