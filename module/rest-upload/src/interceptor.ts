@@ -6,7 +6,7 @@ import {
   RestInterceptor, SerializeInterceptor, MimeUtil
 } from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
-import { AppError } from '@travetto/runtime';
+import { AppError, castTo } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
 import { RestUploadUtil } from './util';
@@ -51,7 +51,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
 
     console.log('Starting multipart upload', req.header('content-length'));
 
-    const uploader = busboy({ headers: { ...req.headers, 'content-type': req.getContentType()?.type! }, limits: { fileSize: largestMax } })
+    const uploader = busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
       .on('file', (field, stream, filename) =>
         uploads.push(
           RestUploadUtil.convertToBlob(stream, filename, config.files![field]?.maxSize ?? largestMax)
