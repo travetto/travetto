@@ -8,6 +8,7 @@ import {
 } from '@travetto/rest-aws-lambda';
 
 import { ExpressRestServer } from '@travetto/rest-express';
+import { castTo, impartial } from '@travetto/runtime';
 
 type AwsLambdaHandle = AwsLambdaHandler['handle'];
 
@@ -31,14 +32,12 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
 
   override async init(): Promise<this['raw']> {
     const ret = await super.init();
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.#handler = configure({ app: ret, ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandle;
+    this.#handler = castTo(configure({ app: ret, ...this.awsConfig.toJSON() }));
     return ret;
   }
 
   override async listen(): Promise<ServerHandle> {
     this.listening = true;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return {} as ServerHandle;
+    return impartial({});
   }
 }

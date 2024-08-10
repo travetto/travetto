@@ -1,6 +1,7 @@
 import { ChildProcess } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
+import { castTo } from './types';
 
 const MINUTE = (1000 * 60);
 
@@ -135,14 +136,13 @@ export class ExecUtil {
       }
     });
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (options.catch ? res : res.then(v => {
+    return castTo(options.catch ? res : res.then(v => {
       if (v.valid) {
         return v;
       } else {
         throw new Error(v.message);
       }
-    })) as Promise<ExecutionResult<T>>;
+    }));
   }
 
   /**

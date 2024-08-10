@@ -1,6 +1,6 @@
 import { DeleteByQueryRequest, QueryDslQueryContainer, SearchRequest, SearchResponse, Sort, SortOptions } from '@elastic/elasticsearch/lib/api/types';
 
-import { asT, Class, TypedObject } from '@travetto/runtime';
+import { castTo, Class, TypedObject } from '@travetto/runtime';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
 import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
@@ -22,15 +22,13 @@ export class ElasticsearchQueryUtil {
    */
   static extractSimple<T>(o: T, path: string = ''): Record<string, unknown> {
     const out: Record<string, unknown> = {};
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const sub = o as Record<string, unknown>;
-    const keys = Object.keys(sub);
+    const keys = TypedObject.keys(o);
     for (const key of keys) {
       const subPath = `${path}${key}`;
-      if (DataUtil.isPlainObject(sub[key]) && !Object.keys(sub[key])[0].startsWith('$')) {
-        Object.assign(out, this.extractSimple(sub[key], `${subPath}.`));
+      if (DataUtil.isPlainObject(o[key]) && !Object.keys(o[key])[0].startsWith('$')) {
+        Object.assign(out, this.extractSimple(o[key], `${subPath}.`));
       } else {
-        out[subPath] = sub[key];
+        out[subPath] = o[key];
       }
     }
     return out;
@@ -45,7 +43,7 @@ export class ElasticsearchQueryUtil {
     const exclude: string[] = [];
     for (const k of Object.keys(simp)) {
       const nk = k === 'id' ? '_id' : k;
-      const v = asT<1 | 0 | boolean>(simp[k]);
+      const v = castTo<1 | 0 | boolean>(simp[k]);
       if (v === 0 || v === false) {
         exclude.push(nk);
       } else {
@@ -62,7 +60,7 @@ export class ElasticsearchQueryUtil {
     return sort.map<SortOptions>(x => {
       const o = this.extractSimple(x);
       const k = Object.keys(o)[0];
-      const v = asT<boolean | -1 | 1>(o[k]);
+      const v = castTo<boolean | -1 | 1>(o[k]);
       return { [k]: { order: v === 1 || v === true ? 'asc' : 'desc' } };
     });
   }
@@ -146,7 +144,7 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$regex': {
-              const pattern = DataUtil.toRegex(asT<string>(v));
+              const pattern = DataUtil.toRegex(castTo<string>(v));
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
                   `${sPath}.text_cs` :
@@ -308,7 +306,7 @@ export class ElasticsearchQueryUtil {
     for (const r of results.hits.hits) {
       const obj = r._source!;
       if (includeId) {
-        asT<{ _id: string }>(obj)._id = r._id!;
+        castTo<{ _id: string }>(obj)._id = r._id!;
       }
       out.push(obj);
     }

@@ -6,7 +6,7 @@ import {
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
   OptionalId
 } from '@travetto/model';
-import { ShutdownManager, type DeepPartial, type Class, AppError, asT, impartial, TypedObject } from '@travetto/runtime';
+import { ShutdownManager, type DeepPartial, type Class, AppError, castTo, impartial, TypedObject } from '@travetto/runtime';
 import { SchemaChange, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
@@ -121,7 +121,7 @@ export class ElasticsearchModelService implements
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     try {
       const res = await this.client.get({ ...this.manager.getIdentity(cls), id });
-      return this.postLoad(cls, asT<T>(res._source));
+      return this.postLoad(cls, castTo<T>(res._source));
     } catch {
       throw new NotFoundError(cls, id);
     }
@@ -266,15 +266,15 @@ export class ElasticsearchModelService implements
 
     const body = operations.reduce<(T | Partial<Record<'delete' | 'create' | 'index' | 'update', { _index: string, _id?: string }>> | { doc: T })[]>((acc, op) => {
 
-      const esIdent = this.manager.getIdentity(asT<Class>((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls }).constructor));
+      const esIdent = this.manager.getIdentity(castTo<Class>((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls }).constructor));
       const ident: { _index: string, _type?: unknown } = { _index: esIdent.index };
 
       if (op.delete) {
         acc.push({ delete: { ...ident, _id: op.delete.id } });
       } else if (op.insert) {
-        acc.push({ create: { ...ident, _id: op.insert.id } }, asT<T>(op.insert));
+        acc.push({ create: { ...ident, _id: op.insert.id } }, castTo(op.insert));
       } else if (op.upsert) {
-        acc.push({ index: { ...ident, _id: op.upsert.id } }, asT<T>(op.upsert));
+        acc.push({ index: { ...ident, _id: op.upsert.id } }, castTo(op.upsert));
       } else if (op.update) {
         acc.push({ update: { ...ident, _id: op.update.id } }, { doc: op.update });
       }
@@ -446,7 +446,7 @@ export class ElasticsearchModelService implements
         refresh: true,
         query: search.query,
         max_docs: 1,
-        script: ElasticsearchSchemaUtil.generateReplaceScript(asT<{}>(copy))
+        script: ElasticsearchSchemaUtil.generateReplaceScript(castTo<{}>(copy))
       });
 
       if (res.version_conflicts || res.updated === undefined || res.updated === 0) {
@@ -499,7 +499,7 @@ export class ElasticsearchModelService implements
   }
 
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
-    const select = asT<SelectClause<T>>({ [field]: 1 });
+    const select = castTo<SelectClause<T>>({ [field]: 1 });
 
     const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
       select,
@@ -524,7 +524,7 @@ export class ElasticsearchModelService implements
     };
 
     const res = await this.execSearch(cls, search);
-    const { buckets } = asT<AggregationsStringTermsAggregate>('buckets' in res.aggregations![field] ? res.aggregations![field] : { buckets: [] });
+    const { buckets } = castTo<AggregationsStringTermsAggregate>('buckets' in res.aggregations![field] ? res.aggregations![field] : { buckets: [] });
     const out = Array.isArray(buckets) ? buckets.map(b => ({ key: b.key, count: b.doc_count })) : [];
     return out;
   }

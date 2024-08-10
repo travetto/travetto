@@ -1,7 +1,7 @@
 import { AssertionError } from 'node:assert';
 import path from 'node:path';
 
-import { Env, TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { Env, TimeUtil, Runtime, RuntimeIndex, castTo, impartial, Class } from '@travetto/runtime';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -39,8 +39,7 @@ export class TestExecutor {
 
         try {
           await pCap.run(() =>
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            (suite.instance as Record<string, Function>)[test.methodName]()
+            castTo<Record<string, Function>>(suite.instance)[test.methodName]()
           );
         } finally {
           process.env = env; // Restore
@@ -68,8 +67,7 @@ export class TestExecutor {
   static failFile(consumer: TestConsumer, imp: string, err: Error): void {
     const name = path.basename(imp);
     const classId = `${RuntimeIndex.getFromImport(imp)?.id}￮${name}`;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const suite = { class: { name }, classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp, } as SuiteConfig & SuiteResult;
+    const suite = impartial<SuiteConfig & SuiteResult>({ class: impartial<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp, });
     err.message = err.message.replaceAll(Runtime.mainSourcePath, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });

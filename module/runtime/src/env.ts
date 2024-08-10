@@ -1,3 +1,5 @@
+import { castTo } from './types';
+
 const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;
 
@@ -93,8 +95,7 @@ type AllType = {
 };
 
 function delegate<T extends object>(base: T): AllType & T {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return new Proxy(base as AllType & T, {
+  return new Proxy(castTo(base), {
     get(target, prop): unknown {
       return typeof prop !== 'string' ? undefined :
         // @ts-expect-error

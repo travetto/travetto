@@ -1,4 +1,4 @@
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { ModelRegistry } from '@travetto/model/src/registry/model';
 import { InjectableConfig, DependencyRegistry } from '@travetto/di';
 import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/common';
@@ -40,8 +40,7 @@ export class ModelCandidateUtil {
    * Get all providers that are viable candidates
    */
   static async getProviders(op?: keyof ModelStorageSupport): Promise<InjectableConfig[]> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const types = DependencyRegistry.getCandidateTypes<ModelStorageSupport>(ModelStorageSupportTarget as unknown as Class<ModelStorageSupport>);
+    const types = DependencyRegistry.getCandidateTypes<ModelStorageSupport>(castTo(ModelStorageSupportTarget));
     return types.filter(x => !op || x.class.prototype?.[op]);
   }
 

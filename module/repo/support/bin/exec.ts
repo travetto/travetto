@@ -1,6 +1,6 @@
 import { ChildProcess } from 'node:child_process';
 
-import { ExecutionResult, Env, Util, ExecUtil } from '@travetto/runtime';
+import { ExecutionResult, Env, Util, ExecUtil, castTo } from '@travetto/runtime';
 import { CliModuleUtil } from '@travetto/cli';
 import type { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
@@ -52,8 +52,7 @@ export class RepoExecUtil {
 
     config.showStdout = config.showStdout ?? (Env.DEBUG.isSet && !Env.DEBUG.isFalse);
     config.showStderr = config.showStderr ?? true;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const transform = config.transformResult ?? ((mod, result): T => result as T);
+    const transform = config.transformResult ?? ((mod, result): T => castTo<T>(result));
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
 

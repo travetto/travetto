@@ -1,5 +1,5 @@
-import { Class, AppError, ClassInstance } from '@travetto/runtime';
-import { ControllerRegistry, ParamConfig, Param, RouteHandler } from '@travetto/rest';
+import { AppError, AsyncMethodDescriptor, castTo, ClassInstance } from '@travetto/runtime';
+import { ControllerRegistry, ParamConfig, Param } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 import { RequestTarget } from '@travetto/rest/src/internal/types';
 
@@ -61,23 +61,22 @@ export function Upload(
  * @augments `@travetto/rest:Endpoint`
  */
 export function UploadAll(config: Partial<ParamConfig> & UploadConfig = {}) {
-  return function (target: ClassInstance, propertyKey: string): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const targetClass = target.constructor as Class;
+  return function <T>(target: T, propertyKey: string, desc: AsyncMethodDescriptor): void {
+    const inst = castTo<ClassInstance<T>>(target);
+    const targetClass = inst.constructor;
 
-    const { params } = ControllerRegistry.getOrCreatePendingField(targetClass, target[propertyKey]);
+    const { params } = ControllerRegistry.getOrCreatePendingField(targetClass, desc.value!);
 
     // Find the request object, and mark it as a file param
     params?.some((el, i) => {
       if (el.contextType === RequestTarget) {
-        SchemaRegistry.registerPendingParamConfig(target.constructor, propertyKey, i, Object, { specifiers: ['file'] });
+        SchemaRegistry.registerPendingParamConfig(inst.constructor, propertyKey, i, Object, { specifiers: ['file'] });
         return true;
       }
     });
 
     ControllerRegistry.registerEndpointInterceptorConfig(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      target.constructor, target[propertyKey] as RouteHandler,
+      inst.constructor, desc.value!,
       RestAssetInterceptor,
       {
         maxSize: config.maxSize,

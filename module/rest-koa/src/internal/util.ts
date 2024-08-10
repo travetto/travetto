@@ -4,6 +4,7 @@ import type koa from 'koa';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
 import { NodeEntityⲐ, ProviderEntityⲐ } from '@travetto/rest/src/internal/symbol';
+import { castTo } from '@travetto/runtime';
 
 /**
  * Provides translation between koa request/response objects and the framework
@@ -16,10 +17,8 @@ export class KoaServerUtil {
     return RestServerUtil.decorateRequest({
       [ProviderEntityⲐ]: ctx,
       [NodeEntityⲐ]: ctx.req,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      protocol: ctx.protocol as 'http',
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      method: ctx.request.method as 'GET',
+      protocol: castTo(ctx.protocol),
+      method: castTo(ctx.request.method),
       query: ctx.request.query,
       url: ctx.originalUrl,
       params: ctx.params,

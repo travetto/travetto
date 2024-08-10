@@ -1,4 +1,4 @@
-import { Class, ClassInstance, TypedObject } from '@travetto/runtime';
+import { castTo, Class, ClassInstance, TypedObject } from '@travetto/runtime';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
@@ -16,6 +16,14 @@ function resolveSchema<T>(base: Class<T>, o: T, view?: string): SchemaConfig {
   return SchemaRegistry.getViewSchema(
     SchemaRegistry.resolveInstanceType(base, o), view
   ).schema;
+}
+
+function isClassInstance<T>(o: unknown): o is ClassInstance<T> {
+  return !DataUtil.isPlainObject(o) && o !== null && typeof o === 'object' && !!o.constructor;
+}
+
+function isRangeValue(o: unknown): o is number | string | Date {
+  return typeof o === 'string' || typeof o === 'number' || o instanceof Date;
 }
 
 declare global {
@@ -42,8 +50,7 @@ export class SchemaValidator {
     const fields = TypedObject.keys<SchemaConfig>(schema);
     for (const field of fields) {
       if (schema[field].access !== 'readonly') { // Do not validate readonly fields
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        errors = errors.concat(this.#validateFieldSchema(schema[field], o[field as keyof T], relative));
+        errors = errors.concat(this.#validateFieldSchema(schema[field], o[castTo<keyof T>(field)], relative));
       }
     }
 
@@ -174,18 +181,15 @@ export class SchemaValidator {
       criteria.push(['maxlength', field.maxlength]);
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if (field.enum && !field.enum.values.includes(value as string)) {
+    if (field.enum && (typeof value !== 'string' || !field.enum.values.includes(value))) {
       criteria.push(['enum', field.enum]);
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if (field.min && this.#validateRange(field, 'min', value as number)) {
+    if (field.min && (!isRangeValue(value) || this.#validateRange(field, 'min', value))) {
       criteria.push(['min', field.min]);
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if (field.max && this.#validateRange(field, 'max', value as number)) {
+    if (field.max && (!isRangeValue(value) || this.#validateRange(field, 'max', value))) {
       criteria.push(['max', field.max]);
     }
 
@@ -268,10 +272,8 @@ export class SchemaValidator {
    * @param view The optional view to limit the scope to
    */
   static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if (!DataUtil.isPlainObject(o) && !(o instanceof cls || cls.Ⲑid === (o as ClassInstance<T>).constructor.Ⲑid)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      throw new TypeMismatchError(cls.name, (o as ClassInstance).constructor.name);
+    if (isClassInstance(o) && !(o instanceof cls || cls.Ⲑid === o.constructor.Ⲑid)) {
+      throw new TypeMismatchError(cls.name, o.constructor.name);
     }
     cls = SchemaRegistry.resolveInstanceType(cls, o);
 

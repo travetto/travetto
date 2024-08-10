@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { Class, TimeSpan, DeepPartial } from '@travetto/runtime';
+import { Class, TimeSpan, DeepPartial, castTo } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
@@ -87,8 +87,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       const item = await this.get(cls, id);
       for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
         const idxName = indexName(cls, idx);
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, item as DeepPartial<T>);
+        const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
         this.#indices[idx.type].get(idxName)?.get(key)?.delete(id);
       }
     } catch (err) {
@@ -101,8 +100,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async #writeIndices<T extends ModelType>(cls: Class<T>, item: T): Promise<void> {
     for (const idx of ModelRegistry.getIndices(cls, ['sorted', 'unsorted'])) {
       const idxName = indexName(cls, idx);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, item as DeepPartial<T>);
+      const { key, sort } = ModelIndexedUtil.computeIndexKey(cls, idx, castTo(item));
       let index = this.#indices[idx.type].get(idxName)?.get(key);
 
       if (!index) {

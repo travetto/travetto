@@ -1,9 +1,9 @@
 import cookies from 'cookies';
-import { ServerResponse, IncomingMessage } from 'node:http';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
+import { castTo } from '@travetto/runtime';
 
 import { FilterContext, Request, Response } from '../types';
 import { RestConfig } from '../application/config';
@@ -48,8 +48,7 @@ class CustomCookies extends cookies {
   #opts: RestCookieConfig;
 
   constructor(req: Request, res: Response, opts: RestCookieConfig) {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    super(req as unknown as IncomingMessage, res as unknown as ServerResponse, opts);
+    super(castTo(req), castTo(res), opts);
     this.#opts = opts;
   }
 

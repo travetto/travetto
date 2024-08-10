@@ -1,4 +1,4 @@
-import { Class, AppError, describeFunction } from '@travetto/runtime';
+import { Class, AppError, describeFunction, castTo, clsInstance, impartial } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig } from './types';
@@ -51,8 +51,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    */
   getMetadata<K>(cls: Class, key: symbol): K | undefined {
     const cfg = this.get(cls);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return cfg.metadata?.[key] as K;
+    return castTo(cfg.metadata?.[key]);
   }
 
   /**
@@ -64,8 +63,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    */
   getOrCreatePendingMetadata<K>(cls: Class, key: symbol, value: K): K {
     const cfg = this.getOrCreatePending(cls);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return ((cfg.metadata ??= {})[key] ??= value) as K;
+    return castTo((cfg.metadata ??= {})[key] ??= value);
   }
 
   /**
@@ -73,11 +71,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    */
   ensureInstanceTypeField<T>(cls: Class, o: T): void {
     const schema = this.get(cls);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const typeField = (schema.subTypeField) as keyof T;
+    const typeField = castTo<keyof T>(schema.subTypeField);
     if (schema.subTypeName && typeField in schema.views[AllViewⲐ].schema && !o[typeField]) {  // Do we have a type field defined
-      // @ts-expect-error
-      o[typeField] = schema.subTypeName; // Assign if missing
+      o[typeField] = castTo<T[keyof T]>(schema.subTypeName); // Assign if missing
     }
   }
 
@@ -112,11 +108,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     const baseSchema = this.get(base);
 
     if (clsSchema.subTypeName || baseSchema.baseType) { // We have a sub type
-      // @ts-expect-error
-      const type = o[baseSchema.subTypeField] ?? clsSchema.subTypeName ?? baseSchema.subTypeName;
+      const type = castTo<string>(o[castTo<keyof T>(baseSchema.subTypeField)]) ?? clsSchema.subTypeName ?? baseSchema.subTypeName;
       const ret = this.#subTypes.get(base)!.get(type)!;
-      // @ts-expect-error
-      if (ret && !(new ret() instanceof cls)) {
+      if (ret && !(clsInstance(ret) instanceof cls)) {
         throw new AppError(`Resolved class ${ret.name} is not assignable to ${cls.name}`);
       }
       return ret;
@@ -237,8 +231,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (!this.#pendingViews.has(target)) {
       this.#pendingViews.set(target, new Map());
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const generalConfig = fields as unknown as ViewFieldsConfig<unknown>;
+    const generalConfig = castTo<ViewFieldsConfig<unknown>>(fields);
     this.#pendingViews.get(target)!.set(view, generalConfig);
   }
 
@@ -286,8 +279,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (!allViewConf.schema[prop]) {
       allViewConf.fields.push(prop);
       // Partial config while building
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      allViewConf.schema[prop] = {} as FieldConfig;
+      allViewConf.schema[prop] = impartial<FieldConfig>({});
     }
     if (config.aliases) {
       config.aliases = [...allViewConf.schema[prop].aliases ?? [], ...config.aliases];

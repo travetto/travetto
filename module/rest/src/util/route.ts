@@ -1,6 +1,6 @@
 import { isPromise } from 'node:util/types';
 
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 
 import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
@@ -32,8 +32,7 @@ export class RouteUtil {
    */
   static getInterceptorConfig<T extends RestInterceptor<U>, U extends ManagedInterceptorConfig>(req: Request, inst: T): U | undefined {
     const cfg = req[InterceptorConfigsⲐ]?.[inst.constructor.Ⲑid] ?? undefined;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return cfg as U;
+    return castTo(cfg);
   }
 
   /**
@@ -97,7 +96,7 @@ export class RouteUtil {
    * @param router
    */
   static resolveInterceptorsWithConfig(
-    interceptors: RestInterceptor[],
+    interceptors: RestInterceptor<LightweightConfig>[],
     route: RouteConfig | EndpointConfig,
     router?: ControllerConfig
   ): (readonly [RestInterceptor, LightweightConfig | undefined])[] {
@@ -113,30 +112,25 @@ export class RouteUtil {
 
     const resolvedConfig = new Map<Class, LightweightConfig>();
     for (const inst of interceptors) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const cls = inst.constructor as Class;
+      const cls = castTo<Class>(inst.constructor);
       const values = resolvedConfigs.get(cls) ?? [];
       if (inst.config) {
         let resolved =
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          inst.resolveConfig?.(values) as LightweightConfig ??
+          inst.resolveConfig?.(values) ??
           Object.assign({}, inst.config, ...values);
 
         if (inst.finalizeConfig) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          resolved = inst.finalizeConfig(resolved) as typeof resolved;
+          resolved = inst.finalizeConfig(resolved);
         }
         resolvedConfig.set(cls, resolved);
       } else {
         resolvedConfig.set(cls, {});
       }
     }
-    return interceptors
-      .map(x => [
-        x,
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        resolvedConfig.get(x.constructor as Class)
-      ] as const);
+    return interceptors.map(inst => [
+      inst,
+      resolvedConfig.get(castTo(inst.constructor))
+    ] as const);
   }
 
   /**

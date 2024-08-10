@@ -3,7 +3,7 @@ import {
   KeySchemaElement, PutItemCommandInput, PutItemCommandOutput
 } from '@aws-sdk/client-dynamodb';
 
-import { ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
+import { impartial, ShutdownManager, TimeUtil, type Class, type DeepPartial } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
@@ -309,8 +309,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, (): Promise<T> => this.get(cls, id));
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const itemAsT = item as T;
+    const itemAsT = impartial<T>(item);
     await this.#putItem(cls, id, itemAsT, 'update');
     return itemAsT;
   }

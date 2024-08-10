@@ -1,4 +1,4 @@
-import { Class, TypedObject } from '@travetto/runtime';
+import { castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
@@ -53,11 +53,9 @@ export class SQLUtil {
           o[k] = this.cleanResults(dct, o[k]);
         }
       }
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return { ...o } as unknown as U[];
+      return castTo({ ...o });
     } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return o as unknown as U;
+      return castTo(o);
     }
   }
 
@@ -73,8 +71,7 @@ export class SQLUtil {
     }
 
     if (!cls) { // If a simple type, it is it's own field
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const field = { ...top } as FieldConfig;
+      const field = castTo<FieldConfig>({ ...top });
       return {
         local: [field], localMap: { [field.name]: field },
         foreign: [], foreignMap: {}
@@ -184,8 +181,7 @@ export class SQLUtil {
       },
       onSub: (config) => {
         const { config: field } = config;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const topObj = pathObj[pathObj.length - 1] as Record<string, unknown>;
+        const topObj = castTo<Record<string, unknown>>(pathObj[pathObj.length - 1]);
         const top = config.path[config.path.length - 1];
 
         if (field.name in topObj) {
@@ -213,8 +209,7 @@ export class SQLUtil {
       },
       onSimple: (config) => {
         const { config: field } = config;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const topObj = pathObj[pathObj.length - 1] as Record<string, unknown>;
+        const topObj = castTo<Record<string, unknown>>(pathObj[pathObj.length - 1]);
         const value = topObj[field.name];
         return handler.onSimple({ ...config, value });
       }
@@ -234,16 +229,14 @@ export class SQLUtil {
     let toGet = new Set<string>();
 
     for (const [k, v] of TypedObject.entries(select)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const sk = k as string;
-      if (!DataUtil.isPlainObject(select[k]) && localMap[sk]) {
+      if (typeof k === 'string' && !DataUtil.isPlainObject(select[k]) && localMap[k]) {
         if (!v) {
           if (toGet.size === 0) {
             toGet = new Set(SchemaRegistry.get(cls).views[AllViewⲐ].fields);
           }
-          toGet.delete(sk);
+          toGet.delete(k);
         } else {
-          toGet.add(sk);
+          toGet.add(k);
         }
       }
     }
@@ -268,8 +261,7 @@ export class SQLUtil {
         } else {
           stack.push(field);
           schema = SchemaRegistry.get(field.type);
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          cl = val as Record<string, unknown>;
+          cl = castTo(val);
         }
       }
       return found;
@@ -283,29 +275,24 @@ export class SQLUtil {
     if (field) {
       const isSimple = SchemaRegistry.has(field.type);
       for (const el of v) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const parentKey = el[dct.parentPathField.name as keyof T] as unknown as string;
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const root = (parent as Record<string, Record<string, unknown>>)[parentKey];
+        const parentKey = castTo<string>(el[castTo<keyof T>(dct.parentPathField.name)]);
+        const root = castTo<Record<string, Record<string, unknown>>>(parent)[parentKey];
+        const fieldKey = castTo<keyof T & string>(field.name);
         if (field.array) {
-          if (!root[field.name]) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            root[field.name] = [isSimple ? el : el[field.name as keyof T]];
-          } else {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            (root[field.name] as unknown[]).push(isSimple ? el : el[field.name as keyof T]);
+          if (!root[fieldKey]) {
+            root[fieldKey] = [isSimple ? el : el[fieldKey]];
+          } else if (Array.isArray(root[fieldKey])) {
+            root[fieldKey].push(isSimple ? el : el[fieldKey]);
           }
         } else {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          root[field.name] = isSimple ? el : el[field.name as keyof T];
+          root[fieldKey] = isSimple ? el : el[fieldKey];
         }
       }
     }
 
     const mapping: Record<string, T> = {};
     for (const el of v) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const key = el[dct.pathField.name as keyof T];
+      const key = el[castTo<keyof T>(dct.pathField.name)];
       if (typeof key === 'string') {
         mapping[key] = el;
       }

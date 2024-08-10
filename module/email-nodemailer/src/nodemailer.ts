@@ -5,6 +5,7 @@ import type ses from 'nodemailer/lib/ses-transport';
 import type sendmail from 'nodemailer/lib/sendmail-transport';
 
 import { MailTransport, EmailOptions, SentEmail } from '@travetto/email';
+import { castTo } from '@travetto/runtime';
 
 type Transport = TransportType | json.Options | smtp.Options | ses.Options | sendmail.Options;
 
@@ -49,7 +50,6 @@ export class NodemailerTransport implements MailTransport {
       console.error('Unable to send emails', { recipientCount: res.rejected?.length });
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return res as S;
+    return castTo(res);
   }
 }

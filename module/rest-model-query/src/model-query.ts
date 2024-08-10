@@ -1,4 +1,4 @@
-import { AppError, Class } from '@travetto/runtime';
+import { AppError, castTo, Class } from '@travetto/runtime';
 import { ModelType, ModelRegistry } from '@travetto/model';
 import { Field, Schema } from '@travetto/schema';
 import { ControllerRegistry } from '@travetto/rest';
@@ -37,8 +37,7 @@ const convert = <T>(k?: string): T | undefined =>
  */
 export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>): (target: Class<Svc>) => void {
   function getCls(): Class<T> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return ModelRegistry.get(cls).class as Class<T>;
+    return castTo(ModelRegistry.get(cls).class);
   }
 
   return (target: Class<Svc>) => {

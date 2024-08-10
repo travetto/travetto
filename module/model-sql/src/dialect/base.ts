@@ -1,5 +1,5 @@
 import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
-import { Class, AppError, TypedObject, describeFunction } from '@travetto/runtime';
+import { Class, AppError, TypedObject, describeFunction, TimeUtil, castTo } from '@travetto/runtime';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
@@ -196,8 +196,11 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Number) {
       return `${value}`;
     } else if (conf.type === Date) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return this.resolveDateValue(ModelQueryUtil.resolveComparator(value) as Date);
+      if (typeof value === 'string' && TimeUtil.isTimeSpan(value)) {
+        return this.resolveDateValue(TimeUtil.fromNow(value));
+      } else {
+        return this.resolveDateValue(DataUtil.coerceType(value, Date, true));
+      }
     } else if (conf.type === PointImpl && Array.isArray(value)) {
       return `point(${value[0]},${value[1]})`;
     } else if (conf.type === Object) {
@@ -294,9 +297,8 @@ export abstract class SQLDialect implements DialectState {
    * Add a sql column
    */
   getAddColumnSQL(stack: VisitStack[]): string {
-    const field = stack[stack.length - 1];
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return `ALTER TABLE ${this.parentTable(stack)} ADD COLUMN ${this.getColumnDefinition(field as FieldConfig)};`;
+    const field = castTo<FieldConfig>(stack[stack.length - 1]);
+    return `ALTER TABLE ${this.parentTable(stack)} ADD COLUMN ${this.getColumnDefinition(field)};`;
   }
 
   /**

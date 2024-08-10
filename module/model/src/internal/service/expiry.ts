@@ -1,4 +1,4 @@
-import { ShutdownManager, Class, TimeSpan, TimeUtil, Util } from '@travetto/runtime';
+import { ShutdownManager, Class, TimeSpan, TimeUtil, Util, castTo } from '@travetto/runtime';
 
 import { ModelRegistry } from '../../registry/model';
 import { ModelExpirySupport } from '../../service/expiry';
@@ -15,10 +15,7 @@ export class ModelExpiryUtil {
    */
   static getExpiryState<T extends ModelType>(cls: Class<T>, item: T): { expiresAt?: Date, expired?: boolean } {
     const expKey = ModelRegistry.getExpiry(cls);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const keyAsT = expKey as keyof T;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const expiresAt = item[keyAsT] ? item[keyAsT] as unknown as Date : undefined;
+    const expiresAt = castTo<Date>(item[expKey]);
 
     return {
       expiresAt,

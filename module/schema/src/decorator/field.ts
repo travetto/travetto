@@ -18,8 +18,7 @@ function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
   };
   fn.Param = fn;
 
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return fn as PropType<V>;
+  return fn;
 }
 
 /**

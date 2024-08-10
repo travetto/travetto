@@ -2,6 +2,7 @@ import { IncomingHttpHeaders } from 'node:http';
 
 import { getExtension } from 'mime';
 
+import { castTo } from '@travetto/runtime';
 
 import { Request, ContentType, ByteRange } from '../../types';
 import { MimeUtil } from '../../util/mime';
@@ -23,8 +24,7 @@ export class RequestCore implements Partial<Request> {
    * @param key The header to get
    */
   header<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | string[] | undefined {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.headers[(key as string).toLowerCase() as K];
+    return this.headers[castTo<string>(key).toLowerCase()];
   }
   /**
    * Get the inbound request header as a string[]

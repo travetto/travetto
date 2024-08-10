@@ -1,4 +1,4 @@
-import { impartial } from '@travetto/runtime';
+import { castTo, impartial } from '@travetto/runtime';
 import { Response, Request } from '../types';
 import { RequestCore } from './internal/request';
 import { ResponseCore } from './internal/response';
@@ -11,13 +11,11 @@ export class RestServerUtil {
    * Add base request as support for the provided
    * @param req Inbound request
    */
-  static decorateRequest<T extends Request>(req: Partial<T> & Record<string, unknown>): T {
+  static decorateRequest<T extends Request>(req: Partial<T> & Record<string, unknown> & { connection?: unknown }): T {
     delete req.redirect;
     Object.setPrototypeOf(req, RequestCore.prototype);
     req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    req.method = req.method?.toUpperCase() as 'GET';
-    // @ts-expect-error
+    req.method = castTo(req.method?.toUpperCase());
     req.connection = {};
 
     if (!('files' in req)) { req.files = undefined; }

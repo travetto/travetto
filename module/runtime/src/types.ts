@@ -21,7 +21,7 @@ export type DeepPartial<T> = {
 };
 
 export const TypedObject: {
-  keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
+  keys<T = unknown, K extends keyof T = keyof T & string>(o: T): K[];
   fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;
   entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
 } & ObjectConstructor = Object;
@@ -38,6 +38,6 @@ export function clsInstance<T>(cls: Class<T>, args: unknown[] = []): ClassInstan
   return new (cls as ConcreteClass)(...args);
 }
 
-export function asT<T>(input: unknown): T {
+export function castTo<T>(input: unknown): T {
   return input as T;
 }

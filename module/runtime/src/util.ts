@@ -3,6 +3,7 @@ import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { castTo } from './types';
 
 type PromiseWithResolvers<T> = {
   resolve: (v: T) => void;
@@ -64,8 +65,7 @@ export class Util {
         idx += 1;
         let m = el;
         for (const fn of fns) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          m = (await fn(m, idx)) as typeof m;
+          m = castTo(await fn(m, idx));
         }
         yield m;
       }

@@ -1,5 +1,5 @@
 import { ModelRegistry, ModelType } from '@travetto/model';
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { PageableModelQuery, Query } from '../../model/query';
@@ -81,10 +81,9 @@ export class ModelQuerySuggestUtil {
    */
   static getSuggestFieldQuery<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Query<T> {
     const config = ModelRegistry.get(cls);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.getSuggestQuery<ModelType>(cls, field as ValidStringFields<ModelType>, prefix, {
+    return this.getSuggestQuery<T>(cls, castTo(field), prefix, {
       ...(query ?? {}),
-      select: { [field]: true, ...(config.subType ? { [SchemaRegistry.get(cls).subTypeField]: true } : {}) }
-    }) as Query<T>;
+      select: castTo({ [field]: true, ...(config.subType ? { [SchemaRegistry.get(cls).subTypeField]: true } : {}) })
+    });
   }
 }

@@ -7,6 +7,7 @@ import { SQLModelConfig, SQLDialect } from '@travetto/model-sql';
 import { VisitStack } from '@travetto/model-sql/src/internal/util';
 
 import { SqliteConnection } from './connection';
+import { castTo } from '@travetto/runtime';
 
 /**
  * Sqlite Dialect for the SQL Model Source
@@ -55,8 +56,7 @@ export class SqliteDialect extends SQLDialect {
    * Define column modification
    */
   getModifyColumnSQL(stack: VisitStack[]): string {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const field = stack[stack.length - 1] as FieldConfig;
+    const field = castTo<FieldConfig>(stack[stack.length - 1]);
     const type = this.getColumnType(field);
     const ident = this.ident(field.name);
     return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${ident} TYPE ${type} USING (${ident}::${type});`;

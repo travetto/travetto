@@ -2,7 +2,7 @@ import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { ModelType } from '@travetto/model';
-import { Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 
 import { SQLDialect, SQLModelConfig } from '@travetto/model-sql';
 import { SQLUtil, VisitStack } from '@travetto/model-sql/src/internal/util';
@@ -52,8 +52,7 @@ export class PostgreSQLDialect extends SQLDialect {
    * Define column modification
    */
   getModifyColumnSQL(stack: VisitStack[]): string {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const field = stack[stack.length - 1] as FieldConfig;
+    const field = castTo<FieldConfig>(stack[stack.length - 1]);
     const type = this.getColumnType(field);
     const ident = this.ident(field.name);
     return `ALTER TABLE ${this.parentTable(stack)} ALTER COLUMN ${ident}  TYPE ${type} USING (${ident}::${type});`;

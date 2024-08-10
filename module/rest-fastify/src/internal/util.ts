@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
 import { NodeEntityⲐ, ProviderEntityⲐ } from '@travetto/rest/src/internal/symbol';
+import { castTo } from '@travetto/runtime';
 
 /**
  * Provide a mapping between fastify request/response and the framework analogs
@@ -15,13 +16,10 @@ export class FastifyServerUtil {
       [ProviderEntityⲐ]: req,
       [NodeEntityⲐ]: req.raw,
       protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      method: req.raw.method as Request['method'],
+      method: castTo(req.raw.method),
       url: req.raw!.url,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      query: req.query as Record<string, string>,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      params: req.params as Record<string, string>,
+      query: castTo(req.query),
+      params: castTo(req.params),
       session: req.session,
       headers: req.headers,
       pipe: req.raw.pipe.bind(req.raw),
@@ -48,8 +46,8 @@ export class FastifyServerUtil {
         }
       },
       send(data): void {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        if (((reply.getHeader('Content-Type') ?? '') as string).includes('json') && typeof data === 'string') {
+        const type = (reply.getHeader('Content-Type') ?? '');
+        if (typeof type === 'string' && type.includes('json') && typeof data === 'string') {
           data = Buffer.from(data);
         }
         reply.send(data);
@@ -62,8 +60,7 @@ export class FastifyServerUtil {
         reply.raw.end();
       },
       setHeader: reply.raw.setHeader.bind(reply.raw),
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      getHeader: reply.raw.getHeader.bind(reply.raw) as (key: string) => string, // NOTE: Forcing type, may be incorrect
+      getHeader: castTo(reply.raw.getHeader.bind(reply.raw)), // NOTE: Forcing type, may be incorrect
       removeHeader: reply.raw.removeHeader.bind(reply.raw),
       write: reply.raw.write.bind(reply.raw)
     });
