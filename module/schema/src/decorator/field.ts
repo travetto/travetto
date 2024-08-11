@@ -28,7 +28,7 @@ function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
  * @augments `@travetto/schema:Field`
  */
 export function Field(type: ClassList, ...config: Partial<FieldConfig>[]) {
-  return (f: ClassInstance, k: string, idx?: number): void => {
+  return (f: ClassInstance, k: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (idx !== undefined && typeof idx === 'number') {
       SchemaRegistry.registerPendingParamConfig(f.constructor, k, idx, type, Object.assign({}, ...config));
     } else {
