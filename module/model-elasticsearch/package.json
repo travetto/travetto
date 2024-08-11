@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-elasticsearch",
-  "version": "5.0.0-rc.9",
+  "version": "5.0.0-rc.10",
   "description": "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.",
   "keywords": [
     "elasticsearch",
@@ -28,9 +28,9 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.14.0",
-    "@travetto/config": "^5.0.0-rc.9",
-    "@travetto/model": "^5.0.0-rc.9",
-    "@travetto/model-query": "^5.0.0-rc.9"
+    "@travetto/config": "^5.0.0-rc.10",
+    "@travetto/model": "^5.0.0-rc.10",
+    "@travetto/model-query": "^5.0.0-rc.10"
   },
   "peerDependencies": {
     "@travetto/command": "^5.0.0-rc.9"

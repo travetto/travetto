@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-query-language",
-  "version": "5.0.0-rc.9",
+  "version": "5.0.0-rc.10",
   "description": "Datastore query language.",
   "keywords": [
     "datastore",
@@ -26,9 +26,9 @@
     "directory": "module/model-query"
   },
   "dependencies": {
-    "@travetto/model-query": "^5.0.0-rc.9",
-    "@travetto/model": "^5.0.0-rc.9",
-    "@travetto/schema": "^5.0.0-rc.9"
+    "@travetto/model-query": "^5.0.0-rc.10",
+    "@travetto/model": "^5.0.0-rc.10",
+    "@travetto/schema": "^5.0.0-rc.10"
   },
   "peerDependencies": {
     "@travetto/test": "^5.0.0-rc.9"
