@@ -16,7 +16,7 @@ class EncodingTest {
 
   @Test('should properly encode the token (utf8)')
   async testUTF8() {
-    const expected = 'José';
+    const expected = 'Resume é';
     const token = await JWTUtil.create({ name: expected }, { key: 'shh' });
     const decodedName = JSON.parse(base64toUtf8(token.split('.')[1])).name;
     assert(decodedName === expected);
@@ -24,7 +24,7 @@ class EncodingTest {
 
   @Test('should properly encode the token (binary)')
   async tesBinary() {
-    const expected = 'José';
+    const expected = 'Resume é';
     const token = await JWTUtil.create({ name: expected }, { key: 'shh', encoding: 'binary' });
     const decodedName = JSON.parse(atob(token.split('.')[1])).name;
     assert(decodedName === expected);

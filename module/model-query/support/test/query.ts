@@ -18,7 +18,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async testWordBoundary() {
     const service = await this.service;
     await this.saveAll(Person, [1, 2, 3, 8].map(x => Person.from({
-      name: 'Bob Ombo',
+      name: 'Bob Omber',
       age: 20 + x,
       gender: 'm',
       address: {

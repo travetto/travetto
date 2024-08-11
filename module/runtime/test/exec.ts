@@ -87,7 +87,7 @@ export class ExecUtilTest {
 
   @Test()
   async testImmediateFail() {
-    const proc = spawn('npm', ['run', 'zork'], { cwd: Runtime.workspace.path });
+    const proc = spawn('npm', ['run', 'Cork'], { cwd: Runtime.workspace.path });
     await timers.setTimeout(600);
     const failure = await ExecUtil.getResult(proc, { catch: true });
     assert(!failure.valid);

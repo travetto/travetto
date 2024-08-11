@@ -35,8 +35,8 @@ export class NamingStrategyTest {
     const resolved = strategy.resolve(asFull<StreamMeta>({
       filename: 'orange',
       contentType: 'image/jpeg',
-      hash: 'banana-tomato-okextra'
+      hash: 'bar-car-fly-extra'
     }));
-    assert(resolved === 'bana/na-t/omat/o-ok/extra.jpeg');
+    assert(resolved === 'bar-/car-/fly-/extr/a.jpeg');
   }
 }

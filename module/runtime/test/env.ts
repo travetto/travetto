@@ -17,7 +17,7 @@ export class EnvTest {
     assert(new EnvProp('nAmE').val === 'bOb');
     assert(new EnvProp('NaMe').val === undefined);
 
-    assert(new EnvProp('nombre').val === undefined);
+    assert(new EnvProp('Random').val === undefined);
   }
 
   @Test()

@@ -14,7 +14,7 @@ export class DockerIOTest {
 
   @Test()
   async test() {
-    const container = new DockerContainer('rafakato/alpine-graphicsmagick')
+    const container = new DockerContainer('rafakato/alpine-graphicsmagick:latest')
       .forceDestroyOnShutdown()
       .setInteractive(true);
 
