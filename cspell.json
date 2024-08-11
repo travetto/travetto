@@ -2,21 +2,11 @@
     "version": "0.2",
     "ignorePaths": [
         "**/*.d.ts",
-        "archived/*/test/**",
-        "module/*/test/**",
-        "global-test/**",
-        "module/*/support/test/**",
-        "node_modules/**",
-        "**/node_modules/**"
+        "**/node_modules/**",
+        ".git/**",
+        "archived/**"
     ],
     "dictionaryDefinitions": [],
-    "dictionaries": [
-        "aws",
-        "html",
-        "softwareTerms",
-        "web-services",
-        "en_US"
-    ],
     "words": [
         "Activatible",
         "addgroup",
@@ -74,7 +64,8 @@
         "/[/][^/ ]+[/]/",
         "/[A-Za-z0-9_\\-]{20,}/",
         "/[A-Z_]{6,}/",
-        "/&[^; ]+;/"
+        "/&[^; ]+;/",
+        "/([A-Za-z])\\1{2,}/"
     ],
     "import": [],
     "enabled": true

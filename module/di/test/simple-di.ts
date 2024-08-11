@@ -21,7 +21,7 @@ import { InjectionError } from '../src/error';
 const FOUR = 4;
 
 function doWork() {
-  throw new Error('ahhh');
+  throw new Error('Uh-oh');
 }
 
 @Suite('di')
@@ -106,7 +106,7 @@ class DiTest2 {
     assert(inst.db.dbConfig.empty.age === 10);
   }
 
-  @Test('factory with autowire after')
+  @Test('factory with auto-wire after')
   async factory2() {
     assert(true);
 
@@ -123,7 +123,7 @@ class DiTest2 {
     assert(inst.dbConfig.empty.age === 20);
   }
 
-  @Test('factory with autowire after')
+  @Test('factory with auto-wire after')
   async factory3() {
     assert(true);
 
@@ -136,7 +136,7 @@ class DiTest2 {
     assert.ok(inst.dbConfig);
   }
 
-  @Test('factory with autowire after')
+  @Test('factory with auto-wire after')
   async factory4() {
     assert(true);
 
@@ -179,7 +179,7 @@ class DiTest2 {
     assert(customInst instanceof InterfaceType);
   }
 
-  @Test('overriden via subclass')
+  @Test('overridden via subclass')
   async subclassVerification() {
     const types = DependencyRegistry.getCandidateTypes(UsableMainClass);
     assert(types.length === 2);

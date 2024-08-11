@@ -19,7 +19,7 @@ class Preferences {
 class User {
   id: string;
   email: string;
-  prefs: Preferences;
+  preferences: Preferences;
 }
 
 @Model()
@@ -58,7 +58,7 @@ export class VerifyTest {
     const query: ModelQuery<User> = {
       where: {
         id: '5',
-        prefs: {
+        preferences: {
           language: {
             $eq: 'a'
           }

@@ -58,7 +58,7 @@ class VerifySuite {
       encoding: 'utf8'
     });
 
-    const res = await JWTUtil.verify(signed, { key: ['toast', 'most', 'mest', 'test'] });
+    const res = await JWTUtil.verify(signed, { key: ['toast', 'most', 'mist', 'test'] });
     assert.deepEqual(res, payload);
   }
 

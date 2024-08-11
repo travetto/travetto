@@ -66,7 +66,7 @@ class TestController {
   @Get('/opt-in')
   async none() { }
 
-  @Get('/opt-in/forreal')
+  @Get('/opt-in/for-real')
   @ConfigureInterceptor(CustomInterceptor, {})
   async optIn() { }
 
@@ -89,12 +89,12 @@ class AltTestController {
   @Get('/opt-in')
   async none() { }
 
-  @Get('/opt-in/forreal')
+  @Get('/opt-in/for-real')
   @ConfigureInterceptor(CustomInterceptor, { disabled: false, name: 'sarah' })
   async optIn() { }
 
   @Get('/override')
-  @ConfigureInterceptor(CustomInterceptor, { name: 'dalek' })
+  @ConfigureInterceptor(CustomInterceptor, { name: 'Randy' })
   async override() { }
 
   @Get('/blackListed')
@@ -128,14 +128,14 @@ class TestInterceptorConfigSuite {
 
   @Test()
   async verifyOptIn() {
-    assert(await this.name(TestController, '/opt-in/forreal') === 'bob');
-    assert(await this.name(AltTestController, '/opt-in/forreal') === 'sarah');
+    assert(await this.name(TestController, '/opt-in/for-real') === 'bob');
+    assert(await this.name(AltTestController, '/opt-in/for-real') === 'sarah');
   }
 
   @Test()
   async verifyOverride() {
     assert(await this.name(TestController, '/override') === 'jane');
-    assert(await this.name(AltTestController, '/override') === 'dalek');
+    assert(await this.name(AltTestController, '/override') === 'Randy');
   }
 
   @Test()

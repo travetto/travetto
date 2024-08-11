@@ -4,7 +4,7 @@ import { Suite, Test } from '@travetto/test';
 import { JWTUtil } from '../__index__';
 
 @Suite()
-export class RerwriteSuite {
+export class RewriteSuite {
   @Test()
   async verifyRewrite() {
     const SIGN = { alg: 'HS256', key: 'bob' } as const;

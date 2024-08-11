@@ -22,7 +22,7 @@ export class DbConfig<A, B> extends Basic {
 
   constructor() {
     super();
-    console.log('Creating dbconfigs');
+    console.log('Creating db configs');
   }
 
   getUrl() {

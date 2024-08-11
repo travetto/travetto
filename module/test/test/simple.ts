@@ -32,12 +32,12 @@ class Simple {
   }
 
   @AfterAll()
-  deinitAll() {
+  deInitAll() {
     console.debug('aft-all');
   }
 
   @AfterEach()
-  deinitEach() {
+  deInitEach() {
     console.debug('aft-each');
   }
 

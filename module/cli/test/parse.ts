@@ -34,7 +34,7 @@ export class ParseSuite {
   @Test()
   async testTokens() {
     assert.deepStrictEqual(CliParseUtil.readToken('hello world'), { value: 'hello', next: 6 });
-    assert.deepStrictEqual(CliParseUtil.readToken('hello world', 1), { value: 'ello', next: 6 });
+    assert.deepStrictEqual(CliParseUtil.readToken('hello world', 4), { value: 'o', next: 6 });
     assert.deepStrictEqual(CliParseUtil.readToken("'hello world'", 0), { value: 'hello world', next: 13 });
 
   }

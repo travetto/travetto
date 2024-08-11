@@ -38,13 +38,13 @@ export class DateTestSchema {
 }
 
 @Schema({ baseType: true })
-export class Aaaz {
+export class Aaaaz {
   type?: string;
   a: boolean;
 }
 
 @Schema()
-export class Bbbbz extends Aaaz {
+export class Bbbbz extends Aaaaz {
   b: number;
 }
 
@@ -55,7 +55,7 @@ export class Ccccz extends Bbbbz {
 
 @Schema()
 export class AllAs {
-  all: Aaaz[];
+  all: Aaaaz[];
 }
 
 @Schema()

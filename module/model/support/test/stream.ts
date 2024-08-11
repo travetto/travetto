@@ -17,9 +17,9 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
   fixture = new TestFixtures(['@travetto/model']);
 
   async getHash(stream: Readable): Promise<string> {
-    const hasher = crypto.createHash('sha1').setEncoding('hex');
-    await pipeline(stream, hasher);
-    return hasher.read().toString();
+    const hash = crypto.createHash('sha1').setEncoding('hex');
+    await pipeline(stream, hash);
+    return hash.read().toString();
   }
 
   async getStream(resource: string): Promise<readonly [{ size: number, contentType: string, hash: string, filename: string }, Readable]> {
@@ -85,7 +85,10 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
     const subContent = await toText(partial);
     const range = await enforceRange({ start: 10, end: 20 }, meta.size);
     assert(subContent.length === (range.end - range.start) + 1);
-    assert(subContent === 'klmnopqrstu');
+
+    const og = await this.fixture.read('/text.txt');
+
+    assert(subContent === og.substring(10, 21));
 
     const partialUnbounded = await service.getStream(meta.hash, { start: 10 });
     const subContent2 = await toText(partialUnbounded);
@@ -99,8 +102,8 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
     assert(subContent3.length === 1);
     assert(subContent3 === 'k');
 
-    const partialOverbounded = await service.getStream(meta.hash, { start: 20, end: 40 });
-    const subContent4 = await toText(partialOverbounded);
+    const partialOverBounded = await service.getStream(meta.hash, { start: 20, end: 40 });
+    const subContent4 = await toText(partialOverBounded);
     assert(subContent4.length === 6);
     assert(subContent4.endsWith('xyz'));
 

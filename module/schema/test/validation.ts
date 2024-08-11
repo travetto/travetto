@@ -9,7 +9,7 @@ import { ValidationError } from '../src/validate/types';
 import { SchemaValidator } from '../src/validate/validator';
 
 import {
-  Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaz,
+  Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaaz,
   CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque, TemplateLit
 } from './models/validation';
 import { Accessors } from './models/binding';
@@ -156,8 +156,8 @@ class Validation {
     );
   }
 
-  @Test('manually unrequired')
-  async unrequired() {
+  @Test('manually unRequired')
+  async unRequired() {
     const o = NotRequiredUndefinable.from({
 
     });
@@ -240,7 +240,7 @@ class Validation {
         type: 'ccccz',
         a: false
       }, {
-        type: 'aaaz',
+        type: 'aaaaz',
         a: false
       }]
     });
@@ -249,7 +249,7 @@ class Validation {
     assert(item.all.length === 3);
     assert(item.all[0] instanceof Bbbbz);
     assert(item.all[1] instanceof Ccccz);
-    assert(item.all[2] instanceof Aaaz);
+    assert(item.all[2] instanceof Aaaaz);
 
     await assert.rejects(() => SchemaValidator.validate(AllAs, item));
 
@@ -308,7 +308,7 @@ class Validation {
   }
 
   @Test()
-  async opqaueChild() {
+  async opaqueChild() {
     const child = Opaque.from({
       name: 'bob',
       details: {
@@ -346,7 +346,7 @@ class Validation {
         type: 'ccccz',
         a: false
       }, {
-        type: 'aaaz',
+        type: 'aaaaz',
         a: false
       }]
     };

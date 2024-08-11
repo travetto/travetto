@@ -21,7 +21,7 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-export class PostgeSQLBasicSuite extends ModelBasicSuite {
+export class PostgreSQLBasicSuite extends ModelBasicSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

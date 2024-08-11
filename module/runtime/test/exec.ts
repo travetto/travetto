@@ -42,10 +42,10 @@ export class ExecUtilTest {
   @Test()
   async fork() {
     const proc = fork(await this.fixture.resolve('echo.js'), { stdio: 'pipe' });
-    proc.stdin?.write('Hello Worldy');
+    proc.stdin?.write('Hello World');
     proc.stdin?.end();
     const result = await ExecUtil.getResult(proc);
-    assert(result.stdout === 'Hello Worldy');
+    assert(result.stdout === 'Hello World');
   }
 
   @Test()

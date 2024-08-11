@@ -5,7 +5,7 @@ import { Suite, Test, ShouldThrow } from '@travetto/test';
 import { JWTUtil } from '../src/util';
 import { JWTError } from '../src/error';
 
-const key = 'shhhhhh';
+const key = 'shh';
 
 @Suite('signing a token asynchronously')
 class AsyncSignTest {

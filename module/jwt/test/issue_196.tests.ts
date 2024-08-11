@@ -16,7 +16,7 @@ class Issue196 {
 
   @Test('should use issuer provided in payload.iss')
   async test() {
-    const token = await JWTUtil.create({ iss: 'foo' }, { key: 'shhhhh' });
+    const token = await JWTUtil.create({ iss: 'foo' }, { key: 'shh' });
     const issuer = JSON.parse(base64toUtf8(token.split('.')[1])).iss;
     assert(issuer === 'foo');
   }

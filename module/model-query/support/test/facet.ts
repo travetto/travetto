@@ -11,7 +11,7 @@ const pick = <T>(arr: T[] | readonly T[]): T => arr[Math.trunc(Math.random() * a
 
 const GENDERS = ['m', 'f'] as const;
 const FNAME = ['Bob', 'Tom', 'Sarah', 'Leo', 'Alice', 'Jennifer', 'Tommy', 'George', 'Paula', 'Sam'];
-const LNAME = ['Smith', 'Sampson', 'Thompson', 'Oscar', 'Washington', 'Jefferson', 'Samuels'];
+const LNAME = ['Smith', 'Sampson', 'Thompson', 'Oscar', 'Washington', 'Jefferson', 'Samuel'];
 const AGES = new Array(100).fill(0).map((x, i) => i + 10);
 
 @Suite()

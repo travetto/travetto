@@ -8,7 +8,7 @@ import { JWTError } from '../src/error';
 @Suite('HS256')
 class HS256Suite {
 
-  #secret = 'shhhhhh';
+  #secret = 'shh';
   #token: string;
 
   @BeforeEach()

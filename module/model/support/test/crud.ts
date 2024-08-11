@@ -49,7 +49,7 @@ class User2 {
   name: string;
 
   prePersist() {
-    this.name = `${this.name}-suff`;
+    this.name = `${this.name}-suffix`;
   }
 }
 
@@ -193,7 +193,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     }));
 
     assert(o.address === undefined);
-    assert(o.name === 'bob-suff');
+    assert(o.name === 'bob-suffix');
 
     await service.updatePartial(User2, User2.from({
       id: o.id,
@@ -217,7 +217,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(res.createdDate instanceof Date);
   }
 
-  @Test('verify prepersist on create/update')
+  @Test('verify pre-persist on create/update')
   async testPrePersist() {
     const service = await this.service;
     const res = await service.create(Dated, Dated.from({}));

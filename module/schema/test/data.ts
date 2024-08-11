@@ -25,9 +25,9 @@ class DataUtilTests {
     assert(DataUtil.coerceType('yes', Boolean));
     assert(DataUtil.coerceType('on', Boolean));
     assert(DataUtil.coerceType('true', Boolean));
-    assert.throws(() => DataUtil.coerceType('truee', Boolean));
-    assert.doesNotThrow(() => DataUtil.coerceType('truee', Boolean, false));
-    assert(!DataUtil.coerceType('truee', Boolean, false));
+    assert.throws(() => DataUtil.coerceType('trueE', Boolean));
+    assert.doesNotThrow(() => DataUtil.coerceType('trueE', Boolean, false));
+    assert(!DataUtil.coerceType('trueE', Boolean, false));
   }
 
   @Test()
@@ -36,9 +36,9 @@ class DataUtilTests {
     assert(DataUtil.coerceType('0', Number) === 0);
     assert(DataUtil.coerceType('-1', Number) === -1);
     assert(DataUtil.coerceType('20.323', Number) === 20.323);
-    assert.throws(() => DataUtil.coerceType('truee', Number));
-    assert.doesNotThrow(() => DataUtil.coerceType('truee', Number, false));
-    assert(Number.isNaN(DataUtil.coerceType('truee', Number, false)));
+    assert.throws(() => DataUtil.coerceType('trueE', Number));
+    assert.doesNotThrow(() => DataUtil.coerceType('trueE', Number, false));
+    assert(Number.isNaN(DataUtil.coerceType('trueE', Number, false)));
   }
 
   @Test()

@@ -15,7 +15,7 @@ export class DbConfig {
   empty: Empty;
 
   constructor() {
-    console.log('Creating dbconfigs');
+    console.log('Creating db configs');
   }
 
   getUrl() {
