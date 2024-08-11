@@ -9,7 +9,7 @@ type PropType<V> = (<T extends Partial<Record<K, V>>, K extends string>(t: T, k:
 };
 
 function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
-  const fn = (t: ClassInstance, k: string, idx?: number): void => {
+  const fn = (t: ClassInstance, k: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (idx !== undefined && typeof idx === 'number') {
       SchemaRegistry.registerPendingParamFacet(t.constructor, k, idx, obj);
     } else {
