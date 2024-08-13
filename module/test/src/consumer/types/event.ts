@@ -2,7 +2,7 @@ import { Writable } from 'node:stream';
 
 import { TestEvent } from '../../model/event';
 import { TestConsumer } from '../types';
-import { ErrorUtil } from '../error';
+import { SerializeUtil } from '../serialize';
 import { Consumable } from '../registry';
 
 /**
@@ -17,8 +17,6 @@ export class EventStreamer implements TestConsumer {
   }
 
   onEvent(event: TestEvent): void {
-    const out = { ...event };
-    ErrorUtil.serializeTestErrors(out);
-    this.#stream.write(`${JSON.stringify(out)}\n`);
+    this.#stream.write(`${SerializeUtil.serializeToJSON(event)}\n`);
   }
 }

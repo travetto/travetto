@@ -5,11 +5,11 @@ import { TestEvent, } from '../model/event';
 
 export type SerializedError = { $?: boolean, message: string, stack?: string, name: string };
 
-function isSerialized(e: unknown): e is SerializedError {
+function isError(e: unknown): e is SerializedError {
   return !!e && (typeof e === 'object') && '$' in e;
 }
 
-export class ErrorUtil {
+export class SerializeUtil {
 
   /**
    *  Prepare error for transmission
@@ -41,7 +41,7 @@ export class ErrorUtil {
   static deserializeError(e: Error | SerializedError): Error;
   static deserializeError(e: undefined): undefined;
   static deserializeError(e: Error | SerializedError | undefined): Error | undefined {
-    if (isSerialized(e)) {
+    if (isError(e)) {
       const err = new Error();
 
       for (const k of TypedObject.keys(e)) {
@@ -54,25 +54,18 @@ export class ErrorUtil {
       err.stack = e.stack;
       err.name = e.name;
       return err;
-    } else if (e) {
+    } else {
       return e;
     }
   }
 
   /**
-   * Serialize all errors for a given test for transmission between parent/child
+   * Serialize to JSON
    */
-  static serializeTestErrors(out: TestEvent): void {
-    if (out.phase === 'after') {
-      if (out.type === 'test') {
-        if (out.test.error) {
-          out.test.error = this.serializeError(out.test.error);
-        }
-      } else if (out.type === 'assertion') {
-        if (out.assertion.error) {
-          out.assertion.error = this.serializeError(out.assertion.error);
-        }
-      }
-    }
+  static serializeToJSON(out: TestEvent): string {
+    return JSON.stringify(out, (_, v) =>
+      v instanceof Error ? this.serializeError(v) :
+        typeof v === 'bigint' ? v.toString() : v
+    );
   }
 }

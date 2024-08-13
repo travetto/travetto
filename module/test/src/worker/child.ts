@@ -3,7 +3,7 @@ import { createWriteStream } from 'node:fs';
 import { ConsoleManager, Env, Util, Runtime } from '@travetto/runtime';
 import { ChildCommChannel } from '@travetto/worker';
 
-import { ErrorUtil } from '../consumer/error';
+import { SerializeUtil } from '../consumer/serialize';
 import { RunnerUtil } from '../execute/util';
 import { Runner } from '../execute/runner';
 import { Events, RunEvent } from './types';
@@ -25,7 +25,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
         throw err;
       }
       // Mark as errored out
-      this.send(type, { error: ErrorUtil.serializeError(err) });
+      this.send(type, { error: SerializeUtil.serializeError(err) });
     }
   }
 

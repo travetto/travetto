@@ -15,6 +15,8 @@ interface Todo {
   priority?: number;
   userId: string;
   color?: 'green' | 'blue' | 'red';
+
+  settings?: unknown;
 }
 
 @Controller('user')
@@ -45,6 +47,19 @@ export class TodoController {
 
   @Delete('/:id')
   async deleteTodo(id: string): Promise<void> {
+
+  }
+
+  @Post('/alt')
+  async inline(shape: {
+    id: string;
+    text: string;
+    priority?: number;
+    userId: string;
+    color?: 'green' | 'blue' | 'red';
+
+    settings?: unknown;
+  }): Promise<void> {
 
   }
 }

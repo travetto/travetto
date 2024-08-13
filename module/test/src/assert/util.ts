@@ -18,6 +18,7 @@ export class AssertUtil {
    */
   static cleanValue(val: unknown): unknown {
     switch (typeof val) {
+      case 'number': case 'boolean': case 'bigint': case 'string': case 'undefined': return val;
       case 'object': {
         if (isCleanable(val)) {
           return val.toClean();
@@ -26,7 +27,6 @@ export class AssertUtil {
         }
         break;
       }
-      case 'undefined': case 'string': case 'number': case 'bigint': case 'boolean': return JSON.stringify(val);
       case 'function': {
         if (val.Ⲑid || !val.constructor) {
           return val.name;

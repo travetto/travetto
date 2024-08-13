@@ -5,7 +5,7 @@ import { ParentCommChannel } from '@travetto/worker';
 
 import { Events, RunEvent, RunRequest } from './types';
 import { TestConsumer } from '../consumer/types';
-import { ErrorUtil } from '../consumer/error';
+import { SerializeUtil } from '../consumer/serialize';
 import { TestEvent } from '../model/event';
 
 /**
@@ -70,6 +70,6 @@ export async function buildStandardTestManager(consumer: TestConsumer, imp: stri
 
   // If we received an error, throw it
   if (error) {
-    throw ErrorUtil.deserializeError(error);
+    throw SerializeUtil.deserializeError(error);
   }
 }

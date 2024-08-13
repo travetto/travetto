@@ -5,7 +5,7 @@ import { stringify } from 'yaml';
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
-import { ErrorUtil } from '../error';
+import { SerializeUtil } from '../serialize';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
 
 /**
@@ -102,7 +102,7 @@ export class TapEmitter implements TestConsumer {
       // Handle error
       if (test.status === 'failed') {
         if (test.error && test.error.name !== 'AssertionError') {
-          const err = ErrorUtil.deserializeError(test.error);
+          const err = SerializeUtil.deserializeError(test.error);
           this.logMeta({ error: err instanceof AppError ? err.toJSON() : err });
         }
       }

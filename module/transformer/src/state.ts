@@ -305,9 +305,9 @@ export class TransformerState implements State {
       const fileName = tgt.getSourceFile().fileName;
 
       if (fileName === this.source.fileName) { // if in same file suffix with location
-        let child = node;
+        let child: ts.Node = tgt;
         while (child && !ts.isSourceFile(child)) {
-          if (ts.isFunctionDeclaration(child) || ts.isMethodDeclaration(child) || ts.isClassDeclaration(child)) {
+          if (ts.isFunctionDeclaration(child) || ts.isMethodDeclaration(child) || ts.isClassDeclaration(child) || ts.isInterfaceDeclaration(child)) {
             if (child.name) {
               unique.push(child.name.getText());
             }

@@ -7,6 +7,7 @@ import {
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
 const FIELD_MOD = '@travetto/schema/src/decorator/field';
 const COMMON_MOD = '@travetto/schema/src/decorator/common';
+const TYPES_FILE = '@travetto/schema/src/internal/types';
 
 export class SchemaTransformUtil {
 
@@ -26,6 +27,10 @@ export class SchemaTransformUtil {
           return state.createIdentifier(type.ctor.name!);
         }
         break;
+      }
+      case 'unknown': {
+        const imp = state.importFile(TYPES_FILE);
+        return state.createAccess(imp.ident, 'UnknownType');
       }
       case 'shape': {
         const uniqueId = state.generateUniqueIdentifier(node, type);
@@ -49,7 +54,7 @@ export class SchemaTransformUtil {
                 this.computeField(state, state.factory.createPropertyDeclaration(
                   [], k,
                   v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
-                  undefined, undefined
+                  v.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined, undefined
                 ), { type: v, root })
               )
           );
@@ -70,7 +75,6 @@ export class SchemaTransformUtil {
         break;
       }
       case 'foreign':
-      case 'unknown':
       default: {
         // Object
       }
@@ -126,8 +130,7 @@ export class SchemaTransformUtil {
     // If we have a union type
     if (primaryExpr.key === 'union') {
       const values = primaryExpr.subTypes.map(x => x.key === 'literal' ? x.value : undefined)
-        .filter(x => x !== undefined && x !== null)
-        .sort();
+        .filter(x => x !== undefined && x !== null);
 
       if (values.length === primaryExpr.subTypes.length) {
         attrs.push(state.factory.createPropertyAssignment('enum', state.fromLiteral({

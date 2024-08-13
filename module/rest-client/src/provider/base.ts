@@ -4,18 +4,20 @@ import path from 'node:path';
 import { Class, Runtime, Util, castTo, describeFunction } from '@travetto/runtime';
 import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
-import { AllViewⲐ } from '@travetto/schema/src/internal/types';
+import { AllViewⲐ, UnknownType } from '@travetto/schema/src/internal/types';
 
 import { ParamConfig } from './shared/types';
 import type { ClientGenerator, EndpointDesc, Imp, RenderContent } from './types';
 
-export const TYPE_MAPPING: Record<string, string> = {
-  String: 'string',
-  Number: 'number',
-  Date: 'Date',
-  Boolean: 'boolean',
-  Object: 'Record<string, unknown>',
-};
+export const TYPE_MAPPING = new Map<Function, string>([
+  [String, 'string'],
+  [BigInt, 'bigint'],
+  [Number, 'number'],
+  [Date, 'Date'],
+  [Boolean, 'boolean'],
+  [Object, 'Record<string, unknown>'],
+  [UnknownType, 'unknown']
+]);
 
 /**
   * Recreate a template literal from AST
@@ -144,7 +146,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
       if (SchemaRegistry.has(type)) {
         return this.renderSchema(SchemaRegistry.get(type));
       } else {
-        return TYPE_MAPPING[type.name];
+        return TYPE_MAPPING.get(type) ?? 'unknown';
       }
     } else {
       return 'void';
@@ -165,7 +167,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
     } else if (field.enum) {
       type = `(${field.enum.values.map(v => typeof v === 'string' ? `'${v}'` : `${v}`).join(' | ')})`;
     } else {
-      type = TYPE_MAPPING[field.type.name] ?? 'unknown';
+      type = TYPE_MAPPING.get(field.type) ?? 'unknown';
     }
     if (typeof type !== 'string') {
       imports.push(type);

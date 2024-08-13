@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { AppError, Class } from '@travetto/runtime';
+import { AppError, castTo, Class } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { ModelCrudSupport, Model } from '@travetto/model';
@@ -29,7 +29,7 @@ class TestConfig {
     const src = new ModelAuthService<User>(
       svc,
       User,
-      u => ({ ...u, details: u, source: 'model' }),
+      u => castTo({ ...u, details: u, source: 'model' }),
       reg => User.from({ ...reg })
     );
     return src;

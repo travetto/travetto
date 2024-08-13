@@ -255,6 +255,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (config.specifiers) {
       config.specifiers = [...params[idx]?.specifiers ?? [], ...config.specifiers];
     }
+    if (config.enum?.values) {
+      config.enum.values = config.enum.values.slice().sort();
+    }
 
     params[idx] = {
       // @ts-expect-error
@@ -286,6 +289,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     }
     if (config.specifiers) {
       config.specifiers = [...allViewConf.schema[prop].specifiers ?? [], ...config.specifiers];
+    }
+    if (config.enum?.values) {
+      config.enum.values = config.enum.values.slice().sort();
     }
 
     Object.assign(allViewConf.schema[prop], config);

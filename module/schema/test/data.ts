@@ -42,6 +42,17 @@ class DataUtilTests {
   }
 
   @Test()
+  testCoerceBigintType() {
+    assert(DataUtil.coerceType('0n', BigInt) === 0n);
+    assert(DataUtil.coerceType(0n, BigInt) === 0n);
+    assert(DataUtil.coerceType('-1', BigInt) === -1n);
+    assert(DataUtil.coerceType('20', BigInt) === 20n);
+    assert.throws(() => DataUtil.coerceType('20.333', BigInt) === 20n);
+    assert(DataUtil.coerceType(true, BigInt) === 1n);
+  }
+
+
+  @Test()
   testCoerceDateType() {
     assert(DataUtil.coerceType(2014, Date).getTime() === new Date(2014).getTime());
     assert(DataUtil.coerceType('2014', Date).getTime() === new Date(2014).getTime());

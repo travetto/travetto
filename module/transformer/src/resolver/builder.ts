@@ -54,7 +54,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     return { category: 'undefined', type };
   } else if (DocUtil.readDocTag(type, 'concrete').length) {
     return { category: 'concrete', type };
-  } else if (flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) { // Any or unknown
+  } else if (flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never)) { // Any or unknown
     return { category: 'unknown', type };
   } else if (objectFlags & ts.ObjectFlags.Reference && !CoreUtil.getSymbol(type)) { // Tuple type?
     return { category: 'tuple', type };
@@ -91,9 +91,10 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
   } else if (flags & (ts.TypeFlags.TemplateLiteral)) {
     return { category: 'template', type };
   } else if (flags & (
-    ts.TypeFlags.Boolean | ts.TypeFlags.BooleanLiteral |
-    ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral |
-    ts.TypeFlags.String | ts.TypeFlags.StringLiteral |
+    ts.TypeFlags.BigIntLike |
+    ts.TypeFlags.BooleanLike |
+    ts.TypeFlags.NumberLike |
+    ts.TypeFlags.StringLike |
     ts.TypeFlags.Void | ts.TypeFlags.Undefined
   )) {
     return { category: 'literal', type };
@@ -104,7 +105,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
   } else if (type.isLiteral()) {
     return { category: 'shape', type };
   }
-  return { category: 'unknown', type };
+  return { category: 'literal', type };
 }
 
 /**
@@ -117,7 +118,7 @@ export const TypeBuilder: {
   }
 } = {
   unknown: {
-    build: (resolver, type) => undefined
+    build: (resolver, type) => ({ key: 'unknown' })
   },
   undefined: {
     build: (resolver, type) => ({ key: 'literal', name: 'undefined', ctor: undefined })
@@ -182,6 +183,12 @@ export const TypeBuilder: {
           ctor: cons,
           tsTypeArguments: resolver.getAllTypeArguments(type)
         };
+      } else {
+        return {
+          key: 'literal',
+          name: 'Object',
+          ctor: Object
+        };
       }
     }
   },
@@ -242,7 +249,7 @@ export const TypeBuilder: {
       const tsTypeArguments = resolver.getAllTypeArguments(type);
       const props = resolver.getPropertiesOfType(type);
       if (props.length === 0) {
-        return { key: 'unknown', name, importName };
+        return { key: 'literal', name: 'Object', ctor: Object };
       }
 
       for (const member of props) {

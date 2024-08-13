@@ -1,6 +1,7 @@
 import { isNumberObject as isNum, isBooleanObject as isBool, isStringObject as isStr } from 'node:util/types';
 
 import { asConstructable, castTo, Class, asFull, TypedObject } from '@travetto/runtime';
+import { UnknownType } from './internal/types';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 
@@ -120,9 +121,11 @@ export class DataUtil {
    */
   static coerceType(input: unknown, type: typeof String, strict?: boolean): string;
   static coerceType(input: unknown, type: typeof Number, strict?: boolean): number;
+  static coerceType(input: unknown, type: typeof BigInt, strict?: boolean): bigint;
   static coerceType(input: unknown, type: typeof Boolean, strict?: boolean): boolean;
   static coerceType(input: unknown, type: typeof Date, strict?: boolean): Date;
   static coerceType(input: unknown, type: typeof RegExp, strict?: boolean): RegExp;
+  static coerceType(input: unknown, type: typeof UnknownType, strict?: boolean): unknown;
   static coerceType<T>(input: unknown, type: Class<T> | Function, strict?: boolean): T;
   static coerceType(input: unknown, type: Class<unknown> | Function, strict = true): unknown {
     // Do nothing
@@ -160,6 +163,20 @@ export class DataUtil {
         }
         return res;
       }
+      case BigInt: {
+        if (typeof input === 'bigint') {
+          return input;
+        }
+        try {
+          return BigInt((typeof input === 'boolean' || typeof input === 'number') ?
+            input : `${input}`.replace(/n$/i, ''));
+        } catch {
+          if (strict) {
+            throw new Error(`Invalid numeric value: ${input}`);
+          }
+          return;
+        }
+      }
       case Boolean: {
         const match = `${input}`.match(/^((?<TRUE>true|yes|1|on)|false|no|off|0)$/i);
         if (strict && !match) {
@@ -183,6 +200,9 @@ export class DataUtil {
         } else {
           return;
         }
+      }
+      case UnknownType: {
+        return input;
       }
       case Object: {
         if (!strict || this.isPlainObject(input)) {

@@ -33,6 +33,7 @@ export class CoerceUtil {
    * @param strict Should a failure to coerce throw an error?
    */
   static coerce(input: unknown, type: typeof String, strict?: boolean): string;
+  static coerce(input: unknown, type: typeof BigInt, strict?: boolean): bigint;
   static coerce(input: unknown, type: typeof Number, strict?: boolean): number;
   static coerce(input: unknown, type: typeof Boolean, strict?: boolean): boolean;
   static coerce(input: unknown, type: typeof Date, strict?: boolean): Date;
@@ -62,6 +63,16 @@ export class CoerceUtil {
           throw new Error(`Invalid numeric value: ${input}`);
         }
         return res;
+      }
+      case BigInt: {
+        try {
+          return BigInt(typeof input === 'string' || typeof input === 'number' ? input : `${input}`);
+        } catch {
+          if (strict) {
+            throw new Error(`Invalid numeric value: ${input}`);
+          }
+          return;
+        }
       }
       case Boolean: {
         const match = `${input}`.match(/^((?<TRUE>true|yes|1|on)|false|no|off|0)$/i);
