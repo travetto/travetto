@@ -25,10 +25,10 @@
     "directory": "module/rest-koa-lambda"
   },
   "dependencies": {
+    "@codegenie/serverless-express": "^4.15.0",
     "@travetto/rest": "^5.0.0-rc.10",
     "@travetto/rest-aws-lambda": "^5.0.0-rc.10",
-    "@travetto/rest-koa": "^5.0.0-rc.10",
-    "@codegenie/serverless-express": "^4.14.1"
+    "@travetto/rest-koa": "^5.0.0-rc.10"
   },
   "travetto": {
     "displayName": "Koa REST AWS Lambda Source"

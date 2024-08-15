@@ -27,10 +27,10 @@
     "directory": "module/email-inky"
   },
   "dependencies": {
-    "@travetto/runtime": "^5.0.0-rc.9",
     "@travetto/config": "^5.0.0-rc.10",
     "@travetto/di": "^5.0.0-rc.9",
     "@travetto/email": "^5.0.0-rc.10",
+    "@travetto/runtime": "^5.0.0-rc.9",
     "foundation-emails": "^2.4.0"
   },
   "devDependencies": {

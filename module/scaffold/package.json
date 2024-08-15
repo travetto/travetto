@@ -27,14 +27,14 @@
     "trv-scaffold": "./bin/trv-scaffold.js"
   },
   "dependencies": {
-    "@travetto/runtime": "^5.0.0-rc.9",
     "@travetto/cli": "^5.0.0-rc.10",
+    "@travetto/runtime": "^5.0.0-rc.9",
     "enquirer": "^2.4.1",
     "mustache": "^4.2.0"
   },
   "devDependencies": {
-    "@types/mustache": "^4.2.5",
-    "@travetto/model": "^5.0.0-rc.10"
+    "@travetto/model": "^5.0.0-rc.10",
+    "@types/mustache": "^4.2.5"
   },
   "travetto": {
     "displayName": "App Scaffold"

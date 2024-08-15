@@ -27,11 +27,11 @@
     "directory": "module/test"
   },
   "dependencies": {
-    "@travetto/runtime": "^5.0.0-rc.9",
     "@travetto/registry": "^5.0.0-rc.9",
+    "@travetto/runtime": "^5.0.0-rc.9",
     "@travetto/terminal": "^5.0.0-rc.9",
     "@travetto/worker": "^5.0.0-rc.9",
-    "yaml": "^2.4.5"
+    "yaml": "^2.5.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^5.0.0-rc.10",

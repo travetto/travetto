@@ -23,8 +23,8 @@
     "directory": "module/image"
   },
   "dependencies": {
-    "@travetto/runtime": "^5.0.0-rc.9",
-    "@travetto/command": "^5.0.0-rc.9"
+    "@travetto/command": "^5.0.0-rc.9",
+    "@travetto/runtime": "^5.0.0-rc.9"
   },
   "travetto": {
     "displayName": "Image"

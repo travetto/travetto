@@ -26,11 +26,11 @@
     "directory": "module/rest"
   },
   "dependencies": {
-    "@travetto/runtime": "^5.0.0-rc.9",
     "@travetto/config": "^5.0.0-rc.10",
     "@travetto/context": "^5.0.0-rc.9",
     "@travetto/di": "^5.0.0-rc.9",
     "@travetto/registry": "^5.0.0-rc.9",
+    "@travetto/runtime": "^5.0.0-rc.9",
     "@travetto/schema": "^5.0.0-rc.10",
     "@types/cookies": "^0.9.0",
     "@types/express-serve-static-core": "^4.19.5",
