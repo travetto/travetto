@@ -67,10 +67,10 @@ export class WorkPool {
       },
       validate: async (x: Worker<I, O>) => x.active ?? true
     }, {
-      max: WorkPool.DEFAULT_SIZE,
-      min: 1,
       evictionRunIntervalMillis: 5000,
       ...(opts ?? {}),
+      max: opts?.max ?? WorkPool.DEFAULT_SIZE,
+      min: opts?.min ?? 1,
     });
 
 

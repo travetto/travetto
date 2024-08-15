@@ -1,6 +1,6 @@
 import type { Class } from '@travetto/runtime';
 
-import { TestConfig, TestResult } from './test';
+import { Assertion, TestConfig, TestResult } from './test';
 import { Skip, SuiteCore } from './common';
 
 /**
@@ -79,4 +79,14 @@ export interface SuiteResult extends Counts {
    * Suite duration
    */
   duration: number;
+}
+
+/**
+ * A total suite failure
+ */
+export interface SuiteFailure {
+  assert: Assertion;
+  testResult: TestResult;
+  test: TestConfig;
+  suite: SuiteConfig;
 }

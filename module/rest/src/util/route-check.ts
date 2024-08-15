@@ -1,7 +1,7 @@
+import { Util } from '@travetto/runtime';
 import { RouteApplies } from '../interceptor/types';
 import { ControllerConfig } from '../registry/types';
 import { RouteConfig } from '../types';
-import { RestCommonUtil } from './common';
 
 interface RouteRule {
   sub: string | RegExp;
@@ -39,7 +39,7 @@ export class RouteCheckUtil {
    *   It is intended to be used during controller setup to determine an interceptors inclusion in the exposed endpoint.
    */
   static matcher(allowDeny: string[]): RouteApplies {
-    return RestCommonUtil.allowDenyMatcher<RouteRule, Parameters<RouteApplies>>(
+    return Util.allowDeny<RouteRule, Parameters<RouteApplies>>(
       allowDeny,
       this.#convertRule.bind(this),
       this.#compareRule.bind(this),

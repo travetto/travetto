@@ -21,6 +21,11 @@ export class TestCommand implements CliCommandShape {
   concurrency: number = WorkPool.DEFAULT_SIZE;
   /** Test run mode */
   mode: TestMode = 'standard';
+  /**
+   * Tags to target or exclude
+   * @alias env.TRV_TEST_TAGS
+   */
+  tags?: string[];
 
   preMain(): void {
     EventEmitter.defaultMaxListeners = 1000;
@@ -48,14 +53,23 @@ export class TestCommand implements CliCommandShape {
     }
   }
 
-  async main(first: string = '**/*', regexes: string[] = []): Promise<void> {
+  async main(first: string = '**/*', globs: string[] = []): Promise<void> {
     const { runTests } = await import('./bin/run');
 
+    const isFirst = await this.isFirstFile(first);
+    const isSingle = this.mode === 'single' || (isFirst && globs.length === 0);
+
     return runTests({
-      args: [first, ...regexes],
-      mode: await this.resolvedMode(first, regexes),
       concurrency: this.concurrency,
-      format: this.format
+      format: this.format,
+      tags: this.tags,
+      target: isSingle ?
+        {
+          import: first,
+          classId: globs[0],
+          methodNames: globs.slice(1),
+        } :
+        { globs: [first, ...globs], }
     });
   }
 }

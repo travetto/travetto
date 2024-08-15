@@ -1,4 +1,4 @@
-import { Env } from '@travetto/runtime';
+import { Env, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 
 import { runTests } from './bin/run';
@@ -17,7 +17,14 @@ export class TestDirectCommand {
     Env.TRV_LOG_TIME.clear();
   }
 
-  main(file: string, args: string[]): Promise<void> {
-    return runTests({ args: [file, ...args], format: this.format, mode: 'single', concurrency: 1 });
+  main(importOrFile: string, clsId?: string, ...methodsNames: string[]): Promise<void> {
+    return runTests({
+      format: this.format,
+      target: {
+        import: importOrFile,
+        classId: clsId,
+        methodNames: methodsNames,
+      }
+    });
   }
 }

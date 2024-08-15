@@ -1,5 +1,5 @@
+import { Util } from '@travetto/runtime';
 import { ContentType } from '../types';
-import { RestCommonUtil } from './common';
 
 /**
  * Utils for checking mime patterns
@@ -25,7 +25,7 @@ export class MimeUtil {
    * Build matcher
    */
   static matcher(rules: string[] | string = []): (contentType: string) => boolean {
-    return RestCommonUtil.allowDenyMatcher<RegExp, [string]>(
+    return Util.allowDeny<RegExp, [string]>(
       rules,
       this.#convert.bind(this),
       (regex, mime) => regex.test(mime),

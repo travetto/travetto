@@ -1,4 +1,5 @@
 import { TestConsumer } from '../consumer/types';
+import { TestRun } from '../worker/types';
 
 /**
  * Run state
@@ -13,19 +14,20 @@ export interface RunState {
    */
   consumer?: TestConsumer;
   /**
-   * Test mode
-   */
-  mode?: 'single' | 'watch' | 'standard';
-  /**
-   * Show progress to stderr
-   */
-  showProgress?: boolean;
-  /**
    * Number of test suites to run concurrently, when mode is not single
    */
-  concurrency: number;
+  concurrency?: number;
   /**
-   * Input arguments
+   * The tags to include or exclude from testing
    */
-  args: string[];
+  tags?: string[];
+  /**
+   * target
+   */
+  target: TestRun | {
+    /**
+     * Globs to run
+     */
+    globs?: string[];
+  };
 }

@@ -23,7 +23,7 @@ export class SimpleSuite {
 
   @AfterAll()
   async cleanup() {
-    await fs.rm(this.getTempDir('.'), { recursive: true });
+    await fs.rm(this.getTempDir('.'), { recursive: true, force: true });
   }
 
   @Test()

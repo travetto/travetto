@@ -6,7 +6,7 @@ import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig, TestResult } from '../model/test';
-import { SuiteConfig, SuiteResult } from '../model/suite';
+import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite';
 import { TestConsumer } from '../consumer/types';
 import { AssertCheck } from '../assert/check';
 import { AssertCapture } from '../assert/capture';
@@ -22,12 +22,44 @@ const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.val) ?? 5000;
  */
 export class TestExecutor {
 
+  #consumer: TestConsumer;
+  #testFilter: (config: TestConfig) => boolean;
+  #fullSuites: boolean;
+
+  constructor(consumer: TestConsumer, testFilter?: (config: TestConfig) => boolean, fullSuites = true) {
+    this.#consumer = consumer;
+    this.#testFilter = testFilter || ((): boolean => true);
+    this.#fullSuites = fullSuites;
+  }
+
+  /**
+   * Handles communicating a suite-level error
+   * @param failure
+   * @param withSuite
+   */
+  #onSuiteFailure(failure: SuiteFailure, triggerSuite?: boolean): void {
+    if (triggerSuite) {
+      this.#consumer.onEvent({ type: 'suite', phase: 'before', suite: failure.suite });
+    }
+
+    this.#consumer.onEvent({ type: 'test', phase: 'before', test: failure.test });
+    this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: failure.assert });
+    this.#consumer.onEvent({ type: 'test', phase: 'after', test: failure.testResult });
+
+    if (triggerSuite) {
+      this.#consumer.onEvent({
+        type: 'suite', phase: 'after',
+        suite: { ...castTo(failure.suite), failed: 1, passed: 0, total: 1, skipped: 0 }
+      });
+    }
+  }
+
   /**
    * Raw execution, runs the method and then returns any thrown errors as the result.
    *
    * This method should never throw under any circumstances.
    */
-  static async #executeTestMethod(test: TestConfig): Promise<Error | undefined> {
+  async #executeTestMethod(test: TestConfig): Promise<Error | undefined> {
     const suite = SuiteRegistry.get(test.class);
 
     // Ensure all the criteria below are satisfied before moving forward
@@ -53,34 +85,41 @@ export class TestExecutor {
   /**
    * Determining if we should skip
    */
-  static async #skip(cfg: TestConfig | SuiteConfig, inst: unknown): Promise<boolean | undefined> {
-    if (cfg.skip !== undefined) {
-      if (typeof cfg.skip === 'boolean' ? cfg.skip : await cfg.skip(inst)) {
-        return true;
-      }
+  async #shouldSkip(cfg: TestConfig | SuiteConfig, inst: unknown): Promise<boolean | undefined> {
+    if ('methodName' in cfg && !this.#testFilter(cfg)) {
+      return true;
     }
+
+    if (typeof cfg.skip === 'function' ? await cfg.skip(inst) : cfg.skip) {
+      return true;
+    }
+  }
+
+  #skipTest(test: TestConfig, result: SuiteResult): void {
+    // Mark test start
+    this.#consumer.onEvent({ type: 'test', phase: 'before', test });
+    result.skipped++;
+    this.#consumer.onEvent({ type: 'test', phase: 'after', test: { ...test, assertions: [], duration: 0, durationTotal: 0, output: {}, status: 'skipped' } });
   }
 
   /**
    * Fail an entire file, marking the whole file as failed
    */
-  static failFile(consumer: TestConsumer, imp: string, err: Error): void {
+  failFile(imp: string, err: Error): void {
     const name = path.basename(imp);
     const classId = `${RuntimeIndex.getFromImport(imp)?.id}￮${name}`;
-    const suite = asFull<SuiteConfig & SuiteResult>({ class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp, });
+    const suite = asFull<SuiteConfig & SuiteResult>({
+      class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp
+    });
     err.message = err.message.replaceAll(Runtime.mainSourcePath, '.');
-    const res = AssertUtil.generateSuiteError(suite, 'require', err);
-    consumer.onEvent({ type: 'suite', phase: 'before', suite });
-    consumer.onEvent({ type: 'test', phase: 'before', test: res.testConfig });
-    consumer.onEvent({ type: 'assertion', phase: 'after', assertion: res.assert });
-    consumer.onEvent({ type: 'test', phase: 'after', test: res.testResult });
-    consumer.onEvent({ type: 'suite', phase: 'after', suite: { ...suite, failed: 1, passed: 0, total: 1, skipped: 0 } });
+    const failure = AssertUtil.generateSuiteFailure(suite, 'require', err);
+    this.#onSuiteFailure(failure, true);
   }
 
   /**
    * An empty suite result based on a suite config
    */
-  static createSuiteResult(suite: SuiteConfig): SuiteResult {
+  createSuiteResult(suite: SuiteConfig): SuiteResult {
     return {
       passed: 0,
       failed: 0,
@@ -98,10 +137,10 @@ export class TestExecutor {
   /**
    * Execute the test, capture output, assertions and promises
    */
-  static async executeTest(consumer: TestConsumer, test: TestConfig, suite: SuiteConfig): Promise<TestResult> {
+  async executeTest(test: TestConfig): Promise<TestResult> {
 
     // Mark test start
-    consumer.onEvent({ type: 'test', phase: 'before', test });
+    this.#consumer.onEvent({ type: 'test', phase: 'before', test });
 
     const startTime = Date.now();
 
@@ -113,6 +152,7 @@ export class TestExecutor {
       lineEnd: test.lineEnd,
       lineBodyStart: test.lineBodyStart,
       import: test.import,
+      sourceImport: test.sourceImport,
       status: 'skipped',
       assertions: [],
       duration: 0,
@@ -120,13 +160,9 @@ export class TestExecutor {
       output: {},
     };
 
-    if (await this.#skip(test, suite.instance)) {
-      return result;
-    }
-
     // Emit every assertion as it occurs
     const getAssertions = AssertCapture.collector(test, asrt =>
-      consumer.onEvent({
+      this.#consumer.onEvent({
         type: 'assertion',
         phase: 'after',
         assertion: asrt
@@ -161,47 +197,25 @@ export class TestExecutor {
     });
 
     // Mark completion
-    consumer.onEvent({ type: 'test', phase: 'after', test: result });
+    this.#consumer.onEvent({ type: 'test', phase: 'after', test: result });
 
     return result;
   }
 
   /**
-   * Execute a single test within a suite
-   */
-  static async executeSuiteTest(consumer: TestConsumer, suite: SuiteConfig, test: TestConfig): Promise<void> {
-    const result: SuiteResult = this.createSuiteResult(suite);
-
-    const mgr = new TestPhaseManager(consumer, suite, result);
-
-    try {
-      await mgr.startPhase('all');
-      const skip = await this.#skip(test, suite.instance);
-      if (!skip) {
-        await mgr.startPhase('each');
-      }
-      await this.executeTest(consumer, test, suite);
-      if (!skip) {
-        await mgr.endPhase('each');
-      }
-      await mgr.endPhase('all');
-    } catch (err) {
-      await mgr.onError(err);
-    }
-  }
-
-  /**
    * Execute an entire suite
    */
-  static async executeSuite(consumer: TestConsumer, suite: SuiteConfig): Promise<SuiteResult> {
+  async executeSuite(suite: SuiteConfig, tests?: TestConfig[]): Promise<void> {
     const result: SuiteResult = this.createSuiteResult(suite);
 
     const startTime = Date.now();
 
-    // Mark suite start
-    consumer.onEvent({ phase: 'before', type: 'suite', suite });
+    if (this.#fullSuites) {
+      // Mark suite start
+      this.#consumer.onEvent({ phase: 'before', type: 'suite', suite });
+    }
 
-    const mgr = new TestPhaseManager(consumer, suite, result);
+    const mgr = new TestPhaseManager(suite, result, e => this.#onSuiteFailure(e));
 
     const originalEnv = { ...process.env };
 
@@ -211,28 +225,30 @@ export class TestExecutor {
 
       const suiteEnv = { ...process.env };
 
-      for (const test of suite.tests) {
+      for (const test of tests ?? suite.tests) {
+        if (await this.#shouldSkip(test, suite.instance)) {
+          this.#skipTest(test, result);
+          continue;
+        }
+
         // Reset env before each test
         process.env = { ...suiteEnv };
+
         const testStart = Date.now();
-        const skip = await this.#skip(test, suite.instance);
-        if (!skip) {
-          // Handle BeforeEach
-          await mgr.startPhase('each');
-        }
+
+        // Handle BeforeEach
+        await mgr.startPhase('each');
 
         // Run test
-        const ret = await this.executeTest(consumer, test, suite);
+        const ret = await this.executeTest(test);
         result[ret.status]++;
-
-        if (!skip) {
-          result.tests.push(ret);
-        }
+        result.tests.push(ret);
 
         // Handle after each
         await mgr.endPhase('each');
         ret.durationTotal = Date.now() - testStart;
       }
+
       // Handle after all
       await mgr.endPhase('all');
     } catch (err) {
@@ -243,26 +259,25 @@ export class TestExecutor {
     process.env = { ...originalEnv };
 
     result.duration = Date.now() - startTime;
-
-    // Mark suite complete
-    consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
-
     result.total = result.passed + result.failed;
 
-    return result;
+    if (this.#fullSuites) {
+      // Mark suite complete
+      this.#consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
+    }
   }
 
   /**
    * Handle executing a suite's test/tests based on command line inputs
    */
-  static async execute(consumer: TestConsumer, imp: string, ...args: string[]): Promise<void> {
+  async execute(imp: string, clsId?: string, methods?: string[]): Promise<void> {
     try {
       await Runtime.importFrom(imp);
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;
       }
-      this.failFile(consumer, imp, err);
+      this.failFile(imp, err);
       return;
     }
 
@@ -270,19 +285,12 @@ export class TestExecutor {
     await SuiteRegistry.init();
 
     // Convert inbound arguments to specific tests to run
-    const params = SuiteRegistry.getRunParams(imp, ...args);
+    const suites = SuiteRegistry.getSuiteTests(imp, clsId, methods ?? []);
 
-    // If running specific suites
-    if ('suites' in params) {
-      for (const suite of params.suites) {
-        if (!(await this.#skip(suite, suite.instance)) && suite.tests.length) {
-          await this.executeSuite(consumer, suite);
-        }
+    for (const { suite, tests } of suites) {
+      if (!(await this.#shouldSkip(suite, suite.instance)) && suite.tests.length) {
+        await this.executeSuite(suite, tests);
       }
-    } else if (params.test) { // If running a single test
-      await this.executeSuiteTest(consumer, params.suite, params.test);
-    } else { // Running the suite
-      await this.executeSuite(consumer, params.suite);
     }
   }
 }

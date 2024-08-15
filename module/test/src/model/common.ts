@@ -1,5 +1,5 @@
 /** Configuration of a skip */
-export type Skip = boolean | ((instance: unknown) => boolean | Promise<boolean>) | (() => boolean | Promise<boolean>);
+export type Skip = boolean | ((instance: unknown) => boolean | Promise<boolean>);
 
 /**
  * Core Suite definition
@@ -25,6 +25,10 @@ export interface SuiteCore {
    * The last line of the unit
    */
   lineEnd: number;
+  /**
+   * Tags for a suite or a test
+   */
+  tags?: string[];
 }
 
 /**
@@ -35,4 +39,8 @@ export interface TestCore extends SuiteCore {
    * The first line of the unit body
    */
   lineBodyStart: number;
+  /**
+   * For extended suites, this is location of the actual file where the test exists
+   */
+  sourceImport?: string;
 }

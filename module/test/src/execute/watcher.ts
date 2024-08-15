@@ -1,20 +1,16 @@
 import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, WorkQueue } from '@travetto/worker';
-import { Runtime, describeFunction } from '@travetto/runtime';
+import { Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
 import { TestConsumerRegistry } from '../consumer/registry';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
-import { RunRequest } from '../worker/types';
+import { TestRun } from '../worker/types';
 import { RunnerUtil } from './util';
 import { TestEvent } from '../model/event';
 
-function isRunRequest(ev: unknown): ev is RunRequest {
-  return typeof ev === 'object' && !!ev && 'type' in ev && typeof ev.type === 'string' && ev.type === 'run-test';
-}
-
-type RemoveTestEvent = { type: 'removeTest', method: string, import: string, classId: string };
+type RemoveTestEvent = { type: 'removeTest' } & TestRun;
 
 export type TestWatchEvent =
   TestEvent |
@@ -35,11 +31,18 @@ export class TestWatcher {
   static async watch(format: string, runAllOnStart = true): Promise<void> {
     console.debug('Listening for changes');
 
-    const itr = new WorkQueue<string | RunRequest>();
-
     await SuiteRegistry.init();
     SuiteRegistry.listen(RootRegistry);
+    await RootRegistry.init();
 
+    const events: TestRun[] = [];
+
+    if (runAllOnStart) {
+      const tests = await RunnerUtil.getTestDigest();
+      events.push(...RunnerUtil.getTestRuns(tests));
+    }
+
+    const itr = new WorkQueue<TestRun>(events);
     const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistry.getInstance(format));
 
     new MethodSource(RootRegistry).on(e => {
@@ -54,39 +57,38 @@ export class TestWatcher {
       const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
       if (e.type !== 'removing') {
         if (conf) {
-          const key = { import: conf.import, class: conf.class.name, method: conf.methodName };
-          itr.add(key, true); // Shift to front
+          const run: TestRun = { import: conf.import, classId: conf.classId, methodNames: [conf.methodName] };
+          console.log('Triggering', run);
+          itr.add(run, true); // Shift to front
         }
       } else {
         process.send?.({
           type: 'removeTest',
+          methodNames: method?.name ? [method.name!] : undefined!,
           method: method?.name,
           classId: cls?.Ⲑid,
           import: Runtime.getImport(cls)
-        } satisfies RemoveTestEvent);
+        } satisfies RemoveTestEvent & { method?: string });
       }
     });
 
-    // If a file is changed, but doesn't emit classes, re-run whole file
-    RootRegistry.onNonClassChanges(imp => itr.add(imp));
 
-    await RootRegistry.init();
+    // If a file is changed, but doesn't emit classes, re-run whole file
+    RootRegistry.onNonClassChanges(imp => itr.add({ import: imp }));
 
     process.on('message', ev => {
-      if (isRunRequest(ev)) {
+      if (typeof ev === 'object' && ev && 'type' in ev && ev.type === 'run-event') {
+        console.log('Received message', ev);
+        // Legacy
+        if ('file' in ev && typeof ev.file === 'string') {
+          ev = { import: RuntimeIndex.getFromSource(ev.file)?.import! };
+        }
         console.debug('Manually triggered', ev);
-        itr.add(ev, true);
+        itr.add(castTo(ev), true);
       }
     });
 
     process.send?.({ type: 'ready' });
-
-    if (runAllOnStart) {
-      for await (const imp of await RunnerUtil.getTestImports()) {
-        await Runtime.importFrom(imp);
-        itr.add(imp);
-      }
-    }
 
     await WorkPool.run(
       buildStandardTestManager.bind(null, consumer),

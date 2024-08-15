@@ -1,5 +1,5 @@
-import { AppError } from '@travetto/runtime';
-import { RestCommonUtil, RestInterceptor, ManagedInterceptorConfig, FilterContext } from '@travetto/rest';
+import { AppError, Util } from '@travetto/runtime';
+import { RestInterceptor, ManagedInterceptorConfig, FilterContext } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -51,7 +51,7 @@ export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConf
   }
 
   finalizeConfig(config: RestAuthVerifyConfig): RestAuthVerifyConfig {
-    config.matcher = RestCommonUtil.allowDenyMatcher<string[], [Set<string>]>(config.permissions ?? [],
+    config.matcher = Util.allowDeny<string[], [Set<string>]>(config.permissions ?? [],
       x => x.split('|'),
       matchPermissionSet,
     );

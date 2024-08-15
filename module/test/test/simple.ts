@@ -159,4 +159,9 @@ class Simple {
       timers.setTimeout(10);
     }
   }
+
+  @Test()
+  async testModuleAssert() {
+    assert(1 % 2);
+  }
 }

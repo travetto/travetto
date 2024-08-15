@@ -3,7 +3,7 @@ import { fork } from 'node:child_process';
 import { Env, RuntimeIndex } from '@travetto/runtime';
 import { ParentCommChannel } from '@travetto/worker';
 
-import { Events, RunEvent, RunRequest } from './types';
+import { Events, TestRun } from './types';
 import { TestConsumer } from '../consumer/types';
 import { SerializeUtil } from '../consumer/serialize';
 import { TestEvent } from '../model/event';
@@ -11,31 +11,21 @@ import { TestEvent } from '../model/event';
 /**
  *  Produce a handler for the child worker
  */
-export async function buildStandardTestManager(consumer: TestConsumer, imp: string | RunRequest): Promise<void> {
-  let event: RunEvent;
-  process.send?.({ type: 'log', message: `Worker Input ${JSON.stringify(imp)}` });
+export async function buildStandardTestManager(consumer: TestConsumer, run: TestRun): Promise<void> {
+  process.send?.({ type: 'log', message: `Worker Input ${JSON.stringify(run)}` });
+  process.send?.({ type: 'log', message: `Worker Executing ${run.import}` });
 
-  if (typeof imp === 'string') {
-    event = { import: imp };
-  } else if ('file' in imp) {
-    event = { import: RuntimeIndex.getFromSource(imp.file)?.import!, class: imp.class, method: imp.method };
-  } else {
-    event = imp;
-  }
-
-  process.send?.({ type: 'log', message: `Worker Executing ${event.import}` });
-
-  const { module } = RuntimeIndex.getFromImport(event.import!)!;
-  const suiteMod = RuntimeIndex.getModule(module);
+  const { module } = RuntimeIndex.getFromImport(run.import)!;
+  const suiteMod = RuntimeIndex.getModule(module)!;
 
   const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
     fork(
       RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'), ['test:child'],
       {
-        cwd: suiteMod!.sourcePath,
+        cwd: suiteMod.sourcePath,
         env: {
           ...process.env,
-          ...Env.TRV_MANIFEST.export(suiteMod!.outputPath),
+          ...Env.TRV_MANIFEST.export(suiteMod.outputPath),
           ...Env.TRV_QUIET.export(true)
         },
         stdio: ['ignore', 'ignore', 2, 'ipc']
@@ -58,7 +48,7 @@ export async function buildStandardTestManager(consumer: TestConsumer, imp: stri
   // Listen for child to complete
   const complete = channel.once(Events.RUN_COMPLETE);
   // Start test
-  channel.send(Events.RUN, event);
+  channel.send(Events.RUN, run);
 
   // Wait for complete
   const { error } = await complete;
@@ -66,7 +56,7 @@ export async function buildStandardTestManager(consumer: TestConsumer, imp: stri
   // Kill on complete
   await channel.destroy();
 
-  process.send?.({ type: 'log', message: `Worker Finished ${event.import}` });
+  process.send?.({ type: 'log', message: `Worker Finished ${run.import}` });
 
   // If we received an error, throw it
   if (error) {

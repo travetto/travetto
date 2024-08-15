@@ -318,9 +318,9 @@ export class DocumentResultsManager {
   onTest(test: TestResult): void {
     const dec = Decorations.buildTest(test);
     const status = test.status === 'skipped' ? 'unknown' : test.status;
-    this.store('test', `${test.classId}:${test.methodName}`, status, dec, test);
+    this.store('test', `${test.classId}#${test.methodName}`, status, dec, test);
 
-    this.refreshTest(`${test.classId}:${test.methodName}`);
+    this.refreshTest(`${test.classId}#${test.methodName}`);
     this.refreshDiagnostics();
   }
 
@@ -330,7 +330,7 @@ export class DocumentResultsManager {
    */
   onAssertion(assertion: Assertion): void {
     const status = assertion.error ? 'failed' : 'passed';
-    const key = `${assertion.classId}:${assertion.methodName}`;
+    const key = `${assertion.classId}#${assertion.methodName}`;
     const dec = Decorations.buildAssertion(assertion);
     if (status === 'failed') {
       this.#failedAssertions[Decorations.line(assertion.line).range.start.line] = assertion;
@@ -345,14 +345,20 @@ export class DocumentResultsManager {
     if (e.type === 'ready' || e.type === 'log') {
       // Ignore
     } else if (e.type === 'removeTest') {
-      this.reset('test', `${e.classId}:${e.method}`);
+      if ('method' in e && typeof e.method === 'string') {
+        this.reset('test', `${e.classId}#${e.method}`);
+      } else {
+        for (const method of e.methodNames ?? []) {
+          this.reset('test', `${e.classId}#${method}`);
+        }
+      }
     } else if (e.phase === 'before') {
       switch (e.type) {
         case 'suite': {
           this.reset('suite', e.suite.classId);
           const tests = Object.values(this.#results.test).filter(x => x.src.classId === e.suite.classId);
           for (const test of tests) {
-            this.reset('test', `${test.src.classId}:${test.src.methodName}`);
+            this.reset('test', `${test.src.classId}#${test.src.methodName}`);
           }
           // Internal methods for before/after all/each
           if (tests.find(x => x.src.methodName.includes('[['))) {
@@ -363,7 +369,7 @@ export class DocumentResultsManager {
         }
         // Clear diags
         case 'test': {
-          const key = `${e.test.classId}:${e.test.methodName}`;
+          const key = `${e.test.classId}#${e.test.methodName}`;
           this.reset('test', key);
           const dec = Decorations.buildTest(e.test);
           this.store('test', key, 'unknown', dec, e.test);

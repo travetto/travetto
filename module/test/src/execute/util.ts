@@ -4,6 +4,8 @@ import fs from 'node:fs/promises';
 import readline from 'node:readline/promises';
 
 import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime } from '@travetto/runtime';
+import { TestConfig } from '../model/test';
+import { TestRun } from '../worker/types';
 
 /**
  * Simple Test Utilities
@@ -63,13 +65,13 @@ export class RunnerUtil {
   }
 
   /**
-   * Get count of tests for a given set of patterns
-   * @param patterns
+   * Get count of tests for a given set of globs
+   * @param globs
    * @returns
    */
-  static async getTestCount(patterns: string[]): Promise<number> {
+  static async getTestDigest(globs: string[] = ['**/*.ts'], tags?: string[]): Promise<TestConfig[]> {
     const countRes = await ExecUtil.getResult(
-      spawn('npx', ['trv', 'test:count', ...patterns], {
+      spawn('npx', ['trv', 'test:digest', '-o', 'json', ...globs], {
         env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
       }),
       { catch: true }
@@ -77,6 +79,30 @@ export class RunnerUtil {
     if (!countRes.valid) {
       throw new Error(countRes.stderr);
     }
-    return countRes.valid ? +countRes.stdout : 0;
+
+    const testFilter = tags?.length ?
+      Util.allowDeny<string, [TestConfig]>(
+        tags,
+        rule => rule,
+        (rule, core) => core.tags?.includes(rule) ?? false
+      ) :
+      ((): boolean => true);
+
+    const res: TestConfig[] = countRes.valid ? JSON.parse(countRes.stdout) : [];
+    return res.filter(testFilter);
+  }
+
+  /**
+   * Get run events
+   */
+  static getTestRuns(tests: TestConfig[]): Iterable<TestRun> {
+    const events = tests.reduce((acc, test) => {
+      if (!acc.has(test.classId)) {
+        acc.set(test.classId, { import: test.import, classId: test.classId, methodNames: [] });
+      }
+      acc.get(test.classId)!.methodNames!.push(test.methodName);
+      return acc;
+    }, new Map<string, TestRun>());
+    return events.values();
   }
 }

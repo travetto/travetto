@@ -5,16 +5,18 @@ import { SuiteRegistry } from '../src/registry/suite';
 import { RunnerUtil } from '../src/execute/util';
 
 @CliCommand({ hidden: true })
-export class TestCountCommand {
+export class TestDigestCommand {
+
+  output: 'json' | 'text' = 'text';
 
   preMain(): void {
     Env.TRV_ROLE.set('test');
     Env.DEBUG.set(false);
   }
 
-  async main(patterns: string[]) {
+  async main(globs: string[] = ['**/*.ts']) {
     // Load all tests
-    for await (const imp of await RunnerUtil.getTestImports(patterns)) {
+    for await (const imp of await RunnerUtil.getTestImports(globs)) {
       try {
         await Runtime.importFrom(imp);
       } catch (err) {
@@ -25,11 +27,17 @@ export class TestCountCommand {
     await SuiteRegistry.init();
 
     const suites = SuiteRegistry.getClasses();
-    const total = suites
+    const all = suites
       .map(c => SuiteRegistry.get(c))
       .filter(c => !describeFunction(c.class).abstract)
-      .reduce((acc, c) => acc + (c.tests?.length ?? 0), 0);
+      .flatMap(c => c.tests);
 
-    console.log(total);
+    if (this.output === 'json') {
+      console.log(JSON.stringify(all));
+    } else {
+      for (const item of all) {
+        console.log(`${item.classId}#${item.methodName}`, item.tags?.join('|') ?? '');
+      }
+    }
   }
 }

@@ -3,7 +3,7 @@ import util from 'node:util';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
-import { SuiteConfig } from '../model/suite';
+import { SuiteConfig, SuiteFailure } from '../model/suite';
 
 function isCleanable(o: unknown): o is { toClean(): unknown } {
   return !!o && typeof o === 'object' && 'toClean' in o && typeof o.toClean === 'function';
@@ -87,7 +87,7 @@ export class AssertUtil {
   /**
    * Generate a suite error given a suite config, and an error
    */
-  static generateSuiteError(suite: SuiteConfig, methodName: string, error: Error): { assert: Assertion, testResult: TestResult, testConfig: TestConfig } {
+  static generateSuiteFailure(suite: SuiteConfig, methodName: string, error: Error): SuiteFailure {
     const { import: imp, ...pos } = this.getPositionOfError(error, suite.import);
     let line = pos.line;
 
@@ -108,11 +108,11 @@ export class AssertUtil {
       ...coreAll,
       status: 'failed', error, duration: 0, durationTotal: 0, assertions: [assert], output: {}
     };
-    const testConfig: TestConfig = {
+    const test: TestConfig = {
       ...coreAll,
       class: suite.class, skip: false
     };
 
-    return { assert, testResult, testConfig };
+    return { assert, testResult, test, suite };
   }
 }

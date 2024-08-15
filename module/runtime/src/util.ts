@@ -18,6 +18,31 @@ type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
  */
 export class Util {
 
+  static #match<T, K extends unknown[]>(
+    rules: { value: T, positive: boolean }[],
+    compare: (rule: T, ...compareInput: K) => boolean,
+    unmatchedValue: boolean,
+    ...input: K
+  ): boolean {
+    for (const rule of rules) {
+      if (compare(rule.value, ...input)) {
+        return rule.positive;
+      }
+    }
+    return unmatchedValue;
+  }
+
+  static #allowDenyRuleInput<T>(
+    rule: (string | T | [value: T, positive: boolean] | [value: T]),
+    convert: (inputRule: string) => T
+  ): { value: T, positive: boolean } {
+    return typeof rule === 'string' ?
+      { value: convert(rule.replace(/^!/, '')), positive: !rule.startsWith('!') } :
+      Array.isArray(rule) ?
+        { value: rule[0], positive: rule[1] ?? true } :
+        { value: rule, positive: true };
+  }
+
   /**
    * Generate a random UUID
    * @param len The length of the uuid to generate
@@ -108,5 +133,34 @@ export class Util {
    */
   static queueMacroTask(): Promise<void> {
     return timers.setImmediate(undefined);
+  }
+
+
+  /**
+   * Simple check against allow/deny rules
+   * @param rules
+   */
+  static allowDeny<T, K extends unknown[]>(
+    rules: string | (string | T | [value: T, positive: boolean])[],
+    convert: (rule: string) => T,
+    compare: (rule: T, ...compareInput: K) => boolean,
+    cacheKey?: (...keyInput: K) => string
+  ): (...input: K) => boolean {
+
+    const rawRules = (Array.isArray(rules) ? rules : rules.split(/\s*,\s*/g));
+    const convertedRules = rawRules.map(rule => this.#allowDenyRuleInput(rule, convert));
+    const unmatchedValue = !convertedRules.some(r => r.positive);
+
+    if (convertedRules.length) {
+      if (cacheKey) {
+        const cache: Record<string, boolean> = {};
+        return (...input: K) =>
+          cache[cacheKey(...input)] ??= this.#match(convertedRules, compare, unmatchedValue, ...input);
+      } else {
+        return (...input: K) => this.#match(convertedRules, compare, unmatchedValue, ...input);
+      }
+    } else {
+      return () => true;
+    }
   }
 }

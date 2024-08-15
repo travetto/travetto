@@ -265,7 +265,7 @@ export class AssertCheck {
    * Look for any unhandled exceptions
    */
   static checkUnhandled(test: TestConfig, err: Error | assert.AssertionError): void {
-    let line = AssertUtil.getPositionOfError(err, test.import).line;
+    let line = AssertUtil.getPositionOfError(err, test.sourceImport ?? test.import).line;
     if (line === 1) {
       line = test.lineStart;
     }

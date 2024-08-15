@@ -379,7 +379,7 @@ Validation Failed {
 ```
 
 ## Data Utilities
-Data utilities for binding values, and type conversion. Currently [DataUtil](https://github.com/travetto/travetto/tree/main/module/schema/src/data.ts#L10) includes:
+Data utilities for binding values, and type conversion. Currently [DataUtil](https://github.com/travetto/travetto/tree/main/module/schema/src/data.ts#L11) includes:
    *  `deepAssign(a, b, mode ?)` which allows for deep assignment of `b` onto `a`, the `mode` determines how aggressive the assignment is, and how flexible it is.  `mode` can have any of the following values:
       *  `loose`, which is the default is the most lenient. It will not error out, and overwrites will always happen
       *  `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out

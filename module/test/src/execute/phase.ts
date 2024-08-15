@@ -1,12 +1,12 @@
 import { Barrier } from '@travetto/worker';
 import { Env, TimeUtil } from '@travetto/runtime';
 
-import { TestConsumer } from '../consumer/types';
-import { SuiteConfig, SuiteResult } from '../model/suite';
+import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
-import { TestResult } from '../model/test';
 
-class TestBreakout extends Error { }
+class TestBreakout extends Error {
+  source?: Error;
+}
 
 const TEST_PHASE_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_PHASE_TIMEOUT.val) ?? 15000;
 
@@ -17,27 +17,14 @@ const TEST_PHASE_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_PHASE_TIMEOUT.val) ??
  */
 export class TestPhaseManager {
   #progress: ('all' | 'each')[] = [];
-  #consumer: TestConsumer;
   #suite: SuiteConfig;
   #result: SuiteResult;
+  #onSuiteFailure: (fail: SuiteFailure) => void;
 
-  constructor(consumer: TestConsumer, suite: SuiteConfig, result: SuiteResult) {
-    this.#consumer = consumer;
+  constructor(suite: SuiteConfig, result: SuiteResult, onSuiteFailure: (fail: SuiteFailure) => void) {
     this.#suite = suite;
     this.#result = result;
-  }
-
-  /**
-   * Create the appropriate events when a suite has an error
-   */
-  async triggerSuiteError(methodName: string, error: Error): Promise<TestResult> {
-    const bad = AssertUtil.generateSuiteError(this.#suite, methodName, error);
-
-    this.#consumer.onEvent({ type: 'test', phase: 'before', test: bad.testConfig });
-    this.#consumer.onEvent({ type: 'assertion', phase: 'after', assertion: bad.assert });
-    this.#consumer.onEvent({ type: 'test', phase: 'after', test: bad.testResult });
-
-    return bad.testResult;
+    this.#onSuiteFailure = onSuiteFailure;
   }
 
   /**
@@ -57,10 +44,9 @@ export class TestPhaseManager {
       }
     }
     if (error) {
-      const res = await this.triggerSuiteError(`[[${phase}]]`, error);
-      this.#result.tests.push(res);
-      this.#result.failed++;
-      throw new TestBreakout();
+      const tbo = new TestBreakout(`[[${phase}]]`);
+      tbo.source = error;
+      throw tbo;
     }
   }
 
@@ -96,10 +82,14 @@ export class TestPhaseManager {
 
     this.#progress = [];
 
-    if (!(err instanceof TestBreakout)) {
-      const res = await this.triggerSuiteError('all', err);
-      this.#result.tests.push(res);
-      this.#result.failed++;
-    }
+    const failure = AssertUtil.generateSuiteFailure(
+      this.#suite,
+      err instanceof TestBreakout ? err.message : 'all',
+      err instanceof TestBreakout ? err.source! : err
+    );
+
+    this.#onSuiteFailure(failure);
+    this.#result.tests.push(failure.testResult);
+    this.#result.failed++;
   }
 }

@@ -93,7 +93,7 @@ export class AssertTransformer {
   /**
    * Resolves optoken to syntax kind.  Relies on `ts`
    */
-  static lookupOpToken(key: number): string {
+  static lookupOpToken(key: number): string | undefined {
     if (OP_TOKEN_TO_NAME.size === 0) {
       Object.keys(ts.SyntaxKind)
         .filter(x => !/^\d+$/.test(x))
@@ -106,7 +106,7 @@ export class AssertTransformer {
     if (name in OPTOKEN_ASSERT) {
       return OPTOKEN_ASSERT[name];
     } else {
-      throw new Error(`Unknown optoken: ${name}:${key}`);
+      return;
     }
   }
 

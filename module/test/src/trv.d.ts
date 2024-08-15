@@ -12,5 +12,9 @@ declare global {
      * @default 5s
      */
     TRV_TEST_TIMEOUT: TimeSpan | number;
+    /**
+     * The tags to include or exclude during testing
+     */
+    TRV_TEST_TAGS: string[];
   }
 }

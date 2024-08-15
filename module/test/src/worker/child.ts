@@ -6,13 +6,13 @@ import { ChildCommChannel } from '@travetto/worker';
 import { SerializeUtil } from '../consumer/serialize';
 import { RunnerUtil } from '../execute/util';
 import { Runner } from '../execute/runner';
-import { Events, RunEvent } from './types';
+import { Events, TestRun } from './types';
 
 /**
  * Child Worker for the Test Runner.  Receives events as commands
  * to run specific tests
  */
-export class TestChildWorker extends ChildCommChannel<RunEvent> {
+export class TestChildWorker extends ChildCommChannel<TestRun> {
 
   #done = Util.resolvablePromise();
 
@@ -56,7 +56,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   /**
    * When we receive a command from the parent
    */
-  async onCommand(event: RunEvent & { type: string }): Promise<boolean> {
+  async onCommand(event: TestRun & { type: string }): Promise<boolean> {
     console.debug('on message', { ...event });
 
     if (event.type === Events.INIT) { // On request to init, start initialization
@@ -76,17 +76,13 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   /**
    * Run a specific test/suite
    */
-  async onRunCommand(event: RunEvent): Promise<void> {
-    console.debug('Run');
-
+  async onRunCommand(event: TestRun): Promise<void> {
     console.debug('Running', { import: event.import });
 
     try {
       await new Runner({
         format: 'exec',
-        mode: 'single',
-        args: [event.import, event.class!, event.method!],
-        concurrency: 1
+        target: event
       }).run();
     } finally {
       this.#done.resolve();

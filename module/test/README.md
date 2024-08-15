@@ -221,12 +221,13 @@ To run the tests you can either call the [Command Line Interface](https://github
 ```bash
 $ trv test --help
 
-Usage: test [options] [first:string] [regexes...:string]
+Usage: test [options] [first:string] [globs...:string]
 
 Options:
   -f, --format <string>         Output format for test results (default: "tap")
   -c, --concurrency <number>    Number of tests to run concurrently (default: 4)
   -m, --mode <single|standard>  Test run mode (default: "standard")
+  -t, --tags <string>           Tags to target or exclude
   -h, --help                    display help for command
 ```
 

@@ -1,24 +1,19 @@
 /**
- * Test Run Request
+ * Test Run
  */
-export type RunRequest = {
-  file: string;
-  class?: string;
-  method?: string;
-} | {
+export type TestRun = {
+  /**
+   * Import for run
+   */
   import: string;
-  class?: string;
-  method?: string;
-};
-
-/**
- * Test Run Event
- */
-export type RunEvent = {
-  import: string;
-  error?: unknown;
-  class?: string;
-  method?: string;
+  /**
+   * Suite class id
+   */
+  classId?: string;
+  /**
+   * Methods names we want to target
+   */
+  methodNames?: string[];
 };
 
 /**
