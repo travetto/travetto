@@ -77,7 +77,7 @@ export class TestWatcher {
     RootRegistry.onNonClassChanges(imp => itr.add({ import: imp }));
 
     process.on('message', ev => {
-      if (typeof ev === 'object' && ev && 'type' in ev && ev.type === 'run-event') {
+      if (typeof ev === 'object' && ev && 'type' in ev && ev.type === 'run-test') {
         console.log('Received message', ev);
         // Legacy
         if ('file' in ev && typeof ev.file === 'string') {
