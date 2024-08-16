@@ -20,7 +20,7 @@ class Config {
   }
 }
 
-@Suite()
+@Suite({ tags: ['expensive'] })
 export class FastifyRestClientTest extends RestClientServerSuite {
   qualifier = FASTIFY;
 }

@@ -1,7 +1,6 @@
 import { AssertionError } from 'node:assert';
-import path from 'node:path';
 
-import { Env, TimeUtil, Runtime, RuntimeIndex, castTo, asFull, Class } from '@travetto/runtime';
+import { Env, TimeUtil, Runtime, castTo } from '@travetto/runtime';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -24,12 +23,10 @@ export class TestExecutor {
 
   #consumer: TestConsumer;
   #testFilter: (config: TestConfig) => boolean;
-  #fullSuites: boolean;
 
   constructor(consumer: TestConsumer, testFilter?: (config: TestConfig) => boolean, fullSuites = true) {
     this.#consumer = consumer;
     this.#testFilter = testFilter || ((): boolean => true);
-    this.#fullSuites = fullSuites;
   }
 
   /**
@@ -100,20 +97,6 @@ export class TestExecutor {
     this.#consumer.onEvent({ type: 'test', phase: 'before', test });
     result.skipped++;
     this.#consumer.onEvent({ type: 'test', phase: 'after', test: { ...test, assertions: [], duration: 0, durationTotal: 0, output: {}, status: 'skipped' } });
-  }
-
-  /**
-   * Fail an entire file, marking the whole file as failed
-   */
-  failFile(imp: string, err: Error): void {
-    const name = path.basename(imp);
-    const classId = `${RuntimeIndex.getFromImport(imp)?.id}￮${name}`;
-    const suite = asFull<SuiteConfig & SuiteResult>({
-      class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp
-    });
-    err.message = err.message.replaceAll(Runtime.mainSourcePath, '.');
-    const failure = AssertUtil.generateSuiteFailure(suite, 'require', err);
-    this.#onSuiteFailure(failure, true);
   }
 
   /**
@@ -205,15 +188,17 @@ export class TestExecutor {
   /**
    * Execute an entire suite
    */
-  async executeSuite(suite: SuiteConfig, tests?: TestConfig[]): Promise<void> {
+  async executeSuite(suite: SuiteConfig, tests: TestConfig[]): Promise<void> {
+    if (!tests.length || await this.#shouldSkip(suite, suite.instance)) {
+      return;
+    }
+
     const result: SuiteResult = this.createSuiteResult(suite);
 
     const startTime = Date.now();
 
-    if (this.#fullSuites) {
-      // Mark suite start
-      this.#consumer.onEvent({ phase: 'before', type: 'suite', suite });
-    }
+    // Mark suite start
+    this.#consumer.onEvent({ phase: 'before', type: 'suite', suite });
 
     const mgr = new TestPhaseManager(suite, result, e => this.#onSuiteFailure(e));
 
@@ -261,23 +246,21 @@ export class TestExecutor {
     result.duration = Date.now() - startTime;
     result.total = result.passed + result.failed;
 
-    if (this.#fullSuites) {
-      // Mark suite complete
-      this.#consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
-    }
+    // Mark suite complete
+    this.#consumer.onEvent({ phase: 'after', type: 'suite', suite: result });
   }
 
   /**
    * Handle executing a suite's test/tests based on command line inputs
    */
-  async execute(imp: string, clsId?: string, methods?: string[]): Promise<void> {
+  async execute(imp: string, classId?: string, methodNames?: string[]): Promise<void> {
     try {
       await Runtime.importFrom(imp);
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;
       }
-      this.failFile(imp, err);
+      this.#onSuiteFailure(AssertUtil.gernerateImportFailure(imp, err));
       return;
     }
 
@@ -285,12 +268,10 @@ export class TestExecutor {
     await SuiteRegistry.init();
 
     // Convert inbound arguments to specific tests to run
-    const suites = SuiteRegistry.getSuiteTests(imp, clsId, methods ?? []);
+    const suites = SuiteRegistry.getSuiteTests(imp, classId, methodNames ?? []);
 
     for (const { suite, tests } of suites) {
-      if (!(await this.#shouldSkip(suite, suite.instance)) && suite.tests.length) {
-        await this.executeSuite(suite, tests);
-      }
+      await this.executeSuite(suite, tests);
     }
   }
 }

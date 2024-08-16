@@ -92,7 +92,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   /**
    * Get run parameters from provided input
    */
-  getSuiteTests(imp: string, clsId?: string, methodNames: string[] = []): { suite: SuiteConfig, tests?: TestConfig[] }[] {
+  getSuiteTests(imp: string, clsId?: string, methodNames: string[] = []): { suite: SuiteConfig, tests: TestConfig[] }[] {
     if (clsId && /^\d+$/.test(clsId)) { // If we only have a line number
       const line = parseInt(clsId, 10);
       const suites = this.getValidClasses()
@@ -102,9 +102,9 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
 
       if (suite) {
         const test = suite.tests.find(x => line >= x.lineStart && line <= x.lineEnd);
-        return test ? [{ suite, tests: [test] }] : [{ suite }];
+        return test ? [{ suite, tests: [test] }] : [{ suite, tests: suite.tests }];
       } else {
-        return suites.map(x => ({ suite: x }));
+        return suites.map(x => ({ suite: x, tests: x.tests }));
       }
     } else { // Else lookup directly
       if (methodNames.length) {
@@ -115,12 +115,12 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       } else if (clsId) {
         const cls = this.getValidClasses().find(x => x.Ⲑid === clsId)!;
         const suite = this.get(cls);
-        return [{ suite }];
+        return [{ suite, tests: suite.tests }];
       } else {
         const suites = this.getValidClasses()
           .map(x => this.get(x))
           .filter(x => !describeFunction(x.class).abstract);  // Do not run abstract suites
-        return suites.map(x => ({ suite: x }));
+        return suites.map(x => ({ suite: x, tests: x.tests }));
       }
     }
   }

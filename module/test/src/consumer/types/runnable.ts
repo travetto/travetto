@@ -15,14 +15,12 @@ export class RunnableTestConsumer implements TestConsumer {
   }
 
   #consumers: TestConsumer[];
-  #results: TestResultsSummarizer | undefined;
+  #results?: TestResultsSummarizer;
 
   constructor(...consumers: TestConsumer[]) {
     this.#consumers = consumers;
+    this.#results = consumers.find(x => !!x.onSummary) ? new TestResultsSummarizer() : undefined;
     for (const c of consumers) {
-      if (!this.#results && c.onSummary) { // If expecting summary
-        this.#results = new TestResultsSummarizer();
-      }
       c.onEvent = c.onEvent.bind(c);
     }
   }
@@ -34,9 +32,7 @@ export class RunnableTestConsumer implements TestConsumer {
   }
 
   onEvent(e: TestEvent): void {
-    if (this.#results) {
-      this.#results.onEvent(e);
-    }
+    this.#results?.onEvent(e);
     for (const c of this.#consumers) {
       c.onEvent(e);
     }

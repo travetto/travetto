@@ -20,7 +20,7 @@ class Config {
   }
 }
 
-@Suite()
+@Suite({ tags: ['expensive'] })
 export class KoaRestClientTest extends RestClientServerSuite {
   qualifier = KOA;
 }

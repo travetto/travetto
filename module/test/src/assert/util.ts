@@ -1,9 +1,10 @@
 import util from 'node:util';
+import path from 'node:path';
 
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asFull, Class, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
-import { SuiteConfig, SuiteFailure } from '../model/suite';
+import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite';
 
 function isCleanable(o: unknown): o is { toClean(): unknown } {
   return !!o && typeof o === 'object' && 'toClean' in o && typeof o.toClean === 'function';
@@ -114,5 +115,18 @@ export class AssertUtil {
     };
 
     return { assert, testResult, test, suite };
+  }
+
+  /**
+   * Define import failure as a SuiteFailure object
+   */
+  static gernerateImportFailure(imp: string, err: Error): SuiteFailure {
+    const name = path.basename(imp);
+    const classId = `${RuntimeIndex.getFromImport(imp)?.id}￮${name}`;
+    const suite = asFull<SuiteConfig & SuiteResult>({
+      class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp
+    });
+    err.message = err.message.replaceAll(Runtime.mainSourcePath, '.');
+    return this.generateSuiteFailure(suite, 'require', err);
   }
 }

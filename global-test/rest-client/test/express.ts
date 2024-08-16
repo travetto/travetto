@@ -20,7 +20,7 @@ class Config {
   }
 }
 
-@Suite()
+@Suite({ tags: ['expensive'] })
 export class ExpressRestClientTest extends RestClientServerSuite {
   qualifier = EXPRESS;
 }
