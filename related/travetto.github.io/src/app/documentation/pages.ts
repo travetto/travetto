@@ -54,8 +54,16 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-elasticsearch/model-elasticsearch.component').then(m => m.ModelElasticsearchComponent)
       },
       {
+        path: 'model-file', title: 'File',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-file/model-file.component').then(m => m.ModelFileComponent)
+      },
+      {
         path: 'model-firestore', title: 'Firestore',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-firestore/model-firestore.component').then(m => m.ModelFirestoreComponent)
+      },
+      {
+        path: 'model-memory', title: 'Memory',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-memory/model-memory.component').then(m => m.ModelMemoryComponent)
       },
       {
         path: 'model-mongo', title: 'Mongo',

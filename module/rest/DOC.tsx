@@ -122,7 +122,7 @@ export const text = <>
       <li>Files</li>
     </ul>
 
-    Per the {d.mod('Base')} module, the following types automatically have rest support as well:
+    Per the {d.mod('Runtime')} module, the following types automatically have rest support as well:
     <ul>
       <li>{d.input('Error')} - Serializes to a standard object, with status, and the error message.</li>
       <li>{d.input('AppError')} - Serializes like {d.input('Error')} but translates the error category to an HTTP status</li>

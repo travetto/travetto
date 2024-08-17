@@ -34,7 +34,7 @@ export const text = <>
 
   <c.Section title='Contracts'>
 
-    The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are {Links.Basic}, {Links.Crud}, {Links.Indexed}, {Links.Expiry}, {Links.Blob} and {Links.Bulk}.
+    The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are {Links.Basic}, {Links.Crud}, {Links.Indexed}, {Links.Expiry}, {Links.Stream} and {Links.Bulk}.
 
     <c.SubSection title='Basic'>
       All {d.mod('Model')} implementations, must honor the {Links.Basic} contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -85,14 +85,13 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Custom Model Service'>
-    In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
-    repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the {d.mod('Model')} implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
+    In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the {d.mod('Model')} implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface. {d.mod('ModelMemory')} serves as a great example of what a full featured implementation can look like.
 
-    <c.Code title='Memory Service' src='src/provider/memory.ts' outline={true} />
+    <br />
 
     To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.
 
-    <c.Code title='Memory Service Test Configuration' src='./test/memory.ts' />
+    <c.Code title='Memory Service Test Configuration' src='./support/test/base.ts' />
   </c.Section>
 
   <c.Section title='CLI - model:export'>

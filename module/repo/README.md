@@ -104,20 +104,18 @@ Options:
 ```bash
 $ trv repo:list
 
-global-test/asset-rest-upload
 global-test/auth-rest
 global-test/auth-rest-jwt
-global-test/model_asset
 global-test/model_auth-model
 global-test/model_cache
 global-test/model_rest-session
+global-test/model_rest-upload
 global-test/openapi
 global-test/pack_app
 global-test/rest-client
 global-test/rest-session
 global-test/rest-upload
 global-test/transformer-test
-module/asset
 module/auth
 module/auth-model
 module/auth-rest
@@ -144,7 +142,9 @@ module/manifest
 module/model
 module/model-dynamodb
 module/model-elasticsearch
+module/model-file
 module/model-firestore
+module/model-memory
 module/model-mongo
 module/model-mysql
 module/model-postgres
@@ -205,20 +205,18 @@ The standard format includes prefixed output to help identify which module produ
 ```bash
 $ trv repo:exec -w 1 pwd
 
-global-test/asset-rest-upload <workspace-root>/global-test/asset-rest-upload
-         global-test/auth-rest <workspace-root>/global-test/auth-rest
+global-test/auth-rest <workspace-root>/global-test/auth-rest
      global-test/auth-rest-jwt <workspace-root>/global-test/auth-rest-jwt
-       global-test/model_asset <workspace-root>/global-test/model_asset
   global-test/model_auth-model <workspace-root>/global-test/model_auth-model
        global-test/model_cache <workspace-root>/global-test/model_cache
 global-test/model_rest-session <workspace-root>/global-test/model_rest-session
+ global-test/model_rest-upload <workspace-root>/global-test/model_rest-upload
            global-test/openapi <workspace-root>/global-test/openapi
           global-test/pack_app <workspace-root>/global-test/pack_app
        global-test/rest-client <workspace-root>/global-test/rest-client
       global-test/rest-session <workspace-root>/global-test/rest-session
        global-test/rest-upload <workspace-root>/global-test/rest-upload
   global-test/transformer-test <workspace-root>/global-test/transformer-test
-                  module/asset <workspace-root>/module/asset
                    module/auth <workspace-root>/module/auth
              module/auth-model <workspace-root>/module/auth-model
               module/auth-rest <workspace-root>/module/auth-rest
@@ -245,7 +243,9 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
                   module/model <workspace-root>/module/model
          module/model-dynamodb <workspace-root>/module/model-dynamodb
     module/model-elasticsearch <workspace-root>/module/model-elasticsearch
+             module/model-file <workspace-root>/module/model-file
         module/model-firestore <workspace-root>/module/model-firestore
+           module/model-memory <workspace-root>/module/model-memory
             module/model-mongo <workspace-root>/module/model-mongo
             module/model-mysql <workspace-root>/module/model-mysql
          module/model-postgres <workspace-root>/module/model-postgres

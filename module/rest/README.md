@@ -226,7 +226,7 @@ The module provides standard structure for rendering content on the response.  T
    *  JSON
    *  String responses
    *  Files
-Per the [Base](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Environment config and common utilities for travetto applications.") module, the following types automatically have rest support as well:
+Per the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.") module, the following types automatically have rest support as well:
    *  `Error` - Serializes to a standard object, with status, and the error message.
    *  `AppError` - Serializes like `Error` but translates the error category to an HTTP status
 Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module supports typing requests and request bodies for run-time validation of requests.

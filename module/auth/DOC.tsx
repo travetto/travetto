@@ -67,7 +67,7 @@ export const text = <>
 
     <c.Code title='Auth util structure' src={AuthUtil} outline={true} />
 
-    {d.method('roleMatcher')} is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from {d.mod('Base')}'s Util class. <br />
+    {d.method('roleMatcher')} is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from {d.mod('Runtime')}'s Util class. <br />
 
     An example of role checks could be:
 

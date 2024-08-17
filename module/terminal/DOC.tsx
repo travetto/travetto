@@ -27,7 +27,7 @@ export const text = <>
 
     <c.Code title='CLI Color Palette' src='@travetto/cli/src/color.ts' />
 
-    When the color palette is combined with {d.mod('Base')}'s Util.makeTemplate, you produce a string template function that will automatically colorize:
+    When the color palette is combined with {d.mod('Runtime')}'s Util.makeTemplate, you produce a string template function that will automatically colorize:
 
     <c.Code title='Sample Template Usage'
       // eslint-disable-next-line no-template-curly-in-string

@@ -30,8 +30,7 @@ The cache module requires an <a target="_blank" class="source-link" href="https:
   </figure>
 
 Currently, the following are packages that provide <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Expiry</a>:
-<ul> <li><a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> - &#64;travetto/model: <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L49">FileModelService</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54">MemoryModelService</a></li>
-<li><a class="module-link" routerLink="/docs/model-dynamodb" title="DynamoDB backing for the travetto model module.">DynamoDB Model Support</a> - &#64;travetto/model-dynamodb</li>
+<ul> <li><a class="module-link" routerLink="/docs/model-dynamodb" title="DynamoDB backing for the travetto model module.">DynamoDB Model Support</a> - &#64;travetto/model-dynamodb</li>
 <li><a class="module-link" routerLink="/docs/model-elasticsearch" title="Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.">Elasticsearch Model Source</a> - &#64;travetto/model-elasticsearch</li>
 <li><a class="module-link" routerLink="/docs/model-mongo" title="Mongo backing for the travetto model module.">MongoDB Model Support</a> - &#64;travetto/model-mongo</li>
 <li><a class="module-link" routerLink="/docs/model-redis" title="Redis backing for the travetto model module.">Redis Model Support</a> - &#64;travetto/model-redis</li>
@@ -39,6 +38,8 @@ Currently, the following are packages that provide <a target="_blank" class="sou
 <li><a class="module-link" routerLink="/docs/model-postgres" title="PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.">PostgreSQL Model Service</a> - &#64;travetto/model-postgres</li>
 <li><a class="module-link" routerLink="/docs/model-mysql" title="MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.">MySQL Model Service</a> - &#64;travetto/model-mysql</li>
 <li><a class="module-link" routerLink="/docs/model-sqlite" title="SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.">SQLite Model Service</a> - &#64;travetto/model-sqlite</li>
+<li><a class="module-link" routerLink="/docs/model-memory" title="Datastore memory abstraction for core operations.">Data Memory Modeling Support</a> - &#64;travetto/model-memory</li>
+<li><a class="module-link" routerLink="/docs/model-file" title="Datastore file abstraction for core operations.">Data File Modeling Support</a> - &#64;travetto/model-file</li>
 </ul>
 
 <h2 id="decorators">Decorators</h2>
@@ -52,7 +53,7 @@ Additionally, to use the decorators you will need to have a <a target="_blank" c
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cache/doc/async.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MemoryModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MemoryModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model-memory'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Cache<span class="token punctuation">,</span> CacheService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/cache'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">request</span><span class="token punctuation">(</span>url<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
@@ -100,7 +101,7 @@ Additionally, there is support for planned eviction via the <a target="_blank" c
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cache/doc/evict.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MemoryModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MemoryModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model-memory'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Cache<span class="token punctuation">,</span> EvictCache<span class="token punctuation">,</span> CacheService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/cache'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
@@ -141,7 +142,8 @@ By design, the <a target="_blank" class="source-link" href="https://github.com/t
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MemoryModelService<span class="token punctuation">,</span> ModelExpirySupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelExpirySupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MemoryModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model-memory'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CacheModelⲐ <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/cache'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">Config</span> <span class="token punctuation">{{'{'}}</span>

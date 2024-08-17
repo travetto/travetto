@@ -1,7 +1,5 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { MemoryModelService } from '@travetto/model-memory';
-import { FileModelService } from '@travetto/model-file';
 import { Context } from '@travetto/rest';
 import { Session } from '@travetto/rest-session';
 
@@ -15,12 +13,13 @@ export const text = <>
   <c.StdHeader />
   This is a module that adds session support to the {d.mod('Rest')} framework.  Sessions allow for persistent data across multiple requests.  Within the framework the sessions are stored against any {d.mod('Model')} implementation that provides {ModelExpirySupport}, as the data needs to be able to be expired appropriately.  The list of supported model providers are:
   <ul>
-    <li>{d.mod('Model')}'s {FileModelService} and {MemoryModelService}</li>
     <li>{d.mod('ModelRedis')}</li>
     <li>{d.mod('ModelMongo')}</li>
     <li>{d.mod('ModelS3')}</li>
     <li>{d.mod('ModelDynamodb')}</li>
     <li>{d.mod('ModelElasticsearch')}</li>
+    <li>{d.mod('ModelFile')}</li>
+    <li>{d.mod('ModelMemory')}</li>
   </ul>
 
   A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the {Context} parameter as {Session} and {SessionData} respectively.  Iit can also be accessed via the {Request} as a session property.
