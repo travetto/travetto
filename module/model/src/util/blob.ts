@@ -5,19 +5,9 @@ import path from 'node:path';
 
 import { getExtension, getType } from 'mime';
 
-import { AppError, castTo, IOUtil, TypedObject, Util } from '@travetto/runtime';
+import { AppError, castTo, IOUtil, Util } from '@travetto/runtime';
 import { ModelBlobMeta, ByteRange, ModelBlob } from '../types/blob';
 
-const FIELD_TO_HEADER: Record<keyof ModelBlobMeta, string> = {
-  contentType: 'content-type',
-  contentEncoding: 'content-encoding',
-  cacheControl: 'cache-control',
-  contentLanguage: 'content-language',
-  size: 'content-length',
-  hash: '',
-  filename: '',
-  title: ''
-};
 
 /**
  * Utilities for processing assets
@@ -180,31 +170,9 @@ export class ModelBlobUtil {
     render(): Readable;
   } {
     return {
-      statusCode(): number {
-        return blob.range ? 206 : 200;
-      },
-
-      headers(): Record<string, string> {
-        const headers: Record<string, string> = {};
-        for (const [f, v] of TypedObject.entries(FIELD_TO_HEADER)) {
-          if (blob.meta[f] && v) {
-            headers[v] = `${blob.meta[f]}`;
-          }
-        }
-        if (blob.meta.filename) {
-          headers['content-disposition'] = `attachment;filename=${path.basename(blob.meta.filename)}`;
-        }
-        if (blob.range) {
-          headers['accept-ranges'] = 'bytes';
-          headers['content-range'] = `bytes ${blob.range.start}-${blob.range.end}/${blob.meta.size}`;
-          headers['content-length'] = `${blob.range.end - blob.range.start + 1}`;
-        }
-        return headers;
-      },
-
-      render(): Readable {
-        return Readable.from(blob.stream());
-      }
+      statusCode: () => blob.range ? 206 : 200,
+      headers: () => blob.headers(),
+      render: () => Readable.from(blob.stream())
     };
   }
 
