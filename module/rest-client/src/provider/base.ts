@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Class, Runtime, Util, castTo, describeFunction } from '@travetto/runtime';
+import { Class, IOUtil, Runtime, Util, castTo, describeFunction } from '@travetto/runtime';
 import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ, UnknownType } from '@travetto/schema/src/internal/types';
@@ -82,7 +82,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
   async writeContent(file: string, content: string | string[]): Promise<void> {
     content = Array.isArray(content) ? content.join('') : content;
 
-    await Util.bufferedFileWrite(
+    await IOUtil.bufferedFileWrite(
       path.resolve(this.#output, this.subFolder, file),
       this.writeContentFilter(content),
       true
