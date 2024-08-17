@@ -8,12 +8,6 @@ export * from './src/service/crud';
 export * from './src/service/indexed';
 export * from './src/service/expiry';
 export * from './src/service/storage';
-export * from './src/service/blob';
-
-export * from './src/types/blob';
-
-export * from '../model-file/src/file';
-export * from '../model-memory/src/memory';
 
 export * from './src/error/exists';
 export * from './src/error/not-found';

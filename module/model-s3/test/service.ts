@@ -6,12 +6,12 @@ import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
-
-import { S3ModelConfig } from '../src/config';
-import { S3ModelService } from '../src/service';
 import { castTo } from '@travetto/runtime';
 import { ModelBlobSuite } from '@travetto/model-blob/support/test/blob';
 import { BlobDataUtil, ModelBlobUtil } from '@travetto/model-blob';
+
+import { S3ModelConfig } from '../src/config';
+import { S3ModelService } from '../src/service';
 
 @Suite()
 export class S3BasicSuite extends ModelBasicSuite {

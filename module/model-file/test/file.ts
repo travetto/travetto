@@ -1,10 +1,11 @@
 import { Suite } from '@travetto/test';
+import { ModelBlobSuite } from '@travetto/model-blob/support/test/blob';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud';
+import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 
-import { FileModelConfig, FileModelService } from '../../model-file/src/file';
-import { ModelCrudSuite } from '../support/test/crud';
-import { ModelExpirySuite } from '../support/test/expiry';
-import { ModelBlobSuite } from '../support/test/stream';
-import { ModelBasicSuite } from '../support/test/basic';
+import { FileModelConfig, FileModelService } from '../src/file';
+
 
 @Suite()
 export class FileBasicSuite extends ModelBasicSuite {
