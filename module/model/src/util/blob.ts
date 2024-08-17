@@ -160,23 +160,6 @@ export class ModelBlobUtil {
   }
 
   /**
-   * Get a blob as an http response
-   * @param blob
-   * @returns
-   */
-  static blobToHttpResponse(blob: ModelBlob): {
-    statusCode(): number;
-    headers(): Record<string, string>;
-    render(): Readable;
-  } {
-    return {
-      statusCode: () => blob.range ? 206 : 200,
-      headers: () => blob.headers(),
-      render: () => Readable.from(blob.stream())
-    };
-  }
-
-  /**
    * Get a hashed location/path for a blob
    *
    * @param blob

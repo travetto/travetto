@@ -9,7 +9,7 @@ import { Inject, InjectableFactory } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/rest-upload';
 import { Util } from '@travetto/runtime';
-import { ModelBlob, ModelBlobSupport, ModelBlobUtil } from '@travetto/model';
+import { ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil } from '@travetto/model';
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -40,7 +40,8 @@ class TestUploadController {
   @Post('/')
   async upload(@Upload() file: Blob) {
     await this.service.upsertBlob('orange', file);
-    return { location: 'orange' };
+    const desc = await this.service.describeBlob('orange');
+    return { location: 'orange', meta: desc };
   }
 
   @Post('/cached')
@@ -109,17 +110,17 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
   @Test()
   async testUploadAll() {
     const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<ModelBlob>('post', '/test/upload/all', this.getMultipartRequest([sent]));
+    const res = await this.request<ModelBlobMeta>('post', '/test/upload/all', this.getMultipartRequest([sent]));
 
     const blob = await this.getBlob('/logo.png');
-    assert(res.body.meta.hash === blob.meta.hash);
+    assert(res.body.hash === blob.meta.hash);
   }
 
 
   @Test()
   async testUploadDirect() {
     const [sent] = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<ModelBlob>('post', '/test/upload', {
+    const res = await this.request<{ location: string, meta: ModelBlobMeta }>('post', '/test/upload', {
       headers: {
         'Content-Type': sent.type,
         'Content-Length': `${sent.size}`
@@ -134,7 +135,7 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<ModelBlob>('post', '/test/upload', this.getMultipartRequest(uploads));
+    const res = await this.request<{ location: string, meta: ModelBlobMeta }>('post', '/test/upload', this.getMultipartRequest(uploads));
     const blob = await this.getBlob('/logo.png');
     assert(res.body.meta.hash === blob.meta.hash);
   }

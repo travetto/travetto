@@ -3,9 +3,9 @@ import assert from 'node:assert';
 import path from 'node:path';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
-
-import { ModelBlobUtil } from '@travetto/model/src/internal/service/util';
 import { IOUtil } from '@travetto/runtime';
+
+import { ModelBlobUtil } from '../__index__';
 
 @Suite()
 export class UtilTest {

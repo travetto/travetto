@@ -112,4 +112,12 @@ export class ModelBlob extends Blob {
     }
     return headers;
   }
+
+  statusCode(): number {
+    return this.range ? 206 : 200;
+  }
+
+  render(): Readable {
+    return this.#stream();
+  }
 }
