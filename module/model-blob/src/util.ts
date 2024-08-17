@@ -5,7 +5,7 @@ import path from 'node:path';
 
 import { getExtension, getType } from 'mime';
 
-import { AppError, castTo, IOUtil, TypedObject } from '@travetto/runtime';
+import { AppError, castTo, IOUtil, TypedObject, Util } from '@travetto/runtime';
 import { ModelBlobMeta, ByteRange, ModelBlob } from './types';
 
 const FIELD_TO_HEADER: Record<keyof ModelBlobMeta, string> = {
@@ -206,5 +206,33 @@ export class ModelBlobUtil {
         return Readable.from(blob.stream());
       }
     };
+  }
+
+  /**
+   * Get a hashed location/path for a blob
+   *
+   * @param blob
+   * @param prefix
+   * @returns
+   */
+  static getHashedLocation(blob: ModelBlob | ModelBlobMeta, prefix = ''): string {
+    const meta = blob instanceof ModelBlob ? blob.meta : blob;
+    let ext: string | undefined = '';
+
+    if (meta.contentType) {
+      ext = ModelBlobUtil.getExtension(meta.contentType);
+    } else if (meta.filename) {
+      const dot = meta.filename.indexOf('.');
+      if (dot > 0) {
+        ext = meta.filename.substring(dot + 1);
+      }
+    }
+
+    ext = ext ? `.${ext.toLowerCase()}` : '';
+
+    const hash = meta.hash ?? Util.uuid();
+
+    return hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (all, ...others) =>
+      `${prefix}${others.slice(0, 5).join('/')}${ext}`);
   }
 }

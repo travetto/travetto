@@ -5,6 +5,7 @@ import path from 'node:path';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
 import { ModelBlobUtil } from '../src/util';
+import { IOUtil } from '@travetto/runtime';
 
 @Suite()
 export class UtilTest {
@@ -80,5 +81,15 @@ export class UtilTest {
     assert(asset.meta.contentType === 'image/png');
     assert(asset.meta.filename === 'logo.png');
     assert(asset.size === (await fs.stat(png)).size);
+  }
+
+
+  @Test()
+  async verifyHash() {
+    const pth = await this.fixture.resolve('/asset.yml');
+    const file = await ModelBlobUtil.asBlob(pth);
+    const location = ModelBlobUtil.getHashedLocation(file);
+    const hash = await IOUtil.hashInput(file);
+    assert(location.replace(/\//g, '').replace(/[.][^.]+$/, '') === hash);
   }
 }
