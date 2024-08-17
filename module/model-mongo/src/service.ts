@@ -4,6 +4,7 @@ import {
   Binary
 } from 'mongodb';
 import { pipeline } from 'node:stream/promises';
+import { Readable } from 'node:stream';
 
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
@@ -17,7 +18,7 @@ import {
 } from '@travetto/model-query';
 import { ByteRange, ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil } from '@travetto/model-blob';
 
-import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull } from '@travetto/runtime';
+import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull, IOUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
@@ -298,7 +299,7 @@ export class MongoModelService implements
       final.end! += 1; // range is exclusive
     }
 
-    const res = ModelBlobUtil.getLazyStream(() => this.#bucket.openDownloadStreamByName(location, range));
+    const res = (): Readable => this.#bucket.openDownloadStreamByName(location, final);
     return new ModelBlob(res, meta, final);
   }
 

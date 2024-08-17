@@ -1,16 +1,12 @@
 import fs from 'node:fs/promises';
-import { Readable, PassThrough } from 'node:stream';
+import { Readable } from 'node:stream';
 import { createReadStream } from 'node:fs';
 import path from 'node:path';
 
 import { getExtension, getType } from 'mime';
 
-import { AppError, castTo, TypedObject } from '@travetto/runtime';
-import { ExistsError, NotFoundError } from '@travetto/model';
-
+import { AppError, castTo, IOUtil, TypedObject } from '@travetto/runtime';
 import { ModelBlobMeta, ByteRange, ModelBlob } from './types';
-import { ModelBlobSupport } from './service';
-import { BlobDataUtil } from './data';
 
 const FIELD_TO_HEADER: Record<keyof ModelBlobMeta, string> = {
   contentType: 'content-type',
@@ -42,32 +38,11 @@ export class ModelBlobUtil {
   }
 
   /**
-   * Ensure unique
-   */
-  static async ensureUnique(storage: ModelBlobSupport, location: string, overwriteIfFound = false): Promise<void> {
-    if (!overwriteIfFound) {
-      let missing = false;
-      try {
-        await storage.describeBlob(location);
-      } catch (err) {
-        if (err instanceof NotFoundError) {
-          missing = true;
-        } else {
-          throw err;
-        }
-      }
-      if (!missing) {
-        throw new ExistsError('Asset', location);
-      }
-    }
-  }
-
-  /**
    * Detect file type
    */
   static async detectFileType(input: string | Buffer | Readable): Promise<{ ext: string, mime: string } | undefined> {
     const { default: fileType } = await import('file-type');
-    const buffer = await BlobDataUtil.readChunk(input, 4100);
+    const buffer = await IOUtil.readChunk(input, 4100);
     const matched = await fileType.fromBuffer(buffer);
     if (matched?.ext === 'wav') {
       return { ext: '.wav', mime: 'audio/wav' };
@@ -159,15 +134,21 @@ export class ModelBlobUtil {
 
   /**
    * Convert blob to asset structure
+   *
+   * Note: For a given blob, due to the nature of hashing the content, this will load the entire blob into memory.
+   * To that end, this method should only be called with small blobs or files
    */
-  static async asBlob(src: Blob | string, metadata: Partial<ModelBlobMeta> = {}): Promise<ModelBlob> {
+  static async asBlob(src: Blob | Buffer | string, metadata: Partial<ModelBlobMeta> = {}): Promise<ModelBlob> {
+    if (Buffer.isBuffer(src)) {
+      src = new Blob([src]);
+    }
     const contentType = metadata.contentType ?? (src instanceof Blob ? src.type : await this.resolveFileType(src));
     const filename = this.getFilename(src, { filename: metadata.filename, contentType });
 
     let input: () => Readable;
     if (src instanceof Blob) {
       const [a, b] = src.stream().tee();
-      metadata.hash = await BlobDataUtil.computeHash(Readable.fromWeb(b));
+      metadata.hash = await IOUtil.hashInput(Readable.fromWeb(b));
       input = (): Readable => Readable.from(a);
     } else {
       input = (): Readable => createReadStream(src);
@@ -181,21 +162,23 @@ export class ModelBlobUtil {
         filename,
         contentType,
         hash: metadata.hash ?? (typeof src === 'string' ?
-          await BlobDataUtil.computeHash(input()) :
+          await IOUtil.hashInput(input()) :
           undefined
         )
       }
     );
-
   }
 
-  static getLazyStream(src: () => (Promise<Readable> | Readable)): () => Readable {
-    const out = new PassThrough();
-    const run = (): void => { Promise.resolve(src()).then(v => v.pipe(out), (err) => out.destroy(err)); };
-    return () => (run(), out);
-  }
-
-  static blobToHttp(blob: ModelBlob): unknown {
+  /**
+   * Get a blob as an http response
+   * @param blob
+   * @returns
+   */
+  static blobToHttpResponse(blob: ModelBlob): {
+    statusCode(): number;
+    headers(): Record<string, string>;
+    render(): Readable;
+  } {
     return {
       statusCode(): number {
         return blob.range ? 206 : 200;

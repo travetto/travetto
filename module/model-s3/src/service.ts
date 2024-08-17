@@ -10,7 +10,7 @@ import {
   ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError, castTo, asFull } from '@travetto/runtime';
+import { Class, AppError, castTo, asFull, IOUtil } from '@travetto/runtime';
 import { ModelBlobMeta, ByteRange, ModelBlob, ModelBlobSupport, ModelBlobUtil } from '@travetto/model-blob';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -308,7 +308,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
   }
 
-  async #getObject(location: string, range: Required<ByteRange>): Promise<Readable> {
+  async #getObject(location: string, range?: Required<ByteRange>): Promise<Readable> {
     // Read from s3
     const res = await this.client.getObject(this.#q(STREAM_SPACE, location, range ? {
       Range: `bytes=${range.start}-${range.end}`
@@ -331,8 +331,8 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async getBlob(location: string, range?: ByteRange): Promise<ModelBlob> {
     const meta = await this.describeBlob(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size) : undefined;
-    const res = (): Promise<Readable> => this.#getObject(location, castTo(range));
-    return new ModelBlob(ModelBlobUtil.getLazyStream(res), meta, final);
+    const res = (): Promise<Readable> => this.#getObject(location, final);
+    return new ModelBlob(res, meta, final);
   }
 
   async headStream(location: string): Promise<{ Metadata?: Partial<ModelBlobMeta>, ContentLength?: number }> {

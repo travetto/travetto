@@ -10,7 +10,6 @@ export class ModelCrudSupportTarget { }
 export class ModelBulkSupportTarget { }
 export class ModelStorageSupportTarget { }
 export class ModelExpirySupportTarget { }
-export class ModelBlobSupportTarget { }
 export class ModelIndexedSupportTarget { }
 
 /**

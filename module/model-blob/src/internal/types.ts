@@ -1,4 +1,4 @@
 /**
- * Concrete target
+ * Blob storage target
  */
-export class ModelBlobNamingStrategyImpl { }
+export class ModelBlobSupportTarget { }

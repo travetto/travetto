@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
 import { arrayBuffer as toBuffer, text as toText } from 'node:stream/consumers';
+import { IOUtil } from '@travetto/runtime';
 
 export interface ModelBlobMeta {
   /**
@@ -56,9 +57,9 @@ export class ModelBlob extends Blob {
    */
   range?: Required<ByteRange>;
 
-  constructor(stream: () => Readable, meta: ModelBlobMeta, range?: Required<ByteRange>) {
+  constructor(stream: () => (Readable | Promise<Readable>), meta: ModelBlobMeta, range?: Required<ByteRange>) {
     super([]);
-    this.#stream = stream;
+    this.#stream = IOUtil.getLazyStream(stream);
     this.meta = meta;
     this.range = range;
     Object.defineProperty(this, 'size', { value: meta.size });

@@ -1,4 +1,4 @@
-import { AnyMap, TimeUtil } from '@travetto/runtime';
+import { AnyMap, castKey, castTo, TimeUtil } from '@travetto/runtime';
 import { ContextProvider } from '@travetto/rest';
 
 /**
@@ -84,8 +84,8 @@ export class Session<T extends SessionData = SessionData> {
    * Set session value
    */
   setValue<V>(key: string, value: V): void {
-    const data = this.data ??= {};
-    data[key] = value;
+    const data = (this.data ??= castTo({}))!;
+    data[castKey<T>(key)] = castTo(value);
   }
 
   /**
