@@ -6,7 +6,7 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { MemoryModelService } from '@travetto/model';
+import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/rest-upload';
 import { Util } from '@travetto/runtime';
 import { ModelBlob, ModelBlobSupport, ModelBlobUtil } from '@travetto/model-blob';

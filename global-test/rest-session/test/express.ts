@@ -4,7 +4,7 @@ import { ExpressRestServer } from '@travetto/rest-express';
 import { SessionModelⲐ } from '@travetto/rest-session';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
-import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
 const EXPRESS = Symbol.for('express');
 

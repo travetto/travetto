@@ -1,4 +1,4 @@
-import { MemoryModelService } from '@travetto/model';
+import { MemoryModelService } from '@travetto/model-memory';
 import { Cache, EvictCache, CacheService } from '@travetto/cache';
 
 class User { }

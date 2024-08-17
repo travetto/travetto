@@ -3,7 +3,7 @@ import { Suite } from '@travetto/test';
 import { FastifyRestServer } from '@travetto/rest-fastify';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
-import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { SessionModelⲐ } from '@travetto/rest-session';
 
 const FASTIFY = Symbol.for('fastify');

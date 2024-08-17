@@ -1,15 +1,16 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { FileModelService } from '../model-file/src/file';
-import { MemoryModelService } from '../model-memory/src/memory';
+import { FileModelService } from '@travetto/model-file';
+import { MemoryModelService } from '@travetto/model-memory';
+
 import { Model } from './src/registry/decorator';
 import { Links } from './support/doc.support';
 
 const ModelTypeSnippet = <c.Code title='ModelType' src='src/types/model.ts' startRe={/export interface/} endRe={/^}/} />;
 
 const ModelImplementations = () => {
-  const modelImplHeader = ['Service', 'Basic', 'CRUD', 'Indexed', 'Expiry', 'Stream', 'Bulk'].map(v => <td>{v}</td>);
+  const modelImplHeader = ['Service', 'Basic', 'CRUD', 'Indexed', 'Expiry', 'Blob', 'Bulk'].map(v => <td>{v}</td>);
 
   const modelImplRows = ([
     [d.mod('ModelDynamodb'), 'X', 'X', 'X', 'X', ' ', ' '],

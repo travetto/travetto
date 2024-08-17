@@ -1,5 +1,5 @@
 import { InjectableFactory } from '@travetto/di';
-import { FileModelConfig, FileModelService } from '@travetto/model';
+import { FileModelConfig, FileModelService } from '@travetto/model-file';
 import { Suite } from '@travetto/test';
 
 import { CacheModelⲐ } from '../../src/service';

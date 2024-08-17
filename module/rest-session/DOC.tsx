@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { FileModelService, MemoryModelService } from '@travetto/model';
+import { MemoryModelService } from '@travetto/model-memory';
+import { FileModelService } from '@travetto/model-file';
 import { Context } from '@travetto/rest';
 import { Session } from '@travetto/rest-session';
 

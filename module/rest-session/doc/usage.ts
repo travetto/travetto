@@ -1,7 +1,8 @@
 import { InjectableFactory } from '@travetto/di';
-import { MemoryModelService, ModelExpirySupport } from '@travetto/model';
+import { ModelExpirySupport } from '@travetto/model';
 import { Controller, Put, Get } from '@travetto/rest';
 import { SessionData, Session, SessionModelⲐ } from '@travetto/rest-session';
+import { MemoryModelService } from '@travetto/model-memory';
 
 // Applies to entire execution, not just this file
 class SessionConfig {
