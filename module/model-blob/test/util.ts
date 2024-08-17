@@ -83,7 +83,6 @@ export class UtilTest {
     assert(asset.size === (await fs.stat(png)).size);
   }
 
-
   @Test()
   async verifyHash() {
     const pth = await this.fixture.resolve('/asset.yml');

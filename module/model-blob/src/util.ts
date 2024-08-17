@@ -220,7 +220,7 @@ export class ModelBlobUtil {
     let ext: string | undefined = '';
 
     if (meta.contentType) {
-      ext = ModelBlobUtil.getExtension(meta.contentType);
+      ext = this.getExtension(meta.contentType);
     } else if (meta.filename) {
       const dot = meta.filename.indexOf('.');
       if (dot > 0) {
