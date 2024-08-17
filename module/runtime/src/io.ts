@@ -24,7 +24,7 @@ export class IOUtil {
     } else {
       await pipeline(input, hash);
     }
-    return hash.read().toString();
+    return hash.digest('hex').toString();
   }
 
   /**

@@ -3,7 +3,7 @@ import { ModelBlobMeta, ByteRange, ModelBlob } from '../types/blob';
 /**
  * Support for Blobs CRD.  Blob update is not supported.
  *
- * @concrete ./internal/types#ModelBlobSupportTarget
+ * @concrete ../internal/service/common#ModelBlobSupportTarget
  */
 export interface ModelBlobSupport {
 
