@@ -3,18 +3,10 @@ import { ReadableStream } from 'node:stream/web';
 import { arrayBuffer as toBuffer, text as toText } from 'node:stream/consumers';
 import path from 'node:path';
 
-import { IOUtil, TypedObject } from '@travetto/runtime';
+import { IOUtil } from '@travetto/runtime';
 
-const FIELD_TO_HEADER: Record<keyof ModelBlobMeta, string> = {
-  contentType: 'content-type',
-  contentEncoding: 'content-encoding',
-  cacheControl: 'cache-control',
-  contentLanguage: 'content-language',
-  size: 'content-length',
-  hash: '',
-  filename: '',
-  title: ''
-};
+const pair = <T>(obj: T, key: keyof T, h: string, tn: (item: unknown) => string = v => `${v}`): Record<string, string> =>
+  (obj[key] ? { [h]: tn(obj[key]) } : {});
 
 export interface ModelBlobMeta {
   /**
@@ -96,21 +88,19 @@ export class ModelBlob extends Blob {
   }
 
   headers(): Record<string, string> {
-    const headers: Record<string, string> = {};
-    for (const [f, v] of TypedObject.entries(FIELD_TO_HEADER)) {
-      if (this.meta[f] && v) {
-        headers[v] = `${this.meta[f]}`;
-      }
-    }
-    if (this.meta.filename) {
-      headers['content-disposition'] = `attachment;filename=${path.basename(this.meta.filename)}`;
-    }
-    if (this.range) {
-      headers['accept-ranges'] = 'bytes';
-      headers['content-range'] = `bytes ${this.range.start}-${this.range.end}/${this.meta.size}`;
-      headers['content-length'] = `${this.range.end - this.range.start + 1}`;
-    }
-    return headers;
+    return {
+      'content-type': this.meta.contentType,
+      'content-length': `${this.meta.size}`,
+      ...pair(this.meta, 'contentEncoding', 'content-encoding'),
+      ...pair(this.meta, 'cacheControl', 'cache-control'),
+      ...pair(this.meta, 'contentLanguage', 'content-language'),
+      ...pair(this.meta, 'filename', 'content-disposition', v => `attachment;filename=${path.basename(v!.toString())}`),
+      ...(this.range ? {
+        'accept-ranges': 'bytes',
+        'content-range': `bytes ${this.range.start}-${this.range.end}/${this.meta.size}`,
+        'content-length': `${this.range.end - this.range.start + 1}`,
+      } : {})
+    };
   }
 
   statusCode(): number {

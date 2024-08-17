@@ -125,8 +125,8 @@ export class ModelBlobUtil {
   /**
    * Convert blob to asset structure
    *
-   * Note: For a given blob, due to the nature of hashing the content, this will load the entire blob into memory.
-   * To that end, this method should only be called with small blobs or files
+   * Note: For a given blob, this implementation assumes that the blob stream can be read multiple times.
+   *   This assumption is incompatible with the blob response from an http request (fetch)
    */
   static async asBlob(src: Blob | Buffer | string, metadata: Partial<ModelBlobMeta> = {}): Promise<ModelBlob> {
     if (Buffer.isBuffer(src)) {
@@ -135,14 +135,9 @@ export class ModelBlobUtil {
     const contentType = metadata.contentType ?? (src instanceof Blob ? src.type : await this.resolveFileType(src));
     const filename = this.getFilename(src, { filename: metadata.filename, contentType });
 
-    let input: () => Readable;
-    if (src instanceof Blob) {
-      const [a, b] = src.stream().tee();
-      metadata.hash = await IOUtil.hashInput(Readable.fromWeb(b));
-      input = (): Readable => Readable.from(a);
-    } else {
-      input = (): Readable => createReadStream(src);
-    }
+    const input = src instanceof Blob ?
+      (): Readable => Readable.from(src.stream()) :
+      (): Readable => createReadStream(src);
 
     return new ModelBlob(
       input,
@@ -151,10 +146,7 @@ export class ModelBlobUtil {
         size: metadata.size ?? (src instanceof Blob ? src.size : (await fs.stat(src)).size),
         filename,
         contentType,
-        hash: metadata.hash ?? (typeof src === 'string' ?
-          await IOUtil.hashInput(input()) :
-          undefined
-        )
+        hash: metadata.hash ?? await IOUtil.hashInput(input())
       }
     );
   }
