@@ -3,8 +3,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry, TestFixtures } from '@travetto/test';
 
-import { isStorageSupported, isBlobSupported } from '../../src/internal/service/common';
-import { StreamModel } from '../../src/internal/service/blob';
+import { isStorageSupported } from '../../src/internal/service/common';
 import { ModelRegistry } from '../../src/registry/model';
 
 const Loaded = Symbol();
@@ -61,13 +60,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
                 }
               }
             }
-            if (isBlobSupported(service)) {
-              if (service.truncateModel) {
-                await service.truncateModel(StreamModel);
-              } else if (service.deleteModel) {
-                await service.deleteModel(StreamModel);
-              }
-            }
+            await service.truncateFinalize?.();
           } else {
             await service.deleteStorage(); // Purge it all
           }

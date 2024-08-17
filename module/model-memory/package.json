@@ -1,0 +1,52 @@
+{
+  "name": "@travetto/model-memory",
+  "version": "5.0.0-rc.10",
+  "description": "Datastore memory abstraction for core operations.",
+  "keywords": [
+    "datastore",
+    "memory",
+    "schema",
+    "typescript",
+    "travetto"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/model-memory"
+  },
+  "dependencies": {
+    "@travetto/config": "^5.0.0-rc.10",
+    "@travetto/di": "^5.0.0-rc.9",
+    "@travetto/model": "^5.0.0-rc.9",
+    "@travetto/model-blob": "^5.0.0-rc.9",
+    "@travetto/schema": "^5.0.0-rc.10"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^5.0.0-rc.10",
+    "@travetto/test": "^5.0.0-rc.9"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    },
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "travetto": {
+    "displayName": "Data Memory Modeling Support"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

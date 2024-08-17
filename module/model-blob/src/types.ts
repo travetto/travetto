@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
-import { arrayBuffer as toBuffer } from 'node:stream/consumers';
+import { arrayBuffer as toBuffer, text as toText } from 'node:stream/consumers';
 import path from 'node:path';
 
 import { TypedObject } from '@travetto/runtime';
@@ -79,6 +79,14 @@ export class BlobWithMeta extends Blob {
   arrayBuffer(): Promise<ArrayBuffer> {
     return toBuffer(this.stream());
   }
+
+  text(): Promise<string> {
+    return toText(this.#stream());
+  }
+
+  buffer(): Promise<Uint8Array> {
+    return toBuffer(this.#stream()).then(v => new Uint8Array(v));
+  }
 }
 
 /**
@@ -91,11 +99,11 @@ export class BlobResponse extends BlobWithMeta {
    */
   range?: Required<BlobRange>;
 
-  constructor({ meta, stream, range }: {
-    stream: () => Readable;
-    meta: BlobMeta;
-    range?: Required<BlobRange>;
-  }) {
+  constructor(
+    stream: () => Readable,
+    meta: BlobMeta,
+    range?: Required<BlobRange>
+  ) {
     super(stream, meta);
     this.range = range;
   }

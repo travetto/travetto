@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { buffer as toBuffer, text as toText } from 'node:stream/consumers';
+import { text as toText } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
 import { S3, CompletedPart, type CreateMultipartUploadRequest } from '@aws-sdk/client-s3';
@@ -7,9 +7,7 @@ import type { MetadataBearer } from '@aws-sdk/types';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
-  ModelCrudSupport, ModelBlobSupport, ModelStorageSupport, BlobMeta,
-  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
-  BlobRange
+  ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull } from '@travetto/runtime';
@@ -20,7 +18,10 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { S3ModelConfig } from './config';
-import { enforceRange } from '@travetto/model/src/internal/service/stream';
+import {
+  BlobMeta, BlobNamingStrategy, BlobRange, BlobResponse,
+  BlobWithMeta, ModelBlobSupport, ModelBlobUtil
+} from '@travetto/model-blob';
 
 function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && typeof o === 'object' && '$metadata' in o;
@@ -296,17 +297,19 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return -1;
   }
 
-  async upsertBlob(location: string, input: Readable, meta: BlobMeta): Promise<void> {
-    if (meta.size < this.config.chunkSize) { // If smaller than chunk size
+  async upsertBlob(blob: BlobWithMeta, location: string | BlobNamingStrategy): Promise<string> {
+    const final = typeof location === 'string' ? location : location.resolve(blob.meta);
+    if (blob.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
-      await this.client.putObject(this.#q(STREAM_SPACE, location, {
-        Body: await toBuffer(input),
-        ContentLength: meta.size,
-        ...this.#getMetaBase(meta),
+      await this.client.putObject(this.#q(STREAM_SPACE, final, {
+        Body: await blob.buffer(),
+        ContentLength: blob.size,
+        ...this.#getMetaBase(blob.meta),
       }));
     } else {
-      await this.#writeMultipart(location, input, meta);
+      await this.#writeMultipart(final, Readable.fromWeb(blob.stream()), blob.meta);
     }
+    return final;
   }
 
   async #getObject(location: string, range: Required<BlobRange>): Promise<Readable> {
@@ -329,12 +332,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }
 
-  async getBlob(location: string, range?: BlobRange): Promise<Readable> {
-    if (range) {
-      const meta = await this.describeBlob(location);
-      range = enforceRange(range, meta.size);
-    }
-    return this.#getObject(location, castTo(range));
+  async getBlob(location: string, range?: BlobRange): Promise<BlobResponse> {
+    const meta = await this.describeBlob(location);
+    const final = range ? ModelBlobUtil.enforceRange(range, meta.size) : undefined;
+    const res = (): Promise<Readable> => this.#getObject(location, castTo(range));
+    return new BlobResponse(ModelBlobUtil.getLazyStream(res), meta, final);
   }
 
   async headStream(location: string): Promise<{ Metadata?: Partial<BlobMeta>, ContentLength?: number }> {

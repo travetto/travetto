@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { Readable } from 'node:stream';
+import { Readable, PassThrough } from 'node:stream';
 import { createReadStream } from 'node:fs';
 import path from 'node:path';
 
@@ -56,7 +56,7 @@ export class ModelBlobUtil {
    */
   static async detectFileType(input: string | Buffer | Readable): Promise<{ ext: string, mime: string } | undefined> {
     const { default: fileType } = await import('file-type');
-    const buffer = await this.readChunk(input, 4100);
+    const buffer = await BlobDataUtil.readChunk(input, 4100);
     const matched = await fileType.fromBuffer(buffer);
     if (matched?.ext === 'wav') {
       return { ext: '.wav', mime: 'audio/wav' };
@@ -175,5 +175,11 @@ export class ModelBlobUtil {
         hash
       }
     );
+  }
+
+  static getLazyStream(src: () => (Promise<Readable> | Readable)): () => Readable {
+    const out = new PassThrough();
+    const run = (): void => { Promise.resolve(src()).then(v => v.pipe(out)); };
+    return () => (run(), out);
   }
 }

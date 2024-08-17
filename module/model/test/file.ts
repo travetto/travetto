@@ -1,6 +1,6 @@
 import { Suite } from '@travetto/test';
 
-import { FileModelConfig, FileModelService } from '../src/provider/file';
+import { FileModelConfig, FileModelService } from '../../model-file/src/file';
 import { ModelCrudSuite } from '../support/test/crud';
 import { ModelExpirySuite } from '../support/test/expiry';
 import { ModelBlobSuite } from '../support/test/stream';

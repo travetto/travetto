@@ -8,18 +8,16 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import {
-  ModelRegistry, ModelType, OptionalId,
-  ModelCrudSupport, ModelStorageSupport, ModelBlobSupport,
-  ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport,
-  BlobMeta, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig,
-  BlobRange
+  ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
+  ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
+  NotFoundError, ExistsError, IndexConfig
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport,
   QueryVerifier
 } from '@travetto/model-query';
+import { BlobNamingStrategy, ModelBlobSupport } from '@travetto/model-blob';
 
 import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
@@ -33,12 +31,12 @@ import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/servic
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { enforceRange, StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
+import { BlobMeta, BlobRange, BlobResponse, BlobWithMeta, ModelBlobUtil } from '../../model-blob/__index__';
 
 const IdxFieldsⲐ = Symbol.for('@travetto/model-mongo:idx');
 
@@ -47,6 +45,8 @@ const asFielded = (cfg: IndexConfig<ModelType>): { [IdxFieldsⲐ]: Sort } => cas
 type IdxCfg = CreateIndexesOptions;
 
 type StreamRaw = GridFSFile & { metadata: BlobMeta };
+
+const STREAMS = '__streams';
 
 /**
  * Mongo-based model source
@@ -151,14 +151,14 @@ export class MongoModelService implements
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    if (cls === StreamModel) {
-      try {
-        await this.#bucket.drop();
-      } catch { }
-    } else {
-      const col = await this.getStore(cls);
-      await col.deleteMany({});
-    }
+    const col = await this.getStore(cls);
+    await col.deleteMany({});
+  }
+
+  async truncateFinalize(): Promise<void> {
+    try {
+      await this.#bucket.drop();
+    } catch { }
   }
 
   /**
@@ -284,28 +284,26 @@ export class MongoModelService implements
   }
 
   // Stream
-  async upsertBlob(location: string, input: Readable, meta: BlobMeta): Promise<void> {
-    const writeStream = this.#bucket.openUploadStream(location, {
-      contentType: meta.contentType,
-      metadata: meta
+  async upsertBlob(blob: BlobWithMeta, location: string | BlobNamingStrategy): Promise<string> {
+    const final = typeof location === 'string' ? location : location.resolve(blob.meta);
+    const writeStream = this.#bucket.openUploadStream(final, {
+      contentType: blob.meta.contentType,
+      metadata: blob.meta
     });
 
-    await pipeline(input, writeStream);
+    await pipeline(blob.stream(), writeStream);
+    return final;
   }
 
-  async getBlob(location: string, range?: BlobRange): Promise<Readable> {
+  async getBlob(location: string, range?: BlobRange): Promise<BlobResponse> {
     const meta = await this.describeBlob(location);
-
-    if (range) {
-      range = enforceRange(range, meta.size);
-      range.end! += 1; // range is exclusive
+    const final = range ? ModelBlobUtil.enforceRange(range, meta.size) : undefined;
+    if (final) {
+      final.end! += 1; // range is exclusive
     }
 
-    const res = await this.#bucket.openDownloadStreamByName(location, range);
-    if (!res) {
-      throw new NotFoundError(STREAMS, location);
-    }
-    return res;
+    const res = ModelBlobUtil.getLazyStream(() => this.#bucket.openDownloadStreamByName(location, range));
+    return new BlobResponse(res, meta, final);
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {

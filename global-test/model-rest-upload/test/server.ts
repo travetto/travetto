@@ -6,9 +6,9 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { MemoryModelService, ModelBlobSupport } from '@travetto/model';
+import { MemoryModelService } from '@travetto/model';
 import { Upload, UploadAll } from '@travetto/rest-upload';
-import { Asset, AssetModelⲐ, AssetService, AssetUtil } from '@travetto/asset';
+import { ModelBlobSupport } from '../../../module/model-blob/__index__';
 
 type FileUpload = { name: string, resource: string, type: string };
 

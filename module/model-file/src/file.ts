@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import { createReadStream, createWriteStream } from 'node:fs';
 import os from 'node:os';
-import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
@@ -9,23 +8,20 @@ import { Class, TimeSpan, Runtime, asFull } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
+import {
+  ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistry,
+  NotFoundError, OptionalId, ExistsError
+} from '@travetto/model';
+import { ModelBlobSupport, BlobWithMeta, BlobNamingStrategy, BlobRange, BlobMeta, ModelBlobUtil, BlobResponse } from '@travetto/model-blob';
 
-import { ModelCrudSupport } from '../service/crud';
-import { ModelBlobSupport, BlobMeta, BlobRange } from '../service/blob';
-import { ModelType, OptionalId } from '../types/model';
-import { ModelExpirySupport } from '../service/expiry';
-import { ModelRegistry } from '../registry/model';
-import { ModelStorageSupport } from '../service/storage';
-import { ModelCrudUtil } from '../internal/service/crud';
-import { ModelExpiryUtil } from '../internal/service/expiry';
-import { NotFoundError } from '../error/not-found';
-import { ExistsError } from '../error/exists';
-import { enforceRange, StreamModel, STREAMS } from '../internal/service/blob';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
 const BIN = '.bin';
 const META = '.meta';
+const STREAMS = '__streams';
 
 @Config('model.file')
 export class FileModelConfig {
@@ -174,21 +170,21 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   // Stream
-  async upsertBlob(location: string, input: Readable, meta: BlobMeta): Promise<void> {
-    const file = await this.#resolveName(STREAMS, BIN, location);
+  async upsertBlob(blob: BlobWithMeta, location: string | BlobNamingStrategy): Promise<string> {
+    const final = typeof location === 'string' ? location : location.resolve(blob.meta);
+    const file = await this.#resolveName(STREAMS, BIN, final);
     await Promise.all([
-      await pipeline(input, createWriteStream(file)),
-      fs.writeFile(file.replace(BIN, META), JSON.stringify(meta), 'utf8')
+      await pipeline(blob.stream(), createWriteStream(file)),
+      fs.writeFile(file.replace(BIN, META), JSON.stringify(blob.meta), 'utf8')
     ]);
+    return final;
   }
 
-  async getBlob(location: string, range?: BlobRange): Promise<Readable> {
+  async getBlob(location: string, range?: BlobRange): Promise<BlobResponse> {
     const file = await this.#find(STREAMS, BIN, location);
-    if (range) {
-      const meta = await this.describeBlob(location);
-      range = enforceRange(range, meta.size);
-    }
-    return createReadStream(file, range);
+    const meta = await this.describeBlob(location);
+    const final = range ? ModelBlobUtil.enforceRange(range, meta.size) : undefined;
+    return new BlobResponse(() => createReadStream(file, range), meta, final);
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {
@@ -225,7 +221,11 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     await fs.rm(path.resolve(this.config.folder, this.config.namespace), { recursive: true, force: true });
   }
 
-  async truncateModel(cls: Class<ModelType>): Promise<void> {
-    await fs.rm(await this.#resolveName(cls === StreamModel ? STREAMS : cls), { recursive: true, force: true });
+  async truncate(cls: Class<ModelType>): Promise<void> {
+    await fs.rm(await this.#resolveName(cls), { recursive: true, force: true });
+  }
+
+  async truncateFinalize(): Promise<void> {
+    await fs.rm(await this.#resolveName(STREAMS), { recursive: true, force: true });
   }
 }

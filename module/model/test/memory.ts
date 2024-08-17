@@ -1,6 +1,6 @@
 import { Suite } from '@travetto/test';
 
-import { MemoryModelConfig, MemoryModelService } from '../src/provider/memory';
+import { MemoryModelConfig, MemoryModelService } from '../../model-memory/src/memory';
 import { ModelCrudSuite } from '../support/test/crud';
 import { ModelExpirySuite } from '../support/test/expiry';
 import { ModelBlobSuite } from '../support/test/stream';

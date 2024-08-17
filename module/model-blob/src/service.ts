@@ -1,5 +1,6 @@
 import { ClassInstance } from '@travetto/runtime';
 import { BlobMeta, BlobRange, BlobResponse, BlobWithMeta } from './types';
+import { BlobNamingStrategy } from './naming';
 
 /**
  * Support for Blobs CRD.  Blob update is not supported.
@@ -14,7 +15,7 @@ export interface ModelBlobSupport {
    * @param input The actual blob to write
    * @param meta The blob metadata
    */
-  upsertBlob(location: string, input: BlobWithMeta): Promise<void>;
+  upsertBlob(input: BlobWithMeta, location: string | BlobNamingStrategy, overwriteIfFound?: boolean): Promise<string>;
 
   /**
    * Get blob from storage

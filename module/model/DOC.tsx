@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { FileModelService } from './src/provider/file';
-import { MemoryModelService } from './src/provider/memory';
+import { FileModelService } from '../model-file/src/file';
+import { MemoryModelService } from '../model-memory/src/memory';
 import { Model } from './src/registry/decorator';
 import { Links } from './support/doc.support';
 

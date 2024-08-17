@@ -1,25 +1,19 @@
 import { Readable } from 'node:stream';
-import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { Class, TimeSpan, DeepPartial, castTo } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
+import {
+  ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
+  ModelRegistry, NotFoundError, ExistsError, OptionalId
+} from '@travetto/model';
+import { ModelBlobSupport, BlobMeta, BlobRange, BlobNamingStrategy, BlobWithMeta, ModelBlobUtil, BlobResponse } from '@travetto/model-blob';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
-import { ModelCrudSupport } from '../service/crud';
-import { ModelBlobSupport, BlobMeta, BlobRange } from '../service/blob';
-import { ModelType, OptionalId } from '../types/model';
-import { ModelExpirySupport } from '../service/expiry';
-import { ModelRegistry } from '../registry/model';
-import { ModelStorageSupport } from '../service/storage';
-import { ModelCrudUtil } from '../internal/service/crud';
-import { ModelExpiryUtil } from '../internal/service/expiry';
-import { NotFoundError } from '../error/not-found';
-import { ExistsError } from '../error/exists';
-import { ModelIndexedSupport } from '../service/indexed';
-import { ModelIndexedUtil } from '../internal/service/indexed';
-import { ModelStorageUtil } from '../internal/service/storage';
-import { enforceRange, StreamModel, STREAMS } from '../internal/service/blob';
-import { IndexConfig } from '../registry/types';
+const STREAMS = '__streams';
 
 const STREAM_META = `${STREAMS}_meta`;
 
@@ -239,21 +233,24 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   // Stream Support
-  async upsertBlob(location: string, input: Readable, meta: BlobMeta): Promise<void> {
+  async upsertBlob(blob: BlobWithMeta, location: string | BlobNamingStrategy): Promise<string> {
     const streams = this.#getStore(STREAMS);
     const metaContent = this.#getStore(STREAM_META);
-    metaContent.set(location, Buffer.from(JSON.stringify(meta)));
-    streams.set(location, await toBuffer(input));
+    const final = typeof location === 'string' ? location : location.resolve(blob.meta);
+    metaContent.set(final, Buffer.from(JSON.stringify(blob.meta)));
+    streams.set(final, Buffer.from(await blob.buffer()));
+    return final;
   }
 
-  async getBlob(location: string, range?: BlobRange): Promise<Readable> {
+  async getBlob(location: string, range?: BlobRange): Promise<BlobResponse> {
     const streams = this.#find(STREAMS, location, 'notfound');
     let buffer = streams.get(location)!;
-    if (range) {
-      range = enforceRange(range, buffer.length);
-      buffer = buffer.subarray(range.start, range.end! + 1);
+    const final = range ? ModelBlobUtil.enforceRange(range, buffer.length) : undefined;
+    if (final) {
+      buffer = buffer.subarray(final.start, final.end + 1);
     }
-    return Readable.from(buffer);
+    const meta = await this.describeBlob(location);
+    return new BlobResponse(() => Readable.from([buffer]), meta, final);
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {
@@ -298,12 +295,12 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    if (cls === StreamModel) {
-      this.#getStore(STREAMS).clear();
-      this.#getStore(STREAM_META).clear();
-    } else {
-      this.#getStore(cls).clear();
-    }
+    this.#getStore(cls).clear();
+  }
+
+  async truncateFinalize(): Promise<void> {
+    this.#getStore(STREAMS).clear();
+    this.#getStore(STREAM_META).clear();
   }
 
   // Indexed
