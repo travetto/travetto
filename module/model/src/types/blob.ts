@@ -5,8 +5,10 @@ import path from 'node:path';
 
 import { IOUtil } from '@travetto/runtime';
 
-const pair = <T>(obj: T, key: keyof T, h: string, tn: (item: unknown) => string = v => `${v}`): Record<string, string> =>
-  (obj[key] ? { [h]: tn(obj[key]) } : {});
+const header = <V extends string | number>(val: V | undefined, h: string,
+  tn: (item: V) => string = v => `${v}`
+): Record<string, string> =>
+  (val !== undefined ? { [h]: tn(val) } : {});
 
 export interface ModelBlobMeta {
   /**
@@ -68,7 +70,7 @@ export class ModelBlob extends Blob {
     this.#stream = IOUtil.getLazyStream(stream);
     this.meta = meta;
     this.range = range;
-    Object.defineProperty(this, 'size', { value: meta.size });
+    Object.defineProperty(this, 'size', { value: range ? range.end - range.start + 1 : meta.size });
   }
 
   stream(): ReadableStream {
@@ -91,10 +93,10 @@ export class ModelBlob extends Blob {
     return {
       'content-type': this.meta.contentType,
       'content-length': `${this.meta.size}`,
-      ...pair(this.meta, 'contentEncoding', 'content-encoding'),
-      ...pair(this.meta, 'cacheControl', 'cache-control'),
-      ...pair(this.meta, 'contentLanguage', 'content-language'),
-      ...pair(this.meta, 'filename', 'content-disposition', v => `attachment;filename=${path.basename(v!.toString())}`),
+      ...header(this.meta.contentEncoding, 'content-encoding'),
+      ...header(this.meta.cacheControl, 'cache-control'),
+      ...header(this.meta.contentLanguage, 'content-language'),
+      ...header(this.meta.filename, 'content-disposition', v => `attachment;filename=${path.basename(v)}`),
       ...(this.range ? {
         'accept-ranges': 'bytes',
         'content-range': `bytes ${this.range.start}-${this.range.end}/${this.meta.size}`,

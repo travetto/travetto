@@ -9,7 +9,7 @@ import { Inject, InjectableFactory } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/rest-upload';
 import { Util } from '@travetto/runtime';
-import { ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil } from '@travetto/model';
+import { ModelBlobMeta, ModelBlobSupport, ModelBlobUtil } from '@travetto/model';
 
 type FileUpload = { name: string, resource: string, type: string };
 
