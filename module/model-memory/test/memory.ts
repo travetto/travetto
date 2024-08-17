@@ -6,7 +6,7 @@ import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
-import { ModelBlobSuite } from '@travetto/model-blob/support/test/blob';
+import { ModelBlobSuite } from '@travetto/model/support/test/blob';
 
 @Suite()
 export class MemoryBasicSuite extends ModelBasicSuite {

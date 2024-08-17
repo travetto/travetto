@@ -5,9 +5,9 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
-  ModelRegistry, NotFoundError, ExistsError, OptionalId
+  ModelRegistry, NotFoundError, ExistsError, OptionalId,
+  ByteRange, ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil
 } from '@travetto/model';
-import { ModelBlobSupport, ModelBlobMeta, ByteRange, ModelBlob, ModelBlobUtil } from '@travetto/model-blob';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';

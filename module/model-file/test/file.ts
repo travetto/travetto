@@ -1,5 +1,5 @@
 import { Suite } from '@travetto/test';
-import { ModelBlobSuite } from '@travetto/model-blob/support/test/blob';
+import { ModelBlobSuite } from '@travetto/model/support/test/blob';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';

@@ -28,7 +28,6 @@
     "@travetto/config": "^5.0.0-rc.10",
     "@travetto/di": "^5.0.0-rc.9",
     "@travetto/model": "^5.0.0-rc.9",
-    "@travetto/model-blob": "^5.0.0-rc.9",
     "@travetto/schema": "^5.0.0-rc.10"
   },
   "peerDependencies": {

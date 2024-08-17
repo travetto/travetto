@@ -1,5 +1,4 @@
-import { ClassInstance } from '@travetto/runtime';
-import { ModelBlobMeta, ByteRange, ModelBlob } from './types';
+import { ModelBlobMeta, ByteRange, ModelBlob } from '../types/blob';
 
 /**
  * Support for Blobs CRD.  Blob update is not supported.
@@ -33,12 +32,3 @@ export interface ModelBlobSupport {
    */
   deleteBlob(location: string): Promise<void>;
 }
-
-/**
- * Type guard for determining if service supports streaming operation
- * @param o
- */
-export function isBlobSupported(o: ClassInstance): o is ModelBlobSupport {
-  return !!o && 'getBlob' in o;
-}
-

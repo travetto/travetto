@@ -6,7 +6,7 @@ import path from 'node:path';
 import { getExtension, getType } from 'mime';
 
 import { AppError, castTo, IOUtil, TypedObject, Util } from '@travetto/runtime';
-import { ModelBlobMeta, ByteRange, ModelBlob } from './types';
+import { ModelBlobMeta, ByteRange, ModelBlob } from '../types/blob';
 
 const FIELD_TO_HEADER: Record<keyof ModelBlobMeta, string> = {
   contentType: 'content-type',

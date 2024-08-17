@@ -75,7 +75,6 @@ export class ModelIndexedUtil {
     return { fields, sorted };
   }
 
-
   /**
    * Project item via index
    * @param cls Type to get index for

@@ -4,9 +4,10 @@ import { Suite, Test, TestFixtures } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { Util } from '@travetto/runtime';
 
-import { ModelBlobSupport } from '../../src/service';
-import { ModelBlob } from '../../__index__';
-import { ModelBlobUtil } from '../../src/util';
+import { ModelBlobSupport } from '../../src/service/blob';
+
+import { ModelBlob } from '../../src/types/blob';
+import { ModelBlobUtil } from '../../src/util/blob';
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {

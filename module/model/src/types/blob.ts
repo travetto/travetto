@@ -3,6 +3,8 @@ import { ReadableStream } from 'node:stream/web';
 import { arrayBuffer as toBuffer, text as toText } from 'node:stream/consumers';
 import { IOUtil } from '@travetto/runtime';
 
+import { ModelBlobUtil } from '../util/blob';
+
 export interface ModelBlobMeta {
   /**
    * File size
@@ -42,6 +44,7 @@ export type ByteRange = { start: number, end?: number };
 
 
 export class ModelBlob extends Blob {
+
   /**
    * Stream meta
    */

@@ -1,9 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { FileModelService } from '@travetto/model-file';
-import { MemoryModelService } from '@travetto/model-memory';
-
 import { Model } from './src/registry/decorator';
 import { Links } from './support/doc.support';
 
@@ -20,8 +17,8 @@ const ModelImplementations = () => {
     [d.mod('ModelRedis'), 'X', 'X', 'X', 'X', ' ', ''],
     [d.mod('ModelS3'), 'X', 'X', ' ', 'X', 'X', ' '],
     [d.mod('ModelSql'), 'X', 'X', 'X', 'X', ' ', 'X'],
-    [MemoryModelService, 'X', 'X', 'X', 'X', 'X', 'X'],
-    [FileModelService, 'X', 'X', ' ', 'X', 'X', 'X']
+    [d.mod('ModelMemory'), 'X', 'X', 'X', 'X', 'X', 'X'],
+    [d.mod('ModelFile'), 'X', 'X', ' ', 'X', 'X', 'X']
   ] as const)
     .map(r => <tr>{...r.map(cell => <td>{cell}</td>)}</tr>);
 
@@ -37,7 +34,7 @@ export const text = <>
 
   <c.Section title='Contracts'>
 
-    The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are {Links.Basic}, {Links.Crud}, {Links.Indexed}, {Links.Expiry}, {Links.Stream} and {Links.Bulk}.
+    The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are {Links.Basic}, {Links.Crud}, {Links.Indexed}, {Links.Expiry}, {Links.Blob} and {Links.Bulk}.
 
     <c.SubSection title='Basic'>
       All {d.mod('Model')} implementations, must honor the {Links.Basic} contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -63,10 +60,10 @@ export const text = <>
       <c.Code title='Expiry Contract' src='src/service/expiry.ts' startRe={/export interface ModelExpiry/} endRe={/^}/} />
     </c.SubSection>
 
-    <c.SubSection title='Stream'>
-      Some implementations also allow for the ability to read/write binary data as a {Links.Stream}.  Given that all implementations can store {d.library('Base64')} encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.  This pattern is currently used by {d.mod('Asset')} for reading and writing asset data.
+    <c.SubSection title='Blob'>
+      Some implementations also allow for the ability to read/write binary data as {Links.Blob}.  Given that all implementations can store {d.library('Base64')} encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
 
-      <c.Code title='Stream Contract' src='src/service/stream.ts' startRe={/export interface ModelStream/} endRe={/^}/} />
+      <c.Code title='Blob Contract' src='src/service/blob.ts' startRe={/export interface ModelBlob/} endRe={/^}/} />
     </c.SubSection>
     <c.SubSection title='Bulk'>
       Finally, there is support for {Links.Bulk} operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.

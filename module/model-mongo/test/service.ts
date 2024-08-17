@@ -9,7 +9,7 @@ import { ModelBulkSuite } from '@travetto/model/support/test/bulk';
 import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
-import { ModelBlobSuite } from '@travetto/model-blob/support/test/blob';
+import { ModelBlobSuite } from '@travetto/model/support/test/blob';
 
 import { MongoModelConfig } from '../src/config';
 import { MongoModelService } from '../src/service';

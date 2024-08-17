@@ -2,8 +2,8 @@ import { InjectableFactory } from '@travetto/di';
 import { FileModelConfig, FileModelService } from '@travetto/model-file';
 import { Suite } from '@travetto/test';
 
-import { CacheModelⲐ } from '../../src/service';
-import { CacheServiceSuite } from '../../support/test/service';
+import { CacheModelⲐ } from '@travetto/cache/src/service';
+import { CacheServiceSuite } from '@travetto/cache/support/test/service';
 
 class Config {
   @InjectableFactory(CacheModelⲐ)

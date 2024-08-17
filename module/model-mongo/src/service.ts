@@ -9,14 +9,14 @@ import { Readable } from 'node:stream';
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig
+  NotFoundError, ExistsError, IndexConfig,
+  ByteRange, ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport,
   QueryVerifier
 } from '@travetto/model-query';
-import { ByteRange, ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil } from '@travetto/model-blob';
 
 import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull, IOUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';

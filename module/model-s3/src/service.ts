@@ -8,10 +8,10 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
   ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
+  ByteRange, ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil,
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError, castTo, asFull, IOUtil } from '@travetto/runtime';
-import { ModelBlobMeta, ByteRange, ModelBlob, ModelBlobSupport, ModelBlobUtil } from '@travetto/model-blob';
+import { Class, AppError, castTo, asFull } from '@travetto/runtime';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';

@@ -1,12 +1,4 @@
 export const MOD_MAPPING = {
-  Asset: {
-    name: '@travetto/asset', folder: '@travetto/asset', displayName: 'Asset',
-    description: 'Modular library for storing and retrieving binary assets'
-  },
-  AssetRest: {
-    name: '@travetto/asset-rest', folder: '@travetto/asset-rest', displayName: 'Asset Rest Support',
-    description: 'Provides integration between the travetto asset and rest module.'
-  },
   Auth: {
     name: '@travetto/auth', folder: '@travetto/auth', displayName: 'Authentication',
     description: 'Authentication scaffolding for the Travetto framework'
@@ -30,10 +22,6 @@ export const MOD_MAPPING = {
   AuthRestSession: {
     name: '@travetto/auth-rest-session', folder: '@travetto/auth-rest-session', displayName: 'Rest Auth Session',
     description: 'Rest authentication session integration support for the Travetto framework'
-  },
-  Base: {
-    name: '@travetto/runtime', folder: '@travetto/runtime', displayName: 'Base',
-    description: 'Environment config and common utilities for travetto applications.'
   },
   Cache: {
     name: '@travetto/cache', folder: '@travetto/cache', displayName: 'Caching',
@@ -115,9 +103,17 @@ export const MOD_MAPPING = {
     name: '@travetto/model-elasticsearch', folder: '@travetto/model-elasticsearch', displayName: 'Elasticsearch Model Source',
     description: 'Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.'
   },
+  ModelFile: {
+    name: '@travetto/model-file', folder: '@travetto/model-file', displayName: 'Data File Modeling Support',
+    description: 'Datastore file abstraction for core operations.'
+  },
   ModelFirestore: {
     name: '@travetto/model-firestore', folder: '@travetto/model-firestore', displayName: 'Firestore Model Support',
     description: 'Firestore backing for the travetto model module.'
+  },
+  ModelMemory: {
+    name: '@travetto/model-memory', folder: '@travetto/model-memory', displayName: 'Data Memory Modeling Support',
+    description: 'Datastore memory abstraction for core operations.'
   },
   ModelMongo: {
     name: '@travetto/model-mongo', folder: '@travetto/model-mongo', displayName: 'MongoDB Model Support',
@@ -134,6 +130,10 @@ export const MOD_MAPPING = {
   ModelQuery: {
     name: '@travetto/model-query', folder: '@travetto/model-query', displayName: 'Data Model Querying',
     description: 'Datastore abstraction for advanced query support.'
+  },
+  ModelQueryLanguage: {
+    name: '@travetto/model-query-language', folder: '@travetto/model-query-language', displayName: 'Data Model Query Language',
+    description: 'Datastore query language.'
   },
   ModelRedis: {
     name: '@travetto/model-redis', folder: '@travetto/model-redis', displayName: 'Redis Model Support',
@@ -218,6 +218,10 @@ export const MOD_MAPPING = {
   RestUpload: {
     name: '@travetto/rest-upload', folder: '@travetto/rest-upload', displayName: 'Rest Upload Support',
     description: 'Provides integration between the travetto asset and rest module.'
+  },
+  Runtime: {
+    name: '@travetto/runtime', folder: '@travetto/runtime', displayName: 'Runtime',
+    description: 'Runtime for travetto applications.'
   },
   Scaffold: {
     name: '@travetto/scaffold', folder: '@travetto/scaffold', displayName: 'App Scaffold',

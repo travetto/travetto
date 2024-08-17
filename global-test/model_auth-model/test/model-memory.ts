@@ -2,7 +2,7 @@ import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { Suite } from '@travetto/test';
 
-import { AuthModelServiceSuite, TestModelSvcⲐ } from '../support/test/model';
+import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/support/test/model';
 
 class Init {
   @InjectableFactory(TestModelSvcⲐ)

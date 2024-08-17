@@ -28,6 +28,8 @@ export const text = <>
     <li>{d.mod('ModelPostgres')} - {mod.ModelPostgres.name}</li>
     <li>{d.mod('ModelMysql')} - {mod.ModelMysql.name}</li>
     <li>{d.mod('ModelSqlite')} - {mod.ModelSqlite.name}</li>
+    <li>{d.mod('ModelMemory')} - {mod.ModelMemory.name}</li>
+    <li>{d.mod('ModelFile')} - {mod.ModelFile.name}</li>
   </ul>
 
   <c.Section title='Decorators'>
