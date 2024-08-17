@@ -9,11 +9,11 @@ import { pipeline } from 'node:stream/promises';
 
 import {
   ModelRegistry, ModelType, OptionalId,
-  ModelCrudSupport, ModelStorageSupport, ModelStreamSupport,
+  ModelCrudSupport, ModelStorageSupport, ModelBlobSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport,
-  StreamMeta, BulkOp, BulkResponse,
+  BlobMeta, BulkOp, BulkResponse,
   NotFoundError, ExistsError, IndexConfig,
-  StreamRange
+  BlobRange
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -46,7 +46,7 @@ const asFielded = (cfg: IndexConfig<ModelType>): { [IdxFieldsⲐ]: Sort } => cas
 
 type IdxCfg = CreateIndexesOptions;
 
-type StreamRaw = GridFSFile & { metadata: StreamMeta };
+type StreamRaw = GridFSFile & { metadata: BlobMeta };
 
 /**
  * Mongo-based model source
@@ -54,7 +54,7 @@ type StreamRaw = GridFSFile & { metadata: StreamMeta };
 @Injectable()
 export class MongoModelService implements
   ModelCrudSupport, ModelStorageSupport,
-  ModelBulkSupport, ModelStreamSupport,
+  ModelBulkSupport, ModelBlobSupport,
   ModelIndexedSupport, ModelQuerySupport,
   ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySuggestSupport, ModelExpirySupport {
@@ -284,7 +284,7 @@ export class MongoModelService implements
   }
 
   // Stream
-  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
+  async upsertBlob(location: string, input: Readable, meta: BlobMeta): Promise<void> {
     const writeStream = this.#bucket.openUploadStream(location, {
       contentType: meta.contentType,
       metadata: meta
@@ -293,8 +293,8 @@ export class MongoModelService implements
     await pipeline(input, writeStream);
   }
 
-  async getStream(location: string, range?: StreamRange): Promise<Readable> {
-    const meta = await this.describeStream(location);
+  async getBlob(location: string, range?: BlobRange): Promise<Readable> {
+    const meta = await this.describeBlob(location);
 
     if (range) {
       range = enforceRange(range, meta.size);
@@ -308,11 +308,11 @@ export class MongoModelService implements
     return res;
   }
 
-  async describeStream(location: string): Promise<StreamMeta> {
+  async describeBlob(location: string): Promise<BlobMeta> {
     return (await this.#describeStreamRaw(location)).metadata;
   }
 
-  async deleteStream(location: string): Promise<void> {
+  async deleteBlob(location: string): Promise<void> {
     const fileId = (await this.#describeStreamRaw(location))._id;
     await this.#bucket.delete(fileId);
   }

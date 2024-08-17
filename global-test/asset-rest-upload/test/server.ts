@@ -6,7 +6,7 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { MemoryModelService, ModelStreamSupport } from '@travetto/model';
+import { MemoryModelService, ModelBlobSupport } from '@travetto/model';
 import { Upload, UploadAll } from '@travetto/rest-upload';
 import { Asset, AssetModelⲐ, AssetService, AssetUtil } from '@travetto/asset';
 
@@ -14,7 +14,7 @@ type FileUpload = { name: string, resource: string, type: string };
 
 class Config {
   @InjectableFactory(AssetModelⲐ)
-  static getModel(): ModelStreamSupport {
+  static getModel(): ModelBlobSupport {
     return new MemoryModelService({});
   }
 }
@@ -29,20 +29,20 @@ class TestUploadController {
   @UploadAll()
   async uploadAll({ files }: Request) {
     for (const [, file] of Object.entries(files)) {
-      const { source: _, ...meta } = await AssetUtil.blobToAsset(file);
+      const { source: _, ...meta } = await AssetUtil.blobToBlobWithMeta(file);
       return meta;
     }
   }
 
   @Post('/')
   async upload(@Upload() file: Blob) {
-    const { asset, location } = await this.service.upsertBlob(file);
+    const { asset, location } = await this.service.upsert(file);
     return { ...asset, location };
   }
 
   @Post('/cached')
   async uploadCached(@Upload() file: Blob) {
-    const { location } = await this.service.upsertBlob(file, {
+    const { location } = await this.service.upsert(file, {
       cacheControl: 'max-age=3600',
       contentLanguage: 'en-GB'
     });
@@ -51,22 +51,22 @@ class TestUploadController {
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    const asset1 = await AssetUtil.blobToAsset(file1);
-    const asset2 = await AssetUtil.blobToAsset(file2);
+    const asset1 = await AssetUtil.blobToBlobWithMeta(file1);
+    const asset2 = await AssetUtil.blobToBlobWithMeta(file2);
     return { hash1: asset1.hash, hash2: asset2.hash };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    const asset1 = await AssetUtil.blobToAsset(file1);
-    const asset2 = await AssetUtil.blobToAsset(file2);
+    const asset1 = await AssetUtil.blobToBlobWithMeta(file1);
+    const asset2 = await AssetUtil.blobToBlobWithMeta(file2);
     return { hash1: asset1.hash, hash2: asset2.hash };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    const asset1 = await AssetUtil.blobToAsset(file1);
-    const asset2 = await AssetUtil.blobToAsset(file2);
+    const asset1 = await AssetUtil.blobToBlobWithMeta(file1);
+    const asset2 = await AssetUtil.blobToBlobWithMeta(file2);
     return { hash1: asset1.hash, hash2: asset2.hash };
   }
 
@@ -93,7 +93,7 @@ export abstract class AssetRestUploadServerSuite extends BaseRestSuite {
   }
 
   async getAsset(pth: string) {
-    return AssetUtil.fileToAsset(await this.fixture.resolve(pth));
+    return AssetUtil.fileToBlobWitMeta(await this.fixture.resolve(pth));
   }
 
   @BeforeAll()

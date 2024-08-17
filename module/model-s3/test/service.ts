@@ -5,7 +5,7 @@ import { Suite, Test } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
-import { ModelStreamSuite } from '@travetto/model/support/test/stream';
+import { ModelBlobSuite } from '@travetto/model/support/test/stream';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 
@@ -38,7 +38,7 @@ export class S3PolymorphismSuite extends ModelPolymorphismSuite {
 }
 
 @Suite()
-export class S3StreamSuite extends ModelStreamSuite {
+export class S3StreamSuite extends ModelBlobSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 
@@ -52,14 +52,14 @@ export class S3StreamSuite extends ModelStreamSuite {
 
     const hash = await this.getHash(Readable.from(buffer));
 
-    await service.upsertStream(hash, Readable.from(buffer), {
+    await service.upsertBlob(hash, Readable.from(buffer), {
       filename: 'Random.bin',
       contentType: 'binary/octet-stream',
       size: buffer.length,
       hash
     });
 
-    const stream = await service.getStream(hash);
+    const stream = await service.getBlob(hash);
     const resolved = await this.getHash(stream);
     assert(resolved === hash);
   }

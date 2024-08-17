@@ -11,7 +11,7 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, StreamMeta, StreamRange } from '../service/stream';
+import { ModelBlobSupport, BlobMeta, BlobRange } from '../service/blob';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
@@ -20,7 +20,7 @@ import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
-import { enforceRange, StreamModel, STREAMS } from '../internal/service/stream';
+import { enforceRange, StreamModel, STREAMS } from '../internal/service/blob';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -46,7 +46,7 @@ const exists = (f: string): Promise<boolean> => fs.stat(f).then(() => true, () =
  * Standard file support
  */
 @Injectable()
-export class FileModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport {
+export class FileModelService implements ModelCrudSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport {
 
   private static async * scanFolder(folder: string, suffix: string): AsyncGenerator<[id: string, field: string]> {
     for (const sub of await fs.readdir(folder)) {
@@ -174,7 +174,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   // Stream
-  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
+  async upsertBlob(location: string, input: Readable, meta: BlobMeta): Promise<void> {
     const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
       await pipeline(input, createWriteStream(file)),
@@ -182,23 +182,23 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     ]);
   }
 
-  async getStream(location: string, range?: StreamRange): Promise<Readable> {
+  async getBlob(location: string, range?: BlobRange): Promise<Readable> {
     const file = await this.#find(STREAMS, BIN, location);
     if (range) {
-      const meta = await this.describeStream(location);
+      const meta = await this.describeBlob(location);
       range = enforceRange(range, meta.size);
     }
     return createReadStream(file, range);
   }
 
-  async describeStream(location: string): Promise<StreamMeta> {
+  async describeBlob(location: string): Promise<BlobMeta> {
     const file = await this.#find(STREAMS, META, location);
     const content = await fs.readFile(file);
-    const text: StreamMeta = JSON.parse(content.toString('utf8'));
+    const text: BlobMeta = JSON.parse(content.toString('utf8'));
     return text;
   }
 
-  async deleteStream(location: string): Promise<void> {
+  async deleteBlob(location: string): Promise<void> {
     const file = await this.#resolveName(STREAMS, BIN, location);
     if (await exists(file)) {
       await Promise.all([

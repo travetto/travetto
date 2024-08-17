@@ -3,7 +3,7 @@ import { Suite } from '@travetto/test';
 import { MemoryModelConfig, MemoryModelService } from '../src/provider/memory';
 import { ModelCrudSuite } from '../support/test/crud';
 import { ModelExpirySuite } from '../support/test/expiry';
-import { ModelStreamSuite } from '../support/test/stream';
+import { ModelBlobSuite } from '../support/test/stream';
 import { ModelIndexedSuite } from '../support/test/indexed';
 import { ModelBasicSuite } from '../support/test/basic';
 import { ModelPolymorphismSuite } from '../support/test/polymorphism';
@@ -21,7 +21,7 @@ export class MemoryCrudSuite extends ModelCrudSuite {
 }
 
 @Suite()
-export class MemoryStreamSuite extends ModelStreamSuite {
+export class MemoryStreamSuite extends ModelBlobSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }

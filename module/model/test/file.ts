@@ -3,7 +3,7 @@ import { Suite } from '@travetto/test';
 import { FileModelConfig, FileModelService } from '../src/provider/file';
 import { ModelCrudSuite } from '../support/test/crud';
 import { ModelExpirySuite } from '../support/test/expiry';
-import { ModelStreamSuite } from '../support/test/stream';
+import { ModelBlobSuite } from '../support/test/stream';
 import { ModelBasicSuite } from '../support/test/basic';
 
 @Suite()
@@ -19,7 +19,7 @@ export class FileCrudSuite extends ModelCrudSuite {
 }
 
 @Suite()
-export class FileStreamSuite extends ModelStreamSuite {
+export class FileStreamSuite extends ModelBlobSuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 }

@@ -7,9 +7,9 @@ import type { MetadataBearer } from '@aws-sdk/types';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
-  ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
+  ModelCrudSupport, ModelBlobSupport, ModelStorageSupport, BlobMeta,
   ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
-  StreamRange
+  BlobRange
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull } from '@travetto/runtime';
@@ -40,14 +40,14 @@ type MetaBase = Pick<CreateMultipartUploadRequest,
  * Asset source backed by S3
  */
 @Injectable()
-export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, ModelExpirySupport {
+export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, ModelStorageSupport, ModelExpirySupport {
 
   idSource = ModelCrudUtil.uuidSource();
   client: S3;
 
   constructor(public readonly config: S3ModelConfig) { }
 
-  #getMetaBase(meta: StreamMeta): MetaBase {
+  #getMetaBase(meta: BlobMeta): MetaBase {
     return {
       ContentType: meta.contentType,
       ...(meta.contentEncoding ? { ContentEncoding: meta.contentEncoding } : {}),
@@ -110,7 +110,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   /**
    * Write multipart file upload, in chunks
    */
-  async #writeMultipart(id: string, input: Readable, meta: StreamMeta): Promise<void> {
+  async #writeMultipart(id: string, input: Readable, meta: BlobMeta): Promise<void> {
     const { UploadId } = await this.client.createMultipartUpload(this.#q(STREAM_SPACE, id, this.#getMetaBase(meta)));
 
     const parts: CompletedPart[] = [];
@@ -296,7 +296,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return -1;
   }
 
-  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
+  async upsertBlob(location: string, input: Readable, meta: BlobMeta): Promise<void> {
     if (meta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#q(STREAM_SPACE, location, {
@@ -309,7 +309,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async #getObject(location: string, range: Required<StreamRange>): Promise<Readable> {
+  async #getObject(location: string, range: Required<BlobRange>): Promise<Readable> {
     // Read from s3
     const res = await this.client.getObject(this.#q(STREAM_SPACE, location, range ? {
       Range: `bytes=${range.start}-${range.end}`
@@ -329,15 +329,15 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }
 
-  async getStream(location: string, range?: StreamRange): Promise<Readable> {
+  async getBlob(location: string, range?: BlobRange): Promise<Readable> {
     if (range) {
-      const meta = await this.describeStream(location);
+      const meta = await this.describeBlob(location);
       range = enforceRange(range, meta.size);
     }
     return this.#getObject(location, castTo(range));
   }
 
-  async headStream(location: string): Promise<{ Metadata?: Partial<StreamMeta>, ContentLength?: number }> {
+  async headStream(location: string): Promise<{ Metadata?: Partial<BlobMeta>, ContentLength?: number }> {
     const query = this.#q(STREAM_SPACE, location);
     try {
       return (await this.client.headObject(query));
@@ -351,11 +351,11 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async describeStream(location: string): Promise<StreamMeta> {
+  async describeBlob(location: string): Promise<BlobMeta> {
     const obj = await this.headStream(location);
 
     if (obj) {
-      const ret: StreamMeta = {
+      const ret: BlobMeta = {
         contentType: '',
         ...obj.Metadata,
         size: obj.ContentLength!,
@@ -376,7 +376,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     }
   }
 
-  async deleteStream(location: string): Promise<void> {
+  async deleteBlob(location: string): Promise<void> {
     await this.client.deleteObject(this.#q(STREAM_SPACE, location));
   }
 

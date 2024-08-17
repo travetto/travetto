@@ -1,0 +1,56 @@
+{
+  "name": "@travetto/model-blob",
+  "version": "5.0.0-rc.10",
+  "description": "Model blob support",
+  "keywords": [
+    "datastore",
+    "blob",
+    "model",
+    "typescript",
+    "travetto"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src",
+    "support"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/model-blob"
+  },
+  "dependencies": {
+    "@travetto/config": "^5.0.0-rc.10",
+    "@travetto/di": "^5.0.0-rc.9",
+    "@travetto/model": "^5.0.0-rc.9",
+    "@travetto/registry": "^5.0.0-rc.9",
+    "@travetto/schema": "^5.0.0-rc.10",
+    "@types/mime": "^3.0.4",
+    "file-type": "^16.5.4",
+    "mime": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^5.0.0-rc.10",
+    "@travetto/test": "^5.0.0-rc.9"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    },
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "travetto": {
+    "displayName": "Data Modeling Blob Support"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

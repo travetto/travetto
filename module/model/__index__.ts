@@ -8,7 +8,9 @@ export * from './src/service/crud';
 export * from './src/service/indexed';
 export * from './src/service/expiry';
 export * from './src/service/storage';
-export * from './src/service/stream';
+export * from './src/service/blob';
+
+export * from './src/types/blob';
 
 export * from './src/provider/file';
 export * from './src/provider/memory';

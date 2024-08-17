@@ -6,7 +6,7 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, StreamMeta, StreamRange } from '../service/stream';
+import { ModelBlobSupport, BlobMeta, BlobRange } from '../service/blob';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
@@ -18,7 +18,7 @@ import { ExistsError } from '../error/exists';
 import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
-import { enforceRange, StreamModel, STREAMS } from '../internal/service/stream';
+import { enforceRange, StreamModel, STREAMS } from '../internal/service/blob';
 import { IndexConfig } from '../registry/types';
 
 const STREAM_META = `${STREAMS}_meta`;
@@ -51,7 +51,7 @@ function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | n
  * Standard in-memory support
  */
 @Injectable()
-export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
+export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
   #store = new Map<string, StoreType>();
   #indices = {
@@ -239,14 +239,14 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   // Stream Support
-  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
+  async upsertBlob(location: string, input: Readable, meta: BlobMeta): Promise<void> {
     const streams = this.#getStore(STREAMS);
     const metaContent = this.#getStore(STREAM_META);
     metaContent.set(location, Buffer.from(JSON.stringify(meta)));
     streams.set(location, await toBuffer(input));
   }
 
-  async getStream(location: string, range?: StreamRange): Promise<Readable> {
+  async getBlob(location: string, range?: BlobRange): Promise<Readable> {
     const streams = this.#find(STREAMS, location, 'notfound');
     let buffer = streams.get(location)!;
     if (range) {
@@ -256,13 +256,13 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     return Readable.from(buffer);
   }
 
-  async describeStream(location: string): Promise<StreamMeta> {
+  async describeBlob(location: string): Promise<BlobMeta> {
     const metaContent = this.#find(STREAM_META, location, 'notfound');
-    const meta: StreamMeta = JSON.parse(metaContent.get(location)!.toString('utf8'));
+    const meta: BlobMeta = JSON.parse(metaContent.get(location)!.toString('utf8'));
     return meta;
   }
 
-  async deleteStream(location: string): Promise<void> {
+  async deleteBlob(location: string): Promise<void> {
     const streams = this.#getStore(STREAMS);
     const metaContent = this.#getStore(STREAM_META);
     if (streams.has(location)) {
