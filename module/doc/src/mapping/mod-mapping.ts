@@ -104,16 +104,16 @@ export const MOD_MAPPING = {
     description: 'Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.'
   },
   ModelFile: {
-    name: '@travetto/model-file', folder: '@travetto/model-file', displayName: 'Data File Modeling Support',
-    description: 'Datastore file abstraction for core operations.'
+    name: '@travetto/model-file', folder: '@travetto/model-file', displayName: 'File Model Support',
+    description: 'File system backing for the travetto model module.'
   },
   ModelFirestore: {
     name: '@travetto/model-firestore', folder: '@travetto/model-firestore', displayName: 'Firestore Model Support',
     description: 'Firestore backing for the travetto model module.'
   },
   ModelMemory: {
-    name: '@travetto/model-memory', folder: '@travetto/model-memory', displayName: 'Data Memory Modeling Support',
-    description: 'Datastore memory abstraction for core operations.'
+    name: '@travetto/model-memory', folder: '@travetto/model-memory', displayName: 'Memory Model Support',
+    description: 'Memory backing for the travetto model module.'
   },
   ModelMongo: {
     name: '@travetto/model-mongo', folder: '@travetto/model-mongo', displayName: 'MongoDB Model Support',

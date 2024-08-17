@@ -1,7 +1,7 @@
 {
   "name": "@travetto/model-memory",
   "version": "5.0.0-rc.10",
-  "description": "Datastore memory abstraction for core operations.",
+  "description": "Memory backing for the travetto model module.",
   "keywords": [
     "datastore",
     "memory",
@@ -43,7 +43,7 @@
     }
   },
   "travetto": {
-    "displayName": "Data Memory Modeling Support"
+    "displayName": "Memory Model Support"
   },
   "publishConfig": {
     "access": "public"

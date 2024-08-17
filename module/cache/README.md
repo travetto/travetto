@@ -34,8 +34,8 @@ Currently, the following are packages that provide [Expiry](https://github.com/t
    *  [PostgreSQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-postgres#readme "PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-postgres
    *  [MySQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-mysql#readme "MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-mysql
    *  [SQLite Model Service](https://github.com/travetto/travetto/tree/main/module/model-sqlite#readme "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-sqlite
-   *  [Data Memory Modeling Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Datastore memory abstraction for core operations.") - @travetto/model-memory
-   *  [Data File Modeling Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "Datastore file abstraction for core operations.") - @travetto/model-file
+   *  [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.") - @travetto/model-memory
+   *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.") - @travetto/model-file
 
 ## Decorators
 The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into [JSON](https://www.json.org).  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.

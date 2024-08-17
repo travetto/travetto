@@ -310,7 +310,7 @@ The <code class="item field">id</code> is the only required field for a model, a
 <td> </td>
 <td>X</td>
 </tr>
-<tr><td><a class="module-link" routerLink="/docs/model-memory" title="Datastore memory abstraction for core operations.">Data Memory Modeling Support</a></td>
+<tr><td><a class="module-link" routerLink="/docs/model-memory" title="Memory backing for the travetto model module.">Memory Model Support</a></td>
 <td>X</td>
 <td>X</td>
 <td>X</td>
@@ -318,7 +318,7 @@ The <code class="item field">id</code> is the only required field for a model, a
 <td>X</td>
 <td>X</td>
 </tr>
-<tr><td><a class="module-link" routerLink="/docs/model-file" title="Datastore file abstraction for core operations.">Data File Modeling Support</a></td>
+<tr><td><a class="module-link" routerLink="/docs/model-file" title="File system backing for the travetto model module.">File Model Support</a></td>
 <td>X</td>
 <td>X</td>
 <td> </td>
@@ -331,7 +331,7 @@ The <code class="item field">id</code> is the only required field for a model, a
 
 <h2 id="custom-model-service">Custom Model Service</h2>
 
-In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface. <a class="module-link" routerLink="/docs/model-memory" title="Datastore memory abstraction for core operations.">Data Memory Modeling Support</a> serves as a great example of what a full featured implementation can look like.<br><br>
+In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface. <a class="module-link" routerLink="/docs/model-memory" title="Memory backing for the travetto model module.">Memory Model Support</a> serves as a great example of what a full featured implementation can look like.<br><br>
 To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.
 
   <figure class="code">
