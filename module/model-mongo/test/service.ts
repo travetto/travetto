@@ -40,7 +40,7 @@ export class MongoExpirySuite extends ModelExpirySuite {
 }
 
 @Suite()
-export class MongoStreamSuite extends ModelBlobSuite {
+export class MongoBlobSuite extends ModelBlobSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }

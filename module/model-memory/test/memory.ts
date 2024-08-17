@@ -21,7 +21,7 @@ export class MemoryCrudSuite extends ModelCrudSuite {
 }
 
 @Suite()
-export class MemoryStreamSuite extends ModelBlobSuite {
+export class MemoryBlobSuite extends ModelBlobSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }

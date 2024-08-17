@@ -20,7 +20,7 @@ export class FileCrudSuite extends ModelCrudSuite {
 }
 
 @Suite()
-export class FileStreamSuite extends ModelBlobSuite {
+export class FileBlobSuite extends ModelBlobSuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 }

@@ -38,7 +38,7 @@ export class S3PolymorphismSuite extends ModelPolymorphismSuite {
 }
 
 @Suite()
-export class S3StreamSuite extends ModelBlobSuite {
+export class S3BlobSuite extends ModelBlobSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 
