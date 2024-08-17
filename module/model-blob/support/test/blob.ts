@@ -5,19 +5,17 @@ import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { Util } from '@travetto/runtime';
 
 import { ModelBlobSupport } from '../../src/service';
-import { BlobWithMeta } from '../../__index__';
+import { ModelBlob } from '../../__index__';
 import { ModelBlobUtil } from '../../src/util';
-import { BlobDataUtil } from '../../src/data';
-import { HashNamingStrategy } from '../../src/naming';
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
   fixture = new TestFixtures(['@travetto/model']);
 
-  async getBlob(resource: string): Promise<BlobWithMeta> {
+  async getBlob(resource: string): Promise<ModelBlob> {
     const file = await this.fixture.resolve(resource);
-    return ModelBlobUtil.fileToBlobWitMeta(file);
+    return ModelBlobUtil.asBlob(file);
   }
 
   @Test()
@@ -27,7 +25,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const id = Util.uuid();
 
-    await service.upsertBlob(blob, id);
+    await service.upsertBlob(id, blob);
     const retrieved = await service.describeBlob(id);
     assert.deepStrictEqual(blob.meta, retrieved);
   }
@@ -38,7 +36,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const blob = await this.getBlob('/asset.yml');
 
     const id = Util.uuid();
-    await service.upsertBlob(blob, id);
+    await service.upsertBlob(id, blob);
 
     const retrieved = await service.getBlob(id);
     assert(blob.meta.hash === retrieved.meta.hash);
@@ -50,7 +48,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const blob = await this.getBlob('/asset.yml');
 
     const id = Util.uuid();
-    await service.upsertBlob(blob, id);
+    await service.upsertBlob(id, blob);
 
     await service.deleteBlob(id);
 
@@ -65,7 +63,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const blob = await this.getBlob('/text.txt');
 
     const id = Util.uuid();
-    await service.upsertBlob(blob, id);
+    await service.upsertBlob(id, blob);
 
     const retrieved = await service.getBlob(id);
     const content = await retrieved.text();
@@ -102,23 +100,13 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     await assert.rejects(() => service.getBlob(id, { start: 30, end: 37 }));
   }
 
-  @Test()
-  async writeHashed() {
-    const service = await this.service;
-    const pth = await this.fixture.resolve('/asset.yml');
-    const file = await ModelBlobUtil.fileToBlobWitMeta(pth);
-    const outHashed = await service.upsertBlob(file, new HashNamingStrategy());
-    const hash = await BlobDataUtil.computeHash(pth);
-    assert(outHashed.replace(/\//g, '').replace(/[.][^.]+$/, '') === hash);
-  }
 
   @Test()
   async writeAndGet() {
     const service = await this.service;
     const blob = await this.getBlob('/asset.yml');
-    const loc = await service.upsertBlob(blob, 'orange');
-
-    const { meta: saved } = await service.getBlob(loc);
+    await service.upsertBlob('orange', blob);
+    const { meta: saved } = await service.getBlob('orange');
 
     assert(blob.meta.contentType === saved.contentType);
     assert(blob.size === saved.size);

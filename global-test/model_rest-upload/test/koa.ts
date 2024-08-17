@@ -3,7 +3,7 @@ import { KoaRestServer } from '@travetto/rest-koa';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
 
-import { AssetRestUploadServerSuite } from './server';
+import { ModelBlobRestUploadServerSuite } from './server';
 
 const KOA = Symbol.for('koa');
 
@@ -22,6 +22,6 @@ class Config {
 }
 
 @Suite()
-export class KoaRestUploadTest extends AssetRestUploadServerSuite {
+export class KoaRestUploadTest extends ModelBlobRestUploadServerSuite {
   qualifier = KOA;
 }

@@ -1,20 +1,10 @@
-
-import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AssetModelⲐ } from '@travetto/asset';
-import { AssetServiceSuite } from '@travetto/asset/support/test/service';
 
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
-
-class Init {
-  @InjectableFactory(AssetModelⲐ)
-  static modelProvider(config: MemoryModelConfig) {
-    return new MemoryModelService(config);
-  }
-}
+import { ModelBlobSuite } from '@travetto/model-blob/support/test/blob';
 
 @Suite()
-export class MemoryAssetServiceSuite extends AssetServiceSuite {
+export class MemoryBlobServiceSuite extends ModelBlobSuite {
   serviceClass = MemoryModelService;
   configClass = MemoryModelConfig;
 }

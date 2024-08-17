@@ -1,20 +1,10 @@
-
-import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AssetModelⲐ } from '@travetto/asset';
-import { AssetServiceSuite } from '@travetto/asset/support/test/service';
 
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
-
-class Init {
-  @InjectableFactory(AssetModelⲐ)
-  static modelProvider(config: MongoModelConfig) {
-    return new MongoModelService(config);
-  }
-}
+import { ModelBlobSuite } from '@travetto/model-blob/support/test/blob';
 
 @Suite()
-export class MongoAssetServiceSuite extends AssetServiceSuite {
+export class MongoBlobServiceSuite extends ModelBlobSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }

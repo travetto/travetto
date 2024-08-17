@@ -1,17 +1,17 @@
 import assert from 'node:assert';
-import { Readable } from 'node:stream';
 
 import { Suite, Test } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
-import { ModelBlobSuite } from '@travetto/model/support/test/stream';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 
 import { S3ModelConfig } from '../src/config';
 import { S3ModelService } from '../src/service';
 import { castTo } from '@travetto/runtime';
+import { ModelBlobSuite } from '@travetto/model-blob/support/test/blob';
+import { BlobDataUtil, ModelBlobUtil } from '@travetto/model-blob';
 
 @Suite()
 export class S3BasicSuite extends ModelBasicSuite {
@@ -50,17 +50,17 @@ export class S3StreamSuite extends ModelBlobSuite {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
-    const hash = await this.getHash(Readable.from(buffer));
+    const hash = await BlobDataUtil.computeHash(buffer);
 
-    await service.upsertBlob(hash, Readable.from(buffer), {
+    await service.upsertBlob(hash, await ModelBlobUtil.asBlob(new Blob([buffer]), {
       filename: 'Random.bin',
       contentType: 'binary/octet-stream',
       size: buffer.length,
       hash
-    });
+    }));
 
     const stream = await service.getBlob(hash);
-    const resolved = await this.getHash(stream);
+    const resolved = await BlobDataUtil.computeHash(stream);
     assert(resolved === hash);
   }
 }

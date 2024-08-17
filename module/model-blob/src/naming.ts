@@ -1,29 +1,29 @@
 import { Util } from '@travetto/runtime';
 
-import { BlobMeta } from './types';
+import { ModelBlobMeta } from './types';
 import { ModelBlobUtil } from './util';
 
 /**
  * Standard class for an blob naming strategy
- * @concrete ./internal/types#BlobNamingStrategyImpl
+ * @concrete ./internal/types#ModelBlobNamingStrategyImpl
  */
-export interface BlobNamingStrategy {
+export interface ModelBlobNamingStrategy {
   readonly prefix: string;
 
   /**
    * Produce a path for a given blob meta
    * @param meta Get path from blob meta
    */
-  resolve(meta: BlobMeta): string;
+  resolve(meta: ModelBlobMeta): string;
 }
 
 /**
  * Straight forward, retains name with optional prefix
  */
-export class SimpleNamingStrategy implements BlobNamingStrategy {
+export class SimpleNamingStrategy implements ModelBlobNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 
-  resolve(meta: BlobMeta): string {
+  resolve(meta: ModelBlobMeta): string {
     return `${this.prefix}${meta.filename}`;
   }
 }
@@ -32,10 +32,10 @@ export class SimpleNamingStrategy implements BlobNamingStrategy {
  * Derives blob name via the hash value, to prevent
  * file duplication
  */
-export class HashNamingStrategy implements BlobNamingStrategy {
+export class HashNamingStrategy implements ModelBlobNamingStrategy {
   constructor(public readonly prefix: string = '') { }
 
-  resolve(meta: BlobMeta): string {
+  resolve(meta: ModelBlobMeta): string {
     let ext: string | undefined = '';
 
     if (meta.contentType) {

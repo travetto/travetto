@@ -5,12 +5,23 @@ import path from 'node:path';
 
 import { getExtension, getType } from 'mime';
 
-import { AppError, castTo } from '@travetto/runtime';
+import { AppError, castTo, TypedObject } from '@travetto/runtime';
 import { ExistsError, NotFoundError } from '@travetto/model';
 
-import { BlobMeta, BlobRange, BlobWithMeta } from './types';
+import { ModelBlobMeta, ByteRange, ModelBlob } from './types';
 import { ModelBlobSupport } from './service';
 import { BlobDataUtil } from './data';
+
+const FIELD_TO_HEADER: Record<keyof ModelBlobMeta, string> = {
+  contentType: 'content-type',
+  contentEncoding: 'content-encoding',
+  cacheControl: 'cache-control',
+  contentLanguage: 'content-language',
+  size: 'content-length',
+  hash: '',
+  filename: '',
+  title: ''
+};
 
 /**
  * Utilities for processing assets
@@ -20,7 +31,7 @@ export class ModelBlobUtil {
   /**
    * Enforce byte range for stream stream/file of a certain size
    */
-  static enforceRange({ start, end }: BlobRange, size: number): Required<BlobRange> {
+  static enforceRange({ start, end }: ByteRange, size: number): Required<ByteRange> {
     end = Math.min(end ?? size - 1, size - 1);
 
     if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0 || start > end) {
@@ -116,70 +127,101 @@ export class ModelBlobUtil {
   }
 
   /**
-   * Convert local file to asset structure
+   * Get filename for a given input
    */
-  static async fileToBlobWitMeta(file: string, metadata: Partial<BlobMeta> = {}): Promise<BlobWithMeta> {
-    const hash = metadata.hash ?? await BlobDataUtil.computeHash(file);
-    const size = metadata.size ?? (await fs.stat(file)).size;
-    const contentType = metadata.contentType ?? await this.resolveFileType(file);
-    let filename = metadata.filename;
+  static getFilename(src: Blob | string, meta: Pick<ModelBlobMeta, 'filename' | 'contentType'>): string {
+    let filename = meta.filename;
 
+    // Detect name if missing
     if (!filename) {
-      filename = path.basename(file);
-      const extName = path.extname(file);
+      if (typeof src === 'string') {
+        filename = path.basename(src);
+      } else if (src instanceof File) {
+        filename = src.name;
+      }
+    }
+
+    filename ??= `unknown_${Date.now()}`;
+
+    // Add extension if missing
+    if (filename) {
+      const extName = path.extname(filename);
       if (!extName) {
-        const ext = this.getExtension(contentType);
+        const ext = this.getExtension(meta.contentType);
         if (ext) {
           filename = `${filename}.${ext}`;
         }
       }
     }
 
-    return new BlobWithMeta(
-      () => createReadStream(filename),
-      {
-        ...metadata,
-        size,
-        filename,
-        contentType,
-        hash
-      }
-    );
+    return filename;
   }
 
   /**
    * Convert blob to asset structure
    */
-  static async blobToBlobWithMeta(blob: Blob, metadata: Partial<BlobMeta> = {}): Promise<BlobWithMeta> {
+  static async asBlob(src: Blob | string, metadata: Partial<ModelBlobMeta> = {}): Promise<ModelBlob> {
+    const contentType = metadata.contentType ?? (src instanceof Blob ? src.type : await this.resolveFileType(src));
+    const filename = this.getFilename(src, { filename: metadata.filename, contentType });
 
-    const hash = metadata.hash ??= await BlobDataUtil.computeHash(blob);
-    const size = metadata.size ?? blob.size;
-    const contentType = metadata.contentType ?? blob.type;
-    let filename = metadata.filename;
-
-    if (!filename) {
-      filename = `unknown.${Date.now()}`;
-      const ext = this.getExtension(contentType);
-      if (ext) {
-        filename = `${filename}.${ext}`;
-      }
+    let input: () => Readable;
+    if (src instanceof Blob) {
+      const [a, b] = src.stream().tee();
+      metadata.hash = await BlobDataUtil.computeHash(Readable.fromWeb(b));
+      input = (): Readable => Readable.from(a);
+    } else {
+      input = (): Readable => createReadStream(src);
     }
 
-    return new BlobWithMeta(
-      () => Readable.fromWeb(blob.stream()),
+    return new ModelBlob(
+      input,
       {
         ...metadata,
-        size,
+        size: metadata.size ?? (src instanceof Blob ? src.size : (await fs.stat(src)).size),
         filename,
         contentType,
-        hash
+        hash: metadata.hash ?? (typeof src === 'string' ?
+          await BlobDataUtil.computeHash(input()) :
+          undefined
+        )
       }
     );
+
   }
 
   static getLazyStream(src: () => (Promise<Readable> | Readable)): () => Readable {
     const out = new PassThrough();
-    const run = (): void => { Promise.resolve(src()).then(v => v.pipe(out)); };
+    const run = (): void => { Promise.resolve(src()).then(v => v.pipe(out), (err) => out.destroy(err)); };
     return () => (run(), out);
+  }
+
+  static blobToHttp(blob: ModelBlob): unknown {
+    return {
+      statusCode(): number {
+        return blob.range ? 206 : 200;
+      },
+
+      headers(): Record<string, string> {
+        const headers: Record<string, string> = {};
+        for (const [f, v] of TypedObject.entries(FIELD_TO_HEADER)) {
+          if (blob.meta[f] && v) {
+            headers[v] = `${blob.meta[f]}`;
+          }
+        }
+        if (blob.meta.filename) {
+          headers['content-disposition'] = `attachment;filename=${path.basename(blob.meta.filename)}`;
+        }
+        if (blob.range) {
+          headers['accept-ranges'] = 'bytes';
+          headers['content-range'] = `bytes ${blob.range.start}-${blob.range.end}/${blob.meta.size}`;
+          headers['content-length'] = `${blob.range.end - blob.range.start + 1}`;
+        }
+        return headers;
+      },
+
+      render(): Readable {
+        return Readable.from(blob.stream());
+      }
+    };
   }
 }

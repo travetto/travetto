@@ -1,10 +1,8 @@
-// Wildcard import needed here due to packaging issues
 import {
   type Db, GridFSBucket, MongoClient, type Sort, type CreateIndexesOptions,
   type GridFSFile, type IndexSpecification, type Collection, ObjectId,
   Binary
 } from 'mongodb';
-import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import {
@@ -17,7 +15,7 @@ import {
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport,
   QueryVerifier
 } from '@travetto/model-query';
-import { BlobNamingStrategy, ModelBlobSupport } from '@travetto/model-blob';
+import { ByteRange, ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil } from '@travetto/model-blob';
 
 import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
@@ -36,7 +34,6 @@ import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
-import { BlobMeta, BlobRange, BlobResponse, BlobWithMeta, ModelBlobUtil } from '../../model-blob/__index__';
 
 const IdxFieldsⲐ = Symbol.for('@travetto/model-mongo:idx');
 
@@ -44,7 +41,7 @@ const asFielded = (cfg: IndexConfig<ModelType>): { [IdxFieldsⲐ]: Sort } => cas
 
 type IdxCfg = CreateIndexesOptions;
 
-type StreamRaw = GridFSFile & { metadata: BlobMeta };
+type StreamRaw = GridFSFile & { metadata: ModelBlobMeta };
 
 const STREAMS = '__streams';
 
@@ -284,18 +281,17 @@ export class MongoModelService implements
   }
 
   // Stream
-  async upsertBlob(blob: BlobWithMeta, location: string | BlobNamingStrategy): Promise<string> {
-    const final = typeof location === 'string' ? location : location.resolve(blob.meta);
-    const writeStream = this.#bucket.openUploadStream(final, {
-      contentType: blob.meta.contentType,
-      metadata: blob.meta
+  async upsertBlob(location: string, blob: Blob | ModelBlob): Promise<void> {
+    const resolved = blob instanceof ModelBlob ? blob : await ModelBlobUtil.asBlob(blob);
+    const writeStream = this.#bucket.openUploadStream(location, {
+      contentType: resolved.meta.contentType,
+      metadata: resolved.meta
     });
 
-    await pipeline(blob.stream(), writeStream);
-    return final;
+    await pipeline(resolved.stream(), writeStream);
   }
 
-  async getBlob(location: string, range?: BlobRange): Promise<BlobResponse> {
+  async getBlob(location: string, range?: ByteRange): Promise<ModelBlob> {
     const meta = await this.describeBlob(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size) : undefined;
     if (final) {
@@ -303,10 +299,10 @@ export class MongoModelService implements
     }
 
     const res = ModelBlobUtil.getLazyStream(() => this.#bucket.openDownloadStreamByName(location, range));
-    return new BlobResponse(res, meta, final);
+    return new ModelBlob(res, meta, final);
   }
 
-  async describeBlob(location: string): Promise<BlobMeta> {
+  async describeBlob(location: string): Promise<ModelBlobMeta> {
     return (await this.#describeStreamRaw(location)).metadata;
   }
 

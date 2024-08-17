@@ -1,20 +1,10 @@
-
-import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AssetModelⲐ } from '@travetto/asset';
-import { AssetServiceSuite } from '@travetto/asset/support/test/service';
+import { ModelBlobSuite } from '@travetto/model-blob/support/test/blob';
 
 import { FileModelConfig, FileModelService } from '@travetto/model';
 
-class Init {
-  @InjectableFactory(AssetModelⲐ)
-  static modelProvider(config: FileModelConfig) {
-    return new FileModelService(config);
-  }
-}
-
 @Suite()
-export class FileAssetServiceSuite extends AssetServiceSuite {
+export class FileBlobServiceSuite extends ModelBlobSuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 }

@@ -2,7 +2,7 @@ import { Suite } from '@travetto/test';
 import { ExpressRestServer } from '@travetto/rest-express';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
-import { AssetRestUploadServerSuite } from './server';
+import { ModelBlobRestUploadServerSuite } from './server';
 
 const EXPRESS = Symbol.for('express');
 
@@ -21,6 +21,6 @@ class Config {
 }
 
 @Suite()
-export class ExpressRestUploadTest extends AssetRestUploadServerSuite {
+export class ExpressRestUploadTest extends ModelBlobRestUploadServerSuite {
   qualifier = EXPRESS;
 }

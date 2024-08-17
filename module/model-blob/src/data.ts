@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import { Readable } from 'node:stream';
-import { createReadStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import crypto from 'node:crypto';
 
@@ -12,13 +11,13 @@ export class BlobDataUtil {
   /**
    * Compute hash from a file location on disk or a blob
    */
-  static async computeHash(input: string | Blob | Buffer): Promise<string> {
+  static async computeHash(input: Readable | Blob | Buffer): Promise<string> {
     const hash = crypto.createHash('sha256').setEncoding('hex');
-    const str = typeof input === 'string' ?
-      createReadStream(input) :
-      Buffer.isBuffer(input) ?
-        Readable.from(input) :
-        Readable.fromWeb(input.stream());
+    const str = Buffer.isBuffer(input) ?
+      Readable.from(input) :
+      input instanceof Blob ?
+        Readable.fromWeb(input.stream()) :
+        input;
     await pipeline(str, hash);
     return hash.read().toString();
   }

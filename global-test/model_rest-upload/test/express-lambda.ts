@@ -3,7 +3,7 @@ import { AwsLambdaExpressRestServer } from '@travetto/rest-express-lambda';
 import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
-import { AssetRestUploadServerSuite } from './server';
+import { ModelBlobRestUploadServerSuite } from './server';
 
 const EXPRESS = Symbol.for('express-lambda');
 
@@ -20,7 +20,7 @@ class Config {
 }
 
 @Suite()
-export class ExpressLambdaRestUploadTest extends AssetRestUploadServerSuite {
+export class ExpressLambdaRestUploadTest extends ModelBlobRestUploadServerSuite {
   qualifier = EXPRESS;
   type = AwsLambdaRestServerSupport;
 }

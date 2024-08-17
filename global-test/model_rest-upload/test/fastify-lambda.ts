@@ -3,7 +3,7 @@ import { AwsLambdaFastifyRestServer } from '@travetto/rest-fastify-lambda';
 import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
-import { AssetRestUploadServerSuite } from './server';
+import { ModelBlobRestUploadServerSuite } from './server';
 
 const FASTIFY = Symbol.for('fastify-lambda');
 
@@ -20,7 +20,7 @@ class Config {
 }
 
 @Suite()
-export class FastifyLambdaRestUploadTest extends AssetRestUploadServerSuite {
+export class FastifyLambdaRestUploadTest extends ModelBlobRestUploadServerSuite {
   qualifier = FASTIFY;
   type = AwsLambdaRestServerSupport;
 }

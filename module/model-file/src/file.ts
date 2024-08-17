@@ -12,7 +12,7 @@ import {
   ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistry,
   NotFoundError, OptionalId, ExistsError
 } from '@travetto/model';
-import { ModelBlobSupport, BlobWithMeta, BlobNamingStrategy, BlobRange, BlobMeta, ModelBlobUtil, BlobResponse } from '@travetto/model-blob';
+import { ModelBlobSupport, ModelBlob, ByteRange, ModelBlobMeta, ModelBlobUtil } from '@travetto/model-blob';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
@@ -170,27 +170,26 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   // Stream
-  async upsertBlob(blob: BlobWithMeta, location: string | BlobNamingStrategy): Promise<string> {
-    const final = typeof location === 'string' ? location : location.resolve(blob.meta);
-    const file = await this.#resolveName(STREAMS, BIN, final);
+  async upsertBlob(location: string, blob: ModelBlob | Blob): Promise<void> {
+    const resolved = blob instanceof ModelBlob ? blob : await ModelBlobUtil.asBlob(blob);
+    const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
       await pipeline(blob.stream(), createWriteStream(file)),
-      fs.writeFile(file.replace(BIN, META), JSON.stringify(blob.meta), 'utf8')
+      fs.writeFile(file.replace(BIN, META), JSON.stringify(resolved.meta), 'utf8')
     ]);
-    return final;
   }
 
-  async getBlob(location: string, range?: BlobRange): Promise<BlobResponse> {
+  async getBlob(location: string, range?: ByteRange): Promise<ModelBlob> {
     const file = await this.#find(STREAMS, BIN, location);
     const meta = await this.describeBlob(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size) : undefined;
-    return new BlobResponse(() => createReadStream(file, range), meta, final);
+    return new ModelBlob(() => createReadStream(file, range), meta, final);
   }
 
-  async describeBlob(location: string): Promise<BlobMeta> {
+  async describeBlob(location: string): Promise<ModelBlobMeta> {
     const file = await this.#find(STREAMS, META, location);
     const content = await fs.readFile(file);
-    const text: BlobMeta = JSON.parse(content.toString('utf8'));
+    const text: ModelBlobMeta = JSON.parse(content.toString('utf8'));
     return text;
   }
 

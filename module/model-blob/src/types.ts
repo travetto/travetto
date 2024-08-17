@@ -1,22 +1,8 @@
 import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
 import { arrayBuffer as toBuffer, text as toText } from 'node:stream/consumers';
-import path from 'node:path';
 
-import { TypedObject } from '@travetto/runtime';
-
-const FIELD_TO_HEADER: Record<keyof BlobMeta, string> = {
-  contentType: 'content-type',
-  contentEncoding: 'content-encoding',
-  cacheControl: 'cache-control',
-  contentLanguage: 'content-language',
-  size: 'content-length',
-  hash: '',
-  filename: '',
-  title: ''
-};
-
-export interface BlobMeta {
+export interface ModelBlobMeta {
   /**
    * File size
    */
@@ -51,24 +37,30 @@ export interface BlobMeta {
   cacheControl?: string;
 }
 
-export type BlobRange = { start: number, end?: number };
+export type ByteRange = { start: number, end?: number };
 
 
-export class BlobWithMeta extends Blob {
+export class ModelBlob extends Blob {
   /**
    * Stream meta
    */
-  meta: BlobMeta;
+  meta: ModelBlobMeta;
 
   /**
    * Data stream
    */
   #stream: () => Readable;
 
-  constructor(stream: () => Readable, meta: BlobMeta) {
+  /**
+   * Response byte range, inclusive
+   */
+  range?: Required<ByteRange>;
+
+  constructor(stream: () => Readable, meta: ModelBlobMeta, range?: Required<ByteRange>) {
     super([]);
     this.#stream = stream;
     this.meta = meta;
+    this.range = range;
     Object.defineProperty(this, 'size', { value: meta.size });
   }
 
@@ -86,47 +78,5 @@ export class BlobWithMeta extends Blob {
 
   buffer(): Promise<Uint8Array> {
     return toBuffer(this.#stream()).then(v => new Uint8Array(v));
-  }
-}
-
-/**
- * A blob response
- */
-export class BlobResponse extends BlobWithMeta {
-
-  /**
-   * Response byte range, inclusive
-   */
-  range?: Required<BlobRange>;
-
-  constructor(
-    stream: () => Readable,
-    meta: BlobMeta,
-    range?: Required<BlobRange>
-  ) {
-    super(stream, meta);
-    this.range = range;
-  }
-
-  statusCode(): number {
-    return this.range ? 206 : 200;
-  }
-
-  headers(): Record<string, string> {
-    const headers: Record<string, string> = {};
-    for (const [f, v] of TypedObject.entries(FIELD_TO_HEADER)) {
-      if (this.meta[f] && v) {
-        headers[v] = `${this.meta[f]}`;
-      }
-    }
-    if (this.meta.filename) {
-      headers['content-disposition'] = `attachment;filename=${path.basename(this.meta.filename)}`;
-    }
-    if (this.range) {
-      headers['accept-ranges'] = 'bytes';
-      headers['content-range'] = `bytes ${this.range.start}-${this.range.end}/${this.meta.size}`;
-      headers['content-length'] = `${this.range.end - this.range.start + 1}`;
-    }
-    return headers;
   }
 }

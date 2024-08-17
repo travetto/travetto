@@ -4,7 +4,7 @@ import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
 
-import { AssetRestUploadServerSuite } from './server';
+import { ModelBlobRestUploadServerSuite } from './server';
 
 const KOA = Symbol.for('koa-lambda');
 
@@ -21,7 +21,7 @@ class Config {
 }
 
 @Suite()
-export class KoaLambdaRestUploadTest extends AssetRestUploadServerSuite {
+export class KoaLambdaRestUploadTest extends ModelBlobRestUploadServerSuite {
   qualifier = KOA;
   type = AwsLambdaRestServerSupport;
 }

@@ -7,7 +7,7 @@ import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
   ModelRegistry, NotFoundError, ExistsError, OptionalId
 } from '@travetto/model';
-import { ModelBlobSupport, BlobMeta, BlobRange, BlobNamingStrategy, BlobWithMeta, ModelBlobUtil, BlobResponse } from '@travetto/model-blob';
+import { ModelBlobSupport, ModelBlobMeta, ByteRange, ModelBlob, ModelBlobUtil } from '@travetto/model-blob';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
@@ -233,16 +233,15 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   // Stream Support
-  async upsertBlob(blob: BlobWithMeta, location: string | BlobNamingStrategy): Promise<string> {
+  async upsertBlob(location: string, blob: ModelBlob | Blob): Promise<void> {
+    const resolved = blob instanceof ModelBlob ? blob : await ModelBlobUtil.asBlob(blob);
     const streams = this.#getStore(STREAMS);
     const metaContent = this.#getStore(STREAM_META);
-    const final = typeof location === 'string' ? location : location.resolve(blob.meta);
-    metaContent.set(final, Buffer.from(JSON.stringify(blob.meta)));
-    streams.set(final, Buffer.from(await blob.buffer()));
-    return final;
+    metaContent.set(location, Buffer.from(JSON.stringify(resolved.meta)));
+    streams.set(location, Buffer.from(await resolved.buffer()));
   }
 
-  async getBlob(location: string, range?: BlobRange): Promise<BlobResponse> {
+  async getBlob(location: string, range?: ByteRange): Promise<ModelBlob> {
     const streams = this.#find(STREAMS, location, 'notfound');
     let buffer = streams.get(location)!;
     const final = range ? ModelBlobUtil.enforceRange(range, buffer.length) : undefined;
@@ -250,12 +249,12 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       buffer = buffer.subarray(final.start, final.end + 1);
     }
     const meta = await this.describeBlob(location);
-    return new BlobResponse(() => Readable.from([buffer]), meta, final);
+    return new ModelBlob(() => Readable.from([buffer]), meta, final);
   }
 
-  async describeBlob(location: string): Promise<BlobMeta> {
+  async describeBlob(location: string): Promise<ModelBlobMeta> {
     const metaContent = this.#find(STREAM_META, location, 'notfound');
-    const meta: BlobMeta = JSON.parse(metaContent.get(location)!.toString('utf8'));
+    const meta: ModelBlobMeta = JSON.parse(metaContent.get(location)!.toString('utf8'));
     return meta;
   }
 
