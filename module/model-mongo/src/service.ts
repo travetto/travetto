@@ -282,7 +282,7 @@ export class MongoModelService implements
   }
 
   // Blob
-  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: ModelBlobMeta): Promise<void> {
+  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: Partial<ModelBlobMeta>): Promise<void> {
     const resolved = await ModelBlobUtil.asBlob(input, meta);
     const writeStream = this.#bucket.openUploadStream(location, {
       contentType: resolved.meta.contentType,

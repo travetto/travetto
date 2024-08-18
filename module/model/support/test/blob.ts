@@ -68,7 +68,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const partial = await service.getBlob(id, { start: 10, end: 20 });
     const subContent = await partial.text();
-    const range = await ModelBlobUtil.enforceRange({ start: 10, end: 20 }, partial.size);
+    const range = await ModelBlobUtil.enforceRange({ start: 10, end: 20 }, partial.meta.size);
     assert(subContent.length === (range.end - range.start) + 1);
 
     const og = await this.fixture.read('/text.txt');
@@ -77,7 +77,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const partialUnbounded = await service.getBlob(id, { start: 10 });
     const subContent2 = await partialUnbounded.text();
-    const range2 = await ModelBlobUtil.enforceRange({ start: 10 }, partialUnbounded.size);
+    const range2 = await ModelBlobUtil.enforceRange({ start: 10 }, partialUnbounded.meta.size);
     assert(subContent2.length === (range2.end - range2.start) + 1);
     assert(subContent2.startsWith('klm'));
     assert(subContent2.endsWith('xyz'));
@@ -101,7 +101,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   async writeAndGet() {
     const service = await this.service;
     const buffer = await this.fixture.read('/asset.yml', true);
-    await service.upsertBlob('orange', buffer);
+    await service.upsertBlob('orange', buffer, { contentType: 'text/yaml', filename: 'asset.yml' });
     const { meta: saved } = await service.getBlob('orange');
 
     const blob = await ModelBlobUtil.asBlob(await this.fixture.resolve('/asset.yml'));

@@ -14,7 +14,7 @@ export interface ModelBlobSupport {
    * @param location The location of the blob
    * @param input The actual blob to write
    */
-  upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: ModelBlobMeta): Promise<void>;
+  upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: Partial<ModelBlobMeta>): Promise<void>;
 
   /**
    * Get blob from storage

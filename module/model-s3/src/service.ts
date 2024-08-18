@@ -295,7 +295,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Blob support
-  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: ModelBlobMeta): Promise<void> {
+  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: Partial<ModelBlobMeta>): Promise<void> {
     const resolved = await ModelBlobUtil.asBlob(input, meta);
     if (resolved.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3

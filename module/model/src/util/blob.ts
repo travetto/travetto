@@ -18,7 +18,7 @@ export class ModelBlobUtil {
    * Enforce byte range for stream stream/file of a certain size
    */
   static enforceRange({ start, end }: ByteRange, size: number): Required<ByteRange> {
-    end = Math.min(end ?? size - 1, size - 1);
+    end = Math.min(end ?? (size - 1), size - 1);
 
     if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0 || start > end) {
       throw new AppError('Invalid position, out of range', 'data');
@@ -129,6 +129,8 @@ export class ModelBlobUtil {
    *   This assumption is incompatible with the blob response from an http request (fetch)
    */
   static async asBlob(src: Blob | Readable | Buffer | string, metadata: Partial<ModelBlobMeta> = {}): Promise<ModelBlob> {
+    metadata = { ...metadata };
+
     if (src instanceof ModelBlob) {
       Object.assign(src.meta, metadata);
       return src;

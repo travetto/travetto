@@ -171,7 +171,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   // Blob
-  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: ModelBlobMeta): Promise<void> {
+  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: Partial<ModelBlobMeta>): Promise<void> {
     const resolved = await ModelBlobUtil.asBlob(input, meta);
     const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
