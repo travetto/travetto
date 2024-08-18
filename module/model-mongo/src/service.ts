@@ -281,9 +281,9 @@ export class MongoModelService implements
     }
   }
 
-  // Stream
-  async upsertBlob(location: string, blob: Blob | ModelBlob): Promise<void> {
-    const resolved = blob instanceof ModelBlob ? blob : await ModelBlobUtil.asBlob(blob);
+  // Blob
+  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: ModelBlobMeta): Promise<void> {
+    const resolved = await ModelBlobUtil.asBlob(input, meta);
     const writeStream = this.#bucket.openUploadStream(location, {
       contentType: resolved.meta.contentType,
       metadata: resolved.meta

@@ -232,9 +232,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     }
   }
 
-  // Stream Support
-  async upsertBlob(location: string, blob: ModelBlob | Blob): Promise<void> {
-    const resolved = blob instanceof ModelBlob ? blob : await ModelBlobUtil.asBlob(blob);
+  // Blob Support
+  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: ModelBlobMeta): Promise<void> {
+    const resolved = await ModelBlobUtil.asBlob(input, meta);
     const streams = this.#getStore(STREAMS);
     const metaContent = this.#getStore(STREAM_META);
     metaContent.set(location, Buffer.from(JSON.stringify(resolved.meta)));

@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import { Readable } from 'node:stream';
+import { buffer as toBuffer } from 'node:stream/consumers';
 import { createReadStream } from 'node:fs';
 import path from 'node:path';
 
@@ -7,7 +8,6 @@ import { getExtension, getType } from 'mime';
 
 import { AppError, castTo, IOUtil, Util } from '@travetto/runtime';
 import { ModelBlobMeta, ByteRange, ModelBlob } from '../types/blob';
-
 
 /**
  * Utilities for processing assets
@@ -128,8 +128,15 @@ export class ModelBlobUtil {
    * Note: For a given blob, this implementation assumes that the blob stream can be read multiple times.
    *   This assumption is incompatible with the blob response from an http request (fetch)
    */
-  static async asBlob(src: Blob | Buffer | string, metadata: Partial<ModelBlobMeta> = {}): Promise<ModelBlob> {
-    if (Buffer.isBuffer(src)) {
+  static async asBlob(src: Blob | Readable | Buffer | string, metadata: Partial<ModelBlobMeta> = {}): Promise<ModelBlob> {
+    if (src instanceof ModelBlob) {
+      Object.assign(src.meta, metadata);
+      return src;
+    }
+
+    if (typeof src === 'object' && 'pipe' in src) {
+      src = new Blob([await toBuffer(src)]);
+    } else if (Buffer.isBuffer(src)) {
       src = new Blob([src]);
     }
     const contentType = metadata.contentType ?? (src instanceof Blob ? src.type : await this.resolveFileType(src));

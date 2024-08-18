@@ -34,7 +34,7 @@ export const text = <>
 
   <c.Section title='Contracts'>
 
-    The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are {Links.Basic}, {Links.Crud}, {Links.Indexed}, {Links.Expiry}, {Links.Stream} and {Links.Bulk}.
+    The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are {Links.Basic}, {Links.Crud}, {Links.Indexed}, {Links.Expiry}, {Links.Blob} and {Links.Bulk}.
 
     <c.SubSection title='Basic'>
       All {d.mod('Model')} implementations, must honor the {Links.Basic} contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.

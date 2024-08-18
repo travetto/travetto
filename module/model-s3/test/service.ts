@@ -7,7 +7,6 @@ import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob';
-import { ModelBlobUtil } from '@travetto/model';
 
 import { S3ModelConfig } from '../src/config';
 import { S3ModelService } from '../src/service';
@@ -51,12 +50,12 @@ export class S3BlobSuite extends ModelBlobSuite {
 
     const hash = await IOUtil.hashInput(buffer);
 
-    await service.upsertBlob(hash, await ModelBlobUtil.asBlob(buffer, {
+    await service.upsertBlob(hash, buffer, {
       filename: 'Random.bin',
       contentType: 'binary/octet-stream',
       size: buffer.length,
       hash
-    }));
+    });
 
     const stream = await service.getBlob(hash);
     const resolved = await IOUtil.hashInput(stream);

@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream';
+
 import { ModelBlobMeta, ByteRange, ModelBlob } from '../types/blob';
 
 /**
@@ -12,7 +14,7 @@ export interface ModelBlobSupport {
    * @param location The location of the blob
    * @param input The actual blob to write
    */
-  upsertBlob(location: string, input: ModelBlob | Blob): Promise<void>;
+  upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: ModelBlobMeta): Promise<void>;
 
   /**
    * Get blob from storage

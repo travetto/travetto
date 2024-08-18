@@ -294,8 +294,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return -1;
   }
 
-  async upsertBlob(location: string, blob: ModelBlob | Blob): Promise<void> {
-    const resolved = blob instanceof ModelBlob ? blob : await ModelBlobUtil.asBlob(blob);
+  // Blob support
+  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: ModelBlobMeta): Promise<void> {
+    const resolved = await ModelBlobUtil.asBlob(input, meta);
     if (resolved.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#q(STREAM_SPACE, location, {
@@ -335,7 +336,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return new ModelBlob(res, meta, final);
   }
 
-  async headStream(location: string): Promise<{ Metadata?: Partial<ModelBlobMeta>, ContentLength?: number }> {
+  async headBlob(location: string): Promise<{ Metadata?: Partial<ModelBlobMeta>, ContentLength?: number }> {
     const query = this.#q(STREAM_SPACE, location);
     try {
       return (await this.client.headObject(query));
@@ -350,7 +351,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async describeBlob(location: string): Promise<ModelBlobMeta> {
-    const obj = await this.headStream(location);
+    const obj = await this.headBlob(location);
 
     if (obj) {
       const ret: ModelBlobMeta = {
@@ -368,14 +369,15 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
   }
 
+  async deleteBlob(location: string): Promise<void> {
+    await this.client.deleteObject(this.#q(STREAM_SPACE, location));
+  }
+
+  // Storage
   async truncateModel<T extends ModelType>(model: Class<T>): Promise<void> {
     for await (const items of this.#iterateBucket(model)) {
       await this.#deleteKeys(items);
     }
-  }
-
-  async deleteBlob(location: string): Promise<void> {
-    await this.client.deleteObject(this.#q(STREAM_SPACE, location));
   }
 
   async createStorage(): Promise<void> {

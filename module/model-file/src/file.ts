@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import { createReadStream, createWriteStream } from 'node:fs';
 import os from 'node:os';
+import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
@@ -169,12 +170,12 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     }
   }
 
-  // Stream
-  async upsertBlob(location: string, blob: ModelBlob | Blob): Promise<void> {
-    const resolved = blob instanceof ModelBlob ? blob : await ModelBlobUtil.asBlob(blob);
+  // Blob
+  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: ModelBlobMeta): Promise<void> {
+    const resolved = await ModelBlobUtil.asBlob(input, meta);
     const file = await this.#resolveName(STREAMS, BIN, location);
     await Promise.all([
-      await pipeline(blob.stream(), createWriteStream(file)),
+      await pipeline(resolved.stream(), createWriteStream(file)),
       fs.writeFile(file.replace(BIN, META), JSON.stringify(resolved.meta), 'utf8')
     ]);
   }

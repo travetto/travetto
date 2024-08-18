@@ -5,8 +5,6 @@ import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { Util } from '@travetto/runtime';
 
 import { ModelBlobSupport } from '../../src/service/blob';
-
-import { ModelBlob } from '../../src/types/blob';
 import { ModelBlobUtil } from '../../src/util/blob';
 
 @Suite()
@@ -14,42 +12,39 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
   fixture = new TestFixtures(['@travetto/model']);
 
-  async getBlob(resource: string): Promise<ModelBlob> {
-    const file = await this.fixture.resolve(resource);
-    return ModelBlobUtil.asBlob(file);
-  }
-
   @Test()
   async writeBasic(): Promise<void> {
     const service = await this.service;
-    const blob = await this.getBlob('/asset.yml');
+    const buffer = await this.fixture.read('/asset.yml', true);
 
     const id = Util.uuid();
 
-    await service.upsertBlob(id, blob);
+    await service.upsertBlob(id, buffer);
+    const meta = await service.describeBlob(id);
     const retrieved = await service.describeBlob(id);
-    assert.deepStrictEqual(blob.meta, retrieved);
+    assert.deepStrictEqual(meta, retrieved);
   }
 
   @Test()
   async writeStream(): Promise<void> {
     const service = await this.service;
-    const blob = await this.getBlob('/asset.yml');
+    const buffer = await this.fixture.read('/asset.yml', true);
 
     const id = Util.uuid();
-    await service.upsertBlob(id, blob);
+    await service.upsertBlob(id, buffer);
+    const meta = await service.describeBlob(id);
 
     const retrieved = await service.getBlob(id);
-    assert(blob.meta.hash === retrieved.meta.hash);
+    assert(meta.hash === retrieved.meta.hash);
   }
 
   @Test()
   async writeAndDelete(): Promise<void> {
     const service = await this.service;
-    const blob = await this.getBlob('/asset.yml');
+    const buffer = await this.fixture.read('/asset.yml', true);
 
     const id = Util.uuid();
-    await service.upsertBlob(id, blob);
+    await service.upsertBlob(id, buffer);
 
     await service.deleteBlob(id);
 
@@ -61,10 +56,10 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   @Test()
   async partialStream(): Promise<void> {
     const service = await this.service;
-    const blob = await this.getBlob('/text.txt');
+    const buffer = await this.fixture.read('/text.txt', true);
 
     const id = Util.uuid();
-    await service.upsertBlob(id, blob);
+    await service.upsertBlob(id, buffer);
 
     const retrieved = await service.getBlob(id);
     const content = await retrieved.text();
@@ -105,10 +100,11 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
   @Test()
   async writeAndGet() {
     const service = await this.service;
-    const blob = await this.getBlob('/asset.yml');
-    await service.upsertBlob('orange', blob);
+    const buffer = await this.fixture.read('/asset.yml', true);
+    await service.upsertBlob('orange', buffer);
     const { meta: saved } = await service.getBlob('orange');
 
+    const blob = await ModelBlobUtil.asBlob(await this.fixture.resolve('/asset.yml'));
     assert(blob.meta.contentType === saved.contentType);
     assert(blob.size === saved.size);
     assert(blob.meta.filename === saved.filename);
