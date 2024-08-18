@@ -6,7 +6,7 @@ import path from 'node:path';
 
 import { getExtension, getType } from 'mime';
 
-import { AppError, castTo, IOUtil, Util } from '@travetto/runtime';
+import { AppError, asFull, castTo, IOUtil, Util } from '@travetto/runtime';
 import { ModelBlobMeta, ByteRange, ModelBlob } from '../types/blob';
 
 /**
@@ -94,7 +94,7 @@ export class ModelBlobUtil {
   /**
    * Get filename for a given input
    */
-  static getFilename(src: Blob | string, meta: Pick<ModelBlobMeta, 'filename' | 'contentType'>): string {
+  static getFilename(src: Blob | string, meta: Partial<ModelBlobMeta>): string {
     let filename = meta.filename;
 
     // Detect name if missing
@@ -111,7 +111,7 @@ export class ModelBlobUtil {
     // Add extension if missing
     if (filename) {
       const extName = path.extname(filename);
-      if (!extName) {
+      if (!extName && meta.contentType) {
         const ext = this.getExtension(meta.contentType);
         if (ext) {
           filename = `${filename}.${ext}`;
@@ -139,23 +139,17 @@ export class ModelBlobUtil {
     } else if (Buffer.isBuffer(src)) {
       src = new Blob([src]);
     }
-    const contentType = metadata.contentType ?? (src instanceof Blob ? src.type : await this.resolveFileType(src));
-    const filename = this.getFilename(src, { filename: metadata.filename, contentType });
 
     const input = src instanceof Blob ?
       (): Readable => Readable.from(src.stream()) :
       (): Readable => createReadStream(src);
 
-    return new ModelBlob(
-      input,
-      {
-        ...metadata,
-        size: metadata.size ?? (src instanceof Blob ? src.size : (await fs.stat(src)).size),
-        filename,
-        contentType,
-        hash: metadata.hash ?? await IOUtil.hashInput(input())
-      }
-    );
+    metadata.contentType ??= (src instanceof Blob ? src.type : await this.resolveFileType(src));
+    metadata.size ??= (src instanceof Blob ? src.size : (await fs.stat(src)).size);
+    metadata.hash ??= await IOUtil.hashInput(input());
+    metadata.filename = this.getFilename(src, metadata);
+
+    return new ModelBlob(input, asFull(metadata));
   }
 
   /**
