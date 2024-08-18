@@ -9,8 +9,7 @@ import { RunnableTestConsumer } from '../consumer/types/runnable';
 import { TestExecutor } from './executor';
 import { RunnerUtil } from './util';
 import { RunState } from './types';
-import { TestConfig } from '../model/test';
-import { TestRun } from '../worker/types';
+import { TestConfig, TestRun } from '../model/test';
 
 /**
  * Test Runner
@@ -32,7 +31,8 @@ export class Runner {
     console.debug('Running', { globs });
 
     const tests = await RunnerUtil.getTestDigest(globs, this.#state.tags);
-    const testRuns = RunnerUtil.getTestRuns(tests);
+    const testRuns = RunnerUtil.getTestRuns(tests)
+      .sort((a, b) => a.runId!.localeCompare(b.runId!));
 
     await consumer.onStart({ testCount: tests.length });
     await WorkPool.run(
@@ -51,24 +51,29 @@ export class Runner {
    * Run a single file
    */
   async runSingle(run: TestRun): Promise<boolean> {
-    const imp =
+    run.import =
       RuntimeIndex.getFromImport(run.import)?.import ??
       RuntimeIndex.getFromSource(path.resolve(run.import))?.import!;
 
-    const entry = RuntimeIndex.getFromImport(imp)!;
+    const entry = RuntimeIndex.getFromImport(run.import)!;
 
     if (entry.module !== Runtime.main.name) {
       RuntimeIndex.reinitForModule(entry.module);
     }
 
-    let filter = (_: TestConfig): boolean => true;
-    if (run.methodNames?.length) {
-      filter = (cfg): boolean => run.methodNames!.includes(cfg.methodName);
-    }
+    const filter = (run.methodNames?.length) ?
+      (cfg: TestConfig): boolean => run.methodNames!.includes(cfg.methodName) :
+      undefined;
 
-    const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
+    const consumer = (await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format))
+      .withTransformer(e => {
+        // Copy run metadata to event
+        e.metadata = run.metadata;
+        return e;
+      });
+
     await consumer.onStart({});
-    await new TestExecutor(consumer, filter, false).execute(imp, run.classId, run.methodNames);
+    await new TestExecutor(consumer, filter).execute(run);
     return consumer.summarizeAsBoolean();
   }
 

@@ -1,5 +1,5 @@
 import { TestConsumer } from '../consumer/types';
-import { TestRun } from '../worker/types';
+import { TestRun } from '../model/test';
 
 /**
  * Run state

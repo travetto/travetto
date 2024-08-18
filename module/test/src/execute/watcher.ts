@@ -6,18 +6,9 @@ import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
 import { TestConsumerRegistry } from '../consumer/registry';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
-import { TestRun } from '../worker/types';
+import { TestRun } from '../model/test';
 import { RunnerUtil } from './util';
-import { TestEvent } from '../model/event';
-
-type RemoveTestEvent = { type: 'removeTest' } & TestRun;
-
-export type TestWatchEvent =
-  TestEvent |
-  RemoveTestEvent |
-  { type: 'ready' } |
-  { type: 'log', message: string };
-
+import { TestReadyEvent, TestRemovedEvent } from '../worker/types';
 /**
  * Test Watcher.
  *
@@ -43,7 +34,8 @@ export class TestWatcher {
     }
 
     const itr = new WorkQueue<TestRun>(events);
-    const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistry.getInstance(format));
+    const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistry.getInstance(format))
+      .withFilter(x => x.metadata?.partial !== true || x.type !== 'suite');
 
     new MethodSource(RootRegistry).on(e => {
       const [cls, method] = (e.prev ?? e.curr ?? []);
@@ -57,7 +49,9 @@ export class TestWatcher {
       const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
       if (e.type !== 'removing') {
         if (conf) {
-          const run: TestRun = { import: conf.import, classId: conf.classId, methodNames: [conf.methodName] };
+          const run: TestRun = {
+            import: conf.import, classId: conf.classId, methodNames: [conf.methodName], metadata: { partial: true }
+          };
           console.log('Triggering', run);
           itr.add(run, true); // Shift to front
         }
@@ -68,7 +62,7 @@ export class TestWatcher {
           method: method?.name,
           classId: cls?.Ⲑid,
           import: Runtime.getImport(cls)
-        } satisfies RemoveTestEvent & { method?: string });
+        } satisfies TestRemovedEvent);
       }
     });
 
@@ -88,7 +82,7 @@ export class TestWatcher {
       }
     });
 
-    process.send?.({ type: 'ready' });
+    process.send?.({ type: 'ready' } satisfies TestReadyEvent);
 
     await WorkPool.run(
       buildStandardTestManager.bind(null, consumer),

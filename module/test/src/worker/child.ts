@@ -6,7 +6,8 @@ import { ChildCommChannel } from '@travetto/worker';
 import { SerializeUtil } from '../consumer/serialize';
 import { RunnerUtil } from '../execute/util';
 import { Runner } from '../execute/runner';
-import { Events, TestRun } from './types';
+import { Events } from './types';
+import { TestRun } from '../model/test';
 
 /**
  * Child Worker for the Test Runner.  Receives events as commands
@@ -76,14 +77,11 @@ export class TestChildWorker extends ChildCommChannel<TestRun> {
   /**
    * Run a specific test/suite
    */
-  async onRunCommand(event: TestRun): Promise<void> {
-    console.debug('Running', { import: event.import });
+  async onRunCommand(run: TestRun): Promise<void> {
+    console.debug('Running', { import: run.import });
 
     try {
-      await new Runner({
-        format: 'exec',
-        target: event
-      }).run();
+      await new Runner({ format: 'exec', target: run }).run();
     } finally {
       this.#done.resolve();
     }

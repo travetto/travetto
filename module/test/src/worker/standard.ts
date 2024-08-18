@@ -3,17 +3,22 @@ import { fork } from 'node:child_process';
 import { Env, RuntimeIndex } from '@travetto/runtime';
 import { ParentCommChannel } from '@travetto/worker';
 
-import { Events, TestRun } from './types';
+import { Events, TestLogEvent } from './types';
 import { TestConsumer } from '../consumer/types';
 import { SerializeUtil } from '../consumer/serialize';
 import { TestEvent } from '../model/event';
+import { TestRun } from '../model/test';
+
+const log = (message: string): void => {
+  process.send?.({ type: 'log', message } satisfies TestLogEvent);
+};
 
 /**
  *  Produce a handler for the child worker
  */
 export async function buildStandardTestManager(consumer: TestConsumer, run: TestRun): Promise<void> {
-  process.send?.({ type: 'log', message: `Worker Input ${JSON.stringify(run)}` });
-  process.send?.({ type: 'log', message: `Worker Executing ${run.import}` });
+  log(`Worker Input ${JSON.stringify(run)}`);
+  log(`Worker Executing ${run.import}`);
 
   const { module } = RuntimeIndex.getFromImport(run.import)!;
   const suiteMod = RuntimeIndex.getModule(module)!;
@@ -56,7 +61,7 @@ export async function buildStandardTestManager(consumer: TestConsumer, run: Test
   // Kill on complete
   await channel.destroy();
 
-  process.send?.({ type: 'log', message: `Worker Finished ${run.import}` });
+  log(`Worker Finished ${run.import}`);
 
   // If we received an error, throw it
   if (error) {

@@ -4,7 +4,7 @@ import { Env, TimeUtil, Runtime, castTo } from '@travetto/runtime';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
-import { TestConfig, TestResult } from '../model/test';
+import { TestConfig, TestResult, TestRun } from '../model/test';
 import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite';
 import { TestConsumer } from '../consumer/types';
 import { AssertCheck } from '../assert/check';
@@ -24,7 +24,7 @@ export class TestExecutor {
   #consumer: TestConsumer;
   #testFilter: (config: TestConfig) => boolean;
 
-  constructor(consumer: TestConsumer, testFilter?: (config: TestConfig) => boolean, fullSuites = true) {
+  constructor(consumer: TestConsumer, testFilter?: (config: TestConfig) => boolean) {
     this.#consumer = consumer;
     this.#testFilter = testFilter || ((): boolean => true);
   }
@@ -253,14 +253,14 @@ export class TestExecutor {
   /**
    * Handle executing a suite's test/tests based on command line inputs
    */
-  async execute(imp: string, classId?: string, methodNames?: string[]): Promise<void> {
+  async execute(run: TestRun): Promise<void> {
     try {
-      await Runtime.importFrom(imp);
+      await Runtime.importFrom(run.import);
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;
       }
-      this.#onSuiteFailure(AssertUtil.gernerateImportFailure(imp, err));
+      this.#onSuiteFailure(AssertUtil.gernerateImportFailure(run.import, err));
       return;
     }
 
@@ -268,7 +268,7 @@ export class TestExecutor {
     await SuiteRegistry.init();
 
     // Convert inbound arguments to specific tests to run
-    const suites = SuiteRegistry.getSuiteTests(imp, classId, methodNames ?? []);
+    const suites = SuiteRegistry.getSuiteTests(run);
 
     for (const { suite, tests } of suites) {
       await this.executeSuite(suite, tests);

@@ -7,19 +7,19 @@ import { TestEvent } from '../../model/event';
 import { TestResult } from '../../model/test';
 import { SuiteResult } from '../../model/suite';
 import { SuiteRegistry } from '../../registry/suite';
+import { DelegatingConsumer } from './delegating';
 
 /**
  * Cumulative Summary consumer
  */
-export class CumulativeSummaryConsumer implements TestConsumer {
+export class CumulativeSummaryConsumer extends DelegatingConsumer {
   /**
    * Total state of all tests run so far
    */
   #state: Record<string, Record<string, TestResult['status']>> = {};
-  #target: TestConsumer;
 
   constructor(target: TestConsumer) {
-    this.#target = target;
+    super([target]);
   }
 
   /**
@@ -29,16 +29,9 @@ export class CumulativeSummaryConsumer implements TestConsumer {
   summarizeSuite(test: TestResult): SuiteResult {
     // Was only loading to verify existence (TODO: double-check)
     if (existsSync(RuntimeIndex.getFromImport(test.import)!.sourceFile)) {
-      this.#state[test.classId] = this.#state[test.classId] ?? {};
-      this.#state[test.classId][test.methodName] = test.status;
-      const SuiteCls = SuiteRegistry.getClasses().find(x =>
-        x.Ⲑid === test.classId
-      )!;
-      if (SuiteCls) {
-        return this.computeTotal(SuiteCls);
-      } else {
-        return this.removeClass(test.classId);
-      }
+      (this.#state[test.classId] ??= {})[test.methodName] = test.status;
+      const SuiteCls = SuiteRegistry.getClasses().find(x => x.Ⲑid === test.classId);
+      return SuiteCls ? this.computeTotal(SuiteCls) : this.removeClass(test.classId);
     } else {
       return this.removeClass(test.classId);
     }
@@ -83,14 +76,13 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    * Listen for event, process the full event, and if the event is an after test,
    * send a full suite summary
    */
-  onEvent(e: TestEvent): void {
-    this.#target.onEvent(e);
+  onEventDone(e: TestEvent): void {
     try {
       if (e.type === 'test' && e.phase === 'after') {
-        this.#target.onEvent({
+        this.onEvent({
           type: 'suite',
           phase: 'after',
-          suite: this.summarizeSuite(e.test)
+          suite: this.summarizeSuite(e.test),
         });
       }
     } catch (err) {

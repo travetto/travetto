@@ -1,20 +1,5 @@
-/**
- * Test Run
- */
-export type TestRun = {
-  /**
-   * Import for run
-   */
-  import: string;
-  /**
-   * Suite class id
-   */
-  classId?: string;
-  /**
-   * Methods names we want to target
-   */
-  methodNames?: string[];
-};
+import { TestEvent } from '../model/event';
+import { TestRun } from '../model/test';
 
 /**
  * Test Run Event Keys
@@ -26,3 +11,13 @@ export const Events = {
   INIT_COMPLETE: 'initComplete',
   READY: 'ready'
 };
+
+export type TestRemovedEvent = { type: 'removeTest', method?: string } & TestRun;
+export type TestReadyEvent = { type: 'ready' };
+export type TestLogEvent = { type: 'log', message: string };
+
+export type TestWatchEvent =
+  TestEvent |
+  TestRemovedEvent |
+  TestReadyEvent |
+  TestLogEvent;

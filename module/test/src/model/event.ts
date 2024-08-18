@@ -5,17 +5,21 @@ import { SuiteConfig, SuiteResult } from './suite';
  * Targets
  */
 export type EventEntity = 'test' | 'suite' | 'assertion';
+
 /**
  * Phases
  */
 export type EventPhase = 'before' | 'after';
 
+type EventTpl<T extends EventEntity, P extends EventPhase, V extends {}> =
+  { type: T, phase: P, metadata?: Record<string, unknown> } & V;
+
 /**
  * Different test event shapes
  */
 export type TestEvent =
-  { type: 'assertion', phase: 'after', assertion: Assertion } |
-  { type: 'test', phase: 'before', test: TestConfig } |
-  { type: 'test', phase: 'after', test: TestResult } |
-  { type: 'suite', phase: 'before', suite: SuiteConfig } |
-  { type: 'suite', phase: 'after', suite: SuiteResult };
+  EventTpl<'assertion', 'after', { assertion: Assertion }> |
+  EventTpl<'test', 'before', { test: TestConfig }> |
+  EventTpl<'test', 'after', { test: TestResult }> |
+  EventTpl<'suite', 'before', { suite: SuiteConfig }> |
+  EventTpl<'suite', 'after', { suite: SuiteResult }>;

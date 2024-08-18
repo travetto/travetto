@@ -2,7 +2,7 @@ import { Class, Runtime, classConstruct, describeFunction, asFull } from '@trave
 import { MetadataRegistry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite';
-import { TestConfig } from '../model/test';
+import { TestConfig, TestRun } from '../model/test';
 
 /**
  * Test Suite registry
@@ -92,7 +92,11 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   /**
    * Get run parameters from provided input
    */
-  getSuiteTests(imp: string, clsId?: string, methodNames: string[] = []): { suite: SuiteConfig, tests: TestConfig[] }[] {
+  getSuiteTests(run: TestRun): { suite: SuiteConfig, tests: TestConfig[] }[] {
+    const clsId = run.classId;
+    const imp = run.import;
+    const methodNames = run.methodNames ?? [];
+
     if (clsId && /^\d+$/.test(clsId)) { // If we only have a line number
       const line = parseInt(clsId, 10);
       const suites = this.getValidClasses()

@@ -108,3 +108,29 @@ export interface TestResult extends TestCore {
    */
   output: Record<string, string>;
 }
+
+/**
+ * Test Run
+ */
+export type TestRun = {
+  /**
+   * Import for run
+   */
+  import: string;
+  /**
+   * Suite class id
+   */
+  classId?: string;
+  /**
+   * Methods names we want to target
+   */
+  methodNames?: string[];
+  /**
+   * Test run metadata
+   */
+  metadata?: Record<string, unknown>;
+  /**
+   * unique id for the run
+   */
+  runId?: string;
+};
