@@ -1,5 +1,5 @@
-import { AppError, Util } from '@travetto/runtime';
-import { BlobMeta, BlobUtil, ByteRange, IOUtil } from '@travetto/io';
+import { Util } from '@travetto/runtime';
+import { BlobMeta, BlobUtil, IOUtil } from '@travetto/io';
 import { BlobInputLocation } from '../service/blob';
 
 /**

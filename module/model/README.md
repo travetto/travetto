@@ -16,7 +16,7 @@ yarn add @travetto/model
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
 ## Contracts
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11),  and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19).
 
 ### Basic
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9) contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -154,30 +154,37 @@ export interface ModelExpirySupport extends ModelCrudSupport {
 ```
 
 ### Blob
-Some implementations also allow for the ability to read/write binary data as [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8).  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
+Some implementations also allow for the ability to read/write binary data as [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10).  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
 
 **Code: Blob Contract**
 ```typescript
 export interface ModelBlobSupport {
 
   /**
+   * Insert blob to storage
+   * @param location The location of the blob
+   * @param input The actual blob to write
+   */
+  insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>, errorIfExisting?: boolean): Promise<void>;
+
+  /**
    * Upsert blob to storage
    * @param location The location of the blob
    * @param input The actual blob to write
    */
-  upsertBlob(location: string, input: ModelBlob | Blob): Promise<void>;
+  upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>): Promise<void>;
 
   /**
    * Get blob from storage
    * @param location The location of the blob
    */
-  getBlob(location: string, range?: ByteRange): Promise<ModelBlob>;
+  getBlob(location: string, range?: ByteRange): Promise<Blob>;
 
   /**
    * Get metadata for blob
    * @param location The location of the blob
    */
-  describeBlob(location: string): Promise<ModelBlobMeta>;
+  describeBlob(location: string): Promise<BlobMeta>;
 
   /**
    * Delete blob by location

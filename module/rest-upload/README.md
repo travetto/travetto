@@ -15,7 +15,7 @@ yarn add @travetto/rest-upload
 
 This module provides a clean and direct mechanism for processing uploads, built upon [@fastify/busboy](https://github.com/fastify/busboy). The module also provides some best practices with respect to temporary file deletion.
 
-Once the files are uploaded, they are exposed on [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.")'s request object as `req.files`. The uploaded files are constructed as `File` instances.
+Once the files are uploaded, they are exposed on [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.")'s request object as `req.uploads`. The uploaded files are constructed as `Blob` instances.
 
 A simple example:
 
@@ -41,8 +41,8 @@ export class Simple {
    * @param file A file to upload
    */
   @Post('/file')
-  loadFile(@Upload() file: File) {
-    return file;
+  loadFile(@Upload() upload: File) {
+    return upload;
   }
 
   /**
@@ -50,9 +50,9 @@ export class Simple {
    */
   @Post('/files')
   @UploadAll()
-  loadFiles({ files }: Request) {
-    for (const [, file] of Object.entries(files)) {
-      return file;
+  async loadFiles({ uploads }: Request) {
+    for (const [, upload] of Object.entries(uploads)) {
+      return upload;
     }
   }
 }

@@ -18,7 +18,7 @@
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>, which is used for data model validation.
 <h2 id="contracts">Contracts</h2>
 
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Expiry</a>,  and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19">Bulk</a>.
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10">Blob</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19">Bulk</a>.
 <h3 id="basic">Basic</h3>
 
 All <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations, must honor the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9">Basic</a> contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -172,33 +172,40 @@ Certain implementations will also provide support for automatic <a target="_blan
 
 <h3 id="blob">Blob</h3>
 
-Some implementations also allow for the ability to read/write binary data as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8">Blob</a>.  Given that all implementations can store <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
+Some implementations also allow for the ability to read/write binary data as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10">Blob</a>.  Given that all implementations can store <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
 
   <figure class="code">
     <figcaption class="code">Blob Contract
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelBlobSupport</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token comment">/**
+   * Insert blob to storage
+   * @param location The location of the blob
+   * @param input The actual blob to write
+   */</span>
+  <span class="token function">insertBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> BlobInputLocation<span class="token punctuation">,</span> input<span class="token operator">:</span> BinaryInput<span class="token punctuation">,</span> meta<span class="token operator">?</span><span class="token operator">:</span> Partial<span class="token operator">&lt;</span>BlobMeta<span class="token operator">></span><span class="token punctuation">,</span> errorIfExisting<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Upsert blob to storage
    * @param location The location of the blob
    * @param input The actual blob to write
    */</span>
-  <span class="token function">upsertBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> input<span class="token operator">:</span> ModelBlob <span class="token operator">|</span> Blob<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">upsertBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> BlobInputLocation<span class="token punctuation">,</span> input<span class="token operator">:</span> BinaryInput<span class="token punctuation">,</span> meta<span class="token operator">?</span><span class="token operator">:</span> Partial<span class="token operator">&lt;</span>BlobMeta<span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Get blob from storage
    * @param location The location of the blob
    */</span>
-  <span class="token function">getBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> range<span class="token operator">?</span><span class="token operator">:</span> ByteRange<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>ModelBlob<span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">getBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> range<span class="token operator">?</span><span class="token operator">:</span> ByteRange<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Blob<span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Get metadata for blob
    * @param location The location of the blob
    */</span>
-  <span class="token function">describeBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>ModelBlobMeta<span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">describeBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>BlobMeta<span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Delete blob by location
