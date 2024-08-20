@@ -2,7 +2,6 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import { PassThrough, Readable, Transform, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
-import { createReadStream } from 'node:fs';
 
 import { getExtension, getType } from 'mime';
 
@@ -22,9 +21,7 @@ export class IOUtil {
    */
   static async hashInput(input: BinaryInput): Promise<string> {
     const hash = crypto.createHash('sha256').setEncoding('hex');
-    if (typeof input === 'string') {
-      await pipeline(createReadStream(input), hash);
-    } else if (Buffer.isBuffer(input)) {
+    if (Buffer.isBuffer(input)) {
       hash.write(input);
     } else if (input instanceof Blob) {
       hash.write(await input.arrayBuffer());
@@ -93,7 +90,7 @@ export class IOUtil {
   /**
    * Read a chunk from a file
    */
-  static async readChunk(input: BinaryInput, bytes: number): Promise<Buffer> {
+  static async readChunk(input: BinaryInput | string, bytes: number): Promise<Buffer> {
     if (input instanceof Blob) {
       return input.slice(0, bytes).arrayBuffer().then(v => Buffer.from(v));
     } else if (Buffer.isBuffer(input)) {
@@ -161,14 +158,13 @@ export class IOUtil {
   static async detectType(input: BinaryInput | string, filename?: string): Promise<{ ext: string, mime: string }> {
     if (typeof input === 'string') {
       filename = input;
-      input = createReadStream(input);
     }
     const { default: fileType } = await import('file-type');
     const buffer = await this.readChunk(input, 4100);
     const matched = await fileType.fromBuffer(buffer);
 
-    if (!matched && typeof input === 'string' || input instanceof File) {
-      const mime = getType(typeof input === 'string' ? input : input.name);
+    if (!matched && (filename || input instanceof File)) {
+      const mime = getType(filename || castTo<File>(input).name);
       if (mime) {
         const ext = this.getExtension(mime)!;
         if (ext) {

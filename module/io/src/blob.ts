@@ -5,7 +5,7 @@ import { ReadableStream } from 'node:stream/web';
 import path from 'node:path';
 import { createReadStream } from 'node:fs';
 
-import { AppError, castTo } from '@travetto/runtime';
+import { AppError, castTo, Util } from '@travetto/runtime';
 
 import { BlobMeta, BinaryInput, BlobMetaⲐ, ByteRange } from './types';
 import { IOUtil } from './util';
@@ -90,11 +90,15 @@ export class BlobUtil {
   }
 
   /**
-   * Convert input to a blob, containing all data in memory
+   * Convert input to a blob, backed by lazy stream, will not hash or attempt to detect content type
    */
   static async lazyStreamBlob(src: (() => (Readable | Promise<Readable>)), metadata: Partial<BlobMeta> = {}): Promise<Blob> {
     const input = IOUtil.getLazyStream(src);
-    return await this.#blobCore(input, metadata);
+    return await this.#blobCore(input, {
+      ...metadata,
+      hash: metadata.hash ?? Util.uuid(),
+      contentType: metadata.contentType || 'application/octet-stream',
+    });
   }
 
   /**
@@ -116,10 +120,16 @@ export class BlobUtil {
     return res;
   }
 
+  /**
+   * Get blob metadata
+   */
   static getBlobMeta(blob: Blob): BlobMeta | undefined {
     return castTo<{ [BlobMetaⲐ]?: BlobMeta }>(blob)[BlobMetaⲐ];
   }
 
+  /**
+   * Update or set blob metadata (if missing)
+   */
   static updateBlobMeta(blob: Blob, meta: BlobMeta): void {
     const existing = this.getBlobMeta(blob);
     if (existing) {
@@ -129,6 +139,9 @@ export class BlobUtil {
     }
   }
 
+  /**
+   * Set blob metadata
+   */
   static setBlobMeta(blob: Blob, meta: BlobMeta): void {
     castTo<{ [BlobMetaⲐ]?: BlobMeta }>(blob)[BlobMetaⲐ] = meta;
   }

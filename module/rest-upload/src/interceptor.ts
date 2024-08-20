@@ -7,10 +7,10 @@ import {
 } from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { AppError, castTo } from '@travetto/runtime';
+import { BlobUtil } from '@travetto/io';
 
 import { RestUploadConfig } from './config';
 import { RestUploadUtil } from './util';
-import { BlobUtil } from '@travetto/io';
 
 type UploadMap = Record<string, Blob>;
 
