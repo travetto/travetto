@@ -9,7 +9,8 @@ import { Inject, InjectableFactory } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/rest-upload';
 import { Util } from '@travetto/runtime';
-import { BlobMeta, ModelBlobSupport, ModelBlobUtil } from '@travetto/model';
+import { ModelBlobSupport } from '@travetto/model';
+import { BlobUtil, BlobMeta } from '@travetto/io';
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -30,10 +31,9 @@ class TestUploadController {
 
   @Post('/all')
   @UploadAll()
-  async uploadAll({ files }: Request) {
-    for (const [, file] of Object.entries(files)) {
-      const blob = await ModelBlobUtil.asBlob(file);
-      return blob.meta;
+  async uploadAll({ uploads }: Request) {
+    for (const [, file] of Object.entries(uploads)) {
+      return await BlobUtil.getBlobMeta(file);
     }
   }
 
@@ -47,32 +47,32 @@ class TestUploadController {
   @Post('/cached')
   async uploadCached(@Upload() file: Blob) {
     const location = Util.uuid();
-    await this.service.upsertBlob(location, await ModelBlobUtil.asBlob(file, {
+    await this.service.upsertBlob(location, file, {
       cacheControl: 'max-age=3600',
       contentLanguage: 'en-GB'
-    }));
+    });
     return await this.service.getBlob(location);
   }
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    const asset1 = await ModelBlobUtil.asBlob(file1);
-    const asset2 = await ModelBlobUtil.asBlob(file2);
-    return { hash1: asset1.meta.hash, hash2: asset2.meta.hash };
+    const asset1 = await BlobUtil.getBlobMeta(file1);
+    const asset2 = await BlobUtil.getBlobMeta(file2);
+    return { hash1: asset1?.hash, hash2: asset2?.hash };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    const asset1 = await ModelBlobUtil.asBlob(file1);
-    const asset2 = await ModelBlobUtil.asBlob(file2);
-    return { hash1: asset1.meta.hash, hash2: asset2.meta.hash };
+    const asset1 = await BlobUtil.getBlobMeta(file1);
+    const asset2 = await BlobUtil.getBlobMeta(file2);
+    return { hash1: asset1?.hash, hash2: asset2?.hash };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    const asset1 = await ModelBlobUtil.asBlob(file1);
-    const asset2 = await ModelBlobUtil.asBlob(file2);
-    return { hash1: asset1.meta.hash, hash2: asset2.meta.hash };
+    const asset1 = await BlobUtil.getBlobMeta(file1);
+    const asset2 = await BlobUtil.getBlobMeta(file2);
+    return { hash1: asset1?.hash, hash2: asset2?.hash };
   }
 
   @Get('*')
@@ -98,8 +98,13 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
   }
 
   async getBlob(pth: string) {
-    return ModelBlobUtil.asBlob(await this.fixture.resolve(pth));
+    return BlobUtil.memoryBlob(await this.fixture.read(pth, true));
   }
+
+  async getBlobMeta(pth: string) {
+    return BlobUtil.getBlobMeta(await BlobUtil.memoryBlob(await this.fixture.read(pth, true)));
+  }
+
 
   @BeforeAll()
   async init() {
@@ -112,8 +117,8 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<BlobMeta>('post', '/test/upload/all', this.getMultipartRequest([sent]));
 
-    const blob = await this.getBlob('/logo.png');
-    assert(res.body.hash === blob.meta.hash);
+    const meta = await this.getBlobMeta('/logo.png');
+    assert(res.body.hash === meta?.hash);
   }
 
 
@@ -128,16 +133,16 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
       body: sent.buffer
     });
 
-    const asset = await this.getBlob('/logo.png');
-    assert(res.body.meta.hash === asset.meta.hash);
+    const meta = await this.getBlobMeta('/logo.png');
+    assert(res.body.meta.hash === meta?.hash);
   }
 
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<{ location: string, meta: BlobMeta }>('post', '/test/upload', this.getMultipartRequest(uploads));
-    const blob = await this.getBlob('/logo.png');
-    assert(res.body.meta.hash === blob.meta.hash);
+    const meta = await this.getBlobMeta('/logo.png');
+    assert(res.body.meta.hash === meta?.hash);
   }
 
   @Test()
@@ -156,9 +161,9 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
-    const blob = await this.getBlob('/logo.png');
-    assert(res.body.hash1 === blob.meta.hash);
-    assert(res.body.hash2 === blob.meta.hash);
+    const meta = await this.getBlobMeta('/logo.png');
+    assert(res.body.hash1 === meta?.hash);
+    assert(res.body.hash2 === meta?.hash);
   }
 
   @Test()
@@ -185,11 +190,11 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     });
     assert(res.status === 200);
 
-    const blob = await this.getBlob('/logo.gif');
-    assert(res.body.hash1 === blob.meta.hash);
+    const blob = await this.getBlobMeta('/logo.gif');
+    assert(res.body.hash1 === blob?.hash);
 
-    const blob2 = await this.getBlob('/logo.png');
-    assert(res.body.hash2 === blob2.meta.hash);
+    const blob2 = await this.getBlobMeta('/logo.png');
+    assert(res.body.hash2 === blob2?.hash);
   }
 
   @Test()
@@ -216,11 +221,11 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     });
     assert(res.status === 200);
 
-    const blob = await this.getBlob('/asset.yml');
-    assert(res.body.hash1 === blob.meta.hash);
+    const blob = await this.getBlobMeta('/asset.yml');
+    assert(res.body.hash1 === blob?.hash);
 
-    const blob2 = await this.getBlob('/logo.png');
-    assert(res.body.hash2 === blob2.meta.hash);
+    const blob2 = await this.getBlobMeta('/logo.png');
+    assert(res.body.hash2 === blob2?.hash);
   }
 
   @Test()
