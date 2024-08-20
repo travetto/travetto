@@ -71,7 +71,9 @@ export class BlobUtil {
    * Convert input to a blob, containing all data in memory
    */
   static async memoryBlob(src: BinaryInput, metadata: Partial<BlobMeta> = {}): Promise<Blob> {
-    if (typeof src === 'object' && 'pipeThrough' in src) {
+    if (src instanceof Blob) {
+      // Skip
+    } else if (typeof src === 'object' && 'pipeThrough' in src) {
       const bytes = await toBuffer(src);
       src = new Blob([bytes]);
     } else if (typeof src === 'object' && 'pipe' in src) {
