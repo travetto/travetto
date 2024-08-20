@@ -1,56 +1,44 @@
 import assert from 'node:assert';
-import crypto from 'node:crypto';
-import { pipeline } from 'node:stream/promises';
 
 import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
+import { IOUtil, BlobUtil } from '@travetto/io';
 
 import { Upload, UploadAll } from '../../src/decorator';
-import { LocalFile } from '../../src/file';
 
 type FileUpload = { name: string, resource: string, type: string };
 
 @Controller('/test/upload')
 class TestUploadController {
 
-  /**
-   * Compute hash from a file location on disk
-   */
-  static async hashFile(file: Blob): Promise<string> {
-    const hasher = crypto.createHash('sha256').setEncoding('hex');
-    await pipeline(file.stream(), hasher);
-    return hasher.read().toString();
-  }
-
-
   @Post('/all')
   @UploadAll()
-  async uploadAll({ files }: Request): Promise<{ hash: string } | undefined> {
-    for (const [, file] of Object.entries(files)) {
-      return { hash: await TestUploadController.hashFile(file) };
+  async uploadAll({ uploads }: Request): Promise<{ hash: string } | undefined> {
+    for (const [, blob] of Object.entries(uploads)) {
+      return { hash: await IOUtil.hashInput(blob) };
     }
   }
 
   @Post('/')
   async upload(@Upload() file: File) {
-    return { hash: await TestUploadController.hashFile(file) };
+    return { hash: await IOUtil.hashInput(file) };
   }
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: await TestUploadController.hashFile(file1), hash2: await TestUploadController.hashFile(file2) };
+    return { hash1: await IOUtil.hashInput(file1), hash2: await IOUtil.hashInput(file2) };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: await TestUploadController.hashFile(file1), hash2: await TestUploadController.hashFile(file2) };
+    return { hash1: await IOUtil.hashInput(file1), hash2: await IOUtil.hashInput(file2) };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    return { hash1: await TestUploadController.hashFile(file1), hash2: await TestUploadController.hashFile(file2) };
+    return { hash1: await IOUtil.hashInput(file1), hash2: await IOUtil.hashInput(file2) };
   }
 }
 
@@ -58,6 +46,10 @@ class TestUploadController {
 export abstract class RestUploadServerSuite extends BaseRestSuite {
 
   fixture: TestFixtures;
+
+  async getBlob(pth: string): Promise<Blob> {
+    return await BlobUtil.memoryBlob(await this.fixture.read(pth, true));
+  }
 
   async getUploads(...files: FileUpload[]) {
     return Promise.all(files.map(async ({ name, type, resource: filename }) => {
@@ -77,8 +69,8 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<{ hash: string }>('post', '/test/upload/all', this.getMultipartRequest([sent]));
 
-    const file = new LocalFile(await this.fixture.resolve('/logo.png'));
-    assert(res.body.hash === await TestUploadController.hashFile(file));
+    const file = await this.getBlob('/logo.png');
+    assert(res.body.hash === await IOUtil.hashInput(file));
   }
 
 
@@ -93,8 +85,8 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
       body: sent.buffer
     });
 
-    const file = new LocalFile(await this.fixture.resolve('/logo.png'));
-    assert(res.body.hash === await TestUploadController.hashFile(file));
+    const file = await this.getBlob('/logo.png');
+    assert(res.body.hash === await IOUtil.hashInput(file));
   }
 
   @Test()
@@ -102,8 +94,8 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<{ hash: string }>('post', '/test/upload', this.getMultipartRequest(uploads));
 
-    const file = new LocalFile(await this.fixture.resolve('/logo.png'));
-    assert(res.body.hash === await TestUploadController.hashFile(file));
+    const file = await this.getBlob('/logo.png');
+    assert(res.body.hash === await IOUtil.hashInput(file));
   }
 
   @Test()
@@ -113,8 +105,8 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
-    const file = new LocalFile(await this.fixture.resolve('/logo.png'));
-    const hash = await TestUploadController.hashFile(file);
+    const file = await this.getBlob('/logo.png');
+    const hash = await IOUtil.hashInput(file);
 
     assert(res.body.hash1 === hash);
     assert(res.body.hash2 === hash);
@@ -144,11 +136,11 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     });
     assert(res.status === 200);
 
-    const file1 = new LocalFile(await this.fixture.resolve('/logo.gif'));
-    const hash1 = await TestUploadController.hashFile(file1);
+    const file1 = await this.getBlob('/logo.gif');
+    const hash1 = await IOUtil.hashInput(file1);
 
-    const file2 = new LocalFile(await this.fixture.resolve('/logo.png'));
-    const hash2 = await TestUploadController.hashFile(file2);
+    const file2 = await this.getBlob('/logo.png');
+    const hash2 = await IOUtil.hashInput(file2);
 
     assert(res.body.hash1 === hash1);
     assert(res.body.hash2 === hash2);
@@ -178,11 +170,11 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     });
     assert(res.status === 200);
 
-    const file1 = new LocalFile(await this.fixture.resolve('/asset.yml'));
-    const hash1 = await TestUploadController.hashFile(file1);
+    const file1 = await this.getBlob('/asset.yml');
+    const hash1 = await IOUtil.hashInput(file1);
 
-    const file2 = new LocalFile(await this.fixture.resolve('/logo.png'));
-    const hash2 = await TestUploadController.hashFile(file2);
+    const file2 = await this.getBlob('/logo.png');
+    const hash2 = await IOUtil.hashInput(file2);
 
     assert(res.body.hash1 === hash1);
     assert(res.body.hash2 === hash2);

@@ -18,8 +18,8 @@ export class Simple {
    * @param file A file to upload
    */
   @Post('/file')
-  loadFile(@Upload() file: File) {
-    return file;
+  loadFile(@Upload() upload: File) {
+    return upload;
   }
 
   /**
@@ -27,9 +27,9 @@ export class Simple {
    */
   @Post('/files')
   @UploadAll()
-  loadFiles({ files }: Request) {
-    for (const [, file] of Object.entries(files)) {
-      return file;
+  async loadFiles({ uploads }: Request) {
+    for (const [, upload] of Object.entries(uploads)) {
+      return upload;
     }
   }
 }

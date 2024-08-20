@@ -1,6 +1,6 @@
-import { Readable } from 'node:stream';
+import { BinaryInput, BlobMeta, ByteRange } from '@travetto/io';
 
-import { ModelBlobMeta, ByteRange, ModelBlob } from '../types/blob';
+export type BlobInputLocation = string | ((meta: BlobMeta) => string);
 
 /**
  * Support for Blobs CRD.  Blob update is not supported.
@@ -10,23 +10,30 @@ import { ModelBlobMeta, ByteRange, ModelBlob } from '../types/blob';
 export interface ModelBlobSupport {
 
   /**
+   * Insert blob to storage
+   * @param location The location of the blob
+   * @param input The actual blob to write
+   */
+  insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>, errorIfExisting?: boolean): Promise<void>;
+
+  /**
    * Upsert blob to storage
    * @param location The location of the blob
    * @param input The actual blob to write
    */
-  upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: Partial<ModelBlobMeta>): Promise<void>;
+  upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>): Promise<void>;
 
   /**
    * Get blob from storage
    * @param location The location of the blob
    */
-  getBlob(location: string, range?: ByteRange): Promise<ModelBlob>;
+  getBlob(location: string, range?: ByteRange): Promise<Blob>;
 
   /**
    * Get metadata for blob
    * @param location The location of the blob
    */
-  describeBlob(location: string): Promise<ModelBlobMeta>;
+  describeBlob(location: string): Promise<BlobMeta>;
 
   /**
    * Delete blob by location

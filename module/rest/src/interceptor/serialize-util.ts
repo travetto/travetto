@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 
 import { ErrorCategory, AppError } from '@travetto/runtime';
+import { BlobUtil, IOUtil } from '@travetto/io';
 
 import { HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
@@ -105,14 +106,34 @@ export class SerializeUtil {
    * Serialize file/blob
    */
   static async serializeBlob(res: Response, output: Blob | File): Promise<void> {
+    const meta = BlobUtil.getBlobMeta(output);
+
+    if (meta) {
+      res.statusCode = meta?.range ? 206 : 200;
+      for (const [k, v] of Object.entries({
+        'content-encoding': meta.contentEncoding,
+        'cache-control': meta.cacheControl,
+        'content-language': meta.contentLanguage,
+        ...(meta.range ? {
+          'accept-ranges': 'bytes',
+          'content-range': `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`
+        } : {})
+      })) {
+        if (v) {
+          res.setHeader(k, v);
+        }
+      }
+    }
+
     if (output instanceof File && output.name) {
-      res.setHeader('Content-Disposition', `filename="${output.name}"`);
+      // TODO: Attachment?
+      res.setHeader('content-disposition', `attachment;filename="${output.name}"`);
     }
     if (output.type) {
       this.setContentTypeIfUndefined(res, output.type);
     }
     if (output.size) {
-      res.setHeader('Content-Length', `${output.size}`);
+      res.setHeader('content-length', `${output.size}`);
     }
     return this.serializeStream(res, Readable.fromWeb(output.stream()));
   }

@@ -10,53 +10,55 @@ import { AppError, castTo } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
 import { RestUploadUtil } from './util';
-import { LocalFile } from './file';
+import { BlobUtil } from '@travetto/io';
 
-type FileMap = Record<string, File>;
+type UploadMap = Record<string, Blob>;
 
 @Injectable()
 export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
 
-  static getLargestFileMax(config: Partial<RestUploadConfig>): number | undefined {
-    const fileMaxes = [...Object.values(config.files!).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
+  static getLargestSize(config: Partial<RestUploadConfig>): number | undefined {
+    const fileMaxes = [...Object.values(config.uploads!).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
     return fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
   }
 
-  static async validateFile(config: Partial<RestUploadConfig>, file: LocalFile): Promise<LocalFile> {
+  static async validateUpload(config: Partial<RestUploadConfig>, upload: Blob): Promise<Blob> {
     const check = config.matcher ??= MimeUtil.matcher(config.types);
-    if (check(file.type)) {
-      return file;
+    if (check(upload.type)) {
+      return upload;
     } else {
-      await file.cleanup();
-      throw new AppError(`Content type not allowed: ${file.type}`, 'data');
+      await BlobUtil.cleanupBlob(upload);
+      throw new AppError(`Content type not allowed: ${upload.type}`, 'data');
     }
   }
 
-  static async uploadDirect(req: Request, config: Partial<RestUploadConfig>): Promise<FileMap> {
+  static async uploadDirect(req: Request, config: Partial<RestUploadConfig>): Promise<UploadMap> {
     console.log('Starting direct upload', req.header('content-length'));
     const filename = req.getFilename();
-    const file = await RestUploadUtil.convertToBlob(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
+    const location = await RestUploadUtil.writeToFile(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
+    const blob = await BlobUtil.fileBlob(location);
     try {
-      return { file: await this.validateFile(config, file) };
+      return { file: await this.validateUpload(config, blob) };
     } catch (err) {
       console.error('Failed direct upload', err);
       throw err;
     }
   }
 
-  static async uploadMultipart(req: Request, config: Partial<RestUploadConfig>): Promise<FileMap> {
-    const largestMax = this.getLargestFileMax(config);
-    const uploads: Promise<LocalFile>[] = [];
-    const files: FileMap = {};
+  static async uploadMultipart(req: Request, config: Partial<RestUploadConfig>): Promise<UploadMap> {
+    const largestMax = this.getLargestSize(config);
+    const uploads: Promise<Blob>[] = [];
+    const uploadMap: UploadMap = {};
 
     console.log('Starting multipart upload', req.header('content-length'));
 
     const uploader = busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
       .on('file', (field, stream, filename) =>
         uploads.push(
-          RestUploadUtil.convertToBlob(stream, filename, config.files![field]?.maxSize ?? largestMax)
-            .then(file => files[field] = file)
-            .then(file => this.validateFile(config.files?.[field] ?? config, file))
+          RestUploadUtil.writeToFile(stream, filename, config.uploads![field]?.maxSize ?? largestMax)
+            .then(location => BlobUtil.fileBlob(location))
+            .then(blob => uploadMap[field] = blob)
+            .then(blob => this.validateUpload(config.uploads?.[field] ?? config, blob))
         )
       )
       .on('limit', field =>
@@ -81,10 +83,10 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
 
     if (err) {
       console.error('Failed multipart upload', err);
-      await RestUploadUtil.cleanupFiles(files);
+      await RestUploadUtil.cleanupFiles(uploadMap);
       throw err;
     }
-    return files;
+    return uploadMap;
   }
 
   @Inject()
@@ -98,8 +100,8 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
   resolveConfig(additional: Partial<RestUploadConfig>[]): RestUploadConfig {
     const out: RestUploadConfig = { ...this.config };
     for (const el of additional) {
-      const files = out.files ?? {};
-      for (const [k, file] of Object.entries(el.files ?? {})) {
+      const files = out.uploads ?? {};
+      for (const [k, file] of Object.entries(el.uploads ?? {})) {
         Object.assign(files[k] ??= {}, file);
       }
       Object.assign(out, el, { files });
@@ -119,16 +121,16 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
       switch (req.getContentType()?.full) {
         case 'application/x-www-form-urlencoded':
         case 'multipart/form-data':
-          req.files = await RestAssetInterceptor.uploadMultipart(req, config);
+          req.uploads = await RestAssetInterceptor.uploadMultipart(req, config);
           break;
         default:
-          req.files = await RestAssetInterceptor.uploadDirect(req, config);
+          req.uploads = await RestAssetInterceptor.uploadDirect(req, config);
           break;
       }
       return await next();
     } finally {
-      if (config.deleteFiles !== false) {
-        await RestUploadUtil.cleanupFiles(req.files);
+      if (config.cleanupFiles !== false) {
+        await RestUploadUtil.cleanupFiles(req.uploads);
       }
     }
   }

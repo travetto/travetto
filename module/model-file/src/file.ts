@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
-import { createReadStream, createWriteStream } from 'node:fs';
+import { createWriteStream, createReadStream } from 'node:fs';
 import os from 'node:os';
-import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
@@ -11,12 +10,14 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistry,
-  NotFoundError, OptionalId, ExistsError,
-  ByteRange, ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil
+  NotFoundError, OptionalId, ExistsError, ModelBlobSupport,
+  BlobInputLocation,
+  ModelBlobUtil
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { BinaryInput, BlobMeta, BlobUtil, ByteRange, IOUtil } from '@travetto/io';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -171,26 +172,36 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   // Blob
-  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: Partial<ModelBlobMeta>): Promise<void> {
-    const resolved = await ModelBlobUtil.asBlob(input, meta);
-    const file = await this.#resolveName(STREAMS, BIN, location);
+  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>, errorIfExisting = false): Promise<void> {
+    const loc = ModelBlobUtil.getLocation(location);
+    await this.describeBlob(loc);
+    if (errorIfExisting) {
+      throw new ExistsError('Blob', loc);
+    }
+    return this.upsertBlob(loc, input, meta);
+  }
+
+  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>): Promise<void> {
+    const loc = ModelBlobUtil.getLocation(location);
+    const resolved = await BlobUtil.memoryBlob(input, meta);
+    const file = await this.#resolveName(STREAMS, BIN, loc);
     await Promise.all([
       await pipeline(resolved.stream(), createWriteStream(file)),
-      fs.writeFile(file.replace(BIN, META), JSON.stringify(resolved.meta), 'utf8')
+      fs.writeFile(file.replace(BIN, META), JSON.stringify(BlobUtil.getBlobMeta(resolved)), 'utf8')
     ]);
   }
 
-  async getBlob(location: string, range?: ByteRange): Promise<ModelBlob> {
+  async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const file = await this.#find(STREAMS, BIN, location);
     const meta = await this.describeBlob(location);
-    const final = range ? ModelBlobUtil.enforceRange(range, meta.size) : undefined;
-    return new ModelBlob(() => createReadStream(file, final), meta, final);
+    const final = range ? BlobUtil.enforceRange(range, meta.size!) : undefined;
+    return BlobUtil.lazyStreamBlob(() => createReadStream(file), { ...meta, range: final });
   }
 
-  async describeBlob(location: string): Promise<ModelBlobMeta> {
+  async describeBlob(location: string): Promise<BlobMeta> {
     const file = await this.#find(STREAMS, META, location);
     const content = await fs.readFile(file);
-    const text: ModelBlobMeta = JSON.parse(content.toString('utf8'));
+    const text: BlobMeta = JSON.parse(content.toString('utf8'));
     return text;
   }
 
@@ -202,7 +213,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
         fs.unlink(file.replace('.bin', META))
       ]);
     } else {
-      throw new NotFoundError('Stream', location);
+      throw new NotFoundError('Blob', location);
     }
   }
 

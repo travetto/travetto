@@ -8,7 +8,6 @@ export * from './src/exec';
 export * from './src/env';
 export * from './src/file-loader';
 export * from './src/function';
-export * from './src/io';
 export * from './src/manifest-index';
 export * from './src/resources';
 export * from './src/shutdown';

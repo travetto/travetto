@@ -5,17 +5,17 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
-  ModelRegistry, NotFoundError, ExistsError, OptionalId,
-  ByteRange, ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil
+  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport, ModelBlobUtil,
+  BlobInputLocation
 } from '@travetto/model';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { BinaryInput, BlobMeta, BlobUtil, ByteRange, IOUtil } from '@travetto/io';
 
-const STREAMS = '__streams';
-
-const STREAM_META = `${STREAMS}_meta`;
+const BLOBS = '__blobs';
+const BLOB_META = `${BLOBS}_meta`;
 
 type StoreType = Map<string, Buffer>;
 
@@ -233,34 +233,45 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   // Blob Support
-  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: Partial<ModelBlobMeta>): Promise<void> {
-    const resolved = await ModelBlobUtil.asBlob(input, meta);
-    const streams = this.#getStore(STREAMS);
-    const metaContent = this.#getStore(STREAM_META);
-    metaContent.set(location, Buffer.from(JSON.stringify(resolved.meta)));
-    streams.set(location, Buffer.from(await resolved.buffer()));
+  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>, errorIfExisting = false): Promise<void> {
+    const loc = ModelBlobUtil.getLocation(location);
+    await this.describeBlob(loc);
+    if (errorIfExisting) {
+      throw new ExistsError('Blob', loc);
+    }
+    return this.upsertBlob(loc, input, meta);
   }
 
-  async getBlob(location: string, range?: ByteRange): Promise<ModelBlob> {
-    const streams = this.#find(STREAMS, location, 'notfound');
+  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>): Promise<void> {
+    const loc = ModelBlobUtil.getLocation(location);
+    const resolved = await BlobUtil.memoryBlob(input, meta);
+    const streams = this.#getStore(BLOBS);
+    const metaContent = this.#getStore(BLOB_META);
+    const resolvedMeta = BlobUtil.getBlobMeta(resolved);
+    metaContent.set(loc, Buffer.from(JSON.stringify(resolvedMeta)));
+    streams.set(loc, Buffer.from(await resolved.bytes()));
+  }
+
+  async getBlob(location: string, range?: ByteRange): Promise<Blob> {
+    const streams = this.#find(BLOBS, location, 'notfound');
     let buffer = streams.get(location)!;
-    const final = range ? ModelBlobUtil.enforceRange(range, buffer.length) : undefined;
+    const final = range ? BlobUtil.enforceRange(range, buffer.length) : undefined;
     if (final) {
       buffer = buffer.subarray(final.start, final.end + 1);
     }
     const meta = await this.describeBlob(location);
-    return new ModelBlob(() => Readable.from([buffer]), meta, final);
+    return BlobUtil.memoryBlob(buffer, { ...meta, range: final });
   }
 
-  async describeBlob(location: string): Promise<ModelBlobMeta> {
-    const metaContent = this.#find(STREAM_META, location, 'notfound');
-    const meta: ModelBlobMeta = JSON.parse(metaContent.get(location)!.toString('utf8'));
+  async describeBlob(location: string): Promise<BlobMeta> {
+    const metaContent = this.#find(BLOB_META, location, 'notfound');
+    const meta: BlobMeta = JSON.parse(metaContent.get(location)!.toString('utf8'));
     return meta;
   }
 
   async deleteBlob(location: string): Promise<void> {
-    const streams = this.#getStore(STREAMS);
-    const metaContent = this.#getStore(STREAM_META);
+    const streams = this.#getStore(BLOBS);
+    const metaContent = this.#getStore(BLOB_META);
     if (streams.has(location)) {
       streams.delete(location);
       metaContent.delete(location);
@@ -298,8 +309,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async truncateFinalize(): Promise<void> {
-    this.#getStore(STREAMS).clear();
-    this.#getStore(STREAM_META).clear();
+    this.#getStore(BLOBS).clear();
+    this.#getStore(BLOB_META).clear();
   }
 
   // Indexed

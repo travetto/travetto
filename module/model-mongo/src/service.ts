@@ -10,7 +10,8 @@ import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
   NotFoundError, ExistsError, IndexConfig,
-  ByteRange, ModelBlob, ModelBlobMeta, ModelBlobSupport, ModelBlobUtil
+  ModelBlobSupport, ModelBlobUtil,
+  BlobInputLocation
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -18,9 +19,10 @@ import {
   QueryVerifier
 } from '@travetto/model-query';
 
-import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull, IOUtil } from '@travetto/runtime';
+import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
+import { BinaryInput, BlobMeta, BlobUtil, ByteRange, IOUtil } from '@travetto/io';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
@@ -42,7 +44,7 @@ const asFielded = (cfg: IndexConfig<ModelType>): { [IdxFieldsⲐ]: Sort } => cas
 
 type IdxCfg = CreateIndexesOptions;
 
-type StreamRaw = GridFSFile & { metadata: ModelBlobMeta };
+type StreamRaw = GridFSFile & { metadata: BlobMeta };
 
 const STREAMS = '__streams';
 
@@ -282,28 +284,39 @@ export class MongoModelService implements
   }
 
   // Blob
-  async upsertBlob(location: string, input: Blob | Buffer | Readable, meta?: Partial<ModelBlobMeta>): Promise<void> {
-    const resolved = await ModelBlobUtil.asBlob(input, meta);
-    const writeStream = this.#bucket.openUploadStream(location, {
-      contentType: resolved.meta.contentType,
-      metadata: resolved.meta
+  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>, errorIfExisting = false): Promise<void> {
+    const loc = ModelBlobUtil.getLocation(location);
+    await this.describeBlob(loc);
+    if (errorIfExisting) {
+      throw new ExistsError('Blob', loc);
+    }
+    return this.upsertBlob(loc, input, meta);
+  }
+
+  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>): Promise<void> {
+    const loc = ModelBlobUtil.getLocation(location);
+    const resolved = await BlobUtil.memoryBlob(input, meta);
+    const resolvedMeta = BlobUtil.getBlobMeta(resolved);
+    const writeStream = this.#bucket.openUploadStream(loc, {
+      contentType: resolved.type,
+      metadata: resolvedMeta
     });
 
     await pipeline(resolved.stream(), writeStream);
   }
 
-  async getBlob(location: string, range?: ByteRange): Promise<ModelBlob> {
+  async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const meta = await this.describeBlob(location);
-    const final = range ? ModelBlobUtil.enforceRange(range, meta.size) : undefined;
+    const final = range ? BlobUtil.enforceRange(range, meta.size!) : undefined;
     if (final) {
       final.end! += 1; // range is exclusive
     }
 
     const res = (): Readable => this.#bucket.openDownloadStreamByName(location, final);
-    return new ModelBlob(res, meta, final);
+    return BlobUtil.lazyStreamBlob(res, { ...meta, range: final });
   }
 
-  async describeBlob(location: string): Promise<ModelBlobMeta> {
+  async describeBlob(location: string): Promise<BlobMeta> {
     return (await this.#describeStreamRaw(location)).metadata;
   }
 

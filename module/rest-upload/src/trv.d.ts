@@ -2,7 +2,7 @@ import '@travetto/rest';
 
 declare global {
   interface TravettoRequest {
-    files: Record<string, File>;
+    uploads: Record<string, Blob>;
   }
 
   /**

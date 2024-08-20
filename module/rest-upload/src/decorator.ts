@@ -6,7 +6,7 @@ import { RequestTarget } from '@travetto/rest/src/internal/types';
 import { RestAssetInterceptor } from './interceptor';
 import { RestUploadConfig } from './config';
 
-type UploadConfig = Partial<Pick<RestUploadConfig, 'types' | 'maxSize' | 'deleteFiles'>>;
+type UploadConfig = Partial<Pick<RestUploadConfig, 'types' | 'maxSize' | 'cleanupFiles'>>;
 
 /**
  * Allows for supporting uploads
@@ -36,12 +36,12 @@ export function Upload(
       {
         maxSize: finalConf.maxSize,
         types: finalConf.types,
-        deleteFiles: finalConf.deleteFiles,
-        files: {
+        cleanupFiles: finalConf.cleanupFiles,
+        uploads: {
           [finalConf.name ?? prop]: {
             maxSize: finalConf.maxSize,
             types: finalConf.types,
-            deleteFiles: finalConf.deleteFiles
+            cleanupFiles: finalConf.cleanupFiles
           }
         }
       }
@@ -49,7 +49,7 @@ export function Upload(
 
     return Param('body', {
       ...finalConf,
-      extract: (config, req) => req?.files[config.name!]
+      extract: (config, req) => req?.uploads[config.name!]
     })(inst, prop, idx);
   };
 }
@@ -80,7 +80,7 @@ export function UploadAll(config: Partial<ParamConfig> & UploadConfig = {}) {
       {
         maxSize: config.maxSize,
         types: config.types,
-        deleteFiles: config.deleteFiles
+        cleanupFiles: config.cleanupFiles
       }
     );
   };

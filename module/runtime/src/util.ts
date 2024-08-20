@@ -1,7 +1,11 @@
 import crypto from 'node:crypto';
 import timers from 'node:timers/promises';
+import path from 'node:path';
+import os from 'node:os';
+import fs from 'node:fs/promises';
 
 import { castTo } from './types';
+
 
 type PromiseWithResolvers<T> = {
   resolve: (v: T) => void;
@@ -144,4 +148,20 @@ export class Util {
     }
   }
 
+
+  /**
+   * Write file and copy over when ready
+   */
+  static async bufferedFileWrite(file: string, content: string, onChangeOnly = false): Promise<void> {
+    if (onChangeOnly) {
+      const current = await fs.readFile(file, 'utf8').catch(() => undefined);
+      if (current === content) {
+        return;
+      }
+    }
+    const temp = path.resolve(os.tmpdir(), `${process.hrtime()[1]}.${path.basename(file)}`);
+    await fs.writeFile(temp, content, 'utf8');
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.rename(temp, file);
+  }
 }

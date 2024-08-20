@@ -1,12 +1,13 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { castTo, IOUtil } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob';
+import { IOUtil } from '@travetto/io';
 
 import { S3ModelConfig } from '../src/config';
 import { S3ModelService } from '../src/service';
