@@ -76,11 +76,8 @@ class TestUploadController {
   }
 
   @Get('*')
-  async get(req: Request, res: Response) {
+  async get(req: Request) {
     const range = req.getRange();
-    if (req.headers.range) {
-      res.setHeader('Accept-Ranges', 'bytes');
-    }
     return await this.service.getBlob(req.url.replace(/^\/test\/upload\//, ''), range);
   }
 }
@@ -255,8 +252,8 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     });
 
     assert(typeof itemRanged.body === 'string');
-    assert(itemRanged.body.length === 10);
     assert(itemRanged.body === 'abcdefghij');
+    assert(itemRanged.body.length === 10);
 
     const itemRanged2 = await this.request('get', `/test/upload/${loc}`, {
       headers: {

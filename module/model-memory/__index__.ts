@@ -1,1 +1,1 @@
-export * from './src/memory';
+export * from './src/service';

@@ -237,7 +237,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     const loc = ModelBlobUtil.getLocation(location);
     await this.describeBlob(loc);
     if (errorIfExisting) {
-      throw new ExistsError('Blob', loc);
+      throw new ExistsError(BLOBS, loc);
     }
     return this.upsertBlob(loc, input, meta);
   }
@@ -257,7 +257,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     let buffer = streams.get(location)!;
     const final = range ? BlobUtil.enforceRange(range, buffer.length) : undefined;
     if (final) {
-      buffer = buffer.subarray(final.start, final.end + 1);
+      buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }
     const meta = await this.describeBlob(location);
     return BlobUtil.memoryBlob(buffer, { ...meta, range: final });
@@ -276,7 +276,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       streams.delete(location);
       metaContent.delete(location);
     } else {
-      throw new NotFoundError('Stream', location);
+      throw new NotFoundError(BLOBS, location);
     }
   }
 

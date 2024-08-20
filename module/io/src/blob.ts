@@ -49,7 +49,7 @@ export class BlobUtil {
     metadata.hash ??= await IOUtil.hashInput(input());
     metadata.contentType = (metadata.contentType || undefined) ?? (await IOUtil.detectType(input())).mime;
 
-    const size = metadata.range ? metadata.range.end - metadata.range.start - 1 : metadata.size;
+    const size = metadata.range ? (metadata.range.end - metadata.range.start) + 1 : metadata.size;
     const out = metadata.filename ?
       new File([], path.basename(metadata.filename), { type: metadata.contentType }) :
       new Blob([], { type: metadata.contentType });
@@ -104,7 +104,7 @@ export class BlobUtil {
   /**
    * Convert file to a blob, backed by file system
    */
-  static async fileBlob(src: string, metadata: Partial<BlobMeta> = {}): Promise<Blob> {
+  static async fileBlob(src: string, metadata: Partial<BlobMeta> = {}): Promise<File> {
     const input = (): Readable => createReadStream(src, metadata.range);
     const res = await this.#blobCore(input, {
       ...metadata,
@@ -117,7 +117,7 @@ export class BlobUtil {
       value: () => fs.rm(src, { force: true, recursive: true })
     });
 
-    return res;
+    return castTo(res);
   }
 
   /**

@@ -40,16 +40,16 @@ export class UtilTest {
 
   @Test({ shouldThrow: 'size' })
   async testMaxBlobWrite() {
-    await RestUploadUtil.convertToBlob(Buffer.alloc(100, 'A', 'utf8'), 'test', 1);
+    await RestUploadUtil.writeToFile(Buffer.alloc(100, 'A', 'utf8'), 'test', 1);
   }
 
   @Test({ shouldThrow: 'size' })
   async testMaxCloseBlobWrite() {
-    await RestUploadUtil.convertToBlob(Buffer.alloc(100, 'A', 'utf8'), 'test', 99);
+    await RestUploadUtil.writeToFile(Buffer.alloc(100, 'A', 'utf8'), 'test', 99);
   }
 
   @Test()
   async testMaxExactBlobWrite() {
-    await RestUploadUtil.convertToBlob(Buffer.alloc(100, 'A', 'utf8'), 'test', 100);
+    await RestUploadUtil.writeToFile(Buffer.alloc(100, 'A', 'utf8'), 'test', 100);
   }
 }

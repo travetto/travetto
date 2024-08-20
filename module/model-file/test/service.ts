@@ -4,7 +4,7 @@ import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 
-import { FileModelConfig, FileModelService } from '../src/file';
+import { FileModelConfig, FileModelService } from '../src/service';
 
 
 @Suite()

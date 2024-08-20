@@ -3,10 +3,9 @@ import assert from 'node:assert';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { Util } from '@travetto/runtime';
-import { IOUtil } from '@travetto/io';
+import { BlobUtil } from '@travetto/io';
 
 import { ModelBlobSupport } from '../../src/service/blob';
-import { ModelBlobUtil } from '../../src/util/blob';
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
@@ -36,7 +35,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const meta = await service.describeBlob(id);
 
     const retrieved = await service.getBlob(id);
-    const retrievedMeta = IOUtil.getBlobMeta(retrieved)!;
+    const retrievedMeta = BlobUtil.getBlobMeta(retrieved)!;
     assert(meta.hash === retrievedMeta.hash);
   }
 
@@ -69,9 +68,10 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(content.endsWith('xyz'));
 
     const partial = await service.getBlob(id, { start: 10, end: 20 });
-    const partialMeta = IOUtil.getBlobMeta(partial)!;
+    assert(partial.size === 11);
+    const partialMeta = BlobUtil.getBlobMeta(partial)!;
     const subContent = await partial.text();
-    const range = await IOUtil.enforceRange({ start: 10, end: 20 }, partialMeta.size!);
+    const range = await BlobUtil.enforceRange({ start: 10, end: 20 }, partialMeta.size!);
     assert(subContent.length === (range.end - range.start) + 1);
 
     const og = await this.fixture.read('/text.txt');
@@ -79,9 +79,9 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(subContent === og.substring(10, 21));
 
     const partialUnbounded = await service.getBlob(id, { start: 10 });
-    const partialUnboundedMeta = IOUtil.getBlobMeta(partial)!;
+    const partialUnboundedMeta = BlobUtil.getBlobMeta(partial)!;
     const subContent2 = await partialUnbounded.text();
-    const range2 = await IOUtil.enforceRange({ start: 10 }, partialUnboundedMeta.size!);
+    const range2 = await BlobUtil.enforceRange({ start: 10 }, partialUnboundedMeta.size!);
     assert(subContent2.length === (range2.end - range2.start) + 1);
     assert(subContent2.startsWith('klm'));
     assert(subContent2.endsWith('xyz'));
@@ -107,10 +107,10 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const buffer = await this.fixture.read('/asset.yml', true);
     await service.upsertBlob('orange', buffer, { contentType: 'text/yaml', filename: 'asset.yml' });
     const saved = await service.getBlob('orange');
-    const savedMeta = IOUtil.getBlobMeta(saved)!;
+    const savedMeta = BlobUtil.getBlobMeta(saved)!;
 
-    const blob = await IOUtil.memoryBlob(await this.fixture.resolve('/asset.yml'));
-    const blobMeta = IOUtil.getBlobMeta(blob)!;
+    const blob = await BlobUtil.fileBlob(await this.fixture.resolve('/asset.yml'));
+    const blobMeta = BlobUtil.getBlobMeta(blob)!;
     assert(blobMeta.contentType === savedMeta.contentType);
     assert(blob.size === savedMeta.size);
     assert(blobMeta.filename === savedMeta.filename);

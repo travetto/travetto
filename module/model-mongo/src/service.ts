@@ -308,11 +308,7 @@ export class MongoModelService implements
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const meta = await this.describeBlob(location);
     const final = range ? BlobUtil.enforceRange(range, meta.size!) : undefined;
-    if (final) {
-      final.end! += 1; // range is exclusive
-    }
-
-    const res = (): Readable => this.#bucket.openDownloadStreamByName(location, final);
+    const res = (): Readable => this.#bucket.openDownloadStreamByName(location, final ? { start: final.start, end: final.end + 1 } : undefined);
     return BlobUtil.lazyStreamBlob(res, { ...meta, range: final });
   }
 

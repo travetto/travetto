@@ -15,7 +15,7 @@ import { RestUploadUtil } from './util';
 type UploadMap = Record<string, Blob>;
 
 @Injectable()
-export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
+export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> {
 
   static getLargestSize(config: Partial<RestUploadConfig>): number | undefined {
     const fileMaxes = [...Object.values(config.uploads!).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
@@ -100,11 +100,12 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
   resolveConfig(additional: Partial<RestUploadConfig>[]): RestUploadConfig {
     const out: RestUploadConfig = { ...this.config };
     for (const el of additional) {
-      const files = out.uploads ?? {};
-      for (const [k, file] of Object.entries(el.uploads ?? {})) {
-        Object.assign(files[k] ??= {}, file);
+      const uploads = out.uploads ?? {};
+      for (const [k, cfg] of Object.entries(el.uploads ?? {})) {
+        Object.assign(uploads[k] ??= {}, cfg);
       }
-      Object.assign(out, el, { files });
+      Object.assign(out, el);
+      out.uploads = uploads;
     }
     return out;
   }
@@ -121,10 +122,10 @@ export class RestAssetInterceptor implements RestInterceptor<RestUploadConfig> {
       switch (req.getContentType()?.full) {
         case 'application/x-www-form-urlencoded':
         case 'multipart/form-data':
-          req.uploads = await RestAssetInterceptor.uploadMultipart(req, config);
+          req.uploads = await RestUploadInterceptor.uploadMultipart(req, config);
           break;
         default:
-          req.uploads = await RestAssetInterceptor.uploadDirect(req, config);
+          req.uploads = await RestUploadInterceptor.uploadDirect(req, config);
           break;
       }
       return await next();
