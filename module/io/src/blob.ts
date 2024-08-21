@@ -19,7 +19,7 @@ export class BlobUtil {
    * Get filename for a given input
    */
   static getFilename(src: Blob | string, meta: Partial<BlobMeta>): string {
-    let filename = meta.filename;
+    let filename = meta.filename ?? (typeof src === 'string' ? src : undefined);
 
     // Detect name if missing
     if (!filename) {
@@ -152,6 +152,7 @@ export class BlobUtil {
    * Enforce byte range for stream stream/file of a certain size
    */
   static enforceRange({ start, end }: ByteRange, size: number): Required<ByteRange> {
+    // End is inclusive
     end = Math.min(end ?? (size - 1), size - 1);
 
     if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0 || start > end) {

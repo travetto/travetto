@@ -175,19 +175,17 @@ export class IOUtil {
 
     filename ??= (input instanceof File ? input.name : undefined);
 
-    if (matched?.ext === 'wav') {
-      return { ext: 'wav', mime: 'audio/wav' };
+    switch (matched?.ext.toString()) {
+      case 'mpga': return { ext: 'mp3', mime: 'audio/mpeg' };
+      case 'wav': return { ext: 'wav', mime: 'audio/wav' };
+      case 'mp4': {
+        if (filename?.endsWith('.m4a')) {
+          return { ext: 'm4a', mime: 'audio/mp4' };
+        }
+        break;
+      }
     }
-    if (matched?.mime === 'video/mp4' && filename?.endsWith('.m4a')) {
-      return { ext: 'm4a', mime: 'audio/mp4' };
-    }
-    if (matched?.ext === castTo('mpga')) {
-      return { ext: 'mp3', mime: 'audio/mpeg' };
-    }
-    if (matched) {
-      return matched;
-    } else {
-      return { ext: 'bin', mime: 'application/octet-stream' };
-    }
+
+    return matched ?? { ext: 'bin', mime: 'application/octet-stream' };
   }
 }
