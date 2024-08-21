@@ -1,11 +1,14 @@
+import os from 'node:os';
+import path from 'node:path';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import { PassThrough, Readable, Transform, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { createWriteStream } from 'node:fs';
 
 import { getExtension, getType } from 'mime';
 
-import { AppError, castTo } from '@travetto/runtime';
+import { AppError, castTo, Util } from '@travetto/runtime';
 
 import { BinaryInput } from './types';
 
@@ -187,5 +190,32 @@ export class IOUtil {
     }
 
     return matched ?? { ext: 'bin', mime: 'application/octet-stream' };
+  }
+
+  /**
+   * Convert stream or buffer to a file, enforcing max size if needed
+   * @param data
+   * @param filename
+   * @param maxSize
+   */
+  static async writeTempFile(data: Readable | Buffer, filename: string, maxSize?: number): Promise<string> {
+    const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
+    await fs.mkdir(uniqueDir, { recursive: true });
+    const uniqueLocal = path.resolve(uniqueDir, path.basename(filename));
+
+    try {
+      const input = Buffer.isBuffer(data) ? Readable.from(data) : data;
+      const output = createWriteStream(uniqueLocal);
+      if (maxSize) {
+        await this.streamWithMaxSize(input, output, maxSize);
+      } else {
+        await pipeline(input, output);
+      }
+    } catch (err) {
+      await fs.rm(uniqueLocal, { force: true });
+      throw err;
+    }
+
+    return uniqueLocal;
   }
 }

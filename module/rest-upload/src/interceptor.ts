@@ -7,10 +7,9 @@ import {
 } from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { AppError, castTo } from '@travetto/runtime';
-import { BlobUtil } from '@travetto/io';
+import { BlobUtil, IOUtil } from '@travetto/io';
 
 import { RestUploadConfig } from './config';
-import { RestUploadUtil } from './util';
 
 type UploadMap = Record<string, Blob>;
 
@@ -35,7 +34,7 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
   static async uploadDirect(req: Request, config: Partial<RestUploadConfig>): Promise<UploadMap> {
     console.log('Starting direct upload', req.header('content-length'));
     const filename = req.getFilename();
-    const location = await RestUploadUtil.writeToFile(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
+    const location = await IOUtil.writeTempFile(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
     const blob = await BlobUtil.fileBlob(location);
     try {
       return { file: await this.validateUpload(config, blob) };
@@ -55,7 +54,7 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
     const uploader = busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
       .on('file', (field, stream, filename) =>
         uploads.push(
-          RestUploadUtil.writeToFile(stream, filename, config.uploads![field]?.maxSize ?? largestMax)
+          IOUtil.writeTempFile(stream, filename, config.uploads![field]?.maxSize ?? largestMax)
             .then(location => BlobUtil.fileBlob(location))
             .then(blob => uploadMap[field] = blob)
             .then(blob => this.validateUpload(config.uploads?.[field] ?? config, blob))
@@ -83,7 +82,6 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
 
     if (err) {
       console.error('Failed multipart upload', err);
-      await RestUploadUtil.cleanupFiles(uploadMap);
       throw err;
     }
     return uploadMap;
@@ -93,6 +91,12 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
   config: RestUploadConfig;
 
   after = [SerializeInterceptor, BodyParseInterceptor];
+
+  async cleanup(uploads: UploadMap): Promise<void> {
+    if (this.config.cleanupFiles !== false) {
+      await Promise.all(Object.values(uploads ?? {}).map(x => BlobUtil.cleanupBlob(x)));
+    }
+  }
 
   /**
    * Produces final config object
@@ -130,9 +134,7 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
       }
       return await next();
     } finally {
-      if (config.cleanupFiles !== false) {
-        await RestUploadUtil.cleanupFiles(req.uploads);
-      }
+      await this.cleanup(req.uploads);
     }
   }
 }
