@@ -100,6 +100,22 @@ export class Util {
   }
 
   /**
+   * Write file and copy over when ready
+   */
+  static async bufferedFileWrite(file: string, content: string, onChangeOnly = false): Promise<void> {
+    if (onChangeOnly) {
+      const current = await fs.readFile(file, 'utf8').catch(() => undefined);
+      if (current === content) {
+        return;
+      }
+    }
+    const temp = path.resolve(os.tmpdir(), `${process.hrtime()[1]}.${path.basename(file)}`);
+    await fs.writeFile(temp, content, 'utf8');
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.rename(temp, file);
+  }
+
+  /**
    * Non-blocking timeout
    */
   static nonBlockingTimeout(time: number): Promise<void> {
@@ -146,22 +162,5 @@ export class Util {
     } else {
       return () => true;
     }
-  }
-
-
-  /**
-   * Write file and copy over when ready
-   */
-  static async bufferedFileWrite(file: string, content: string, onChangeOnly = false): Promise<void> {
-    if (onChangeOnly) {
-      const current = await fs.readFile(file, 'utf8').catch(() => undefined);
-      if (current === content) {
-        return;
-      }
-    }
-    const temp = path.resolve(os.tmpdir(), `${process.hrtime()[1]}.${path.basename(file)}`);
-    await fs.writeFile(temp, content, 'utf8');
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.rename(temp, file);
   }
 }
