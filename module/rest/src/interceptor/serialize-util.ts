@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 
 import { ErrorCategory, AppError } from '@travetto/runtime';
-import { BlobUtil, IOUtil } from '@travetto/io';
+import { BlobUtil } from '@travetto/io';
 
 import { HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';

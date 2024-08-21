@@ -22,7 +22,7 @@ import {
 import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
-import { BinaryInput, BlobMeta, BlobUtil, ByteRange, IOUtil } from '@travetto/io';
+import { BinaryInput, BlobMeta, BlobUtil, ByteRange } from '@travetto/io';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';

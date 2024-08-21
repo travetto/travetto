@@ -17,7 +17,7 @@ import {
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { BinaryInput, BlobMeta, BlobUtil, ByteRange, IOUtil } from '@travetto/io';
+import { BinaryInput, BlobMeta, BlobUtil, ByteRange } from '@travetto/io';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 

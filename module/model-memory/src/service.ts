@@ -1,5 +1,3 @@
-import { Readable } from 'node:stream';
-
 import { Class, TimeSpan, DeepPartial, castTo } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -12,7 +10,7 @@ import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { BinaryInput, BlobMeta, BlobUtil, ByteRange, IOUtil } from '@travetto/io';
+import { BinaryInput, BlobMeta, BlobUtil, ByteRange } from '@travetto/io';
 
 const BLOBS = '__blobs';
 const BLOB_META = `${BLOBS}_meta`;
