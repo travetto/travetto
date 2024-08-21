@@ -44,7 +44,7 @@ type IdxCfg = CreateIndexesOptions;
 
 type BlobRaw = GridFSFile & { metadata?: BlobMeta };
 
-const BLOBS = '__streams';
+const BLOBS = '__blobs';
 
 /**
  * Mongo-based model source
