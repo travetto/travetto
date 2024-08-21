@@ -15,7 +15,7 @@ export const ModelTypes = (fn: | Function): DocJSXElement[] => {
   const { content } = DocFileUtil.readSource(fn);
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
   const seen = new Set();
-  for (const [, key] of content.matchAll(/Model(Crud|Expiry|Indexed|Bulk|Blob)Support/g)) {
+  for (const [, key] of content.matchAll(/Model(Crud|Blob|Expiry|Indexed|Bulk)Support/g)) {
     if (!seen.has(key)) {
       seen.add(key);
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
