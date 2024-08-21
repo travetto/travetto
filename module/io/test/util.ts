@@ -100,4 +100,19 @@ export class IOUtilTest {
     const result = await IOUtil.detectType(png);
     assert(result.mime === 'image/png');
   }
+
+  @Test({ shouldThrow: 'size' })
+  async testMaxBlobWrite() {
+    await IOUtil.writeTempFile(Buffer.alloc(100, 'A', 'utf8'), 'test', 1);
+  }
+
+  @Test({ shouldThrow: 'size' })
+  async testMaxCloseBlobWrite() {
+    await IOUtil.writeTempFile(Buffer.alloc(100, 'A', 'utf8'), 'test', 99);
+  }
+
+  @Test()
+  async testMaxExactBlobWrite() {
+    await IOUtil.writeTempFile(Buffer.alloc(100, 'A', 'utf8'), 'test', 100);
+  }
 }
