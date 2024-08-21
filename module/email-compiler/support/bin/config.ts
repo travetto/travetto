@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { Runtime, Util } from '@travetto/runtime';
+import { Util, Runtime } from '@travetto/runtime';
 import { parse, stringify } from 'yaml';
 
 import { EditorConfigType } from './types';

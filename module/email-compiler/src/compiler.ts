@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { TypedObject, RuntimeIndex, watchCompiler, Runtime, Util } from '@travetto/runtime';
+import { TypedObject, Util, RuntimeIndex, watchCompiler, Runtime } from '@travetto/runtime';
 import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
 
 import { EmailCompileUtil } from './util';
