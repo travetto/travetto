@@ -1,7 +1,5 @@
 import { BinaryInput, BlobMeta, ByteRange } from '@travetto/runtime';
 
-export type BlobInputLocation = string | ((meta: BlobMeta) => string);
-
 /**
  * Support for Blobs CRD.  Blob update is not supported.
  *
@@ -14,14 +12,14 @@ export interface ModelBlobSupport {
    * @param location The location of the blob
    * @param input The actual blob to write
    */
-  insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta, errorIfExisting?: boolean): Promise<void>;
+  insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting?: boolean): Promise<void>;
 
   /**
    * Upsert blob to storage
    * @param location The location of the blob
    * @param input The actual blob to write
    */
-  upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta): Promise<void>;
+  upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void>;
 
   /**
    * Get blob from storage

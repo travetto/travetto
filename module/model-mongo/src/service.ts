@@ -9,7 +9,7 @@ import { Readable } from 'node:stream';
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig, ModelBlobSupport, ModelBlobUtil, BlobInputLocation
+  NotFoundError, ExistsError, IndexConfig, ModelBlobSupport, ModelBlobUtil
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -282,19 +282,17 @@ export class MongoModelService implements
   }
 
   // Blob
-  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
-    const loc = ModelBlobUtil.getLocation(location);
-    await this.describeBlob(loc);
+  async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
+    await this.describeBlob(location);
     if (errorIfExisting) {
-      throw new ExistsError(BLOBS, loc);
+      throw new ExistsError(BLOBS, location);
     }
-    return this.upsertBlob(loc, input, meta);
+    return this.upsertBlob(location, input, meta);
   }
 
-  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta): Promise<void> {
+  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.memoryBlob(input, meta);
-    const loc = ModelBlobUtil.getLocation(location, resolved.meta);
-    const writeStream = this.#bucket.openUploadStream(loc, {
+    const writeStream = this.#bucket.openUploadStream(location, {
       contentType: resolved.type,
       metadata: resolved.meta ?? {}
     });

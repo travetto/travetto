@@ -10,7 +10,7 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistry,
-  NotFoundError, OptionalId, ExistsError, ModelBlobSupport, ModelBlobUtil, BlobInputLocation,
+  NotFoundError, OptionalId, ExistsError, ModelBlobSupport, ModelBlobUtil
 } from '@travetto/model';
 import { BlobUtil } from '@travetto/io';
 
@@ -170,19 +170,17 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   // Blob
-  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
-    const loc = ModelBlobUtil.getLocation(location);
-    await this.describeBlob(loc);
+  async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
+    await this.describeBlob(location);
     if (errorIfExisting) {
-      throw new ExistsError('Blob', loc);
+      throw new ExistsError('Blob', location);
     }
-    return this.upsertBlob(loc, input, meta);
+    return this.upsertBlob(location, input, meta);
   }
 
-  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta): Promise<void> {
+  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.memoryBlob(input, meta);
-    const loc = ModelBlobUtil.getLocation(location, resolved.meta);
-    const file = await this.#resolveName(BLOBS, BIN, loc);
+    const file = await this.#resolveName(BLOBS, BIN, location);
     await Promise.all([
       await pipeline(resolved.stream(), createWriteStream(file)),
       fs.writeFile(file.replace(BIN, META), JSON.stringify(resolved.meta ?? {}), 'utf8')

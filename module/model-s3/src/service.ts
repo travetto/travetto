@@ -8,7 +8,7 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
   ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
-  ModelBlobSupport, ModelBlobUtil, BlobInputLocation,
+  ModelBlobSupport, ModelBlobUtil
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput } from '@travetto/runtime';
@@ -296,28 +296,26 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Blob support
-  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
-    const loc = ModelBlobUtil.getLocation(location);
-    await this.describeBlob(loc);
+  async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
+    await this.describeBlob(location);
     if (errorIfExisting) {
-      throw new ExistsError('Blob', loc);
+      throw new ExistsError('Blob', location);
     }
-    return this.upsertBlob(loc, input, meta);
+    return this.upsertBlob(location, input, meta);
   }
 
-  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta): Promise<void> {
+  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.memoryBlob(input, meta);
-    const loc = ModelBlobUtil.getLocation(location, resolved.meta);
 
     if (resolved.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
-      await this.client.putObject(this.#q(BLOB_SPACE, loc, {
+      await this.client.putObject(this.#q(BLOB_SPACE, location, {
         Body: await resolved.bytes(),
         ContentLength: resolved.size,
         ...this.#getMetaBase(resolved.meta ?? {}),
       }));
     } else {
-      await this.#writeMultipart(loc, Readable.fromWeb(resolved.stream()), resolved.meta ?? {});
+      await this.#writeMultipart(location, Readable.fromWeb(resolved.stream()), resolved.meta ?? {});
     }
   }
 

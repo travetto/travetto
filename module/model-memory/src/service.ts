@@ -5,7 +5,7 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
-  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport, ModelBlobUtil, BlobInputLocation
+  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport, ModelBlobUtil
 } from '@travetto/model';
 import { BlobUtil } from '@travetto/io';
 
@@ -233,22 +233,20 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   // Blob Support
-  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
-    const loc = ModelBlobUtil.getLocation(location);
-    await this.describeBlob(loc);
+  async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
+    await this.describeBlob(location);
     if (errorIfExisting) {
-      throw new ExistsError(BLOBS, loc);
+      throw new ExistsError(BLOBS, location);
     }
-    return this.upsertBlob(loc, input, meta);
+    return this.upsertBlob(location, input, meta);
   }
 
-  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta): Promise<void> {
+  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.memoryBlob(input, meta);
-    const loc = ModelBlobUtil.getLocation(location, resolved.meta);
     const streams = this.#getStore(BLOBS);
     const metaContent = this.#getStore(BLOB_META);
-    metaContent.set(loc, Buffer.from(JSON.stringify(resolved.meta ?? {})));
-    streams.set(loc, Buffer.from(await resolved.bytes()));
+    metaContent.set(location, Buffer.from(JSON.stringify(resolved.meta ?? {})));
+    streams.set(location, Buffer.from(await resolved.bytes()));
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
