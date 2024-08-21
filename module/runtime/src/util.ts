@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
 import timers from 'node:timers/promises';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import fs from 'node:fs/promises';
 
 import { castTo } from './types';
 
@@ -108,6 +108,7 @@ export class Util {
         return;
       }
     }
+
     const temp = path.resolve(os.tmpdir(), `${process.hrtime()[1]}.${path.basename(file)}`);
     await fs.writeFile(temp, content, 'utf8');
     await fs.mkdir(path.dirname(file), { recursive: true });
