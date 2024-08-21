@@ -12,6 +12,7 @@ import {
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull } from '@travetto/runtime';
+import { BinaryInput, BlobMeta, BlobUtil, ByteRange } from '@travetto/io';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
@@ -19,7 +20,6 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { S3ModelConfig } from './config';
-import { BinaryInput, BlobMeta, BlobUtil, ByteRange } from '@travetto/io';
 
 function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && typeof o === 'object' && '$metadata' in o;
