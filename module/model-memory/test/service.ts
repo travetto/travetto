@@ -1,12 +1,13 @@
 import { Suite } from '@travetto/test';
 
-import { MemoryModelConfig, MemoryModelService } from '../src/service';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob';
+
+import { MemoryModelConfig, MemoryModelService } from '../src/service';
 
 @Suite()
 export class MemoryBasicSuite extends ModelBasicSuite {
