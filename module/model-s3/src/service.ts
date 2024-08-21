@@ -11,8 +11,8 @@ import {
   ModelBlobSupport, ModelBlobUtil, BlobInputLocation,
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError, castTo, asFull } from '@travetto/runtime';
-import { BinaryInput, BlobMeta, BlobUtil, ByteRange } from '@travetto/io';
+import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput } from '@travetto/runtime';
+import { BlobUtil } from '@travetto/io';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
@@ -296,7 +296,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Blob support
-  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>, errorIfExisting = false): Promise<void> {
+  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
     const loc = ModelBlobUtil.getLocation(location);
     await this.describeBlob(loc);
     if (errorIfExisting) {
@@ -305,20 +305,19 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     return this.upsertBlob(loc, input, meta);
   }
 
-  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>): Promise<void> {
-    const loc = ModelBlobUtil.getLocation(location);
+  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.memoryBlob(input, meta);
-    meta = BlobUtil.getBlobMeta(resolved)!;
+    const loc = ModelBlobUtil.getLocation(location, resolved.meta);
 
     if (resolved.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#q(BLOB_SPACE, loc, {
         Body: await resolved.bytes(),
         ContentLength: resolved.size,
-        ...this.#getMetaBase(meta),
+        ...this.#getMetaBase(resolved.meta ?? {}),
       }));
     } else {
-      await this.#writeMultipart(loc, Readable.fromWeb(resolved.stream()), meta);
+      await this.#writeMultipart(loc, Readable.fromWeb(resolved.stream()), resolved.meta ?? {});
     }
   }
 
@@ -346,10 +345,10 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const meta = await this.describeBlob(location);
     const final = range ? BlobUtil.enforceRange(range, meta.size!) : undefined;
     const res = (): Promise<Readable> => this.#getObject(location, final);
-    return BlobUtil.lazyStreamBlob(res, { ...meta, range: final });
+    return ModelBlobUtil.lazyStreamBlob(res, { ...meta, range: final });
   }
 
-  async headBlob(location: string): Promise<{ Metadata?: Partial<BlobMeta>, ContentLength?: number }> {
+  async headBlob(location: string): Promise<{ Metadata?: BlobMeta, ContentLength?: number }> {
     const query = this.#q(BLOB_SPACE, location);
     try {
       return (await this.client.headObject(query));

@@ -1,5 +1,6 @@
 /// <reference path="./src/trv.d.ts" />
 /// <reference path="./src/global.d.ts" />
+export * from './src/blob';
 export * from './src/console';
 export * from './src/context';
 export * from './src/debug';

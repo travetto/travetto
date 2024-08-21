@@ -1,4 +1,4 @@
-import { BinaryInput, BlobMeta, ByteRange } from '@travetto/io';
+import { BinaryInput, BlobMeta, ByteRange } from '@travetto/runtime';
 
 export type BlobInputLocation = string | ((meta: BlobMeta) => string);
 
@@ -14,14 +14,14 @@ export interface ModelBlobSupport {
    * @param location The location of the blob
    * @param input The actual blob to write
    */
-  insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>, errorIfExisting?: boolean): Promise<void>;
+  insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta, errorIfExisting?: boolean): Promise<void>;
 
   /**
    * Upsert blob to storage
    * @param location The location of the blob
    * @param input The actual blob to write
    */
-  upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>): Promise<void>;
+  upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta): Promise<void>;
 
   /**
    * Get blob from storage

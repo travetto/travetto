@@ -1,12 +1,14 @@
-import { Class, TimeSpan, DeepPartial, castTo } from '@travetto/runtime';
+import { Readable } from 'node:stream';
+
+import { Class, TimeSpan, DeepPartial, castTo, BlobMeta, ByteRange, BinaryInput } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { BinaryInput, BlobMeta, BlobUtil, ByteRange } from '@travetto/io';
 import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
-  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport, ModelBlobUtil,
-  BlobInputLocation
+  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport, ModelBlobUtil, BlobInputLocation
 } from '@travetto/model';
+import { BlobUtil } from '@travetto/io';
+
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
@@ -231,7 +233,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   // Blob Support
-  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>, errorIfExisting = false): Promise<void> {
+  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
     const loc = ModelBlobUtil.getLocation(location);
     await this.describeBlob(loc);
     if (errorIfExisting) {
@@ -240,13 +242,12 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     return this.upsertBlob(loc, input, meta);
   }
 
-  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>): Promise<void> {
-    const loc = ModelBlobUtil.getLocation(location);
+  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.memoryBlob(input, meta);
+    const loc = ModelBlobUtil.getLocation(location, resolved.meta);
     const streams = this.#getStore(BLOBS);
     const metaContent = this.#getStore(BLOB_META);
-    const resolvedMeta = BlobUtil.getBlobMeta(resolved);
-    metaContent.set(loc, Buffer.from(JSON.stringify(resolvedMeta)));
+    metaContent.set(loc, Buffer.from(JSON.stringify(resolved.meta ?? {})));
     streams.set(loc, Buffer.from(await resolved.bytes()));
   }
 
@@ -258,7 +259,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }
     const meta = await this.describeBlob(location);
-    return BlobUtil.memoryBlob(buffer, { ...meta, range: final });
+    return ModelBlobUtil.lazyStreamBlob(() => Readable.from(buffer), { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {

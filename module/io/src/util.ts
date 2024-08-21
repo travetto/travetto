@@ -2,15 +2,13 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
-import { PassThrough, Readable, Transform, Writable } from 'node:stream';
+import { Readable, Transform, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
 
 import { getExtension, getType } from 'mime';
 
-import { AppError, castTo, Util } from '@travetto/runtime';
-
-import { BinaryInput } from './types';
+import { AppError, BinaryInput, castTo, Util } from '@travetto/runtime';
 
 /**
  * Common functions for dealing with binary data/streams
@@ -77,17 +75,6 @@ export class IOUtil {
    */
   static async hashUrl(url: string, byteLimit = -1): Promise<string> {
     return this.hashInput(await this.fetchBytes(url, byteLimit));
-  }
-
-  /**
-   * Get a stream as a lazy value
-   * @param src
-   * @returns
-   */
-  static getLazyStream(src: () => (Promise<Readable> | Readable)): () => Readable {
-    const out = new PassThrough();
-    const run = (): void => { Promise.resolve(src()).then(v => v.pipe(out), (err) => out.destroy(err)); };
-    return () => (run(), out);
   }
 
   /**

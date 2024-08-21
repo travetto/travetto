@@ -1,10 +1,3 @@
-import { Readable } from 'node:stream';
-import { ReadableStream } from 'node:stream/web';
-
-export const BlobMetaⲐ = Symbol.for('@travetto/io:blob-meta');
-
-export type BinaryInput = Blob | Buffer | Readable | ReadableStream;
-
 /**
  * Range of bytes, inclusive
  */

@@ -29,7 +29,6 @@
     "@travetto/config": "^5.0.0-rc.10",
     "@travetto/context": "^5.0.0-rc.9",
     "@travetto/di": "^5.0.0-rc.9",
-    "@travetto/io": "^5.0.0-rc.9",
     "@travetto/registry": "^5.0.0-rc.9",
     "@travetto/runtime": "^5.0.0-rc.9",
     "@travetto/schema": "^5.0.0-rc.10",

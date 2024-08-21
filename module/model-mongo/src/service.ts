@@ -17,10 +17,10 @@ import {
   QueryVerifier
 } from '@travetto/model-query';
 
-import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull } from '@travetto/runtime';
+import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull, BlobMeta, ByteRange, BinaryInput } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
-import { BinaryInput, BlobMeta, BlobUtil, ByteRange } from '@travetto/io';
+import { BlobUtil } from '@travetto/io';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
@@ -282,7 +282,7 @@ export class MongoModelService implements
   }
 
   // Blob
-  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>, errorIfExisting = false): Promise<void> {
+  async insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
     const loc = ModelBlobUtil.getLocation(location);
     await this.describeBlob(loc);
     if (errorIfExisting) {
@@ -291,13 +291,12 @@ export class MongoModelService implements
     return this.upsertBlob(loc, input, meta);
   }
 
-  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: Partial<BlobMeta>): Promise<void> {
-    const loc = ModelBlobUtil.getLocation(location);
+  async upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.memoryBlob(input, meta);
-    const resolvedMeta = BlobUtil.getBlobMeta(resolved);
+    const loc = ModelBlobUtil.getLocation(location, resolved.meta);
     const writeStream = this.#bucket.openUploadStream(loc, {
       contentType: resolved.type,
-      metadata: resolvedMeta
+      metadata: resolved.meta ?? {}
     });
 
     await pipeline(resolved.stream(), writeStream);
@@ -308,7 +307,7 @@ export class MongoModelService implements
     const final = range ? BlobUtil.enforceRange(range, meta.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
     const res = (): Readable => this.#bucket.openDownloadStreamByName(location, mongoRange);
-    return BlobUtil.lazyStreamBlob(res, { ...meta, range: final });
+    return ModelBlobUtil.lazyStreamBlob(res, { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {

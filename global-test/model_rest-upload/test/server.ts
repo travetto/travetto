@@ -1,16 +1,16 @@
 import assert from 'node:assert';
 
 import { DataUtil } from '@travetto/schema';
-import { Controller, Get, Post, Request, Response } from '@travetto/rest';
+import { Controller, Get, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/rest-upload';
-import { Util } from '@travetto/runtime';
+import { Util, BlobMeta } from '@travetto/runtime';
 import { ModelBlobSupport } from '@travetto/model';
-import { BlobUtil, BlobMeta } from '@travetto/io';
+import { BlobUtil } from '@travetto/io';
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -33,7 +33,7 @@ class TestUploadController {
   @UploadAll()
   async uploadAll({ uploads }: Request) {
     for (const [, file] of Object.entries(uploads)) {
-      return await BlobUtil.getBlobMeta(file);
+      return file.meta;
     }
   }
 
@@ -56,22 +56,22 @@ class TestUploadController {
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    const asset1 = await BlobUtil.getBlobMeta(file1);
-    const asset2 = await BlobUtil.getBlobMeta(file2);
+    const asset1 = file1.meta;
+    const asset2 = file2.meta;
     return { hash1: asset1?.hash, hash2: asset2?.hash };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    const asset1 = await BlobUtil.getBlobMeta(file1);
-    const asset2 = await BlobUtil.getBlobMeta(file2);
+    const asset1 = file1.meta;
+    const asset2 = file2.meta;
     return { hash1: asset1?.hash, hash2: asset2?.hash };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    const asset1 = await BlobUtil.getBlobMeta(file1);
-    const asset2 = await BlobUtil.getBlobMeta(file2);
+    const asset1 = file1.meta;
+    const asset2 = file2.meta;
     return { hash1: asset1?.hash, hash2: asset2?.hash };
   }
 
@@ -99,7 +99,7 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
   }
 
   async getBlobMeta(pth: string) {
-    return BlobUtil.getBlobMeta(await BlobUtil.memoryBlob(await this.fixture.read(pth, true)));
+    return (await this.getBlob(pth)).meta;
   }
 
 
