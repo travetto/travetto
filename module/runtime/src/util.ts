@@ -6,7 +6,6 @@ import fs from 'node:fs/promises';
 
 import { castTo } from './types';
 
-
 type PromiseWithResolvers<T> = {
   resolve: (v: T) => void;
   reject: (err?: unknown) => void;
@@ -102,10 +101,10 @@ export class Util {
   /**
    * Write file and copy over when ready
    */
-  static async bufferedFileWrite(file: string, content: string, onChangeOnly = false): Promise<void> {
-    if (onChangeOnly) {
-      const current = await fs.readFile(file, 'utf8').catch(() => undefined);
-      if (current === content) {
+  static async bufferedFileWrite(file: string, content: string, checkHash = false): Promise<void> {
+    if (checkHash) {
+      const current = await fs.readFile(file, 'utf8').catch(() => '');
+      if (Util.hash(current) === Util.hash(content)) {
         return;
       }
     }
