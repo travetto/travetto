@@ -1,5 +1,9 @@
 import { BinaryInput, BlobMeta, ByteRange } from '@travetto/runtime';
 
+
+export const ModelBlobNamespace = '__blobs';
+
+
 /**
  * Support for Blobs CRD.  Blob update is not supported.
  *

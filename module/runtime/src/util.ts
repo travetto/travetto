@@ -3,12 +3,8 @@ import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { ReadableStream } from 'node:stream/web';
-import { text as toText, arrayBuffer as toBuffer } from 'node:stream/consumers';
-import { Readable } from 'node:stream';
 
 import { castTo } from './types';
-import { BlobMeta } from './blob';
 
 type PromiseWithResolvers<T> = {
   resolve: (v: T) => void;
@@ -166,27 +162,5 @@ export class Util {
     } else {
       return () => true;
     }
-  }
-
-  /**
-   * Make a blob, and assign metadata
-   */
-  static async toBlob(input: () => Readable, metadata: BlobMeta): Promise<Blob> {
-    const size = metadata.range ? (metadata.range.end - metadata.range.start) + 1 : metadata.size;
-    const out: Blob = metadata.filename ?
-      new File([], path.basename(metadata.filename), { type: metadata.contentType }) :
-      new Blob([], { type: metadata.contentType });
-
-    Object.defineProperties(out, {
-      size: { value: size },
-      stream: { value: () => ReadableStream.from(input()) },
-      arrayBuffer: { value: () => toBuffer(input()) },
-      text: { value: () => toText(input()) },
-      buffer: { value: () => toBuffer(input()).then(v => new Uint8Array(v)) },
-    });
-
-    out.meta = metadata;
-
-    return out;
   }
 }

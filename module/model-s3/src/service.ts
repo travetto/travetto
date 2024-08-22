@@ -11,8 +11,7 @@ import {
   ModelBlobSupport, ModelBlobUtil
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput } from '@travetto/runtime';
-import { BlobUtil } from '@travetto/io';
+import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BlobUtil } from '@travetto/runtime';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
@@ -310,7 +309,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (resolved.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#q(BLOB_SPACE, location, {
-        Body: await resolved.bytes(),
+        Body: Readable.fromWeb(resolved.stream()),
         ContentLength: resolved.size,
         ...this.#getMetaBase(resolved.meta ?? {}),
       }));
@@ -343,7 +342,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const meta = await this.describeBlob(location);
     const final = range ? BlobUtil.enforceRange(range, meta.size!) : undefined;
     const res = (): Promise<Readable> => this.#getObject(location, final);
-    return ModelBlobUtil.lazyStreamBlob(res, { ...meta, range: final });
+    return BlobUtil.lazyStreamBlob(res, { ...meta, range: final });
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BlobMeta, ContentLength?: number }> {

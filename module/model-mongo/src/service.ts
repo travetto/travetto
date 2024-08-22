@@ -9,7 +9,7 @@ import { Readable } from 'node:stream';
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig, ModelBlobSupport, ModelBlobUtil
+  NotFoundError, ExistsError, IndexConfig, ModelBlobSupport, ModelBlobNamespace
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -17,10 +17,12 @@ import {
   QueryVerifier
 } from '@travetto/model-query';
 
-import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull, BlobMeta, ByteRange, BinaryInput } from '@travetto/runtime';
+import {
+  ShutdownManager, type Class, type DeepPartial, AppError, TypedObject,
+  castTo, asFull, BlobMeta, ByteRange, BinaryInput, BlobUtil
+} from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
-import { BlobUtil } from '@travetto/io';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
@@ -44,8 +46,6 @@ type IdxCfg = CreateIndexesOptions;
 
 type BlobRaw = GridFSFile & { metadata?: BlobMeta };
 
-const BLOBS = '__blobs';
-
 /**
  * Mongo-based model source
  */
@@ -68,7 +68,7 @@ export class MongoModelService implements
     const files: BlobRaw[] = await this.#bucket.find({ filename: location }, { limit: 1 }).toArray();
 
     if (!files?.length) {
-      throw new NotFoundError(BLOBS, location);
+      throw new NotFoundError(ModelBlobNamespace, location);
     }
 
     return files[0];
@@ -78,7 +78,7 @@ export class MongoModelService implements
     this.client = await MongoClient.connect(this.config.url, this.config.options);
     this.#db = this.client.db(this.config.namespace);
     this.#bucket = new GridFSBucket(this.#db, {
-      bucketName: BLOBS,
+      bucketName: ModelBlobNamespace,
       writeConcern: { w: 1 }
     });
     await ModelStorageUtil.registerModelChangeListener(this);
@@ -285,13 +285,13 @@ export class MongoModelService implements
   async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
     await this.describeBlob(location);
     if (errorIfExisting) {
-      throw new ExistsError(BLOBS, location);
+      throw new ExistsError(ModelBlobNamespace, location);
     }
     return this.upsertBlob(location, input, meta);
   }
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
-    const resolved = await BlobUtil.memoryBlob(input, meta);
+    const resolved = await BlobUtil.streamBlob(input, meta);
     const writeStream = this.#bucket.openUploadStream(location, {
       contentType: resolved.type,
       metadata: resolved.meta ?? {}
@@ -305,7 +305,7 @@ export class MongoModelService implements
     const final = range ? BlobUtil.enforceRange(range, meta.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
     const res = (): Readable => this.#bucket.openDownloadStreamByName(location, mongoRange);
-    return ModelBlobUtil.lazyStreamBlob(res, { ...meta, range: final });
+    return BlobUtil.lazyStreamBlob(res, { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {
