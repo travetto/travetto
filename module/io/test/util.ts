@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import { Readable, PassThrough } from 'node:stream';
 import fs from 'node:fs/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
@@ -103,16 +104,16 @@ export class IOUtilTest {
 
   @Test({ shouldThrow: 'size' })
   async testMaxBlobWrite() {
-    await IOUtil.writeTempFile(Buffer.alloc(100, 'A', 'utf8'), 'test', 1);
+    await IOUtil.streamWithLimit(Readable.from(Buffer.alloc(100, 'A', 'utf8')), new PassThrough(), 1);
   }
 
   @Test({ shouldThrow: 'size' })
   async testMaxCloseBlobWrite() {
-    await IOUtil.writeTempFile(Buffer.alloc(100, 'A', 'utf8'), 'test', 99);
+    await IOUtil.streamWithLimit(Readable.from(Buffer.alloc(100, 'A', 'utf8')), new PassThrough(), 99);
   }
 
   @Test()
   async testMaxExactBlobWrite() {
-    await IOUtil.writeTempFile(Buffer.alloc(100, 'A', 'utf8'), 'test', 100);
+    await IOUtil.streamWithLimit(Readable.from(Buffer.alloc(100, 'A', 'utf8')), new PassThrough(), 100);
   }
 }

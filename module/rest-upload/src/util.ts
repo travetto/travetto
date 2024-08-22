@@ -1,34 +1,50 @@
 import busboy from '@fastify/busboy';
 
+import { createWriteStream } from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import fs from 'node:fs/promises';
 import { Readable } from 'node:stream';
 
 import { IOUtil } from '@travetto/io';
 import { Request, MimeUtil } from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
-import { BlobUtil, AppError, castTo } from '@travetto/runtime';
+import { BlobUtil, AppError, castTo, Util } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
 
 type UploadMap = Record<string, Blob>;
 
 export class RestUploadUtil {
-  static #singleUpload(stream: Readable, filename: string, config: Partial<RestUploadConfig>): Promise<Blob> {
-    return IOUtil.writeTempFile(stream, filename, config.maxSize)
-      .then(location => BlobUtil.fileBlob(location))
-      .then(blob => IOUtil.computeMetadata(blob))
-      .then(async blob => {
-        const check = config.matcher ??= MimeUtil.matcher(config.types);
-        if (check(blob.type)) {
-          return blob;
-        } else {
-          await BlobUtil.cleanupBlob(blob);
-          throw new AppError(`Content type not allowed: ${blob.type}`, 'data');
-        }
-      });
+
+  static async #singleUpload(stream: Readable, filename: string, config: Partial<RestUploadConfig>, field?: string): Promise<Blob> {
+    console.log('Doing upload', filename, config, field);
+
+    const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
+    await fs.mkdir(uniqueDir, { recursive: true });
+    const location = path.resolve(uniqueDir, path.basename(filename));
+
+    try {
+      const check = config.matcher ??= MimeUtil.matcher(config.types);
+      await IOUtil.streamWithLimit(stream, createWriteStream(location), config.maxSize);
+      const blob = await BlobUtil.fileBlob(location);
+      await IOUtil.computeMetadata(blob);
+      castTo<{ cleanup: Function }>(blob).cleanup = (): Promise<void> => fs.rm(location, { force: true });
+
+      if (!check(blob.type)) {
+        throw new AppError(`Content type not allowed: ${blob.type}`, 'data');
+      }
+      return blob;
+    } catch (err) {
+      if (location) {
+        await fs.rm(location, { force: true });
+      }
+      throw err;
+    }
   }
 
   static #getLargestSize(config: Partial<RestUploadConfig>): number | undefined {
-    const fileMaxes = [...Object.values(config.uploads!).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
+    const fileMaxes = [...Object.values(config.uploads ?? {}).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
     return fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
   }
 
@@ -53,7 +69,7 @@ export class RestUploadUtil {
     const uploader = busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
       .on('file', (field, stream, filename) =>
         uploads.push(
-          this.#singleUpload(stream, filename, { maxSize: largestMax, ...config.uploads![field] ?? config })
+          this.#singleUpload(stream, filename, { maxSize: largestMax, ...config.uploads![field] ?? config }, field)
         )
       )
       .on('limit', field =>

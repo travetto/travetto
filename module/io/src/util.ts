@@ -111,23 +111,30 @@ export class IOUtil {
   /**
    * Stream from input to output, enforcing a max size
    */
-  static async streamWithMaxSize(input: Readable, output: Writable, maxSize: number): Promise<void> {
+  static async streamWithLimit(input: Readable, output: Writable, maxSize?: number): Promise<void> {
     let read = 0;
 
-    await pipeline(
-      input,
-      new Transform({
-        transform(chunk, encoding, callback): void {
-          read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : 0;
-          if (read > maxSize) {
-            callback(new AppError('File size exceeded', 'data'));
-          } else {
-            callback(null, chunk);
-          }
-        },
-      }),
-      output
-    );
+    if (maxSize) {
+      await pipeline(
+        input,
+        new Transform({
+          transform(chunk, encoding, callback): void {
+            read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : 0;
+            if (read > maxSize) {
+              callback(new AppError('File size exceeded', 'data', {
+                read,
+                maxSize
+              }));
+            } else {
+              callback(null, chunk);
+            }
+          },
+        }),
+        output
+      );
+    } else {
+      await pipeline(input, output);
+    }
   }
 
   /**
@@ -180,34 +187,6 @@ export class IOUtil {
   }
 
   /**
-   * Convert stream or buffer to a file, enforcing max size if needed
-   * @param data
-   * @param filename
-   * @param maxSize
-   */
-  static async writeTempFile(data: Readable | Buffer, filename: string, maxSize?: number): Promise<string> {
-    const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
-    await fs.mkdir(uniqueDir, { recursive: true });
-    const uniqueLocal = path.resolve(uniqueDir, path.basename(filename));
-
-    try {
-      const input = Buffer.isBuffer(data) ? Readable.from(data) : data;
-      const output = createWriteStream(uniqueLocal);
-      if (maxSize) {
-        await this.streamWithMaxSize(input, output, maxSize);
-      } else {
-        await pipeline(input, output);
-      }
-    } catch (err) {
-      await fs.rm(uniqueLocal, { force: true });
-      throw err;
-    }
-
-    return uniqueLocal;
-  }
-
-
-  /**
    * Get filename for a given input
    */
   static getFilename(src: Blob | string, meta: BlobMeta): string {
@@ -245,7 +224,6 @@ export class IOUtil {
     meta.hash ??= await this.hashInput(blob);
     meta.contentType = (meta.contentType || undefined) ?? (await this.detectType(blob)).mime;
     meta.filename = this.getFilename(blob, meta) ?? meta.filename;
-    BlobUtil.setBlobMeta(blob, meta);
-    return blob;
+    return BlobUtil.lazyStreamBlob(() => Readable.fromWeb(blob.stream()), meta);
   }
 }
