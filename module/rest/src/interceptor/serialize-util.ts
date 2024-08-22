@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { ErrorCategory, AppError } from '@travetto/runtime';
+import { ErrorCategory, AppError, BlobUtil } from '@travetto/runtime';
 
 import { HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
@@ -105,7 +105,7 @@ export class SerializeUtil {
    * Serialize file/blob
    */
   static async serializeBlob(res: Response, output: Blob | File): Promise<void> {
-    const meta = output.meta;
+    const meta = BlobUtil.getBlobMeta(output);
     if (meta) {
       res.statusCode = meta?.range ? 206 : 200;
       for (const [k, v] of Object.entries({

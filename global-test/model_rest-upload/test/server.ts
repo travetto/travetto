@@ -10,6 +10,7 @@ import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/rest-upload';
 import { Util, BlobMeta, BlobUtil } from '@travetto/runtime';
 import { ModelBlobSupport } from '@travetto/model';
+import { IOUtil } from '@travetto/io';
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -73,6 +74,7 @@ class TestUploadController {
   @Get('*')
   async get(req: Request) {
     const range = req.getRange();
+    console.log('Getting file', range);
     return await this.service.getBlob(req.url.replace(/^\/test\/upload\//, ''), range);
   }
 }
@@ -90,7 +92,9 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
   }
 
   async getBlobMeta(pth: string) {
-    return BlobUtil.getBlobMeta(await this.fixture.readBlob(pth));
+    const blob = await this.fixture.readBlob(pth);
+    const updated = await IOUtil.computeMetadata(blob);
+    return BlobUtil.getBlobMeta(updated);
   }
 
 
@@ -137,6 +141,7 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
   async testCached() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request('post', '/test/upload/cached', this.getMultipartRequest(uploads));
+    assert(res.status === 200);
     assert(this.getFirstHeader(res.headers, 'cache-control') === 'max-age=3600');
     assert(this.getFirstHeader(res.headers, 'content-language') === 'en-GB');
   }

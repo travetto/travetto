@@ -6,7 +6,6 @@ export type HeaderMap = Record<string, (string | (() => string))>;
 
 export type Request = TravettoRequest;
 export type Response = TravettoResponse;
-export type ByteRange = TravettoByteRange;
 
 export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 

@@ -100,6 +100,7 @@ export class BlobUtil {
     if (src instanceof Blob) {
       type = src.type;
       buffer = Buffer.from(await src.arrayBuffer());
+      metadata = { ...this.getBlobMeta(src), ...metadata };
     } else if (typeof src === 'object' && 'pipeThrough' in src) {
       buffer = Buffer.from(await toBuffer(src));
     } else if (typeof src === 'object' && 'pipe' in src) {
@@ -111,7 +112,7 @@ export class BlobUtil {
     return await this.lazyStreamBlob(() => Readable.from(buffer), {
       ...metadata,
       contentType: metadata.contentType ?? type,
-      size: metadata.size ?? buffer!.length,
+      size: metadata.size ?? buffer.length,
     });
   }
 
@@ -126,7 +127,8 @@ export class BlobUtil {
     if (src instanceof Blob) {
       type = src.type;
       size = src.size;
-      input = async (): Promise<Readable> => Readable.from(await src.bytes());
+      metadata = { ...this.getBlobMeta(src), ...metadata };
+      input = async (): Promise<Readable> => Readable.fromWeb(src.stream());
     } else if (typeof src === 'object' && 'pipeThrough' in src) {
       input = (): Readable => Readable.fromWeb(src);
     } else if (typeof src === 'object' && 'pipe' in src) {

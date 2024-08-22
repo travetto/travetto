@@ -304,7 +304,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
-    const resolved = await BlobUtil.memoryBlob(input, meta);
+    const resolved = await BlobUtil.streamBlob(input, meta);
     meta = BlobUtil.getBlobMeta(resolved) ?? {};
 
     if (resolved.size < this.config.chunkSize) { // If smaller than chunk size

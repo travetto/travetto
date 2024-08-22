@@ -18,8 +18,6 @@ type UploadMap = Record<string, Blob>;
 export class RestUploadUtil {
 
   static async #singleUpload(stream: Readable, filename: string, config: Partial<RestUploadConfig>, field?: string): Promise<Blob> {
-    console.log('Doing upload', filename, config, field);
-
     const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDir, { recursive: true });
     const location = path.resolve(uniqueDir, path.basename(filename));
@@ -29,8 +27,6 @@ export class RestUploadUtil {
       await IOUtil.streamWithLimit(stream, createWriteStream(location), config.maxSize);
       const blob = await IOUtil.computeMetadata(await BlobUtil.fileBlob(location, { filename }));
       castTo<{ cleanup: Function }>(blob).cleanup = (): Promise<void> => fs.rm(location, { force: true });
-
-      console.log('Got upload', filename, field, blob);
 
       if (!check(blob.type)) {
         throw new AppError(`Content type not allowed: ${blob.type}`, 'data');

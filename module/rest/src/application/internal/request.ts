@@ -2,9 +2,9 @@ import { IncomingHttpHeaders } from 'node:http';
 
 import { getExtension } from 'mime';
 
-import { castTo } from '@travetto/runtime';
+import { ByteRange, castTo } from '@travetto/runtime';
 
-import { Request, ContentType, ByteRange } from '../../types';
+import { Request, ContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
 import { NodeEntityⲐ, ParsedType } from '../../internal/symbol';
 

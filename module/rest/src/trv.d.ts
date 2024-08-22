@@ -7,10 +7,9 @@ import {
   HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ,
   ProviderEntityⲐ, RequestParamsⲐ, RequestLoggingⲐ
 } from './internal/symbol';
+import { ByteRange } from '@travetto/runtime';
 
 declare global {
-  type TravettoByteRange = { start: number, end: number };
-
   /**
    * Extension point for supporting new request headers
    */
@@ -125,7 +124,7 @@ declare global {
     /**
      * Get requested range
      */
-    getRange(chunkSize?: number): TravettoByteRange | undefined;
+    getRange(chunkSize?: number): ByteRange | undefined;
     /**
      * Read the file name from the request content disposition
      */
