@@ -2,8 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
-import { Util } from '@travetto/runtime';
-import { BlobUtil } from '@travetto/io';
+import { BlobUtil, Util } from '@travetto/runtime';
 
 import { ModelBlobSupport } from '../../src/service/blob';
 

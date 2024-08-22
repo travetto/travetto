@@ -1,10 +1,11 @@
 import assert from 'node:assert';
 
+import { BlobUtil } from '@travetto/runtime';
 import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { IOUtil, BlobUtil } from '@travetto/io';
+import { IOUtil } from '@travetto/io';
 
 import { Upload, UploadAll } from '../../src/decorator';
 

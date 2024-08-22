@@ -25,7 +25,7 @@ export class IOUtil {
     if (Buffer.isBuffer(input)) {
       hash.write(input);
     } else if (input instanceof Blob) {
-      hash.write(await input.arrayBuffer());
+      hash.write(await input.bytes());
     } else {
       await pipeline(input, hash);
     }
