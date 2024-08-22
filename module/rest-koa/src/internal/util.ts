@@ -58,6 +58,7 @@ export class KoaServerUtil {
           ctx.res.end(); // Only end on redirect
         }
       },
+      getHeaderNames: () => Object.keys(ctx.response.headers),
       setHeader: ctx.response.set.bind(ctx.response),
       getHeader: ctx.response.get.bind(ctx.response),
       removeHeader: ctx.response.remove.bind(ctx.response),

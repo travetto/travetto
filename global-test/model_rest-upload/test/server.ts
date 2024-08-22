@@ -5,37 +5,27 @@ import { Controller, Get, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { Inject, InjectableFactory } from '@travetto/di';
+import { Inject } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/rest-upload';
 import { Util, BlobMeta, BlobUtil } from '@travetto/runtime';
-import { ModelBlobSupport } from '@travetto/model';
 import { IOUtil } from '@travetto/io';
 
 type FileUpload = { name: string, resource: string, type: string };
 
-const ModelBlobⲐ = Symbol();
-
-class Config {
-  @InjectableFactory(ModelBlobⲐ)
-  static getModel(): ModelBlobSupport {
-    return new MemoryModelService({});
-  }
-}
-
-const bHash = (blob: Blob) => BlobUtil.getBlobMeta(blob)?.hash;
+const getMeta = (blob: Blob) => BlobUtil.getBlobMeta(blob);
 
 @Controller('/test/upload')
 class TestUploadController {
 
-  @Inject(ModelBlobⲐ)
-  service: ModelBlobSupport;
+  @Inject()
+  service: MemoryModelService;
 
   @Post('/all')
   @UploadAll()
   async uploadAll({ uploads }: Request) {
     for (const [, file] of Object.entries(uploads)) {
-      return bHash(file);
+      return getMeta(file);
     }
   }
 
@@ -58,17 +48,17 @@ class TestUploadController {
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: bHash(file1), hash2: bHash(file2) };
+    return { hash1: getMeta(file1)?.hash, hash2: getMeta(file2)?.hash };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: bHash(file1), hash2: bHash(file2) };
+    return { hash1: getMeta(file1)?.hash, hash2: getMeta(file2)?.hash };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    return { hash1: bHash(file1), hash2: bHash(file2) };
+    return { hash1: getMeta(file1)?.hash, hash2: getMeta(file2)?.hash };
   }
 
   @Get('*')
@@ -94,7 +84,7 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
   async getBlobMeta(pth: string) {
     const blob = await this.fixture.readBlob(pth);
     const updated = await IOUtil.computeMetadata(blob);
-    return BlobUtil.getBlobMeta(updated);
+    return getMeta(updated);
   }
 
 

@@ -59,6 +59,7 @@ export class FastifyServerUtil {
         }
         reply.raw.end();
       },
+      getHeaderNames: reply.raw.getHeaderNames.bind(reply.raw),
       setHeader: reply.raw.setHeader.bind(reply.raw),
       getHeader: castTo(reply.raw.getHeader.bind(reply.raw)), // NOTE: Forcing type, may be incorrect
       removeHeader: reply.raw.removeHeader.bind(reply.raw),

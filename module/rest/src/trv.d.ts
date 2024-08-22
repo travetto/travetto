@@ -167,10 +167,15 @@ declare global {
      */
     readonly headersSent: boolean;
     /**
-     * Get the headers that have been marked for sending
+     * Get a registered response header by name
      * @param key Header name
      */
     getHeader(key: string): string | string[] | undefined;
+    /**
+     * Get the headers that have been marked for sending
+     * @param key Header name
+     */
+    getHeaderNames(): string[];
     /**
      * Set a header to be sent.  Fails if headers have already been sent.
      * @param key The header to set

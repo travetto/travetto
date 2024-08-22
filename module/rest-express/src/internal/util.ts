@@ -59,6 +59,7 @@ export class ExpressServerUtil {
         }
         res.end();
       },
+      getHeaderNames: res.getHeaderNames.bind(res),
       setHeader: res.setHeader.bind(res),
       getHeader: castTo(res.getHeader.bind(res)), // NOTE: Forcing type, may be incorrect
       removeHeader: res.removeHeader.bind(res),
