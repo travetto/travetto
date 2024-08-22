@@ -305,16 +305,17 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.memoryBlob(input, meta);
+    meta = BlobUtil.getBlobMeta(resolved) ?? {};
 
     if (resolved.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#q(BLOB_SPACE, location, {
         Body: Readable.fromWeb(resolved.stream()),
         ContentLength: resolved.size,
-        ...this.#getMetaBase(resolved.meta ?? {}),
+        ...this.#getMetaBase(meta),
       }));
     } else {
-      await this.#writeMultipart(location, Readable.fromWeb(resolved.stream()), resolved.meta ?? {});
+      await this.#writeMultipart(location, Readable.fromWeb(resolved.stream()), meta);
     }
   }
 

@@ -8,6 +8,8 @@ import { PassThrough, Readable } from 'node:stream';
 import { BinaryInput, castTo } from './types';
 import { AppError } from './error';
 
+const BLOB_META = Symbol.for('@travetto/runtime:blob-meta');
+
 /**
  * Range of bytes, inclusive
  */
@@ -37,6 +39,20 @@ export interface BlobMeta {
 export class BlobUtil {
 
   /**
+   * Setting blob meta
+   */
+  static setBlobMeta(blob: Blob, meta: BlobMeta): void {
+    castTo<{ [BLOB_META]?: BlobMeta }>(blob)[BLOB_META] = meta;
+  }
+
+  /**
+   * Getting blob meta
+   */
+  static getBlobMeta(blob: Blob): BlobMeta | undefined {
+    return castTo<{ [BLOB_META]?: BlobMeta }>(blob)[BLOB_META];
+  }
+
+  /**
    * Make a blob, and assign metadata
    */
   static async lazyStreamBlob(input: () => (Readable | Promise<Readable>), metadata: BlobMeta): Promise<Blob> {
@@ -59,7 +75,7 @@ export class BlobUtil {
       buffer: { value: () => toBuffer(go()).then(v => new Uint8Array(v)) },
     });
 
-    out.meta = metadata;
+    this.setBlobMeta(out, metadata);
 
     return out;
   }
@@ -69,8 +85,8 @@ export class BlobUtil {
    */
   static async fileBlob(src: string, metadata: BlobMeta = {}): Promise<File> {
     return castTo(this.lazyStreamBlob(() => createReadStream(src, metadata.range), {
-      size: (await fs.stat(src)).size,
       ...metadata,
+      size: metadata.size ?? (await fs.stat(src)).size,
     }));
   }
 
@@ -106,14 +122,14 @@ export class BlobUtil {
     let input: () => (Readable | Promise<Readable>);
     let type: string | undefined;
     let size: number | undefined;
-    if (typeof src === 'object' && 'pipeThrough' in src) {
-      input = (): Readable => Readable.fromWeb(src);
-    } else if (typeof src === 'object' && 'pipe' in src) {
-      input = (): Readable => src;
-    } else if (src instanceof Blob) {
+    if (src instanceof Blob) {
       type = src.type;
       size = src.size;
       input = async (): Promise<Readable> => Readable.from(await src.bytes());
+    } else if (typeof src === 'object' && 'pipeThrough' in src) {
+      input = (): Readable => Readable.fromWeb(src);
+    } else if (typeof src === 'object' && 'pipe' in src) {
+      input = (): Readable => src;
     } else {
       size = src.length;
       input = (): Readable => Readable.from(src);
@@ -138,5 +154,15 @@ export class BlobUtil {
     }
 
     return { start, end };
+  }
+
+  /**
+   * Cleanup if valid
+   * @param blob
+   */
+  static async cleanupBlob(blob: Blob): Promise<void> {
+    if ('cleanup' in blob && typeof blob.cleanup === 'function') {
+      await blob.cleanup();
+    }
   }
 }

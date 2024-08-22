@@ -178,10 +178,11 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.streamBlob(input, meta);
+    meta = BlobUtil.getBlobMeta(resolved) ?? {};
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
       await pipeline(resolved.stream(), createWriteStream(file)),
-      fs.writeFile(file.replace(BIN, META), JSON.stringify(resolved.meta ?? {}), 'utf8')
+      fs.writeFile(file.replace(BIN, META), JSON.stringify(meta ?? {}), 'utf8')
     ]);
   }
 

@@ -292,9 +292,10 @@ export class MongoModelService implements
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.streamBlob(input, meta);
+    meta = BlobUtil.getBlobMeta(resolved) ?? {};
     const writeStream = this.#bucket.openUploadStream(location, {
       contentType: resolved.type,
-      metadata: resolved.meta ?? {}
+      metadata: meta
     });
 
     await pipeline(resolved.stream(), writeStream);

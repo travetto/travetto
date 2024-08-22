@@ -8,7 +8,7 @@ import { createWriteStream } from 'node:fs';
 
 import { getExtension, getType } from 'mime';
 
-import { AppError, BinaryInput, castTo, Util } from '@travetto/runtime';
+import { AppError, BinaryInput, BlobMeta, BlobUtil, castTo, Util } from '@travetto/runtime';
 
 /**
  * Common functions for dealing with binary data/streams
@@ -204,5 +204,50 @@ export class IOUtil {
     }
 
     return uniqueLocal;
+  }
+
+
+  /**
+   * Get filename for a given input
+   */
+  static getFilename(src: Blob | string, meta: BlobMeta): string {
+    let filename = meta.filename ?? (typeof src === 'string' ? src : undefined);
+
+    // Detect name if missing
+    if (!filename) {
+      if (typeof src === 'string') {
+        filename = path.basename(src);
+      } else if (src instanceof File) {
+        filename = src.name;
+      }
+    }
+
+    filename ??= `unknown_${Date.now()}`;
+
+    // Add extension if missing
+    if (filename) {
+      const extName = path.extname(filename);
+      if (!extName && meta.contentType) {
+        const ext = this.getExtension(meta.contentType);
+        if (ext) {
+          filename = `${filename}.${ext}`;
+        }
+      }
+    }
+    return filename;
+  }
+
+  /**
+   * Compute metadata for a blob
+   * @param blob
+   * @returns
+   */
+  static async computeMetadata(blob: Blob): Promise<BlobMeta> {
+    const meta = BlobUtil.getBlobMeta(blob) ?? {};
+    meta.hash ??= await this.hashInput(blob);
+    meta.contentType = (meta.contentType || undefined) ?? (await this.detectType(blob)).mime;
+    meta.filename ??= this.getFilename(blob, meta);
+    BlobUtil.setBlobMeta(blob, meta);
+    return meta;
   }
 }

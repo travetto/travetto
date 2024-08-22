@@ -241,9 +241,10 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.memoryBlob(input, meta);
+    meta = BlobUtil.getBlobMeta(resolved) ?? {};
     const streams = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(BlobMetaNamespace);
-    metaContent.set(location, Buffer.from(JSON.stringify(resolved.meta ?? {})));
+    metaContent.set(location, Buffer.from(JSON.stringify(meta)));
     streams.set(location, Buffer.from(await resolved.bytes()));
   }
 

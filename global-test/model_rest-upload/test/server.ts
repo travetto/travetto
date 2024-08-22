@@ -8,9 +8,8 @@ import { RootRegistry } from '@travetto/registry';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/rest-upload';
-import { Util, BlobMeta } from '@travetto/runtime';
+import { Util, BlobMeta, BlobUtil } from '@travetto/runtime';
 import { ModelBlobSupport } from '@travetto/model';
-import { BlobUtil } from '@travetto/io';
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -23,6 +22,8 @@ class Config {
   }
 }
 
+const bHash = (blob: Blob) => BlobUtil.getBlobMeta(blob)?.hash;
+
 @Controller('/test/upload')
 class TestUploadController {
 
@@ -33,7 +34,7 @@ class TestUploadController {
   @UploadAll()
   async uploadAll({ uploads }: Request) {
     for (const [, file] of Object.entries(uploads)) {
-      return file.meta;
+      return bHash(file);
     }
   }
 
@@ -56,23 +57,17 @@ class TestUploadController {
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    const asset1 = file1.meta;
-    const asset2 = file2.meta;
-    return { hash1: asset1?.hash, hash2: asset2?.hash };
+    return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    const asset1 = file1.meta;
-    const asset2 = file2.meta;
-    return { hash1: asset1?.hash, hash2: asset2?.hash };
+    return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    const asset1 = file1.meta;
-    const asset2 = file2.meta;
-    return { hash1: asset1?.hash, hash2: asset2?.hash };
+    return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 
   @Get('*')
@@ -99,7 +94,7 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
   }
 
   async getBlobMeta(pth: string) {
-    return (await this.getBlob(pth)).meta;
+    return BlobUtil.getBlobMeta(await this.getBlob(pth));
   }
 
 

@@ -1,5 +1,5 @@
 import { BlobMeta, Util } from '@travetto/runtime';
-import { BlobUtil } from '@travetto/io';
+import { IOUtil } from '@travetto/io';
 
 /**
  * Utilities for processing assets
@@ -15,6 +15,6 @@ export class ModelBlobUtil {
     const base = hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (_, ...others) =>
       `${prefix}${others.slice(0, 5).join('/')}`);
 
-    return BlobUtil.getFilename(base, meta);
+    return IOUtil.getFilename(base, meta);
   }
 }
