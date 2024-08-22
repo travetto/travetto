@@ -27,9 +27,10 @@ export class RestUploadUtil {
     try {
       const check = config.matcher ??= MimeUtil.matcher(config.types);
       await IOUtil.streamWithLimit(stream, createWriteStream(location), config.maxSize);
-      const blob = await BlobUtil.fileBlob(location);
-      await IOUtil.computeMetadata(blob);
+      const blob = await IOUtil.computeMetadata(await BlobUtil.fileBlob(location, { filename }));
       castTo<{ cleanup: Function }>(blob).cleanup = (): Promise<void> => fs.rm(location, { force: true });
+
+      console.log('Got upload', filename, field, blob);
 
       if (!check(blob.type)) {
         throw new AppError(`Content type not allowed: ${blob.type}`, 'data');
@@ -69,7 +70,9 @@ export class RestUploadUtil {
     const uploader = busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
       .on('file', (field, stream, filename) =>
         uploads.push(
-          this.#singleUpload(stream, filename, { maxSize: largestMax, ...config.uploads![field] ?? config }, field)
+          this.#singleUpload(stream, filename, { maxSize: largestMax, ...config.uploads![field] ?? config }, field).then(v =>
+            uploadMap[field] = v
+          )
         )
       )
       .on('limit', field =>

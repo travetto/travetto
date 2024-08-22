@@ -11,35 +11,37 @@ import { Upload, UploadAll } from '../../src/decorator';
 
 type FileUpload = { name: string, resource: string, type: string };
 
+const bHash = (blob: Blob) => BlobUtil.getBlobMeta(blob)?.hash;
+
 @Controller('/test/upload')
 class TestUploadController {
 
   @Post('/all')
   @UploadAll()
-  async uploadAll({ uploads }: Request): Promise<{ hash: string } | undefined> {
+  async uploadAll({ uploads }: Request): Promise<{ hash?: string } | undefined> {
     for (const [, blob] of Object.entries(uploads)) {
-      return { hash: await IOUtil.hashInput(blob) };
+      return { hash: bHash(blob) };
     }
   }
 
   @Post('/')
   async upload(@Upload() file: File) {
-    return { hash: await IOUtil.hashInput(file) };
+    return { hash: bHash(file) };
   }
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: await IOUtil.hashInput(file1), hash2: await IOUtil.hashInput(file2) };
+    return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: await IOUtil.hashInput(file1), hash2: await IOUtil.hashInput(file2) };
+    return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    return { hash1: await IOUtil.hashInput(file1), hash2: await IOUtil.hashInput(file2) };
+    return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 }
 
@@ -49,7 +51,7 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
   fixture: TestFixtures;
 
   async getBlob(pth: string): Promise<Blob> {
-    return await BlobUtil.memoryBlob(await this.fixture.read(pth, true));
+    return await BlobUtil.fileBlob(await this.fixture.resolve(pth));
   }
 
   async getUploads(...files: FileUpload[]) {

@@ -43,6 +43,7 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
         case 'application/x-www-form-urlencoded':
         case 'multipart/form-data':
           req.uploads = await RestUploadUtil.uploadMultipart(req, config);
+          console.log('Uploaded', req.uploads);
           break;
         default:
           req.uploads = await RestUploadUtil.uploadDirect(req, config);
