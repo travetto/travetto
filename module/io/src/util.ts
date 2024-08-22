@@ -25,7 +25,7 @@ export class IOUtil {
     if (Buffer.isBuffer(input)) {
       hash.write(input);
     } else if (input instanceof Blob) {
-      hash.write(await input.bytes());
+      await pipeline(Readable.fromWeb(input.stream()), hash);
     } else {
       await pipeline(input, hash);
     }
@@ -239,8 +239,6 @@ export class IOUtil {
 
   /**
    * Compute metadata for a blob
-   * @param blob
-   * @returns
    */
   static async computeMetadata(blob: Blob): Promise<Blob> {
     const meta = BlobUtil.getBlobMeta(blob) ?? {};
