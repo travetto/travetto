@@ -86,6 +86,7 @@ export class BlobUtil {
   static async fileBlob(src: string, metadata: BlobMeta = {}): Promise<File> {
     return castTo(this.lazyStreamBlob(() => createReadStream(src, metadata.range), {
       ...metadata,
+      filename: src,
       size: metadata.size ?? (await fs.stat(src)).size,
     }));
   }

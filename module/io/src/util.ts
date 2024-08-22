@@ -242,12 +242,12 @@ export class IOUtil {
    * @param blob
    * @returns
    */
-  static async computeMetadata(blob: Blob): Promise<BlobMeta> {
+  static async computeMetadata(blob: Blob): Promise<Blob> {
     const meta = BlobUtil.getBlobMeta(blob) ?? {};
     meta.hash ??= await this.hashInput(blob);
     meta.contentType = (meta.contentType || undefined) ?? (await this.detectType(blob)).mime;
-    meta.filename ??= this.getFilename(blob, meta);
+    meta.filename = this.getFilename(blob, meta) ?? meta.filename;
     BlobUtil.setBlobMeta(blob, meta);
-    return meta;
+    return blob;
   }
 }

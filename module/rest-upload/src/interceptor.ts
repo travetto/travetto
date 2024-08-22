@@ -35,7 +35,9 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
     console.log('Starting direct upload', req.header('content-length'));
     const filename = req.getFilename();
     const location = await IOUtil.writeTempFile(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
-    const blob = await BlobUtil.fileBlob(location);
+    const blob = await BlobUtil.fileBlob(location)
+      .then(b => IOUtil.computeMetadata(b));
+
     try {
       return { file: await this.validateUpload(config, blob) };
     } catch (err) {
@@ -56,6 +58,7 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
         uploads.push(
           IOUtil.writeTempFile(stream, filename, config.uploads![field]?.maxSize ?? largestMax)
             .then(location => BlobUtil.fileBlob(location))
+            .then(blob => IOUtil.computeMetadata(blob))
             .then(blob => uploadMap[field] = blob)
             .then(blob => this.validateUpload(config.uploads?.[field] ?? config, blob))
         )
