@@ -1,7 +1,6 @@
 
 import { Inject, Injectable } from '@travetto/di';
 import { BodyParseInterceptor, FilterContext, FilterReturn, FilterNext, RestInterceptor, SerializeInterceptor } from '@travetto/rest';
-import { BlobUtil } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
 import { RestUploadUtil } from './util';
@@ -43,7 +42,6 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
         case 'application/x-www-form-urlencoded':
         case 'multipart/form-data':
           req.uploads = await RestUploadUtil.uploadMultipart(req, config);
-          console.log('Uploaded', req.uploads);
           break;
         default:
           req.uploads = await RestUploadUtil.uploadDirect(req, config);
@@ -52,7 +50,7 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
       return await next();
     } finally {
       if (this.config.cleanupFiles !== false && req.uploads) {
-        await Promise.all(Object.values(req.uploads).map(x => BlobUtil.cleanupBlob(x)));
+        await RestUploadUtil.cleanupBlobs(Object.values(req.uploads));
       }
     }
   }

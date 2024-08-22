@@ -156,14 +156,4 @@ export class BlobUtil {
 
     return { start, end };
   }
-
-  /**
-   * Cleanup if valid
-   * @param blob
-   */
-  static async cleanupBlob(blob: Blob): Promise<void> {
-    if ('cleanup' in blob && typeof blob.cleanup === 'function') {
-      await blob.cleanup();
-    }
-  }
 }

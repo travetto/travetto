@@ -108,7 +108,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const saved = await service.getBlob('orange');
     const savedMeta = BlobUtil.getBlobMeta(saved)!;
 
-    const blob = await BlobUtil.fileBlob(await this.fixture.resolve('/asset.yml'));
+    const blob = await this.fixture.readBlob('/asset.yml');
     const blobMeta = BlobUtil.getBlobMeta(blob)!;
     assert(blobMeta.contentType === savedMeta.contentType);
     assert(blob.size === savedMeta.size);

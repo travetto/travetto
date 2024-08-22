@@ -101,4 +101,12 @@ export class RestUploadUtil {
     }
     return uploadMap;
   }
+
+  static async cleanupBlobs(blobs: Blob[]): Promise<void> {
+    await Promise.all(blobs.map(async blob => {
+      if ('cleanup' in blob && typeof blob.cleanup === 'function') {
+        await blob.cleanup();
+      }
+    }));
+  }
 }

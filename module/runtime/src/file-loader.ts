@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { AppError } from './error';
+import { BlobUtil } from './blob';
 
 /**
  * File loader that will search for files across the provided search paths
@@ -55,5 +56,14 @@ export class FileLoader {
   async readStream(relativePath: string, binary = true): Promise<Readable> {
     const file = await this.resolve(relativePath);
     return createReadStream(file, { encoding: binary ? undefined : 'utf8' });
+  }
+
+  /**
+   * Read a blob form a given path
+   * @param relativePath The path to blob
+   */
+  async readBlob(relativePath: string): Promise<Blob> {
+    const file = await this.resolve(relativePath);
+    return BlobUtil.fileBlob(file);
   }
 }

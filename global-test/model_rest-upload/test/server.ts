@@ -89,12 +89,8 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     }));
   }
 
-  async getBlob(pth: string) {
-    return BlobUtil.memoryBlob(await this.fixture.read(pth, true));
-  }
-
   async getBlobMeta(pth: string) {
-    return BlobUtil.getBlobMeta(await this.getBlob(pth));
+    return BlobUtil.getBlobMeta(await this.fixture.readBlob(pth));
   }
 
 
