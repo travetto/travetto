@@ -17,7 +17,6 @@ const BlobMetaNamespace = `${ModelBlobNamespace}_meta`;
 
 type StoreType = Map<string, Buffer>;
 
-
 @Config('model.memory')
 export class MemoryModelConfig {
   autoCreate?: boolean = true;
@@ -240,7 +239,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
-    const resolved = await BlobUtil.memoryBlob(input, meta);
+    const resolved = await BlobUtil.streamBlob(input, meta);
     meta = BlobUtil.getBlobMeta(resolved) ?? {};
     const streams = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(BlobMetaNamespace);

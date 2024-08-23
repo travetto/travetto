@@ -64,7 +64,6 @@ class TestUploadController {
   @Get('*')
   async get(req: Request) {
     const range = req.getRange();
-    console.log('Getting file', range);
     return await this.service.getBlob(req.url.replace(/^\/test\/upload\//, ''), range);
   }
 }

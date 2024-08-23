@@ -94,32 +94,6 @@ export class BlobUtil {
   /**
    * Convert input to a blob, containing all data in memory
    */
-  static async memoryBlob(src: BinaryInput, metadata: BlobMeta = {}): Promise<Blob> {
-    let buffer: Buffer;
-    let type: string | undefined;
-    if (src instanceof Blob) {
-      type = src.type;
-      buffer = Buffer.from(await src.arrayBuffer());
-      metadata = { ...this.getBlobMeta(src), ...metadata };
-    } else if (typeof src === 'object' && 'pipeThrough' in src) {
-      buffer = Buffer.from(await toBuffer(src));
-    } else if (typeof src === 'object' && 'pipe' in src) {
-      buffer = Buffer.from(await toBuffer(src));
-    } else {
-      buffer = src;
-    }
-
-    return await this.lazyStreamBlob(() => Readable.from(buffer), {
-      ...metadata,
-      contentType: metadata.contentType ?? type,
-      size: metadata.size ?? buffer.length,
-    });
-  }
-
-
-  /**
-   * Convert input to a blob, containing all data in memory
-   */
   static async streamBlob(src: BinaryInput, metadata: BlobMeta = {}): Promise<Blob> {
     let input: () => (Readable | Promise<Readable>);
     let type: string | undefined;

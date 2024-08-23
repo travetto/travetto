@@ -21,15 +21,6 @@ export class BlobUtilTest {
     assert(blobBytes.equals(allBytes));
   }
 
-  @Test()
-  async verifyMemoryBlob() {
-    const blob = await BlobUtil.memoryBlob(await this.fixtures.readStream('/logo.png'));
-    const blobBytes = Buffer.from(await blob.arrayBuffer());
-    const allBytes = await this.fixtures.read('/logo.png', true);
-    assert(blob.size === blobBytes.length);
-    assert(blobBytes.length === allBytes.length);
-    assert(blobBytes.equals(allBytes));
-  }
 
   @Test()
   async verifyStreamBlob() {

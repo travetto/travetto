@@ -133,7 +133,12 @@ export class SerializeUtil {
     if (output.size) {
       res.setHeader('content-length', `${output.size}`);
     }
-    return this.serializeStream(res, Readable.fromWeb(output.stream()));
+
+    this.setContentTypeIfUndefined(res, 'application/octet-stream');
+
+    for await (const chunk of output.stream()) {
+      res.write(chunk);
+    }
   }
 
   /**
