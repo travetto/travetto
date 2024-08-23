@@ -1,12 +1,13 @@
 import path from 'node:path';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
 import { Readable, Transform, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { getExtension, getType } from 'mime';
 
-import { AppError, BinaryInput, BlobMeta, BlobUtil, castTo } from '@travetto/runtime';
+import { AppError, BinaryInput, BlobMeta, castTo } from '@travetto/runtime';
 
 /**
  * Common functions for dealing with binary data/streams
@@ -215,13 +216,15 @@ export class IOUtil {
   }
 
   /**
-   * Compute metadata for a blob
+   * Compute metadata for a file
    */
-  static async computeMetadata(blob: Blob): Promise<Blob> {
-    const meta = BlobUtil.getBlobMeta(blob) ?? {};
-    meta.hash ??= await this.hashInput(blob);
-    meta.contentType = (meta.contentType || undefined) ?? (await this.detectType(blob)).mime;
-    meta.filename = this.getFilename(blob, meta) ?? meta.filename;
-    return BlobUtil.lazyStreamBlob(() => Readable.fromWeb(blob.stream()), { ...meta });
+  static async computeMetadata(file: string, meta: BlobMeta = {}): Promise<BlobMeta> {
+    const contentType = (await this.detectType(file)).mime;
+    return {
+      ...meta,
+      hash: await this.hashInput(createReadStream(file)),
+      contentType,
+      filename: this.getFilename(file, { ...meta, contentType })
+    };
   }
 }

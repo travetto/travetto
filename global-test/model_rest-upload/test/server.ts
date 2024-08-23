@@ -80,10 +80,9 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     }));
   }
 
-  async getBlobMeta(pth: string) {
-    const blob = await this.fixture.readBlob(pth);
-    const updated = await IOUtil.computeMetadata(blob);
-    return getMeta(updated);
+  async getFileMeta(pth: string) {
+    const loc = await this.fixture.resolve(pth);
+    return await IOUtil.computeMetadata(loc);
   }
 
 
@@ -98,7 +97,7 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<BlobMeta>('post', '/test/upload/all', this.getMultipartRequest([sent]));
 
-    const meta = await this.getBlobMeta('/logo.png');
+    const meta = await this.getFileMeta('/logo.png');
     assert(res.body.hash === meta?.hash);
   }
 
@@ -114,7 +113,7 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
       body: sent.buffer
     });
 
-    const meta = await this.getBlobMeta('/logo.png');
+    const meta = await this.getFileMeta('/logo.png');
     assert(res.body.meta.hash === meta?.hash);
   }
 
@@ -122,7 +121,7 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<{ location: string, meta: BlobMeta }>('post', '/test/upload', this.getMultipartRequest(uploads));
-    const meta = await this.getBlobMeta('/logo.png');
+    const meta = await this.getFileMeta('/logo.png');
     assert(res.body.meta.hash === meta?.hash);
   }
 
@@ -143,7 +142,7 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
-    const meta = await this.getBlobMeta('/logo.png');
+    const meta = await this.getFileMeta('/logo.png');
     assert(res.body.hash1 === meta?.hash);
     assert(res.body.hash2 === meta?.hash);
   }
@@ -172,10 +171,10 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     });
     assert(res.status === 200);
 
-    const blob = await this.getBlobMeta('/logo.gif');
+    const blob = await this.getFileMeta('/logo.gif');
     assert(res.body.hash1 === blob?.hash);
 
-    const blob2 = await this.getBlobMeta('/logo.png');
+    const blob2 = await this.getFileMeta('/logo.png');
     assert(res.body.hash2 === blob2?.hash);
   }
 
@@ -203,10 +202,10 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     });
     assert(res.status === 200);
 
-    const blob = await this.getBlobMeta('/asset.yml');
+    const blob = await this.getFileMeta('/asset.yml');
     assert(res.body.hash1 === blob?.hash);
 
-    const blob2 = await this.getBlobMeta('/logo.png');
+    const blob2 = await this.getFileMeta('/logo.png');
     assert(res.body.hash2 === blob2?.hash);
   }
 

@@ -25,7 +25,8 @@ export class RestUploadUtil {
     try {
       const check = config.matcher ??= MimeUtil.matcher(config.types);
       await IOUtil.streamWithLimit(stream, createWriteStream(location), config.maxSize);
-      const blob = await IOUtil.computeMetadata(await BlobUtil.fileBlob(location, { filename }));
+      const meta = await IOUtil.computeMetadata(location, { filename });
+      const blob = await BlobUtil.fileBlob(location, meta);
       castTo<{ cleanup: Function }>(blob).cleanup = (): Promise<void> => fs.rm(location, { force: true });
 
       if (!check(blob.type)) {

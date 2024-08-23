@@ -72,7 +72,7 @@ export class BlobUtil {
       stream: { value: () => ReadableStream.from(go()) },
       arrayBuffer: { value: () => toBuffer(go()) },
       text: { value: () => toText(go()) },
-      buffer: { value: () => toBuffer(go()).then(v => new Uint8Array(v)) },
+      bytes: { value: () => toBuffer(go()).then(v => new Uint8Array(v)) },
     });
 
     this.setBlobMeta(out, metadata);

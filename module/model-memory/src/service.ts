@@ -241,21 +241,21 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const resolved = await BlobUtil.streamBlob(input, meta);
     meta = BlobUtil.getBlobMeta(resolved) ?? {};
-    const streams = this.#getStore(ModelBlobNamespace);
+    const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(BlobMetaNamespace);
     metaContent.set(location, Buffer.from(JSON.stringify(meta)));
-    streams.set(location, Buffer.from(await resolved.bytes()));
+    blobs.set(location, Buffer.from(await resolved.bytes()));
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
-    const streams = this.#find(ModelBlobNamespace, location, 'notfound');
-    let buffer = streams.get(location)!;
+    const blobs = this.#find(ModelBlobNamespace, location, 'notfound');
+    let buffer = blobs.get(location)!;
     const final = range ? BlobUtil.enforceRange(range, buffer.length) : undefined;
     if (final) {
       buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }
     const meta = await this.describeBlob(location);
-    return BlobUtil.lazyStreamBlob(() => Readable.from(buffer), { ...meta, range: final });
+    return BlobUtil.streamBlob(() => Readable.from(buffer), { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {
@@ -265,10 +265,10 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async deleteBlob(location: string): Promise<void> {
-    const streams = this.#getStore(ModelBlobNamespace);
+    const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(BlobMetaNamespace);
-    if (streams.has(location)) {
-      streams.delete(location);
+    if (blobs.has(location)) {
+      blobs.delete(location);
       metaContent.delete(location);
     } else {
       throw new NotFoundError(ModelBlobNamespace, location);
