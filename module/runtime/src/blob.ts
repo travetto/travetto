@@ -1,12 +1,9 @@
 import path from 'node:path';
-import fs from 'node:fs/promises';
-import { createReadStream } from 'node:fs';
 import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toBuffer } from 'node:stream/consumers';
 import { PassThrough, Readable } from 'node:stream';
 
-import { BinaryInput, castTo } from './types';
-import { AppError } from './error';
+import { castTo } from './types';
 
 const BLOB_META = Symbol.for('@travetto/runtime:blob-meta');
 
@@ -55,7 +52,7 @@ export class BlobUtil {
   /**
    * Make a blob, and assign metadata
    */
-  static async lazyStreamBlob(input: () => (Readable | Promise<Readable>), metadata: BlobMeta): Promise<Blob> {
+  static readableBlob(input: () => (Readable | Promise<Readable>), metadata: BlobMeta): Blob {
     const stream = new PassThrough();
     const go = (): Readable => {
       Promise.resolve(input()).then(v => v.pipe(stream), (err) => stream.destroy(err));
@@ -78,58 +75,5 @@ export class BlobUtil {
     this.setBlobMeta(out, metadata);
 
     return out;
-  }
-
-  /**
-   * Convert file to a blob, backed by file system
-   */
-  static async fileBlob(src: string, metadata: BlobMeta = {}): Promise<File> {
-    return castTo(this.lazyStreamBlob(() => createReadStream(src, metadata.range), {
-      ...metadata,
-      filename: src,
-      size: metadata.size ?? (await fs.stat(src)).size,
-    }));
-  }
-
-  /**
-   * Convert input to a blob, containing all data in memory
-   */
-  static async streamBlob(src: BinaryInput, metadata: BlobMeta = {}): Promise<Blob> {
-    let input: () => (Readable | Promise<Readable>);
-    let type: string | undefined;
-    let size: number | undefined;
-    if (src instanceof Blob) {
-      type = src.type;
-      size = src.size;
-      metadata = { ...this.getBlobMeta(src), ...metadata };
-      input = async (): Promise<Readable> => Readable.fromWeb(src.stream());
-    } else if (typeof src === 'object' && 'pipeThrough' in src) {
-      input = (): Readable => Readable.fromWeb(src);
-    } else if (typeof src === 'object' && 'pipe' in src) {
-      input = (): Readable => src;
-    } else {
-      size = src.length;
-      input = (): Readable => Readable.from(src);
-    }
-
-    return await this.lazyStreamBlob(input, {
-      ...metadata,
-      contentType: metadata.contentType ?? type,
-      size: metadata.size ?? size,
-    });
-  }
-
-  /**
-   * Enforce byte range for stream stream/file of a certain size
-   */
-  static enforceRange({ start, end }: ByteRange, size: number): Required<ByteRange> {
-    // End is inclusive
-    end = Math.min(end ?? (size - 1), size - 1);
-
-    if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0 || start > end) {
-      throw new AppError('Invalid position, out of range', 'data');
-    }
-
-    return { start, end };
   }
 }

@@ -1,6 +1,6 @@
 import busboy from '@fastify/busboy';
 
-import { createWriteStream } from 'node:fs';
+import { createReadStream, createWriteStream } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
@@ -9,7 +9,7 @@ import { Readable } from 'node:stream';
 import { IOUtil } from '@travetto/io';
 import { Request, MimeUtil } from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
-import { BlobUtil, AppError, castTo, Util } from '@travetto/runtime';
+import { BlobUtil, AppError, castTo, Util, BlobMeta } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
 
@@ -25,8 +25,15 @@ export class RestUploadUtil {
     try {
       const check = config.matcher ??= MimeUtil.matcher(config.types);
       await IOUtil.streamWithLimit(stream, createWriteStream(location), config.maxSize);
-      const meta = await IOUtil.computeMetadata(location, { filename });
-      const blob = await BlobUtil.fileBlob(location, meta);
+      const contentType = (await IOUtil.detectType(location)).mime;
+      const meta: BlobMeta = {
+        contentType,
+        hash: await IOUtil.hashInput(createReadStream(location)),
+        filename: IOUtil.getFilename(filename, contentType),
+        size: (await fs.stat(location)).size,
+      };
+      const blob = BlobUtil.readableBlob(() => createReadStream(location), meta);
+
       castTo<{ cleanup: Function }>(blob).cleanup = (): Promise<void> => fs.rm(location, { force: true });
 
       if (!check(blob.type)) {

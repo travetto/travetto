@@ -68,7 +68,7 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<{ hash: string }>('post', '/test/upload/all', this.getMultipartRequest([sent]));
 
-    const file = await this.fixture.readBlob('/logo.png');
+    const file = await this.fixture.readStream('/logo.png');
     assert(res.body.hash === await IOUtil.hashInput(file));
   }
 
@@ -84,7 +84,7 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
       body: sent.buffer
     });
 
-    const file = await this.fixture.readBlob('/logo.png');
+    const file = await this.fixture.readStream('/logo.png');
     assert(res.body.hash === await IOUtil.hashInput(file));
   }
 
@@ -93,7 +93,7 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<{ hash: string }>('post', '/test/upload', this.getMultipartRequest(uploads));
 
-    const file = await this.fixture.readBlob('/logo.png');
+    const file = await this.fixture.readStream('/logo.png');
     assert(res.body.hash === await IOUtil.hashInput(file));
   }
 
@@ -104,7 +104,7 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
-    const file = await this.fixture.readBlob('/logo.png');
+    const file = await this.fixture.readStream('/logo.png');
     const hash = await IOUtil.hashInput(file);
 
     assert(res.body.hash1 === hash);
@@ -135,10 +135,10 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     });
     assert(res.status === 200);
 
-    const file1 = await this.fixture.readBlob('/logo.gif');
+    const file1 = await this.fixture.readStream('/logo.gif');
     const hash1 = await IOUtil.hashInput(file1);
 
-    const file2 = await this.fixture.readBlob('/logo.png');
+    const file2 = await this.fixture.readStream('/logo.png');
     const hash2 = await IOUtil.hashInput(file2);
 
     assert(res.body.hash1 === hash1);
@@ -169,10 +169,10 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     });
     assert(res.status === 200);
 
-    const file1 = await this.fixture.readBlob('/asset.yml');
+    const file1 = await this.fixture.readStream('/asset.yml');
     const hash1 = await IOUtil.hashInput(file1);
 
-    const file2 = await this.fixture.readBlob('/logo.png');
+    const file2 = await this.fixture.readStream('/logo.png');
     const hash2 = await IOUtil.hashInput(file2);
 
     assert(res.body.hash1 === hash1);

@@ -81,8 +81,8 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
   }
 
   async getFileMeta(pth: string) {
-    const loc = await this.fixture.resolve(pth);
-    return await IOUtil.computeMetadata(loc);
+    const loc = await this.fixture.readStream(pth);
+    return { hash: await IOUtil.hashInput(loc) };
   }
 
 

@@ -304,18 +304,17 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
-    const resolved = await BlobUtil.streamBlob(input, meta);
-    meta = BlobUtil.getBlobMeta(resolved) ?? {};
+    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
 
-    if (resolved.size < this.config.chunkSize) { // If smaller than chunk size
+    if (blobMeta.size && blobMeta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#q(BLOB_SPACE, location, {
-        Body: Readable.fromWeb(resolved.stream()),
-        ContentLength: resolved.size,
-        ...this.#getMetaBase(meta),
+        Body: stream,
+        ContentLength: blobMeta.size,
+        ...this.#getMetaBase(blobMeta),
       }));
     } else {
-      await this.#writeMultipart(location, Readable.fromWeb(resolved.stream()), meta);
+      await this.#writeMultipart(location, stream, blobMeta);
     }
   }
 
@@ -341,9 +340,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const meta = await this.describeBlob(location);
-    const final = range ? BlobUtil.enforceRange(range, meta.size!) : undefined;
+    const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     const res = (): Promise<Readable> => this.#getObject(location, final);
-    return BlobUtil.lazyStreamBlob(res, { ...meta, range: final });
+    return BlobUtil.readableBlob(res, { ...meta, range: final });
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BlobMeta, ContentLength?: number }> {

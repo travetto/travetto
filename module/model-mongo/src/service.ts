@@ -9,7 +9,8 @@ import { Readable } from 'node:stream';
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig, ModelBlobSupport, ModelBlobNamespace
+  NotFoundError, ExistsError, IndexConfig, ModelBlobSupport, ModelBlobNamespace,
+  ModelBlobUtil
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -291,22 +292,21 @@ export class MongoModelService implements
   }
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
-    const resolved = await BlobUtil.streamBlob(input, meta);
-    meta = BlobUtil.getBlobMeta(resolved) ?? {};
+    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
     const writeStream = this.#bucket.openUploadStream(location, {
-      contentType: resolved.type,
-      metadata: meta
+      contentType: blobMeta.contentType,
+      metadata: blobMeta
     });
 
-    await pipeline(resolved.stream(), writeStream);
+    await pipeline(stream, writeStream);
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const meta = await this.describeBlob(location);
-    const final = range ? BlobUtil.enforceRange(range, meta.size!) : undefined;
+    const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
     const res = (): Readable => this.#bucket.openDownloadStreamByName(location, mongoRange);
-    return BlobUtil.lazyStreamBlob(res, { ...meta, range: final });
+    return BlobUtil.readableBlob(res, { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {

@@ -1,13 +1,12 @@
 import path from 'node:path';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
-import { createReadStream } from 'node:fs';
 import { Readable, Transform, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { getExtension, getType } from 'mime';
 
-import { AppError, BinaryInput, BlobMeta, castTo } from '@travetto/runtime';
+import { AppError, BinaryInput, castTo } from '@travetto/runtime';
 
 /**
  * Common functions for dealing with binary data/streams
@@ -188,43 +187,18 @@ export class IOUtil {
   /**
    * Get filename for a given input
    */
-  static getFilename(src: Blob | string, meta: BlobMeta): string {
-    let filename = meta.filename ?? (typeof src === 'string' ? src : undefined);
-
-    // Detect name if missing
-    if (!filename) {
-      if (typeof src === 'string') {
-        filename = path.basename(src);
-      } else if (src instanceof File) {
-        filename = src.name;
-      }
-    }
-
+  static getFilename(filename?: string, contentType?: string): string {
     filename ??= `unknown_${Date.now()}`;
+    filename = path.basename(filename);
 
-    // Add extension if missing
-    if (filename) {
-      const extName = path.extname(filename);
-      if (!extName && meta.contentType) {
-        const ext = this.getExtension(meta.contentType);
-        if (ext) {
-          filename = `${filename}.${ext}`;
-        }
+    const extName = path.extname(filename);
+    if (!extName && contentType) {
+      const ext = this.getExtension(contentType);
+      if (ext) {
+        filename = `${filename}.${ext}`;
       }
     }
-    return filename;
-  }
 
-  /**
-   * Compute metadata for a file
-   */
-  static async computeMetadata(file: string, meta: BlobMeta = {}): Promise<BlobMeta> {
-    const contentType = (await this.detectType(file)).mime;
-    return {
-      ...meta,
-      hash: await this.hashInput(createReadStream(file)),
-      contentType,
-      filename: this.getFilename(file, { ...meta, contentType })
-    };
+    return filename;
   }
 }

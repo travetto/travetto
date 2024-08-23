@@ -1,11 +1,12 @@
 import { Readable } from 'node:stream';
+import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { Class, TimeSpan, DeepPartial, castTo, BlobMeta, ByteRange, BinaryInput, BlobUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
-  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport, ModelBlobNamespace
+  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport, ModelBlobNamespace, ModelBlobUtil
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -239,23 +240,22 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
-    const resolved = await BlobUtil.streamBlob(input, meta);
-    meta = BlobUtil.getBlobMeta(resolved) ?? {};
+    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(BlobMetaNamespace);
-    metaContent.set(location, Buffer.from(JSON.stringify(meta)));
-    blobs.set(location, Buffer.from(await resolved.bytes()));
+    metaContent.set(location, Buffer.from(JSON.stringify(blobMeta)));
+    blobs.set(location, await toBuffer(stream));
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const blobs = this.#find(ModelBlobNamespace, location, 'notfound');
     let buffer = blobs.get(location)!;
-    const final = range ? BlobUtil.enforceRange(range, buffer.length) : undefined;
+    const final = range ? ModelBlobUtil.enforceRange(range, buffer.length) : undefined;
     if (final) {
       buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }
     const meta = await this.describeBlob(location);
-    return BlobUtil.lazyStreamBlob(() => Readable.from(buffer), { ...meta, range: final });
+    return BlobUtil.readableBlob(() => Readable.from(buffer), { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {

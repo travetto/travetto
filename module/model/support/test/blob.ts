@@ -5,6 +5,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { BlobUtil, Util } from '@travetto/runtime';
 
 import { ModelBlobSupport } from '../../src/service/blob';
+import { ModelBlobUtil } from '../../src/util/blob';
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
@@ -70,7 +71,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(partial.size === 11);
     const partialMeta = BlobUtil.getBlobMeta(partial)!;
     const subContent = await partial.text();
-    const range = await BlobUtil.enforceRange({ start: 10, end: 20 }, partialMeta.size!);
+    const range = await ModelBlobUtil.enforceRange({ start: 10, end: 20 }, partialMeta.size!);
     assert(subContent.length === (range.end - range.start) + 1);
 
     const og = await this.fixture.read('/text.txt');
@@ -80,7 +81,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const partialUnbounded = await service.getBlob(id, { start: 10 });
     const partialUnboundedMeta = BlobUtil.getBlobMeta(partial)!;
     const subContent2 = await partialUnbounded.text();
-    const range2 = await BlobUtil.enforceRange({ start: 10 }, partialUnboundedMeta.size!);
+    const range2 = await ModelBlobUtil.enforceRange({ start: 10 }, partialUnboundedMeta.size!);
     assert(subContent2.length === (range2.end - range2.start) + 1);
     assert(subContent2.startsWith('klm'));
     assert(subContent2.endsWith('xyz'));

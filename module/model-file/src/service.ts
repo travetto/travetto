@@ -10,7 +10,7 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistry,
-  NotFoundError, OptionalId, ExistsError, ModelBlobSupport, ModelBlobNamespace
+  NotFoundError, OptionalId, ExistsError, ModelBlobSupport, ModelBlobNamespace, ModelBlobUtil
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -177,20 +177,19 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
-    const resolved = await BlobUtil.streamBlob(input, meta);
-    meta = BlobUtil.getBlobMeta(resolved) ?? {};
+    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([
-      await pipeline(resolved.stream(), createWriteStream(file)),
-      fs.writeFile(file.replace(BIN, META), JSON.stringify(meta ?? {}), 'utf8')
+      await pipeline(stream, createWriteStream(file)),
+      fs.writeFile(file.replace(BIN, META), JSON.stringify(blobMeta), 'utf8')
     ]);
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const file = await this.#find(ModelBlobNamespace, BIN, location);
     const meta = await this.describeBlob(location);
-    const final = range ? BlobUtil.enforceRange(range, meta.size!) : undefined;
-    return BlobUtil.lazyStreamBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
+    const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
+    return BlobUtil.readableBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {
