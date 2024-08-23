@@ -255,7 +255,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }
     const meta = await this.describeBlob(location);
-    return BlobUtil.streamBlob(() => Readable.from(buffer), { ...meta, range: final });
+    return BlobUtil.lazyStreamBlob(() => Readable.from(buffer), { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {
