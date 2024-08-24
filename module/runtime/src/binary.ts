@@ -6,6 +6,7 @@ import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toBuffer } from 'node:stream/consumers';
+import { createReadStream } from 'node:fs';
 
 import { BinaryInput, BlobMeta } from './types';
 
@@ -59,26 +60,16 @@ export class BinaryUtil {
     const buffer: Buffer[] = [];
 
     for await (const chunk of str.body) {
-      if (Buffer.isBuffer(chunk)) {
-        buffer.push(chunk);
-        count += chunk.length;
-      } else if (typeof chunk === 'string') {
-        buffer.push(Buffer.from(chunk));
-        count += chunk.length;
-      } else if (chunk instanceof Uint8Array) {
-        buffer.push(Buffer.from(chunk));
-        count += chunk.byteLength;
-      }
+      const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      buffer.push(buf);
+      count += buf.length;
 
       if (count > byteLimit && byteLimit > 0) {
         break;
       }
     }
 
-    try {
-      await str.body?.cancel();
-    } catch { }
-
+    await str.body?.cancel()?.catch(() => { });
     return Buffer.concat(buffer, byteLimit <= 0 ? undefined : byteLimit);
   }
 
@@ -98,26 +89,18 @@ export class BinaryUtil {
     } else if (Buffer.isBuffer(input)) {
       return input.subarray(0, bytes);
     } else if (typeof input === 'string') {
-      const fd = await fs.open(input, 'r');
-      try {
-        const buffer = Buffer.alloc(bytes);
-        await fd.read(buffer, 0, bytes, 0);
-        return buffer;
-      } finally {
-        try { fd.close(); } catch { }
-      }
-    } else {
-      const chunks: Buffer[] = [];
-      let size = 0;
-      for await (const chunk of input) {
-        const bChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-        chunks.push(bChunk);
-        if ((size += bChunk.length) >= bytes) {
-          break;
-        }
-      }
-      return Buffer.concat(chunks).subarray(0, bytes);
+      input = createReadStream(input);
     }
+    const chunks: Buffer[] = [];
+    let size = 0;
+    for await (const chunk of input) {
+      const bChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      chunks.push(bChunk);
+      if ((size += bChunk.length) >= bytes) {
+        break;
+      }
+    }
+    return Buffer.concat(chunks).subarray(0, bytes);
   }
 
   /**
