@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
-import { BlobUtil, Util } from '@travetto/runtime';
+import { Util } from '@travetto/runtime';
 
 import { ModelBlobSupport } from '../../src/service/blob';
 import { ModelBlobUtil } from '../../src/util/blob';
@@ -35,7 +35,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const meta = await service.describeBlob(id);
 
     const retrieved = await service.getBlob(id);
-    const retrievedMeta = BlobUtil.getBlobMeta(retrieved)!;
+    const retrievedMeta = retrieved.meta!;
     assert(meta.hash === retrievedMeta.hash);
   }
 
@@ -69,7 +69,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const partial = await service.getBlob(id, { start: 10, end: 20 });
     assert(partial.size === 11);
-    const partialMeta = BlobUtil.getBlobMeta(partial)!;
+    const partialMeta = partial.meta!;
     const subContent = await partial.text();
     const range = await ModelBlobUtil.enforceRange({ start: 10, end: 20 }, partialMeta.size!);
     assert(subContent.length === (range.end - range.start) + 1);
@@ -79,7 +79,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(subContent === og.substring(10, 21));
 
     const partialUnbounded = await service.getBlob(id, { start: 10 });
-    const partialUnboundedMeta = BlobUtil.getBlobMeta(partial)!;
+    const partialUnboundedMeta = partial.meta!;
     const subContent2 = await partialUnbounded.text();
     const range2 = await ModelBlobUtil.enforceRange({ start: 10 }, partialUnboundedMeta.size!);
     assert(subContent2.length === (range2.end - range2.start) + 1);
@@ -107,7 +107,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const buffer = await this.fixture.read('/asset.yml', true);
     await service.upsertBlob('orange', buffer, { contentType: 'text/yaml', filename: 'asset.yml' });
     const saved = await service.getBlob('orange');
-    const savedMeta = BlobUtil.getBlobMeta(saved)!;
+    const savedMeta = saved.meta!;
 
     assert('text/yaml' === savedMeta.contentType);
     assert(buffer.length === savedMeta.size);

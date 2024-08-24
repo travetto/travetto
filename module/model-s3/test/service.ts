@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { BytesUtil, castTo } from '@travetto/runtime';
+import { BinaryUtil, castTo } from '@travetto/runtime';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
@@ -48,7 +48,7 @@ export class S3BlobSuite extends ModelBlobSuite {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
-    const hash = await BytesUtil.hashInput(buffer);
+    const hash = await BinaryUtil.hashInput(buffer);
 
     await service.upsertBlob(hash, buffer, {
       filename: 'Random.bin',
@@ -58,7 +58,7 @@ export class S3BlobSuite extends ModelBlobSuite {
     });
 
     const stream = await service.getBlob(hash);
-    const resolved = await BytesUtil.hashInput(stream);
+    const resolved = await BinaryUtil.hashInput(stream);
     assert(resolved === hash);
   }
 }

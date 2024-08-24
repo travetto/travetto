@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { BlobUtil, BytesUtil } from '@travetto/runtime';
+import { BinaryUtil } from '@travetto/runtime';
 import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
@@ -10,7 +10,7 @@ import { Upload, UploadAll } from '../../src/decorator';
 
 type FileUpload = { name: string, resource: string, type: string };
 
-const bHash = (blob: Blob) => BlobUtil.getBlobMeta(blob)?.hash;
+const bHash = (blob: Blob) => blob.meta?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -68,7 +68,7 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     const res = await this.request<{ hash: string }>('post', '/test/upload/all', this.getMultipartRequest([sent]));
 
     const file = await this.fixture.readStream('/logo.png');
-    assert(res.body.hash === await BytesUtil.hashInput(file));
+    assert(res.body.hash === await BinaryUtil.hashInput(file));
   }
 
 
@@ -84,7 +84,7 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     });
 
     const file = await this.fixture.readStream('/logo.png');
-    assert(res.body.hash === await BytesUtil.hashInput(file));
+    assert(res.body.hash === await BinaryUtil.hashInput(file));
   }
 
   @Test()
@@ -93,7 +93,7 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     const res = await this.request<{ hash: string }>('post', '/test/upload', this.getMultipartRequest(uploads));
 
     const file = await this.fixture.readStream('/logo.png');
-    assert(res.body.hash === await BytesUtil.hashInput(file));
+    assert(res.body.hash === await BinaryUtil.hashInput(file));
   }
 
   @Test()
@@ -104,7 +104,7 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     );
     const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
     const file = await this.fixture.readStream('/logo.png');
-    const hash = await BytesUtil.hashInput(file);
+    const hash = await BinaryUtil.hashInput(file);
 
     assert(res.body.hash1 === hash);
     assert(res.body.hash2 === hash);
@@ -135,10 +135,10 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     assert(res.status === 200);
 
     const file1 = await this.fixture.readStream('/logo.gif');
-    const hash1 = await BytesUtil.hashInput(file1);
+    const hash1 = await BinaryUtil.hashInput(file1);
 
     const file2 = await this.fixture.readStream('/logo.png');
-    const hash2 = await BytesUtil.hashInput(file2);
+    const hash2 = await BinaryUtil.hashInput(file2);
 
     assert(res.body.hash1 === hash1);
     assert(res.body.hash2 === hash2);
@@ -169,10 +169,10 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     assert(res.status === 200);
 
     const file1 = await this.fixture.readStream('/asset.yml');
-    const hash1 = await BytesUtil.hashInput(file1);
+    const hash1 = await BinaryUtil.hashInput(file1);
 
     const file2 = await this.fixture.readStream('/logo.png');
-    const hash2 = await BytesUtil.hashInput(file2);
+    const hash2 = await BinaryUtil.hashInput(file2);
 
     assert(res.body.hash1 === hash1);
     assert(res.body.hash2 === hash2);

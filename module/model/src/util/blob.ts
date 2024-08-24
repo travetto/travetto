@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import path from 'node:path';
 
-import { AppError, BinaryInput, BlobMeta, BlobUtil, ByteRange, Util } from '@travetto/runtime';
+import { AppError, BinaryInput, BlobMeta, ByteRange, Util } from '@travetto/runtime';
 
 /**
  * Utilities for processing assets
@@ -29,7 +29,7 @@ export class ModelBlobUtil {
   static async getInput(src: BinaryInput, metadata: BlobMeta = {}): Promise<[Readable, BlobMeta]> {
     let input: Readable;
     if (src instanceof Blob) {
-      metadata = { ...BlobUtil.getBlobMeta(src), ...metadata };
+      metadata = { ...src.meta, ...metadata };
       metadata.size ??= src.size;
       input = Readable.fromWeb(src.stream());
     } else if (typeof src === 'object' && 'pipeThrough' in src) {

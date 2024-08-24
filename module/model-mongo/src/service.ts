@@ -20,7 +20,7 @@ import {
 
 import {
   ShutdownManager, type Class, type DeepPartial, AppError, TypedObject,
-  castTo, asFull, BlobMeta, ByteRange, BinaryInput, BlobUtil
+  castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
@@ -306,7 +306,7 @@ export class MongoModelService implements
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
     const res = (): Readable => this.#bucket.openDownloadStreamByName(location, mongoRange);
-    return BlobUtil.readableBlob(res, { ...meta, range: final });
+    return BinaryUtil.readableBlob(res, { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {

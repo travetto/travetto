@@ -10,7 +10,7 @@ import { getExtension, getType } from 'mime';
 
 import { Request, MimeUtil } from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
-import { BlobUtil, AppError, castTo, Util, TypedObject, BinaryInput, BytesUtil } from '@travetto/runtime';
+import { AppError, castTo, Util, TypedObject, BinaryInput, BinaryUtil } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
 import { UploadMap } from './types';
@@ -36,10 +36,10 @@ export class RestUploadUtil {
         filename = `${filename}.${this.getExtension(contentType)}`;
       }
 
-      const blob = BlobUtil.readableBlob(() => createReadStream(location), {
+      const blob = BinaryUtil.readableBlob(() => createReadStream(location), {
         contentType,
         filename,
-        hash: await BytesUtil.hashInput(createReadStream(location)),
+        hash: await BinaryUtil.hashInput(createReadStream(location)),
         size: (await fs.stat(location)).size,
       });
 
@@ -132,7 +132,7 @@ export class RestUploadUtil {
       filename = input;
     }
     const { default: fileType } = await import('file-type');
-    const buffer = await BytesUtil.readChunk(input, 4100);
+    const buffer = await BinaryUtil.readChunk(input, 4100);
     const matched = await fileType.fromBuffer(buffer);
 
     if (!matched && (filename || input instanceof File)) {

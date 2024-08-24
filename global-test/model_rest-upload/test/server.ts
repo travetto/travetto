@@ -8,11 +8,9 @@ import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/rest-upload';
-import { Util, BlobMeta, BlobUtil, BytesUtil } from '@travetto/runtime';
+import { Util, BlobMeta, BinaryUtil } from '@travetto/runtime';
 
 type FileUpload = { name: string, resource: string, type: string };
-
-const getMeta = (blob: Blob) => BlobUtil.getBlobMeta(blob);
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -24,7 +22,7 @@ class TestUploadController {
   @UploadAll()
   async uploadAll({ uploads }: Request) {
     for (const [, file] of Object.entries(uploads)) {
-      return getMeta(file);
+      return file.meta;
     }
   }
 
@@ -47,17 +45,17 @@ class TestUploadController {
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: getMeta(file1)?.hash, hash2: getMeta(file2)?.hash };
+    return { hash1: file1.meta?.hash, hash2: file2.meta?.hash };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: getMeta(file1)?.hash, hash2: getMeta(file2)?.hash };
+    return { hash1: file1.meta?.hash, hash2: file2.meta?.hash };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    return { hash1: getMeta(file1)?.hash, hash2: getMeta(file2)?.hash };
+    return { hash1: file1.meta?.hash, hash2: file2.meta?.hash };
   }
 
   @Get('*')
@@ -81,7 +79,7 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
 
   async getFileMeta(pth: string) {
     const loc = await this.fixture.readStream(pth);
-    return { hash: await BytesUtil.hashInput(loc) };
+    return { hash: await BinaryUtil.hashInput(loc) };
   }
 
 

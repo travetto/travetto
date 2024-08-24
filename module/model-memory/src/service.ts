@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { Class, TimeSpan, DeepPartial, castTo, BlobMeta, ByteRange, BinaryInput, BlobUtil } from '@travetto/runtime';
+import { Class, TimeSpan, DeepPartial, castTo, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
@@ -255,7 +255,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }
     const meta = await this.describeBlob(location);
-    return BlobUtil.readableBlob(() => Readable.from(buffer), { ...meta, range: final });
+    return BinaryUtil.readableBlob(() => Readable.from(buffer), { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {

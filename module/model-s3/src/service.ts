@@ -11,7 +11,7 @@ import {
   ModelBlobSupport, ModelBlobUtil
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BlobUtil } from '@travetto/runtime';
+import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
@@ -342,7 +342,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     const meta = await this.describeBlob(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     const res = (): Promise<Readable> => this.#getObject(location, final);
-    return BlobUtil.readableBlob(res, { ...meta, range: final });
+    return BinaryUtil.readableBlob(res, { ...meta, range: final });
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BlobMeta, ContentLength?: number }> {

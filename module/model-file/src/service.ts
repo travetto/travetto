@@ -4,7 +4,7 @@ import os from 'node:os';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { Class, TimeSpan, Runtime, asFull, BlobMeta, ByteRange, BinaryInput, BlobUtil } from '@travetto/runtime';
+import { Class, TimeSpan, Runtime, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
@@ -189,7 +189,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     const file = await this.#find(ModelBlobNamespace, BIN, location);
     const meta = await this.describeBlob(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
-    return BlobUtil.readableBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
+    return BinaryUtil.readableBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {
