@@ -1,6 +1,6 @@
 {
   "name": "@travetto/transformer",
-  "version": "5.0.0-rc.6",
+  "version": "5.0.0-rc.7",
   "description": "Functionality for AST transformations, with transformer registration, and general utils",
   "keywords": [
     "typescript",
