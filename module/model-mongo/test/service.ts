@@ -5,11 +5,11 @@ import { Index, Model } from '@travetto/model';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
-import { ModelStreamSuite } from '@travetto/model/support/test/stream';
 import { ModelBulkSuite } from '@travetto/model/support/test/bulk';
 import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
+import { ModelBlobSuite } from '@travetto/model/support/test/blob';
 
 import { MongoModelConfig } from '../src/config';
 import { MongoModelService } from '../src/service';
@@ -40,7 +40,7 @@ export class MongoExpirySuite extends ModelExpirySuite {
 }
 
 @Suite()
-export class MongoStreamSuite extends ModelStreamSuite {
+export class MongoBlobSuite extends ModelBlobSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
 }

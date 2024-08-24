@@ -2,15 +2,15 @@ import { SetOption, GetOption } from 'cookies';
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'node:http';
 import { Readable, Writable } from 'node:stream';
 
+import { ByteRange } from '@travetto/runtime';
+
 import { ContentType, HeaderMap } from './types';
 import {
-  HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ,
-  ProviderEntityⲐ, RequestParamsⲐ, RequestLoggingⲐ
+  HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ, ProviderEntityⲐ, RequestParamsⲐ,
+  RequestLoggingⲐ
 } from './internal/symbol';
 
 declare global {
-  type TravettoByteRange = { start: number, end: number };
-
   /**
    * Extension point for supporting new request headers
    */
@@ -125,11 +125,15 @@ declare global {
     /**
      * Get requested range
      */
-    getRange(chunkSize?: number): TravettoByteRange | undefined;
+    getRange(chunkSize?: number): ByteRange | undefined;
     /**
      * Read the file name from the request content disposition
      */
     getFilename(): string;
+    /**
+     * Readable stream for the request body
+     */
+    stream(): Readable;
   }
 
   /**
@@ -168,10 +172,15 @@ declare global {
      */
     readonly headersSent: boolean;
     /**
-     * Get the headers that have been marked for sending
+     * Get a registered response header by name
      * @param key Header name
      */
     getHeader(key: string): string | string[] | undefined;
+    /**
+     * Get the headers that have been marked for sending
+     * @param key Header name
+     */
+    getHeaderNames(): string[];
     /**
      * Set a header to be sent.  Fails if headers have already been sent.
      * @param key The header to set

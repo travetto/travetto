@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { buffer as toBuffer, text as toText } from 'node:stream/consumers';
+import { text as toText } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
 import { S3, CompletedPart, type CreateMultipartUploadRequest } from '@aws-sdk/client-s3';
@@ -7,20 +7,19 @@ import type { MetadataBearer } from '@aws-sdk/types';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
-  ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
-  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
-  StreamRange
+  ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
+  ModelBlobSupport, ModelBlobUtil,
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError, castTo, asFull } from '@travetto/runtime';
+import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
 
+import { MODEL_BLOB, ModelBlobNamespace } from '@travetto/model/src/internal/service/blob';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { S3ModelConfig } from './config';
-import { enforceRange } from '@travetto/model/src/internal/service/stream';
 
 function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && typeof o === 'object' && '$metadata' in o;
@@ -30,8 +29,6 @@ function hasContentType<T>(o: T): o is T & { contenttype?: string } {
   return o !== undefined && o !== null && Object.hasOwn(o, 'contenttype');
 }
 
-const STREAM_SPACE = '@travetto/model-s3:stream';
-
 type MetaBase = Pick<CreateMultipartUploadRequest,
   'ContentType' | 'Metadata' | 'ContentEncoding' | 'ContentLanguage' | 'CacheControl' | 'ContentDisposition'
 >;
@@ -40,14 +37,14 @@ type MetaBase = Pick<CreateMultipartUploadRequest,
  * Asset source backed by S3
  */
 @Injectable()
-export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, ModelExpirySupport {
+export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, ModelStorageSupport, ModelExpirySupport {
 
   idSource = ModelCrudUtil.uuidSource();
   client: S3;
 
   constructor(public readonly config: S3ModelConfig) { }
 
-  #getMetaBase(meta: StreamMeta): MetaBase {
+  #getMetaBase({ range, ...meta }: BlobMeta): MetaBase {
     return {
       ContentType: meta.contentType,
       ...(meta.contentEncoding ? { ContentEncoding: meta.contentEncoding } : {}),
@@ -62,7 +59,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   #resolveKey(cls: Class | string, id?: string): string {
     let key: string;
-    if (cls === STREAM_SPACE) { // If we are streaming, treat as primary use case
+    if (cls === MODEL_BLOB) { // If we are streaming, treat as primary use case
       key = id!; // Store it directly at root
     } else {
       key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
@@ -110,8 +107,8 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   /**
    * Write multipart file upload, in chunks
    */
-  async #writeMultipart(id: string, input: Readable, meta: StreamMeta): Promise<void> {
-    const { UploadId } = await this.client.createMultipartUpload(this.#q(STREAM_SPACE, id, this.#getMetaBase(meta)));
+  async #writeMultipart(id: string, input: Readable, meta: BlobMeta): Promise<void> {
+    const { UploadId } = await this.client.createMultipartUpload(this.#q(MODEL_BLOB, id, this.#getMetaBase(meta)));
 
     const parts: CompletedPart[] = [];
     let buffers: Buffer[] = [];
@@ -119,7 +116,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     let n = 1;
     const flush = async (): Promise<void> => {
       if (!total) { return; }
-      const part = await this.client.uploadPart(this.#q(STREAM_SPACE, id, {
+      const part = await this.client.uploadPart(this.#q(MODEL_BLOB, id, {
         Body: Buffer.concat(buffers),
         PartNumber: n,
         UploadId
@@ -139,12 +136,12 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       }
       await flush();
 
-      await this.client.completeMultipartUpload(this.#q(STREAM_SPACE, id, {
+      await this.client.completeMultipartUpload(this.#q(MODEL_BLOB, id, {
         UploadId,
         MultipartUpload: { Parts: parts }
       }));
     } catch (err) {
-      await this.client.abortMultipartUpload(this.#q(STREAM_SPACE, id, { UploadId }));
+      await this.client.abortMultipartUpload(this.#q(MODEL_BLOB, id, { UploadId }));
       throw err;
     }
   }
@@ -296,22 +293,33 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     return -1;
   }
 
-  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
-    if (meta.size < this.config.chunkSize) { // If smaller than chunk size
+  // Blob support
+  async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
+    await this.describeBlob(location);
+    if (errorIfExisting) {
+      throw new ExistsError(ModelBlobNamespace, location);
+    }
+    return this.upsertBlob(location, input, meta);
+  }
+
+  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
+    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
+
+    if (blobMeta.size && blobMeta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
-      await this.client.putObject(this.#q(STREAM_SPACE, location, {
-        Body: await toBuffer(input),
-        ContentLength: meta.size,
-        ...this.#getMetaBase(meta),
+      await this.client.putObject(this.#q(MODEL_BLOB, location, {
+        Body: stream,
+        ContentLength: blobMeta.size,
+        ...this.#getMetaBase(blobMeta),
       }));
     } else {
-      await this.#writeMultipart(location, input, meta);
+      await this.#writeMultipart(location, stream, blobMeta);
     }
   }
 
-  async #getObject(location: string, range: Required<StreamRange>): Promise<Readable> {
+  async #getObject(location: string, range?: Required<ByteRange>): Promise<Readable> {
     // Read from s3
-    const res = await this.client.getObject(this.#q(STREAM_SPACE, location, range ? {
+    const res = await this.client.getObject(this.#q(MODEL_BLOB, location, range ? {
       Range: `bytes=${range.start}-${range.end}`
     } : {}));
 
@@ -329,33 +337,32 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }
 
-  async getStream(location: string, range?: StreamRange): Promise<Readable> {
-    if (range) {
-      const meta = await this.describeStream(location);
-      range = enforceRange(range, meta.size);
-    }
-    return this.#getObject(location, castTo(range));
+  async getBlob(location: string, range?: ByteRange): Promise<Blob> {
+    const meta = await this.describeBlob(location);
+    const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
+    const res = (): Promise<Readable> => this.#getObject(location, final);
+    return BinaryUtil.readableBlob(res, { ...meta, range: final });
   }
 
-  async headStream(location: string): Promise<{ Metadata?: Partial<StreamMeta>, ContentLength?: number }> {
-    const query = this.#q(STREAM_SPACE, location);
+  async headBlob(location: string): Promise<{ Metadata?: BlobMeta, ContentLength?: number }> {
+    const query = this.#q(MODEL_BLOB, location);
     try {
       return (await this.client.headObject(query));
     } catch (err) {
       if (isMetadataBearer(err)) {
         if (err.$metadata.httpStatusCode === 404) {
-          err = new NotFoundError(STREAM_SPACE, location);
+          err = new NotFoundError(MODEL_BLOB, location);
         }
       }
       throw err;
     }
   }
 
-  async describeStream(location: string): Promise<StreamMeta> {
-    const obj = await this.headStream(location);
+  async describeBlob(location: string): Promise<BlobMeta> {
+    const obj = await this.headBlob(location);
 
     if (obj) {
-      const ret: StreamMeta = {
+      const ret: BlobMeta = {
         contentType: '',
         ...obj.Metadata,
         size: obj.ContentLength!,
@@ -366,18 +373,19 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       }
       return ret;
     } else {
-      throw new NotFoundError(STREAM_SPACE, location);
+      throw new NotFoundError(MODEL_BLOB, location);
     }
   }
 
+  async deleteBlob(location: string): Promise<void> {
+    await this.client.deleteObject(this.#q(MODEL_BLOB, location));
+  }
+
+  // Storage
   async truncateModel<T extends ModelType>(model: Class<T>): Promise<void> {
     for await (const items of this.#iterateBucket(model)) {
       await this.#deleteKeys(items);
     }
-  }
-
-  async deleteStream(location: string): Promise<void> {
-    await this.client.deleteObject(this.#q(STREAM_SPACE, location));
   }
 
   async createStorage(): Promise<void> {

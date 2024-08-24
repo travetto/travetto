@@ -5,7 +5,7 @@ import { InjectableFactory } from '@travetto/di';
 import { SessionModelⲐ } from '@travetto/rest-session';
 import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
-import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
 const FASTIFY = Symbol.for('fastify-lambda');
 

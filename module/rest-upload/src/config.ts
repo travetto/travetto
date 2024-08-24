@@ -16,12 +16,12 @@ export class RestUploadConfig extends ManagedInterceptorConfig {
    */
   types: string[] = [];
   /**
-   * Delete files after use
+   * Cleanup temporary files after request finishes
    */
-  deleteFiles: boolean = true;
+  cleanupFiles: boolean = true;
 
   @Ignore()
-  files?: Record<string, Partial<RestUploadConfig>>;
+  uploads?: Record<string, Partial<RestUploadConfig>>;
 
   @Ignore()
   matcher: (contentType: string) => boolean;

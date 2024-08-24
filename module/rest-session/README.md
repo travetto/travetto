@@ -14,20 +14,22 @@ yarn add @travetto/rest-session
 ```
 
 This is a module that adds session support to the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") framework.  Sessions allow for persistent data across multiple requests.  Within the framework the sessions are stored against any [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementation that provides [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts), as the data needs to be able to be expired appropriately.  The list of supported model providers are:
-   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.")'s [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L49) and [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)
    *  [Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.")
    *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.")
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")
    *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.")
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")
+   *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.")
+   *  [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.")
 A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) parameter as [Session](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L15) and [SessionData](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L8) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest-session/src/trv.d.ts#L7) as a session property.
 
 **Code: Sample Session Usage**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { MemoryModelService, ModelExpirySupport } from '@travetto/model';
+import { ModelExpirySupport } from '@travetto/model';
 import { Controller, Put, Get } from '@travetto/rest';
 import { SessionData, Session, SessionModelⲐ } from '@travetto/rest-session';
+import { MemoryModelService } from '@travetto/model-memory';
 
 // Applies to entire execution, not just this file
 class SessionConfig {

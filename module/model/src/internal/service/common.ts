@@ -4,14 +4,14 @@ import { ModelCrudSupport } from '../../service/crud';
 import type { ModelExpirySupport } from '../../service/expiry';
 import { ModelIndexedSupport } from '../../service/indexed';
 import type { ModelStorageSupport } from '../../service/storage';
-import type { ModelStreamSupport } from '../../service/stream';
+import { ModelBlobSupport } from '../../service/blob';
 
 export class ModelBasicSupportTarget { }
 export class ModelCrudSupportTarget { }
 export class ModelBulkSupportTarget { }
 export class ModelStorageSupportTarget { }
+export class ModelBlobSupportTarget { }
 export class ModelExpirySupportTarget { }
-export class ModelStreamSupportTarget { }
 export class ModelIndexedSupportTarget { }
 
 /**
@@ -39,19 +39,19 @@ export function isExpirySupported(o: ClassInstance): o is ModelExpirySupport {
 }
 
 /**
+ * Type guard for determining if service supports streaming operation
+ * @param o
+ */
+export function isBlobSupported(o: ClassInstance): o is ModelBlobSupport {
+  return !!o && 'getBlob' in o;
+}
+
+/**
  * Type guard for determining if service supports storage operation
  * @param o
  */
 export function isStorageSupported(o: ClassInstance): o is ModelStorageSupport {
   return !!o && 'createStorage' in o;
-}
-
-/**
- * Type guard for determining if service supports streaming operation
- * @param o
- */
-export function isStreamSupported(o: ClassInstance): o is ModelStreamSupport {
-  return !!o && 'getStream' in o;
 }
 
 /**

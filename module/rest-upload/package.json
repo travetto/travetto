@@ -26,10 +26,11 @@
   },
   "dependencies": {
     "@fastify/busboy": "^2.1.1",
-    "@travetto/asset": "^5.0.0-rc.10",
     "@travetto/config": "^5.0.0-rc.10",
     "@travetto/rest": "^5.0.0-rc.10",
-    "file-type": "^16.5.4"
+    "file-type": "^16.5.4",
+    "@types/mime": "^3.0.4",
+    "mime": "^3.0.0"
   },
   "peerDependencies": {
     "@travetto/test": "^5.0.0-rc.9"

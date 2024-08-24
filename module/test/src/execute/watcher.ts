@@ -1,6 +1,6 @@
 import { RootRegistry, MethodSource } from '@travetto/registry';
-import { WorkPool, WorkQueue } from '@travetto/worker';
-import { Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
+import { WorkPool } from '@travetto/worker';
+import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
@@ -33,7 +33,7 @@ export class TestWatcher {
       events.push(...RunnerUtil.getTestRuns(tests));
     }
 
-    const itr = new WorkQueue<TestRun>(events);
+    const itr = new AsyncQueue(events);
     const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistry.getInstance(format))
       .withFilter(x => x.metadata?.partial !== true || x.type !== 'suite');
 

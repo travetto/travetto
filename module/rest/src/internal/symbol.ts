@@ -7,4 +7,4 @@ export const RawBodyⲐ: unique symbol = Symbol.for('@travetto/rest:raw-body');
 export const TravettoEntityⲐ: unique symbol = Symbol.for('@travetto/rest:travetto');
 export const HeadersAddedⲐ: unique symbol = Symbol.for('@travetto/rest:headers');
 export const InterceptorConfigsⲐ: unique symbol = Symbol.for('@travetto/rest:interceptors');
-export const ParsedType = Symbol.for('@travetto/rest:content-type');
+export const ParsedTypeⲐ = Symbol.for('@travetto/rest:content-type');

@@ -147,7 +147,7 @@ export class AuthUtil {
 }
 ```
 
-`roleMatcher` is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from [Base](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Environment config and common utilities for travetto applications.")'s Util class. 
+`roleMatcher` is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.")'s Util class. 
 
 An example of role checks could be:
    *  Admin

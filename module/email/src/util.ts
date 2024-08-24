@@ -1,4 +1,4 @@
-import { Util, Runtime } from '@travetto/runtime';
+import { Runtime, BinaryUtil } from '@travetto/runtime';
 
 import { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types';
 
@@ -77,7 +77,7 @@ export class MailUtil {
   static buildUniqueMessageId(message: EmailOptions): string {
     const from = this.getPrimaryEmail(message.from)!;
     const to = this.getPrimaryEmail(message.to)!;
-    const uid = Util.hash(`${to}${from}${message.subject}${Date.now()}`, 12);
+    const uid = BinaryUtil.hash(`${to}${from}${message.subject}${Date.now()}`, 12);
     return `<${uid}@${from.split('@')[1]}>`;
   }
 }

@@ -1,90 +1,111 @@
-import { createWriteStream } from 'node:fs';
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import stream, { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
+import { createReadStream, createWriteStream } from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
+import fs from 'node:fs/promises';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
-import { AppError, Util } from '@travetto/runtime';
+import busboy from '@fastify/busboy';
 
-import { LocalFile } from './file';
+import { Request, MimeUtil } from '@travetto/rest';
+import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
+import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
+
+import { RestUploadConfig } from './config';
+
+const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
+
+type UploadItem = { stream: Readable, filename: string, field: string };
+type FileType = { ext: string, mime: string };
 
 /**
- * General support for handling file uploads/downloads
+ * Rest upload utilities
  */
 export class RestUploadUtil {
 
-  static async cleanupFiles(fileMap: Record<string, File>): Promise<void> {
-    await Promise.all(Object.values(fileMap ?? {}).filter(x => x instanceof LocalFile).map(x => x.cleanup()));
-  }
+  /**
+   * Get all the uploads, separating multipart from direct
+   */
+  static async* getUploads(req: Request, config: Partial<RestUploadConfig>): AsyncIterable<UploadItem> {
+    if (MULTIPART.has(req.getContentType()?.full!)) {
+      const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
+      const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
+      const itr = new AsyncQueue<UploadItem>();
 
-  static async #streamToFileWithMaxSize(inputStream: stream.Readable, outputFile: string, maxSize?: number): Promise<void> {
-    if (!maxSize || maxSize < 0) {
-      return pipeline(inputStream, createWriteStream(outputFile));
+      // Upload
+      req.pipe(busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
+        .on('file', (field, stream, filename) => itr.add({ stream, filename, field }))
+        .on('limit', field => itr.throw(new AppError(`File size exceeded for ${field}`, 'data')))
+        .on('finish', () => itr.close())
+        .on('error', (err) => itr.throw(err instanceof Error ? err : new Error(`${err}`))));
+
+      yield* itr;
+    } else {
+      yield { stream: req.body ?? req[NodeEntityⲐ], filename: req.getFilename(), field: 'file' };
     }
-
-    let read = 0;
-
-    await pipeline(
-      inputStream,
-      new stream.Transform({
-        transform(chunk, encoding, callback): void {
-          read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : 0;
-          if (read > maxSize) {
-            callback(new AppError('File size exceeded', 'data'));
-          } else {
-            callback(null, chunk);
-          }
-        },
-      }),
-      createWriteStream(outputFile)
-    );
   }
 
   /**
-   * File to blob
-   * @param file
-   * @param metadata
+   * Convert an UploadItem to a Blob
    */
-  static async fileToBlob(file: string, metadata: Partial<{ contentType?: string }> = {}): Promise<LocalFile> {
-    let type = metadata.contentType;
-    if (!type) {
-      const { default: fileType } = await import('file-type');
-      let buffer: Buffer;
-      const fd = await fs.open(file, 'r');
-      try {
-        buffer = Buffer.alloc(4100);
-        await fd.read(buffer, 0, 4100, 0);
-      } finally {
-        try { fd.close(); } catch { }
-      }
-
-      type = (await fileType.fromBuffer(buffer))?.mime;
-      if (type === 'video/mp4' && file.endsWith('.m4a')) {
-        type = 'audio/mpeg';
-      }
-    }
-    return new LocalFile(file, type);
-  }
-
-  /**
-   * Convert stream or buffer to a file, enforcing max size if needed
-   * @param data
-   * @param filename
-   * @param maxSize
-   */
-  static async convertToBlob(data: stream.Readable | Buffer, filename: string, maxSize?: number): Promise<LocalFile> {
-    const uniqueDir = path.resolve(os.tmpdir(), `upload_${Date.now()}_${Util.uuid(5)}`);
+  static async uploadToBlob({ stream, filename }: UploadItem, config: Partial<RestUploadConfig>): Promise<Blob> {
+    const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDir, { recursive: true });
-    const uniqueLocal = path.resolve(uniqueDir, path.basename(filename));
+    filename = path.basename(filename);
+
+    const location = path.resolve(uniqueDir, filename);
+    const remove = (): Promise<void> => fs.rm(location).catch(() => { });
+    const mimeCheck = config.matcher ??= MimeUtil.matcher(config.types);
 
     try {
-      await this.#streamToFileWithMaxSize(Buffer.isBuffer(data) ? Readable.from(data) : data, uniqueLocal, maxSize);
+      const target = createWriteStream(location);
+
+      await (config.maxSize ?
+        pipeline(stream, BinaryUtil.limitWrite(config.maxSize), target) :
+        pipeline(stream, target));
+
+      const detected = await this.getFileType(location);
+
+      if (!mimeCheck(detected.mime)) {
+        throw new AppError(`Content type not allowed: ${detected.mime}`, 'data');
+      }
+
+      if (!path.extname(filename)) {
+        filename = `${filename}.${detected.ext}`;
+      }
+
+      const blob = BinaryUtil.readableBlob(() => createReadStream(location), {
+        contentType: detected.mime,
+        filename,
+        hash: await BinaryUtil.hashInput(createReadStream(location)),
+        size: (await fs.stat(location)).size,
+      });
+
+      if (config.cleanupFiles !== false) {
+        castTo<{ cleanup: Function }>(blob).cleanup = remove;
+      }
+
+      return blob;
     } catch (err) {
-      await fs.rm(uniqueLocal, { force: true });
+      await remove();
       throw err;
     }
+  }
 
-    return await this.fileToBlob(uniqueLocal);
+  /**
+   * Get file type
+   */
+  static async getFileType(input: string | Readable): Promise<FileType> {
+    const { default: { fromFile, fromStream } } = await import('file-type');
+    const { default: { getType, getExtension } } = await import('mime');
+
+    const matched = await (typeof input === 'string' ? fromFile(input) : fromStream(input));
+    if (!matched && typeof input === 'string') {
+      const mime = getType(input);
+      if (mime) {
+        return { ext: getExtension(mime)!, mime };
+      }
+    }
+    return matched ?? { ext: 'bin', mime: 'application/octet-stream' };
   }
 }

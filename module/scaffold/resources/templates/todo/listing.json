@@ -30,6 +30,7 @@
   "src/rest/auth.config.ts": {
     "requires": [
       "@travetto/rest",
+      "@travetto/model-memory",
       "@travetto/auth-rest"
     ]
   },

@@ -1,19 +1,15 @@
-// Wildcard import needed here due to packaging issues
 import {
   type Db, GridFSBucket, MongoClient, type Sort, type CreateIndexesOptions,
   type GridFSFile, type IndexSpecification, type Collection, ObjectId,
   Binary
 } from 'mongodb';
-import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { Readable } from 'node:stream';
 
 import {
-  ModelRegistry, ModelType, OptionalId,
-  ModelCrudSupport, ModelStorageSupport, ModelStreamSupport,
-  ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport,
-  StreamMeta, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig,
-  StreamRange
+  ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
+  ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
+  NotFoundError, ExistsError, IndexConfig, ModelBlobSupport, ModelBlobUtil
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -21,7 +17,10 @@ import {
   QueryVerifier
 } from '@travetto/model-query';
 
-import { ShutdownManager, type Class, type DeepPartial, AppError, TypedObject, castTo, asFull } from '@travetto/runtime';
+import {
+  ShutdownManager, type Class, type DeepPartial, AppError, TypedObject,
+  castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil
+} from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
@@ -33,9 +32,9 @@ import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/servic
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { enforceRange, StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
+import { MODEL_BLOB, ModelBlobNamespace } from '@travetto/model/src/internal/service/blob';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
@@ -46,7 +45,7 @@ const asFielded = (cfg: IndexConfig<ModelType>): { [IdxFieldsⲐ]: Sort } => cas
 
 type IdxCfg = CreateIndexesOptions;
 
-type StreamRaw = GridFSFile & { metadata: StreamMeta };
+type BlobRaw = GridFSFile & { metadata?: BlobMeta };
 
 /**
  * Mongo-based model source
@@ -54,7 +53,7 @@ type StreamRaw = GridFSFile & { metadata: StreamMeta };
 @Injectable()
 export class MongoModelService implements
   ModelCrudSupport, ModelStorageSupport,
-  ModelBulkSupport, ModelStreamSupport,
+  ModelBulkSupport, ModelBlobSupport,
   ModelIndexedSupport, ModelQuerySupport,
   ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySuggestSupport, ModelExpirySupport {
@@ -66,11 +65,11 @@ export class MongoModelService implements
 
   constructor(public readonly config: MongoModelConfig) { }
 
-  async #describeStreamRaw(location: string): Promise<StreamRaw> {
-    const files: StreamRaw[] = castTo(await this.#bucket.find({ filename: location }, { limit: 1 }).toArray());
+  async #describeBlobRaw(location: string): Promise<BlobRaw> {
+    const files: BlobRaw[] = await this.#bucket.find({ filename: location }, { limit: 1 }).toArray();
 
     if (!files?.length) {
-      throw new NotFoundError(STREAMS, location);
+      throw new NotFoundError(ModelBlobNamespace, location);
     }
 
     return files[0];
@@ -80,7 +79,7 @@ export class MongoModelService implements
     this.client = await MongoClient.connect(this.config.url, this.config.options);
     this.#db = this.client.db(this.config.namespace);
     this.#bucket = new GridFSBucket(this.#db, {
-      bucketName: STREAMS,
+      bucketName: ModelBlobNamespace,
       writeConcern: { w: 1 }
     });
     await ModelStorageUtil.registerModelChangeListener(this);
@@ -151,10 +150,8 @@ export class MongoModelService implements
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    if (cls === StreamModel) {
-      try {
-        await this.#bucket.drop();
-      } catch { }
+    if (cls === MODEL_BLOB) {
+      await this.#bucket.drop().catch(() => { });
     } else {
       const col = await this.getStore(cls);
       await col.deleteMany({});
@@ -283,37 +280,39 @@ export class MongoModelService implements
     }
   }
 
-  // Stream
-  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
+  // Blob
+  async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
+    await this.describeBlob(location);
+    if (errorIfExisting) {
+      throw new ExistsError(ModelBlobNamespace, location);
+    }
+    return this.upsertBlob(location, input, meta);
+  }
+
+  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
+    const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
     const writeStream = this.#bucket.openUploadStream(location, {
-      contentType: meta.contentType,
-      metadata: meta
+      contentType: blobMeta.contentType,
+      metadata: blobMeta
     });
 
-    await pipeline(input, writeStream);
+    await pipeline(stream, writeStream);
   }
 
-  async getStream(location: string, range?: StreamRange): Promise<Readable> {
-    const meta = await this.describeStream(location);
-
-    if (range) {
-      range = enforceRange(range, meta.size);
-      range.end! += 1; // range is exclusive
-    }
-
-    const res = await this.#bucket.openDownloadStreamByName(location, range);
-    if (!res) {
-      throw new NotFoundError(STREAMS, location);
-    }
-    return res;
+  async getBlob(location: string, range?: ByteRange): Promise<Blob> {
+    const meta = await this.describeBlob(location);
+    const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
+    const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
+    const res = (): Readable => this.#bucket.openDownloadStreamByName(location, mongoRange);
+    return BinaryUtil.readableBlob(res, { ...meta, range: final });
   }
 
-  async describeStream(location: string): Promise<StreamMeta> {
-    return (await this.#describeStreamRaw(location)).metadata;
+  async describeBlob(location: string): Promise<BlobMeta> {
+    return (await this.#describeBlobRaw(location)).metadata ?? {};
   }
 
-  async deleteStream(location: string): Promise<void> {
-    const fileId = (await this.#describeStreamRaw(location))._id;
+  async deleteBlob(location: string): Promise<void> {
+    const fileId = (await this.#describeBlobRaw(location))._id;
     await this.#bucket.delete(fileId);
   }
 

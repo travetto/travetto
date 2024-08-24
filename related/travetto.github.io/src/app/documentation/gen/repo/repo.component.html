@@ -125,20 +125,18 @@ Options:
 </figcaption>
     <pre><code class="language-bash">$ trv repo:list
 
-global-test/asset-rest-upload
 global-test/auth-rest
 global-test/auth-rest-jwt
-global-test/model_asset
 global-test/model_auth-model
 global-test/model_cache
 global-test/model_rest-session
+global-test/model_rest-upload
 global-test/openapi
 global-test/pack_app
 global-test/rest-client
 global-test/rest-session
 global-test/rest-upload
 global-test/transformer-test
-module/asset
 module/auth
 module/auth-model
 module/auth-rest
@@ -165,7 +163,9 @@ module/manifest
 module/model
 module/model-dynamodb
 module/model-elasticsearch
+module/model-file
 module/model-firestore
+module/model-memory
 module/model-mongo
 module/model-mysql
 module/model-postgres
@@ -231,20 +231,18 @@ The standard format includes prefixed output to help identify which module produ
 </figcaption>
     <pre><code class="language-bash">$ trv repo:exec <span class="token parameter variable">-w</span> <span class="token number">1</span> <span class="token builtin class-name">pwd</span>
 
-global-test/asset-rest-upload <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/asset-rest-upload
-         global-test/auth-rest <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/auth-rest
+global-test/auth-rest <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/auth-rest
      global-test/auth-rest-jwt <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/auth-rest-jwt
-       global-test/model_asset <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/model_asset
   global-test/model_auth-model <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/model_auth-model
        global-test/model_cache <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/model_cache
 global-test/model_rest-session <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/model_rest-session
+ global-test/model_rest-upload <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/model_rest-upload
            global-test/openapi <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/openapi
           global-test/pack_app <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/pack_app
        global-test/rest-client <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/rest-client
       global-test/rest-session <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/rest-session
        global-test/rest-upload <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/rest-upload
   global-test/transformer-test <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/transformer-test
-                  module/asset <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/asset
                    module/auth <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/auth
              module/auth-model <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/auth-model
               module/auth-rest <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/auth-rest
@@ -271,7 +269,9 @@ global-test/model_rest-session <span class="token operator">&lt;</span>workspace
                   module/model <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model
          module/model-dynamodb <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-dynamodb
     module/model-elasticsearch <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-elasticsearch
+             module/model-file <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-file
         module/model-firestore <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-firestore
+           module/model-memory <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-memory
             module/model-mongo <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-mongo
             module/model-mysql <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-mysql
          module/model-postgres <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-postgres

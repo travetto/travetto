@@ -8,14 +8,14 @@ export const Links = {
   Expiry: d.codeLink('Expiry', '@travetto/model/src/service/expiry.ts', /export interface/),
   Indexed: d.codeLink('Indexed', '@travetto/model/src/service/indexed.ts', /export interface/),
   Bulk: d.codeLink('Bulk', '@travetto/model/src/service/bulk.ts', /export interface/),
-  Stream: d.codeLink('Streaming', '@travetto/model/src/service/stream.ts', /export interface/),
+  Blob: d.codeLink('Blob', '@travetto/model/src/service/blob.ts', /export interface/),
 };
 
 export const ModelTypes = (fn: | Function): DocJSXElement[] => {
   const { content } = DocFileUtil.readSource(fn);
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
   const seen = new Set();
-  for (const [, key] of content.matchAll(/Model(Crud|Expiry|Indexed|Bulk|Stream)Support/g)) {
+  for (const [, key] of content.matchAll(/Model(Crud|Expiry|Indexed|Bulk|Blob)Support/g)) {
     if (!seen.has(key)) {
       seen.add(key);
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

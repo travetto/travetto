@@ -18,7 +18,7 @@ export class RestServerUtil {
     req.method = castTo(req.method?.toUpperCase());
     req.connection = {};
 
-    if (!('files' in req)) { req.files = undefined; }
+    if (!('uploads' in req)) { req.uploads = undefined; }
     if (!('auth' in req)) { req.auth = undefined; }
 
     return asFull<T>(req);

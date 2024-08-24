@@ -1,6 +1,5 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c, mod } from '@travetto/doc';
-import { FileModelService, MemoryModelService } from '@travetto/model';
 
 import { Links } from '@travetto/model/support/doc.support';
 
@@ -18,7 +17,6 @@ export const text = <>
 
   Currently, the following are packages that provide {Links.Expiry}:
   <ul>
-    <li>{d.mod('Model')} - {mod.Model.name}: {FileModelService}, {MemoryModelService}</li>
     <li>{d.mod('ModelDynamodb')} - {mod.ModelDynamodb.name}</li>
     <li>{d.mod('ModelElasticsearch')} - {mod.ModelElasticsearch.name}</li>
     <li>{d.mod('ModelMongo')} - {mod.ModelMongo.name}</li>
@@ -27,6 +25,8 @@ export const text = <>
     <li>{d.mod('ModelPostgres')} - {mod.ModelPostgres.name}</li>
     <li>{d.mod('ModelMysql')} - {mod.ModelMysql.name}</li>
     <li>{d.mod('ModelSqlite')} - {mod.ModelSqlite.name}</li>
+    <li>{d.mod('ModelMemory')} - {mod.ModelMemory.name}</li>
+    <li>{d.mod('ModelFile')} - {mod.ModelFile.name}</li>
   </ul>
 
   <c.Section title='Decorators'>

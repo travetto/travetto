@@ -1,4 +1,4 @@
-import { Util } from '@travetto/runtime';
+import { BinaryUtil } from '@travetto/runtime';
 
 import { CoreCacheConfig } from './types';
 
@@ -35,6 +35,6 @@ export class CacheUtil {
     const input = config.params?.(params) ?? params;
     const keyParams = config.key?.(...input) ?? input;
     const key = `${config.keySpace!}_${this.toSafeJSON(keyParams)}`;
-    return Util.hash(key, 32);
+    return BinaryUtil.hash(key, 32);
   }
 }

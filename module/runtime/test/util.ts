@@ -1,9 +1,8 @@
-import crypto from 'node:crypto';
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
-import { WorkQueue } from '@travetto/worker';
 
+import { AsyncQueue } from '../src/queue';
 import { Util } from '../src/util';
 
 @Suite()
@@ -19,25 +18,8 @@ export class UtilTest {
   }
 
   @Test()
-  staticUuidVerify() {
-    const hash = crypto.createHash('sha512');
-    hash.update('roger');
-    const key = hash.digest('hex');
-
-    assert(Util.hash('roger', 64) === key.substring(0, 64));
-
-    const hash2 = crypto.createHash('sha512');
-    hash2.update('');
-    const unKey = hash2.digest('hex');
-
-    assert(Util.hash('', 20) === unKey.substring(0, 20));
-
-    assert(Util.hash('', 20) !== key.substring(0, 20));
-  }
-
-  @Test()
   async verifyMap() {
-    const lines = new WorkQueue(['aaa', 'bbb']);
+    const lines = new AsyncQueue(['aaa', 'bbb']);
 
     const values: string[] = [];
     let j = 0;

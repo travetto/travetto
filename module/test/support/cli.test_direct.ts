@@ -17,7 +17,7 @@ export class TestDirectCommand {
     Env.TRV_LOG_TIME.clear();
   }
 
-  main(importOrFile: string, clsId?: string, ...methodsNames: string[]): Promise<void> {
+  main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {
     return runTests({
       format: this.format,
       target: {

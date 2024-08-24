@@ -26,7 +26,6 @@ npm install @travetto/model-{provider}
 yarn add @travetto/model-{provider}
 ```
 Currently, the following are packages that provide [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11):
-   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") - @travetto/model: [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L49), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)
    *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - @travetto/model-dynamodb
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.") - @travetto/model-elasticsearch
    *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.") - @travetto/model-mongo
@@ -35,6 +34,8 @@ Currently, the following are packages that provide [Expiry](https://github.com/t
    *  [PostgreSQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-postgres#readme "PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-postgres
    *  [MySQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-mysql#readme "MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-mysql
    *  [SQLite Model Service](https://github.com/travetto/travetto/tree/main/module/model-sqlite#readme "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-sqlite
+   *  [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.") - @travetto/model-memory
+   *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.") - @travetto/model-file
 
 ## Decorators
 The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into [JSON](https://www.json.org).  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.
@@ -45,7 +46,7 @@ Additionally, to use the decorators you will need to have a [CacheService](https
 
 **Code: Using decorators to cache expensive async call**
 ```typescript
-import { MemoryModelService } from '@travetto/model';
+import { MemoryModelService } from '@travetto/model-memory';
 import { Cache, CacheService } from '@travetto/cache';
 
 async function request(url: string): Promise<string> {
@@ -86,7 +87,7 @@ Additionally, there is support for planned eviction via the [@EvictCache](https:
 
 **Code: Using decorators to cache/evict user access**
 ```typescript
-import { MemoryModelService } from '@travetto/model';
+import { MemoryModelService } from '@travetto/model-memory';
 import { Cache, EvictCache, CacheService } from '@travetto/cache';
 
 class User { }
@@ -123,7 +124,8 @@ By design, the [CacheService](https://github.com/travetto/travetto/tree/main/mod
 **Code: Registering a Custom Model Source**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { MemoryModelService, ModelExpirySupport } from '@travetto/model';
+import { ModelExpirySupport } from '@travetto/model';
+import { MemoryModelService } from '@travetto/model-memory';
 import { CacheModelⲐ } from '@travetto/cache';
 
 class Config {

@@ -145,7 +145,7 @@ export const text = <>
 
       <c.Code title='Simple Run Target' src='../rest/support/cli.run_rest.ts' />
 
-      As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, and {d.input('env')}. These env flag is directly tied to the {EnvLink} {d.field('name')} defined in the {d.mod('Base')} module. <br />
+      As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, and {d.input('env')}. These env flag is directly tied to the {EnvLink} {d.field('name')} defined in the {d.mod('Runtime')} module. <br />
 
       The {d.input('module')} field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
     </c.SubSection>

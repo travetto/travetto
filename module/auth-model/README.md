@@ -35,6 +35,8 @@ Currently, the following are packages that provide [CRUD](https://github.com/tra
    *  [MySQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-mysql#readme "MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-mysql
    *  [PostgreSQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-postgres#readme "PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-postgres
    *  [SQLite Model Service](https://github.com/travetto/travetto/tree/main/module/model-sqlite#readme "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-sqlite
+   *  [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.") - @travetto/model-memory
+   *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.") - @travetto/model-file
 The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a [Registered Principal](https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L9). 
 
 A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.

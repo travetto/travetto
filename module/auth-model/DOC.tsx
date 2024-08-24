@@ -23,6 +23,8 @@ export const text = <>
     <li>{d.mod('ModelMysql')} - {mod.ModelMysql.name}</li>
     <li>{d.mod('ModelPostgres')} - {mod.ModelPostgres.name}</li>
     <li>{d.mod('ModelSqlite')} - {mod.ModelSqlite.name}</li>
+    <li>{d.mod('ModelMemory')} - {mod.ModelMemory.name}</li>
+    <li>{d.mod('ModelFile')} - {mod.ModelFile.name}</li>
   </ul>
 
   The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a {d.codeLink(RegisteredPrincipal)}. <br />

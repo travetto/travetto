@@ -6,7 +6,6 @@ export type HeaderMap = Record<string, (string | (() => string))>;
 
 export type Request = TravettoRequest;
 export type Response = TravettoResponse;
-export type ByteRange = TravettoByteRange;
 
 export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 
@@ -20,7 +19,6 @@ export type RequestResponseHandler = (req: Request, res: Response) => FilterRetu
 export type ServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
 
 export type ContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
-
 
 /**
  * Param configuration

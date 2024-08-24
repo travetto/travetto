@@ -1,5 +1,6 @@
 /// <reference path="./src/trv.d.ts" />
 /// <reference path="./src/global.d.ts" />
+export * from './src/binary';
 export * from './src/console';
 export * from './src/context';
 export * from './src/debug';
@@ -9,6 +10,7 @@ export * from './src/env';
 export * from './src/file-loader';
 export * from './src/function';
 export * from './src/manifest-index';
+export * from './src/queue';
 export * from './src/resources';
 export * from './src/shutdown';
 export * from './src/time';

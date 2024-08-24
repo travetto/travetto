@@ -1,9 +1,7 @@
 import os from 'node:os';
 import { Options, Pool, createPool } from 'generic-pool';
 
-import { Env, Util } from '@travetto/runtime';
-
-import { WorkQueue } from './queue';
+import { Env, Util, AsyncQueue } from '@travetto/runtime';
 
 type ItrSource<I> = Iterable<I> | AsyncIterable<I>;
 
@@ -143,7 +141,7 @@ export class WorkPool {
    * Process a given input source as an async iterable
    */
   static runStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, opts?: WorkPoolConfig<I, O>): AsyncIterable<O> {
-    const itr = new WorkQueue<O>();
+    const itr = new AsyncQueue<O>();
     const res = this.run(worker, input, {
       ...opts,
       onComplete: (ev, inp, finishIdx) => {
@@ -163,7 +161,7 @@ export class WorkPool {
     value: O;
     total: number;
   }> {
-    const itr = new WorkQueue<{ idx: number, value: O, total: number }>();
+    const itr = new AsyncQueue<{ idx: number, value: O, total: number }>();
     const res = this.run(worker, input, {
       ...opts,
       onComplete: (ev, inp, finishIdx) => {

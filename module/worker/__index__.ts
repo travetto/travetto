@@ -5,5 +5,4 @@ export * from './src/comm/types';
 export * from './src/support/barrier';
 export * from './src/support/timeout';
 export * from './src/support/error';
-export * from './src/queue';
 export * from './src/pool';

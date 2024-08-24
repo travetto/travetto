@@ -17,10 +17,10 @@ This module provides an [mongodb](https://mongodb.com)-based implementation for 
 
 Supported features:
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
-   *  [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11)
    *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19)
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12)
+   *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8)
    *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/facet.ts#L12)
    *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/query.ts#L10)

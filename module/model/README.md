@@ -16,7 +16,7 @@ yarn add @travetto/model
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
 ## Contracts
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19).
 
 ### Basic
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9) contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -153,38 +153,44 @@ export interface ModelExpirySupport extends ModelCrudSupport {
 }
 ```
 
-### Stream
-Some implementations also allow for the ability to read/write binary data as a [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3).  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.  This pattern is currently used by [Asset](https://github.com/travetto/travetto/tree/main/module/asset#readme "Modular library for storing and retrieving binary assets") for reading and writing asset data.
+### Blob
+Some implementations also allow for the ability to read/write binary data as [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8).  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
 
-**Code: Stream Contract**
+**Code: Blob Contract**
 ```typescript
-export interface ModelStreamSupport {
+export interface ModelBlobSupport {
 
   /**
-   * Upsert stream to storage
-   * @param location The location of the stream
-   * @param input The actual stream to write
-   * @param meta The stream metadata
+   * Insert blob to storage
+   * @param location The location of the blob
+   * @param input The actual blob to write
    */
-  upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void>;
+  insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting?: boolean): Promise<void>;
 
   /**
-   * Get stream from asset store
-   * @param location The location of the stream
+   * Upsert blob to storage
+   * @param location The location of the blob
+   * @param input The actual blob to write
    */
-  getStream(location: string, range?: StreamRange): Promise<Readable>;
+  upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void>;
 
   /**
-   * Get metadata for stream
-   * @param location The location of the stream
+   * Get blob from storage
+   * @param location The location of the blob
    */
-  describeStream(location: string): Promise<StreamMeta>;
+  getBlob(location: string, range?: ByteRange): Promise<Blob>;
 
   /**
-   * Delete stream by location
-   * @param location The location of the stream
+   * Get metadata for blob
+   * @param location The location of the blob
    */
-  deleteStream(location: string): Promise<void>;
+  describeBlob(location: string): Promise<BlobMeta>;
+
+  /**
+   * Delete blob by location
+   * @param location The location of the blob
+   */
+  deleteBlob(location: string): Promise<void>;
 }
 ```
 
@@ -216,8 +222,8 @@ export interface ModelType {
 The `id` is the only required field for a model, as this is a hard requirement on naming and type.  This may make using existing data models impossible if types other than strings are required.  Additionally, the `type` field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."), but also in [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.").
 
 ## Implementations
-|Service|Basic|CRUD|Indexed|Expiry|Stream|Bulk|
-|-------|-----|----|-------|------|------|----|
+|Service|Basic|CRUD|Indexed|Expiry|Blob|Bulk|
+|-------|-----|----|-------|------|----|----|
 |[DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.")|X|X|X|X| | |
 |[Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")|X|X|X|X| |X|
 |[Firestore Model Support](https://github.com/travetto/travetto/tree/main/module/model-firestore#readme "Firestore backing for the travetto model module.")|X|X|X| | | |
@@ -225,142 +231,76 @@ The `id` is the only required field for a model, as this is a hard requirement o
 |[Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
 |[S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
-|[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L49)|X|X| |X|X|X|
+|[Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.")|X|X|X|X|X|X|
+|[File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.")|X|X| |X|X|X|
 
 ## Custom Model Service
-In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
-
-**Code: Memory Service**
-```typescript
-import { Readable } from 'node:stream';
-import { buffer as toBuffer } from 'node:stream/consumers';
-import { Class, TimeSpan, DeepPartial, castTo } from '@travetto/runtime';
-import { Injectable } from '@travetto/di';
-import { Config } from '@travetto/config';
-import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, StreamMeta, StreamRange } from '../service/stream';
-import { ModelType, OptionalId } from '../types/model';
-import { ModelExpirySupport } from '../service/expiry';
-import { ModelRegistry } from '../registry/model';
-import { ModelStorageSupport } from '../service/storage';
-import { ModelCrudUtil } from '../internal/service/crud';
-import { ModelExpiryUtil } from '../internal/service/expiry';
-import { NotFoundError } from '../error/not-found';
-import { ExistsError } from '../error/exists';
-import { ModelIndexedSupport } from '../service/indexed';
-import { ModelIndexedUtil } from '../internal/service/indexed';
-import { ModelStorageUtil } from '../internal/service/storage';
-import { enforceRange, StreamModel, STREAMS } from '../internal/service/stream';
-import { IndexConfig } from '../registry/types';
-const STREAM_META = `${STREAMS}_meta`;
-type StoreType = Map<string, Buffer>;
-@Config('model.memory')
-export class MemoryModelConfig {
-  autoCreate?: boolean = true;
-  namespace?: string;
-  cullRate?: number | TimeSpan;
-}
-function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, suffix?: string): string {
-  return [cls.Ⲑid, typeof idx === 'string' ? idx : idx.name, suffix].filter(x => !!x).join(':');
-}
-function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | number): string | undefined {
-  let id: string | undefined;
-  if (data instanceof Set) {
-    id = data.values().next().value;
-  } else {
-    id = [...data.entries()].find(([k, v]) => value === undefined || v === value)?.[0];
-  }
-  return id;
-}
-/**
- * Standard in-memory support
- */
-@Injectable()
-export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
-    sorted: new Map<string, Map<string, Map<string, number>>>(),
-    unsorted: new Map<string, Map<string, Set<string>>>()
-  };
-  idSource = ModelCrudUtil.uuidSource();
-  get client(): Map<string, StoreType>;
-  constructor(public readonly config: MemoryModelConfig) { }
-  async postConstruct(): Promise<void>;
-  // CRUD Support
-  async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T>;
-  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
-  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T>;
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T>;
-  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void>;
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T>;
-  // Stream Support
-  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void>;
-  async getStream(location: string, range?: StreamRange): Promise<Readable>;
-  async describeStream(location: string): Promise<StreamMeta>;
-  async deleteStream(location: string): Promise<void>;
-  // Expiry
-  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number>;
-  // Storage Support
-  async createStorage(): Promise<void>;
-  async deleteStorage(): Promise<void>;
-  async createModel<T extends ModelType>(cls: Class<T>): Promise<void>;
-  async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void>;
-  // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T>;
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void>;
-  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T>;
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T>;
-}
-```
+In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface. [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.") serves as a great example of what a full featured implementation can look like.
 
 To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.
 
 **Code: Memory Service Test Configuration**
 ```typescript
-import { Suite } from '@travetto/test';
+import { DependencyRegistry } from '@travetto/di';
+import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
 
-import { MemoryModelConfig, MemoryModelService } from '../src/provider/memory';
-import { ModelCrudSuite } from '../support/test/crud';
-import { ModelExpirySuite } from '../support/test/expiry';
-import { ModelStreamSuite } from '../support/test/stream';
-import { ModelIndexedSuite } from '../support/test/indexed';
-import { ModelBasicSuite } from '../support/test/basic';
-import { ModelPolymorphismSuite } from '../support/test/polymorphism';
+import { isBulkSupported, isCrudSupported } from '../../src/internal/service/common';
+import { ModelType } from '../../src/types/model';
+import { ModelSuite } from './suite';
 
-@Suite()
-export class MemoryBasicSuite extends ModelBasicSuite {
-  serviceClass = MemoryModelService;
-  configClass = MemoryModelConfig;
-}
+type ServiceClass = { serviceClass: { new(): unknown } };
 
-@Suite()
-export class MemoryCrudSuite extends ModelCrudSuite {
-  serviceClass = MemoryModelService;
-  configClass = MemoryModelConfig;
-}
+@ModelSuite()
+export abstract class BaseModelSuite<T> {
 
-@Suite()
-export class MemoryStreamSuite extends ModelStreamSuite {
-  serviceClass = MemoryModelService;
-  configClass = MemoryModelConfig;
-}
+  static ifNot(pred: (svc: unknown) => boolean): (x: unknown) => Promise<boolean> {
+    return async (x: unknown) => !pred(classConstruct(castTo<ServiceClass>(x).serviceClass));
+  }
 
-@Suite()
-export class MemoryExpirySuite extends ModelExpirySuite {
-  serviceClass = MemoryModelService;
-  configClass = MemoryModelConfig;
-}
+  serviceClass: Class<T>;
+  configClass: Class;
 
-@Suite()
-export class MemoryIndexedSuite extends ModelIndexedSuite {
-  serviceClass = MemoryModelService;
-  configClass = MemoryModelConfig;
-}
+  async getSize<U extends ModelType>(cls: Class<U>): Promise<number> {
+    const svc = (await this.service);
+    if (isCrudSupported(svc)) {
+      let i = 0;
+      for await (const __el of svc.list(cls)) {
+        i += 1;
+      }
+      return i;
+    } else {
+      throw new AppError(`Size is not supported for this service: ${this.serviceClass.name}`);
+    }
+  }
 
-@Suite()
-export class MemoryPolymorphicSuite extends ModelPolymorphismSuite {
-  serviceClass = MemoryModelService;
-  configClass = MemoryModelConfig;
+  async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
+    const svc = await this.service;
+    if (isBulkSupported(svc)) {
+      const res = await svc.processBulk(cls, items.map(x => ({ insert: x })));
+      return res.counts.insert;
+    } else if (isCrudSupported(svc)) {
+      const out: Promise<M>[] = [];
+      for (const el of items) {
+        out.push(svc.create(cls, el));
+      }
+      await Promise.all(out);
+      return out.length;
+    } else {
+      throw new Error('Service does not support crud operations');
+    }
+  }
+
+  get service(): Promise<T> {
+    return DependencyRegistry.getInstance(this.serviceClass);
+  }
+
+  async toArray<U>(src: AsyncIterable<U> | AsyncGenerator<U>): Promise<U[]> {
+    const out: U[] = [];
+    for await (const el of src) {
+      out.push(el);
+    }
+    return out;
+  }
 }
 ```
 
@@ -403,7 +343,6 @@ Options:
 
 Providers
 --------------------
-  * Memory
   * SQL
 
 Models

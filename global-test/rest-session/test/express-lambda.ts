@@ -4,7 +4,7 @@ import { AwsLambdaExpressRestServer } from '@travetto/rest-express-lambda';
 import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
-import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
+import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { SessionModelⲐ } from '@travetto/rest-session';
 
 const EXPRESS = Symbol.for('express-lambda');
