@@ -60,7 +60,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
                 }
               }
             }
-            await service.truncateFinalize?.();
+            await service.truncateBlob?.();
           } else {
             await service.deleteStorage(); // Purge it all
           }

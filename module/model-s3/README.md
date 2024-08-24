@@ -17,7 +17,7 @@ This module provides an [s3](https://aws.amazon.com/documentation/s3/)-based imp
 
 Supported features:
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
-   *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10)
+   *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L12)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11)
 Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module.
 

@@ -16,7 +16,7 @@ yarn add @travetto/model
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
 ## Contracts
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L12) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19).
 
 ### Basic
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9) contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -154,7 +154,7 @@ export interface ModelExpirySupport extends ModelCrudSupport {
 ```
 
 ### Blob
-Some implementations also allow for the ability to read/write binary data as [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10).  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
+Some implementations also allow for the ability to read/write binary data as [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L12).  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
 
 **Code: Blob Contract**
 ```typescript
@@ -165,14 +165,14 @@ export interface ModelBlobSupport {
    * @param location The location of the blob
    * @param input The actual blob to write
    */
-  insertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta, errorIfExisting?: boolean): Promise<void>;
+  insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting?: boolean): Promise<void>;
 
   /**
    * Upsert blob to storage
    * @param location The location of the blob
    * @param input The actual blob to write
    */
-  upsertBlob(location: BlobInputLocation, input: BinaryInput, meta?: BlobMeta): Promise<void>;
+  upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void>;
 
   /**
    * Get blob from storage
@@ -311,20 +311,38 @@ The module provides the ability to generate an export of the model structure fro
 ```bash
 $ trv model:export --help
 
-Usage: model:export [options] <provider:string> <models...:string>
+node:internal/modules/cjs/loader:1248
+  const err = new Error(message);
+              ^
 
-Options:
-  -e, --env <string>     Application environment
-  -m, --module <module>  Module to run for
-  -h, --help             display help for command
+Error: Cannot find module './src/blob.js'
+Require stack:
+- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
+    at Module._load (node:internal/modules/cjs/loader:1074:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
+    at Module.require (node:internal/modules/cjs/loader:1339:12)
+    at require (node:internal/modules/helpers:125:16)
+    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
+    at Module._compile (node:internal/modules/cjs/loader:1546:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
+    at Module.load (node:internal/modules/cjs/loader:1317:32) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
+    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
+  ]
+}
 
-Providers
---------------------
-  * SQL
-
-Models
---------------------
-  * samplemodel
+Node.js v22.6.0
 ```
 
 ## CLI - model:install
@@ -334,18 +352,36 @@ The module provides the ability to install all the various [@Model](https://gith
 ```bash
 $ trv model:install --help
 
-Usage: model:install [options] <provider:string> <models...:string>
+node:internal/modules/cjs/loader:1248
+  const err = new Error(message);
+              ^
 
-Options:
-  -e, --env <string>     Application environment
-  -m, --module <module>  Module to run for
-  -h, --help             display help for command
+Error: Cannot find module './src/blob.js'
+Require stack:
+- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
+    at Module._load (node:internal/modules/cjs/loader:1074:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
+    at Module.require (node:internal/modules/cjs/loader:1339:12)
+    at require (node:internal/modules/helpers:125:16)
+    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
+    at Module._compile (node:internal/modules/cjs/loader:1546:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
+    at Module.load (node:internal/modules/cjs/loader:1317:32) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
+    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
+  ]
+}
 
-Providers
---------------------
-  * SQL
-
-Models
---------------------
-  * samplemodel
+Node.js v22.6.0
 ```

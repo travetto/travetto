@@ -14,7 +14,7 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
-const BlobMetaNamespace = `${ModelBlobNamespace}_meta`;
+const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
 
 type StoreType = Map<string, Buffer>;
 
@@ -242,7 +242,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
-    const metaContent = this.#getStore(BlobMetaNamespace);
+    const metaContent = this.#getStore(ModelBlobMetaNamespace);
     metaContent.set(location, Buffer.from(JSON.stringify(blobMeta)));
     blobs.set(location, await toBuffer(stream));
   }
@@ -259,14 +259,14 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {
-    const metaContent = this.#find(BlobMetaNamespace, location, 'notfound');
+    const metaContent = this.#find(ModelBlobMetaNamespace, location, 'notfound');
     const meta: BlobMeta = JSON.parse(metaContent.get(location)!.toString('utf8'));
     return meta;
   }
 
   async deleteBlob(location: string): Promise<void> {
     const blobs = this.#getStore(ModelBlobNamespace);
-    const metaContent = this.#getStore(BlobMetaNamespace);
+    const metaContent = this.#getStore(ModelBlobMetaNamespace);
     if (blobs.has(location)) {
       blobs.delete(location);
       metaContent.delete(location);
@@ -303,9 +303,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     this.#getStore(cls).clear();
   }
 
-  async truncateFinalize(): Promise<void> {
+  async truncateBlob(): Promise<void> {
     this.#getStore(ModelBlobNamespace).clear();
-    this.#getStore(BlobMetaNamespace).clear();
+    this.#getStore(ModelBlobMetaNamespace).clear();
   }
 
   // Indexed

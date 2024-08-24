@@ -18,7 +18,7 @@
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>, which is used for data model validation.
 <h2 id="contracts">Contracts</h2>
 
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10">Blob</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19">Bulk</a>.
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L12">Blob</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19">Bulk</a>.
 <h3 id="basic">Basic</h3>
 
 All <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations, must honor the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9">Basic</a> contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -172,11 +172,11 @@ Certain implementations will also provide support for automatic <a target="_blan
 
 <h3 id="blob">Blob</h3>
 
-Some implementations also allow for the ability to read/write binary data as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10">Blob</a>.  Given that all implementations can store <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
+Some implementations also allow for the ability to read/write binary data as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L12">Blob</a>.  Given that all implementations can store <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
 
   <figure class="code">
     <figcaption class="code">Blob Contract
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L10">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L12">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelBlobSupport</span> <span class="token punctuation">{{'{'}}</span>
@@ -186,14 +186,14 @@ Some implementations also allow for the ability to read/write binary data as <a 
    * &#64;param location The location of the blob
    * &#64;param input The actual blob to write
    */</span>
-  <span class="token function">insertBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> BlobInputLocation<span class="token punctuation">,</span> input<span class="token operator">:</span> BinaryInput<span class="token punctuation">,</span> meta<span class="token operator">?</span><span class="token operator">:</span> Partial<span class="token operator">&lt;</span>BlobMeta<span class="token operator">></span><span class="token punctuation">,</span> errorIfExisting<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">insertBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> input<span class="token operator">:</span> BinaryInput<span class="token punctuation">,</span> meta<span class="token operator">?</span><span class="token operator">:</span> BlobMeta<span class="token punctuation">,</span> errorIfExisting<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Upsert blob to storage
    * &#64;param location The location of the blob
    * &#64;param input The actual blob to write
    */</span>
-  <span class="token function">upsertBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> BlobInputLocation<span class="token punctuation">,</span> input<span class="token operator">:</span> BinaryInput<span class="token punctuation">,</span> meta<span class="token operator">?</span><span class="token operator">:</span> Partial<span class="token operator">&lt;</span>BlobMeta<span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">upsertBlob</span><span class="token punctuation">(</span>location<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> input<span class="token operator">:</span> BinaryInput<span class="token punctuation">,</span> meta<span class="token operator">?</span><span class="token operator">:</span> BlobMeta<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Get blob from storage
@@ -419,20 +419,38 @@ The module provides the ability to generate an export of the model structure fro
 </figcaption>
     <pre><code class="language-bash">$ trv model:export <span class="token parameter variable">--help</span>
 
-Usage: model:export <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>provider:string<span class="token operator">></span> <span class="token operator">&lt;</span>models<span class="token punctuation">..</span>.:string<span class="token operator">></span>
+node:internal/modules/cjs/loader:1248
+  const err <span class="token operator">=</span> new Error<span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+              ^
 
-Options:
-  -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>     Application environment
-  -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>  Module to run <span class="token keyword">for</span>
-  -h, <span class="token parameter variable">--help</span>             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+Error: Cannot <span class="token function">find</span> module <span class="token string">'./src/blob.js'</span>
+Require stack:
+- ./doc-exec/.trv/output/node_modules/&#64;travetto/runtime/__index__.js
+- ./doc-exec/.trv/output/node_modules/&#64;travetto/cli/src/decorators.js
+- ./doc-exec/.trv/output/node_modules/&#64;travetto/cli/__index__.js
+- ./doc-exec/.trv/output/node_modules/&#64;travetto/cli/support/entry.trv.js
+- ./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.trvc.js
+    at Module._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1248:15<span class="token punctuation">)</span>
+    at Module._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1074:27<span class="token punctuation">)</span>
+    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:315:14<span class="token punctuation">)</span>
+    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:217:24<span class="token punctuation">)</span>
+    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1339:12<span class="token punctuation">)</span>
+    at require <span class="token punctuation">(</span>node:internal/modules/helpers:125:16<span class="token punctuation">)</span>
+    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/__index__.ts:3:1<span class="token punctuation">)</span>
+    at Module._compile <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1546:14<span class="token punctuation">)</span>
+    at Module._extensions<span class="token punctuation">..</span>js <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1691:10<span class="token punctuation">)</span>
+    at Module.load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1317:32<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
+  requireStack: <span class="token punctuation">[</span>
+    <span class="token string">'./doc-exec/.trv/output/node_modules/&#64;travetto/runtime/__index__.js'</span>,
+    <span class="token string">'./doc-exec/.trv/output/node_modules/&#64;travetto/cli/src/decorators.js'</span>,
+    <span class="token string">'./doc-exec/.trv/output/node_modules/&#64;travetto/cli/__index__.js'</span>,
+    <span class="token string">'./doc-exec/.trv/output/node_modules/&#64;travetto/cli/support/entry.trv.js'</span>,
+    <span class="token string">'./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.trvc.js'</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">{{'}'}}</span>
 
-Providers
---------------------
-  * SQL
-
-Models
---------------------
-  * samplemodel</code></pre>
+Node.js v22.6.0</code></pre>
   </figure>
 
 <h2 id="cli-model-install">CLI - model:install</h2>
@@ -445,18 +463,36 @@ The module provides the ability to install all the various <a target="_blank" cl
 </figcaption>
     <pre><code class="language-bash">$ trv model:install <span class="token parameter variable">--help</span>
 
-Usage: model:install <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>provider:string<span class="token operator">></span> <span class="token operator">&lt;</span>models<span class="token punctuation">..</span>.:string<span class="token operator">></span>
+node:internal/modules/cjs/loader:1248
+  const err <span class="token operator">=</span> new Error<span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
+              ^
 
-Options:
-  -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>     Application environment
-  -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>  Module to run <span class="token keyword">for</span>
-  -h, <span class="token parameter variable">--help</span>             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+Error: Cannot <span class="token function">find</span> module <span class="token string">'./src/blob.js'</span>
+Require stack:
+- ./doc-exec/.trv/output/node_modules/&#64;travetto/runtime/__index__.js
+- ./doc-exec/.trv/output/node_modules/&#64;travetto/cli/src/decorators.js
+- ./doc-exec/.trv/output/node_modules/&#64;travetto/cli/__index__.js
+- ./doc-exec/.trv/output/node_modules/&#64;travetto/cli/support/entry.trv.js
+- ./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.trvc.js
+    at Module._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1248:15<span class="token punctuation">)</span>
+    at Module._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1074:27<span class="token punctuation">)</span>
+    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:315:14<span class="token punctuation">)</span>
+    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:217:24<span class="token punctuation">)</span>
+    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1339:12<span class="token punctuation">)</span>
+    at require <span class="token punctuation">(</span>node:internal/modules/helpers:125:16<span class="token punctuation">)</span>
+    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/__index__.ts:3:1<span class="token punctuation">)</span>
+    at Module._compile <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1546:14<span class="token punctuation">)</span>
+    at Module._extensions<span class="token punctuation">..</span>js <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1691:10<span class="token punctuation">)</span>
+    at Module.load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1317:32<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
+  requireStack: <span class="token punctuation">[</span>
+    <span class="token string">'./doc-exec/.trv/output/node_modules/&#64;travetto/runtime/__index__.js'</span>,
+    <span class="token string">'./doc-exec/.trv/output/node_modules/&#64;travetto/cli/src/decorators.js'</span>,
+    <span class="token string">'./doc-exec/.trv/output/node_modules/&#64;travetto/cli/__index__.js'</span>,
+    <span class="token string">'./doc-exec/.trv/output/node_modules/&#64;travetto/cli/support/entry.trv.js'</span>,
+    <span class="token string">'./doc-exec/.trv/compiler/node_modules/&#64;travetto/compiler/support/entry.trvc.js'</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">{{'}'}}</span>
 
-Providers
---------------------
-  * SQL
-
-Models
---------------------
-  * samplemodel</code></pre>
+Node.js v22.6.0</code></pre>
   </figure>

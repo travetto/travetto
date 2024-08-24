@@ -13,7 +13,7 @@ npm install @travetto/rest
 yarn add @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L140) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L30) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class.
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L144) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L30) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class.
 
 ## Routes: Controller
 To define a route, you must first declare a [@Controller](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/controller.ts#L9) which is only allowed on classes. Controllers can be configured with:
@@ -82,7 +82,7 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
    *  [@Query](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L50) - Query params
    *  [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62) - Request body (in it's entirety), with support for validation
    *  [@Header](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L56) - Header values
-   *  [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17), [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L140), etc.)
+   *  [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17), [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L144), etc.)
 Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L25) can be configured to indicate:
    *  `name` - Name of param, field name, defaults to handler parameter name if necessary
    *  `description` - Description of param, pulled from [JSDoc](http://usejsdoc.org/about-getting-started.html), or defaults to name if empty
@@ -238,51 +238,38 @@ By default, the framework provides a default [@CliCommand](https://github.com/tr
 ```bash
 $ trv run:rest
 
-Initialized {
-  manifest: {
-    main: { name: '@travetto-doc/rest', folder: '' },
-    workspace: {
-      name: '@travetto-doc/rest',
-      path: './doc-exec',
-      mono: false,
-      manager: 'npm',
-      type: 'commonjs',
-      defaultEnv: 'local'
-    }
-  },
-  runtime: {
-    env: 'local',
-    debug: false,
-    production: false,
-    dynamic: false,
-    resourcePaths: [ './doc-exec/resources' ],
-    profiles: []
-  },
-  config: {
-    sources: [ { priority: 999, source: 'memory://override' } ],
-    active: {
-      RestAcceptsConfig: { types: {} },
-      RestAsyncContextConfig: {},
-      RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
-      RestConfig: {
-        serve: true,
-        port: 3000,
-        trustProxy: false,
-        hostname: 'localhost',
-        bindAddress: '0.0.0.0',
-        baseUrl: 'http://localhost:3000',
-        defaultMessage: true
-      },
-      RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-      RestCorsConfig: {},
-      RestGetCacheConfig: {},
-      RestLogRoutesConfig: {},
-      RestRpcConfig: {},
-      RestSslConfig: { active: false }
-    }
-  }
+node:internal/modules/cjs/loader:1248
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module './src/blob.js'
+Require stack:
+- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
+    at Module._load (node:internal/modules/cjs/loader:1074:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
+    at Module.require (node:internal/modules/cjs/loader:1339:12)
+    at require (node:internal/modules/helpers:125:16)
+    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
+    at Module._compile (node:internal/modules/cjs/loader:1546:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
+    at Module.load (node:internal/modules/cjs/loader:1317:32) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
+    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
+  ]
 }
-Listening { port: 3000 }
+
+Node.js v22.6.0
 ```
 
 ### Creating a Custom CLI Entry Point
@@ -322,52 +309,38 @@ And using the pattern established in the [Command Line Interface](https://github
 ```bash
 $ trv run:rest:custom
 
-CUSTOM STARTUP
-Initialized {
-  manifest: {
-    main: { name: '@travetto-doc/rest', folder: '' },
-    workspace: {
-      name: '@travetto-doc/rest',
-      path: './doc-exec',
-      mono: false,
-      manager: 'npm',
-      type: 'commonjs',
-      defaultEnv: 'local'
-    }
-  },
-  runtime: {
-    env: 'prod',
-    debug: false,
-    production: true,
-    dynamic: false,
-    resourcePaths: [ './doc-exec/resources' ],
-    profiles: []
-  },
-  config: {
-    sources: [ { priority: 999, source: 'memory://override' } ],
-    active: {
-      RestAcceptsConfig: { types: {} },
-      RestAsyncContextConfig: {},
-      RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
-      RestConfig: {
-        serve: true,
-        port: 3000,
-        trustProxy: false,
-        hostname: 'localhost',
-        bindAddress: '0.0.0.0',
-        baseUrl: 'http://localhost:3000',
-        defaultMessage: true
-      },
-      RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-      RestCorsConfig: {},
-      RestGetCacheConfig: {},
-      RestLogRoutesConfig: {},
-      RestRpcConfig: {},
-      RestSslConfig: { active: true }
-    }
-  }
+node:internal/modules/cjs/loader:1248
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module './src/blob.js'
+Require stack:
+- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
+- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
+- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
+    at Module._load (node:internal/modules/cjs/loader:1074:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
+    at Module.require (node:internal/modules/cjs/loader:1339:12)
+    at require (node:internal/modules/helpers:125:16)
+    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
+    at Module._compile (node:internal/modules/cjs/loader:1546:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
+    at Module.load (node:internal/modules/cjs/loader:1317:32) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
+    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
+    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
+  ]
 }
-Listening { port: 3000 }
+
+Node.js v22.6.0
 ```
 
 ## Interceptors
@@ -498,7 +471,7 @@ rest.log:
 [AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/context.ts#L17) is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
 
 ### Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L28) interface.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L140) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L28) interface.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L144) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
@@ -591,7 +564,7 @@ The resolution logic is as follows:
    *  By default, if nothing else matched, assume the interceptor is valid.
 
 ## Cookie Support
-[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17)/[TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L140) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L17)/[TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/trv.d.ts#L144) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 **Code: Sample Cookie Usage**
 ```typescript
