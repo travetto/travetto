@@ -6,7 +6,6 @@ import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toBuffer } from 'node:stream/consumers';
-import { createReadStream } from 'node:fs';
 
 import { BinaryInput, BlobMeta } from './types';
 
@@ -40,67 +39,6 @@ export class BinaryUtil {
       await pipeline(input, hash);
     }
     return hash.digest('hex').toString();
-  }
-
-  /**
-   * Fetch bytes from a url
-   */
-  static async fetchBytes(url: string, byteLimit: number = -1): Promise<Buffer> {
-    const str = await fetch(url, {
-      headers: (byteLimit > 0) ? {
-        Range: `0-${byteLimit - 1}`
-      } : {}
-    });
-
-    if (!str.ok || !str.body) {
-      throw new Error('Invalid url for hashing');
-    }
-
-    let count = 0;
-    const buffer: Buffer[] = [];
-
-    for await (const chunk of str.body) {
-      const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-      buffer.push(buf);
-      count += buf.length;
-
-      if (count > byteLimit && byteLimit > 0) {
-        break;
-      }
-    }
-
-    await str.body?.cancel()?.catch(() => { });
-    return Buffer.concat(buffer, byteLimit <= 0 ? undefined : byteLimit);
-  }
-
-  /**
-   * Compute hash from a url
-   */
-  static async hashUrl(url: string, byteLimit = -1): Promise<string> {
-    return this.hashInput(await this.fetchBytes(url, byteLimit));
-  }
-
-  /**
-   * Read a chunk from a file
-   */
-  static async readChunk(input: BinaryInput | string, bytes: number): Promise<Buffer> {
-    if (input instanceof Blob) {
-      return input.slice(0, bytes).arrayBuffer().then(v => Buffer.from(v));
-    } else if (Buffer.isBuffer(input)) {
-      return input.subarray(0, bytes);
-    } else if (typeof input === 'string') {
-      input = createReadStream(input);
-    }
-    const chunks: Buffer[] = [];
-    let size = 0;
-    for await (const chunk of input) {
-      const bChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-      chunks.push(bChunk);
-      if ((size += bChunk.length) >= bytes) {
-        break;
-      }
-    }
-    return Buffer.concat(chunks).subarray(0, bytes);
   }
 
   /**

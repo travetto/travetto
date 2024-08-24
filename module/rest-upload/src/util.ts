@@ -10,17 +10,44 @@ import { getExtension, getType } from 'mime';
 
 import { Request, MimeUtil } from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
-import { AppError, castTo, Util, TypedObject, BinaryInput, BinaryUtil } from '@travetto/runtime';
+import { AsyncQueue, AppError, castTo, Util, BinaryInput, BinaryUtil } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
-import { UploadMap } from './types';
+
+const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
+
+type UploadItem = { stream: Readable, filename: string, field: string };
 
 /**
  * Rest upload utilities
  */
 export class RestUploadUtil {
 
-  static async #uploadSingle(stream: Readable, filename: string, config: Partial<RestUploadConfig>): Promise<Blob> {
+  /**
+   * Get all the uploads, separating multipart from direct
+   */
+  static async* getUploads(req: Request, config: Partial<RestUploadConfig>): AsyncIterable<UploadItem> {
+    if (MULTIPART.has(req.getContentType()?.type!)) {
+      const fileMaxes = [...Object.values(config.uploads ?? {}).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
+      const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
+
+      const itr = new AsyncQueue<UploadItem>();
+      const uploader = busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
+        .on('file', (field, stream, filename) => itr.add({ stream, filename, field }))
+        .on('limit', field => itr.throw(new AppError(`File size exceeded for ${field}`, 'data')));
+
+      // Do upload
+      pipeline(req.stream(), uploader).then(() => itr.close());
+      yield* itr;
+    } else {
+      yield { stream: req.body ?? req[NodeEntityⲐ], filename: req.getFilename(), field: 'file' };
+    }
+  }
+
+  /**
+   * Treat a readable stream as an upload
+   */
+  static async upload({ stream, filename }: UploadItem, config: Partial<RestUploadConfig>): Promise<Blob> {
     const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDir, { recursive: true });
     filename = path.basename(filename);
@@ -58,29 +85,27 @@ export class RestUploadUtil {
     }
   }
 
-  static async uploadSingle(req: Request, config: Partial<RestUploadConfig>): Promise<UploadMap> {
-    return { file: await this.#uploadSingle(req.body ?? req[NodeEntityⲐ], req.getFilename(), config) };
-  }
-
-  static async uploadMultipart(req: Request, config: Partial<RestUploadConfig>): Promise<UploadMap> {
-    const fileMaxes = [...Object.values(config.uploads ?? {}).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
-    const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
-    const uploads: Promise<[string, Blob]>[] = [];
-
-    const uploader = busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
-      .on('file', (field, stream, filename) =>
-        uploads.push(
-          this.#uploadSingle(stream, filename, { ...config.uploads![field] ?? config })
-            .then(v => [field, v])
-        )
-      )
-      .on('limit', field =>
-        uploads.push(Promise.reject(new AppError(`File size exceeded for ${field}`, 'data')))
-      );
-
-    // Do upload
-    await pipeline(req.stream(), uploader);
-    return TypedObject.fromEntries(await Promise.all(uploads));
+  /**
+   * Read a chunk from a file
+   */
+  static async readChunk(input: BinaryInput | string, bytes: number): Promise<Buffer> {
+    if (input instanceof Blob) {
+      return input.slice(0, bytes).arrayBuffer().then(v => Buffer.from(v));
+    } else if (Buffer.isBuffer(input)) {
+      return input.subarray(0, bytes);
+    } else if (typeof input === 'string') {
+      input = createReadStream(input);
+    }
+    const chunks: Buffer[] = [];
+    let size = 0;
+    for await (const chunk of input) {
+      const bChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      chunks.push(bChunk);
+      if ((size += bChunk.length) >= bytes) {
+        break;
+      }
+    }
+    return Buffer.concat(chunks).subarray(0, bytes);
   }
 
   /**
@@ -132,7 +157,7 @@ export class RestUploadUtil {
       filename = input;
     }
     const { default: fileType } = await import('file-type');
-    const buffer = await BinaryUtil.readChunk(input, 4100);
+    const buffer = await this.readChunk(input, 4100);
     const matched = await fileType.fromBuffer(buffer);
 
     if (!matched && (filename || input instanceof File)) {

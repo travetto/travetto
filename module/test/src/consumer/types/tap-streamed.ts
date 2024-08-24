@@ -1,6 +1,5 @@
-import { Util } from '@travetto/runtime';
+import { Util, AsyncQueue } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
-import { WorkQueue } from '@travetto/worker';
 
 import { TestEvent } from '../../model/event';
 import { TestResult } from '../../model/test';
@@ -17,7 +16,7 @@ import { TapEmitter } from './tap';
 export class TapStreamedEmitter implements TestConsumer {
 
   #terminal: Terminal;
-  #results = new WorkQueue<TestResult>();
+  #results = new AsyncQueue<TestResult>();
   #progress: Promise<unknown> | undefined;
   #consumer: TapEmitter;
 

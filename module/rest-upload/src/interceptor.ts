@@ -5,8 +5,6 @@ import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, RestInte
 import { RestUploadConfig } from './config';
 import { RestUploadUtil } from './util';
 
-const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data',]);
-
 @Injectable()
 export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> {
 
@@ -40,19 +38,16 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
 
   async intercept({ req, config }: FilterContext<RestUploadConfig>, next: FilterNext): Promise<FilterReturn> {
     try {
-      const type = MULTIPART.has(req.getContentType()?.full!) ? 'multipart' : 'direct';
-      console.log(`Uploading ${type}`, req.header('content-length'));
-      if (type === 'multipart') {
-        req.uploads = await RestUploadUtil.uploadMultipart(req, config);
-      } else {
-        req.uploads = await RestUploadUtil.uploadSingle(req, config);
-      };
+      req.uploads = {};
+
+      for await (const item of RestUploadUtil.getUploads(req, config)) {
+        req.uploads[item.field] = await RestUploadUtil.upload(item, { ...config.uploads![item.field] ?? config });
+      }
+
       return await next();
     } finally {
-      for (const item of Object.values(req.uploads ?? {})) {
-        if ('cleanup' in item && typeof item.cleanup === 'function') {
-          await item.cleanup();
-        }
+      for (const item of Object.values<Blob & { cleanup?: Function }>(req.uploads)) {
+        await item.cleanup?.();
       }
     }
   }

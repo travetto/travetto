@@ -10,6 +10,7 @@ export * from './src/env';
 export * from './src/file-loader';
 export * from './src/function';
 export * from './src/manifest-index';
+export * from './src/queue';
 export * from './src/resources';
 export * from './src/shutdown';
 export * from './src/time';

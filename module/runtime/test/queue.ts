@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 
-import { WorkQueue } from '../src/queue';
+import { AsyncQueue } from '../src/queue';
 
 @Suite()
 export class WorkSetTest {
@@ -10,7 +10,7 @@ export class WorkSetTest {
   async eventSource() {
     const items = [1, 2, 3];
     const comp = items.slice(0);
-    const itr = new WorkQueue();
+    const itr = new AsyncQueue();
 
     for (let i = 0; i < items.length; i++) {
       setTimeout(() => itr.add(items[i]), (i + 1) * 1000);

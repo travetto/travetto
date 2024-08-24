@@ -81,4 +81,12 @@ export class BytesUtilTest {
   async testMaxExactBlobWrite() {
     await RestUploadUtil.streamWithLimit(Readable.from(Buffer.alloc(100, 'A', 'utf8')), new PassThrough(), 100);
   }
+
+
+  @Test()
+  async readChunk() {
+    const yml = await this.fixture.resolve('/asset.yml');
+    const chunk = await RestUploadUtil.readChunk(yml, 10);
+    assert(chunk.length === 10);
+  }
 }
