@@ -311,38 +311,20 @@ The module provides the ability to generate an export of the model structure fro
 ```bash
 $ trv model:export --help
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
+Usage: model:export [options] <provider:string> <models...:string>
 
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
+Options:
+  -e, --env <string>     Application environment
+  -m, --module <module>  Module to run for
+  -h, --help             display help for command
 
-Node.js v22.6.0
+Providers
+--------------------
+  * SQL
+
+Models
+--------------------
+  * samplemodel
 ```
 
 ## CLI - model:install
@@ -352,36 +334,18 @@ The module provides the ability to install all the various [@Model](https://gith
 ```bash
 $ trv model:install --help
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
+Usage: model:install [options] <provider:string> <models...:string>
 
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
+Options:
+  -e, --env <string>     Application environment
+  -m, --module <module>  Module to run for
+  -h, --help             display help for command
 
-Node.js v22.6.0
+Providers
+--------------------
+  * SQL
+
+Models
+--------------------
+  * samplemodel
 ```

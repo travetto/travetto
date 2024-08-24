@@ -77,38 +77,10 @@ export class BasicCommand {
 ```bash
 $ trv basic -h
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
+Usage: basic [options]
 
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+Options:
+  -h, --help  display help for command
 ```
 
 ## Command Naming
@@ -142,38 +114,11 @@ export class BasicCommand {
 ```bash
 $ trv basic:flag -h
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
+Usage: basic:flag [options]
 
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+Options:
+  -l, --loud
+  -h, --help  display help for command
 ```
 
 As you can see the command now has the support of a basic boolean flag to determine if the response should be loud or not.  The default value here is undefined/false, and so is an opt-in experience.
@@ -182,38 +127,7 @@ As you can see the command now has the support of a basic boolean flag to determ
 ```bash
 $ trv basic:flag --loud
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+HELLO
 ```
 
 The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L85) supports the following data types for flags:
@@ -245,152 +159,37 @@ export class BasicCommand {
 ```bash
 $ trv basic:arg -h
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
+Usage: basic:arg [options] [volume:number]
 
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+Options:
+  -h, --help  display help for command
 ```
 
 **Terminal: Basic Command with Invalid Loud Arg**
 ```bash
 $ trv basic:arg 20
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
+Execution failed:
+ * Argument volume is bigger than (10)
 
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
+Usage: basic:arg [options] [volume:number]
 
-Node.js v22.6.0
+Options:
+  -h, --help  display help for command
 ```
 
 **Terminal: Basic Command with Loud Arg > 7**
 ```bash
 $ trv basic:arg 8
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+HELLO
 ```
 
 **Terminal: Basic Command without Arg**
 ```bash
 $ trv basic:arg
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+Hello
 ```
 
 Additionally, if you provide a field as an array, it will collect all valid values (excludes flags, and any arguments past a `--`).
@@ -415,152 +214,39 @@ export class BasicCommand {
 ```bash
 $ trv basic:arglist -h
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
+Usage: basic:arglist [options] <volumes...:number>
 
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+Options:
+  -r, --reverse
+  -h, --help     display help for command
 ```
 
 **Terminal: Basic Arg List**
 ```bash
 $ trv basic:arglist 10 5 3 9 8 1
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+1 3 5 8 9 10
 ```
 
 **Terminal: Basic Arg List with Invalid Number**
 ```bash
 $ trv basic:arglist 10 5 3 9 20 1
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
+Execution failed:
+ * Argument volumes[4] is bigger than (10)
 
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
+Usage: basic:arglist [options] <volumes...:number>
 
-Node.js v22.6.0
+Options:
+  -r, --reverse
+  -h, --help     display help for command
 ```
 
 **Terminal: Basic Arg List with Reverse**
 ```bash
 $ trv basic:arglist -r 10 5 3 9 8 1
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+10 9 8 5 3 1
 ```
 
 ## Customization
@@ -594,114 +280,25 @@ export class CustomCommand {
 ```bash
 $ trv custom:arg -h
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
+Usage: custom:arg [options] [volume:number]
 
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+Options:
+  -m, --message <string>  The message to send back to the user (default: "hello")
+  -h, --help              display help for command
 ```
 
 **Terminal: Custom Command Help with overridden Text**
 ```bash
 $ trv custom:arg 10 -m cUsToM
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+CUSTOM
 ```
 
 **Terminal: Custom Command Help with default Text**
 ```bash
 $ trv custom:arg 6
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+hello
 ```
 
 ## Environment Variable Support
@@ -734,152 +331,32 @@ export class CustomCommand {
 ```bash
 $ trv custom:env-arg -h
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
+Usage: custom:env-arg [options] [volume:number]
 
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+Options:
+  -t, --text <string>  The message to send back to the user (default: "hello")
+  -h, --help           display help for command
 ```
 
 **Terminal: Custom Command Help with default Text**
 ```bash
 $ trv custom:env-arg 6
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+hello
 ```
 
 **Terminal: Custom Command Help with overridden Text**
 ```bash
 $ MESSAGE=CuStOm trv custom:env-arg 10
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+CUSTOM
 ```
 
 **Terminal: Custom Command Help with overridden Text**
 ```bash
 $ MESSAGE=CuStOm trv custom:env-arg 7
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
-}
-
-Node.js v22.6.0
+CuStOm
 ```
 
 ## Flag File Support

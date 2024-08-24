@@ -107,38 +107,13 @@ The run command allows for generating documentation output.
 </figcaption>
     <pre><code class="language-bash">$ trv doc <span class="token parameter variable">--help</span>
 
-node:internal/modules/cjs/loader:1248
-  const err <span class="token operator">=</span> new Error<span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
-              ^
+Usage: doc <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
-Error: Cannot <span class="token function">find</span> module <span class="token string">'./src/blob.js'</span>
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1248:15<span class="token punctuation">)</span>
-    at Module._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1074:27<span class="token punctuation">)</span>
-    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:315:14<span class="token punctuation">)</span>
-    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:217:24<span class="token punctuation">)</span>
-    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1339:12<span class="token punctuation">)</span>
-    at require <span class="token punctuation">(</span>node:internal/modules/helpers:125:16<span class="token punctuation">)</span>
-    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/__index__.ts:3:1<span class="token punctuation">)</span>
-    at Module._compile <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1546:14<span class="token punctuation">)</span>
-    at Module._extensions<span class="token punctuation">..</span>js <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1691:10<span class="token punctuation">)</span>
-    at Module.load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1317:32<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
-  requireStack: <span class="token punctuation">[</span>
-    <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js'</span>,
-    <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js'</span>,
-    <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js'</span>,
-    <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js'</span>,
-    <span class="token string">'./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">{{'}'}}</span>
-
-Node.js v22.6.0</code></pre>
+Options:
+  -i, <span class="token parameter variable">--input</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>    Input File <span class="token punctuation">(</span>default: <span class="token string">"DOC.tsx"</span><span class="token punctuation">)</span>
+  -o, <span class="token parameter variable">--outputs</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Outputs <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token string">"README.md"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -w, <span class="token parameter variable">--watch</span>             Watch? <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>              display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 By default, running the command will output the <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Markdown">Markdown</a> content directly to the terminal.
@@ -149,36 +124,50 @@ By default, running the command will output the <a target="_blank" class="extern
 </figcaption>
     <pre><code class="language-bash">$ trv doc <span class="token parameter variable">-o</span> html
 
-node:internal/modules/cjs/loader:1248
-  const err <span class="token operator">=</span> new Error<span class="token punctuation">(</span>message<span class="token punctuation">)</span><span class="token punctuation">;</span>
-              ^
+<span class="token operator">&lt;</span><span class="token operator">!</span>-- This <span class="token function">file</span> was generated by @travetto/doc and should not be modified directly --<span class="token operator">></span>
+<span class="token operator">&lt;</span><span class="token operator">!</span>-- Please modify ./doc-exec/DOC.tsx and execute <span class="token string">"npx trv doc"</span> to rebuild --<span class="token operator">></span>
+<span class="token operator">&lt;</span>h<span class="token operator"><span class="token file-descriptor important">1</span>></span>@travetto-doc/doc<span class="token operator">&lt;</span>/h<span class="token operator"><span class="token file-descriptor important">1</span>></span>
 
-Error: Cannot <span class="token function">find</span> module <span class="token string">'./src/blob.js'</span>
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1248:15<span class="token punctuation">)</span>
-    at Module._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1074:27<span class="token punctuation">)</span>
-    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:315:14<span class="token punctuation">)</span>
-    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:217:24<span class="token punctuation">)</span>
-    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1339:12<span class="token punctuation">)</span>
-    at require <span class="token punctuation">(</span>node:internal/modules/helpers:125:16<span class="token punctuation">)</span>
-    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/__index__.ts:3:1<span class="token punctuation">)</span>
-    at Module._compile <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1546:14<span class="token punctuation">)</span>
-    at Module._extensions<span class="token punctuation">..</span>js <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1691:10<span class="token punctuation">)</span>
-    at Module.load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1317:32<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
-  requireStack: <span class="token punctuation">[</span>
-    <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js'</span>,
-    <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js'</span>,
-    <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js'</span>,
-    <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js'</span>,
-    <span class="token string">'./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">{{'}'}}</span>
+  <span class="token operator">&lt;</span>figure <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"install"</span><span class="token operator">></span>
+    <span class="token operator">&lt;</span>figcaption <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"install"</span><span class="token operator">></span>Install @travetto-doc/doc
 
-Node.js v22.6.0</code></pre>
+    <span class="token operator">&lt;</span>/figcaption<span class="token operator">></span>
+    <span class="token operator">&lt;</span>pre<span class="token operator">></span><span class="token operator">&lt;</span>code <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"language-bash"</span><span class="token operator">></span><span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token function"</span><span class="token operator">></span>npm<span class="token operator">&lt;</span>/span<span class="token operator">></span> <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token function"</span><span class="token operator">></span>install<span class="token operator">&lt;</span>/span<span class="token operator">></span> @travetto-doc/doc
+
+<span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token comment"</span><span class="token operator">></span><span class="token comment"># or&lt;/span></span>
+
+<span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token function"</span><span class="token operator">></span>yarn<span class="token operator">&lt;</span>/span<span class="token operator">></span> <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token function"</span><span class="token operator">></span>add<span class="token operator">&lt;</span>/span<span class="token operator">></span> @travetto-doc/doc<span class="token operator">&lt;</span>/code<span class="token operator">></span><span class="token operator">&lt;</span>/pre<span class="token operator">></span>
+  <span class="token operator">&lt;</span>/figure<span class="token operator">></span>
+
+Sample documentation <span class="token keyword">for</span> fictional module.  This module fictitiously relies upon <span class="token operator">&lt;</span>a <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"module-link"</span> <span class="token assign-left variable">href</span><span class="token operator">=</span><span class="token string">"https://github.com/travetto/travetto/tree/main/module/cache"</span> <span class="token assign-left variable">title</span><span class="token operator">=</span><span class="token string">"Caching functionality with decorators for declarative use."</span><span class="token operator">></span>Caching<span class="token operator">&lt;</span>/a<span class="token operator">></span> functionality.
+<span class="token operator">&lt;</span>ol<span class="token operator">></span> <span class="token operator">&lt;</span>li<span class="token operator">></span>First<span class="token operator">&lt;</span>/li<span class="token operator">></span>
+<span class="token operator">&lt;</span>li<span class="token operator">></span>Second<span class="token operator">&lt;</span>/li<span class="token operator">></span>
+<span class="token operator">&lt;</span>li<span class="token operator">></span><span class="token operator">&lt;</span>code <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"item path"</span><span class="token operator">></span>Special<span class="token operator">&lt;</span>/code<span class="token operator">></span><span class="token operator">&lt;</span>/li<span class="token operator">></span>
+<span class="token operator">&lt;</span>/ol<span class="token operator">></span>
+
+<span class="token operator">&lt;</span>h2 <span class="token assign-left variable">id</span><span class="token operator">=</span><span class="token string">"content"</span><span class="token operator">></span>Content<span class="token operator">&lt;</span>/h<span class="token operator"><span class="token file-descriptor important">2</span>></span>
+
+  <span class="token operator">&lt;</span>figure <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"code"</span><span class="token operator">></span>
+    <span class="token operator">&lt;</span>figcaption <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"code"</span><span class="token operator">></span>Document Sample
+<span class="token operator">&lt;</span>cite<span class="token operator">></span><span class="token operator">&lt;</span>a <span class="token assign-left variable">target</span><span class="token operator">=</span><span class="token string">"_blank"</span> <span class="token assign-left variable">href</span><span class="token operator">=</span><span class="token string">"./doc-exec/src/test.ts"</span><span class="token operator">></span>Source<span class="token operator">&lt;</span>/a<span class="token operator">></span><span class="token operator">&lt;</span>/cite<span class="token operator">></span>
+
+<span class="token operator">&lt;</span>/figcaption<span class="token operator">></span>
+    <span class="token operator">&lt;</span>pre<span class="token operator">></span><span class="token operator">&lt;</span>code <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"language-typescript"</span><span class="token operator">></span><span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token keyword"</span><span class="token operator">></span>class<span class="token operator">&lt;</span>/span<span class="token operator">></span> <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token class-name"</span><span class="token operator">></span>TestFile<span class="token operator">&lt;</span>/span<span class="token operator">></span> <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'{'}}</span><span class="token string">'{{'{'}}'</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">{{'}'}}</span><span class="token operator">&lt;</span>/span<span class="token operator">></span>
+  <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token keyword"</span><span class="token operator">></span>static<span class="token operator">&lt;</span>/span<span class="token operator">></span> <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token function"</span><span class="token operator">></span>method<span class="token operator">&lt;</span>/span<span class="token operator">></span><span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">(</span><span class="token operator">&lt;</span>/span<span class="token operator">></span><span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">&lt;</span>/span<span class="token operator">></span><span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token operator"</span><span class="token operator">></span>:<span class="token operator">&lt;</span>/span<span class="token operator">></span> <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token keyword"</span><span class="token operator">></span>void<span class="token operator">&lt;</span>/span<span class="token operator">></span> <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'{'}}</span><span class="token string">'{{'{'}}'</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">{{'}'}}</span><span class="token operator">&lt;</span>/span<span class="token operator">></span> <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'{'}}</span><span class="token string">'{{'}'}}'</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">{{'}'}}</span><span class="token operator">&lt;</span>/span<span class="token operator">></span>
+<span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'{'}}</span><span class="token string">'{{'}'}}'</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">{{'}'}}</span><span class="token operator">&lt;</span>/span<span class="token operator">></span><span class="token operator">&lt;</span>/code<span class="token operator">></span><span class="token operator">&lt;</span>/pre<span class="token operator">></span>
+  <span class="token operator">&lt;</span>/figure<span class="token operator">></span>
+
+<span class="token operator">&lt;</span>h3 <span class="token assign-left variable">id</span><span class="token operator">=</span><span class="token string">"output"</span><span class="token operator">></span>Output<span class="token operator">&lt;</span>/h<span class="token operator"><span class="token file-descriptor important">3</span>></span>
+
+  <span class="token operator">&lt;</span>figure <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"terminal"</span><span class="token operator">></span>
+    <span class="token operator">&lt;</span>figcaption <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"terminal"</span><span class="token operator">></span>Run program
+
+<span class="token operator">&lt;</span>/figcaption<span class="token operator">></span>
+    <span class="token operator">&lt;</span>pre<span class="token operator">></span><span class="token operator">&lt;</span>code <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"language-bash"</span><span class="token operator">></span>$ trv
+
+Usage:  <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token operator">&lt;</span>/span<span class="token operator">></span>options<span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">]</span><span class="token operator">&lt;</span>/span<span class="token operator">></span> <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token operator">&lt;</span>/span<span class="token operator">></span>command<span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token punctuation"</span><span class="token operator">></span><span class="token punctuation">]</span><span class="token operator">&lt;</span>/span<span class="token operator">></span>
+
+Commands:
+  doc        Command line support <span class="token operator">&lt;</span>span <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"token keyword"</span><span class="token operator">></span>for<span class="token operator">&lt;</span>/span<span class="token operator">></span> generating module docs.<span class="token operator">&lt;</span>/code<span class="token operator">></span><span class="token operator">&lt;</span>/pre<span class="token operator">></span>
+  <span class="token operator">&lt;</span>/figure<span class="token operator">></span></code></pre>
   </figure>

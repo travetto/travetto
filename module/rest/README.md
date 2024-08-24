@@ -238,38 +238,51 @@ By default, the framework provides a default [@CliCommand](https://github.com/tr
 ```bash
 $ trv run:rest
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
+Initialized {
+  manifest: {
+    main: { name: '@travetto-doc/rest', folder: '' },
+    workspace: {
+      name: '@travetto-doc/rest',
+      path: './doc-exec',
+      mono: false,
+      manager: 'npm',
+      type: 'commonjs',
+      defaultEnv: 'local'
+    }
+  },
+  runtime: {
+    env: 'local',
+    debug: false,
+    production: false,
+    dynamic: false,
+    resourcePaths: [ './doc-exec/resources' ],
+    profiles: []
+  },
+  config: {
+    sources: [ { priority: 999, source: 'memory://override' } ],
+    active: {
+      RestAcceptsConfig: { types: {} },
+      RestAsyncContextConfig: {},
+      RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
+      RestConfig: {
+        serve: true,
+        port: 3000,
+        trustProxy: false,
+        hostname: 'localhost',
+        bindAddress: '0.0.0.0',
+        baseUrl: 'http://localhost:3000',
+        defaultMessage: true
+      },
+      RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      RestCorsConfig: {},
+      RestGetCacheConfig: {},
+      RestLogRoutesConfig: {},
+      RestRpcConfig: {},
+      RestSslConfig: { active: false }
+    }
+  }
 }
-
-Node.js v22.6.0
+Listening { port: 3000 }
 ```
 
 ### Creating a Custom CLI Entry Point
@@ -309,38 +322,52 @@ And using the pattern established in the [Command Line Interface](https://github
 ```bash
 $ trv run:rest:custom
 
-node:internal/modules/cjs/loader:1248
-  const err = new Error(message);
-              ^
-
-Error: Cannot find module './src/blob.js'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js
-- ./doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js
-- ./doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1248:15)
-    at Module._load (node:internal/modules/cjs/loader:1074:27)
-    at TracingChannel.traceSync (node:diagnostics_channel:315:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:217:24)
-    at Module.require (node:internal/modules/cjs/loader:1339:12)
-    at require (node:internal/modules/helpers:125:16)
-    at Object.<anonymous> (<workspace-root>/module/runtime/__index__.ts:3:1)
-    at Module._compile (node:internal/modules/cjs/loader:1546:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1691:10)
-    at Module.load (node:internal/modules/cjs/loader:1317:32) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto/runtime/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/src/decorators.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/__index__.js',
-    './doc-exec/.trv/output/node_modules/@travetto/cli/support/entry.trv.js',
-    './doc-exec/.trv/compiler/node_modules/@travetto/compiler/support/entry.trvc.js'
-  ]
+CUSTOM STARTUP
+Initialized {
+  manifest: {
+    main: { name: '@travetto-doc/rest', folder: '' },
+    workspace: {
+      name: '@travetto-doc/rest',
+      path: './doc-exec',
+      mono: false,
+      manager: 'npm',
+      type: 'commonjs',
+      defaultEnv: 'local'
+    }
+  },
+  runtime: {
+    env: 'prod',
+    debug: false,
+    production: true,
+    dynamic: false,
+    resourcePaths: [ './doc-exec/resources' ],
+    profiles: []
+  },
+  config: {
+    sources: [ { priority: 999, source: 'memory://override' } ],
+    active: {
+      RestAcceptsConfig: { types: {} },
+      RestAsyncContextConfig: {},
+      RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
+      RestConfig: {
+        serve: true,
+        port: 3000,
+        trustProxy: false,
+        hostname: 'localhost',
+        bindAddress: '0.0.0.0',
+        baseUrl: 'http://localhost:3000',
+        defaultMessage: true
+      },
+      RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      RestCorsConfig: {},
+      RestGetCacheConfig: {},
+      RestLogRoutesConfig: {},
+      RestRpcConfig: {},
+      RestSslConfig: { active: true }
+    }
+  }
 }
-
-Node.js v22.6.0
+Listening { port: 3000 }
 ```
 
 ## Interceptors
