@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
-import { WorkQueue } from '@travetto/worker';
 
+import { AsyncQueue } from '../src/queue';
 import { Util } from '../src/util';
 
 @Suite()
@@ -19,7 +19,7 @@ export class UtilTest {
 
   @Test()
   async verifyMap() {
-    const lines = new WorkQueue(['aaa', 'bbb']);
+    const lines = new AsyncQueue(['aaa', 'bbb']);
 
     const values: string[] = [];
     let j = 0;

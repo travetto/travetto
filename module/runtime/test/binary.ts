@@ -1,7 +1,8 @@
 import crypto from 'node:crypto';
 import assert from 'node:assert';
-import { Readable } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
+import { pipeline } from 'node:stream/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
@@ -22,7 +23,6 @@ export class BytesUtilTest {
     assert(blobBytes.equals(allBytes));
   }
 
-
   @Test()
   async verifySimpleHash() {
     const hash = crypto.createHash('sha512');
@@ -38,5 +38,20 @@ export class BytesUtilTest {
     assert(BinaryUtil.hash('', 20) === unKey.substring(0, 20));
 
     assert(BinaryUtil.hash('', 20) !== key.substring(0, 20));
+  }
+
+  @Test({ shouldThrow: 'size' })
+  async testMaxBlobWrite() {
+    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), BinaryUtil.limitWrite(1), new PassThrough());
+  }
+
+  @Test({ shouldThrow: 'size' })
+  async testMaxCloseBlobWrite() {
+    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), BinaryUtil.limitWrite(99), new PassThrough());
+  }
+
+  @Test()
+  async testMaxExactBlobWrite() {
+    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), BinaryUtil.limitWrite(100), new PassThrough());
   }
 }

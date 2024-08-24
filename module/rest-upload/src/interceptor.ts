@@ -41,7 +41,7 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
       req.uploads = {};
 
       for await (const item of RestUploadUtil.getUploads(req, config)) {
-        req.uploads[item.field] = await RestUploadUtil.upload(item, { ...config.uploads![item.field] ?? config });
+        req.uploads[item.field] = await RestUploadUtil.uploadToBlob(item, { ...config.uploads![item.field] ?? config });
       }
 
       return await next();
