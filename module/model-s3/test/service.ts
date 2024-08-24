@@ -1,13 +1,12 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { castTo } from '@travetto/runtime';
+import { BytesUtil, castTo } from '@travetto/runtime';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob';
-import { IOUtil } from '@travetto/io';
 
 import { S3ModelConfig } from '../src/config';
 import { S3ModelService } from '../src/service';
@@ -49,7 +48,7 @@ export class S3BlobSuite extends ModelBlobSuite {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
-    const hash = await IOUtil.hashInput(buffer);
+    const hash = await BytesUtil.hashInput(buffer);
 
     await service.upsertBlob(hash, buffer, {
       filename: 'Random.bin',
@@ -59,7 +58,7 @@ export class S3BlobSuite extends ModelBlobSuite {
     });
 
     const stream = await service.getBlob(hash);
-    const resolved = await IOUtil.hashInput(stream);
+    const resolved = await BytesUtil.hashInput(stream);
     assert(resolved === hash);
   }
 }

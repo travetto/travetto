@@ -1,16 +1,16 @@
-import busboy from '@fastify/busboy';
-
 import { createReadStream, createWriteStream } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
-import { Readable } from 'node:stream';
+import { Readable, Transform, Writable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-import { IOUtil } from '@travetto/io';
+import busboy from '@fastify/busboy';
+import { getExtension, getType } from 'mime';
+
 import { Request, MimeUtil } from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
-import { BlobUtil, AppError, castTo, Util, TypedObject } from '@travetto/runtime';
+import { BlobUtil, AppError, castTo, Util, TypedObject, BinaryInput, BytesUtil } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
 import { UploadMap } from './types';
@@ -29,17 +29,17 @@ export class RestUploadUtil {
     const remove = (): Promise<void> => fs.rm(location).catch(() => { });
 
     try {
-      await IOUtil.streamWithLimit(stream, createWriteStream(location), config.maxSize);
-      const contentType = (await IOUtil.detectType(location)).mime;
+      await this.streamWithLimit(stream, createWriteStream(location), config.maxSize);
+      const contentType = (await this.detectType(location)).mime;
 
       if (!path.extname(filename)) {
-        filename = `${filename}.${IOUtil.getExtension(contentType)}`;
+        filename = `${filename}.${this.getExtension(contentType)}`;
       }
 
       const blob = BlobUtil.readableBlob(() => createReadStream(location), {
         contentType,
         filename,
-        hash: await IOUtil.hashInput(createReadStream(location)),
+        hash: await BytesUtil.hashInput(createReadStream(location)),
         size: (await fs.stat(location)).size,
       });
 
@@ -83,11 +83,81 @@ export class RestUploadUtil {
     return TypedObject.fromEntries(await Promise.all(uploads));
   }
 
-  static async cleanup(req: Request): Promise<void> {
-    for (const item of Object.values(req.uploads ?? {})) {
-      if ('cleanup' in item && typeof item.cleanup === 'function') {
-        await item.cleanup();
+  /**
+   * Stream from input to output, enforcing a max size
+   */
+  static async streamWithLimit(input: Readable, output: Writable, maxSize?: number): Promise<void> {
+    let read = 0;
+
+    if (maxSize) {
+      await pipeline(
+        input,
+        new Transform({
+          transform(chunk, encoding, callback): void {
+            read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : 0;
+            if (read > maxSize) {
+              callback(new AppError('File size exceeded', 'data', {
+                read,
+                maxSize
+              }));
+            } else {
+              callback(null, chunk);
+            }
+          },
+        }),
+        output
+      );
+    } else {
+      await pipeline(input, output);
+    }
+  }
+
+  /**
+   * Get extension for a given content type
+   * @param contentType
+   */
+  static getExtension(contentType: string): string | undefined {
+    const res = getExtension(contentType)!;
+    if (res === 'mpga') {
+      return 'mp3';
+    }
+    return res;
+  }
+
+  /**
+   * Detect file type
+   */
+  static async detectType(input: BinaryInput | string, filename?: string): Promise<{ ext: string, mime: string }> {
+    if (typeof input === 'string') {
+      filename = input;
+    }
+    const { default: fileType } = await import('file-type');
+    const buffer = await BytesUtil.readChunk(input, 4100);
+    const matched = await fileType.fromBuffer(buffer);
+
+    if (!matched && (filename || input instanceof File)) {
+      const mime = getType(filename || castTo<File>(input).name);
+      if (mime) {
+        const ext = this.getExtension(mime)!;
+        if (ext) {
+          return { ext, mime };
+        }
       }
     }
+
+    filename ??= (input instanceof File ? input.name : undefined);
+
+    switch (matched?.ext.toString()) {
+      case 'mpga': return { ext: 'mp3', mime: 'audio/mpeg' };
+      case 'wav': return { ext: 'wav', mime: 'audio/wav' };
+      case 'mp4': {
+        if (filename?.endsWith('.m4a')) {
+          return { ext: 'm4a', mime: 'audio/mp4' };
+        }
+        break;
+      }
+    }
+
+    return matched ?? { ext: 'bin', mime: 'application/octet-stream' };
   }
 }

@@ -8,8 +8,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/rest-upload';
-import { Util, BlobMeta, BlobUtil } from '@travetto/runtime';
-import { IOUtil } from '@travetto/io';
+import { Util, BlobMeta, BlobUtil, BytesUtil } from '@travetto/runtime';
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -82,13 +81,13 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
 
   async getFileMeta(pth: string) {
     const loc = await this.fixture.readStream(pth);
-    return { hash: await IOUtil.hashInput(loc) };
+    return { hash: await BytesUtil.hashInput(loc) };
   }
 
 
   @BeforeAll()
   async init() {
-    this.fixture = new TestFixtures(['@travetto/model']);
+    this.fixture = new TestFixtures(['@travetto/model', '@travetto/rest-upload']);
     await RootRegistry.init();
   }
 

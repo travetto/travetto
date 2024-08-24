@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
+import path from 'node:path';
 
 import { AppError, BinaryInput, BlobMeta, BlobUtil, ByteRange, Util } from '@travetto/runtime';
-import { IOUtil } from '@travetto/io';
 
 /**
  * Utilities for processing assets
@@ -19,8 +19,8 @@ export class ModelBlobUtil {
       parts = [...parts.slice(0, 4), parts.slice(4).join('')];
     }
 
-    const ext = meta.contentType ? IOUtil.getExtension(meta.contentType) : 'bin';
-    return `${parts.join('/')}.${ext}`;
+    const ext = path.extname(meta.filename ?? '') || '.bin';
+    return `${parts.join('/')}${ext}`;
   }
 
   /**

@@ -1,16 +1,14 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
-import { Readable, Transform, Writable } from 'node:stream';
+import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-import { getExtension, getType } from 'mime';
-
-import { AppError, BinaryInput, castTo } from '@travetto/runtime';
+import { BinaryInput } from '@travetto/runtime';
 
 /**
  * Common functions for dealing with binary data/streams
  */
-export class IOUtil {
+export class BytesUtil {
 
   /**
    * Compute hash from an input blob, buffer or readable stream.
@@ -104,83 +102,5 @@ export class IOUtil {
       }
       return Buffer.concat(chunks).subarray(0, bytes);
     }
-  }
-
-  /**
-   * Stream from input to output, enforcing a max size
-   */
-  static async streamWithLimit(input: Readable, output: Writable, maxSize?: number): Promise<void> {
-    let read = 0;
-
-    if (maxSize) {
-      await pipeline(
-        input,
-        new Transform({
-          transform(chunk, encoding, callback): void {
-            read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : 0;
-            if (read > maxSize) {
-              callback(new AppError('File size exceeded', 'data', {
-                read,
-                maxSize
-              }));
-            } else {
-              callback(null, chunk);
-            }
-          },
-        }),
-        output
-      );
-    } else {
-      await pipeline(input, output);
-    }
-  }
-
-  /**
-   * Get extension for a given content type
-   * @param contentType
-   */
-  static getExtension(contentType: string): string | undefined {
-    const res = getExtension(contentType)!;
-    if (res === 'mpga') {
-      return 'mp3';
-    }
-    return res;
-  }
-
-  /**
-   * Detect file type
-   */
-  static async detectType(input: BinaryInput | string, filename?: string): Promise<{ ext: string, mime: string }> {
-    if (typeof input === 'string') {
-      filename = input;
-    }
-    const { default: fileType } = await import('file-type');
-    const buffer = await this.readChunk(input, 4100);
-    const matched = await fileType.fromBuffer(buffer);
-
-    if (!matched && (filename || input instanceof File)) {
-      const mime = getType(filename || castTo<File>(input).name);
-      if (mime) {
-        const ext = this.getExtension(mime)!;
-        if (ext) {
-          return { ext, mime };
-        }
-      }
-    }
-
-    filename ??= (input instanceof File ? input.name : undefined);
-
-    switch (matched?.ext.toString()) {
-      case 'mpga': return { ext: 'mp3', mime: 'audio/mpeg' };
-      case 'wav': return { ext: 'wav', mime: 'audio/wav' };
-      case 'mp4': {
-        if (filename?.endsWith('.m4a')) {
-          return { ext: 'm4a', mime: 'audio/mp4' };
-        }
-        break;
-      }
-    }
-
-    return matched ?? { ext: 'bin', mime: 'application/octet-stream' };
   }
 }

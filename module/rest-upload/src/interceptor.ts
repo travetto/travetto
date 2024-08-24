@@ -49,7 +49,11 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
       };
       return await next();
     } finally {
-      await RestUploadUtil.cleanup(req);
+      for (const item of Object.values(req.uploads ?? {})) {
+        if ('cleanup' in item && typeof item.cleanup === 'function') {
+          await item.cleanup();
+        }
+      }
     }
   }
 }
