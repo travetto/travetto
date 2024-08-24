@@ -171,7 +171,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
     await this.describeBlob(location);
     if (errorIfExisting) {
-      throw new ExistsError('Blob', location);
+      throw new ExistsError(ModelBlobNamespace, location);
     }
     return this.upsertBlob(location, input, meta);
   }
@@ -207,7 +207,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
         fs.unlink(file.replace('.bin', META))
       ]);
     } else {
-      throw new NotFoundError('Blob', location);
+      throw new NotFoundError(ModelBlobNamespace, location);
     }
   }
 

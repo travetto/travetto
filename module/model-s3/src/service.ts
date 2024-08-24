@@ -8,7 +8,8 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
   ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
-  ModelBlobSupport, ModelBlobUtil
+  ModelBlobSupport, ModelBlobUtil,
+  ModelBlobNamespace
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
@@ -298,7 +299,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
     await this.describeBlob(location);
     if (errorIfExisting) {
-      throw new ExistsError('Blob', location);
+      throw new ExistsError(ModelBlobNamespace, location);
     }
     return this.upsertBlob(location, input, meta);
   }
