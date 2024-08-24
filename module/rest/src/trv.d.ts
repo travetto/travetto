@@ -2,12 +2,13 @@ import { SetOption, GetOption } from 'cookies';
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'node:http';
 import { Readable, Writable } from 'node:stream';
 
+import { ByteRange } from '@travetto/runtime';
+
 import { ContentType, HeaderMap } from './types';
 import {
-  HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ,
-  ProviderEntityⲐ, RequestParamsⲐ, RequestLoggingⲐ
+  HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ, ProviderEntityⲐ, RequestParamsⲐ,
+  RequestLoggingⲐ
 } from './internal/symbol';
-import { ByteRange } from '@travetto/runtime';
 
 declare global {
   /**
@@ -129,6 +130,10 @@ declare global {
      * Read the file name from the request content disposition
      */
     getFilename(): string;
+    /**
+     * Readable stream for the request body
+     */
+    stream(): Readable;
   }
 
   /**

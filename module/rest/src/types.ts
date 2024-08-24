@@ -20,7 +20,6 @@ export type ServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'cl
 
 export type ContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
-
 /**
  * Param configuration
  */

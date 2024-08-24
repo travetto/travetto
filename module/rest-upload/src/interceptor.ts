@@ -1,9 +1,11 @@
 
 import { Inject, Injectable } from '@travetto/di';
-import { BodyParseInterceptor, FilterContext, FilterReturn, FilterNext, RestInterceptor, SerializeInterceptor } from '@travetto/rest';
+import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, RestInterceptor, SerializeInterceptor } from '@travetto/rest';
 
 import { RestUploadConfig } from './config';
 import { RestUploadUtil } from './util';
+
+const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data',]);
 
 @Injectable()
 export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> {
@@ -38,20 +40,16 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
 
   async intercept({ req, config }: FilterContext<RestUploadConfig>, next: FilterNext): Promise<FilterReturn> {
     try {
-      switch (req.getContentType()?.full) {
-        case 'application/x-www-form-urlencoded':
-        case 'multipart/form-data':
-          req.uploads = await RestUploadUtil.uploadMultipart(req, config);
-          break;
-        default:
-          req.uploads = await RestUploadUtil.uploadDirect(req, config);
-          break;
-      }
+      const type = MULTIPART.has(req.getContentType()?.full!) ? 'multipart' : 'direct';
+      console.log(`Uploading ${type}`, req.header('content-length'));
+      if (type === 'multipart') {
+        req.uploads = await RestUploadUtil.uploadMultipart(req, config);
+      } else {
+        req.uploads = await RestUploadUtil.uploadSingle(req, config);
+      };
       return await next();
     } finally {
-      if (this.config.cleanupFiles !== false && req.uploads) {
-        await RestUploadUtil.cleanupBlobs(Object.values(req.uploads));
-      }
+      await RestUploadUtil.cleanup(req);
     }
   }
 }

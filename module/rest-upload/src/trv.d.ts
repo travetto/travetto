@@ -1,8 +1,8 @@
-import '@travetto/rest';
+import { UploadMap } from './types';
 
 declare global {
   interface TravettoRequest {
-    uploads: Record<string, Blob>;
+    uploads: UploadMap
   }
 
   /**

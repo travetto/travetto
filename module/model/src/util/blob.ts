@@ -14,10 +14,13 @@ export class ModelBlobUtil {
   static getHashedLocation(meta: BlobMeta, prefix = ''): string {
     const hash = meta.hash ?? Util.uuid();
 
-    const base = hash.replace(/(.{4})(.{4})(.{4})(.{4})(.+)/, (_, ...others) =>
-      `${prefix}${others.slice(0, 5).join('/')}`);
+    let parts = hash.match(/(.{1,4})/g)!.slice();
+    if (parts.length > 4) {
+      parts = [...parts.slice(0, 4), parts.slice(4).join('')];
+    }
 
-    return IOUtil.getFilename(base, meta.contentType);
+    const ext = meta.contentType ? IOUtil.getExtension(meta.contentType) : 'bin';
+    return `${parts.join('/')}.${ext}`;
   }
 
   /**

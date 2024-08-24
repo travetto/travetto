@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { BlobMeta } from '@travetto/io';
+import { BlobMeta } from '@travetto/runtime';
 import { ModelBlobUtil } from '../__index__';
 
 @Suite()
@@ -12,7 +12,7 @@ class BlobUtilSuite {
       hash: 'ora_nge_bee_for_sly_'
     };
 
-    assert(ModelBlobUtil.getHashedLocation(meta) === 'ora_/nge_/bee_/for_/sly_');
+    assert(ModelBlobUtil.getHashedLocation(meta) === 'ora_/nge_/bee_/for_/sly_.bin');
 
     meta.contentType = 'image/jpeg';
 
@@ -33,11 +33,11 @@ class BlobUtilSuite {
       hash: 'ora_nge_bee'
     };
 
-    assert(ModelBlobUtil.getHashedLocation(meta) === 'ora_nge_bee');
+    assert(ModelBlobUtil.getHashedLocation(meta) === 'ora_/nge_/bee.bin');
 
     meta.contentType = 'image/jpeg';
 
-    assert(ModelBlobUtil.getHashedLocation(meta) === 'ora_nge_bee.jpeg');
+    assert(ModelBlobUtil.getHashedLocation(meta) === 'ora_/nge_/bee.jpeg');
 
   }
 }

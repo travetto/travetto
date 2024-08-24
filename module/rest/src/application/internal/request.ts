@@ -1,12 +1,11 @@
 import { IncomingHttpHeaders } from 'node:http';
-
-import { getExtension } from 'mime';
+import { PassThrough, Readable } from 'node:stream';
 
 import { ByteRange, castTo } from '@travetto/runtime';
 
 import { Request, ContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
-import { NodeEntityⲐ, ParsedType } from '../../internal/symbol';
+import { NodeEntityⲐ, ParsedTypeⲐ } from '../../internal/symbol';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
@@ -17,7 +16,7 @@ export class RequestCore implements Partial<Request> {
   /**
    * Content type parsed
    */
-  [ParsedType]?: ContentType;
+  [ParsedTypeⲐ]?: ContentType;
 
   /**
    * Get the inbound request header as a string
@@ -55,7 +54,7 @@ export class RequestCore implements Partial<Request> {
    */
   getContentType(this: Request): ContentType | undefined {
     const self: Request & Partial<RequestCore> = castTo(this);
-    return self[ParsedType] ??= MimeUtil.parse(this.headerFirst('content-type'));
+    return self[ParsedTypeⲐ] ??= MimeUtil.parse(this.headerFirst('content-type'));
   }
 
   /**
@@ -90,12 +89,16 @@ export class RequestCore implements Partial<Request> {
     if (match) {
       return match;
     } else {
-      const contentType = this.getContentType();
-      if (contentType) {
-        return `file-upload.${getExtension(contentType.full)}`;
-      } else {
-        return 'file-upload.unknown';
-      }
+      return `unknown_${Date.now()}`;
     }
+  }
+
+  /**
+   * Get request body as a stream
+   */
+  stream(this: Request): Readable {
+    const out = new PassThrough();
+    this.pipe(out);
+    return out;
   }
 }

@@ -5,78 +5,73 @@ import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { IOUtil } from '@travetto/io';
 import { Request, MimeUtil } from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
-import { BlobUtil, AppError, castTo, Util, BlobMeta } from '@travetto/runtime';
+import { BlobUtil, AppError, castTo, Util, TypedObject } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
+import { UploadMap } from './types';
 
-type UploadMap = Record<string, Blob>;
-
+/**
+ * Rest upload utilities
+ */
 export class RestUploadUtil {
 
-  static async #singleUpload(stream: Readable, filename: string, config: Partial<RestUploadConfig>, field?: string): Promise<Blob> {
+  static async #uploadSingle(stream: Readable, filename: string, config: Partial<RestUploadConfig>): Promise<Blob> {
     const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDir, { recursive: true });
-    const location = path.resolve(uniqueDir, path.basename(filename));
+    filename = path.basename(filename);
+
+    const location = path.resolve(uniqueDir, filename);
+    const remove = (): Promise<void> => fs.rm(location).catch(() => { });
 
     try {
-      const check = config.matcher ??= MimeUtil.matcher(config.types);
       await IOUtil.streamWithLimit(stream, createWriteStream(location), config.maxSize);
       const contentType = (await IOUtil.detectType(location)).mime;
-      const meta: BlobMeta = {
+
+      if (!path.extname(filename)) {
+        filename = `${filename}.${IOUtil.getExtension(contentType)}`;
+      }
+
+      const blob = BlobUtil.readableBlob(() => createReadStream(location), {
         contentType,
+        filename,
         hash: await IOUtil.hashInput(createReadStream(location)),
-        filename: IOUtil.getFilename(filename, contentType),
         size: (await fs.stat(location)).size,
-      };
-      const blob = BlobUtil.readableBlob(() => createReadStream(location), meta);
+      });
 
-      castTo<{ cleanup: Function }>(blob).cleanup = (): Promise<void> => fs.rm(location, { force: true });
+      if (config.cleanupFiles !== false) {
+        castTo<{ cleanup: Function }>(blob).cleanup = remove;
+      }
 
+      const check = config.matcher ??= MimeUtil.matcher(config.types);
       if (!check(blob.type)) {
         throw new AppError(`Content type not allowed: ${blob.type}`, 'data');
       }
       return blob;
     } catch (err) {
-      if (location) {
-        await fs.rm(location, { force: true });
-      }
+      await remove();
       throw err;
     }
   }
 
-  static #getLargestSize(config: Partial<RestUploadConfig>): number | undefined {
-    const fileMaxes = [...Object.values(config.uploads ?? {}).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
-    return fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
-  }
-
-  static async uploadDirect(req: Request, config: Partial<RestUploadConfig>): Promise<UploadMap> {
-    console.log('Starting direct upload', req.header('content-length'));
-    try {
-      const blob = await this.#singleUpload(req.body ?? req[NodeEntityⲐ], req.getFilename(), config);
-      return { file: blob };
-    } catch (err) {
-      console.error('Failed direct upload', err);
-      throw err;
-    }
+  static async uploadSingle(req: Request, config: Partial<RestUploadConfig>): Promise<UploadMap> {
+    return { file: await this.#uploadSingle(req.body ?? req[NodeEntityⲐ], req.getFilename(), config) };
   }
 
   static async uploadMultipart(req: Request, config: Partial<RestUploadConfig>): Promise<UploadMap> {
-    const largestMax = this.#getLargestSize(config);
-    const uploads: Promise<Blob>[] = [];
-    const uploadMap: UploadMap = {};
-
-    console.log('Starting multipart upload', req.header('content-length'));
+    const fileMaxes = [...Object.values(config.uploads ?? {}).map(x => x.maxSize ?? config.maxSize)].filter(x => x !== undefined);
+    const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
+    const uploads: Promise<[string, Blob]>[] = [];
 
     const uploader = busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
       .on('file', (field, stream, filename) =>
         uploads.push(
-          this.#singleUpload(stream, filename, { maxSize: largestMax, ...config.uploads![field] ?? config }, field).then(v =>
-            uploadMap[field] = v
-          )
+          this.#uploadSingle(stream, filename, { ...config.uploads![field] ?? config })
+            .then(v => [field, v])
         )
       )
       .on('limit', field =>
@@ -84,33 +79,15 @@ export class RestUploadUtil {
       );
 
     // Do upload
-    let err = await new Promise<Error | undefined>(res => {
-      try {
-        uploader.on('finish', () => res(undefined)).on('error', res);
-        req.pipe(uploader);
-      } catch (err2) {
-        if (err2 instanceof Error) {
-          res(err2);
-        } else {
-          res(new Error(`${err2}`));
-        }
-      }
-    });
-
-    err ??= (await Promise.allSettled(uploads)).find(x => x.status === 'rejected')?.reason;
-
-    if (err) {
-      console.error('Failed multipart upload', err);
-      throw err;
-    }
-    return uploadMap;
+    await pipeline(req.stream(), uploader);
+    return TypedObject.fromEntries(await Promise.all(uploads));
   }
 
-  static async cleanupBlobs(blobs: Blob[]): Promise<void> {
-    await Promise.all(blobs.map(async blob => {
-      if ('cleanup' in blob && typeof blob.cleanup === 'function') {
-        await blob.cleanup();
+  static async cleanup(req: Request): Promise<void> {
+    for (const item of Object.values(req.uploads ?? {})) {
+      if ('cleanup' in item && typeof item.cleanup === 'function') {
+        await item.cleanup();
       }
-    }));
+    }
   }
 }

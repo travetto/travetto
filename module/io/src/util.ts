@@ -1,4 +1,3 @@
-import path from 'node:path';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import { Readable, Transform, Writable } from 'node:stream';
@@ -15,8 +14,6 @@ export class IOUtil {
 
   /**
    * Compute hash from an input blob, buffer or readable stream.
-   *
-   * For Readable/Blob this will most likely consume the data
    */
   static async hashInput(input: BinaryInput): Promise<string> {
     const hash = crypto.createHash('sha256').setEncoding('hex');
@@ -40,20 +37,23 @@ export class IOUtil {
       } : {}
     });
 
-    if (!str.ok) {
+    if (!str.ok || !str.body) {
       throw new Error('Invalid url for hashing');
     }
 
     let count = 0;
     const buffer: Buffer[] = [];
 
-    for await (const chunk of Readable.fromWeb(str.body!)) {
+    for await (const chunk of str.body) {
       if (Buffer.isBuffer(chunk)) {
         buffer.push(chunk);
         count += chunk.length;
       } else if (typeof chunk === 'string') {
         buffer.push(Buffer.from(chunk));
         count += chunk.length;
+      } else if (chunk instanceof Uint8Array) {
+        buffer.push(Buffer.from(chunk));
+        count += chunk.byteLength;
       }
 
       if (count > byteLimit && byteLimit > 0) {
@@ -182,23 +182,5 @@ export class IOUtil {
     }
 
     return matched ?? { ext: 'bin', mime: 'application/octet-stream' };
-  }
-
-  /**
-   * Get filename for a given input
-   */
-  static getFilename(filename?: string, contentType?: string): string {
-    filename ??= `unknown_${Date.now()}`;
-    filename = path.basename(filename);
-
-    const extName = path.extname(filename);
-    if (!extName && contentType) {
-      const ext = this.getExtension(contentType);
-      if (ext) {
-        filename = `${filename}.${ext}`;
-      }
-    }
-
-    return filename;
   }
 }
