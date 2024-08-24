@@ -23,14 +23,6 @@ type FileType = { ext: string, mime: string };
  */
 export class RestUploadUtil {
 
-  static async #getTypeByFilename(file: string): Promise<FileType | undefined> {
-    const { default: { getExtension, getType } } = await import('mime');
-    const mime = getType(file);
-    if (mime) {
-      return { ext: getExtension(mime)!, mime };
-    }
-  }
-
   /**
    * Get all the uploads, separating multipart from direct
    */
@@ -104,10 +96,16 @@ export class RestUploadUtil {
    * Get file type
    */
   static async getFileType(input: string | Readable): Promise<FileType> {
-    const { default: fileType } = await import('file-type');
+    const { default: { fromFile, fromStream } } = await import('file-type');
+    const { default: { getType, getExtension } } = await import('mime');
 
-    return await (typeof input === 'string' ? fileType.fromFile(input) : fileType.fromStream(input)) ??
-      (typeof input === 'string' ? await this.#getTypeByFilename(input) : undefined) ??
-      { ext: 'bin', mime: 'application/octet-stream' };
+    const matched = await (typeof input === 'string' ? fromFile(input) : fromStream(input));
+    if (!matched && typeof input === 'string') {
+      const mime = getType(input);
+      if (mime) {
+        return { ext: getExtension(mime)!, mime };
+      }
+    }
+    return matched ?? { ext: 'bin', mime: 'application/octet-stream' };
   }
 }
