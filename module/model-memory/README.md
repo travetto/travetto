@@ -17,4 +17,4 @@ This module provides a memory-based implementation for the [Data Modeling Suppor
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11)
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12)
-   *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L12)
+   *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8)
