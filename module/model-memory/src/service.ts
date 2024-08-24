@@ -6,13 +6,14 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
-  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport, ModelBlobNamespace, ModelBlobUtil
+  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport, ModelBlobUtil
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { MODEL_BLOB, ModelBlobNamespace } from '@travetto/model/src/internal/service/blob';
 
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
 
@@ -300,12 +301,12 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    this.#getStore(cls).clear();
-  }
-
-  async truncateBlob(): Promise<void> {
-    this.#getStore(ModelBlobNamespace).clear();
-    this.#getStore(ModelBlobMetaNamespace).clear();
+    if (cls === MODEL_BLOB) {
+      this.#getStore(ModelBlobNamespace).clear();
+      this.#getStore(ModelBlobMetaNamespace).clear();
+    } else {
+      this.#getStore(cls).clear();
+    }
   }
 
   // Indexed
