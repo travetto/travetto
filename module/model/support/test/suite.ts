@@ -4,8 +4,8 @@ import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry, TestFixtures } from '@travetto/test';
 
 import { isBlobSupported, isStorageSupported } from '../../src/internal/service/common';
-import { ModelRegistry } from '../../src/registry/model';
 import { MODEL_BLOB } from '../../src/internal/service/blob';
+import { ModelRegistry } from '../../src/registry/model';
 
 const Loaded = Symbol();
 
