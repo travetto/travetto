@@ -129,7 +129,7 @@ declare global {
     /**
      * Read the file name from the request content disposition
      */
-    getFilename(): string;
+    getFilename(): string | undefined;
     /**
      * Readable stream for the request body
      */

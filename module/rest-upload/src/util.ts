@@ -15,7 +15,7 @@ import { RestUploadConfig } from './config';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 
-type UploadItem = { stream: Readable, filename: string, field: string };
+type UploadItem = { stream: Readable, filename?: string, field: string };
 type FileType = { ext: string, mime: string };
 
 /**
@@ -46,12 +46,13 @@ export class RestUploadUtil {
   }
 
   /**
-   * Convert an UploadItem to a Blob
+   * Convert an UploadItem to a File
    */
-  static async uploadToBlob({ stream, filename }: UploadItem, config: Partial<RestUploadConfig>): Promise<Blob> {
+  static async toFile({ stream, filename }: UploadItem, config: Partial<RestUploadConfig>): Promise<File> {
     const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDir, { recursive: true });
-    filename = path.basename(filename);
+
+    filename = filename ? path.basename(filename) : `unknown_${Date.now()}`;
 
     const location = path.resolve(uniqueDir, filename);
     const remove = (): Promise<void> => fs.rm(location).catch(() => { });
@@ -74,7 +75,7 @@ export class RestUploadUtil {
         filename = `${filename}.${detected.ext}`;
       }
 
-      const blob = BinaryUtil.readableBlob(() => createReadStream(location), {
+      const file = BinaryUtil.readableBlob(() => createReadStream(location), {
         contentType: detected.mime,
         filename,
         hash: await BinaryUtil.hashInput(createReadStream(location)),
@@ -82,10 +83,10 @@ export class RestUploadUtil {
       });
 
       if (config.cleanupFiles !== false) {
-        castTo<{ cleanup: Function }>(blob).cleanup = remove;
+        Object.assign(file, { cleanup: remove });
       }
 
-      return blob;
+      return file;
     } catch (err) {
       await remove();
       throw err;

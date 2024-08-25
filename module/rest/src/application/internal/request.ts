@@ -84,13 +84,9 @@ export class RequestCore implements Partial<Request> {
   /**
    * Read the filename from the content disposition
    */
-  getFilename(this: Request): string {
+  getFilename(this: Request): string | undefined {
     const [, match] = (this.header('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
-    if (match) {
-      return match;
-    } else {
-      return `unknown_${Date.now()}`;
-    }
+    return match;
   }
 
   /**

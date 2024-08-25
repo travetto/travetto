@@ -1,2 +1,2 @@
 
-export type UploadMap = Record<string, Blob>;
+export type UploadMap = Record<string, File>;

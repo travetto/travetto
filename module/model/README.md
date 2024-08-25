@@ -161,18 +161,13 @@ Some implementations also allow for the ability to read/write binary data as [Bl
 export interface ModelBlobSupport {
 
   /**
-   * Insert blob to storage
-   * @param location The location of the blob
-   * @param input The actual blob to write
-   */
-  insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting?: boolean): Promise<void>;
-
-  /**
    * Upsert blob to storage
    * @param location The location of the blob
    * @param input The actual blob to write
+   * @param meta Additional metadata to store with the blob
+   * @param overwrite Should we replace content if already found, defaults to true
    */
-  upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void>;
+  upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite?: boolean): Promise<void>;
 
   /**
    * Get blob from storage
