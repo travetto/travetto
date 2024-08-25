@@ -40,6 +40,9 @@ export class PackConfigUtil {
         `RUN npm install ${item}`
       );
     }
+    if (out.length) {
+      out.unshift(`WORKDIR ${cfg.dockerRuntime.folder}`);
+    }
     return out.join('\n');
   }
 
