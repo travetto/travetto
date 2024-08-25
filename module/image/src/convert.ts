@@ -106,7 +106,12 @@ export class ImageConverter {
    */
   static async resize<T extends ImageType>(image: T, options: ResizeOptions = {}): Promise<T> {
     const dims = [options.w, options.h].map(d => (!d && options.strictResolution === false) ? undefined : d);
-    if (!options.asSubprocess) {
+    if (options.asSubprocess) {
+      return this.#subprocessReturn(
+        await this.CONVERTER.exec('gm', 'convert', '-resize', dims.join('x'), '-auto-orient',
+          ...(options.optimize ? ['-strip', '-quality', '86'] : []), '-', '-'),
+        image);
+    } else {
       const { default: sharp } = await import('sharp');
 
       return this.#sharpReturn(
@@ -118,11 +123,6 @@ export class ImageConverter {
         image,
         options.optimize,
       );
-    } else {
-      return this.#subprocessReturn(
-        await this.CONVERTER.exec('gm', 'convert', '-resize', dims.join('x'), '-auto-orient',
-          ...(options.optimize ? ['-strip', '-quality', '86'] : []), '-', '-'),
-        image);
     }
   }
 
