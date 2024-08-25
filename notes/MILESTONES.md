@@ -603,6 +603,7 @@ Release 5.0 - 2024-8-26
    * Path should now be used as a standard import (swapped out at build time)
 * Reworked how we store file ids, and access them
    * No longer depending on manifest for registering classes
+* ResourceLoader is gone, only File Loader
 
 ### Compiler
 * Fixed bug that killed all userland processes
@@ -630,3 +631,6 @@ Release 5.0 - 2024-8-26
 * Moved to rest-upload
 * Standardized on blob/file for upload
 * Centralized logic for hashing/file detection to where we know we have a file on disk
+
+### Image
+* Pulled in sharp for native-node support, avoiding the external operations
