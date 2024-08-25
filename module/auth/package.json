@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth",
-  "version": "5.0.0-rc.12",
+  "version": "5.0.0-rc.13",
   "description": "Authentication scaffolding for the Travetto framework",
   "keywords": [
     "authentication",
@@ -23,7 +23,7 @@
     "directory": "module/auth"
   },
   "dependencies": {
-    "@travetto/runtime": "^5.0.0-rc.12"
+    "@travetto/runtime": "^5.0.0-rc.13"
   },
   "travetto": {
     "displayName": "Authentication"
