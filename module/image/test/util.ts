@@ -8,10 +8,10 @@ import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
-import { ImageUtil } from '../src/convert';
+import { ImageUtil } from '../src/util';
 
-@Suite('ImageConverter')
-class ImageConverterTest {
+@Suite()
+class ImageUtilSuite {
 
   fixture = new TestFixtures();
 
