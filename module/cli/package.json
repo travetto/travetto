@@ -1,6 +1,6 @@
 {
   "name": "@travetto/cli",
-  "version": "5.0.0-rc.14",
+  "version": "5.0.0",
   "description": "CLI infrastructure for Travetto framework",
   "keywords": [
     "cli",
@@ -29,8 +29,8 @@
     "directory": "module/cli"
   },
   "dependencies": {
-    "@travetto/schema": "^5.0.0-rc.14",
-    "@travetto/terminal": "^5.0.0-rc.13"
+    "@travetto/schema": "^5.0.0",
+    "@travetto/terminal": "^5.0.0"
   },
   "travetto": {
     "displayName": "Command Line Interface",
