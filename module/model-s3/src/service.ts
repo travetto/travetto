@@ -44,7 +44,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   constructor(public readonly config: S3ModelConfig) { }
 
-  #getMetaBase({ range, ...meta }: BlobMeta): MetaBase {
+  #getMetaBase({ range, size, ...meta }: BlobMeta): MetaBase {
     return {
       ContentType: meta.contentType,
       ...(meta.contentEncoding ? { ContentEncoding: meta.contentEncoding } : {}),
@@ -52,7 +52,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       ...(meta.cacheControl ? { CacheControl: meta.cacheControl } : {}),
       Metadata: {
         ...meta,
-        size: `${meta.size}`
+        ...(size ? { size: `${size}` } : {})
       }
     };
   }
@@ -128,8 +128,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     };
     try {
       for await (const chunk of input) {
-        buffers.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-        total += chunk.length;
+        const chunked = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        buffers.push(chunked);
+        total += chunked.length;
         if (total > this.config.chunkSize) {
           await flush();
         }
