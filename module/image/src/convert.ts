@@ -51,7 +51,7 @@ type ImageType = Readable | Buffer;
 /**
  * Simple support for image manipulation.
  */
-export class ImageConverter {
+export class ImageUtil {
 
   /**
    * Resize/conversion util

@@ -15,18 +15,26 @@ yarn add @travetto/image
 
 This module provides functionality for image resizing, and png optimization. This is primarily meant to be used in conjunction with other modules, like the [Email Compilation Support](https://github.com/travetto/travetto/tree/main/module/email-compiler#readme "Email compiling module") module. It can also be invoked directly as needed (as it can be very handy for batch processing images on the command line). 
 
-The utility's primary structure revolves around the [CommandOperation](https://github.com/travetto/travetto/tree/main/module/command/src/command.ts#L12) from the [Command](https://github.com/travetto/travetto/tree/main/module/command#readme "Support for executing complex commands at runtime.") module.  The [CommandOperation](https://github.com/travetto/travetto/tree/main/module/command/src/command.ts#L12)  allows for declaration of a local executable, and a fall-back docker container (mainly meant for development).  The [ImageConverter](https://github.com/travetto/travetto/tree/main/module/image/src/convert.ts#L38) utilizes [ImageMagick](https://imagemagick.org/index.php), [pngquant](https://pngquant.org/), and  [Jpegoptim](https://github.com/tjko/jpegoptim) as the backing for image resizing and png compression, respectively.
+The [ImageUtil](https://github.com/travetto/travetto/tree/main/module/image/src/convert.ts#L54) functionality supports two operation modes:
+   *  In-process operations using [sharp](https://sharp.pixelplumbing.com/)
+   *  Out-of-process operations using [ImageMagick](https://imagemagick.org/index.php),[pngquant](https://pngquant.org/) and [Jpegoptim](https://github.com/tjko/jpegoptim).
+
+## In-Process
+The in process operations leverage [sharp](https://sharp.pixelplumbing.com/) and will perform within expectations, and will execute substantially faster than invoking a subprocess.  The primary caveats here being that [Jpegoptim](https://github.com/tjko/jpegoptim) and [pngquant](https://pngquant.org/) are better geared for image optimization.  Additionally, by running these processes in-memory, there will be shared contention within the process.
+
+## Out-of-Process
+The out-of-process executions will leverage external tools ([ImageMagick](https://imagemagick.org/index.php),[pngquant](https://pngquant.org/) and [Jpegoptim](https://github.com/tjko/jpegoptim)) via [CommandOperation](https://github.com/travetto/travetto/tree/main/module/command/src/command.ts#L12)s.  These tools are tried and tested, but come with the overhead of invoking a separate process to operate.  The benefit here is externalized memory usage, and a more robust optimization flow.
 
 **Code: Simple Image Resize**
 ```typescript
 import { createReadStream, createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 
-import { ImageConverter } from '@travetto/image';
+import { ImageUtil } from '@travetto/image';
 
 export class ResizeService {
   async resizeImage(imgPath: string, width: number, height: number): Promise<string> {
-    const stream = await ImageConverter.resize(createReadStream(imgPath), { w: width, h: height });
+    const stream = await ImageUtil.resize(createReadStream(imgPath), { w: width, h: height });
     const out = imgPath.replace(/[.][^.]+$/, (ext) => `.resized${ext}`);
     await pipeline(stream, createWriteStream(out));
     return out;

@@ -3,7 +3,7 @@ import { buffer as toBuffer } from 'node:stream/consumers';
 import path from 'node:path';
 
 import { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
-import { ImageConverter } from '@travetto/image';
+import { ImageUtil } from '@travetto/image';
 
 type Tokenized = {
   text: string;
@@ -137,8 +137,9 @@ export class EmailCompileUtil {
     for (const [token, src] of tokens) {
       const ext = path.extname(src);
       if (/^[.](jpe?g|png)$/.test(ext)) {
-        const output = await ImageConverter.optimize(
-          ext === '.png' ? 'png' : 'jpeg', await opts.loader.readStream(src)
+        const output = await ImageUtil.optimize(
+          await opts.loader.readStream(src),
+          { format: ext === '.png' ? 'png' : 'jpeg' }
         );
         const buffer = await toBuffer(output);
         pendingImages.push([token, ext, buffer]);
