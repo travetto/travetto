@@ -1,11 +1,9 @@
+import { Readable } from 'node:stream';
 import { Class, AppError, BinaryInput, BinaryUtil, BlobMeta, ByteRange } from '@travetto/runtime';
 import { ModelType } from '../../types/model';
 
 export const ModelBlobNamespace = '__blobs';
 export const MODEL_BLOB: Class<ModelType> = class { id: string; };
-
-import { Readable } from 'node:stream';
-
 
 /**
  * Utilities for processing assets
