@@ -4,16 +4,8 @@ export const PAGES = [
   {
     path: 'app', title: 'Application', subs: [
       {
-        path: 'command', title: 'Command',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/command/command.component').then(m => m.CommandComponent)
-      },
-      {
         path: 'cache', title: 'Cache',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/cache/cache.component').then(m => m.CacheComponent)
-      },
-      {
-        path: 'pack', title: 'Pack',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/pack/pack.component').then(m => m.PackComponent)
       },
       {
         path: 'image', title: 'Image',
@@ -34,17 +26,33 @@ export const PAGES = [
     ]
   },
   {
+    path: 'tools', title: 'Tools', subs: [
+      {
+        path: 'command', title: 'Command',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/command/command.component').then(m => m.CommandComponent)
+      },
+      {
+        path: 'pack', title: 'Pack',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/pack/pack.component').then(m => m.PackComponent)
+      },
+      {
+        path: 'eslint', title: 'ESLint Support',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/eslint/eslint.component').then(m => m.EslintComponent)
+      },
+      {
+        path: 'scaffold', title: 'App Scaffold',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/scaffold/scaffold.component').then(m => m.ScaffoldComponent)
+      },
+      {
+        path: 'vscode-plugin', title: 'VS Code Plugin',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/vscode-plugin/vscode-plugin.component').then(m => m.VSCodePluginComponent)
+      }
+    ]
+  },
+  {
     path: 'model', title: 'Model',
     loadComponent: (): Promise<Type<unknown>> => import('./gen/model/model.component').then(m => m.ModelComponent),
     subs: [
-      {
-        path: 'model-query', title: 'Query',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-query/model-query.component').then(m => m.ModelQueryComponent)
-      },
-      {
-        path: 'model-query-language', title: 'Query Language',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-query-language/model-query-language.component').then(m => m.ModelQueryLanguageComponent)
-      },
       {
         path: 'model-dynamodb', title: 'DynamoDB',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-dynamodb/model-dynamodb.component').then(m => m.ModelDynamodbComponent)
@@ -92,6 +100,14 @@ export const PAGES = [
       {
         path: 'model-sqlite', title: 'Sqlite',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/model-sqlite/model-sqlite.component').then(m => m.ModelSqliteComponent)
+      },
+      {
+        path: 'model-query', title: 'Query',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-query/model-query.component').then(m => m.ModelQueryComponent)
+      },
+      {
+        path: 'model-query-language', title: 'Query Language',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/model-query-language/model-query-language.component').then(m => m.ModelQueryLanguageComponent)
       },
     ]
   },
@@ -144,10 +160,6 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-client/rest-client.component').then(m => m.RestClientComponent)
       }
     ]
-  },
-  {
-    path: 'asset', title: 'Asset',
-    loadComponent: (): Promise<Type<unknown>> => import('./gen/asset/asset.component').then(m => m.AssetComponent),
   },
   {
     path: 'auth', title: 'Auth',
@@ -224,7 +236,7 @@ export const PAGES = [
   {
     path: 'foundation', title: 'Foundation', subs: [
       {
-        path: 'base', title: 'Base',
+        path: 'runtime', title: 'Runtime',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/runtime/runtime.component').then(m => m.BaseComponent)
       },
       {
@@ -248,21 +260,5 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/manifest/manifest.component').then(m => m.ManifestComponent)
       },
     ]
-  },
-  {
-    path: 'tools', title: 'Tooling', subs: [
-      {
-        path: 'vscode-plugin', title: 'VS Code Plugin',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/vscode-plugin/vscode-plugin.component').then(m => m.VSCodePluginComponent)
-      },
-      {
-        path: 'scaffold', title: 'App Scaffold',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/scaffold/scaffold.component').then(m => m.ScaffoldComponent)
-      },
-      {
-        path: 'eslint', title: 'ESLint Support',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/eslint/eslint.component').then(m => m.EslintComponent)
-      },
-    ]
-  },
+  }
 ];

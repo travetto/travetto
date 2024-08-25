@@ -1,9 +1,9 @@
-.full        { grid-column: 2/span 6; }
-.left-half   { grid-column: 2/span 3; }
-.right-half  { grid-column: 5/span 3; }
-.left-third  { grid-column: 2/span 2; }
-.mid-third   { grid-column: 4/span 2; }
-.right-third { grid-column: 6/span 2; }
+.full        { grid-column: 1/span 6; }
+.left-half   { grid-column: 1/span 3; }
+.right-half  { grid-column: 4/span 3; }
+.left-third  { grid-column: 1/span 2; }
+.mid-third   { grid-column: 3/span 2; }
+.right-third { grid-column: 5/span 2; }
 
 .vertical { 
   grid-row: 1/span 5; 
@@ -13,30 +13,28 @@
 }
 
 @mixin group($r,$g,$b) {
-  background:linear-gradient(135deg, rgba($r, $g, $b, 1) 80%, rgba($r*.85, $g*.85, $b*.85, 1));
+  background:linear-gradient(135deg, rgba($r*.85, $g*.85, $b*.85, 1) 0%, rgba($r*1.15, $g*1.15, $b*1.15, 1) 100%);
+    * { color: white !important; }
 }
 
-.group-common   { @include group(224, 255, 255); }
-.group-lib      { @include group(173, 216, 230); }
-.group-system   { @include group(238, 238, 238); }
-.group-core     { @include group(144,238,144); }
-.group-external { @include group(255,192,203);  }
+.group-core     { @include group(190, 102, 102); }
+.group-lib      { @include group(123, 156, 205); }
+.group-tools    { @include group(242, 185, 180); }
+.group-system   { @include group(138, 138, 138); }
+.group-system-2 { @include group(108, 108, 108); }
+.group-common   { @include group(76,  175,  80); }
 
 .modules {
   display: grid;
-  grid-template-columns: auto repeat(6, 1fr) auto auto;
+  grid-template-columns: repeat(6, 1fr);
   grid-template-rows: 5;
-
-  .vscode-plugin { grid-column:  1; @extend .vertical;    @extend .group-external; }
-  .scaffold      { grid-column:  8; @extend .vertical;    @extend .group-external; }
-  .eslint        { grid-column:  9; @extend .vertical;    @extend .group-external; }
   
   .app           { grid-row: 1;     @extend .full;        @extend .group-common;   }
-  .asset         { grid-row: 2;     @extend .left-third;  @extend .group-lib;      }
+  .tools         { grid-row: 2;     @extend .left-third;  @extend .group-lib;      }
   .auth          { grid-row: 2;     @extend .mid-third;   @extend .group-lib;      }
   .email         { grid-row: 2;     @extend .right-third; @extend .group-lib;      }
   .model         { grid-row: 3;     @extend .left-half;   @extend .group-core;     }
   .rest          { grid-row: 3;     @extend .right-half;  @extend .group-core;     }
-  .core          { grid-row: 4;     @extend .full;        @extend .group-core;     }  
+  .core          { grid-row: 4;     @extend .full;        @extend .group-system-2  }  
   .foundation    { grid-row: 5;     @extend .full;        @extend .group-system;   }  
 }

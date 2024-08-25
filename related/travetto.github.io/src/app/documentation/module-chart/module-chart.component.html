@@ -1,10 +1,5 @@
 <div class="documentation">
   <div class="modules">
-    @for (page of tools[0].subs; track $index) {
-    <div [class]="page.path">
-      <a [routerLink]="['/', 'docs', page.path]" [innerHtml]="page.title"></a>
-    </div>
-    }
     @for (page of pages; track $index) {
     <div [class]="page.path">
       @if (page.loadComponent) {

@@ -15,10 +15,6 @@ export class ModuleChartComponent {
   _pages = PAGES;
 
   get pages(): typeof PAGES {
-    return this._pages.filter(x => x.path !== 'tools');
-  }
-
-  get tools(): typeof PAGES {
-    return this._pages.filter(x => x.path === 'tools');
+    return this._pages;
   }
 }
