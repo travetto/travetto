@@ -38,6 +38,7 @@ Options:
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
   -wr, --include-workspace-resources   Include workspace resources (default: false)
+  -np, --npm-package <string>          External NPM Packages (default: [])
   -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```

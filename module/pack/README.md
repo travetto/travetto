@@ -43,6 +43,7 @@ Options:
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
   -wr, --include-workspace-resources   Include workspace resources (default: false)
+  -np, --npm-package <string>          External NPM Packages (default: [])
   -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```
@@ -108,6 +109,7 @@ Options:
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
   -wr, --include-workspace-resources   Include workspace resources (default: false)
+  -np, --npm-package <string>          External NPM Packages (default: [])
   -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```
@@ -136,6 +138,7 @@ Options:
   --env-file <string>                    Env Flag File Name (default: ".env")
   --manifest-file <string>               Manifest File Name (default: "manifest.json")
   -wr, --include-workspace-resources     Include workspace resources (default: false)
+  -np, --npm-package <string>            External NPM Packages (default: [])
   -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile")
   -di, --docker-image <string>           Docker Image to extend (default: "node:22-alpine")
   -dn, --docker-name <string>            Docker Image Name (default: "travetto_pack")
@@ -259,6 +262,7 @@ echo "RUN addgroup -g 2000 app && adduser -D -G app -u 2000 app" >> $DIST/Docker
 echo "RUN mkdir /app && chown app:app /app" >> $DIST/Dockerfile
 echo "COPY --chown=\"app:app\" . /app" >> $DIST/Dockerfile
 echo "ENV NODE_OPTIONS=\"\"" >> $DIST/Dockerfile
+echo "" >> $DIST/Dockerfile
 echo "USER app" >> $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
