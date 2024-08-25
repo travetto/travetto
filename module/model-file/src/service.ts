@@ -10,12 +10,12 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistry,
-  NotFoundError, OptionalId, ExistsError, ModelBlobSupport, ModelBlobUtil
+  NotFoundError, OptionalId, ExistsError, ModelBlobSupport
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { MODEL_BLOB, ModelBlobNamespace } from '@travetto/model/src/internal/service/blob';
+import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -169,15 +169,11 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   // Blob
-  async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
-    await this.describeBlob(location);
-    if (errorIfExisting) {
-      throw new ExistsError(ModelBlobNamespace, location);
+  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
+    if (!overwrite && await this.describeBlob(location).then(() => true, () => false)) {
+      return;
     }
-    return this.upsertBlob(location, input, meta);
-  }
 
-  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
     const file = await this.#resolveName(ModelBlobNamespace, BIN, location);
     await Promise.all([

@@ -12,6 +12,8 @@ import { Util, BlobMeta, BinaryUtil } from '@travetto/runtime';
 
 type FileUpload = { name: string, resource: string, type: string };
 
+const meta = BinaryUtil.getBlobMeta;
+
 @Controller('/test/upload')
 class TestUploadController {
 
@@ -22,7 +24,7 @@ class TestUploadController {
   @UploadAll()
   async uploadAll({ uploads }: Request) {
     for (const [, file] of Object.entries(uploads)) {
-      return file.meta;
+      return meta(file);
     }
   }
 
@@ -45,17 +47,17 @@ class TestUploadController {
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: file1.meta?.hash, hash2: file2.meta?.hash };
+    return { hash1: meta(file1)?.hash, hash2: meta(file2)?.hash };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: file1.meta?.hash, hash2: file2.meta?.hash };
+    return { hash1: meta(file1)?.hash, hash2: meta(file2)?.hash };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    return { hash1: file1.meta?.hash, hash2: file2.meta?.hash };
+    return { hash1: meta(file1)?.hash, hash2: meta(file2)?.hash };
   }
 
   @Get('*')
@@ -94,8 +96,8 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<BlobMeta>('post', '/test/upload/all', this.getMultipartRequest([sent]));
 
-    const meta = await this.getFileMeta('/logo.png');
-    assert(res.body.hash === meta?.hash);
+    const { hash } = await this.getFileMeta('/logo.png');
+    assert(res.body.hash === hash);
   }
 
 
@@ -110,16 +112,16 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
       body: sent.buffer
     });
 
-    const meta = await this.getFileMeta('/logo.png');
-    assert(res.body.meta.hash === meta?.hash);
+    const { hash } = await this.getFileMeta('/logo.png');
+    assert(res.body.meta.hash === hash);
   }
 
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<{ location: string, meta: BlobMeta }>('post', '/test/upload', this.getMultipartRequest(uploads));
-    const meta = await this.getFileMeta('/logo.png');
-    assert(res.body.meta.hash === meta?.hash);
+    const { hash } = await this.getFileMeta('/logo.png');
+    assert(res.body.meta.hash === hash);
   }
 
   @Test()
@@ -139,9 +141,9 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
-    const meta = await this.getFileMeta('/logo.png');
-    assert(res.body.hash1 === meta?.hash);
-    assert(res.body.hash2 === meta?.hash);
+    const { hash } = await this.getFileMeta('/logo.png');
+    assert(res.body.hash1 === hash);
+    assert(res.body.hash2 === hash);
   }
 
   @Test()

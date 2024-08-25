@@ -7,6 +7,7 @@ import { pipeline } from 'node:stream/promises';
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
 import { BinaryUtil } from '../src/binary';
+import { BlobMeta } from '../src/types';
 
 @Suite()
 export class BytesUtilTest {
@@ -63,5 +64,42 @@ export class BytesUtilTest {
   @Test()
   async testMaxExactBlobWrite() {
     await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), BinaryUtil.limitWrite(100), new PassThrough());
+  }
+
+  @Test()
+  async simpleTest() {
+    const meta: BlobMeta = {
+      hash: 'ora_nge_bee_for_sly_',
+      filename: 'bob'
+    };
+
+    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee_/for_/sly_.bin');
+
+    meta.filename = 'billy.jpeg';
+
+    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee_/for_/sly_.jpeg');
+
+    meta.filename = 'video.mp4';
+
+    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee_/for_/sly_.mp4');
+
+    meta.filename = 'none';
+
+    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee_/for_/sly_.bin');
+  }
+
+  @Test()
+  async simpleShort() {
+    const meta: BlobMeta = {
+      hash: 'ora_nge_bee'
+    };
+
+    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee.bin');
+
+    meta.contentType = 'image/jpeg';
+    meta.filename = 'image.jpeg';
+
+    assert(BinaryUtil.hashedBlobLocation(meta) === 'ora_/nge_/bee.jpeg');
+
   }
 }

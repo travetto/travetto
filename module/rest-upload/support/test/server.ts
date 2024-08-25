@@ -10,7 +10,7 @@ import { Upload, UploadAll } from '../../src/decorator';
 
 type FileUpload = { name: string, resource: string, type: string };
 
-const bHash = (blob: Blob) => blob.meta?.hash;
+const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
 
 @Controller('/test/upload')
 class TestUploadController {

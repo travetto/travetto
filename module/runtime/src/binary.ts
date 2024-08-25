@@ -9,6 +9,7 @@ import { text as toText, arrayBuffer as toBuffer } from 'node:stream/consumers';
 
 import { BinaryInput, BlobMeta } from './types';
 import { AppError } from './error';
+import { Util } from './util';
 
 const BlobMetaⲐ = Symbol.for('@travetto/runtime:blob-meta');
 
@@ -110,5 +111,20 @@ export class BinaryUtil {
         }
       },
     });
+  }
+
+  /**
+   * Get a hashed location/path for a blob
+   */
+  static hashedBlobLocation(meta: BlobMeta): string {
+    const hash = meta.hash ?? Util.uuid();
+
+    let parts = hash.match(/(.{1,4})/g)!.slice();
+    if (parts.length > 4) {
+      parts = [...parts.slice(0, 4), parts.slice(4).join('')];
+    }
+
+    const ext = path.extname(meta.filename ?? '') || '.bin';
+    return `${parts.join('/')}${ext}`;
   }
 }

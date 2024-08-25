@@ -6,14 +6,14 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
-  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport, ModelBlobUtil
+  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport
 } from '@travetto/model';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { MODEL_BLOB, ModelBlobNamespace } from '@travetto/model/src/internal/service/blob';
+import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
 
@@ -232,15 +232,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   // Blob Support
-  async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
-    await this.describeBlob(location);
-    if (errorIfExisting) {
-      throw new ExistsError(ModelBlobNamespace, location);
+  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
+    if (!overwrite && await this.describeBlob(location).then(() => true, () => false)) {
+      return;
     }
-    return this.upsertBlob(location, input, meta);
-  }
 
-  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
     const blobs = this.#getStore(ModelBlobNamespace);
     const metaContent = this.#getStore(ModelBlobMetaNamespace);

@@ -2,10 +2,12 @@ import assert from 'node:assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
-import { Util } from '@travetto/runtime';
+import { BinaryUtil, Util } from '@travetto/runtime';
 
 import { ModelBlobSupport } from '../../src/service/blob';
-import { ModelBlobUtil } from '../../src/util/blob';
+import { ModelBlobUtil } from '../../src/internal/service/blob';
+
+const meta = BinaryUtil.getBlobMeta;
 
 @Suite()
 export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
@@ -20,9 +22,26 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const id = Util.uuid();
 
     await service.upsertBlob(id, buffer);
-    const meta = await service.describeBlob(id);
+    const m = await service.describeBlob(id);
     const retrieved = await service.describeBlob(id);
-    assert.deepStrictEqual(meta, retrieved);
+    assert.deepStrictEqual(m, retrieved);
+  }
+
+  @Test()
+  async upsert(): Promise<void> {
+    const service = await this.service;
+    const buffer = await this.fixture.read('/asset.yml', true);
+
+    const id = Util.uuid();
+
+    await service.upsertBlob(id, buffer, { hash: '10' });
+    assert((await service.describeBlob(id)).hash === '10');
+
+    await service.upsertBlob(id, buffer, { hash: '20' });
+    assert((await service.describeBlob(id)).hash === '20');
+
+    await service.upsertBlob(id, buffer, { hash: '30' }, false);
+    assert((await service.describeBlob(id)).hash === '20');
   }
 
   @Test()
@@ -32,11 +51,11 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const id = Util.uuid();
     await service.upsertBlob(id, buffer);
-    const meta = await service.describeBlob(id);
+    const { hash } = await service.describeBlob(id);
 
     const retrieved = await service.getBlob(id);
-    const retrievedMeta = retrieved.meta!;
-    assert(meta.hash === retrievedMeta.hash);
+    const { hash: received } = meta(retrieved)!;
+    assert(hash === received);
   }
 
   @Test()
@@ -69,7 +88,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const partial = await service.getBlob(id, { start: 10, end: 20 });
     assert(partial.size === 11);
-    const partialMeta = partial.meta!;
+    const partialMeta = meta(partial)!;
     const subContent = await partial.text();
     const range = await ModelBlobUtil.enforceRange({ start: 10, end: 20 }, partialMeta.size!);
     assert(subContent.length === (range.end - range.start) + 1);
@@ -79,7 +98,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(subContent === og.substring(10, 21));
 
     const partialUnbounded = await service.getBlob(id, { start: 10 });
-    const partialUnboundedMeta = partial.meta!;
+    const partialUnboundedMeta = meta(partial)!;
     const subContent2 = await partialUnbounded.text();
     const range2 = await ModelBlobUtil.enforceRange({ start: 10 }, partialUnboundedMeta.size!);
     assert(subContent2.length === (range2.end - range2.start) + 1);
@@ -107,7 +126,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const buffer = await this.fixture.read('/asset.yml', true);
     await service.upsertBlob('orange', buffer, { contentType: 'text/yaml', filename: 'asset.yml' });
     const saved = await service.getBlob('orange');
-    const savedMeta = saved.meta!;
+    const savedMeta = meta(saved)!;
 
     assert('text/yaml' === savedMeta.contentType);
     assert(buffer.length === savedMeta.size);

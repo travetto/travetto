@@ -8,12 +8,12 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 import {
   ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
-  ModelBlobSupport, ModelBlobUtil,
+  ModelBlobSupport
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
 
-import { MODEL_BLOB, ModelBlobNamespace } from '@travetto/model/src/internal/service/blob';
+import { MODEL_BLOB, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
@@ -295,15 +295,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Blob support
-  async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
-    await this.describeBlob(location);
-    if (errorIfExisting) {
-      throw new ExistsError(ModelBlobNamespace, location);
+  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
+    if (!overwrite && await this.describeBlob(location).then(() => true, () => false)) {
+      return;
     }
-    return this.upsertBlob(location, input, meta);
-  }
 
-  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
 
     if (blobMeta.size && blobMeta.size < this.config.chunkSize) { // If smaller than chunk size

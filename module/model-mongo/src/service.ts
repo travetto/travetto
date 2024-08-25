@@ -9,7 +9,7 @@ import { Readable } from 'node:stream';
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig, ModelBlobSupport, ModelBlobUtil
+  NotFoundError, ExistsError, IndexConfig, ModelBlobSupport
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -34,7 +34,7 @@ import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
-import { MODEL_BLOB, ModelBlobNamespace } from '@travetto/model/src/internal/service/blob';
+import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
@@ -281,22 +281,22 @@ export class MongoModelService implements
   }
 
   // Blob
-  async insertBlob(location: string, input: BinaryInput, meta?: BlobMeta, errorIfExisting = false): Promise<void> {
-    await this.describeBlob(location);
-    if (errorIfExisting) {
-      throw new ExistsError(ModelBlobNamespace, location);
+  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
+    const existing = await this.describeBlob(location).then(() => true, () => false);
+    if (!overwrite && existing) {
+      return;
     }
-    return this.upsertBlob(location, input, meta);
-  }
-
-  async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta): Promise<void> {
     const [stream, blobMeta] = await ModelBlobUtil.getInput(input, meta);
     const writeStream = this.#bucket.openUploadStream(location, {
       contentType: blobMeta.contentType,
-      metadata: blobMeta
+      metadata: blobMeta,
     });
-
     await pipeline(stream, writeStream);
+
+    if (existing) {
+      const [read] = await this.#bucket.find({ filename: location, _id: { $ne: writeStream.id } }).toArray();
+      await this.#bucket.delete(read._id);
+    }
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
