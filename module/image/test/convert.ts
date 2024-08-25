@@ -17,7 +17,6 @@ class ImageConverterTest {
 
   @Test('resize test')
   async resizeImage() {
-
     const imgBuffer = await this.fixture.read('apple.jpg', true);
 
     assert(imgBuffer.length > 0);
@@ -34,7 +33,7 @@ class ImageConverterTest {
     const imgStream = await this.fixture.readStream('google.png');
     const imgBuffer = await this.fixture.read('google.png', true);
 
-    const out = await ImageConverter.optimize('png', imgStream);
+    const out = await ImageConverter.optimize(imgStream);
 
     const optimized = await toBuffer(out);
 
@@ -48,7 +47,7 @@ class ImageConverterTest {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
     const imgBuffer = await this.fixture.read('lincoln.jpg', true);
 
-    const out = await ImageConverter.optimize('jpeg', imgStream);
+    const out = await ImageConverter.optimize(imgStream, { format: 'jpeg', asSubprocess: true });
 
     const optimized = await toBuffer(out);
 
@@ -85,7 +84,8 @@ class ImageConverterTest {
       w: 50,
       h: 50,
       strictResolution: false,
-      optimize: true
+      optimize: true,
+      asSubprocess: true
     });
 
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);

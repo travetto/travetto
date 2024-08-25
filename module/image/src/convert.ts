@@ -1,13 +1,17 @@
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import { buffer as toBuffer } from 'node:stream/consumers';
+import { ChildProcess } from 'node:child_process';
+
+import type { Sharp } from 'sharp';
 
 import { CommandOperation } from '@travetto/command';
 import { castTo } from '@travetto/runtime';
-import sharp from 'sharp';
 
 /**
- * Image output options
+ * Image resize options
  */
-export interface ImageOptions {
+export interface ResizeOptions {
   /**
    * New height
    */
@@ -24,7 +28,23 @@ export interface ImageOptions {
    * Strict resolution
    */
   strictResolution?: boolean;
+  /**
+   * Sub process, allows for externalization of memory
+   */
+  asSubprocess?: boolean;
 }
+
+/**
+ * Image optimize options
+ */
+export interface OptimizeOptions {
+  format?: 'png' | 'jpeg';
+  /**
+   * Sub process, allows for externalization of memory
+   */
+  asSubprocess?: boolean;
+}
+
 
 type ImageType = Readable | Buffer;
 
@@ -57,70 +77,78 @@ export class ImageConverter {
     localCheck: ['jpegoptim', ['-h']]
   });
 
-  static async #stream<T extends ImageType>(proc: ChildProcess, input: T): Promise<T> {
+  static async #subprocessReturn<T extends ImageType>(proc: ChildProcess, input: T): Promise<T> {
     if (Buffer.isBuffer(input)) {
-      Readable.from(input).pipe(proc.stdin!);
-      return castTo(toBuffer(proc.stdout!));
+      const [, buffer] = await Promise.all([
+        pipeline(Readable.from(input), proc.stdin!),
+        toBuffer(proc.stdout!)
+      ]);
+      return castTo(buffer);
     } else {
-      input.pipe(proc.stdin!); // Start the process
+      pipeline(input, proc.stdin!);
       return castTo(proc.stdout);
     }
   }
 
+  static async #sharpReturn<T extends ImageType>(output: Sharp, input: T, optimize?: boolean, format?: 'jpeg' | 'png'): Promise<T> {
+    if (optimize) {
+      output = output
+        .jpeg({ quality: 80, progressive: true, force: format === 'jpeg' })
+        .png({ compressionLevel: 9, quality: 80, adaptiveFiltering: true, force: format === 'png' });
+    }
+    const stream = Buffer.isBuffer(input) ? Readable.from(input) : input;
+    pipeline(stream, output);
+    return castTo(Buffer.isBuffer(input) ? output.toBuffer() : output);
+  }
+
   /**
-   * Resize image using imagemagick
    * Resize image
    */
-  static async resize<T extends ImageType>(image: T, options: ImageOptions): Promise<T> {
-    const dims = [options.w, options.h].map(d => (d && options.strictResolution !== false) ? d : d);
-    const output = (Buffer.isBuffer(image) ? sharp(image) : sharp())
-      .resize({ width: dims[0], height: dims[1], fit: options.strictResolution !== false ? 'fill' : 'inside' });
+  static async resize<T extends ImageType>(image: T, options: ResizeOptions = {}): Promise<T> {
+    const dims = [options.w, options.h].map(d => (!d && options.strictResolution === false) ? undefined : d);
+    if (!options.asSubprocess) {
+      const { default: sharp } = await import('sharp');
 
-    if (Buffer.isBuffer(image)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return output.toBuffer() as Promise<T>;
+      return this.#sharpReturn(
+        sharp().resize({
+          width: dims[0],
+          height: dims[1],
+          fit: options.strictResolution !== false ? 'fill' : 'inside'
+        }),
+        image,
+        options.optimize,
+      );
     } else {
-      image.pipe(output);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return output as unknown as Promise<T>;
+      return this.#subprocessReturn(
+        await this.CONVERTER.exec('gm', 'convert', '-resize', dims.join('x'), '-auto-orient',
+          ...(options.optimize ? ['-strip', '-quality', '86'] : []), '-', '-'),
+        image);
     }
   }
 
   /**
-   * Optimize image
+   * Optimize an image
    */
-  static async optimize<T extends ImageType>(format: 'png' | 'jpeg', image: T): Promise<T> {
-    switch (format) {
-      case 'png': {
-        if (Buffer.isBuffer(image)) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          return sharp(image).toFormat('png', { quality: 80 }).toBuffer() as Promise<T>;
-        } else {
-          const output = sharp().toFormat('png', { quality: 80 });
-          image.pipe(output);
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          return output as unknown as Promise<T>;
-        }
+  static async optimize<T extends ImageType>(image: T, options: OptimizeOptions = {}): Promise<T> {
+    if (options.asSubprocess) {
+      switch (options.format) {
+        case 'png': return this.#subprocessReturn(
+          await this.PNG_COMPRESSOR.exec('pngquant', '--quality', '40-80', '--speed', '1', '--force', '-'), image);
+        default:
+        case 'jpeg': return this.#subprocessReturn(
+          await this.JPEG_COMPRESSOR.exec('jpegoptim', '-m70', '-s', '--stdin', '--stdout'), image);
       }
-      case 'jpeg': {
-        if (Buffer.isBuffer(image)) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          return sharp(image).toFormat('jpg', { quality: 70, }).toBuffer() as Promise<T>;
-        } else {
-          const output = sharp().toFormat('jpg', { quality: 70 });
-          image.pipe(output);
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          return output as unknown as Promise<T>;
-        }
-      }
+    } else {
+      const { default: sharp } = await import('sharp');
+      return this.#sharpReturn(sharp(), image, true, options.format);
     }
   }
 
   /**
    * Get Image Dimensions
-   * @param image
    */
   static async getDimensions(image: Buffer | string): Promise<{ width: number, height: number }> {
+    const { default: sharp } = await import('sharp');
     return sharp(image).metadata().then(v => ({ width: v.width!, height: v.height! }));
   }
 }
