@@ -9,7 +9,6 @@ export * from './src/service/crud';
 export * from './src/service/indexed';
 export * from './src/service/expiry';
 export * from './src/service/storage';
-export * from './src/util/blob';
 
 export * from './src/error/exists';
 export * from './src/error/not-found';
