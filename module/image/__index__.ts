@@ -1,2 +1,1 @@
-/// <reference path="./src/trv.d.ts" />
-export * from './src/convert';
+export * from './src/util';

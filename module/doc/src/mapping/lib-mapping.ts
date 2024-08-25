@@ -82,6 +82,7 @@ export const LIB_MAPPING = {
   ImageMagick: { title: 'ImageMagick', href: 'https://imagemagick.org/index.php' },
   PngQuant: { title: 'pngquant', href: 'https://pngquant.org/' },
   JpegOptim: { title: 'Jpegoptim', href: 'https://github.com/tjko/jpegoptim' },
+  Sharp: { title: 'sharp', href: 'https://sharp.pixelplumbing.com/' },
 
   // Dbs
   MongoDB: { title: 'mongodb', href: 'https://mongodb.com' },
