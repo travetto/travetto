@@ -67,7 +67,8 @@ export class PackOperation {
         ['BUNDLE_SOURCES', cfg.includeSources],
         ['BUNDLE_OUTPUT', cfg.buildDir],
         ['BUNDLE_FORMAT', Runtime.workspace.type],
-        ['BUNDLE_ENV_FILE', cfg.envFile]
+        ['BUNDLE_ENV_FILE', cfg.envFile],
+        ['BUNDLE_EXTERNAL', cfg.externalDependencies.join(',')]
       ] as const)
         .filter(x => x[1] === false || x[1])
         .map(x => [x[0], `${x[1]}`])

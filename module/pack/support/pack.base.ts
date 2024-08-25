@@ -71,6 +71,9 @@ export abstract class BasePackCommand implements CliCommandShape {
   @CliFlag({ desc: 'Include workspace resources', short: 'wr' })
   includeWorkspaceResources: boolean = false;
 
+  @CliFlag({ desc: 'External NPM Packages', short: 'np', name: 'npm-package', envVars: ['PACK_EXTERNAL_PACKAGES'] })
+  externalDependencies: string[] = [];
+
   @Ignore()
   module: string;
 

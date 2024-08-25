@@ -30,6 +30,20 @@ export class PackConfigUtil {
   }
 
   /**
+   * Install docker pages in either apk or apt environments
+   */
+  static dockerNodePackageInstall(cfg: DockerPackConfig): string {
+    const out: string[] = [];
+    for (const item of cfg.externalDependencies ?? []) {
+      out.push(item.endsWith(':from-source') ?
+        `RUN npm_config_build_from_source=true npm install ${item.split(':')[0]} --build-from-source` :
+        `RUN npm install ${item}`
+      );
+    }
+    return out.join('\n');
+  }
+
+  /**
    * Setup docker ports
    */
   static dockerPorts(cfg: DockerPackConfig): string {
@@ -100,6 +114,7 @@ export class PackConfigUtil {
       this.dockerPorts(cfg),
       this.dockerUser(cfg),
       this.dockerPackageInstall(cfg),
+      this.dockerNodePackageInstall(cfg),
       this.dockerAppFolder(cfg),
       this.dockerAppFiles(cfg),
       this.dockerEnvVars(cfg),

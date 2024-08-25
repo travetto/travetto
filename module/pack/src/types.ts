@@ -19,6 +19,7 @@ export type CommonPackConfig = {
   rollupConfiguration: string;
   entryPoint: string;
   entryArguments: string[];
+  externalDependencies: string[];
   minify: boolean;
   sourcemap: boolean;
   includeSources: boolean;
@@ -72,5 +73,6 @@ export type CoreRollupConfig = {
   entry: string;
   files: string[];
   ignore: Set<string>;
+  external: string[];
   minify: Parameters<typeof terser>[0];
 };

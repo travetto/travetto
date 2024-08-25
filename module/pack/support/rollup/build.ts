@@ -16,6 +16,7 @@ export default function buildConfig(): RollupOptions {
   return {
     input: [config.entry],
     output: config.output,
+    external: config.external,
     plugins: [
       jsonImport(),
       travettoEntryPlugin(config),
