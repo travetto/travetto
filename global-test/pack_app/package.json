@@ -6,7 +6,7 @@
   },
   "devDependencies": {
     "@travetto/compiler": "^5.0.0-rc.8",
-    "@travetto/pack": "^5.0.0-rc.13"
+    "@travetto/pack": "^5.0.0-rc.14"
   },
   "travetto": {},
   "private": true
