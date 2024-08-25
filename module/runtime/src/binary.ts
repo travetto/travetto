@@ -10,6 +10,8 @@ import { text as toText, arrayBuffer as toBuffer } from 'node:stream/consumers';
 import { BinaryInput, BlobMeta } from './types';
 import { AppError } from './error';
 
+const BlobMetaⲐ = Symbol.for('@travetto/runtime:blob-meta');
+
 /**
  * Common functions for dealing with binary data/streams
  */
@@ -74,18 +76,22 @@ export class BinaryUtil {
       new File([], path.basename(metadata.filename), { type: metadata.contentType }) :
       new Blob([], { type: metadata.contentType });
 
-    Object.defineProperties(out, {
+    return Object.defineProperties(out, {
       size: { value: size },
       stream: { value: () => ReadableStream.from(go()) },
       arrayBuffer: { value: () => toBuffer(go()) },
       text: { value: () => toText(go()) },
       bytes: { value: () => toBuffer(go()).then(v => new Uint8Array(v)) },
+      [BlobMetaⲐ]: { value: metadata }
     });
+  }
 
-    // @ts-expect-error
-    out.meta = metadata;
-
-    return out;
+  /**
+   * Get blob metadata
+   */
+  static getBlobMeta(blob: Blob): BlobMeta | undefined {
+    const withMeta: Blob & { [BlobMetaⲐ]?: BlobMeta } = blob;
+    return withMeta[BlobMetaⲐ];
   }
 
   /**
