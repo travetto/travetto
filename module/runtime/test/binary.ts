@@ -24,6 +24,16 @@ export class BytesUtilTest {
   }
 
   @Test()
+  async verifyReadableBlobMultiple() {
+    const blob = await BinaryUtil.readableBlob(() => this.fixture.readStream('/logo.png'), {});
+    const blobBytes = await buffer(Readable.fromWeb(await blob.stream()));
+    const allBytes = await buffer(Readable.fromWeb(await blob.stream()));
+    assert(blob.size === undefined);
+    assert(blobBytes.length === allBytes.length);
+    assert(blobBytes.equals(allBytes));
+  }
+
+  @Test()
   async verifySimpleHash() {
     const hash = crypto.createHash('sha512');
     hash.update('roger');

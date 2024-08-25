@@ -1,4 +1,5 @@
 import { Readable } from 'node:stream';
+import { ReadableStream } from 'node:stream/web';
 import { pipeline } from 'node:stream/promises';
 import { buffer as toBuffer } from 'node:stream/consumers';
 import { ChildProcess } from 'node:child_process';
@@ -46,7 +47,7 @@ export interface OptimizeOptions {
 }
 
 
-type ImageType = Readable | Buffer;
+type ImageType = Readable | Buffer | ReadableStream;
 
 /**
  * Simple support for image manipulation.
@@ -85,8 +86,8 @@ export class ImageUtil {
       ]);
       return castTo(buffer);
     } else {
-      pipeline(input, proc.stdin!);
-      return castTo(proc.stdout);
+      pipeline(castTo<Readable>(input), proc.stdin!);
+      return castTo('pipeThrough' in input ? ReadableStream.from(proc.stdout!) : proc.stdout);
     }
   }
 
@@ -98,7 +99,7 @@ export class ImageUtil {
     }
     const stream = Buffer.isBuffer(input) ? Readable.from(input) : input;
     pipeline(stream, output);
-    return castTo(Buffer.isBuffer(input) ? output.toBuffer() : output);
+    return castTo('pipeThrough' in input ? ReadableStream.from(output) : Buffer.isBuffer(input) ? output.toBuffer() : output);
   }
 
   /**

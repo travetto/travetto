@@ -63,8 +63,8 @@ export class BinaryUtil {
    * Make a blob, and assign metadata
    */
   static readableBlob(input: () => (Readable | Promise<Readable>), metadata: BlobMeta): Blob {
-    const stream = new PassThrough();
     const go = (): Readable => {
+      const stream = new PassThrough();
       Promise.resolve(input()).then(v => v.pipe(stream), (err) => stream.destroy(err));
       return stream;
     };
