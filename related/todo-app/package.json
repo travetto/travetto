@@ -22,14 +22,14 @@
   },
   "dependencies": {
     "@travetto/auth-rest": "^5.0.0-rc.13",
-    "@travetto/auth-rest-session": "^5.0.0-rc.13",
+    "@travetto/auth-rest-session": "^5.0.0-rc.14",
     "@travetto/cli": "^5.0.0-rc.13",
     "@travetto/email-inky": "^5.0.0-rc.14",
     "@travetto/log": "^5.0.0-rc.13",
-    "@travetto/model-mongo": "^5.0.0-rc.13",
+    "@travetto/model-mongo": "^5.0.0-rc.14",
     "@travetto/openapi": "^5.0.0-rc.13",
     "@travetto/rest-express": "^5.0.0-rc.13",
-    "@travetto/rest-session": "^5.0.0-rc.13",
+    "@travetto/rest-session": "^5.0.0-rc.14",
     "vue": "^3.4.37"
   },
   "devDependencies": {

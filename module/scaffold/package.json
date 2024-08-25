@@ -1,6 +1,6 @@
 {
   "name": "@travetto/scaffold",
-  "version": "5.0.0-rc.13",
+  "version": "5.0.0-rc.14",
   "description": "App Scaffold for the Travetto framework",
   "keywords": [
     "generator",
@@ -33,7 +33,7 @@
     "mustache": "^4.2.0"
   },
   "devDependencies": {
-    "@travetto/model": "^5.0.0-rc.13",
+    "@travetto/model": "^5.0.0-rc.14",
     "@types/mustache": "^4.2.5"
   },
   "travetto": {

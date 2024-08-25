@@ -9,7 +9,7 @@
     "@travetto/rest-koa": "^5.0.0-rc.13",
     "@travetto/rest-koa-lambda": "^5.0.0-rc.13",
     "@travetto/rest-upload": "^5.0.0-rc.13",
-    "@travetto/model": "^5.0.0-rc.13"
+    "@travetto/model": "^5.0.0-rc.14"
   },
   "travetto": {},
   "private": true
