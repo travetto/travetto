@@ -117,7 +117,6 @@ export class PackConfigUtil {
       this.dockerPorts(cfg),
       this.dockerUser(cfg),
       this.dockerPackageInstall(cfg),
-      this.dockerNodePackageInstall(cfg),
       this.dockerAppFolder(cfg),
       this.dockerAppFiles(cfg),
       this.dockerEnvVars(cfg),
@@ -131,6 +130,7 @@ export class PackConfigUtil {
     return [
       this.dockerInit(cfg),
       this.dockerWorkspace(cfg),
+      this.dockerNodePackageInstall(cfg),
       this.dockerEntrypoint(cfg)
     ].join('\n');
   }
