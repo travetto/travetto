@@ -17,11 +17,19 @@ const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-
 
 type UploadItem = { stream: Readable, filename?: string, field: string };
 type FileType = { ext: string, mime: string };
+const RawFileⲐ = Symbol.for('@travetto/rest-upload:raw-file');
 
 /**
  * Rest upload utilities
  */
 export class RestUploadUtil {
+
+  /**
+   * Get uploaded file path location
+   */
+  static getUploadLocation(file: File): string {
+    return castTo<{ [RawFileⲐ]: string }>(file)[RawFileⲐ];
+  }
 
   /**
    * Get all the uploads, separating multipart from direct
@@ -82,9 +90,7 @@ export class RestUploadUtil {
         size: (await fs.stat(location)).size,
       });
 
-      if (config.cleanupFiles !== false) {
-        Object.assign(file, { cleanup: remove });
-      }
+      Object.assign(file, { [RawFileⲐ]: location });
 
       return file;
     } catch (err) {
@@ -108,5 +114,14 @@ export class RestUploadUtil {
       }
     }
     return matched ?? { ext: 'bin', mime: 'application/octet-stream' };
+  }
+
+  /**
+   * Finish upload
+   */
+  static async finishUpload(upload: File, config: Partial<RestUploadConfig>): Promise<void> {
+    if (config.cleanupFiles !== false) {
+      await fs.rm(this.getUploadLocation(upload), { force: true });
+    }
   }
 }
