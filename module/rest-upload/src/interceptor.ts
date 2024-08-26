@@ -1,4 +1,3 @@
-
 import { Inject, Injectable } from '@travetto/di';
 import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, RestInterceptor, SerializeInterceptor } from '@travetto/rest';
 
@@ -41,13 +40,13 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
       req.uploads = {};
 
       for await (const item of RestUploadUtil.getUploads(req, config)) {
-        req.uploads[item.field] = await RestUploadUtil.toFile(item, { ...config.uploads![item.field] ?? config });
+        req.uploads[item.field] = await RestUploadUtil.toFile(item, config.uploads?.[item.field] ?? config);
       }
 
       return await next();
     } finally {
-      for (const item of Object.values<Blob & { cleanup?: Function }>(req.uploads)) {
-        await item.cleanup?.();
+      for (const [field, item] of Object.entries(req.uploads)) {
+        await RestUploadUtil.finishUpload(item, config.uploads?.[field] ?? config);
       }
     }
   }
