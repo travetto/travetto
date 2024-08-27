@@ -16,7 +16,7 @@ export class TodoService {
   }
 
   async update(todo: Todo): Promise<Todo> {
-    return await this.modelService.updatePartial(Todo, todo);
+    return await this.modelService.updatePartial(Todo, { ...todo });
   }
 
   async get(id: string): Promise<Todo> {

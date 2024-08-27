@@ -125,22 +125,22 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(o.id);
     assert(o.name === 'bob');
 
-    const o2 = await service.updatePartial(Person, Person.from({
+    const o2 = await service.updatePartial(Person, {
       id: o.id,
       name: 'oscar'
-    }));
+    });
 
     assert(o2.name === 'oscar');
     assert(o2.age === 20);
     assert(o2.address.street2 === 'roader');
 
-    await service.updatePartial(Person, Person.from({
+    await service.updatePartial(Person, {
       id: o2.id,
       gender: 'f',
       address: {
         street1: 'changed\n',
       }
-    }));
+    });
 
     const o3 = await service.get(Person, o.id);
 
@@ -175,11 +175,11 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       ]
     }));
 
-    const o2 = await service.updatePartial(SimpleList, SimpleList.from({
+    const o2 = await service.updatePartial(SimpleList, {
       id: o.id,
       names: ['a', 'd'],
       simples: [{ name: 'd' }]
-    }));
+    });
 
     assert.deepStrictEqual(o2.names, ['a', 'd']);
     assert.deepStrictEqual(o2.simples, [SimpleItem.from({ name: 'd' })]);
@@ -195,12 +195,12 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(o.address === undefined);
     assert(o.name === 'bob-suffix');
 
-    await service.updatePartial(User2, User2.from({
+    await service.updatePartial(User2, {
       id: o.id,
       address: {
         street1: 'blue'
       }
-    }));
+    });
 
     const o3 = await service.get(User2, o.id);
 

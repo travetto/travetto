@@ -88,9 +88,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => this.get(cls, item.id));
-    const cleaned = toSimpleObj(item, FieldValue.delete());
-    await this.#getCollection(cls).doc(id).set(cleaned, { mergeFields: Object.keys(item) });
+    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
+    const cleaned = toSimpleObj(full, FieldValue.delete());
+    await this.#getCollection(cls).doc(id).set(cleaned, { mergeFields: Object.keys(full) });
     return this.get(cls, id);
   }
 

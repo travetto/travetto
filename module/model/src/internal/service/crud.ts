@@ -1,6 +1,4 @@
-import crypto from 'node:crypto';
-
-import { castTo, Class, asFull, Util, asConstructable } from '@travetto/runtime';
+import { castTo, Class, Util, asConstructable, AppError } from '@travetto/runtime';
 import { DataUtil, SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
@@ -26,18 +24,6 @@ export class ModelCrudUtil {
     const create = (): string => Util.uuid(len);
     const valid = (id: string): boolean => id.length === len && /^[0-9a-f]+$/i.test(id);
     return { create, valid };
-  }
-
-  /**
-   * Provide hash value
-   * @param value Input value
-   * @param length Number of characters to produce
-   */
-  static hashValue(value: string, length = 32): string {
-    if (value.length < 32) {
-      value = value.padEnd(32, ' ');
-    }
-    return crypto.createHash('sha1').update(value).digest('hex').substring(0, length);
   }
 
   /**
@@ -110,36 +96,6 @@ export class ModelCrudUtil {
   }
 
   /**
-   * Performs a naive partial update by fetching, patching, and then storing
-   * @param cls Type to store for
-   * @param item The object to use for a partial update
-   * @param view The schema view to validate against
-   * @param getExisting How to fetch an existing item
-   */
-  static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, view: undefined | string, getExisting: () => Promise<T>): Promise<T> {
-    if (DataUtil.isPlainObject(item)) {
-      item = cls.from(castTo(item));
-    }
-
-    const config = ModelRegistry.get(asConstructable(item).constructor);
-    if (config.subType) { // Sub-typing, assign type
-      SchemaRegistry.ensureInstanceTypeField(cls, item);
-    }
-
-    if (view) {
-      await SchemaValidator.validate(cls, item, view);
-    }
-
-    const existing = await getExisting();
-
-    item = Object.assign(existing, item);
-
-    item = await this.prePersist(cls, item, 'partial');
-
-    return asFull(item);
-  }
-
-  /**
    * Ensure subtype is not supported
    */
   static ensureNotSubType(cls: Class): void {
@@ -177,5 +133,29 @@ export class ModelCrudUtil {
       item = await item.postLoad() ?? item;
     }
     return item;
+  }
+
+  /**
+   * Ensure everything is correct for a partial update
+   */
+  static async prePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, view?: string): Promise<Partial<T>> {
+    if (!DataUtil.isPlainObject(item)) {
+      throw new AppError('Update partial requires a plain object', 'data');
+    }
+
+    if (view) {
+      await SchemaValidator.validate(cls, castTo(item), view);
+    }
+
+    return await this.prePersist(cls, castTo(item), 'partial');
+  }
+
+  /**
+   * Ensure everything is correct for a partial update
+   */
+  static async naivePartialUpdate<T extends ModelType>(cls: Class<T>, get: () => Promise<T>, item: Partial<T>, view?: string): Promise<T> {
+    const prepared = await this.prePartialUpdate(cls, item, view);
+    const full = await get();
+    return cls.from(castTo({ ...full, ...prepared }));
   }
 }
