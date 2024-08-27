@@ -182,9 +182,9 @@ export class SQLModelService implements
   }
 
   @Transactional()
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     const id = item.id;
-    const final = await ModelCrudUtil.naivePartialUpdate(cls, item, undefined, () => this.get(cls, id));
+    const final = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
     return this.update(cls, final);
   }
 

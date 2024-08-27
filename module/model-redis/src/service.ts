@@ -232,7 +232,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    const updated = await ModelCrudUtil.naivePartialUpdate(cls, item, view, (): Promise<T> => this.get(cls, id));
+    const updated = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
     await this.#store(cls, updated, 'write');
     return updated;
   }

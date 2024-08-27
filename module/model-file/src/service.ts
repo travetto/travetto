@@ -4,7 +4,7 @@ import os from 'node:os';
 import { pipeline } from 'node:stream/promises';
 import path from 'node:path';
 
-import { Class, TimeSpan, Runtime, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
+import { Class, TimeSpan, Runtime, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
@@ -145,10 +145,10 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
-    item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
-    const file = await this.#resolveName(cls, '.json', item.id);
-    await fs.writeFile(file, JSON.stringify(item), { encoding: 'utf8' });
-    return asFull<T>(item);
+    const full = await ModelCrudUtil.naivePartialUpdate(cls, () => this.get(cls, id), item, view);
+    const file = await this.#resolveName(cls, '.json', full.id);
+    await fs.writeFile(file, JSON.stringify(full), { encoding: 'utf8' });
+    return full;
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
