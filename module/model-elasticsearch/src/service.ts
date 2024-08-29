@@ -431,7 +431,7 @@ export class ElasticsearchModelService implements
   }
 
   // Query Crud
-  async updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
+  async updateByQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
     await QueryVerifier.verify(cls, query);
 
@@ -485,10 +485,12 @@ export class ElasticsearchModelService implements
     return res.deleted ?? 0;
   }
 
-  async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
+  async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
 
-    const script = ElasticsearchSchemaUtil.generateUpdateScript(data);
+    const item = await ModelCrudUtil.prePartialUpdate(cls, data);
+
+    const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
     const res = await this.client.updateByQuery({

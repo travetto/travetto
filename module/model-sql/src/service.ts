@@ -273,7 +273,7 @@ export class SQLModelService implements
 
   @Connected()
   @Transactional()
-  async updateOneWithQuery<T extends ModelType>(cls: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
+  async updateByQuery<T extends ModelType>(cls: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
     await QueryVerifier.verify(cls, query);
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
     where.id = item.id;
@@ -283,9 +283,10 @@ export class SQLModelService implements
 
   @Connected()
   @Transactional()
-  async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
+  async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
-    const { count } = await this.#exec(this.#dialect.getUpdateSQL(SQLUtil.classToStack(cls), data, ModelQueryUtil.getWhereClause(cls, query.where)));
+    const item = await ModelCrudUtil.prePartialUpdate(cls, data);
+    const { count } = await this.#exec(this.#dialect.getUpdateSQL(SQLUtil.classToStack(cls), item, ModelQueryUtil.getWhereClause(cls, query.where)));
     return count;
   }
 

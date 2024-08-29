@@ -55,7 +55,7 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
     await this.saveAll(Worker, [doc, doc2, fire, eng]);
     assert(await this.getSize(Worker) === 4);
 
-    const c = await svc.updateByQuery(Doctor, { where: { specialty: 'feet' } }, { specialty: 'eyes' });
+    const c = await svc.updatePartialByQuery(Doctor, { where: { specialty: 'feet' } }, { specialty: 'eyes' });
     assert(c === 1);
 
     assert((await svc.queryCount(Doctor, { where: { specialty: 'eyes' } })) === 2);

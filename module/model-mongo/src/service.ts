@@ -485,7 +485,7 @@ export class MongoModelService implements
   }
 
   // Query Crud
-  async updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
+  async updateByQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
     await QueryVerifier.verify(cls, query);
 
     const col = await this.getStore(cls);
@@ -510,11 +510,13 @@ export class MongoModelService implements
     return res.deletedCount ?? 0;
   }
 
-  async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
+  async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
 
+    const item = await ModelCrudUtil.prePartialUpdate(cls, data);
+
     const col = await this.getStore(cls);
-    const items = MongoUtil.extractSimple(cls, data);
+    const items = MongoUtil.extractSimple(cls, item);
     const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>(
       (acc, [k, v]) => {
         if (v === null || v === undefined) {

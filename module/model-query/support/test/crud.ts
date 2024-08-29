@@ -19,7 +19,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
     assert(todo1.id);
     assert(todo1.version === 0);
 
-    const todo1v2 = await svc.updateOneWithQuery(Todo, Todo.from({
+    const todo1v2 = await svc.updateByQuery(Todo, Todo.from({
       id: todo1.id,
       text: `${todo1.text}!!`,
       version: todo1.version + 1
@@ -29,7 +29,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
     assert(todo1v2.version > todo1.version);
 
     await assert.rejects(
-      () => svc.updateOneWithQuery(Todo, Todo.from({
+      () => svc.updateByQuery(Todo, Todo.from({
         id: todo1.id,
         text: `${todo1.text}!!`,
         version: todo1.version + 1
@@ -40,7 +40,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     const todo2 = await svc.create(Todo, Todo.from({ text: 'bob2' }));
 
-    const result = await svc.updateOneWithQuery(Todo, Todo.from({
+    const result = await svc.updateByQuery(Todo, Todo.from({
       id: todo2.id,
       text: `${todo1.text}!!`,
       version: todo1.version + 1
@@ -60,7 +60,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     const todo1v = ['a', 'b', 'c', 'd', 'e'].map(x => Todo.from({ ...todo1, text: `${todo1.text}-${x}`, version: todo1.version + 1 }));
 
-    const promises = todo1v.map(x => svc.updateOneWithQuery(Todo, x, { where: { version: todo1.version } }));
+    const promises = todo1v.map(x => svc.updateByQuery(Todo, x, { where: { version: todo1.version } }));
 
     const results = await Promise.allSettled(promises);
     const rejected = results.filter(x => x.status === 'rejected');
@@ -81,7 +81,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
     assert.deepStrictEqual(todo2, succeeded.value);
 
     const promises2 = ['a', 'b', 'c', 'd', 'e'].map(x => Todo.from({ ...todo2, text: `${todo2.text}-${x}`, version: todo2.version + 2 }));
-    const results2 = await Promise.allSettled(promises2.map(x => svc.updateOneWithQuery(Todo, x, { where: { version: todo2.version + 1 } })));
+    const results2 = await Promise.allSettled(promises2.map(x => svc.updateByQuery(Todo, x, { where: { version: todo2.version + 1 } })));
     for (const el of results2) {
       assert(el.status === 'rejected');
       assert(el.reason instanceof NotFoundError);
@@ -137,7 +137,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     assert(await svc.queryCount(Person, { where: { gender: 'm' } }) === 5);
 
-    const c = await svc.updateByQuery(Person, { where: { age: { $gt: 3 } } }, { gender: 'f' });
+    const c = await svc.updatePartialByQuery(Person, { where: { age: { $gt: 3 } } }, { gender: 'f' });
 
     assert((await svc.query(Person, {}))[0].address.street1 === 'street1');
 
@@ -145,7 +145,7 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
 
     assert(await svc.queryCount(Person, { where: { gender: 'm' } }) === 3);
 
-    const c2 = await svc.updateByQuery(Person, { where: { gender: 'm' } }, { gender: 'f' });
+    const c2 = await svc.updatePartialByQuery(Person, { where: { gender: 'm' } }, { gender: 'f' });
 
     assert(c2 === 3);
 
