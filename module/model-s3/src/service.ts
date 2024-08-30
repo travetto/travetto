@@ -92,9 +92,13 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   async * #iterateBucket(cls?: string | Class): AsyncIterable<{ Key: string, id: string }[]> {
     let Marker: string | undefined;
     for (; ;) {
-      const obs = await this.client.listObjects({ Bucket: this.config.bucket, Prefix: cls ? this.#resolveKey(cls) : undefined, Marker });
-      if (obs.Contents && obs.Contents.length) {
-        yield (obs.Contents ?? []).map(o => ({ Key: o.Key!, id: o.Key!.split(':').pop()! }));
+      const obs = await this.client.listObjects({
+        Bucket: this.config.bucket,
+        Prefix: cls ? this.#resolveKey(cls) : this.config.namespace,
+        Marker
+      });
+      if (obs.Contents?.length) {
+        yield obs.Contents.map(o => ({ Key: o.Key!, id: o.Key!.split(':').pop()! }));
       }
       if (obs.NextMarker) {
         Marker = obs.NextMarker;
@@ -148,19 +152,12 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async #deleteKeys(items: { Key: string }[]): Promise<void> {
-    if (this.config.endpoint.includes('localhost')) {
-      await Promise.all(items.map(item => this.client.deleteObject({
-        Bucket: this.config.bucket,
-        Key: item.Key
-      })));
-    } else {
-      await this.client.deleteObjects({
-        Bucket: this.config.bucket,
-        Delete: {
-          Objects: items
-        }
-      });
-    }
+    await this.client.deleteObjects({
+      Bucket: this.config.bucket,
+      Delete: {
+        Objects: items
+      }
+    });
   }
 
   async postConstruct(): Promise<void> {
@@ -395,7 +392,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async deleteStorage(): Promise<void> {
     if (this.config.namespace) {
-      for await (const items of this.#iterateBucket('')) {
+      for await (const items of this.#iterateBucket()) {
         await this.#deleteKeys(items);
       }
     } else {
