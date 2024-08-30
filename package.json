@@ -38,6 +38,12 @@
     "related/todo-app"
   ],
   "overrides": {
+    "node-fetch": {
+      "whatwg-url": "14.0.0"
+    },
+    "mongodb": {
+      "whatwg-url": "14.0.0"
+    },
     "compression": {
       "debug": "^4.3.4"
     },
