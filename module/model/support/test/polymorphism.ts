@@ -133,6 +133,9 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
       name: 'bob2'
     }));
 
+    const all2 = await collect(service.list(Worker));
+    assert(all2.length === 4);
+
     const engineers2 = await collect(service.list(Engineer));
     assert(engineers2.length === 2);
   }
