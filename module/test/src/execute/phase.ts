@@ -1,8 +1,8 @@
-import { Barrier } from '@travetto/worker';
 import { Env, TimeUtil } from '@travetto/runtime';
 
 import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite';
 import { AssertUtil } from '../assert/util';
+import { Barrier } from './barrier';
 
 class TestBreakout extends Error {
   source?: Error;
@@ -35,9 +35,7 @@ export class TestPhaseManager {
     for (const fn of this.#suite[phase]) {
 
       // Ensure all the criteria below are satisfied before moving forward
-      error = await new Barrier(TEST_PHASE_TIMEOUT, true)
-        .add(async () => fn.call(this.#suite.instance))
-        .wait();
+      error = await Barrier.awaitOperation(TEST_PHASE_TIMEOUT, async () => fn.call(this.#suite.instance));
 
       if (error) {
         break;

@@ -1,7 +1,6 @@
 import { AssertionError } from 'node:assert';
 
 import { Env, TimeUtil, Runtime, castTo } from '@travetto/runtime';
-import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig, TestResult, TestRun } from '../model/test';
@@ -11,8 +10,9 @@ import { AssertCheck } from '../assert/check';
 import { AssertCapture } from '../assert/capture';
 import { ConsoleCapture } from './console';
 import { TestPhaseManager } from './phase';
-import { PromiseCapturer } from './promise';
 import { AssertUtil } from '../assert/util';
+import { Barrier } from './barrier';
+import { ExecutionError } from './error';
 
 const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.val) ?? 5000;
 
@@ -22,11 +22,9 @@ const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.val) ?? 5000;
 export class TestExecutor {
 
   #consumer: TestConsumer;
-  #testFilter: (config: TestConfig) => boolean;
 
-  constructor(consumer: TestConsumer, testFilter?: (config: TestConfig) => boolean) {
+  constructor(consumer: TestConsumer) {
     this.#consumer = consumer;
-    this.#testFilter = testFilter || ((): boolean => true);
   }
 
   /**
@@ -60,33 +58,21 @@ export class TestExecutor {
     const suite = SuiteRegistry.get(test.class);
 
     // Ensure all the criteria below are satisfied before moving forward
-    const barrier = new Barrier(test.timeout || TEST_TIMEOUT, true)
-      .add(async () => {
-        const env = process.env;
-        process.env = { ...env }; // Created an isolated environment
-        const pCap = new PromiseCapturer();
-
-        try {
-          await pCap.run(() =>
-            castTo<Record<string, Function>>(suite.instance)[test.methodName]()
-          );
-        } finally {
-          process.env = env; // Restore
-        }
-      });
-
-    // Wait for all barriers to be satisfied
-    return barrier.wait();
+    return Barrier.awaitOperation(test.timeout || TEST_TIMEOUT, async () => {
+      const env = process.env;
+      process.env = { ...env }; // Created an isolated environment
+      try {
+        await castTo<Record<string, Function>>(suite.instance)[test.methodName]();
+      } finally {
+        process.env = env; // Restore
+      }
+    });
   }
 
   /**
    * Determining if we should skip
    */
   async #shouldSkip(cfg: TestConfig | SuiteConfig, inst: unknown): Promise<boolean | undefined> {
-    if ('methodName' in cfg && !this.#testFilter(cfg)) {
-      return true;
-    }
-
     if (typeof cfg.skip === 'function' ? await cfg.skip(inst) : cfg.skip) {
       return true;
     }
