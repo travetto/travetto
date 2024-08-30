@@ -1,8 +1,8 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { ExecutionError } from '@travetto/worker';
 import { Suite, BeforeAll, AfterEach, AfterAll, BeforeEach, Test } from '@travetto/test';
+import { ExecutionError } from '@travetto/test/src/execute/error';
 
 let a: unknown = 0; a = 1;
 

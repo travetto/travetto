@@ -5,11 +5,11 @@ import { WorkPool } from '@travetto/worker';
 
 import { buildStandardTestManager } from '../worker/standard';
 import { RunnableTestConsumer } from '../consumer/types/runnable';
+import { TestRun } from '../model/test';
 
 import { TestExecutor } from './executor';
 import { RunnerUtil } from './util';
 import { RunState } from './types';
-import { TestConfig, TestRun } from '../model/test';
 
 /**
  * Test Runner
@@ -61,10 +61,6 @@ export class Runner {
       RuntimeIndex.reinitForModule(entry.module);
     }
 
-    const filter = (run.methodNames?.length) ?
-      (cfg: TestConfig): boolean => run.methodNames!.includes(cfg.methodName) :
-      undefined;
-
     const consumer = (await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format))
       .withTransformer(e => {
         // Copy run metadata to event
@@ -73,7 +69,7 @@ export class Runner {
       });
 
     await consumer.onStart({});
-    await new TestExecutor(consumer, filter).execute(run);
+    await new TestExecutor(consumer).execute(run);
     return consumer.summarizeAsBoolean();
   }
 
