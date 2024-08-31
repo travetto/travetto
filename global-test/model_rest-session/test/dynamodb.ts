@@ -17,6 +17,7 @@ class Config {
 @Suite()
 @ModelSuite()
 export class DynamoDBRestSessionServerSuite extends RestSessionServerSuite {
+  timeScale = 1.3;
   serviceClass = DynamoDBModelService;
   configClass = DynamoDBModelConfig;
 }

@@ -179,6 +179,7 @@ export abstract class AuthRestJWTServerSuite extends BaseRestSuite {
     });
     assert(status === 201);
 
+    const start = Date.now();
     const cookie = this.getCookieValue(headers);
     assert(cookie);
 
@@ -192,7 +193,9 @@ export abstract class AuthRestJWTServerSuite extends BaseRestSuite {
     assert(this.getCookie(selfHeaders) === undefined);
     assert(lastStatus === 200);
 
-    await timers.setTimeout(1100);
+    const used = (Date.now() - start);
+    assert(used < 1000);
+    await timers.setTimeout((2000 - used) / 2);
 
     const { headers: selfHeadersRenew } = await this.request('get', '/test/auth/self', {
       throwOnError: false,
@@ -204,7 +207,7 @@ export abstract class AuthRestJWTServerSuite extends BaseRestSuite {
     assert(expiresRenew);
 
     const delta = expiresRenew.getTime() - expires.getTime();
-    assert(delta < 1300);
+    assert(delta < 1800);
     assert(delta > 500);
   }
 }

@@ -9,6 +9,7 @@ import { BindUtil } from '@travetto/schema';
 import { MethodOrAll, Request, ServerHandle } from '../../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
 import { CoreRestServerSupport } from './server-support/core';
+import { RestNetUtil } from '../../src/util/net';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
@@ -28,9 +29,7 @@ export abstract class BaseRestSuite {
   @BeforeAll()
   async initServer(): Promise<void> {
     if (!this.type || this.type === CoreRestServerSupport) {
-      // eslint-disable-next-line no-bitwise
-      const uniqueId = Math.abs(Buffer.from(this.constructor.Ⲑid).reduce((a, v) => (a * 33) ^ v, 5381));
-      this.#support = new CoreRestServerSupport((uniqueId % 60000) + 2000);
+      this.#support = new CoreRestServerSupport(await RestNetUtil.getFreePort());
     } else {
       this.#support = classConstruct(this.type);
     }

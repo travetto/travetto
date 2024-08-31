@@ -47,7 +47,7 @@ class ImageUtilSuite {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
     const imgBuffer = await this.fixture.read('lincoln.jpg', true);
 
-    const out = await ImageUtil.optimize(imgStream, { format: 'jpeg', asSubprocess: true });
+    const out = await ImageUtil.optimize(imgStream, { asSubprocess: true });
 
     const optimized = await toBuffer(out);
 
