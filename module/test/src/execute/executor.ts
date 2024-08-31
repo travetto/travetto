@@ -255,6 +255,9 @@ export class TestExecutor {
 
     // Convert inbound arguments to specific tests to run
     const suites = SuiteRegistry.getSuiteTests(run);
+    if (!suites.length) {
+      console.warn('Unable to find suites for ', run);
+    }
 
     for (const { suite, tests } of suites) {
       await this.executeSuite(suite, tests);

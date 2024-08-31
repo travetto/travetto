@@ -119,7 +119,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       } else if (clsId) {
         const cls = this.getValidClasses().find(x => x.Ⲑid === clsId)!;
         const suite = this.get(cls);
-        return [{ suite, tests: suite.tests }];
+        return suite ? [{ suite, tests: suite.tests }] : [];
       } else {
         const suites = this.getValidClasses()
           .map(x => this.get(x))
