@@ -71,6 +71,7 @@ class DataGenerationSuite {
     const user = SchemaFaker.generate(UserScore);
     assert(user.score >= -10);
     assert(user.score <= 100);
-    assert(`${user.score}`.split('.')[1].length < 3);
+    const scoreRepr = `${user.score}`;
+    assert(!scoreRepr.includes('.') || scoreRepr.split('.')[1].length < 3);
   }
 }

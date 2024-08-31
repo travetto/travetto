@@ -137,7 +137,7 @@ export class ImageUtil {
           await this.PNG_COMPRESSOR.exec('pngquant', '--quality', '40-80', '--speed', '1', '--force', '-'), image);
         default:
         case 'jpeg': return this.#subprocessReturn(
-          await this.JPEG_COMPRESSOR.exec('jpegoptim', '-m70', '-s', '--stdin', '--stdout'), image);
+          await this.JPEG_COMPRESSOR.exec('jpegoptim', '-m70', '-s', '--stdin', '--stdout', '-'), image);
       }
     } else {
       const { default: sharp } = await import('sharp');

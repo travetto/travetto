@@ -60,7 +60,7 @@ class SampleService {
 
   @Cache('source', { keySpace: 'user.id', reinstate: x => User.from(castTo(x)) })
   async getUser(userId: string) {
-    await timers.setTimeout(100);
+    await timers.setTimeout(105);
 
     return {
       id: userId,
