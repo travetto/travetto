@@ -99,7 +99,7 @@ export class TodoService {
   }
 
   async update(todo: Todo): Promise<Todo> {
-    return await this.modelService.updatePartial(Todo, todo);
+    return await this.modelService.updatePartial(Todo, { ...todo });
   }
 
   async get(id: string): Promise<Todo> {
@@ -115,7 +115,7 @@ export class TodoService {
   }
 
   async complete(id: string, completed = true): Promise<Todo> {
-    return this.modelService.updatePartial(Todo, Todo.from({ id, completed }));
+    return this.modelService.updatePartial(Todo, { id, completed });
   }
 
   async remove(id: string): Promise<void> {
