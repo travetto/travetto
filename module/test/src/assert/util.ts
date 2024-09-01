@@ -1,14 +1,12 @@
 import util from 'node:util';
 import path from 'node:path';
 
-import { asFull, Class, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asFull, Class, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite';
 
-function isCleanable(o: unknown): o is { toClean(): unknown } {
-  return !!o && typeof o === 'object' && 'toClean' in o && typeof o.toClean === 'function';
-}
+const isCleanable = hasFunction<{ toClean(): unknown }>('toClean');
 
 /**
  * Assertion utilities

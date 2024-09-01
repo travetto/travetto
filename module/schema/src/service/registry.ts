@@ -458,6 +458,22 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       });
     }
   }
+
+  /**
+   * Visit fields recursively
+   */
+  visitFields<T>(cls: Class<T>, onField: (field: FieldConfig, path: FieldConfig[]) => void, _path: FieldConfig[] = [], root = cls): void {
+    const fields = this.has(cls) ?
+      Object.values(this.getViewSchema(cls).schema) :
+      [];
+    for (const field of fields) {
+      if (this.has(field.type)) {
+        this.visitFields(field.type, onField, [..._path, field], root);
+      } else {
+        onField(field, _path);
+      }
+    }
+  }
 }
 
 export const SchemaRegistry = new $SchemaRegistry();

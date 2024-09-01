@@ -1,10 +1,10 @@
-import { ClassInstance } from '@travetto/runtime';
+import { hasFunction } from '@travetto/runtime';
 import type { ModelBulkSupport } from '../../service/bulk';
-import { ModelCrudSupport } from '../../service/crud';
+import type { ModelCrudSupport } from '../../service/crud';
 import type { ModelExpirySupport } from '../../service/expiry';
-import { ModelIndexedSupport } from '../../service/indexed';
+import type { ModelIndexedSupport } from '../../service/indexed';
 import type { ModelStorageSupport } from '../../service/storage';
-import { ModelBlobSupport } from '../../service/blob';
+import type { ModelBlobSupport } from '../../service/blob';
 
 export class ModelBasicSupportTarget { }
 export class ModelCrudSupportTarget { }
@@ -16,57 +16,35 @@ export class ModelIndexedSupportTarget { }
 
 /**
  * Type guard for determining if service supports basic operations
- * @param o
  */
-export function isBasicSupported(o: ClassInstance): o is ModelBulkSupport {
-  return !!o && 'create' in o;
-}
+export const isBasicSupported = hasFunction<ModelBulkSupport>('create');
 
 /**
  * Type guard for determining if service supports crud operations
- * @param o
  */
-export function isCrudSupported(o: ClassInstance): o is ModelCrudSupport {
-  return !!o && 'upsert' in o;
-}
+export const isCrudSupported = hasFunction<ModelCrudSupport>('upsert');
 
 /**
  * Type guard for determining if model supports expiry
- * @param o
  */
-export function isExpirySupported(o: ClassInstance): o is ModelExpirySupport {
-  return !!o && 'deleteExpired' in o;
-}
+export const isExpirySupported = hasFunction<ModelExpirySupport>('deleteExpired');
 
 /**
  * Type guard for determining if service supports streaming operation
- * @param o
  */
-export function isBlobSupported(o: ClassInstance): o is ModelBlobSupport {
-  return !!o && 'getBlob' in o;
-}
+export const isBlobSupported = hasFunction<ModelBlobSupport>('getBlob');
 
 /**
  * Type guard for determining if service supports storage operation
- * @param o
  */
-export function isStorageSupported(o: ClassInstance): o is ModelStorageSupport {
-  return !!o && 'createStorage' in o;
-}
+export const isStorageSupported = hasFunction<ModelStorageSupport>('createStorage');
 
 /**
  * Type guard for determining if service supports streaming operation
- * @param o
  */
-export function isBulkSupported(o: ClassInstance): o is ModelBulkSupport {
-  return !!o && 'processBulk' in o;
-}
+export const isBulkSupported = hasFunction<ModelBulkSupport>('processBulk');
 
 /**
  * Type guard for determining if service supports indexed operation
- * @param o
  */
-export function isIndexedSupported(o: ClassInstance): o is ModelIndexedSupport {
-  return !!o && 'getByIndex' in o;
-}
-
+export const isIndexedSupported = hasFunction<ModelIndexedSupport>('getByIndex');

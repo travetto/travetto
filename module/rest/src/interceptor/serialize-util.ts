@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { ErrorCategory, AppError, BinaryUtil } from '@travetto/runtime';
+import { ErrorCategory, AppError, BinaryUtil, hasFunction } from '@travetto/runtime';
 
 import { HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
@@ -23,8 +23,8 @@ const categoryToCode: Record<ErrorCategory, number> = {
  * Utilities for serializing output
  */
 export class SerializeUtil {
-  static isRenderable = (o: unknown): o is Renderable => !!o && (typeof o === 'object' || typeof o === 'function') && 'render' in o && typeof o.render === 'function';
-  static isStream = (o: unknown): o is Readable => !!o && typeof o === 'object' && 'pipe' in o && 'on' in o && typeof o.pipe === 'function';
+  static isRenderable = hasFunction<Renderable>('render');
+  static isStream = hasFunction<Readable>('pipe');
 
   /**
    * Determine the error status for a given error, with special provisions for AppError

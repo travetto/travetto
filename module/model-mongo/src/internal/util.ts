@@ -1,11 +1,14 @@
-import { Binary, ObjectId } from 'mongodb';
+import { Binary, CreateIndexesOptions, FindCursor, IndexDirection, ObjectId } from 'mongodb';
 
 import { castTo, Class, TypedObject } from '@travetto/runtime';
-import { DistanceUnit, WhereClause } from '@travetto/model-query';
-import type { ModelType, IndexField } from '@travetto/model';
+import { DistanceUnit, PageableModelQuery, WhereClause } from '@travetto/model-query';
+import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
+import { PointImpl } from '@travetto/model-query/src/internal/model/point';
+
+type IdxCfg = CreateIndexesOptions;
 
 /**
  * Converting units to various radians
@@ -21,12 +24,15 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
 export type WithId<T, I = unknown> = T & { _id?: I };
 const isWithId = <T extends ModelType, I = unknown>(o: T): o is WithId<T, I> => o && '_id' in o;
 
+export type BasicIdx = Record<string, IndexDirection>;
+export type PlainIdx = Record<string, -1 | 0 | 1>;
+
 /**
  * Basic mongo utils for conforming to the model module
  */
 export class MongoUtil {
 
-  static toIndex<T extends ModelType>(f: IndexField<T>): Record<string, number> {
+  static toIndex<T extends ModelType>(f: IndexField<T>): PlainIdx {
     const keys = [];
     while (typeof f !== 'number' && typeof f !== 'boolean' && Object.keys(f)) {
       const key = TypedObject.keys(f)[0];
@@ -35,7 +41,7 @@ export class MongoUtil {
     }
     const rf: number | boolean = castTo(f);
     return {
-      [keys.join('.')]: typeof rf === 'boolean' ? (rf ? 1 : 0) : rf
+      [keys.join('.')]: typeof rf === 'boolean' ? (rf ? 1 : 0) : castTo<-1 | 1 | 0>(rf)
     };
   }
 
@@ -152,5 +158,69 @@ export class MongoUtil {
       }
     }
     return out;
+  }
+
+  static getExtraIndices<T extends ModelType>(cls: Class<T>): BasicIdx[] {
+    const out: BasicIdx[] = [];
+    const textFields: string[] = [];
+    SchemaRegistry.visitFields(cls, (field, path) => {
+      if (field.type === PointImpl) {
+        const name = [...path, field].map(x => x.name).join('.');
+        out.push({ [name]: '2d' });
+      } else if (field.specifiers?.includes('text') && (field.specifiers?.includes('long') || field.specifiers.includes('search'))) {
+        const name = [...path, field].map(x => x.name).join('.');
+        textFields.push(name);
+      }
+    });
+    if (textFields.length) {
+      const text: BasicIdx = {};
+      for (const field of textFields) {
+        text[field] = 'text';
+      }
+      out.push(text);
+    }
+    return out;
+  }
+
+  static getPlainIndex(idx: IndexConfig<ModelType>): PlainIdx {
+    let out: PlainIdx = {};
+    for (const cfg of idx.fields.map(x => this.toIndex(x))) {
+      out = Object.assign(out, cfg);
+    }
+    return out;
+  }
+
+  static getIndices<T extends ModelType>(cls: Class<T>, indices: IndexConfig<ModelType>[] = []): [BasicIdx, IdxCfg][] {
+    return [
+      ...indices.map(idx => [this.getPlainIndex(idx), (idx.type === 'unique' ? { unique: true } : {})] as const),
+      ...this.getExtraIndices(cls).map((x) => [x, {}] as const)
+    ].map(x => [...x]);
+  }
+
+  static prepareCursor<T extends ModelType>(cls: Class<T>, cursor: FindCursor<T>, query: PageableModelQuery<T>): FindCursor<T> {
+    if (query.select) {
+      const selectKey = Object.keys(query.select)[0];
+      const select = typeof selectKey === 'string' && selectKey.startsWith('$') ? query.select : this.extractSimple(cls, query.select);
+      // Remove id if not explicitly defined, and selecting fields directly
+      if (!select['_id']) {
+        const values = new Set([...Object.values(select)]);
+        if (values.has(1) || values.has(true)) {
+          select['_id'] = false;
+        }
+      }
+      cursor.project(select);
+    }
+
+    if (query.sort) {
+      cursor = cursor.sort(Object.assign({}, ...query.sort.map(x => this.extractSimple(cls, x))));
+    }
+
+    cursor = cursor.limit(Math.trunc(query.limit ?? 200));
+
+    if (query.offset && typeof query.offset === 'number') {
+      cursor = cursor.skip(Math.trunc(query.offset ?? 0));
+    }
+
+    return cursor;
   }
 }
