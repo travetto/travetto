@@ -152,7 +152,8 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): AsyncIterable<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, idx, body, { emptySortValue: null });
+    const cfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
+    const { fields, sorted } = ModelIndexedUtil.computeIndexParts(cls, cfg, body, { emptySortValue: null });
     let query = fields.reduce<Query>((q, { path, value }) =>
       q.where(path.join('.'), '==', value), this.#getCollection(cls));
 

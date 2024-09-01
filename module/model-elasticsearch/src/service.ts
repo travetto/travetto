@@ -375,10 +375,7 @@ export class ElasticsearchModelService implements
   }
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
-    const cfg = ModelRegistry.getIndex(cls, idx);
-    if (cfg.type === 'unique') {
-      throw new AppError('Cannot list on unique indices', 'data');
-    }
+    const cfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
     let search = await this.execSearch<T>(cls, {
       scroll: '2m',
       size: 100,

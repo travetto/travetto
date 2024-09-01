@@ -1,4 +1,7 @@
-import { Class, Runtime, asConstructable, castTo, classConstruct, describeFunction, asFull, castKey, TypedFunction } from '@travetto/runtime';
+import {
+  Class, Runtime, asConstructable, castTo, classConstruct, describeFunction,
+  asFull, castKey, TypedFunction, hasFunction
+} from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
@@ -13,13 +16,8 @@ export type ResolutionType = 'strict' | 'loose' | 'any';
 
 const PrimaryCandidateⲐ = Symbol.for('@travetto/di:primary');
 
-function hasPostConstruct(o: unknown): o is { postConstruct: () => Promise<unknown> } {
-  return !!o && typeof o === 'object' && 'postConstruct' in o && typeof o.postConstruct === 'function';
-}
-
-function hasPreDestroy(o: unknown): o is { preDestroy: () => unknown } {
-  return !!o && typeof o === 'object' && 'preDestroy' in o && typeof o.preDestroy === 'function';
-}
+const hasPostConstruct = hasFunction<{ postConstruct: () => Promise<unknown> }>('postConstruct');
+const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>('preDestroy');
 
 /**
  * Dependency registry

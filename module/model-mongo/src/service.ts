@@ -1,15 +1,11 @@
-import {
-  type Db, GridFSBucket, MongoClient, type Sort, type CreateIndexesOptions,
-  type GridFSFile, type IndexSpecification, type Collection, ObjectId,
-  Binary
-} from 'mongodb';
 import { pipeline } from 'node:stream/promises';
-import { Readable } from 'node:stream';
+
+import { type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection, type ObjectId, type Binary, type RootFilterOperators } from 'mongodb';
 
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig, ModelBlobSupport
+  NotFoundError, ExistsError, ModelBlobSupport
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -18,34 +14,29 @@ import {
 } from '@travetto/model-query';
 
 import {
-  ShutdownManager, type Class, type DeepPartial, AppError, TypedObject,
+  ShutdownManager, type Class, type DeepPartial, TypedObject,
   castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
-import { FieldConfig, SchemaRegistry } from '@travetto/schema';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
-import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 
-import { MongoUtil, WithId } from './internal/util';
+import { MongoUtil, PlainIdx, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
 
-const IdxFieldsⲐ = Symbol.for('@travetto/model-mongo:idx');
-
-const asFielded = (cfg: IndexConfig<ModelType>): { [IdxFieldsⲐ]: Sort } => castTo(cfg);
-
-type IdxCfg = CreateIndexesOptions;
+const ListIndexⲐ = Symbol.for('@travetto/mongo-model:list-index');
 
 type BlobRaw = GridFSFile & { metadata?: BlobMeta };
+
+type MongoTextSearch = RootFilterOperators<unknown>['$text'];
 
 /**
  * Mongo-based model source
@@ -98,45 +89,13 @@ export class MongoModelService implements
     await this.#db.dropDatabase();
   }
 
-  getGeoIndices<T extends ModelType>(cls: Class<T>, path: FieldConfig[] = [], root = cls): IndexSpecification[] {
-    const fields = SchemaRegistry.has(cls) ?
-      Object.values(SchemaRegistry.get(cls).views[AllViewⲐ].schema) :
-      [];
-    const out: IndexSpecification[] = [];
-    for (const field of fields) {
-      if (SchemaRegistry.has(field.type)) {
-        // Recurse
-        out.push(...this.getGeoIndices(field.type, [...path, field], root));
-      } else if (field.type === PointImpl) {
-        const name = [...path, field].map(x => x.name).join('.');
-        console.debug('Preparing geo-index', { cls: root.Ⲑid, name });
-        out.push({ [name]: '2d' });
-      }
-    }
-    return out;
-  }
-
-  getIndices<T extends ModelType>(cls: Class<T>): ([IndexSpecification] | [IndexSpecification, IdxCfg])[] {
-    const indices = ModelRegistry.get(cls).indices ?? [];
-    return [
-      ...indices.map((idx): [IndexSpecification, IdxCfg] => {
-        const combined = asFielded(idx)[IdxFieldsⲐ] ??= Object.assign({}, ...idx.fields.map(x => MongoUtil.toIndex(x)));
-        return [
-          castTo(combined),
-          (idx.type === 'unique' ? { unique: true } : {})
-        ];
-      }),
-      ...this.getGeoIndices(cls).map((x): [IndexSpecification] => [x])
-    ];
-  }
-
   async establishIndices<T extends ModelType>(cls: Class<T>): Promise<void> {
     const col = await this.getStore(cls);
-    const creating = this.getIndices(cls);
+    const creating = MongoUtil.getIndices(cls, ModelRegistry.get(cls).indices);
     if (creating.length) {
       console.debug('Creating indexes', { indices: creating });
       for (const el of creating) {
-        await col.createIndex(el[0], el[1] ?? {});
+        await col.createIndex(...el);
       }
     }
   }
@@ -297,8 +256,7 @@ export class MongoModelService implements
     const meta = await this.describeBlob(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
-    const res = (): Readable => this.#bucket.openDownloadStreamByName(location, mongoRange);
-    return BinaryUtil.readableBlob(res, { ...meta, range: final });
+    return BinaryUtil.readableBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...meta, range: final });
   }
 
   async describeBlob(location: string): Promise<BlobMeta> {
@@ -419,18 +377,15 @@ export class MongoModelService implements
 
   async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> {
     const store = await this.getStore(cls);
-    const idxCfg = ModelRegistry.getIndex(cls, idx);
-
-    if (idxCfg.type === 'unique') {
-      throw new AppError('Cannot list on unique indices', 'data');
-    }
+    const idxCfg = ModelRegistry.getIndex(cls, idx, ['sorted', 'unsorted']);
 
     const where = this.getWhereFilter(
       cls,
       castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
     );
 
-    const cursor = store.find(where, { timeout: true }).batchSize(100).sort(asFielded(idxCfg)[IdxFieldsⲐ]);
+    const sort = castTo<{ [ListIndexⲐ]: PlainIdx }>(idxCfg)[ListIndexⲐ] ??= MongoUtil.getPlainIndex(idxCfg);
+    const cursor = store.find(where, { timeout: true }).batchSize(100).sort(castTo(sort));
 
     for await (const el of cursor) {
       yield (await MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el)));
@@ -443,31 +398,8 @@ export class MongoModelService implements
 
     const col = await this.getStore(cls);
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
-    let cursor = col.find<T>(filter, {});
-    if (query.select) {
-      const selectKey = Object.keys(query.select)[0];
-      const select = typeof selectKey === 'string' && selectKey.startsWith('$') ? query.select : MongoUtil.extractSimple(cls, query.select);
-      // Remove id if not explicitly defined, and selecting fields directly
-      if (!select['_id']) {
-        const values = new Set([...Object.values(select)]);
-        if (values.has(1) || values.has(true)) {
-          select['_id'] = false;
-        }
-      }
-      cursor.project(select);
-    }
-
-    if (query.sort) {
-      cursor = cursor.sort(Object.assign({}, ...query.sort.map(x => MongoUtil.extractSimple(cls, x))));
-    }
-
-    cursor = cursor.limit(Math.trunc(query.limit ?? 200));
-
-    if (query.offset && typeof query.offset === 'number') {
-      cursor = cursor.skip(Math.trunc(query.offset ?? 0));
-    }
-
-    const items = await cursor.toArray();
+    const cursor = col.find<T>(filter, {});
+    const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
     return await Promise.all(items.map(r => ModelCrudUtil.load(cls, r).then(MongoUtil.postLoadId)));
   }
 
@@ -580,5 +512,19 @@ export class MongoModelService implements
     const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const results = await this.query<T>(cls, q);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (_, b) => b, query && query.limit);
+  }
+
+  // Other
+  async queryText<T extends ModelType>(cls: Class<T>, search: string | MongoTextSearch, query: PageableModelQuery<T> = {}): Promise<T[]> {
+    await QueryVerifier.verify(cls, query);
+
+    const col = await this.getStore(cls);
+    const filter = MongoUtil.extractWhereFilter(cls, query.where);
+    if (typeof search === 'string') {
+      search = { $search: search, $language: 'en' };
+    }
+    const cursor = col.find<T>({ $and: [{ $text: search }, filter] }, {});
+    const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
+    return await Promise.all(items.map(r => ModelCrudUtil.load(cls, r).then(MongoUtil.postLoadId)));
   }
 }

@@ -46,6 +46,9 @@ export function classConstruct<T>(cls: Class<T>, args: unknown[] = []): ClassIns
   return castTo(new cons(...args));
 }
 
+export const hasFunction = <T>(key: keyof T) => (o: unknown): o is T =>
+  typeof o === 'object' && o !== null && typeof o[castKey(key)] === 'function';
+
 /**
  * Range of bytes, inclusive
  */
