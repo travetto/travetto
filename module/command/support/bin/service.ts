@@ -77,7 +77,6 @@ export class ServiceUtil {
   static async * start(svc: CommandService): AsyncIterable<ServiceEvent> {
     const preRun = yield* this.isRunning(svc, 'running');
     if (!preRun) {
-      yield event('starting', { subtitle: 'Starting' });
       try {
         const container = new DockerContainer(svc.image)
           .setInteractive(true)
@@ -86,6 +85,14 @@ export class ServiceUtil {
           .setPrivileged(svc.privileged)
           .addLabel(`trv-${svc.name}`)
           .addEnvVars(svc.env || {});
+
+        if (!await container.isImagePulled()) {
+          for await (const msg of container.pullImage()) {
+            yield event('downloading', { subtitle: `Downloading: ${msg}` });
+          }
+        }
+
+        yield event('starting', { subtitle: 'Starting' });
 
         if (svc.ports) {
           for (const [pub, pri] of Object.entries(svc.ports)) {
