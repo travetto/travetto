@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import rl from 'node:readline/promises';
 import { ChildProcess, spawn, execSync } from 'node:child_process';
 import { rmSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
@@ -484,5 +485,23 @@ export class DockerContainer {
     } catch {
       // ignore
     }
+  }
+
+  /**
+   * See if image is already available
+   */
+  async isImagePulled(): Promise<boolean> {
+    const result = await ExecUtil.getResult(spawn(this.#dockerCmd, ['image', 'inspect', this.#image]), { catch: true });
+    return result.valid;
+  }
+
+  /**
+   * Pull image
+   */
+  async * pullImage(): AsyncIterable<string> {
+    const proc = spawn(this.#dockerCmd, ['pull', this.#image], { stdio: [0, 'pipe', 'pipe'] });
+    const output = rl.createInterface(proc.stdout!);
+    yield* output;
+    await ExecUtil.getResult(proc);
   }
 }
