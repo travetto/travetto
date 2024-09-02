@@ -12,7 +12,8 @@ export class ManifestFileUtil {
     const temp = path.resolve(os.tmpdir(), `${process.hrtime()[1]}.${path.basename(file)}`);
     await fs.writeFile(temp, content, 'utf8');
     await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.rename(temp, file);
+    await fs.copyFile(temp, file);
+    await fs.rm(temp, { force: true });
   }
 
   /**
