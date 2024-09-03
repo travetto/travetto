@@ -34,7 +34,6 @@ While running any code within the framework, there are common patterns/goals for
 ```typescript
 class $Runtime {
   constructor(idx: ManifestIndex, resourceOverrides?: Record<string, string>);
-  get #moduleAliases(): Record<string, string>;
   /** Get env name, with support for the default env */
   get env(): string | undefined;
   /** Are we in development mode */
@@ -353,4 +352,4 @@ export function registerShutdownHandler() {
 ```
 
 ## Path Behavior
-To ensure consistency in path usage throughout the framework, imports pointing at $`node:path` and $`path` are rewritten at compile time.  These imports are pointing towards [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s `path`  implementation.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.
+To ensure consistency in path usage throughout the framework, imports pointing at `node:path` and `path` are rewritten at compile time.  These imports are pointing towards [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s `path`  implementation.  This allows for seamless import/usage patterns with the reliability needed for cross platform support.

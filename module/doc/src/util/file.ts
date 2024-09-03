@@ -133,7 +133,7 @@ export class DocFileUtil {
         return '';
       }
     })
-      .filter(x => !/^\s+(#|private |static #|async #)/.test(x))
+      .filter(x => !/#|(\b(private|protected)\b)/.test(x))
       .filter(x => !!x)
       .join('\n');
 
