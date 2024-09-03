@@ -120,7 +120,7 @@ export const text = <>
 
     The flag files can be included in one of a few ways:
     <ul>
-      <li>{d.input('+=<name>')} - This translates into ${d.input('<mod>/support/<name>.flags')}, which is a convenient shorthand.</li>
+      <li>{d.input('+=<name>')} - This translates into {d.input('<mod>/support/<name>.flags')}, which is a convenient shorthand.</li>
       <li>{d.input('+=<mod>/path/file.flags')} - This is a path-related file that will be resolved from the module's location.</li>
       <li>{d.input('+=/path/file.flags')} - This is an absolute path that will be read from the root of the file system.</li>
     </ul>
