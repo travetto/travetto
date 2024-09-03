@@ -523,6 +523,12 @@ export class MongoModelService implements
     if (typeof search === 'string') {
       search = { $search: search, $language: 'en' };
     }
+
+    (query.sort ??= []).unshift({
+      // @ts-expect-error
+      score: { $meta: 'textScore' }
+    });
+
     const cursor = col.find<T>({ $and: [{ $text: search }, filter] }, {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
     return await Promise.all(items.map(r => ModelCrudUtil.load(cls, r).then(MongoUtil.postLoadId)));
