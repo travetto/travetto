@@ -30,7 +30,7 @@
   },
   "peerDependencies": {
     "@travetto/cli": "^5.0.1",
-    "@travetto/pack": "^5.0.1",
+    "@travetto/pack": "^5.0.2",
     "@travetto/test": "^5.0.1"
   },
   "peerDependenciesMeta": {
