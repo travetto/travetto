@@ -155,13 +155,14 @@ Options:
   -df, --docker-factory <span class="token operator">&lt;</span>string<span class="token operator">></span>         Docker Factory <span class="token builtin class-name">source</span> <span class="token punctuation">(</span>default: <span class="token string">"&#64;travetto/pack/support/pack.dockerfile"</span><span class="token punctuation">)</span>
   -di, --docker-image <span class="token operator">&lt;</span>string<span class="token operator">></span>           Docker Image to extend <span class="token punctuation">(</span>default: <span class="token string">"node:22-alpine"</span><span class="token punctuation">)</span>
   -dn, --docker-name <span class="token operator">&lt;</span>string<span class="token operator">></span>            Docker Image Name <span class="token punctuation">(</span>default: <span class="token string">"travetto_pack"</span><span class="token punctuation">)</span>
-  -dt, --docker-tag <span class="token operator">&lt;</span>string<span class="token operator">></span>             Docker Image Tag <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token string">"latest"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -ru, --runtime-user <span class="token operator">&lt;</span>string<span class="token operator">></span>           Docker Runtime user
+  -rp, --runtime-package <span class="token operator">&lt;</span>string<span class="token operator">></span>        Docker Runtime Packages <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -dp, --docker-port <span class="token operator">&lt;</span>number<span class="token operator">></span>            Docker Image Port <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -ds, --docker-stage-only               Docker Stage Only <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -dt, --docker-tag <span class="token operator">&lt;</span>string<span class="token operator">></span>             Docker Image Tag <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token string">"latest"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -dx, --docker-push                     Docker Push Tags <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -db, --docker-build-platform <span class="token operator">&lt;</span>string<span class="token operator">></span>  Docker Build Platform
   -dr, --docker-registry <span class="token operator">&lt;</span>string<span class="token operator">></span>        Docker Registry
-  -ru, --runtime-user <span class="token operator">&lt;</span>string<span class="token operator">></span>           Docker Runtime user
-  -rp, --runtime-package <span class="token operator">&lt;</span>string<span class="token operator">></span>        Docker Runtime Packages <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>module<span class="token operator">></span>                  Module to run <span class="token keyword">for</span>
   -h, <span class="token parameter variable">--help</span>                             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
@@ -281,13 +282,5 @@ npx rollup <span class="token parameter variable">-c</span> <span class="token v
 <span class="token builtin class-name">echo</span> <span class="token string">""</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"USER app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"WORKDIR /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
-<span class="token builtin class-name">echo</span> <span class="token string">"ENTRYPOINT [<span class="token entity" title="\&quot;">\"</span>/app/todo-app.sh<span class="token entity" title="\&quot;">\"</span>]"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
-
-<span class="token comment"># Building Docker Container latest</span>
-
-<span class="token builtin class-name">echo</span> <span class="token string">"Building Docker Container latest"</span>
-
-<span class="token builtin class-name">cd</span> <span class="token variable">$DIST</span>
-<span class="token function">docker</span> build <span class="token parameter variable">-t</span> travetto_todo-app:latest <span class="token builtin class-name">.</span>
-<span class="token builtin class-name">cd</span> <span class="token variable">$ROOT</span></code></pre>
+<span class="token builtin class-name">echo</span> <span class="token string">"ENTRYPOINT [<span class="token entity" title="\&quot;">\"</span>/app/todo-app.sh<span class="token entity" title="\&quot;">\"</span>]"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile</code></pre>
   </figure>

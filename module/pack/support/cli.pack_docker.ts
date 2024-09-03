@@ -22,20 +22,24 @@ export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Image Name', short: 'dn', envVars: ['PACK_DOCKER_IMAGE'] })
   @Required(false)
   dockerName: string;
-  @CliFlag({ desc: 'Docker Image Tag', short: 'dt', envVars: ['PACK_DOCKER_TAGS'] })
-  dockerTag: string[] = ['latest'];
+  @CliFlag({ desc: 'Docker Runtime user', short: 'ru', name: 'runtime-user', envVars: ['PACK_DOCKER_RUNTIME_USER'] })
+  dockerRuntimeUserSrc?: string;
+  @CliFlag({ desc: 'Docker Runtime Packages', short: 'rp', name: 'runtime-package', envVars: ['PACK_DOCKER_RUNTIME_PACKAGES'] })
+  dockerRuntimePackages: string[] = [];
   @CliFlag({ desc: 'Docker Image Port', short: 'dp', envVars: ['PACK_DOCKER_PORT'] })
   dockerPort: number[] = [];
+
+  // Publish flags
+  @CliFlag({ desc: 'Docker Stage Only', short: 'ds', envVars: ['PACK_DOCKER_STAGE'] })
+  dockerStageOnly: boolean = false;
+  @CliFlag({ desc: 'Docker Image Tag', short: 'dt', envVars: ['PACK_DOCKER_TAGS'] })
+  dockerTag: string[] = ['latest'];
   @CliFlag({ desc: 'Docker Push Tags', short: 'dx', envVars: ['PACK_DOCKER_PUSH'] })
   dockerPush = false;
   @CliFlag({ desc: 'Docker Build Platform', short: 'db', envVars: ['PACK_DOCKER_BUILD_PLATFORM'] })
   dockerBuildPlatform?: string;
   @CliFlag({ desc: 'Docker Registry', short: 'dr', envVars: ['PACK_DOCKER_REGISTRY'] })
   dockerRegistry?: string;
-  @CliFlag({ desc: 'Docker Runtime user', short: 'ru', name: 'runtime-user', envVars: ['PACK_DOCKER_RUNTIME_USER'] })
-  dockerRuntimeUserSrc?: string;
-  @CliFlag({ desc: 'Docker Runtime Packages', short: 'rp', name: 'runtime-package', envVars: ['PACK_DOCKER_RUNTIME_PACKAGES'] })
-  dockerRuntimePackages: string[] = [];
 
   @Ignore()
   dockerRuntime: DockerPackConfig['dockerRuntime'];
@@ -79,6 +83,21 @@ export class PackDockerCommand extends BasePackCommand {
     const group = (!groupIsNum ? groupOrGid : undefined) || this.defaultUser;
     const user = (!userIsNum ? userOrUid : undefined) || this.defaultUser;
     this.dockerRuntime = { user, uid, group, gid, folder: `/${this.appFolder}`, packages: this.dockerRuntimePackages };
+
+    if (this.dockerStageOnly) {
+      if (this.dockerRegistry) {
+        console.warn('Docker Registry is currently ignored due to --docker-build being false');
+      }
+      if (this.dockerBuildPlatform) {
+        console.warn('Docker Build Platform is currently ignored due to --docker-build being false');
+      }
+      if (this.dockerPush) {
+        console.warn('Docker Push is currently ignored due to --docker-build being false');
+      }
+      if (this.dockerTag) {
+        console.warn('Docker Tag is currently ignored due to --docker-build being false');
+      }
+    }
   }
 
   preHelp(): void {
@@ -91,8 +110,10 @@ export class PackDockerCommand extends BasePackCommand {
       DockerPackOperation.pullDockerBaseImage,
       DockerPackOperation.detectDockerImageOs,
       DockerPackOperation.writeDockerFile,
-      DockerPackOperation.buildDockerContainer,
-      DockerPackOperation.pushDockerContainer
+      ...this.dockerStageOnly ? [
+        DockerPackOperation.buildDockerContainer,
+        DockerPackOperation.pushDockerContainer
+      ] : []
     ];
   }
 }

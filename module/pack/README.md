@@ -142,13 +142,14 @@ Options:
   -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile")
   -di, --docker-image <string>           Docker Image to extend (default: "node:22-alpine")
   -dn, --docker-name <string>            Docker Image Name (default: "travetto_pack")
-  -dt, --docker-tag <string>             Docker Image Tag (default: ["latest"])
+  -ru, --runtime-user <string>           Docker Runtime user
+  -rp, --runtime-package <string>        Docker Runtime Packages (default: [])
   -dp, --docker-port <number>            Docker Image Port (default: [])
+  -ds, --docker-stage-only               Docker Stage Only (default: false)
+  -dt, --docker-tag <string>             Docker Image Tag (default: ["latest"])
   -dx, --docker-push                     Docker Push Tags (default: false)
   -db, --docker-build-platform <string>  Docker Build Platform
   -dr, --docker-registry <string>        Docker Registry
-  -ru, --runtime-user <string>           Docker Runtime user
-  -rp, --runtime-package <string>        Docker Runtime Packages (default: [])
   -m, --module <module>                  Module to run for
   -h, --help                             display help for command
 ```
@@ -266,12 +267,4 @@ echo "" >> $DIST/Dockerfile
 echo "USER app" >> $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
-
-# Building Docker Container latest 
-
-echo "Building Docker Container latest"
-
-cd $DIST
-docker build -t travetto_todo-app:latest .
-cd $ROOT
 ```
