@@ -58,7 +58,7 @@ export class MongoQuerySuite extends ModelQuerySuite {
   @Test()
   async validateStemming() {
     await this.saveAll(TextModel, [
-      TextModel.from({ document: 'I was running from bear' }),
+      TextModel.from({ document: 'I was running from bear that was running as well' }),
       TextModel.from({ document: 'I ran at a bear, ferociously' }),
       TextModel.from({ document: 'We run from Bears fans on the weekend' }),
     ]);
@@ -66,6 +66,7 @@ export class MongoQuerySuite extends ModelQuerySuite {
 
     const all4 = await svc.queryText(TextModel, 'run');
     assert(all4.length === 2);
+    assert(all4[0].document.includes('running as well'));
 
     const all5 = await svc.queryText(TextModel, 'ran');
     assert(all5.length === 1);
