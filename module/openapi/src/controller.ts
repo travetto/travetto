@@ -1,6 +1,7 @@
+import { stringify } from 'yaml';
+
 import { ConfigureInterceptor, Controller, CorsInterceptor, Get, SetHeaders, Undocumented } from '@travetto/rest';
 import { Inject } from '@travetto/di';
-import { stringify } from 'yaml';
 
 import { OpenApiService } from './service';
 

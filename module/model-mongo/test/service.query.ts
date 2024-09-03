@@ -1,6 +1,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+import { Model } from '@travetto/model';
+import { LongText } from '@travetto/schema';
+import { castTo } from '@travetto/runtime';
 
 import { ModelQuerySuite } from '@travetto/model-query/support/test/query';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud';
@@ -10,9 +13,6 @@ import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/sugge
 
 import { MongoModelConfig } from '../src/config';
 import { MongoModelService } from '../src/service';
-import { Model } from '@travetto/model';
-import { LongText } from '@travetto/schema';
-import { castTo } from '@travetto/runtime';
 
 @Model()
 class TextModel {

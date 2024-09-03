@@ -1,9 +1,9 @@
 import { isJSXElement, JSXElement, createFragment, JSXFragmentType, JSXChild } from '@travetto/email-inky/jsx-runtime';
+import { castTo } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../components';
 import { RenderProvider, RenderState } from '../types';
 import { RenderContext, RenderContextInit } from './context';
-import { castTo } from '@travetto/runtime';
 
 /**
  * Inky Renderer

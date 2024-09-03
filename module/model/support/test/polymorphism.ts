@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
+import { castTo } from '@travetto/runtime';
 import { SubTypeField, Text, TypeMismatchError } from '@travetto/schema';
 import {
   ModelIndexedSupport, Index, ModelCrudSupport, Model,
@@ -12,7 +13,6 @@ import { isIndexedSupported } from '../../src/internal/service/common';
 import { ExistsError } from '../../src/error/exists';
 
 import { BaseModelSuite } from './base';
-import { castTo } from '@travetto/runtime';
 
 @Model({ baseType: true })
 export class Worker {

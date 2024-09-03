@@ -2,6 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
+import { asFull, castTo } from '@travetto/runtime';
 
 import { SchemaRegistry } from '../src/service/registry';
 import { ValidationResultError } from '../src/validate/error';
@@ -13,7 +14,6 @@ import {
   CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque, TemplateLit
 } from './models/validation';
 import { Accessors } from './models/binding';
-import { asFull, castTo } from '@travetto/runtime';
 
 function findError(errors: ValidationError[], path: string, message: string) {
   return errors.find(x => x.path === path && x.message.includes(message));

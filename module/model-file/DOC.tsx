@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { FileModelService } from './__index__';
+import { FileModelService } from '@travetto/model-file';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc.support';
 import { ModelTypes } from '@travetto/model/support/doc.support';
 

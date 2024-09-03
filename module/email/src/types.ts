@@ -1,6 +1,7 @@
-import { FileLoader } from '@travetto/runtime';
 import { Readable } from 'node:stream';
 import { Url } from 'node:url';
+
+import { FileLoader } from '@travetto/runtime';
 
 /**
  * An address

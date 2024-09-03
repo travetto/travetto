@@ -2,11 +2,11 @@ import assert from 'node:assert';
 
 import { Schema, FieldConfig } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
+import { castTo } from '@travetto/runtime';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 
 import { VisitStack } from '../../src/internal/util';
 import { SQLModelService } from '../../src/service';
-import { castTo } from '@travetto/runtime';
 
 @Schema()
 class User {

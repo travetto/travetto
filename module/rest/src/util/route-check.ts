@@ -1,4 +1,5 @@
 import { Util } from '@travetto/runtime';
+
 import { RouteApplies } from '../interceptor/types';
 import { ControllerConfig } from '../registry/types';
 import { RouteConfig } from '../types';

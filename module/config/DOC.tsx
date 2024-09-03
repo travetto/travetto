@@ -1,11 +1,11 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 import { Field, Schema } from '@travetto/schema';
+import { Injectable } from '@travetto/di';
 
 import { Config as ConfigDec, EnvVar } from '@travetto/config/src/decorator';
 import { ConfigurationService } from '@travetto/config/src/service';
-import { Injectable } from '@travetto/di';
-import { OverrideConfigSource } from './__index__';
+import { OverrideConfigSource } from '@travetto/config/src/source/override';
 
 const ConfigSource = d.codeLink('ConfigSource', 'src/source/types.ts', /interface ConfigSource/);
 

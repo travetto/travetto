@@ -66,7 +66,7 @@ export const ImportOrder: TrvEslintPlugin = {
 
             const lineType: typeof groupType = /^@travetto/.test(from) ? 'travetto' : /^[^.]/.test(from) ? 'node' : 'workspace';
 
-            if (/module\/[^/]+\/doc\//.test(context.getFilename()) && lineType === 'workspace' && from.startsWith('..')) {
+            if (/module\/[^/]+\/doc\//.test(context.filename) && lineType === 'workspace' && from.startsWith('..')) {
               context.report({ message: 'Doc does not support parent imports', node });
             }
 

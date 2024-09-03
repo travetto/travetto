@@ -2,12 +2,12 @@ import { FieldConfig } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
+import { castTo } from '@travetto/runtime';
 
 import { SQLModelConfig, SQLDialect } from '@travetto/model-sql';
 import { VisitStack } from '@travetto/model-sql/src/internal/util';
 
 import { SqliteConnection } from './connection';
-import { castTo } from '@travetto/runtime';
 
 /**
  * Sqlite Dialect for the SQL Model Source

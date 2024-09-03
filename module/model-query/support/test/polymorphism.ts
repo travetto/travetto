@@ -4,7 +4,8 @@ import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { ModelCrudSupport } from '@travetto/model/src/service/crud';
 import { Doctor, Engineer, Worker, Firefighter } from '@travetto/model/support/test/polymorphism';
-import { NotFoundError } from '@travetto/model/src/error/not-found';
+import { NotFoundError } from '@travetto/model';
+import { castTo } from '@travetto/runtime';
 
 import { ModelQueryCrudSupport } from '../../src/service/crud';
 import { ModelQuerySupport } from '../../src/service/query';
@@ -12,7 +13,6 @@ import { ModelQueryFacetSupport } from '../../src/service/facet';
 import { ModelQuerySuggestSupport } from '../../src/service/suggest';
 
 import { isQueryCrudSupported, isQueryFacetSupported, isQuerySuggestSupported } from '../../src/internal/service/common';
-import { castTo } from '@travetto/runtime';
 
 @Suite()
 export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {

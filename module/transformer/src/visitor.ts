@@ -1,8 +1,9 @@
 import ts from 'typescript';
 
+import { ManifestModuleUtil } from '@travetto/manifest';
+
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
 import { CoreUtil } from './util/core';
-import { ManifestModuleUtil } from '@travetto/manifest';
 
 /**
  * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler

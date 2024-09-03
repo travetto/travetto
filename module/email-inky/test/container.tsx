@@ -3,8 +3,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+
 import { renderJSX } from './util';
-import { Container } from '../__index__';
+import { Container } from '../src/components';
 
 @Suite('Container')
 class ContainerTest {

@@ -1,6 +1,7 @@
+import { stringify } from 'yaml';
+
 import { Terminal } from '@travetto/terminal';
 import { AppError, TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { stringify } from 'yaml';
 
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';

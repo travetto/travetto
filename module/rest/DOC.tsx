@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 import { Field, Schema } from '@travetto/schema';
+import { CliCommand } from '@travetto/cli';
 
 import { RestApplication } from './src/application/rest';
 import { Controller } from './src/decorator/controller';
@@ -14,7 +15,6 @@ import { SerializeInterceptor } from './src/interceptor/serialize';
 import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies';
 import { RestConfig } from './src/application/config';
 import { AsyncContextInterceptor } from './src/interceptor/context';
-import { CliCommand } from '@travetto/cli';
 
 const Request = d.codeLink('TravettoRequest', 'src/trv.d.ts', /interface TravettoRequest/);
 const Response = d.codeLink('TravettoResponse', 'src/trv.d.ts', /interface TravettoResponse/);

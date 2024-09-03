@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { DependencyRegistry } from '../../__index__';
+
+import { DependencyRegistry } from '../../src/registry';
 
 import { MyCustomClass, MyCustomClass2, MyCustomClass3, MyCustomClass4 } from './types';
 

@@ -1,4 +1,5 @@
 import { hasFunction } from '@travetto/runtime';
+
 import type { ModelBulkSupport } from '../../service/bulk';
 import type { ModelCrudSupport } from '../../service/crud';
 import type { ModelExpirySupport } from '../../service/expiry';

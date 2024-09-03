@@ -3,6 +3,7 @@ import { AwsLambdaFastifyRestServer } from '@travetto/rest-fastify-lambda';
 import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
+
 import { ModelBlobRestUploadServerSuite } from './server';
 
 const FASTIFY = Symbol.for('fastify-lambda');

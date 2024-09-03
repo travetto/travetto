@@ -1,5 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
+
 import { CommonLogger, CommonLoggerConfig } from './src/common';
 import { FileLogAppender } from './src/appender/file';
 import { ConsoleLogAppender } from './src/appender/console';

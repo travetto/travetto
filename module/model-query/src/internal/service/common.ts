@@ -1,4 +1,5 @@
 import { hasFunction } from '@travetto/runtime';
+
 import type { ModelQueryCrudSupport } from '../../service/crud';
 import type { ModelQueryFacetSupport } from '../../service/facet';
 import type { ModelQuerySupport } from '../../service/query';

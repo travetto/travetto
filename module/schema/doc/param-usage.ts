@@ -1,4 +1,4 @@
-import { Match, Min } from '../__index__';
+import { Match, Min } from '@travetto/schema';
 
 const NAME_REGEX = /[A-Z][a-z]+(\s+[A-Z][a-z]+)*/;
 

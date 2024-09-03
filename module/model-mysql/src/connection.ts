@@ -1,10 +1,10 @@
 import { createPool } from 'mysql2';
+import { PoolConnection, Pool, OkPacket, ResultSetHeader } from 'mysql2/promise';
 
 import { castTo, ShutdownManager } from '@travetto/runtime';
 import { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, SQLModelConfig } from '@travetto/model-sql';
-import { PoolConnection, Pool, OkPacket, ResultSetHeader } from 'mysql2/promise';
 
 function isSimplePacket(o: unknown): o is OkPacket | ResultSetHeader {
   return o !== null && o !== undefined && typeof o === 'object' && 'constructor' in o && (

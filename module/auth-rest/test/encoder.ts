@@ -7,9 +7,9 @@ import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 import { Principal } from '@travetto/auth/src/types/principal';
 import { Config } from '@travetto/config';
+import { asFull } from '@travetto/runtime';
 
 import { PrincipalEncoder } from '../src/encoder';
-import { asFull } from '@travetto/runtime';
 
 @Config('stateless')
 class StatelessEncoderConfig {
