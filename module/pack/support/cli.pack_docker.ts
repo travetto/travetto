@@ -110,10 +110,10 @@ export class PackDockerCommand extends BasePackCommand {
       DockerPackOperation.pullDockerBaseImage,
       DockerPackOperation.detectDockerImageOs,
       DockerPackOperation.writeDockerFile,
-      ...this.dockerStageOnly ? [
+      ...this.dockerStageOnly ? [] : [
         DockerPackOperation.buildDockerContainer,
         DockerPackOperation.pushDockerContainer
-      ] : []
+      ]
     ];
   }
 }
