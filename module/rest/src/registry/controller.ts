@@ -45,7 +45,6 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       method: 'all',
       class: cls,
       filters: [],
-      priority: controllerConf.endpoints!.length, // Lowest is first
       headers: {},
       params: [],
       interceptors: [],
@@ -225,7 +224,6 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     const foundRoutes = new Set<string>();
 
     final.endpoints = final.endpoints
-      .sort((a, b) => a.priority - b.priority)
       .map(ep => {
         ep.id = `${ep.method}#${final.basePath}${ep.path}`;
         return ep;

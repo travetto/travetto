@@ -74,10 +74,6 @@ export interface EndpointConfig extends RouteConfig, CoreConfig, DescribableConf
    */
   id: string;
   /**
-   * Endpoint priority, used for conflicting routes
-   */
-  priority: number;
-  /**
    * The name of the method
    */
   handlerName: string;

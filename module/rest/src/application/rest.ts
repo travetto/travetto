@@ -121,7 +121,7 @@ export class RestApplication<T = unknown> {
       config.instance = RetargettingProxy.unwrap(config.instance);
     }
 
-    for (const ep of config.endpoints) {
+    for (const ep of RouteUtil.orderEndpoints(config.endpoints)) {
       ep.instance = config.instance;
       ep.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, ep, config);
     }
