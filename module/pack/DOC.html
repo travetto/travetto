@@ -282,5 +282,13 @@ npx rollup <span class="token parameter variable">-c</span> <span class="token v
 <span class="token builtin class-name">echo</span> <span class="token string">""</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"USER app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"WORKDIR /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
-<span class="token builtin class-name">echo</span> <span class="token string">"ENTRYPOINT [<span class="token entity" title="\&quot;">\"</span>/app/todo-app.sh<span class="token entity" title="\&quot;">\"</span>]"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile</code></pre>
+<span class="token builtin class-name">echo</span> <span class="token string">"ENTRYPOINT [<span class="token entity" title="\&quot;">\"</span>/app/todo-app.sh<span class="token entity" title="\&quot;">\"</span>]"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
+
+<span class="token comment"># Building Docker Container latest</span>
+
+<span class="token builtin class-name">echo</span> <span class="token string">"Building Docker Container latest"</span>
+
+<span class="token builtin class-name">cd</span> <span class="token variable">$DIST</span>
+<span class="token function">docker</span> build <span class="token parameter variable">-t</span> travetto_todo-app:latest <span class="token builtin class-name">.</span>
+<span class="token builtin class-name">cd</span> <span class="token variable">$ROOT</span></code></pre>
   </figure>

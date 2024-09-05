@@ -24,7 +24,9 @@ const INDEX_FILES = new Set(
 );
 
 const STD_TOP_FOLDERS = new Set(['src', 'bin', 'support']);
+const FULL_TOP_FOLDERS = new Set([...STD_TOP_FOLDERS, 'doc', 'test', 'resources']);
 const STD_TOP_FILES = new Set([...INDEX_FILES, 'package.json']);
+const FULL_TOP_FILES = new Set([...STD_TOP_FILES, 'DOC.tsx', 'README.md', 'LICENSE', 'DOC.html']);
 
 const SUPPORT_FILE_MAP: Record<string, ManifestModuleRole> = {
   transformer: 'compile',
@@ -32,7 +34,7 @@ const SUPPORT_FILE_MAP: Record<string, ManifestModuleRole> = {
   test: 'test',
   doc: 'doc',
   pack: 'build',
-  FILEld: 'build'
+  build: 'build'
 };
 
 const SUPPORT_FILE_RE = new RegExp(`^support[/](?<name>${Object.keys(SUPPORT_FILE_MAP).join('|')})[./]`);
@@ -73,6 +75,9 @@ export class ManifestModuleUtil {
       path.resolve(ctx.workspace.path, ctx.build.toolFolder),
     ]);
 
+    const topFolders = full ? FULL_TOP_FOLDERS : STD_TOP_FOLDERS;
+    const topFiles = full ? FULL_TOP_FILES : STD_TOP_FILES;
+
     const stack: [string, number][] = [[folder, 0]];
     while (stack.length) {
       const popped = stack.pop();
@@ -85,21 +90,23 @@ export class ManifestModuleUtil {
       // Don't navigate into sub-folders with package.json's
       if (top !== folder && await fs.stat(`${top}/package.json`).catch(() => false)) {
         continue;
-      }
-      if (exclude.has(top)) {
+      } else if (exclude.has(top)) {
         continue;
       }
 
       for (const sub of await fs.readdir(top)) {
-        const valid = !sub.startsWith('.') && (depth > 0 || full);
-        const stat = await fs.stat(`${top}/${sub}`);
+        if (sub.startsWith('.') || sub === 'node_modules') {
+          continue;
+        }
+        const fullPath = `${top}/${sub}`;
+        const stat = await fs.stat(fullPath);
         if (stat.isFile()) {
-          if (valid || STD_TOP_FILES.has(sub)) {
-            out.push(`${top}/${sub}`);
+          if (depth > 0 || topFiles.has(sub)) {
+            out.push(fullPath);
           }
         } else {
-          if (!sub.includes('node_modules') && (valid || STD_TOP_FOLDERS.has(sub))) {
-            stack.push([`${top}/${sub}`, depth + 1]);
+          if (depth > 0 || topFolders.has(sub)) {
+            stack.push([fullPath, depth + 1]);
           }
         }
       }
@@ -167,7 +174,7 @@ export class ManifestModuleUtil {
         case 'doc':
         case 'resources':
         case 'support': return key;
-        default: return '$other';
+        default: throw new Error(`Unknown folder: ${key}`);
       }
     } else if (/^DOC[.]tsx?$/.test(moduleFile)) {
       return 'doc';

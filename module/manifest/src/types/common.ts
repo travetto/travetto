@@ -6,6 +6,6 @@ export type ManifestModuleFolderType =
   '$root' | '$index' | '$package' |
   'src' | 'bin' | 'support' | 'resources' | 'test' | 'doc' |
   'test/fixtures' | 'support/fixtures' | 'support/resources' |
-  '$other' | '$transformer';
+  '$transformer';
 
 export type ManifestModuleRole = 'std' | 'test' | 'doc' | 'compile' | 'build';

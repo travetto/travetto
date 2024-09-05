@@ -1,21 +1,9 @@
 import { EventEmitter } from 'node:events';
 
-import { type FindConfig } from '@travetto/manifest';
 import { Class, Env, Runtime, RuntimeIndex, describeFunction, flushPendingFunctions } from '@travetto/runtime';
 
 import { DynamicFileLoader } from '../internal/file-loader';
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
-
-const moduleFindConfig: FindConfig = {
-  module: (m) => {
-    const role = Env.TRV_ROLE.val;
-    return m.roles.includes('std') && (
-      !Runtime.production || m.prod ||
-      ((role === 'doc' || role === 'test') && m.roles.includes(role))
-    );
-  },
-  folder: f => f === 'src' || f === '$index'
-};
 
 function isClass(cls: Function): cls is Class {
   return !!describeFunction(cls).class;
@@ -139,7 +127,16 @@ export class ClassSource implements ChangeSource<Class> {
     }
 
     // Ensure everything is loaded
-    for (const entry of RuntimeIndex.find(moduleFindConfig)) {
+    for (const entry of RuntimeIndex.find({
+      module: (m) => {
+        const role = Env.TRV_ROLE.val;
+        return m.roles.includes('std') && (
+          !Runtime.production || m.prod ||
+          ((role === 'doc' || role === 'test') && m.roles.includes(role))
+        );
+      },
+      folder: f => f === 'src' || f === '$index'
+    })) {
       await Runtime.importFrom(entry.import);
     }
 

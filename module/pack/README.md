@@ -267,4 +267,12 @@ echo "" >> $DIST/Dockerfile
 echo "USER app" >> $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
+
+# Building Docker Container latest 
+
+echo "Building Docker Container latest"
+
+cd $DIST
+docker build -t travetto_todo-app:latest .
+cd $ROOT
 ```
