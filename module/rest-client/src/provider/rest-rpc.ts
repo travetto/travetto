@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { ControllerConfig } from '@travetto/rest';
+import { ControllerConfig, ControllerVisitorOptions } from '@travetto/rest';
 import { Class, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { ClientGenerator } from './types';
@@ -14,6 +14,10 @@ export class RestRpcClientGenerator implements ClientGenerator {
 
   constructor(output: string) {
     this.output = output;
+  }
+
+  getOptions(): ControllerVisitorOptions {
+    return { skipUndocumented: false };
   }
 
   seenImport(imp: string): boolean {
