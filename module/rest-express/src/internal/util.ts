@@ -11,7 +11,7 @@ export class ExpressServerUtil {
   /**
    * Build a Travetto Request from an Express Request
    */
-  static getRequest(req: express.Request & { session?: TravettoRequest['session'] }): Request {
+  static getRequest(req: express.Request & { session?: Request['session'] }): Request {
     return RestServerUtil.decorateRequest<Request>({
       [ProviderEntityⲐ]: req,
       [NodeEntityⲐ]: req,
