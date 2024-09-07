@@ -24,4 +24,6 @@ export type RestRpcClientFactory<T extends Record<string, {}>> =
     decorate?: (opts: RestRpcClientOptions, target: string) => R
   ) => RestRpcClient<T, R>;
 
+export function RPC_IGNORE<T>(): T;
+
 export function restRpcClientFactory<T extends Record<string, {}>>(): RestRpcClientFactory<T>;
