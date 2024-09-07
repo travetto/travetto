@@ -1,4 +1,4 @@
-/// <reference path="./src/trv.d.ts" />
+import './src/trv';
 export * from './src/interceptors/read-write';
 export * from './src/interceptors/context';
 export * from './src/interceptors/login';

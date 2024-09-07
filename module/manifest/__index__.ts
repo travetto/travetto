@@ -1,5 +1,3 @@
-/// <reference path="../runtime/src/global.d.ts" />
-
 export * from './src/module';
 export * from './src/delta';
 export * from './src/manifest-index';

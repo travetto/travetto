@@ -57,6 +57,8 @@ export class CompilerState implements ts.CompilerHost {
     const mapper = folderMapper(this.#manifest.workspace.path, '##');
     this.#rootDir = mapper.dir;
     this.#inputPathToSourcePath = mapper.translate;
+    this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
+
 
     this.#compilerOptions = {
       ...await TypescriptUtil.getCompilerOptions(this.#manifest),
@@ -64,7 +66,6 @@ export class CompilerState implements ts.CompilerHost {
       outDir: this.#outputPath
     };
 
-    this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#modules = Object.values(this.#manifest.modules);
 
     // Register all inputs
@@ -121,12 +122,13 @@ export class CompilerState implements ts.CompilerHost {
   }
 
   async writeInputFile(inputFile: string, needsNewProgram = false): Promise<CompileEmitError | undefined> {
+    const output = this.#inputToEntry.get(inputFile)?.outputFile;
+    if (!output) {
+      return;
+    }
+
     const program = await this.createProgram(needsNewProgram);
     try {
-      const output = this.#inputToEntry.get(inputFile)!.outputFile!;
-      if (!output) {
-        return;
-      }
       switch (ManifestModuleUtil.getFileType(inputFile)) {
         case 'typings':
         case 'package-json':

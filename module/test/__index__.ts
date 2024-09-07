@@ -1,4 +1,4 @@
-/// <reference path="./src/trv.d.ts" />
+import './src/trv';
 export * from './src/decorator/suite';
 export * from './src/decorator/test';
 export * from './src/model/suite';

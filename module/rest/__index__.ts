@@ -1,5 +1,4 @@
-/// <reference path="./src/trv.d.ts" />
-
+import './src/trv';
 export * from './src/application/rest';
 export * from './src/application/server';
 export * from './src/application/config';

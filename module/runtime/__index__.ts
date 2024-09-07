@@ -1,5 +1,5 @@
-/// <reference path="./src/trv.d.ts" />
-/// <reference path="./src/global.d.ts" />
+import './src/trv';
+import './src/global';
 export * from './src/binary';
 export * from './src/console';
 export * from './src/context';
