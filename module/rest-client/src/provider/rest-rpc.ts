@@ -56,14 +56,14 @@ export class RestRpcClientGenerator implements ClientGenerator {
 
     // Write out factory
     await fs.writeFile(path.resolve(this.output, 'factory.js'), [
-      "import rpc from './rest-rpc';",
+      "import * as rpc from './rest-rpc';",
       `export const factory = rpc.${restRpcClientFactory.name}();`,
       'export const RPC_IGNORE = rpc.RPC_IGNORE;',
     ].join('\n'), 'utf8');
 
     // And typings
     await fs.writeFile(path.resolve(this.output, 'factory.d.ts'), [
-      "import rpc from './rest-rpc';",
+      "import * as rpc from './rest-rpc';",
       ...[...this.classes.entries()]
         .map(([n, s]) => `import {${n}} from '${path.relative(this.output, RuntimeIndex.getFromImport(s)!.sourceFile)}';`),
       'export function RPC_IGNORE<T>(): T',
