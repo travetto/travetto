@@ -1,6 +1,6 @@
 import '@travetto/runtime';
 
-declare global {
+declare module '@travetto/runtime' {
   interface TravettoEnv {
     /**
      * Docker support, if non-zero, acts as the docker namespace.

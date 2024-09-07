@@ -1,6 +1,6 @@
 import { TimeSpan } from '@travetto/runtime';
 
-declare global {
+declare module '@travetto/runtime' {
   interface TravettoEnv {
     /**
      * The default time to wait for each phase to finish.

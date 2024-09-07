@@ -3,17 +3,9 @@ import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResul
 
 import { EndpointConfig } from '../registry/types';
 import { ParamConfig, Request, Response } from '../types';
-import { MissingParamⲐ, RequestParamsⲐ } from '../internal/symbol';
+import { MissingParamⲐ, RequestParamsⲐ, QueryExpandedⲐ } from '../internal/symbol';
 
 export type ExtractFn = (c: ParamConfig, req: Request, res: Response, schema: FieldConfig) => unknown;
-
-const QueryExpandedⲐ = Symbol.for('@travetto/rest:query-expanded');
-
-declare global {
-  interface TravettoRequest {
-    [QueryExpandedⲐ]: Record<string, unknown>;
-  }
-}
 
 function isClass(o: unknown): o is Class {
   return !!o && typeof o === 'function' && 'Ⲑid' in o;

@@ -3,7 +3,7 @@ import { Principal } from '@travetto/auth';
 import { LoginContextⲐ } from './internal/types';
 import { LoginContext } from './types';
 
-declare global {
+declare module '@travetto/rest' {
   export interface TravettoRequest {
     /**
      * The authenticated principal

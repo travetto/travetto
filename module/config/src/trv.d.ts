@@ -1,6 +1,6 @@
 import '@travetto/runtime';
 
-declare global {
+declare module '@travetto/runtime' {
   interface TravettoEnv {
     /** 
      * Configuration profiles, in addition to TRV_ENV
