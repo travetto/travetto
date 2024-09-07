@@ -18,14 +18,6 @@ export const SessionModelⲐ = Symbol.for('@travetto/rest-session:model');
  */
 export const SessionⲐ = Symbol.for('@travetto/rest-session:data');
 
-/**
- * Declare the session on the request
- */
-declare global {
-  interface TravettoRequest {
-    [SessionⲐ]: Session;
-  }
-}
 
 @Model({ autoCreate: false })
 export class SessionEntry {

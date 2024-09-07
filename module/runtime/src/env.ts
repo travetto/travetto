@@ -3,6 +3,8 @@ import { castKey, castTo } from './types';
 const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;
 
+export interface EnvData { }
+
 export class EnvProp<T> {
   constructor(public readonly key: string) { }
 
@@ -86,11 +88,11 @@ export class EnvProp<T> {
 }
 
 type AllType = {
-  [K in keyof TravettoEnv]: Pick<EnvProp<TravettoEnv[K]>, 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
-    (TravettoEnv[K] extends unknown[] ? 'list' | 'add' : never) |
-    (Extract<TravettoEnv[K], object> extends never ? never : 'object') |
-    (Extract<TravettoEnv[K], number> extends never ? never : 'int') |
-    (Extract<TravettoEnv[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse')
+  [K in keyof EnvData]: Pick<EnvProp<EnvData[K]>, 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
+    (EnvData[K] extends unknown[] ? 'list' | 'add' : never) |
+    (Extract<EnvData[K], object> extends never ? never : 'object') |
+    (Extract<EnvData[K], number> extends never ? never : 'int') |
+    (Extract<EnvData[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse')
   >
 };
 

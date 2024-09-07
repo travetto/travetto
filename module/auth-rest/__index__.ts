@@ -1,4 +1,4 @@
-import './src/trv';
+import type { } from './src/trv';
 export * from './src/interceptors/read-write';
 export * from './src/interceptors/context';
 export * from './src/interceptors/login';

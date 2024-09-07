@@ -70,69 +70,69 @@ class $Runtime {
 ```
 
 ## Environment Support
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L6), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L169) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L66), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
 
 **Code: Base Known Environment Flags**
 ```typescript
-interface TravettoEnv {
-    /** 
-     * The node environment we are running in
-     * @default development
-     */
-    NODE_ENV: 'development' | 'production';
-    /** 
-     * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod. 
-     */
-    DEBUG: boolean | string;
-    /** 
-     * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.  
-     */
-    TRV_ENV: string;
-    /** 
-     * Special role to run as, used to access additional files from the manifest during runtime.  
-     */
-    TRV_ROLE: Role;
-    /** 
-     * Whether or not to run the program in dynamic mode, allowing for real-time updates  
-     */
-    TRV_DYNAMIC: boolean;
-    /** 
-     * The folders to use for resource lookup
-     */
-    TRV_RESOURCES: string[];
-    /** 
-     * Resource path overrides
-     * @private
-     */
-    TRV_RESOURCE_OVERRIDES: Record<string, string>;
-    /** 
-     * The max time to wait for shutdown to finish after initial SIGINT, 
-     * @default 2s
-     */
-    TRV_SHUTDOWN_WAIT: TimeSpan | number;
-    /**
-     * The desired runtime module 
-     */
-    TRV_MODULE: string;
-    /**
-     * The location of the manifest file
-     * @default undefined
-     */
-    TRV_MANIFEST: string;
-    /**
-     * trvc log level
-     */
-    TRV_BUILD: 'none' | 'info' | 'debug' | 'error' | 'warn',
-    /**
-     * Should break on first line of a method when using the @DebugBreak decorator
-     * @default false
-     */
-    TRV_DEBUG_BREAK: boolean;
-  }
+export interface EnvData {
+  /** 
+   * The node environment we are running in
+   * @default development
+   */
+  NODE_ENV: 'development' | 'production';
+  /** 
+   * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod. 
+   */
+  DEBUG: boolean | string;
+  /** 
+   * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.  
+   */
+  TRV_ENV: string;
+  /** 
+   * Special role to run as, used to access additional files from the manifest during runtime.  
+   */
+  TRV_ROLE: Role;
+  /** 
+   * Whether or not to run the program in dynamic mode, allowing for real-time updates  
+   */
+  TRV_DYNAMIC: boolean;
+  /** 
+   * The folders to use for resource lookup
+   */
+  TRV_RESOURCES: string[];
+  /** 
+   * Resource path overrides
+   * @private
+   */
+  TRV_RESOURCE_OVERRIDES: Record<string, string>;
+  /** 
+   * The max time to wait for shutdown to finish after initial SIGINT, 
+   * @default 2s
+   */
+  TRV_SHUTDOWN_WAIT: TimeSpan | number;
+  /**
+   * The desired runtime module 
+   */
+  TRV_MODULE: string;
+  /**
+   * The location of the manifest file
+   * @default undefined
+   */
+  TRV_MANIFEST: string;
+  /**
+   * trvc log level
+   */
+  TRV_BUILD: 'none' | 'info' | 'debug' | 'error' | 'warn',
+  /**
+   * Should break on first line of a method when using the @DebugBreak decorator
+   * @default false
+   */
+  TRV_DEBUG_BREAK: boolean;
+}
 ```
 
 ### Environment Property
-For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L6), we support the ability to access different properties as a means to better facilitate environment variable usage.
+For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L66), we support the ability to access different properties as a means to better facilitate environment variable usage.
 
 **Code: EnvProp Shape**
 ```typescript
@@ -256,7 +256,7 @@ The primary access patterns for resources, is to directly request a file, and to
 
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L15) with a category of 'notfound'.  
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L109)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L169)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L17) includes:

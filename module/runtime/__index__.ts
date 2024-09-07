@@ -1,5 +1,4 @@
-import './src/trv';
-import './src/global';
+import type { } from './src/global';
 export * from './src/binary';
 export * from './src/console';
 export * from './src/context';

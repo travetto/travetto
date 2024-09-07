@@ -1,4 +1,4 @@
-import './src/trv';
+import type { } from './src/trv';
 export * from './src/service';
 export * from './src/formatter/json';
 export * from './src/formatter/line';

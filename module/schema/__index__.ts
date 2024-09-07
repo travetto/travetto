@@ -1,4 +1,4 @@
-import './src/global';
+import type { } from './src/global';
 export * from './src/decorator/field';
 export * from './src/decorator/schema';
 export * from './src/decorator/common';
