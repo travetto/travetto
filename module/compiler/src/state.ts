@@ -58,6 +58,12 @@ export class CompilerState implements ts.CompilerHost {
     this.#rootDir = mapper.dir;
     this.#inputPathToSourcePath = mapper.translate;
 
+    this.#compilerOptions = {
+      ...await TypescriptUtil.getCompilerOptions(this.#manifest),
+      rootDir: this.#rootDir,
+      outDir: this.#outputPath
+    };
+
     this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#modules = Object.values(this.#manifest.modules);
 
@@ -81,12 +87,6 @@ export class CompilerState implements ts.CompilerHost {
     }
 
     this.#transformerManager = await TransformerManager.create(this.#manifestIndex);
-
-    this.#compilerOptions = {
-      ...await TypescriptUtil.getCompilerOptions(this.#manifest),
-      rootDir: this.#rootDir,
-      outDir: this.#outputPath
-    };
 
     return this;
   }
@@ -123,12 +123,17 @@ export class CompilerState implements ts.CompilerHost {
   async writeInputFile(inputFile: string, needsNewProgram = false): Promise<CompileEmitError | undefined> {
     const program = await this.createProgram(needsNewProgram);
     try {
+      const output = this.#inputToEntry.get(inputFile)!.outputFile!;
+      if (!output) {
+        return;
+      }
       switch (ManifestModuleUtil.getFileType(inputFile)) {
+        case 'typings':
         case 'package-json':
-          this.writeFile(this.#inputToEntry.get(inputFile)!.outputFile!, this.readFile(inputFile)!, false), undefined;
+          this.writeFile(output, this.readFile(inputFile)!, false), undefined;
           break;
         case 'js':
-          this.writeFile(this.#inputToEntry.get(inputFile)!.outputFile!, ts.transpile(this.readFile(inputFile)!, this.#compilerOptions), false);
+          this.writeFile(output, ts.transpile(this.readFile(inputFile)!, this.#compilerOptions), false);
           break;
         case 'ts': {
           const result = program.emit(
@@ -160,7 +165,7 @@ export class CompilerState implements ts.CompilerHost {
     const inputFolder = path.dirname(inputFile);
     const fileType = ManifestModuleUtil.getFileType(moduleFile);
     const outputFile = fileType === 'typings' ?
-      undefined :
+      (this.#compilerOptions.declaration ? path.resolve(this.#outputPath, relativeInput) : undefined) :
       path.resolve(this.#outputPath, ManifestModuleUtil.withOutputExtension(relativeInput));
 
     const entry = { sourceFile, inputFile, outputFile, module };

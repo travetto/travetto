@@ -8,6 +8,7 @@
     ],
     "jsx": "react-jsx",
     "strict": true,
+    "declaration": true,
     "esModuleInterop": true,
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,
