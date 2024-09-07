@@ -1,7 +1,7 @@
 import '@travetto/runtime';
 
 declare module '@travetto/runtime' {
-  interface TravettoEnv {
+  interface EnvData {
     /** 
      * Provides an IPC http url for the CLI to communicate with. 
      * This facilitates cli-based invocation for external usage.

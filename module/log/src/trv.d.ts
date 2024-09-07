@@ -1,7 +1,7 @@
 import '@travetto/runtime';
 
 declare module '@travetto/runtime' {
-  interface TravettoEnv {
+  interface EnvData {
     /** 
      * Determines whether or not to augment console log information
      * @default false

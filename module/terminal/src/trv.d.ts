@@ -1,7 +1,7 @@
 import type { ColorLevel } from './style';
 
 declare module '@travetto/runtime' {
-  interface TravettoEnv {
+  interface EnvData {
     /**
      * Flag for node to disable colors
      */

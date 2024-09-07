@@ -4,7 +4,7 @@ import { LoginContextⲐ } from './internal/types';
 import { LoginContext } from './types';
 
 declare module '@travetto/rest' {
-  export interface TravettoRequest {
+  export interface Request {
     /**
      * The authenticated principal
      */

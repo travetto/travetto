@@ -16,8 +16,8 @@ import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies'
 import { RestConfig } from './src/application/config';
 import { AsyncContextInterceptor } from './src/interceptor/context';
 
-const Request = d.codeLink('TravettoRequest', 'src/trv.d.ts', /interface TravettoRequest/);
-const Response = d.codeLink('TravettoResponse', 'src/trv.d.ts', /interface TravettoResponse/);
+const Request = d.codeLink('Request', 'src/types.ts', /interface Request/);
+const Response = d.codeLink('Response', 'src/types.ts', /interface Response/);
 const RestInterceptor = d.codeLink('RestInterceptor', 'src/interceptor/types.ts', /interface RestInterceptor/);
 const RuntimeResources = d.codeLink('RuntimeResources', '@travetto/runtime/src/resources.ts', /RuntimeResources/);
 

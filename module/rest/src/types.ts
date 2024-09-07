@@ -28,7 +28,7 @@ export type ContentType = { type: string, subtype: string, full: string, paramet
 /**
  * Extension point for supporting new request headers
  */
-export interface TravettoRequestHeaders extends IncomingHttpHeaders { }
+export interface RequestHeaders extends IncomingHttpHeaders { }
 
 /**
  * Travetto request
@@ -87,7 +87,7 @@ export interface Request<T = unknown> {
   /**
    * The request headers
    */
-  headers: TravettoRequestHeaders;
+  headers: RequestHeaders;
   /**
    * The cookie support
    */
@@ -116,17 +116,17 @@ export interface Request<T = unknown> {
    * Get a header as a string or array of strings depending on what was passed
    * @param key
    */
-  header<K extends keyof TravettoRequestHeaders>(key: K): TravettoRequestHeaders[K] | undefined;
+  header<K extends keyof RequestHeaders>(key: K): RequestHeaders[K] | undefined;
   /**
    * Get a header as a list of values
    * @param key 
    */
-  headerList<K extends keyof TravettoRequestHeaders>(key: K): string[] | undefined;
+  headerList<K extends keyof RequestHeaders>(key: K): string[] | undefined;
   /**
    * Get a single header
    * @param key 
    */
-  headerFirst<K extends keyof TravettoRequestHeaders>(key: K): string | undefined;
+  headerFirst<K extends keyof RequestHeaders>(key: K): string | undefined;
   /**
    * Get the structured content type of the request
    */
