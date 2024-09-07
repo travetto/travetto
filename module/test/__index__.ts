@@ -1,4 +1,4 @@
-import './src/trv';
+import type { } from './src/trv';
 export * from './src/decorator/suite';
 export * from './src/decorator/test';
 export * from './src/model/suite';

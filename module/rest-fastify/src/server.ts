@@ -2,7 +2,7 @@ import https from 'node:https';
 import compress from '@fastify/compress';
 import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 
-import { Request, Response, RestConfig, RouteConfig, RestServer } from '@travetto/rest';
+import { RestConfig, RouteConfig, RestServer } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
 
 import { TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
@@ -10,15 +10,6 @@ import { ServerHandle } from '@travetto/rest/src/types';
 
 import { FastifyServerUtil } from './internal/util';
 
-// Support typings
-declare module 'fastify' {
-  interface FastifyRequest {
-    [TravettoEntityⲐ]?: Request;
-  }
-  interface FastifyReply {
-    [TravettoEntityⲐ]?: Response;
-  }
-}
 
 function isHttps(ssl: boolean | undefined, cfg: https.ServerOptions): cfg is FastifyHttpsOptions<https.Server> {
   return !!ssl;
