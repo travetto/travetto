@@ -1,5 +1,10 @@
 // @ts-check
 
+/** 
+ * @typedef BasicResponse 
+ * @type {{ text(): (string | Promise<string>), ok: boolean, body?: unknown, statusText?: string, status?: number }} 
+ */
+
 /**
  * @template {(number | string | { unref(): unknown })} T
  * @param  controller
@@ -15,75 +20,100 @@ function registerTimeout(controller, timeout, start, stop) {
   controller.signal.onabort = () => { timer && stop(timer); };
 }
 
-/** @type {import('./rest-rpc.d.ts').RpcRequestUtil} */
-export const RpcRequestUtil = {
-  async getBody(res) {
-    let payload = res.body ? await res.text() : undefined;
-    try {
-      if (payload) {
-        payload = JSON.parse(payload);
-      }
-    } catch (err) {
-      if (res.ok) {
-        throw new Error(`Unable to parse response: ${payload}`);
-      }
-    }
-    return payload;
-  },
-
-  /** @returns {Promise<Error>} */
-  async getError(payload) {
-    try {
-      // @ts-ignore
-      const { AppError } = await import('@travetto/runtime');
-      const res = AppError.fromJSON(payload);
-      if (res) {
-        return res;
-      }
-    } catch { }
-    if (payload instanceof Error) {
-      return payload;
-    } else {
-      const err = new Error();
-      Object.assign(err, payload);
-      return err;
-    }
-  },
-
-  /** @template T */
-  async exec(opts, ...params) {
-    /** @type {AbortSignal | undefined} */
-    let signal;
-    if (opts.timeout) {
-      const abort = new AbortController();
-      signal = abort.signal;
-      registerTimeout(abort, opts.timeout, setTimeout, clearTimeout);
-    }
-    try {
-      const res = await fetch(opts.url, {
-        ...opts.request,
-        signal,
-        body: JSON.stringify(params),
+/**
+ * @template T
+ * @param {BasicResponse} res
+ * @returns {Promise<T | undefined>}
+ */
+export async function getBody(res) {
+  const payload = res.body ? await res.text() : undefined;
+  try {
+    if (payload) {
+      const body = JSON.parse(payload, (key, value) => {
+        if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z/.test(value)) {
+          return new Date(value);
+        } else {
+          return value;
+        }
       });
-      const payload = await RpcRequestUtil.getBody(res);
-      if (res.ok) {
-        // @ts-expect-error
-        const /** @type {T} */ final = payload;
-        return final;
-      } else if (typeof payload === 'object') {
-        throw await RpcRequestUtil.getError(payload);
-      } else {
-        throw new Error(payload ?? `Unknown error: ${res.statusText}@${res.status}`);
-      }
-    } catch (err) {
-      throw await RpcRequestUtil.getError(err);
+      return body;
+    }
+  } catch (err) {
+    if (res.ok) {
+      throw new Error(`Unable to parse response: ${payload}`);
     }
   }
-};
+}
+
+/**
+ * @param {*} payload
+ * @returns {Promise<Error>}
+ */
+export async function getError(payload) {
+  try {
+    let res = undefined;
+    // @ts-ignore
+    const { AppError } = await import('@travetto/runtime'); // server-only
+    res = AppError.fromJSON(payload); // server-only
+    if (res) {
+      return res;
+    }
+  } catch { }
+  if (payload instanceof Error) {
+    return payload;
+  } else {
+    const err = new Error();
+    Object.assign(err, payload);
+    return err;
+  }
+}
+
+/**
+ * @template T
+ * @param {BasicResponse} res
+ * @returns {Promise<T>}
+ */
+export async function onResponse(res) {
+  const payload = await getBody(res);
+  if (res.ok) {
+    return payload;
+  } else if (typeof payload === 'object') {
+    throw await getError(payload);
+  } else {
+    throw new Error(payload ?? `Unknown error: ${res.statusText}@${res.status}`);
+  }
+}
+
+/**
+ * Execute request
+ * @template T
+ * @param {import('./rest-rpc.d.ts').ClientOptions} opts
+ * @param  {...unknown} params
+ * @returns {Promise<T>}
+ */
+export async function callRpc(opts, ...params) {
+  /** @type {AbortSignal | undefined} */
+  let signal;
+  if (opts.timeout) {
+    const abort = new AbortController();
+    signal = abort.signal;
+    registerTimeout(abort, opts.timeout, setTimeout, clearTimeout);
+  }
+  try {
+    const res = await fetch(opts.url, {
+      ...opts.request,
+      signal,
+      body: JSON.stringify(params),
+    });
+    return await onResponse(res);
+  } catch (err) {
+    throw await getError(err);
+  }
+}
 
 /** @template {Record<string, {}>} T */
-export function restRpcClientFactory() {
-  /** @type {import('./rest-rpc.d.ts').RestRpcClientFactory<T>} */
+export function clientFactory() {
+  /** @type {import('./rest-rpc.d.ts').ClientFactory<T>} */
   return function (opts, decorate) {
     const cache = {};
     // @ts-ignore
@@ -102,7 +132,7 @@ export function restRpcClientFactory() {
               }
             };
             return cache[target] ??= Object.defineProperties(
-              RpcRequestUtil.exec.bind(RpcRequestUtil, { ...opts, request }),
+              callRpc.bind(callRpc, { ...opts, request }),
               Object.fromEntries(
                 Object.entries(decorate?.({ ...opts, request }, target) ?? {}).map(([k, v]) => [k, { value: v }])
               )
@@ -117,9 +147,6 @@ export function restRpcClientFactory() {
  * @template T
  * @returns {T}
  */
-export function RPC_IGNORE() {
-  /** @type {T} */
-  // @ts-ignore
-  const res = null;
-  return res;
+export function IGNORE() {
+  return /** @type {T} */ (/** @type {T | null} */ null);
 }

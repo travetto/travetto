@@ -9,6 +9,7 @@
     "jsx": "react-jsx",
     "strict": true,
     "declaration": true,
+    "declarationMap": true,
     "esModuleInterop": true,
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,

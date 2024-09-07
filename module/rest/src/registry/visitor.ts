@@ -1,10 +1,8 @@
 import { Class } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ControllerVisitor } from './types';
+import { ControllerVisitor, ControllerVisitorOptions } from './types';
 import { ControllerRegistry } from './controller';
-
-export type ControllerVisitorOptions = { skipUndocumented?: boolean };
 
 /**
  * Supports visiting the controller structure
@@ -16,6 +14,10 @@ export class ControllerVisitUtil {
   }
 
   static async visitController(visitor: ControllerVisitor, cls: Class, options: ControllerVisitorOptions = {}): Promise<void> {
+    if (visitor.getOptions) {
+      options = Object.assign(visitor.getOptions(), options);
+    }
+
     options.skipUndocumented ??= true;
 
     const controller = ControllerRegistry.get(cls);

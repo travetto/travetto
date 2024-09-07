@@ -33,7 +33,7 @@ class $ActivationManager {
   }
 
   async init(): Promise<void> {
-    for (const entry of [...this.#registry.values()]) {
+    for (const entry of this.#registry.values()) {
       const { module, command, cls } = entry;
       if (command === true || $ActivationManager.#isInstalled(module)) {
         const inst = entry.instance = new cls(module, command === true ? undefined : command);

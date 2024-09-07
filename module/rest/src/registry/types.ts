@@ -106,9 +106,16 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
 }
 
 /**
+ * Controller visitor options
+ */
+export type ControllerVisitorOptions = { skipUndocumented?: boolean };
+
+/**
  * Controller visitor pattern
  */
 export interface ControllerVisitor<T = unknown> {
+
+  getOptions?: () => ControllerVisitorOptions;
 
   onControllerStart?(controller: ControllerConfig): Promise<unknown> | unknown;
   onControllerEnd?(controller: ControllerConfig): Promise<unknown> | unknown;
