@@ -5,15 +5,17 @@ import { ControllerConfig, ControllerVisitorOptions } from '@travetto/rest';
 import { Class, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { ClientGenerator } from './types';
-import { restRpcClientFactory } from './shared/rest-rpc.js';
+import { clientFactory } from './shared/rest-rpc.js';
 
 export class RestRpcClientGenerator implements ClientGenerator {
 
   classes = new Map<string, string>();
   output: string;
+  server: boolean;
 
-  constructor(output: string) {
+  constructor(output: string, server = false) {
     this.output = output;
+    this.server = server;
   }
 
   getOptions(): ControllerVisitorOptions {
@@ -51,14 +53,20 @@ export class RestRpcClientGenerator implements ClientGenerator {
     const clientDtsFile = path.resolve(path.dirname(source), 'shared/rest-rpc.d.ts');
     const clientSourceContents = await fs.readFile(clientSourceFile, 'utf8');
     const clientDtsContents = await fs.readFile(clientDtsFile, 'utf8');
+
     await fs.writeFile(path.resolve(this.output, path.basename(clientDtsFile)), clientDtsContents, 'utf8');
-    await fs.writeFile(path.resolve(this.output, path.basename(clientSourceFile)), clientSourceContents, 'utf8');
+
+    await fs.writeFile(
+      path.resolve(this.output, path.basename(clientSourceFile)),
+      clientSourceContents.replace(/^[^\n]*\/\/\s*server-only\s*$/gsm, x => this.server ? x : ''),
+      'utf8'
+    );
 
     // Write out factory
     await fs.writeFile(path.resolve(this.output, 'factory.js'), [
       "import * as rpc from './rest-rpc';",
-      `export const factory = rpc.${restRpcClientFactory.name}();`,
-      'export const RPC_IGNORE = rpc.RPC_IGNORE;',
+      `export const factory = rpc.${clientFactory.name}();`,
+      'export const IGNORE = rpc.IGNORE;',
     ].join('\n'), 'utf8');
 
     // And typings
@@ -66,10 +74,10 @@ export class RestRpcClientGenerator implements ClientGenerator {
       "import * as rpc from './rest-rpc';",
       ...[...this.classes.entries()]
         .map(([n, s]) => `import {${n}} from '${path.relative(this.output, RuntimeIndex.getFromImport(s)!.outputFile)}';`),
-      'export function RPC_IGNORE<T>(): T',
-      'export const factory: rpc.RestRpcClientFactory<{',
+      'export function IGNORE<T>(): T',
+      'export const factory: rpc.ClientFactory<{',
       ...[...this.classes.keys()].map(x => `  ${x}: ${x},`),
       '}>;'
-    ].join('\n'), 'utf8')
+    ].join('\n'), 'utf8');
   }
 }
