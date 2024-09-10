@@ -18,9 +18,17 @@ export type ClientFactory<T extends Record<string, {}>> =
     decorate?: (opts: ClientOptions, target: string) => R
   ) => Client<T, R>;
 
+type BasicResponse = {
+  text(): (string | Promise<string>);
+  ok: boolean;
+  body?: unknown;
+  statusText?: string;
+  status?: number;
+};
+
 export function IGNORE<T>(): T;
 export function clientFactory<T extends Record<string, {}>>(): ClientFactory<T>;
 export function callRpc<T = unknown>(opts: ClientOptions, ...args: unknown[]): Promise<T>;
-export function onResponse<T = unknown>(res: Response): Promise<T>;
-export function getBody(res: Response): Promise<string | object | undefined>;
+export function onResponse<T = unknown>(res: BasicResponse): Promise<T>;
+export function getBody(res: BasicResponse): Promise<string | object | undefined>;
 export function getError(payload: object): Promise<Error>;

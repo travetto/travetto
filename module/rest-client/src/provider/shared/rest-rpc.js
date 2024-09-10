@@ -1,5 +1,10 @@
 // @ts-check
 
+/** 
+ * @typedef BasicResponse 
+ * @type {{ text(): (string | Promise<string>), ok: boolean, body?: unknown, statusText?: string, status?: number }} 
+ */
+
 /**
  * @template {(number | string | { unref(): unknown })} T
  * @param  controller
@@ -17,14 +22,20 @@ function registerTimeout(controller, timeout, start, stop) {
 
 /**
  * @template T
- * @param {Response} res
+ * @param {BasicResponse} res
  * @returns {Promise<T | undefined>}
  */
 export async function getBody(res) {
   const payload = res.body ? await res.text() : undefined;
   try {
     if (payload) {
-      const body = JSON.parse(payload);
+      const body = JSON.parse(payload, (key, value) => {
+        if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z/.test(value)) {
+          return new Date(value);
+        } else {
+          return value;
+        }
+      });
       return body;
     }
   } catch (err) {
@@ -59,7 +70,7 @@ export async function getError(payload) {
 
 /**
  * @template T
- * @param {Response} res
+ * @param {BasicResponse} res
  * @returns {Promise<T>}
  */
 export async function onResponse(res) {
