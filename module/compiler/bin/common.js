@@ -64,7 +64,7 @@ async function getEntry() {
 
   // Load
   try {
-    const res = require(target('support/entry.trvc.ts').dest);
+    const res = await import(target('support/entry.trvc.ts').dest);
     return await res.main(ctx);
   } catch (err) {
     rmSync(target('.').dest, { recursive: true, force: true });
