@@ -40,7 +40,7 @@ export class ImportManager {
     if (
       fileOrImport &&
       (fileOrImport.startsWith('.') || this.#resolver.isKnownFile(fileOrImport)) &&
-      !/[.]([mc]?js|ts|json)$/.test(fileOrImport)
+      !/[.]([mc]?(js|ts)|json)$/.test(fileOrImport)
     ) {
       return LiteralUtil.fromLiteral(this.factory, `${fileOrImport}.js`);
     }
@@ -190,7 +190,7 @@ export class ImportManager {
             stmt.isTypeOnly,
             stmt.exportClause,
             this.#rewriteModuleSpecifier(stmt.moduleSpecifier),
-            stmt.assertClause
+            stmt.attributes
           ));
         }
       } else if (ts.isImportDeclaration(stmt)) {
@@ -200,7 +200,7 @@ export class ImportManager {
             stmt.modifiers,
             this.#rewriteImportClause(stmt.moduleSpecifier, stmt.importClause)!,
             this.#rewriteModuleSpecifier(stmt.moduleSpecifier)!,
-            stmt.assertClause
+            stmt.attributes
           ));
         }
       } else {

@@ -28,7 +28,7 @@ const getTarget = (/** @type {Ctx} */ ctx, file = '') => ({
 });
 
 const getTranspiler = async (/** @type {Ctx} */ ctx) => {
-  const ts = require('typescript');
+  const ts = (await import('typescript')).default;
   const module = ctx.workspace.type === 'module' ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS;
   return (content = '') =>
     ts.transpile(content, { target: ts.ScriptTarget.ES2022, module, esModuleInterop: true, allowSyntheticDefaultImports: true })

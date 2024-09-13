@@ -88,7 +88,7 @@ export class VisitorFactory<S extends State = State> {
         const state = this.#getState(context, file);
         // Skip transforming all the compiler related content
         if (/@travetto[/](compiler|manifest|transformer)/.test(state.importName)) {
-          return file;
+          return state.finalize(file);
         }
 
         let ret = this.visit(state, context, file);
