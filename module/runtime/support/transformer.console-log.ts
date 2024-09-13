@@ -6,7 +6,6 @@ import {
 } from '@travetto/transformer';
 
 const CONSOLE_IMPORT = '@travetto/runtime/src/console';
-const MANIFEST_MOD = '@travetto/manifest';
 
 type CustomState = TransformerState & {
   scope: { type: 'method' | 'class' | 'function', name: string }[];
@@ -75,7 +74,7 @@ export class ConsoleLogTransformer {
 
   @OnCall()
   static onLogCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
-    if (!ts.isPropertyAccessExpression(node.expression) || state.importName.startsWith(MANIFEST_MOD)) {
+    if (!ts.isPropertyAccessExpression(node.expression)) {
       return node;
     }
 
