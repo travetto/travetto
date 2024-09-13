@@ -133,7 +133,7 @@ function $resolveModule(workspace, folder) {
  * @param {string} [folder]
  * @return {ManifestContext}
  */
-export function getManifestContext(folder) {
+function getManifestContext(folder) {
   const workspace = $resolveWorkspace(folder);
   const mod = $resolveModule(workspace, folder);
   const build = workspace.travetto?.build ?? {};
@@ -163,3 +163,5 @@ export function getManifestContext(folder) {
     }
   };
 }
+
+module.exports = { getManifestContext };

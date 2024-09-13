@@ -36,7 +36,7 @@ const getTranspiler = async (/** @type {Ctx} */ ctx) => {
       .replace(/from '(@travetto\/[^/']+)([/][^']+)?'/g, (_, mod, file) => `from '${modPath(ctx, mod, file)}'`);
 };
 
-export async function getEntry() {
+async function getEntry() {
   process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
   process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
 
@@ -64,9 +64,12 @@ export async function getEntry() {
 
   // Load
   try {
-    return await require(target('support/entry.trvc.ts').dest).then(v => v.main(ctx));
+    const res = require(target('support/entry.trvc.ts').dest);
+    return await res.main(ctx);
   } catch (err) {
     rmSync(target('.').dest, { recursive: true, force: true });
     throw err;
   }
 }
+
+module.exports = { getEntry };
