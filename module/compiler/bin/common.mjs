@@ -2,7 +2,7 @@
 import { statSync, readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 
-import { getManifestContext } from '@travetto/manifest/bin/context.js';
+import { getManifestContext } from '@travetto/manifest/bin/context.mjs';
 
 /** @typedef {import('@travetto/manifest').ManifestContext} Ctx */
 

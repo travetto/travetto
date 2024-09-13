@@ -9,16 +9,6 @@ import { CompilerUtil } from './util';
 import { CompileEmitError, CompileStateEntry } from './types';
 import { CommonUtil } from '../support/util';
 
-function folderMapper(root: string, prefix: string): { dir: string, translate: (val: string) => string } {
-  let matched: string = '~~';
-  prefix = `/${prefix}`;
-  const final = path.resolve(root).replace(/\/[^\/]+/, m => {
-    matched = m;
-    return prefix;
-  });
-  return { dir: final, translate: (file: string) => file.replace(prefix, matched) };
-}
-
 export class CompilerState implements ts.CompilerHost {
 
   static async get(idx: ManifestIndex): Promise<CompilerState> {
@@ -28,7 +18,6 @@ export class CompilerState implements ts.CompilerHost {
   private constructor() { }
 
   #rootDir: string;
-  #inputPathToSourcePath: (file: string) => string;
   #outputPath: string;
   #inputFiles = new Set<string>();
   #inputDirectoryToSource = new Map<string, string>();
@@ -48,15 +37,13 @@ export class CompilerState implements ts.CompilerHost {
   #program: ts.Program;
 
   #readFile(inputFile: string): string | undefined {
-    return ts.sys.readFile(this.#inputToEntry.get(inputFile)?.sourceFile ?? this.#inputPathToSourcePath(inputFile));
+    return ts.sys.readFile(this.#inputToEntry.get(inputFile)?.sourceFile ?? inputFile);
   }
 
   async init(idx: ManifestIndex): Promise<this> {
     this.#manifestIndex = idx;
     this.#manifest = idx.manifest;
-    const mapper = folderMapper(this.#manifest.workspace.path, '##');
-    this.#rootDir = mapper.dir;
-    this.#inputPathToSourcePath = mapper.translate;
+    this.#rootDir = this.#manifest.workspace.path;
     this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
 
 
@@ -81,7 +68,7 @@ export class CompilerState implements ts.CompilerHost {
         ...base.$package ?? []
       ];
       for (const [file, type] of files) {
-        if (CompilerUtil.validFile(type) || type === 'typings') {
+        if (CompilerUtil.validFile(type)) {
           this.registerInput(x, file);
         }
       }
@@ -227,11 +214,11 @@ export class CompilerState implements ts.CompilerHost {
   getDefaultLibLocation(): string { return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions)); }
 
   fileExists(inputFile: string): boolean {
-    return this.#inputToEntry.has(inputFile) || ts.sys.fileExists(this.#inputPathToSourcePath(inputFile));
+    return this.#inputToEntry.has(inputFile) || ts.sys.fileExists(inputFile);
   }
 
   directoryExists(inputDir: string): boolean {
-    return this.#inputDirectoryToSource.has(inputDir) || ts.sys.directoryExists(this.#inputPathToSourcePath(inputDir));
+    return this.#inputDirectoryToSource.has(inputDir) || ts.sys.directoryExists(inputDir);
   }
 
   writeFile(
@@ -244,10 +231,6 @@ export class CompilerState implements ts.CompilerHost {
   ): void {
     if (outputFile.endsWith('package.json')) {
       text = CompilerUtil.rewritePackageJSON(this.#manifest, text);
-    } else if (!this.#compilerOptions.inlineSourceMap && this.#compilerOptions.sourceMap && outputFile.endsWith('.map')) {
-      text = CompilerUtil.rewriteSourceMap(this.#manifest, text, f => this.#outputToEntry.get(f.replace(/[.]map$/, ''))!);
-    } else if (this.#compilerOptions.inlineSourceMap && CompilerUtil.isSourceMapUrlPosData(data)) {
-      text = CompilerUtil.rewriteInlineSourceMap(this.#manifest, text, f => this.#outputToEntry.get(f)!, data);
     }
     ts.sys.writeFile(outputFile, text, bom);
   }
