@@ -1,8 +1,8 @@
 // @ts-check
-import { statSync, readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, rmSync } from 'node:fs';
-import path from 'node:path';
+const { statSync, readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, rmSync } = require('node:fs');
+const path = require('node:path');
 
-import { getManifestContext } from '@travetto/manifest/bin/context.mjs';
+const { getManifestContext } = require('@travetto/manifest/bin/context.js');
 
 /** @typedef {import('@travetto/manifest').ManifestContext} Ctx */
 
@@ -28,16 +28,13 @@ const getTarget = (/** @type {Ctx} */ ctx, file = '') => ({
 });
 
 const getTranspiler = async (/** @type {Ctx} */ ctx) => {
-  const ts = (await import('typescript')).default;
+  const ts = require('typescript');
   const module = ctx.workspace.type === 'module' ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS;
   return (content = '') =>
     ts.transpile(content, { target: ts.ScriptTarget.ES2022, module, esModuleInterop: true, allowSyntheticDefaultImports: true })
       .replace(/from '([.][^']+)'/g, (_, i) => `from '${i.replace(/[.]js$/, '')}.js'`)
       .replace(/from '(@travetto\/[^/']+)([/][^']+)?'/g, (_, mod, file) => `from '${modPath(ctx, mod, file)}'`);
 };
-
-/** @returns {Promise<import('@travetto/compiler/support/entry.trvc')>} */
-async function imp(f = '') { try { return require(f); } catch { return import(f); } }
 
 export async function getEntry() {
   process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
@@ -67,7 +64,7 @@ export async function getEntry() {
 
   // Load
   try {
-    return await imp(target('support/entry.trvc.ts').dest).then(v => v.main(ctx));
+    return await require(target('support/entry.trvc.ts').dest).then(v => v.main(ctx));
   } catch (err) {
     rmSync(target('.').dest, { recursive: true, force: true });
     throw err;

@@ -5,9 +5,9 @@
  * @typedef {Pkg & { mono: boolean, manager: 'yarn'|'npm', resolve: (file:string) => string, stripRoot: (file:string)=>string}} Workspace
  * @typedef {import('../src/types/context').ManifestContext} ManifestContext
  */
-import { existsSync, readFileSync } from 'node:fs';
-import path from 'node:path';
-import { createRequire } from 'node:module';
+const { existsSync, readFileSync } = require('node:fs');
+const path = require('node:path');
+const { createRequire } = require('node:module');
 
 /** @type {Record<string, Workspace>} */ const WS_ROOT = {};
 const TOOL_FOLDER = '.trv/tool';
