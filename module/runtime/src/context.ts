@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@travetto/manifest';
@@ -111,9 +112,14 @@ class $Runtime {
     if (existsSync(file)) {
       imp = this.#idx.getFromSource(file)?.import;
     }
+
     if (!imp) {
       throw new Error(`Unable to find ${imp}, not in the manifest`);
+    } else if (imp.endsWith('.json')) {
+      imp = this.#idx.getFromImport(imp)?.sourceFile ?? imp;
+      return fs.readFile(imp, 'utf8').then(JSON.parse);
     }
+
     if (!/[.][cm]?[tj]s$/.test(imp)) {
       if (imp.startsWith('@')) {
         if (/[/].*?[/]/.test(imp)) {
@@ -123,6 +129,7 @@ class $Runtime {
         imp = `${imp}.ts`;
       }
     }
+
     imp = ManifestModuleUtil.withOutputExtension(imp);
     return import(imp);
   }
