@@ -6,7 +6,7 @@
   "publishConfig": {
     "access": "restricted"
   },
-  "type": "module",
+  "type": "commonjs",
   "private": true,
   "name": "@travetto/mono-repo",
   "license": "MIT",
