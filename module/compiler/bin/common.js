@@ -43,7 +43,7 @@ async function getEntry() {
   const src = readFileSync(loc, 'utf8')
     // Remove type information
     .replace(/\s*[|]\s+undefined/g, '')
-    .replace(/<[^>]+>/g, '')
+    .replace(/<([^>]|\n)+>/gsm, '')
     .replace(/: (string|[A-Z][a-zA-Z]+)/g, '')
     .replace(/^(import )?type .*$/gm, '');
 

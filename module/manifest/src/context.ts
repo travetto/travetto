@@ -5,8 +5,14 @@ import { createRequire } from 'node:module';
 import type { Package } from './types/package';
 import type { ManifestContext } from './types/context';
 
-type Pkg = Package & { path: string };
-type Workspace = Pkg & { mono: boolean; manager: 'yarn' | 'npm'; resolve: (file: string) => string; stripRoot: (file: string) => string };
+type Pkg<T extends {} = {}> = Package & T & { path: string };
+type PathOp = (file: string) => string;
+type Workspace = Pkg<{
+  mono: boolean;
+  manager: 'yarn' | 'npm';
+  resolve: PathOp;
+  stripRoot: PathOp
+}>;
 
 const TOOL_FOLDER = '.trv/tool';
 const COMPILER_FOLDER = '.trv/compiler';
