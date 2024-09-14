@@ -51,7 +51,7 @@ export class ManifestModuleUtil {
    * Replace a source file's extension with a given value
    */
   static #pathToExtension(inputFile: string, ext: string): string {
-    return inputFile.replace(/[.][tj]sx?$/, ext);
+    return inputFile.replace(/[.][cm]?[tj]sx?$/, ext);
   }
 
   /**

@@ -114,6 +114,15 @@ class $Runtime {
     if (!imp) {
       throw new Error(`Unable to find ${imp}, not in the manifest`);
     }
+    if (!/[.][cm]?[tj]s$/.test(imp)) {
+      if (imp.startsWith('@')) {
+        if (/[/].*?[/]/.test(imp)) {
+          imp = `${imp}.ts`;
+        }
+      } else {
+        imp = `${imp}.ts`;
+      }
+    }
     imp = ManifestModuleUtil.withOutputExtension(imp);
     return import(imp);
   }

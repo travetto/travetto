@@ -21,6 +21,7 @@ export const path: posix.PlatformPath & {
   dirname: file => posix.dirname(toPosix(file)),
   toNative,
   toPosix,
+  matchesGlob: (file, pattern) => posix.matchesGlob(toPosix(file), toPosix(pattern)),
   ...process.platform === 'win32' ? {
     resolve: (...args) => toPosix(native.resolve(cwd(), ...args.map(toPosix))),
     join: (root, ...args) => toPosix(native.join(toPosix(root), ...args.map(toPosix))),
