@@ -2,7 +2,7 @@
 
 /**
  * @typedef BasicResponse
- * @type {{ text(): (string | Promise<string>), ok: boolean, body?: unknown, statusText?: string, status?: number }} 
+ * @type {{ text(): (string | Promise<string>), ok: boolean, body?: unknown, statusText?: string, status?: number }}
  */
 
 /**
