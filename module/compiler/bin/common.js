@@ -2,8 +2,6 @@
 const { statSync, readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, rmSync } = require('node:fs');
 const path = require('node:path');
 
-const { getManifestContext } = require('@travetto/manifest/bin/context.js');
-
 /** @typedef {import('@travetto/manifest').ManifestContext} Ctx */
 
 const TS_EXT = /[.]tsx?$/;
@@ -40,6 +38,19 @@ async function getEntry() {
   process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
   process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
 
+  // Load manifest without compiling, just stripping types away
+  const loc = require.resolve('@travetto/manifest').replace(/__index__.*/, 'src/context.ts');
+  const src = readFileSync(loc, 'utf8')
+    // Remove type information
+    .replace(/\s*[|]\s+undefined/g, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/: (string|[A-Z][a-zA-Z]+)/g, '')
+    .replace(/^(import )?type .*$/gm, '');
+
+  // Load module on demand
+  const { getManifestContext } = await import(`data:text/javascript;charset=utf-8,${encodeURIComponent(src)}`);
+
+  /** @type {Ctx} */
   const ctx = getManifestContext();
   const target = getTarget.bind(null, ctx);
 

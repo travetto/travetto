@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
-import { getManifestContext } from '@travetto/manifest/bin/context';
+import { getManifestContext } from '@travetto/manifest/src/context';
 
 import { ActivationManager } from './core/activation';
 import { Workspace } from './core/workspace';
