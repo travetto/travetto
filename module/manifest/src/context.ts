@@ -2,16 +2,16 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
-import type { Package as findPackage } from './types/package';
+import type { Package } from './types/package';
 import type { ManifestContext } from './types/context';
 
-type Pkg<T extends {} = {}> = findPackage & T & { path: string };
+type Pkg<T extends {} = {}> = Package & T & { path: string };
 type PathOp = (file: string) => string;
 type Workspace = Pkg<{
   mono: boolean;
   manager: 'yarn' | 'npm';
   resolve: PathOp;
-  stripRoot: PathOp
+  stripRoot: PathOp;
 }>;
 
 const TOOL_FOLDER = '.trv/tool';
