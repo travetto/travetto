@@ -1,7 +1,7 @@
 // @ts-check
 
-/** 
- * @typedef BasicResponse 
+/**
+ * @typedef BasicResponse
  * @type {{ text(): (string | Promise<string>), ok: boolean, body?: unknown, statusText?: string, status?: number }} 
  */
 
@@ -50,15 +50,14 @@ export async function getBody(res) {
  * @returns {Promise<Error>}
  */
 export async function getError(payload) {
-  try {
-    let res = undefined;
-    // @ts-ignore
+  try { // server-only
+    let res = undefined; // server-only
     const { AppError } = await import('@travetto/runtime'); // server-only
     res = AppError.fromJSON(payload); // server-only
-    if (res) {
-      return res;
-    }
-  } catch { }
+    if (res) { // server-only
+      return res; // server-only
+    } // server-only
+  } catch { } // server-only
   if (payload instanceof Error) {
     return payload;
   } else {

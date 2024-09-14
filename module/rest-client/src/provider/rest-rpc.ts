@@ -58,7 +58,7 @@ export class RestRpcClientGenerator implements ClientGenerator {
 
     await fs.writeFile(
       path.resolve(this.output, path.basename(clientSourceFile)),
-      clientSourceContents.replace(/^[^\n]*\/\/\s*server-only\s*$/gsm, x => this.server ? x : ''),
+      clientSourceContents.replace(/^[^\n]*\/\/\s*server-only\s*\n/gsm, x => this.server ? x : ''),
       'utf8'
     );
 
@@ -73,7 +73,7 @@ export class RestRpcClientGenerator implements ClientGenerator {
     await fs.writeFile(path.resolve(this.output, 'factory.d.ts'), [
       "import * as rpc from './rest-rpc';",
       ...[...this.classes.entries()]
-        .map(([n, s]) => `import type {${n}} from '${s}';`),
+        .map(([n, s]) => `import type { ${n} } from '${s}';`),
       'export function IGNORE<T>(): T',
       'export const factory: rpc.ClientFactory<{',
       ...[...this.classes.keys()].map(x => `  ${x}: ${x},`),
