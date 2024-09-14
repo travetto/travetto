@@ -8,3 +8,4 @@ export const TravettoEntityⲐ: unique symbol = Symbol.for('@travetto/rest:trave
 export const HeadersAddedⲐ: unique symbol = Symbol.for('@travetto/rest:headers');
 export const InterceptorConfigsⲐ: unique symbol = Symbol.for('@travetto/rest:interceptors');
 export const ParsedTypeⲐ = Symbol.for('@travetto/rest:content-type');
+export const QueryExpandedⲐ = Symbol.for('@travetto/rest:query-expanded');

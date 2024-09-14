@@ -1,4 +1,4 @@
-import './src/trv';
+import type { } from './src/trv';
 export * from './src/config';
 export * from './src/interceptor';
 export * from './src/service';

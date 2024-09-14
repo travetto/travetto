@@ -14,13 +14,6 @@ import { KoaServerUtil } from './internal/util';
 type Keyed = { key?: symbol | string };
 type Routes = ReturnType<kRouter<unknown, koa.Context>['routes']>;
 
-// Support typings
-declare module 'koa' {
-  interface Context {
-    [TravettoEntityⲐ]?: [TravettoRequest, TravettoResponse];
-  }
-}
-
 /**
  * Koa-based Rest server
  */

@@ -36,7 +36,7 @@ export const text = <>
   <c.Section title='Environment Support'>
     The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the {EnvLink} object, and will return a scoped {EnvProp}, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports {d.input('true')} or {d.input('false')}
 
-    <c.Code title='Base Known Environment Flags' src='./src/trv.d.ts' startRe={/TravettoEnv/} endRe={/[}]/}></c.Code>
+    <c.Code title='Base Known Environment Flags' src='./src/trv.d.ts' startRe={/EnvData/} endRe={/[}]/}></c.Code>
 
     <c.SubSection title='Environment Property'>
       For a given {EnvProp}, we support the ability to access different properties as a means to better facilitate environment variable usage.

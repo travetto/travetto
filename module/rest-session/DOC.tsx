@@ -6,7 +6,7 @@ import { Session } from '@travetto/rest-session';
 
 const ModelExpirySupport = d.ref('ModelExpirySupport', '@travetto/model/src/service/expiry.ts');
 
-const Request = d.codeLink('TravettoRequest', 'src/trv.d.ts', /interface TravettoRequest/);
+const Request = d.codeLink('Request', 'src/trv.d.ts', /interface Request/);
 const SessionData = d.codeLink('SessionData', 'src/session.ts', /interface SessionData/);
 
 export const text = <>

@@ -5,27 +5,11 @@ import compression from 'compression';
 import { Inject, Injectable } from '@travetto/di';
 import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
-import { NodeEntityⲐ, TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
+import { TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { ServerHandle } from '@travetto/rest/src/types';
 
 import { RouteStack } from './internal/types';
 import { ExpressServerUtil } from './internal/util';
-
-// Support typings
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Express {
-    // eslint-disable-next-line no-shadow
-    interface Request {
-      [TravettoEntityⲐ]?: TravettoRequest;
-      [NodeEntityⲐ]?: express.Request;
-    }
-    interface Response {
-      [TravettoEntityⲐ]?: TravettoResponse;
-      [NodeEntityⲐ]?: express.Response;
-    }
-  }
-}
 
 /**
  * An express rest server

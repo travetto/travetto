@@ -59,14 +59,45 @@ $ TRV_BUILD=debug trvc build
 2029-03-14T04:00:10.395Z debug [manifest       ] Started
 2029-03-14T04:00:10.407Z debug [manifest       ] Wrote manifest @travetto-doc/compiler
 2029-03-14T04:00:10.799Z debug [manifest       ] Completed
-2029-03-14T04:00:11.013Z info  [server         ] State changed: compile-end
-2029-03-14T04:00:11.827Z debug [compiler-exec  ] Skipped
-2029-03-14T04:00:11.894Z debug [event-stream   ] Finished event stream
-2029-03-14T04:00:12.133Z info  [server         ] Closing down server
-2029-03-14T04:00:13.123Z debug [server         ] Server close event
-2029-03-14T04:00:14.014Z info  [server         ] Closed down server
-2029-03-14T04:00:14.924Z debug [server         ] Finished processing events
-2029-03-14T04:00:15.690Z debug [main           ] End Server
+2029-03-14T04:00:11.013Z debug [compiler-exec  ] Started watch=false changed=@travetto/cli/src/trv.d.ts,@travetto/manifest/bin/context.d.ts,@travetto/runtime/src/global.d.ts,@travetto/schema/src/global.d.ts,@travetto/terminal/src/trv.d.ts
+2029-03-14T04:00:11.827Z info  [compiler-exec  ] Launching compiler
+2029-03-14T04:00:11.894Z debug [transformers   ] Loaded Transformer: @travetto/cli:registerMainMethod#class
+2029-03-14T04:00:12.133Z debug [transformers   ] Loaded Transformer: @travetto/runtime:startClassForLog#class
+2029-03-14T04:00:13.123Z debug [transformers   ] Loaded Transformer: @travetto/runtime:leaveClassForLog#class
+2029-03-14T04:00:14.014Z debug [transformers   ] Loaded Transformer: @travetto/runtime:startMethodForLog#method
+2029-03-14T04:00:14.924Z debug [transformers   ] Loaded Transformer: @travetto/runtime:leaveMethodForLog#method
+2029-03-14T04:00:15.690Z debug [transformers   ] Loaded Transformer: @travetto/runtime:startFunctionForLog#function
+2029-03-14T04:00:15.865Z debug [transformers   ] Loaded Transformer: @travetto/runtime:leaveFunctionForLog#function
+2029-03-14T04:00:16.757Z debug [transformers   ] Loaded Transformer: @travetto/runtime:onLogCall#call
+2029-03-14T04:00:17.081Z debug [transformers   ] Loaded Transformer: @travetto/runtime:debugOnEntry#method
+2029-03-14T04:00:17.980Z debug [transformers   ] Loaded Transformer: @travetto/runtime:collectClassMetadata#class
+2029-03-14T04:00:18.548Z debug [transformers   ] Loaded Transformer: @travetto/runtime:collectMethodMetadata#method
+2029-03-14T04:00:18.920Z debug [transformers   ] Loaded Transformer: @travetto/runtime:registerClassMetadata#class
+2029-03-14T04:00:19.667Z debug [transformers   ] Loaded Transformer: @travetto/runtime:registerFunctionMetadata#function
+2029-03-14T04:00:19.971Z debug [transformers   ] Loaded Transformer: @travetto/runtime:rewritePathImport#file
+2029-03-14T04:00:20.340Z debug [transformers   ] Loaded Transformer: @travetto/runtime:onTypeHelper#call
+2029-03-14T04:00:20.665Z debug [transformers   ] Loaded Transformer: @travetto/schema:startSchema#class
+2029-03-14T04:00:20.769Z debug [transformers   ] Loaded Transformer: @travetto/schema:finalizeSchema#class
+2029-03-14T04:00:20.962Z debug [transformers   ] Loaded Transformer: @travetto/schema:processSchemaField#property
+2029-03-14T04:00:21.880Z debug [transformers   ] Loaded Transformer: @travetto/schema:processSchemaGetter#getter
+2029-03-14T04:00:22.594Z debug [transformers   ] Loaded Transformer: @travetto/schema:processSchemaSetter#setter
+2029-03-14T04:00:23.247Z debug [server         ] Running compiler with dirty file ./.trv/compiler/manifest-delta-ae78291e71040.json
+2029-03-14T04:00:23.647Z debug [server         ] Compilation started
+2029-03-14T04:00:24.142Z info  [server         ] State changed: init
+2029-03-14T04:00:24.354Z debug [server         ] Compiler loaded
+2029-03-14T04:00:24.626Z info  [server         ] State changed: compile-start
+2029-03-14T04:00:25.546Z debug [server         ] Compiled 5 files
+2029-03-14T04:00:25.761Z debug [server         ] Compilation succeeded
+2029-03-14T04:00:25.807Z info  [server         ] State changed: compile-end
+2029-03-14T04:00:26.300Z debug [server         ] Compiler process shutdown
+2029-03-14T04:00:27.025Z debug [compiler-exec  ] Finished
+2029-03-14T04:00:27.808Z debug [event-stream   ] Finished event stream
+2029-03-14T04:00:28.198Z debug [compiler-exec  ] Shutting down process
+2029-03-14T04:00:28.609Z info  [server         ] Closing down server
+2029-03-14T04:00:29.467Z debug [server         ] Server close event
+2029-03-14T04:00:29.752Z info  [server         ] Closed down server
+2029-03-14T04:00:30.040Z debug [server         ] Finished processing events
+2029-03-14T04:00:30.207Z debug [main           ] End Server
 ```
 
 **Terminal: Sample trv output with default log level**

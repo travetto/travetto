@@ -6,8 +6,8 @@ import { AuthService, Authenticate, Unauthenticated, Authenticated } from '@trav
 import { RuntimeIndex } from '@travetto/runtime';
 
 const Principal = d.codeLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
-const Request = d.codeLink('TravettoRequest', `${RuntimeIndex.getModule('@travetto/rest')?.sourcePath}/src/trv.d.ts`, /interface TravettoRequest/);
-const Response = d.codeLink('TravettoResponse', `${RuntimeIndex.getModule('@travetto/rest')?.sourcePath}/src/trv.d.ts`, /interface TravettoResponse/);
+const Request = d.codeLink('Request', `${RuntimeIndex.getModule('@travetto/rest')?.sourcePath}/src/types.ts`, /interface Request/);
+const Response = d.codeLink('Response', `${RuntimeIndex.getModule('@travetto/rest')?.sourcePath}/src/types.ts`, /interface Response/);
 const Authenticator = d.codeLink('Authenticator', '@travetto/auth/src/types/authenticator.ts', /interface Authenticator/);
 
 export const text = <>
@@ -26,7 +26,7 @@ export const text = <>
     When working with framework's authentication, the user information is exposed via the {Request}
     object.  The auth functionality is exposed on the request as the property {d.input('auth')}.
 
-    <c.Code title='Structure of auth property on the request' src='src/trv.d.ts' startRe={/interface TravettoRequest/} endRe={/^\s+[}]/} />
+    <c.Code title='Structure of auth property on the request' src='src/trv.d.ts' startRe={/interface Request/} endRe={/^\s+[}]/} />
 
     This allows for any filters/middleware to access this information without deeper knowledge of the framework itself.  Also, for performance benefits, the auth context can be stored in the user session as a means to minimize future lookups. If storing the entire principal in the session, it is best to keep the principal as small as possible. <br />
 

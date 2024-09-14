@@ -1,17 +1,7 @@
 import { UploadMap } from './types';
 
-declare global {
-  interface TravettoRequest {
+declare module '@travetto/rest' {
+  interface Request {
     uploads: UploadMap
   }
-
-  /**
-   * @concrete node:buffer#Blob
-   */
-  interface Blob { }
-
-  /**
-   * @concrete node:buffer#File
-   */
-  interface File { }
 }
