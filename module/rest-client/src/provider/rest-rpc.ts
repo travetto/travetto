@@ -48,6 +48,7 @@ export class RestRpcClientGenerator implements ClientGenerator {
     await fs.writeFile(path.resolve(this.output, path.basename(dtsFile)), dtsContents, 'utf8');
     await fs.writeFile(path.resolve(this.output, 'factory.js'), `
 ${coreContents}
+
 ${[...this.classes.entries()].map(([n, s]) => `/** @typedef {import('${path.relative(this.output, RuntimeIndex.getFromImport(s)!.sourceFile)}').${n}} ${n} */`).join('\n')}
 /** @type {import('./rest-rpc.d.ts').RestRpcClientFactory<{${[...this.classes.keys()].map(x => `${x}: ${x}`).join(', ')}}>} */
 export const factory = ${restRpcClientFactory.name}();
