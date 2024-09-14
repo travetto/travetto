@@ -33,26 +33,26 @@ export class CompilerSetup {
   };
 
   /**  Convert a file to a given ext */
-  static #sourceToExtension(inputFile: string, ext: string): string {
-    return inputFile.replace(/[.][tj]sx?$/, ext);
+  static #sourceToExtension(sourceFile: string, ext: string): string {
+    return sourceFile.replace(/[.][tj]sx?$/, ext);
   }
 
   /**
    * Get the output file name for a given input
    */
-  static #sourceToOutputExt(inputFile: string): string {
-    return this.#sourceToExtension(inputFile, '.js');
+  static #sourceToOutputExt(sourceFile: string): string {
+    return this.#sourceToExtension(sourceFile, '.js');
   }
 
   /**
    * Output a file, support for ts, js, and package.json
    */
-  static async #transpileFile(ctx: ManifestContext, inputFile: string, outputFile: string): Promise<void> {
-    const type = CommonUtil.getFileType(inputFile);
+  static async #transpileFile(ctx: ManifestContext, sourceFile: string, outputFile: string): Promise<void> {
+    const type = CommonUtil.getFileType(sourceFile);
     if (type === 'js' || type === 'ts') {
       const compilerOut = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules');
 
-      const text = (await fs.readFile(inputFile, 'utf8'))
+      const text = (await fs.readFile(sourceFile, 'utf8'))
         .replace(/from '([.][^']+)'/g, (_, i) => `from '${i.replace(/[.]js$/, '')}.js'`)
         .replace(/from '(@travetto\/(.*?))'/g, (_, i, s) => `from '${compilerOut}/${i}${s.includes('/') ? '.js' : '/__index__.js'}'`);
 
@@ -61,10 +61,10 @@ export class CompilerSetup {
         ...await TypescriptUtil.getCompilerOptions(ctx),
         sourceMap: false,
         inlineSourceMap: true,
-      }, inputFile);
+      }, sourceFile);
       await CommonUtil.writeTextFile(outputFile, content);
     } else if (type === 'package-json') {
-      const pkg: Package = JSON.parse(await fs.readFile(inputFile, 'utf8'));
+      const pkg: Package = JSON.parse(await fs.readFile(sourceFile, 'utf8'));
       const main = pkg.main ? this.#sourceToOutputExt(pkg.main) : undefined;
       const files = pkg.files?.map(x => this.#sourceToOutputExt(x));
 

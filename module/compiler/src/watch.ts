@@ -189,10 +189,10 @@ export class CompilerWatcher {
           entry = this.#state.registerInput(mod, moduleFile);
         } else if (!entry) {
           continue;
-        } else if (action === 'update' && !this.#state.checkIfSourceChanged(entry.inputFile)) {
+        } else if (action === 'update' && !this.#state.checkIfSourceChanged(entry.sourceFile)) {
           continue;
         } else if (action === 'delete') {
-          this.#state.removeInput(entry.inputFile);
+          this.#state.removeSource(entry.sourceFile);
         }
 
         outEvents.push({ action, file: entry.sourceFile, entry });
