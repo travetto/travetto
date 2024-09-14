@@ -62,9 +62,6 @@ export class ManifestDeltaUtil {
     }
     // Deleted
     for (const el of right) {
-      if (el.includes('.d.ts')) {
-        console.log(`Removed ${el}`);
-      }
       add(el, 'removed');
     }
     return out;
