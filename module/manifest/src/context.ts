@@ -2,10 +2,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
-import type { Package } from './types/package';
+import type { Package as findPackage } from './types/package';
 import type { ManifestContext } from './types/context';
 
-type Pkg<T extends {} = {}> = Package & T & { path: string };
+type Pkg<T extends {} = {}> = findPackage & T & { path: string };
 type PathOp = (file: string) => string;
 type Workspace = Pkg<{
   mono: boolean;
@@ -34,7 +34,7 @@ function readPackage(dir: string): Pkg | undefined {
 /**
  * Find package.json for a given folder
  */
-function Package(dir: string): Pkg {
+function findPackage(dir: string): Pkg {
   let prev;
   let pkg, curr = path.resolve(dir);
   while (!pkg && curr !== prev) {
@@ -103,7 +103,7 @@ function resolveModule(workspace: Workspace, folder: string): Pkg {
     mod = process.env.TRV_MODULE;
     if (/[.][cm]?(t|j)sx?$/.test(mod)) { // Rewrite from file to module
       try {
-        process.env.TRV_MODULE = mod = Package(path.dirname(mod)).name;
+        process.env.TRV_MODULE = mod = findPackage(path.dirname(mod)).name;
       } catch {
         process.env.TRV_MODULE = mod = '';
       }
@@ -123,7 +123,7 @@ function resolveModule(workspace: Workspace, folder: string): Pkg {
     }
   }
 
-  return Package(folder ?? '.');
+  return findPackage(folder ?? '.');
 }
 
 /**
