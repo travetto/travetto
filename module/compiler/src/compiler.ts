@@ -42,7 +42,7 @@ export class Compiler {
     this.#state = state;
     this.#dirtyFiles = dirtyFiles[0] === '*' ?
       this.#state.getAllFiles() :
-      dirtyFiles.map(f => this.#state.getBySource(f)!.inputFile);
+      dirtyFiles.map(f => this.#state.getBySource(f)!.sourceFile);
     this.#watch = watch;
 
     this.#ctrl = new AbortController();
@@ -91,7 +91,7 @@ export class Compiler {
    * Compile in a single pass, only emitting dirty files
    */
   getCompiler(): CompileEmitter {
-    return (inputFile: string, needsNewProgram?: boolean) => this.#state.compileInputFile(inputFile, needsNewProgram);
+    return (sourceFile: string, needsNewProgram?: boolean) => this.#state.compileSourceFile(sourceFile, needsNewProgram);
   }
 
   /**
@@ -166,9 +166,9 @@ export class Compiler {
       try {
         for await (const ev of new CompilerWatcher(this.#state, this.#signal).watchChanges()) {
           if (ev.action !== 'delete') {
-            const err = await emitter(ev.entry.inputFile, true);
+            const err = await emitter(ev.entry.sourceFile, true);
             if (err) {
-              log.info('Compilation Error', CompilerUtil.buildTranspileError(ev.entry.inputFile, err));
+              log.info('Compilation Error', CompilerUtil.buildTranspileError(ev.entry.sourceFile, err));
             } else {
               log.info(`Compiled ${ev.entry.sourceFile} on ${ev.action}`);
             }
