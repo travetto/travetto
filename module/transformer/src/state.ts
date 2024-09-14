@@ -48,6 +48,14 @@ export class TransformerState implements State {
   }
 
   /**
+   * Is a file or an import file path known by the framework, but missing an extensions
+   * @param fileOrImport
+   */
+  isUntypedImport(fileOrImport: ts.StringLiteral | string | undefined): boolean {
+    return this.#imports.isUntypedImport(fileOrImport);
+  }
+
+  /**
    * Get or import the node or external type
    */
   getOrImport(type: ManagedType): ts.Identifier | ts.PropertyAccessExpression {

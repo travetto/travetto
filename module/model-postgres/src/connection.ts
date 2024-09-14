@@ -1,4 +1,4 @@
-import { Pool, PoolClient } from 'pg';
+import { type Pool, type PoolClient, default as pg } from 'pg';
 
 import { castTo, ShutdownManager } from '@travetto/runtime';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
@@ -27,7 +27,7 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
    */
   @WithAsyncContext()
   async init(): Promise<void> {
-    this.#pool = new Pool({
+    this.#pool = new pg.Pool({
       user: this.#config.user,
       password: this.#config.password,
       database: this.#config.database,

@@ -90,7 +90,7 @@ export class Compiler {
    * Compile in a single pass, only emitting dirty files
    */
   getCompiler(): CompileEmitter {
-    return (inputFile: string, needsNewProgram?: boolean) => this.#state.writeInputFile(inputFile, needsNewProgram);
+    return (inputFile: string, needsNewProgram?: boolean) => this.#state.compileInputFile(inputFile, needsNewProgram);
   }
 
   /**

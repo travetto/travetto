@@ -108,7 +108,7 @@ export class CompilerState implements ts.CompilerHost {
     return this.#program;
   }
 
-  async writeInputFile(inputFile: string, needsNewProgram = false): Promise<CompileEmitError | undefined> {
+  async compileInputFile(inputFile: string, needsNewProgram = false): Promise<CompileEmitError | undefined> {
     const output = this.#inputToEntry.get(inputFile)?.outputFile;
     if (!output) {
       return;
