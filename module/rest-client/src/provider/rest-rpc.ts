@@ -1,19 +1,25 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { ControllerConfig } from '@travetto/rest';
+import { ControllerConfig, ControllerVisitorOptions } from '@travetto/rest';
 import { Class, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import type { ClientGenerator } from './types';
-import { restRpcClientFactory } from './shared/rest-rpc.js';
+import { clientFactory } from './shared/rest-rpc.js';
 
 export class RestRpcClientGenerator implements ClientGenerator {
 
   classes = new Map<string, string>();
   output: string;
+  server: boolean;
 
-  constructor(output: string) {
+  constructor(output: string, server = false) {
     this.output = output;
+    this.server = server;
+  }
+
+  getOptions(): ControllerVisitorOptions {
+    return { skipUndocumented: false };
   }
 
   seenImport(imp: string): boolean {
@@ -41,17 +47,37 @@ export class RestRpcClientGenerator implements ClientGenerator {
   async flush(): Promise<void> {
     await fs.mkdir(this.output, { recursive: true });
     const source = Runtime.getSourceFile(this.constructor);
-    const coreFile = path.resolve(path.dirname(source), 'shared/rest-rpc.js');
-    const dtsFile = path.resolve(path.dirname(source), 'shared/rest-rpc.d.ts');
-    const coreContents = await fs.readFile(coreFile, 'utf8');
-    const dtsContents = await fs.readFile(dtsFile, 'utf8');
-    await fs.writeFile(path.resolve(this.output, path.basename(dtsFile)), dtsContents, 'utf8');
-    await fs.writeFile(path.resolve(this.output, 'factory.js'), `
-${coreContents}
 
-${[...this.classes.entries()].map(([n, s]) => `/** @typedef {import('${path.relative(this.output, RuntimeIndex.getFromImport(s)!.sourceFile)}').${n}} ${n} */`).join('\n')}
-/** @type {import('./rest-rpc.d.ts').RestRpcClientFactory<{${[...this.classes.keys()].map(x => `${x}: ${x}`).join(', ')}}>} */
-export const factory = ${restRpcClientFactory.name}();
-`.trim(), 'utf8');
+    // Basically copying files
+    const clientSourceFile = path.resolve(path.dirname(source), 'shared/rest-rpc.js');
+    const clientDtsFile = path.resolve(path.dirname(source), 'shared/rest-rpc.d.ts');
+    const clientSourceContents = await fs.readFile(clientSourceFile, 'utf8');
+    const clientDtsContents = await fs.readFile(clientDtsFile, 'utf8');
+
+    await fs.writeFile(path.resolve(this.output, path.basename(clientDtsFile)), clientDtsContents, 'utf8');
+
+    await fs.writeFile(
+      path.resolve(this.output, path.basename(clientSourceFile)),
+      clientSourceContents.replace(/^[^\n]*\/\/\s*server-only\s*$/gsm, x => this.server ? x : ''),
+      'utf8'
+    );
+
+    // Write out factory
+    await fs.writeFile(path.resolve(this.output, 'factory.js'), [
+      "import * as rpc from './rest-rpc';",
+      `export const factory = rpc.${clientFactory.name}();`,
+      'export const IGNORE = rpc.IGNORE;',
+    ].join('\n'), 'utf8');
+
+    // And typings
+    await fs.writeFile(path.resolve(this.output, 'factory.d.ts'), [
+      "import * as rpc from './rest-rpc';",
+      ...[...this.classes.entries()]
+        .map(([n, s]) => `import {${n}} from '${path.relative(this.output, RuntimeIndex.getFromImport(s)!.outputFile.replace(/[.]js$/, '.ts'))}';`),
+      'export function IGNORE<T>(): T',
+      'export const factory: rpc.ClientFactory<{',
+      ...[...this.classes.keys()].map(x => `  ${x}: ${x},`),
+      '}>;'
+    ].join('\n'), 'utf8');
   }
 }

@@ -25,7 +25,9 @@ export class RestClientGeneratorService implements AutoCreate {
       case 'fetch':
       case 'fetch-node':
       case 'fetch-web': return new FetchClientGenerator(output, moduleName, { ...options, node: !type.includes('web') });
-      case 'rest-rpc': return new RestRpcClientGenerator(output);
+      case 'rest-rpc-web':
+      case 'rest-rpc-node':
+      case 'rest-rpc': return new RestRpcClientGenerator(output, !type.includes('web'));
     }
   }
 
