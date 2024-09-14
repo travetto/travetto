@@ -1,3 +1,4 @@
+export * from './src/context';
 export * from './src/module';
 export * from './src/delta';
 export * from './src/manifest-index';
