@@ -235,6 +235,9 @@ export class ManifestModuleUtil {
    * Get the output file name for a given input
    */
   static withOutputExtension(inputFile: string): string {
+    if (inputFile.endsWith('.d.ts')) {
+      return inputFile;
+    }
     return this.#pathToExtension(inputFile, '.js');
   }
 
@@ -242,6 +245,9 @@ export class ManifestModuleUtil {
    * Get the file without an extension
    */
   static withoutSourceExtension(inputFile: string): string {
+    if (inputFile.endsWith('.d.ts')) {
+      return inputFile;
+    }
     return this.#pathToExtension(inputFile, '');
   }
 }

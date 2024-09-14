@@ -12,8 +12,8 @@ type DeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFi
 export type DeltaEvent = { file: string, type: DeltaEventType, module: string, sourceFile: string };
 
 const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$package', 'doc']);
-const VALID_OUTPUT_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json', 'typings']);
-const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>([...VALID_OUTPUT_TYPE]);
+const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
+const VALID_OUTPUT_TYPE = new Set<ManifestModuleFileType>([...VALID_SOURCE_TYPE, 'typings']);
 
 const TypedObject: { keys<T = unknown, K extends keyof T = keyof T>(o: T): K[] } & ObjectConstructor = Object;
 
@@ -62,6 +62,9 @@ export class ManifestDeltaUtil {
     }
     // Deleted
     for (const el of right) {
+      if (el.includes('.d.ts')) {
+        console.log(`Removed ${el}`);
+      }
       add(el, 'removed');
     }
     return out;
