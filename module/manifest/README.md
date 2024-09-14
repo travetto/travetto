@@ -134,6 +134,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
           [ "test/fixtures/simple.ts", "fixture", 1868155200000, "test" ]
         ],
         "src": [
+          [ "src/context.ts", "ts", 1868155200000 ],
           [ "src/delta.ts", "ts", 1868155200000 ],
           [ "src/dependencies.ts", "ts", 1868155200000 ],
           [ "src/file.ts", "ts", 1868155200000 ],
@@ -146,10 +147,6 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
           [ "src/types/context.ts", "ts", 1868155200000 ],
           [ "src/types/manifest.ts", "ts", 1868155200000 ],
           [ "src/types/package.ts", "ts", 1868155200000 ]
-        ],
-        "bin": [
-          [ "bin/context.d.ts", "typings", 1868155200000 ],
-          [ "bin/context.js", "js", 1868155200000 ]
         ]
       }
     }

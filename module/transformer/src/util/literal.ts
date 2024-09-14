@@ -50,7 +50,7 @@ export class LiteralUtil {
     } else if (val === null) {
       val = factory.createNull();
     } else if (typeof val === 'string') {
-      val = factory.createStringLiteral(val, true);
+      val = factory.createStringLiteral(val);
     } else if (typeof val === 'number') {
       val = factory.createNumericLiteral(val);
     } else if (typeof val === 'boolean') {

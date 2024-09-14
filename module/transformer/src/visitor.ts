@@ -1,9 +1,11 @@
 import ts from 'typescript';
 
-import { ManifestModuleUtil } from '@travetto/manifest';
+import { ManifestModuleFolderType, ManifestModuleUtil } from '@travetto/manifest';
 
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
 import { CoreUtil } from './util/core';
+
+const COMPILER_SRC = new Set<ManifestModuleFolderType>(['support', 'src', '$index']);
 
 /**
  * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler
@@ -87,7 +89,10 @@ export class VisitorFactory<S extends State = State> {
       try {
         const state = this.#getState(context, file);
         // Skip transforming all the compiler related content
-        if (/@travetto[/](compiler|manifest|transformer)/.test(state.importName)) {
+        if (
+          /@travetto[/](compiler|manifest|transformer)/.test(state.importName) &&
+          COMPILER_SRC.has(ManifestModuleUtil.getFolderKey(state.importName.replace(/@travetto[/][^/]+[/]/, '')))
+        ) {
           return state.finalize(file);
         }
 

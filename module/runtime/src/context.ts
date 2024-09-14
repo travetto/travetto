@@ -120,7 +120,7 @@ class $Runtime {
       return fs.readFile(imp, 'utf8').then(JSON.parse);
     }
 
-    if (!/[.][cm]?[tj]s$/.test(imp)) {
+    if (!/[.][cm]?[tj]sx?$/.test(imp)) {
       if (imp.startsWith('@')) {
         if (/[/].*?[/]/.test(imp)) {
           imp = `${imp}.ts`;
