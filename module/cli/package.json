@@ -7,7 +7,6 @@
     "travetto",
     "typescript"
   ],
-  "type": "module",
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {

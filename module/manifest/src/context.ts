@@ -1,25 +1,29 @@
-// @ts-check
-
-/**
- * @typedef {import('../src/types/package').Package & { path:string }} Pkg
- * @typedef {Pkg & { mono: boolean, manager: 'yarn'|'npm', resolve: (file:string) => string, stripRoot: (file:string)=>string}} Workspace
- * @typedef {import('../src/types/context').ManifestContext} ManifestContext
- */
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
-/** @type {Record<string, Workspace>} */ const WS_ROOT = {};
+import type { Package } from './types/package';
+import type { ManifestContext } from './types/context';
+
+type Pkg<T extends {} = {}> = Package & T & { path: string };
+type PathOp = (file: string) => string;
+type Workspace = Pkg<{
+  mono: boolean;
+  manager: 'yarn' | 'npm';
+  resolve: PathOp;
+  stripRoot: PathOp;
+}>;
+
 const TOOL_FOLDER = '.trv/tool';
 const COMPILER_FOLDER = '.trv/compiler';
 const OUTPUT_FOLDER = '.trv/output';
 
+const WS_ROOT: Record<string, Workspace> = {};
+
 /**
  * Read package.json or return undefined if missing
- * @param {string} dir
- * @returns {Pkg|undefined}
  */
-function $readPackage(dir) {
+function readPackage(dir: string): Pkg | undefined {
   dir = dir.endsWith('.json') ? path.dirname(dir) : dir;
   try {
     const v = readFileSync(path.resolve(dir, 'package.json'), 'utf8');
@@ -29,14 +33,12 @@ function $readPackage(dir) {
 
 /**
  * Find package.json for a given folder
- * @param {string} dir
- * @return {Pkg}
  */
-function $findPackage(dir) {
+function findPackage(dir: string): Pkg {
   let prev;
   let pkg, curr = path.resolve(dir);
   while (!pkg && curr !== prev) {
-    pkg = $readPackage(curr);
+    pkg = readPackage(curr);
     [prev, curr] = [curr, path.dirname(curr)];
   }
   if (!pkg) {
@@ -48,9 +50,8 @@ function $findPackage(dir) {
 
 /**
  * Get workspace root
- * @return {Workspace}
  */
-function $resolveWorkspace(base = process.cwd()) {
+function resolveWorkspace(base: string): Workspace {
   if (base in WS_ROOT) { return WS_ROOT[base]; }
   let folder = base;
   let prev;
@@ -59,7 +60,7 @@ function $resolveWorkspace(base = process.cwd()) {
 
   while (prev !== folder) {
     [prev, prevPkg] = [folder, pkg];
-    pkg = $readPackage(folder) ?? pkg;
+    pkg = readPackage(folder) ?? pkg;
     if (
       (pkg && (!!pkg.workspaces || !!pkg.travetto?.build?.isolated)) || // if we have a monorepo root, or we are isolated
       existsSync(path.resolve(folder, '.git')) // we made it to the source repo root
@@ -86,9 +87,8 @@ function $resolveWorkspace(base = process.cwd()) {
 
 /**
  * Get Compiler url
- * @param {Workspace} ws
  */
-function $getCompilerUrl(ws) {
+function getCompilerUrl(ws: Workspace): string {
   // eslint-disable-next-line no-bitwise
   const port = (Math.abs([...ws.path].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
   return `http://localhost:${port}`;
@@ -96,16 +96,14 @@ function $getCompilerUrl(ws) {
 
 /**
  * Resolve module folder
- * @param {Workspace} workspace
- * @param {string|undefined} folder
  */
-function $resolveModule(workspace, folder) {
+function resolveModule(workspace: Workspace, folder: string): Pkg {
   let mod;
   if (!folder && process.env.TRV_MODULE) {
     mod = process.env.TRV_MODULE;
-    if (/[.](t|j)sx?$/.test(mod)) { // Rewrite from file to module
+    if (/[.][cm]?(t|j)sx?$/.test(mod)) { // Rewrite from file to module
       try {
-        process.env.TRV_MODULE = mod = $findPackage(path.dirname(mod)).name;
+        process.env.TRV_MODULE = mod = findPackage(path.dirname(mod)).name;
       } catch {
         process.env.TRV_MODULE = mod = '';
       }
@@ -116,7 +114,7 @@ function $resolveModule(workspace, folder) {
     try {
       folder = path.dirname(workspace.resolve(`${mod}/package.json`));
     } catch {
-      const workspacePkg = $readPackage(workspace.path);
+      const workspacePkg = readPackage(workspace.path);
       if (workspacePkg?.name === mod) {
         folder = workspace.path;
       } else {
@@ -125,17 +123,15 @@ function $resolveModule(workspace, folder) {
     }
   }
 
-  return $findPackage(folder ?? '.');
+  return findPackage(folder ?? '.');
 }
 
 /**
  * Gets build context
- * @param {string} [folder]
- * @return {ManifestContext}
  */
-export function getManifestContext(folder) {
-  const workspace = $resolveWorkspace(folder);
-  const mod = $resolveModule(workspace, folder);
+export function getManifestContext(folder = process.cwd()): ManifestContext {
+  const workspace = resolveWorkspace(folder);
+  const mod = resolveModule(workspace, folder);
   const build = workspace.travetto?.build ?? {};
   const toolFolder = build.toolFolder ?? TOOL_FOLDER;
 
@@ -150,7 +146,7 @@ export function getManifestContext(folder) {
     },
     build: {
       compilerFolder: build.compilerFolder ?? COMPILER_FOLDER,
-      compilerUrl: build.compilerUrl ?? $getCompilerUrl(workspace),
+      compilerUrl: build.compilerUrl ?? getCompilerUrl(workspace),
       compilerModuleFolder: workspace.stripRoot(path.dirname(workspace.resolve('@travetto/compiler/package.json'))),
       outputFolder: build.outputFolder ?? OUTPUT_FOLDER,
       toolFolder

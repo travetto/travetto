@@ -13,7 +13,6 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "type": "module",
   "files": [
     "__index__.ts",
     "src",

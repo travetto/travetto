@@ -1,8 +1,6 @@
 import ts from 'typescript';
 
-import { path, ManifestContext, ManifestModuleFileType, ManifestModuleUtil, ManifestRoot, Package } from '@travetto/manifest';
-
-type OutputToSource = (outputFile: string) => ({ sourceFile: string } | undefined);
+import { ManifestModuleFileType, ManifestModuleUtil, ManifestRoot, Package } from '@travetto/manifest';
 
 const nativeCwd = process.cwd();
 
@@ -14,57 +12,7 @@ export class CompilerUtil {
   /**
    * Determine if this is a manifest file we care about
    */
-  static validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
-
-  /**
-   * Determines if write callback data has sourcemap information
-   * @param data
-   * @returns
-   */
-  static isSourceMapUrlPosData(data?: ts.WriteFileCallbackData): data is { sourceMapUrlPos: number } {
-    return data !== undefined && data !== null && typeof data === 'object' && ('sourceMapUrlPos' in data);
-  }
-
-  /**
-   * Rewrite's sourcemap locations to real folders
-   * @returns
-   */
-  static rewriteSourceMap(ctx: ManifestContext, text: string, outputToSource: OutputToSource): string {
-    const data: { sourceRoot?: string, sources: string[] } = JSON.parse(text);
-    const output = ManifestModuleUtil.withOutputExtension(path.resolve(ctx.workspace.path, ctx.build.outputFolder, data.sources[0]));
-    const { sourceFile } = outputToSource(output) ?? {};
-
-    if (sourceFile) {
-      delete data.sourceRoot;
-      data.sources = [sourceFile];
-      text = JSON.stringify(data);
-    }
-    return text;
-  }
-
-  /**
-   * Rewrite's inline sourcemap locations to real folders
-   * @param text
-   * @param outputToSource
-   * @param writeData
-   * @returns
-   */
-  static rewriteInlineSourceMap(
-    ctx: ManifestContext,
-    text: string,
-    outputToSource: OutputToSource,
-    { sourceMapUrlPos }: ts.WriteFileCallbackData & { sourceMapUrlPos: number }
-  ): string {
-    const sourceMapUrl = text.substring(sourceMapUrlPos);
-    const [prefix, sourceMapData] = sourceMapUrl.split('base64,');
-    const rewritten = this.rewriteSourceMap(ctx, Buffer.from(sourceMapData, 'base64url').toString('utf8'), outputToSource);
-    return [
-      text.substring(0, sourceMapUrlPos),
-      prefix,
-      'base64,',
-      Buffer.from(rewritten, 'utf8').toString('base64url')
-    ].join('');
-  }
+  static validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js' || type === 'typings';
 
   /**
    * Rewrites the package.json to target output file names, and pins versions

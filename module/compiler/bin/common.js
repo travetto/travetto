@@ -1,8 +1,6 @@
 // @ts-check
-import { statSync, readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, rmSync } from 'node:fs';
-import path from 'node:path';
-
-import { getManifestContext } from '@travetto/manifest/bin/context.js';
+const { statSync, readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, rmSync } = require('node:fs');
+const path = require('node:path');
 
 /** @typedef {import('@travetto/manifest').ManifestContext} Ctx */
 
@@ -36,13 +34,23 @@ const getTranspiler = async (/** @type {Ctx} */ ctx) => {
       .replace(/from '(@travetto\/[^/']+)([/][^']+)?'/g, (_, mod, file) => `from '${modPath(ctx, mod, file)}'`);
 };
 
-/** @returns {Promise<import('@travetto/compiler/support/entry.trvc')>} */
-async function imp(f = '') { try { return require(f); } catch { return import(f); } }
-
-export async function getEntry() {
+async function getEntry() {
   process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
   process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
 
+  // Load manifest without compiling, just stripping types away
+  const loc = require.resolve('@travetto/manifest').replace(/__index__.*/, 'src/context.ts');
+  const src = readFileSync(loc, 'utf8')
+    // Remove type information
+    .replace(/\s*[|]\s+undefined/g, '')
+    .replace(/<([^>]|\n)+>/gsm, '')
+    .replace(/: (string|[A-Z][a-zA-Z]+)/g, '')
+    .replace(/^(import )?type .*$/gm, '');
+
+  // Load module on demand
+  const { getManifestContext } = await import(`data:text/javascript;charset=utf-8,${encodeURIComponent(src)}`);
+
+  /** @type {Ctx} */
   const ctx = getManifestContext();
   const target = getTarget.bind(null, ctx);
 
@@ -67,9 +75,12 @@ export async function getEntry() {
 
   // Load
   try {
-    return await imp(target('support/entry.trvc.ts').dest).then(v => v.main(ctx));
+    const res = await import(target('support/entry.trvc.ts').dest);
+    return await res.main(ctx);
   } catch (err) {
     rmSync(target('.').dest, { recursive: true, force: true });
     throw err;
   }
 }
+
+module.exports = { getEntry };

@@ -29,20 +29,9 @@ export class ImportManager {
     this.#importName = this.#resolver.getFileImportName(source.fileName);
   }
 
-  #getImportFile(spec?: ts.Expression): string | undefined {
-    if (spec && ts.isStringLiteral(spec)) {
-      return spec.text.replace(/^['"]|["']$/g, '');
-    }
-  }
-
   #rewriteModuleSpecifier(spec: ts.Expression | undefined): ts.Expression | undefined {
-    const fileOrImport = this.#getImportFile(spec);
-    if (
-      fileOrImport &&
-      (fileOrImport.startsWith('.') || this.#resolver.isKnownFile(fileOrImport)) &&
-      !/[.]([mc]?js|ts|json)$/.test(fileOrImport)
-    ) {
-      return LiteralUtil.fromLiteral(this.factory, `${fileOrImport}.js`);
+    if (spec && ts.isStringLiteral(spec) && this.isUntypedImport(spec)) {
+      return LiteralUtil.fromLiteral(this.factory, `${spec.text.replace(/['"]/g, '')}.js`);
     }
     return spec;
   }
@@ -52,8 +41,7 @@ export class ImportManager {
       return clause;
     }
 
-    const fileOrImport = this.#getImportFile(spec);
-    if (!(fileOrImport && (fileOrImport.startsWith('.') || this.#resolver.isKnownFile(fileOrImport)))) {
+    if (spec && ts.isStringLiteral(spec) && !this.isKnownImport(spec)) {
       return clause;
     }
 
@@ -81,6 +69,35 @@ export class ImportManager {
     } else {
       return clause;
     }
+  }
+
+  /**
+   * Is a known import an untyped file access
+   * @param fileOrImport
+   */
+  isKnownImport(fileOrImport: ts.StringLiteral | string | undefined): boolean {
+    if (fileOrImport && typeof fileOrImport !== 'string') {
+      if (ts.isStringLiteral(fileOrImport)) {
+        fileOrImport = fileOrImport.text.replace(/['"]g/, '');
+      } else {
+        return false;
+      }
+    }
+
+    return fileOrImport ?
+      (fileOrImport.startsWith('.') || this.#resolver.isKnownFile(fileOrImport)) :
+      false;
+  }
+
+
+  /**
+   * Is a file or import an untyped file access
+   * @param fileOrImport
+   */
+  isUntypedImport(fileOrImport: ts.StringLiteral | string | undefined): boolean {
+    return this.isKnownImport(fileOrImport) &&
+      !/[.](([mc]?[jt]s)|json)['"]?$/
+        .test(typeof fileOrImport === 'string' ? fileOrImport : fileOrImport!.text);
   }
 
   /**
@@ -190,7 +207,7 @@ export class ImportManager {
             stmt.isTypeOnly,
             stmt.exportClause,
             this.#rewriteModuleSpecifier(stmt.moduleSpecifier),
-            stmt.assertClause
+            stmt.attributes
           ));
         }
       } else if (ts.isImportDeclaration(stmt)) {
@@ -200,7 +217,7 @@ export class ImportManager {
             stmt.modifiers,
             this.#rewriteImportClause(stmt.moduleSpecifier, stmt.importClause)!,
             this.#rewriteModuleSpecifier(stmt.moduleSpecifier)!,
-            stmt.assertClause
+            stmt.attributes
           ));
         }
       } else {

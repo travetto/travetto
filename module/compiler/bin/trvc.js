@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // @ts-check
-import { getEntry } from './common.js';
+const { getEntry } = require('./common.js');
 
 const help = () => [
   'npx trvc [command]',

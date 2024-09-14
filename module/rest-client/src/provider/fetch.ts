@@ -30,7 +30,7 @@ export class FetchClientGenerator extends BaseClientGenerator<{ node?: boolean }
 
   async init(): Promise<void> {
     if (this.config.node) {
-      const pkg = await import('../../../runtime/package.json');
+      const pkg = await Runtime.importFrom<Package>('@travetto/runtime/package.json');
 
       this.registerContent('_pkgId', {
         imports: [],
@@ -42,7 +42,7 @@ export class FetchClientGenerator extends BaseClientGenerator<{ node?: boolean }
           version: Runtime.main.version,
           main: `${this.subFolder ?? '.'}/index.ts`,
           dependencies: this.config.node ? {
-            '@types/node': pkg.dependencies['@types/node']
+            '@types/node': pkg.dependencies!['@types/node']!
           } : {}
         } satisfies Package, null, 2)]
       });

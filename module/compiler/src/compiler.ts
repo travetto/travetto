@@ -27,6 +27,7 @@ export class Compiler {
     const state = await CompilerState.get(new ManifestIndex());
     log.debug('Running compiler with dirty file', dirty);
     const dirtyFiles = ManifestModuleUtil.getFileType(dirty) === 'ts' ? [dirty] : (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
+    log.debug('Running compiler with dirty file', dirtyFiles);
     await new Compiler(state, dirtyFiles, watch === 'true').run();
   }
 
@@ -90,7 +91,7 @@ export class Compiler {
    * Compile in a single pass, only emitting dirty files
    */
   getCompiler(): CompileEmitter {
-    return (inputFile: string, needsNewProgram?: boolean) => this.#state.writeInputFile(inputFile, needsNewProgram);
+    return (inputFile: string, needsNewProgram?: boolean) => this.#state.compileInputFile(inputFile, needsNewProgram);
   }
 
   /**
