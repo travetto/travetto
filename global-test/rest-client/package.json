@@ -2,7 +2,7 @@
   "name": "@travetto-test/rest-client",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/rest-client": "^5.0.5",
+    "@travetto/rest-client": "^5.0.6",
     "@travetto/rest-express": "^5.0.5",
     "@travetto/rest-fastify": "^5.0.5",
     "@travetto/rest-koa": "^5.0.5"
