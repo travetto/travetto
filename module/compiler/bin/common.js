@@ -44,7 +44,7 @@ async function getEntry() {
     // Remove type information
     .replace(/\s*[|]\s+undefined/g, '')
     .replace(/<([^>]|\n)+>/gsm, '')
-    .replace(/: (string|[A-Z][a-zA-Z]+)/g, '')
+    .replace(/[?]?: (string|[A-Z][a-zA-Z]+)/g, '')
     .replace(/^(import )?type .*$/gm, '');
 
   // Load module on demand

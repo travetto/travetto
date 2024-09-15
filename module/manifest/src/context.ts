@@ -51,7 +51,7 @@ function findPackage(dir: string): Pkg {
 /**
  * Get workspace root
  */
-function resolveWorkspace(base: string): Workspace {
+function resolveWorkspace(base: string = process.cwd()): Workspace {
   if (base in WS_ROOT) { return WS_ROOT[base]; }
   let folder = base;
   let prev;
@@ -97,7 +97,7 @@ function getCompilerUrl(ws: Workspace): string {
 /**
  * Resolve module folder
  */
-function resolveModule(workspace: Workspace, folder: string): Pkg {
+function resolveModule(workspace: Workspace, folder?: string): Pkg {
   let mod;
   if (!folder && process.env.TRV_MODULE) {
     mod = process.env.TRV_MODULE;
@@ -129,8 +129,8 @@ function resolveModule(workspace: Workspace, folder: string): Pkg {
 /**
  * Gets build context
  */
-export function getManifestContext(folder = process.cwd()): ManifestContext {
-  const workspace = resolveWorkspace(folder);
+export function getManifestContext(folder?: string): ManifestContext {
+  const workspace = resolveWorkspace();
   const mod = resolveModule(workspace, folder);
   const build = workspace.travetto?.build ?? {};
   const toolFolder = build.toolFolder ?? TOOL_FOLDER;
