@@ -56,7 +56,7 @@ export interface Request<T = unknown> {
    * Interceptor-related configs, providing request-awareness of route-level configurations
    */
   [InterceptorConfigsⲐ]?: Record<string, Record<string, unknown>>;
-  /** 
+  /**
    * Expanded representation of query
    */
   [QueryExpandedⲐ]: Record<string, unknown>;
@@ -79,11 +79,11 @@ export interface Request<T = unknown> {
   /**
    * The query parameters
    */
-  query: Record<string, any>;
+  query: Record<string, Any>;
   /**
    * The path parameters
    */
-  params: Record<string, any>;
+  params: Record<string, Any>;
   /**
    * The request headers
    */
@@ -102,7 +102,7 @@ export interface Request<T = unknown> {
   /**
    * The http request body
    */
-  body: any;
+  body: Any;
   /**
    * Raw body as a buffer, if applicable
    */
@@ -119,12 +119,12 @@ export interface Request<T = unknown> {
   header<K extends keyof RequestHeaders>(key: K): RequestHeaders[K] | undefined;
   /**
    * Get a header as a list of values
-   * @param key 
+   * @param key
    */
   headerList<K extends keyof RequestHeaders>(key: K): string[] | undefined;
   /**
    * Get a single header
-   * @param key 
+   * @param key
    */
   headerFirst<K extends keyof RequestHeaders>(key: K): string | undefined;
   /**
@@ -236,7 +236,7 @@ export interface Response<T = unknown> {
    * Send a value to the client
    * @param value Value to send
    */
-  send(value: any): unknown;
+  send(value: Any): unknown;
   /**
    * Write content directly to the output stream
    * @param value The value to write
@@ -257,7 +257,7 @@ export interface Response<T = unknown> {
      * @param value The cookie value
      * @param options Cookie options to set
      */
-    set(name: string, value?: any, options?: SetOption): void;
+    set(name: string, value?: Any, options?: SetOption): void;
   };
   /**
    * Send readable stream to the response

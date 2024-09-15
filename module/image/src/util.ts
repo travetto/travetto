@@ -26,10 +26,6 @@ export interface ResizeOptions {
    */
   optimize?: boolean;
   /**
-   * Strict resolution
-   */
-  strictResolution?: boolean;
-  /**
    * Sub process, allows for externalization of memory
    */
   asSubprocess?: boolean;
@@ -106,10 +102,12 @@ export class ImageUtil {
    * Resize image
    */
   static async resize<T extends ImageType>(image: T, options: ResizeOptions = {}): Promise<T> {
-    const dims = [options.w, options.h].map(d => (!d && options.strictResolution === false) ? undefined : d);
+    const dims = [options.w, options.h].map(x => x ? Math.trunc(x) : undefined);
+    const fluid = dims.some(x => !x);
+
     if (options.asSubprocess) {
       return this.#subprocessReturn(
-        await this.CONVERTER.exec('gm', 'convert', '-resize', dims.join('x'), '-auto-orient',
+        await this.CONVERTER.exec('gm', 'convert', '-resize', dims.map(x => x || '').join('x'), '-auto-orient',
           ...(options.optimize ? ['-strip', '-quality', '86'] : []), '-', '-'),
         image);
     } else {
@@ -119,7 +117,7 @@ export class ImageUtil {
         sharp().resize({
           width: dims[0],
           height: dims[1],
-          fit: options.strictResolution !== false ? 'fill' : 'inside'
+          fit: fluid ? 'inside' : 'fill'
         }),
         image,
         options.optimize,
@@ -148,8 +146,8 @@ export class ImageUtil {
   /**
    * Get Image Dimensions
    */
-  static async getDimensions(image: Buffer | string): Promise<{ width: number, height: number }> {
+  static async getDimensions(image: Buffer | string): Promise<{ width: number, height: number, aspect: number }> {
     const { default: sharp } = await import('sharp');
-    return sharp(image).metadata().then(v => ({ width: v.width!, height: v.height! }));
+    return sharp(image).metadata().then(v => ({ width: v.width!, height: v.height!, aspect: v.width! / v.height! }));
   }
 }

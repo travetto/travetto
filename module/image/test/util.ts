@@ -78,13 +78,10 @@ class ImageUtilSuite {
   }
 
   @Test()
-  async resizeLooseToFile() {
+  async resizeLooseWidthToFile() {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
     const out = await ImageUtil.resize(imgStream, {
-      w: 50,
-      h: 50,
-      strictResolution: false,
-      optimize: true,
+      w: 100,
       asSubprocess: true
     });
 
@@ -93,8 +90,28 @@ class ImageUtilSuite {
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
     const dims = await ImageUtil.getDimensions(outFile);
-    assert(dims.height === 50);
-    assert(dims.width === 37);
+    assert(dims.width === 100);
+    assert(dims.height === 134);
+
+    await fs.unlink(outFile);
+    assert(await fs.stat(outFile).then(() => false, () => true));
+  }
+
+  @Test()
+  async resizeLooseHeightToFile() {
+    const imgStream = await this.fixture.readStream('lincoln.jpg');
+    const out = await ImageUtil.resize(imgStream, {
+      h: 134.00005,
+      asSubprocess: true
+    });
+
+    const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
+    await pipeline(out, createWriteStream(outFile));
+    assert.ok(await fs.stat(outFile).then(() => true, () => false));
+
+    const dims = await ImageUtil.getDimensions(outFile);
+    assert(dims.width === 100);
+    assert(dims.height === 134);
 
     await fs.unlink(outFile);
     assert(await fs.stat(outFile).then(() => false, () => true));
