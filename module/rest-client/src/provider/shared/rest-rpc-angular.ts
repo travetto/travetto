@@ -1,7 +1,7 @@
-// #UNCOMMENT import { Observable, catchError, map, timeout } from 'rxjs';
-// #UNCOMMENT import type { HttpClient } from '@angular/common/http';
+// #UNCOMMENT import { Observable, catchError, mergeMap, timeout } from 'rxjs';
+// #UNCOMMENT import type { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { ClientOptions, parseBody } from './rest-rpc';
+import type { ClientOptions } from './rest-rpc';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PromiseFn = (...args: any) => Promise<unknown>;
@@ -23,16 +23,12 @@ export function angularFactoryDecorator(service: { http: HttpClient }) {
           reportProgress: false
         }).pipe(
           // @ts-ignore
-          map(parseBody<PromiseRes<V>>),
+          mergeMap(opts.parseBody<PromiseRes<V>>),
           // @ts-ignore
-          timeout(opts.timeout ?? (1000 * 60 ** 2)),
+          timeout(opts.timeout || (1000 * 60 ** 2)),
           // @ts-ignore
-          catchError((v: unknown) => {
-            const err = new Error();
-            if (typeof v === 'object' && !!v && 'error' in v && typeof v.error === 'object' && !!v.error) {
-              Object.assign(err, v.error);
-            }
-            throw err;
+          catchError((v: HttpErrorResponse) => {
+            throw opts.toError(v.error);
           })
         );
       }

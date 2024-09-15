@@ -49,18 +49,18 @@ export class RestRpcClientGenerator implements ClientGenerator {
     await fs.mkdir(this.output, { recursive: true });
     const source = Runtime.getSourceFile(this.constructor);
 
-    // Basically copying files
     const clientSourceFile = path.resolve(path.dirname(source), 'shared/rest-rpc.ts');
     const clientSourceContents = await fs.readFile(clientSourceFile, 'utf8');
+    const clientOutputFile = path.resolve(this.output, path.basename(clientSourceFile));
 
-    await fs.writeFile(
-      path.resolve(this.output, path.basename(clientSourceFile)),
-      clientSourceContents.replace(/^[^\n]*\/\/\s*server-only\s*\n/gsm, x => this.flavor === 'node' ? x : ''),
-      'utf8'
-    );
+    const flavorSourceFile = path.resolve(path.dirname(source), `shared/rest-rpc-${this.flavor}.ts`);
+    const flavorOutputFile = path.resolve(this.output, path.basename(flavorSourceFile));
+    const flavorSourceContents = (await fs.readFile(flavorSourceFile, 'utf8').catch(() => ''))
+      .replaceAll(/^\s*\/\/\s*@ts-ignore[^\n]*\n/gsm, '')
+      .replaceAll(/^\/\/ #UNCOMMENT (.*)/gm, (_, v) => v);
 
-    // Write out factory
-    await fs.writeFile(path.resolve(this.output, 'factory.ts'), [
+    const factoryOutputFile = path.resolve(this.output, 'factory.ts');
+    const factorySourceContents = [
       ...[...this.classes.entries()]
         .map(([n, s]) => `import type { ${n} } from '${ManifestModuleUtil.withoutSourceExtension(s)}';`),
       `import { ${clientFactory.name} } from './rest-rpc';`,
@@ -68,16 +68,12 @@ export class RestRpcClientGenerator implements ClientGenerator {
       `export const factory = ${clientFactory.name}<{`,
       ...[...this.classes.keys()].map(x => `  ${x}: ${x},`),
       '}>();',
-    ].join('\n'), 'utf8');
+    ].join('\n');
 
-    try {
-      const angularSourceFile = path.resolve(path.dirname(source), `shared/rest-rpc-${this.flavor}.ts`);
-      const angularSourceContents = (await fs.readFile(angularSourceFile, 'utf8'))
-        .replaceAll(/^\s*\/\/\s*@ts-ignore[^\n]*\n/gsm, '')
-        .replaceAll(/^\/\/ #UNCOMMENT (.*)/gm, (_, v) => v);
-      await fs.writeFile(path.resolve(this.output, path.basename(angularSourceFile)), angularSourceContents, 'utf8');
-    } catch {
-      // Ignore
+    await fs.writeFile(clientOutputFile, clientSourceContents, 'utf8');
+    await fs.writeFile(factoryOutputFile, factorySourceContents, 'utf8');
+    if (flavorSourceContents) {
+      await fs.writeFile(flavorOutputFile, flavorSourceContents, 'utf8');
     }
   }
 }
