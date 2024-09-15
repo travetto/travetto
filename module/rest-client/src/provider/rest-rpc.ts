@@ -62,7 +62,7 @@ export class RestRpcClientGenerator implements ClientGenerator {
     // Write out factory
     await fs.writeFile(path.resolve(this.output, 'factory.ts'), [
       ...[...this.classes.entries()]
-        .map(([n, s]) => `import type { ${n} } from '${ManifestModuleUtil.withoutSourceExtension(s)}.d.ts';`),
+        .map(([n, s]) => `import type { ${n} } from '${ManifestModuleUtil.withoutSourceExtension(s)}';`),
       `import { ${clientFactory.name} } from './rest-rpc';`,
       '',
       `export const factory = ${clientFactory.name}<{`,
