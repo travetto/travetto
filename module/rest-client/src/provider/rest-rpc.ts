@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import { ControllerConfig, ControllerVisitorOptions } from '@travetto/rest';
 import { Class, Runtime } from '@travetto/runtime';
+import { ManifestModuleUtil } from '@travetto/manifest';
 
 import type { ClientGenerator } from './types';
 import { clientFactory } from './shared/rest-rpc.js';
@@ -11,11 +12,11 @@ export class RestRpcClientGenerator implements ClientGenerator {
 
   classes = new Map<string, string>();
   output: string;
-  server: boolean;
+  flavor: 'node' | 'web' | 'angular';
 
-  constructor(output: string, server = false) {
+  constructor(output: string, flavor: 'node' | 'web' | 'angular' = 'web') {
     this.output = output;
-    this.server = server;
+    this.flavor = flavor;
   }
 
   getOptions(): ControllerVisitorOptions {
@@ -49,35 +50,34 @@ export class RestRpcClientGenerator implements ClientGenerator {
     const source = Runtime.getSourceFile(this.constructor);
 
     // Basically copying files
-    const clientSourceFile = path.resolve(path.dirname(source), 'shared/rest-rpc.js');
-    const clientDtsFile = path.resolve(path.dirname(source), 'shared/rest-rpc.d.ts');
+    const clientSourceFile = path.resolve(path.dirname(source), 'shared/rest-rpc.ts');
     const clientSourceContents = await fs.readFile(clientSourceFile, 'utf8');
-    const clientDtsContents = await fs.readFile(clientDtsFile, 'utf8');
-
-    await fs.writeFile(path.resolve(this.output, path.basename(clientDtsFile)), clientDtsContents, 'utf8');
 
     await fs.writeFile(
       path.resolve(this.output, path.basename(clientSourceFile)),
-      clientSourceContents.replace(/^[^\n]*\/\/\s*server-only\s*\n/gsm, x => this.server ? x : ''),
+      clientSourceContents.replace(/^[^\n]*\/\/\s*server-only\s*\n/gsm, x => this.flavor === 'node' ? x : ''),
       'utf8'
     );
 
     // Write out factory
-    await fs.writeFile(path.resolve(this.output, 'factory.js'), [
-      "import * as rpc from './rest-rpc';",
-      `export const factory = rpc.${clientFactory.name}();`,
-      'export const IGNORE = rpc.IGNORE;',
+    await fs.writeFile(path.resolve(this.output, 'factory.ts'), [
+      ...[...this.classes.entries()]
+        .map(([n, s]) => `import type { ${n} } from '${ManifestModuleUtil.withoutSourceExtension(s)}.d.ts';`),
+      `import { ${clientFactory.name} } from './rest-rpc';`,
+      '',
+      `export const factory = ${clientFactory.name}<{`,
+      ...[...this.classes.keys()].map(x => `  ${x}: ${x},`),
+      '}>();',
     ].join('\n'), 'utf8');
 
-    // And typings
-    await fs.writeFile(path.resolve(this.output, 'factory.d.ts'), [
-      "import * as rpc from './rest-rpc';",
-      ...[...this.classes.entries()]
-        .map(([n, s]) => `import type { ${n} } from '${s}';`),
-      'export function IGNORE<T>(): T',
-      'export const factory: rpc.ClientFactory<{',
-      ...[...this.classes.keys()].map(x => `  ${x}: ${x},`),
-      '}>;'
-    ].join('\n'), 'utf8');
+    try {
+      const angularSourceFile = path.resolve(path.dirname(source), `shared/rest-rpc-${this.flavor}.ts`);
+      const angularSourceContents = (await fs.readFile(angularSourceFile, 'utf8'))
+        .replaceAll(/^\s*\/\/\s*@ts-ignore[^\n]*\n/gsm, '')
+        .replaceAll(/^\/\/ #UNCOMMENT (.*)/gm, (_, v) => v);
+      await fs.writeFile(path.resolve(this.output, path.basename(angularSourceFile)), angularSourceContents, 'utf8');
+    } catch {
+      // Ignore
+    }
   }
 }

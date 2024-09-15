@@ -31,6 +31,8 @@ export class AngularClientGenerator extends BaseClientGenerator {
   writeContentFilter(text: string): string {
     return super.writeContentFilter(text)
       .replaceAll(/^.*#NODE_FETCH.*/gm, '')
+      .replaceAll(/^\s*\/\/\s*@ts-ignore[^\n]*\n/gsm, '')
+      .replaceAll(/^\/\/ #UNCOMMENT (.*)/gm, (_, v) => v)
       .trimStart();
   }
 
@@ -91,9 +93,6 @@ export class AngularClientGenerator extends BaseClientGenerator {
     const httpClient: Imp = { classId: '_ngHttp', file: '@angular/common/http', name: 'HttpClient' };
     const injectable: Imp = { classId: '_ngCore', file: '@angular/core', name: 'Injectable' };
     const optional: Imp = { classId: '_ngCore', file: '@angular/core', name: 'Optional' };
-    const map: Imp = { classId: '_rxjs', file: 'rxjs', name: 'map' };
-    const operatorFn: Imp = { classId: '_rxjs', file: 'rxjs', name: 'OperatorFunction' };
-    const timeout: Imp = { classId: '_timeout', file: 'rxjs/operators', name: 'timeout' };
 
     const imports = [base, httpClient, injectable, optional, options, ...results.flatMap(x => x.imports)];
 
@@ -106,11 +105,8 @@ export class AngularClientGenerator extends BaseClientGenerator {
       ...results.flatMap(f => f.config),
       '\n',
       '  constructor(public client: ', httpClient, ', @', optional, '() options: ', options, ') {\n',
-      '    super(options);\n',
+      '    super(client, options);\n',
       '  }\n',
-      '\n',
-      '  transform = <T>(): ', operatorFn, '<unknown, T> => ', map, `(o => this.${CommonUtil.consumeJSON.name}<T>(o));\n`,
-      '  timer = <T>(delay: number): ', operatorFn, '<T, T> => ', timeout, '(delay);\n',
       '\n',
       ...results.flatMap(f => f.method),
       '}\n\n'

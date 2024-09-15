@@ -1,11 +1,11 @@
-// @ts-ignore
-import type { HttpResponse, HttpEvent, HttpClient } from '@angular/common/http';
-// @ts-ignore
-import type { Observable, OperatorFunction } from 'rxjs';
+// #UNCOMMENT import type { HttpResponse, HttpEvent, HttpClient } from '@angular/common/http';
+// #UNCOMMENT import { Observable, map } from 'rxjs';
+// #UNCOMMENT import { timeout } from 'rxjs/operators';
 
-import { BaseRemoteService, IRemoteService, RequestDefinition, RequestOptions } from './types';
+import { BaseRemoteService, IRemoteService, IRemoteServiceConfig, RequestDefinition, RequestOptions } from './types';
 import { CommonUtil, restCast } from './util';
 
+// @ts-ignore
 export type AngularResponse<T> = Observable<T> & { events: Observable<HttpEvent<T>>, response: Observable<HttpResponse<T>> };
 
 export type IAngularServiceConfig = Partial<IRemoteService<unknown, AngularResponse<unknown>>>;
@@ -17,10 +17,10 @@ export class Configuration implements IAngularServiceConfig {
 }
 
 export abstract class BaseAngularService extends BaseRemoteService<RequestInit, Response> {
-  abstract get transform(): <T>() => OperatorFunction<T, T>;
-  abstract get client(): HttpClient;
-
-  abstract timer<T>(delay: number): OperatorFunction<T, T>;
+  // @ts-ignore
+  constructor(public client: HttpClient, cfg: IRemoteServiceConfig<RequestInit, Response>) {
+    super(cfg);
+  }
 
   consumeJSON<T>(text: string | unknown): T {
     return CommonUtil.consumeJSON(text);
@@ -34,10 +34,12 @@ export abstract class BaseAngularService extends BaseRemoteService<RequestInit, 
     });
 
     if (req.timeout) {
-      ngReq = ngReq.pipe(this.timer<T>(req.timeout));
+      // @ts-ignore
+      ngReq = ngReq.pipe(timeout(req.timeout));
     }
 
-    return restCast(ngReq.pipe(this.transform<T>()));
+    // @ts-ignore
+    return restCast(ngReq.pipe(map((v: unknown) => this.consumeJSON(v))));
   }
 
   makeRequest<T>(params: unknown[], opts: RequestDefinition): AngularResponse<T> {

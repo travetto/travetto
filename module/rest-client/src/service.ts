@@ -22,12 +22,13 @@ export class RestClientGeneratorService implements AutoCreate {
     output = Runtime.workspaceRelative(output.includes('#') ? Runtime.modulePath(output) : output);
     switch (type) {
       case 'angular': return new AngularClientGenerator(output, moduleName, options);
-      case 'fetch':
       case 'fetch-node':
       case 'fetch-web': return new FetchClientGenerator(output, moduleName, { ...options, node: !type.includes('web') });
-      case 'rest-rpc-web':
-      case 'rest-rpc-node':
-      case 'rest-rpc': return new RestRpcClientGenerator(output, !type.includes('web'));
+      case 'rpc-web':
+      case 'rpc-angular':
+      case 'rpc-node':
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        return new RestRpcClientGenerator(output, type.split('rpc-')[1] as 'web');
     }
   }
 
