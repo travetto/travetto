@@ -1,6 +1,6 @@
 {
   "name": "@travetto/image",
-  "version": "5.0.4",
+  "version": "5.0.5",
   "description": "Image support, resizing, and optimization",
   "keywords": [
     "images",
