@@ -15,7 +15,7 @@ yarn add @travetto/image
 
 This module provides functionality for image resizing, and png optimization. This is primarily meant to be used in conjunction with other modules, like the [Email Compilation Support](https://github.com/travetto/travetto/tree/main/module/email-compiler#readme "Email compiling module") module. It can also be invoked directly as needed (as it can be very handy for batch processing images on the command line). 
 
-The [ImageUtil](https://github.com/travetto/travetto/tree/main/module/image/src/util.ts#L55) functionality supports two operation modes:
+The [ImageUtil](https://github.com/travetto/travetto/tree/main/module/image/src/util.ts#L51) functionality supports two operation modes:
    *  In-process operations using [sharp](https://sharp.pixelplumbing.com/)
    *  Out-of-process operations using [ImageMagick](https://imagemagick.org/index.php),[pngquant](https://pngquant.org/) and [Jpegoptim](https://github.com/tjko/jpegoptim).
 
