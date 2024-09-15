@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-client",
-  "version": "5.0.7",
+  "version": "5.0.8",
   "description": "RESTful support for generating clients for controller endpoints",
   "keywords": [
     "rest",
