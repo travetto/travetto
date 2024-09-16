@@ -66,7 +66,7 @@ export class RestRpcClientGenerator implements ClientGenerator {
       `import { ${clientFactory.name} } from './rest-rpc';`,
       '',
       `export const factory = ${clientFactory.name}<{`,
-      ...[...this.classes.keys()].map(x => `  ${x}: ${x},`),
+      ...[...this.classes.keys()].map(x => `  ${x}: ${x};`),
       '}>();',
     ].join('\n');
 

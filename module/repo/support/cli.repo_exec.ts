@@ -37,7 +37,7 @@ export class RepoExecCommand implements CliCommandShape {
     const finalArgs = [...args, ...this._parsed.unknown];
 
     await RepoExecUtil.execOnModules(
-      this.changed ? 'changed' : 'all',
+      this.changed ? 'changed' : 'workspace',
       mod => spawn(cmd, finalArgs, {
         cwd: mod.sourceFolder,
         env: {

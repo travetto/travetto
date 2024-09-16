@@ -33,11 +33,11 @@ export class RepoVersionCommand implements CliCommandShape {
   }
 
   async main(level: SemverLevel, prefix?: string): Promise<void> {
-    const mode = this.mode ?? CHANGE_LEVELS.has(level) ? 'changed' : 'all';
+    const mode = this.mode ?? CHANGE_LEVELS.has(level) ? 'changed' : 'workspace';
 
     this.tag ??= (level === 'minor' || level === 'major');
 
-    const allModules = await CliModuleUtil.findModules(mode === 'changed' ? 'changed' : 'all');
+    const allModules = await CliModuleUtil.findModules(mode);
 
     const modules = allModules.filter(x => !x.internal && (this.mode !== 'direct' || this.modules?.includes(x.name)));
 

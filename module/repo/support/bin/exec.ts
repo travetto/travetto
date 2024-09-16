@@ -46,7 +46,7 @@ export class RepoExecUtil {
    * Run on all modules
    */
   static async execOnModules<T = ExecutionResult>(
-    mode: 'all' | 'changed',
+    mode: 'all' | 'workspace' | 'changed',
     operation: (mod: IndexedModule) => ChildProcess,
     config: ModuleRunConfig<T> = {}
   ): Promise<Map<IndexedModule, T>> {
