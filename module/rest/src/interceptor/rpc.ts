@@ -41,13 +41,8 @@ export class RpcInterceptor implements RestInterceptor<RestRpcConfig> {
     }
 
     const [controller, endpoint] = target;
-    const cls = ControllerRegistry.getClasses().find(x => x.name.endsWith(controller));
-    if (!cls) {
-      return SerializeUtil.serializeError(res, new AppError('Unknown controller'));
-    }
+    const ep = ControllerRegistry.getEndpointByNames(controller, endpoint);
 
-    const ctrl = ControllerRegistry.get(cls);
-    const ep = ctrl.endpoints.find(x => x.handlerName === endpoint);
     if (!ep) {
       return SerializeUtil.serializeError(res, new AppError('Unknown endpoint'));
     }
@@ -57,7 +52,7 @@ export class RpcInterceptor implements RestInterceptor<RestRpcConfig> {
       return SerializeUtil.serializeError(res, new AppError('Invalid parameters, must be an array'));
     }
 
-    req[RequestLoggingⲐ] = { controller: ctrl.class.name, endpoint: ep.handlerName };
+    req[RequestLoggingⲐ] = { controller: ep.class.name, endpoint: ep.handlerName };
     req[RequestParamsⲐ] = ep.params.map((x, i) => x.location === 'context' ? MissingParamⲐ : params[i]);
     req.body = ep.params.find((x, i) => x.location === 'body' ? params[i] : undefined) ?? params; // Re-assign body
 

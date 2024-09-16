@@ -20,8 +20,14 @@ type RetainFields<T> = Pick<T, ValidFieldNames<T>>;
  */
 class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointConfig> {
 
+  #endpointsById = new Map<string, EndpointConfig>();
+
   constructor() {
     super(DependencyRegistry);
+  }
+
+  getEndpointByNames(id: string): EndpointConfig | undefined {
+    return this.#endpointsById.get(id);
   }
 
   createPending(cls: Class): ControllerConfig {
@@ -40,7 +46,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     const controllerConf = this.getOrCreatePending(cls);
 
     const fieldConf: EndpointConfig = {
-      id: '',
+      id: `${cls.name}#${handler.name}`,
       path: '/',
       method: 'all',
       class: cls,
@@ -220,21 +226,24 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   onInstallFinalize(cls: Class): ControllerConfig {
     const final = asFull(this.getOrCreatePending(cls));
 
-    // Handle duplicates, take latest
-    const foundRoutes = new Set<string>();
-
-    final.endpoints = final.endpoints
-      .map(ep => {
-        ep.id = `${ep.method}#${final.basePath}${ep.path}`;
-        return ep;
-      })
-      .filter(ep => !foundRoutes.has(ep.id) && !!(foundRoutes.add(ep.id)));
+    // Store for lookup
+    for (const ep of final.endpoints) {
+      this.#endpointsById.set(ep.id, ep);
+    }
 
     if (this.has(final.basePath)) {
       console.debug('Reloading controller', { name: cls.name, path: final.basePath });
     }
 
     return final;
+  }
+
+  onUninstallFinalize<T>(cls: Class<T>): void {
+    const toDelete = [...this.#endpointsById.values()].filter(x => x.class.name === cls.name);
+    for (const k of toDelete) {
+      this.#endpointsById.delete(k.id);
+    }
+    super.onUninstallFinalize(cls);
   }
 }
 
