@@ -18,6 +18,7 @@ export class CompilerState implements ts.CompilerHost {
   private constructor() { }
 
   #outputPath: string;
+  #typingsPath?: string;
   #sourceFiles = new Set<string>();
   #sourceDirectory = new Map<string, string>();
   #sourceToEntry = new Map<string, CompileStateEntry>();
@@ -45,11 +46,18 @@ export class CompilerState implements ts.CompilerHost {
     this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
 
 
+    const baseOptions: ts.CompilerOptions = await TypescriptUtil.getCompilerOptions(this.#manifest);
+
     this.#compilerOptions = {
-      ...await TypescriptUtil.getCompilerOptions(this.#manifest),
+      ...baseOptions,
+      declarationDir: undefined,
       rootDir: this.#manifest.workspace.path,
       outDir: this.#outputPath
     };
+
+    if (baseOptions.declarationDir) {
+      this.#typingsPath = path.resolve(baseOptions.declarationDir);
+    }
 
     this.#modules = Object.values(this.#manifest.modules);
 
@@ -242,6 +250,9 @@ export class CompilerState implements ts.CompilerHost {
       text = CompilerUtil.rewritePackageJSON(this.#manifest, text);
     }
     const location = this.#tscOutputFileToOuptut.get(outputFile)! ?? outputFile;
+    if (this.#typingsPath && outputFile.includes('.d.')) {
+      ts.sys.writeFile(location.replace(this.#outputPath, this.#typingsPath), text, bom);
+    }
     ts.sys.writeFile(location, text, bom);
   }
 
