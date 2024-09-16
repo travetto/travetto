@@ -38,17 +38,23 @@ async function getEntry() {
   process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
   process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
 
-  // Load manifest without compiling, just stripping types away
-  const loc = require.resolve('@travetto/manifest').replace(/__index__.*/, 'src/context.ts');
-  const src = readFileSync(loc, 'utf8')
-    // Remove type information
-    .replace(/\s*[|]\s+undefined/g, '')
-    .replace(/<([^>]|\n)+>/gsm, '')
-    .replace(/[?]?: (string|[A-Z][a-zA-Z]+)/g, '')
-    .replace(/^(import )?type .*$/gm, '');
+  // eslint-disable-next-line no-undef
+  const manifestJs = path.resolve(__dirname, 'manifest-context.mjs');
+
+  // Compile if needed
+  if (!existsSync(manifestJs)) {
+    const ts = (await import('typescript')).default;
+    const loc = require.resolve('@travetto/manifest').replace(/__index__.*/, 'src/context.ts');
+    const text = ts.transpile(readFileSync(loc, 'utf8'), {
+      target: ts.ScriptTarget.ES2022,
+      module: ts.ModuleKind.ESNext,
+      removeComments: true
+    }, manifestJs);
+    writeFileSync(manifestJs, text, 'utf8');
+  }
 
   // Load module on demand
-  const { getManifestContext } = await import(`data:text/javascript;charset=utf-8,${encodeURIComponent(src)}`);
+  const { getManifestContext } = await import(manifestJs);
 
   /** @type {Ctx} */
   const ctx = getManifestContext();
@@ -83,4 +89,5 @@ async function getEntry() {
   }
 }
 
+// eslint-disable-next-line no-undef
 module.exports = { getEntry };
