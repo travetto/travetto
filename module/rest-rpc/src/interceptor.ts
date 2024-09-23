@@ -1,27 +1,20 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
-import { FilterContext, FilterNext, RouteConfig } from '../types';
+import { MissingParamⲐ, RequestParamsⲐ, RequestLoggingⲐ } from '@travetto/rest/src/internal/symbol';
+import {
+  BodyParseInterceptor, LoggingInterceptor, RouteConfig, FilterContext, FilterNext, ControllerRegistry,
+  RestInterceptor
+} from '@travetto/rest';
+import { SerializeUtil } from '@travetto/rest/src/interceptor/serialize-util';
+import { RestRpcConfig } from './config';
 
-import { ManagedInterceptorConfig, RestInterceptor } from './types';
-import { LoggingInterceptor } from './logging';
-import { BodyParseInterceptor } from './body-parse';
-import { ControllerRegistry } from '../registry/controller';
-import { MissingParamⲐ, RequestParamsⲐ, RequestLoggingⲐ } from '../internal/symbol';
-import { SerializeUtil } from './serialize-util';
-
-/**
- * Rest body parse configuration
- */
-@Config('rest.rpc')
-export class RestRpcConfig extends ManagedInterceptorConfig { }
 
 /**
  * Exposes functionality for RPC behavior
  */
 @Injectable()
-export class RpcInterceptor implements RestInterceptor<RestRpcConfig> {
+export class RestRpcInterceptor implements RestInterceptor<RestRpcConfig> {
 
   after = [BodyParseInterceptor];
   before = [LoggingInterceptor];
@@ -35,13 +28,12 @@ export class RpcInterceptor implements RestInterceptor<RestRpcConfig> {
   }
 
   async intercept({ req, res }: FilterContext<RestRpcConfig>, next: FilterNext): Promise<unknown> {
-    const target = req.headerFirst('X-TRV-RPC')?.split(/[#:.]/);
-    if (target?.length !== 2) {
+    const target = req.headerFirst('X-TRV-RPC')?.trim();
+    if (!target) {
       return await next();
     }
 
-    const [controller, endpoint] = target;
-    const ep = ControllerRegistry.getEndpointByNames(controller, endpoint);
+    const ep = ControllerRegistry.getEndpointByNames(target);
 
     if (!ep) {
       return SerializeUtil.serializeError(res, new AppError('Unknown endpoint'));
