@@ -38,7 +38,7 @@ The library, in addition to generating client output at runtime, also allows for
 ```bash
 $ trv rest:client --help
 
-Usage: rest:client [options] <type:angular|config|fetch-node|fetch-web|rpc-angular|rpc-node|rpc-web> [output:string]
+Usage: rest:client [options] <type:angular|config|fetch-node|fetch-web> [output:string]
 
 Options:
   -e, --env <string>     Application environment
