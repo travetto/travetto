@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex } from '@travetto/manifest';
+import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex, ManifestModuleRole } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
 import { TypescriptUtil } from '../support/ts-util';
@@ -38,6 +38,17 @@ export class CompilerState implements ts.CompilerHost {
 
   #readFile(sourceFile: string): string | undefined {
     return ts.sys.readFile(this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile);
+  }
+
+  #rewriteKnownModule(text: string, namespaceSuffix: string): string {
+    return text.replace(/@[a-zA-Z0-9_-]+[/][a-zA-Z0-9_-]+/g, mod => {
+      if (this.#manifestIndex.hasModule(mod)) {
+        const [ns, pkg] = mod.split('/');
+        return `${ns}-${namespaceSuffix}/${pkg}`;
+      } else {
+        return mod;
+      }
+    });
   }
 
   async init(idx: ManifestIndex): Promise<this> {
@@ -250,8 +261,13 @@ export class CompilerState implements ts.CompilerHost {
       text = CompilerUtil.rewritePackageJSON(this.#manifest, text);
     }
     const location = this.#tscOutputFileToOuptut.get(outputFile)! ?? outputFile;
+
     if (this.#typingsPath && outputFile.includes('.d.')) {
-      ts.sys.writeFile(location.replace(this.#outputPath, this.#typingsPath), text, bom);
+      ts.sys.writeFile(
+        this.#rewriteKnownModule(location.replace(this.#outputPath, this.#typingsPath), 'types'),
+        this.#rewriteKnownModule(text, 'types'),
+        bom
+      );
     }
     ts.sys.writeFile(location, text, bom);
   }
