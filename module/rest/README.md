@@ -277,7 +277,6 @@ Initialized {
       RestCorsConfig: {},
       RestGetCacheConfig: {},
       RestLogRoutesConfig: {},
-      RestRpcConfig: {},
       RestSslConfig: { active: false }
     }
   }
@@ -362,7 +361,6 @@ Initialized {
       RestCorsConfig: {},
       RestGetCacheConfig: {},
       RestLogRoutesConfig: {},
-      RestRpcConfig: {},
       RestSslConfig: { active: true }
     }
   }

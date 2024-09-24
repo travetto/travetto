@@ -1,7 +1,7 @@
 {
   "name": "@travetto/rest-rpc",
   "version": "5.0.8",
-  "description": "RESTful support for generating rpc client for a module",
+  "description": "RESTful RPC support for a module",
   "keywords": [
     "rest",
     "rpc",
@@ -31,7 +31,7 @@
     "@travetto/schema": "^5.0.4"
   },
   "travetto": {
-    "displayName": "RESTful RPC Client Support"
+    "displayName": "RESTful RPC Support"
   },
   "publishConfig": {
     "access": "public"

@@ -1,7 +1,7 @@
 // #UNCOMMENT import { Observable, catchError, mergeMap, timeout } from 'rxjs';
 // #UNCOMMENT import type { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { type RemoteRequest, consumeError, consumeJSON } from './rpc';
+import { type RpcRequest, consumeError, consumeJSON } from './rpc';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PromiseFn = (...args: any) => Promise<unknown>;
@@ -10,7 +10,7 @@ type PromiseRes<V extends PromiseFn> = Awaited<ReturnType<V>>;
 // @ts-ignore
 export function angularFactoryDecorator(service: { http: HttpClient }) {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  return function (opts: RemoteRequest<RequestInit, Response>) {
+  return function (opts: RpcRequest) {
     return {
       // @ts-ignore
       $<V extends PromiseFn>(this: V, ...params: Parameters<V>): Observable<PromiseRes<V>> {

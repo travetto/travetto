@@ -1,32 +1,30 @@
-type OrProm<X> = X | Promise<X>;
-
 type MethodKeys<C extends {}> = {
   [METHOD in keyof C]: C[METHOD] extends Function ? METHOD : never
 }[keyof C];
 
-export type PreRequestHandler<R> = (req: R) => OrProm<R | undefined | void>;
-export type PostResponseHandler<R> = (res: R) => OrProm<R | undefined | void>;
+export type PreRequestHandler = (item: RequestInit) => Promise<RequestInit | undefined | void>;
+export type PostResponseHandler = (item: Response) => Promise<Response | undefined | void>;
 
-export type RemoteRequest<B, R> = {
-  core?: Partial<B>;
+export type RpcRequest = {
+  core?: Partial<RequestInit>;
   timeout?: number;
   url: URL | string;
-  consumeJSON?: <T>(text?: unknown) => OrProm<T>;
-  consumeError?: (error: unknown) => OrProm<Error>;
+  consumeJSON?: <T>(text?: unknown) => (T | Promise<T>);
+  consumeError?: (item: unknown) => (Error | Promise<Error>);
   retriesOnConnectFailure?: number;
-  preRequestHandlers?: PreRequestHandler<B>[];
-  postResponseHandlers?: PostResponseHandler<R>[];
+  preRequestHandlers?: PreRequestHandler[];
+  postResponseHandlers?: PostResponseHandler[];
 }
 
-export type Client<T extends Record<string, {}>, E extends Record<string, Function> = {}> = {
+export type RpcClient<T extends Record<string, {}>, E extends Record<string, Function> = {}> = {
   [C in keyof T]: Pick<T[C], MethodKeys<T[C]>> & Record<MethodKeys<T[C]>, E>
 };
 
-export type ClientFactory<T extends Record<string, {}>> =
+export type RpcClientFactory<T extends Record<string, {}>> =
   <R extends Record<string, Function>>(
-    baseOpts: RemoteRequest<RequestInit, Response>,
-    decorate?: (opts: RemoteRequest<RequestInit, Response>) => R
-  ) => Client<T, R>;
+    baseOpts: RpcRequest,
+    decorate?: (opts: RpcRequest) => R
+  ) => RpcClient<T, R>;
 
 function isResponse(v: unknown): v is Response {
   return !!v && typeof v === 'object' && 'status' in v && !!v.status && 'headers' in v && !!v.headers;
@@ -53,9 +51,16 @@ function registerTimeout<T extends (number | string | { unref(): unknown })>(
   controller.signal.onabort = (): void => { timer && stop(timer); };
 }
 
-function restCast<T>(input: unknown): T {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return input as T;
+function buildRequest<T extends RequestInit>(base: T, controller: string, endpoint: string): T {
+  return {
+    ...base,
+    method: 'POST',
+    headers: {
+      ...base.headers,
+      'Content-Type': 'application/json',
+      'X-TRV-RPC': `${controller}#${endpoint}`
+    }
+  };
 }
 
 export function consumeJSON<T>(text: string | unknown): T {
@@ -93,7 +98,7 @@ export async function consumeError(err: unknown): Promise<Error> {
   }
 }
 
-export async function invokeFetch<T>(req: RemoteRequest<RequestInit, Response>): Promise<T> {
+export async function invokeFetch<T>(req: RpcRequest): Promise<T> {
   let core = req.core!;
 
   try {
@@ -163,25 +168,13 @@ export async function invokeFetch<T>(req: RemoteRequest<RequestInit, Response>):
   }
 }
 
-export function buildRequest<T extends RequestInit>(base: T, controller: string, endpoint: string): T {
-  return {
-    ...base,
-    method: 'POST',
-    headers: {
-      ...base.headers,
-      'Content-Type': 'application/json',
-      'X-TRV-RPC': `${controller}#${endpoint}`
-    }
-  };
-}
-
-export function clientFactory<T extends Record<string, {}>>(): ClientFactory<T> {
+export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<T> {
   // @ts-ignore
   return function (opts, decorate) {
-    const client: RemoteRequest<RequestInit, Response> = {
+    const client: RpcRequest = {
       timeout: 0,
       consumeJSON,
-      consumeError: restCast(consumeError),
+      consumeError,
       ...opts,
       core: { credentials: 'include', mode: 'cors', ...opts.core },
     };
@@ -191,7 +184,7 @@ export function clientFactory<T extends Record<string, {}>>(): ClientFactory<T> 
       get: (_, controller: string) =>
         cache[controller] ??= new Proxy({}, {
           get: (__, endpoint: string): unknown => {
-            const final: RemoteRequest<RequestInit, Response> = {
+            const final: RpcRequest = {
               ...client,
               core: buildRequest(client.core!, controller, endpoint)
             };

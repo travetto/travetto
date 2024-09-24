@@ -4,20 +4,11 @@ import { Runtime } from '@travetto/runtime';
 
 export const text = <>
   <c.StdHeader />
-  This module allows for a highly focused scenario, of producing {d.library('Typescript')}-based clients for use within a homogenous ecosystem.  If a more general/robust solution is needed, {d.mod('Openapi')} operates with the the full generative abilities provided by {d.library('OpenAPI')}'s client generation tools. <br />
+  This module allows for a highly focused scenario, of supporting RPC operations within a {d.mod('Rest')} application.  The module takes care of producing the appropriate interceptor to handle the RPC commands along with the ability to generate the appropriate client to be used to interact with the RPC functionality.  The client uses Proxy-based objects, along with {d.library('Typescript')} magic to create a dynamic client that is not generated.
 
-  The primary benefit with this approach is faster code generation times, as well as no longer having a dependency on {d.library('Docker')} during generation.  This results in far less system resources, along with a more responsive rendering process.
+  <c.Section title='CLI - rest:rpc'>
+    The library will create the RPC client in one of three flavors: fetch, fetch + node, angular.
 
-  <c.Code src='doc/sample-config.yml' title='Sample Configuration'></c.Code>
-
-  The code will only be generated during development (when {d.field('TRV_DYNAMIC')} is true-ish).  This is the same pattern the {d.mod('Model')}  and {d.mod('Rest')} take for responding to code changes, in realtime. <br />
-
-  By default the output is relative to the workspace root, which is helpful when generated clients are centralized within a monorepo.  If the goal is to have the output relative to the module itself, then use {d.path('@#relative/path')} as a convention.
-
-
-  <c.Section title='CLI - rest:client'>
-    The library, in addition to generating client output at runtime, also allows for direct generation of clients, regardless of any configurations defined in the application's configuration files.
-
-    <c.Execution title='Command Service' cmd='trv' args={['rest:client', '--help']} config={{ cwd: Runtime.workspace.path }} />
+    <c.Execution title='Command Service' cmd='trv' args={['rest:rpc', '--help']} config={{ cwd: Runtime.workspace.path }} />
   </c.Section>
 </>;
