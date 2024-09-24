@@ -10,6 +10,7 @@
     "strict": true,
     "declaration": true,
     "declarationMap": true,
+    "declarationDir": "node_modules",
     "esModuleInterop": true,
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,

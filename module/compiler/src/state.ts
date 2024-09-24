@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex, ManifestModuleRole } from '@travetto/manifest';
+import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
 import { TypescriptUtil } from '../support/ts-util';
@@ -67,7 +67,7 @@ export class CompilerState implements ts.CompilerHost {
     };
 
     if (baseOptions.declarationDir) {
-      this.#typingsPath = path.resolve(baseOptions.declarationDir);
+      this.#typingsPath = path.resolve(baseOptions.declarationDir.replace(/^node_modules$/, '.'));
     }
 
     this.#modules = Object.values(this.#manifest.modules);
