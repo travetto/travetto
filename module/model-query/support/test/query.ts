@@ -4,6 +4,7 @@ import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { ModelCrudSupport } from '@travetto/model/src/service/crud';
 import { TimeUtil } from '@travetto/runtime';
+import { NotFoundError } from '@travetto/model';
 
 import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './types';
 
@@ -35,6 +36,33 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     const results3 = await service.query(Person, { where: { name: { $regex: /\bomb.*/ } } });
     assert(results3.length === 0);
+  }
+
+
+  @Test('verify query one behavior')
+  async testQueryOne() {
+    const service = await this.service;
+    await this.saveAll(Person, [1, 2, 3, 8].map(x => Person.from({
+      name: 'Bob Omber',
+      age: 20 + x,
+      gender: 'm',
+      address: {
+        street1: 'a',
+        ...(x === 1 ? { street2: 'b' } : {})
+      }
+    })));
+
+    await assert.rejects(() => service.queryOne(Person, { where: { gender: 'm' } }), /Invalid number of results/);
+    await assert.rejects(() => service.queryOne(Person, { where: { gender: 'z' } }), NotFoundError);
+    await assert.rejects(() => service.queryOne(Person, { where: { gender: 'z' } }), /unknown/);
+    assert.deepStrictEqual(
+      (await service.queryOne(Person, { where: { gender: 'z' } }).catch(e => e)).details.where,
+      {
+        gender: 'z'
+      }
+    );
+    await assert.rejects(() => service.queryOne(Person, { where: { id: 'orange' } }), NotFoundError);
+    await assert.rejects(() => service.queryOne(Person, { where: { id: 'orange' } }), /orange/);
   }
 
   @Test('Verify array $in queries work properly')
