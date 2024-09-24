@@ -7,7 +7,6 @@ import { RootRegistry } from '@travetto/registry';
 import { RestClientConfig, RestClientProvider } from './config';
 import { AngularClientGenerator } from './provider/angular';
 import { FetchClientGenerator } from './provider/fetch';
-import { RestRpcClientGenerator } from './provider/rest-rpc';
 import type { ClientGenerator } from './provider/types';
 
 @Injectable()
@@ -24,11 +23,6 @@ export class RestClientGeneratorService implements AutoCreate {
       case 'angular': return new AngularClientGenerator(output, moduleName, options);
       case 'fetch-node':
       case 'fetch-web': return new FetchClientGenerator(output, moduleName, { ...options, node: !type.includes('web') });
-      case 'rpc-web':
-      case 'rpc-angular':
-      case 'rpc-node':
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        return new RestRpcClientGenerator(output, type.split('rpc-')[1] as 'web');
     }
   }
 

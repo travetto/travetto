@@ -1,9 +1,7 @@
 import { Config } from '@travetto/config';
 
 export type RestClientProvider = {
-  type:
-  'angular' | 'fetch-node' | 'fetch-web' |
-  'rpc-angular' | 'rpc-node' | 'rpc-web';
+  type: 'angular' | 'fetch-node' | 'fetch-web';
   output: string;
   moduleName?: string;
   options?: object;
