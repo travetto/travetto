@@ -26,12 +26,13 @@ export class ModelQueryUtil {
   /**
    * Verify result set is singular, and decide if failing on many should happen
    */
-  static verifyGetSingleCounts<T>(cls: Class<T>, res?: T[], failOnMany = true): T {
+  static verifyGetSingleCounts<T extends ModelType>(cls: Class<T>, failOnMany: boolean, res?: T[], where?: WhereClause<T>): T {
     res = res ?? [];
     if (res.length === 1 || res.length > 1 && !failOnMany) {
       return res[0]!;
     }
-    throw res.length === 0 ? new NotFoundError(cls, 'none') : new AppError(`Invalid number of results for find by id: ${res.length}`, 'data');
+    const requestedId = ((where && 'id' in where && typeof where.id === 'string') ? where.id : undefined) ?? 'unknown';
+    throw res.length === 0 ? new NotFoundError(cls, requestedId, { where }) : new AppError(`Invalid number of results for find by id: ${res.length}`, 'data');
   }
 
   /**
