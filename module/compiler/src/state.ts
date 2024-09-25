@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex } from '@travetto/manifest';
+import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex, ManifestModuleFolderType } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
 import { TypescriptUtil } from '../support/ts-util';
@@ -8,6 +8,9 @@ import { TypescriptUtil } from '../support/ts-util';
 import { CompilerUtil } from './util';
 import { CompileEmitError, CompileStateEntry } from './types';
 import { CommonUtil } from '../support/util';
+
+const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src']);
+const TYPINGS_EXT_RE = /[.]d[.][cm]?ts$/;
 
 export class CompilerState implements ts.CompilerHost {
 
@@ -40,15 +43,21 @@ export class CompilerState implements ts.CompilerHost {
     return ts.sys.readFile(this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile);
   }
 
-  #rewriteKnownModule(text: string, namespaceSuffix: string): string {
-    return text.replace(/@[a-zA-Z0-9_-]+[/][a-zA-Z0-9_-]+/g, mod => {
-      if (this.#manifestIndex.hasModule(mod)) {
-        const [ns, pkg] = mod.split('/');
-        return `${ns}-${namespaceSuffix}/${pkg}`;
-      } else {
-        return mod;
+  #writeExternalTypings(location: string, text: string, bom: boolean): void {
+    if (!this.#typingsPath) {
+      return;
+    }
+    let core = location.replace('.map', '');
+    if (!this.#outputToEntry.has(core)) {
+      core = core.replace('.d.ts', '.js');
+    }
+    const entry = this.#outputToEntry.get(core);
+    if (entry) {
+      const relative = this.#manifestIndex.getFromSource(entry.sourceFile)?.relativeFile;
+      if (relative && TYPINGS_FOLDER_KEYS.has(ManifestModuleUtil.getFolderKey(relative))) {
+        ts.sys.writeFile(location.replace(this.#outputPath, this.#typingsPath), text, bom);
       }
-    });
+    }
   }
 
   async init(idx: ManifestIndex): Promise<this> {
@@ -67,7 +76,7 @@ export class CompilerState implements ts.CompilerHost {
     };
 
     if (baseOptions.declarationDir) {
-      this.#typingsPath = path.resolve(baseOptions.declarationDir.replace(/^node_modules$/, '.'));
+      this.#typingsPath = path.resolve(this.#manifest.workspace.path, baseOptions.declarationDir);
     }
 
     this.#modules = Object.values(this.#manifest.modules);
@@ -260,15 +269,12 @@ export class CompilerState implements ts.CompilerHost {
     if (outputFile.endsWith('package.json')) {
       text = CompilerUtil.rewritePackageJSON(this.#manifest, text);
     }
-    const location = this.#tscOutputFileToOuptut.get(outputFile)! ?? outputFile;
+    const location = this.#tscOutputFileToOuptut.get(outputFile) ?? outputFile;
 
-    if (this.#typingsPath && outputFile.includes('.d.')) {
-      ts.sys.writeFile(
-        this.#rewriteKnownModule(location.replace(this.#outputPath, this.#typingsPath), 'types'),
-        this.#rewriteKnownModule(text, 'types'),
-        bom
-      );
+    if (TYPINGS_EXT_RE.test(outputFile)) {
+      this.#writeExternalTypings(location, text, bom);
     }
+
     ts.sys.writeFile(location, text, bom);
   }
 
