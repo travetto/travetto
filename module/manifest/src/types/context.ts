@@ -26,6 +26,8 @@ export type ManifestContext = {
     outputFolder: string;
     /** Location of development-time tool output */
     toolFolder: string;
+    /** Location for type outputs */
+    typesFolder?: string;
   };
   main: {
     /** Main module for manifest */

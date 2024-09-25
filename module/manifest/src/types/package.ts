@@ -46,6 +46,7 @@ export type Package = {
       isolated?: boolean;
       includes?: Record<string, 'main' | true>;
       watchIgnores?: string[];
+      typesFolder?: string;
     };
   };
   workspaces?: string[];

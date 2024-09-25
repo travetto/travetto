@@ -10,7 +10,7 @@ import { CompileEmitError, CompileStateEntry } from './types';
 import { CommonUtil } from '../support/util';
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src']);
-const TYPINGS_EXT_RE = /[.]d[.][cm]?ts$/;
+const TYPINGS_EXT_RE = /[.]d[.][cm]?ts([.]map)?$/;
 
 export class CompilerState implements ts.CompilerHost {
 
@@ -65,18 +65,14 @@ export class CompilerState implements ts.CompilerHost {
     this.#manifest = idx.manifest;
     this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
 
-
-    const baseOptions: ts.CompilerOptions = await TypescriptUtil.getCompilerOptions(this.#manifest);
-
     this.#compilerOptions = {
-      ...baseOptions,
-      declarationDir: undefined,
+      ...await TypescriptUtil.getCompilerOptions(this.#manifest),
       rootDir: this.#manifest.workspace.path,
       outDir: this.#outputPath
     };
 
-    if (baseOptions.declarationDir) {
-      this.#typingsPath = path.resolve(this.#manifest.workspace.path, baseOptions.declarationDir);
+    if (this.#manifest.build.typesFolder) {
+      this.#typingsPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.typesFolder);
     }
 
     this.#modules = Object.values(this.#manifest.modules);

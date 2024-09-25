@@ -149,7 +149,8 @@ export function getManifestContext(folder?: string): ManifestContext {
       compilerUrl: build.compilerUrl ?? getCompilerUrl(workspace),
       compilerModuleFolder: workspace.stripRoot(path.dirname(workspace.resolve('@travetto/compiler/package.json'))),
       outputFolder: build.outputFolder ?? OUTPUT_FOLDER,
-      toolFolder
+      toolFolder,
+      typesFolder: workspace.travetto?.build?.typesFolder
     },
     main: {
       name: mod.name ?? 'untitled',

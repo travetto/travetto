@@ -21,26 +21,36 @@ export class RestRpcClientGeneratorService implements AutoCreate {
     if (!this.config.clients.length || !Runtime.dynamic) {
       return;
     }
-
     ControllerRegistry.on(() => this.render());
   }
 
-  async renderProvider(config: RestRpcClient) {
-    await fs.mkdir(config.output, { recursive: true });
-
-    const classes = ControllerRegistry.getClasses()
+  async #getClasses(relativeTo: string): Promise<{ name: string, import: string }[]> {
+    return ControllerRegistry.getClasses()
       .filter(x => {
         const entry = RuntimeIndex.getEntry(Runtime.getSourceFile(x));
         return entry && entry.role === 'std';
       })
-      .map(x => ({
-        name: x.name,
-        import: ManifestModuleUtil.withoutSourceExtension(Runtime.getImport(x))
-      }));
+      .map(x => {
+        let imp = ManifestModuleUtil.withOutputExtension(Runtime.getImport(x));
+        if (RuntimeIndex.manifest.build.typesFolder) {
+          const base = Runtime.workspaceRelative(RuntimeIndex.manifest.build.typesFolder);
+          imp = path.relative(relativeTo, `${base}/node_modules/${imp}`);
+        }
+        return {
+          name: x.name,
+          import: imp
+        };
+      });
+  }
+
+  async renderProvider(config: RestRpcClient): Promise<void> {
+    await fs.mkdir(config.output, { recursive: true });
+
+    const classes = await this.#getClasses(config.output);
 
     const clientSourceFile = RuntimeIndex.getFromImport('@travetto/rest-rpc/support/client/rpc.ts')!.sourceFile;
-    const clientSourceContents = await fs.readFile(clientSourceFile, 'utf8');
     const clientOutputFile = path.resolve(config.output, path.basename(clientSourceFile));
+    const clientSourceContents = await fs.readFile(clientSourceFile, 'utf8');
 
     const flavorSourceFile = RuntimeIndex.getFromImport(`@travetto/rest-rpc/support/client/rpc-${config.type}.ts`)!.sourceFile;
     const flavorOutputFile = path.resolve(config.output, path.basename(flavorSourceFile));
