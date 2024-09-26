@@ -21,7 +21,7 @@ export class CompilerState implements ts.CompilerHost {
   private constructor() { }
 
   #outputPath: string;
-  #typingsPath?: string;
+  #typingsPath: string;
   #sourceFiles = new Set<string>();
   #sourceDirectory = new Map<string, string>();
   #sourceToEntry = new Map<string, CompileStateEntry>();
@@ -44,9 +44,6 @@ export class CompilerState implements ts.CompilerHost {
   }
 
   #writeExternalTypings(location: string, text: string, bom: boolean): void {
-    if (!this.#typingsPath) {
-      return;
-    }
     let core = location.replace('.map', '');
     if (!this.#outputToEntry.has(core)) {
       core = core.replace('.d.ts', '.js');
@@ -64,16 +61,13 @@ export class CompilerState implements ts.CompilerHost {
     this.#manifestIndex = idx;
     this.#manifest = idx.manifest;
     this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
+    this.#typingsPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.typesFolder);
 
     this.#compilerOptions = {
       ...await TypescriptUtil.getCompilerOptions(this.#manifest),
       rootDir: this.#manifest.workspace.path,
       outDir: this.#outputPath
     };
-
-    if (this.#manifest.build.typesFolder) {
-      this.#typingsPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.typesFolder);
-    }
 
     this.#modules = Object.values(this.#manifest.modules);
 
