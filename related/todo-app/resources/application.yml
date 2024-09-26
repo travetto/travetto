@@ -7,7 +7,5 @@ rest:
 
 rest.client:
   providers:
-    - type: fetch
+    - type: fetch-node
       output: related/todo-app/api-client
-    - type: rest-rpc
-      output: related/todo-app/resources/ui/js/api-client

@@ -14,7 +14,7 @@ export type RpcRequest = {
   retriesOnConnectFailure?: number;
   preRequestHandlers?: PreRequestHandler[];
   postResponseHandlers?: PostResponseHandler[];
-}
+};
 
 export type RpcClient<T extends Record<string, {}>, E extends Record<string, Function> = {}> = {
   [C in keyof T]: Pick<T[C], MethodKeys<T[C]>> & Record<MethodKeys<T[C]>, E>
@@ -98,7 +98,7 @@ export async function consumeError(err: unknown): Promise<Error> {
   }
 }
 
-export async function invokeFetch<T>(req: RpcRequest): Promise<T> {
+export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Promise<T> {
   let core = req.core!;
 
   try {
@@ -115,6 +115,8 @@ export async function invokeFetch<T>(req: RpcRequest): Promise<T> {
       // Node/Browser handling of timeout registration
       registerTimeout(controller, req.timeout, setTimeout, clearTimeout);
     }
+
+    core.body ??= JSON.stringify(params);
 
     let resolved: Response | undefined;
     for (let i = 0; i <= (req.retriesOnConnectFailure ?? 0); i += 1) {

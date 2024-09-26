@@ -21,8 +21,7 @@
   },
   "travetto": {
     "build": {
-      "compilerUrl": "http://127.0.0.1:26803",
-      "typesFolder": "typings"
+      "compilerUrl": "http://127.0.0.1:26803"
     },
     "doc": {
       "baseUrl": "https://github.com/travetto/travetto/tree/main",

@@ -31,14 +31,11 @@ export class RestRpcClientGeneratorService implements AutoCreate {
         return entry && entry.role === 'std';
       })
       .map(x => {
-        let imp = ManifestModuleUtil.withOutputExtension(Runtime.getImport(x));
-        if (RuntimeIndex.manifest.build.typesFolder) {
-          const base = Runtime.workspaceRelative(RuntimeIndex.manifest.build.typesFolder);
-          imp = path.relative(relativeTo, `${base}/node_modules/${imp}`);
-        }
+        const imp = ManifestModuleUtil.withOutputExtension(Runtime.getImport(x));
+        const base = Runtime.workspaceRelative(RuntimeIndex.manifest.build.typesFolder);
         return {
           name: x.name,
-          import: imp
+          import: path.relative(relativeTo, `${base}/node_modules/${imp}`)
         };
       });
   }
@@ -60,7 +57,7 @@ export class RestRpcClientGeneratorService implements AutoCreate {
 
     const factoryOutputFile = path.resolve(config.output, 'factory.ts');
     const factorySourceContents = [
-      `import { ${clientFactory.name} } from './rest-rpc';`,
+      `import { ${clientFactory.name} } from './rpc';`,
       ...classes.map((n) => `import type { ${n.name} } from '${n.import}';`),
       '',
       `export const factory = ${clientFactory.name}<{`,

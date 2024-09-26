@@ -13,11 +13,14 @@ const modPath = (/** @type {Ctx} */ ctx, mod, file) => {
   return `${base}${file.includes('.') ? '' : file.includes('/') ? '.ts' : '/__index__.ts'}`.replace(TS_EXT, '.js');
 };
 
+const needsWriting = (/** @type {string} */ src, /** @type {string} */ dest) =>
+  !existsSync(dest) || getAge(statSync(dest)) < getAge(statSync(src));
+
 const getTarget = (/** @type {Ctx} */ ctx, file = '') => ({
   dest: modPath(ctx, '@travetto/compiler', file),
   src: path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, file),
   async writeIfStale(/** @type {(text:string)=>(string|Promise<string>)}*/ transform) {
-    if (!existsSync(this.dest) || getAge(statSync(this.dest)) < getAge(statSync(this.src))) {
+    if (needsWriting(this.src, this.dest)) {
       const text = readFileSync(this.src, 'utf8');
       mkdirSync(path.dirname(this.dest), { recursive: true });
       writeFileSync(this.dest, await transform(text), 'utf8');
@@ -40,11 +43,11 @@ async function getEntry() {
 
   // eslint-disable-next-line no-undef
   const manifestJs = path.resolve(__dirname, 'manifest-context.mjs');
+  const loc = require.resolve('@travetto/manifest').replace(/__index__.*/, 'src/context.ts');
 
   // Compile if needed
-  if (!existsSync(manifestJs)) {
+  if (needsWriting(loc, manifestJs)) {
     const ts = (await import('typescript')).default;
-    const loc = require.resolve('@travetto/manifest').replace(/__index__.*/, 'src/context.ts');
     const text = ts.transpile(readFileSync(loc, 'utf8'), {
       target: ts.ScriptTarget.ES2022,
       module: ts.ModuleKind.ESNext,
