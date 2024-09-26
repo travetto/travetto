@@ -81,6 +81,7 @@ async function getEntry() {
 
   // Load
   try {
+    /** @type {import('../support/entry.trvc')} */
     const res = await import(target('support/entry.trvc.ts').dest);
     return await res.main(ctx);
   } catch (err) {
