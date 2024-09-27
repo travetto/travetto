@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-rpc",
-  "version": "5.0.8",
+  "version": "5.0.9",
   "description": "RESTful RPC support for a module",
   "keywords": [
     "rest",
@@ -26,9 +26,9 @@
     "directory": "module/rest-rpc"
   },
   "dependencies": {
-    "@travetto/config": "^5.0.4",
-    "@travetto/rest": "^5.0.5",
-    "@travetto/schema": "^5.0.4"
+    "@travetto/config": "^5.0.5",
+    "@travetto/rest": "^5.0.6",
+    "@travetto/schema": "^5.0.5"
   },
   "travetto": {
     "displayName": "RESTful RPC Support"
