@@ -394,12 +394,7 @@ npx trv run:rest
       RestAuthLoginConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
-      RestClientConfig: {
-        providers: {
-          '0': { type: 'fetch', output: 'related/todo-app/api-client' },
-          '1': { type: 'rest-rpc', output: 'related/todo-app/resources/ui/js/api-client' }
-        }
-      },
+      RestClientConfig: { providers: { '0': { type: 'fetch-node', output: 'related/todo-app/api-client' } } },
       RestConfig: {
         serve: true,
         port: 12555,
@@ -414,7 +409,7 @@ npx trv run:rest
       RestCorsConfig: {},
       RestGetCacheConfig: {},
       RestLogRoutesConfig: {},
-      RestRpcConfig: {},
+      RestRpcConfig: { clients: {} },
       RestSessionConfig: {},
       RestSslConfig: { active: false },
       SessionConfig: {

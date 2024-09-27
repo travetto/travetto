@@ -422,12 +422,7 @@ First we must start the application:
       RestAuthLoginConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> permissions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-      RestClientConfig: <span class="token punctuation">{{'{'}}</span>
-        providers: <span class="token punctuation">{{'{'}}</span>
-          <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token punctuation">{{'{'}}</span> type: <span class="token string">'fetch'</span>, output: <span class="token string">'related/todo-app/api-client'</span> <span class="token punctuation">{{'}'}}</span>,
-          <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token punctuation">{{'{'}}</span> type: <span class="token string">'rest-rpc'</span>, output: <span class="token string">'related/todo-app/resources/ui/js/api-client'</span> <span class="token punctuation">{{'}'}}</span>
-        <span class="token punctuation">{{'}'}}</span>
-      <span class="token punctuation">{{'}'}}</span>,
+      RestClientConfig: <span class="token punctuation">{{'{'}}</span> providers: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token punctuation">{{'{'}}</span> type: <span class="token string">'fetch-node'</span>, output: <span class="token string">'related/todo-app/api-client'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">12555</span>,
@@ -442,7 +437,7 @@ First we must start the application:
       RestCorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestGetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestLogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      RestRpcConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      RestRpcConfig: <span class="token punctuation">{{'{'}}</span> clients: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestSessionConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       SessionConfig: <span class="token punctuation">{{'{'}}</span>

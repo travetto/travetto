@@ -91,7 +91,8 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
     "compilerUrl": "http://127.0.0.1:26803",
     "compilerModuleFolder": "module/compiler",
     "outputFolder": ".trv/output",
-    "toolFolder": ".trv/tool"
+    "toolFolder": ".trv/tool",
+    "typesFolder": ".trv/types"
   },
   "main": {
     "name": "@travetto/manifest",

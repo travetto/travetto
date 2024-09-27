@@ -38,7 +38,7 @@ This contract provides the ability to apply the query support to return one or m
    * Find one by query, fail if not found
    * &#64;param cls The model class
    * &#64;param query The query to search for
-   * &#64;param failOnMany Should the query fail on more than one result found
+   * &#64;param failOnMany Should the query fail on more than one result found, defaults to true
    */</span>
   <span class="token generic-function"><span class="token function">queryOne</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> query<span class="token operator">:</span> ModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> failOnMany<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
