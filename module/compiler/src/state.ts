@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex } from '@travetto/manifest';
+import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex, ManifestModuleFolderType } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
 import { TypescriptUtil } from '../support/ts-util';
@@ -8,6 +8,9 @@ import { TypescriptUtil } from '../support/ts-util';
 import { CompilerUtil } from './util';
 import { CompileEmitError, CompileStateEntry } from './types';
 import { CommonUtil } from '../support/util';
+
+const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src']);
+const TYPINGS_EXT_RE = /[.]d[.][cm]?ts([.]map)?$/;
 
 export class CompilerState implements ts.CompilerHost {
 
@@ -18,6 +21,7 @@ export class CompilerState implements ts.CompilerHost {
   private constructor() { }
 
   #outputPath: string;
+  #typingsPath: string;
   #sourceFiles = new Set<string>();
   #sourceDirectory = new Map<string, string>();
   #sourceToEntry = new Map<string, CompileStateEntry>();
@@ -39,11 +43,25 @@ export class CompilerState implements ts.CompilerHost {
     return ts.sys.readFile(this.#sourceToEntry.get(sourceFile)?.sourceFile ?? sourceFile);
   }
 
+  #writeExternalTypings(location: string, text: string, bom: boolean): void {
+    let core = location.replace('.map', '');
+    if (!this.#outputToEntry.has(core)) {
+      core = core.replace('.d.ts', '.js');
+    }
+    const entry = this.#outputToEntry.get(core);
+    if (entry) {
+      const relative = this.#manifestIndex.getFromSource(entry.sourceFile)?.relativeFile;
+      if (relative && TYPINGS_FOLDER_KEYS.has(ManifestModuleUtil.getFolderKey(relative))) {
+        ts.sys.writeFile(location.replace(this.#outputPath, this.#typingsPath), text, bom);
+      }
+    }
+  }
+
   async init(idx: ManifestIndex): Promise<this> {
     this.#manifestIndex = idx;
     this.#manifest = idx.manifest;
     this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
-
+    this.#typingsPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.typesFolder);
 
     this.#compilerOptions = {
       ...await TypescriptUtil.getCompilerOptions(this.#manifest),
@@ -241,7 +259,12 @@ export class CompilerState implements ts.CompilerHost {
     if (outputFile.endsWith('package.json')) {
       text = CompilerUtil.rewritePackageJSON(this.#manifest, text);
     }
-    const location = this.#tscOutputFileToOuptut.get(outputFile)! ?? outputFile;
+    const location = this.#tscOutputFileToOuptut.get(outputFile) ?? outputFile;
+
+    if (TYPINGS_EXT_RE.test(outputFile)) {
+      this.#writeExternalTypings(location, text, bom);
+    }
+
     ts.sys.writeFile(location, text, bom);
   }
 

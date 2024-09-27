@@ -1,4 +1,4 @@
-import { toError } from './rest-rpc';
+import { consumeError } from './rpc';
 
 export async function toNodeError(payload: unknown): Promise<Error> {
   try {
@@ -9,5 +9,5 @@ export async function toNodeError(payload: unknown): Promise<Error> {
       return res;
     }
   } catch { }
-  return toError(payload);
+  return consumeError(payload);
 }

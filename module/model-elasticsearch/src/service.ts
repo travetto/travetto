@@ -413,10 +413,9 @@ export class ElasticsearchModelService implements
     return Promise.all(items.map(m => this.postLoad(cls, m)));
   }
 
-  async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T> {
-    await QueryVerifier.verify(cls, query);
-
-    return ModelQueryUtil.verifyGetSingleCounts(cls, await this.query<T>(cls, { ...query, limit: failOnMany ? 2 : 1 }));
+  async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany: boolean = true): Promise<T> {
+    const result = await this.query<T>(cls, { ...query, limit: failOnMany ? 2 : 1 });
+    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, failOnMany, result, query.where);
   }
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {

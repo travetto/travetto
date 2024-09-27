@@ -21,6 +21,8 @@ related/*/out
 related/*/.vscode
 !related/vscode-plugin/.vscode
 
+module/compiler/bin/manifest-context.mjs
+
 # Pack
 dist/
 

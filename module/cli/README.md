@@ -44,6 +44,7 @@ Commands:
   repo:version      Version all changed dependencies
   repo:version-sync Enforces all packages to write out their versions and dependencies
   rest:client       Run client rest operation
+  rest:rpc          Run client rest operation
   run:double        Doubles a number
   run:rest          Run a rest server as an application
   scaffold          Command to run scaffolding

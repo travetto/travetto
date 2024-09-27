@@ -21,13 +21,13 @@ export class DocAngularCommand {
       target = target.replace(root, '').split('/').pop()!;
     }
 
-    const mods = new Set((await CliModuleUtil.findModules('all'))
+    const mods = new Set((await CliModuleUtil.findModules('workspace'))
       .filter(x => !target || x.sourcePath === path.resolve(root, target))
       .filter(x => (x.files.doc ?? []).some(f => /DOC[.]tsx?$/.test(f.sourceFile))));
 
     if (mods.size > 1) {
       // Build out docs
-      await RepoExecUtil.execOnModules('all',
+      await RepoExecUtil.execOnModules('workspace',
         mod => {
           const proc = spawn('trv', ['doc'], {
             timeout: 20000,

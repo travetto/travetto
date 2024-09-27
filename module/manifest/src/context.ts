@@ -17,6 +17,7 @@ type Workspace = Pkg<{
 const TOOL_FOLDER = '.trv/tool';
 const COMPILER_FOLDER = '.trv/compiler';
 const OUTPUT_FOLDER = '.trv/output';
+const TYPES_FOLDER = '.trv/types';
 
 const WS_ROOT: Record<string, Workspace> = {};
 
@@ -133,7 +134,6 @@ export function getManifestContext(folder?: string): ManifestContext {
   const workspace = resolveWorkspace();
   const mod = resolveModule(workspace, folder);
   const build = workspace.travetto?.build ?? {};
-  const toolFolder = build.toolFolder ?? TOOL_FOLDER;
 
   return {
     workspace: {
@@ -149,7 +149,8 @@ export function getManifestContext(folder?: string): ManifestContext {
       compilerUrl: build.compilerUrl ?? getCompilerUrl(workspace),
       compilerModuleFolder: workspace.stripRoot(path.dirname(workspace.resolve('@travetto/compiler/package.json'))),
       outputFolder: build.outputFolder ?? OUTPUT_FOLDER,
-      toolFolder
+      toolFolder: build.toolFolder ?? TOOL_FOLDER,
+      typesFolder: build.typesFolder ?? TYPES_FOLDER
     },
     main: {
       name: mod.name ?? 'untitled',

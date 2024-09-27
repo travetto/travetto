@@ -411,9 +411,9 @@ export class MongoModelService implements
     return col.countDocuments(filter);
   }
 
-  async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany = false): Promise<T> {
+  async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany = true): Promise<T> {
     const results = await this.query<T>(cls, { ...query, limit: failOnMany ? 2 : 1 });
-    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, results, failOnMany);
+    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, failOnMany, results, query.where);
   }
 
   // Query Crud

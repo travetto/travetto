@@ -15,7 +15,7 @@ import { CommonUtil } from './util';
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {
   const client = new CompilerClient(ctx, Log.scoped('client'));
-  const buildFolders = [ctx.build.outputFolder, ctx.build.compilerFolder];
+  const buildFolders = [ctx.build.outputFolder, ctx.build.compilerFolder, ctx.build.typesFolder];
   Log.root = ctx.workspace.path;
   Log.initLevel('error');
 

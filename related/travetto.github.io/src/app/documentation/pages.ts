@@ -152,6 +152,10 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-session/rest-session.component').then(m => m.RestSessionComponent)
       },
       {
+        path: 'rest-rpc', title: 'Rest RPC',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-rpc/rest-rpc.component').then(m => m.RestRpcComponent)
+      }
+      {
         path: 'openapi', title: 'OpenAPI',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/openapi/openapi.component').then(m => m.OpenapiComponent)
       },

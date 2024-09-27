@@ -167,6 +167,7 @@ module/rest-fastify
 module/rest-fastify-lambda
 module/rest-koa
 module/rest-koa-lambda
+module/rest-rpc
 module/rest-session
 module/rest-upload
 module/runtime
@@ -266,6 +267,7 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
     module/rest-fastify-lambda <workspace-root>/module/rest-fastify-lambda
                module/rest-koa <workspace-root>/module/rest-koa
         module/rest-koa-lambda <workspace-root>/module/rest-koa-lambda
+               module/rest-rpc <workspace-root>/module/rest-rpc
            module/rest-session <workspace-root>/module/rest-session
             module/rest-upload <workspace-root>/module/rest-upload
                 module/runtime <workspace-root>/module/runtime

@@ -44,10 +44,10 @@ export class CliModuleUtil {
    * @param transitive
    * @returns
    */
-  static async findModules(mode: 'all' | 'changed', fromHash?: string, toHash?: string): Promise<IndexedModule[]> {
+  static async findModules(mode: 'all' | 'changed' | 'workspace', fromHash?: string, toHash?: string): Promise<IndexedModule[]> {
     return (mode === 'changed' ?
       await this.findChangedModulesRecursive(fromHash, toHash, true) :
-      [...RuntimeIndex.getModuleList('all')].map(x => RuntimeIndex.getModule(x)!)
+      [...RuntimeIndex.getModuleList(mode)].map(x => RuntimeIndex.getModule(x)!)
     ).filter(x => x.sourcePath !== Runtime.workspace.path);
   }
 

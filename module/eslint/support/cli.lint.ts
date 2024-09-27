@@ -32,8 +32,8 @@ export class LintCommand implements CliCommandShape {
         files = (await CliScmUtil.findChangedFiles(this.since, 'HEAD'))
           .filter(x => !x.endsWith('package.json') && !x.endsWith('package-lock.json'));
       } else {
-        const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all', undefined, 'HEAD');
-        files = mods.filter(x => x.workspace).map(x => x.sourcePath);
+        const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'workspace', undefined, 'HEAD');
+        files = mods.map(x => x.sourcePath);
       }
     } catch (err) {
       if (err instanceof Error) {

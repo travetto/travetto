@@ -18,7 +18,7 @@ export interface ModelQuerySupport {
    * Find one by query, fail if not found
    * @param cls The model class
    * @param query The query to search for
-   * @param failOnMany Should the query fail on more than one result found
+   * @param failOnMany Should the query fail on more than one result found, defaults to true
    */
   queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T>;
   /**

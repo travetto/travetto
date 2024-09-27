@@ -13,11 +13,14 @@ const modPath = (/** @type {Ctx} */ ctx, mod, file) => {
   return `${base}${file.includes('.') ? '' : file.includes('/') ? '.ts' : '/__index__.ts'}`.replace(TS_EXT, '.js');
 };
 
+const needsWriting = (/** @type {string} */ src, /** @type {string} */ dest) =>
+  !existsSync(dest) || getAge(statSync(dest)) < getAge(statSync(src));
+
 const getTarget = (/** @type {Ctx} */ ctx, file = '') => ({
   dest: modPath(ctx, '@travetto/compiler', file),
   src: path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, file),
   async writeIfStale(/** @type {(text:string)=>(string|Promise<string>)}*/ transform) {
-    if (!existsSync(this.dest) || getAge(statSync(this.dest)) < getAge(statSync(this.src))) {
+    if (needsWriting(this.src, this.dest)) {
       const text = readFileSync(this.src, 'utf8');
       mkdirSync(path.dirname(this.dest), { recursive: true });
       writeFileSync(this.dest, await transform(text), 'utf8');
@@ -38,17 +41,23 @@ async function getEntry() {
   process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
   process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
 
-  // Load manifest without compiling, just stripping types away
+  // eslint-disable-next-line no-undef
+  const manifestJs = path.resolve(__dirname, 'manifest-context.mjs');
   const loc = require.resolve('@travetto/manifest').replace(/__index__.*/, 'src/context.ts');
-  const src = readFileSync(loc, 'utf8')
-    // Remove type information
-    .replace(/\s*[|]\s+undefined/g, '')
-    .replace(/<([^>]|\n)+>/gsm, '')
-    .replace(/[?]?: (string|[A-Z][a-zA-Z]+)/g, '')
-    .replace(/^(import )?type .*$/gm, '');
+
+  // Compile if needed
+  if (needsWriting(loc, manifestJs)) {
+    const ts = (await import('typescript')).default;
+    const text = ts.transpile(readFileSync(loc, 'utf8'), {
+      target: ts.ScriptTarget.ES2022,
+      module: ts.ModuleKind.ESNext,
+      removeComments: true
+    }, manifestJs);
+    writeFileSync(manifestJs, text, 'utf8');
+  }
 
   // Load module on demand
-  const { getManifestContext } = await import(`data:text/javascript;charset=utf-8,${encodeURIComponent(src)}`);
+  const { getManifestContext } = await import(manifestJs);
 
   /** @type {Ctx} */
   const ctx = getManifestContext();
@@ -75,6 +84,7 @@ async function getEntry() {
 
   // Load
   try {
+    /** @type {import('../support/entry.trvc')} */
     const res = await import(target('support/entry.trvc.ts').dest);
     return await res.main(ctx);
   } catch (err) {
@@ -83,4 +93,5 @@ async function getEntry() {
   }
 }
 
+// eslint-disable-next-line no-undef
 module.exports = { getEntry };

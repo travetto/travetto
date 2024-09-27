@@ -261,7 +261,7 @@ export class SQLModelService implements
   @Connected()
   async queryOne<T extends ModelType>(cls: Class<T>, builder: ModelQuery<T>, failOnMany = true): Promise<T> {
     const res = await this.query<T>(cls, { ...builder, limit: failOnMany ? 2 : 1 });
-    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, res, failOnMany);
+    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, failOnMany, res, builder.where);
   }
 
   @Connected()
