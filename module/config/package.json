@@ -28,7 +28,7 @@
   "dependencies": {
     "@travetto/di": "^5.0.5",
     "@travetto/schema": "^5.0.5",
-    "yaml": "^2.5.0"
+    "yaml": "^2.5.1"
   },
   "travetto": {
     "displayName": "Configuration"

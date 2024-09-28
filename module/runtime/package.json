@@ -30,8 +30,8 @@
   "dependencies": {
     "@travetto/manifest": "^5.0.4",
     "@types/debug": "^4.1.12",
-    "@types/node": "^22.5.4",
-    "debug": "^4.3.6"
+    "@types/node": "^22.7.4",
+    "debug": "^4.3.7"
   },
   "peerDependencies": {
     "@travetto/transformer": "^5.0.5"

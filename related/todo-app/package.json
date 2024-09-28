@@ -31,7 +31,7 @@
     "@travetto/rest-express": "^5.0.6",
     "@travetto/rest-rpc": "^5.0.10",
     "@travetto/rest-session": "^5.0.6",
-    "vue": "^3.4.38"
+    "vue": "^3.5.10"
   },
   "devDependencies": {
     "@travetto/compiler": "^5.0.6",

@@ -1,14 +1,9 @@
-import os from 'node:os';
 import assert from 'node:assert';
-import path from 'node:path';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
-import { Util } from '@travetto/runtime';
-import { Inject } from '@travetto/di';
+import { RootRegistry } from '@travetto/registry';
 
-import { RestClientGeneratorService } from '../../src/service';
 import { Todo } from './service';
 import { RestClientTestUtil } from './util';
 
@@ -36,15 +31,12 @@ async function go() {
 `;
 }
 
-@InjectableSuite()
 @Suite()
 export abstract class RestClientServerSuite extends BaseRestSuite {
 
-  @Inject()
-  svc: RestClientGeneratorService;
-
   @BeforeAll()
   async setupPuppeteer(): Promise<void> {
+    await RootRegistry.init();
     await RestClientTestUtil.setupPuppeteer();
   }
 
@@ -72,23 +64,18 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
 
   @Test({ timeout: 10000 })
   async fetchNodeClient() {
-    const result = await RestClientTestUtil.runNodeClient(this.svc, fetchRequestBody('./src', this.port!));
+    const result = await RestClientTestUtil.runNodeClient(fetchRequestBody('./src', this.port!));
     this.validateFetchResponses(result);
   }
 
   @Test({ timeout: 10000 })
   async fetchWebClient() {
-    const result = await RestClientTestUtil.runWebClient(this.svc, fetchRequestBody('./api.js', this.port!));
+    const result = await RestClientTestUtil.runWebClient(fetchRequestBody('./api.js', this.port!));
     this.validateFetchResponses(result);
   }
 
   @Test({ timeout: 10000 })
   async angularClient() {
-    const tmp = path.resolve(os.tmpdir(), `rest-client-angular-${Util.uuid()}`);
-    try {
-      await this.svc.renderClient({ type: 'angular', output: tmp });
-    } finally {
-      await RestClientTestUtil.cleanupFolder(tmp);
-    }
+    await RestClientTestUtil.runAngularClient();
   }
 }

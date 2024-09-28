@@ -1,13 +1,10 @@
-import path from 'node:path';
-
 import { Env } from '@travetto/runtime';
-import { CliCommand, CliCommandShape, CliValidationResultError } from '@travetto/cli';
-import { DependencyRegistry } from '@travetto/di';
+import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 import { Ignore } from '@travetto/schema';
 
-import type { RestClientProvider } from '../src/config';
-import { RestClientGeneratorService } from '../src/service';
+import { AngularClientGenerator } from '../src/provider/angular';
+import { FetchClientGenerator } from '../src/provider/fetch';
 
 /**
  * Run client rest operation
@@ -23,25 +20,12 @@ export class CliRestClientCommand implements CliCommandShape {
     Env.TRV_DYNAMIC.set(false);
   }
 
-  get #service(): Promise<RestClientGeneratorService> {
-    return RootRegistry.init().then(() => DependencyRegistry.getInstance(RestClientGeneratorService));
-  }
-
-  async main(type: RestClientProvider['type'] | 'config', output?: string): Promise<void> {
-    if (type === 'config') {
-      const svc = await this.#service;
-      for (const provider of svc.providers) {
-        await svc.renderClient(provider);
-      }
-    } else {
-      if (!output) {
-        throw new CliValidationResultError(this, [
-          { message: 'output is required when type is not `config`', source: 'arg' }
-        ]);
-      }
-      const svc = await this.#service;
-      output = path.resolve(output);
-      return svc.renderClient({ type, output, moduleName: this.module, });
+  async main(type: 'angular' | 'fetch-node' | 'fetch-web', output: string): Promise<void> {
+    await RootRegistry.init();
+    switch (type) {
+      case 'angular': return new AngularClientGenerator(output, this.module, {}).render();
+      case 'fetch-node':
+      case 'fetch-web': return new FetchClientGenerator(output, this.module, { node: !type.includes('web') }).render();
     }
   }
 }

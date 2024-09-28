@@ -6,7 +6,8 @@ import path from 'node:path';
 import { ExecUtil, Util, Runtime } from '@travetto/runtime';
 import { TestFixtures } from '@travetto/test';
 
-import { RestClientGeneratorService } from '../../src/service';
+import { FetchClientGenerator } from '../../src/provider/fetch';
+import { AngularClientGenerator } from '../../src/provider/angular';
 
 const fixtures = new TestFixtures(['@travetto/rest-client']);
 
@@ -48,10 +49,10 @@ export class RestClientTestUtil {
     }
   }
 
-  static async runNodeClient(svc: RestClientGeneratorService, body: string): Promise<string> {
+  static async runNodeClient(body: string): Promise<string> {
     const tmp = path.resolve(os.tmpdir(), `rest-client-fetch-node-${Util.uuid()}`);
     try {
-      await svc.renderClient({ type: 'fetch-node', output: tmp, options: {} });
+      await new FetchClientGenerator(tmp, Runtime.main.name, { node: true }).render();
 
       await fs.writeFile(
         path.resolve(tmp, 'main.ts'),
@@ -67,10 +68,10 @@ export class RestClientTestUtil {
     }
   }
 
-  static async runWebClient(svc: RestClientGeneratorService, body: string): Promise<string> {
+  static async runWebClient(body: string): Promise<string> {
     const tmp = path.resolve(os.tmpdir(), `rest-client-fetch-web-${Util.uuid()}`);
     try {
-      await svc.renderClient({ type: 'fetch-web', output: tmp });
+      await new FetchClientGenerator(tmp, Runtime.main.name, { node: false }).render();
 
       await fs.writeFile(
         path.resolve(tmp, 'main.ts'),
@@ -89,6 +90,15 @@ export class RestClientTestUtil {
       return result.stdout;
     } finally {
       await this.cleanupFolder(tmp);
+    }
+  }
+
+  static async runAngularClient() {
+    const tmp = path.resolve(os.tmpdir(), `rest-client-angular-${Util.uuid()}`);
+    try {
+      await new AngularClientGenerator(tmp, Runtime.main.name).render();
+    } finally {
+      await RestClientTestUtil.cleanupFolder(tmp);
     }
   }
 }

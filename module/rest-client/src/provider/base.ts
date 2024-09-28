@@ -2,12 +2,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { BinaryUtil, Class, Runtime, Util, castTo, describeFunction } from '@travetto/runtime';
-import { ControllerConfig, ControllerRegistry, EndpointConfig } from '@travetto/rest';
+import { ControllerConfig, ControllerRegistry, ControllerVisitor, ControllerVisitUtil, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ, UnknownType } from '@travetto/schema/src/internal/types';
 
 import { ParamConfig } from './shared/types';
-import type { ClientGenerator, EndpointDesc, Imp, RenderContent } from './types';
+import type { EndpointDesc, Imp, RenderContent } from './types';
 
 export const TYPE_MAPPING = new Map<Function, string>([
   [String, 'string'],
@@ -40,7 +40,7 @@ const recreateTemplateLiteral = (template: TemplateLiteral, escape = false): str
 /**
  * Base functional skeleton for generating rest client artifacts
  */
-export abstract class BaseClientGenerator<C = unknown> implements ClientGenerator {
+export abstract class BaseClientGenerator<C = unknown> implements ControllerVisitor {
 
   #output: string;
   #schemaContent = new Map<string, RenderContent>();
@@ -425,5 +425,9 @@ export abstract class BaseClientGenerator<C = unknown> implements ClientGenerato
 
   seenImport(imp: string): boolean {
     return this.#imports.has(imp);
+  }
+
+  async render(): Promise<void> {
+    return await ControllerVisitUtil.visit(this);
   }
 }

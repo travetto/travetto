@@ -20,6 +20,7 @@ export function angularFactoryDecorator(service: { http: HttpClient }) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         return service.http.request(opts.core!.method! as 'get', opts.url.toString(), {
           body: params,
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           headers: opts.core?.headers as Record<string, string>,
           withCredentials: opts.core?.credentials === 'include',
           responseType: 'text',

@@ -33,11 +33,11 @@
     "@travetto/runtime": "^5.0.5",
     "@travetto/schema": "^5.0.5",
     "@types/cookies": "^0.9.0",
-    "@types/express-serve-static-core": "^4.19.5",
+    "@types/express-serve-static-core": "^4.19.6",
     "@types/inflation": "^2.0.4",
     "cookies": "^0.9.1",
     "inflation": "^2.1.0",
-    "raw-body": "^2.5.2"
+    "raw-body": "^3.0.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^5.0.5",

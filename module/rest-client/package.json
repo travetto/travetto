@@ -31,7 +31,10 @@
     "@travetto/schema": "^5.0.5"
   },
   "travetto": {
-    "displayName": "RESTful Client Support"
+    "displayName": "RESTful Client Support",
+    "roles": [
+      "build"
+    ]
   },
   "publishConfig": {
     "access": "public"
