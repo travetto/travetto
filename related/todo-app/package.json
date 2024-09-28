@@ -29,12 +29,12 @@
     "@travetto/model-mongo": "^5.0.5",
     "@travetto/openapi": "^5.0.6",
     "@travetto/rest-express": "^5.0.6",
-    "@travetto/rest-rpc": "^5.0.9",
+    "@travetto/rest-rpc": "^5.0.10",
     "@travetto/rest-session": "^5.0.6",
     "vue": "^3.4.38"
   },
   "devDependencies": {
-    "@travetto/compiler": "^5.0.5",
+    "@travetto/compiler": "^5.0.6",
     "@travetto/email-compiler": "^5.0.6",
     "@travetto/pack": "^5.0.6",
     "@travetto/rest-client": "^5.0.9"
