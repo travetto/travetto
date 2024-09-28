@@ -18,16 +18,16 @@ export function angularFactoryDecorator(service: { http: HttpClient }) {
         const readJSON = opts.consumeJSON ?? consumeJSON;
 
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        return service.http.request(opts.core!.method! as 'get', opts.url, {
+        return service.http.request(opts.core!.method! as 'get', opts.url.toString(), {
           body: params,
-          headers: opts.core?.headers,
+          headers: opts.core?.headers as Record<string, string>,
           withCredentials: opts.core?.credentials === 'include',
           responseType: 'text',
           reportProgress: false
         }).pipe(
           // @ts-ignore
           mergeMap(
-            readJSON<PromiseRes<V>>
+            async (v: unknown) => (await readJSON<PromiseRes<V>>(v))!
           ),
           // @ts-ignore
           timeout(

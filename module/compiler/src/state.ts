@@ -9,7 +9,7 @@ import { CompilerUtil } from './util';
 import { CompileEmitError, CompileStateEntry } from './types';
 import { CommonUtil } from '../support/util';
 
-const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src']);
+const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
 const TYPINGS_EXT_RE = /[.]d[.][cm]?ts([.]map)?$/;
 
 export class CompilerState implements ts.CompilerHost {
@@ -261,7 +261,7 @@ export class CompilerState implements ts.CompilerHost {
     }
     const location = this.#tscOutputFileToOuptut.get(outputFile) ?? outputFile;
 
-    if (TYPINGS_EXT_RE.test(outputFile)) {
+    if (TYPINGS_EXT_RE.test(outputFile) || outputFile.endsWith('package.json')) {
       this.#writeExternalTypings(location, text, bom);
     }
 
