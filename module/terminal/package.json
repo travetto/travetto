@@ -1,6 +1,6 @@
 {
   "name": "@travetto/terminal",
-  "version": "5.0.5",
+  "version": "5.0.6",
   "description": "General terminal support",
   "keywords": [
     "terminal",
@@ -24,7 +24,7 @@
     "directory": "module/terminal"
   },
   "dependencies": {
-    "@travetto/runtime": "^5.0.5",
+    "@travetto/runtime": "^5.0.6",
     "chalk": "^4.1.2"
   },
   "travetto": {
