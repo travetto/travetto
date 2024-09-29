@@ -4,23 +4,23 @@
     "name": "{{{author.name}}}"
   },
   "dependencies": {
-    // {{#dependencies}}
+    {{#dependencies}}
     "{{{.}}}": "^{{{frameworkVersion}}}",
-    // {{/dependencies}}
+    {{/dependencies}}
     "@travetto/cli": "^{{{frameworkVersion}}}"
   },
   "devDependencies": {
-    // {{#devDependencies}}
+    {{#devDependencies}}
     "{{{.}}}": "^{{{frameworkVersion}}}",
-    // {{/devDependencies}}
+    {{/devDependencies}}
     "@travetto/compiler": "^{{{frameworkVersion}}}",
     "@travetto/pack": "^{{{frameworkVersion}}}"
   },
   "description": "A Travetto-based project",
   "keywords": [
-    // {{#moduleNames}}
+    {{#moduleNames}}
     "{{{.}}}",
-    // {{/moduleNames}}
+    {{/moduleNames}}
     "travetto"
   ],
   "license": "MIT",
