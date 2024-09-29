@@ -63,6 +63,32 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
   };
 }
 
+export function getBody(inputs: unknown[]): { body: Blob | string, headers: Record<string, string> } {
+  // If we have a blob, upload
+  if (!inputs.some(x => x instanceof Blob)) {
+    return {
+      body: JSON.stringify(inputs),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
+  }
+
+  const plainInputs = inputs.map(x => x instanceof Blob ? null : x);
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const blob: Blob = inputs.find(x => x instanceof Blob)! as Blob;
+
+  return {
+    body: blob,
+    headers: blob instanceof File ? {
+      'Content-Disposition': `inline; filename="${blob.name}"`,
+      'Content-Type': blob.type ?? 'binary/octet-stream',
+      'X-TRV-RPC-INPUTS': btoa(encodeURIComponent(JSON.stringify(plainInputs)))
+    } : {}
+  };
+}
+
+
 export function consumeJSON<T>(text: string | unknown): T {
   if (typeof text !== 'string') {
     return consumeJSON(JSON.stringify(text));
@@ -102,6 +128,13 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
   let core = req.core!;
 
   try {
+    const { body, headers } = getBody(params);
+    core.body = body;
+    core.headers = {
+      ...core.headers ?? {},
+      ...headers
+    };
+
     for (const fn of req.preRequestHandlers ?? []) {
       const computed = await fn(core);
       if (computed) {
@@ -115,8 +148,6 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
       // Node/Browser handling of timeout registration
       registerTimeout(controller, req.timeout, setTimeout, clearTimeout);
     }
-
-    core.body ??= JSON.stringify(params);
 
     let resolved: Response | undefined;
     for (let i = 0; i <= (req.retriesOnConnectFailure ?? 0); i += 1) {

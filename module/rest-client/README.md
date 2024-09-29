@@ -17,20 +17,6 @@ This module allows for a highly focused scenario, of producing [Typescript](http
 
 The primary benefit with this approach is faster code generation times, as well as no longer having a dependency on [docker](https://www.docker.com/community-edition) during generation.  This results in far less system resources, along with a more responsive rendering process.
 
-**Code: Sample Configuration**
-```yaml
----
-rest.client:
-  providers:
-    - type: fetch
-      output: api-client/sample
-      moduleName: '@travetto-client/sample'
-```
-
-The code will only be generated during development (when `TRV_DYNAMIC` is true-ish).  This is the same pattern the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.")  and [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") take for responding to code changes, in realtime. 
-
-By default the output is relative to the workspace root, which is helpful when generated clients are centralized within a monorepo.  If the goal is to have the output relative to the module itself, then use `@#relative/path` as a convention.
-
 ## CLI - rest:client
 The library, in addition to generating client output at runtime, also allows for direct generation of clients, regardless of any configurations defined in the application's configuration files.
 
@@ -38,7 +24,7 @@ The library, in addition to generating client output at runtime, also allows for
 ```bash
 $ trv rest:client --help
 
-Usage: rest:client [options] <type:angular|config|fetch-node|fetch-web> [output:string]
+Usage: rest:client [options] <type:angular|fetch-node|fetch-web> <output:string>
 
 Options:
   -e, --env <string>     Application environment

@@ -9,18 +9,19 @@ import {
 import { SerializeUtil } from '@travetto/rest/src/interceptor/serialize-util';
 import { RestRpcConfig } from './config';
 
-
 /**
  * Exposes functionality for RPC behavior
  */
 @Injectable()
 export class RestRpcInterceptor implements RestInterceptor<RestRpcConfig> {
 
-  after = [BodyParseInterceptor];
-  before = [LoggingInterceptor];
+  before = [LoggingInterceptor, BodyParseInterceptor];
 
   @Inject()
   config: RestRpcConfig;
+
+  @Inject()
+  body: BodyParseInterceptor;
 
   applies(route: RouteConfig): boolean {
     // Global handler
@@ -39,14 +40,36 @@ export class RestRpcInterceptor implements RestInterceptor<RestRpcConfig> {
       return SerializeUtil.serializeError(res, new AppError('Unknown endpoint'));
     }
 
-    const params = req.body ?? [];
+    let params: unknown[];
+
+    // Allow request to read inputs from header, if body isn't JSON
+    const isBinary = req.getContentType()?.full !== 'application/json';
+    if (isBinary) {
+      const data = req.headerFirst('X-TRV-RPC-INPUTS')?.trim();
+      if (data) {
+        let decoded = Buffer.from(data, 'base64').toString('utf8');
+        if (decoded.startsWith('%')) {
+          decoded = decodeURIComponent(decoded);
+        }
+        params = JSON.parse(decoded);
+      }
+    } else {
+      await this.body.intercept({ req, res, config: this.body.config }, () => { });
+      params = req.body;
+      if (Array.isArray(params)) {
+        req.body = ep.params.find((x, i) => x.location === 'body' ? params[i] : undefined) ?? params; // Re-assign body
+      }
+    }
+
+    params ??= [];
+
     if (!Array.isArray(params)) {
       return SerializeUtil.serializeError(res, new AppError('Invalid parameters, must be an array'));
     }
 
     req[RequestLoggingⲐ] = { controller: ep.class.name, endpoint: ep.handlerName };
-    req[RequestParamsⲐ] = ep.params.map((x, i) => x.location === 'context' ? MissingParamⲐ : params[i]);
-    req.body = ep.params.find((x, i) => x.location === 'body' ? params[i] : undefined) ?? params; // Re-assign body
+    req[RequestParamsⲐ] = ep.params.map((x, i) =>
+      (x.location === 'context' || (x.location === 'body' && isBinary)) ? MissingParamⲐ : params[i]);
 
     return await ep.handlerFinalized!(req, res);
   }

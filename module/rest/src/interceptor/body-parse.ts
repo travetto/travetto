@@ -24,7 +24,7 @@ export class RestBodyParseConfig extends ManagedInterceptorConfig {
   /**
    * Max body size limit
    */
-  limit: string = '100kb';
+  limit: string = '1mb';
   /**
    * How to interpret different content types
    */

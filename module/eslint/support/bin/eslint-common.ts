@@ -97,7 +97,8 @@ export const IGNORES = [
   'out/**/*',
   '**/*.d.ts',
   '**/fixtures/**/*',
-  '**/resources/**/*'
+  '**/resources/**/*',
+  '**/compiler/bin/manifest-context.mjs'
 ];
 
 export const TS_OPTIONS = {

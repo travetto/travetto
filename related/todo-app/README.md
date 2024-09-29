@@ -393,8 +393,7 @@ npx trv run:rest
       RestAuthContextConfig: {},
       RestAuthLoginConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
-      RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
-      RestClientConfig: { providers: { '0': { type: 'fetch-node', output: 'related/todo-app/api-client' } } },
+      RestBodyParseConfig: { limit: '1mb', parsingTypes: {} },
       RestConfig: {
         serve: true,
         port: 12555,

@@ -8,13 +8,6 @@ export const text = <>
 
   The primary benefit with this approach is faster code generation times, as well as no longer having a dependency on {d.library('Docker')} during generation.  This results in far less system resources, along with a more responsive rendering process.
 
-  <c.Code src='doc/sample-config.yml' title='Sample Configuration'></c.Code>
-
-  The code will only be generated during development (when {d.field('TRV_DYNAMIC')} is true-ish).  This is the same pattern the {d.mod('Model')}  and {d.mod('Rest')} take for responding to code changes, in realtime. <br />
-
-  By default the output is relative to the workspace root, which is helpful when generated clients are centralized within a monorepo.  If the goal is to have the output relative to the module itself, then use {d.path('@#relative/path')} as a convention.
-
-
   <c.Section title='CLI - rest:client'>
     The library, in addition to generating client output at runtime, also allows for direct generation of clients, regardless of any configurations defined in the application's configuration files.
 

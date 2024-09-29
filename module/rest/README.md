@@ -263,7 +263,7 @@ Initialized {
     active: {
       RestAcceptsConfig: { types: {} },
       RestAsyncContextConfig: {},
-      RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
+      RestBodyParseConfig: { limit: '1mb', parsingTypes: {} },
       RestConfig: {
         serve: true,
         port: 3000,
@@ -347,7 +347,7 @@ Initialized {
     active: {
       RestAcceptsConfig: { types: {} },
       RestAsyncContextConfig: {},
-      RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
+      RestBodyParseConfig: { limit: '1mb', parsingTypes: {} },
       RestConfig: {
         serve: true,
         port: 3000,
@@ -399,7 +399,7 @@ export class RestBodyParseConfig extends ManagedInterceptorConfig {
   /**
    * Max body size limit
    */
-  limit: string = '100kb';
+  limit: string = '1mb';
   /**
    * How to interpret different content types
    */

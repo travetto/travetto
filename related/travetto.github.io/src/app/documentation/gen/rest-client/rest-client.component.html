@@ -17,22 +17,6 @@
 
 This module allows for a highly focused scenario, of producing <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a>-based clients for use within a homogenous ecosystem.  If a more general/robust solution is needed, <a class="module-link" routerLink="/docs/openapi" title="OpenAPI integration support for the Travetto framework">OpenAPI Specification</a> operates with the the full generative abilities provided by <a target="_blank" class="external-link" href="https://github.com/OAI/OpenAPI-Specification">OpenAPI</a>'s client generation tools. <br><br>
 The primary benefit with this approach is faster code generation times, as well as no longer having a dependency on <a target="_blank" class="external-link" href="https://www.docker.com/community-edition">docker</a> during generation.  This results in far less system resources, along with a more responsive rendering process.
-
-  <figure class="code">
-    <figcaption class="code">Sample Configuration
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest-client/doc/sample-config.yml">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-yaml"><span class="token punctuation">---</span>
-<span class="token key atrule">rest.client</span><span class="token punctuation">:</span>
-  <span class="token key atrule">providers</span><span class="token punctuation">:</span>
-    <span class="token punctuation">-</span> <span class="token key atrule">type</span><span class="token punctuation">:</span> fetch
-      <span class="token key atrule">output</span><span class="token punctuation">:</span> api<span class="token punctuation">-</span>client/sample
-      <span class="token key atrule">moduleName</span><span class="token punctuation">:</span> <span class="token string">'&#64;travetto-client/sample'</span></code></pre>
-  </figure>
-
-The code will only be generated during development (when <code class="item field">TRV_DYNAMIC</code> is true-ish).  This is the same pattern the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>  and <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> take for responding to code changes, in realtime. <br><br>
-By default the output is relative to the workspace root, which is helpful when generated clients are centralized within a monorepo.  If the goal is to have the output relative to the module itself, then use <code class="item path">&#64;#relative/path</code> as a convention.
 <h2 id="cli-rest-client">CLI - rest:client</h2>
 
 The library, in addition to generating client output at runtime, also allows for direct generation of clients, regardless of any configurations defined in the application's configuration files.
@@ -43,7 +27,7 @@ The library, in addition to generating client output at runtime, also allows for
 </figcaption>
     <pre><code class="language-bash">$ trv rest:client <span class="token parameter variable">--help</span>
 
-Usage: rest:client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>type:angular<span class="token operator">|</span>config<span class="token operator">|</span>fetch-node<span class="token operator">|</span>fetch-web<span class="token operator">></span> <span class="token punctuation">[</span>output:string<span class="token punctuation">]</span>
+Usage: rest:client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>type:angular<span class="token operator">|</span>fetch-node<span class="token operator">|</span>fetch-web<span class="token operator">></span> <span class="token operator">&lt;</span>output:string<span class="token operator">></span>
 
 Options:
   -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>     Application environment

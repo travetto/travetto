@@ -1,7 +1,7 @@
 // #UNCOMMENT import { Observable, catchError, mergeMap, timeout } from 'rxjs';
 // #UNCOMMENT import type { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { type RpcRequest, consumeError, consumeJSON } from './rpc';
+import { type RpcRequest, consumeError, consumeJSON, getBody, } from './rpc';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PromiseFn = (...args: any) => Promise<unknown>;
@@ -16,12 +16,16 @@ export function angularFactoryDecorator(service: { http: HttpClient }) {
       $<V extends PromiseFn>(this: V, ...params: Parameters<V>): Observable<PromiseRes<V>> {
         const readError = opts.consumeError ?? consumeError;
         const readJSON = opts.consumeJSON ?? consumeJSON;
+        const { body, headers } = getBody(params);
 
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         return service.http.request(opts.core!.method! as 'get', opts.url.toString(), {
-          body: params,
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          headers: opts.core?.headers as Record<string, string>,
+          body,
+          headers: {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            ...opts.core?.headers as Record<string, string>,
+            ...headers
+          },
           withCredentials: opts.core?.credentials === 'include',
           responseType: 'text',
           reportProgress: false
