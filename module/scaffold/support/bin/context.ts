@@ -139,6 +139,7 @@ export class Context {
         .replaceAll('_$', '}}}'),
       this.templateContext(),
     )
+      .replace(/^[ ]*[/][/][ ]*\n/gsm, '')
       .replace(/[ ]*[/][/][ ]*@ts-expect-error[^\n]*\n/gsm, '') // Excluding errors
       .replace(/^[ ]*[/][/][ ]*[{][{][^\n]*\n/gsm, '') // Excluding conditional comments, full-line
       .replace(/[ ]*[/][/][ ]*[{][{][^\n]*/gsm, ''); // Excluding conditional comments
