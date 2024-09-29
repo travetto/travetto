@@ -1,6 +1,6 @@
 {
   "name": "@travetto/eslint",
-  "version": "5.0.6",
+  "version": "5.0.7",
   "description": "ES Linting Rules",
   "keywords": [
     "eslint",
