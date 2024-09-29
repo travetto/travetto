@@ -154,14 +154,17 @@ export class Context {
 
   async resolveFeature(feat: Feature): Promise<void> {
     if (feat.package) {
-      if (feat.package.startsWith('@travetto')) {
-        if (DEV_DEPS.has(feat.package)) {
-          this.#devDependencies.push(feat.package);
+      const pkgs = Array.isArray(feat.package) ? feat.package : [feat.package];
+      for (const pkg of pkgs) {
+        if (pkg.startsWith('@travetto')) {
+          if (DEV_DEPS.has(pkg)) {
+            this.#devDependencies.push(pkg);
+          } else {
+            this.#dependencies.push(pkg);
+          }
         } else {
-          this.#dependencies.push(feat.package);
+          this.#peerDependencies.push(pkg);
         }
-      } else {
-        this.#peerDependencies.push(feat.package);
       }
     }
     if (feat.field) {

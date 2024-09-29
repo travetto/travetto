@@ -12,8 +12,7 @@
   "resources/application.yml": {},
   "src/model/todo.ts": {
     "requires": [
-      "@travetto/model",
-      "@travetto/model-memory"
+      "@travetto/model"
     ]
   },
   "src/rest/todo.ts": {
@@ -31,6 +30,7 @@
   "src/rest/auth.config.ts": {
     "requires": [
       "@travetto/rest",
+      "@travetto/model-memory",
       "@travetto/auth-rest"
     ]
   },

@@ -1,6 +1,6 @@
 export type Feature = {
   title?: string;
-  package?: string;
+  package?: string | string[];
   field?: string;
   value?: string;
   required?: boolean;
@@ -45,8 +45,8 @@ export const FEATURES: Feature[] = [
     title: 'Rest Authentication',
     package: '@travetto/auth-rest',
     addons: [
-      { title: 'Rest Session', package: '@travetto/rest-session' },
-      { title: 'Auth Rest Session', package: '@travetto/auth-rest-session' },
+      { title: 'Rest Session', package: ['@travetto/rest-session', '@travetto/model-memory'] },
+      { title: 'Auth Rest Session', package: ['@travetto/auth-rest-session', '@travetto/model-memory'] },
     ]
   },
   {
