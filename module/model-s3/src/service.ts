@@ -413,15 +413,19 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async getBlobWriteUrl(location: string, meta: BlobMeta, exp: TimeSpan = '1h'): Promise<string> {
+    const base = this.#getMetaBase(meta);
     return await getSignedUrl(
       this.client,
       new PutObjectCommand({
         ...this.#q(MODEL_BLOB, location),
-        ...this.#getMetaBase(meta),
+        ...base,
         ...(meta.size ? { ContentLength: meta.size } : {}),
         ...((meta.hash && meta.hash !== '-1') ? { ChecksumSHA256: meta.hash } : {}),
       }),
-      { expiresIn: TimeUtil.asSeconds(exp) }
+      {
+        expiresIn: TimeUtil.asSeconds(exp),
+        ...(meta.contentType ? { signableHeaders: new Set(['content-type']) } : {})
+      }
     );
   }
 
