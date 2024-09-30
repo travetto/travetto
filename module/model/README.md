@@ -179,13 +179,36 @@ export interface ModelBlobSupport {
    * Get metadata for blob
    * @param location The location of the blob
    */
-  describeBlob(location: string): Promise<BlobMeta>;
+  getBlobMeta(location: string): Promise<BlobMeta>;
 
   /**
    * Delete blob by location
    * @param location The location of the blob
    */
   deleteBlob(location: string): Promise<void>;
+
+  /**
+   * Update blob metadata
+   * @param location The location of the blob
+   */
+  updateBlobMeta(location: string, meta: BlobMeta): Promise<void>;
+
+  /**
+   * Produces an externally usable URL for sharing limited read access to a specific resource
+   *
+   * @param location The asset location to read from
+   * @param exp Expiry
+   */
+  getBlobReadUrl?(location: string, exp?: TimeSpan): Promise<string>;
+
+  /**
+   * Produces an externally usable URL for sharing allowing direct write access
+   *
+   * @param location The asset location to write to
+   * @param meta The metadata to associate with the final asset
+   * @param exp Expiry
+   */
+  getBlobWriteUrl?(location: string, meta: BlobMeta, exp?: TimeSpan): Promise<string>;
 }
 ```
 

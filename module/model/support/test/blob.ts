@@ -22,8 +22,8 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const id = Util.uuid();
 
     await service.upsertBlob(id, buffer);
-    const m = await service.describeBlob(id);
-    const retrieved = await service.describeBlob(id);
+    const m = await service.getBlobMeta(id);
+    const retrieved = await service.getBlobMeta(id);
     assert.deepStrictEqual(m, retrieved);
   }
 
@@ -35,13 +35,13 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const id = Util.uuid();
 
     await service.upsertBlob(id, buffer, { hash: '10' });
-    assert((await service.describeBlob(id)).hash === '10');
+    assert((await service.getBlobMeta(id)).hash === '10');
 
     await service.upsertBlob(id, buffer, { hash: '20' });
-    assert((await service.describeBlob(id)).hash === '20');
+    assert((await service.getBlobMeta(id)).hash === '20');
 
     await service.upsertBlob(id, buffer, { hash: '30' }, false);
-    assert((await service.describeBlob(id)).hash === '20');
+    assert((await service.getBlobMeta(id)).hash === '20');
   }
 
   @Test()
@@ -51,7 +51,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const id = Util.uuid();
     await service.upsertBlob(id, buffer);
-    const { hash } = await service.describeBlob(id);
+    const { hash } = await service.getBlobMeta(id);
 
     const retrieved = await service.getBlob(id);
     const { hash: received } = meta(retrieved)!;
@@ -132,5 +132,66 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(buffer.length === savedMeta.size);
     assert('asset.yml' === savedMeta.filename);
     assert(undefined === savedMeta.hash);
+  }
+
+
+  @Test()
+  async metadataUpdate() {
+    const service = await this.service;
+
+    await this.writeAndGet();
+
+    await service.updateBlobMeta('orange', {
+      contentType: 'text/yml',
+      filename: 'orange.yml'
+    });
+
+    const savedMeta = await service.getBlobMeta('orange');
+
+    assert('text/yml' === savedMeta.contentType);
+    assert('orange.yml' === savedMeta.filename);
+    assert(undefined === savedMeta.hash);
+  }
+
+
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  @Test({ skip: (x: unknown) => !(x as ModelBlobSuite).serviceClass.prototype.getBlobWriteUrl })
+  async signedUrl() {
+    const service = await this.service;
+
+
+    const buffer = Buffer.alloc(1.5 * 10000);
+    for (let i = 0; i < buffer.length; i++) {
+      buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
+    }
+
+    const writable = await service.getBlobWriteUrl!('largeFile/one', {
+      contentType: 'image/jpeg',
+    });
+
+    console.log(writable);
+    assert(writable);
+
+    const res = await fetch(writable, {
+      method: 'PUT',
+      body: new File([buffer], 'gary', { type: 'image/jpeg' }),
+    });
+
+    console.error(await res.text());
+
+    assert(res.ok);
+
+    await service.updateBlobMeta('largeFile/one', {
+      contentType: 'image/jpeg',
+      title: 'orange',
+      filename: 'gary',
+      size: buffer.length,
+    });
+
+    const found = await service.getBlob('largeFile/one');
+    assert(found.size === buffer.length);
+    assert(found.type === 'image/jpeg');
+    assert(BinaryUtil.getBlobMeta(found)?.title === 'orange');
+    assert(BinaryUtil.getBlobMeta(found)?.filename === 'gary');
   }
 }

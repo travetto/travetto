@@ -31,7 +31,7 @@ export const isCrudSupported = hasFunction<ModelCrudSupport>('upsert');
 export const isExpirySupported = hasFunction<ModelExpirySupport>('deleteExpired');
 
 /**
- * Type guard for determining if service supports streaming operation
+ * Type guard for determining if service supports blob operations
  */
 export const isBlobSupported = hasFunction<ModelBlobSupport>('getBlob');
 
@@ -41,7 +41,7 @@ export const isBlobSupported = hasFunction<ModelBlobSupport>('getBlob');
 export const isStorageSupported = hasFunction<ModelStorageSupport>('createStorage');
 
 /**
- * Type guard for determining if service supports streaming operation
+ * Type guard for determining if service supports bulk operation
  */
 export const isBulkSupported = hasFunction<ModelBulkSupport>('processBulk');
 

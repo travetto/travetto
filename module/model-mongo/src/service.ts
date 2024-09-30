@@ -235,7 +235,7 @@ export class MongoModelService implements
 
   // Blob
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
-    const existing = await this.describeBlob(location).then(() => true, () => false);
+    const existing = await this.getBlobMeta(location).then(() => true, () => false);
     if (!overwrite && existing) {
       return;
     }
@@ -253,19 +253,27 @@ export class MongoModelService implements
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
-    const meta = await this.describeBlob(location);
+    const meta = await this.getBlobMeta(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     const mongoRange = final ? { start: final.start, end: final.end + 1 } : undefined;
     return BinaryUtil.readableBlob(() => this.#bucket.openDownloadStreamByName(location, mongoRange), { ...meta, range: final });
   }
 
-  async describeBlob(location: string): Promise<BlobMeta> {
-    return (await this.#describeBlobRaw(location)).metadata ?? {};
+  async getBlobMeta(location: string): Promise<BlobMeta> {
+    const res = await this.#db.collection<{ metadata: BlobMeta }>(`${ModelBlobNamespace}.files`).findOne({ filename: location });
+    return res!.metadata;
   }
 
   async deleteBlob(location: string): Promise<void> {
     const fileId = (await this.#describeBlobRaw(location))._id;
     await this.#bucket.delete(fileId);
+  }
+
+  async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
+    await this.#db.collection<{ metadata: BlobMeta }>(`${ModelBlobNamespace}.files`).findOneAndUpdate(
+      { filename: location },
+      { $set: { metadata: meta, contentType: meta.contentType! } },
+    );
   }
 
   // Bulk
