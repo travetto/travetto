@@ -22,8 +22,8 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const id = Util.uuid();
 
     await service.upsertBlob(id, buffer);
-    const m = await service.describeBlob(id);
-    const retrieved = await service.describeBlob(id);
+    const m = await service.getBlobMeta(id);
+    const retrieved = await service.getBlobMeta(id);
     assert.deepStrictEqual(m, retrieved);
   }
 
@@ -35,13 +35,13 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     const id = Util.uuid();
 
     await service.upsertBlob(id, buffer, { hash: '10' });
-    assert((await service.describeBlob(id)).hash === '10');
+    assert((await service.getBlobMeta(id)).hash === '10');
 
     await service.upsertBlob(id, buffer, { hash: '20' });
-    assert((await service.describeBlob(id)).hash === '20');
+    assert((await service.getBlobMeta(id)).hash === '20');
 
     await service.upsertBlob(id, buffer, { hash: '30' }, false);
-    assert((await service.describeBlob(id)).hash === '20');
+    assert((await service.getBlobMeta(id)).hash === '20');
   }
 
   @Test()
@@ -51,7 +51,7 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
 
     const id = Util.uuid();
     await service.upsertBlob(id, buffer);
-    const { hash } = await service.describeBlob(id);
+    const { hash } = await service.getBlobMeta(id);
 
     const retrieved = await service.getBlob(id);
     const { hash: received } = meta(retrieved)!;
@@ -131,6 +131,25 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert('text/yaml' === savedMeta.contentType);
     assert(buffer.length === savedMeta.size);
     assert('asset.yml' === savedMeta.filename);
+    assert(undefined === savedMeta.hash);
+  }
+
+
+  @Test()
+  async metadataUpdate() {
+    const service = await this.service;
+
+    await this.writeAndGet();
+
+    await service.updateBlobMeta('orange', {
+      contentType: 'text/yml',
+      filename: 'orange.yml'
+    });
+
+    const savedMeta = await service.getBlobMeta('orange');
+
+    assert('text/yml' === savedMeta.contentType);
+    assert('orange.yml' === savedMeta.filename);
     assert(undefined === savedMeta.hash);
   }
 }

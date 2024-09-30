@@ -73,11 +73,8 @@ export class S3BlobSuite extends ModelBlobSuite {
       buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
     }
 
-    const writable = await service.getWriteableBlobUrl('largeFile/one', {
+    const writable = await service.getBlobWriteUrl('largeFile/one', {
       contentType: 'image/jpeg',
-      title: 'orange',
-      filename: 'gary',
-      size: buffer.length
     });
 
     console.log(writable);
@@ -85,15 +82,19 @@ export class S3BlobSuite extends ModelBlobSuite {
 
     const res = await fetch(writable, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'image/jpeg',
-      },
-      body: new Blob([buffer], { type: 'image/jpeg' }),
+      body: new File([buffer], 'gary', { type: 'image/jpeg' }),
     });
 
     console.error(await res.text());
 
     assert(res.ok);
+
+    await service.updateBlobMeta('largeFile/one', {
+      contentType: 'image/jpeg',
+      title: 'orange',
+      filename: 'gary',
+      size: buffer.length,
+    });
 
     const found = await service.getBlob('largeFile/one');
     assert(found.size === buffer.length);

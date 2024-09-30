@@ -233,7 +233,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
 
   // Blob Support
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
-    if (!overwrite && await this.describeBlob(location).then(() => true, () => false)) {
+    if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
       return;
     }
 
@@ -251,11 +251,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     if (final) {
       buffer = Buffer.from(buffer.subarray(final.start, final.end + 1));
     }
-    const meta = await this.describeBlob(location);
+    const meta = await this.getBlobMeta(location);
     return BinaryUtil.readableBlob(() => Readable.from(buffer), { ...meta, range: final });
   }
 
-  async describeBlob(location: string): Promise<BlobMeta> {
+  async getBlobMeta(location: string): Promise<BlobMeta> {
     const metaContent = this.#find(ModelBlobMetaNamespace, location, 'notfound');
     const meta: BlobMeta = JSON.parse(metaContent.get(location)!.toString('utf8'));
     return meta;
@@ -270,6 +270,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     } else {
       throw new NotFoundError(ModelBlobNamespace, location);
     }
+  }
+
+  async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
+    const metaContent = this.#getStore(ModelBlobMetaNamespace);
+    metaContent.set(location, Buffer.from(JSON.stringify(meta), 'utf8'));
   }
 
   // Expiry

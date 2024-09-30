@@ -166,12 +166,12 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     } catch (err) {
       // Handle GCS
       if (err instanceof Error && err.name === 'NotImplemented') {
-        // for (const item of items) {
-        //   await this.client.deleteObject({
-        //     Bucket: this.config.bucket,
-        //     Key: item.Key
-        //   });
-        // }
+        for (const item of items) {
+          await this.client.deleteObject({
+            Bucket: this.config.bucket,
+            Key: item.Key
+          });
+        }
       } else {
         throw err;
       }
@@ -311,7 +311,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   // Blob support
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
-    if (!overwrite && await this.describeBlob(location).then(() => true, () => false)) {
+    if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
       return;
     }
 
@@ -350,7 +350,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
-    const meta = await this.describeBlob(location);
+    const meta = await this.getBlobMeta(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     const res = (): Promise<Readable> => this.#getObject(location, final);
     return BinaryUtil.readableBlob(res, { ...meta, range: final });
@@ -370,7 +370,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     }
   }
 
-  async describeBlob(location: string): Promise<BlobMeta> {
+  async getBlobMeta(location: string): Promise<BlobMeta> {
     const obj = await this.headBlob(location);
 
     if (obj) {
@@ -393,7 +393,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     await this.client.deleteObject(this.#q(MODEL_BLOB, location));
   }
 
-  async getReadableBlobUrl(location: string, exp: TimeSpan = '1h'): Promise<string> {
+  async getBlobReadUrl(location: string, exp: TimeSpan = '1h'): Promise<string> {
     return await getSignedUrl(
       this.client,
       new GetObjectCommand(this.#q(MODEL_BLOB, location)),
@@ -401,20 +401,27 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     );
   }
 
-  async getWriteableBlobUrl(location: string, meta: BlobMeta, exp: TimeSpan = '1h'): Promise<string> {
-    const payload: PutObjectCommandInput = {
-      ...this.#q(MODEL_BLOB, location),
-      ...this.#getMetaBase(meta),
-      ...(meta.size ? { ContentLength: meta.size } : {}),
-      ...((meta.hash && meta.hash !== '-1') ? { ChecksumSHA256: meta.hash } : {})
-    };
+  async getBlobWriteUrl(location: string, meta: BlobMeta, exp: TimeSpan = '1h'): Promise<string> {
     return await getSignedUrl(
       this.client,
-      new PutObjectCommand(payload),
-      {
-        expiresIn: TimeUtil.asSeconds(exp)
-      }
+      new PutObjectCommand({
+        ...this.#q(MODEL_BLOB, location),
+        ...this.#getMetaBase(meta),
+        ...(meta.size ? { ContentLength: meta.size } : {}),
+        ...((meta.hash && meta.hash !== '-1') ? { ChecksumSHA256: meta.hash } : {}),
+      }),
+      { expiresIn: TimeUtil.asSeconds(exp) }
     );
+  }
+
+  async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
+    await this.client.copyObject({
+      Bucket: this.config.bucket,
+      Key: this.#resolveKey(MODEL_BLOB, location),
+      CopySource: `/${this.config.bucket}/${this.#resolveKey(MODEL_BLOB, location)}`,
+      ...this.#getMetaBase(meta),
+      MetadataDirective: 'REPLACE'
+    });
   }
 
   // Storage

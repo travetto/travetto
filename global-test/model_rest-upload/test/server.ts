@@ -31,7 +31,7 @@ class TestUploadController {
   @Post('/')
   async upload(@Upload() file: Blob) {
     await this.service.upsertBlob('orange', file);
-    const desc = await this.service.describeBlob('orange');
+    const desc = await this.service.getBlobMeta('orange');
     return { location: 'orange', meta: desc };
   }
 

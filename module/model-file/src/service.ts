@@ -170,7 +170,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   // Blob
   async upsertBlob(location: string, input: BinaryInput, meta?: BlobMeta, overwrite = true): Promise<void> {
-    if (!overwrite && await this.describeBlob(location).then(() => true, () => false)) {
+    if (!overwrite && await this.getBlobMeta(location).then(() => true, () => false)) {
       return;
     }
 
@@ -184,12 +184,12 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const file = await this.#find(ModelBlobNamespace, BIN, location);
-    const meta = await this.describeBlob(location);
+    const meta = await this.getBlobMeta(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
     return BinaryUtil.readableBlob(() => createReadStream(file, { ...range }), { ...meta, range: final });
   }
 
-  async describeBlob(location: string): Promise<BlobMeta> {
+  async getBlobMeta(location: string): Promise<BlobMeta> {
     const file = await this.#find(ModelBlobNamespace, META, location);
     const content = await fs.readFile(file);
     const text: BlobMeta = JSON.parse(content.toString('utf8'));
@@ -206,6 +206,11 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     } else {
       throw new NotFoundError(ModelBlobNamespace, location);
     }
+  }
+
+  async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
+    const file = await this.#find(ModelBlobNamespace, META, location);
+    await fs.writeFile(file, JSON.stringify(meta));
   }
 
   // Expiry

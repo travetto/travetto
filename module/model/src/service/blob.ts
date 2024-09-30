@@ -26,11 +26,17 @@ export interface ModelBlobSupport {
    * Get metadata for blob
    * @param location The location of the blob
    */
-  describeBlob(location: string): Promise<BlobMeta>;
+  getBlobMeta(location: string): Promise<BlobMeta>;
 
   /**
    * Delete blob by location
    * @param location The location of the blob
    */
   deleteBlob(location: string): Promise<void>;
+
+  /**
+   * Update blob description
+   * @param location The location of the blob
+   */
+  updateBlobMeta(location: string, meta: BlobMeta): Promise<void>;
 }
