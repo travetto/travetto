@@ -6,12 +6,14 @@ import type { ModelExpirySupport } from '../../service/expiry';
 import type { ModelIndexedSupport } from '../../service/indexed';
 import type { ModelStorageSupport } from '../../service/storage';
 import type { ModelBlobSupport } from '../../service/blob';
+import type { ModelBlobUrlSupport } from '../../service/blob-url';
 
 export class ModelBasicSupportTarget { }
 export class ModelCrudSupportTarget { }
 export class ModelBulkSupportTarget { }
 export class ModelStorageSupportTarget { }
 export class ModelBlobSupportTarget { }
+export class ModelBlobUrlSupportTarget { }
 export class ModelExpirySupportTarget { }
 export class ModelIndexedSupportTarget { }
 
@@ -31,9 +33,14 @@ export const isCrudSupported = hasFunction<ModelCrudSupport>('upsert');
 export const isExpirySupported = hasFunction<ModelExpirySupport>('deleteExpired');
 
 /**
- * Type guard for determining if service supports streaming operation
+ * Type guard for determining if service supports blob operations
  */
 export const isBlobSupported = hasFunction<ModelBlobSupport>('getBlob');
+
+/**
+ * Type guard for determining if service supports blob url operation
+ */
+export const isBlobUrlSupported = hasFunction<ModelBlobUrlSupport>('getBlobWriteUrl');
 
 /**
  * Type guard for determining if service supports storage operation
@@ -41,7 +48,7 @@ export const isBlobSupported = hasFunction<ModelBlobSupport>('getBlob');
 export const isStorageSupported = hasFunction<ModelStorageSupport>('createStorage');
 
 /**
- * Type guard for determining if service supports streaming operation
+ * Type guard for determining if service supports bulk operation
  */
 export const isBulkSupported = hasFunction<ModelBulkSupport>('processBulk');
 

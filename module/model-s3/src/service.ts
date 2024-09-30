@@ -9,7 +9,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
   ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
-  ModelBlobSupport
+  ModelBlobSupport, ModelBlobUrlSupport
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil, TimeSpan, TimeUtil } from '@travetto/runtime';
@@ -38,7 +38,7 @@ type MetaBase = Pick<CreateMultipartUploadRequest,
  * Asset source backed by S3
  */
 @Injectable()
-export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, ModelStorageSupport, ModelExpirySupport {
+export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, ModelBlobUrlSupport, ModelStorageSupport, ModelExpirySupport {
 
   idSource = ModelCrudUtil.uuidSource();
   client: S3;
