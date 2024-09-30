@@ -2,16 +2,17 @@ import { Readable } from 'node:stream';
 import { text as toText } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
-import { S3, CompletedPart, type CreateMultipartUploadRequest } from '@aws-sdk/client-s3';
+import { S3, CompletedPart, type CreateMultipartUploadRequest, GetObjectCommand, PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
 import type { MetadataBearer } from '@aws-sdk/types';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
   ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
   ModelBlobSupport
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
+import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { MODEL_BLOB, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
@@ -67,6 +68,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
         key = `${key}:${id}`;
       }
       key = `_data/${key}`; // Separate data
+    }
+    if (key?.startsWith('/')) {
+      key = key.substring(1);
     }
     if (this.config.namespace) {
       key = `${this.config.namespace}/${key}`;
@@ -152,12 +156,26 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   async #deleteKeys(items: { Key: string }[]): Promise<void> {
-    await this.client.deleteObjects({
-      Bucket: this.config.bucket,
-      Delete: {
-        Objects: items
+    try {
+      await this.client.deleteObjects({
+        Bucket: this.config.bucket,
+        Delete: {
+          Objects: items
+        }
+      });
+    } catch (err) {
+      // Handle GCS
+      if (err instanceof Error && err.name === 'NotImplemented') {
+        // for (const item of items) {
+        //   await this.client.deleteObject({
+        //     Bucket: this.config.bucket,
+        //     Key: item.Key
+        //   });
+        // }
+      } else {
+        throw err;
       }
-    });
+    }
   }
 
   async postConstruct(): Promise<void> {
@@ -373,6 +391,30 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async deleteBlob(location: string): Promise<void> {
     await this.client.deleteObject(this.#q(MODEL_BLOB, location));
+  }
+
+  async getReadableBlobUrl(location: string, exp: TimeSpan = '1h'): Promise<string> {
+    return await getSignedUrl(
+      this.client,
+      new GetObjectCommand(this.#q(MODEL_BLOB, location)),
+      { expiresIn: TimeUtil.asSeconds(exp) }
+    );
+  }
+
+  async getWriteableBlobUrl(location: string, meta: BlobMeta, exp: TimeSpan = '1h'): Promise<string> {
+    const payload: PutObjectCommandInput = {
+      ...this.#q(MODEL_BLOB, location),
+      ...this.#getMetaBase(meta),
+      ...(meta.size ? { ContentLength: meta.size } : {}),
+      ...((meta.hash && meta.hash !== '-1') ? { ChecksumSHA256: meta.hash } : {})
+    };
+    return await getSignedUrl(
+      this.client,
+      new PutObjectCommand(payload),
+      {
+        expiresIn: TimeUtil.asSeconds(exp)
+      }
+    );
   }
 
   // Storage

@@ -61,4 +61,44 @@ export class S3BlobSuite extends ModelBlobSuite {
     const resolved = await BinaryUtil.hashInput(stream);
     assert(resolved === hash);
   }
+
+
+  @Test({ timeout: 15000 })
+  async signedUrl() {
+    const service: S3ModelService = castTo(await this.service);
+
+
+    const buffer = Buffer.alloc(1.5 * service['config'].chunkSize);
+    for (let i = 0; i < buffer.length; i++) {
+      buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
+    }
+
+    const writable = await service.getWriteableBlobUrl('largeFile/one', {
+      contentType: 'image/jpeg',
+      title: 'orange',
+      filename: 'gary',
+      size: buffer.length
+    });
+
+    console.log(writable);
+    assert(writable);
+
+    const res = await fetch(writable, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'image/jpeg',
+      },
+      body: new Blob([buffer], { type: 'image/jpeg' }),
+    });
+
+    console.error(await res.text());
+
+    assert(res.ok);
+
+    const found = await service.getBlob('largeFile/one');
+    assert(found.size === buffer.length);
+    assert(found.type === 'image/jpeg');
+    assert(BinaryUtil.getBlobMeta(found)?.title === 'orange');
+    assert(BinaryUtil.getBlobMeta(found)?.filename === 'gary');
+  }
 }
