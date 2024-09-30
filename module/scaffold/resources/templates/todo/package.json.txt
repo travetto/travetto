@@ -25,9 +25,9 @@
   ],
   "license": "MIT",
   "scripts": {
-    "watch": "npx trv watch",
-    "build": "npx trv build",
-    "start": "npx trv run rest",
+    "watch": "npx trvc watch",
+    "build": "npx trvc build",
+    "start": "npx trv run:rest",
     "test": "npx trv test",
     "lint": "npx trv lint"
   },

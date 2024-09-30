@@ -53,14 +53,15 @@ function findPackage(dir: string): Pkg {
  * Get workspace root
  */
 function resolveWorkspace(base: string = process.cwd()): Workspace {
-  if (base in WS_ROOT) { return WS_ROOT[base]; }
+  if (base in WS_ROOT) {
+    return WS_ROOT[base];
+  }
   let folder = base;
-  let prev;
-  /** @type {Pkg|undefined} */
-  let prevPkg, pkg;
+  let prev: string | undefined;
+  let pkg: Pkg | undefined;
 
   while (prev !== folder) {
-    [prev, prevPkg] = [folder, pkg];
+    prev = folder;
     pkg = readPackage(folder) ?? pkg;
     if (
       (pkg && (!!pkg.workspaces || !!pkg.travetto?.build?.isolated)) || // if we have a monorepo root, or we are isolated
@@ -82,7 +83,7 @@ function resolveWorkspace(base: string = process.cwd()): Workspace {
     manager: existsSync(path.resolve(pkg.path, 'yarn.lock')) ? 'yarn' : 'npm',
     resolve: createRequire(`${pkg.path}/node_modules`).resolve.bind(null),
     stripRoot: (full) => full === pkg.path ? '' : full.replace(`${pkg.path}/`, ''),
-    mono: !!pkg.workspaces || (!pkg.travetto?.build?.isolated && !!prevPkg)  // Workspaces or nested projects
+    mono: !!pkg.workspaces
   };
 }
 

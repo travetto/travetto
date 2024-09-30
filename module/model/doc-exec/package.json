@@ -1,13 +1,13 @@
 {
   "name": "@travetto-doc/model",
   "dependencies": {
-    "@travetto/model": "^4.0.0-rc.0",
-    "@travetto/model-mysql": "^4.0.0-rc.0",
-    "@travetto/registry": "^4.0.0-rc.0",
-    "@travetto/cli": "^4.0.0-rc.0"
+    "@travetto/model": "^5.0.0-rc.0",
+    "@travetto/model-mysql": "^5.0.0-rc.0",
+    "@travetto/registry": "^5.0.0-rc.0",
+    "@travetto/cli": "^5.0.0-rc.0"
   },
   "devDependencies": {
-    "@travetto/compiler": "^4.0.0-rc.0"
+    "@travetto/compiler": "^5.0.0-rc.0"
   },
   "travetto": {
     "build": {
