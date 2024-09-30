@@ -10,6 +10,7 @@ import { ModelBlobSuite } from '@travetto/model/support/test/blob';
 
 import { S3ModelConfig } from '../src/config';
 import { S3ModelService } from '../src/service';
+import { ModelBlobUrlSuite } from '@travetto/model/support/test/blob-url';
 
 @Suite()
 export class S3BasicSuite extends ModelBasicSuite {
@@ -31,6 +32,12 @@ export class S3ExpirySuite extends ModelExpirySuite {
 
 @Suite()
 export class S3PolymorphismSuite extends ModelPolymorphismSuite {
+  serviceClass = S3ModelService;
+  configClass = S3ModelConfig;
+}
+
+@Suite()
+export class S3BlobUrlSuite extends ModelBlobUrlSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 }
@@ -60,46 +67,5 @@ export class S3BlobSuite extends ModelBlobSuite {
     const stream = await service.getBlob(hash);
     const resolved = await BinaryUtil.hashInput(stream);
     assert(resolved === hash);
-  }
-
-
-  @Test({ timeout: 15000 })
-  async signedUrl() {
-    const service: S3ModelService = castTo(await this.service);
-
-
-    const buffer = Buffer.alloc(1.5 * service['config'].chunkSize);
-    for (let i = 0; i < buffer.length; i++) {
-      buffer.writeUInt8(Math.trunc(Math.random() * 255), i);
-    }
-
-    const writable = await service.getBlobWriteUrl('largeFile/one', {
-      contentType: 'image/jpeg',
-    });
-
-    console.log(writable);
-    assert(writable);
-
-    const res = await fetch(writable, {
-      method: 'PUT',
-      body: new File([buffer], 'gary', { type: 'image/jpeg' }),
-    });
-
-    console.error(await res.text());
-
-    assert(res.ok);
-
-    await service.updateBlobMeta('largeFile/one', {
-      contentType: 'image/jpeg',
-      title: 'orange',
-      filename: 'gary',
-      size: buffer.length,
-    });
-
-    const found = await service.getBlob('largeFile/one');
-    assert(found.size === buffer.length);
-    assert(found.type === 'image/jpeg');
-    assert(BinaryUtil.getBlobMeta(found)?.title === 'orange');
-    assert(BinaryUtil.getBlobMeta(found)?.filename === 'gary');
   }
 }

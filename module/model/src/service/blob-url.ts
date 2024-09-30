@@ -1,11 +1,12 @@
 import { BlobMeta, TimeSpan } from '@travetto/runtime';
+import { ModelBlobSupport } from './blob';
 
 /**
  * Support for Blob URL Read/Write
  *
  * @concrete ../internal/service/common#ModelBlobUrlSupportTarget
  */
-export interface ModelBlobUrlSupport {
+export interface ModelBlobUrlSupport extends ModelBlobSupport {
   /**
    * Produces an externally usable URL for sharing limited read access to a specific resource
    *
