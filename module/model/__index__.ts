@@ -4,7 +4,6 @@ export * from './src/registry/types';
 export * from './src/types/model';
 export * from './src/service/basic';
 export * from './src/service/blob';
-export * from './src/service/blob-url';
 export * from './src/service/bulk';
 export * from './src/service/crud';
 export * from './src/service/indexed';
