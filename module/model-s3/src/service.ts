@@ -393,6 +393,17 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     await this.client.deleteObject(this.#q(MODEL_BLOB, location));
   }
 
+  async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
+    await this.client.copyObject({
+      Bucket: this.config.bucket,
+      Key: this.#resolveKey(MODEL_BLOB, location),
+      CopySource: `/${this.config.bucket}/${this.#resolveKey(MODEL_BLOB, location)}`,
+      ...this.#getMetaBase(meta),
+      MetadataDirective: 'REPLACE'
+    });
+  }
+
+  // Signed urls
   async getBlobReadUrl(location: string, exp: TimeSpan = '1h'): Promise<string> {
     return await getSignedUrl(
       this.client,
@@ -412,16 +423,6 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
       }),
       { expiresIn: TimeUtil.asSeconds(exp) }
     );
-  }
-
-  async updateBlobMeta(location: string, meta: BlobMeta): Promise<void> {
-    await this.client.copyObject({
-      Bucket: this.config.bucket,
-      Key: this.#resolveKey(MODEL_BLOB, location),
-      CopySource: `/${this.config.bucket}/${this.#resolveKey(MODEL_BLOB, location)}`,
-      ...this.#getMetaBase(meta),
-      MetadataDirective: 'REPLACE'
-    });
   }
 
   // Storage
