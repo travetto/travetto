@@ -35,7 +35,7 @@ export interface ModelBlobSupport {
   deleteBlob(location: string): Promise<void>;
 
   /**
-   * Update blob description
+   * Update blob metadata
    * @param location The location of the blob
    */
   updateBlobMeta(location: string, meta: BlobMeta): Promise<void>;
