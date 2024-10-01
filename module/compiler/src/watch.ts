@@ -7,6 +7,9 @@ import { CompilerState } from './state';
 import { CompilerUtil } from './util';
 
 import { AsyncQueue } from '../support/queue';
+import { IpcLogger } from '../support/log';
+
+const log = new IpcLogger({ level: 'debug' });
 
 type WatchAction = 'create' | 'update' | 'delete';
 type WatchEvent = { action: WatchAction, file: string };
@@ -19,6 +22,8 @@ type FileShape = {
   action: WatchAction;
 };
 
+const DEFAULT_WRITE_LIMIT = 1000 * 60 * 5;
+
 /**
  * Watch support, based on compiler state and manifest details
  */
@@ -29,6 +34,29 @@ export class CompilerWatcher {
   constructor(state: CompilerState, signal: AbortSignal) {
     this.#state = state;
     this.#signal = signal;
+  }
+
+  #watchDog(): { reset(): void, close(): void } {
+    let lastWrite = Date.now();
+    let writeThreshold = DEFAULT_WRITE_LIMIT;
+    log.info('Starting watchdog');
+    const value = setInterval(() => {
+      if (Date.now() > (lastWrite + writeThreshold)) {
+        const delta = (Date.now() - lastWrite) / (1000 * 60);
+        log.info(`Watch has not seen changes in ${Math.trunc(delta)}m`);
+        writeThreshold += DEFAULT_WRITE_LIMIT;
+      }
+    }, DEFAULT_WRITE_LIMIT / 10);
+    return {
+      close: (): void => {
+        log.info('Closing watchdog');
+        clearInterval(value);
+      },
+      reset: (): void => {
+        lastWrite = Date.now();
+        writeThreshold = DEFAULT_WRITE_LIMIT;
+      }
+    };
   }
 
   #reset(ev: WatchEvent): never {
@@ -155,6 +183,8 @@ export class CompilerWatcher {
     const OUTPUT_PATH = path.resolve(manifest.workspace.path, manifest.build.outputFolder);
     const COMPILER_PATH = path.resolve(manifest.workspace.path, manifest.build.compilerFolder);
 
+    const watchDog = this.#watchDog();
+
     for await (const events of this.#watchFolder(this.#state.manifest.workspace.path)) {
 
       const outEvents: CompilerWatchEvent[] = [];
@@ -170,6 +200,8 @@ export class CompilerWatcher {
           this.#reset(ev);
         }
 
+        watchDog.reset();
+
         const fileType = ManifestModuleUtil.getFileType(sourceFile);
         if (!CompilerUtil.validFile(fileType)) {
           continue;
@@ -179,6 +211,7 @@ export class CompilerWatcher {
 
         const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(sourceFile);
         if (!mod) { // Unknown module
+          log.debug(`Unknown module for a given file ${sourceFile}`);
           continue;
         }
 
@@ -188,8 +221,10 @@ export class CompilerWatcher {
         if (action === 'create') {
           entry = this.#state.registerInput(mod, moduleFile);
         } else if (!entry) {
+          log.debug(`Unknown file ${sourceFile}`);
           continue;
         } else if (action === 'update' && !this.#state.checkIfSourceChanged(entry.sourceFile)) {
+          log.debug(`Skipping update, as contents unchanged ${entry.sourceFile}`);
           continue;
         } else if (action === 'delete') {
           this.#state.removeSource(entry.sourceFile);
@@ -201,5 +236,7 @@ export class CompilerWatcher {
       await this.#rebuildManifestsIfNeeded(outEvents);
       yield* outEvents;
     }
+
+    watchDog.close();
   }
 }
