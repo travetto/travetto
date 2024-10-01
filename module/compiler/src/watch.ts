@@ -36,7 +36,7 @@ export class CompilerWatcher {
     this.#signal = signal;
   }
 
-  #watchDog(): { reset(): void, close(): void } {
+  #watchDog(): { reset(file: string): void, close(): void } {
     let lastWrite = Date.now();
     let writeThreshold = DEFAULT_WRITE_LIMIT;
     log.info('Starting watchdog');
@@ -52,7 +52,8 @@ export class CompilerWatcher {
         log.info('Closing watchdog');
         clearInterval(value);
       },
-      reset: (): void => {
+      reset: (file: string): void => {
+        log.debug('Resetting watchdog', file);
         lastWrite = Date.now();
         writeThreshold = DEFAULT_WRITE_LIMIT;
       }
@@ -178,29 +179,40 @@ export class CompilerWatcher {
     }
 
     const manifest = this.#state.manifest;
-    const ROOT_LOCK = path.resolve(manifest.workspace.path, 'package-lock.json');
-    const ROOT_PKG = path.resolve(manifest.workspace.path, 'package.json');
-    const OUTPUT_PATH = path.resolve(manifest.workspace.path, manifest.build.outputFolder);
-    const COMPILER_PATH = path.resolve(manifest.workspace.path, manifest.build.compilerFolder);
+    const ROOT = manifest.workspace.path;
+    const ROOT_LOCK = 'package-lock.json';
+    const ROOT_PKG = 'package.json';
+    const OUTPUT_PATH = manifest.build.outputFolder;
+    const COMPILER_PATH = manifest.build.compilerFolder;
+    const TYPES_PATH = manifest.build.typesFolder;
+    const COMPILER_ROOT = path.dirname(COMPILER_PATH);
+
+    const IGNORE_RE = new RegExp(`^[.]|(${COMPILER_PATH}|${TYPES_PATH}|${OUTPUT_PATH})`);
 
     const watchDog = this.#watchDog();
 
-    for await (const events of this.#watchFolder(this.#state.manifest.workspace.path)) {
+    for await (const events of this.#watchFolder(ROOT)) {
 
       const outEvents: CompilerWatchEvent[] = [];
 
       for (const ev of events) {
         const { action, file: sourceFile } = ev;
 
+        const relativeFile = sourceFile.replace(`${ROOT}/`, '');
+
         if (
-          sourceFile === ROOT_LOCK ||
-          sourceFile === ROOT_PKG ||
-          (action === 'delete' && (sourceFile === OUTPUT_PATH || sourceFile === COMPILER_PATH))
+          relativeFile === ROOT_LOCK ||
+          relativeFile === ROOT_PKG ||
+          (action === 'delete' && relativeFile === COMPILER_ROOT)
         ) {
           this.#reset(ev);
         }
 
-        watchDog.reset();
+        if (IGNORE_RE.test(relativeFile)) {
+          continue;
+        }
+
+        watchDog.reset(relativeFile);
 
         const fileType = ManifestModuleUtil.getFileType(sourceFile);
         if (!CompilerUtil.validFile(fileType)) {
@@ -211,7 +223,7 @@ export class CompilerWatcher {
 
         const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(sourceFile);
         if (!mod) { // Unknown module
-          log.debug(`Unknown module for a given file ${sourceFile}`);
+          log.debug(`Unknown module for a given file ${relativeFile}`);
           continue;
         }
 
@@ -221,10 +233,10 @@ export class CompilerWatcher {
         if (action === 'create') {
           entry = this.#state.registerInput(mod, moduleFile);
         } else if (!entry) {
-          log.debug(`Unknown file ${sourceFile}`);
+          log.debug(`Unknown file ${relativeFile}`);
           continue;
         } else if (action === 'update' && !this.#state.checkIfSourceChanged(entry.sourceFile)) {
-          log.debug(`Skipping update, as contents unchanged ${entry.sourceFile}`);
+          log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
           continue;
         } else if (action === 'delete') {
           this.#state.removeSource(entry.sourceFile);
