@@ -245,7 +245,12 @@ export class CompilerWatcher {
         outEvents.push({ action, file: entry.sourceFile, entry });
       }
 
-      await this.#rebuildManifestsIfNeeded(outEvents);
+      try {
+        await this.#rebuildManifestsIfNeeded(outEvents);
+      } catch (err) {
+        log.info('Restarting due to manifest rebuild failure', err);
+        this.#reset(events[0]);
+      }
       yield* outEvents;
     }
 
