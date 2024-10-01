@@ -2,7 +2,7 @@
   "name": "@travetto-test/model-rest-upload",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/model": "^5.0.7",
+    "@travetto/model": "^5.0.8",
     "@travetto/rest-express": "^5.0.9",
     "@travetto/rest-express-lambda": "^5.0.9",
     "@travetto/rest-fastify": "^5.0.9",
