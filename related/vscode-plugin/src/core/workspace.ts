@@ -1,8 +1,12 @@
 import vscode from 'vscode';
 import timers from 'node:timers/promises';
+import fs from 'node:fs/promises';
 
 import type { CompilerStateType } from '@travetto/compiler/support/types';
-import { type ManifestContext, ManifestIndex, ManifestUtil, PackageUtil } from '@travetto/manifest';
+import { path, type ManifestContext, ManifestIndex, ManifestUtil, PackageUtil } from '@travetto/manifest';
+import { Log } from './log';
+
+const log = new Log('workspace');
 
 /**
  * Standard set of workspace utilities
@@ -77,6 +81,7 @@ export class Workspace {
     this.#manifestContext = manifestContext;
     // Overwrite "const"
     Object.assign(this, { folder });
+    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(() => this.touchEditorFile()));
   }
 
   /** Find full path for a resource */
@@ -114,5 +119,11 @@ export class Workspace {
       token.onCancellationRequested(() => ctrl.abort());
       await timers.setTimeout(duration, undefined, { signal: ctrl.signal }).catch(() => { });
     });
+  }
+
+  /** Record updated touch file on every save, fallback for when watching hangs */
+  static async touchEditorFile(): Promise<void> {
+    const loc = path.resolve(this.path, path.dirname(this.#manifestContext.build.compilerFolder), 'editor-write');
+    await fs.writeFile(loc, '', 'utf8');
   }
 }

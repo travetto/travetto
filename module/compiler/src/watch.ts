@@ -1,10 +1,7 @@
 import fs from 'node:fs/promises';
 import { watch } from 'node:fs';
 
-import {
-  type ManifestContext, type ManifestModuleFileType, type ManifestModuleFolderType,
-  ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil, path
-} from '@travetto/manifest';
+import { type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CompilerReset, type CompilerWatchEvent } from './types';
 import { CompilerState } from './state';
@@ -19,11 +16,32 @@ type WatchEvent = Omit<CompilerWatchEvent, 'entry'>;
 type ModuleFileMap = Map<string, { context: ManifestContext, events: CompilerWatchEvent[] }>;
 
 const DEFAULT_WRITE_LIMIT = 1000 * 60 * 5;
+const EDITOR_WRITE_LIMIT = 1000 * 5;
 const ROOT_PACKAGE_FILES = new Set(['package-lock.json', 'yarn.lock', 'package.json']);
+
+const toMin = (v: number): number => Math.trunc((Date.now() - v) / (1000 * 60));
 
 export class CompilerWatcher {
 
   static #ignoreCache: Record<string, string[]> = {};
+
+  /** Check for staleness */
+  static async checkWatchStaleness(ctx: ManifestContext, q: AsyncQueue<WatchEvent[]>, lastWrite: number): Promise<void> {
+    let maxTimestamp = 0;
+    const manifest = await ManifestModuleUtil.produceModules(ctx);
+    for (const mod of Object.values(manifest)) {
+      for (const file of Object.values(mod.files)) {
+        for (const [, , timestamp,] of file) {
+          maxTimestamp = Math.max(timestamp, maxTimestamp);
+          if (maxTimestamp > lastWrite) {
+            q.throw(new CompilerReset(`File watch timed out, last write time ${new Date(lastWrite).toISOString()}`));
+            return;
+          }
+        }
+      }
+    }
+    log.info(`Watch has not seen changes in ${toMin(lastWrite)}m, last file changed: ${toMin(maxTimestamp)}m`);
+  }
 
   /** Get standard set of watch ignores */
   static async getWatchIgnores(root: string): Promise<string[]> {
@@ -58,7 +76,7 @@ export class CompilerWatcher {
   }
 
   /** Create watchdog that will fire every multiple of threshold if reset is not called */
-  static createWatchDog(signal: AbortSignal, threshold: number, onStall: (lastWriteTs: number) => void): () => void {
+  static createWatchDog(signal: AbortSignal, threshold: number, onStall: (lastWriteTs: number) => void): () => number {
     let lastWrite = Date.now();
     let writeThreshold = threshold;
     const value = setInterval(() => {
@@ -74,9 +92,9 @@ export class CompilerWatcher {
       clearInterval(value);
     }
 
-    return (): void => {
-      lastWrite = Date.now();
+    return (): number => {
       writeThreshold = threshold;
+      return lastWrite = Date.now();
     };
   }
 
@@ -174,6 +192,7 @@ export class CompilerWatcher {
     const toolRootFolder = path.dirname(path.resolve(root, build.compilerFolder));
     const toolFolders = new Set([path.dirname(build.compilerFolder), build.compilerFolder, build.typesFolder, build.outputFolder]);
     const toolingPrefixRe = new RegExp(`^(${[...toolFolders].join('|')})`.replace(/[.]/g, '[.]'));
+    const editorTouchFile = path.join(path.dirname(build.compilerFolder), 'editor-write');
 
     log.debug('Tooling Folders', [...toolFolders]);
     log.debug('Ignore Globs', await this.getWatchIgnores(root));
@@ -183,23 +202,11 @@ export class CompilerWatcher {
     await this.listenFiles(root, q, signal);
     await this.listenFolder(toolRootFolder, q, signal);
 
-    const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT, async (lastWrite) => {
-      const toMin = (v: number): number => Math.trunc((Date.now() - v) / (1000 * 60));
-      let maxTimestamp = 0;
-      const manifest = await ManifestModuleUtil.produceModules(state.manifest);
-      for (const mod of Object.values(manifest)) {
-        for (const file of Object.values(mod.files)) {
-          for (const [, , timestamp,] of file) {
-            maxTimestamp = Math.max(timestamp, maxTimestamp);
-            if (maxTimestamp > lastWrite) {
-              q.throw(new CompilerReset(`File watch timed out, last write time ${new Date(lastWrite).toISOString()}`));
-              return;
-            }
-          }
-        }
-      }
-      log.info(`Watch has not seen changes in ${toMin(lastWrite)}m, last file changed: ${toMin(maxTimestamp)}`);
-    });
+    let lastRecordedWrite = Date.now();
+
+    const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT, timestamp =>
+      this.checkWatchStaleness(state.manifest, q, timestamp)
+    );
 
     for await (const events of q) {
       if (events.length > 25) {
@@ -218,10 +225,12 @@ export class CompilerWatcher {
         } else if (action === 'delete' && toolFolders.has(relativeFile)) {
           throw new CompilerReset(`Tooling folder removal ${ev.file}`);
         } else if (relativeFile.startsWith('.') || toolingPrefixRe.test(relativeFile)) {
+          if (relativeFile === editorTouchFile && (Date.now() - lastRecordedWrite) > EDITOR_WRITE_LIMIT) {
+            log.debug(`Editor file touched, stale ${Math.trunc(lastRecordedWrite / 1000)}s`);
+            await this.checkWatchStaleness(state.manifest, q, lastRecordedWrite);
+          }
           continue;
         }
-
-        watchDogReset();
 
         const fileType = ManifestModuleUtil.getFileType(sourceFile);
         if (!CompilerUtil.validFile(fileType)) {
@@ -245,15 +254,19 @@ export class CompilerWatcher {
           log.debug(`Unknown file ${relativeFile}`);
           continue;
         } else if (action === 'update' && !state.checkIfSourceChanged(entry.sourceFile)) {
-          log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
-          continue;
+          entry = undefined;
         } else if (action === 'delete') {
           state.removeSource(entry.sourceFile);
         }
 
-        log.debug(`Compiling ${action}: ${relativeFile}`);
+        lastRecordedWrite = watchDogReset();
 
-        outEvents.push({ action, file: entry.sourceFile, entry });
+        if (entry) {
+          log.debug(`Compiling ${action}: ${relativeFile}`);
+          outEvents.push({ action, file: entry.sourceFile, entry });
+        } else {
+          log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
+        }
       }
 
       try {
