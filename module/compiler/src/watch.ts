@@ -58,12 +58,12 @@ export class CompilerWatcher {
   }
 
   /** Create watchdog that will fire every multiple of threshold if reset is not called */
-  static createWatchDog(signal: AbortSignal, threshold: number, onStall: (deltaMin: number) => void): () => void {
+  static createWatchDog(signal: AbortSignal, threshold: number, onStall: (lastWriteTs: number) => void): () => void {
     let lastWrite = Date.now();
     let writeThreshold = threshold;
     const value = setInterval(() => {
       if (Date.now() > (lastWrite + writeThreshold)) {
-        onStall(Math.trunc((Date.now() - lastWrite) / (1000 * 60)));
+        onStall(lastWrite);
         writeThreshold += threshold;
       }
     }, threshold / 10);
@@ -183,9 +183,25 @@ export class CompilerWatcher {
     await this.listenFiles(root, q, signal);
     await this.listenFolder(toolRootFolder, q, signal);
 
-    const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT, (deltaMin) => {
-      log.info(`Watch has not seen changes in ${deltaMin}m`);
+    const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT, async (lastWrite) => {
+      const toMin = (v: number): number => Math.trunc((Date.now() - v) / (1000 * 60));
+      let maxTimestamp = 0;
+      const manifest = await ManifestModuleUtil.produceModules(state.manifest);
+      for (const mod of Object.values(manifest)) {
+        for (const file of Object.values(mod.files)) {
+          for (const [, , timestamp,] of file) {
+            maxTimestamp = Math.max(timestamp, maxTimestamp);
+            if (maxTimestamp > lastWrite) {
+              q.throw(new CompilerReset(`File watch timed out, last write time ${new Date(lastWrite).toISOString()}`));
+              return;
+            }
+          }
+        }
+      }
+      log.info(`Watch has not seen changes in ${toMin(lastWrite)}m, last file changed: ${toMin(maxTimestamp)}`);
     });
+
+    let itr = 0;
 
     for await (const events of q) {
       if (events.length > 25) {
@@ -222,6 +238,8 @@ export class CompilerWatcher {
           continue;
         }
 
+        itr += 1;
+
         const modRoot = mod.sourceFolder || state.manifest.workspace.path;
         const moduleFile = sourceFile.includes(modRoot) ? sourceFile.split(`${modRoot}/`)[1] : sourceFile;
 
@@ -231,11 +249,13 @@ export class CompilerWatcher {
           log.debug(`Unknown file ${relativeFile}`);
           continue;
         } else if (action === 'update' && !state.checkIfSourceChanged(entry.sourceFile)) {
-          log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
+          log.debug(`Skipping update, as contents unchanged ${relativeFile}`, itr);
           continue;
         } else if (action === 'delete') {
           state.removeSource(entry.sourceFile);
         }
+
+        log.debug(`Compiling ${action}: ${relativeFile}`, itr);
 
         outEvents.push({ action, file: entry.sourceFile, entry });
       }
