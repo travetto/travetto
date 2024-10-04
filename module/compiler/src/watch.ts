@@ -1,8 +1,12 @@
-import os from 'node:os';
+import fs from 'node:fs/promises';
+import { watch } from 'node:fs';
 
-import { ManifestContext, type ManifestModuleFileType, type ManifestModuleFolderType, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import {
+  type ManifestContext, type ManifestModuleFileType, type ManifestModuleFolderType,
+  ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil, path
+} from '@travetto/manifest';
 
-import type { CompileStateEntry } from './types';
+import { CompilerReset, type CompilerWatchEvent } from './types';
 import { CompilerState } from './state';
 import { CompilerUtil } from './util';
 
@@ -11,123 +15,101 @@ import { IpcLogger } from '../support/log';
 
 const log = new IpcLogger({ level: 'debug' });
 
-type WatchAction = 'create' | 'update' | 'delete';
-type WatchEvent = { action: WatchAction, file: string };
-type CompilerWatchEvent = WatchEvent & { entry: CompileStateEntry };
+type WatchEvent = Omit<CompilerWatchEvent, 'entry'>;
 type FileShape = {
   mod: string;
   folderKey: ManifestModuleFolderType;
   fileType: ManifestModuleFileType;
   moduleFile: string;
-  action: WatchAction;
+  action: CompilerWatchEvent['action'];
 };
 
 const DEFAULT_WRITE_LIMIT = 1000 * 60 * 5;
+const ROOT_PACKAGE_FILES = new Set(['package-lock.json', 'yarn.lock', 'package.json']);
 
-/**
- * Watch support, based on compiler state and manifest details
- */
 export class CompilerWatcher {
-  #state: CompilerState;
-  #signal: AbortSignal;
 
-  constructor(state: CompilerState, signal: AbortSignal) {
-    this.#state = state;
-    this.#signal = signal;
+  static #ignoreCache: Record<string, string[]> = {};
+
+  /** Get standard set of watch ignores */
+  static async getWatchIgnores(root: string): Promise<string[]> {
+    if (this.#ignoreCache[root]) {
+      return this.#ignoreCache[root];
+    }
+
+    const pkg = PackageUtil.readPackage(root);
+    const patterns = [
+      ...pkg?.travetto?.build?.watchIgnores ?? [],
+      '**/node_modules',
+      '.*/**/node_modules'
+    ];
+    const ignores = new Set(['node_modules', '.git']);
+    for (const item of patterns) {
+      if (item.includes('*')) {
+        for await (const sub of fs.glob(item, { cwd: root })) {
+          if (sub.startsWith('node_modules')) {
+            continue;
+          } else if (sub.endsWith('/node_modules')) {
+            ignores.add(sub.split('/node_modules')[0]);
+          } else {
+            ignores.add(sub);
+          }
+        }
+      } else {
+        ignores.add(item);
+      }
+    }
+    this.#ignoreCache[root] = [...ignores].sort().map(x => x.endsWith('/') ? x : `${x}/`);
+    return this.#ignoreCache[root];
   }
 
-  #watchDog(): { reset(file: string): void, close(): void } {
+  /** Create watchdog that will fire every multiple of threshold if reset is not called */
+  static createWatchDog(signal: AbortSignal, threshold: number, onStall: (deltaMin: number) => void): () => void {
     let lastWrite = Date.now();
-    let writeThreshold = DEFAULT_WRITE_LIMIT;
-    log.info('Starting watchdog');
+    let writeThreshold = threshold;
     const value = setInterval(() => {
       if (Date.now() > (lastWrite + writeThreshold)) {
-        const delta = (Date.now() - lastWrite) / (1000 * 60);
-        log.info(`Watch has not seen changes in ${Math.trunc(delta)}m`);
-        writeThreshold += DEFAULT_WRITE_LIMIT;
+        onStall(Math.trunc((Date.now() - lastWrite) / (1000 * 60)));
+        writeThreshold += threshold;
       }
-    }, DEFAULT_WRITE_LIMIT / 10);
-    return {
-      close: (): void => {
-        log.info('Closing watchdog');
-        clearInterval(value);
-      },
-      reset: (file: string): void => {
-        log.debug('Resetting watchdog', file);
-        lastWrite = Date.now();
-        writeThreshold = DEFAULT_WRITE_LIMIT;
-      }
+    }, threshold / 10);
+
+    signal.addEventListener('abort', () => clearInterval(value));
+
+    if (signal.aborted) {
+      clearInterval(value);
+    }
+
+    return (): void => {
+      lastWrite = Date.now();
+      writeThreshold = threshold;
     };
   }
 
-  #reset(ev: WatchEvent): never {
-    throw new Error('RESET', { cause: `${ev.action}:${ev.file}` });
-  }
-
-  #getIgnores(): string[] {
-    // TODO: Read .gitignore?
-    let ignores = PackageUtil.readPackage(this.#state.manifest.workspace.path)?.travetto?.build?.watchIgnores;
-
-    if (!ignores) {
-      ignores = ['node_modules/**'];
-    }
-
-    // TODO: Fix once node/parcel sort this out
-    return os.platform() === 'linux' ? [] : [
-      ...ignores,
-      '.git', '**/.git',
-      `${this.#state.manifest.build.outputFolder}/node_modules/**`,
-      `${this.#state.manifest.build.compilerFolder}/node_modules/**`,
-      `${this.#state.manifest.build.toolFolder}/**`
-    ];
-  }
-
-  /** Watch files */
-  async * #watchFolder(rootPath: string): AsyncIterable<WatchEvent[]> {
-    const q = new AsyncQueue<WatchEvent[]>(this.#signal);
-    const lib = await import('@parcel/watcher');
-    const ignore = this.#getIgnores();
-
-    const cleanup = await lib.subscribe(rootPath, (err, events) => {
-      if (err) {
-        q.throw(err instanceof Error ? err : new Error(`${err}`));
-        return;
-      }
-      q.add(events.map(ev => ({ action: ev.type, file: path.toPosix(ev.path) })));
-    }, { ignore });
-
-    if (this.#signal.aborted) { // If already aborted, can happen async
-      cleanup.unsubscribe();
-      return;
-    }
-
-    this.#signal.addEventListener('abort', () => cleanup.unsubscribe());
-
-    yield* q;
-  }
-
-  async #rebuildManifestsIfNeeded(events: CompilerWatchEvent[]): Promise<void> {
+  /** Rebuild manifest index if changes require it */
+  static async rebuildManifestsIfNeeded(idx: ManifestIndex, events: CompilerWatchEvent[]): Promise<void> {
     events = events.filter(x => x.entry.outputFile && x.action !== 'update');
 
     if (!events.length) {
       return;
     }
 
+    const manifest = idx.manifest;
     const mods = [...new Set(events.map(v => v.entry.module.name))];
 
     const parents = new Map<string, string[]>(
-      mods.map(m => [m, this.#state.manifestIndex.getDependentModules(m, 'parents').map(x => x.name)])
+      mods.map(m => [m, idx.getDependentModules(m, 'parents').map(x => x.name)])
     );
 
     const moduleToFiles = new Map<string, { context: ManifestContext, files: FileShape[] }>(
       [...mods, ...parents.values()].flat().map(m => [m, {
-        context: ManifestUtil.getModuleContext(this.#state.manifest, this.#state.manifestIndex.getManifestModule(m)!.sourceFolder),
+        context: ManifestUtil.getModuleContext(manifest, idx.getManifestModule(m)!.sourceFolder),
         files: []
       }])
     );
 
     const allFiles = events.map(ev => {
-      const modRoot = ev.entry.module.sourceFolder || this.#state.manifest.workspace.path;
+      const modRoot = ev.entry.module.sourceFolder || manifest.workspace.path;
       const moduleFile = ev.file.includes(modRoot) ? ev.file.split(`${modRoot}/`)[1] : ev.file;
       const folderKey = ManifestModuleUtil.getFolderKey(moduleFile);
       const fileType = ManifestModuleUtil.getFileType(moduleFile);
@@ -138,7 +120,7 @@ export class CompilerWatcher {
       for (const parent of parents.get(file.mod)!) {
         const mod = moduleToFiles.get(parent);
         if (!mod || !mod.files) {
-          this.#reset({ action: file.action, file: `${file.mod}/${file.moduleFile}` });
+          throw new CompilerReset(`Unknown module ${file.mod}`);
         }
         mod.files.push(file);
       }
@@ -148,112 +130,137 @@ export class CompilerWatcher {
       const newManifest = await ManifestUtil.buildManifest(context);
       for (const { action, mod, fileType, moduleFile, folderKey } of files) {
         const modFiles = newManifest.modules[mod].files[folderKey] ??= [];
-        const idx = modFiles.findIndex(x => x[0] === moduleFile);
+        const modIndex = modFiles.findIndex(x => x[0] === moduleFile);
 
-        if (action === 'create' && idx < 0) {
+        if (action === 'create' && modIndex < 0) {
           modFiles.push([moduleFile, fileType, Date.now()]);
-        } else if (idx >= 0) {
+        } else if (modIndex >= 0) {
           if (action === 'delete') {
-            modFiles.splice(idx, 1);
+            modFiles.splice(modIndex, 1);
           } else {
-            modFiles[idx] = [moduleFile, fileType, Date.now()];
+            modFiles[modIndex] = [moduleFile, fileType, Date.now()];
           }
         }
       }
       await ManifestUtil.writeManifest(newManifest);
     }
 
-    // Reindex at workspace root
-    this.#state.manifestIndex.init(ManifestUtil.getManifestLocation(this.#state.manifest));
+    idx.init(ManifestUtil.getManifestLocation(manifest));
+  }
+
+  /** Listen recursively for file changes */
+  static async listenFiles(root: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): Promise<void> {
+    const lib = await import('@parcel/watcher');
+    const ignore = await this.getWatchIgnores(root);
+
+    const listener = await lib.subscribe(root, (err, events) => {
+      if (err) {
+        q.throw(err instanceof Error ? err : new Error(`${err}`));
+        return;
+      }
+      q.add(events.map(ev => ({ action: ev.type, file: path.toPosix(ev.path) })));
+    }, { ignore });
+    signal.addEventListener('abort', () => listener.unsubscribe());
+  }
+
+  /** Listen at a single level for folder changes */
+  static listenFolder(folder: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): void {
+    const listener = watch(folder, { encoding: 'utf8' }, async (ev, f) => {
+      if (!f) {
+        return;
+      }
+      const full = path.resolve(folder, f);
+      const missing = !(await fs.stat(full).catch(() => null));
+      q.add([{ action: missing ? 'delete' : 'update', file: full }]);
+    });
+    signal.addEventListener('abort', () => listener.close());
   }
 
   /**
-   * Get a watcher for a given compiler state
-   * @param state
-   * @param handler
-   * @returns
+   * Watch workspace given a compiler state
    */
-  async * watchChanges(): AsyncIterable<CompilerWatchEvent> {
-    if (this.#signal.aborted) {
-      return;
-    }
+  static async * watch(state: CompilerState, signal: AbortSignal): AsyncIterable<CompilerWatchEvent> {
+    const build = state.manifest.build;
+    const root = state.manifest.workspace.path;
+    const toolRootFolder = path.dirname(path.resolve(root, build.compilerFolder));
+    const toolFolders = new Set([path.dirname(build.compilerFolder), build.compilerFolder, build.typesFolder, build.outputFolder]);
+    const toolingPrefixRe = new RegExp(`^(${[...toolFolders].join('|')})`.replace(/[.]/g, '[.]'));
 
-    const manifest = this.#state.manifest;
-    const ROOT = manifest.workspace.path;
-    const ROOT_LOCK = 'package-lock.json';
-    const ROOT_PKG = 'package.json';
-    const OUTPUT_PATH = manifest.build.outputFolder;
-    const COMPILER_PATH = manifest.build.compilerFolder;
-    const TYPES_PATH = manifest.build.typesFolder;
-    const COMPILER_ROOT = path.dirname(COMPILER_PATH);
+    log.debug('Tooling Folders', [...toolFolders]);
+    log.debug('Ignore Globs', await this.getWatchIgnores(root));
 
-    const IGNORE_RE = new RegExp(`^[.]|(${COMPILER_PATH}|${TYPES_PATH}|${OUTPUT_PATH})`);
+    const q = new AsyncQueue<Omit<CompilerWatchEvent, 'entry'>[]>();
 
-    const watchDog = this.#watchDog();
+    await this.listenFiles(root, q, signal);
+    await this.listenFolder(toolRootFolder, q, signal);
 
-    for await (const events of this.#watchFolder(ROOT)) {
+    const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT, (deltaMin) => {
+      log.info(`Watch has not seen changes in ${deltaMin}m`);
+    });
+
+    for await (const events of q) {
+      if (events.length > 25) {
+        throw new CompilerReset(`Large influx of file changes: ${events.length}`);
+      }
 
       const outEvents: CompilerWatchEvent[] = [];
 
       for (const ev of events) {
         const { action, file: sourceFile } = ev;
 
-        const relativeFile = sourceFile.replace(`${ROOT}/`, '');
+        const relativeFile = sourceFile.replace(`${root}/`, '');
 
-        if (
-          relativeFile === ROOT_LOCK ||
-          relativeFile === ROOT_PKG ||
-          (action === 'delete' && relativeFile === COMPILER_ROOT)
-        ) {
-          this.#reset(ev);
-        }
-
-        if (IGNORE_RE.test(relativeFile)) {
+        if (ROOT_PACKAGE_FILES.has(relativeFile)) {
+          throw new CompilerReset(`Package information changed ${ev.file}`);
+        } else if (action === 'delete' && toolFolders.has(relativeFile)) {
+          throw new CompilerReset(`Tooling folder removal ${ev.file}`);
+        } else if (relativeFile.startsWith('.') || toolingPrefixRe.test(relativeFile)) {
           continue;
         }
 
-        watchDog.reset(relativeFile);
+        watchDogReset();
 
         const fileType = ManifestModuleUtil.getFileType(sourceFile);
         if (!CompilerUtil.validFile(fileType)) {
           continue;
         }
 
-        let entry = this.#state.getBySource(sourceFile);
+        let entry = state.getBySource(sourceFile);
 
-        const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(sourceFile);
+        const mod = entry?.module ?? state.manifestIndex.findModuleForArbitraryFile(sourceFile);
         if (!mod) { // Unknown module
           log.debug(`Unknown module for a given file ${relativeFile}`);
           continue;
         }
 
-        const modRoot = mod.sourceFolder || this.#state.manifest.workspace.path;
+        const modRoot = mod.sourceFolder || state.manifest.workspace.path;
         const moduleFile = sourceFile.includes(modRoot) ? sourceFile.split(`${modRoot}/`)[1] : sourceFile;
 
         if (action === 'create') {
-          entry = this.#state.registerInput(mod, moduleFile);
+          entry = state.registerInput(mod, moduleFile);
         } else if (!entry) {
           log.debug(`Unknown file ${relativeFile}`);
           continue;
-        } else if (action === 'update' && !this.#state.checkIfSourceChanged(entry.sourceFile)) {
+        } else if (action === 'update' && !state.checkIfSourceChanged(entry.sourceFile)) {
           log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
           continue;
         } else if (action === 'delete') {
-          this.#state.removeSource(entry.sourceFile);
+          state.removeSource(entry.sourceFile);
         }
 
         outEvents.push({ action, file: entry.sourceFile, entry });
       }
 
       try {
-        await this.#rebuildManifestsIfNeeded(outEvents);
+        await this.rebuildManifestsIfNeeded(state.manifestIndex, outEvents);
       } catch (err) {
         log.info('Restarting due to manifest rebuild failure', err);
-        this.#reset(events[0]);
+        if (!(err instanceof CompilerReset)) {
+          err = new CompilerReset(`Manifest rebuild failure: ${events[0].file} -- ${err}`);
+        }
+        throw err;
       }
       yield* outEvents;
     }
-
-    watchDog.close();
   }
 }
