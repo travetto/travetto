@@ -201,8 +201,6 @@ export class CompilerWatcher {
       log.info(`Watch has not seen changes in ${toMin(lastWrite)}m, last file changed: ${toMin(maxTimestamp)}`);
     });
 
-    let itr = 0;
-
     for await (const events of q) {
       if (events.length > 25) {
         throw new CompilerReset(`Large influx of file changes: ${events.length}`);
@@ -238,8 +236,6 @@ export class CompilerWatcher {
           continue;
         }
 
-        itr += 1;
-
         const modRoot = mod.sourceFolder || state.manifest.workspace.path;
         const moduleFile = sourceFile.includes(modRoot) ? sourceFile.split(`${modRoot}/`)[1] : sourceFile;
 
@@ -249,13 +245,13 @@ export class CompilerWatcher {
           log.debug(`Unknown file ${relativeFile}`);
           continue;
         } else if (action === 'update' && !state.checkIfSourceChanged(entry.sourceFile)) {
-          log.debug(`Skipping update, as contents unchanged ${relativeFile}`, itr);
+          log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
           continue;
         } else if (action === 'delete') {
           state.removeSource(entry.sourceFile);
         }
 
-        log.debug(`Compiling ${action}: ${relativeFile}`, itr);
+        log.debug(`Compiling ${action}: ${relativeFile}`);
 
         outEvents.push({ action, file: entry.sourceFile, entry });
       }
