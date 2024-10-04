@@ -16,13 +16,7 @@ import { IpcLogger } from '../support/log';
 const log = new IpcLogger({ level: 'debug' });
 
 type WatchEvent = Omit<CompilerWatchEvent, 'entry'>;
-type FileShape = {
-  mod: string;
-  folderKey: ManifestModuleFolderType;
-  fileType: ManifestModuleFileType;
-  moduleFile: string;
-  action: CompilerWatchEvent['action'];
-};
+type ModuleFileMap = Map<string, { context: ManifestContext, events: CompilerWatchEvent[] }>;
 
 const DEFAULT_WRITE_LIMIT = 1000 * 60 * 5;
 const ROOT_PACKAGE_FILES = new Set(['package-lock.json', 'yarn.lock', 'package.json']);
@@ -86,49 +80,46 @@ export class CompilerWatcher {
     };
   }
 
-  /** Rebuild manifest index if changes require it */
-  static async rebuildManifestsIfNeeded(idx: ManifestIndex, events: CompilerWatchEvent[]): Promise<void> {
-    events = events.filter(x => x.entry.outputFile && x.action !== 'update');
-
-    if (!events.length) {
-      return;
-    }
-
-    const manifest = idx.manifest;
+  /** Get map of files from compiler events */
+  static getManifestFiles(idx: ManifestIndex, events: CompilerWatchEvent[]): ModuleFileMap {
     const mods = [...new Set(events.map(v => v.entry.module.name))];
 
     const parents = new Map<string, string[]>(
       mods.map(m => [m, idx.getDependentModules(m, 'parents').map(x => x.name)])
     );
 
-    const moduleToFiles = new Map<string, { context: ManifestContext, files: FileShape[] }>(
+    const moduleToFiles: ModuleFileMap = new Map(
       [...mods, ...parents.values()].flat().map(m => [m, {
-        context: ManifestUtil.getModuleContext(manifest, idx.getManifestModule(m)!.sourceFolder),
-        files: []
+        context: ManifestUtil.getModuleContext(idx.manifest, idx.getManifestModule(m)!.sourceFolder),
+        events: []
       }])
     );
 
-    const allFiles = events.map(ev => {
-      const modRoot = ev.entry.module.sourceFolder || manifest.workspace.path;
-      const moduleFile = ev.file.includes(modRoot) ? ev.file.split(`${modRoot}/`)[1] : ev.file;
-      const folderKey = ManifestModuleUtil.getFolderKey(moduleFile);
-      const fileType = ManifestModuleUtil.getFileType(moduleFile);
-      return { mod: ev.entry.module.name, action: ev.action, moduleFile, folderKey, fileType };
-    });
-
-    for (const file of allFiles) {
-      for (const parent of parents.get(file.mod)!) {
+    for (const ev of events) {
+      const modName = ev.entry.module.name;
+      for (const parent of parents.get(modName)!) {
         const mod = moduleToFiles.get(parent);
-        if (!mod || !mod.files) {
-          throw new CompilerReset(`Unknown module ${file.mod}`);
+        if (!mod || !mod.events) {
+          throw new CompilerReset(`Unknown module ${modName}`);
         }
-        mod.files.push(file);
+        mod.events.push(ev);
       }
     }
 
-    for (const { context, files } of moduleToFiles.values()) {
+    return moduleToFiles;
+  }
+
+  /** Rebuild manifest index */
+  static async updateManifests(root: string, moduleToFiles: ModuleFileMap): Promise<void> {
+    for (const { context, events } of moduleToFiles.values()) {
       const newManifest = await ManifestUtil.buildManifest(context);
-      for (const { action, mod, fileType, moduleFile, folderKey } of files) {
+      for (const { action, file, entry } of events) {
+        const mod = entry.module.name;
+        const modRoot = entry.module.sourceFolder || root;
+        const moduleFile = file.includes(modRoot) ? file.split(`${modRoot}/`)[1] : file;
+        const folderKey = ManifestModuleUtil.getFolderKey(moduleFile);
+        const fileType = ManifestModuleUtil.getFileType(moduleFile);
+
         const modFiles = newManifest.modules[mod].files[folderKey] ??= [];
         const modIndex = modFiles.findIndex(x => x[0] === moduleFile);
 
@@ -144,8 +135,6 @@ export class CompilerWatcher {
       }
       await ManifestUtil.writeManifest(newManifest);
     }
-
-    idx.init(ManifestUtil.getManifestLocation(manifest));
   }
 
   /** Listen recursively for file changes */
@@ -252,7 +241,12 @@ export class CompilerWatcher {
       }
 
       try {
-        await this.rebuildManifestsIfNeeded(state.manifestIndex, outEvents);
+        const filtered = outEvents.filter(x => x.entry.outputFile && x.action !== 'update');
+        if (events.length) {
+          const moduleToFiles = this.getManifestFiles(state.manifestIndex, filtered);
+          await this.updateManifests(state.manifest.workspace.path, moduleToFiles);
+          state.manifestIndex.init(ManifestUtil.getManifestLocation(state.manifest));
+        }
       } catch (err) {
         log.info('Restarting due to manifest rebuild failure', err);
         if (!(err instanceof CompilerReset)) {
