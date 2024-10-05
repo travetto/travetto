@@ -154,23 +154,21 @@ export class CompilerWatcher {
     const toolingPrefixRe = new RegExp(`^(${[...toolFolders].join('|')})`.replace(/[.]/g, '[.]'));
     const watchCanary = path.resolve(toolRootFolder, 'canary');
     let lastCheckedTime = Date.now();
+    let canaryId: NodeJS.Timeout = undefined!;
 
     log.debug('Tooling Folders', [...toolFolders]);
     log.debug('Ignore Globs', await this.getWatchIgnores(root));
 
-    await ManifestFileUtil.bufferedFileWrite(watchCanary, '');
-
     const q = new AsyncQueue<Omit<CompilerWatchEvent, 'entry'>[]>();
 
-    let canaryValue: NodeJS.Timeout = undefined!;
     const listeners = {
       folder: await this.listenFolder(toolRootFolder, q, new Set([watchCanary])),
       files: await this.listenFiles(root, q),
-      canary: (): void => clearInterval(canaryValue)
+      canary: (): void => clearInterval(canaryId)
     };
 
     log.debug('Canary started');
-    canaryValue = setInterval(async () => {
+    canaryId = setInterval(async () => {
       const delta = Math.trunc((Date.now() - lastCheckedTime) / 1000);
       if (delta > CANARY_FREQ * 2 + 1) {
         q.throw(new CompilerReset(`Watch stopped responding ${delta}s ago`));
@@ -179,7 +177,11 @@ export class CompilerWatcher {
         log.error('Restarting parcel watcher due to inactivity');
         listeners.files = await this.listenFiles(root, q);
       } else {
-        await fs.utimes(watchCanary, new Date(), new Date());
+        try {
+          await fs.utimes(watchCanary, new Date(), new Date());
+        } catch {
+          await ManifestFileUtil.bufferedFileWrite(watchCanary, '');
+        }
       }
     }, CANARY_FREQ * 1000);
 
@@ -237,19 +239,19 @@ export class CompilerWatcher {
           return { action, file: entry.sourceFile, entry };
         });
 
-      try {
-        const filtered = outEvents.filter(x => x.entry.outputFile && x.action !== 'update');
-        if (events.length) {
-          const moduleToFiles = this.getManifestFiles(state.manifestIndex, filtered);
+      const nonUpdates = outEvents.filter(x => x.entry.outputFile && x.action !== 'update');
+      if (nonUpdates.length) {
+        try {
+          const moduleToFiles = this.getManifestFiles(state.manifestIndex, nonUpdates);
           await this.updateManifests(state.manifest.workspace.path, moduleToFiles);
           state.manifestIndex.init(ManifestUtil.getManifestLocation(state.manifest));
+        } catch (err) {
+          log.info('Restarting due to manifest rebuild failure', err);
+          if (!(err instanceof CompilerReset)) {
+            err = new CompilerReset(`Manifest rebuild failure: ${err}`);
+          }
+          throw err;
         }
-      } catch (err) {
-        log.info('Restarting due to manifest rebuild failure', err);
-        if (!(err instanceof CompilerReset)) {
-          err = new CompilerReset(`Manifest rebuild failure: ${err}`);
-        }
-        throw err;
       }
 
       yield* outEvents;
