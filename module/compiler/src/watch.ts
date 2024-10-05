@@ -168,15 +168,20 @@ export class CompilerWatcher {
     };
 
     log.debug('Canary started');
+    let check = 0;
     canaryId = setInterval(async () => {
       const delta = Math.trunc((Date.now() - lastCheckedTime) / 1000);
-      if (delta > CANARY_FREQ * 2 + 1) {
-        q.throw(new CompilerReset(`Watch stopped responding ${delta}s ago`));
-      } else if (delta > CANARY_FREQ + 1) {
-        listeners.files?.();
-        log.error('Restarting parcel watcher due to inactivity');
-        listeners.files = await this.listenFiles(root, q);
+      if (delta > CANARY_FREQ + 1) {
+        check += 1;
+        if (check > 1) {
+          q.throw(new CompilerReset(`Watch stopped responding ${delta}s ago`));
+        } else {
+          listeners.files?.();
+          log.error('Restarting parcel watcher due to inactivity');
+          listeners.files = await this.listenFiles(root, q);
+        }
       } else {
+        check = 0;
         try {
           await fs.utimes(watchCanary, new Date(), new Date());
         } catch {
