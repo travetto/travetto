@@ -128,7 +128,7 @@ export class CompilerWatcher {
   }
 
   /** Listen recursively for file changes */
-  static async listenFiles(root: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): Promise<() => void> {
+  static async listenFiles(root: string, q: AsyncQueue<WatchEvent[]>): Promise<() => void> {
     const lib = await import('@parcel/watcher');
     const ignore = await this.getWatchIgnores(root);
 
@@ -140,16 +140,11 @@ export class CompilerWatcher {
       q.add(events.map(ev => ({ action: ev.type, file: path.toPosix(ev.path) })));
     }, { ignore });
 
-    const close = (): void => {
-      listener.unsubscribe();
-      signal.removeEventListener('abort', close);
-    };
-    signal.addEventListener('abort', close);
-    return close;
+    return () => listener.unsubscribe();
   }
 
   /** Listen at a single level for folder changes */
-  static listenFolder(folder: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal, ignore: Set<string>): () => void {
+  static listenFolder(folder: string, q: AsyncQueue<WatchEvent[]>, ignore: Set<string>): () => void {
     const listener = watch(folder, { encoding: 'utf8' }, async (ev, f) => {
       if (!f) {
         return;
@@ -161,14 +156,8 @@ export class CompilerWatcher {
       }
     });
 
-    const close = (): void => {
-      listener.close();
-      signal.removeEventListener('abort', close);
-    };
-    signal.addEventListener('abort', close);
-    return close;
+    return () => listener.close();
   }
-
 
   /**
    * Watch workspace given a compiler state
@@ -189,26 +178,28 @@ export class CompilerWatcher {
 
     const q = new AsyncQueue<Omit<CompilerWatchEvent, 'entry'>[]>();
 
-    if (!signal.aborted) {
-      await this.listenFolder(toolRootFolder, q, signal, new Set([watchCanary]));
-      let stopListen = await this.listenFiles(root, q, signal);
+    let canaryValue: NodeJS.Timeout | undefined;
+    const listeners = {
+      folder: await this.listenFolder(toolRootFolder, q, new Set([watchCanary])),
+      files: await this.listenFiles(root, q),
+      canary: () => { canaryValue && clearInterval(canaryValue) }
+    };
 
-      log.debug('Canary started');
-      const value = setInterval(async () => {
-        const delta = Math.trunc((Date.now() - lastCheckedTime) / 1000);
-        if (delta > CANARY_FREQ * 2 + 1) {
-          q.throw(new CompilerReset(`Watch stopped responding ${delta}s ago`));
-        } else if (delta > CANARY_FREQ + 1) {
-          stopListen();
-          log.debug('Restarting parcel watcher due to inactivity');
-          stopListen = await this.listenFiles(root, q, signal);
-        } else {
-          await fs.utimes(watchCanary, new Date(), new Date());
-        }
-      }, CANARY_FREQ * 1000);
+    signal.addEventListener('abort', () => Object.values(listeners).forEach(x => x()));
 
-      signal.addEventListener('abort', () => clearInterval(value));
-    }
+    log.debug('Canary started');
+    canaryValue = setInterval(async () => {
+      const delta = Math.trunc((Date.now() - lastCheckedTime) / 1000);
+      if (delta > CANARY_FREQ * 2 + 1) {
+        q.throw(new CompilerReset(`Watch stopped responding ${delta}s ago`));
+      } else if (delta > CANARY_FREQ + 1) {
+        listeners.files?.();
+        log.error('Restarting parcel watcher due to inactivity');
+        listeners.files = await this.listenFiles(root, q);
+      } else {
+        await fs.utimes(watchCanary, new Date(), new Date());
+      }
+    }, CANARY_FREQ * 1000);
 
     for await (const events of q) {
       lastCheckedTime = Date.now();
