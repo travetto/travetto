@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { watch } from 'node:fs';
 
-import { type ManifestContext, ManifestFileUtil, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { type ManifestContext, ManifestFileUtil, ManifestIndex, ManifestModule, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CompilerReset, type CompilerWatchEvent } from './types';
 import { CompilerState } from './state';
@@ -168,6 +168,7 @@ export class CompilerWatcher {
     return close;
   }
 
+
   /**
    * Watch workspace given a compiler state
    */
@@ -215,49 +216,50 @@ export class CompilerWatcher {
         throw new CompilerReset(`Large influx of file changes: ${events.length}`);
       }
 
-      const outEvents: CompilerWatchEvent[] = [];
+      const outEvents = events
+        .map(ev => {
+          let entry = state.getBySource(ev.file);
+          const mod = entry?.module ?? state.manifestIndex.findModuleForArbitraryFile(ev.file);
+          const relativeFile = ev.file.replace(`${root}/`, '');
+          const fileType = ManifestModuleUtil.getFileType(relativeFile);
+          return { entry, module: mod, ...ev, relativeFile, fileType };
+        })
+        .filter((ev): ev is (typeof ev) & { module: ManifestModule } => {
+          if (ROOT_PACKAGE_FILES.has(ev.relativeFile)) {
+            throw new CompilerReset(`Package information changed ${ev.file}`);
+          } else if (ev.action === 'delete' && toolFolders.has(ev.relativeFile)) {
+            throw new CompilerReset(`Tooling folder removal ${ev.file}`);
+          } else if (ev.file === watchCanary) {
+            return false;
+          } else if (ev.relativeFile.startsWith('.') || toolingPrefixRe.test(ev.relativeFile)) {
+            return false;
+          } else if (!CompilerUtil.validFile(ev.fileType)) {
+            return false;
+          } else if (!ev.module) { // Unknown module
+            log.debug(`Unknown module for a given file ${ev.relativeFile}`);
+            return false;
+          } else if (!ev.entry && ev.action !== 'create') {
+            log.debug(`Skipping unknown file ${ev.relativeFile}`);
+            return false;
+          } else if (ev.entry && ev.action === 'update' && !state.checkIfSourceChanged(ev.entry.sourceFile)) {
+            log.debug(`Skipping update, as contents unchanged ${ev.relativeFile}`);
+            return false;
+          }
+          return true;
+        })
+        .map(({ entry, action, file, module, relativeFile }) => {
+          const modRoot = module.sourceFolder || state.manifest.workspace.path;
+          const moduleFile = file.includes(modRoot) ? file.split(`${modRoot}/`)[1] : file;
 
-      for (const ev of events) {
-        const { action, file: sourceFile } = ev;
-        log.debug('Received change', ev);
+          entry ??= state.registerInput(module, moduleFile);
 
-        const relativeFile = sourceFile.replace(`${root}/`, '');
-        const fileType = ManifestModuleUtil.getFileType(relativeFile);
-        let entry = state.getBySource(sourceFile);
-        const mod = entry?.module ?? state.manifestIndex.findModuleForArbitraryFile(sourceFile);
+          if (action === 'delete') {
+            state.removeSource(entry.sourceFile);
+          }
 
-        if (ROOT_PACKAGE_FILES.has(relativeFile)) {
-          throw new CompilerReset(`Package information changed ${ev.file}`);
-        } else if (action === 'delete' && toolFolders.has(relativeFile)) {
-          throw new CompilerReset(`Tooling folder removal ${ev.file}`);
-        } else if (relativeFile.startsWith('.') || toolingPrefixRe.test(relativeFile)) {
-          continue;
-        } else if (!CompilerUtil.validFile(fileType)) {
-          continue;
-        } else if (!mod) { // Unknown module
-          log.debug(`Unknown module for a given file ${relativeFile}`);
-          continue;
-        } else if (!entry && action !== 'create') {
-          log.debug(`Skipping unknown file ${relativeFile}`);
-          continue;
-        } else if (entry && action === 'update' && !state.checkIfSourceChanged(entry.sourceFile)) {
-          log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
-          continue;
-        }
-
-        if (!entry) {
-          const modRoot = mod.sourceFolder || state.manifest.workspace.path;
-          const moduleFile = sourceFile.includes(modRoot) ? sourceFile.split(`${modRoot}/`)[1] : sourceFile;
-          entry = state.registerInput(mod, moduleFile);
-        }
-
-        if (action === 'delete') {
-          state.removeSource(entry.sourceFile);
-        }
-
-        log.debug(`${action} ${relativeFile}`);
-        outEvents.push({ action, file: entry.sourceFile, entry });
-      }
+          log.debug(`${action} ${relativeFile}`);
+          return { action, file: entry.sourceFile, entry };
+        });
 
       try {
         const filtered = outEvents.filter(x => x.entry.outputFile && x.action !== 'update');
