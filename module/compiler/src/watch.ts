@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { watch } from 'node:fs';
 
-import { type ManifestContext, ManifestFileUtil, ManifestIndex, ManifestModule, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { type ManifestContext, ManifestFileUtil, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CompilerReset, type CompilerWatchEvent } from './types';
 import { CompilerState } from './state';
@@ -21,22 +21,6 @@ const CANARY_FREQ = 5;
 export class CompilerWatcher {
 
   static #ignoreCache: Record<string, string[]> = {};
-
-  /** Check for staleness */
-  static async checkWatchStaleness(ctx: ManifestContext, lastWrite: number): Promise<number | undefined> {
-    let maxTimestamp = 0;
-    const manifest = await ManifestModuleUtil.produceModules(ctx);
-    for (const mod of Object.values(manifest)) {
-      for (const file of Object.values(mod.files)) {
-        for (const [, , timestamp,] of file) {
-          maxTimestamp = Math.max(timestamp, maxTimestamp);
-          if (maxTimestamp > lastWrite) {
-            return maxTimestamp;
-          }
-        }
-      }
-    }
-  }
 
   /** Get standard set of watch ignores */
   static async getWatchIgnores(root: string): Promise<string[]> {
@@ -216,7 +200,7 @@ export class CompilerWatcher {
           const fileType = ManifestModuleUtil.getFileType(relativeFile);
           return { entry, module: mod, ...ev, relativeFile, fileType };
         })
-        .filter((ev): ev is (typeof ev) & { module: ManifestModule } => {
+        .filter((ev): ev is (typeof ev) & { module: Exclude<(typeof ev)['module'], undefined> } => {
           if (ROOT_PACKAGE_FILES.has(ev.relativeFile)) {
             throw new CompilerReset(`Package information changed ${ev.file}`);
           } else if (ev.action === 'delete' && toolFolders.has(ev.relativeFile)) {
