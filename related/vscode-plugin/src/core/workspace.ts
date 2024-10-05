@@ -1,12 +1,8 @@
 import vscode from 'vscode';
 import timers from 'node:timers/promises';
-import fs from 'node:fs/promises';
 
 import type { CompilerStateType } from '@travetto/compiler/support/types';
-import { path, type ManifestContext, ManifestIndex, ManifestUtil, PackageUtil } from '@travetto/manifest';
-import { Log } from './log';
-
-const log = new Log('workspace');
+import { path, type ManifestContext, ManifestIndex, ManifestUtil, PackageUtil, ManifestFileUtil } from '@travetto/manifest';
 
 /**
  * Standard set of workspace utilities
@@ -123,7 +119,9 @@ export class Workspace {
 
   /** Record updated touch file on every save, fallback for when watching hangs */
   static async touchEditorFile(): Promise<void> {
-    const loc = path.resolve(this.path, path.dirname(this.#manifestContext.build.compilerFolder), 'editor-write');
-    await fs.writeFile(loc, '', 'utf8');
+    await ManifestFileUtil.bufferedFileWrite(
+      path.resolve(this.path, this.#manifestContext.build.toolFolder, 'editor-write'),
+      `${Date.now()}`
+    );
   }
 }

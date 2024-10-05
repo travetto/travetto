@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
-import { watch } from 'node:fs';
+import { unwatchFile, watch, watchFile } from 'node:fs';
 
-import { type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { type ManifestContext, ManifestFileUtil, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CompilerReset, type CompilerWatchEvent } from './types';
 import { CompilerState } from './state';
@@ -26,7 +26,7 @@ export class CompilerWatcher {
   static #ignoreCache: Record<string, string[]> = {};
 
   /** Check for staleness */
-  static async checkWatchStaleness(ctx: ManifestContext, q: AsyncQueue<WatchEvent[]>, lastWrite: number): Promise<void> {
+  static async checkWatchStaleness(ctx: ManifestContext, q: AsyncQueue<WatchEvent[]>, lastWrite: number): Promise<number> {
     let maxTimestamp = 0;
     const manifest = await ManifestModuleUtil.produceModules(ctx);
     for (const mod of Object.values(manifest)) {
@@ -35,12 +35,12 @@ export class CompilerWatcher {
           maxTimestamp = Math.max(timestamp, maxTimestamp);
           if (maxTimestamp > lastWrite) {
             q.throw(new CompilerReset(`File watch timed out, last write time ${new Date(lastWrite).toISOString()}`));
-            return;
+            return maxTimestamp;
           }
         }
       }
     }
-    log.info(`Watch has not seen changes in ${toMin(lastWrite)}m, last file changed: ${toMin(maxTimestamp)}m`);
+    return maxTimestamp;
   }
 
   /** Get standard set of watch ignores */
@@ -155,6 +155,16 @@ export class CompilerWatcher {
     }
   }
 
+  /** Listen for a single file change */
+  static async listenFile(file: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): Promise<void> {
+    if (!await fs.stat(file).catch(() => null)) {
+      await ManifestFileUtil.bufferedFileWrite(file, '');
+    }
+    const handler = (): void => q.add([{ file, action: 'update' }]);
+    watchFile(file, handler);
+    signal.addEventListener('abort', () => unwatchFile(file, handler));
+  }
+
   /** Listen recursively for file changes */
   static async listenFiles(root: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): Promise<void> {
     const lib = await import('@parcel/watcher');
@@ -192,21 +202,23 @@ export class CompilerWatcher {
     const toolRootFolder = path.dirname(path.resolve(root, build.compilerFolder));
     const toolFolders = new Set([path.dirname(build.compilerFolder), build.compilerFolder, build.typesFolder, build.outputFolder]);
     const toolingPrefixRe = new RegExp(`^(${[...toolFolders].join('|')})`.replace(/[.]/g, '[.]'));
-    const editorTouchFile = path.join(path.dirname(build.compilerFolder), 'editor-write');
+    const editorTouchFile = path.resolve(root, build.toolFolder, 'editor-write');
 
     log.debug('Tooling Folders', [...toolFolders]);
     log.debug('Ignore Globs', await this.getWatchIgnores(root));
 
     const q = new AsyncQueue<Omit<CompilerWatchEvent, 'entry'>[]>();
 
+    await this.listenFile(editorTouchFile, q, signal);
     await this.listenFiles(root, q, signal);
     await this.listenFolder(toolRootFolder, q, signal);
 
     let lastRecordedWrite = Date.now();
 
-    const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT, timestamp =>
-      this.checkWatchStaleness(state.manifest, q, timestamp)
-    );
+    const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT, async timestamp => {
+      const maxTimestamp = await this.checkWatchStaleness(state.manifest, q, timestamp);
+      log.info(`Watch has not seen changes in ${toMin(timestamp)}m, last file changed: ${toMin(maxTimestamp)}m`);
+    });
 
     for await (const events of q) {
       if (events.length > 25) {
@@ -220,15 +232,17 @@ export class CompilerWatcher {
 
         const relativeFile = sourceFile.replace(`${root}/`, '');
 
-        if (ROOT_PACKAGE_FILES.has(relativeFile)) {
+        if (sourceFile === editorTouchFile) {
+          if ((Date.now() - lastRecordedWrite) > EDITOR_WRITE_LIMIT) {
+            log.debug(`Editor file touched, stale ${Math.trunc(lastRecordedWrite / 1000)}s`);
+            await this.checkWatchStaleness(state.manifest, q, lastRecordedWrite);
+          }
+          continue;
+        } else if (ROOT_PACKAGE_FILES.has(relativeFile)) {
           throw new CompilerReset(`Package information changed ${ev.file}`);
         } else if (action === 'delete' && toolFolders.has(relativeFile)) {
           throw new CompilerReset(`Tooling folder removal ${ev.file}`);
         } else if (relativeFile.startsWith('.') || toolingPrefixRe.test(relativeFile)) {
-          if (relativeFile === editorTouchFile && (Date.now() - lastRecordedWrite) > EDITOR_WRITE_LIMIT) {
-            log.debug(`Editor file touched, stale ${Math.trunc(lastRecordedWrite / 1000)}s`);
-            await this.checkWatchStaleness(state.manifest, q, lastRecordedWrite);
-          }
           continue;
         }
 
