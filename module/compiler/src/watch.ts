@@ -16,7 +16,7 @@ type WatchEvent = Omit<CompilerWatchEvent, 'entry'>;
 type ModuleFileMap = Map<string, { context: ManifestContext, events: CompilerWatchEvent[] }>;
 
 const DEFAULT_WRITE_LIMIT_MS = 300 * 1000; // 5 minute
-const EDITOR_WRITE_LIMIT_SEC = 5;
+const EDITOR_WRITE_LIMIT_SEC = 30;
 const ROOT_PACKAGE_FILES = new Set(['package-lock.json', 'yarn.lock', 'package.json']);
 
 const toMin = (v: number): number => Math.trunc((Date.now() - v) / (1000 * 60));
@@ -212,13 +212,14 @@ export class CompilerWatcher {
     await this.listenFiles(root, q, signal);
     await this.listenFolder(toolRootFolder, q, signal);
 
-    let lastRecordedWrite = Date.now();
+    let lastCheckedTime = Date.now();
 
     const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT_MS, async timestamp => {
       const maxTimestamp = await this.checkWatchStaleness(state.manifest, timestamp);
       if (maxTimestamp) {
-        q.throw(new CompilerReset(`File watch timed out as of ${toMin(lastRecordedWrite)}m ago`));
+        q.throw(new CompilerReset(`File watch timed out as of ${toMin(timestamp)}m ago`));
       } else {
+        lastCheckedTime = Date.now();
         log.debug(`Watch has not seen changes in ${toMin(timestamp)}m`);
       }
     });
@@ -236,12 +237,14 @@ export class CompilerWatcher {
         const relativeFile = sourceFile.replace(`${root}/`, '');
 
         if (sourceFile === editorTouchFile) {
-          if (toSec(lastRecordedWrite) > EDITOR_WRITE_LIMIT_SEC) {
-            const maxStale = await this.checkWatchStaleness(state.manifest, lastRecordedWrite);
+          if (toSec(lastCheckedTime) > EDITOR_WRITE_LIMIT_SEC) {
+            log.debug('Editor file touched');
+            const maxStale = await this.checkWatchStaleness(state.manifest, lastCheckedTime);
             if (maxStale) {
-              q.throw(new CompilerReset(`File watch timed out as of ${toSec(lastRecordedWrite)}s ago`));
-              log.debug(`Editor file touched, stale ${toSec(lastRecordedWrite)}s, last file change ${toSec(maxStale)}s`);
+              q.throw(new CompilerReset(`File watch timed out as of ${toSec(lastCheckedTime)}s ago`));
+              log.debug(`Editor file touched, stale ${toSec(lastCheckedTime)}s, last file change ${toSec(maxStale)}s`);
             } else {
+              lastCheckedTime = Date.now();
               log.debug('Editor file touched, no changes detected');
             }
           }
@@ -281,7 +284,7 @@ export class CompilerWatcher {
           state.removeSource(entry.sourceFile);
         }
 
-        lastRecordedWrite = watchDogReset();
+        lastCheckedTime = watchDogReset();
 
         if (entry) {
           log.debug(`Compiling ${action}: ${relativeFile}`);
