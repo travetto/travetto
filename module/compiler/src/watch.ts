@@ -229,43 +229,38 @@ export class CompilerWatcher {
         throw new CompilerReset(`Large influx of file changes: ${events.length}`);
       }
 
+      lastCheckedTime = watchDogReset();
+
       const outEvents: CompilerWatchEvent[] = [];
 
       for (const ev of events) {
         const { action, file: sourceFile } = ev;
 
         const relativeFile = sourceFile.replace(`${root}/`, '');
+        const fileType = ManifestModuleUtil.getFileType(relativeFile);
+        let entry = state.getBySource(sourceFile);
+        const mod = entry?.module ?? state.manifestIndex.findModuleForArbitraryFile(sourceFile);
 
-        if (sourceFile === editorTouchFile) {
-          if (toSec(lastCheckedTime) > EDITOR_WRITE_LIMIT_SEC) {
+        if (ROOT_PACKAGE_FILES.has(relativeFile)) {
+          throw new CompilerReset(`Package information changed ${ev.file}`);
+        } else if (action === 'delete' && toolFolders.has(relativeFile)) {
+          throw new CompilerReset(`Tooling folder removal ${ev.file}`);
+        } else if (relativeFile.startsWith('.') || toolingPrefixRe.test(relativeFile)) {
+          if (sourceFile === editorTouchFile && toSec(lastCheckedTime) > EDITOR_WRITE_LIMIT_SEC) {
             log.debug('Editor file touched');
             const maxStale = await this.checkWatchStaleness(state.manifest, lastCheckedTime);
             if (maxStale) {
-              q.throw(new CompilerReset(`File watch timed out as of ${toSec(lastCheckedTime)}s ago`));
-              log.debug(`Editor file touched, stale ${toSec(lastCheckedTime)}s, last file change ${toSec(maxStale)}s`);
+              log.debug(`Editor file touched, stale since ${toSec(lastCheckedTime)}s`);
+              throw new CompilerReset(`File watch timed out as of ${toSec(lastCheckedTime)}s ago`);
             } else {
               lastCheckedTime = Date.now();
               log.debug('Editor file touched, no changes detected');
             }
           }
           continue;
-        } else if (ROOT_PACKAGE_FILES.has(relativeFile)) {
-          throw new CompilerReset(`Package information changed ${ev.file}`);
-        } else if (action === 'delete' && toolFolders.has(relativeFile)) {
-          throw new CompilerReset(`Tooling folder removal ${ev.file}`);
-        } else if (relativeFile.startsWith('.') || toolingPrefixRe.test(relativeFile)) {
+        } else if (!CompilerUtil.validFile(fileType)) {
           continue;
-        }
-
-        const fileType = ManifestModuleUtil.getFileType(sourceFile);
-        if (!CompilerUtil.validFile(fileType)) {
-          continue;
-        }
-
-        let entry = state.getBySource(sourceFile);
-
-        const mod = entry?.module ?? state.manifestIndex.findModuleForArbitraryFile(sourceFile);
-        if (!mod) { // Unknown module
+        } else if (!mod) { // Unknown module
           log.debug(`Unknown module for a given file ${relativeFile}`);
           continue;
         }
@@ -275,22 +270,21 @@ export class CompilerWatcher {
 
         if (action === 'create') {
           entry = state.registerInput(mod, moduleFile);
+          log.debug(`Creating ${relativeFile}`);
+          outEvents.push({ action, file: entry.sourceFile, entry });
         } else if (!entry) {
-          log.debug(`Unknown file ${relativeFile}`);
-          continue;
-        } else if (action === 'update' && !state.checkIfSourceChanged(entry.sourceFile)) {
-          entry = undefined;
+          log.debug(`Skipping unknown file ${relativeFile}`);
+        } else if (action === 'update') {
+          if (state.checkIfSourceChanged(entry.sourceFile)) {
+            outEvents.push({ action, file: entry.sourceFile, entry });
+            log.debug(`Updating ${relativeFile}`);
+          } else {
+            log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
+          }
         } else if (action === 'delete') {
           state.removeSource(entry.sourceFile);
-        }
-
-        lastCheckedTime = watchDogReset();
-
-        if (entry) {
-          log.debug(`Compiling ${action}: ${relativeFile}`);
+          log.debug(`Removing ${relativeFile}`);
           outEvents.push({ action, file: entry.sourceFile, entry });
-        } else {
-          log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
         }
       }
 
@@ -304,7 +298,7 @@ export class CompilerWatcher {
       } catch (err) {
         log.info('Restarting due to manifest rebuild failure', err);
         if (!(err instanceof CompilerReset)) {
-          err = new CompilerReset(`Manifest rebuild failure: ${events[0].file} -- ${err}`);
+          err = new CompilerReset(`Manifest rebuild failure: ${err}`);
         }
         throw err;
       }
