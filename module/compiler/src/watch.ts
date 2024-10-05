@@ -16,6 +16,7 @@ type WatchEvent = Omit<CompilerWatchEvent, 'entry'>;
 type ModuleFileMap = Map<string, { context: ManifestContext, events: CompilerWatchEvent[] }>;
 
 const ROOT_PACKAGE_FILES = new Set(['package-lock.json', 'yarn.lock', 'package.json']);
+const CANARY_FREQ = 5;
 
 export class CompilerWatcher {
 
@@ -192,19 +193,19 @@ export class CompilerWatcher {
       await this.listenFolder(toolRootFolder, q, signal, new Set([watchCanary]));
       let stopListen = await this.listenFiles(root, q, signal);
 
+      log.debug('Canary started');
       const value = setInterval(async () => {
         const delta = Math.trunc((Date.now() - lastCheckedTime) / 1000);
-        log.debug('Checking canary', delta);
-        if (delta > 10) {
+        if (delta > CANARY_FREQ * 2 + 1) {
           q.throw(new CompilerReset(`Watch stopped responding ${delta}s ago`));
-        } else if (delta > 2) {
+        } else if (delta > CANARY_FREQ + 1) {
           stopListen();
           log.debug('Restarting parcel watcher due to inactivity');
           stopListen = await this.listenFiles(root, q, signal);
         } else {
           await fs.utimes(watchCanary, new Date(), new Date());
         }
-      }, 1000);
+      }, CANARY_FREQ * 1000);
 
       signal.addEventListener('abort', () => clearInterval(value));
     }
