@@ -174,7 +174,7 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
     const ignore = await CompilerWatcher.getWatchIgnores(root);
     const packageFiles = new Set(['package-lock.json', 'yarn.lock', 'package.json'].map(x => path.resolve(root, x)));
 
-    log.debug('Ignore Globs', await CompilerWatcher.getWatchIgnores(root));
+    log.debug('Ignore Globs', ignore);
 
     await this.#cleanup.workspace?.();
 
@@ -240,6 +240,7 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
     const full = path.resolve(this.#state.manifest.workspace.path, this.#watchCanary);
     await ManifestFileUtil.bufferedFileWrite(full, '');
 
+    log.debug('Starting workspace canary');
     const canaryId = setInterval(async () => {
       const delta = Math.trunc((Date.now() - this.#lastWorkspaceModified) / 1000);
       if (delta > this.#watchCanaryFreq * 2) {
