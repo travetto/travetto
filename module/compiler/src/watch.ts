@@ -15,18 +15,19 @@ const log = new IpcLogger({ level: 'debug' });
 type WatchEvent = Omit<CompilerWatchEvent, 'entry'>;
 type ModuleFileMap = Map<string, { context: ManifestContext, events: CompilerWatchEvent[] }>;
 
-const DEFAULT_WRITE_LIMIT = 1000 * 60 * 5;
-const EDITOR_WRITE_LIMIT = 1000 * 5;
+const DEFAULT_WRITE_LIMIT_MS = 300 * 1000; // 5 minute
+const EDITOR_WRITE_LIMIT_SEC = 5;
 const ROOT_PACKAGE_FILES = new Set(['package-lock.json', 'yarn.lock', 'package.json']);
 
 const toMin = (v: number): number => Math.trunc((Date.now() - v) / (1000 * 60));
+const toSec = (v: number): number => Math.trunc((Date.now() - v) / (1000));
 
 export class CompilerWatcher {
 
   static #ignoreCache: Record<string, string[]> = {};
 
   /** Check for staleness */
-  static async checkWatchStaleness(ctx: ManifestContext, q: AsyncQueue<WatchEvent[]>, lastWrite: number): Promise<number> {
+  static async checkWatchStaleness(ctx: ManifestContext, lastWrite: number): Promise<number | undefined> {
     let maxTimestamp = 0;
     const manifest = await ManifestModuleUtil.produceModules(ctx);
     for (const mod of Object.values(manifest)) {
@@ -34,13 +35,11 @@ export class CompilerWatcher {
         for (const [, , timestamp,] of file) {
           maxTimestamp = Math.max(timestamp, maxTimestamp);
           if (maxTimestamp > lastWrite) {
-            q.throw(new CompilerReset(`File watch timed out, last write time ${new Date(lastWrite).toISOString()}`));
             return maxTimestamp;
           }
         }
       }
     }
-    return maxTimestamp;
   }
 
   /** Get standard set of watch ignores */
@@ -215,9 +214,13 @@ export class CompilerWatcher {
 
     let lastRecordedWrite = Date.now();
 
-    const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT, async timestamp => {
-      const maxTimestamp = await this.checkWatchStaleness(state.manifest, q, timestamp);
-      log.info(`Watch has not seen changes in ${toMin(timestamp)}m, last file changed: ${toMin(maxTimestamp)}m`);
+    const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT_MS, async timestamp => {
+      const maxTimestamp = await this.checkWatchStaleness(state.manifest, timestamp);
+      if (maxTimestamp) {
+        q.throw(new CompilerReset(`File watch timed out as of ${toMin(lastRecordedWrite)}m ago`));
+      } else {
+        log.debug(`Watch has not seen changes in ${toMin(timestamp)}m`);
+      }
     });
 
     for await (const events of q) {
@@ -233,9 +236,14 @@ export class CompilerWatcher {
         const relativeFile = sourceFile.replace(`${root}/`, '');
 
         if (sourceFile === editorTouchFile) {
-          if ((Date.now() - lastRecordedWrite) > EDITOR_WRITE_LIMIT) {
-            log.debug(`Editor file touched, stale ${Math.trunc(lastRecordedWrite / 1000)}s`);
-            await this.checkWatchStaleness(state.manifest, q, lastRecordedWrite);
+          if (toSec(lastRecordedWrite) > EDITOR_WRITE_LIMIT_SEC) {
+            const maxStale = await this.checkWatchStaleness(state.manifest, lastRecordedWrite);
+            if (maxStale) {
+              q.throw(new CompilerReset(`File watch timed out as of ${toSec(lastRecordedWrite)}s ago`));
+              log.debug(`Editor file touched, stale ${toSec(lastRecordedWrite)}s, last file change ${toSec(maxStale)}s`);
+            } else {
+              log.debug('Editor file touched, no changes detected');
+            }
           }
           continue;
         } else if (ROOT_PACKAGE_FILES.has(relativeFile)) {
