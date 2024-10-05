@@ -247,13 +247,11 @@ export class CompilerWatcher {
           throw new CompilerReset(`Tooling folder removal ${ev.file}`);
         } else if (relativeFile.startsWith('.') || toolingPrefixRe.test(relativeFile)) {
           if (sourceFile === editorTouchFile && toSec(lastCheckedTime) > EDITOR_WRITE_LIMIT_SEC) {
-            log.debug('Editor file touched');
             const maxStale = await this.checkWatchStaleness(state.manifest, lastCheckedTime);
             if (maxStale) {
               log.debug(`Editor file touched, stale since ${toSec(lastCheckedTime)}s`);
               throw new CompilerReset(`File watch timed out as of ${toSec(lastCheckedTime)}s ago`);
             } else {
-              lastCheckedTime = Date.now();
               log.debug('Editor file touched, no changes detected');
             }
           }
