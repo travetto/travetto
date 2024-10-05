@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import timers from 'node:timers/promises';
 
 import type { CompilerStateType } from '@travetto/compiler/support/types';
-import { path, type ManifestContext, ManifestIndex, ManifestUtil, PackageUtil, ManifestFileUtil } from '@travetto/manifest';
+import { type ManifestContext, ManifestIndex, ManifestUtil, PackageUtil } from '@travetto/manifest';
 
 /**
  * Standard set of workspace utilities
@@ -68,18 +68,6 @@ export class Workspace {
     return this.#workspaceIndex ??= new ManifestIndex(ManifestUtil.getManifestLocation(this.#manifestContext));
   }
 
-  /**
-   * Initialize extension context
-   * @param context
-   */
-  static async init(context: vscode.ExtensionContext, manifestContext: ManifestContext, folder: vscode.WorkspaceFolder): Promise<void> {
-    this.#context = context;
-    this.#manifestContext = manifestContext;
-    // Overwrite "const"
-    Object.assign(this, { folder });
-    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(() => this.touchEditorFile()));
-  }
-
   /** Find full path for a resource */
   static getAbsoluteResource(rel: string): string {
     return this.#context.asAbsolutePath(rel);
@@ -115,13 +103,5 @@ export class Workspace {
       token.onCancellationRequested(() => ctrl.abort());
       await timers.setTimeout(duration, undefined, { signal: ctrl.signal }).catch(() => { });
     });
-  }
-
-  /** Record updated touch file on every save, fallback for when watching hangs */
-  static async touchEditorFile(): Promise<void> {
-    await ManifestFileUtil.bufferedFileWrite(
-      path.resolve(this.path, this.#manifestContext.build.toolFolder, 'editor-write'),
-      `${Date.now()}`
-    );
   }
 }
