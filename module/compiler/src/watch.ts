@@ -148,14 +148,16 @@ export class CompilerWatcher {
   }
 
   /** Listen at a single level for folder changes */
-  static listenFolder(folder: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): () => void {
+  static listenFolder(folder: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal, ignore: Set<string>): () => void {
     const listener = watch(folder, { encoding: 'utf8' }, async (ev, f) => {
       if (!f) {
         return;
       }
       const full = path.resolve(folder, f);
-      const missing = !(await fs.stat(full).catch(() => null));
-      q.add([{ action: missing ? 'delete' : 'update', file: full }]);
+      const stat = await fs.stat(full).catch(() => null);
+      if (!ignore.has(full)) {
+        q.add([{ action: !stat ? 'delete' : 'update', file: full }]);
+      }
     });
 
     const close = (): void => {
@@ -186,11 +188,12 @@ export class CompilerWatcher {
     const q = new AsyncQueue<Omit<CompilerWatchEvent, 'entry'>[]>();
 
     if (!signal.aborted) {
-      // await this.listenFolder(toolRootFolder, q, signal);
+      await this.listenFolder(toolRootFolder, q, signal, new Set([watchCanary]));
       let stopListen = await this.listenFiles(root, q, signal);
 
       const value = setInterval(async () => {
         const delta = Math.trunc((Date.now() - lastCheckedTime) / 1000);
+        log.debug('Checking canary', delta);
         if (delta > 10) {
           q.throw(new CompilerReset(`Watch stopped responding ${delta}s ago`));
         } else if (delta > 2) {
@@ -216,6 +219,7 @@ export class CompilerWatcher {
 
       for (const ev of events) {
         const { action, file: sourceFile } = ev;
+        log.debug('Received change', ev);
 
         const relativeFile = sourceFile.replace(`${root}/`, '');
         const fileType = ManifestModuleUtil.getFileType(relativeFile);
