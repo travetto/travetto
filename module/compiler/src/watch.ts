@@ -95,15 +95,15 @@ export class CompilerWatcher {
         const fileType = ManifestModuleUtil.getFileType(moduleFile);
 
         const modFiles = newManifest.modules[mod].files[folderKey] ??= [];
-        const modIndex = modFiles.findIndex(x => x[0] === moduleFile);
+        const idx = modFiles.findIndex(x => x[0] === moduleFile);
 
-        if (action === 'create' && modIndex < 0) {
+        if (action === 'create' && idx < 0) {
           modFiles.push([moduleFile, fileType, Date.now()]);
-        } else if (modIndex >= 0) {
+        } else if (idx >= 0) {
           if (action === 'delete') {
-            modFiles.splice(modIndex, 1);
+            modFiles.splice(idx, 1);
           } else {
-            modFiles[modIndex] = [moduleFile, fileType, Date.now()];
+            modFiles[idx] = [moduleFile, fileType, Date.now()];
           }
         }
       }
