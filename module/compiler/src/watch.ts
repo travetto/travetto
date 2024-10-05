@@ -162,14 +162,12 @@ export class CompilerWatcher {
 
     const q = new AsyncQueue<Omit<CompilerWatchEvent, 'entry'>[]>();
 
-    let canaryValue: NodeJS.Timeout | undefined;
+    let canaryValue: NodeJS.Timeout = undefined!;
     const listeners = {
       folder: await this.listenFolder(toolRootFolder, q, new Set([watchCanary])),
       files: await this.listenFiles(root, q),
-      canary: () => { canaryValue && clearInterval(canaryValue) }
+      canary: (): void => clearInterval(canaryValue)
     };
-
-    signal.addEventListener('abort', () => Object.values(listeners).forEach(x => x()));
 
     log.debug('Canary started');
     canaryValue = setInterval(async () => {
@@ -185,6 +183,8 @@ export class CompilerWatcher {
       }
     }, CANARY_FREQ * 1000);
 
+    signal.addEventListener('abort', () => Object.values(listeners).forEach(x => x()));
+
     for await (const events of q) {
       lastCheckedTime = Date.now();
 
@@ -194,7 +194,7 @@ export class CompilerWatcher {
 
       const outEvents = events
         .map(ev => {
-          let entry = state.getBySource(ev.file);
+          const entry = state.getBySource(ev.file);
           const mod = entry?.module ?? state.manifestIndex.findModuleForArbitraryFile(ev.file);
           const relativeFile = ev.file.replace(`${root}/`, '');
           const fileType = ManifestModuleUtil.getFileType(relativeFile);
