@@ -16,9 +16,11 @@
     "name": "Travetto Framework"
   },
   "files": [
+    "__index__.ts",
     "src",
     "support"
   ],
+  "main": "__index__.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/rest-client"
