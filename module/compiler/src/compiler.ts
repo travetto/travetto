@@ -164,7 +164,7 @@ export class Compiler {
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
       try {
-        for await (const ev of CompilerWatcher.watch(this.#state, this.#signal)) {
+        for await (const ev of new CompilerWatcher(this.#state, this.#signal)) {
           if (ev.action !== 'delete') {
             const err = await emitter(ev.entry.sourceFile, true);
             if (err) {
