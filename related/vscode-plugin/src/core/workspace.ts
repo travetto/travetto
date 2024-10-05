@@ -68,6 +68,17 @@ export class Workspace {
     return this.#workspaceIndex ??= new ManifestIndex(ManifestUtil.getManifestLocation(this.#manifestContext));
   }
 
+  /**
+   * Initialize extension context
+   * @param context
+   */
+  static async init(context: vscode.ExtensionContext, manifestContext: ManifestContext, folder: vscode.WorkspaceFolder): Promise<void> {
+    this.#context = context;
+    this.#manifestContext = manifestContext;
+    // Overwrite "const"
+    Object.assign(this, { folder });
+  }
+
   /** Find full path for a resource */
   static getAbsoluteResource(rel: string): string {
     return this.#context.asAbsolutePath(rel);

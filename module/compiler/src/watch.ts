@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { unwatchFile, watch, watchFile } from 'node:fs';
+import { watch } from 'node:fs';
 
 import { type ManifestContext, ManifestFileUtil, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
@@ -15,12 +15,7 @@ const log = new IpcLogger({ level: 'debug' });
 type WatchEvent = Omit<CompilerWatchEvent, 'entry'>;
 type ModuleFileMap = Map<string, { context: ManifestContext, events: CompilerWatchEvent[] }>;
 
-const DEFAULT_WRITE_LIMIT_MS = 300 * 1000; // 5 minute
-const EDITOR_WRITE_LIMIT_SEC = 30;
 const ROOT_PACKAGE_FILES = new Set(['package-lock.json', 'yarn.lock', 'package.json']);
-
-const toMin = (v: number): number => Math.trunc((Date.now() - v) / (1000 * 60));
-const toSec = (v: number): number => Math.trunc((Date.now() - v) / (1000));
 
 export class CompilerWatcher {
 
@@ -72,29 +67,6 @@ export class CompilerWatcher {
     }
     this.#ignoreCache[root] = [...ignores].sort().map(x => x.endsWith('/') ? x : `${x}/`);
     return this.#ignoreCache[root];
-  }
-
-  /** Create watchdog that will fire every multiple of threshold if reset is not called */
-  static createWatchDog(signal: AbortSignal, threshold: number, onStall: (lastWriteTs: number) => void): () => number {
-    let lastWrite = Date.now();
-    let writeThreshold = threshold;
-    const value = setInterval(() => {
-      if (Date.now() > (lastWrite + writeThreshold)) {
-        onStall(lastWrite);
-        writeThreshold += threshold;
-      }
-    }, threshold / 10);
-
-    signal.addEventListener('abort', () => clearInterval(value));
-
-    if (signal.aborted) {
-      clearInterval(value);
-    }
-
-    return (): number => {
-      writeThreshold = threshold;
-      return lastWrite = Date.now();
-    };
   }
 
   /** Get map of files from compiler events */
@@ -154,18 +126,8 @@ export class CompilerWatcher {
     }
   }
 
-  /** Listen for a single file change */
-  static async listenFile(file: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): Promise<void> {
-    if (!await fs.stat(file).catch(() => null)) {
-      await ManifestFileUtil.bufferedFileWrite(file, '');
-    }
-    const handler = (): void => q.add([{ file, action: 'update' }]);
-    watchFile(file, handler);
-    signal.addEventListener('abort', () => unwatchFile(file, handler));
-  }
-
   /** Listen recursively for file changes */
-  static async listenFiles(root: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): Promise<void> {
+  static async listenFiles(root: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): Promise<() => void> {
     const lib = await import('@parcel/watcher');
     const ignore = await this.getWatchIgnores(root);
 
@@ -176,11 +138,17 @@ export class CompilerWatcher {
       }
       q.add(events.map(ev => ({ action: ev.type, file: path.toPosix(ev.path) })));
     }, { ignore });
-    signal.addEventListener('abort', () => listener.unsubscribe());
+
+    const close = (): void => {
+      listener.unsubscribe();
+      signal.removeEventListener('abort', close);
+    };
+    signal.addEventListener('abort', close);
+    return close;
   }
 
   /** Listen at a single level for folder changes */
-  static listenFolder(folder: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): void {
+  static listenFolder(folder: string, q: AsyncQueue<WatchEvent[]>, signal: AbortSignal): () => void {
     const listener = watch(folder, { encoding: 'utf8' }, async (ev, f) => {
       if (!f) {
         return;
@@ -189,7 +157,13 @@ export class CompilerWatcher {
       const missing = !(await fs.stat(full).catch(() => null));
       q.add([{ action: missing ? 'delete' : 'update', file: full }]);
     });
-    signal.addEventListener('abort', () => listener.close());
+
+    const close = (): void => {
+      listener.close();
+      signal.removeEventListener('abort', close);
+    };
+    signal.addEventListener('abort', close);
+    return close;
   }
 
   /**
@@ -201,35 +175,42 @@ export class CompilerWatcher {
     const toolRootFolder = path.dirname(path.resolve(root, build.compilerFolder));
     const toolFolders = new Set([path.dirname(build.compilerFolder), build.compilerFolder, build.typesFolder, build.outputFolder]);
     const toolingPrefixRe = new RegExp(`^(${[...toolFolders].join('|')})`.replace(/[.]/g, '[.]'));
-    const editorTouchFile = path.resolve(root, build.toolFolder, 'editor-write');
+    const watchCanary = path.resolve(toolRootFolder, 'canary');
+    let lastCheckedTime = Date.now();
 
     log.debug('Tooling Folders', [...toolFolders]);
     log.debug('Ignore Globs', await this.getWatchIgnores(root));
 
+    await ManifestFileUtil.bufferedFileWrite(watchCanary, '');
+
     const q = new AsyncQueue<Omit<CompilerWatchEvent, 'entry'>[]>();
 
-    await this.listenFile(editorTouchFile, q, signal);
-    await this.listenFiles(root, q, signal);
-    await this.listenFolder(toolRootFolder, q, signal);
+    if (!signal.aborted) {
+      // await this.listenFolder(toolRootFolder, q, signal);
+      let stopListen = await this.listenFiles(root, q, signal);
 
-    let lastCheckedTime = Date.now();
+      const value = setInterval(async () => {
+        const delta = Math.trunc((Date.now() - lastCheckedTime) / 1000);
+        if (delta > 10) {
+          q.throw(new CompilerReset(`Watch stopped responding ${delta}s ago`));
+        } else if (delta > 2) {
+          stopListen();
+          log.debug('Restarting parcel watcher due to inactivity');
+          stopListen = await this.listenFiles(root, q, signal);
+        } else {
+          await fs.utimes(watchCanary, new Date(), new Date());
+        }
+      }, 1000);
 
-    const watchDogReset = this.createWatchDog(signal, DEFAULT_WRITE_LIMIT_MS, async timestamp => {
-      const maxTimestamp = await this.checkWatchStaleness(state.manifest, timestamp);
-      if (maxTimestamp) {
-        q.throw(new CompilerReset(`File watch timed out as of ${toMin(timestamp)}m ago`));
-      } else {
-        lastCheckedTime = Date.now();
-        log.debug(`Watch has not seen changes in ${toMin(timestamp)}m`);
-      }
-    });
+      signal.addEventListener('abort', () => clearInterval(value));
+    }
 
     for await (const events of q) {
+      lastCheckedTime = Date.now();
+
       if (events.length > 25) {
         throw new CompilerReset(`Large influx of file changes: ${events.length}`);
       }
-
-      lastCheckedTime = watchDogReset();
 
       const outEvents: CompilerWatchEvent[] = [];
 
@@ -246,44 +227,32 @@ export class CompilerWatcher {
         } else if (action === 'delete' && toolFolders.has(relativeFile)) {
           throw new CompilerReset(`Tooling folder removal ${ev.file}`);
         } else if (relativeFile.startsWith('.') || toolingPrefixRe.test(relativeFile)) {
-          if (sourceFile === editorTouchFile && toSec(lastCheckedTime) > EDITOR_WRITE_LIMIT_SEC) {
-            const maxStale = await this.checkWatchStaleness(state.manifest, lastCheckedTime);
-            if (maxStale) {
-              log.debug(`Editor file touched, stale since ${toSec(lastCheckedTime)}s`);
-              throw new CompilerReset(`File watch timed out as of ${toSec(lastCheckedTime)}s ago`);
-            } else {
-              log.debug('Editor file touched, no changes detected');
-            }
-          }
           continue;
         } else if (!CompilerUtil.validFile(fileType)) {
           continue;
         } else if (!mod) { // Unknown module
           log.debug(`Unknown module for a given file ${relativeFile}`);
           continue;
-        }
-
-        const modRoot = mod.sourceFolder || state.manifest.workspace.path;
-        const moduleFile = sourceFile.includes(modRoot) ? sourceFile.split(`${modRoot}/`)[1] : sourceFile;
-
-        if (action === 'create') {
-          entry = state.registerInput(mod, moduleFile);
-          log.debug(`Creating ${relativeFile}`);
-          outEvents.push({ action, file: entry.sourceFile, entry });
-        } else if (!entry) {
+        } else if (!entry && action !== 'create') {
           log.debug(`Skipping unknown file ${relativeFile}`);
-        } else if (action === 'update') {
-          if (state.checkIfSourceChanged(entry.sourceFile)) {
-            outEvents.push({ action, file: entry.sourceFile, entry });
-            log.debug(`Updating ${relativeFile}`);
-          } else {
-            log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
-          }
-        } else if (action === 'delete') {
-          state.removeSource(entry.sourceFile);
-          log.debug(`Removing ${relativeFile}`);
-          outEvents.push({ action, file: entry.sourceFile, entry });
+          continue;
+        } else if (entry && action === 'update' && !state.checkIfSourceChanged(entry.sourceFile)) {
+          log.debug(`Skipping update, as contents unchanged ${relativeFile}`);
+          continue;
         }
+
+        if (!entry) {
+          const modRoot = mod.sourceFolder || state.manifest.workspace.path;
+          const moduleFile = sourceFile.includes(modRoot) ? sourceFile.split(`${modRoot}/`)[1] : sourceFile;
+          entry = state.registerInput(mod, moduleFile);
+        }
+
+        if (action === 'delete') {
+          state.removeSource(entry.sourceFile);
+        }
+
+        log.debug(`${action} ${relativeFile}`);
+        outEvents.push({ action, file: entry.sourceFile, entry });
       }
 
       try {
@@ -300,6 +269,7 @@ export class CompilerWatcher {
         }
         throw err;
       }
+
       yield* outEvents;
     }
   }
