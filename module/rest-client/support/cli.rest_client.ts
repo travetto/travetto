@@ -3,8 +3,8 @@ import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 import { Ignore } from '@travetto/schema';
 
-import { AngularClientGenerator } from '../src/provider/angular';
-import { FetchClientGenerator } from '../src/provider/fetch';
+import { AngularClientGenerator } from '../src/angular';
+import { FetchClientGenerator } from '../src/fetch';
 
 /**
  * Run client rest operation
@@ -24,8 +24,8 @@ export class CliRestClientCommand implements CliCommandShape {
     await RootRegistry.init();
     switch (type) {
       case 'angular': return new AngularClientGenerator(output, this.module, {}).render();
-      case 'fetch-node':
-      case 'fetch-web': return new FetchClientGenerator(output, this.module, { node: !type.includes('web') }).render();
+      case 'fetch-node': return new FetchClientGenerator(output, this.module, { node: true }).render();
+      case 'fetch-web': return new FetchClientGenerator(output, this.module, { node: false }).render();
     }
   }
 }

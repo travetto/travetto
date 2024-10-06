@@ -6,7 +6,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
 import { ControllerRegistry } from '../src/registry/controller';
-import { RouteUtil } from '../__index__';
+import { RouteUtil } from '../src/util/route';
 
 @Controller('/')
 class RouteController {

@@ -5,9 +5,9 @@ type Role = Exclude<ManifestModuleRole, 'std' | 'compile'>;
 declare module "@travetto/runtime" {
   interface EnvData {
     /** 
- * The node environment we are running in
- * @default development
- */
+     * The node environment we are running in
+     * @default development
+     */
     NODE_ENV: 'development' | 'production';
     /** 
      * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod. 

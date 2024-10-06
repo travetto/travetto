@@ -87,60 +87,60 @@ The functionality we support for testing and retrieving environment information 
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">interface</span> <span class="token class-name">EnvData</span> <span class="token punctuation">{{'{'}}</span>
-   <span class="token comment">/**
-* The node environment we are running in
-* &#64;default development
-*/</span>
-   <span class="token constant">NODE_ENV</span><span class="token operator">:</span> <span class="token string">'development'</span> <span class="token operator">|</span> <span class="token string">'production'</span><span class="token punctuation">;</span>
-   <span class="token comment">/**
-    * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod.
-    */</span>
-   <span class="token constant">DEBUG</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-   <span class="token comment">/**
-    * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.
-    */</span>
-   <span class="token constant">TRV_ENV</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-   <span class="token comment">/**
-    * Special role to run as, used to access additional files from the manifest during runtime.
-    */</span>
-   <span class="token constant">TRV_ROLE</span><span class="token operator">:</span> Role<span class="token punctuation">;</span>
-   <span class="token comment">/**
-    * Whether or not to run the program in dynamic mode, allowing for real-time updates
-    */</span>
-   <span class="token constant">TRV_DYNAMIC</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-   <span class="token comment">/**
-    * The folders to use for resource lookup
-    */</span>
-   <span class="token constant">TRV_RESOURCES</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-   <span class="token comment">/**
-    * Resource path overrides
-    * &#64;private
-    */</span>
-   <span class="token constant">TRV_RESOURCE_OVERRIDES</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
-   <span class="token comment">/**
-    * The max time to wait for shutdown to finish after initial SIGINT,
-    * &#64;default 2s
-    */</span>
-   <span class="token constant">TRV_SHUTDOWN_WAIT</span><span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-   <span class="token comment">/**
-    * The desired runtime module
-    */</span>
-   <span class="token constant">TRV_MODULE</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-   <span class="token comment">/**
-    * The location of the manifest file
-    * &#64;default undefined
-    */</span>
-   <span class="token constant">TRV_MANIFEST</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-   <span class="token comment">/**
-    * trvc log level
-    */</span>
-   <span class="token constant">TRV_BUILD</span><span class="token operator">:</span> <span class="token string">'none'</span> <span class="token operator">|</span> <span class="token string">'info'</span> <span class="token operator">|</span> <span class="token string">'debug'</span> <span class="token operator">|</span> <span class="token string">'error'</span> <span class="token operator">|</span> <span class="token string">'warn'</span><span class="token punctuation">,</span>
-   <span class="token comment">/**
-    * Should break on first line of a method when using the &#64;DebugBreak decorator
-    * &#64;default false
-    */</span>
-   <span class="token constant">TRV_DEBUG_BREAK</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
- <span class="token punctuation">{{'}'}}</span></code></pre>
+  <span class="token comment">/**
+   * The node environment we are running in
+   * &#64;default development
+   */</span>
+  <span class="token constant">NODE_ENV</span><span class="token operator">:</span> <span class="token string">'development'</span> <span class="token operator">|</span> <span class="token string">'production'</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod.
+   */</span>
+  <span class="token constant">DEBUG</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.
+   */</span>
+  <span class="token constant">TRV_ENV</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Special role to run as, used to access additional files from the manifest during runtime.
+   */</span>
+  <span class="token constant">TRV_ROLE</span><span class="token operator">:</span> Role<span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Whether or not to run the program in dynamic mode, allowing for real-time updates
+   */</span>
+  <span class="token constant">TRV_DYNAMIC</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The folders to use for resource lookup
+   */</span>
+  <span class="token constant">TRV_RESOURCES</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Resource path overrides
+   * &#64;private
+   */</span>
+  <span class="token constant">TRV_RESOURCE_OVERRIDES</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The max time to wait for shutdown to finish after initial SIGINT,
+   * &#64;default 2s
+   */</span>
+  <span class="token constant">TRV_SHUTDOWN_WAIT</span><span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The desired runtime module
+   */</span>
+  <span class="token constant">TRV_MODULE</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The location of the manifest file
+   * &#64;default undefined
+   */</span>
+  <span class="token constant">TRV_MANIFEST</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * trvc log level
+   */</span>
+  <span class="token constant">TRV_BUILD</span><span class="token operator">:</span> <span class="token string">'none'</span> <span class="token operator">|</span> <span class="token string">'info'</span> <span class="token operator">|</span> <span class="token string">'debug'</span> <span class="token operator">|</span> <span class="token string">'error'</span> <span class="token operator">|</span> <span class="token string">'warn'</span><span class="token punctuation">,</span>
+  <span class="token comment">/**
+   * Should break on first line of a method when using the &#64;DebugBreak decorator
+   * &#64;default false
+   */</span>
+  <span class="token constant">TRV_DEBUG_BREAK</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 <h3 id="environment-property">Environment Property</h3>
