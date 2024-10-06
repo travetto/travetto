@@ -29,7 +29,6 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
     signal.addEventListener('abort', () => Object.values(this.#cleanup).forEach(x => x()));
   }
 
-  /** Get standard set of watch ignores */
   async #getWatchIgnores(): Promise<string[]> {
     const pkg = PackageUtil.readPackage(this.#root);
     const patterns = [
@@ -187,8 +186,7 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
           this.add(item);
         }
       } catch (out) {
-        const finalErr = out instanceof Error ? out : new Error(`${out}`);
-        return this.throw(finalErr);
+        return this.throw(out instanceof Error ? out : new Error(`${out}`));
       }
     }, { ignore });
 
@@ -227,7 +225,9 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
     log.debug('Starting workspace canary');
     const canaryId = setInterval(async () => {
       const delta = Math.trunc((Date.now() - this.#lastWorkspaceModified) / 1000);
-      if (delta > this.#watchCanaryFreq * 2) {
+      if (delta > 600) {
+        this.#lastWorkspaceModified = Date.now(); // Reset
+      } else if (delta > this.#watchCanaryFreq * 2) {
         this.throw(new CompilerReset(`Workspace watch stopped responding ${delta}s ago`));
       } else if (delta > this.#watchCanaryFreq) {
         log.error('Restarting parcel due to inactivity');
