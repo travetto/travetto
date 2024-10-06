@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { watch } from 'node:fs';
 
-import { ManifestContext, ManifestFileUtil, ManifestModuleUtil, ManifestRoot, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types';
 import { CompilerState } from './state';
@@ -91,39 +91,27 @@ export class CompilerWatcher {
       return;
     }
 
-    nonUpdates.filter(ev => ev.action === 'delete')
-      .forEach(ev => this.#state.removeSource(ev.entry.sourceFile));
-
     try {
-      const mods = [...new Set(nonUpdates.map(v => v.entry.module.name))];
-
-      const parents = new Map<string, string[]>(
-        mods.map(m => [m, this.#state.manifestIndex.getDependentModules(m, 'parents').map(x => x.name)])
-      );
-
-      const moduleToFiles = new Map(
-        [...mods, ...parents.values()].flat().map(m => [m, {
-          context: ManifestUtil.getModuleContext(this.#state.manifest, this.#state.manifestIndex.getManifestModule(m)!.sourceFolder),
-          events: nonUpdates.filter(x => x.entry.module.name === m)
-        }])
+      const eventsByMod = new Map<string, CompilerWatchEvent[]>(
+        [...this.#state.manifestIndex.getModuleList('all')].map(x => [x, []])
       );
 
       for (const ev of nonUpdates) {
-        const modName = ev.entry.module.name;
-        for (const parent of parents.get(modName)!) {
-          const mod = moduleToFiles.get(parent);
-          if (!mod || !mod.events) {
-            throw new CompilerReset(`Unknown module ${modName}`);
-          }
-          mod.events.push(ev);
+        const mod = ev.entry.module.name;
+        if (ev.action === 'delete') {
+          this.#state.removeSource(ev.entry.sourceFile);
+        }
+        eventsByMod.get(mod)!.push(ev);
+        for (const p of this.#state.manifestIndex.getDependentModules(mod, 'parents')) {
+          eventsByMod.get(p.name)!.push(ev);
         }
       }
 
-      for (const { context, events } of moduleToFiles.values()) {
-        const newManifest: ManifestRoot = ManifestUtil.readManifestSync(ManifestUtil.getManifestLocation(context));
+      for (const [mod, events] of eventsByMod.entries()) {
+        const context = ManifestUtil.getModuleContext(this.#state.manifest, this.#state.manifestIndex.getManifestModule(mod)!.sourceFolder);
+        const newManifest = ManifestUtil.readManifestSync(ManifestUtil.getManifestLocation(context));
         log.debug('Updating manifest', { module: context.main.name });
         for (const { action, file, entry } of events) {
-          const mod = entry.module.name;
           const modRoot = entry.module.sourceFolder || this.#root;
           const moduleFile = file.includes(modRoot) ? file.split(`${modRoot}/`)[1] : file;
           const folderKey = ManifestModuleUtil.getFolderKey(moduleFile);
@@ -131,15 +119,9 @@ export class CompilerWatcher {
 
           const modFiles = newManifest.modules[mod].files[folderKey] ??= [];
           const idx = modFiles.findIndex(x => x[0] === moduleFile);
-
-          if (action === 'create' && idx < 0) {
-            modFiles.push([moduleFile, fileType, Date.now()]);
-          } else if (idx >= 0) {
-            if (action === 'delete') {
-              modFiles.splice(idx, 1);
-            } else {
-              modFiles[idx] = [moduleFile, fileType, Date.now()];
-            }
+          switch (action) {
+            case 'create': modFiles[idx < 0 ? modFiles.length : idx] = [moduleFile, fileType, Date.now()]; break;
+            case 'delete': modFiles.splice(idx, 1); break;
           }
         }
         await ManifestUtil.writeManifest(newManifest);
