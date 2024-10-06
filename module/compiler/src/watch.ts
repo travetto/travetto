@@ -206,6 +206,7 @@ export class CompilerWatcher {
     const canaryId = setInterval(async () => {
       const delta = Math.trunc((Date.now() - this.#lastWorkspaceModified) / 1000);
       if (delta > 600) {
+        log.error('Restarting canary due to extra long delay');
         this.#lastWorkspaceModified = Date.now(); // Reset
       } else if (delta > this.#watchCanaryFreq * 2) {
         this.#q.throw(new CompilerReset(`Workspace watch stopped responding ${delta}s ago`));
