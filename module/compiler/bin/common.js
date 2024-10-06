@@ -61,7 +61,7 @@ async function getEntry() {
   const { getManifestContext } = await import(manifestJs);
 
   /** @type {Ctx} */
-  const ctx = getManifestContext(process.cwd(), process.env.TRV_MODULE);
+  const ctx = getManifestContext();
   const target = getTarget.bind(null, ctx);
 
   // Setup Tsconfig

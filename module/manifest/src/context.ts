@@ -39,13 +39,13 @@ function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
 /**
  * Gets build context
  */
-export function getManifestContext(root: string, mod?: string): ManifestContext {
+export function getManifestContext(root: string = process.cwd()): ManifestContext {
   const workspace = findPackage(root, pkg => !!pkg?.workspaces || !!pkg?.travetto?.build?.isolated);
   const build = workspace.travetto?.build ?? {};
   const resolve = createRequire(path.resolve(workspace.path, 'node_modules')).resolve.bind(null);
   const wsPrefix = `${workspace.path}/`;
-  const modPkg = mod ?
-    readPackage(resolve(`${mod}/package.json`)) :
+  const modPkg = (!!workspace.workspaces && process.env.TRV_MODULE) ?
+    readPackage(resolve(`${process.env.TRV_MODULE}/package.json`)) :
     findPackage(root, pkg => !!pkg) ?? workspace;
 
   return {
