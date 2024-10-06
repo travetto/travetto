@@ -92,28 +92,29 @@ export class CompilerWatcher {
     }
 
     try {
-      const eventsByMod = new Map<string, CompilerWatchEvent[]>(
-        [...this.#state.manifestIndex.getModuleList('all')].map(x => [x, []])
-      );
+      const eventsByMod = new Map<string, CompilerWatchEvent[]>();
 
       for (const ev of nonUpdates) {
-        const mod = ev.entry.module.name;
+        const mod = ev.entry.module;
         if (ev.action === 'delete') {
           this.#state.removeSource(ev.entry.sourceFile);
         }
-        eventsByMod.get(mod)!.push(ev);
-        for (const p of this.#state.manifestIndex.getDependentModules(mod, 'parents')) {
-          eventsByMod.get(p.name)!.push(ev);
+        for (const m of [mod, ...this.#state.manifestIndex.getDependentModules(mod.name, 'parents')]) {
+          if (!eventsByMod.has(m.name)) {
+            eventsByMod.set(m.name, []);
+          }
+          eventsByMod.get(m.name)!.push(ev);
         }
       }
 
       for (const [mod, events] of eventsByMod.entries()) {
-        const context = ManifestUtil.getModuleContext(this.#state.manifest, this.#state.manifestIndex.getManifestModule(mod)!.sourceFolder);
+        const modRoot = this.#state.manifestIndex.getManifestModule(mod)!.sourceFolder;
+        const context = ManifestUtil.getModuleContext(this.#state.manifest, modRoot);
         const newManifest = ManifestUtil.readManifestSync(ManifestUtil.getManifestLocation(context));
         log.debug('Updating manifest', { module: context.main.name });
-        for (const { action, file, entry } of events) {
-          const modRoot = entry.module.sourceFolder || this.#root;
-          const moduleFile = file.includes(modRoot) ? file.split(`${modRoot}/`)[1] : file;
+        for (const { action, file } of events) {
+          const resolvedRoot = modRoot || this.#root;
+          const moduleFile = file.includes(resolvedRoot) ? file.split(`${resolvedRoot}/`)[1] : file;
           const folderKey = ManifestModuleUtil.getFolderKey(moduleFile);
           const fileType = ManifestModuleUtil.getFileType(moduleFile);
 
