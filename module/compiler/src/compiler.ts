@@ -6,7 +6,7 @@ import { ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
 import { CompilerWatcher } from './watch';
-import { CompileEmitEvent, CompileEmitter } from './types';
+import { CompileEmitEvent, CompileEmitter, CompilerReset } from './types';
 import { EventUtil } from './event';
 
 import { IpcLogger } from '../support/log';
@@ -74,7 +74,7 @@ export class Compiler {
         break;
       }
       case 'reset': {
-        log.info('Triggering reset due to change in core files', err?.cause);
+        log.info('Reset due to', err?.message);
         EventUtil.sendEvent('state', { state: 'reset' });
         process.exitCode = 0;
         break;
@@ -164,7 +164,7 @@ export class Compiler {
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
       try {
-        for await (const ev of new CompilerWatcher(this.#state, this.#signal).watchChanges()) {
+        for await (const ev of new CompilerWatcher(this.#state, this.#signal)) {
           if (ev.action !== 'delete') {
             const err = await emitter(ev.entry.sourceFile, true);
             if (err) {
@@ -193,7 +193,7 @@ export class Compiler {
 
       } catch (err) {
         if (err instanceof Error) {
-          this.#shutdown(err.message === 'RESET' ? 'reset' : 'error', err);
+          this.#shutdown(err instanceof CompilerReset ? 'reset' : 'error', err);
         }
       }
     }
