@@ -14,7 +14,7 @@ export class TestDigestCommand {
     Env.DEBUG.set(false);
   }
 
-  async main(globs: string[] = ['**/*.ts']) {
+  async main(globs: string[] = ['**/*']) {
     // Load all tests
     for await (const imp of await RunnerUtil.getTestImports(globs)) {
       try {

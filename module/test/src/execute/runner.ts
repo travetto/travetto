@@ -27,9 +27,6 @@ export class Runner {
    */
   async runFiles(globs?: string[]): Promise<boolean> {
     const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
-
-    console.debug('Running', { globs });
-
     const tests = await RunnerUtil.getTestDigest(globs, this.#state.tags);
     const testRuns = RunnerUtil.getTestRuns(tests)
       .sort((a, b) => a.runId!.localeCompare(b.runId!));

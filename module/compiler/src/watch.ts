@@ -141,6 +141,7 @@ export class CompilerWatcher {
     const packageFiles = new Set(['package-lock.json', 'yarn.lock', 'package.json'].map(x => path.resolve(this.#root, x)));
 
     log.debug('Ignore Globs', ignore);
+    log.debug('Watching', this.#root);
 
     await this.#cleanup.workspace?.();
 

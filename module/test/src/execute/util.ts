@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import readline from 'node:readline/promises';
+import path from 'node:path';
 
 import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime } from '@travetto/runtime';
 import { TestConfig, TestRun } from '../model/test';
@@ -48,7 +49,7 @@ export class RunnerUtil {
     if (globs?.length) {
       const allFiles = new Map(all.map(x => [x.sourceFile, x]));
       for await (const item of fs.glob(globs)) {
-        const src = Runtime.workspaceRelative(item);
+        const src = Runtime.workspaceRelative(path.resolve(item));
         const match = allFiles.get(src);
         if (match && await this.isTestFile(match.sourceFile)) {
           yield match.import;

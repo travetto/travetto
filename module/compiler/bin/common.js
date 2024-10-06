@@ -57,10 +57,11 @@ async function getEntry() {
   }
 
   // Load module on demand
+  /** @type {import('@travetto/manifest/src/context')} */
   const { getManifestContext } = await import(manifestJs);
 
   /** @type {Ctx} */
-  const ctx = getManifestContext();
+  const ctx = getManifestContext(process.cwd(), process.env.TRV_MODULE);
   const target = getTarget.bind(null, ctx);
 
   // Setup Tsconfig

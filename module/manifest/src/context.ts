@@ -5,159 +5,71 @@ import { createRequire } from 'node:module';
 import type { Package } from './types/package';
 import type { ManifestContext } from './types/context';
 
-type Pkg<T extends {} = {}> = Package & T & { path: string };
-type PathOp = (file: string) => string;
-type Workspace = Pkg<{
-  mono: boolean;
-  manager: 'yarn' | 'npm';
-  resolve: PathOp;
-  stripRoot: PathOp;
-}>;
+type Pkg = Package & { path: string };
 
-const TOOL_FOLDER = '.trv/tool';
-const COMPILER_FOLDER = '.trv/compiler';
-const OUTPUT_FOLDER = '.trv/output';
-const TYPES_FOLDER = '.trv/types';
+// eslint-disable-next-line no-bitwise
+const toPort = (pth: string): number => (Math.abs([...pth].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
+const toPosix = (pth: string): string => pth.replaceAll('\\', '/');
+const readPackage = (file: string): Pkg => ({ ...JSON.parse(readFileSync(file, 'utf8')), path: toPosix(path.dirname(file)) });
 
-const WS_ROOT: Record<string, Workspace> = {};
-
-/**
- * Read package.json or return undefined if missing
- */
-function readPackage(dir: string): Pkg | undefined {
-  dir = dir.endsWith('.json') ? path.dirname(dir) : dir;
-  try {
-    const v = readFileSync(path.resolve(dir, 'package.json'), 'utf8');
-    return ({ ...JSON.parse(v), path: path.resolve(dir) });
-  } catch { }
-}
-
-/**
- * Find package.json for a given folder
- */
-function findPackage(dir: string): Pkg {
-  let prev;
-  let pkg, curr = path.resolve(dir);
-  while (!pkg && curr !== prev) {
-    pkg = readPackage(curr);
-    [prev, curr] = [curr, path.dirname(curr)];
-  }
-  if (!pkg) {
-    throw new Error('Could not find a package.json');
-  } else {
-    return pkg;
-  }
-}
-
-/**
- * Get workspace root
- */
-function resolveWorkspace(base: string = process.cwd()): Workspace {
-  if (base in WS_ROOT) {
-    return WS_ROOT[base];
-  }
-  let folder = base;
-  let prev: string | undefined;
+/** Find package */
+function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
+  let folder = `${base}/.`;
+  let prev: string;
   let pkg: Pkg | undefined;
 
-  while (prev !== folder) {
+  do {
     prev = folder;
-    pkg = readPackage(folder) ?? pkg;
-    if (
-      (pkg && (!!pkg.workspaces || !!pkg.travetto?.build?.isolated)) || // if we have a monorepo root, or we are isolated
-      existsSync(path.resolve(folder, '.git')) // we made it to the source repo root
-    ) {
-      break;
-    }
     folder = path.dirname(folder);
-  }
+    const folderPkg = path.resolve(folder, 'package.json');
+    pkg = existsSync(folderPkg) ? readPackage(folderPkg) : pkg;
+  } while (
+    prev !== folder && // Not at root
+    !pred(pkg) && // Matches criteria
+    !existsSync(path.resolve(folder, '.git')) // Not at source root
+  );
 
   if (!pkg) {
     throw new Error('Could not find a package.json');
   }
 
-  return WS_ROOT[base] = {
-    ...pkg,
-    name: pkg.name ?? 'untitled',
-    type: pkg.type,
-    manager: existsSync(path.resolve(pkg.path, 'yarn.lock')) ? 'yarn' : 'npm',
-    resolve: createRequire(`${pkg.path}/node_modules`).resolve.bind(null),
-    stripRoot: (full) => full === pkg.path ? '' : full.replace(`${pkg.path}/`, ''),
-    mono: !!pkg.workspaces
-  };
-}
-
-/**
- * Get Compiler url
- */
-function getCompilerUrl(ws: Workspace): string {
-  // eslint-disable-next-line no-bitwise
-  const port = (Math.abs([...ws.path].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
-  return `http://localhost:${port}`;
-}
-
-/**
- * Resolve module folder
- */
-function resolveModule(workspace: Workspace, folder?: string): Pkg {
-  let mod;
-  if (!folder && process.env.TRV_MODULE) {
-    mod = process.env.TRV_MODULE;
-    if (/[.][cm]?(t|j)sx?$/.test(mod)) { // Rewrite from file to module
-      try {
-        process.env.TRV_MODULE = mod = findPackage(path.dirname(mod)).name;
-      } catch {
-        process.env.TRV_MODULE = mod = '';
-      }
-    }
-  }
-
-  if (mod) { // If module provided in lieu of folder
-    try {
-      folder = path.dirname(workspace.resolve(`${mod}/package.json`));
-    } catch {
-      const workspacePkg = readPackage(workspace.path);
-      if (workspacePkg?.name === mod) {
-        folder = workspace.path;
-      } else {
-        throw new Error(`Unable to resolve location for ${folder}`);
-      }
-    }
-  }
-
-  return findPackage(folder ?? '.');
+  return pkg;
 }
 
 /**
  * Gets build context
  */
-export function getManifestContext(folder?: string): ManifestContext {
-  const workspace = resolveWorkspace();
-  const mod = resolveModule(workspace, folder);
+export function getManifestContext(root: string, mod?: string): ManifestContext {
+  const workspace = findPackage(root, pkg => !!pkg?.workspaces || !!pkg?.travetto?.build?.isolated);
   const build = workspace.travetto?.build ?? {};
+  const resolve = createRequire(path.resolve(workspace.path, 'node_modules')).resolve.bind(null);
+  const wsPrefix = `${workspace.path}/`;
+  const modPkg = mod ?
+    readPackage(resolve(`${mod}/package.json`)) :
+    findPackage(root, pkg => !!pkg) ?? workspace;
 
   return {
     workspace: {
-      name: workspace.name,
+      name: workspace.name ?? 'untitled',
       path: workspace.path,
-      mono: workspace.mono,
-      manager: workspace.manager,
+      mono: !!workspace.workspaces,
+      manager: existsSync(path.resolve(workspace.path, 'yarn.lock')) ? 'yarn' : 'npm',
       type: workspace.type ?? 'commonjs',
       defaultEnv: workspace.travetto?.defaultEnv ?? 'local'
     },
     build: {
-      compilerFolder: build.compilerFolder ?? COMPILER_FOLDER,
-      compilerUrl: build.compilerUrl ?? getCompilerUrl(workspace),
-      compilerModuleFolder: workspace.stripRoot(path.dirname(workspace.resolve('@travetto/compiler/package.json'))),
-      outputFolder: build.outputFolder ?? OUTPUT_FOLDER,
-      toolFolder: build.toolFolder ?? TOOL_FOLDER,
-      typesFolder: build.typesFolder ?? TYPES_FOLDER
+      compilerUrl: build.compilerUrl ?? `http://localhost:${toPort(wsPrefix)}`,
+      compilerModuleFolder: toPosix(path.dirname(resolve('@travetto/compiler/package.json'))).replace(wsPrefix, ''),
+      compilerFolder: toPosix(build.compilerFolder ?? '.trv/compiler'),
+      outputFolder: toPosix(build.outputFolder ?? '.trv/output'),
+      toolFolder: toPosix(build.toolFolder ?? '.trv/tool'),
+      typesFolder: toPosix(build.typesFolder ?? '.trv/types')
     },
     main: {
-      name: mod.name ?? 'untitled',
-      folder: workspace.stripRoot(mod.path),
-      version: mod.version,
-      description: mod.description
+      name: modPkg.name ?? 'untitled',
+      folder: modPkg.path.replace(wsPrefix, ''),
+      version: modPkg.version,
+      description: modPkg.description
     }
   };
 }
