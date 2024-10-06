@@ -67,8 +67,8 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
     return { entry, file: entry?.sourceFile ?? file, action };
   }
 
-  #toEvent(ev: CompilerWatchEventCandidate): ev is CompilerWatchEvent {
-    const relativeFile = ev.file.replace(`${this.#root}}/`, '');
+  #isValidEvent(ev: CompilerWatchEventCandidate): ev is CompilerWatchEvent {
+    const relativeFile = ev.file.replace(`${this.#root}/`, '');
     if (relativeFile === this.#watchCanary) {
       return false;
     } else if (relativeFile.startsWith('.')) {
@@ -179,7 +179,7 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
 
         const items = events
           .map(x => this.#toCandidateEvent(x.type, path.toPosix(x.path)))
-          .filter(x => this.#toEvent(x));
+          .filter(x => this.#isValidEvent(x));
 
         await this.#reconcileAddRemove(items);
 
