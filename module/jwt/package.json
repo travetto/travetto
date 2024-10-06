@@ -1,6 +1,6 @@
 {
   "name": "@travetto/jwt",
-  "version": "5.0.7",
+  "version": "5.0.8",
   "description": "JSON Web Token implementation",
   "keywords": [
     "jwt",
@@ -23,7 +23,7 @@
     "directory": "module/jwt"
   },
   "dependencies": {
-    "@travetto/runtime": "^5.0.7",
+    "@travetto/runtime": "^5.0.8",
     "@types/jws": "^3.2.10",
     "jws": "^4.0.0"
   },

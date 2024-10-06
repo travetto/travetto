@@ -1,6 +1,6 @@
 {
   "name": "@travetto/di",
-  "version": "5.0.7",
+  "version": "5.0.8",
   "description": "Dependency registration/management and injection support.",
   "keywords": [
     "ast-transformations",
@@ -27,7 +27,7 @@
     "directory": "module/di"
   },
   "dependencies": {
-    "@travetto/registry": "^5.0.7"
+    "@travetto/registry": "^5.0.8"
   },
   "peerDependencies": {
     "@travetto/transformer": "^5.0.6"

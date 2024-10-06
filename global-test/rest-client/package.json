@@ -2,10 +2,10 @@
   "name": "@travetto-test/rest-client",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/rest-client": "^5.0.12",
-    "@travetto/rest-express": "^5.0.9",
-    "@travetto/rest-fastify": "^5.0.9",
-    "@travetto/rest-koa": "^5.0.9"
+    "@travetto/rest-client": "^5.0.13",
+    "@travetto/rest-express": "^5.0.10",
+    "@travetto/rest-fastify": "^5.0.10",
+    "@travetto/rest-koa": "^5.0.10"
   },
   "travetto": {},
   "private": true
