@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { watch } from 'node:fs';
 
-import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { ManifestContext, ManifestFileUtil, ManifestModuleUtil, ManifestRoot, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types';
 import { CompilerState } from './state';
@@ -14,18 +14,19 @@ const log = new IpcLogger({ level: 'debug' });
 
 type CompilerWatchEventCandidate = Omit<CompilerWatchEvent, 'entry'> & { entry?: CompileStateEntry };
 
-export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
+export class CompilerWatcher {
   #state: CompilerState;
   #cleanup: Partial<Record<'tool' | 'workspace' | 'canary', () => (void | Promise<void>)>> = {};
   #watchCanary: string = '.trv/canary.id';
   #lastWorkspaceModified = Date.now();
   #watchCanaryFreq = 5;
   #root: string;
+  #q: AsyncQueue<CompilerWatchEvent>;
 
   constructor(state: CompilerState, signal: AbortSignal) {
-    super(signal);
     this.#state = state;
     this.#root = state.manifest.workspace.path;
+    this.#q = new AsyncQueue(signal);
     signal.addEventListener('abort', () => Object.values(this.#cleanup).forEach(x => x()));
   }
 
@@ -103,8 +104,7 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
       const moduleToFiles = new Map(
         [...mods, ...parents.values()].flat().map(m => [m, {
           context: ManifestUtil.getModuleContext(this.#state.manifest, this.#state.manifestIndex.getManifestModule(m)!.sourceFolder),
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          events: [] as CompilerWatchEvent[]
+          events: nonUpdates.filter(x => x.entry.module.name === m)
         }])
       );
 
@@ -120,7 +120,8 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
       }
 
       for (const { context, events } of moduleToFiles.values()) {
-        const newManifest = await ManifestUtil.buildManifest(context);
+        const newManifest: ManifestRoot = ManifestUtil.readManifestSync(ManifestUtil.getManifestLocation(context));
+        log.debug('Updating manifest', { module: context.main.name });
         for (const { action, file, entry } of events) {
           const mod = entry.module.name;
           const modRoot = entry.module.sourceFolder || this.#root;
@@ -183,10 +184,10 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
         await this.#reconcileAddRemove(items);
 
         for (const item of items) {
-          this.add(item);
+          this.#q.add(item);
         }
       } catch (out) {
-        return this.throw(out instanceof Error ? out : new Error(`${out}`));
+        return this.#q.throw(out instanceof Error ? out : new Error(`${out}`));
       }
     }, { ignore });
 
@@ -211,7 +212,7 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
       const full = path.resolve(toolRootFolder, f);
       const stat = await fs.stat(full).catch(() => null);
       if (toolFolders.has(full) && !stat) {
-        this.throw(new CompilerReset(`Tooling folder removal ${full}`));
+        this.#q.throw(new CompilerReset(`Tooling folder removal ${full}`));
       }
     });
     this.#cleanup.tool = (): void => listener.close();
@@ -228,7 +229,7 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
       if (delta > 600) {
         this.#lastWorkspaceModified = Date.now(); // Reset
       } else if (delta > this.#watchCanaryFreq * 2) {
-        this.throw(new CompilerReset(`Workspace watch stopped responding ${delta}s ago`));
+        this.#q.throw(new CompilerReset(`Workspace watch stopped responding ${delta}s ago`));
       } else if (delta > this.#watchCanaryFreq) {
         log.error('Restarting parcel due to inactivity');
         await this.#listenWorkspace();
@@ -246,6 +247,6 @@ export class CompilerWatcher extends AsyncQueue<CompilerWatchEvent> {
       this.#listenToolFolder();
       this.#listenCanary();
     }
-    return super[Symbol.asyncIterator]();
+    return this.#q[Symbol.asyncIterator]();
   }
 }
