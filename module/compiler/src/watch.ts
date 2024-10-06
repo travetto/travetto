@@ -131,11 +131,7 @@ export class CompilerWatcher {
       this.#state.manifestIndex.init(ManifestUtil.getManifestLocation(this.#state.manifest));
     } catch (mErr) {
       log.info('Restarting due to manifest rebuild failure', mErr);
-      if (!(mErr instanceof CompilerReset)) {
-        throw new CompilerReset(`Manifest rebuild failure: ${mErr}`);
-      } else {
-        throw mErr;
-      }
+      throw new CompilerReset(`Manifest rebuild failure: ${mErr}`);
     }
   }
 
