@@ -111,7 +111,7 @@ export class CompilerWatcher {
         const modRoot = this.#state.manifestIndex.getManifestModule(mod)!.sourceFolder;
         const context = ManifestUtil.getModuleContext(this.#state.manifest, modRoot);
         const newManifest = ManifestUtil.readManifestSync(ManifestUtil.getManifestLocation(context));
-        log.debug('Updating manifest', { module: context.main.name });
+        log.debug('Updating manifest', { module: mod });
         for (const { action, file } of events) {
           const resolvedRoot = modRoot || this.#root;
           const moduleFile = file.includes(resolvedRoot) ? file.split(`${resolvedRoot}/`)[1] : file;
