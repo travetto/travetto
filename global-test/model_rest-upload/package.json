@@ -2,14 +2,14 @@
   "name": "@travetto-test/model-rest-upload",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/model": "^5.0.10",
-    "@travetto/rest-express": "^5.0.11",
-    "@travetto/rest-express-lambda": "^5.0.11",
-    "@travetto/rest-fastify": "^5.0.11",
-    "@travetto/rest-fastify-lambda": "^5.0.11",
-    "@travetto/rest-koa": "^5.0.11",
-    "@travetto/rest-koa-lambda": "^5.0.11",
-    "@travetto/rest-upload": "^5.0.11"
+    "@travetto/model": "^5.0.11",
+    "@travetto/rest-express": "^5.0.12",
+    "@travetto/rest-express-lambda": "^5.0.12",
+    "@travetto/rest-fastify": "^5.0.12",
+    "@travetto/rest-fastify-lambda": "^5.0.12",
+    "@travetto/rest-koa": "^5.0.12",
+    "@travetto/rest-koa-lambda": "^5.0.12",
+    "@travetto/rest-upload": "^5.0.12"
   },
   "travetto": {},
   "private": true
