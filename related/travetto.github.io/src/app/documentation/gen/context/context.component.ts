@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink, RouterModule } from '@angular/router';
 
 @Component({
-    selector: 'app-context',
-    templateUrl: './context.component.html',
-    styleUrls: [],
-    standalone: true
+  imports: [RouterLink, RouterModule],
+  selector: 'app-context',
+  templateUrl: './context.component.html',
+  styleUrls: [],
+  standalone: true
 })
 export class ContextComponent { }

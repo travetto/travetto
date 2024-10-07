@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterLink, RouterModule } from '@angular/router';
 
 @Component({
+  imports: [RouterLink, RouterModule],
   selector: 'rest-upload',
   standalone: true,
-  imports: [],
   templateUrl: './rest-upload.component.html',
   styleUrls: []
 })

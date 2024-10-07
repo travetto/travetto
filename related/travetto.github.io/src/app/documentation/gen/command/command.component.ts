@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink, RouterModule } from '@angular/router';
 
 @Component({
-    selector: 'app-command',
-    templateUrl: './command.component.html',
-    styleUrls: [],
-    standalone: true
+  imports: [RouterLink, RouterModule],
+  selector: 'app-command',
+  templateUrl: './command.component.html',
+  styleUrls: [],
+  standalone: true
 })
 export class CommandComponent { }

@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterLink, RouterModule } from '@angular/router';
 
 @Component({
+  imports: [RouterLink, RouterModule],
   selector: 'model-file',
   standalone: true,
-  imports: [],
   templateUrl: './model-file.component.html',
   styles: []
 })
