@@ -4,7 +4,7 @@ import { Config } from '@travetto/config';
 import { RouteConfig, FilterContext, FilterNext } from '../types';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
-import { CorsInterceptor } from './cors';
+import { SerializeInterceptor } from './serialize';
 
 @Config('rest.getCache')
 export class RestGetCacheConfig extends ManagedInterceptorConfig { }
@@ -15,7 +15,7 @@ export class RestGetCacheConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class GetCacheInterceptor implements RestInterceptor {
 
-  after = [CorsInterceptor];
+  dependsOn = [SerializeInterceptor];
 
   @Inject()
   config: RestGetCacheConfig;

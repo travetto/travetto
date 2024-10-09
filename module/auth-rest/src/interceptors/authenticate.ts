@@ -1,5 +1,5 @@
 import { AppError, Util } from '@travetto/runtime';
-import { RestInterceptor, ManagedInterceptorConfig, FilterContext } from '@travetto/rest';
+import { RestInterceptor, ManagedInterceptorConfig, FilterContext, SerializeInterceptor } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -38,7 +38,7 @@ export class RestAuthVerifyConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConfig> {
 
-  after = [AuthReadWriteInterceptor];
+  dependsOn = [SerializeInterceptor, AuthReadWriteInterceptor];
 
   @Inject()
   config: RestAuthVerifyConfig;

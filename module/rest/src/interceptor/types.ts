@@ -35,12 +35,12 @@ export interface RestInterceptor<C = Any> {
   /**
    * This interceptor must run after these
    */
-  after?: Class<RestInterceptor>[];
+  dependsOn?: Class<RestInterceptor>[];
 
   /**
    * This interceptor must run before these
    */
-  before?: Class<RestInterceptor>[];
+  runsBefore?: Class<RestInterceptor>[];
 
   /**
    * Determines the current route is applicable for the interceptor

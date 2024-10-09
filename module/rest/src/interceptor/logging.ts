@@ -4,6 +4,7 @@ import { Config } from '@travetto/config';
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { FilterContext, FilterNext } from '../types';
 import { RequestLoggingⲐ } from '../internal/symbol';
+import { SerializeInterceptor } from './serialize';
 
 /**
  * Rest logging configuration
@@ -16,6 +17,8 @@ export class RestLogRoutesConfig extends ManagedInterceptorConfig { }
  */
 @Injectable()
 export class LoggingInterceptor implements RestInterceptor {
+
+  runsBefore = [SerializeInterceptor];
 
   @Inject()
   config: RestLogRoutesConfig;

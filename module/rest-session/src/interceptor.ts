@@ -1,7 +1,7 @@
 import { Class, RuntimeIndex } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
-import { CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext, FilterReturn } from '@travetto/rest';
+import { CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext, FilterReturn, SerializeInterceptor } from '@travetto/rest';
 
 import { SessionService, SessionⲐ } from './service';
 
@@ -19,7 +19,7 @@ export class RestSessionConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class SessionReadInterceptor implements RestInterceptor {
 
-  after: Class<RestInterceptor>[] = [CookiesInterceptor];
+  dependsOn: Class<RestInterceptor>[] = [CookiesInterceptor, SerializeInterceptor];
 
   @Inject()
   service: SessionService;
@@ -30,7 +30,7 @@ export class SessionReadInterceptor implements RestInterceptor {
   async postConstruct(): Promise<void> {
     if (RuntimeIndex.hasModule('@travetto/auth-rest')) {
       const { AuthReadWriteInterceptor } = await import('@travetto/auth-rest');
-      this.after.push(AuthReadWriteInterceptor);
+      this.dependsOn.push(AuthReadWriteInterceptor);
     }
   }
 
@@ -51,9 +51,9 @@ export class SessionReadInterceptor implements RestInterceptor {
 @Injectable()
 export class SessionWriteInterceptor implements RestInterceptor {
 
-  after = [CookiesInterceptor];
+  dependsOn = [CookiesInterceptor, SerializeInterceptor];
 
-  before: Class<RestInterceptor>[] = [];
+  runsBefore: Class<RestInterceptor>[] = [];
 
   @Inject()
   service: SessionService;
@@ -64,7 +64,7 @@ export class SessionWriteInterceptor implements RestInterceptor {
   async postConstruct(): Promise<void> {
     if (RuntimeIndex.hasModule('@travetto/auth-rest')) {
       const { AuthReadWriteInterceptor } = await import('@travetto/auth-rest');
-      this.before.push(AuthReadWriteInterceptor);
+      this.runsBefore.push(AuthReadWriteInterceptor);
     }
   }
 

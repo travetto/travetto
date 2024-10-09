@@ -47,7 +47,7 @@ export class CorsInterceptor implements RestInterceptor<RestCorsConfig> {
   @Inject()
   config: RestCorsConfig;
 
-  after = [SerializeInterceptor];
+  dependsOn = [SerializeInterceptor];
 
   finalizeConfig(config: RestCorsConfig): RestCorsConfig {
     config.resolved = {

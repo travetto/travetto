@@ -270,7 +270,10 @@ By default, the framework provides a default <a target="_blank" class="source-li
 
 Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
-    main: <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'@travetto-doc/rest'</span>, folder: <span class="token string">''</span> <span class="token punctuation">{{'}'}}</span>,
+    main: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'@travetto-doc/rest'</span>,
+      folder: <span class="token string">'./doc-exec'</span>
+    <span class="token punctuation">{{'}'}}</span>,
     workspace: <span class="token punctuation">{{'{'}}</span>
       name: <span class="token string">'@travetto-doc/rest'</span>,
       path: <span class="token string">'./doc-exec'</span>,
@@ -360,7 +363,10 @@ And using the pattern established in the <a class="module-link" href="https://gi
 CUSTOM STARTUP
 Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
-    main: <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'@travetto-doc/rest'</span>, folder: <span class="token string">''</span> <span class="token punctuation">{{'}'}}</span>,
+    main: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'@travetto-doc/rest'</span>,
+      folder: <span class="token string">'./doc-exec'</span>
+    <span class="token punctuation">{{'}'}}</span>,
     workspace: <span class="token punctuation">{{'{'}}</span>
       name: <span class="token string">'@travetto-doc/rest'</span>,
       path: <span class="token string">'./doc-exec'</span>,
@@ -419,7 +425,7 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">HelloWorldInterceptor</span> <span class="token keyword">implements</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{'{'}}</span>
 
-  after <span class="token operator">=</span> <span class="token punctuation">[</span>SerializeInterceptor<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  dependsOn <span class="token operator">=</span> <span class="token punctuation">[</span>SerializeInterceptor<span class="token punctuation">]</span><span class="token punctuation">;</span>
 
   <span class="token function">intercept</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> FilterContext<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Hello world!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -452,7 +458,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 <h3 id="serializeinterceptor">SerializeInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L15">SerializeInterceptor</a> is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L14">SerializeInterceptor</a> is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
 
 <h3 id="corsinterceptor">CorsInterceptor</h3>
 
@@ -493,11 +499,11 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 <h3 id="cookiesinterceptor">CookiesInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L73">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L72">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
   <figure class="code">
     <figcaption class="code">Cookies Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L19">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L18">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RestCookieConfig</span> <span class="token keyword">extends</span> <span class="token class-name">ManagedInterceptorConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -535,7 +541,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 <h3 id="logginginterceptor">LoggingInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L18">LoggingInterceptor</a> allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L19">LoggingInterceptor</a> allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
 
   <figure class="code">
     <figcaption class="code">Control Logging

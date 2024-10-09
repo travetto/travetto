@@ -4,7 +4,7 @@ import { AppError } from '@travetto/runtime';
 import { MissingParamⲐ, RequestParamsⲐ, RequestLoggingⲐ } from '@travetto/rest/src/internal/symbol';
 import {
   BodyParseInterceptor, LoggingInterceptor, RouteConfig, FilterContext, FilterNext, ControllerRegistry,
-  RestInterceptor
+  RestInterceptor, SerializeInterceptor
 } from '@travetto/rest';
 import { SerializeUtil } from '@travetto/rest/src/interceptor/serialize-util';
 import { RestRpcConfig } from './config';
@@ -15,7 +15,7 @@ import { RestRpcConfig } from './config';
 @Injectable()
 export class RestRpcInterceptor implements RestInterceptor<RestRpcConfig> {
 
-  before = [LoggingInterceptor, BodyParseInterceptor];
+  runsBefore = [LoggingInterceptor, SerializeInterceptor];
 
   @Inject()
   config: RestRpcConfig;

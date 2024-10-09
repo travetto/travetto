@@ -1,5 +1,5 @@
 import { Class } from '@travetto/runtime';
-import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, FilterNext } from '@travetto/rest';
+import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, FilterNext, SerializeInterceptor } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
@@ -18,7 +18,7 @@ export class RestAuthConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class AuthReadWriteInterceptor implements RestInterceptor {
 
-  after: Class<RestInterceptor>[] = [];
+  dependsOn: Class<RestInterceptor>[] = [SerializeInterceptor];
 
   @Inject()
   encoder: PrincipalEncoder;

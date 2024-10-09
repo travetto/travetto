@@ -5,7 +5,7 @@ import { AsyncContext } from '@travetto/context';
 import { FilterContext, FilterNext } from '../types';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
-import { GetCacheInterceptor } from './get-cache';
+import { BodyParseInterceptor } from './body-parse';
 
 @Config('rest.context')
 class RestAsyncContextConfig extends ManagedInterceptorConfig { }
@@ -16,7 +16,7 @@ class RestAsyncContextConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class AsyncContextInterceptor implements RestInterceptor {
 
-  after = [GetCacheInterceptor];
+  dependsOn = [BodyParseInterceptor];
 
   @Inject()
   context: AsyncContext;

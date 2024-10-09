@@ -8,6 +8,7 @@ import { MimeUtil } from '../util/mime';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { BodyParseInterceptor } from './body-parse';
+import { SerializeInterceptor } from './serialize';
 
 @Config('rest.accepts')
 class RestAcceptsConfig extends ManagedInterceptorConfig {
@@ -23,7 +24,7 @@ class RestAcceptsConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AcceptsInterceptor implements RestInterceptor<RestAcceptsConfig> {
 
-  before = [BodyParseInterceptor];
+  dependsOn = [SerializeInterceptor];
 
   @Inject()
   config: RestAcceptsConfig;

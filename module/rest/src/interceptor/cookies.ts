@@ -9,8 +9,7 @@ import { FilterContext, Request, Response } from '../types';
 import { RestConfig } from '../application/config';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
-import { CorsInterceptor } from './cors';
-import { GetCacheInterceptor } from './get-cache';
+import { SerializeInterceptor } from './serialize';
 
 /**
  * Rest cookie configuration
@@ -72,8 +71,7 @@ class CustomCookies extends cookies {
 @Injectable()
 export class CookiesInterceptor implements RestInterceptor<RestCookieConfig> {
 
-  after = [CorsInterceptor];
-  before = [GetCacheInterceptor];
+  dependsOn = [SerializeInterceptor];
 
   @Inject()
   config: RestCookieConfig;

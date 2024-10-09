@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, RestInterceptor, SerializeInterceptor } from '@travetto/rest';
+import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, RestInterceptor } from '@travetto/rest';
 
 import { RestUploadConfig } from './config';
 import { RestUploadUtil } from './util';
@@ -10,7 +10,7 @@ export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> 
   @Inject()
   config: RestUploadConfig;
 
-  after = [SerializeInterceptor, BodyParseInterceptor];
+  dependsOn = [BodyParseInterceptor];
 
   /**
    * Produces final config object

@@ -9,8 +9,8 @@ import { NodeEntityⲐ } from '../internal/symbol';
 import { RouteConfig, Request, FilterContext, FilterNext } from '../types';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
-import { LoggingInterceptor } from './logging';
-import { SerializeUtil } from './serialize-util';
+import { SerializeInterceptor } from './serialize';
+import { AcceptsInterceptor } from './accepts';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
@@ -37,7 +37,7 @@ export class RestBodyParseConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class BodyParseInterceptor implements RestInterceptor<RestBodyParseConfig> {
 
-  before = [LoggingInterceptor];
+  dependsOn = [SerializeInterceptor, AcceptsInterceptor];
 
   @Inject()
   config: RestBodyParseConfig;
@@ -103,7 +103,7 @@ export class BodyParseInterceptor implements RestInterceptor<RestBodyParseConfig
         return next();
       } else {
         console.error('Malformed input', malformed);
-        SerializeUtil.serializeError(res, new AppError('Malformed input', 'data'));
+        throw new AppError('Malformed input', 'data');
       }
     }
   }

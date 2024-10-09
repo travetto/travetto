@@ -160,6 +160,26 @@ export class SerializeUtil {
   }
 
   /**
+   * Serialize renderable
+   */
+  static async serializeRenderable(req: Request, res: Response, output: Renderable): Promise<void> {
+    if (output.headers) {
+      for (const [k, v] of Object.entries(output.headers())) {
+        res.setHeader(k, v);
+      }
+    }
+    if (output.statusCode) {
+      res.status(output.statusCode());
+    }
+    const result = await output.render(res);
+    if (result === undefined) { // If render didn't return a result, consider us done
+      return;
+    } else {
+      return this.serializeStandard(req, res, result);
+    }
+  }
+
+  /**
    * Determine serialization type based on output
    */
   static serializeStandard(req: Request, res: Response, output: unknown): void | Promise<void> {
@@ -183,6 +203,8 @@ export class SerializeUtil {
           return this.serializeError(res, output);
         } else if (output instanceof Blob) {
           return this.serializeBlob(res, output);
+        } else if (this.isRenderable(output)) {
+          return this.serializeRenderable(req, res, output);
         } else {
           return this.serializeJSON(req, res, output);
         }

@@ -15,8 +15,8 @@ export class RestAuthContextConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class AuthContextInterceptor implements RestInterceptor {
 
-  after = [AsyncContextInterceptor];
-  before = [AuthReadWriteInterceptor];
+  dependsOn = [AsyncContextInterceptor];
+  runsBefore = [AuthReadWriteInterceptor];
 
   @Inject()
   config: RestAuthContextConfig;

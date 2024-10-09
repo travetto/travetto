@@ -1,4 +1,4 @@
-import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn } from '@travetto/rest';
+import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, SerializeInterceptor } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -27,7 +27,7 @@ export class AuthLoginInterceptor implements RestInterceptor<RestAuthLoginConfig
   @Inject()
   service: AuthService;
 
-  after = [AuthReadWriteInterceptor];
+  dependsOn = [SerializeInterceptor, AuthReadWriteInterceptor];
 
   /**
    * Ensures this is an opt-in interceptor
