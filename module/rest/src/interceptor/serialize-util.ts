@@ -1,10 +1,12 @@
 import { Readable } from 'node:stream';
 
-import { ErrorCategory, AppError, BinaryUtil, hasFunction } from '@travetto/runtime';
+import { BinaryUtil, ErrorCategory, hasFunction } from '@travetto/runtime';
 
 import { HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
 import { Request, Response } from '../types';
+
+type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
 /**
  * Mapping from error category to standard http error codes
@@ -25,15 +27,7 @@ const categoryToCode: Record<ErrorCategory, number> = {
 export class SerializeUtil {
   static isRenderable = hasFunction<Renderable>('render');
   static isStream = hasFunction<Readable>('pipe');
-
-  /**
-   * Determine the error status for a given error, with special provisions for AppError
-   */
-  static getErrorStatus(err: Error & { status?: number, statusCode?: number }): number {
-    return err.status ??
-      err.statusCode ??
-      (err instanceof AppError ? categoryToCode[err.category] : 500);
-  }
+  static hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 
   /**
    * Set outbound content type if not defined
@@ -61,10 +55,7 @@ export class SerializeUtil {
    * Standard json
    */
   static serializeJSON(req: Request, res: Response, output: unknown): void {
-    let val = output;
-    if (typeof val === 'object' && !!val && 'toJSON' in val && typeof val.toJSON === 'function') {
-      val = val.toJSON();
-    }
+    const val = this.hasToJSON(output) ? output.toJSON() : output;
     this.setContentTypeIfUndefined(res, 'application/json');
     res.send(JSON.stringify(val, undefined, '__pretty' in req.query ? 2 : 0));
   }
@@ -150,12 +141,12 @@ export class SerializeUtil {
    * @param res
    * @param error
    */
-  static serializeError(res: Response, error: Error): void {
-    const status = this.getErrorStatus(error);
+  static serializeError(res: Response, error: ErrorResponse): void {
+    const status = error.status ?? error.statusCode ?? categoryToCode[error.category!] ?? 500;
     res.status(status);
     res.statusError = error;
     res.setHeader('Content-Type', 'application/json');
-    const out = error instanceof AppError ? error.toJSON() : { message: error.message };
+    const out = this.hasToJSON(error) ? error.toJSON() : { message: error.message };
     res.send(JSON.stringify({ ...out, status }));
   }
 
