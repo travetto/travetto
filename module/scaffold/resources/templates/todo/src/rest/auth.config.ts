@@ -1,7 +1,6 @@
-import { Authorizer, Authenticator } from '@travetto/auth';
+import { Authorizer, Authenticator, AuthenticationError } from '@travetto/auth';
 import { SessionModelⲐ } from '@travetto/rest-session';
 import { InjectableFactory } from '@travetto/di';
-import { AppError } from '@travetto/runtime';
 import { ModelExpirySupport } from '@travetto/model';
 import { MemoryModelService } from '@travetto/model-memory';
 
@@ -33,7 +32,7 @@ class AuthConfig {
             source: 'insecure'
           };
         } else {
-          throw new AppError('Unknown user', 'authentication');
+          throw new AuthenticationError('Unknown user');
         }
       }
     };

@@ -3,6 +3,7 @@ import { RestInterceptor, ManagedInterceptorConfig, FilterContext, SerializeInte
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
+import { AuthenticationError } from '@travetto/auth';
 
 import { AuthReadWriteInterceptor } from './read-write';
 
@@ -62,17 +63,17 @@ export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConf
     switch (config?.state) {
       case 'authenticated': {
         if (!req.auth) {
-          throw new AppError('User is unauthenticated', 'authentication');
+          throw new AuthenticationError('User is unauthenticated');
         } else {
           if (!config.matcher(new Set(req.auth.permissions))) {
-            throw new AppError('Access denied', 'permissions');
+            throw new AppError('Access denied', { category: 'permissions' });
           }
         }
         break;
       }
       case 'unauthenticated': {
         if (req.auth) {
-          throw new AppError('User is authenticated', 'authentication');
+          throw new AuthenticationError('User is authenticated');
         }
         break;
       }

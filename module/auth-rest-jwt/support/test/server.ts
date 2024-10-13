@@ -4,8 +4,7 @@ import timers from 'node:timers/promises';
 import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
-import { AppError } from '@travetto/runtime';
-import { Authenticator } from '@travetto/auth';
+import { AuthenticationError, Authenticator } from '@travetto/auth';
 import { AuthService, Authenticate, Authenticated } from '@travetto/auth-rest';
 import { JWTUtil } from '@travetto/jwt';
 
@@ -28,7 +27,7 @@ class Config {
             issuer: 'custom',
           };
         }
-        throw new AppError('User unknown', 'authentication');
+        throw new AuthenticationError('User unknown');
       }
     };
   }

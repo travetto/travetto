@@ -56,13 +56,13 @@ export class JWTVerifier {
     if (payload.nbf !== undefined && !ignore.nbf &&
       payload.nbf > clock.timestamp + clock.tolerance
     ) {
-      throw new JWTError('Token is not active', { date: TimeUtil.asDate(payload.nbf, 's') }, 'permissions');
+      throw new JWTError('Token is not active', { details: { date: TimeUtil.asDate(payload.nbf, 's') }, category: 'permissions' });
     }
 
     if (payload.exp !== undefined && !ignore.exp &&
       clock.timestamp >= payload.exp + clock.tolerance
     ) {
-      throw new JWTError('Token is expired', { expiredAt: TimeUtil.asDate(payload.exp, 's') }, 'permissions');
+      throw new JWTError('Token is expired', { details: { expiredAt: TimeUtil.asDate(payload.exp, 's') }, category: 'permissions' });
     }
 
     if (options.maxAgeSec) {
@@ -73,7 +73,7 @@ export class JWTVerifier {
       const maxAgeTimestamp = options.maxAgeSec + payload.iat;
 
       if (clock.timestamp >= maxAgeTimestamp + (clock.tolerance || 0)) {
-        throw new JWTError('Token maxAge exceeded', { date: TimeUtil.asDate(maxAgeTimestamp, 's') });
+        throw new JWTError('Token maxAge exceeded', { details: { date: TimeUtil.asDate(maxAgeTimestamp, 's') } });
       }
     }
   }

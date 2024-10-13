@@ -59,7 +59,7 @@ export class CacheService {
 
     if (delta < 0) { // Expired
       await this.#modelService.delete(CacheRecord, id);
-      throw new CacheError('Key expired', 'data');
+      throw new CacheError('Key expired', { category: 'data' });
     }
 
     // If half way to eviction, not perfect, but will reduce the amount of unnecessary updates
@@ -119,7 +119,7 @@ export class CacheService {
       }
       await Promise.all(removes);
     } else {
-      throw new AppError('Unable to delete all on an un-indexed database', 'general');
+      throw new AppError('Unable to delete all on an un-indexed database');
     }
   }
 

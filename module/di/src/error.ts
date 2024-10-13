@@ -7,6 +7,12 @@ function getName(symbol: symbol): string {
 
 export class InjectionError extends AppError {
   constructor(message: string, target: ClassTarget, qualifiers?: symbol[]) {
-    super(`${message}: [${target.Ⲑid}]${qualifiers ? `[${qualifiers.map(getName)}]` : ''}`, 'notfound');
+    super(`${message}: [${target.Ⲑid}]${qualifiers ? `[${qualifiers.map(getName)}]` : ''}`, {
+      category: 'notfound',
+      details: {
+        qualifiers: qualifiers?.map(getName),
+        target: target.Ⲑid
+      }
+    });
   }
 }

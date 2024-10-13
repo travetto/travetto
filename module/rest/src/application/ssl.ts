@@ -72,7 +72,7 @@ export class RestSslConfig {
     }
     if (!this.keys) {
       if (Runtime.production) {
-        throw new AppError('Default ssl keys are only valid for development use, please specify a config value at rest.ssl.keys', 'permissions');
+        throw new AppError('Default ssl keys are only valid for development use, please specify a config value at rest.ssl.keys');
       }
       return RestSslConfig.generateSslKeyPair();
     } else {

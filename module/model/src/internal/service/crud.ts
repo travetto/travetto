@@ -81,7 +81,7 @@ export class ModelCrudUtil {
       await SchemaValidator.validate(cls, item);
     } catch (err) {
       if (err instanceof ValidationResultError) {
-        errors = err.details.errors;
+        errors = err.details!.errors;
       }
     }
 
@@ -140,7 +140,7 @@ export class ModelCrudUtil {
    */
   static async prePartialUpdate<T extends ModelType>(cls: Class<T>, item: Partial<T>, view?: string): Promise<Partial<T>> {
     if (!DataUtil.isPlainObject(item)) {
-      throw new AppError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, 'data');
+      throw new AppError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, { category: 'data' });
     }
     const res = await this.prePersist(cls, castTo(item), 'partial');
     await SchemaValidator.validatePartial(cls, item, view);

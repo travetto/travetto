@@ -206,7 +206,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Object) {
       return this.quote(JSON.stringify(value).replace(/[']/g, "''"));
     }
-    throw new AppError(`Unknown value type for field ${conf.name}, ${value}`, 'data');
+    throw new AppError(`Unknown value type for field ${conf.name}, ${value}`, { category: 'data' });
   }
 
   /**

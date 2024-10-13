@@ -73,7 +73,7 @@ class $ParamExtractor {
   getExtractor(cls: Class): ExtractFn {
     const fn = this.#typeExtractors.get(cls);
     if (!fn) {
-      throw new AppError(`Unknown context type: ${cls.name}`, 'data');
+      throw new AppError(`Unknown context type: ${cls.name}`, { category: 'data' });
     }
     return fn;
   }
@@ -100,7 +100,7 @@ class $ParamExtractor {
       await SchemaValidator.validateMethod(cls, method, params, route.params.map(x => x.prefix));
     } catch (err) {
       if (err instanceof ValidationResultError) {
-        for (const el of err.details.errors) {
+        for (const el of err.details?.errors ?? []) {
           if (el.kind === 'required') {
             const config = route.params.find(x => x.name === el.path);
             if (config) {

@@ -5,6 +5,6 @@ import { Class, AppError } from '@travetto/runtime';
  */
 export class SubTypeNotSupportedError extends AppError {
   constructor(cls: Class | string) {
-    super(`${typeof cls === 'string' ? cls : cls.name} cannot be used for this operation`, 'data');
+    super(`${typeof cls === 'string' ? cls : cls.name} cannot be used for this operation`, { category: 'data' });
   }
 }

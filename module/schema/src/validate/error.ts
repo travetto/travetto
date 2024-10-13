@@ -8,7 +8,7 @@ import { ValidationError } from './types';
  */
 export class ValidationResultError extends AppError<{ errors: ValidationError[] }> {
   constructor(errors: ValidationError[]) {
-    super('Validation errors have occurred', 'data', { errors });
+    super('Validation errors have occurred', { category: 'data', details: { errors } });
   }
 }
 
@@ -18,7 +18,7 @@ export class ValidationResultError extends AppError<{ errors: ValidationError[] 
  */
 export class TypeMismatchError extends AppError {
   constructor(cls: Class | string, type: string) {
-    super(`Expected ${typeof cls === 'string' ? cls : cls.name} but found ${type}`, 'data');
+    super(`Expected ${typeof cls === 'string' ? cls : cls.name} but found ${type}`, { category: 'data' });
   }
 }
 

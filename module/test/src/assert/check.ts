@@ -161,7 +161,7 @@ export class AssertCheck {
       // Else treat as a simple function to build an error or not
       const res = shouldThrow(err);
       if (res && !(res instanceof Error)) {
-        return new AppError(`Invalid check, "${shouldThrow.name}" should return an Error or undefined`, 'data');
+        return new AppError(`Invalid check, "${shouldThrow.name}" should return an Error or undefined`, { category: 'data' });
       } else {
         return res;
       }

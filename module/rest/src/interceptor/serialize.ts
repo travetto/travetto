@@ -22,8 +22,8 @@ export class SerializeInterceptor implements RestInterceptor {
     } catch (err) {
       const resolved = err instanceof Error ? err : (
         DataUtil.isPlainObject(err) ?
-          new AppError(`${err['message'] || 'Unexpected error'}`, 'general', err) :
-          new AppError(`${err}`, 'general')
+          new AppError(`${err['message'] || 'Unexpected error'}`, { details: err }) :
+          new AppError(`${err}`)
       );
       if (ctx.res.headersSent) {
         console.error('Failed to serialize, already sent partially', resolved);

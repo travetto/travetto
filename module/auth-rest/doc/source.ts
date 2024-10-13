@@ -1,5 +1,4 @@
-import { AppError } from '@travetto/runtime';
-import { Authenticator } from '@travetto/auth';
+import { AuthenticationError, Authenticator } from '@travetto/auth';
 
 type User = { username: string, password: string };
 
@@ -15,7 +14,7 @@ export class SimpleAuthenticator implements Authenticator<User> {
         }
       };
     } else {
-      throw new AppError('Invalid credentials', 'authentication');
+      throw new AuthenticationError('Invalid credentials');
     }
   }
 }

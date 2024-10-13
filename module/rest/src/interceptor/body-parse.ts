@@ -103,7 +103,7 @@ export class BodyParseInterceptor implements RestInterceptor<RestBodyParseConfig
         return next();
       } else {
         console.error('Malformed input', malformed);
-        throw new AppError('Malformed input', 'data');
+        throw new AppError('Malformed input', { category: 'data' });
       }
     }
   }
