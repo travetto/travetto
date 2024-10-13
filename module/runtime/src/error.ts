@@ -27,44 +27,41 @@ export class AppError<T = Record<string, unknown>> extends Error {
       ('message' in e && typeof e.message === 'string') &&
       ('category' in e && typeof e.category === 'string') &&
       ('type' in e && typeof e.type === 'string') &&
-      ('at' in e && (typeof e.at === 'number' || typeof e.at === 'string' || e.at instanceof Date))
+      ('at' in e && typeof e.at === 'string')
     ) {
-      const err = new AppError(e.message, castTo(e));
-      return err;
+      return new AppError(e.message, castTo(e));
     }
   }
 
   type: string;
   category: ErrorCategory;
-  at: Date;
+  at: string;
   details?: T;
 
   /**
    * Build an app error
    *
    * @param message The error message
-   * @param category The error category, can be mapped to HTTP statuses
-   * @param details Optional error payload
    */
   constructor(message: string, opts: AppErrorOptions<T> = {}) {
     super(message, opts.cause ? { cause: opts.cause } : undefined);
     this.type = opts.type ?? this.constructor.name;
     this.details = opts.details;
     this.category = opts.category ?? 'general';
-    this.at = opts.at ? (opts.at instanceof Date ? opts.at : new Date(opts.at)) : new Date();
+    this.at = (opts.at ? (opts.at instanceof Date ? opts.at : new Date(opts.at)) : new Date()).toISOString();
   }
 
   /**
-   * The format of the JSON output
+   * Serializes an error to a basic object
    */
-  toJSON(): Omit<AppError, 'at' | 'toJSON' | 'name'> & { at: string } {
+  toJSON(): Omit<AppError<T>, 'toJSON' | 'name'> {
     return {
       message: this.message,
       category: this.category,
       cause: this.cause ? `${this.cause}` : undefined,
       type: this.type,
-      at: this.at.toISOString(),
-      details: castTo(this.details),
+      at: this.at,
+      details: this.details,
     };
   }
 }

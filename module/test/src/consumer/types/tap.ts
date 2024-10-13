@@ -1,13 +1,16 @@
 import { stringify } from 'yaml';
 
 import { Terminal } from '@travetto/terminal';
-import { AppError, TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { TimeUtil, Runtime, RuntimeIndex, hasFunction } from '@travetto/runtime';
 
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 import { SerializeUtil } from '../serialize';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
+
+const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
+
 
 /**
   * TAP Format consumer
@@ -104,7 +107,7 @@ export class TapEmitter implements TestConsumer {
       if (test.status === 'failed') {
         if (test.error && test.error.name !== 'AssertionError') {
           const err = SerializeUtil.deserializeError(test.error);
-          this.logMeta({ error: err instanceof AppError ? err.toJSON() : err });
+          this.logMeta({ error: hasToJSON(err) ? err.toJSON() : err });
         }
       }
 
@@ -128,7 +131,7 @@ export class TapEmitter implements TestConsumer {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.#enhancer.failure(err instanceof AppError ? JSON.stringify(err.toJSON(), null, 2) : `${err}`));
+        this.log(this.#enhancer.failure(hasToJSON(err) ? JSON.stringify(err.toJSON(), null, 2) : `${err}`));
       }
     }
 

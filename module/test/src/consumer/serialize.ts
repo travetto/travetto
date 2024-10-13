@@ -1,4 +1,4 @@
-import { AppError, TypedObject } from '@travetto/runtime';
+import { hasFunction, TypedObject } from '@travetto/runtime';
 
 import { TestEvent, } from '../model/event';
 
@@ -8,6 +8,8 @@ export type SerializedError = { $?: boolean, message: string, stack?: string, na
 function isError(e: unknown): e is SerializedError {
   return !!e && (typeof e === 'object') && '$' in e;
 }
+
+const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 
 export class SerializeUtil {
 
@@ -25,7 +27,7 @@ export class SerializeUtil {
         error[k] = e[k];
       }
       error.name = e.name;
-      if (e instanceof AppError) {
+      if (hasToJSON(e)) {
         Object.assign(error, e.toJSON());
       }
       error.message ||= e.message;
