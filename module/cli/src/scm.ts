@@ -50,7 +50,7 @@ export class CliScmUtil {
     const ws = Runtime.workspace.path;
     const res = await ExecUtil.getResult(spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }), { catch: true });
     if (!res.valid) {
-      throw new AppError('Unable to detect changes between', 'data', { fromHash, toHash, output: (res.stderr || res.stdout) });
+      throw new AppError('Unable to detect changes between', { category: 'data', details: { fromHash, toHash, output: (res.stderr || res.stdout) } });
     }
     const out = new Set<string>();
     for (const line of res.stdout.split(/\n/g)) {

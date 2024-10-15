@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 
-import { AppError } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { Authorizer } from '../src/types/authorizer';
 import { Principal } from '../src/types/principal';
+import { AuthenticationError } from '../src/types/error';
 
 const USERS: Record<string, Principal> = {
   a: {
@@ -18,7 +18,7 @@ const USERS: Record<string, Principal> = {
 class CustomAuthorizer implements Authorizer {
   async authorize(p: Principal): Promise<Principal> {
     if (!(p.id in USERS)) {
-      throw new AppError('User is not found', 'notfound');
+      throw new AuthenticationError('User is not found', { category: 'notfound' });
     }
     return USERS[p.id];
   }

@@ -5,7 +5,7 @@ export class EmailResourceLoader extends FileLoader {
   constructor(module: string, globalResources?: string[]) {
     const mod = RuntimeIndex.getModule(module);
     if (!mod) {
-      throw new AppError(`Unknown module - ${module}`, 'notfound', { module });
+      throw new AppError(`Unknown module - ${module}`, { category: 'notfound', details: { module } });
     }
     super([
       ...Env.TRV_RESOURCES.list ?? [],
