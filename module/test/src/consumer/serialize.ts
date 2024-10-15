@@ -43,8 +43,8 @@ export class SerializeUtil {
         Object.assign(err, rest);
       }
       err.message = e.message;
-      err.name = e.name;
       err.stack = e.stack;
+      err.name = e.name;
       return err;
     } else {
       return e;
