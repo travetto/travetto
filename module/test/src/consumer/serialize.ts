@@ -23,10 +23,10 @@ export class SerializeUtil {
 
     return {
       $: true,
+      ...hasToJSON(e) ? e.toJSON() : e,
       name: e.name,
       message: e.message,
       stack: e.stack?.replace(/.*\[ERR_ASSERTION\]:\s*/, ''),
-      ...hasToJSON(e) ? e.toJSON() : e
     };
   }
 
