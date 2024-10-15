@@ -92,8 +92,7 @@ A sample auth provider would look like:
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/doc/source.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Authenticator <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AuthenticationError<span class="token punctuation">,</span> Authenticator <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">type</span> <span class="token class-name">User</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> username<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> password<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
@@ -109,7 +108,7 @@ A sample auth provider would look like:
         <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">AppError</span><span class="token punctuation">(</span><span class="token string">'Invalid credentials'</span><span class="token punctuation">,</span> <span class="token string">'authentication'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">AuthenticationError</span><span class="token punctuation">(</span><span class="token string">'Invalid credentials'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
@@ -140,7 +139,7 @@ The symbol <code class="item input">FB_AUTH</code> is what will be used to refer
 
 <h2 id="route-declaration">Route Declaration</h2>
 
-Like the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/service.ts#L16">AuthService</a>, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use. <br><br>
+Like the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/service.ts#L15">AuthService</a>, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use. <br><br>
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L12">@Authenticate</a> integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
   <figure class="code">
