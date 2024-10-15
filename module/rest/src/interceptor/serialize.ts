@@ -28,7 +28,7 @@ export class SerializeInterceptor implements RestInterceptor {
       if (ctx.res.headersSent) {
         console.error('Failed to serialize, already sent partially', resolved);
       } else {
-        await SerializeUtil.serializeError(ctx.res, resolved);
+        await SerializeUtil.serializeError(ctx.req, ctx.res, resolved);
       }
     }
   }

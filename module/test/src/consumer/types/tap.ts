@@ -1,16 +1,13 @@
 import { stringify } from 'yaml';
 
 import { Terminal } from '@travetto/terminal';
-import { TimeUtil, Runtime, RuntimeIndex, hasFunction } from '@travetto/runtime';
+import { TimeUtil, Runtime, RuntimeIndex, hasToJSON } from '@travetto/runtime';
 
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 import { SerializeUtil } from '../serialize';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
-
-const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
-
 
 /**
   * TAP Format consumer

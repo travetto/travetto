@@ -54,14 +54,14 @@ export class AppError<T = Record<string, unknown>> extends Error {
   /**
    * Serializes an error to a basic object
    */
-  toJSON(): Omit<AppError<T>, 'toJSON' | 'name'> {
+  toJSON(): Required<AppErrorOptions<T>> & { message: string } {
     return {
       message: this.message,
       category: this.category,
       cause: this.cause ? `${this.cause}` : undefined,
       type: this.type,
       at: this.at,
-      details: this.details,
+      details: this.details!,
     };
   }
 }

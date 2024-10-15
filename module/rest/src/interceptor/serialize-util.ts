@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { BinaryUtil, ErrorCategory, hasFunction } from '@travetto/runtime';
+import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
 import { HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
@@ -27,16 +27,15 @@ const categoryToCode: Record<ErrorCategory, number> = {
 export class SerializeUtil {
   static isRenderable = hasFunction<Renderable>('render');
   static isStream = hasFunction<Readable>('pipe');
-  static hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 
   /**
    * Set outbound content type if not defined
    * @param res Response
    * @param type mime type
    */
-  static setContentTypeIfUndefined(res: Response, type: string): void {
-    if (!res.getHeader('Content-Type')) {
-      res.setHeader('Content-Type', type);
+  static ensureContentType(res: Response, defaultType: string, redefine = false): void {
+    if (redefine || !res.getHeader('Content-Type')) {
+      res.setHeader('Content-Type', defaultType);
     }
   }
 
@@ -54,9 +53,9 @@ export class SerializeUtil {
   /**
    * Standard json
    */
-  static serializeJSON(req: Request, res: Response, output: unknown): void {
-    const val = this.hasToJSON(output) ? output.toJSON() : output;
-    this.setContentTypeIfUndefined(res, 'application/json');
+  static serializeJSON(req: Request, res: Response, output: unknown, forceHeader = false): void {
+    const val = hasToJSON(output) ? output.toJSON() : output;
+    this.ensureContentType(res, 'application/json', forceHeader);
     res.send(JSON.stringify(val, undefined, '__pretty' in req.query ? 2 : 0));
   }
 
@@ -64,7 +63,7 @@ export class SerializeUtil {
    * Primitive json
    */
   static serializePrimitive(res: Response, output: unknown): void {
-    this.setContentTypeIfUndefined(res, 'application/json');
+    this.ensureContentType(res, 'application/json');
     res.send(JSON.stringify(output));
   }
 
@@ -72,7 +71,7 @@ export class SerializeUtil {
    * Serialize text
    */
   static serializeText(res: Response, output: string): void {
-    this.setContentTypeIfUndefined(res, 'text/plain');
+    this.ensureContentType(res, 'text/plain');
     res.send(output);
   }
 
@@ -80,7 +79,7 @@ export class SerializeUtil {
    * Serialize buffer
    */
   static serializeBuffer(res: Response, output: Buffer): void {
-    this.setContentTypeIfUndefined(res, 'application/octet-stream');
+    this.ensureContentType(res, 'application/octet-stream');
     res.send(output);
   }
 
@@ -88,7 +87,7 @@ export class SerializeUtil {
    * Serialize stream
    */
   static async serializeStream(res: Response, output: Readable): Promise<void> {
-    this.setContentTypeIfUndefined(res, 'application/octet-stream');
+    this.ensureContentType(res, 'application/octet-stream');
     await res.sendStream(output);
   }
 
@@ -119,7 +118,7 @@ export class SerializeUtil {
       res.setHeader('content-disposition', `attachment;filename="${output.name}"`);
     }
     if (output.type) {
-      this.setContentTypeIfUndefined(res, output.type);
+      this.ensureContentType(res, output.type);
     }
     if (output.size) {
       res.setHeader('content-length', `${output.size}`);
@@ -141,13 +140,11 @@ export class SerializeUtil {
    * @param res
    * @param error
    */
-  static serializeError(res: Response, error: ErrorResponse): void {
+  static serializeError(req: Request, res: Response, error: ErrorResponse): void {
     const status = error.status ?? error.statusCode ?? categoryToCode[error.category!] ?? 500;
     res.status(status);
     res.statusError = error;
-    res.setHeader('Content-Type', 'application/json');
-    const out = this.hasToJSON(error) ? error.toJSON() : { message: error.message };
-    res.send(JSON.stringify({ ...out, status }));
+    return this.serializeJSON(req, res, hasToJSON(error) ? error.toJSON() : { message: error.message }, true);
   }
 
   /**
@@ -191,7 +188,7 @@ export class SerializeUtil {
         } else if (this.isStream(output)) {
           return this.serializeStream(res, output);
         } else if (output instanceof Error) {
-          return this.serializeError(res, output);
+          return this.serializeError(req, res, output);
         } else if (output instanceof Blob) {
           return this.serializeBlob(res, output);
         } else if (this.isRenderable(output)) {
