@@ -48,7 +48,7 @@ export class AppError<T = Record<string, unknown>> extends Error {
     this.type = opts.type ?? this.constructor.name;
     this.details = opts.details;
     this.category = opts.category ?? 'general';
-    this.at = (opts.at ? (opts.at instanceof Date ? opts.at : new Date(opts.at)) : new Date()).toISOString();
+    this.at = new Date(opts.at ?? Date.now()).toISOString();
   }
 
   /**
