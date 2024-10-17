@@ -43,7 +43,7 @@ export class RestUploadUtil {
       // Upload
       req.pipe(busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
         .on('file', (field, stream, filename) => itr.add({ stream, filename, field }))
-        .on('limit', field => itr.throw(new AppError(`File size exceeded for ${field}`, 'data')))
+        .on('limit', field => itr.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
         .on('finish', () => itr.close())
         .on('error', (err) => itr.throw(err instanceof Error ? err : new Error(`${err}`))));
 
@@ -76,7 +76,7 @@ export class RestUploadUtil {
       const detected = await this.getFileType(location);
 
       if (!mimeCheck(detected.mime)) {
-        throw new AppError(`Content type not allowed: ${detected.mime}`, 'data');
+        throw new AppError(`Content type not allowed: ${detected.mime}`, { category: 'data' });
       }
 
       if (!path.extname(filename)) {

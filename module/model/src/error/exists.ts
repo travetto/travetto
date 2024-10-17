@@ -5,6 +5,6 @@ import { Class, AppError } from '@travetto/runtime';
  */
 export class ExistsError extends AppError {
   constructor(cls: Class | string, id: string) {
-    super(`${typeof cls === 'string' ? cls : cls.name} with id ${id} already exists`, 'data');
+    super(`${typeof cls === 'string' ? cls : cls.name} with id ${id} already exists`, { category: 'data' });
   }
 }

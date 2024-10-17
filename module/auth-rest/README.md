@@ -79,8 +79,7 @@ A sample auth provider would look like:
 
 **Code: Sample Identity Source**
 ```typescript
-import { AppError } from '@travetto/runtime';
-import { Authenticator } from '@travetto/auth';
+import { AuthenticationError, Authenticator } from '@travetto/auth';
 
 type User = { username: string, password: string };
 
@@ -96,7 +95,7 @@ export class SimpleAuthenticator implements Authenticator<User> {
         }
       };
     } else {
-      throw new AppError('Invalid credentials', 'authentication');
+      throw new AuthenticationError('Invalid credentials');
     }
   }
 }
@@ -123,7 +122,7 @@ export class AppConfig {
 The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70) method.
 
 ## Route Declaration
-Like the [AuthService](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/service.ts#L16), there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use. 
+Like the [AuthService](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/service.ts#L15), there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use. 
 
 [@Authenticate](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L12) integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 

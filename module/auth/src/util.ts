@@ -33,7 +33,7 @@ export class AuthUtil {
    */
   static async generatePassword(password: string, salt: number | string = 32): Promise<{ salt: string, hash: string }> {
     if (!password) {
-      throw new AppError('Password is required', 'data');
+      throw new AppError('Password is required', { category: 'data' });
     }
 
     salt = typeof salt === 'number' ? Util.uuid(salt) : salt;

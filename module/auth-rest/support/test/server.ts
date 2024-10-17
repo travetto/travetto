@@ -4,8 +4,7 @@ import { Controller, FilterContext, Get, Post, Redirect, Request } from '@travet
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable, InjectableFactory } from '@travetto/di';
-import { AppError } from '@travetto/runtime';
-import { Authenticator, Principal } from '@travetto/auth';
+import { AuthenticationError, Authenticator, Principal } from '@travetto/auth';
 
 import { Authenticate, Authenticated } from '../../src/decorator';
 import { PrincipalEncoder } from '../../src/encoder';
@@ -46,7 +45,7 @@ class Config {
             issuer: 'custom',
           };
         }
-        throw new AppError('User unknown', 'authentication');
+        throw new AuthenticationError('User unknown');
       }
     };
   }

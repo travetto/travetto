@@ -1,6 +1,6 @@
-import { AppError, Util, Class, TimeUtil, Runtime } from '@travetto/runtime';
+import { Util, Class, TimeUtil, Runtime } from '@travetto/runtime';
 import { ModelCrudSupport, ModelType, NotFoundError, OptionalId } from '@travetto/model';
-import { AuthUtil, Principal, Authenticator, Authorizer } from '@travetto/auth';
+import { AuthUtil, Principal, Authenticator, Authorizer, AuthenticationError } from '@travetto/auth';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 /**
@@ -83,7 +83,7 @@ export class ModelAuthService<T extends ModelType> implements
 
     const hash = await AuthUtil.generateHash(password, ident.salt!);
     if (hash !== ident.hash) {
-      throw new AppError('Invalid password', 'authentication');
+      throw new AuthenticationError('Invalid password');
     } else {
       delete ident.password;
       return ident;
@@ -106,7 +106,7 @@ export class ModelAuthService<T extends ModelType> implements
     try {
       if (ident.id) {
         await this.#retrieve(ident.id);
-        throw new AppError('That id is already taken.', 'data');
+        throw new AuthenticationError('That id is already taken.', { category: 'data' });
       }
     } catch (err) {
       if (!(err instanceof NotFoundError)) {
@@ -136,12 +136,12 @@ export class ModelAuthService<T extends ModelType> implements
 
     if (oldPassword === ident.resetToken) {
       if (ident.resetExpires && ident.resetExpires.getTime() < Date.now()) {
-        throw new AppError('Reset token has expired', 'data');
+        throw new AuthenticationError('Reset token has expired', { category: 'data' });
       }
     } else if (oldPassword !== undefined) {
       const pw = await AuthUtil.generateHash(oldPassword, ident.salt!);
       if (pw !== ident.hash) {
-        throw new AppError('Old password is required to change', 'authentication');
+        throw new AuthenticationError('Old password is required to change');
       }
     }
 

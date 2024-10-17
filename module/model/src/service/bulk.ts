@@ -1,5 +1,5 @@
 import { Class, AppError } from '@travetto/runtime';
-import { ValidationResultError } from '@travetto/schema';
+import { ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelCrudSupport } from './crud';
 import { ModelType, OptionalId } from '../types/model';
@@ -37,16 +37,21 @@ export interface BulkResponse<E = unknown> {
   };
 }
 
+type BulkErrorItem = { message: string, type: string, errors?: ValidationError[], idx: number };
+
 /**
  * Bulk processing error
  */
-export class BulkProcessError extends AppError {
+export class BulkProcessError extends AppError<{ errors: BulkErrorItem[] }> {
   constructor(public errors: { idx: number, error: ValidationResultError }[]) {
-    super('Bulk processing errors have occurred', 'data', {
-      errors: errors.map(x => {
-        const { message, type, details: { errors: subErrors } = {}, details } = x.error;
-        return { message, type, errors: subErrors ?? details, idx: x.idx };
-      })
+    super('Bulk processing errors have occurred', {
+      category: 'data',
+      details: {
+        errors: errors.map(x => {
+          const { message, type, details: { errors: subErrors } = {} } = x.error;
+          return { message, type, errors: subErrors, idx: x.idx };
+        })
+      }
     });
   }
 }

@@ -167,12 +167,12 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
       // Don't allow two models with same class name, or same store name
       if (candidates.length > 1) {
         if (config.store) {
-          throw new AppError('Duplicate models with same store name', 'general', {
-            classes: candidates.map(x => x.Ⲑid)
+          throw new AppError('Duplicate models with same store name', {
+            details: { classes: candidates.map(x => x.Ⲑid) }
           });
         } else {
-          throw new AppError('Duplicate models with same class name, but no store name provided', 'general', {
-            classes: candidates.map(x => x.Ⲑid)
+          throw new AppError('Duplicate models with same class name, but no store name provided', {
+            details: { classes: candidates.map(x => x.Ⲑid) }
           });
         }
       }
@@ -210,7 +210,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   getExpiry<T extends ModelType>(cls: Class<T>): keyof T {
     const expiry = this.get(cls).expiresAt;
     if (!expiry) {
-      throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`, 'general');
+      throw new AppError(`${cls.name} is not configured with expiry support, please use @ExpiresAt to declare expiration behavior`);
     }
     return castTo(expiry);
   }

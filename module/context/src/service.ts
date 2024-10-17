@@ -23,7 +23,7 @@ export class AsyncContext {
   #store<T = unknown>(setAs?: Ctx<T> | null): Ctx<T> {
     const val = this.alStorage.getStore();
     if (!val) {
-      throw new AppError('Context is not initialized', 'general');
+      throw new AppError('Context is not initialized');
     }
     if (setAs) {
       val.value = setAs;

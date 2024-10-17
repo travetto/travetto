@@ -1,4 +1,4 @@
-import { AppError, ErrorCategory } from '@travetto/runtime';
+import { AppError, AppErrorOptions } from '@travetto/runtime';
 
 type JWTDetails = {
   expiredAt?: Date;
@@ -10,7 +10,7 @@ type JWTDetails = {
  * Error in decoding
  */
 export class JWTError extends AppError<JWTDetails> {
-  constructor(message: string, details?: JWTDetails, category: ErrorCategory = 'data') {
-    super(message, category, details);
+  constructor(message: string, opts?: AppErrorOptions<JWTDetails>) {
+    super(message, { category: 'data', ...opts });
   }
 }

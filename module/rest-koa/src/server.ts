@@ -64,7 +64,7 @@ export class KoaRestServer implements RestServer<koa> {
 
     // Register all routes to extract the proper request/response for the framework
     for (const route of routes) {
-      const routePath = route.path.replaceAll('*', '(.*)');
+      const routePath = route.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
       router[route.method](routePath, async (ctx) => {
         const [req, res] = ctx[TravettoEntityⲐ] ??= [
           KoaServerUtil.getRequest(ctx),

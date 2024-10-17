@@ -116,7 +116,7 @@ export class SessionConfig {
 
   postConstruct(): void {
     if (!this.secret && Runtime.production) {
-      throw new AppError('Default session secret is only valid for development use, please specify a config value at rest.session.secret', 'permissions');
+      throw new AppError('Default session secret is only valid for development use, please specify a config value at rest.session.secret');
     }
   }
 }

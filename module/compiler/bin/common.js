@@ -85,6 +85,9 @@ async function getEntry() {
 
   // Load
   try {
+    // @ts-ignore
+    try { await import('node:module').then(v => v.enableCompileCache()); } catch { }
+
     /** @type {import('../support/entry.trvc')} */
     const res = await import(target('support/entry.trvc.ts').dest);
     return await res.main(ctx);

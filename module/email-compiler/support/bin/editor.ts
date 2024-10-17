@@ -61,7 +61,7 @@ export class EditorService {
    */
   async listen(): Promise<void> {
     if (!process.connected || !process.send) {
-      throw new AppError('Unable to run email editor, missing ipc channel', 'permissions');
+      throw new AppError('Unable to run email editor, missing ipc channel');
     }
     process.on('message', async (msg: EditorRequest) => {
       switch (msg.type) {

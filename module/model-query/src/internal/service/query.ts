@@ -32,7 +32,7 @@ export class ModelQueryUtil {
       return res[0]!;
     }
     const requestedId = ((where && 'id' in where && typeof where.id === 'string') ? where.id : undefined) ?? 'unknown';
-    throw res.length === 0 ? new NotFoundError(cls, requestedId, { where }) : new AppError(`Invalid number of results for find by id: ${res.length}`, 'data');
+    throw res.length === 0 ? new NotFoundError(cls, requestedId, { where }) : new AppError(`Invalid number of results for find by id: ${res.length}`, { category: 'data' });
   }
 
   /**

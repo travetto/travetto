@@ -37,7 +37,7 @@ export class RestRpcInterceptor implements RestInterceptor<RestRpcConfig> {
     const ep = ControllerRegistry.getEndpointByNames(target);
 
     if (!ep) {
-      return SerializeUtil.serializeError(res, new AppError('Unknown endpoint'));
+      return SerializeUtil.serializeError(req, res, new AppError('Unknown endpoint'));
     }
 
     let params: unknown[];
@@ -64,7 +64,7 @@ export class RestRpcInterceptor implements RestInterceptor<RestRpcConfig> {
     params ??= [];
 
     if (!Array.isArray(params)) {
-      return SerializeUtil.serializeError(res, new AppError('Invalid parameters, must be an array'));
+      return SerializeUtil.serializeError(req, res, new AppError('Invalid parameters, must be an array'));
     }
 
     req[RequestLoggingⲐ] = { controller: ep.class.name, endpoint: ep.handlerName };

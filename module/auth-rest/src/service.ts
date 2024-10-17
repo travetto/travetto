@@ -1,7 +1,6 @@
-import { AppError } from '@travetto/runtime';
 import { FilterContext, Request } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { Principal, Authorizer, Authenticator } from '@travetto/auth';
+import { Principal, Authorizer, Authenticator, AuthenticationError } from '@travetto/auth';
 import { AuthenticatorTarget } from '@travetto/auth/src/internal/types';
 import { AsyncContext } from '@travetto/context';
 
@@ -64,9 +63,7 @@ export class AuthService {
     }
 
     // Take the last error and return
-    const finalError = new AppError('Unable to authenticate', 'authentication');
-    finalError.stack = lastError?.stack ?? finalError.stack;
-    throw finalError;
+    throw new AuthenticationError('Unable to authenticate', { cause: lastError });
   }
 
   /**

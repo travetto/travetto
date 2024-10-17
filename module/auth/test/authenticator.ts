@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
-import { AppError } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { Authenticator } from '../src/types/authenticator';
+import { AuthenticationError } from '../src/types/error';
 
 type User = { username: string, password: string };
 
@@ -25,7 +25,7 @@ class SimpleAuthenticator implements Authenticator<User> {
         }
       };
     } else {
-      throw new AppError('Unable to authenticate, credentials are invalid', 'authentication');
+      throw new AuthenticationError('Unable to authenticate, credentials are invalid');
     }
   }
 }

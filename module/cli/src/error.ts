@@ -54,7 +54,7 @@ export class CliValidationResultError extends AppError<{ errors: CliValidationEr
   command: CliCommandShape;
 
   constructor(command: CliCommandShape, errors: CliValidationError[]) {
-    super('', undefined, { errors });
+    super('', { details: { errors } });
     this.command = command;
   }
 }

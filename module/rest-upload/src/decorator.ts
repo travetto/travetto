@@ -25,7 +25,7 @@ export function Upload(
   const finalConf = { ...param };
 
   if (!(finalConf.contextType === Blob || finalConf.contextType === File)) {
-    throw new AppError(`Cannot use upload decorator with ${finalConf.contextType}, but only an Blob or File`, 'general');
+    throw new AppError(`Cannot use upload decorator with ${finalConf.contextType}, but only an Blob or File`);
   }
 
   return (inst: ClassInstance, prop: string, idx: number): void => {

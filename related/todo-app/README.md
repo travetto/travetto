@@ -462,8 +462,7 @@ $ trv main support/create-todo.ts <key> <port>
         path: 'todo'
       }
     ]
-  },
-  status: 400
+  }
 }
 ```
 

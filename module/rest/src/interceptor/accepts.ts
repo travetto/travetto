@@ -7,7 +7,6 @@ import { FilterContext } from '../types';
 import { MimeUtil } from '../util/mime';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
-import { BodyParseInterceptor } from './body-parse';
 import { SerializeInterceptor } from './serialize';
 
 @Config('rest.accepts')
@@ -42,7 +41,7 @@ export class AcceptsInterceptor implements RestInterceptor<RestAcceptsConfig> {
   intercept({ req, config }: FilterContext<RestAcceptsConfig>): void {
     const contentType = req.header('content-type');
     if (!contentType || !config.matcher(contentType)) {
-      throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, 'data');
+      throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });
     }
   }
 }
