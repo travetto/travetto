@@ -30,7 +30,7 @@
     "@types/koa-router": "^7.4.8",
     "koa": "^2.15.3",
     "koa-compress": "^5.1.1",
-    "koa-router": "^12.0.1"
+    "koa-router": "^13.0.1"
   },
   "travetto": {
     "displayName": "Koa REST Source"
