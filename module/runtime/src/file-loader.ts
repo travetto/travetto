@@ -34,7 +34,7 @@ export class FileLoader {
         return resolved;
       }
     }
-    throw new AppError(`Unable to find: ${relativePath}, searched=${this.searchPaths.join(',')}`, 'notfound');
+    throw new AppError(`Unable to find: ${relativePath}, searched=${this.searchPaths.join(',')}`, { category: 'notfound' });
   }
 
   /**

@@ -135,3 +135,9 @@ export class TemplateLit {
   age: `${number}-${TimeUnit}s`;
   heights?: `${number}${HeightUnit}`[];
 }
+
+@Schema()
+export class RangeSchema {
+  @Min(10) @Max(100)
+  value: number;
+}

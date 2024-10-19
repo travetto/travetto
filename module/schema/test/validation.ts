@@ -11,7 +11,8 @@ import { SchemaValidator } from '../src/validate/validator';
 
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaaz,
-  CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque, TemplateLit
+  CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque, TemplateLit,
+  RangeSchema
 } from './models/validation';
 import { Accessors } from './models/binding';
 
@@ -38,8 +39,8 @@ class Validation {
     } catch (err) {
       assert(err instanceof ValidationResultError);
       console.warn('Validation Failed', { error: err });
-      assert(findError(err.details!.errors, 'url', 'not a valid url'));
-      assert(findError(err.details!.errors, 'timestamp', 'is required'));
+      assert(findError(err.details.errors, 'url', 'not a valid url'));
+      assert(findError(err.details.errors, 'timestamp', 'is required'));
     }
   }
 
@@ -58,10 +59,10 @@ class Validation {
       assert.fail('Validation should have failed');
     } catch (err) {
       assert(err instanceof ValidationResultError);
-      assert(findError(err.details!.errors, 'responses', 'required'));
-      assert(findError(err.details!.errors, 'response.pandaState', 'TIRED'));
-      assert(findError(err.details!.errors, 'response.url', 'not a valid url'));
-      assert(findError(err.details!.errors, 'response.timestamp', 'is required'));
+      assert(findError(err.details.errors, 'responses', 'required'));
+      assert(findError(err.details.errors, 'response.pandaState', 'TIRED'));
+      assert(findError(err.details.errors, 'response.url', 'not a valid url'));
+      assert(findError(err.details.errors, 'response.timestamp', 'is required'));
     }
   }
 
@@ -118,9 +119,9 @@ class Validation {
       assert(false);
     } catch (err) {
       assert(err instanceof ValidationResultError);
-      assert(err.details!.errors[0].path === 'age1');
-      assert(err.details!.errors[0].kind === 'custom');
-      assert(err.details!.errors[0].message === 'age1 + age2 cannot be even');
+      assert(err.details.errors[0].path === 'age1');
+      assert(err.details.errors[0].kind === 'custom');
+      assert(err.details.errors[0].message === 'age1 + age2 cannot be even');
     }
   }
 
@@ -172,7 +173,7 @@ class Validation {
       const o = DateTestSchema.from({ date: undefined });
       return SchemaValidator.validate(DateTestSchema, o);
     }, (err: unknown) => {
-      if (!(err instanceof ValidationResultError && err.details!.errors[0].kind === 'required')) {
+      if (!(err instanceof ValidationResultError && err.details.errors[0].kind === 'required')) {
         return err;
       }
     });
@@ -182,7 +183,7 @@ class Validation {
       const o = DateTestSchema.from({ date: NaN });
       return SchemaValidator.validate(DateTestSchema, o);
     }, (err: unknown) => {
-      if (!(err instanceof ValidationResultError && err.details!.errors[0].kind === 'type')) {
+      if (!(err instanceof ValidationResultError && err.details.errors[0].kind === 'type')) {
         return err;
       }
     });
@@ -191,7 +192,7 @@ class Validation {
       const o = CustomValidated.from({ age: Number.NaN, age2: 1 });
       return SchemaValidator.validate(CustomValidated, o);
     }, (err: unknown) => {
-      if (!(err instanceof ValidationResultError && err.details!.errors[0].kind === 'type')) {
+      if (!(err instanceof ValidationResultError && err.details.errors[0].kind === 'type')) {
         return err;
       }
     });
@@ -200,7 +201,7 @@ class Validation {
       const o = CustomValidated.from({ age: 1, age2: 1 });
       return SchemaValidator.validate(CustomValidated, o);
     }, (err: unknown) => {
-      if (!(err instanceof ValidationResultError && err.details!.errors[0].kind === 'custom')) {
+      if (!(err instanceof ValidationResultError && err.details.errors[0].kind === 'custom')) {
         return err;
       }
     });
@@ -210,7 +211,7 @@ class Validation {
       const o = DateTestSchema.from({ date: '' });
       return SchemaValidator.validate(DateTestSchema, o);
     }, (err: unknown) => {
-      if (!(err instanceof ValidationResultError && err.details!.errors[0].kind === 'required')) {
+      if (!(err instanceof ValidationResultError && err.details.errors[0].kind === 'required')) {
         return err;
       }
     });
@@ -257,12 +258,12 @@ class Validation {
       await SchemaValidator.validate(AllAs, item);
     } catch (err) {
       assert(err instanceof ValidationResultError);
-      assert(err.details!.errors[0].path === 'all[0].b');
-      assert(err.details!.errors[0].message === 'all[0].b is required');
-      assert(err.details!.errors[1].path === 'all[1].b');
-      assert(err.details!.errors[1].message === 'all[1].b is required');
-      assert(err.details!.errors[2].path === 'all[1].c');
-      assert(err.details!.errors[2].message === 'all[1].c is required');
+      assert(err.details.errors[0].path === 'all[0].b');
+      assert(err.details.errors[0].message === 'all[0].b is required');
+      assert(err.details.errors[1].path === 'all[1].b');
+      assert(err.details.errors[1].message === 'all[1].b is required');
+      assert(err.details.errors[2].path === 'all[1].c');
+      assert(err.details.errors[2].message === 'all[1].c is required');
     }
   }
 
@@ -355,12 +356,12 @@ class Validation {
       await SchemaValidator.validate(AllAs, item);
     } catch (err) {
       assert(err instanceof ValidationResultError);
-      assert(err.details!.errors[0].path === 'all[0].b');
-      assert(err.details!.errors[0].message === 'all[0].b is required');
-      assert(err.details!.errors[1].path === 'all[1].b');
-      assert(err.details!.errors[1].message === 'all[1].b is required');
-      assert(err.details!.errors[2].path === 'all[1].c');
-      assert(err.details!.errors[2].message === 'all[1].c is required');
+      assert(err.details.errors[0].path === 'all[0].b');
+      assert(err.details.errors[0].message === 'all[0].b is required');
+      assert(err.details.errors[1].path === 'all[1].b');
+      assert(err.details.errors[1].message === 'all[1].b is required');
+      assert(err.details.errors[2].path === 'all[1].c');
+      assert(err.details.errors[2].message === 'all[1].c is required');
     }
   }
 
@@ -369,11 +370,11 @@ class Validation {
     await assert.rejects(() => SchemaValidator.validate(Accessors, asFull({})),
       err => {
         assert(err instanceof ValidationResultError);
-        assert(err.details!.errors.length === 2);
-        assert(err.details!.errors[0].path === 'color');
-        assert(err.details!.errors[0].message === 'color is required');
-        assert(err.details!.errors[1].path === 'area');
-        assert(err.details!.errors[1].message === 'area is required');
+        assert(err.details.errors.length === 2);
+        assert(err.details.errors[0].path === 'color');
+        assert(err.details.errors[0].message === 'color is required');
+        assert(err.details.errors[1].path === 'area');
+        assert(err.details.errors[1].message === 'area is required');
       });
 
     await assert.doesNotReject(() =>
@@ -386,9 +387,9 @@ class Validation {
     await assert.rejects(() => SchemaValidator.validate(TemplateLit, asFull({})),
       err => {
         assert(err instanceof ValidationResultError);
-        assert(err.details!.errors.length === 1);
-        assert(err.details!.errors[0].path === 'age');
-        assert(err.details!.errors[0].message === 'age is required');
+        assert(err.details.errors.length === 1);
+        assert(err.details.errors[0].path === 'age');
+        assert(err.details.errors[0].message === 'age is required');
       }
     );
 
@@ -396,9 +397,9 @@ class Validation {
       await assert.rejects(() => SchemaValidator.validate(TemplateLit, castTo({ age })),
         err => {
           assert(err instanceof ValidationResultError);
-          assert(err.details!.errors.length === 1);
-          assert(err.details!.errors[0].path === 'age');
-          assert(err.details!.errors[0].message.startsWith('age must match'));
+          assert(err.details.errors.length === 1);
+          assert(err.details.errors[0].path === 'age');
+          assert(err.details.errors[0].message.startsWith('age must match'));
         }
       );
     }
@@ -418,11 +419,40 @@ class Validation {
       await assert.rejects(() => SchemaValidator.validate(TemplateLit, castTo({ age: '19-ys', heights })),
         err => {
           assert(err instanceof ValidationResultError);
-          assert(err.details!.errors.length === 1);
-          assert(err.details!.errors[0].path === 'heights[0]');
-          assert(err.details!.errors[0].message.startsWith('heights[0] must match'));
+          assert(err.details.errors.length === 1);
+          assert(err.details.errors[0].path === 'heights[0]');
+          assert(err.details.errors[0].message.startsWith('heights[0] must match'));
         }
       );
     }
+  }
+
+  @Test()
+  async verifyMinMaxValues() {
+    // Valid cases
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(RangeSchema, { value: 10 })
+    );
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(RangeSchema, { value: 50 })
+    );
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(RangeSchema, { value: 100 })
+    );
+
+    // Invalid cases
+    await assert.rejects(() => SchemaValidator.validate(RangeSchema, { value: 9 }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'value');
+      assert(err.details.errors[0].message.includes('is less than (10)'));
+    });
+
+    await assert.rejects(() => SchemaValidator.validate(RangeSchema, { value: 101 }), err => {
+      assert(err instanceof ValidationResultError);
+      assert(err.details.errors.length === 1);
+      assert(err.details.errors[0].path === 'value');
+      assert(err.details.errors[0].message.includes('is greater than (100)'));
+    });
   }
 }

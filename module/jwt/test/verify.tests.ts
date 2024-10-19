@@ -131,7 +131,6 @@ class VerifyExpirationSuite {
     } catch (err: unknown) {
       assert(err instanceof JWTError);
       assert(err.message === 'Token is expired');
-      assert(err.details);
       assert(err.details.expiredAt);
       assert(TimeUtil.asSeconds(err.details.expiredAt) === 1437018592);
     }

@@ -112,32 +112,13 @@ export class SchemaValidator {
    * @param value The value to validate
    */
   static #validateRange(field: FieldConfig, key: 'min' | 'max', value: string | number | Date): boolean {
-
     const f = field[key]!;
-    const fn = f.n;
-    if (typeof fn === 'number') {
-      if (typeof value === 'string') {
-        value = parseInt(value, 10);
-      }
-      if (field.type === Date) {
-        value = new Date(value);
-      }
-      const valN = typeof value === 'number' ? value : value.getTime();
-      if (key === 'min' && valN < fn || key === 'max' && valN > fn) {
-        return true;
-      }
-    } else {
-      const date = fn.getTime();
-      if (typeof value === 'string') {
-        value = Date.parse(value);
-      } else if (value instanceof Date) {
-        value = value.getTime();
-      }
-      if (key === 'min' && value < date || key === 'max' && value > date) {
-        return true;
-      }
-    }
-    return false;
+    const valueNum = (typeof value === 'string') ?
+      (field.type === Date ? Date.parse(value) : parseInt(value, 10)) :
+      (value instanceof Date ? value.getTime() : value);
+
+    const boundary = (typeof f.n === 'number' ? f.n : f.n.getTime());
+    return key === 'min' ? valueNum < boundary : valueNum > boundary;
   }
 
   /**
@@ -314,9 +295,9 @@ export class SchemaValidator {
       await this.validate(cls, o, view);
     } catch (err) {
       if (err instanceof ValidationResultError) { // Don't check required fields
-        const errs = err.details!.errors.filter(x => x.kind !== 'required');
+        const errs = err.details.errors.filter(x => x.kind !== 'required');
         if (errs.length) {
-          err.details!.errors = errs;
+          err.details.errors = errs;
           throw err;
         }
       }

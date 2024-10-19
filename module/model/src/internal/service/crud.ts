@@ -81,7 +81,7 @@ export class ModelCrudUtil {
       await SchemaValidator.validate(cls, item);
     } catch (err) {
       if (err instanceof ValidationResultError) {
-        errors = err.details!.errors;
+        errors = err.details.errors;
       }
     }
 

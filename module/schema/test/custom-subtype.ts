@@ -8,6 +8,7 @@ import { Schema } from '../src/decorator/schema';
 @Schema({ subTypeField: 'flavor' })
 abstract class CustomBase {
   flavor: string;
+  beans: number;
 }
 
 @Schema()
