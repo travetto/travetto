@@ -103,14 +103,28 @@ export class RestUploadUtil {
    * Get file type
    */
   static async getFileType(input: string | Readable): Promise<FileType> {
-    const { default: { fromFile, fromStream } } = await import('file-type');
-    const { default: { getType, getExtension } } = await import('mime');
+    const { FileTypeParser } = await import('file-type');
+    const { fromStream } = await import('strtok3');
 
-    const matched = await (typeof input === 'string' ? fromFile(input) : fromStream(input));
+    const parser = new FileTypeParser();
+    let tok: ReturnType<typeof fromStream> | undefined;
+    let matched: FileType | undefined;
+
+    try {
+      tok = await fromStream(typeof input === 'string' ? createReadStream(input) : input);
+      matched = await parser.fromTokenizer(tok);
+    } finally {
+      await tok?.close();
+    }
+
     if (!matched && typeof input === 'string') {
-      const mime = getType(input);
+      const { Mime } = (await import('mime'));
+      const otherTypes = (await import('mime/types/other.js')).default;
+      const standardTypes = (await import('mime/types/standard.js')).default;
+      const checker = new Mime(standardTypes, otherTypes);
+      const mime = checker.getType(input);
       if (mime) {
-        return { ext: getExtension(mime)!, mime };
+        return { ext: checker.getExtension(mime)!, mime };
       }
     }
     return matched ?? { ext: 'bin', mime: 'application/octet-stream' };

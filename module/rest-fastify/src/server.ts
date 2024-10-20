@@ -43,7 +43,7 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
     const app = fastify(fastConf);
     app.register(compress);
     app.removeAllContentTypeParsers();
-    app.addContentTypeParser(/.*/, (req, body, done) => done(null, body));
+    app.addContentTypeParser(/^.*/, (req, body, done) => done(null, body));
 
     this.raw = app;
     return this.raw;

@@ -171,7 +171,7 @@ Options:
 $ trv basic:arg 20
 
 Execution failed:
- * Argument volume is bigger than (10)
+ * Argument volume is greater than (10)
 
 Usage: basic:arg [options] [volume:number]
 
@@ -234,7 +234,7 @@ $ trv basic:arglist 10 5 3 9 8 1
 $ trv basic:arglist 10 5 3 9 20 1
 
 Execution failed:
- * Argument volumes[4] is bigger than (10)
+ * Argument volumes[4] is greater than (10)
 
 Usage: basic:arglist [options] <volumes...:number>
 

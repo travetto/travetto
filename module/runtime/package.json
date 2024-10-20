@@ -30,7 +30,7 @@
   "dependencies": {
     "@travetto/manifest": "^5.0.7",
     "@types/debug": "^4.1.12",
-    "@types/node": "^22.7.4",
+    "@types/node": "^22.7.7",
     "debug": "^4.3.7"
   },
   "peerDependencies": {

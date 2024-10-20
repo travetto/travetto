@@ -52,5 +52,5 @@ When working with an [fastify](https://www.fastify.io/) applications, the module
 const app = fastify(fastConf);
     app.register(compress);
     app.removeAllContentTypeParsers();
-    app.addContentTypeParser(/.*/, (req, body, done) => done(null, body));
+    app.addContentTypeParser(/^.*/, (req, body, done) => done(null, body));
 ```

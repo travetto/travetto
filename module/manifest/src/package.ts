@@ -1,5 +1,6 @@
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 
 import { path } from './path';
 import { ManifestFileUtil } from './file';
@@ -52,7 +53,18 @@ export class PackageUtil {
       try {
         const resolved = this.resolveImport(name, root);
         return path.join(resolved.split(name)[0], name);
-      } catch { }
+      } catch { // When import lookup fails
+        let folder = root ?? process.cwd();
+        let prev = '';
+        while (folder !== prev) {
+          const pkg = path.resolve(folder, 'node_modules', name, 'package.json');
+          if (existsSync(pkg)) {
+            return pkg;
+          }
+          prev = folder;
+          folder = path.dirname(folder);
+        }
+      }
     }
     throw new Error(`Unable to resolve: ${name}`);
   }

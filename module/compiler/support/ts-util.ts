@@ -31,7 +31,8 @@ export class TypescriptUtil {
         sourceRoot: ctx.workspace.path,
         rootDir: ctx.workspace.path,
         outDir: CommonUtil.resolveWorkspace(ctx),
-        module: ctx.workspace.type === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext,
+        moduleResolution: (ctx.workspace.type === 'commonjs' ? ts.ModuleResolutionKind.Node16 : ts.ModuleResolutionKind.Bundler),
+        module: ctx.workspace.type === 'commonjs' ? ts.ModuleKind.Node16 : ts.ModuleKind.ESNext,
       };
     }
     return OPT_CACHE[ctx.workspace.path];
