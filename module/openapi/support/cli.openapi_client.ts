@@ -1,7 +1,6 @@
 import path from 'node:path';
 
 import { CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
-import { DockerContainer } from '@travetto/command';
 import { ExecUtil } from '@travetto/runtime';
 
 import { OpenApiClientHelp } from './bin/help';
@@ -29,6 +28,9 @@ export class OpenApiClientCommand implements CliCommandShape {
   async main(format: string): Promise<void> {
     this.output = path.resolve(this.output);
     this.input = path.resolve(this.input);
+
+    // Peer dependency
+    const { DockerContainer } = await import('@travetto/command');
 
     const cmd = new DockerContainer(this.dockerImage)
       .setUser(process.geteuid?.() ?? 0, process.getgid?.() ?? 0)
