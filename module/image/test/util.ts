@@ -47,7 +47,7 @@ class ImageUtilSuite {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
     const imgBuffer = await this.fixture.read('lincoln.jpg', true);
 
-    const out = await ImageUtil.optimize(imgStream, { asSubprocess: true });
+    const out = await ImageUtil.optimize(imgStream);
 
     const optimized = await toBuffer(out);
 
@@ -82,7 +82,6 @@ class ImageUtilSuite {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
     const out = await ImageUtil.resize(imgStream, {
       w: 100,
-      asSubprocess: true
     });
 
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
@@ -102,7 +101,6 @@ class ImageUtilSuite {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
     const out = await ImageUtil.resize(imgStream, {
       h: 134.00005,
-      asSubprocess: true
     });
 
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
@@ -112,6 +110,31 @@ class ImageUtilSuite {
     const dims = await ImageUtil.getDimensions(outFile);
     assert(dims.width === 100);
     assert(dims.height === 134);
+
+    await fs.unlink(outFile);
+    assert(await fs.stat(outFile).then(() => false, () => true));
+  }
+
+  @Test()
+  async resizeAndChangeFormat() {
+    const imgStream = await this.fixture.readStream('lincoln.jpg');
+    const out = await ImageUtil.resize(imgStream, {
+      w: 200,
+      h: 200,
+      format: 'avif',
+    });
+
+    const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.avif`);
+    await pipeline(out, createWriteStream(outFile));
+    assert.ok(await fs.stat(outFile).then(() => true, () => false));
+
+    const dims = await ImageUtil.getDimensions(outFile);
+    assert(dims.width === 200);
+    assert(dims.height === 200);
+
+    // Verify the format is avif
+    const fileType = await ImageUtil.getFileType(outFile);
+    assert(fileType === 'avif');
 
     await fs.unlink(outFile);
     assert(await fs.stat(outFile).then(() => false, () => true));

@@ -15,19 +15,11 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/image</code></pre>
   </figure>
 
-This module provides functionality for image resizing, and png optimization. This is primarily meant to be used in conjunction with other modules, like the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/email-compiler" title="Email compiling module">Email Compilation Support</a> module. It can also be invoked directly as needed (as it can be very handy for batch processing images on the command line). <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/image/src/util.ts#L51">ImageUtil</a> functionality supports two operation modes:
-<ul> <li>In-process operations using <a target="_blank" class="external-link" href="https://sharp.pixelplumbing.com/">sharp</a></li>
-<li>Out-of-process operations using <a target="_blank" class="external-link" href="https://imagemagick.org/index.php">ImageMagick</a>,<a target="_blank" class="external-link" href="https://pngquant.org/">pngquant</a> and <a target="_blank" class="external-link" href="https://github.com/tjko/jpegoptim">Jpegoptim</a>.</li>
-</ul>
+This module provides functionality for image resizing, and image optimization. This is primarily meant to be used in conjunction with other modules, like the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/email-compiler" title="Email compiling module">Email Compilation Support</a> module. It can also be invoked directly as needed (as it can be very handy for batch processing images on the command line). <br><br>
 
-<h2 id="in-process">In-Process</h2>
+<h2 id="sharp">Sharp</h2>
 
-The in process operations leverage <a target="_blank" class="external-link" href="https://sharp.pixelplumbing.com/">sharp</a> and will perform within expectations, and will execute substantially faster than invoking a subprocess.  The primary caveats here being that <a target="_blank" class="external-link" href="https://github.com/tjko/jpegoptim">Jpegoptim</a> and <a target="_blank" class="external-link" href="https://pngquant.org/">pngquant</a> are better geared for image optimization.  Additionally, by running these processes in-memory, there will be shared contention within the process.
-
-<h2 id="out-of-process">Out-of-Process</h2>
-
-The out-of-process executions will leverage external tools (<a target="_blank" class="external-link" href="https://imagemagick.org/index.php">ImageMagick</a>,<a target="_blank" class="external-link" href="https://pngquant.org/">pngquant</a> and <a target="_blank" class="external-link" href="https://github.com/tjko/jpegoptim">Jpegoptim</a>) via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/command/src/command.ts#L12">CommandOperation</a> s.  These tools are tried and tested, but come with the overhead of invoking a separate process to operate.  The benefit here is externalized memory usage, and a more robust optimization flow.
+The in process operations leverage <a target="_blank" class="external-link" href="https://sharp.pixelplumbing.com/">sharp</a> and will perform within expectations, and will execute substantially faster than invoking a subprocess.
 
   <figure class="code">
     <figcaption class="code">Simple Image Resize

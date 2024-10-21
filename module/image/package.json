@@ -23,7 +23,6 @@
     "directory": "module/image"
   },
   "dependencies": {
-    "@travetto/command": "^5.0.11",
     "@travetto/runtime": "^5.0.11",
     "sharp": "^0.33.5"
   },
