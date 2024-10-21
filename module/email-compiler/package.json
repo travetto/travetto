@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email-compiler",
-  "version": "5.0.12",
+  "version": "5.0.13",
   "description": "Email compiling module",
   "keywords": [
     "email",
@@ -29,7 +29,7 @@
     "@travetto/config": "^5.0.11",
     "@travetto/di": "^5.0.11",
     "@travetto/email": "^5.0.11",
-    "@travetto/image": "^5.0.12",
+    "@travetto/image": "^5.0.13",
     "@travetto/runtime": "^5.0.11",
     "@travetto/worker": "^5.0.11",
     "@types/inline-css": "^3.0.3",

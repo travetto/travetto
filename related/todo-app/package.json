@@ -24,7 +24,7 @@
     "@travetto/auth-rest": "^5.0.14",
     "@travetto/auth-rest-session": "^5.0.15",
     "@travetto/cli": "^5.0.11",
-    "@travetto/email-inky": "^5.0.12",
+    "@travetto/email-inky": "^5.0.13",
     "@travetto/log": "^5.0.11",
     "@travetto/model-mongo": "^5.0.12",
     "@travetto/openapi": "^5.0.14",
@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@travetto/compiler": "^5.0.14",
-    "@travetto/email-compiler": "^5.0.12",
+    "@travetto/email-compiler": "^5.0.13",
     "@travetto/pack": "^5.0.12",
     "@travetto/rest-client": "^5.0.17"
   },
