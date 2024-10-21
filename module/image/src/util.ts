@@ -2,16 +2,14 @@ import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
 import { pipeline } from 'node:stream/promises';
 
-import type { Sharp } from 'sharp';
-
-import { castTo } from '@travetto/runtime';
+import { AppError, castTo } from '@travetto/runtime';
 
 type ImageFormat = 'jpeg' | 'png' | 'avif' | 'webp';
 
 /**
- * Image resize options
+ * Image convert options
  */
-export interface ResizeOptions {
+export interface ConvertOptions {
   /**
    * New height
    */
@@ -30,14 +28,6 @@ export interface ResizeOptions {
   format?: ImageFormat;
 }
 
-/**
- * Image optimize options
- */
-export interface OptimizeOptions {
-  format?: ImageFormat;
-}
-
-
 type ImageType = Readable | Buffer | ReadableStream;
 
 /**
@@ -45,44 +35,50 @@ type ImageType = Readable | Buffer | ReadableStream;
  */
 export class ImageUtil {
 
-  static async #sharpReturn<T extends ImageType>(output: Sharp, input: T, optimize?: boolean, format?: ImageFormat): Promise<T> {
-    output = output
-      .jpeg({ ...(optimize ? { quality: 80, progressive: true } : {}), force: format === 'jpeg' })
-      .png({ ...(optimize ? { compressionLevel: 9, quality: 80, adaptiveFiltering: true } : {}), force: format === 'png' })
-      .avif({ ...(optimize ? { quality: 70 } : {}), force: format === 'avif' })
-      .webp({ ...(optimize ? { quality: 80 } : {}), force: format === 'webp' });
-    const stream = Buffer.isBuffer(input) ? Readable.from(input) : input;
-    pipeline(stream, output);
-    return castTo('pipeThrough' in input ? ReadableStream.from(output) : Buffer.isBuffer(input) ? output.toBuffer() : output);
-  }
-
   /**
    * Resize image
    */
-  static async resize<T extends ImageType>(image: T, options: ResizeOptions = {}): Promise<T> {
-    const dims = [options.w, options.h].map(x => x ? Math.trunc(x) : undefined);
-    const fluid = dims.some(x => !x);
+  static async convert<T extends ImageType>(image: T, options: ConvertOptions): Promise<T> {
+    if (options.optimize && !options.format) {
+      if (Buffer.isBuffer(image)) {
+        options.format = await this.getFileType(image);
+      }
+      throw new AppError('Format is required for optimizing');
+    }
 
     const { default: sharp } = await import('sharp');
 
-    return this.#sharpReturn(
-      sharp().resize({
+    let builder = sharp();
+    if (options.w || options.h) {
+      const dims = [options.w, options.h].map(x => x ? Math.trunc(x) : undefined);
+      const fluid = dims.some(x => !x);
+      builder = builder.resize({
         width: dims[0],
         height: dims[1],
         fit: fluid ? 'inside' : 'fill'
-      }),
-      image,
-      options.optimize,
-      options.format
-    );
-  }
+      });
+    }
 
-  /**
-   * Optimize an image
-   */
-  static async optimize<T extends ImageType>(image: T, options: OptimizeOptions = {}): Promise<T> {
-    const { default: sharp } = await import('sharp');
-    return this.#sharpReturn(sharp(), image, true, options.format);
+    switch (options.format) {
+      case 'jpeg':
+        builder = builder.jpeg(options.optimize ? { quality: 80, progressive: true } : {});
+        break;
+      case 'png':
+        builder = builder.png(options.optimize ? { compressionLevel: 9, quality: 80, adaptiveFiltering: true } : {});
+        break;
+      case 'avif':
+        builder = builder.avif(options.optimize ? { quality: 70 } : {});
+        break;
+      case 'webp':
+        builder = builder.webp(options.optimize ? { quality: 80 } : {});
+        break;
+    }
+
+    const stream = Buffer.isBuffer(image) ? Readable.from(image) : image;
+    pipeline(stream, builder);
+    return castTo('pipeThrough' in image ?
+      ReadableStream.from(builder) :
+      Buffer.isBuffer(image) ? builder.toBuffer() : builder);
   }
 
   /**
@@ -96,8 +92,11 @@ export class ImageUtil {
   /**
    * Get image type
    */
-  static async getFileType(image: Buffer | string): Promise<string> {
+  static async getFileType(image: Buffer | string): Promise<ImageFormat> {
     const { default: sharp } = await import('sharp');
-    return sharp(image).metadata().then(v => v.format?.replace('heif', 'avif')!);
+    return sharp(image).metadata().then(v =>
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      v.format?.replace('heif', 'avif')! as ImageFormat
+    );
   }
 }

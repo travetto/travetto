@@ -137,7 +137,7 @@ export class EmailCompileUtil {
     for (const [token, src] of tokens) {
       const ext = path.extname(src);
       if (/^[.](jpe?g|png)$/.test(ext)) {
-        const output = await ImageUtil.optimize(
+        const output = await ImageUtil.convert(
           await opts.loader.readStream(src),
           { format: ext === '.png' ? 'png' : 'jpeg' }
         );

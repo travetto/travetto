@@ -21,7 +21,7 @@ class ImageUtilSuite {
 
     assert(imgBuffer.length > 0);
 
-    const resizedBuffer = await ImageUtil.resize(imgBuffer, { h: 100, w: 100 });
+    const resizedBuffer = await ImageUtil.convert(imgBuffer, { h: 100, w: 100 });
 
     assert(resizedBuffer.length > 0);
 
@@ -33,7 +33,7 @@ class ImageUtilSuite {
     const imgStream = await this.fixture.readStream('google.png');
     const imgBuffer = await this.fixture.read('google.png', true);
 
-    const out = await ImageUtil.optimize(imgStream);
+    const out = await ImageUtil.convert(imgStream, { optimize: true, format: 'png' });
 
     const optimized = await toBuffer(out);
 
@@ -47,7 +47,7 @@ class ImageUtilSuite {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
     const imgBuffer = await this.fixture.read('lincoln.jpg', true);
 
-    const out = await ImageUtil.optimize(imgStream);
+    const out = await ImageUtil.convert(imgStream, { optimize: true });
 
     const optimized = await toBuffer(out);
 
@@ -59,7 +59,7 @@ class ImageUtilSuite {
   @Test('resizeToFile')
   async resizeToFile() {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
-    const out = await ImageUtil.resize(imgStream, {
+    const out = await ImageUtil.convert(imgStream, {
       w: 50,
       h: 50,
       optimize: true
@@ -80,7 +80,7 @@ class ImageUtilSuite {
   @Test()
   async resizeLooseWidthToFile() {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
-    const out = await ImageUtil.resize(imgStream, {
+    const out = await ImageUtil.convert(imgStream, {
       w: 100,
     });
 
@@ -99,7 +99,7 @@ class ImageUtilSuite {
   @Test()
   async resizeLooseHeightToFile() {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
-    const out = await ImageUtil.resize(imgStream, {
+    const out = await ImageUtil.convert(imgStream, {
       h: 134.00005,
     });
 
@@ -118,7 +118,7 @@ class ImageUtilSuite {
   @Test()
   async resizeAndChangeFormat() {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
-    const out = await ImageUtil.resize(imgStream, {
+    const out = await ImageUtil.convert(imgStream, {
       w: 200,
       h: 200,
       format: 'avif',
