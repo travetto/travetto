@@ -2,7 +2,7 @@ import { CliCommandShape, CliCommand, cliTpl, CliValidationError } from '@travet
 import { Terminal } from '@travetto/terminal';
 import { AsyncQueue, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { ServiceDescriptor, ServiceWrapper } from './bin/service';
+import { ServiceWrapper, ServiceDescriptor } from '../src/service';
 
 type ServiceAction = 'start' | 'stop' | 'restart' | 'status';
 
@@ -11,6 +11,7 @@ type ServiceAction = 'start' | 'stop' | 'restart' | 'status';
  */
 @CliCommand()
 export class CliServiceCommand implements CliCommandShape {
+
   async #getServices(services: string[]): Promise<ServiceDescriptor[]> {
     return (await Promise.all(
       RuntimeIndex.find({
