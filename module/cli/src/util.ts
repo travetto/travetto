@@ -1,6 +1,9 @@
 import { spawn } from 'node:child_process';
+import https from 'node:https';
+import http from 'node:http';
+import net from 'node:net';
 
-import { Env, ExecUtil, ShutdownManager, Runtime } from '@travetto/runtime';
+import { Env, ExecUtil, ShutdownManager, Runtime, AppError, TimeSpan, TimeUtil, Util } from '@travetto/runtime';
 
 import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
 
@@ -104,5 +107,69 @@ export class CliUtil {
         await new Promise<void>(res => result.on('close', res)); // Wait for callback
       }
     }
+  }
+
+  /**
+   * Wait for the url to return a valid response
+   */
+  static async waitForHttp(url: URL | string, timeout: TimeSpan | number = '5s'): Promise<string> {
+    const parsed = typeof url === 'string' ? new URL(url) : url;
+    const ssl = parsed.protocol === 'https:';
+
+    const timeoutMs = TimeUtil.asMillis(timeout);
+    const port = parseInt(parsed.port || (ssl ? '443' : '80'), 10);
+    await this.waitForPort(port, timeoutMs);
+
+    const start = Date.now();
+    while ((Date.now() - start) < timeoutMs) {
+      const [status, body] = await new Promise<[number, string]>((resolve) => {
+        const data: Buffer[] = [];
+        const res = (s: number): void => resolve([s, Buffer.concat(data).toString('utf8')]);
+        try {
+          const client = ssl ? https : http;
+          const req = client.get(url, (msg) =>
+            msg
+              .on('data', (d) => { data.push(Buffer.from(d)); }) // Consume data
+              .on('error', (err) => res(500))
+              .on('end', () => res((msg.statusCode || 200)))
+              .on('close', () => res((msg.statusCode || 200))));
+          req.on('error', (err) => res(500));
+        } catch {
+          res(400);
+        }
+      });
+      if (status >= 200 && status <= 299) {
+        return body; // We good
+      }
+      await Util.blockingTimeout(100);
+    }
+    throw new AppError('Could not make http connection to url');
+  }
+
+  /**
+   * Wait for a TCP port to become available
+   */
+  static async waitForPort(port: number, timeout: TimeSpan | number = '5s'): Promise<void> {
+    const start = Date.now();
+    const timeoutMs = TimeUtil.asMillis(timeout);
+    while ((Date.now() - start) < timeoutMs) {
+      try {
+        await new Promise((res, rej) => {
+          try {
+            const sock: net.Socket = net.createConnection(port, 'localhost')
+              .on('connect', res)
+              .on('connect', () => sock.destroy())
+              .on('timeout', rej)
+              .on('error', rej);
+          } catch (err) {
+            rej(err);
+          }
+        });
+        return;
+      } catch {
+        await Util.blockingTimeout(50);
+      }
+    }
+    throw new AppError('Could not acquire port');
   }
 }
