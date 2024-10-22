@@ -1,19 +1,19 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import rl from 'node:readline/promises';
-import http from 'node:http';
-import https from 'node:https';
 import net from 'node:net';
 
-import { AppError, ExecUtil, TimeSpan, TimeUtil, Util } from '@travetto/runtime';
+import { ExecUtil, TimeUtil, Util } from '@travetto/runtime';
 
-type ServiceRunningMode = 'running' | 'startup';
 type ServiceStatus = 'started' | 'stopped' | 'starting' | 'downloading' | 'stopping' | 'initializing' | 'failed';
 
 const ports = (val: number | `${number}:${number}`): [number, number] =>
   typeof val === 'number' ?
     [val, val] :
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     val.split(':').map(x => parseInt(x, 10)) as [number, number];
+
+type BodyCheck = (body: string) => boolean;
 
 /**
  * This represents the schema for defined services
@@ -25,7 +25,7 @@ export interface ServiceDescriptor {
   privileged?: boolean;
   image: string;
   args?: string[];
-  ready?: { url: string, test?(body: string): boolean };
+  ready?: { url: string, test?: BodyCheck };
   volumes?: Record<string, string>;
   env?: Record<string, string>;
   startupTimeout?: number;
@@ -36,68 +36,45 @@ export interface ServiceDescriptor {
  */
 export class ServiceRunner {
 
-  static async waitForHttp(url: URL | string, timeout: TimeSpan | number = '5s'): Promise<string> {
-    const parsed = typeof url === 'string' ? new URL(url) : url;
-    const ssl = parsed.protocol === 'https:';
-
-    const timeoutMs = TimeUtil.asMillis(timeout);
-    const port = parseInt(parsed.port || (ssl ? '443' : '80'), 10);
-    await this.waitForPort(port, timeoutMs);
-
-    const start = Date.now();
-    while ((Date.now() - start) < timeoutMs) {
-      const [status, body] = await new Promise<[number, string]>((resolve) => {
-        const data: Buffer[] = [];
-        const res = (s: number): void => resolve([s, Buffer.concat(data).toString('utf8')]);
-        try {
-          const client = ssl ? https : http;
-          const req = client.get(url, (msg) =>
-            msg
-              .on('data', (d) => { data.push(Buffer.from(d)); }) // Consume data
-              .on('error', (err) => res(500))
-              .on('end', () => res((msg.statusCode || 200)))
-              .on('close', () => res((msg.statusCode || 200))));
-          req.on('error', (err) => res(500));
-        } catch {
-          res(400);
-        }
-      });
-      if (status >= 200 && status <= 299) {
-        return body; // We good
-      }
-      await Util.blockingTimeout(100);
-    }
-    throw new AppError('Could not make http connection to url');
-  }
-
-  static async waitForPort(port: number, timeout: TimeSpan | number = '5s'): Promise<void> {
-    const start = Date.now();
-    const timeoutMs = TimeUtil.asMillis(timeout);
-    while ((Date.now() - start) < timeoutMs) {
-      try {
-        await new Promise((res, rej) => {
-          try {
-            const sock = net.createConnection(port, 'localhost')
-              .on('connect', res)
-              .on('connect', () => sock.destroy())
-              .on('timeout', rej)
-              .on('error', rej);
-          } catch (err) {
-            rej(err);
-          }
-        });
-        return;
-      } catch {
-        await Util.blockingTimeout(50);
-      }
-    }
-    throw new AppError('Could not acquire port');
-  }
-
   label: string;
 
   constructor(public svc: ServiceDescriptor, private emit?: (status: ServiceStatus, type: 'failure' | 'success' | 'message', value: string | number) => void) {
     this.label = `trv-${this.svc.name}`;
+  }
+
+  async #isRunning(full = false): Promise<boolean> {
+
+    if (!this.svc.port) {
+      return true;
+    }
+
+    const port: number = ports(this.svc.port)[0];
+    const start = Date.now();
+    const timeoutMs = TimeUtil.asMillis(full ? this.svc.startupTimeout ?? 5000 : 100);
+    while ((Date.now() - start) < timeoutMs) {
+      try {
+        const sock = net.createConnection(port, 'localhost');
+        await new Promise<void>((res, rej) =>
+          sock.on('connect', res).on('timeout', rej).on('error', rej)
+        ).finally(() => sock.destroy());
+
+        if (!this.svc.ready?.url) {
+          return true;
+        } else {
+          const req = await fetch(this.svc.ready.url, { method: 'GET' });
+          if (req.ok) {
+            const text = await req.text();
+            if (!full || (this.svc.ready.test?.(text) ?? true)) {
+              return true;
+            }
+          }
+        }
+      } catch {
+        await Util.blockingTimeout(50);
+      }
+    }
+
+    return false;
   }
 
   async #findContainer(): Promise<string> {
@@ -118,35 +95,22 @@ export class ServiceRunner {
     await ExecUtil.getResult(proc);
   }
 
-  async #isRunning(mode: ServiceRunningMode, timeout = 100): Promise<boolean> {
+
+  async #isStarted(): Promise<boolean> {
     const port = this.svc.port ? ports(this.svc.port)[0] : 0;
     if (port > 0) {
-      const checkPort = ServiceRunner.waitForPort(port, timeout).then(() => true, () => false);
-      if (mode === 'startup') {
-        this.emit?.('initializing', 'message', `Waiting for port ${port}...`);
-
-        let res = await checkPort;
-        if (res && this.svc.ready) {
-          try {
-            this.emit?.('initializing', 'message', `Waiting for url ${this.svc.ready.url}...`);
-            const body = await ServiceRunner.waitForHttp(this.svc.ready.url, timeout);
-            res = this.svc.ready.test ? this.svc.ready.test(body) : res;
-          } catch {
-            res = false;
-          }
-        }
-        return res;
-      } else {
-        return await checkPort;
+      try {
+        this.emit?.('initializing', 'message', `Waiting for ${this.svc.ready?.url ?? `port ${port}`}...`);
+        return await this.#isRunning(true);
+      } catch {
+        return false;
       }
-    } else {
-      return true;
     }
+    return true;
   }
 
   async stop(): Promise<void> {
-    const running = await this.#isRunning('running');
-    if (running) {
+    if (await this.#isRunning()) {
       const pid = await this.#findContainer();
       if (pid) {
         this.emit?.('stopping', 'message', 'Stopping');
@@ -161,8 +125,7 @@ export class ServiceRunner {
   }
 
   async start(): Promise<void> {
-    const preRun = await this.#isRunning('running');
-    if (!preRun) {
+    if (!await this.#isRunning()) {
       try {
         const args = [
           'run',
@@ -187,7 +150,7 @@ export class ServiceRunner {
 
         const out = (await ExecUtil.getResult(spawn('docker', args, { shell: false, stdio: [0, 'pipe', 2] }))).stdout;
 
-        const running = await this.#isRunning('startup', this.svc.startupTimeout ?? 5000);
+        const running = await this.#isStarted();
         if (!running) {
           this.emit?.('failed', 'failure', 'Failed to start service correctly');
         } else {
@@ -202,16 +165,14 @@ export class ServiceRunner {
   }
 
   async restart(): Promise<void> {
-    const running = await this.#isRunning('running');
-    if (running) {
+    if (await this.#isRunning()) {
       await this.stop();
     }
     await this.start();
   }
 
   async status(): Promise<void> {
-    const running = await this.#isRunning('running');
-    if (!running) {
+    if (!await this.#isRunning()) {
       this.emit?.('stopped', 'message', 'Not running');
     } else {
       const pid = await this.#findContainer();
