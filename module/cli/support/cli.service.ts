@@ -2,7 +2,7 @@ import { CliCommandShape, CliCommand, cliTpl, CliValidationError } from '@travet
 import { Terminal } from '@travetto/terminal';
 import { AsyncQueue, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { ServiceWrapper, ServiceDescriptor } from '../src/service';
+import { ServiceRunner, ServiceDescriptor } from '../src/service';
 
 type ServiceAction = 'start' | 'stop' | 'restart' | 'status';
 
@@ -53,7 +53,7 @@ export class CliServiceCommand implements CliCommandShape {
     const q = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
 
     for (let i = 0; i < all.length; i += 1) {
-      const state = new ServiceWrapper(i, all[i]);
+      const state = new ServiceRunner(i, all[i]);
 
       state.addListener('log', ({ idx, status, statusText }) => {
         const identifier = state.svc.name.padEnd(maxName);

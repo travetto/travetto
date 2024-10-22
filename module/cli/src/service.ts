@@ -8,7 +8,6 @@ import net from 'node:net';
 
 import { AppError, ExecUtil, TimeSpan, TimeUtil, Util } from '@travetto/runtime';
 
-import { CliUtil, } from './util';
 import { cliTpl } from './color';
 
 type ServiceRunningMode = 'running' | 'startup';
@@ -21,7 +20,6 @@ type ServiceEvent = { statusText: string, status: ServiceStatus, svc: ServiceDes
 export interface ServiceDescriptor {
   name: string;
   version: string | number;
-  port?: number;
   ports?: Record<number, number>;
   privileged?: boolean;
   image: string;
@@ -29,19 +27,14 @@ export interface ServiceDescriptor {
   ready?: { url: string, test?(body: string): boolean };
   volumes?: Record<string, string>;
   env?: Record<string, string>;
-  require?: string;
   startupTimeout?: number;
-  label?: string;
 }
 
 /**
- * Service wrapper
+ * Service runner
  */
-export class ServiceWrapper extends EventEmitter<{ log: [ServiceEvent] }> {
+export class ServiceRunner extends EventEmitter<{ log: [ServiceEvent] }> {
 
-  /**
-   * Wait for the url to return a valid response
-   */
   static async waitForHttp(url: URL | string, timeout: TimeSpan | number = '5s'): Promise<string> {
     const parsed = typeof url === 'string' ? new URL(url) : url;
     const ssl = parsed.protocol === 'https:';
@@ -76,9 +69,6 @@ export class ServiceWrapper extends EventEmitter<{ log: [ServiceEvent] }> {
     throw new AppError('Could not make http connection to url');
   }
 
-  /**
-   * Wait for a TCP port to become available
-   */
   static async waitForPort(port: number, timeout: TimeSpan | number = '5s'): Promise<void> {
     const start = Date.now();
     const timeoutMs = TimeUtil.asMillis(timeout);
@@ -86,7 +76,7 @@ export class ServiceWrapper extends EventEmitter<{ log: [ServiceEvent] }> {
       try {
         await new Promise((res, rej) => {
           try {
-            const sock: net.Socket = net.createConnection(port, 'localhost')
+            const sock = net.createConnection(port, 'localhost')
               .on('connect', res)
               .on('connect', () => sock.destroy())
               .on('timeout', rej)
@@ -103,9 +93,11 @@ export class ServiceWrapper extends EventEmitter<{ log: [ServiceEvent] }> {
     throw new AppError('Could not acquire port');
   }
 
+  label: string;
+
   constructor(public idx: number, public svc: ServiceDescriptor) {
     super();
-    this.svc.label = `trv-${this.svc.name}`;
+    this.label = `trv-${this.svc.name}`;
   }
 
   #log(status: ServiceStatus, statusText: Record<string, string | number>): void {
@@ -113,7 +105,7 @@ export class ServiceWrapper extends EventEmitter<{ log: [ServiceEvent] }> {
   }
 
   async #findContainer(): Promise<string> {
-    return (await ExecUtil.getResult(spawn('docker', ['ps', '-q', '--filter', `label=${this.svc.label}`], { shell: false }))).stdout.trim();
+    return (await ExecUtil.getResult(spawn('docker', ['ps', '-q', '--filter', `label=${this.label}`], { shell: false }))).stdout.trim();
   }
 
   async #pullImage(): Promise<void> {
@@ -131,9 +123,9 @@ export class ServiceWrapper extends EventEmitter<{ log: [ServiceEvent] }> {
   }
 
   async #isRunning(mode: ServiceRunningMode, timeout = 100): Promise<boolean> {
-    const port = this.svc.ports ? +Object.keys(this.svc.ports)[0] : (this.svc.port ?? 0);
+    const port = this.svc.ports ? +Object.keys(this.svc.ports)[0] : 0;
     if (port > 0) {
-      const checkPort = ServiceWrapper.waitForPort(port, timeout).then(() => true, () => false);
+      const checkPort = ServiceRunner.waitForPort(port, timeout).then(() => true, () => false);
       if (mode === 'startup') {
         this.#log('initializing', { input: `Waiting for port ${port}...` });
 
@@ -141,7 +133,7 @@ export class ServiceWrapper extends EventEmitter<{ log: [ServiceEvent] }> {
         if (res && this.svc.ready) {
           try {
             this.#log('initializing', { input: `Waiting for url ${this.svc.ready.url}...` });
-            const body = await ServiceWrapper.waitForHttp(this.svc.ready.url, timeout);
+            const body = await ServiceRunner.waitForHttp(this.svc.ready.url, timeout);
             res = this.svc.ready.test ? this.svc.ready.test(body) : res;
           } catch {
             res = false;
@@ -181,10 +173,9 @@ export class ServiceWrapper extends EventEmitter<{ log: [ServiceEvent] }> {
           '--rm',
           '--detach',
           ...this.svc.privileged ? ['--privileged'] : [],
-          '--label', this.svc.label!,
+          '--label', this.label!,
           ...Object.entries(this.svc.env ?? {}).flatMap(([k, v]) => ['--env', `${k}=${v}`]),
           ...Object.entries(this.svc.ports ?? {}).flatMap(([k, v]) => ['--expose', `${k}:${v}`]),
-          ...(this.svc.port ? ['--expose', `${this.svc.port}:${this.svc.port}`] : []),
           ...Object.entries(this.svc.volumes ?? {}).flatMap(([k, v]) => ['--volume', `${k}:${v}`])
         ];
 
