@@ -6,7 +6,7 @@ export const service: ServiceDescriptor = {
   name: 'mysql',
   version,
   image: `mysql:${version}`,
-  ports: { 3306: 3306 },
+  port: 3306,
   env: {
     MYSQL_ROOT_PASSWORD: 'password',
     MYSQL_DATABASE: 'app'

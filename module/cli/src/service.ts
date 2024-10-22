@@ -14,13 +14,18 @@ type ServiceRunningMode = 'running' | 'startup';
 type ServiceStatus = 'started' | 'stopped' | 'starting' | 'downloading' | 'stopping' | 'initializing' | 'failed';
 type ServiceEvent = { statusText: string, status: ServiceStatus, svc: ServiceDescriptor, idx: number };
 
+const ports = (val: number | `${number}:${number}`): [number, number] =>
+  typeof val === 'number' ?
+    [val, val] :
+    val.split(':').map(x => parseInt(x, 10)) as [number, number];
+
 /**
  * This represents the schema for defined services
  */
 export interface ServiceDescriptor {
   name: string;
   version: string | number;
-  ports?: Record<number, number>;
+  port?: number | `${number}:${number}`;
   privileged?: boolean;
   image: string;
   args?: string[];
@@ -123,7 +128,7 @@ export class ServiceRunner extends EventEmitter<{ log: [ServiceEvent] }> {
   }
 
   async #isRunning(mode: ServiceRunningMode, timeout = 100): Promise<boolean> {
-    const port = this.svc.ports ? +Object.keys(this.svc.ports)[0] : 0;
+    const port = this.svc.port ? ports(this.svc.port)[0] : 0;
     if (port > 0) {
       const checkPort = ServiceRunner.waitForPort(port, timeout).then(() => true, () => false);
       if (mode === 'startup') {
@@ -165,18 +170,20 @@ export class ServiceRunner extends EventEmitter<{ log: [ServiceEvent] }> {
   }
 
   async start(): Promise<void> {
-    const preRun = this.#isRunning('running');
+    const preRun = await this.#isRunning('running');
     if (!preRun) {
       try {
         const args = [
-          '-it',
+          'run',
           '--rm',
           '--detach',
           ...this.svc.privileged ? ['--privileged'] : [],
-          '--label', this.label!,
+          '--label', this.label,
           ...Object.entries(this.svc.env ?? {}).flatMap(([k, v]) => ['--env', `${k}=${v}`]),
-          ...Object.entries(this.svc.ports ?? {}).flatMap(([k, v]) => ['--expose', `${k}:${v}`]),
-          ...Object.entries(this.svc.volumes ?? {}).flatMap(([k, v]) => ['--volume', `${k}:${v}`])
+          ...this.svc.port ? ['-p', ports(this.svc.port).join(':')] : [],
+          ...Object.entries(this.svc.volumes ?? {}).flatMap(([k, v]) => ['--volume', `${k}:${v}`]),
+          this.svc.image,
+          ...this.svc.args ?? [],
         ];
 
         for (const item of Object.keys(this.svc.volumes ?? {})) {
