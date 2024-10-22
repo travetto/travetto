@@ -27,6 +27,7 @@
     "directory": "module/model-postgres"
   },
   "dependencies": {
+    "@travetto/cli": "^5.0.11",
     "@travetto/config": "^5.0.11",
     "@travetto/context": "^5.0.11",
     "@travetto/model": "^5.0.12",
@@ -34,14 +35,6 @@
     "@travetto/model-sql": "^5.0.12",
     "@types/pg": "^8.11.10",
     "pg": "^8.13.0"
-  },
-  "peerDependencies": {
-    "@travetto/command": "^5.0.11"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/command": {
-      "optional": true
-    }
   },
   "travetto": {
     "displayName": "PostgreSQL Model Service"
