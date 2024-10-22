@@ -3,27 +3,11 @@ import { EventEmitter } from 'node:events';
 import fs from 'node:fs/promises';
 import rl from 'node:readline/promises';
 
-import { cliTpl, CliUtil } from '@travetto/cli';
 import { ExecUtil } from '@travetto/runtime';
 
-/**
- * This represents the schema for defined services
- */
-export interface ServiceDescriptor {
-  name: string;
-  version: string | number;
-  port?: number;
-  ports?: Record<number, number>;
-  privileged?: boolean;
-  image: string;
-  args?: string[];
-  ready?: { url: string, test?(body: string): boolean };
-  volumes?: Record<string, string>;
-  env?: Record<string, string>;
-  require?: string;
-  startupTimeout?: number;
-  label?: string;
-}
+import { CliUtil, } from '../../src/util';
+import { ServiceDescriptor } from '../../src/service';
+import { cliTpl } from '../../src/color';
 
 type ServiceRunningMode = 'running' | 'startup';
 type ServiceStatus = 'started' | 'stopped' | 'starting' | 'downloading' | 'stopping' | 'initializing' | 'failed';

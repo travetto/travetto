@@ -1,8 +1,8 @@
-import type { CommandService } from '@travetto/command';
+import type { ServiceDescriptor } from '@travetto/cli';
 
 const version = process.env.DYNAMODB_VERSION || '2.0.0';
 
-export const service: CommandService = {
+export const service: ServiceDescriptor = {
   name: 'dynamodb',
   version,
   port: 8000,

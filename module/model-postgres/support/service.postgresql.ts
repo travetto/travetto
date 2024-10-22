@@ -1,8 +1,8 @@
-import type { CommandService } from '@travetto/command';
+import type { ServiceDescriptor } from '@travetto/cli';
 
 const version = process.env.POSTGRESQL_VERSION || '15.4';
 
-export const service: CommandService = {
+export const service: ServiceDescriptor = {
   name: 'postgresql',
   version,
   port: 5432,

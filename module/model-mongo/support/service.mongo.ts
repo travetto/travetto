@@ -1,8 +1,8 @@
-import type { CommandService } from '@travetto/command';
+import type { ServiceDescriptor } from '@travetto/cli';
 
 const version = process.env.MONGO_VERSION ?? '7.0';
 
-export const service: CommandService = {
+export const service: ServiceDescriptor = {
   name: 'mongodb',
   version,
   port: 27017,

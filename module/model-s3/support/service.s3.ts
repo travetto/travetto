@@ -1,8 +1,8 @@
-import type { CommandService } from '@travetto/command';
+import type { ServiceDescriptor } from '@travetto/cli';
 
 const version = '3.1.0';
 
-export const service: CommandService = {
+export const service: ServiceDescriptor = {
   name: 's3',
   version,
   privileged: true,

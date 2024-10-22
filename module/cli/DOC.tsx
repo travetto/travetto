@@ -159,4 +159,20 @@ export const text = <>
       <c.Code title='Simple Validation Example' src='@travetto/doc/support/cli.doc.ts' startRe={/validate\(/} endRe={/^[ ]{2}\}/} />
     </c.SubSection>
   </c.Section>
+
+  <c.Section title='CLI - service'>
+    The module provides the ability to start/stop/restart services as {d.library('Docker')} containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
+
+    <c.Execution title='Command Service' cmd='trv' args={['service', '--help']} config={{ cwd: Runtime.workspace.path }} />
+
+    A sample of all services available to the entire framework:
+
+    <c.Execution title='All Services' cmd='trv' args={['service', 'status']} config={{ cwd: Runtime.workspace.path }} />
+
+    <c.SubSection title='Defining new Services'>
+      The services are defined as plain typescript files within the framework and can easily be extended:
+
+      <c.Code title='Sample Service Definition' src='doc/service.mongo.ts' />
+    </c.SubSection>
+  </c.Section>
 </>;

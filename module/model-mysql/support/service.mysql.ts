@@ -1,8 +1,8 @@
-import type { CommandService } from '@travetto/command';
+import type { ServiceDescriptor } from '@travetto/cli';
 
 const version = process.env.MYSQL_VERSION || '8.0';
 
-export const service: CommandService = {
+export const service: ServiceDescriptor = {
   name: 'mysql',
   version,
   image: `mysql:${version}`,
