@@ -533,3 +533,62 @@ async validate(): Promise<CliValidationError | undefined> {
     }
   }
 ```
+
+## CLI - service
+The module provides the ability to start/stop/restart services as [docker](https://www.docker.com/community-edition) containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
+
+**Terminal: Command Service**
+```bash
+$ trv service --help
+
+Usage: service [options] <action:restart|start|status|stop> [services...:string]
+
+Options:
+  -h, --help  display help for command
+
+Available Services
+--------------------
+ * dynamodb@2.0.0
+ * elasticsearch@8.9.1
+ * firestore@latest
+ * mongodb@7.0
+ * mysql@8.0
+ * postgresql@15.4
+ * redis@7.2
+ * s3@3.1.0
+```
+
+A sample of all services available to the entire framework:
+
+**Terminal: All Services**
+```bash
+$ trv service status
+
+Service          Version    Status
+-------------------------------------------------
+dynamodb           2.0.0    Running 93af422e793a
+elasticsearch      8.9.1    Running ed76ee063d13
+firestore         latest    Running feec2e5e95b4
+mongodb              7.0    Running 5513eba6734e
+mysql                8.0    Running 307bc66d442a
+postgresql          15.4    Running e78291e71040
+redis                7.2    Running 77ba279b4e30
+s3                 3.1.0    Running fdacfc55b9e3
+```
+
+### Defining new Services
+The services are defined as plain typescript files within the framework and can easily be extended:
+
+**Code: Sample Service Definition**
+```typescript
+import type { ServiceDescriptor } from '@travetto/cli';
+
+const version = process.env.MONGO_VERSION ?? '7.0';
+
+export const service: ServiceDescriptor = {
+  name: 'mongodb',
+  version,
+  port: 27017,
+  image: `mongo:${version}`
+};
+```

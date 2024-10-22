@@ -172,7 +172,7 @@ export const text = <>
     <c.SubSection title='Defining new Services'>
       The services are defined as plain typescript files within the framework and can easily be extended:
 
-      <c.Code title='Sample Service Definition' src='doc/service.mongo.ts' />
+      <c.Code title='Sample Service Definition' src='../model-mongo/support/service.mongo.ts' />
     </c.SubSection>
   </c.Section>
 </>;
