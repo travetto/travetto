@@ -1,6 +1,6 @@
 import { CliCommandShape, CliCommand, cliTpl, CliValidationError } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
-import { AsyncQueue, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
+import { AsyncQueue, Runtime, RuntimeIndex, TypedObject, Util } from '@travetto/runtime';
 
 import { ServiceRunner, ServiceDescriptor } from '../src/service';
 
@@ -48,24 +48,19 @@ export class CliServiceCommand implements CliCommandShape {
     const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;
     const maxVersion = Math.max(...all.map(x => `${x.version}`.length), 'Version'.length) + 3;
     const maxStatus = 20;
-
-    let active = all.length;
     const q = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
 
-    for (let i = 0; i < all.length; i += 1) {
-      const state = new ServiceRunner(all[i], (status, valueType, value) => {
-        const identifier = state.svc.name.padEnd(maxName);
-        const type = `${state.svc.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
+    const jobs = all.map(async (v, i) => {
+      for await (const item of new ServiceRunner(v).action(action)) {
+        const [[valueType, value]] = TypedObject.entries(item);
+        const identifier = v.name.padEnd(maxName);
+        const type = `${v.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
         const details = { [valueType === 'message' ? 'subtitle' : valueType]: value };
-        q.add({ idx: i, text: cliTpl`${{ identifier }} ${{ type }} ${details}`, done: status === 'started' });
-      });
+        q.add({ idx: i, text: cliTpl`${{ identifier }} ${{ type }} ${details}` });
+      }
+    });
 
-      state[action]().then(() => {
-        if ((active -= 1) === 0) {
-          Util.queueMacroTask().then(() => q.close());
-        }
-      });
-    }
+    Promise.all(jobs).then(() => Util.queueMacroTask()).then(() => q.close());
 
     const term = new Terminal();
     await term.writer.writeLines([
