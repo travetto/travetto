@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-express-lambda",
-  "version": "5.0.14",
+  "version": "5.0.15",
   "description": "Express AWS Lambda provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -26,9 +26,9 @@
   },
   "dependencies": {
     "@codegenie/serverless-express": "^4.15.0",
-    "@travetto/rest": "^5.0.14",
-    "@travetto/rest-aws-lambda": "^5.0.14",
-    "@travetto/rest-express": "^5.0.14"
+    "@travetto/rest": "^5.0.15",
+    "@travetto/rest-aws-lambda": "^5.0.15",
+    "@travetto/rest-express": "^5.0.15"
   },
   "travetto": {
     "displayName": "Express REST AWS Lambda Source"
