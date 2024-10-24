@@ -42,7 +42,8 @@ export class ExpressRestServer implements RestServer<express.Application> {
   }
 
   async unregisterRoutes(key: string | symbol): Promise<void> {
-    const routes: RouteStack[] = this.raw._router.stack;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const routes = (this.raw.router as unknown as { stack: RouteStack[] }).stack;
     const pos = routes.findIndex(x => x.handle.key === key);
     if (pos >= 0) {
       routes.splice(pos, 1);
