@@ -18,7 +18,6 @@ const DEV_DEPS = new Set([
   '@travetto/test',
   '@travetto/pack',
   '@travetto/compiler',
-  '@travetto/command',
   '@travetto/transformer',
   '@travetto/eslint',
 ]);

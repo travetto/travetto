@@ -27,20 +27,13 @@
     "directory": "module/model-mysql"
   },
   "dependencies": {
+    "@travetto/cli": "^5.0.11",
     "@travetto/config": "^5.0.11",
     "@travetto/context": "^5.0.11",
     "@travetto/model": "^5.0.12",
     "@travetto/model-query": "^5.0.12",
     "@travetto/model-sql": "^5.0.12",
     "mysql2": "^3.11.3"
-  },
-  "peerDependencies": {
-    "@travetto/command": "^5.0.11"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/command": {
-      "optional": true
-    }
   },
   "travetto": {
     "displayName": "MySQL Model Service"

@@ -124,7 +124,6 @@ module/auth-rest-passport
 module/auth-rest-session
 module/cache
 module/cli
-module/command
 module/compiler
 module/config
 module/context
@@ -224,7 +223,6 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
       module/auth-rest-session <workspace-root>/module/auth-rest-session
                   module/cache <workspace-root>/module/cache
                     module/cli <workspace-root>/module/cli
-                module/command <workspace-root>/module/command
                module/compiler <workspace-root>/module/compiler
                  module/config <workspace-root>/module/config
                 module/context <workspace-root>/module/context

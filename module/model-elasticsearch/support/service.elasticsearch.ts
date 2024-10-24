@@ -1,10 +1,10 @@
-import type { CommandService } from '@travetto/command';
+import type { ServiceDescriptor } from '@travetto/cli';
 
 const version = '8.9.1';
 
 const port = 9200;
 
-export const service: CommandService = {
+export const service: ServiceDescriptor = {
   name: 'elasticsearch',
   version,
   port,

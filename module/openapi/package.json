@@ -33,14 +33,10 @@
     "yaml": "^2.6.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^5.0.11",
-    "@travetto/command": "^5.0.11"
+    "@travetto/cli": "^5.0.11"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
-      "optional": true
-    },
-    "@travetto/command": {
       "optional": true
     }
   },

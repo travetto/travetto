@@ -1,4 +1,5 @@
 import path from 'node:path';
+import cp from 'node:child_process';
 
 import { CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
 import { ExecUtil } from '@travetto/runtime';
@@ -29,18 +30,15 @@ export class OpenApiClientCommand implements CliCommandShape {
     this.output = path.resolve(this.output);
     this.input = path.resolve(this.input);
 
-    // Peer dependency
-    const { DockerContainer } = await import('@travetto/command');
-
-    const cmd = new DockerContainer(this.dockerImage)
-      .setUser(process.geteuid?.() ?? 0, process.getgid?.() ?? 0)
-      .addVolume(this.output, '/workspace')
-      .addVolume(path.dirname(this.input), '/input')
-      .setInteractive(true)
-      .setTTY(false)
-      .setDeleteOnFinish(true);
-
-    const proc = await cmd.run([
+    const proc = cp.spawn('docker', [
+      'run',
+      '--rm',
+      '-i',
+      '-v', `${this.output}:/workspace`,
+      '-v', `${path.dirname(this.input)}:/input`,
+      '--user', `${process.geteuid?.() ?? 0}:${process.getgid?.() ?? 0}`,
+      this.dockerImage,
+      // Parameters
       'generate',
       '--skip-validate-spec',
       '--remove-operation-id-prefix',
@@ -48,9 +46,12 @@ export class OpenApiClientCommand implements CliCommandShape {
       '-o', '/workspace',
       '-i', `/input/${path.basename(this.input)}`,
       ...(this.props.length ? ['--additional-properties', this.props.join(',')] : [])
-    ]);
+    ], {
+      stdio: 'inherit'
+    });
 
     const result = await ExecUtil.getResult(proc);
+
     if (!result.valid) {
       process.exitCode = 1;
     }

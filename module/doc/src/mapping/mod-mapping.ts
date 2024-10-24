@@ -31,10 +31,6 @@ export const MOD_MAPPING = {
     name: '@travetto/cli', folder: '@travetto/cli', displayName: 'Command Line Interface',
     description: 'CLI infrastructure for Travetto framework'
   },
-  Command: {
-    name: '@travetto/command', folder: '@travetto/command', displayName: 'Command',
-    description: 'Support for executing complex commands at runtime.'
-  },
   Compiler: {
     name: '@travetto/compiler', folder: '@travetto/compiler', displayName: 'Compiler',
     description: 'The compiler infrastructure for the Travetto framework'
@@ -202,14 +198,6 @@ export const MOD_MAPPING = {
   RestKoaLambda: {
     name: '@travetto/rest-koa-lambda', folder: '@travetto/rest-koa-lambda', displayName: 'Koa REST AWS Lambda Source',
     description: 'Koa provider for the travetto rest module.'
-  },
-  RestModel: {
-    name: '@travetto/rest-model', folder: '@travetto/rest-model', displayName: 'RESTful Model Routes',
-    description: 'RESTful support for generating APIs from Model classes.'
-  },
-  RestModelQuery: {
-    name: '@travetto/rest-model-query', folder: '@travetto/rest-model-query', displayName: 'RESTful Model Query Routes',
-    description: 'RESTful support for generating query APIs from Model classes.'
   },
   RestSession: {
     name: '@travetto/rest-session', folder: '@travetto/rest-session', displayName: 'REST Session',

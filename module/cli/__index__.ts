@@ -10,4 +10,5 @@ export * from './src/color';
 export * from './src/module';
 export * from './src/scm';
 export * from './src/parse';
+export * from './src/service';
 export * from './src/util';
