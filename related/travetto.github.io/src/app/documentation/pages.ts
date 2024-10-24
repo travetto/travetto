@@ -28,10 +28,6 @@ export const PAGES = [
   {
     path: 'tools', title: 'Tools', subs: [
       {
-        path: 'command', title: 'Command',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/command/command.component').then(m => m.CommandComponent)
-      },
-      {
         path: 'pack', title: 'Pack',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/pack/pack.component').then(m => m.PackComponent)
       },
