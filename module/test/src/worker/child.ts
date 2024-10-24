@@ -1,7 +1,7 @@
 import { createWriteStream } from 'node:fs';
 
 import { ConsoleManager, Env, Util, Runtime } from '@travetto/runtime';
-import { ChildCommChannel } from '@travetto/worker';
+import { IpcChannel } from '@travetto/worker';
 
 import { SerializeUtil } from '../consumer/serialize';
 import { RunnerUtil } from '../execute/util';
@@ -13,7 +13,7 @@ import { TestRun } from '../model/test';
  * Child Worker for the Test Runner.  Receives events as commands
  * to run specific tests
  */
-export class TestChildWorker extends ChildCommChannel<TestRun> {
+export class TestChildWorker extends IpcChannel<TestRun> {
 
   #done = Util.resolvablePromise();
 

@@ -220,6 +220,14 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/cli/cli.component').then(m => m.CliComponent)
       },
       {
+        path: 'schema', title: 'Schema',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/schema/schema.component').then(m => m.SchemaComponent)
+      },
+      {
+        path: 'registry', title: 'Registry',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/registry/registry.component').then(m => m.RegistryComponent)
+      },
+      {
         path: 'test', title: 'Test',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/test/test.component').then(m => m.TestComponent)
       },
@@ -238,14 +246,6 @@ export const PAGES = [
       {
         path: 'runtime', title: 'Runtime',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/runtime/runtime.component').then(m => m.BaseComponent)
-      },
-      {
-        path: 'schema', title: 'Schema',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/schema/schema.component').then(m => m.SchemaComponent)
-      },
-      {
-        path: 'registry', title: 'Registry',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/registry/registry.component').then(m => m.RegistryComponent)
       },
       {
         path: 'compiler', title: 'Compiler',
