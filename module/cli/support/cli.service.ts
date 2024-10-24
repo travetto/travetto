@@ -1,10 +1,8 @@
 import { CliCommandShape, CliCommand, cliTpl, CliValidationError } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
-import { AsyncQueue, Runtime, RuntimeIndex, TypedObject, Util } from '@travetto/runtime';
+import { AsyncQueue, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
 
-import { ServiceRunner, ServiceDescriptor } from '../src/service';
-
-type ServiceAction = 'start' | 'stop' | 'restart' | 'status';
+import { ServiceRunner, ServiceDescriptor, ServiceAction } from '../src/service';
 
 /**
  * Allows for running services
@@ -51,10 +49,9 @@ export class CliServiceCommand implements CliCommandShape {
     const q = new AsyncQueue<{ idx: number, text: string, done?: boolean }>();
 
     const jobs = all.map(async (v, i) => {
-      for await (const item of new ServiceRunner(v).action(action)) {
-        const [[valueType, value]] = TypedObject.entries(item);
-        const identifier = v.name.padEnd(maxName);
-        const type = `${v.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
+      const identifier = v.name.padEnd(maxName);
+      const type = `${v.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
+      for await (const [valueType, value] of new ServiceRunner(v).action(action)) {
         const details = { [valueType === 'message' ? 'subtitle' : valueType]: value };
         q.add({ idx: i, text: cliTpl`${{ identifier }} ${{ type }} ${details}` });
       }

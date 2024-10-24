@@ -29,6 +29,8 @@ export interface ServiceDescriptor {
   startupTimeout?: number;
 }
 
+export type ServiceAction = 'start' | 'stop' | 'status' | 'restart';
+
 /**
  * Service runner
  */
@@ -37,11 +39,7 @@ export class ServiceRunner {
   constructor(public svc: ServiceDescriptor) { }
 
   async #isRunning(full = false): Promise<boolean> {
-    if (!this.svc.port) {
-      return true;
-    }
-
-    const port: number = ports(this.svc.port)[0];
+    const port = ports(this.svc.port!)[0];
     const start = Date.now();
     const timeoutMs = TimeUtil.asMillis(full ? this.svc.startupTimeout ?? 5000 : 100);
     while ((Date.now() - start) < timeoutMs) {
@@ -51,12 +49,12 @@ export class ServiceRunner {
           sock.on('connect', res).on('timeout', rej).on('error', rej)
         ).finally(() => sock.destroy());
 
-        if (!this.svc.ready?.url) {
+        if (!this.svc.ready?.url || !full) {
           return true;
         } else {
           const req = await fetch(this.svc.ready.url, { method: 'GET' });
           const text = await req.text();
-          if (req.ok && (!full || (this.svc.ready.test?.(text) ?? true))) {
+          if (req.ok && (this.svc.ready.test?.(text) ?? true)) {
             return true;
           }
         }
@@ -108,52 +106,52 @@ export class ServiceRunner {
     await ExecUtil.getResult(spawn('docker', ['kill', cid], { shell: false }));
   }
 
-  async * action(op: 'start' | 'stop' | 'status' | 'restart'): AsyncIterable<{ success: string } | { failure: string } | { message: string }> {
+  async * action(op: ServiceAction): AsyncIterable<['success' | 'failure' | 'message', string]> {
     try {
       const cid = await this.#getContainerId();
-      const running = !!cid && await this.#isRunning();
       const port = this.svc.port ? ports(this.svc.port)[0] : 0;
+      const running = !!cid && (!port || await this.#isRunning());
 
       if (running && !cid) { // We don't own
-        return yield (op === 'status' ? { message: 'Running but not managed' } : { failure: 'Running but not managed' });
+        return yield [op === 'status' ? 'message' : 'failure', 'Running but not managed'];
       }
 
       if (op === 'status') {
-        return yield !cid ? { message: 'Not running' } : { success: `Running ${cid}` };
-      } else if (op === 'start' && await this.#isRunning()) {
-        return yield { message: 'Skipping, already running' };
+        return yield !cid ? ['message', 'Not running'] : ['success', `Running ${cid}`];
+      } else if (op === 'start' && running) {
+        return yield ['message', 'Skipping, already running'];
       } else if (op === 'stop' && !running) {
-        return yield { message: 'Skipping, already stopped' };
+        return yield ['message', 'Skipping, already stopped'];
       }
 
       if (running && (op === 'restart' || op === 'stop')) {
-        yield { message: 'Stopping' };
+        yield ['message', 'Stopping'];
         await this.#killContainer(cid);
-        yield { success: 'Stopped' };
+        yield ['success', 'Stopped'];
       }
 
       if (op === 'restart' || op === 'start') {
         if (!await this.#hasImage()) {
-          yield { message: 'Starting image download' };
+          yield ['message', 'Starting image download'];
           for await (const line of await this.#pullImage()) {
-            yield { message: `Downloading: ${line}` };
+            yield ['message', `Downloading: ${line}`];
           }
-          yield { message: 'Image download complete' };
+          yield ['message', 'Image download complete'];
         }
 
-        yield { message: 'Starting' };
+        yield ['message', 'Starting'];
         const out = await this.#startContainer();
 
         if (port) {
-          yield { message: `Waiting for ${this.svc.ready?.url ?? 'container'}...` };
+          yield ['message', `Waiting for ${this.svc.ready?.url ?? 'container'}...`];
           if (!await this.#isRunning(true)) {
-            yield { failure: 'Failed to start service correctly' };
+            yield ['failure', 'Failed to start service correctly'];
           }
         }
-        yield { success: `Started ${out.substring(0, 12)}` };
+        yield ['success', `Started ${out.substring(0, 12)}`];
       }
     } catch {
-      yield { failure: 'Failed to start' };
+      yield ['failure', 'Failed to start'];
     }
   }
 }
