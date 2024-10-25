@@ -76,8 +76,8 @@ export class TerminalWriter {
     const q = this.#buffer.filter(x => x !== undefined);
     this.#buffer = [];
     if (q.length && restorePosition) {
-      this.storePosition(true);
-      this.restorePosition();
+      q.unshift(Codes.POSITION_SAVE);
+      q.push(Codes.POSITION_RESTORE);
     }
     if (q.length && !this.#term.output.write(q.join(''))) {
       return new Promise<void>(r => this.#term.output.once('drain', r));
@@ -86,14 +86,14 @@ export class TerminalWriter {
     }
   }
 
-  write(text: (string | number), beforeAll = false): this {
-    beforeAll ? this.#buffer.unshift(text) : this.#buffer.push(text);
+  write(...text: (string | number)[]): this {
+    this.#buffer.push(...text);
     return this;
   }
 
   /** Stores current cursor position, if called multiple times before restore, last one ones */
-  storePosition(beforeAll = false): this {
-    return this.write(Codes.POSITION_SAVE, beforeAll);
+  storePosition(): this {
+    return this.write(Codes.POSITION_SAVE);
   }
 
   /** Restores cursor position, will not behave correctly if nested  */

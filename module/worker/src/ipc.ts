@@ -81,9 +81,6 @@ export class IpcChannel<V = unknown> {
    */
   async destroy(): Promise<void> {
     if (this.active) {
-      this.proc.removeAllListeners();
-      this.#emitter.removeAllListeners();
-
       try {
         console.debug('Killing', { pid: this.parentId, id: this.id });
         if (this.proc instanceof ChildProcess) {
@@ -95,5 +92,15 @@ export class IpcChannel<V = unknown> {
         }
       } catch { }
     }
+    this.release();
+  }
+
+  /**
+   * Remove all listeners, but do not destroy
+   */
+  release(): void {
+    console.debug('Released', { pid: this.parentId, id: this.id });
+    this.proc.removeAllListeners();
+    this.#emitter.removeAllListeners();
   }
 }
