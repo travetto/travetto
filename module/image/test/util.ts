@@ -47,6 +47,22 @@ class ImageUtilSuite {
     const imgStream = await this.fixture.readStream('lincoln.jpg');
     const imgBuffer = await this.fixture.read('lincoln.jpg', true);
 
+    const out = await ImageUtil.convert(imgStream, { optimize: true, format: 'avif' });
+
+    const optimized = await toBuffer(out);
+
+    assert(optimized.length > 0);
+
+    assert(imgBuffer.length >= optimized.length);
+
+    assert((await ImageUtil.getMetadata(optimized)).format === 'avif');
+  }
+
+  @Test('compress jpeg')
+  async compressJpegNoFormat() {
+    const imgStream = await this.fixture.readStream('lincoln.jpg');
+    const imgBuffer = await this.fixture.read('lincoln.jpg', true);
+
     const out = await ImageUtil.convert(imgStream, { optimize: true });
 
     const optimized = await toBuffer(out);
@@ -54,22 +70,25 @@ class ImageUtilSuite {
     assert(optimized.length > 0);
 
     assert(imgBuffer.length >= optimized.length);
+
+    assert((await ImageUtil.getMetadata(optimized)).format === 'jpeg');
   }
+
 
   @Test('resizeToFile')
   async resizeToFile() {
-    const imgStream = await this.fixture.readStream('lincoln.jpg');
-    const out = await ImageUtil.convert(imgStream, {
+    const imgFile = await this.fixture.resolve('lincoln.jpg');
+    const out = await ImageUtil.convert(imgFile, {
       w: 50,
       h: 50,
-      optimize: true
+      optimize: true,
     });
 
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const dims = await ImageUtil.getDimensions(outFile);
+    const dims = await ImageUtil.getMetadata(outFile);
     assert(dims.height === 50);
     assert(dims.width === 50);
 
@@ -88,7 +107,7 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const dims = await ImageUtil.getDimensions(outFile);
+    const dims = await ImageUtil.getMetadata(outFile);
     assert(dims.width === 100);
     assert(dims.height === 134);
 
@@ -107,7 +126,7 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const dims = await ImageUtil.getDimensions(outFile);
+    const dims = await ImageUtil.getMetadata(outFile);
     assert(dims.width === 100);
     assert(dims.height === 134);
 
@@ -128,13 +147,12 @@ class ImageUtilSuite {
     await pipeline(out, createWriteStream(outFile));
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
 
-    const dims = await ImageUtil.getDimensions(outFile);
-    assert(dims.width === 200);
-    assert(dims.height === 200);
+    const meta = await ImageUtil.getMetadata(outFile);
+    assert(meta.width === 200);
+    assert(meta.height === 200);
 
     // Verify the format is avif
-    const fileType = await ImageUtil.getFileType(outFile);
-    assert(fileType === 'avif');
+    assert(meta.format === 'avif');
 
     await fs.unlink(outFile);
     assert(await fs.stat(outFile).then(() => false, () => true));
