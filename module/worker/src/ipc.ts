@@ -1,6 +1,7 @@
-import { ShutdownManager } from '@travetto/runtime';
 import { ChildProcess } from 'node:child_process';
 import { EventEmitter } from 'node:events';
+
+import { ShutdownManager, Util } from '@travetto/runtime';
 
 /**
  * Channel that represents ipc communication
@@ -13,7 +14,7 @@ export class IpcChannel<V = unknown> {
 
   constructor(proc: NodeJS.Process | ChildProcess = process) {
     this.proc = proc;
-    this.parentId = process.pid;
+    this.parentId = proc instanceof ChildProcess ? process.pid : process.ppid;
 
     // Close on shutdown
     ShutdownManager.onGracefulShutdown(() => this.destroy(), this);
@@ -80,25 +81,19 @@ export class IpcChannel<V = unknown> {
    */
   async destroy(): Promise<void> {
     if (this.active) {
-      const complete = this.proc instanceof ChildProcess ?
-        new Promise<void>(r => this.proc.on('close', r)) :
-        undefined;
+      this.proc.removeAllListeners();
+      this.#emitter.removeAllListeners();
 
-      console.debug('Killing', { pid: this.parentId, id: this.id });
-      if (!('argv' in this.proc)) {
-        this.proc.kill();
-      }
-
-      await complete;
+      try {
+        console.debug('Killing', { pid: this.parentId, id: this.id });
+        if (this.proc instanceof ChildProcess) {
+          const complete = new Promise<void>(r => this.proc.on('close', r));
+          this.proc.kill();
+          await Promise.race([complete, Util.nonBlockingTimeout(1000)]);
+        } else {
+          this.proc.disconnect();
+        }
+      } catch { }
     }
-    this.release();
-  }
-
-  /**
-   * Remove all listeners, but do not destroy
-   */
-  release(): void {
-    console.debug('Released', { pid: this.parentId, id: this.id });
-    this.#emitter.removeAllListeners();
   }
 }
