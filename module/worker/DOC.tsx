@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
-import { d, c } from '@travetto/doc';
+import { c } from '@travetto/doc';
 import { AsyncQueue } from '@travetto/runtime';
-import { WorkPool, ChildCommChannel, ParentCommChannel } from '@travetto/worker';
+import { WorkPool, IpcChannel } from '@travetto/worker';
 
 export const text = <>
   <c.StdHeader />
@@ -12,6 +12,6 @@ export const text = <>
   </c.Section>
 
   <c.Section title='IPC Support' >
-    Within the {d.input('comm')} package, there is support for two primary communication elements: {ChildCommChannel} and {ParentCommChannel}.  Usually {ParentCommChannel} indicates it is the owner of the sub process. {ChildCommChannel} indicates that it has been created/spawned/forked by the parent and will communicate back to it's parent. This generally means that a {ParentCommChannel} can be destroyed (i.e. killing the subprocess) where a {ChildCommChannel} can only exit the process, but the channel cannot be destroyed.
+    To handle communication between processes, {IpcChannel} is provided. This class abstracts the underlying IPC mechanism and provides a simple interface for sending and receiving messages. It also includes event management capabilities, allowing for easy handling of different message types. By default the class assumes it is running in a child process, but it can also be used in a parent process (by passing in the child process) to communicate with child processes.
   </c.Section>
 </>;
