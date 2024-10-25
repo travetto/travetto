@@ -1,7 +1,7 @@
 import { fork } from 'node:child_process';
 
 import { Env, RuntimeIndex } from '@travetto/runtime';
-import { ParentCommChannel } from '@travetto/worker';
+import { IpcChannel } from '@travetto/worker';
 
 import { Events, TestLogEvent } from './types';
 import { TestConsumer } from '../consumer/types';
@@ -23,7 +23,7 @@ export async function buildStandardTestManager(consumer: TestConsumer, run: Test
   const { module } = RuntimeIndex.getFromImport(run.import)!;
   const suiteMod = RuntimeIndex.getModule(module)!;
 
-  const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
+  const channel = new IpcChannel<TestEvent & { error?: Error }>(
     fork(
       RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'), ['test:child'],
       {
