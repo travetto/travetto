@@ -51,10 +51,12 @@ export class CliServiceCommand implements CliCommandShape {
     const jobs = all.map(async (v, i) => {
       const identifier = v.name.padEnd(maxName);
       const type = `${v.version}`.padStart(maxVersion - 3).padEnd(maxVersion);
+      let msg: string;
       for await (const [valueType, value] of new ServiceRunner(v).action(action)) {
         const details = { [valueType === 'message' ? 'subtitle' : valueType]: value };
-        q.add({ idx: i, text: cliTpl`${{ identifier }} ${{ type }} ${details}` });
+        q.add({ idx: i, text: msg = cliTpl`${{ identifier }} ${{ type }} ${details}` });
       }
+      q.add({ idx: i, done: true, text: msg! });
     });
 
     Promise.all(jobs).then(() => Util.queueMacroTask()).then(() => q.close());
