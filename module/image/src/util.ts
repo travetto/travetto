@@ -2,11 +2,11 @@ import { createReadStream } from 'node:fs';
 import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
 import { pipeline } from 'node:stream/promises';
-import { Metadata } from 'sharp';
+import type { Metadata } from 'sharp';
 
 import { castTo } from '@travetto/runtime';
 
-type ImageFormat = 'jpeg' | 'png' | 'avif' | 'webp';
+type ImageFormat = 'jpeg' | 'png' | 'avif' | 'webp' | 'gif' | 'jxl';
 type Input = Buffer | string | ReadableStream | Readable;
 
 /**
@@ -57,7 +57,9 @@ export class ImageUtil {
       .avif({ force: format === 'avif', ...optimize ? { quality: 70 } : {} })
       .webp({ force: format === 'webp', ...optimize ? { quality: 80 } : {} })
       .png({ force: format === 'png', ...optimize ? { compressionLevel: 9, quality: 80, adaptiveFiltering: true } : {} })
-      .jpeg({ force: format === 'jpeg', ...optimize ? { quality: 80, progressive: true } : {} });
+      .jpeg({ force: format === 'jpeg', ...optimize ? { quality: 80, progressive: true } : {} })
+      .jxl({ force: format === 'jxl', ...optimize ? { lossless: false, quality: 80 } : {} })
+      .gif({ force: format === 'gif', ...optimize ? { effort: 10 } : {} });
 
     const stream = Buffer.isBuffer(image) ?
       Readable.from(image) :
