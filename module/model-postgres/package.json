@@ -34,7 +34,7 @@
     "@travetto/model-query": "^5.0.12",
     "@travetto/model-sql": "^5.0.15",
     "@types/pg": "^8.11.10",
-    "pg": "^8.13.0"
+    "pg": "^8.13.1"
   },
   "travetto": {
     "displayName": "PostgreSQL Model Service"

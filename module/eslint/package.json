@@ -29,8 +29,8 @@
     "@travetto/runtime": "^5.0.11",
     "@types/eslint": "^9.6.1",
     "@types/eslint__js": "^8.42.3",
-    "@typescript-eslint/eslint-plugin": "^8.10.0",
-    "@typescript-eslint/parser": "^8.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.11.0",
+    "@typescript-eslint/parser": "^8.11.0",
     "eslint": "^9.13.0"
   },
   "peerDependencies": {
