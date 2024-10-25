@@ -33,7 +33,7 @@
     "mime": "^4.0.4"
   },
   "peerDependencies": {
-    "@travetto/test": "^5.0.12"
+    "@travetto/test": "^5.0.13"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

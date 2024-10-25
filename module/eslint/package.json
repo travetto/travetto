@@ -34,7 +34,7 @@
     "eslint": "^9.13.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^5.0.13"
+    "@travetto/cli": "^5.0.14"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

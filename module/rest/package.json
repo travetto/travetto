@@ -40,8 +40,8 @@
     "raw-body": "^3.0.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^5.0.13",
-    "@travetto/test": "^5.0.12",
+    "@travetto/cli": "^5.0.14",
+    "@travetto/test": "^5.0.13",
     "@travetto/transformer": "^5.0.9"
   },
   "peerDependenciesMeta": {
