@@ -35,10 +35,13 @@ export class PackConfigUtil {
   static dockerNodePackageInstall(cfg: DockerPackConfig): string {
     const out: string[] = [];
     for (const item of cfg.externalDependencies ?? []) {
-      out.push(item.endsWith(':from-source') ?
-        `RUN npm_config_build_from_source=true npm install ${item.split(':')[0]} --build-from-source` :
-        `RUN npm install ${item}`
-      );
+      const [name, directive] = item.split(':');
+      switch (directive) {
+        case 'from-source':
+          out.push(`RUN npm_config_build_from_source=true npm install ${name} --build-from-source`); break;
+        default:
+          out.push(`RUN npm install ${name}`); break;
+      }
     }
     if (out.length) {
       out.unshift(`WORKDIR ${cfg.dockerRuntime.folder}`);

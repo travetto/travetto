@@ -27,7 +27,12 @@
     "sharp": "^0.33.5"
   },
   "travetto": {
-    "displayName": "Image"
+    "displayName": "Image",
+    "build": {
+      "binaryDependencies": [
+        "sharp"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

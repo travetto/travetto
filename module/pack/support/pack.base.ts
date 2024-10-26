@@ -5,6 +5,7 @@ import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
 import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { Terminal } from '@travetto/terminal';
 import { Ignore, Required, Schema } from '@travetto/schema';
+import { PackageUtil } from '@travetto/manifest';
 
 import { PackOperation } from './bin/operation';
 import { PackUtil } from './bin/util';
@@ -111,6 +112,19 @@ export abstract class BasePackCommand implements CliCommandShape {
     }
   }
 
+  /**
+   * Get all binary dependencies
+   */
+  getBinaryDependencies(): string[] {
+    return [...RuntimeIndex.getModuleList('all')]
+      .map(m => RuntimeIndex.getModule(m))
+      .filter(m => !!m)
+      .filter(m => m.prod)
+      .map(m => PackageUtil.readPackage(m?.sourcePath))
+      .map(p => p?.travetto?.build?.binaryDependencies ?? [])
+      .flat();
+  }
+
   async main(args: string[] = []): Promise<void> {
     // Resolve all files to absolute paths
     this.output = this.output ? path.resolve(this.output) : undefined!;
@@ -122,6 +136,11 @@ export abstract class BasePackCommand implements CliCommandShape {
     this.module ||= Runtime.main.name;
     this.mainName ??= path.basename(this.module);
     this.mainFile = `${this.mainName}.js`;
+
+    // Collect binary dependencies
+    const binaryDeps = await this.getBinaryDependencies();
+    console.log('Binary Dependencies:', binaryDeps);
+    this.externalDependencies = [...this.externalDependencies, ...binaryDeps];
 
     const stream = this.runOperations();
 
