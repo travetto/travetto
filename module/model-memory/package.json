@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-memory",
-  "version": "5.0.12",
+  "version": "5.0.13",
   "description": "Memory backing for the travetto model module.",
   "keywords": [
     "datastore",
@@ -25,14 +25,14 @@
     "directory": "module/model-memory"
   },
   "dependencies": {
-    "@travetto/config": "^5.0.11",
-    "@travetto/di": "^5.0.11",
-    "@travetto/model": "^5.0.12",
-    "@travetto/schema": "^5.0.11"
+    "@travetto/config": "^5.0.12",
+    "@travetto/di": "^5.0.12",
+    "@travetto/model": "^5.0.13",
+    "@travetto/schema": "^5.0.12"
   },
   "peerDependencies": {
-    "@travetto/cli": "^5.0.14",
-    "@travetto/test": "^5.0.13"
+    "@travetto/cli": "^5.0.15",
+    "@travetto/test": "^5.0.14"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
