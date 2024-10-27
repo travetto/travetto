@@ -28,7 +28,7 @@ export class GoogleLogFormatter implements LogFormatter {
 
     return JSON.stringify({
       context,
-      'logging.googleapis.com/sourceLocation': { file: ev.source, line: ev.line },
+      'logging.googleapis.com/sourceLocation': { file: `${ev.module}/${ev.modulePath}`, line: ev.line },
       'logging.googleapis.com/labels': { module: ev.module, scope: ev.scope },
       severity: ev.level,
       message: LogFormatUtil.getLogMessage(ev),
