@@ -139,7 +139,6 @@ export abstract class BasePackCommand implements CliCommandShape {
 
     // Collect binary dependencies
     const binaryDeps = await this.getBinaryDependencies();
-    console.log('Binary Dependencies:', binaryDeps);
     this.externalDependencies = [...this.externalDependencies, ...binaryDeps];
 
     const stream = this.runOperations();
