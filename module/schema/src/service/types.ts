@@ -27,6 +27,14 @@ export interface DescribableConfig {
 }
 
 /**
+ * Basic structure for a method configuration
+ */
+export interface SchemaMethodConfig {
+  fields: FieldConfig[];
+  validators: ValidatorFn<Any, unknown>[];
+}
+
+/**
  * Schema configuration
  */
 export interface SchemaConfig {
@@ -85,7 +93,7 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * Method parameter configs
    */
-  methods: Record<string, FieldConfig[]>;
+  methods: Record<string, SchemaMethodConfig>;
 }
 
 /**

@@ -324,6 +324,12 @@ export class SchemaValidator {
         return x;
       }));
     }
+    for (const validator of SchemaRegistry.getMethodValidators(cls, method)) {
+      const error = await validator(params);
+      if (error) {
+        errors.push(error);
+      }
+    }
     if (errors.length) {
       throw new ValidationResultError(errors);
     }
