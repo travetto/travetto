@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import { isPromise } from 'node:util/types';
 
 import { AppError, Class, castTo, castKey, asConstructable } from '@travetto/runtime';
 
@@ -161,7 +162,7 @@ export class AssertCheck {
       // Else treat as a simple function to build an error or not
       const res = shouldThrow(err);
       if (res && !(res instanceof Error)) {
-        return new AppError(`Invalid check, "${shouldThrow.name}" should return an Error or undefined`, { category: 'data' });
+        return new assert.AssertionError({ message: `Invalid check, "${shouldThrow.name}" should return an Error or undefined` });
       } else {
         return res;
       }
@@ -171,7 +172,8 @@ export class AssertCheck {
   static #onError(
     positive: boolean,
     message: string | undefined,
-    err: unknown, missed: Error | undefined,
+    err: unknown,
+    missed: Error | undefined,
     shouldThrow: ThrowableError | undefined,
     assertion: CaptureAssert
   ): void {
@@ -182,7 +184,7 @@ export class AssertCheck {
       throw err;
     }
     if (positive) {
-      missed = new AppError('Error thrown, but expected no errors');
+      missed = new assert.AssertionError({ message: 'Error thrown, but expected no errors' });
       missed.stack = err.stack;
     }
 
@@ -216,7 +218,7 @@ export class AssertCheck {
         if (typeof shouldThrow === 'function') {
           shouldThrow = shouldThrow.name;
         }
-        throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'}`));
+        throw (missed = new assert.AssertionError({ message: `No error thrown, but expected ${shouldThrow ?? 'an error'}`, expected: shouldThrow ?? 'an error' }));
       }
     } catch (err) {
       this.#onError(positive, message, err, missed, shouldThrow, assertion);
@@ -243,7 +245,7 @@ export class AssertCheck {
     let missed: Error | undefined;
 
     try {
-      if ('then' in action) {
+      if (isPromise(action)) {
         await action;
       } else {
         await action();
@@ -252,7 +254,7 @@ export class AssertCheck {
         if (typeof shouldThrow === 'function') {
           shouldThrow = shouldThrow.name;
         }
-        throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'} `));
+        throw (missed = new assert.AssertionError({ message: `No error thrown, but expected ${shouldThrow ?? 'an error'}`, expected: shouldThrow ?? 'an error' }));
       }
     } catch (err) {
       this.#onError(positive, message, err, missed, shouldThrow, assertion);
