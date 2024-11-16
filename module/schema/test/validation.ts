@@ -172,39 +172,29 @@ class Validation {
     await assert.rejects(() => {
       const o = DateTestSchema.from({ date: undefined });
       return SchemaValidator.validate(DateTestSchema, o);
-    }, (err: unknown) =>
-      err instanceof ValidationResultError && err.details.errors[0].kind === 'required'
-    );
+    }, e => e instanceof ValidationResultError && e.details.errors[0].kind === 'required');
 
     await assert.rejects(() => {
       // @ts-ignore
       const o = DateTestSchema.from({ date: NaN });
       return SchemaValidator.validate(DateTestSchema, o);
-    }, (err: unknown) =>
-      err instanceof ValidationResultError && err.details.errors[0].kind === 'type'
-    );
+    }, e => e instanceof ValidationResultError && e.details.errors[0].kind === 'type');
 
     await assert.rejects(() => {
       const o = CustomValidated.from({ age: Number.NaN, age2: 1 });
       return SchemaValidator.validate(CustomValidated, o);
-    }, (err: unknown) =>
-      err instanceof ValidationResultError && err.details.errors[0].kind === 'type'
-    );
+    }, e => e instanceof ValidationResultError && e.details.errors[0].kind === 'type');
 
     await assert.rejects(() => {
       const o = CustomValidated.from({ age: 1, age2: 1 });
       return SchemaValidator.validate(CustomValidated, o);
-    }, (err: unknown) =>
-      err instanceof ValidationResultError && err.details.errors[0].kind === 'custom'
-    );
+    }, e => e instanceof ValidationResultError && e.details.errors[0].kind === 'custom');
 
     await assert.rejects(() => {
       // @ts-ignore
       const o = DateTestSchema.from({ date: '' });
       return SchemaValidator.validate(DateTestSchema, o);
-    }, (err: unknown) =>
-      err instanceof ValidationResultError && err.details.errors[0].kind === 'required'
-    );
+    }, e => e instanceof ValidationResultError && e.details.errors[0].kind === 'required');
   }
 
   @Test()
