@@ -6,7 +6,7 @@ import { Min } from '@travetto/schema';
  */
 @CliCommand({ runTarget: true })
 export class DoubleCommand {
-  async main(@(Min(10).Param) age: number): Promise<void> {
+  async main(@Min(10) age: number): Promise<void> {
     console.log(`Result: ${age * 2}`);
   }
 }

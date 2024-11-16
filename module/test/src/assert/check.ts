@@ -163,6 +163,8 @@ export class AssertCheck {
       const res = shouldThrow(err);
       if (res && !(res instanceof Error)) {
         return new assert.AssertionError({ message: `Invalid check, "${shouldThrow.name}" should return an Error or undefined` });
+      } else if (res instanceof Error) {
+        return new assert.AssertionError({ message: 'Did not match expected error', actual: err });
       } else {
         return res;
       }

@@ -1,27 +1,34 @@
 import assert from 'node:assert';
-import { Suite, Test, ShouldThrow, BeforeEach } from '@travetto/test';
-import { MaxLength, MethodValidator, SchemaValidator, ValidationResultError, Validator } from '../__index__';
+import { Suite, Test } from '@travetto/test';
+import { MaxLength, MethodValidator, SchemaValidator, ValidationError, ValidationResultError } from '../__index__';
 import { RootRegistry } from '@travetto/registry';
 
+const nameValidator = (name: string): ValidationError | undefined => {
+  if (name === 'bob') {
+    return {
+      kind: 'invalid',
+      path: 'name',
+      message: 'Name cannot be bob'
+    };
+  }
+};
+
+const EvenValidator = MethodValidator((name: string): ValidationError | undefined => {
+  if (name.length % 2 !== 0) {
+    return {
+      kind: 'format',
+      path: 'name',
+      message: 'Name must be even length'
+    };
+  }
+});
+
+
 class TestClass {
-  @MethodValidator(([name]) => {
-    if (name === 'bob') {
-      return {
-        kind: 'invalid',
-        path: 'name',
-        message: 'Name cannot be bob'
-      };
-    }
-    if (name.length > 10) {
-      return {
-        kind: 'maxlength',
-        path: 'name',
-        n: 10,
-        message: 'Name cannot be longer than 10 characters'
-      };
-    }
-  })
-  value(name: string) {
+
+  @MethodValidator(nameValidator)
+  @EvenValidator
+  value(@MaxLength(10) name: string) {
     return name;
   }
 }
@@ -47,7 +54,20 @@ class SchemaValidatorMethodSuite {
 
     await assert.rejects(
       async () => SchemaValidator.validateMethod(TestClass, 'value', ['bob bob bob bob']),
-      e => (e instanceof ValidationResultError && !e.details.errors.find(x => /name cannot be longer/i.test(x.message)) ? e : undefined)
+      e => (e instanceof ValidationResultError && !e.details.errors.find(x => /too long/i.test(x.message)) ? e : undefined)
     );
+
+    await assert.rejects(
+      async () => SchemaValidator.validateMethod(TestClass, 'value', ['bob bob bob bob']),
+      e => (e instanceof ValidationResultError && !e.details.errors.find(x => /even/i.test(x.message)) ? e : undefined)
+    );
+
+    await assert.rejects(
+      async () => SchemaValidator.validateMethod(TestClass, 'value', ['bob bob bob bob']),
+      e => (
+        e instanceof ValidationResultError &&
+        !e.details.errors.find(x => /too long/i.test(x.message)) &&
+        !e.details.errors.find(x => /even/i.test(x.message))
+      ) ? e : undefined);
   }
 }

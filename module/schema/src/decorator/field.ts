@@ -1,24 +1,19 @@
-import { Any, castTo, ClassInstance } from '@travetto/runtime';
+import { Any, ClassInstance } from '@travetto/runtime';
 
 import { SchemaRegistry } from '../service/registry';
 import { CommonRegExp } from '../validate/regexp';
 import { ClassList, FieldConfig } from '../service/types';
 
-type PropType<V> = (<T extends Partial<Record<K, V>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void) & {
-  Param: (t: unknown, k: string, idx: number) => void;
-};
+type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 
 function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
-  const fn = (t: ClassInstance, k: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
+  return (t: ClassInstance, k: string, idx?: number | TypedPropertyDescriptor<Any>): void => {
     if (idx !== undefined && typeof idx === 'number') {
       SchemaRegistry.registerPendingParamFacet(t.constructor, k, idx, obj);
     } else {
       SchemaRegistry.registerPendingFieldFacet(t.constructor, k, obj);
     }
   };
-  fn.Param = fn;
-
-  return castTo(fn);
 }
 
 /**

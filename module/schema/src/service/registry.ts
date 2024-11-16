@@ -4,7 +4,7 @@ import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry'
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types';
 import { SchemaChangeListener } from './changes';
 import { AllViewⲐ } from '../internal/types';
-import { ValidatorFn } from '../validate/types';
+import { MethodValidatorFn } from '../validate/types';
 
 const classToSubTypeName = (cls: Class): string => cls.name
   .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
@@ -227,7 +227,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param cls
    * @param method
    */
-  getMethodValidators<T>(cls: Class<T>, method: string): ValidatorFn<Any, unknown>[] {
+  getMethodValidators<T>(cls: Class<T>, method: string): MethodValidatorFn<unknown[]>[] {
     return (this.get(cls)?.methods?.[method] ?? {}).validators ?? [];
   }
 
