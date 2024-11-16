@@ -1,6 +1,6 @@
 {
   "name": "@travetto/runtime",
-  "version": "5.0.12",
+  "version": "5.0.13",
   "description": "Runtime for travetto applications.",
   "keywords": [
     "console-manager",
