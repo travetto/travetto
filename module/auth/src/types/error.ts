@@ -1,7 +1,6 @@
-import { AppError, AppErrorOptions } from '@travetto/runtime';
+import { AppError, ErrorCategory } from '@travetto/runtime';
 
-export class AuthenticationError<T> extends AppError<T> {
-  constructor(message: string, opts?: AppErrorOptions<T>) {
-    super(message, { category: 'authentication', ...opts });
-  }
+export class AuthenticationError<T = Record<string, unknown> | undefined> extends AppError<T> {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  static defaultCategory = 'authentication' as ErrorCategory;
 }

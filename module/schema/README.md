@@ -63,28 +63,28 @@ User:
 
 ### Fields
 This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
-   *  [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L30) defines a field that will be serialized.
-   *  [@Required](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L70) defines a that field should be required
-   *  [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L77) defines the allowable values that a field can have
-   *  [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L98) defines a regular expression that the field value should match
-   *  [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L106) enforces min length of a string
-   *  [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L116) enforces max length of a string
-   *  [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L106) enforces min value for a date or a number
-   *  [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L116) enforces max value for a date or a number
-   *  [@Email](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L143) ensures string field matches basic email regex
-   *  [@Telephone](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L150) ensures string field matches basic telephone regex
-   *  [@Url](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L157) ensures string field matches basic url regex
-   *  [@Ignore](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L196) exclude from auto schema registration
-   *  [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L171) ensures number passed in is only a whole number
-   *  [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L177) ensures number passed in allows fractional values
-   *  [@Currency](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L189) provides support for standard currency
-   *  [@Text](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L85) indicates that a field is expecting natural language input, not just discrete values
-   *  [@LongText](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L90) same as text, but expects longer form content
-   *  [@Readonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L57) defines a that field should not be bindable external to the class
-   *  [@Writeonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L51) defines a that field should not be exported in serialization, but that it can be bound to
-   *  [@Secret](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L63) marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.
-   *  [@Specifier](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L205) attributes additional specifiers to a field, allowing for more specification beyond just the field's type.
-   *  [@SubTypeField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L211) allows for promoting a given field as the owner of the sub type discriminator (defaults to `type`).
+   *  [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25) defines a field that will be serialized.
+   *  [@Required](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L65) defines a that field should be required
+   *  [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L72) defines the allowable values that a field can have
+   *  [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L93) defines a regular expression that the field value should match
+   *  [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L101) enforces min length of a string
+   *  [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L111) enforces max length of a string
+   *  [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L101) enforces min value for a date or a number
+   *  [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L111) enforces max value for a date or a number
+   *  [@Email](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L138) ensures string field matches basic email regex
+   *  [@Telephone](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L145) ensures string field matches basic telephone regex
+   *  [@Url](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L152) ensures string field matches basic url regex
+   *  [@Ignore](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L191) exclude from auto schema registration
+   *  [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L166) ensures number passed in is only a whole number
+   *  [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L172) ensures number passed in allows fractional values
+   *  [@Currency](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L184) provides support for standard currency
+   *  [@Text](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L80) indicates that a field is expecting natural language input, not just discrete values
+   *  [@LongText](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L85) same as text, but expects longer form content
+   *  [@Readonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L52) defines a that field should not be bindable external to the class
+   *  [@Writeonly](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L46) defines a that field should not be exported in serialization, but that it can be bound to
+   *  [@Secret](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L58) marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.
+   *  [@Specifier](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L200) attributes additional specifiers to a field, allowing for more specification beyond just the field's type.
+   *  [@SubTypeField](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L206) allows for promoting a given field as the owner of the sub type discriminator (defaults to `type`).
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. 
 
 Just like the class, all fields can be defined with
@@ -102,7 +102,7 @@ import { Match, Min } from '@travetto/schema';
 const NAME_REGEX = /[A-Z][a-z]+(\s+[A-Z][a-z]+)*/;
 
 export class ParamUsage {
-  main(@Match(NAME_REGEX).Param name: string, @Min(20).Param age?: number) {
+  main(@Match(NAME_REGEX) name: string, @Min(20) age?: number) {
     console.log('Valid name and age!', { name, age });
   }
 }

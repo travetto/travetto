@@ -13,6 +13,8 @@ type StringFields<T> = {
   (T[K] extends string ? K : never)
 }[Extract<keyof T, string>];
 
+const isClass = (e: unknown): e is Class => e === Error || e === AppError || Object.getPrototypeOf(e) !== Object.getPrototypeOf(Function);
+
 /**
  * Check assertion
  */
@@ -125,46 +127,48 @@ export class AssertCheck {
   static checkError(shouldThrow: ThrowableError | undefined, err: Error | string | undefined): Error | undefined {
     if (!shouldThrow) { // If we shouldn't be throwing anything, we are good
       return;
-    }
-    // If should throw is a string or a regexp
-    if (typeof shouldThrow === 'string' || shouldThrow instanceof RegExp) {
-      const actual = `${err instanceof Error ? `'${err.message}'` : (err ? `'${err}'` : 'nothing')}`;
-
-      // If a string, check if error exists, and then see if the string is included in the message
-      if (typeof shouldThrow === 'string' && (!err || !(err instanceof Error ? err.message : err).includes(shouldThrow))) {
+    } else if (!err) {
+      return new assert.AssertionError({ message: 'Expected to throw an error, but got nothing' });
+    } else if (typeof shouldThrow === 'string') {
+      if (!(err instanceof Error ? err.message : err).includes(shouldThrow)) {
+        const actual = err instanceof Error ? `'${err.message}'` : `'${err}'`;
         return new assert.AssertionError({
           message: `Expected error containing text '${shouldThrow}', but got ${actual}`,
           actual,
           expected: shouldThrow
         });
       }
-      // If a regexp, check if error exists, and then test the error message against the regex
-      if (shouldThrow instanceof RegExp && (!err || !shouldThrow.test(typeof err === 'string' ? err : err.message))) {
+    } else if (shouldThrow instanceof RegExp) {
+      if (!shouldThrow.test(typeof err === 'string' ? err : err.message)) {
+        const actual = err instanceof Error ? `'${err.message}'` : `'${err}'`;
         return new assert.AssertionError({
           message: `Expected error with message matching '${shouldThrow.source}', but got ${actual}`,
           actual,
           expected: shouldThrow.source
         });
       }
-      // If passing in a constructor
-    } else if (shouldThrow === Error ||
-      shouldThrow === AppError ||
-      Object.getPrototypeOf(shouldThrow) !== Object.getPrototypeOf(Function)
-    ) { // if not simple function, treat as class
-      if (!err || !(err instanceof shouldThrow)) {
+    } else if (isClass(shouldThrow)) {
+      if (!(err instanceof shouldThrow)) {
         return new assert.AssertionError({
-          message: `Expected to throw ${shouldThrow.name}, but got ${err ?? 'nothing'}`,
+          message: `Expected to throw ${shouldThrow.name}, but got ${err}`,
           actual: (err ?? 'nothing'),
           expected: shouldThrow.name
         });
       }
-    } else {
-      // Else treat as a simple function to build an error or not
-      const res = shouldThrow(err);
-      if (res && !(res instanceof Error)) {
-        return new assert.AssertionError({ message: `Invalid check, "${shouldThrow.name}" should return an Error or undefined` });
-      } else {
-        return res;
+    } else if (typeof shouldThrow === 'function') {
+      try {
+        const res = shouldThrow(err);
+        if (res === false) {
+          return new assert.AssertionError({ message: `Checking "${shouldThrow.name}" indicated an invalid error`, actual: err });
+        } else if (typeof res === 'string') {
+          return new assert.AssertionError({ message: res, actual: err });
+        }
+      } catch (checkErr) {
+        if (checkErr instanceof assert.AssertionError) {
+          return checkErr;
+        } else {
+          return new assert.AssertionError({ message: `Checking "${shouldThrow.name}" threw an error`, actual: checkErr });
+        }
       }
     }
   }

@@ -1,7 +1,7 @@
 import type { Class, TimeSpan } from '@travetto/runtime';
 import { Skip, TestCore } from './common';
 
-export type ThrowableError = string | RegExp | Function;
+export type ThrowableError = string | RegExp | Class<Error> | ((e: Error | string) => boolean | void | undefined);
 
 /**
  * Specific configuration for a test

@@ -1,7 +1,7 @@
 import { ClassInstance } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
-import { TestConfig } from '../model/test';
+import { TestConfig, ThrowableError } from '../model/test';
 
 /**
  * The `@AssertCheck` indicates that a function's assert calls should be transformed
@@ -39,7 +39,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
  * Marks a method as should throw to indicate a lack of throwing is a problem
  * @param state The parameters to use for checking if the response is valid
  */
-export function ShouldThrow(state: TestConfig['shouldThrow']): MethodDecorator {
+export function ShouldThrow(state: ThrowableError): MethodDecorator {
   return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
     SuiteRegistry.registerField(inst.constructor, descriptor.value, { shouldThrow: state });
     return descriptor;

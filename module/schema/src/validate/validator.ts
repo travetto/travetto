@@ -233,7 +233,11 @@ export class SchemaValidator {
       try {
         const res = await fn(o, view);
         if (res) {
-          errors.push(res);
+          if (Array.isArray(res)) {
+            errors.push(...res);
+          } else {
+            errors.push(res);
+          }
         }
       } catch (err: unknown) {
         if (isValidationError(err)) {
@@ -323,6 +327,16 @@ export class SchemaValidator {
         x.path = !prefixes[i] ? x.path.replace(`${field.name}.`, '') : x.path.replace(field.name, prefixes[i]!);
         return x;
       }));
+    }
+    for (const validator of SchemaRegistry.getMethodValidators(cls, method)) {
+      const res = await validator(...params);
+      if (res) {
+        if (Array.isArray(res)) {
+          errors.push(...res);
+        } else {
+          errors.push(res);
+        }
+      }
     }
     if (errors.length) {
       throw new ValidationResultError(errors);

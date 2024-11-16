@@ -1,9 +1,10 @@
-import { Class, AppError, describeFunction, castTo, classConstruct, asFull, castKey } from '@travetto/runtime';
+import { Class, AppError, describeFunction, castTo, classConstruct, asFull, castKey, Any } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig } from './types';
+import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types';
 import { SchemaChangeListener } from './changes';
 import { AllViewⲐ } from '../internal/types';
+import { MethodValidatorFn } from '../validate/types';
 
 const classToSubTypeName = (cls: Class): string => cls.name
   .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
@@ -218,7 +219,16 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param method
    */
   getMethodSchema<T>(cls: Class<T>, method: string): FieldConfig[] {
-    return (this.get(cls)?.methods?.[method] ?? []).filter(x => !!x).sort((a, b) => a.index! - b.index!);
+    return (this.get(cls)?.methods?.[method] ?? {}).fields?.filter(x => !!x).sort((a, b) => a.index! - b.index!) ?? [];
+  }
+
+  /**
+   * Get method validators
+   * @param cls
+   * @param method
+   */
+  getMethodValidators<T>(cls: Class<T>, method: string): MethodValidatorFn<unknown[]>[] {
+    return (this.get(cls)?.methods?.[method] ?? {}).validators ?? [];
   }
 
   /**
@@ -236,6 +246,16 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   }
 
   /**
+   * Register pending method, and establish a method config
+   * @param target
+   * @param method
+   */
+  registerPendingMethod(target: Class, method: string): SchemaMethodConfig {
+    const methods = this.getOrCreatePending(target)!.methods!;
+    return (methods[method] ??= { fields: [], validators: [] });
+  }
+
+  /**
    * Register a partial config for a pending method param
    * @param target The class to target
    * @param prop The method name
@@ -243,8 +263,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param config The config to register
    */
   registerPendingParamFacet(target: Class, method: string, idx: number, config: Partial<FieldConfig>): Class {
-    const methods = this.getOrCreatePending(target)!.methods!;
-    const params = (methods[method] ??= []);
+    const params = this.registerPendingMethod(target, method).fields;
     if (config.name === '') {
       delete config.name;
     }

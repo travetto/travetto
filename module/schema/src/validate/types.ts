@@ -65,7 +65,14 @@ export interface ValidationResult {
   n?: number | Date;
 }
 
+type OrPromise<T> = T | Promise<T>;
+
 /**
  * Validator function
  */
-export type ValidatorFn<T, U> = (value: T, parent?: U) => ValidationError | undefined | Promise<ValidationError | undefined>;
+export type ValidatorFn<T, U> = (value: T, parent?: U) => OrPromise<ValidationError | ValidationError[] | undefined>;
+
+/**
+ * Method Validator function
+ */
+export type MethodValidatorFn<T extends unknown[]> = (...value: T) => OrPromise<ValidationError | ValidationError[] | undefined>;

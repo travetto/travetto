@@ -13,7 +13,7 @@ npm install @travetto/rest
 yarn add @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31) and [Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L30) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class.
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31) and [Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class.
 
 ## Routes: Controller
 To define a route, you must first declare a [@Controller](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/controller.ts#L9) which is only allowed on classes. Controllers can be configured with:
@@ -129,8 +129,8 @@ export class Simple {
   @Get('img/*')
   async getImage(
     req: Request,
-    @Query('w') @Integer().Param @Min(100).Param width?: number,
-    @Query('h') @Integer().Param @Min(100).Param height?: number
+    @Query('w') @Integer() @Min(100) width?: number,
+    @Query('h') @Integer() @Min(100) height?: number
   ) {
     const img = await this.service.fetchImage(req.path, { width, height });
     return img;

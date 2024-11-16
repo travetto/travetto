@@ -1,9 +1,9 @@
-import { castTo, Class, DeepPartial } from '@travetto/runtime';
+import { Any, castTo, Class, ClassInstance, DeepPartial } from '@travetto/runtime';
 
 import { BindUtil } from '../bind-util';
 import { SchemaRegistry } from '../service/registry';
 import { ClassConfig, ViewFieldsConfig } from '../service/types';
-import { ValidatorFn } from '../validate/types';
+import { MethodValidatorFn, ValidatorFn } from '../validate/types';
 
 /**
  * Register a class as a Schema
@@ -26,11 +26,22 @@ export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeF
  *
  * @param fn The validator function
  */
-export function Validator<T>(fn: ValidatorFn<T, string>) {
-  return (target: Class<T>): void => {
+export const Validator = <T>(fn: ValidatorFn<T, string>) =>
+  (target: Class<T>, k?: string): void => {
     SchemaRegistry.getOrCreatePending(target).validators!.push(castTo(fn));
   };
+
+/**
+ * Add a custom validator for a given method
+ *
+ * @param fn The validator function
+ */
+export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>) {
+  return (target: ClassInstance, k: string, prop: TypedPropertyDescriptor<T>): void => {
+    SchemaRegistry.registerPendingMethod(target.constructor, k).validators!.push(castTo(fn));
+  };
 }
+
 
 /**
  * Register a specific view for a class

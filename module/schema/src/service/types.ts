@@ -1,7 +1,7 @@
 import { Any, Class, Primitive } from '@travetto/runtime';
 
 import { AllViewⲐ } from '../internal/types';
-import { ValidatorFn } from '../validate/types';
+import { MethodValidatorFn, ValidatorFn } from '../validate/types';
 
 export type ClassList = Class | [Class];
 
@@ -24,6 +24,14 @@ export interface DescribableConfig {
    * List of examples
    */
   examples?: string[];
+}
+
+/**
+ * Basic structure for a method configuration
+ */
+export interface SchemaMethodConfig {
+  fields: FieldConfig[];
+  validators: MethodValidatorFn<unknown[]>[];
 }
 
 /**
@@ -85,7 +93,7 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * Method parameter configs
    */
-  methods: Record<string, FieldConfig[]>;
+  methods: Record<string, SchemaMethodConfig>;
 }
 
 /**

@@ -44,7 +44,7 @@ class ParamController {
   async jobOutput(@Path() jobId: string, @Required(false) @Query() time: Date) { }
 
   @Get('/job/output-min/:jobId')
-  async jobOutputMin(@Path() jobId: string, @(Min(10).Param) @Query() age: number) { }
+  async jobOutputMin(@Path() jobId: string, @Min(10) @Query() age: number) { }
 
   @Get('/job/output2')
   async jobOutput2(@Query({ name: 'optional' }) time?: Date) { }

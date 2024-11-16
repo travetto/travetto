@@ -25,6 +25,8 @@ export type AppErrorOptions<T> =
  */
 export class AppError<T = Record<string, unknown> | undefined> extends Error {
 
+  static defaultCategory?: ErrorCategory;
+
   /** Convert from JSON object */
   static fromJSON(e: unknown): AppError | undefined {
     if (!!e && typeof e === 'object' &&
@@ -54,7 +56,7 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
     super(message, opts?.cause ? { cause: opts.cause } : undefined);
     this.type = opts?.type ?? this.constructor.name;
     this.details = opts?.details!;
-    this.category = opts?.category ?? 'general';
+    this.category = opts?.category ?? castTo<typeof AppError>(this.constructor).defaultCategory ?? 'general';
     this.at = new Date(opts?.at ?? Date.now()).toISOString();
   }
 

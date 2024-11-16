@@ -161,13 +161,13 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
         service.upsert(Doctor, Doctor.from({
           id: fire.id, name: 'gob', specialty: 'eyes'
         })),
-      e => (e instanceof SubTypeNotSupportedError || e instanceof ExistsError) ? undefined : e
+      e => e instanceof SubTypeNotSupportedError || e instanceof ExistsError
     );
 
     await assert.rejects(
       () => service.update(Engineer, castTo(Doctor.from({ ...doc }))),
-      (e: Error) => (e instanceof NotFoundError || e instanceof SubTypeNotSupportedError || e instanceof TypeMismatchError) ? undefined : e);
-
+      e => e instanceof NotFoundError || e instanceof SubTypeNotSupportedError || e instanceof TypeMismatchError
+    );
     await timers.setTimeout(15);
 
     try {
@@ -189,7 +189,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     // Delete by wrong class
     await assert.rejects(
       () => service.delete(Doctor, fire.id),
-      e => (e instanceof SubTypeNotSupportedError || e instanceof NotFoundError) ? undefined : e
+      e => e instanceof SubTypeNotSupportedError || e instanceof NotFoundError
     );
 
     // Delete by base class
@@ -203,7 +203,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     // Delete by any subtype when id is missing
     await assert.rejects(
       () => service.delete(Firefighter, doc.id),
-      e => (e instanceof SubTypeNotSupportedError || e instanceof NotFoundError) ? undefined : e
+      e => e instanceof SubTypeNotSupportedError || e instanceof NotFoundError
     );
   }
 
