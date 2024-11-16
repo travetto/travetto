@@ -9,8 +9,8 @@ type JWTDetails = {
 /**
  * Error in decoding
  */
-export class JWTError extends AppError<JWTDetails> {
+export class JWTError extends AppError<JWTDetails | undefined> {
   constructor(message: string, opts?: AppErrorOptions<JWTDetails>) {
-    super(message, { category: 'data', ...opts });
+    super(message, { category: 'data', details: undefined!, ...opts });
   }
 }

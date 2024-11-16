@@ -48,26 +48,25 @@ class SchemaValidatorMethodSuite {
     await assert.rejects(
       async () =>
         SchemaValidator.validateMethod(TestClass, 'value', ['bob']),
+      e => e instanceof ValidationResultError && e.details.errors.find(x => /name cannot be bob/i.test(x.message))
+    );
+
+    await assert.rejects(
+      async () => SchemaValidator.validateMethod(TestClass, 'value', ['bob bob bob bob']),
+      e => e instanceof ValidationResultError && e.details.errors.find(x => /too long/i.test(x.message))
+    );
+
+    await assert.rejects(
+      async () => SchemaValidator.validateMethod(TestClass, 'value', ['bob bob bob bob']),
+      e => e instanceof ValidationResultError && e.details.errors.find(x => /even/i.test(x.message))
+    );
+
+    await assert.rejects(
+      async () => SchemaValidator.validateMethod(TestClass, 'value', ['bob bob bob bob']),
       e =>
-        (e instanceof ValidationResultError && !e.details.errors.find(x => /name cannot be bob/i.test(x.message)) ? e : undefined)
-    );
-
-    await assert.rejects(
-      async () => SchemaValidator.validateMethod(TestClass, 'value', ['bob bob bob bob']),
-      e => (e instanceof ValidationResultError && !e.details.errors.find(x => /too long/i.test(x.message)) ? e : undefined)
-    );
-
-    await assert.rejects(
-      async () => SchemaValidator.validateMethod(TestClass, 'value', ['bob bob bob bob']),
-      e => (e instanceof ValidationResultError && !e.details.errors.find(x => /even/i.test(x.message)) ? e : undefined)
-    );
-
-    await assert.rejects(
-      async () => SchemaValidator.validateMethod(TestClass, 'value', ['bob bob bob bob']),
-      e => (
         e instanceof ValidationResultError &&
-        !e.details.errors.find(x => /too long/i.test(x.message)) &&
-        !e.details.errors.find(x => /even/i.test(x.message))
-      ) ? e : undefined);
+        e.details.errors.find(x => /too long/i.test(x.message)) &&
+        e.details.errors.find(x => /even/i.test(x.message))
+    );
   }
 }
