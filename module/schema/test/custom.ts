@@ -60,8 +60,7 @@ export class CustomTest {
     });
     await assert.rejects(() => SchemaValidator.validate(User, u), 'Validation errors');
     await assert.rejects(() => SchemaValidator.validate(User, u),
-      (err: Error) =>
-        err instanceof ValidationResultError && err.details?.errors.some(x => x.message.includes('A password must'))
+      e => e instanceof ValidationResultError && e.details?.errors.some(x => x.message.includes('A password must'))
     );
   }
 
@@ -72,7 +71,7 @@ export class CustomTest {
     });
     await assert.rejects(() => SchemaValidator.validate(AsyncUser, u), 'Validation errors');
     await assert.rejects(() => SchemaValidator.validate(AsyncUser, u),
-      (err: Error) => err instanceof ValidationResultError && err.details?.errors.some(x => x.message.includes('A password must'))
+      e => e instanceof ValidationResultError && e.details?.errors.some(x => x.message.includes('A password must'))
     );
   }
 }
