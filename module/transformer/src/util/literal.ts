@@ -52,7 +52,8 @@ export class LiteralUtil {
     } else if (typeof val === 'string') {
       val = factory.createStringLiteral(val);
     } else if (typeof val === 'number') {
-      val = factory.createNumericLiteral(val);
+      const res = factory.createNumericLiteral(Math.abs(val));
+      val = val < 0 ? factory.createPrefixMinus(res) : res;
     } else if (typeof val === 'boolean') {
       val = val ? factory.createTrue() : factory.createFalse();
     } else if (val instanceof RegExp) {
