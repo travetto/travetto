@@ -108,6 +108,13 @@ export class LiteralUtil {
       } else {
         return parseInt(txt, 10);
       }
+    } else if (ts.isPrefixUnaryExpression(val) && val.operator === ts.SyntaxKind.MinusToken && ts.isNumericLiteral(val.operand)) {
+      const txt = val.operand.text;
+      if (txt.includes('.')) {
+        return -parseFloat(txt);
+      } else {
+        return -parseInt(txt, 10);
+      }
     } else if (val.kind === ts.SyntaxKind.FalseKeyword) {
       return false;
     } else if (val.kind === ts.SyntaxKind.TrueKeyword) {
