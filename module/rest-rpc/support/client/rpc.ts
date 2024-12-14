@@ -1,17 +1,20 @@
 type MethodKeys<C extends {}> = {
   [METHOD in keyof C]: C[METHOD] extends Function ? METHOD : never
 }[keyof C];
+type PromiseFn = (...args: any) => Promise<unknown>;
+type PromiseRes<V extends PromiseFn> = Awaited<ReturnType<V>>;
 
 export type PreRequestHandler = (item: RequestInit) => Promise<RequestInit | undefined | void>;
 export type PostResponseHandler = (item: Response) => Promise<Response | undefined | void>;
 
 export type RpcRequest = {
-  core?: Partial<RequestInit>;
-  timeout?: number;
+  core?: Partial<RequestInit> & {
+    timeout?: number;
+    retriesOnConnectFailure?: number;
+  };
   url: URL | string;
   consumeJSON?: <T>(text?: unknown) => (T | Promise<T>);
   consumeError?: (item: unknown) => (Error | Promise<Error>);
-  retriesOnConnectFailure?: number;
   preRequestHandlers?: PreRequestHandler[];
   postResponseHandlers?: PostResponseHandler[];
 };
@@ -142,20 +145,29 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
       }
     }
 
-    if (req.timeout) {
+    const signals = [];
+    if (core.signal) {
+      signals.push(core.signal);
+    }
+
+    if (core.timeout) {
       const controller = new AbortController();
-      core.signal = controller.signal;
       // Node/Browser handling of timeout registration
-      registerTimeout(controller, req.timeout, setTimeout, clearTimeout);
+      registerTimeout(controller, core.timeout, setTimeout, clearTimeout);
+      signals.push(controller.signal)
+    }
+
+    if (signals.length) {
+      core.signal = AbortSignal.any(signals);
     }
 
     let resolved: Response | undefined;
-    for (let i = 0; i <= (req.retriesOnConnectFailure ?? 0); i += 1) {
+    for (let i = 0; i <= (core.retriesOnConnectFailure ?? 0); i += 1) {
       try {
         resolved = await fetch(req.url, core);
         break;
       } catch (err) {
-        if (i < (req.retriesOnConnectFailure ?? 0)) {
+        if (i < (core.retriesOnConnectFailure ?? 0)) {
           await new Promise(r => setTimeout(r, 1000)); // Wait 1s
           continue;
         } else {
@@ -205,11 +217,10 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
   // @ts-ignore
   return function (opts, decorate) {
     const client: RpcRequest = {
-      timeout: 0,
       consumeJSON,
       consumeError,
       ...opts,
-      core: { credentials: 'include', mode: 'cors', ...opts.core },
+      core: { timeout: 0, credentials: 'include', mode: 'cors', ...opts.core },
     };
     const cache: Record<string, unknown> = {};
     // @ts-ignore
@@ -230,6 +241,14 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
           }
         })
     });
+  };
+}
+
+export function withConfigFactoryDecorator(opts: RpcRequest) {
+  return {
+    withConfig<V extends PromiseFn>(this: V, extra: Partial<RpcRequest['core']>, ...params: Parameters<V>): Promise<PromiseRes<V>> {
+      return invokeFetch({ ...opts, core: { ...opts.core, ...extra } }, ...params);
+    }
   };
 }
 
