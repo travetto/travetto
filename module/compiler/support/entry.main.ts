@@ -11,7 +11,6 @@ import { CompilerRunner } from './server/runner';
 import { CompilerClient } from './server/client';
 import { CommonUtil } from './util';
 
-
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {
   const client = new CompilerClient(ctx, Log.scoped('client'));
@@ -91,21 +90,19 @@ export const main = (ctx: ManifestContext) => {
       await compile('watch');
     },
 
-    /** Build and return a loader */
-    async getLoader(): Promise<(mod: string, args?: string[]) => Promise<unknown>> {
+    /** Set arguments and import module */
+    async exec(mod: string, args?: string[]): Promise<unknown> {
       Log.initLevel('none');
       if (!(await client.isWatching())) { // Short circuit if we can
         Log.initLevel('error');
         await compile('build');
       }
 
-      return (mod, args) => {
-        process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.main.name); // Setup for running
-        if (args) {
-          process.argv = [process.argv0, mod, ...args];
-        }
-        return import(CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', mod)); // Return function to run import on a module
-      };
+      process.env.TRV_MANIFEST = CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', ctx.main.name); // Setup for running
+      if (args) {
+        process.argv = [process.argv0, mod, ...args];
+      }
+      return import(CommonUtil.resolveWorkspace(ctx, ctx.build.outputFolder, 'node_modules', mod)); // Return function to run import on a module
     },
 
     /** Manifest entry point */
@@ -116,3 +113,5 @@ export const main = (ctx: ManifestContext) => {
   };
   return ops;
 };
+
+export type Operations = ReturnType<typeof main>;

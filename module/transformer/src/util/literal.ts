@@ -52,7 +52,8 @@ export class LiteralUtil {
     } else if (typeof val === 'string') {
       val = factory.createStringLiteral(val);
     } else if (typeof val === 'number') {
-      val = factory.createNumericLiteral(val);
+      const res = factory.createNumericLiteral(Math.abs(val));
+      val = val < 0 ? factory.createPrefixMinus(res) : res;
     } else if (typeof val === 'boolean') {
       val = val ? factory.createTrue() : factory.createFalse();
     } else if (val instanceof RegExp) {
@@ -106,6 +107,13 @@ export class LiteralUtil {
         return parseFloat(txt);
       } else {
         return parseInt(txt, 10);
+      }
+    } else if (ts.isPrefixUnaryExpression(val) && val.operator === ts.SyntaxKind.MinusToken && ts.isNumericLiteral(val.operand)) {
+      const txt = val.operand.text;
+      if (txt.includes('.')) {
+        return -parseFloat(txt);
+      } else {
+        return -parseInt(txt, 10);
       }
     } else if (val.kind === ts.SyntaxKind.FalseKeyword) {
       return false;

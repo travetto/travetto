@@ -21,6 +21,7 @@ related/*/out
 related/*/.vscode
 !related/vscode-plugin/.vscode
 
+module/compiler/bin/gen.*.mjs
 module/compiler/bin/manifest-context.mjs
 
 # Pack
