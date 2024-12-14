@@ -14,19 +14,20 @@ async function writeIfStale(src = '', dest = '', transform = async (x = '') => x
   }
 }
 
-async function transpile(content = '', esm = true, full = true) {
+async function transpile(content = '', esm = true) {
   const ts = (await import('typescript')).default;
   return ts.transpile(content, {
     target: ts.ScriptTarget.ES2022,
     module: esm ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS,
-    ...(full ? { esModuleInterop: true, allowSyntheticDefaultImports: true } : {})
+    esModuleInterop: true,
+    allowSyntheticDefaultImports: true
   });
 }
 
 async function getContext() {
   const ctxSrc = require.resolve('@travetto/manifest/src/context.ts');
   const ctxDest = path.resolve(__dirname, 'gen.context.mjs');
-  await writeIfStale(ctxSrc, ctxDest, content => transpile(content, true, false));
+  await writeIfStale(ctxSrc, ctxDest, content => transpile(content, true));
   const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest/src/context')} */ v) => v.getManifestContext());
 
   const srcPath = path.resolve.bind(path, ctx.workspace.path, ctx.build.compilerModuleFolder);
@@ -34,7 +35,6 @@ async function getContext() {
     const base = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, mod, file);
     return `${base}${file.includes('.') ? '' : file.includes('/') ? '.ts' : '/__index__.ts'}`.replace('.ts', '.js');
   };
-
 
   return {
     packageType: ctx.workspace.type,
@@ -46,7 +46,7 @@ async function getContext() {
       .replace(/from '(@travetto\/[^/']+)([/][^']+)?'/g, (_, mod, modFile) => `from '${destPath(modFile, mod)}'`),
     loadMain: () => import(destPath('support/entry.main.ts'))
       .then((/** @type {import('../support/entry.main')} */ v) => v.main(ctx)),
-    supportFiles: () => readdir(srcPath('support/.'), { recursive: true, encoding: 'utf8' })
+    supportFiles: () => readdir(srcPath('support'), { recursive: true, encoding: 'utf8' })
       .then(v => v.filter(f => f.endsWith('.ts')).map(v => `support/${v}`))
   };
 }
