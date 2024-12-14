@@ -14,20 +14,19 @@ async function writeIfStale(src = '', dest = '', transform = async (x = '') => x
   }
 }
 
-async function transpile(content = '', esm = true) {
+async function transpile(content = '', esm = true, full = true) {
   const ts = (await import('typescript')).default;
   return ts.transpile(content, {
     target: ts.ScriptTarget.ES2022,
     module: esm ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS,
-    esModuleInterop: true,
-    allowSyntheticDefaultImports: true
+    ...(full ? { esModuleInterop: true, allowSyntheticDefaultImports: true } : {})
   });
 }
 
 async function getContext() {
   const ctxSrc = require.resolve('@travetto/manifest/src/context.ts');
   const ctxDest = path.resolve(__dirname, 'gen.context.mjs');
-  await writeIfStale(ctxSrc, ctxDest, content => transpile(content, true));
+  await writeIfStale(ctxSrc, ctxDest, content => transpile(content, true, false));
   const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest/src/context')} */ v) => v.getManifestContext());
 
   const srcPath = path.resolve.bind(path, ctx.workspace.path, ctx.build.compilerModuleFolder);

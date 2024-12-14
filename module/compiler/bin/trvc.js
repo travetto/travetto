@@ -34,6 +34,6 @@ require('./entry.common.js').load(ops => {
     case 'watch': return ops.watch();
     case 'stop': return ops.stop();
     case 'restart': return ops.restart();
-    default: return console.error(`\nUnknown trvc operation: ${op}\n${help}`);
+    default: console.error(`\nUnknown trvc operation: ${op}\n${help}`);
   }
 });
