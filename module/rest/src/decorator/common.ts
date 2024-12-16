@@ -39,17 +39,22 @@ export function Produces(mime: string): EndpointDecorator { return register({ he
 
 
 type HeaderSet = ReturnType<typeof SetHeaders>;
+type CacheControlFlag =
+  'must-revalidate' | 'public' | 'private' | 'no-cache' |
+  'no-store' | 'no-transform' | 'proxy-revalidate' | 'immutable' |
+  'must-understand' | 'stale-if-error' | 'stale-while-revalidate';
+
 
 /**
  * Set the max-age of a response based on the config
  * @param value The value for the duration
  * @param unit The unit of measurement
  */
-export function CacheControl(value: number | TimeSpan): HeaderSet {
+export function CacheControl(value: number | TimeSpan, flags: CacheControlFlag[] = []): HeaderSet {
   const delta = TimeUtil.asSeconds(value);
   return SetHeaders({
     Expires: delta === 0 ? '-1' : ((): string => TimeUtil.fromNow(delta, 's').toUTCString()),
-    'Cache-Control': delta === 0 ? 'max-age=0,no-cache' : `max-age=${delta}`
+    'Cache-Control': delta === 0 ? 'max-age=0,no-cache' : [...flags, `max-age=${delta}`].join(',')
   });
 }
 
