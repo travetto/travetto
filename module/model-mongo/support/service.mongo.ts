@@ -1,6 +1,6 @@
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = process.env.MONGO_VERSION ?? '7.0';
+const version = process.env.MONGO_VERSION ?? '8.0';
 
 export const service: ServiceDescriptor = {
   name: 'mongodb',

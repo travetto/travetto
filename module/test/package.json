@@ -31,7 +31,7 @@
     "@travetto/runtime": "^5.0.13",
     "@travetto/terminal": "^5.0.15",
     "@travetto/worker": "^5.0.15",
-    "yaml": "^2.6.0"
+    "yaml": "^2.6.1"
   },
   "peerDependencies": {
     "@travetto/cli": "^5.0.16",
