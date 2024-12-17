@@ -25,6 +25,9 @@
   "engines": {
     "node": ">=22.0.0"
   },
+  "dependencies": {
+    "@types/node": "^22.10.2"
+  },
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/manifest"
