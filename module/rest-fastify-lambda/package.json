@@ -25,7 +25,7 @@
     "directory": "module/rest-fastify-lambda"
   },
   "dependencies": {
-    "@fastify/aws-lambda": "^4.1.0",
+    "@fastify/aws-lambda": "^5.0.0",
     "@travetto/rest": "^5.0.17",
     "@travetto/rest-aws-lambda": "^5.0.17",
     "@travetto/rest-fastify": "^5.0.17"

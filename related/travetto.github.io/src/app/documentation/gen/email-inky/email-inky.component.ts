@@ -5,8 +5,7 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-email-inky',
     templateUrl: './email-inky.component.html',
-    styleUrls: [],
-    standalone: true
+    styleUrls: []
 })
 export class EmailInkyComponent {
 

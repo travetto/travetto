@@ -35,7 +35,7 @@
     "@types/inline-css": "^3.0.3",
     "html-entities": "^2.5.2",
     "inline-css": "^4.0.2",
-    "purgecss": "^6.0.0",
+    "purgecss": "^7.0.2",
     "sass": "^1.83.0"
   },
   "peerDependencies": {

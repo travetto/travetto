@@ -5,7 +5,6 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-model-mysql',
     templateUrl: './model-mysql.component.html',
-    styleUrls: [],
-    standalone: true
+    styleUrls: []
 })
 export class ModelMysqlComponent { }

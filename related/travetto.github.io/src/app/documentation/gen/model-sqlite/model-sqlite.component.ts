@@ -5,7 +5,6 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-model-sqlite',
     templateUrl: './model-sqlite.component.html',
-    styleUrls: [],
-    standalone: true
+    styleUrls: []
 })
 export class ModelSqliteComponent { }

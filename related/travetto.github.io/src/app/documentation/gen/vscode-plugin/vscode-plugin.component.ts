@@ -5,7 +5,6 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-vscode-plugin',
     templateUrl: './vscode-plugin.component.html',
-    styleUrls: ['./vscode-plugin.component.scss'],
-    standalone: true
+    styleUrls: ['./vscode-plugin.component.scss']
 })
 export class VSCodePluginComponent { }

@@ -5,7 +5,6 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-scaffold',
     templateUrl: './scaffold.component.html',
-    styleUrls: [],
-    standalone: true
+    styleUrls: []
 })
 export class ScaffoldComponent { }
