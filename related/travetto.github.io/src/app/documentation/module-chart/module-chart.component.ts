@@ -4,11 +4,10 @@ import { RouterLink } from '@angular/router';
 import { PAGES } from '../pages';
 
 @Component({
-  selector: 'app-module-chart',
-  imports: [RouterLink],
-  templateUrl: './module-chart.component.html',
-  styleUrls: ['./module-chart.component.scss', './module-chart.layout.scss'],
-  standalone: true,
+    selector: 'app-module-chart',
+    imports: [RouterLink],
+    templateUrl: './module-chart.component.html',
+    styleUrls: ['./module-chart.component.scss', './module-chart.layout.scss']
 })
 export class ModuleChartComponent {
 

@@ -5,8 +5,7 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-rest-client',
     templateUrl: './rest-client.component.html',
-    styleUrls: [],
-    standalone: true
+    styleUrls: []
 })
 export class RestClientComponent {
 

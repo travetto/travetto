@@ -5,7 +5,6 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-rest-fastify-lambda',
     templateUrl: './rest-fastify-lambda.component.html',
-    styleUrls: [],
-    standalone: true
+    styleUrls: []
 })
 export class RestFastifyLambdaComponent { }

@@ -5,7 +5,6 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-rest-aws-lambda',
     templateUrl: './rest-aws-lambda.component.html',
-    styleUrls: [],
-    standalone: true
+    styleUrls: []
 })
 export class RestAwsLambdaComponent { }

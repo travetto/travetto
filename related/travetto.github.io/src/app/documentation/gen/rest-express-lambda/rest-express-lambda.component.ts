@@ -5,7 +5,6 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-rest-express-lambda',
     templateUrl: './rest-express-lambda.component.html',
-    styleUrls: [],
-    standalone: true
+    styleUrls: []
 })
 export class RestExpressLambdaComponent { }

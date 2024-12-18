@@ -5,7 +5,6 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-manifest',
     templateUrl: './manifest.component.html',
-    styleUrls: ['./manifest.component.scss'],
-    standalone: true
+    styleUrls: ['./manifest.component.scss']
 })
 export class ManifestComponent { }

@@ -5,7 +5,6 @@ import { RouterLink, RouterModule } from '@angular/router';
     imports: [RouterLink, RouterModule],
     selector: 'app-terminal',
     templateUrl: './terminal.component.html',
-    styleUrls: ['./terminal.component.scss'],
-    standalone: true
+    styleUrls: ['./terminal.component.scss']
 })
 export class TerminalComponent { }
