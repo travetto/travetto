@@ -91,6 +91,9 @@ export class DataUtil {
         const retObj: Record<string, unknown> = castTo(ret);
 
         for (const key of Object.keys(bObj)) {
+          if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+            continue;
+          }
           retObj[key] = this.#deepAssignRaw(retObj[key], bObj[key], mode);
         }
       }
