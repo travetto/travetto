@@ -87,8 +87,6 @@ export class IpcChannel<V = unknown> {
           const complete = new Promise<void>(r => this.proc.on('close', r));
           this.proc.kill();
           await Promise.race([complete, Util.nonBlockingTimeout(1000)]);
-        } else {
-          this.proc.disconnect();
         }
       } catch { }
     }

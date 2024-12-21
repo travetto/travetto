@@ -1,11 +1,12 @@
 // @ts-check
+/* eslint-disable no-undef */
 const { stat, readFile, writeFile, mkdir, rm, readdir } = require('node:fs/promises');
 const path = require('node:path');
 
 const COMP_MOD = '@travetto/compiler';
 
 async function writeIfStale(src = '', dest = '', transform = async (x = '') => x) {
-  const [srcStat, destStat] = await Promise.all([src, dest].map(x => stat(`${x}`).then(x => x.mtimeMs, () => 0)));
+  const [srcStat, destStat] = await Promise.all([src, dest].map(x => stat(`${x}`).then(z => z.mtimeMs, () => 0)));
 
   if (!destStat || destStat < srcStat) {
     const text = src ? await readFile(src, 'utf8') : '';
@@ -46,7 +47,7 @@ async function getContext() {
     loadMain: () => import(destPath('support/entry.main.ts'))
       .then((/** @type {import('../support/entry.main')} */ v) => v.main(ctx)),
     supportFiles: () => readdir(srcPath('support'), { recursive: true, encoding: 'utf8' })
-      .then(v => v.filter(f => f.endsWith('.ts')).map(v => `support/${v}`))
+      .then(v => v.filter(f => f.endsWith('.ts')).map(j => `support/${j}`))
   };
 }
 
@@ -66,7 +67,7 @@ async function load(/** @type {(ops: import('../support/entry.main').Operations)
         t => transpile(t, ctx.packageType === 'module').then(ctx.cleanImports))));
 
     process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
-    process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children  
+    process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
     const res = await ctx.loadMain();
     // @ts-ignore
     try { module.enableCompileCache(); } catch { }

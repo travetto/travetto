@@ -5,6 +5,7 @@
     "moduleResolution": "node",
     "target": "esnext",
     "lib": [
+      "dom",
       "es2022"
     ],
     "esModuleInterop": true,

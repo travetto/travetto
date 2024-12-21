@@ -4,27 +4,29 @@ import { Options, Pool, createPool } from 'generic-pool';
 import { Env, Util, AsyncQueue } from '@travetto/runtime';
 
 type ItrSource<I> = Iterable<I> | AsyncIterable<I>;
+type WorkerExecutor<I, O> = (input: I, idx: number) => Promise<O>;
 
 /**
  * Worker definition
  */
 export interface Worker<I, O = unknown> {
-  active?: boolean;
-  id?: unknown;
+  active: boolean;
+  id: unknown;
   init?(): Promise<unknown>;
-  execute(input: I, idx: number): Promise<O>;
+  execute: WorkerExecutor<I, O>;
   destroy?(): Promise<void>;
   release?(): unknown;
 }
 
-type WorkerInput<I, O> = (() => Worker<I, O>) | ((input: I, inputIdx: number) => Promise<O>);
+type WorkerFactoryInput<I, O = unknown> = Partial<Worker<I, O>> & { execute: WorkerExecutor<I, O> };
+type WorkerInput<I, O> = (() => WorkerFactoryInput<I, O>) | WorkerExecutor<I, O>;
 type WorkPoolConfig<I, O> = Options & {
   onComplete?: (output: O, input: I, finishIdx: number) => void;
   onError?(ev: Error, input: I, finishIdx: number): (unknown | Promise<unknown>);
   shutdown?: AbortSignal;
 };
 
-const isWorkerFactory = <I, O>(o: WorkerInput<I, O>): o is (() => Worker<I, O>) => o.length === 0;
+const isWorkerFactory = <I, O>(o: WorkerInput<I, O>): o is (() => WorkerFactoryInput<I, O>) => o.length === 0;
 
 /**
  * Work pool support
@@ -45,13 +47,12 @@ export class WorkPool {
       async create() {
         try {
           pendingAcquires += 1;
-          const res = isWorkerFactory(worker) ? await worker() : { execute: worker };
-          res.id ??= Util.uuid();
-
-          if (res.init) {
-            await res.init();
-          }
-
+          const res: Worker<I, O> = {
+            id: Util.uuid(),
+            active: true,
+            ...isWorkerFactory(worker) ? await worker() : { execute: worker }
+          };
+          await res.init?.();
           return res;
         } finally {
           pendingAcquires -= 1;
@@ -63,7 +64,7 @@ export class WorkPool {
         }
         return x.destroy?.();
       },
-      validate: async (x: Worker<I, O>) => x.active ?? true
+      validate: async (x: Worker<I, O>) => x.active
     }, {
       evictionRunIntervalMillis: 5000,
       ...(opts ?? {}),
@@ -115,7 +116,7 @@ export class WorkPool {
             console.debug('Releasing', { pid: process.pid, worker: worker.id });
           }
           try {
-            if (worker.active ?? true) {
+            if (worker.active) {
               try {
                 await worker.release?.();
               } catch { }

@@ -5,12 +5,10 @@ import path from 'node:path';
 
 import { AfterAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { DependencyRegistry } from '@travetto/di';
 
 
-import { RestClientGeneratorService } from '../src/service';
-import { FetchClientGenerator } from '../src/provider/fetch';
-import { AngularClientGenerator } from '../src/provider/angular';
+import { FetchClientGenerator } from '../src/fetch';
+import { AngularClientGenerator } from '../src/angular';
 
 import './sample';
 
@@ -32,11 +30,9 @@ export class SimpleSuite {
     const exists = (file: string) => fs.stat(path.resolve(root, file)).then(() => true, () => false);
 
     await RootRegistry.init();
-    const svc = await DependencyRegistry.getInstance(RestClientGeneratorService);
 
     await fs.mkdir(root, { recursive: true });
-    const gen = new FetchClientGenerator(root, undefined, { node: true });
-    await svc.renderClient(gen);
+    await new FetchClientGenerator(root, undefined, { node: true }).render();
 
     assert(await exists('package.json'));
     assert(JSON.parse(await fs.readFile(path.resolve(root, 'package.json'), 'utf8')).main === 'src/index.ts');
@@ -52,11 +48,8 @@ export class SimpleSuite {
     const exists = (file: string) => fs.stat(path.resolve(root, file)).then(() => true, () => false);
 
     await RootRegistry.init();
-    const svc = await DependencyRegistry.getInstance(RestClientGeneratorService);
-
     await fs.mkdir(root, { recursive: true });
-    const gen = new AngularClientGenerator(root);
-    await svc.renderClient(gen);
+    await new AngularClientGenerator(root).render();
 
     assert(!await exists('package.json'));
     assert(await exists('index.ts'));
