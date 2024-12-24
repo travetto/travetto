@@ -49,10 +49,10 @@ export class PostgreSQLConnection extends Connection<PoolClient> {
     ShutdownManager.onGracefulShutdown(() => this.#pool.end(), this);
   }
 
-  async execute<T = unknown>(conn: PoolClient, query: string): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(conn: PoolClient, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
     console.debug('Executing query', { query });
     try {
-      const out = await conn.query(query);
+      const out = await conn.query(query, values);
       const records: T[] = [...out.rows].map(v => ({ ...v }));
       return { count: out.rowCount!, records };
     } catch (err) {

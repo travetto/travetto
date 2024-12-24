@@ -72,11 +72,11 @@ export class SqliteConnection extends Connection<Database> {
     ShutdownManager.onGracefulShutdown(() => this.#pool.clear(), this);
   }
 
-  async execute<T = unknown>(conn: Database, query: string): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(conn: Database, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
     return this.#withRetries(async () => {
       console.debug('Executing query', { query });
       try {
-        const out = await conn.prepare<unknown[], T>(query)[query.trim().startsWith('SELECT') ? 'all' : 'run']();
+        const out = await conn.prepare<unknown[], T>(query)[query.trim().startsWith('SELECT') ? 'all' : 'run'](...values ?? []);
         if (Array.isArray(out)) {
           const records: T[] = out.map(v => ({ ...v }));
           return { count: out.length, records };

@@ -18,12 +18,12 @@ export abstract class Connection<C = unknown> {
 
   transactionDialect = {
     begin: 'BEGIN;',
-    beginNested: 'SAVEPOINT %;',
+    beginNested: 'SAVEPOINT $1;',
     isolate: 'SET TRANSACTION ISOLATION LEVEL READ COMMITTED;',
     rollback: 'ROLLBACK;',
-    rollbackNested: 'ROLLBACK TO %;',
+    rollbackNested: 'ROLLBACK TO $1;',
     commit: 'COMMIT;',
-    commitNested: 'RELEASE SAVEPOINT %;'
+    commitNested: 'RELEASE SAVEPOINT $1;'
   };
 
   constructor(public readonly context: AsyncContext) {
@@ -54,7 +54,7 @@ export abstract class Connection<C = unknown> {
    * @param rawConnection
    * @param query
    */
-  abstract execute<T = unknown>(rawConnection: C, query: string): Promise<{ records: T[], count: number }>;
+  abstract execute<T = unknown>(rawConnection: C, query: string, values?: unknown[]): Promise<{ records: T[], count: number }>;
 
   /**
    * Acquire new connection
@@ -146,7 +146,7 @@ export abstract class Connection<C = unknown> {
   async startTx(conn: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
-        await this.execute(conn, this.transactionDialect.beginNested.replace('%', transactionId));
+        await this.execute(conn, this.transactionDialect.beginNested, [transactionId]);
       }
     } else {
       if (this.isolatedTransactions) {
@@ -162,7 +162,7 @@ export abstract class Connection<C = unknown> {
   async commitTx(conn: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.nestedTransactions) {
-        await this.execute(conn, this.transactionDialect.commitNested.replace('%', transactionId));
+        await this.execute(conn, this.transactionDialect.commitNested, [transactionId]);
       }
     } else {
       await this.execute(conn, this.transactionDialect.commit);
@@ -175,7 +175,7 @@ export abstract class Connection<C = unknown> {
   async rollbackTx(conn: C, transactionId?: string): Promise<void> {
     if (transactionId) {
       if (this.isolatedTransactions) {
-        await this.execute(conn, this.transactionDialect.rollbackNested.replace('%', transactionId));
+        await this.execute(conn, this.transactionDialect.rollbackNested, [transactionId]);
       }
     } else {
       await this.execute(conn, this.transactionDialect.rollback);

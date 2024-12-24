@@ -59,10 +59,12 @@ export class MySQLConnection extends Connection<PoolConnection> {
     return res;
   }
 
-  async execute<T = unknown>(conn: PoolConnection, query: string): Promise<{ count: number, records: T[] }> {
+  async execute<T = unknown>(conn: PoolConnection, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
     console.debug('Executing Query', { query });
+    let prepared;
     try {
-      const [results,] = await conn.query(query);
+      prepared = (values?.length ?? 0) > 0 ? await conn.prepare(query) : undefined;
+      const [results,] = await (prepared ? prepared.execute(values) : conn.query(query));
       if (isSimplePacket(results)) {
         return { records: [], count: results.affectedRows };
       } else {
@@ -79,6 +81,10 @@ export class MySQLConnection extends Connection<PoolConnection> {
       } else {
         throw err;
       }
+    } finally {
+      try {
+        await prepared?.close();
+      } catch { }
     }
   }
 
