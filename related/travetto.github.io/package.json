@@ -39,7 +39,6 @@
     "@angular/cli": "^19.0.6",
     "@angular/compiler-cli": "^19.0.5",
     "@types/node": "^22.10.2",
-    "codelyzer": "^6.0.2",
     "source-map-explorer": "^2.5.3",
     "ts-node": "~10.9.1",
     "typescript": "~5.5.4"
