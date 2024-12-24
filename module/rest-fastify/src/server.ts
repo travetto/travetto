@@ -62,7 +62,7 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
       if (route.path) {
         sub = `${path}/${route.path}`;
       }
-      sub = sub.replace(/\/+/g, '/').replace(/\/+$/, '');
+      sub = sub.replace(/\/{1,3}/g, '/').replace(/\/{1,3}$/, '');
       this.raw[route.method](sub, async (req, reply) => {
         await route.handlerFinalized!(
           req[TravettoEntityⲐ] ??= FastifyServerUtil.getRequest(req),

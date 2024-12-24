@@ -1,4 +1,5 @@
 import { Request } from '@travetto/rest';
+import { castTo } from '@travetto/runtime';
 
 /**
  * Passport utilities
@@ -39,10 +40,12 @@ export class PassportUtil {
   static addToState(state: string | Record<string, unknown>, current?: string | Request, key?: string): string {
     const pre = this.readState(current) ?? {};
     const toAdd = typeof state === 'string' ? JSON.parse(state) : state;
-    if (key) {
-      Object.assign(pre[key] ??= {}, toAdd);
-    } else {
-      Object.assign(pre, toAdd);
+    const base: Record<string, unknown> = key ? castTo(pre[key] ??= {}) : { ...pre };
+    for (const k of Object.keys(toAdd)) {
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype') {
+        continue;
+      }
+      base[k] = toAdd[k];
     }
     return this.writeState(pre)!;
   }

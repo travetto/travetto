@@ -126,8 +126,8 @@ export class ImportManager {
     }
 
     // Allow for node classes to be imported directly
-    if (/@types\/node/.test(file)) {
-      file = PackageUtil.resolveImport(file.replace(/.*@types\/node\//, '').replace(D_OR_D_TS_EXT_RE, ''));
+    if (/@types\/node\//.test(file)) {
+      file = PackageUtil.resolveImport(file.split('@types/node/')[1].replace(D_OR_D_TS_EXT_RE, ''));
     }
 
     if (!D_OR_D_TS_EXT_RE.test(file) && !this.#newImports.has(file)) {

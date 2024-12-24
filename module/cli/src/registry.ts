@@ -3,7 +3,7 @@ import { asConstructable, Class, classConstruct, describeFunction, Runtime, Runt
 import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
 
-const CLI_FILE_REGEX = /\/cli[.](?<name>.*?)([.]tsx?)?$/;
+const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
 
 class $CliCommandRegistry {

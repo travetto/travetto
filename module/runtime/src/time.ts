@@ -69,7 +69,7 @@ export class TimeUtil {
     if (value === undefined) {
       return value;
     }
-    const val = (typeof value === 'string' && /\d+[a-z]$/i.test(value)) ?
+    const val = (typeof value === 'string' && /\d{1,30}[a-z]$/i.test(value)) ?
       (this.isTimeSpan(value) ? this.asMillis(value) : undefined) :
       (typeof value === 'string' ? parseInt(value, 10) :
         (value instanceof Date ? value.getTime() : value));

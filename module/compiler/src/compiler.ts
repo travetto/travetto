@@ -103,7 +103,7 @@ export class Compiler {
 
     for (const file of files) {
       const err = await emitter(file);
-      const imp = file.replace(/.*node_modules\//, '');
+      const imp = file.includes('node_modules/') ? file.split('node_modules/')[1] : file;
       yield { file: imp, i: i += 1, err, total: files.length };
       if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
         lastSent = Date.now();

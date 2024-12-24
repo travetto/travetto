@@ -3,8 +3,8 @@ import path from 'node:path';
 
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
-const ESLINT_PATTERN = /\s*\/\/ eslint.*$/g;
-const ENV_KEY = /Env.([^.]+)[.]key/g;
+const ESLINT_PATTERN = /\s{0,10}\/\/ eslint.{0,300}$/g;
+const ENV_KEY = /Env.([^.]{1,100})[.]key/g;
 
 /**
  * Standard file utilities
@@ -113,15 +113,15 @@ export class DocFileUtil {
     let methodPrefix = '';
     code = code.split(/\n/).map((x) => {
       if (!methodPrefix) {
-        const info = x.match(/^(\s+)(?:(private|public)\s+)?(?:static\s+)?(?:async\s+)?(?:[*]\s*)?(?:(?:get|set)\s+)?(\S+)[<(](.*)/);
+        const info = x.match(/^(\s{0,50})(?:(private|public)\s{1,10})?(?:static\s{1,10})?(?:async\s{1,10})?(?:[*]\s{0,10})?(?:(?:get|set)\s{1,10})?(\S{1,200})[<(](.{0,500})/);
         if (info) {
           const [, space, __name, rest] = info;
           if (!rest.endsWith(';')) {
-            if (/\s*[{]\s*return.*$/.test(x)) {
-              return x.replace(/\s*[{]\s*return.*$/, ';');
+            if (/\s{0,50}[{]\s{0,50}return.{0,200}$/.test(x)) {
+              return x.replace(/\s{0,50}[{]\s{0,50}return.{0,200}$/, ';');
             } else {
               methodPrefix = space;
-              return x.replace(/\s*[{]\s*$/, ';');
+              return x.replace(/\s{0,50}[{]\s{0,50}$/, ';');
             }
           }
         }

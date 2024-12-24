@@ -220,7 +220,7 @@ export class BindUtil {
             // Ensure its an array
             if (!Array.isArray(v) && field.array) {
               if (typeof v === 'string' && v.includes(',')) {
-                v = v.split(/\s*,\s*/);
+                v = v.split(/,/).map(x => x.trim());
               } else {
                 v = [v];
               }

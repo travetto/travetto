@@ -11,13 +11,15 @@ type Tokenized = {
   finalize: (onToken: (token: string) => string) => string;
 };
 
+const SUPPORT_SRC = /(support|src)\//;
+
 /**
  * Email compile tools
  */
 export class EmailCompileUtil {
   static #HTML_CSS_IMAGE_URLS = [
-    /(?<pre><img[^>]src=\s*["'])(?<src>[^"{}]+)/g,
-    /(?<pre>background(?:-image)?:\s*url[(]['"]?)(?<src>[^"'){}]+)/g
+    /(?<pre><img[^>]src=\s{0,10}["'])(?<src>[^"{}]{1,1000})/g,
+    /(?<pre>background(?:-image)?:\s{0,10}url[(]['"]?)(?<src>[^"'){}]{1,1000})/g
   ];
 
   static #EXT = /[.]email[.]tsx$/;
@@ -33,7 +35,7 @@ export class EmailCompileUtil {
    * Generate singular output path given a file
    */
   static buildOutputPath(file: string, suffix: string, prefix?: string): string {
-    const res = file.replace(/.*(support|src)\//, '').replace(this.#EXT, suffix);
+    const res = (SUPPORT_SRC.test(file) ? file.split(SUPPORT_SRC)[1] : file).replace(this.#EXT, suffix);
     return prefix ? path.join(prefix, res) : res;
   }
 
@@ -68,7 +70,7 @@ export class EmailCompileUtil {
         text = text.replace(all, `${pre}${token}`);
       }
     }
-    const finalize = (onToken: (token: string) => string): string => text.replace(/@@[^@]+@@/g, t => onToken(t));
+    const finalize = (onToken: (token: string) => string): string => text.replace(/@@[^@]{1,100}@@/g, t => onToken(t));
 
     return { text, tokens, finalize };
   }
@@ -161,7 +163,7 @@ export class EmailCompileUtil {
   static handleHtmlEdgeCases(html: string): string {
     return html
       .replace(/\n{3,100}/msg, '\n\n')
-      .replace(/<(meta|img|link|hr|br)[^>]*>/g, a => a.replace('>', '/>')) // Fix self closing
+      .replace(/<(meta|img|link|hr|br)[^>]{0,200}>/g, a => a.replace(/>/g, '/>')) // Fix self closing
       .replace(/&apos;/g, '&#39;') // Fix apostrophes, as outlook hates them
       .replace(/(background(?:-color)?:\s*)([#0-9a-f]{6,8})([^>.#,]+)>/ig,
         (all, p, col, rest) => `${p}${col}${rest} bgcolor="${col}">`) // Inline bg-color

@@ -8,7 +8,7 @@ import { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from 
 export class MailUtil {
   /** Remove brand from text */
   static purgeBrand(text: string): string {
-    return text.replace(/<!-- WARNING:[^\n]*\n/m, '');
+    return text.replace(/<!-- WARNING:[^\n]{0,500}\n/m, '');
   }
 
   /** Add brand to text */
@@ -31,7 +31,8 @@ export class MailUtil {
     const attachments: EmailAttachment[] = [];
     const contentMap = new Map<string, string>();
 
-    html = html.replace(/data:(image\/[^;]+);base64,([^"']+)/g, (__, contentType, content) => {
+    // Max of 10mb
+    html = html.replace(/data:(image\/[^;]{1,50});base64,([^"']{1,10000000})/g, (__, contentType, content) => {
       // Ensure same data uris map to a single cid
       if (!contentMap.has(content)) {
         const cid = `image-${idx += 1}`;
