@@ -1,10 +1,16 @@
-import { Suite } from '@travetto/test';
+import assert from 'node:assert';
+import fs from 'fs/promises';
+
+import { Suite, Test } from '@travetto/test';
+import { TimeUtil } from '@travetto/runtime';
+import { ModelRegistry } from '@travetto/model';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob';
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud';
-import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
+import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expiry';
 
 import { FileModelConfig, FileModelService } from '../src/service';
+import { DependencyRegistry } from '@travetto/di';
 
 
 @Suite()
@@ -29,4 +35,43 @@ export class FileBlobSuite extends ModelBlobSuite {
 export class FileExpirySuite extends ModelExpirySuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
+
+
+  @Test()
+  async ensureCulled() {
+    const service = await this.service;
+    const config = await DependencyRegistry.getInstance(this.configClass);
+    const store = ModelRegistry.getStore(ExpiryUser);
+    const folder = `${config.folder}/${config.namespace}/${store}`;
+
+    const countFiles = () => fs.stat(folder)
+      .then(() => fs.readdir(folder, { recursive: true }), () => [])
+      .then(v => v.filter(x => x.endsWith('.json')))
+      .then(v => v.length);
+
+    let total;
+    let allFiles = await countFiles();
+
+    total = await this.getSize(ExpiryUser);
+    assert(total === 0);
+    assert(allFiles === 0);
+
+
+    // Create
+    await service.upsert(ExpiryUser, ExpiryUser.from({
+      expiresAt: TimeUtil.fromNow(500, 'ms'),
+    }));
+
+    allFiles = await countFiles();
+    assert(allFiles > 0);
+
+    // Let expire
+    await this.wait(1000);
+    await service.deleteExpired(ExpiryUser);
+
+    total = await this.getSize(ExpiryUser);
+    allFiles = await countFiles();
+    assert(total === 0);
+    assert(allFiles === 0);
+  }
 }

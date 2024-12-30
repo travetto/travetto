@@ -11,10 +11,11 @@ import { NotFoundError } from '../../src/error/not-found';
 import { BaseModelSuite } from './base';
 
 @Model('expiry-user')
-class User {
+export class ExpiryUser {
   id: string;
   @ExpiresAt()
   expiresAt?: Date;
+  payload?: string;
 }
 
 @Suite()
@@ -33,63 +34,63 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   @Test()
   async basic() {
     const service = await this.service;
-    const res = await service.upsert(User, User.from({
+    const res = await service.upsert(ExpiryUser, ExpiryUser.from({
       expiresAt: this.timeFromNow('2s')
     }));
-    assert(res instanceof User);
+    assert(res instanceof ExpiryUser);
 
-    const expiry = ModelExpiryUtil.getExpiryState(User, await service.get(User, res.id));
+    const expiry = ModelExpiryUtil.getExpiryState(ExpiryUser, await service.get(ExpiryUser, res.id));
     assert(!expiry.expired);
   }
 
   @Test()
   async aging() {
     const service = await this.service;
-    const res = await service.upsert(User, User.from({
+    const res = await service.upsert(ExpiryUser, ExpiryUser.from({
       expiresAt: this.timeFromNow(100)
     }));
 
-    assert(res instanceof User);
+    assert(res instanceof ExpiryUser);
 
     await this.wait(200);
 
-    await assert.rejects(() => service.get(User, res.id), NotFoundError);
+    await assert.rejects(() => service.get(ExpiryUser, res.id), NotFoundError);
   }
 
   @Test()
   async updateExpired() {
     const service = await this.service;
-    const res = await service.upsert(User, User.from({
+    const res = await service.upsert(ExpiryUser, ExpiryUser.from({
       expiresAt: this.timeFromNow(100)
     }));
 
-    assert(res instanceof User);
+    assert(res instanceof ExpiryUser);
 
     await this.wait(200);
 
-    await assert.rejects(() => service.update(User, User.from({ id: res.id })), NotFoundError);
+    await assert.rejects(() => service.update(ExpiryUser, ExpiryUser.from({ id: res.id })), NotFoundError);
   }
 
   @Test()
   async ageWithExtension() {
     const service = await this.service;
-    const res = await service.upsert(User, User.from({
+    const res = await service.upsert(ExpiryUser, ExpiryUser.from({
       expiresAt: this.timeFromNow('2s')
     }));
-    assert(res instanceof User);
+    assert(res instanceof ExpiryUser);
 
     await this.wait(50);
 
-    assert(!ModelExpiryUtil.getExpiryState(User, (await service.get(User, res.id))).expired);
+    assert(!ModelExpiryUtil.getExpiryState(ExpiryUser, (await service.get(ExpiryUser, res.id))).expired);
 
-    await service.updatePartial(User, {
+    await service.updatePartial(ExpiryUser, {
       id: res.id,
       expiresAt: this.timeFromNow(100)
     });
 
     await this.wait(200);
 
-    await assert.rejects(() => service.get(User, res.id), NotFoundError);
+    await assert.rejects(() => service.get(ExpiryUser, res.id), NotFoundError);
   }
 
   @Test()
@@ -98,12 +99,12 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
 
     let total;
 
-    total = await this.getSize(User);
+    total = await this.getSize(ExpiryUser);
     assert(total === 0);
 
     // Create
     await Promise.all(
-      Array(10).fill(0).map((x, i) => service.upsert(User, User.from({
+      Array(10).fill(0).map((x, i) => service.upsert(ExpiryUser, ExpiryUser.from({
         expiresAt: this.timeFromNow(1000 + i * this.delayFactor)
       })))
     );
@@ -111,16 +112,16 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     // Let expire
     await this.wait(1);
 
-    total = await this.getSize(User);
+    total = await this.getSize(ExpiryUser);
     assert(total === 10);
 
     // Let expire
     await this.wait(1100);
 
-    total = await this.getSize(User);
+    total = await this.getSize(ExpiryUser);
     assert(total === 0);
 
-    total = await this.getSize(User);
+    total = await this.getSize(ExpiryUser);
     assert(total === 0);
   }
 }

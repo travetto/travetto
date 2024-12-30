@@ -303,7 +303,6 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     this.#indices.unsorted.clear();
   }
 
-
   async createModel<T extends ModelType>(cls: Class<T>): Promise<void> {
     for (const idx of ModelRegistry.get(cls).indices ?? []) {
       if (idx.type === 'sorted' || idx.type === 'unsorted') {
