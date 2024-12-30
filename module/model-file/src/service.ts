@@ -215,7 +215,17 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
 
   // Expiry
   async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
-    return ModelExpiryUtil.naiveDeleteExpired(this, cls);
+    let deleted = 0;
+    for await (const [_id, file] of FileModelService.scanFolder(await this.#resolveName(cls, '.json'), '.json')) {
+      try {
+        const res = await ModelCrudUtil.load(cls, await fs.readFile(file));
+        if (ModelExpiryUtil.getExpiryState(cls, res).expired) {
+          await fs.rm(file, { force: true });
+          deleted += 1;
+        }
+      } catch { } // Don't let a single failure stop the process
+    }
+    return deleted;
   }
 
   // Storage management
