@@ -1,4 +1,4 @@
-import { DeleteByQueryRequest, QueryDslQueryContainer, SearchRequest, SearchResponse, Sort, SortOptions } from '@elastic/elasticsearch/lib/api/types';
+import { estypes } from '@elastic/elasticsearch';
 
 import { castTo, Class, TypedObject } from '@travetto/runtime';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
@@ -54,8 +54,8 @@ export class ElasticsearchQueryUtil {
   /**
    * Build sort mechanism
    */
-  static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']): Sort {
-    return sort.map<SortOptions>(x => {
+  static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']): estypes.Sort {
+    return sort.map<estypes.SortOptions>(x => {
       const o = this.extractSimple(x);
       const k = Object.keys(o)[0];
       const v: boolean | -1 | 1 = castTo(o[k]);
@@ -217,7 +217,7 @@ export class ElasticsearchQueryUtil {
    * @param cls
    * @param search
    */
-  static getSearchQuery<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): QueryDslQueryContainer {
+  static getSearchQuery<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): estypes.QueryDslQueryContainer {
     const clauses = [];
     if (search && Object.keys(search).length) {
       clauses.push(search);
@@ -250,8 +250,8 @@ export class ElasticsearchQueryUtil {
    */
   static getSearchObject<T extends ModelType>(
     cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, checkExpiry = true
-  ): SearchRequest & Omit<DeleteByQueryRequest, 'index' | 'sort'> {
-    const search: (SearchRequest & Omit<DeleteByQueryRequest, 'index' | 'sort'>) = {
+  ): estypes.SearchRequest & Omit<estypes.DeleteByQueryRequest, 'index' | 'sort'> {
+    const search: (estypes.SearchRequest & Omit<estypes.DeleteByQueryRequest, 'index' | 'sort'>) = {
       query: this.getSearchQuery(cls, this.extractWhereQuery(cls, query.where ?? {}, config), checkExpiry)
     };
 
@@ -286,7 +286,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Safely load the data, excluding ids if needed
    */
-  static cleanIdRemoval<T>(req: SearchRequest, results: SearchResponse<T>): T[] {
+  static cleanIdRemoval<T>(req: estypes.SearchRequest, results: estypes.SearchResponse<T>): T[] {
     const out: T[] = [];
 
     const toArr = <V>(x: V | V[] | undefined): V[] => (x ? (Array.isArray(x) ? x : [x]) : []);

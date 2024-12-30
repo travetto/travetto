@@ -1,5 +1,4 @@
-import { Client, errors } from '@elastic/elasticsearch';
-import { AggregationsStringTermsAggregate, SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Client, errors, estypes } from '@elastic/elasticsearch';
 
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
@@ -55,7 +54,7 @@ export class ElasticsearchModelService implements
   /**
    * Directly run the search
    */
-  async execSearch<T extends ModelType>(cls: Class<T>, search: SearchRequest): Promise<SearchResponse<T>> {
+  async execSearch<T extends ModelType>(cls: Class<T>, search: estypes.SearchRequest): Promise<estypes.SearchResponse<T>> {
     let query = search.query;
     if (query && Object.keys(query).length === 0) {
       query = undefined;
@@ -238,7 +237,7 @@ export class ElasticsearchModelService implements
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    let search: SearchResponse<T> = await this.execSearch<T>(cls, {
+    let search: estypes.SearchResponse<T> = await this.execSearch<T>(cls, {
       scroll: '2m',
       size: 100,
       query: ElasticsearchQueryUtil.getSearchQuery(cls, {})
@@ -342,7 +341,7 @@ export class ElasticsearchModelService implements
   // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
-    const res: SearchResponse<T> = await this.execSearch<T>(cls, {
+    const res = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
           ModelIndexedUtil.projectIndex(cls, idx, body))
@@ -539,7 +538,7 @@ export class ElasticsearchModelService implements
     };
 
     const res = await this.execSearch(cls, search);
-    const { buckets } = castTo<AggregationsStringTermsAggregate>('buckets' in res.aggregations![field] ? res.aggregations![field] : { buckets: [] });
+    const { buckets } = castTo<estypes.AggregationsStringTermsAggregate>('buckets' in res.aggregations![field] ? res.aggregations![field] : { buckets: [] });
     const out = Array.isArray(buckets) ? buckets.map(b => ({ key: b.key, count: b.doc_count })) : [];
     return out;
   }

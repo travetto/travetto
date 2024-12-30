@@ -65,7 +65,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     return this.#store.get(key)!;
   }
 
-  #find<T extends ModelType>(cls: Class<T> | string, id?: string, errorState?: 'data' | 'notfound'): StoreType {
+  #find<T extends ModelType>(cls: Class<T> | string, id?: string, errorState?: 'exists' | 'notfound'): StoreType {
     const store = this.#getStore(cls);
 
     if (id && errorState && (errorState === 'notfound' ? !store.has(id) : store.has(id))) {
@@ -185,7 +185,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     if (!item.id) {
       item.id = this.idSource.create();
     }
-    this.#find(cls, item.id, 'data');
+    this.#find(cls, item.id, 'exists');
     return await this.upsert(cls, item);
   }
 

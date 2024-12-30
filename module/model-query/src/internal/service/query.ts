@@ -31,8 +31,18 @@ export class ModelQueryUtil {
     if (res.length === 1 || res.length > 1 && !failOnMany) {
       return res[0]!;
     }
-    const requestedId = ((where && 'id' in where && typeof where.id === 'string') ? where.id : undefined) ?? 'unknown';
-    throw res.length === 0 ? new NotFoundError(cls, requestedId, { where }) : new AppError(`Invalid number of results for find by id: ${res.length}`, { category: 'data' });
+    const requestedId = ((where && 'id' in where && typeof where.id === 'string') ? where.id : undefined);
+    if (res.length === 0) {
+      if (requestedId) {
+        throw new NotFoundError(cls, requestedId);
+      } else {
+        const err = new NotFoundError(cls, 'unknown');
+        err.message = 'No results found for query';
+        throw err;
+      }
+    } else {
+      throw new AppError(`Invalid number of results for find by id: ${res.length}`, { category: 'data' });
+    }
   }
 
   /**

@@ -187,11 +187,11 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     }
   }
 
-  async has<T extends ModelType>(cls: Class<T>, id: string, error?: 'notfound' | 'data'): Promise<void> {
+  async has<T extends ModelType>(cls: Class<T>, id: string, error?: 'notfound' | 'exists'): Promise<void> {
     const res = await this.client.exists(this.#resolveKey(cls, id));
     if (res === 0 && error === 'notfound') {
       throw new NotFoundError(cls, id);
-    } else if (res === 1 && error === 'data') {
+    } else if (res === 1 && error === 'exists') {
       throw new ExistsError(cls, id);
     }
   }
@@ -209,7 +209,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     if (item.id) {
-      await this.has(cls, item.id, 'data');
+      await this.has(cls, item.id, 'exists');
     }
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
     await this.#store(cls, prepped, 'write');
