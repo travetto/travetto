@@ -1,6 +1,7 @@
 type MethodKeys<C extends {}> = {
   [METHOD in keyof C]: C[METHOD] extends Function ? METHOD : never
 }[keyof C];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PromiseFn = (...args: any) => Promise<unknown>;
 type PromiseRes<V extends PromiseFn> = Awaited<ReturnType<V>>;
 
@@ -154,7 +155,7 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
       const controller = new AbortController();
       // Node/Browser handling of timeout registration
       registerTimeout(controller, core.timeout, setTimeout, clearTimeout);
-      signals.push(controller.signal)
+      signals.push(controller.signal);
     }
 
     if (signals.length) {
@@ -244,6 +245,7 @@ export function clientFactory<T extends Record<string, {}>>(): RpcClientFactory<
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function withConfigFactoryDecorator(opts: RpcRequest) {
   return {
     withConfig<V extends PromiseFn>(this: V, extra: Partial<RpcRequest['core']>, ...params: Parameters<V>): Promise<PromiseRes<V>> {
