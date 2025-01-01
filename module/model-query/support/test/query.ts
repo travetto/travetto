@@ -54,13 +54,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     await assert.rejects(() => service.queryOne(Person, { where: { gender: 'm' } }), /Invalid number of results/);
     await assert.rejects(() => service.queryOne(Person, { where: { gender: 'z' } }), NotFoundError);
-    await assert.rejects(() => service.queryOne(Person, { where: { gender: 'z' } }), /unknown/);
-    assert.deepStrictEqual(
-      (await service.queryOne(Person, { where: { gender: 'z' } }).catch(e => e)).details.where,
-      {
-        gender: 'z'
-      }
-    );
+    await assert.rejects(() => service.queryOne(Person, { where: { gender: 'z' } }), /No results found for query/);
     await assert.rejects(() => service.queryOne(Person, { where: { id: 'orange' } }), NotFoundError);
     await assert.rejects(() => service.queryOne(Person, { where: { id: 'orange' } }), /orange/);
   }

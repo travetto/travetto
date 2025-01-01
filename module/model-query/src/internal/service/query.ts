@@ -41,7 +41,7 @@ export class ModelQueryUtil {
         throw err;
       }
     } else {
-      throw new AppError(`Invalid number of results for find by id: ${res.length}`, { category: 'data' });
+      throw new AppError(`Invalid number of results: ${res.length}`, { category: 'data' });
     }
   }
 
