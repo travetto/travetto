@@ -1,6 +1,6 @@
 {
   "name": "@travetto/config",
-  "version": "5.0.13",
+  "version": "5.0.14",
   "description": "Configuration support",
   "keywords": [
     "yaml",
@@ -26,8 +26,8 @@
     "directory": "module/config"
   },
   "dependencies": {
-    "@travetto/di": "^5.0.13",
-    "@travetto/schema": "^5.0.13",
+    "@travetto/di": "^5.0.14",
+    "@travetto/schema": "^5.0.14",
     "yaml": "^2.6.1"
   },
   "travetto": {

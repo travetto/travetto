@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-s3",
-  "version": "5.0.17",
+  "version": "5.0.18",
   "description": "S3 backing for the travetto model module.",
   "keywords": [
     "s3",
@@ -28,9 +28,9 @@
     "@aws-sdk/client-s3": "^3.713.0",
     "@aws-sdk/credential-provider-ini": "^3.713.0",
     "@aws-sdk/s3-request-presigner": "^3.713.0",
-    "@travetto/cli": "^5.0.16",
-    "@travetto/config": "^5.0.13",
-    "@travetto/model": "^5.0.14"
+    "@travetto/cli": "^5.0.17",
+    "@travetto/config": "^5.0.14",
+    "@travetto/model": "^5.0.15"
   },
   "travetto": {
     "displayName": "S3 Model Support"
