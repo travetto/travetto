@@ -120,7 +120,7 @@ export class AssertUtil {
    */
   static gernerateImportFailure(imp: string, err: Error): SuiteFailure {
     const name = path.basename(imp);
-    const classId = `${RuntimeIndex.getFromImport(imp)?.id}￮${name}`;
+    const classId = `${RuntimeIndex.getFromImport(imp)?.id}#${name}`;
     const suite = asFull<SuiteConfig & SuiteResult>({
       class: asFull<Class>({ name }), classId, duration: 0, lineStart: 1, lineEnd: 1, import: imp
     });
