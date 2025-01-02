@@ -1,6 +1,6 @@
 import { pipeline } from 'node:stream/promises';
 
-import { type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection, type ObjectId, type Binary, type RootFilterOperators } from 'mongodb';
+import { type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection, type ObjectId, type Binary, type RootFilterOperators, Filter, FindCursor } from 'mongodb';
 
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
@@ -78,8 +78,12 @@ export class MongoModelService implements
     ModelExpiryUtil.registerCull(this);
   }
 
-  getWhereFilter<T extends ModelType>(cls: Class<T>, where: WhereClause<T>, checkExpiry = true): Record<string, unknown> {
-    return MongoUtil.extractWhereFilter(cls, where, checkExpiry);
+  getWhereFilter<T extends ModelType>(cls: Class<T>, where: WhereClause<T>, checkExpiry = true): Filter<T> {
+    return castTo(MongoUtil.extractWhereFilter(cls, where, checkExpiry));
+  }
+
+  getIdFilter<T extends ModelType>(cls: Class<T>, id: string, checkExpiry = true): Filter<T> {
+    return this.getWhereFilter(cls, castTo({ _id: MongoUtil.uuid(id) }), checkExpiry);
   }
 
   // Storage
@@ -120,14 +124,14 @@ export class MongoModelService implements
   /**
    * Get mongo collection
    */
-  async getStore<T extends ModelType>(cls: Class<T>): Promise<Collection> {
+  async getStore<T extends ModelType>(cls: Class<T>): Promise<Collection<T>> {
     return this.#db.collection(ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
   }
 
   // Crud
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const store = await this.getStore(cls);
-    const result = await store.findOne(this.getWhereFilter<ModelType>(cls, { id }), {});
+    const result = await store.findOne(this.getIdFilter(cls, id), {});
     if (result) {
       const res = await ModelCrudUtil.load(cls, result);
       if (res) {
@@ -153,7 +157,7 @@ export class MongoModelService implements
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     item = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
-    const res = await store.replaceOne(this.getWhereFilter<ModelType>(cls, { id: item.id }), item);
+    const res = await store.replaceOne(this.getIdFilter(cls, item.id), item);
     if (res.matchedCount === 0) {
       throw new NotFoundError(cls, item.id);
     }
@@ -163,9 +167,12 @@ export class MongoModelService implements
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const cleaned = await ModelCrudUtil.preStore(cls, item, this);
     const store = await this.getStore(cls);
+    if (!('_id' in cleaned)) {
+      castTo<WithId<T>>(cleaned)._id = MongoUtil.uuid(cleaned.id);
+    }
     try {
       await store.updateOne(
-        this.getWhereFilter<ModelType>(cls, { id: cleaned.id }, false),
+        this.getIdFilter(cls, cleaned.id, false),
         { $set: cleaned },
         { upsert: true }
       );
@@ -199,7 +206,7 @@ export class MongoModelService implements
     const id = item.id;
 
     const res = await store.findOneAndUpdate(
-      this.getWhereFilter<ModelType>(cls, { id }),
+      this.getIdFilter(cls, id),
       final,
       { returnDocument: 'after', includeResultMetadata: true }
     );
@@ -213,7 +220,7 @@ export class MongoModelService implements
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     const store = await this.getStore(cls);
-    const result = await store.deleteOne(this.getWhereFilter<ModelType>(cls, { id }, false));
+    const result = await store.deleteOne(this.getIdFilter(cls, id, false));
     if (result.deletedCount === 0) {
       throw new NotFoundError(cls, id);
     }
@@ -406,7 +413,7 @@ export class MongoModelService implements
 
     const col = await this.getStore(cls);
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
-    const cursor = col.find<T>(filter, {});
+    const cursor = col.find(filter, {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
     return await Promise.all(items.map(r => ModelCrudUtil.load(cls, r).then(MongoUtil.postLoadId)));
   }
@@ -468,7 +475,7 @@ export class MongoModelService implements
       }, {});
 
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
-    const res = await col.updateMany(filter, final);
+    const res = await col.updateMany(filter, castTo(final));
     return res.matchedCount;
   }
 
@@ -537,7 +544,7 @@ export class MongoModelService implements
       score: { $meta: 'textScore' }
     });
 
-    const cursor = col.find<T>({ $and: [{ $text: search }, filter] }, {});
+    const cursor = col.find(castTo({ $and: [{ $text: search }, filter] }), {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
     return await Promise.all(items.map(r => ModelCrudUtil.load(cls, r).then(MongoUtil.postLoadId)));
   }

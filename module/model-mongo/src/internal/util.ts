@@ -1,4 +1,6 @@
-import { Binary, CreateIndexesOptions, FindCursor, IndexDirection, ObjectId } from 'mongodb';
+import {
+  Binary, type CreateIndexesOptions, type Filter, type FindCursor, type IndexDirection, ObjectId, type WithId as MongoWithId
+} from 'mongodb';
 
 import { castTo, Class, TypedObject } from '@travetto/runtime';
 import { DistanceUnit, PageableModelQuery, WhereClause } from '@travetto/model-query';
@@ -74,9 +76,9 @@ export class MongoUtil {
     return item;
   }
 
-  static extractWhereFilter<T extends ModelType, U extends WhereClause<T>>(cls: Class<T>, where?: U, checkExpiry = true): Record<string, unknown> {
+  static extractWhereFilter<T extends ModelType, U extends WhereClause<T>>(cls: Class<T>, where?: U, checkExpiry = true): Filter<T> {
     where = castTo(ModelQueryUtil.getWhereClause(cls, where, checkExpiry));
-    return where ? this.extractWhereClause(cls, where) : {};
+    return castTo(where ? this.extractWhereClause(cls, where) : {});
   }
 
   /**
@@ -197,7 +199,7 @@ export class MongoUtil {
     ].map(x => [...x]);
   }
 
-  static prepareCursor<T extends ModelType>(cls: Class<T>, cursor: FindCursor<T>, query: PageableModelQuery<T>): FindCursor<T> {
+  static prepareCursor<T extends ModelType>(cls: Class<T>, cursor: FindCursor<T | MongoWithId<T>>, query: PageableModelQuery<T>): FindCursor<T> {
     if (query.select) {
       const selectKey = Object.keys(query.select)[0];
       const select = typeof selectKey === 'string' && selectKey.startsWith('$') ? query.select : this.extractSimple(cls, query.select);
@@ -221,6 +223,6 @@ export class MongoUtil {
       cursor = cursor.skip(Math.trunc(query.offset ?? 0));
     }
 
-    return cursor;
+    return castTo(cursor);
   }
 }
