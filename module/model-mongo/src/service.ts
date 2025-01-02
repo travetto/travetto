@@ -133,67 +133,67 @@ export class MongoModelService implements
     const store = await this.getStore(cls);
     const result = await store.findOne(this.getIdFilter(cls, id), {});
     if (result) {
-      const res = await ModelCrudUtil.load(cls, result);
+      const res = await ModelCrudUtil.load(cls, MongoUtil.postLoadDoc(result));
       if (res) {
-        return MongoUtil.postLoadId(res);
+        return res;
       }
     }
     throw new NotFoundError(cls, id);
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned: WithId<T, Binary> = castTo(await ModelCrudUtil.preStore(cls, item, this));
-    cleaned._id = MongoUtil.uuid(cleaned.id);
+    const cleaned = await ModelCrudUtil.preStore<WithId<T, Binary>>(cls, item, this);
+    const id = cleaned.id;
 
     const store = await this.getStore(cls);
-    const result = await store.insertOne(castTo(cleaned));
+    const result = await store.insertOne(castTo(MongoUtil.preUpdateDoc(cleaned)));
     if (!result.insertedId) {
-      throw new ExistsError(cls, cleaned.id);
+      throw new ExistsError(cls, id);
     }
-    delete cleaned._id;
-    return cleaned;
+    return MongoUtil.postLoadDoc(cleaned);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     item = await ModelCrudUtil.preStore(cls, item, this);
+    const id = item.id;
     const store = await this.getStore(cls);
-    const res = await store.replaceOne(this.getIdFilter(cls, item.id), item);
+    const res = await store.replaceOne(this.getIdFilter(cls, id), MongoUtil.preUpdateDoc(item));
     if (res.matchedCount === 0) {
-      throw new NotFoundError(cls, item.id);
+      throw new NotFoundError(cls, id);
     }
-    return item;
+    return MongoUtil.postLoadDoc(item);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preStore(cls, item, this);
+    const cleaned = await ModelCrudUtil.preStore<WithId<T, Binary>>(cls, item, this);
+    const id = cleaned.id;
     const store = await this.getStore(cls);
-    if (!('_id' in cleaned)) {
-      castTo<WithId<T>>(cleaned)._id = MongoUtil.uuid(cleaned.id);
-    }
+
     try {
       await store.updateOne(
-        this.getIdFilter(cls, cleaned.id, false),
-        { $set: cleaned },
+        this.getIdFilter(cls, id, false),
+        { $set: MongoUtil.preUpdateDoc(cleaned) },
         { upsert: true }
       );
     } catch (err) {
       if (err instanceof Error && err.message.includes('duplicate key error')) {
-        throw new ExistsError(cls, cleaned.id);
+        throw new ExistsError(cls, id);
       } else {
         throw err;
       }
     }
-    return cleaned;
+    return MongoUtil.postLoadDoc(cleaned);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     const store = await this.getStore(cls);
 
-    let final: Record<string, unknown> = await ModelCrudUtil.prePartialUpdate(cls, item, view);
+    const final = await ModelCrudUtil.prePartialUpdate(cls, item, view);
+    const simple = MongoUtil.extractSimple(cls, final, undefined, false);
+    delete simple.id;
 
-    const items = MongoUtil.extractSimple(cls, final, undefined, false);
-    final = Object
-      .entries(items)
+    const operation: Partial<T> = castTo(Object
+      .entries(simple)
       .reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((acc, [k, v]) => {
         if (v === null || v === undefined) {
           (acc.$unset ??= {})[k] = v;
@@ -201,13 +201,13 @@ export class MongoModelService implements
           (acc.$set ??= {})[k] = v;
         }
         return acc;
-      }, {});
+      }, {}));
 
     const id = item.id;
 
     const res = await store.findOneAndUpdate(
       this.getIdFilter(cls, id),
-      final,
+      operation,
       { returnDocument: 'after', includeResultMetadata: true }
     );
 
@@ -231,7 +231,7 @@ export class MongoModelService implements
     const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true }).batchSize(100);
     for await (const el of cursor) {
       try {
-        yield MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el));
+        yield await ModelCrudUtil.load(cls, MongoUtil.postLoadDoc(el));
       } catch (err) {
         if (!(err instanceof NotFoundError)) {
           throw err;
@@ -309,11 +309,11 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
-        bulk.insert(MongoUtil.preInsertId(asFull(op.insert)));
+        bulk.insert(MongoUtil.preUpdateDoc(asFull(op.insert)));
       } else if (op.upsert) {
-        bulk.find({ _id: MongoUtil.uuid(op.upsert.id!) }).upsert().updateOne({ $set: op.upsert });
+        bulk.find({ _id: MongoUtil.uuid(op.upsert.id!) }).upsert().updateOne({ $set: MongoUtil.preUpdateDoc(asFull(op.upsert)) });
       } else if (op.update) {
-        bulk.find({ _id: MongoUtil.uuid(op.update.id) }).update({ $set: op.update });
+        bulk.find({ _id: MongoUtil.uuid(op.update.id) }).update({ $set: MongoUtil.preUpdateDoc(asFull(op.update)) });
       } else if (op.delete) {
         bulk.find({ _id: MongoUtil.uuid(op.delete.id) }).deleteOne();
       }
@@ -323,7 +323,7 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
-        MongoUtil.postLoadId(asFull(op.insert));
+        MongoUtil.postLoadDoc(asFull(op.insert));
       }
     }
     for (const [index, _id] of TypedObject.entries(res.upsertedIds)) {
@@ -368,7 +368,7 @@ export class MongoModelService implements
     if (!result) {
       throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
-    return await ModelCrudUtil.load(cls, result);
+    return await ModelCrudUtil.load(cls, MongoUtil.postLoadDoc(result));
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
@@ -403,7 +403,7 @@ export class MongoModelService implements
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(castTo(sort));
 
     for await (const el of cursor) {
-      yield (await MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el)));
+      yield await ModelCrudUtil.load(cls, MongoUtil.postLoadDoc(el));
     }
   }
 
@@ -415,7 +415,7 @@ export class MongoModelService implements
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
     const cursor = col.find(filter, {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
-    return await Promise.all(items.map(r => ModelCrudUtil.load(cls, r).then(MongoUtil.postLoadId)));
+    return await Promise.all(items.map(r => ModelCrudUtil.load(cls, MongoUtil.postLoadDoc(r))));
   }
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
@@ -437,15 +437,16 @@ export class MongoModelService implements
 
     const col = await this.getStore(cls);
     const item = await ModelCrudUtil.preStore(cls, data, this);
+    const id = item.id;
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
-    where.id = item.id;
+    where.id = id;
 
     const filter = MongoUtil.extractWhereFilter(cls, where);
-    const res = await col.replaceOne(filter, item);
+    const res = await col.replaceOne(filter, MongoUtil.preUpdateDoc(item));
     if (res.matchedCount === 0) {
-      throw new NotFoundError(cls, item.id);
+      throw new NotFoundError(cls, id);
     }
-    return item;
+    return MongoUtil.postLoadDoc(item);
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
@@ -461,6 +462,7 @@ export class MongoModelService implements
     await QueryVerifier.verify(cls, query);
 
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
+    delete item.id;
 
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, item);
@@ -546,6 +548,6 @@ export class MongoModelService implements
 
     const cursor = col.find(castTo({ $and: [{ $text: search }, filter] }), {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
-    return await Promise.all(items.map(r => ModelCrudUtil.load(cls, r).then(MongoUtil.postLoadId)));
+    return await Promise.all(items.map(r => ModelCrudUtil.load(cls, MongoUtil.postLoadDoc(r))));
   }
 }

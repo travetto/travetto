@@ -4,7 +4,7 @@ import {
 
 import { castTo, Class, TypedObject } from '@travetto/runtime';
 import { DistanceUnit, PageableModelQuery, WhereClause } from '@travetto/model-query';
-import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
+import type { ModelType, IndexField, IndexConfig, OptionalId } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
@@ -24,8 +24,6 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
 };
 
 export type WithId<T, I = unknown> = T & { _id?: I };
-const isWithId = <T extends ModelType, I = unknown>(o: T): o is WithId<T, I> => o && '_id' in o;
-
 export type BasicIdx = Record<string, IndexDirection>;
 export type PlainIdx = Record<string, -1 | 0 | 1>;
 
@@ -61,17 +59,19 @@ export class MongoUtil {
     }
   }
 
-  static async postLoadId<T extends ModelType>(item: T): Promise<T> {
-    if (isWithId(item)) {
+  static postLoadDoc<T extends ModelType>(item: T & { _id?: unknown }): T {
+    if (item._id) {
+      item.id = this.idToString(castTo(item._id));
       delete item._id;
     }
     return item;
   }
 
-  static preInsertId<T extends ModelType>(item: T): T {
+  static preUpdateDoc<T extends OptionalId<ModelType>>(item: T): T {
     if (item && item.id) {
       const itemWithId: WithId<T> = castTo(item);
       itemWithId._id = this.uuid(item.id);
+      delete castTo<{ id: undefined }>(itemWithId).id;
     }
     return item;
   }
