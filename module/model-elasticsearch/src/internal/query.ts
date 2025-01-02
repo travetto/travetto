@@ -281,31 +281,4 @@ export class ElasticsearchQueryUtil {
 
     return search;
   }
-
-
-  /**
-   * Safely load the data, excluding ids if needed
-   */
-  static cleanIdRemoval<T>(req: estypes.SearchRequest, results: estypes.SearchResponse<T>): T[] {
-    const out: T[] = [];
-
-    const toArr = <V>(x: V | V[] | undefined): V[] => (x ? (Array.isArray(x) ? x : [x]) : []);
-
-    // determine if id
-    const select = [
-      toArr(req._source_includes),
-      toArr(req._source_excludes)
-    ];
-    const includeId = select[0].includes('_id') || (select[0].length === 0 && !select[1].includes('_id'));
-
-    for (const r of results.hits.hits) {
-      const obj = r._source!;
-      if (includeId) {
-        castTo<{ _id: string }>(obj)._id = r._id!;
-      }
-      out.push(obj);
-    }
-
-    return out;
-  }
 }
