@@ -4,9 +4,9 @@ import { Principal, Authorizer, Authenticator, AuthenticationError } from '@trav
 import { AuthenticatorTarget } from '@travetto/auth/src/internal/types';
 import { AsyncContext } from '@travetto/context';
 
-import { AuthToken, AuthTokenⲐ } from './internal/types';
+import { AuthToken, AuthTokenSymbol } from './internal/types';
 
-const PrincipalⲐ = Symbol.for('@travetto/auth:principal');
+const PrincipalSymbol = Symbol.for('@travetto/auth:principal');
 
 /**
  * Auth service to allow for rest-based interaction
@@ -77,14 +77,14 @@ export class AuthService {
    * Get the authentication token, if it exists
    */
   getAuthenticationToken(): AuthToken | undefined {
-    return this.context.get<AuthToken>(AuthTokenⲐ);
+    return this.context.get<AuthToken>(AuthTokenSymbol);
   }
 
   /**
    * Set/overwrite the user's authentication token
    */
   setAuthenticationToken(token: AuthToken): void {
-    this.context.set(AuthTokenⲐ, token);
+    this.context.set(AuthTokenSymbol, token);
   }
 
   /**
@@ -92,7 +92,7 @@ export class AuthService {
   * @param p The auth principal
   */
   setPrincipal(p: Principal | undefined): void {
-    this.context.set(PrincipalⲐ, p);
+    this.context.set(PrincipalSymbol, p);
   }
 
   /**
@@ -101,6 +101,6 @@ export class AuthService {
    * @returns undefined if not authenticated
    */
   getPrincipal<T = { [key: string]: unknown }>(): (Principal<T> | undefined) {
-    return this.context.get<Principal<T>>(PrincipalⲐ);
+    return this.context.get<Principal<T>>(PrincipalSymbol);
   }
 }

@@ -5,7 +5,7 @@ import { ByteRange, castTo } from '@travetto/runtime';
 
 import { Request, ContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
-import { NodeEntityⲐ, ParsedTypeⲐ } from '../../internal/symbol';
+import { NodeEntitySymbol, ParsedTypeSymbol } from '../../internal/symbol';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
@@ -16,7 +16,7 @@ export class RequestCore implements Partial<Request> {
   /**
    * Content type parsed
    */
-  [ParsedTypeⲐ]?: ContentType;
+  [ParsedTypeSymbol]?: ContentType;
 
   /**
    * Get the inbound request header as a string
@@ -54,7 +54,7 @@ export class RequestCore implements Partial<Request> {
    */
   getContentType(this: Request): ContentType | undefined {
     const self: Request & Partial<RequestCore> = castTo(this);
-    return self[ParsedTypeⲐ] ??= MimeUtil.parse(this.headerFirst('content-type'));
+    return self[ParsedTypeSymbol] ??= MimeUtil.parse(this.headerFirst('content-type'));
   }
 
   /**
@@ -62,7 +62,7 @@ export class RequestCore implements Partial<Request> {
    */
   getIp(this: Request): string | undefined {
     const self: Request & Partial<RequestCore> = castTo(this);
-    const raw = self[NodeEntityⲐ];
+    const raw = self[NodeEntitySymbol];
     return self.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
   }
 

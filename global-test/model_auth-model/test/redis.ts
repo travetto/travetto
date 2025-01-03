@@ -1,11 +1,11 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/support/test/model';
+import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model';
 
 import { RedisModelConfig, RedisModelService } from '@travetto/model-redis';
 
 class Init {
-  @InjectableFactory(TestModelSvcⲐ)
+  @InjectableFactory(TestModelSvcSymbol)
   static modelProvider(config: RedisModelConfig) {
     return new RedisModelService(config);
   }

@@ -3,7 +3,7 @@ import { Authenticate, Authenticated, AuthService, Unauthenticated } from '@trav
 import { Principal } from '@travetto/auth';
 import { Inject } from '@travetto/di';
 
-import { BasicAuthⲐ, User } from './auth.config';
+import { BasicAuthSymbol, User } from './auth.config';
 
 /**
  * Auth API
@@ -15,7 +15,7 @@ export class AuthController {
   svc: AuthService;
 
   @Post('/login')
-  @Authenticate(BasicAuthⲐ)
+  @Authenticate(BasicAuthSymbol)
   async login(user: User): Promise<Redirect> {
     return new Redirect('/auth/self', 301);
   }

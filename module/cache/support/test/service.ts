@@ -11,7 +11,7 @@ import { castTo, Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import { Cache, EvictCache } from '../../src/decorator';
-import { CacheModelⲐ, CacheService } from '../../src/service';
+import { CacheModelSymbol, CacheService } from '../../src/service';
 import { CacheUtil } from '../../src/util';
 
 @Schema()
@@ -82,7 +82,7 @@ class SampleService {
 }
 
 @Suite()
-@ModelSuite(CacheModelⲐ)
+@ModelSuite(CacheModelSymbol)
 @InjectableSuite()
 export abstract class CacheServiceSuite {
 

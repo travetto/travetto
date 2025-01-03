@@ -8,7 +8,7 @@ import { Schema } from '../src/decorator/schema';
 import { SchemaRegistry } from '../src/service/registry';
 import { SchemaValidator } from '../src/validate/validator';
 import { ValidationError } from '../src/validate/types';
-import { AllViewⲐ } from '../src/internal/types';
+import { AllViewSymbol } from '../src/internal/types';
 import { ValidationResultError } from '../src/validate/error';
 
 import { Address2 } from './models/address';
@@ -45,7 +45,7 @@ class ViewsTest {
 
   @Test()
   async testRegister() {
-    assert(SchemaRegistry.get(User).views[AllViewⲐ].schema.address.type);
+    assert(SchemaRegistry.get(User).views[AllViewSymbol].schema.address.type);
   }
 
   @Test('Url and message')

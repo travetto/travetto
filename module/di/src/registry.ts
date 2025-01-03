@@ -14,7 +14,7 @@ export type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: 
 
 export type ResolutionType = 'strict' | 'loose' | 'any';
 
-const PrimaryCandidateⲐ = Symbol.for('@travetto/di:primary');
+const PrimaryCandidateSymbol = Symbol.for('@travetto/di:primary');
 
 const hasPostConstruct = hasFunction<{ postConstruct: () => Promise<unknown> }>('postConstruct');
 const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>('preDestroy');
@@ -55,8 +55,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       const resolved = [...qualifiers.keys()];
       if (!qualifier) {
         // If primary found
-        if (qualifiers.has(PrimaryCandidateⲐ)) {
-          qualifier = PrimaryCandidateⲐ;
+        if (qualifiers.has(PrimaryCandidateSymbol)) {
+          qualifier = PrimaryCandidateSymbol;
         } else {
           // If there is only one default symbol
           const filtered = resolved.filter(x => !!x).filter(x => this.defaultSymbols.has(x));
@@ -478,7 +478,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.classToTarget.get(classId)!.set(Symbol.for(el.Ⲑid), el.Ⲑid);
 
       if (config.primary && (classId === targetId || config.factory)) {
-        this.targetToClass.get(el.Ⲑid)!.set(PrimaryCandidateⲐ, classId);
+        this.targetToClass.get(el.Ⲑid)!.set(PrimaryCandidateSymbol, classId);
       }
     }
 
@@ -491,7 +491,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
 
       if (config.primary) {
-        this.targetToClass.get(parentId)!.set(PrimaryCandidateⲐ, classId);
+        this.targetToClass.get(parentId)!.set(PrimaryCandidateSymbol, classId);
       }
 
       this.targetToClass.get(parentId)!.set(config.qualifier, classId);
@@ -502,10 +502,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       if (!this.targetToClass.has(classId)) {
         this.targetToClass.set(classId, new Map());
       }
-      this.targetToClass.get(classId)!.set(PrimaryCandidateⲐ, classId);
+      this.targetToClass.get(classId)!.set(PrimaryCandidateSymbol, classId);
 
       if (config.factory) {
-        this.targetToClass.get(targetId)!.set(PrimaryCandidateⲐ, classId);
+        this.targetToClass.get(targetId)!.set(PrimaryCandidateSymbol, classId);
       }
 
       // Register primary if only one interface provided and no parent config
@@ -514,7 +514,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         if (!this.targetToClass.has(primaryInterface.Ⲑid)) {
           this.targetToClass.set(primaryInterface.Ⲑid, new Map());
         }
-        this.targetToClass.get(primaryInterface.Ⲑid)!.set(PrimaryCandidateⲐ, classId);
+        this.targetToClass.get(primaryInterface.Ⲑid)!.set(PrimaryCandidateSymbol, classId);
       }
     }
 

@@ -4,7 +4,7 @@ import { FastifyRestServer } from '@travetto/rest-fastify';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
-import { SessionModelⲐ } from '@travetto/rest-session';
+import { SessionModelSymbol } from '@travetto/rest-session';
 
 const FASTIFY = Symbol.for('fastify');
 
@@ -21,7 +21,7 @@ class Config {
     }();
   }
 
-  @InjectableFactory({ primary: true, qualifier: SessionModelⲐ })
+  @InjectableFactory({ primary: true, qualifier: SessionModelSymbol })
   static provider() {
     return new MemoryModelService(new MemoryModelConfig());
   }

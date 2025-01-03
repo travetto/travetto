@@ -1,6 +1,6 @@
 import { Any, castKey, castTo, classConstruct } from '@travetto/runtime';
 
-const ProxyTargetⲐ = Symbol.for('@travetto/runtime:proxy-target');
+const ProxyTargetSymbol = Symbol.for('@travetto/runtime:proxy-target');
 
 const AsyncGeneratorFunction = Object.getPrototypeOf(async function* () { });
 const GeneratorFunction = Object.getPrototypeOf(function* () { });
@@ -50,7 +50,7 @@ export class RetargettingHandler<T> implements ProxyHandler<Any> {
   }
 
   get(target: T, prop: PropertyKey, receiver: unknown): Any {
-    if (prop === ProxyTargetⲐ) {
+    if (prop === ProxyTargetSymbol) {
       return this.target;
     }
     let ret = this.target[castKey<T>(prop)];
@@ -98,7 +98,7 @@ export class RetargettingProxy<T> {
    * Unwrap proxy
    */
   static unwrap<U>(el: U): U {
-    return castTo<{ [ProxyTargetⲐ]: U }>(el)?.[ProxyTargetⲐ] ?? el;
+    return castTo<{ [ProxyTargetSymbol]: U }>(el)?.[ProxyTargetSymbol] ?? el;
   }
 
   #handler: RetargettingHandler<T>;

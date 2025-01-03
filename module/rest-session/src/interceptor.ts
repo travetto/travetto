@@ -3,7 +3,7 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext, FilterReturn, SerializeInterceptor } from '@travetto/rest';
 
-import { SessionService, SessionⲐ } from './service';
+import { SessionService, SessionRawSymbol } from './service';
 
 @Config('rest.session')
 export class RestSessionConfig extends ManagedInterceptorConfig { }
@@ -73,7 +73,7 @@ export class SessionWriteInterceptor implements RestInterceptor {
       Object.defineProperty(req, 'session', { get: () => this.service.ensureCreated(req) });
       return await next();
     } finally {
-      await this.service.writeResponse(res, req[SessionⲐ]);
+      await this.service.writeResponse(res, req[SessionRawSymbol]);
     }
   }
 }

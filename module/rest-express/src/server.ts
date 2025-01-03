@@ -5,7 +5,7 @@ import compression from 'compression';
 import { Inject, Injectable } from '@travetto/di';
 import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
-import { TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
+import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
 import { ServerHandle } from '@travetto/rest/src/types';
 
 import { RouteStack } from './internal/types';
@@ -57,8 +57,8 @@ export class ExpressRestServer implements RestServer<express.Application> {
       const routePath = route.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
       router[route.method](routePath, async (req, res) => {
         await route.handlerFinalized!(
-          req[TravettoEntityⲐ] ??= ExpressServerUtil.getRequest(req),
-          res[TravettoEntityⲐ] ??= ExpressServerUtil.getResponse(res)
+          req[TravettoEntitySymbol] ??= ExpressServerUtil.getRequest(req),
+          res[TravettoEntitySymbol] ??= ExpressServerUtil.getResponse(res)
         );
       });
     }
@@ -80,8 +80,8 @@ export class ExpressRestServer implements RestServer<express.Application> {
 
       router.options('*all', (req, res) => {
         optionHandler(
-          req[TravettoEntityⲐ] ??= ExpressServerUtil.getRequest(req),
-          res[TravettoEntityⲐ] ??= ExpressServerUtil.getResponse(res)
+          req[TravettoEntitySymbol] ??= ExpressServerUtil.getRequest(req),
+          res[TravettoEntitySymbol] ??= ExpressServerUtil.getResponse(res)
         );
       });
     }

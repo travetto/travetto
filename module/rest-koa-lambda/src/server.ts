@@ -2,7 +2,7 @@ import { configure } from '@codegenie/serverless-express';
 
 import { Inject, Injectable } from '@travetto/di';
 import {
-  AwsLambdaHandle, AwsLambdaRestServer, AwsLambdaⲐ,
+  AwsLambdaHandle, AwsLambdaRestServer, AwsLambdaSymbol,
   RestAwsConfig, LambdaContext, LambdaAPIGatewayProxyEvent
 } from '@travetto/rest-aws-lambda';
 import type { ServerHandle } from '@travetto/rest';
@@ -12,7 +12,7 @@ import { castTo, asFull } from '@travetto/runtime';
 /**
  * Aws Lambda Rest Server
  */
-@Injectable(AwsLambdaⲐ)
+@Injectable(AwsLambdaSymbol)
 export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRestServer {
 
   #handler: AwsLambdaHandle;
