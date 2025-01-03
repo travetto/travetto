@@ -59,3 +59,8 @@ export function describeFunction(fn?: Function): FunctionMetadata | undefined {
   const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata }) | undefined = fn;
   return _fn?.[MetadataSymbol];
 }
+
+export function getUniqueId(fn: Function): string;
+export function getUniqueId(fn?: Function): string | undefined {
+  return fn?.Ⲑid;
+}

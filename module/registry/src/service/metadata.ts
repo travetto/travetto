@@ -1,10 +1,10 @@
-import { Class } from '@travetto/runtime';
+import { Class, getUniqueId } from '@travetto/runtime';
 
 import { Registry } from '../registry';
 import { ChangeEvent } from '../types';
 
 function id(cls: string | Class): string {
-  return cls && typeof cls !== 'string' ? cls.Ⲑid : cls;
+  return cls && typeof cls !== 'string' ? getUniqueId(cls) : cls;
 }
 
 /**
@@ -128,7 +128,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    */
   getOrCreatePendingField(cls: Class, field: F): Partial<M> {
     this.getOrCreatePending(cls);
-    const classId = cls.Ⲑid;
+    const classId = getUniqueId(cls);
 
     if (!this.pendingFields.get(classId)!.has(field)) {
       this.pendingFields.get(classId)!.set(field, this.createPendingField(cls, field));
@@ -156,7 +156,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * On an install event, finalize
    */
   onInstall(cls: Class, e: ChangeEvent<Class>): void {
-    const classId = cls.Ⲑid;
+    const classId = getUniqueId(cls);
     if (this.pending.has(classId) || this.pendingFields.has(classId)) {
       if (this.trace) {
         console.debug('Installing', { service: this.constructor.name, id: classId });
@@ -174,7 +174,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * On an uninstall event, remove
    */
   onUninstall(cls: Class, e: ChangeEvent<Class>): void {
-    const classId = cls.Ⲑid;
+    const classId = getUniqueId(cls);
     if (this.entries.has(classId)) {
       if (this.trace) {
         console.debug('Uninstalling', { service: this.constructor.name, id: classId });

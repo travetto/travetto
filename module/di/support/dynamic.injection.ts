@@ -1,4 +1,4 @@
-import { Class, describeFunction } from '@travetto/runtime';
+import { Class, describeFunction, getUniqueId } from '@travetto/runtime';
 import { RetargettingProxy } from '@travetto/registry';
 
 import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
@@ -63,7 +63,7 @@ class $DynamicDependencyRegistry {
   onInstallFinalize<T>(cls: Class<T>): InjectableConfig<T> {
     const config = this.#registryOnInstallFinalize(cls);
     // If already loaded, reload
-    const classId = cls.Ⲑid;
+    const classId = getUniqueId(cls);
 
     if (
       !describeFunction(cls)?.abstract &&
@@ -79,7 +79,7 @@ class $DynamicDependencyRegistry {
   }
 
   destroyInstance(cls: Class, qualifier: symbol): void {
-    const classId = cls.Ⲑid;
+    const classId = getUniqueId(cls);
     const proxy = this.#proxies.get(classId)?.get(qualifier);
     this.#registryDestroyInstance(cls, qualifier);
     if (proxy) {

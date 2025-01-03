@@ -1,4 +1,4 @@
-import { castTo, Class, Util, asConstructable, AppError } from '@travetto/runtime';
+import { castTo, Class, Util, asConstructable, AppError, getUniqueId } from '@travetto/runtime';
 import { DataUtil, SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
@@ -43,7 +43,7 @@ export class ModelCrudUtil {
 
     const result = ModelRegistry.getBaseModel(cls).from(resolvedInput);
 
-    if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
+    if (!(result instanceof cls || getUniqueId(result.constructor) === getUniqueId(cls))) {
       if (onTypeMismatch === 'notfound') {
         throw new NotFoundError(cls, result.id);
       } else {

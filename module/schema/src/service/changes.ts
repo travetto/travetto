@@ -1,12 +1,12 @@
 import { EventEmitter } from 'node:events';
 
-import { Class } from '@travetto/runtime';
+import { Class, getUniqueId } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 
 import { FieldConfig, ClassConfig } from './types';
 import { AllViewSymbol } from '../internal/types';
 
-const id = (c: Class | string): string => typeof c === 'string' ? c : c.Ⲑid;
+const id = (c: Class | string): string => typeof c === 'string' ? c : getUniqueId(c);
 
 interface FieldMapping {
   path: FieldConfig[];
@@ -132,7 +132,11 @@ class $SchemaChangeListener {
     }
 
     // Handle class references changing, but keeping same id
-    const compareTypes = (a: Class, b: Class): boolean => 'Ⲑid' in a ? a.Ⲑid === b.Ⲑid : a === b;
+    const compareTypes = (a: Class, b: Class): boolean => {
+      const aClassId = getUniqueId(a);
+      const bClassId = getUniqueId(b);
+      return (aClassId ? aClassId === bClassId : a === b);
+    };
 
     for (const c of currFields) {
       if (prevFields.has(c)) {

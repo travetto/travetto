@@ -1,4 +1,4 @@
-import { describeFunction } from '@travetto/runtime';
+import { describeFunction, getUniqueId } from '@travetto/runtime';
 import { ClassConfig } from './service/types';
 
 const SYNTHETIC_PREFIX = 'Δ_';
@@ -19,7 +19,7 @@ export class SchemaNameResolver {
   }
 
   getName(schema: ClassConfig): string {
-    const id = schema.class.Ⲑid;
+    const id = getUniqueId(schema.class);
     if (describeFunction(schema.class)?.synthetic && schema.class.name.startsWith(SYNTHETIC_PREFIX) && ID_RE.test(schema.class.name)) {
       if (!this.#schemaIdToName.has(id)) {
         const name = schema.class.name

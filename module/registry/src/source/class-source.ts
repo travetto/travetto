@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { Class, Env, Runtime, RuntimeIndex, describeFunction, flushPendingFunctions } from '@travetto/runtime';
+import { Class, Env, Runtime, RuntimeIndex, describeFunction, flushPendingFunctions, getUniqueId } from '@travetto/runtime';
 
 import { DynamicFileLoader } from '../internal/file-loader';
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
@@ -42,7 +42,7 @@ export class ClassSource implements ChangeSource<Class> {
    * Process changes for a single file, looking for add/remove/update of classes
    */
   #handleFileChanges(importFile: string, classes: Class[] = []): number {
-    const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
+    const next = new Map<string, Class>(classes.map(cls => [getUniqueId(cls), cls] as const));
 
     let prev = new Map<string, Class>();
     if (this.#classes.has(importFile)) {

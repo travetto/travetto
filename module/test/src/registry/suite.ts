@@ -1,4 +1,4 @@
-import { Class, Runtime, classConstruct, describeFunction, asFull } from '@travetto/runtime';
+import { Class, Runtime, classConstruct, describeFunction, asFull, getUniqueId } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite';
@@ -60,7 +60,8 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    */
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
     const config = asFull(this.getOrCreatePending(cls));
-    const tests = [...this.pendingFields.get(cls.Ⲑid)!.values()];
+    const classId = getUniqueId(cls);
+    const tests = [...this.pendingFields.get(classId)!.values()];
 
     const parent = this.getParentClass(cls);
 
@@ -112,12 +113,12 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       }
     } else { // Else lookup directly
       if (methodNames.length) {
-        const cls = this.getValidClasses().find(x => x.Ⲑid === clsId)!;
+        const cls = this.getValidClasses().find(x => getUniqueId(x) === clsId)!;
         const suite = this.get(cls);
         const tests = suite.tests.filter(x => methodNames.includes(x.methodName))!;
         return [{ suite, tests }];
       } else if (clsId) {
-        const cls = this.getValidClasses().find(x => x.Ⲑid === clsId)!;
+        const cls = this.getValidClasses().find(x => getUniqueId(x) === clsId)!;
         const suite = this.get(cls);
         return suite ? [{ suite, tests: suite.tests }] : [];
       } else {

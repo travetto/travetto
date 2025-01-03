@@ -1,6 +1,7 @@
 import { Env } from './env';
 import { Util } from './util';
 import { TimeUtil } from './time';
+import { getUniqueId } from './function';
 
 /**
  * Shutdown manager, allowing for listening for graceful shutdowns
@@ -15,13 +16,13 @@ export class ShutdownManager {
    * @param name name to log for
    * @param handler synchronous or asynchronous handler
    */
-  static onGracefulShutdown(handler: () => Promise<void>, name?: string | { constructor: { Ⲑid: string } }): () => void {
+  static onGracefulShutdown(handler: () => Promise<void>, name?: string | { constructor: Function }): () => void {
     if (!this.#registered) {
       this.#registered = true;
       const done = (): void => { this.gracefulShutdown(0); };
       process.on('SIGUSR2', done).on('SIGTERM', done).on('SIGINT', done);
     }
-    this.#handlers.push({ handler, name: typeof name === 'string' ? name : name?.constructor.Ⲑid });
+    this.#handlers.push({ handler, name: typeof name === 'string' ? name : getUniqueId(name?.constructor!) });
     return () => {
       const idx = this.#handlers.findIndex(x => x.handler === handler);
       if (idx >= 0) {

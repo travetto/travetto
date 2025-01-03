@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { BinaryUtil, Class, Runtime, Util, castTo, describeFunction } from '@travetto/runtime';
+import { BinaryUtil, Class, Runtime, Util, castTo, describeFunction, getUniqueId } from '@travetto/runtime';
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, ControllerVisitUtil, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewSymbol, UnknownType } from '@travetto/schema/src/internal/types';
@@ -289,7 +289,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
   }
 
   renderSchema(schema: ClassConfig, force = false, visited = new Set<string>()): RenderContent {
-    const classId = schema.class.Ⲑid;
+    const classId = getUniqueId(schema.class);
     if (!force && this.#schemaContent.has(classId)) {
       return this.#schemaContent.get(classId)!;
     }
@@ -302,7 +302,8 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
       // Render all children
       const children: RenderContent[] = [];
       for (const el of SchemaRegistry.getSubTypesForClass(schema.class) ?? []) {
-        if (el !== schema.class && !visited.has(el.Ⲑid)) {
+        const elClassId = getUniqueId(el);
+        if (el !== schema.class && !visited.has(elClassId)) {
           children.push(this.renderSchema(SchemaRegistry.get(el), force, visited));
         }
       }

@@ -1,6 +1,6 @@
 import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
-import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
+import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction, getUniqueId } from '@travetto/runtime';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
@@ -42,7 +42,7 @@ export class TestWatcher {
       if (!cls || describeFunction(cls).abstract) {
         return;
       }
-      const classId = cls.Ⲑid;
+      const classId = getUniqueId(cls);
       if (!method) {
         consumer.removeClass(classId);
         return;

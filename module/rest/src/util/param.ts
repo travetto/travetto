@@ -1,4 +1,4 @@
-import { Class, AppError } from '@travetto/runtime';
+import { Class, AppError, getUniqueId } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { EndpointConfig } from '../registry/types';
@@ -8,7 +8,7 @@ import { MissingParamSymbol, RequestParamsSymbol, QueryExpandedSymbol } from '..
 export type ExtractFn = (c: ParamConfig, req: Request, res: Response, schema: FieldConfig) => unknown;
 
 function isClass(o: unknown): o is Class {
-  return !!o && typeof o === 'function' && 'Ⲑid' in o;
+  return !!o && typeof o === 'function' && !!getUniqueId(o);
 }
 
 /**
