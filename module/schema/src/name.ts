@@ -20,7 +20,7 @@ export class SchemaNameResolver {
 
   getName(schema: ClassConfig): string {
     const id = schema.class.Ⲑid;
-    if (describeFunction(schema.class)?.synthetic && schema.class.name.startsWith(SYNTHETIC_PREFIX)) {
+    if (describeFunction(schema.class)?.synthetic && schema.class.name.startsWith(SYNTHETIC_PREFIX) && ID_RE.test(schema.class.name)) {
       if (!this.#schemaIdToName.has(id)) {
         const name = schema.class.name
           .replaceAll(SYNTHETIC_PREFIX, '')
