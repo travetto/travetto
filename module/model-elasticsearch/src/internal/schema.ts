@@ -1,4 +1,4 @@
-import { InlineScript, MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
 import { ModelRegistry } from '@travetto/model';
@@ -15,8 +15,8 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build the update script for a given object
    */
-  static generateUpdateScript(o: Record<string, unknown>): InlineScript {
-    const out: InlineScript = {
+  static generateUpdateScript(o: Record<string, unknown>): estypes.Script {
+    const out: estypes.Script = {
       lang: 'painless',
       source: `
  for (entry in params.body.entrySet()) {
@@ -42,7 +42,7 @@ export class ElasticsearchSchemaUtil {
    * @param o
    * @returns
    */
-  static generateReplaceScript(o: Record<string, unknown>): InlineScript {
+  static generateReplaceScript(o: Record<string, unknown>): estypes.Script {
     return {
       lang: 'painless',
       source: 'ctx._source.clear(); ctx._source.putAll(params.body)',
@@ -53,7 +53,7 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build one or more mappings depending on the polymorphic state
    */
-  static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): MappingTypeMapping {
+  static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
     return ModelRegistry.get(cls).baseType ?
       this.generateAllMapping(cls, config) :
       this.generateSingleMapping(cls, config);
@@ -62,9 +62,9 @@ export class ElasticsearchSchemaUtil {
   /**
    * Generate all mappings
    */
-  static generateAllMapping(cls: Class, config?: EsSchemaConfig): MappingTypeMapping {
+  static generateAllMapping(cls: Class, config?: EsSchemaConfig): estypes.MappingTypeMapping {
     const allTypes = ModelRegistry.getClassesByBaseType(cls);
-    return allTypes.reduce<MappingTypeMapping>((acc, schemaCls) => {
+    return allTypes.reduce<estypes.MappingTypeMapping>((acc, schemaCls) => {
       DataUtil.deepAssign(acc, this.generateSingleMapping(schemaCls, config));
       return acc;
     }, { properties: {}, dynamic: false });
@@ -73,10 +73,10 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build a mapping for a given class
    */
-  static generateSingleMapping<T>(cls: Class<T>, config?: EsSchemaConfig): MappingTypeMapping {
+  static generateSingleMapping<T>(cls: Class<T>, config?: EsSchemaConfig): estypes.MappingTypeMapping {
     const schema = SchemaRegistry.getViewSchema(cls);
 
-    const props: Record<string, MappingProperty> = {};
+    const props: Record<string, estypes.MappingProperty> = {};
 
     for (const field of schema.fields) {
       const conf = schema.schema[field];

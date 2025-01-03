@@ -15,6 +15,36 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
   supportsGeo = true;
 
+  @Test()
+  async testIds() {
+    const svc = await this.service;
+
+    const people = [1, 2, 3, 8].map(x => Person.from({
+      id: svc.idSource.create(),
+      name: 'Bob Omber',
+      age: 20 + x,
+      gender: 'm',
+      address: {
+        street1: 'a',
+        ...(x === 1 ? { street2: 'b' } : {})
+      }
+    }));
+
+    await this.saveAll(Person, people);
+
+    const one = await svc.queryOne(Person, { where: { id: people[0].id } });
+    assert(one.id === people[0].id);
+
+    const one2 = await svc.queryOne(Person, { where: { id: { $eq: people[0].id } } });
+    assert(one2.id === people[0].id);
+
+    const none = await svc.queryCount(Person, { where: { id: { $ne: people[0].id } } });
+    assert(none === 3);
+
+    const noneids = await svc.query(Person, { where: { id: { $ne: people[0].id } } });
+    assert(noneids.every(x => x.id !== people[0].id));
+  }
+
   @Test('verify word boundary')
   async testWordBoundary() {
     const service = await this.service;
@@ -62,11 +92,11 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   @Test('Verify array $in queries work properly')
   async testArrayContains() {
     const svc = await this.service;
-    await svc.create(SimpleList, SimpleList.from({
+    const first = await svc.create(SimpleList, SimpleList.from({
       names: ['a', 'b', 'c']
     }));
 
-    await svc.create(SimpleList, SimpleList.from({
+    const second = await svc.create(SimpleList, SimpleList.from({
       names: ['b', 'c', 'd']
     }));
 
@@ -105,6 +135,24 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       }
     });
     assert(none.length === 0);
+
+    const ids = await svc.query(SimpleList, {
+      where: {
+        id: {
+          $in: [first.id, second.id]
+        }
+      }
+    });
+    assert(ids.length === 2);
+
+    const idNin = await svc.query(SimpleList, {
+      where: {
+        id: {
+          $nin: ['a', 'b']
+        }
+      }
+    });
+    assert(idNin.length === 2);
   }
 
   @Test('verify all operators')

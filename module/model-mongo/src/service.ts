@@ -1,6 +1,10 @@
 import { pipeline } from 'node:stream/promises';
 
-import { type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection, type ObjectId, type Binary, type RootFilterOperators } from 'mongodb';
+import {
+  type Db, GridFSBucket, MongoClient, type GridFSFile, type Collection,
+  type ObjectId, type Binary, type RootFilterOperators, type Filter,
+  type WithId as MongoWithId
+} from 'mongodb';
 
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
@@ -56,6 +60,40 @@ export class MongoModelService implements
 
   constructor(public readonly config: MongoModelConfig) { }
 
+  restoreId(item: { id?: string, _id?: unknown }): void {
+    if (item._id) {
+      item.id ??= MongoUtil.idToString(castTo(item._id));
+      delete item._id;
+    }
+  }
+
+  async postLoad<T extends ModelType>(cls: Class<T>, item: T | MongoWithId<T>): Promise<T> {
+    this.restoreId(item);
+    return await ModelCrudUtil.load(cls, item);
+  }
+
+  postUpdate<T extends ModelType>(item: T, id?: string): T {
+    if (id) {
+      item.id ??= id;
+    }
+    this.restoreId(item);
+    return item;
+  }
+
+  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: string }): string;
+  preUpdate<T extends OptionalId<ModelType>>(item: Omit<T, 'id'> & { _id?: Binary }): undefined;
+  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: undefined }): undefined;
+  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id?: string }): string | undefined {
+    if (item && item.id) {
+      const id = item.id;
+      item._id = MongoUtil.uuid(id);
+      if (!this.config.storeId) {
+        delete item.id;
+      }
+      return id;
+    }
+  }
+
   async #describeBlobRaw(location: string): Promise<BlobRaw> {
     const files: BlobRaw[] = await this.#bucket.find({ filename: location }, { limit: 1 }).toArray();
 
@@ -78,8 +116,12 @@ export class MongoModelService implements
     ModelExpiryUtil.registerCull(this);
   }
 
-  getWhereFilter<T extends ModelType>(cls: Class<T>, where: WhereClause<T>, checkExpiry = true): Record<string, unknown> {
-    return MongoUtil.extractWhereFilter(cls, where, checkExpiry);
+  getWhereFilter<T extends ModelType>(cls: Class<T>, where: WhereClause<T>, checkExpiry = true): Filter<T> {
+    return castTo(MongoUtil.extractWhereFilter(cls, where, checkExpiry));
+  }
+
+  getIdFilter<T extends ModelType>(cls: Class<T>, id: string, checkExpiry = true): Filter<T> {
+    return this.getWhereFilter(cls, castTo({ _id: MongoUtil.uuid(id) }), checkExpiry);
   }
 
   // Storage
@@ -120,73 +162,75 @@ export class MongoModelService implements
   /**
    * Get mongo collection
    */
-  async getStore<T extends ModelType>(cls: Class<T>): Promise<Collection> {
+  async getStore<T extends ModelType>(cls: Class<T>): Promise<Collection<T>> {
     return this.#db.collection(ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_'));
   }
 
   // Crud
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const store = await this.getStore(cls);
-    const result = await store.findOne(this.getWhereFilter<ModelType>(cls, { id }), {});
+    const result = await store.findOne(this.getIdFilter(cls, id), {});
     if (result) {
-      const res = await ModelCrudUtil.load(cls, result);
+      const res = await this.postLoad(cls, result);
       if (res) {
-        return MongoUtil.postLoadId(res);
+        return res;
       }
     }
     throw new NotFoundError(cls, id);
   }
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned: WithId<T, Binary> = castTo(await ModelCrudUtil.preStore(cls, item, this));
-    cleaned._id = MongoUtil.uuid(cleaned.id);
+    const cleaned = await ModelCrudUtil.preStore<WithId<T, Binary>>(cls, item, this);
+    const id = this.preUpdate(cleaned);
 
     const store = await this.getStore(cls);
     const result = await store.insertOne(castTo(cleaned));
     if (!result.insertedId) {
-      throw new ExistsError(cls, cleaned.id);
+      throw new ExistsError(cls, id);
     }
-    delete cleaned._id;
-    return cleaned;
+    return this.postUpdate(cleaned, id);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     item = await ModelCrudUtil.preStore(cls, item, this);
+    const id = this.preUpdate(item);
     const store = await this.getStore(cls);
-    const res = await store.replaceOne(this.getWhereFilter<ModelType>(cls, { id: item.id }), item);
+    const res = await store.replaceOne(this.getIdFilter(cls, id), item);
     if (res.matchedCount === 0) {
-      throw new NotFoundError(cls, item.id);
+      throw new NotFoundError(cls, id);
     }
-    return item;
+    return this.postUpdate(item, id);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
-    const cleaned = await ModelCrudUtil.preStore(cls, item, this);
+    const cleaned = await ModelCrudUtil.preStore<WithId<T, Binary>>(cls, item, this);
+    const id = this.preUpdate(cleaned);
     const store = await this.getStore(cls);
+
     try {
       await store.updateOne(
-        this.getWhereFilter<ModelType>(cls, { id: cleaned.id }, false),
+        this.getIdFilter(cls, id, false),
         { $set: cleaned },
         { upsert: true }
       );
     } catch (err) {
       if (err instanceof Error && err.message.includes('duplicate key error')) {
-        throw new ExistsError(cls, cleaned.id);
+        throw new ExistsError(cls, id);
       } else {
         throw err;
       }
     }
-    return cleaned;
+    return this.postUpdate(cleaned, id);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     const store = await this.getStore(cls);
 
-    let final: Record<string, unknown> = await ModelCrudUtil.prePartialUpdate(cls, item, view);
+    const final = await ModelCrudUtil.prePartialUpdate(cls, item, view);
+    const simple = MongoUtil.extractSimple(cls, final, undefined, false);
 
-    const items = MongoUtil.extractSimple(cls, final, undefined, false);
-    final = Object
-      .entries(items)
+    const operation: Partial<T> = castTo(Object
+      .entries(simple)
       .reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>((acc, [k, v]) => {
         if (v === null || v === undefined) {
           (acc.$unset ??= {})[k] = v;
@@ -194,13 +238,13 @@ export class MongoModelService implements
           (acc.$set ??= {})[k] = v;
         }
         return acc;
-      }, {});
+      }, {}));
 
     const id = item.id;
 
     const res = await store.findOneAndUpdate(
-      this.getWhereFilter<ModelType>(cls, { id }),
-      final,
+      this.getIdFilter(cls, id),
+      operation,
       { returnDocument: 'after', includeResultMetadata: true }
     );
 
@@ -213,7 +257,7 @@ export class MongoModelService implements
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     const store = await this.getStore(cls);
-    const result = await store.deleteOne(this.getWhereFilter<ModelType>(cls, { id }, false));
+    const result = await store.deleteOne(this.getIdFilter(cls, id, false));
     if (result.deletedCount === 0) {
       throw new NotFoundError(cls, id);
     }
@@ -224,7 +268,7 @@ export class MongoModelService implements
     const cursor = store.find(this.getWhereFilter(cls, {}), { timeout: true }).batchSize(100);
     for await (const el of cursor) {
       try {
-        yield MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el));
+        yield await this.postLoad(cls, el);
       } catch (err) {
         if (!(err instanceof NotFoundError)) {
           throw err;
@@ -294,7 +338,7 @@ export class MongoModelService implements
       return out;
     }
 
-    const store = await this.getStore(cls);
+    const store = await this.getStore<Partial<T> & ModelType>(cls);
     const bulk = store.initializeUnorderedBulkOp({ writeConcern: { w: 1 } });
     const { upsertedIds, insertedIds } = await ModelBulkUtil.preStore(cls, operations, this);
 
@@ -302,11 +346,14 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
-        bulk.insert(MongoUtil.preInsertId(asFull(op.insert)));
+        this.preUpdate(op.insert);
+        bulk.insert(op.insert);
       } else if (op.upsert) {
-        bulk.find({ _id: MongoUtil.uuid(op.upsert.id!) }).upsert().updateOne({ $set: op.upsert });
+        const id = this.preUpdate(op.upsert);
+        bulk.find({ _id: MongoUtil.uuid(id!) }).upsert().updateOne({ $set: op.upsert });
       } else if (op.update) {
-        bulk.find({ _id: MongoUtil.uuid(op.update.id) }).update({ $set: op.update });
+        const id = this.preUpdate(op.update);
+        bulk.find({ _id: MongoUtil.uuid(id) }).update({ $set: op.update });
       } else if (op.delete) {
         bulk.find({ _id: MongoUtil.uuid(op.delete.id) }).deleteOne();
       }
@@ -314,13 +361,16 @@ export class MongoModelService implements
 
     const res = await bulk.execute({});
 
+    // Restore all ids
     for (const op of operations) {
-      if (op.insert) {
-        MongoUtil.postLoadId(asFull(op.insert));
+      const core = op.insert ?? op.upsert ?? op.update;
+      if (core) {
+        this.postUpdate(asFull(core));
       }
     }
-    for (const [index, _id] of TypedObject.entries(res.upsertedIds)) {
-      out.insertedIds.set(+index, MongoUtil.idToString(castTo(_id)));
+
+    for (const [index, _id] of TypedObject.entries<Record<string, string>>(res.upsertedIds)) {
+      out.insertedIds.set(+index, MongoUtil.idToString(_id));
     }
 
     if (out.counts) {
@@ -361,7 +411,7 @@ export class MongoModelService implements
     if (!result) {
       throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
-    return await ModelCrudUtil.load(cls, result);
+    return await this.postLoad(cls, result);
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
@@ -396,7 +446,7 @@ export class MongoModelService implements
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(castTo(sort));
 
     for await (const el of cursor) {
-      yield (await MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el)));
+      yield await this.postLoad(cls, el);
     }
   }
 
@@ -406,9 +456,9 @@ export class MongoModelService implements
 
     const col = await this.getStore(cls);
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
-    const cursor = col.find<T>(filter, {});
+    const cursor = col.find(filter, {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
-    return await Promise.all(items.map(r => ModelCrudUtil.load(cls, r).then(MongoUtil.postLoadId)));
+    return await Promise.all(items.map(r => this.postLoad(cls, r)));
   }
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
@@ -430,15 +480,16 @@ export class MongoModelService implements
 
     const col = await this.getStore(cls);
     const item = await ModelCrudUtil.preStore(cls, data, this);
+    const id = this.preUpdate(item);
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
-    where.id = item.id;
+    where.id = id;
 
     const filter = MongoUtil.extractWhereFilter(cls, where);
     const res = await col.replaceOne(filter, item);
     if (res.matchedCount === 0) {
-      throw new NotFoundError(cls, item.id);
+      throw new NotFoundError(cls, id);
     }
-    return item;
+    return this.postUpdate(item, id);
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
@@ -454,7 +505,6 @@ export class MongoModelService implements
     await QueryVerifier.verify(cls, query);
 
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
-
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, item);
     const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>(
@@ -468,7 +518,7 @@ export class MongoModelService implements
       }, {});
 
     const filter = MongoUtil.extractWhereFilter(cls, query.where);
-    const res = await col.updateMany(filter, final);
+    const res = await col.updateMany(filter, castTo(final));
     return res.matchedCount;
   }
 
@@ -532,13 +582,12 @@ export class MongoModelService implements
       search = { $search: search, $language: 'en' };
     }
 
-    (query.sort ??= []).unshift({
-      // @ts-expect-error
+    (query.sort ??= []).unshift(castTo<(typeof query.sort[0])>({
       score: { $meta: 'textScore' }
-    });
+    }));
 
-    const cursor = col.find<T>({ $and: [{ $text: search }, filter] }, {});
+    const cursor = col.find(castTo({ $and: [{ $text: search }, filter] }), {});
     const items = await MongoUtil.prepareCursor(cls, cursor, query).toArray();
-    return await Promise.all(items.map(r => ModelCrudUtil.load(cls, r).then(MongoUtil.postLoadId)));
+    return await Promise.all(items.map(r => this.postLoad(cls, r)));
   }
 }

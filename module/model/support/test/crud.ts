@@ -57,6 +57,8 @@ class User2 {
 class Dated {
   id: string;
 
+  value?: string;
+
   @PersistValue(v => v ?? new Date(), 'full')
   @Required(false)
   createdDate: Date;
@@ -154,7 +156,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('Verify update partial on missing item fails')
   async testMissingUpdatePartial() {
     const service = await this.service;
-    await assert.rejects(() => service.updatePartial(User2, { id: '-1' }), NotFoundError);
+    await assert.rejects(() => service.updatePartial(User2, { id: '-1', name: 'bob' }), NotFoundError);
   }
 
   @Test('Verify partial update with field removal and lists')
@@ -227,7 +229,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
 
     await timers.setTimeout(100);
 
-    const final = await service.updatePartial(Dated, { id: res.id });
+    const final = await service.updatePartial(Dated, { id: res.id, value: 'random' });
     assert(final.createdDate instanceof Date);
     assert(final.createdDate.getTime() === created?.getTime());
     assert(final.updatedDate instanceof Date);

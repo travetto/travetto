@@ -1,4 +1,4 @@
-import { asConstructable, castTo, Class } from '@travetto/runtime';
+import { AppError, asConstructable, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelType } from '../types/model';
@@ -25,6 +25,9 @@ export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
  * Defines an index on a model
  */
 export function Index<T extends ModelType>(...indices: IndexConfig<T>[]) {
+  if (indices.some(x => x.fields.some(f => f === 'id'))) {
+    throw new AppError('Cannot create an index with the id field');
+  }
   return function (target: Class<T>): void {
     ModelRegistry.getOrCreatePending(target).indices!.push(...indices);
   };

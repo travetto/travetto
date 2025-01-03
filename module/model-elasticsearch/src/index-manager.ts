@@ -1,5 +1,4 @@
-import { Client } from '@elastic/elasticsearch';
-import { ReindexRequest } from '@elastic/elasticsearch/lib/api/types';
+import { Client, estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
 import { ModelRegistry, ModelType } from '@travetto/model';
@@ -164,7 +163,7 @@ export class IndexManager implements ModelStorageSupport {
 
       const allChange = removes.concat(fieldChanges);
 
-      const reindexBody: ReindexRequest = {
+      const reindexBody: estypes.ReindexRequest = {
         source: { index: curr },
         dest: { index: next },
         script: {

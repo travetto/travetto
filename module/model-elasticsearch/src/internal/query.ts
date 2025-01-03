@@ -78,6 +78,10 @@ export class ElasticsearchQueryUtil {
         ((key === 'id' && !path) ? '_id' : `${path}${key}`) :
         `${path}${key}`;
 
+      const sPathQuery = (val: unknown): {} => (key === 'id' && !path) ?
+        { ids: { values: Array.isArray(val) ? val : [val] } } :
+        { [Array.isArray(val) ? 'terms' : 'term']: { [sPath]: val } };
+
       if (DataUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
@@ -100,29 +104,19 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$in': {
-              items.push({ terms: { [sPath]: Array.isArray(v) ? v : [v] } });
+              items.push(sPathQuery(Array.isArray(v) ? v : [v]));
               break;
             }
             case '$nin': {
-              items.push({
-                bool: {
-                  ['must_not']: [{
-                    terms: {
-                      [sPath]: Array.isArray(v) ? v : [v]
-                    }
-                  }]
-                }
-              });
+              items.push({ bool: { ['must_not']: [sPathQuery(Array.isArray(v) ? v : [v])] } });
               break;
             }
             case '$eq': {
-              items.push({ term: { [sPath]: v } });
+              items.push(sPathQuery(v));
               break;
             }
             case '$ne': {
-              items.push({
-                bool: { ['must_not']: [{ term: { [sPath]: v } }] }
-              });
+              items.push({ bool: { ['must_not']: [sPathQuery(v)] } });
               break;
             }
             case '$exists': {
@@ -183,11 +177,7 @@ export class ElasticsearchQueryUtil {
         }
         // Handle operations
       } else {
-        items.push({
-          [Array.isArray(top) ? 'terms' : 'term']: {
-            [(key === 'id' && !path) ? '_id' : `${path}${key}`]: top
-          }
-        });
+        items.push(sPathQuery(top));
       }
     }
     if (items.length === 1) {
@@ -280,32 +270,5 @@ export class ElasticsearchQueryUtil {
     }
 
     return search;
-  }
-
-
-  /**
-   * Safely load the data, excluding ids if needed
-   */
-  static cleanIdRemoval<T>(req: estypes.SearchRequest, results: estypes.SearchResponse<T>): T[] {
-    const out: T[] = [];
-
-    const toArr = <V>(x: V | V[] | undefined): V[] => (x ? (Array.isArray(x) ? x : [x]) : []);
-
-    // determine if id
-    const select = [
-      toArr(req._source_includes),
-      toArr(req._source_excludes)
-    ];
-    const includeId = select[0].includes('_id') || (select[0].length === 0 && !select[1].includes('_id'));
-
-    for (const r of results.hits.hits) {
-      const obj = r._source!;
-      if (includeId) {
-        castTo<{ _id: string }>(obj)._id = r._id!;
-      }
-      out.push(obj);
-    }
-
-    return out;
   }
 }

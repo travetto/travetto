@@ -25,6 +25,16 @@ export class MongoBasicSuite extends ModelBasicSuite {
     const user = await svc.create(UniqueUser, UniqueUser.from({ name: 'bob' }));
     assert(user.id.length === 32);
   }
+
+  @Test()
+  async upsert() {
+    const svc = await this.service;
+    const user = await svc.upsert(UniqueUser, UniqueUser.from({ name: 'bob', id: svc.idSource.create() }));
+    assert(user.id.length === 32);
+
+    const found = await svc.get(UniqueUser, user.id);
+    assert(found.id === user.id);
+  }
 }
 
 @Suite()

@@ -32,7 +32,7 @@ export function registerFunction(
   const modulePath = pth.replace(/[.][cm]?[tj]sx?$/, '');
 
   const metadata: FunctionMetadata = {
-    id: (fn.name ? `${pkg}:${modulePath}￮${fn.name}` : `${pkg}:${modulePath}`),
+    id: (fn.name ? `${pkg}:${modulePath}#${fn.name}` : `${pkg}:${modulePath}`),
     import: `${pkg}/${pth}`,
     module: pkg,
     modulePath,
