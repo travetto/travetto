@@ -53,16 +53,12 @@
         "upserts",
         "xcopy",
         "xpack",
-        "xunit",
-        "Ⲑid",
-        "Ⲑinit",
-        "Ⲑsyn",
-        "Ⲑmod",
-        "Ⲑimp",
-        "Ⲑcon"
+        "xunit"
     ],
+    "ignoreRandomStrings": true,
     "ignoreWords": [],
     "ignoreRegExpList": [
+        "Ⲑ",
         "/from\\s+(['\"]).*\\1/",
         "/import\\s+(['\"]).*\\1/",
         "/import[(](['\"]).*\\1[)]/",

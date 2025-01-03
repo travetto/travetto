@@ -1,10 +1,6 @@
 import ts from 'typescript';
 
-import {
-  TransformerState, OnMethod, OnClass, AfterClass,
-  CoreUtil, SystemUtil, Import, OnFunction,
-  SYNTHETIC_PREFIX
-} from '@travetto/transformer';
+import { TransformerState, OnMethod, OnClass, AfterClass, CoreUtil, SystemUtil, Import, OnFunction, SYNTHETIC_PREFIX } from '@travetto/transformer';
 
 import type { FunctionMetadataTag } from '../src/function';
 
