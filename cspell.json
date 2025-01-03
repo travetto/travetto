@@ -57,6 +57,7 @@
         "Ⲑinit",
         "Ⲑsyn",
         "Ⲑmod",
+        "Ⲑimp",
         "Ⲑcon"
     ],
     "ignoreWords": [],
