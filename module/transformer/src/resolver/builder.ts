@@ -67,6 +67,8 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
       }
     } catch { }
     return { category: 'shape', type };
+  } else if (objectFlags & (ts.ObjectFlags.Mapped)) { // Mapped types: Pick, Omit, Exclude, Retain
+    return { category: 'shape', type };
   } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
     let resolvedType = type;
     if (CoreUtil.hasTarget(resolvedType)) {
