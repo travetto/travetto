@@ -228,7 +228,6 @@ export class MongoModelService implements
 
     const final = await ModelCrudUtil.prePartialUpdate(cls, item, view);
     const simple = MongoUtil.extractSimple(cls, final, undefined, false);
-    delete simple.id;
 
     const operation: Partial<T> = castTo(Object
       .entries(simple)
@@ -506,8 +505,6 @@ export class MongoModelService implements
     await QueryVerifier.verify(cls, query);
 
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
-    delete item.id;
-
     const col = await this.getStore(cls);
     const items = MongoUtil.extractSimple(cls, item);
     const final = Object.entries(items).reduce<Partial<Record<'$unset' | '$set', Record<string, unknown>>>>(

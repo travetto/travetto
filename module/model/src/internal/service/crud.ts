@@ -142,6 +142,13 @@ export class ModelCrudUtil {
     if (!DataUtil.isPlainObject(item)) {
       throw new AppError(`A partial update requires a plain object, not an instance of ${castTo<Function>(item).constructor.name}`, { category: 'data' });
     }
+    const keys = Object.keys(item);
+    if ((keys.length === 1 && item.id) || keys.length === 0) {
+      throw new AppError('No fields to update');
+    } else {
+      item = { ...item };
+      delete item.id;
+    }
     const res = await this.prePersist(cls, castTo(item), 'partial');
     await SchemaValidator.validatePartial(cls, item, view);
     return res;

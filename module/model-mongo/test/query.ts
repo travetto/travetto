@@ -62,7 +62,7 @@ export class QueryTest {
 
     assert.deepStrictEqual(out, {
       $and: [{
-        _id: { $in: ids }
+        _id: { $in: ids.map(x => MongoUtil.uuid(x)) }
       }]
     });
   }
