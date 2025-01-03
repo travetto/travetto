@@ -27,7 +27,7 @@ function hasEscapedName(n: ts.Node): n is ts.Node & { name: { escapedText: strin
  * Transformer runtime state
  */
 export class TransformerState implements State {
-  static SYNTHETIC_EXT = '_Ⲑ_syn';
+  static SYNTHETIC_EXT = 'Ⲑsyn';
 
   #resolver: SimpleResolver;
   #imports: ImportManager;
@@ -268,7 +268,7 @@ export class TransformerState implements State {
    */
   getModuleIdentifier(): ts.Expression {
     if (this.#modIdent === undefined) {
-      this.#modIdent = this.createIdentifier('Ⲑ_mod');
+      this.#modIdent = this.createIdentifier('Ⲑmod');
       const entry = this.#resolver.getFileImport(this.source.fileName);
       const decl = this.factory.createVariableDeclaration(this.#modIdent, undefined, undefined,
         this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])

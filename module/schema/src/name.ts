@@ -1,7 +1,7 @@
 import { describeFunction } from '@travetto/runtime';
 import { ClassConfig } from './service/types';
 
-const SYNTHETIC_EXT = '_Ⲑ_syn';
+const SYNTHETIC_EXT = 'Ⲑsyn';
 const SYNTHETIC_RE = new RegExp(`(__)(\\d+)${SYNTHETIC_EXT}$`);
 
 /**
