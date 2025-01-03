@@ -17,7 +17,7 @@ type ComputeConfig = {
 type IndexFieldPart = { path: string[], value: (string | boolean | Date | number) };
 type IndexSortPart = { path: string[], dir: number, value: number | Date };
 
-const NULL = '\u0000';
+const DEFAULT_SEP = '\u8203';
 
 /**
  * Utils for working with indexed model services
@@ -109,7 +109,7 @@ export class ModelIndexedUtil {
     opts?: ComputeConfig & { sep?: string }
   ): { type: string, key: string, sort?: number | Date } {
     const { fields, sorted } = this.computeIndexParts(cls, idx, item, { ...(opts ?? {}), includeSortInFields: false });
-    const key = fields.map(({ value }) => value).map(x => `${x}`).join(opts?.sep ?? NULL);
+    const key = fields.map(({ value }) => value).map(x => `${x}`).join(opts?.sep ?? DEFAULT_SEP);
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
     return !sorted ? { type: cfg.type, key } : { type: cfg.type, key, sort: sorted.value };
   }
