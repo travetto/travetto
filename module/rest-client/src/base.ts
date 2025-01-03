@@ -289,12 +289,13 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
   }
 
   renderSchema(schema: ClassConfig, force = false, visited = new Set<string>()): RenderContent {
-    if (!force && this.#schemaContent.has(schema.class.Ⲑid)) {
-      return this.#schemaContent.get(schema.class.Ⲑid)!;
+    const classId = schema.class.Ⲑid;
+    if (!force && this.#schemaContent.has(classId)) {
+      return this.#schemaContent.get(classId)!;
     }
 
     let parent: Imp | undefined;
-    visited.add(schema.class.Ⲑid);
+    visited.add(classId);
     const imports: Imp[] = [];
 
     if (schema.baseType) {
@@ -311,9 +312,9 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
         content: [`export type ${baseName} = ${children.map(x => x.name).join(' | ')};\n`],
         file: './schema.ts',
         imports: [],
-        classId: schema.class.Ⲑid,
+        classId,
       };
-      this.#schemaContent.set(schema.class.Ⲑid, baseResult);
+      this.#schemaContent.set(classId, baseResult);
       this.#imports.add(Runtime.getImport(schema.class));
       return baseResult;
     }
@@ -346,7 +347,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
 
     const result: RenderContent = {
       imports,
-      classId: schema.class.Ⲑid,
+      classId,
       file: './schema.ts',
       name,
       content: [
@@ -357,7 +358,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
       ]
     };
 
-    this.#schemaContent.set(schema.class.Ⲑid, result);
+    this.#schemaContent.set(classId, result);
     this.#imports.add(Runtime.getImport(schema.class));
 
     return result;

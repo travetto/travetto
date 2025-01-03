@@ -128,11 +128,12 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    */
   getOrCreatePendingField(cls: Class, field: F): Partial<M> {
     this.getOrCreatePending(cls);
+    const classId = cls.Ⲑid;
 
-    if (!this.pendingFields.get(cls.Ⲑid)!.has(field)) {
-      this.pendingFields.get(cls.Ⲑid)!.set(field, this.createPendingField(cls, field));
+    if (!this.pendingFields.get(classId)!.has(field)) {
+      this.pendingFields.get(classId)!.set(field, this.createPendingField(cls, field));
     }
-    return this.pendingFields.get(cls.Ⲑid)!.get(field)!;
+    return this.pendingFields.get(classId)!.get(field)!;
   }
 
   /**
@@ -155,15 +156,16 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * On an install event, finalize
    */
   onInstall(cls: Class, e: ChangeEvent<Class>): void {
-    if (this.pending.has(cls.Ⲑid) || this.pendingFields.has(cls.Ⲑid)) {
+    const classId = cls.Ⲑid;
+    if (this.pending.has(classId) || this.pendingFields.has(classId)) {
       if (this.trace) {
-        console.debug('Installing', { service: this.constructor.name, id: cls.Ⲑid });
+        console.debug('Installing', { service: this.constructor.name, id: classId });
       }
       const result = this.onInstallFinalize(cls);
-      this.pendingFields.delete(cls.Ⲑid);
-      this.pending.delete(cls.Ⲑid);
+      this.pendingFields.delete(classId);
+      this.pending.delete(classId);
 
-      this.entries.set(cls.Ⲑid, result);
+      this.entries.set(classId, result);
       this.emit(e);
     }
   }
@@ -172,17 +174,18 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * On an uninstall event, remove
    */
   onUninstall(cls: Class, e: ChangeEvent<Class>): void {
-    if (this.entries.has(cls.Ⲑid)) {
+    const classId = cls.Ⲑid;
+    if (this.entries.has(classId)) {
       if (this.trace) {
-        console.debug('Uninstalling', { service: this.constructor.name, id: cls.Ⲑid });
+        console.debug('Uninstalling', { service: this.constructor.name, id: classId });
       }
-      this.expired.set(cls.Ⲑid, this.entries.get(cls.Ⲑid)!);
-      this.entries.delete(cls.Ⲑid);
+      this.expired.set(classId, this.entries.get(classId)!);
+      this.entries.delete(classId);
       this.onUninstallFinalize(cls);
       if (e.type === 'removing') {
         this.emit(e);
       }
-      process.nextTick(() => this.expired.delete(cls.Ⲑid));
+      process.nextTick(() => this.expired.delete(classId));
     }
   }
 }
