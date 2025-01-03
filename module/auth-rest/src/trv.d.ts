@@ -1,6 +1,6 @@
 import { Principal } from '@travetto/auth';
 
-import { LoginContextⲐ } from './internal/types';
+import { LoginContextSymbol } from './internal/types';
 import { LoginContext } from './types';
 
 declare module '@travetto/rest' {
@@ -12,6 +12,6 @@ declare module '@travetto/rest' {
     /**
      * Any additional context for login
      */
-    [LoginContextⲐ]?: LoginContext;
+    [LoginContextSymbol]?: LoginContext;
   }
 }

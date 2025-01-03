@@ -11,12 +11,12 @@ import { SessionConfig } from './config';
 /**
  * Session model service identifier
  */
-export const SessionModelⲐ = Symbol.for('@travetto/rest-session:model');
+export const SessionModelSymbol = Symbol.for('@travetto/rest-session:model');
 
 /**
  * Symbol for accessing the raw session
  */
-export const SessionⲐ = Symbol.for('@travetto/rest-session:data');
+export const SessionRawSymbol = Symbol.for('@travetto/rest-session:data');
 
 
 @Model({ autoCreate: false })
@@ -42,7 +42,7 @@ export class SessionService {
 
   #modelService: ModelExpirySupport;
 
-  constructor(@Inject(SessionModelⲐ) service: ModelExpirySupport) {
+  constructor(@Inject(SessionModelSymbol) service: ModelExpirySupport) {
     this.#modelService = service;
   }
 
@@ -119,21 +119,21 @@ export class SessionService {
    * Get or recreate session
    */
   ensureCreated(req: Request): Session {
-    const sub: Request | { [SessionⲐ]?: Session } = req;
-    if (sub[SessionⲐ]?.action === 'destroy') {
-      sub[SessionⲐ] = undefined;
+    const sub: Request | { [SessionRawSymbol]?: Session } = req;
+    if (sub[SessionRawSymbol]?.action === 'destroy') {
+      sub[SessionRawSymbol] = undefined;
     }
-    return sub[SessionⲐ] ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
+    return sub[SessionRawSymbol] ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
   }
 
   /**
    * Load from request
    */
   async readRequest(req: Request, id?: string): Promise<void> {
-    if (!req[SessionⲐ]) {
+    if (!req[SessionRawSymbol]) {
       id ??= this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.headerFirst(this.config.keyName);
       if (id) {
-        req[SessionⲐ] = (await this.#load(id))!;
+        req[SessionRawSymbol] = (await this.#load(id))!;
       }
     }
   }

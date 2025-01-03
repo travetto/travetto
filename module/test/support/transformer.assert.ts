@@ -48,21 +48,21 @@ const METHODS: Record<string, Function[]> = {
 
 const OP_TOKEN_TO_NAME = new Map<number, keyof typeof OPTOKEN_ASSERT>();
 
-const AssertⲐ = Symbol.for('@travetto/test:assert');
-const IsTestⲐ = Symbol.for('@travetto/test:valid');
+const AssertSymbol = Symbol.for('@travetto/test:assert');
+const IsTestSymbol = Symbol.for('@travetto/test:valid');
 
 /**
  * Assert transformation state
  */
 interface AssertState {
-  [AssertⲐ]?: {
+  [AssertSymbol]?: {
     assert: ts.Identifier;
     hasAssertCall?: boolean;
     assertCheck: ts.Expression;
     checkThrow: ts.Expression;
     checkThrowAsync: ts.Expression;
   };
-  [IsTestⲐ]?: boolean;
+  [IsTestSymbol]?: boolean;
 }
 
 /**
@@ -136,9 +136,9 @@ export class AssertTransformer {
    * Initialize transformer state
    */
   static initState(state: TransformerState & AssertState): void {
-    if (!state[AssertⲐ]) {
+    if (!state[AssertSymbol]) {
       const asrt = state.importFile('@travetto/test/src/assert/check').ident;
-      state[AssertⲐ] = {
+      state[AssertSymbol] = {
         assert: asrt,
         assertCheck: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'check'),
         checkThrow: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'checkThrow'),
@@ -157,7 +157,7 @@ export class AssertTransformer {
     const firstText = first!.getText();
 
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
-    const check = state.factory.createCallExpression(state[AssertⲐ]!.assertCheck, undefined, state.factory.createNodeArray([
+    const check = state.factory.createCallExpression(state[AssertSymbol]!.assertCheck, undefined, state.factory.createNodeArray([
       state.fromLiteral({
         module: state.getModuleIdentifier(),
         line: state.fromLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
@@ -180,7 +180,7 @@ export class AssertTransformer {
 
     this.initState(state);
     return state.factory.createCallExpression(
-      /reject/i.test(key) ? state[AssertⲐ]!.checkThrowAsync : state[AssertⲐ]!.checkThrow,
+      /reject/i.test(key) ? state[AssertSymbol]!.checkThrowAsync : state[AssertSymbol]!.checkThrow,
       undefined,
       state.factory.createNodeArray([
         state.fromLiteral({
@@ -269,13 +269,13 @@ export class AssertTransformer {
 
   @OnMethod('AssertCheck')
   static onAssertCheck(state: TransformerState & AssertState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    state[IsTestⲐ] = true;
+    state[IsTestSymbol] = true;
     return node;
   }
 
   @AfterMethod('AssertCheck')
   static afterAssertCheck(state: TransformerState & AssertState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    state[IsTestⲐ] = false;
+    state[IsTestSymbol] = false;
     return node;
   }
 
@@ -285,7 +285,7 @@ export class AssertTransformer {
   @OnCall()
   static onAssertCall(state: TransformerState & AssertState, node: ts.CallExpression): ts.CallExpression {
     // Only check in test mode
-    if (!state[IsTestⲐ]) {
+    if (!state[IsTestSymbol]) {
       return node;
     }
 

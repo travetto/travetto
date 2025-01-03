@@ -1,6 +1,6 @@
 import { ConsoleEvent } from '@travetto/runtime';
 
-export const LogCommonⲐ = Symbol.for('@travetto/log:common');
+export const LogCommonSymbol = Symbol.for('@travetto/log:common');
 
 /**
  * Logging event

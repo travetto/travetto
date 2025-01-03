@@ -8,7 +8,7 @@ import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
 
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { AllViewⲐ } from '@travetto/schema/src/internal/types';
+import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 
 type IdxCfg = CreateIndexesOptions;
@@ -89,7 +89,7 @@ export class MongoUtil {
     for (const key of keys) {
       const subpath = `${path}${key}`;
       const v: Record<string, unknown> = castTo(sub[key]);
-      const subField = schema?.views[AllViewⲐ].schema[key];
+      const subField = schema?.views[AllViewSymbol].schema[key];
 
       const isPlain = v && DataUtil.isPlainObject(v);
       const firstKey = isPlain ? Object.keys(v)[0] : '';

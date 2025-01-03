@@ -29,14 +29,14 @@ export class CommonLoggerConfig {
 }
 ```
 
-In addition to these simple overrides, the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L12) can be extended by providing an implementation of either a [LogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L34) or [LogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L26), with the declared symbol of `LogCommonⲐ`.
+In addition to these simple overrides, the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L12) can be extended by providing an implementation of either a [LogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L34) or [LogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L26), with the declared symbol of `LogCommonSymbol`.
 
 **Code: Sample Common Formatter**
 ```typescript
 import { Injectable } from '@travetto/di';
-import { LogFormatter, LogCommonⲐ, LogEvent } from '@travetto/log';
+import { LogFormatter, LogCommonSymbol, LogEvent } from '@travetto/log';
 
-@Injectable(LogCommonⲐ)
+@Injectable(LogCommonSymbol)
 export class SampleFormatter implements LogFormatter {
 
   format(e: LogEvent): string {

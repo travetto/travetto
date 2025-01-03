@@ -1,12 +1,12 @@
 import { castTo, Class, classConstruct, asFull, TypedObject, castKey } from '@travetto/runtime';
 
 import { DataUtil } from './data';
-import { AllViewⲐ } from './internal/types';
+import { AllViewSymbol } from './internal/types';
 import { SchemaRegistry } from './service/registry';
 import { FieldConfig } from './service/types';
 
 type BindConfig = {
-  view?: string | typeof AllViewⲐ;
+  view?: string | typeof AllViewSymbol;
   filterField?: (field: FieldConfig) => boolean;
   filterValue?: (value: unknown, field: FieldConfig) => boolean;
 };
@@ -169,7 +169,7 @@ export class BindUtil {
    * @param cfg The bind configuration
    */
   static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: object, cfg: BindConfig = {}): T {
-    const view = cfg.view ?? AllViewⲐ; // Does not convey
+    const view = cfg.view ?? AllViewSymbol; // Does not convey
     delete cfg.view;
 
     if (!!data && isInstance<T>(data)) {

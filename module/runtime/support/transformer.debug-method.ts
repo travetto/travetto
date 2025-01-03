@@ -2,13 +2,13 @@ import ts from 'typescript';
 
 import { TransformerState, OnMethod, CoreUtil } from '@travetto/transformer';
 
-const DebugⲐ = Symbol.for('@travetto/runtime:debug');
+const DebugSymbol = Symbol.for('@travetto/runtime:debug');
 
 /**
  * Debug transformation state
  */
 interface DebugState {
-  [DebugⲐ]?: ts.Expression;
+  [DebugSymbol]?: ts.Expression;
 }
 
 /**
@@ -18,9 +18,9 @@ export class DebugEntryTransformer {
 
   @OnMethod('DebugBreak')
   static debugOnEntry(state: TransformerState & DebugState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (!state[DebugⲐ]) {
+    if (!state[DebugSymbol]) {
       const imp = state.importFile('@travetto/runtime/src/debug').ident;
-      state[DebugⲐ] = CoreUtil.createAccess(state.factory, imp, 'tryDebugger');
+      state[DebugSymbol] = CoreUtil.createAccess(state.factory, imp, 'tryDebugger');
     }
 
     return state.factory.updateMethodDeclaration(node,
@@ -32,7 +32,7 @@ export class DebugEntryTransformer {
       node.parameters,
       node.type,
       node.body ? state.factory.updateBlock(node.body, [
-        state.factory.createIfStatement(state[DebugⲐ]!,
+        state.factory.createIfStatement(state[DebugSymbol]!,
           state.factory.createExpressionStatement(state.factory.createIdentifier('debugger'))),
         ...node.body.statements
       ]) : node.body

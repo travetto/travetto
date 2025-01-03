@@ -3,7 +3,7 @@ import { Config } from '@travetto/config';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { FilterContext, FilterNext } from '../types';
-import { RequestLoggingⲐ } from '../internal/symbol';
+import { RequestLoggingSymbol } from '../internal/symbol';
 import { SerializeInterceptor } from './serialize';
 
 /**
@@ -36,7 +36,7 @@ export class LoggingInterceptor implements RestInterceptor {
         path: req.path,
         query: { ...req.query },
         params: req.params,
-        ...req[RequestLoggingⲐ] ?? {},
+        ...req[RequestLoggingSymbol] ?? {},
         statusCode: res.statusCode,
         duration,
       };

@@ -36,7 +36,7 @@ import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/s
 import { MongoUtil, PlainIdx, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
 
-const ListIndexⲐ = Symbol.for('@travetto/mongo-model:list-index');
+const ListIndexSymbol = Symbol.for('@travetto/mongo-model:list-index');
 
 type BlobRaw = GridFSFile & { metadata?: BlobMeta };
 
@@ -442,7 +442,7 @@ export class MongoModelService implements
       castTo(ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
     );
 
-    const sort = castTo<{ [ListIndexⲐ]: PlainIdx }>(idxCfg)[ListIndexⲐ] ??= MongoUtil.getPlainIndex(idxCfg);
+    const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxCfg)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxCfg);
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(castTo(sort));
 
     for await (const el of cursor) {

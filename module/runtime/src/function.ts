@@ -10,7 +10,7 @@ export type FunctionMetadata = FunctionMetadataTag & {
   abstract?: boolean;
 };
 
-const METADATA = Symbol.for('@travetto/runtime:function-metadata');
+const MetadataSymbol = Symbol.for('@travetto/runtime:function-metadata');
 
 const pending = new Set<Function>([]);
 
@@ -39,7 +39,7 @@ export function registerFunction(
     ...tag, methods, abstract, synthetic, class: abstract !== undefined
   };
   pending.add(fn);
-  Object.defineProperties(fn, { Ⲑid: { value: metadata.id }, [METADATA]: { value: metadata } });
+  Object.defineProperties(fn, { Ⲑid: { value: metadata.id }, [MetadataSymbol]: { value: metadata } });
 }
 
 /**
@@ -56,6 +56,6 @@ export function flushPendingFunctions(): Function[] {
  */
 export function describeFunction(fn: Function): FunctionMetadata;
 export function describeFunction(fn?: Function): FunctionMetadata | undefined {
-  const _fn: (Function & { [METADATA]?: FunctionMetadata }) | undefined = fn;
-  return _fn?.[METADATA];
+  const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata }) | undefined = fn;
+  return _fn?.[MetadataSymbol];
 }

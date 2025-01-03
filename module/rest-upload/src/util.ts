@@ -8,7 +8,7 @@ import { pipeline } from 'node:stream/promises';
 import busboy from '@fastify/busboy';
 
 import { Request, MimeUtil } from '@travetto/rest';
-import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
+import { NodeEntitySymbol } from '@travetto/rest/src/internal/symbol';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
@@ -17,7 +17,7 @@ const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-
 
 type UploadItem = { stream: Readable, filename?: string, field: string };
 type FileType = { ext: string, mime: string };
-const RawFileⲐ = Symbol.for('@travetto/rest-upload:raw-file');
+const RawFileSymbol = Symbol.for('@travetto/rest-upload:raw-file');
 
 /**
  * Rest upload utilities
@@ -28,7 +28,7 @@ export class RestUploadUtil {
    * Get uploaded file path location
    */
   static getUploadLocation(file: File): string {
-    return castTo<{ [RawFileⲐ]: string }>(file)[RawFileⲐ];
+    return castTo<{ [RawFileSymbol]: string }>(file)[RawFileSymbol];
   }
 
   /**
@@ -49,7 +49,7 @@ export class RestUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: req.body ?? req[NodeEntityⲐ], filename: req.getFilename(), field: 'file' };
+      yield { stream: req.body ?? req[NodeEntitySymbol], filename: req.getFilename(), field: 'file' };
     }
   }
 
@@ -90,7 +90,7 @@ export class RestUploadUtil {
         size: (await fs.stat(location)).size,
       });
 
-      Object.assign(file, { [RawFileⲐ]: location });
+      Object.assign(file, { [RawFileSymbol]: location });
 
       return file;
     } catch (err) {

@@ -5,7 +5,7 @@ import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 import { RestConfig, RouteConfig, RestServer } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
 
-import { TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
+import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
 import { ServerHandle } from '@travetto/rest/src/types';
 
 import { FastifyServerUtil } from './internal/util';
@@ -65,8 +65,8 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
       sub = sub.replace(/\/{1,3}/g, '/').replace(/\/{1,3}$/, '');
       this.raw[route.method](sub, async (req, reply) => {
         await route.handlerFinalized!(
-          req[TravettoEntityⲐ] ??= FastifyServerUtil.getRequest(req),
-          reply[TravettoEntityⲐ] ??= FastifyServerUtil.getResponse(reply)
+          req[TravettoEntitySymbol] ??= FastifyServerUtil.getRequest(req),
+          reply[TravettoEntitySymbol] ??= FastifyServerUtil.getResponse(reply)
         );
       });
     }

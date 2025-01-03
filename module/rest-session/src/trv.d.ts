@@ -1,4 +1,4 @@
-import { SessionⲐ } from './service';
+import { SessionRawSymbol } from './service';
 import { Session } from './session';
 
 /**
@@ -7,6 +7,6 @@ import { Session } from './session';
 declare module '@travetto/rest' {
   interface Request {
     readonly session: Session;
-    [SessionⲐ]: Session;
+    [SessionRawSymbol]: Session;
   }
 }

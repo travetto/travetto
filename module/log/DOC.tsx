@@ -25,7 +25,7 @@ export const text = <>
 
     <c.Code title='Standard Logging Config' src='src/common.ts' startRe={/class CommonLoggerConfig/} endRe={/^[}]/} />
 
-    In addition to these simple overrides, the {CommonLogger} can be extended by providing an implementation of either a {LogFormatter} or {LogAppender}, with the declared symbol of {d.field('LogCommonⲐ')}.
+    In addition to these simple overrides, the {CommonLogger} can be extended by providing an implementation of either a {LogFormatter} or {LogAppender}, with the declared symbol of {d.field('LogCommonSymbol')}.
 
     <c.Code title='Sample Common Formatter' src='doc/formatter.ts' />
 

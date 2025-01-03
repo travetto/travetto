@@ -3,7 +3,7 @@ import { pipeline } from 'node:stream/promises';
 import type koa from 'koa';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
-import { NodeEntityⲐ, ProviderEntityⲐ } from '@travetto/rest/src/internal/symbol';
+import { NodeEntitySymbol, ProviderEntitySymbol } from '@travetto/rest/src/internal/symbol';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -15,8 +15,8 @@ export class KoaServerUtil {
    */
   static getRequest(ctx: koa.Context): Request {
     return RestServerUtil.decorateRequest({
-      [ProviderEntityⲐ]: ctx,
-      [NodeEntityⲐ]: ctx.req,
+      [ProviderEntitySymbol]: ctx,
+      [NodeEntitySymbol]: ctx.req,
       protocol: castTo(ctx.protocol),
       method: castTo(ctx.request.method),
       query: ctx.request.query,
@@ -35,8 +35,8 @@ export class KoaServerUtil {
    */
   static getResponse(ctx: koa.Context): Response {
     return RestServerUtil.decorateResponse({
-      [ProviderEntityⲐ]: ctx,
-      [NodeEntityⲐ]: ctx.res,
+      [ProviderEntitySymbol]: ctx,
+      [NodeEntitySymbol]: ctx.res,
       get headersSent(): boolean {
         return ctx.headerSent;
       },

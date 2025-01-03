@@ -34,7 +34,7 @@ A session allows for defining the expiration time, what state the session should
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelExpirySupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Put<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/rest'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SessionData<span class="token punctuation">,</span> Session<span class="token punctuation">,</span> SessionModelⲐ <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/rest-session'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SessionData<span class="token punctuation">,</span> Session<span class="token punctuation">,</span> SessionModelSymbol <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/rest-session'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> MemoryModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model-memory'</span><span class="token punctuation">;</span>
 
 <span class="token comment">// Applies to entire execution, not just this file</span>
@@ -43,7 +43,7 @@ A session allows for defining the expiration time, what state the session should
    * Session provider must be specified. The memory service is sufficient for simple
    *   workloads, buts falls down when dealing with multiple servers
    */</span>
-  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span>SessionModelⲐ<span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span>SessionModelSymbol<span class="token punctuation">)</span>
   <span class="token keyword">static</span> <span class="token function">getSessionModel</span><span class="token punctuation">(</span>memory<span class="token operator">:</span> MemoryModelService<span class="token punctuation">)</span><span class="token operator">:</span> ModelExpirySupport <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> memory<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>

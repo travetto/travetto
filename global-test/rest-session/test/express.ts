@@ -1,7 +1,7 @@
 import { RestSessionServerSuite } from '@travetto/rest-session/support/test/server';
 import { Suite } from '@travetto/test';
 import { ExpressRestServer } from '@travetto/rest-express';
-import { SessionModelⲐ } from '@travetto/rest-session';
+import { SessionModelSymbol } from '@travetto/rest-session';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
@@ -21,7 +21,7 @@ class Config {
     }();
   }
 
-  @InjectableFactory({ primary: true, qualifier: SessionModelⲐ })
+  @InjectableFactory({ primary: true, qualifier: SessionModelSymbol })
   static provider() {
     return new MemoryModelService(new MemoryModelConfig());
   }

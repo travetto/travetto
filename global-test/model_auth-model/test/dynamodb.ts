@@ -1,11 +1,11 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/support/test/model';
+import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model';
 
 import { DynamoDBModelConfig, DynamoDBModelService } from '@travetto/model-dynamodb';
 
 class Init {
-  @InjectableFactory(TestModelSvcⲐ)
+  @InjectableFactory(TestModelSvcSymbol)
   static modelProvider(config: DynamoDBModelConfig) {
     return new DynamoDBModelService(config);
   }

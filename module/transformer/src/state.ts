@@ -3,10 +3,10 @@ import ts from 'typescript';
 import { path, ManifestIndex } from '@travetto/manifest';
 
 import { ManagedType, AnyType, ForeignType } from './resolver/types';
-import { State, DecoratorMeta, Transformer, ModuleNameⲐ } from './types/visitor';
+import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor';
 import { SimpleResolver } from './resolver/service';
 import { ImportManager } from './importer';
-import { Import } from './types/shared';
+import { Import, SYNTHETIC_PREFIX } from './types/shared';
 
 import { DocUtil } from './util/doc';
 import { DecoratorUtil } from './util/decorator';
@@ -27,8 +27,6 @@ function hasEscapedName(n: ts.Node): n is ts.Node & { name: { escapedText: strin
  * Transformer runtime state
  */
 export class TransformerState implements State {
-  static SYNTHETIC_EXT = 'Ⲑsyn';
-
   #resolver: SimpleResolver;
   #imports: ImportManager;
   #modIdent: ts.Identifier;
@@ -288,7 +286,7 @@ export class TransformerState implements State {
    * @param module
    */
   findDecorator(mod: string | Transformer, node: ts.Node, name: string, module?: string): ts.Decorator | undefined {
-    mod = typeof mod === 'string' ? mod : mod[ModuleNameⲐ]!;
+    mod = typeof mod === 'string' ? mod : mod[ModuleNameSymbol]!;
     const target = `${mod}:${name}`;
     const list = this.getDecoratorList(node);
     return list.find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.dec;
@@ -344,7 +342,7 @@ export class TransformerState implements State {
    * Register synthetic identifier
    */
   createSyntheticIdentifier(id: string): [identifier: ts.Identifier, exists: boolean] {
-    id = `${id}${TransformerState.SYNTHETIC_EXT}`;
+    id = `${SYNTHETIC_PREFIX}${id}`;
     let exists = true;
     if (!this.#syntheticIdentifiers.has(id)) {
       this.#syntheticIdentifiers.set(id, this.factory.createIdentifier(id));

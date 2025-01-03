@@ -42,8 +42,9 @@ export class TestWatcher {
       if (!cls || describeFunction(cls).abstract) {
         return;
       }
+      const classId = cls.Ⲑid;
       if (!method) {
-        consumer.removeClass(cls.Ⲑid);
+        consumer.removeClass(classId);
         return;
       }
       const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
@@ -60,7 +61,7 @@ export class TestWatcher {
           type: 'removeTest',
           methodNames: method?.name ? [method.name!] : undefined!,
           method: method?.name,
-          classId: cls?.Ⲑid,
+          classId,
           import: Runtime.getImport(cls)
         } satisfies TestRemovedEvent);
       }

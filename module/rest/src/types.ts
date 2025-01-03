@@ -5,8 +5,8 @@ import { Readable, Writable } from 'node:stream';
 import type { ByteRange, Any, Class, TypedFunction } from '@travetto/runtime';
 
 import {
-  HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ, ProviderEntityⲐ, RequestParamsⲐ,
-  RequestLoggingⲐ, QueryExpandedⲐ
+  HeadersAddedSymbol, InterceptorConfigsSymbol, NodeEntitySymbol, ProviderEntitySymbol, RequestParamsSymbol,
+  RequestLoggingSymbol, QueryExpandedSymbol
 } from './internal/symbol';
 
 import type { RestInterceptor } from './interceptor/types';
@@ -39,27 +39,27 @@ export interface Request<T = unknown> {
   /**
    * The parsed params for the target handler
    */
-  [RequestParamsⲐ]?: unknown[];
+  [RequestParamsSymbol]?: unknown[];
   /**
    * Additional logging context
    */
-  [RequestLoggingⲐ]?: Record<string, unknown>;
+  [RequestLoggingSymbol]?: Record<string, unknown>;
   /**
    * The original request of the underlying framework
    */
-  [ProviderEntityⲐ]?: T;
+  [ProviderEntitySymbol]?: T;
   /**
    * The raw http Incoming Message object
    */
-  [NodeEntityⲐ]: IncomingMessage;
+  [NodeEntitySymbol]: IncomingMessage;
   /**
    * Interceptor-related configs, providing request-awareness of route-level configurations
    */
-  [InterceptorConfigsⲐ]?: Record<string, Record<string, unknown>>;
+  [InterceptorConfigsSymbol]?: Record<string, Record<string, unknown>>;
   /**
    * Expanded representation of query
    */
-  [QueryExpandedⲐ]: Record<string, unknown>;
+  [QueryExpandedSymbol]: Record<string, unknown>;
   /**
    * The http method
    */
@@ -162,15 +162,15 @@ export interface Response<T = unknown> {
   /**
    * The underlying request object
    */
-  [ProviderEntityⲐ]?: T;
+  [ProviderEntitySymbol]?: T;
   /**
    * The raw http server response object
    */
-  [NodeEntityⲐ]: ServerResponse;
+  [NodeEntitySymbol]: ServerResponse;
   /**
    * The additional headers for this request, provided by controllers/route config
    */
-  [HeadersAddedⲐ]?: HeaderMap;
+  [HeadersAddedSymbol]?: HeaderMap;
   /**
    * Outbound status code
    */

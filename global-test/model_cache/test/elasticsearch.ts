@@ -1,13 +1,13 @@
 
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { CacheModelⲐ } from '@travetto/cache';
+import { CacheModelSymbol } from '@travetto/cache';
 import { CacheServiceSuite } from '@travetto/cache/support/test/service';
 
 import { ElasticsearchModelService, ElasticsearchModelConfig } from '@travetto/model-elasticsearch';
 
 class Config {
-  @InjectableFactory(CacheModelⲐ)
+  @InjectableFactory(CacheModelSymbol)
   static getModel(config: ElasticsearchModelConfig) {
     return new ElasticsearchModelService(config);
   }

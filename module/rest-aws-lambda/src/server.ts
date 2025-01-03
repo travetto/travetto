@@ -4,7 +4,7 @@ import { RestServer, RestApplication } from '@travetto/rest';
 
 import { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from './types';
 
-export const AwsLambdaⲐ = Symbol.for('@travetto/rest-aws-lambda:entry');
+export const AwsLambdaSymbol = Symbol.for('@travetto/rest-aws-lambda:entry');
 
 
 /**
@@ -44,7 +44,7 @@ export class RestAwsConfig {
 export class AwsLambdaRestApplication extends RestApplication implements AwsLambdaHandler {
   #lambdaServer: AwsLambdaRestServer;
 
-  constructor(@Inject(AwsLambdaⲐ) lambdaServer: AwsLambdaRestServer) {
+  constructor(@Inject(AwsLambdaSymbol) lambdaServer: AwsLambdaRestServer) {
     super();
     this.server = lambdaServer;
     this.#lambdaServer = lambdaServer;

@@ -2,14 +2,14 @@ import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
-import { AllViewⲐ } from '@travetto/schema/src/internal/types';
+import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
 
-const TableⲐ = Symbol.for('@travetto/model-sql:table');
+const TableSymbol = Symbol.for('@travetto/model-sql:table');
 
 export type VisitStack = {
-  [TableⲐ]?: string;
+  [TableSymbol]?: string;
   array?: boolean;
   type: Class;
   name: string;
@@ -79,14 +79,14 @@ export class SQLUtil {
     }
 
     const model = ModelRegistry.get(cls.class)!;
-    const conf = cls.views[AllViewⲐ];
+    const conf = cls.views[AllViewSymbol];
     const fields = conf.fields.map(x => ({ ...conf.schema[x] }));
 
     // Polymorphic
     if (model && (model.baseType ?? model.subType)) {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of ModelRegistry.getClassesByBaseType(ModelRegistry.getBaseModel(cls.class))) {
-        const typeConf = SchemaRegistry.get(type).views[AllViewⲐ];
+        const typeConf = SchemaRegistry.get(type).views[AllViewSymbol];
         for (const f of typeConf.fields) {
           if (!fieldMap.has(f)) {
             fieldMap.add(f);
@@ -232,7 +232,7 @@ export class SQLUtil {
       if (typeof k === 'string' && !DataUtil.isPlainObject(select[k]) && localMap[k]) {
         if (!v) {
           if (toGet.size === 0) {
-            toGet = new Set(SchemaRegistry.get(cls).views[AllViewⲐ].fields);
+            toGet = new Set(SchemaRegistry.get(cls).views[AllViewSymbol].fields);
           }
           toGet.delete(k);
         } else {
@@ -254,7 +254,7 @@ export class SQLUtil {
       while (!found) {
         const key = Object.keys(cl)[0];
         const val = cl[key];
-        const field = { ...schema.views[AllViewⲐ].schema[key] };
+        const field = { ...schema.views[AllViewSymbol].schema[key] };
         if (DataUtil.isPrimitive(val)) {
           stack.push(field);
           found = { stack, asc: val === 1 };
@@ -305,10 +305,10 @@ export class SQLUtil {
    */
   static buildTable(list: VisitStack[]): string {
     const top = list[list.length - 1];
-    if (!top[TableⲐ]) {
-      top[TableⲐ] = list.map((el, i) => i === 0 ? ModelRegistry.getStore(el.type) : el.name).join('_');
+    if (!top[TableSymbol]) {
+      top[TableSymbol] = list.map((el, i) => i === 0 ? ModelRegistry.getStore(el.type) : el.name).join('_');
     }
-    return top[TableⲐ]!;
+    return top[TableSymbol]!;
   }
 
   /**

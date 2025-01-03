@@ -113,8 +113,9 @@ export class ConfigurationService {
    * Bind and validate configuration into class instance
    */
   async bindTo<T>(cls: Class<T>, item: T, namespace: string, validate = true): Promise<T> {
+    const classId = cls.Ⲑid;
     if (!SchemaRegistry.has(cls)) {
-      throw new AppError(`${cls.Ⲑid} is not a valid schema class, config is not supported`);
+      throw new AppError(`${classId} is not a valid schema class, config is not supported`);
     }
     const out = BindUtil.bindSchemaToObject(cls, item, this.#get(namespace));
     if (validate) {
@@ -123,10 +124,10 @@ export class ConfigurationService {
       } catch (err) {
         if (err instanceof ValidationResultError) {
           const ogMessage = err.message;
-          err.message = `Failed to construct ${cls.Ⲑid} as validation errors have occurred`;
+          err.message = `Failed to construct ${classId} as validation errors have occurred`;
           err.stack = err.stack?.replace(ogMessage, err.message);
           const imp = Runtime.getImport(cls);
-          Object.defineProperty(err, 'details', { value: { class: cls.Ⲑid, import: imp, ...(err.details ?? {}) } });
+          Object.defineProperty(err, 'details', { value: { class: classId, import: imp, ...(err.details ?? {}) } });
         }
         throw err;
       }

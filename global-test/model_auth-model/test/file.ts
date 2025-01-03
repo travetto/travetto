@@ -2,10 +2,10 @@ import { InjectableFactory } from '@travetto/di';
 import { FileModelConfig, FileModelService } from '@travetto/model-file';
 import { Suite } from '@travetto/test';
 
-import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/support/test/model';
+import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model';
 
 class Init {
-  @InjectableFactory(TestModelSvcⲐ)
+  @InjectableFactory(TestModelSvcSymbol)
   static modelProvider(config: FileModelConfig) {
     return new FileModelService(config);
   }
