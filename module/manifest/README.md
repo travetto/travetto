@@ -50,10 +50,10 @@ export class TestClass {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TestClass = void 0;
 const tslib_1 = require("tslib");
-const 𝚫_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
+const Δ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
 var Ⲑmod = ["@travetto/manifest", "doc/test-class.ts"];
 class TestClass {
-    static Ⲑinit = 𝚫_function_1.registerFunction(TestClass, Ⲑmod, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
+    static Ⲑinit = Δ_function_1.registerFunction(TestClass, Ⲑmod, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
     async doStuff() { }
 }
 exports.TestClass = TestClass;

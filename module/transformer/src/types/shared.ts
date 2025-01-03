@@ -36,4 +36,4 @@ export function transformCast<T>(input: unknown): T {
   return input as T;
 }
 
-export const SYNTHETIC_PREFIX = '𝚫_';
+export const SYNTHETIC_PREFIX = 'Δ_';

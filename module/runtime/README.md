@@ -213,7 +213,7 @@ export function work() {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.work = work;
 const tslib_1 = require("tslib");
-const 𝚫_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
+const Δ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
 const Ⲑcon = tslib_1.__importStar(require("@travetto/runtime/src/console.js"));
 var Ⲑmod = ["@travetto/runtime", "doc/transpile.ts"];
 function work() {
@@ -226,7 +226,7 @@ function work() {
     }
     Ⲑcon.log({ level: "debug", import: Ⲑmod, line: 9, scope: "work", args: ['End Work'] });
 }
-𝚫_function_1.registerFunction(work, Ⲑmod, { hash: 1030247697, lines: [1, 10, 2] });
+Δ_function_1.registerFunction(work, Ⲑmod, { hash: 1030247697, lines: [1, 10, 2] });
 ```
 
 #### Filtering Debug
