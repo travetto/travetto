@@ -227,7 +227,7 @@ export class ElasticsearchModelService implements
   async updatePartial<T extends ModelType>(cls: Class<T>, data: Partial<T> & { id: string }, view?: string): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
-    const id = this.preUpdate(data);
+    const id = data.id;
     const item = castTo<typeof data>(await ModelCrudUtil.prePartialUpdate(cls, data, view));
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
@@ -506,11 +506,8 @@ export class ElasticsearchModelService implements
 
   async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
-    // Do not allow id in query
-    delete data.id;
 
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
-
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
