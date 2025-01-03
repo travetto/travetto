@@ -5,7 +5,7 @@ import { ManifestModuleUtil, PackageUtil, path } from '@travetto/manifest';
 import { AnyType, TransformResolver, ManagedType } from './resolver/types';
 import { ImportUtil } from './util/import';
 import { CoreUtil } from './util/core';
-import { Import } from './types/shared';
+import { Import, SYNTHETIC_PREFIX } from './types/shared';
 import { LiteralUtil } from './util/literal';
 import { DeclarationUtil } from './util/declaration';
 
@@ -109,7 +109,7 @@ export class ImportManager {
         this.#ids.set(file, name);
       } else {
         const key = path.basename(file, path.extname(file)).replace(/[^A-Za-z0-9]+/g, '_');
-        this.#ids.set(file, `${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}Δimp`);
+        this.#ids.set(file, `${SYNTHETIC_PREFIX}${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
       }
     }
     return this.#ids.get(file)!;

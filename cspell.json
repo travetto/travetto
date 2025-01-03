@@ -55,11 +55,11 @@
         "xpack",
         "xunit",
         "Ⲑid",
-        "Δinit",
-        "Δsyn",
-        "Δmod",
-        "Δimp",
-        "Δcon"
+        "Ⲑinit",
+        "Ⲑsyn",
+        "Ⲑmod",
+        "Ⲑimp",
+        "Ⲑcon"
     ],
     "ignoreWords": [],
     "ignoreRegExpList": [

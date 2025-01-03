@@ -1,8 +1,8 @@
 import { describeFunction } from '@travetto/runtime';
 import { ClassConfig } from './service/types';
 
-const SYNTHETIC_EXT = 'Δsyn';
-const SYNTHETIC_RE = new RegExp(`(__)(\\d+)${SYNTHETIC_EXT}$`);
+const SYNTHETIC_PREFIX = '𝚫_';
+const ID_RE = /(__)(\\d+)$/;
 
 /**
  * Name resolver, specifically for synthetic types
@@ -20,14 +20,16 @@ export class SchemaNameResolver {
 
   getName(schema: ClassConfig): string {
     const id = schema.class.Ⲑid;
-    if (describeFunction(schema.class)?.synthetic && SYNTHETIC_RE.test(schema.class.name)) {
+    if (describeFunction(schema.class)?.synthetic && schema.class.name.startsWith(SYNTHETIC_PREFIX)) {
       if (!this.#schemaIdToName.has(id)) {
-        const name = schema.class.name.replace(SYNTHETIC_RE, (_, pref, uid) => `__${(+uid % this.#base).toString().padStart(this.#digits, '0')}`);
+        const name = schema.class.name
+          .replaceAll(SYNTHETIC_PREFIX, '')
+          .replace(ID_RE, (_, pref, uid) => `${pref}${(+uid % this.#base).toString().padStart(this.#digits, '0')}`);
         this.#schemaIdToName.set(id, name);
       }
       return this.#schemaIdToName.get(id)!;
     } else {
-      return schema.class.name.replace(SYNTHETIC_EXT, '');
+      return schema.class.name.replace(SYNTHETIC_PREFIX, '');
     }
   }
 }

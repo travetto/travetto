@@ -6,7 +6,7 @@ import { ManagedType, AnyType, ForeignType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor';
 import { SimpleResolver } from './resolver/service';
 import { ImportManager } from './importer';
-import { Import } from './types/shared';
+import { Import, SYNTHETIC_PREFIX } from './types/shared';
 
 import { DocUtil } from './util/doc';
 import { DecoratorUtil } from './util/decorator';
@@ -27,8 +27,6 @@ function hasEscapedName(n: ts.Node): n is ts.Node & { name: { escapedText: strin
  * Transformer runtime state
  */
 export class TransformerState implements State {
-  static SYNTHETIC_EXT = 'Δsyn';
-
   #resolver: SimpleResolver;
   #imports: ImportManager;
   #modIdent: ts.Identifier;
@@ -268,7 +266,7 @@ export class TransformerState implements State {
    */
   getModuleIdentifier(): ts.Expression {
     if (this.#modIdent === undefined) {
-      this.#modIdent = this.createIdentifier('Δmod');
+      this.#modIdent = this.createIdentifier('Ⲑmod');
       const entry = this.#resolver.getFileImport(this.source.fileName);
       const decl = this.factory.createVariableDeclaration(this.#modIdent, undefined, undefined,
         this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])
@@ -344,7 +342,7 @@ export class TransformerState implements State {
    * Register synthetic identifier
    */
   createSyntheticIdentifier(id: string): [identifier: ts.Identifier, exists: boolean] {
-    id = `${id}${TransformerState.SYNTHETIC_EXT}`;
+    id = `${SYNTHETIC_PREFIX}${id}`;
     let exists = true;
     if (!this.#syntheticIdentifiers.has(id)) {
       this.#syntheticIdentifiers.set(id, this.factory.createIdentifier(id));
