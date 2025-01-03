@@ -109,7 +109,7 @@ export class ImportManager {
         this.#ids.set(file, name);
       } else {
         const key = path.basename(file, path.extname(file)).replace(/[^A-Za-z0-9]+/g, '_');
-        this.#ids.set(file, `Ⲑ_${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
+        this.#ids.set(file, `${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}Ⲑid`);
       }
     }
     return this.#ids.get(file)!;
