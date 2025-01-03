@@ -52,7 +52,7 @@ export class SchemaTransformUtil {
             Object.entries(type.fieldTypes)
               .map(([k, v]) =>
                 this.computeField(state, state.factory.createPropertyDeclaration(
-                  [], k,
+                  [], /\W/.test(k) ? state.factory.createComputedPropertyName(state.fromLiteral(k)) : k,
                   v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
                   v.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined, undefined
                 ), { type: v, root })
@@ -68,7 +68,7 @@ export class SchemaTransformUtil {
         }
         return id;
       }
-      case 'union': {
+      case 'composition': {
         if (type.commonType) {
           return this.toConcreteType(state, type.commonType, node, root);
         }
@@ -127,8 +127,8 @@ export class SchemaTransformUtil {
     const primaryExpr = typeExpr.key === 'literal' && typeExpr.typeArguments?.[0] ? typeExpr.typeArguments[0] : typeExpr;
 
     // We need to ensure we aren't being tripped up by the wrapper for arrays, sets, etc.
-    // If we have a union type
-    if (primaryExpr.key === 'union') {
+    // If we have a composition type
+    if (primaryExpr.key === 'composition') {
       const values = primaryExpr.subTypes.map(x => x.key === 'literal' ? x.value : undefined)
         .filter(x => x !== undefined && x !== null);
 

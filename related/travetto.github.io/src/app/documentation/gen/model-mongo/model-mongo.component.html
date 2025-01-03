@@ -116,6 +116,11 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
   connectionString<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
+   * Should we store the _id as a string in the id field
+   */</span>
+  storeId<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
    * Load all the ssl certs as needed
    */</span>
   <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>

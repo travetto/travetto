@@ -108,6 +108,11 @@ export class MongoModelConfig {
   connectionString?: string;
 
   /**
+   * Should we store the _id as a string in the id field
+   */
+  storeId?: boolean;
+
+  /**
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {

@@ -51,9 +51,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TestClass = void 0;
 const tslib_1 = require("tslib");
 const Ⲑ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
-var ᚕm = ["@travetto/manifest", "doc/test-class.ts"];
+var Ⲑmod = ["@travetto/manifest", "doc/test-class.ts"];
 class TestClass {
-    static Ⲑinit = Ⲑ_function_1.registerFunction(TestClass, ᚕm, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
+    static Ⲑinit = Ⲑ_function_1.registerFunction(TestClass, Ⲑmod, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
     async doStuff() { }
 }
 exports.TestClass = TestClass;

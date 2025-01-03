@@ -156,7 +156,7 @@ export class ImportManager {
       switch (type.key) {
         case 'managed':
         case 'literal': this.importFromResolved(...type.typeArguments || []); break;
-        case 'union':
+        case 'composition':
         case 'tuple': this.importFromResolved(...type.subTypes || []); break;
         case 'shape': this.importFromResolved(...Object.values(type.fieldTypes)); break;
       }

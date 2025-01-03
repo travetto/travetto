@@ -268,7 +268,7 @@ export class TransformerState implements State {
    */
   getModuleIdentifier(): ts.Expression {
     if (this.#modIdent === undefined) {
-      this.#modIdent = this.createIdentifier('ᚕm');
+      this.#modIdent = this.createIdentifier('Ⲑmod');
       const entry = this.#resolver.getFileImport(this.source.fileName);
       const decl = this.factory.createVariableDeclaration(this.#modIdent, undefined, undefined,
         this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])

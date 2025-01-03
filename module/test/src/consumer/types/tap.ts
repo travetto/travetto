@@ -36,7 +36,7 @@ export class TapEmitter implements TestConsumer {
    */
   onStart(): void {
     this.#start = Date.now();
-    this.log(this.#enhancer.suiteName('TAP version 13')!);
+    this.log(this.#enhancer.suiteName('TAP version 14')!);
   }
 
   /**
@@ -44,7 +44,7 @@ export class TapEmitter implements TestConsumer {
    */
   logMeta(obj: Record<string, unknown>): void {
     const lineLength = this.#terminal.width - 5;
-    let body = stringify(obj, { lineWidth: lineLength });
+    let body = stringify(obj, { lineWidth: lineLength, indent: 2 });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
   }

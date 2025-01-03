@@ -55,7 +55,9 @@
         "xpack",
         "xunit",
         "Ⲑinit",
-        "Ⲑsyn"
+        "Ⲑsyn",
+        "Ⲑmod",
+        "Ⲑcon"
     ],
     "ignoreWords": [],
     "ignoreRegExpList": [

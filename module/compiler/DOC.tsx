@@ -2,7 +2,7 @@
 import { d, c } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 
-const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /getEntry/);
+const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /entry.common/);
 
 export const text = async () => {
   await DocRunUtil.run('npx', ['trvc', 'build'], { cwd: './doc-exec' });

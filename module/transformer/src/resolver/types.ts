@@ -117,7 +117,7 @@ export interface TemplateType extends Type<'template'> {
 /**
  * Union type
  */
-export interface UnionType extends Type<'union'> {
+export interface CompositionType extends Type<'composition'> {
   /**
    * A common type if derivable, e.g. 'a'|'b' will have a common type of string
    */
@@ -130,6 +130,10 @@ export interface UnionType extends Type<'union'> {
    * Type Info
    */
   tsSubTypes?: ts.Type[];
+  /**
+   * Operation to perform
+   */
+  operation?: 'and' | 'or';
 }
 
 /**
@@ -177,7 +181,7 @@ export interface ForeignType extends Type<'foreign'> {
 export interface UnknownType extends Type<'unknown'> { }
 
 export type AnyType =
-  TupleType | ShapeType | UnionType | LiteralType |
+  TupleType | ShapeType | CompositionType | LiteralType |
   ManagedType | PointerType | UnknownType | ForeignType | TemplateType;
 
 /**

@@ -548,14 +548,14 @@ Options:
 
 Available Services
 --------------------
- * dynamodb@2.0.0
- * elasticsearch@8.9.1
+ * dynamodb@2.5.3
+ * elasticsearch@8.17.0
  * firestore@latest
- * mongodb@7.0
+ * mongodb@8.0
  * mysql@8.0
- * postgresql@15.4
- * redis@7.2
- * s3@3.1.0
+ * postgresql@17.2
+ * redis@7.4
+ * s3@3.12.0
 ```
 
 A sample of all services available to the entire framework:
@@ -566,14 +566,14 @@ $ trv service status
 
 Service          Version    Status
 -------------------------------------------------
-dynamodb           2.0.0    Running 93af422e793a
-elasticsearch      8.9.1    Running ed76ee063d13
+dynamodb           2.5.3    Running 93af422e793a
+elasticsearch     8.17.0    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
-mongodb              7.0    Running 5513eba6734e
+mongodb              8.0    Running 5513eba6734e
 mysql                8.0    Running 307bc66d442a
-postgresql          15.4    Running e78291e71040
-redis                7.2    Running 77ba279b4e30
-s3                 3.1.0    Running fdacfc55b9e3
+postgresql          17.2    Running e78291e71040
+redis                7.4    Running 77ba279b4e30
+s3                3.12.0    Running fdacfc55b9e3
 ```
 
 ### Defining new Services
@@ -583,7 +583,7 @@ The services are defined as plain typescript files within the framework and can 
 ```typescript
 import type { ServiceDescriptor } from '@travetto/cli';
 
-const version = process.env.MONGO_VERSION ?? '7.0';
+const version = process.env.MONGO_VERSION || '8.0';
 
 export const service: ServiceDescriptor = {
   name: 'mongodb',
