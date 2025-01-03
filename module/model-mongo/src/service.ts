@@ -65,6 +65,10 @@ export class MongoModelService implements
     return item;
   }
 
+  postUpdate<T extends ModelType>(item: T & { _id?: unknown }): T {
+    return this.postLoad(item);
+  }
+
   preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: string }): string;
   preUpdate<T extends OptionalId<ModelType>>(item: Omit<T, 'id'> & { _id?: Binary }): undefined;
   preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: undefined }): undefined;
@@ -173,7 +177,7 @@ export class MongoModelService implements
     if (!result.insertedId) {
       throw new ExistsError(cls, id);
     }
-    return this.postLoad(cleaned);
+    return this.postUpdate(cleaned);
   }
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
@@ -184,7 +188,7 @@ export class MongoModelService implements
     if (res.matchedCount === 0) {
       throw new NotFoundError(cls, id);
     }
-    return this.postLoad(item);
+    return this.postUpdate(item);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
@@ -205,7 +209,7 @@ export class MongoModelService implements
         throw err;
       }
     }
-    return this.postLoad(cleaned);
+    return this.postUpdate(cleaned);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
@@ -349,7 +353,7 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
-        this.postLoad(asFull(op.insert));
+        this.postUpdate(asFull(op.insert));
       }
     }
     for (const [index, _id] of TypedObject.entries<Record<string, string>>(res.upsertedIds)) {
@@ -472,7 +476,7 @@ export class MongoModelService implements
     if (res.matchedCount === 0) {
       throw new NotFoundError(cls, id);
     }
-    return this.postLoad(item);
+    return this.postUpdate(item);
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
