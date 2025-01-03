@@ -30,24 +30,6 @@ import { ElasticsearchQueryUtil } from './internal/query';
 import { ElasticsearchSchemaUtil } from './internal/schema';
 import { IndexManager } from './index-manager';
 
-function extractId(o: { id: string }): string;
-function extractId(o: {}): undefined;
-function extractId(o: { id?: string }): string | undefined {
-  if ('id' in o && typeof o.id === 'string') {
-    const id = o.id;
-    delete o.id;
-    return id;
-  }
-  return;
-}
-
-function restoreId<T extends OptionalId<ModelType>>(o: T, id?: string): T {
-  if (id) {
-    o.id = id;
-  }
-  return o;
-}
-
 /**
  * Elasticsearch model source.
  */
@@ -88,18 +70,34 @@ export class ElasticsearchModelService implements
     }
   }
 
+  preUpdate(o: { id: string }): string;
+  preUpdate(o: {}): undefined;
+  preUpdate(o: { id?: string }): string | undefined {
+    if ('id' in o && typeof o.id === 'string') {
+      const id = o.id;
+      if (!this.config.storeId) {
+        delete o.id;
+      }
+      return id;
+    }
+    return;
+  }
+
+  postUpdate<T extends ModelType>(o: T, id?: string): T {
+    if (!this.config.storeId) {
+      o.id = id!;
+    }
+    return o;
+  }
+
   /**
    * Convert _id to id
    */
-  async postLoad<T extends ModelType>(cls: Class<T>, inp: estypes.SearchHit<T> | estypes.GetGetResult<T>, removeId?: boolean): Promise<T> {
-    let item = castTo<T>({
-      ...inp._source,
-      ...(inp._id ? { id: inp._id } : {})
-    });
-
-    if (removeId) {
-      delete castTo<OptionalId<T>>(inp).id;
-    }
+  async postLoad<T extends ModelType>(cls: Class<T>, inp: estypes.SearchHit<T> | estypes.GetGetResult<T>): Promise<T> {
+    let item = {
+      ...(inp._id ? { id: inp._id } : {}),
+      ...inp._source!,
+    };
 
     item = await ModelCrudUtil.load(cls, item);
 
@@ -169,7 +167,7 @@ export class ElasticsearchModelService implements
   async create<T extends ModelType>(cls: Class<T>, o: OptionalId<T>): Promise<T> {
     try {
       const clean = await ModelCrudUtil.preStore(cls, o, this);
-      const id = extractId(clean);
+      const id = this.preUpdate(clean);
 
       await this.client.index({
         ...this.manager.getIdentity(cls),
@@ -177,7 +175,8 @@ export class ElasticsearchModelService implements
         refresh: true,
         body: clean
       });
-      return restoreId(clean, id);
+
+      return this.postUpdate(clean, id);
     } catch (err) {
       console.error(err);
       throw err;
@@ -189,7 +188,7 @@ export class ElasticsearchModelService implements
 
     o = await ModelCrudUtil.preStore(cls, o, this);
 
-    const id = extractId(o);
+    const id = this.preUpdate(o);
 
     if (ModelRegistry.get(cls).expiresAt) {
       await this.get(cls, id);
@@ -203,14 +202,14 @@ export class ElasticsearchModelService implements
       body: o
     });
 
-    return restoreId(o, id);
+    return this.postUpdate(o, id);
   }
 
   async upsert<T extends ModelType>(cls: Class<T>, o: OptionalId<T>): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const item = await ModelCrudUtil.preStore(cls, o, this);
-    const id = extractId(item);
+    const id = this.preUpdate(item);
 
     await this.client.update({
       ...this.manager.getIdentity(cls),
@@ -222,14 +221,14 @@ export class ElasticsearchModelService implements
       }
     });
 
-    return restoreId(item, id);
+    return this.postUpdate(item, id);
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, data: Partial<T> & { id: string }, view?: string): Promise<T> {
     ModelCrudUtil.ensureNotSubType(cls);
 
     const item = castTo<typeof data>(await ModelCrudUtil.prePartialUpdate(cls, data, view));
-    const id = extractId(item);
+    const id = this.preUpdate(item);
 
     const script = ElasticsearchSchemaUtil.generateUpdateScript(item);
 
@@ -288,13 +287,13 @@ export class ElasticsearchModelService implements
       if (op.delete) {
         acc.push({ delete: { ...ident, _id: op.delete.id } });
       } else if (op.insert) {
-        const id = extractId(op.insert);
+        const id = this.preUpdate(op.insert);
         acc.push({ create: { ...ident, _id: id } }, castTo(op.insert));
       } else if (op.upsert) {
-        const id = extractId(op.upsert);
+        const id = this.preUpdate(op.upsert);
         acc.push({ index: { ...ident, _id: id } }, castTo(op.upsert));
       } else if (op.update) {
-        const id = extractId(op.update);
+        const id = this.preUpdate(op.update);
         acc.push({ update: { ...ident, _id: id } }, { doc: op.update });
       }
       return acc;
@@ -359,7 +358,6 @@ export class ElasticsearchModelService implements
 
   // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
-    const _id = extractId(body);
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const res = await this.execSearch<T>(cls, {
       query: ElasticsearchQueryUtil.getSearchQuery(cls,
@@ -429,7 +427,12 @@ export class ElasticsearchModelService implements
     const req = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
     const results = await this.execSearch(cls, req);
     const shouldRemoveIds = query.select && 'id' in query.select && !query.select.id;
-    return Promise.all(results.hits.hits.map(m => this.postLoad(cls, m, shouldRemoveIds)));
+    return Promise.all(results.hits.hits.map(m => this.postLoad(cls, m).then(v => {
+      if (shouldRemoveIds) {
+        delete castTo<OptionalId<T>>(v).id;
+      }
+      return v;
+    })));
   }
 
   async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany: boolean = true): Promise<T> {
@@ -451,7 +454,7 @@ export class ElasticsearchModelService implements
     await QueryVerifier.verify(cls, query);
 
     const item = await ModelCrudUtil.preStore(cls, data, this);
-    const id = extractId(item);
+    const id = this.preUpdate(item);
 
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
     if (id) {
@@ -487,7 +490,7 @@ export class ElasticsearchModelService implements
       }
     }
 
-    return restoreId(item, id);
+    return this.postUpdate(item, id);
   }
 
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
@@ -504,7 +507,8 @@ export class ElasticsearchModelService implements
 
   async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
-    const _id = extractId(data);
+    // Do not allow id in query
+    delete data.id;
 
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
 
