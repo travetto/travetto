@@ -40,7 +40,7 @@ export class PassportUtil {
   static addToState(state: string | Record<string, unknown>, current?: string | Request, key?: string): string {
     const pre = this.readState(current) ?? {};
     const toAdd = typeof state === 'string' ? JSON.parse(state) : state;
-    const base: Record<string, unknown> = key ? castTo(pre[key] ??= {}) : { ...pre };
+    const base: Record<string, unknown> = key ? castTo(pre[key] ??= {}) : pre;
     for (const k of Object.keys(toAdd)) {
       if (k === '__proto__' || k === 'constructor' || k === 'prototype') {
         continue;
