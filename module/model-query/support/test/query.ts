@@ -15,6 +15,36 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
   supportsGeo = true;
 
+  @Test()
+  async testIds() {
+    const svc = await this.service;
+
+    const people = [1, 2, 3, 8].map(x => Person.from({
+      id: svc.idSource.create(),
+      name: 'Bob Omber',
+      age: 20 + x,
+      gender: 'm',
+      address: {
+        street1: 'a',
+        ...(x === 1 ? { street2: 'b' } : {})
+      }
+    }));
+
+    await this.saveAll(Person, people);
+
+    const one = await svc.queryOne(Person, { where: { id: people[0].id } });
+    assert(one.id === people[0].id);
+
+    const one2 = await svc.queryOne(Person, { where: { id: { $eq: people[0].id } } });
+    assert(one2.id === people[0].id);
+
+    const none = await svc.queryCount(Person, { where: { id: { $ne: people[0].id } } });
+    assert(none === 3);
+
+    const noneids = await svc.query(Person, { where: { id: { $ne: people[0].id } } });
+    assert(noneids.every(x => x.id !== people[0].id));
+  }
+
   @Test('verify word boundary')
   async testWordBoundary() {
     const service = await this.service;

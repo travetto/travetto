@@ -29,7 +29,6 @@ export class ElasticsearchModelConfig {
    * Auto-create, disabled in prod by default
    */
   autoCreate?: boolean;
-
   /**
    * Should we store the id as a string in the document
    */
