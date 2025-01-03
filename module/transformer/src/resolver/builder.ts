@@ -9,7 +9,7 @@ import { DeclarationUtil } from '../util/declaration';
 import { LiteralUtil } from '../util/literal';
 import { transformCast, TemplateLiteralPart } from '../types/shared';
 
-import { Type, AnyType, UnionType, TransformResolver, TemplateType, IntersectionType } from './types';
+import { Type, AnyType, CompositionType, TransformResolver, TemplateType } from './types';
 import { CoerceUtil } from './coerce';
 
 const TYPINGS_RE = /[.]d[.][cm]?ts$/;
@@ -39,7 +39,7 @@ const GLOBAL_SIMPLE: Record<string, Function> = {
 type Category =
   'void' | 'undefined' | 'concrete' | 'unknown' |
   'tuple' | 'shape' | 'literal' | 'template' | 'managed' |
-  'union' | 'intersection' | 'foreign';
+  'composition' | 'foreign';
 
 /**
  * Type categorizer, input for builder
@@ -98,10 +98,8 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     ts.TypeFlags.Void | ts.TypeFlags.Undefined
   )) {
     return { category: 'literal', type };
-  } else if (type.isUnion()) {
-    return { category: 'union', type };
-  } else if (type.isIntersection()) {
-    return { category: 'intersection', type };
+  } else if (type.isUnionOrIntersection()) {
+    return { category: 'composition', type };
   } else if (objectFlags & ts.ObjectFlags.Tuple) {
     return { category: 'tuple', type };
   } else if (type.isLiteral()) {
@@ -211,8 +209,8 @@ export const TypeBuilder: {
       return { key: 'managed', name, importName, tsTypeArguments };
     }
   },
-  union: {
-    build: (resolver, uType: ts.UnionType) => {
+  composition: {
+    build: (resolver, uType: ts.UnionOrIntersectionType) => {
       let undefinable = false;
       let nullable = false;
       const remainder = uType.types.filter(ut => {
@@ -223,9 +221,9 @@ export const TypeBuilder: {
         return !(u || n);
       });
       const name = CoreUtil.getSymbol(uType)?.getName();
-      return { key: 'union', name, undefinable, nullable, tsSubTypes: remainder, subTypes: [] };
+      return { key: 'composition', name, undefinable, nullable, tsSubTypes: remainder, subTypes: [], operation: uType.isUnion() ? 'or' : 'and' };
     },
-    finalize: (type: UnionType) => {
+    finalize: (type: CompositionType) => {
       const { undefinable, nullable, subTypes } = type;
       const [first] = subTypes;
 
@@ -241,21 +239,7 @@ export const TypeBuilder: {
         return { undefinable, nullable, ...first };
       } else if (first.key === 'literal' && subTypes.every(el => el.name === first.name)) { // We have a common
         type.commonType = first;
-      }
-      return type;
-    }
-  },
-  intersection: {
-    build: (resolver, uType: ts.IntersectionType) => {
-      const name = CoreUtil.getSymbol(uType)?.getName();
-      return { key: 'intersection', name, tsSubTypes: uType.types, subTypes: [] };
-    },
-    finalize: (type: IntersectionType): AnyType => {
-      const { subTypes } = type;
-      const [first] = subTypes;
-      if (subTypes.length === 1) {
-        return first;
-      } else if (first.key === 'shape' && subTypes.every(el => el.key === 'shape')) { // All shapes
+      } else if (type.operation === 'and' && first.key === 'shape' && subTypes.every(el => el.key === 'shape')) { // All shapes
         return { importName: first.importName, name: first.name, key: 'shape', fieldTypes: subTypes.reduce((acc, x) => ({ ...acc, ...x.fieldTypes }), {}) };
       }
       return type;

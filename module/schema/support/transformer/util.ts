@@ -68,14 +68,10 @@ export class SchemaTransformUtil {
         }
         return id;
       }
-      case 'union': {
+      case 'composition': {
         if (type.commonType) {
           return this.toConcreteType(state, type.commonType, node, root);
         }
-        break;
-      }
-      case 'intersection': {
-        // Nothing should be here, as we do not want intersections, fall through to object
         break;
       }
       case 'foreign':
@@ -131,8 +127,8 @@ export class SchemaTransformUtil {
     const primaryExpr = typeExpr.key === 'literal' && typeExpr.typeArguments?.[0] ? typeExpr.typeArguments[0] : typeExpr;
 
     // We need to ensure we aren't being tripped up by the wrapper for arrays, sets, etc.
-    // If we have a union type
-    if (primaryExpr.key === 'union') {
+    // If we have a composition type
+    if (primaryExpr.key === 'composition') {
       const values = primaryExpr.subTypes.map(x => x.key === 'literal' ? x.value : undefined)
         .filter(x => x !== undefined && x !== null);
 
