@@ -51,6 +51,7 @@ type MustType = {
     };
   };
   terms: { _id: string };
+  ids: { values: string[] };
 };
 
 function isBool(o: unknown): o is { bool: { must: [MustType], ['must_not']: unknown, ['should_not']: unknown } } {
@@ -121,7 +122,7 @@ export class QueryTest {
     assert(isBool(out));
 
     if (isBool(out)) {
-      assert(!!out.bool.must[0].terms._id);
+      assert(!!out.bool.must[0].ids.values);
     }
   }
 

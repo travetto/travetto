@@ -78,6 +78,10 @@ export class ElasticsearchQueryUtil {
         ((key === 'id' && !path) ? '_id' : `${path}${key}`) :
         `${path}${key}`;
 
+      const sPathQuery = (val: unknown): {} => (key === 'id' && !path) ?
+        { ids: { values: Array.isArray(val) ? val : [val] } } :
+        { [Array.isArray(val) ? 'terms' : 'term']: { [sPath]: val } };
+
       if (DataUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
@@ -100,29 +104,19 @@ export class ElasticsearchQueryUtil {
               break;
             }
             case '$in': {
-              items.push({ terms: { [sPath]: Array.isArray(v) ? v : [v] } });
+              items.push(sPathQuery(Array.isArray(v) ? v : [v]));
               break;
             }
             case '$nin': {
-              items.push({
-                bool: {
-                  ['must_not']: [{
-                    terms: {
-                      [sPath]: Array.isArray(v) ? v : [v]
-                    }
-                  }]
-                }
-              });
+              items.push({ bool: { ['must_not']: [sPathQuery(Array.isArray(v) ? v : [v])] } });
               break;
             }
             case '$eq': {
-              items.push({ term: { [sPath]: v } });
+              items.push(sPathQuery(v));
               break;
             }
             case '$ne': {
-              items.push({
-                bool: { ['must_not']: [{ term: { [sPath]: v } }] }
-              });
+              items.push({ bool: { ['must_not']: [sPathQuery(v)] } });
               break;
             }
             case '$exists': {
@@ -183,11 +177,7 @@ export class ElasticsearchQueryUtil {
         }
         // Handle operations
       } else {
-        items.push({
-          [Array.isArray(top) ? 'terms' : 'term']: {
-            [(key === 'id' && !path) ? '_id' : `${path}${key}`]: top
-          }
-        });
+        items.push(sPathQuery(top));
       }
     }
     if (items.length === 1) {
