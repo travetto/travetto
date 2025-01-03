@@ -65,10 +65,10 @@ export class MongoModelService implements
     return item;
   }
 
-  preUpdateDoc<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: string }): string;
-  preUpdateDoc<T extends OptionalId<ModelType>>(item: Omit<T, 'id'> & { _id?: Binary }): undefined;
-  preUpdateDoc<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: undefined }): undefined;
-  preUpdateDoc<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id?: string }): string | undefined {
+  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: string }): string;
+  preUpdate<T extends OptionalId<ModelType>>(item: Omit<T, 'id'> & { _id?: Binary }): undefined;
+  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id: undefined }): undefined;
+  preUpdate<T extends OptionalId<ModelType>>(item: T & { _id?: Binary, id?: string }): string | undefined {
     if (item && item.id) {
       const id = item.id;
       item._id = MongoUtil.uuid(id);
@@ -166,7 +166,7 @@ export class MongoModelService implements
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const cleaned = await ModelCrudUtil.preStore<WithId<T, Binary>>(cls, item, this);
-    const id = this.preUpdateDoc(cleaned);
+    const id = this.preUpdate(cleaned);
 
     const store = await this.getStore(cls);
     const result = await store.insertOne(castTo(cleaned));
@@ -178,7 +178,7 @@ export class MongoModelService implements
 
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     item = await ModelCrudUtil.preStore(cls, item, this);
-    const id = this.preUpdateDoc(item);
+    const id = this.preUpdate(item);
     const store = await this.getStore(cls);
     const res = await store.replaceOne(this.getIdFilter(cls, id), item);
     if (res.matchedCount === 0) {
@@ -189,7 +189,7 @@ export class MongoModelService implements
 
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     const cleaned = await ModelCrudUtil.preStore<WithId<T, Binary>>(cls, item, this);
-    const id = this.preUpdateDoc(cleaned);
+    const id = this.preUpdate(cleaned);
     const store = await this.getStore(cls);
 
     try {
@@ -332,13 +332,13 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
-        this.preUpdateDoc(op.insert);
+        this.preUpdate(op.insert);
         bulk.insert(op.insert);
       } else if (op.upsert) {
-        const id = this.preUpdateDoc(op.upsert);
+        const id = this.preUpdate(op.upsert);
         bulk.find({ _id: MongoUtil.uuid(id!) }).upsert().updateOne({ $set: op.upsert });
       } else if (op.update) {
-        const id = this.preUpdateDoc(op.update);
+        const id = this.preUpdate(op.update);
         bulk.find({ _id: MongoUtil.uuid(id) }).update({ $set: op.update });
       } else if (op.delete) {
         bulk.find({ _id: MongoUtil.uuid(op.delete.id) }).deleteOne();
@@ -463,7 +463,7 @@ export class MongoModelService implements
 
     const col = await this.getStore(cls);
     const item = await ModelCrudUtil.preStore(cls, data, this);
-    const id = this.preUpdateDoc(item);
+    const id = this.preUpdate(item);
     const where = ModelQueryUtil.getWhereClause(cls, query.where);
     where.id = id;
 
