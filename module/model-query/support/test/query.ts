@@ -62,11 +62,11 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   @Test('Verify array $in queries work properly')
   async testArrayContains() {
     const svc = await this.service;
-    await svc.create(SimpleList, SimpleList.from({
+    const first = await svc.create(SimpleList, SimpleList.from({
       names: ['a', 'b', 'c']
     }));
 
-    await svc.create(SimpleList, SimpleList.from({
+    const second = await svc.create(SimpleList, SimpleList.from({
       names: ['b', 'c', 'd']
     }));
 
@@ -105,6 +105,24 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       }
     });
     assert(none.length === 0);
+
+    const ids = await svc.query(SimpleList, {
+      where: {
+        id: {
+          $in: [first.id, second.id]
+        }
+      }
+    });
+    assert(ids.length === 2);
+
+    const idNin = await svc.query(SimpleList, {
+      where: {
+        id: {
+          $nin: ['a', 'b']
+        }
+      }
+    });
+    assert(idNin.length === 2);
   }
 
   @Test('verify all operators')
