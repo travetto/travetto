@@ -109,7 +109,7 @@ export class RegisterTransformer {
       node.typeParameters,
       node.heritageClauses,
       [
-        state.createStaticField('Ⲑinit', meta),
+        state.createStaticField('Δinit', meta),
         ...node.members
       ]
     );
