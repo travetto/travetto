@@ -52,7 +52,7 @@ export class SchemaTransformUtil {
             Object.entries(type.fieldTypes)
               .map(([k, v]) =>
                 this.computeField(state, state.factory.createPropertyDeclaration(
-                  [], k,
+                  [], /\W/.test(k) ? state.factory.createComputedPropertyName(state.fromLiteral(k)) : k,
                   v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
                   v.key === 'unknown' ? state.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword) : undefined, undefined
                 ), { type: v, root })
@@ -72,6 +72,10 @@ export class SchemaTransformUtil {
         if (type.commonType) {
           return this.toConcreteType(state, type.commonType, node, root);
         }
+        break;
+      }
+      case 'intersection': {
+        // Nothing should be here, as we do not want intersections, fall through to object
         break;
       }
       case 'foreign':

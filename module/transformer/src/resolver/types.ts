@@ -133,6 +133,20 @@ export interface UnionType extends Type<'union'> {
 }
 
 /**
+ * Intersection type
+ */
+export interface IntersectionType extends Type<'intersection'> {
+  /**
+   * All the types represented in the union
+   */
+  subTypes: AnyType[];
+  /**
+   * Type Info
+   */
+  tsSubTypes?: ts.Type[];
+}
+
+/**
  * Tuple type
  */
 export interface TupleType extends Type<'tuple'> {
@@ -177,7 +191,7 @@ export interface ForeignType extends Type<'foreign'> {
 export interface UnknownType extends Type<'unknown'> { }
 
 export type AnyType =
-  TupleType | ShapeType | UnionType | LiteralType |
+  TupleType | ShapeType | UnionType | IntersectionType | LiteralType |
   ManagedType | PointerType | UnknownType | ForeignType | TemplateType;
 
 /**

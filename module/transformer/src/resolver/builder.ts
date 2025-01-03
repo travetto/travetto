@@ -9,7 +9,7 @@ import { DeclarationUtil } from '../util/declaration';
 import { LiteralUtil } from '../util/literal';
 import { transformCast, TemplateLiteralPart } from '../types/shared';
 
-import { Type, AnyType, UnionType, TransformResolver, TemplateType } from './types';
+import { Type, AnyType, UnionType, TransformResolver, TemplateType, IntersectionType } from './types';
 import { CoerceUtil } from './coerce';
 
 const TYPINGS_RE = /[.]d[.][cm]?ts$/;
@@ -39,7 +39,7 @@ const GLOBAL_SIMPLE: Record<string, Function> = {
 type Category =
   'void' | 'undefined' | 'concrete' | 'unknown' |
   'tuple' | 'shape' | 'literal' | 'template' | 'managed' |
-  'union' | 'foreign';
+  'union' | 'intersection' | 'foreign';
 
 /**
  * Type categorizer, input for builder
@@ -66,8 +66,6 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
         return { category: 'foreign', type };
       }
     } catch { }
-    return { category: 'shape', type };
-  } else if (objectFlags & (ts.ObjectFlags.Mapped)) { // Mapped types: Pick, Omit, Exclude, Retain
     return { category: 'shape', type };
   } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
     let resolvedType = type;
@@ -102,9 +100,13 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     return { category: 'literal', type };
   } else if (type.isUnion()) {
     return { category: 'union', type };
+  } else if (type.isIntersection()) {
+    return { category: 'intersection', type };
   } else if (objectFlags & ts.ObjectFlags.Tuple) {
     return { category: 'tuple', type };
   } else if (type.isLiteral()) {
+    return { category: 'shape', type };
+  } else if ((objectFlags & ts.ObjectFlags.Mapped)) { // Mapped types: Pick, Omit, Exclude, Retain
     return { category: 'shape', type };
   }
   return { category: 'literal', type };
@@ -216,8 +218,8 @@ export const TypeBuilder: {
       const remainder = uType.types.filter(ut => {
         const u = (ut.getFlags() & (ts.TypeFlags.Undefined)) > 0;
         const n = (ut.getFlags() & (ts.TypeFlags.Null)) > 0;
-        undefinable = undefinable || u;
-        nullable = nullable || n;
+        undefinable ||= u;
+        nullable ||= n;
         return !(u || n);
       });
       const name = CoreUtil.getSymbol(uType)?.getName();
@@ -239,6 +241,22 @@ export const TypeBuilder: {
         return { undefinable, nullable, ...first };
       } else if (first.key === 'literal' && subTypes.every(el => el.name === first.name)) { // We have a common
         type.commonType = first;
+      }
+      return type;
+    }
+  },
+  intersection: {
+    build: (resolver, uType: ts.IntersectionType) => {
+      const name = CoreUtil.getSymbol(uType)?.getName();
+      return { key: 'intersection', name, tsSubTypes: uType.types, subTypes: [] };
+    },
+    finalize: (type: IntersectionType): AnyType => {
+      const { subTypes } = type;
+      const [first] = subTypes;
+      if (subTypes.length === 1) {
+        return first;
+      } else if (first.key === 'shape' && subTypes.every(el => el.key === 'shape')) { // All shapes
+        return { importName: first.importName, name: first.name, key: 'shape', fieldTypes: subTypes.reduce((acc, x) => ({ ...acc, ...x.fieldTypes }), {}) };
       }
       return type;
     }
