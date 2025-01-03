@@ -3,9 +3,10 @@ import {
 } from 'mongodb';
 
 import { AppError, castTo, Class, TypedObject } from '@travetto/runtime';
-import { DistanceUnit, PageableModelQuery, WhereClause } from '@travetto/model-query';
-import type { ModelType, IndexField, IndexConfig, OptionalId } from '@travetto/model';
+import type { DistanceUnit, PageableModelQuery, WhereClause } from '@travetto/model-query';
+import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
+
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
