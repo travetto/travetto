@@ -27,7 +27,7 @@ function hasEscapedName(n: ts.Node): n is ts.Node & { name: { escapedText: strin
  * Transformer runtime state
  */
 export class TransformerState implements State {
-  static SYNTHETIC_EXT = 'Ⲑsyn';
+  static SYNTHETIC_EXT = '_Ⲑ_syn';
 
   #resolver: SimpleResolver;
   #imports: ImportManager;

@@ -54,8 +54,8 @@
         "xcopy",
         "xpack",
         "xunit",
-        "Ⲑinit",
-        "Ⲑsyn"
+        "Ⲑ_init",
+        "Ⲑ_syn"
     ],
     "ignoreWords": [],
     "ignoreRegExpList": [

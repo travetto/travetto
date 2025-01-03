@@ -200,12 +200,12 @@ You can see that the `DBConfig` allows for the `port` to be overridden by the `D
 $ trv main doc/dbconfig-run.ts
 
 {
-  message: 'Failed to construct @travetto/config:doc/dbconfig￮DBConfig as validation errors have occurred',
+  message: 'Failed to construct @travetto/config:doc/dbconfig#DBConfig as validation errors have occurred',
   category: 'data',
   type: 'ValidationResultError',
   at: '2029-03-14T04:00:00.618Z',
   details: {
-    class: '@travetto/config:doc/dbconfig￮DBConfig',
+    class: '@travetto/config:doc/dbconfig#DBConfig',
     import: '@travetto/config/doc/dbconfig.ts',
     errors: [
       {
