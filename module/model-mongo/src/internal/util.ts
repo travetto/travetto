@@ -59,23 +59,6 @@ export class MongoUtil {
     }
   }
 
-  static postLoadDoc<T extends ModelType>(item: T & { _id?: unknown }): T {
-    if (item._id) {
-      item.id = this.idToString(castTo(item._id));
-      delete item._id;
-    }
-    return item;
-  }
-
-  static preUpdateDoc<T extends OptionalId<ModelType>>(item: T): T {
-    if (item && item.id) {
-      const itemWithId: WithId<T> = castTo(item);
-      itemWithId._id = this.uuid(item.id);
-      delete castTo<{ id: undefined }>(itemWithId).id;
-    }
-    return item;
-  }
-
   static extractWhereFilter<T extends ModelType, U extends WhereClause<T>>(cls: Class<T>, where?: U, checkExpiry = true): Filter<T> {
     where = castTo(ModelQueryUtil.getWhereClause(cls, where, checkExpiry));
     return castTo(where ? this.extractWhereClause(cls, where) : {});
