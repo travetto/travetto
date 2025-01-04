@@ -1,4 +1,4 @@
-import { Class, AppError, getUniqueId } from '@travetto/runtime';
+import { Class, AppError } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { EndpointConfig } from '../registry/types';
@@ -8,7 +8,7 @@ import { MissingParamSymbol, RequestParamsSymbol, QueryExpandedSymbol } from '..
 export type ExtractFn = (c: ParamConfig, req: Request, res: Response, schema: FieldConfig) => unknown;
 
 function isClass(o: unknown): o is Class {
-  return !!o && typeof o === 'function' && !!getUniqueId(o);
+  return !!o && typeof o === 'function' && !!o.Ⲑid;
 }
 
 /**
@@ -29,7 +29,7 @@ class $ParamExtractor {
         const exp = (r[QueryExpandedSymbol] ??= BindUtil.expandPaths(r.query));
         if (c.prefix) {
           return exp[c.prefix];
-        } else if (getUniqueId(schema.type)) { // Is a complex type
+        } else if (schema.type.Ⲑid) { // Is a complex type
           return exp; // Return whole thing
         } else {
           return exp[c.name!];

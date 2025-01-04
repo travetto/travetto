@@ -18,6 +18,9 @@ const pending = new Set<Function>([]);
 export function setFunctionMetadata<T extends Function>(fn: T, meta: FunctionMetadata): T {
   const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata }) | undefined = fn;
   Object.defineProperty(_fn, MetadataSymbol, { value: meta });
+  if (meta.id) {
+    Object.defineProperty(_fn, 'Ⲑid', { value: meta.id });
+  }
   return fn;
 }
 
@@ -65,13 +68,4 @@ export function describeFunction(fn: Function): FunctionMetadata;
 export function describeFunction(fn?: Function): FunctionMetadata | undefined {
   const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata }) | undefined = fn;
   return _fn?.[MetadataSymbol];
-}
-
-/**
- * Get unique id for function/class
- */
-export function getUniqueId(fn: Function): string;
-export function getUniqueId(fn?: Function): string | undefined {
-  const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata, $id?: string }) | undefined = fn;
-  return _fn?.[MetadataSymbol]?.id ?? _fn?.$id;
 }

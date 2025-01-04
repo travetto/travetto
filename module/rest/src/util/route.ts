@@ -1,6 +1,6 @@
 import { isPromise } from 'node:util/types';
 
-import { asConstructable, castTo, Class, getUniqueId } from '@travetto/runtime';
+import { asConstructable, castTo, Class } from '@travetto/runtime';
 
 import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
@@ -47,8 +47,7 @@ export class RouteUtil {
    * Get the interceptor config for a given request and interceptor instance
    */
   static getInterceptorConfig<T extends RestInterceptor<U>, U extends ManagedInterceptorConfig>(req: Request, inst: T): U | undefined {
-    const consClassId = getUniqueId(inst.constructor);
-    const cfg = req[InterceptorConfigsSymbol]?.[consClassId] ?? undefined;
+    const cfg = req[InterceptorConfigsSymbol]?.[inst.constructor.Ⲑid] ?? undefined;
     return castTo(cfg);
   }
 

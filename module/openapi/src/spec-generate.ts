@@ -5,7 +5,7 @@ import type {
 } from 'openapi3-ts/oas31';
 
 import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
-import { Class, describeFunction, getUniqueId } from '@travetto/runtime';
+import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 
@@ -60,7 +60,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const viewConf = SchemaRegistry.has(field.type) && SchemaRegistry.getViewSchema(field.type, field.view);
     const schemaConf = viewConf && viewConf.schema;
     if (!schemaConf) {
-      throw new Error(`Unknown class, not registered as a schema: ${getUniqueId(field.type)}`);
+      throw new Error(`Unknown class, not registered as a schema: ${field.type.Ⲑid}`);
     }
     const params: ParameterObject[] = [];
     for (const sub of Object.values(schemaConf)) {

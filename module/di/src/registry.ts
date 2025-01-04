@@ -1,6 +1,6 @@
 import {
   Class, Runtime, asConstructable, castTo, classConstruct, describeFunction,
-  asFull, castKey, TypedFunction, hasFunction, getUniqueId, setFunctionMetadata
+  asFull, castKey, TypedFunction, hasFunction, setFunctionMetadata
 } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
@@ -45,8 +45,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * @param qualifier
    */
   protected resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
-    const targetClassId = getUniqueId(target);
-    const qualifiers = this.targetToClass.get(targetClassId) ?? new Map<symbol, string>();
+    const qualifiers = this.targetToClass.get(target.Ⲑid) ?? new Map<symbol, string>();
 
     let cls: string | undefined;
 
@@ -85,7 +84,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         throw new InjectionError('Dependency not found', target);
       } else if (!qualifiers.has(qualifier)) {
         if (!this.defaultSymbols.has(qualifier) && resolution === 'loose') {
-          console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: targetClassId });
+          console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: target.Ⲑid });
           return this.resolveTarget(target);
         }
         throw new InjectionError('Dependency not found', target, [qualifier]);
@@ -98,7 +97,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return {
       qualifier,
       config,
-      id: getUniqueId(config.factory ? config.target : config.class)
+      id: (config.factory ? config.target : config.class).Ⲑid
     };
   }
 
@@ -118,7 +117,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
           return undefined;
         } else {
           if (err && err instanceof Error) {
-            err.message = `${err.message} via=${getUniqueId(managed.class)}`;
+            err.message = `${err.message} via=${managed.class.Ⲑid}`;
           }
           throw err;
         }
@@ -210,7 +209,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Destroy an instance
    */
   protected destroyInstance(cls: Class, qualifier: symbol): void {
-    const classId = getUniqueId(cls);
+    const classId = cls.Ⲑid;
 
     const activeInstance = this.instances.get(classId)!.get(qualifier);
     if (hasPreDestroy(activeInstance)) {
@@ -287,8 +286,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Get all available candidate types for the target
    */
   getCandidateTypes<T, U = T>(target: Class<U>): InjectableConfig<T>[] {
-    const targetId = getUniqueId(target);
-    const qualifiers = this.targetToClass.get(targetId)!;
+    const qualifiers = this.targetToClass.get(target.Ⲑid)!;
     const uniqueQualifiers = qualifiers ? Array.from(new Set(qualifiers.values())) : [];
     return castTo(uniqueQualifiers.map(id => this.get(id)));
   }
@@ -322,11 +320,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    */
   registerClass<T>(cls: Class<T>, pConfig: Partial<InjectableConfig<T>> = {}): void {
     const config = this.getOrCreatePending(pConfig.class ?? cls);
-    const classId = getUniqueId(cls);
 
     config.enabled = pConfig.enabled ?? config.enabled;
     config.class = cls;
-    config.qualifier = pConfig.qualifier ?? config.qualifier ?? Symbol.for(classId);
+    config.qualifier = pConfig.qualifier ?? config.qualifier ?? Symbol.for(cls.Ⲑid);
     if (pConfig.interfaces) {
       config.interfaces?.push(...pConfig.interfaces);
     }
@@ -383,7 +380,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     this.registerClass(fnClass, finalConfig);
 
-    const srcClassId = getUniqueId(config.src);
+    const srcClassId = config.src.Ⲑid;
 
     if (!this.factories.has(srcClassId)) {
       this.factories.set(srcClassId, new Map());
@@ -397,7 +394,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    */
   override onInstall<T>(cls: Class<T>, e: ChangeEvent<Class<T>>): void {
     super.onInstall(cls, e);
-    const classId = getUniqueId(cls);
+    const classId = cls.Ⲑid;
 
     // Install factories separate from classes
     if (this.factories.has(classId)) {
@@ -411,7 +408,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Handle installing a class
    */
   onInstallFinalize<T>(cls: Class<T>): InjectableConfig<T> {
-    const classId = getUniqueId(cls);
+    const classId = cls.Ⲑid;
 
     const config: InjectableConfig<T> = castTo(this.getOrCreatePending(cls));
 
@@ -433,7 +430,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.targetToClass.get(classId)?.set(config.qualifier, classId);
     }
 
-    const parentConfig = this.get(getUniqueId(parentClass));
+    const parentConfig = this.get(parentClass.Ⲑid);
 
     if (parentConfig) {
       config.dependencies.fields = {
@@ -461,7 +458,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.classToTarget.set(classId, new Map());
     }
 
-    const targetClassId = getUniqueId(config.target);
+    const targetClassId = config.target.Ⲑid;
 
     if (!this.targetToClass.has(targetClassId)) {
       this.targetToClass.set(targetClassId, new Map());
@@ -476,7 +473,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // If aliased
     for (const el of config.interfaces) {
-      const elClassId = getUniqueId(el);
+      const elClassId = el.Ⲑid;
       if (!this.targetToClass.has(elClassId)) {
         this.targetToClass.set(elClassId, new Map());
       }
@@ -490,7 +487,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // If targeting self (default @Injectable behavior)
     if ((classId === targetClassId || config.factory) && (parentConfig || describeFunction(parentClass)?.abstract)) {
-      const parentId = getUniqueId(parentClass);
+      const parentId = parentClass.Ⲑid;
 
       if (!this.targetToClass.has(parentId)) {
         this.targetToClass.set(parentId, new Map());
@@ -517,7 +514,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       // Register primary if only one interface provided and no parent config
       if (config.interfaces.length === 1 && !parentConfig) {
         const [primaryInterface] = config.interfaces;
-        const primaryClassId = getUniqueId(primaryInterface);
+        const primaryClassId = primaryInterface.Ⲑid;
         if (!this.targetToClass.has(primaryClassId)) {
           this.targetToClass.set(primaryClassId, new Map());
         }
@@ -532,7 +529,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Handle uninstalling a class
    */
   override onUninstallFinalize(cls: Class): void {
-    const classId = getUniqueId(cls);
+    const classId = cls.Ⲑid;
 
     if (!this.classToTarget.has(classId)) {
       return;

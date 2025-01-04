@@ -1,4 +1,4 @@
-import { castKey, castTo, Class, ClassInstance, getUniqueId, TypedObject } from '@travetto/runtime';
+import { castKey, castTo, Class, ClassInstance, TypedObject } from '@travetto/runtime';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
@@ -252,7 +252,7 @@ export class SchemaValidator {
    * @param view The optional view to limit the scope to
    */
   static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
-    if (isClassInstance(o) && !(o instanceof cls || getUniqueId(cls) === getUniqueId(o.constructor))) {
+    if (isClassInstance(o) && !(o instanceof cls || cls.Ⲑid === o.constructor.Ⲑid)) {
       throw new TypeMismatchError(cls.name, o.constructor.name);
     }
     cls = SchemaRegistry.resolveInstanceType(cls, o);

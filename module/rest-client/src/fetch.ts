@@ -1,5 +1,5 @@
 import type { Package } from '@travetto/manifest';
-import { Class, getUniqueId, Runtime } from '@travetto/runtime';
+import { Class, Runtime } from '@travetto/runtime';
 import { ControllerConfig } from '@travetto/rest';
 
 import { BaseClientGenerator } from './base';
@@ -69,7 +69,7 @@ export class FetchClientGenerator extends BaseClientGenerator<{ node?: boolean }
 
     return {
       file: './api.ts',
-      classId: getUniqueId(controller.class),
+      classId: controller.class.Ⲑid,
       name: service,
       content: contents,
       imports: [baseFetchService, ...results.flatMap(x => x.imports)]

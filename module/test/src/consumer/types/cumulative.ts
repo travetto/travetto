@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 
-import { Class, getUniqueId, RuntimeIndex } from '@travetto/runtime';
+import { Class, RuntimeIndex } from '@travetto/runtime';
 
 import { TestConsumer } from '../types';
 import { TestEvent } from '../../model/event';
@@ -30,7 +30,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
     // Was only loading to verify existence (TODO: double-check)
     if (existsSync(RuntimeIndex.getFromImport(test.import)!.sourceFile)) {
       (this.#state[test.classId] ??= {})[test.methodName] = test.status;
-      const SuiteCls = SuiteRegistry.getClasses().find(x => getUniqueId(x) === test.classId);
+      const SuiteCls = SuiteRegistry.getClasses().find(x => x.Ⲑid === test.classId);
       return SuiteCls ? this.computeTotal(SuiteCls) : this.removeClass(test.classId);
     } else {
       return this.removeClass(test.classId);

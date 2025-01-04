@@ -1,4 +1,4 @@
-import { Class, getUniqueId } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 import { ControllerConfig } from '@travetto/rest';
 
 import { BaseClientGenerator } from './base';
@@ -47,7 +47,7 @@ export class AngularClientGenerator extends BaseClientGenerator {
     const skipSelf: Imp = { file: '@angular/core', name: 'SkipSelf', classId: '__ngSkipSelf' };
     const optional: Imp = { file: '@angular/core', name: 'Optional', classId: '__optional' };
     const httpClient: Imp = { file: '@angular/common/http', name: 'HttpClient', classId: '_http' };
-    const config: Imp = { file: './shared/angular-service', name: 'Configuration', classId: getUniqueId(Configuration) };
+    const config: Imp = { file: './shared/angular-service', name: 'Configuration', classId: Configuration.Ⲑid };
     const self: Imp = { file: '', name: 'RestClientModule', classId: '_restClientMod' };
 
     return {
@@ -87,7 +87,7 @@ export class AngularClientGenerator extends BaseClientGenerator {
       .filter(v => v.documented !== false)
       .map(x => this.renderEndpoint(x, controller));
 
-    const base: Imp = { name: BaseAngularService.name, file: SVC, classId: getUniqueId(BaseAngularService) };
+    const base: Imp = { name: BaseAngularService.name, file: SVC, classId: BaseAngularService.Ⲑid };
     const options: Imp = { classId: '_opts', file: SVC, name: 'Configuration' };
 
     const httpClient: Imp = { classId: '_ngHttp', file: '@angular/common/http', name: 'HttpClient' };
@@ -114,7 +114,7 @@ export class AngularClientGenerator extends BaseClientGenerator {
 
     return {
       file: './api.ts',
-      classId: getUniqueId(controller.class),
+      classId: controller.class.Ⲑid,
       name: service,
       content: contents,
       imports

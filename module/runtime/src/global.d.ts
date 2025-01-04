@@ -7,6 +7,11 @@ declare global {
     [write]?: (a: W) => void;
   }
 
+  interface Function {
+    // Public id used within the framework
+    Ⲑid: string;
+  }
+
   /**
    * @concrete node:buffer#Blob
    */

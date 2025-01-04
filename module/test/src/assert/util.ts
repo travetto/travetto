@@ -1,7 +1,7 @@
 import util from 'node:util';
 import path from 'node:path';
 
-import { asFull, Class, getUniqueId, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { asFull, Class, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite';
@@ -27,7 +27,7 @@ export class AssertUtil {
         break;
       }
       case 'function': {
-        if (getUniqueId(val) || !val.constructor) {
+        if (val.Ⲑid || !val.constructor) {
           return val.name;
         }
         break;

@@ -14,8 +14,7 @@ export class InjectableTransformer {
 
   static getForeignTarget(state: TransformerState, ret: ForeignType): ts.Expression {
     return state.fromLiteral({
-      // Connects to the function getUniqueId
-      $id: `${ret.source.split('node_modules/')[1]}+${ret.name}`
+      Ⲑid: `${ret.source.split('node_modules/')[1]}+${ret.name}`
     });
   }
 

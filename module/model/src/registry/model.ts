@@ -1,7 +1,7 @@
 import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { AppError, castTo, Class, describeFunction, asFull, getUniqueId } from '@travetto/runtime';
+import { AppError, castTo, Class, describeFunction, asFull } from '@travetto/runtime';
 import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 
 import { IndexConfig, IndexType, ModelOptions } from './types';
@@ -71,7 +71,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {
-    const classId = getUniqueId(cls);
+    const classId = cls.Ⲑid;
     const config = asFull(this.pending.get(classId)!);
 
     const schema = SchemaRegistry.get(cls);
@@ -169,11 +169,11 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
       if (candidates.length > 1) {
         if (config.store) {
           throw new AppError('Duplicate models with same store name', {
-            details: { classes: candidates.map(getUniqueId) }
+            details: { classes: candidates.map(x => x.Ⲑid) }
           });
         } else {
           throw new AppError('Duplicate models with same class name, but no store name provided', {
-            details: { classes: candidates.map(getUniqueId) }
+            details: { classes: candidates.map(x => x.Ⲑid) }
           });
         }
       }

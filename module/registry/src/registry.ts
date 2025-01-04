@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { Class, Env, getUniqueId } from '@travetto/runtime';
+import { Class, Env } from '@travetto/runtime';
 import { ChangeSource, ChangeEvent, ChangeHandler } from './types';
 
 /**
@@ -37,10 +37,6 @@ export abstract class Registry implements ChangeSource<Class> {
    */
   trace = Env.DEBUG.val?.includes('@travetto/registry');
 
-  get #uniqueId(): string {
-    return getUniqueId(this.constructor);
-  }
-
   /**
    * Creates a new registry, with it's parents specified
    */
@@ -66,7 +62,7 @@ export abstract class Registry implements ChangeSource<Class> {
     try {
       this.#resolved = false;
       if (this.trace) {
-        console.debug('Initializing', { id: this.#uniqueId, uid: this.#uid });
+        console.debug('Initializing', { id: this.constructor.Ⲑid, uid: this.#uid });
       }
 
       // Handle top level when dealing with non-registry
@@ -112,7 +108,7 @@ export abstract class Registry implements ChangeSource<Class> {
    */
   async init(): Promise<unknown> {
     if (this.trace) {
-      console.debug('Trying to initialize', { id: this.#uniqueId, uid: this.#uid, initialized: !!this.#initialized });
+      console.debug('Trying to initialize', { id: this.constructor.Ⲑid, uid: this.#uid, initialized: !!this.#initialized });
     }
 
     if (!this.#initialized) {
@@ -164,7 +160,7 @@ export abstract class Registry implements ChangeSource<Class> {
    */
   onEvent(event: ChangeEvent<Class>): void {
     if (this.trace) {
-      console.debug('Received', { id: this.#uniqueId, type: event.type, targetId: getUniqueId((event.curr ?? event.prev)!) });
+      console.debug('Received', { id: this.constructor.Ⲑid, type: event.type, targetId: (event.curr ?? event.prev)?.Ⲑid });
     }
 
     switch (event.type) {

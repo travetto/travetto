@@ -1,4 +1,4 @@
-import { Class, AppError, describeFunction, castTo, classConstruct, asFull, castKey, Any, getUniqueId } from '@travetto/runtime';
+import { Class, AppError, describeFunction, castTo, classConstruct, asFull, castKey } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types';
@@ -102,8 +102,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param o Actual instance
    */
   resolveInstanceType<T>(cls: Class<T>, o: T): Class {
-    const classId = getUniqueId(cls);
-    cls = this.get(classId).class; // Resolve by id to handle any stale references
+    cls = this.get(cls.Ⲑid).class; // Resolve by id to handle any stale references
 
     const base = this.getBaseSchema(cls);
     const clsSchema = this.get(cls);
@@ -150,7 +149,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       this.#subTypes.get(base)!.set(config.subTypeName!, cls);
     }
     if (base !== cls) {
-      while (base && getUniqueId(base)) {
+      while (base && base.Ⲑid) {
         this.#subTypes.get(base)!.set(config.subTypeName!, cls);
         const parent = this.getParentClass(base);
         base = parent ? this.getBaseSchema(parent) : undefined;

@@ -1,4 +1,4 @@
-import { asConstructable, asFull, getUniqueId, TypedFunction, type Class } from '@travetto/runtime';
+import { asConstructable, asFull, TypedFunction, type Class } from '@travetto/runtime';
 
 import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry, ResolutionType } from './registry';
@@ -70,12 +70,11 @@ export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | u
 export function InjectableFactory(first?: Partial<InjectableFactoryConfig> | symbol, ...args: (Partial<InjectableFactoryConfig> | undefined)[]) {
   return <T extends Class>(target: T, property: string | symbol, descriptor: TypedPropertyDescriptor<TypedFunction>): void => {
     const config: InjectableFactoryConfig = collapseConfig(first, ...args);
-    const targetClassId = getUniqueId(target);
     DependencyRegistry.registerFactory({
       ...config,
       dependencies: config.dependencies?.map(x => Array.isArray(x) ? collapseConfig(...x) : collapseConfig(x)),
       fn: descriptor.value!,
-      id: `${targetClassId}#${property.toString()}`
+      id: `${target.Ⲑid}#${property.toString()}`
     });
   };
 }

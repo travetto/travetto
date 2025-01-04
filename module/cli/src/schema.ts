@@ -1,4 +1,4 @@
-import { castKey, castTo, Class, getUniqueId } from '@travetto/runtime';
+import { castKey, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { CliCommandRegistry } from './registry';
@@ -59,7 +59,7 @@ export class CliCommandSchemaUtil {
 
     // Ensure finalized
     const parent = SchemaRegistry.getParentClass(cls);
-    if (parent && getUniqueId(parent)) {
+    if (parent?.Ⲑid) {
       SchemaRegistry.onInstall(parent, { type: 'added', curr: parent });
     }
     SchemaRegistry.onInstall(cls, { type: 'added', curr: cls });

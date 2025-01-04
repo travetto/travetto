@@ -1,4 +1,4 @@
-import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction, getUniqueId } from '@travetto/runtime';
+import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
 import { FieldConfig, SchemaRegistry } from '@travetto/schema';
 
 import { CliCommandShape, CliCommandShapeFields } from './types';
@@ -84,7 +84,8 @@ const FIELD_CONFIG: {
  */
 export function CliCommand(cfg: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
-    if (!getUniqueId(target) || describeFunction(target)?.abstract) {
+    const desc = describeFunction(target);
+    if (!desc?.id || desc.abstract) {
       return;
     }
 

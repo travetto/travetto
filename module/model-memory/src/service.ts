@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { Class, TimeSpan, DeepPartial, castTo, BlobMeta, ByteRange, BinaryInput, BinaryUtil, getUniqueId } from '@travetto/runtime';
+import { Class, TimeSpan, DeepPartial, castTo, BlobMeta, ByteRange, BinaryInput, BinaryUtil } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
@@ -27,7 +27,7 @@ export class MemoryModelConfig {
 }
 
 function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, suffix?: string): string {
-  return [getUniqueId(cls), typeof idx === 'string' ? idx : idx.name, suffix].filter(x => !!x).join(':');
+  return [cls.Ⲑid, typeof idx === 'string' ? idx : idx.name, suffix].filter(x => !!x).join(':');
 }
 
 function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | number): string | undefined {
@@ -155,7 +155,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
       for (const idx of ModelRegistry.get(el).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
-            console.error('Unique indices are not supported for', { cls: getUniqueId(el), idx: idx.name });
+            console.error('Unique indices are not supported for', { cls: el.Ⲑid, idx: idx.name });
             break;
           }
         }

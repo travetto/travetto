@@ -2,7 +2,7 @@ import {
   Binary, type CreateIndexesOptions, type Filter, type FindCursor, type IndexDirection, ObjectId, type WithId as MongoWithId
 } from 'mongodb';
 
-import { AppError, castTo, Class, getUniqueId, TypedObject } from '@travetto/runtime';
+import { AppError, castTo, Class, TypedObject } from '@travetto/runtime';
 import type { DistanceUnit, PageableModelQuery, WhereClause } from '@travetto/model-query';
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
@@ -103,7 +103,7 @@ export class MongoUtil {
         } else {
           throw new AppError('Invalid id query');
         }
-      } else if ((isPlain && !firstKey.startsWith('$')) || getUniqueId(v?.constructor)) {
+      } else if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.Ⲑid) {
         if (recursive) {
           Object.assign(out, this.extractSimple(subField?.type, v, `${subpath}.`, recursive));
         } else {

@@ -1,4 +1,4 @@
-import { Class, describeFunction, getUniqueId } from '@travetto/runtime';
+import { Class, describeFunction } from '@travetto/runtime';
 import { RetargettingProxy } from '@travetto/registry';
 
 import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
@@ -20,7 +20,7 @@ class $DynamicDependencyRegistry {
    */
   proxyInstance<T>(target: ClassTarget<T>, qual: symbol | undefined, instance: T): T {
     const { qualifier, id: classId } = this.#registryResolveTarget(target, qual);
-    const targetClassId = getUniqueId(target);
+    const targetClassId = target.Ⲑid;
     let proxy: RetargettingProxy<unknown>;
 
     if (!this.#proxies.has(classId)) {
@@ -64,7 +64,7 @@ class $DynamicDependencyRegistry {
   onInstallFinalize<T>(cls: Class<T>): InjectableConfig<T> {
     const config = this.#registryOnInstallFinalize(cls);
     // If already loaded, reload
-    const classId = getUniqueId(cls);
+    const classId = cls.Ⲑid;
 
     if (
       !describeFunction(cls)?.abstract &&
@@ -80,8 +80,7 @@ class $DynamicDependencyRegistry {
   }
 
   destroyInstance(cls: Class, qualifier: symbol): void {
-    const classId = getUniqueId(cls);
-    const proxy = this.#proxies.get(classId)?.get(qualifier);
+    const proxy = this.#proxies.get(cls.Ⲑid)?.get(qualifier);
     this.#registryDestroyInstance(cls, qualifier);
     if (proxy) {
       proxy.setTarget(null);
