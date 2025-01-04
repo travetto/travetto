@@ -67,6 +67,9 @@ export function describeFunction(fn?: Function): FunctionMetadata | undefined {
   return _fn?.[MetadataSymbol];
 }
 
+/**
+ * Get unique id for function/class
+ */
 export function getUniqueId(fn: Function): string;
 export function getUniqueId(fn?: Function): string | undefined {
   const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata, $id?: string }) | undefined = fn;
