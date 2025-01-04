@@ -190,7 +190,7 @@ export class SchemaValidator {
         kind: res.kind,
         value: res.value,
         message: '',
-        re: (res.re ? CommonRegExpToName.get(res.re) ?? res.re?.source : '') ?? '',
+        re: CommonRegExpToName.get(res.re!) ?? res.re?.source ?? '',
         path,
         type: (typeof res.type === 'function' ? res.type.name : res.type)
       };
