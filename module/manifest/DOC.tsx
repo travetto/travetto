@@ -55,16 +55,7 @@ export const text = <>
   <c.Section title='Manifest Delta'>
     During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The {DeltaRef} provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the {d.mod('Compiler')}'s incremental behavior to know when a file has changed and needs to be recompiled.
   </c.Section>
-  <c.Section title='Class and Function Metadata'>
 
-    For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every {d.input('class')} is decorated with metadata describing the class/function, including a unique id that is tied to the file/class combination. <br />
-
-    The id is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup associated data by the id.
-
-    <c.Code title='Test Class' src='./doc/test-class.ts' />
-
-    <c.Code title='Test Class Compiled' src={RuntimeIndex.getFromImport('@travetto/manifest/doc/test-class')!.outputFile} />
-  </c.Section>
   <c.Section title='Module Indexing'>
     Once the manifest is created, the application runtime can now read this manifest, which allows for influencing runtime behavior. The most common patterns include:
     <ul>
