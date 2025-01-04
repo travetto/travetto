@@ -31,4 +31,3 @@ declare module 'stream' {
    */
   interface Readable { }
 }
-
