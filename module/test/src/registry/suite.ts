@@ -60,8 +60,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    */
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
     const config = asFull(this.getOrCreatePending(cls));
-    const classId = cls.Ⲑid;
-    const tests = [...this.pendingFields.get(classId)!.values()];
+    const tests = [...this.pendingFields.get(cls.Ⲑid)!.values()];
 
     const parent = this.getParentClass(cls);
 
