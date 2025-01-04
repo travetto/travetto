@@ -8,6 +8,7 @@ declare global {
   }
 
   interface Function {
+    /* Exposed for use within framework, only applies to framework managed classes */
     readonly Ⲑid: string;
   }
 }
