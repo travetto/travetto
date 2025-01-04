@@ -77,6 +77,10 @@ While running any code within the framework, there are common patterns/goals for
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
+<h3 id="class-and-function-metadata">Class and Function Metadata</h3>
+
+For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every <code class="item input">class</code> is decorated with metadata, including methods, line numbers, and ultimately a unique id stored at <code class="item input">Ⲑid</code>.
+
 <h2 id="environment-support">Environment Support</h2>
 
 The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L111">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L8">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>

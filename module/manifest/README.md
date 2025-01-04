@@ -32,33 +32,6 @@ Additionally, once the code has been compiled (or even bundled after that), the 
 ## Manifest Delta
 During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The [ManifestDeltaUtil](https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L23) provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s incremental behavior to know when a file has changed and needs to be recompiled.
 
-## Class and Function Metadata
-For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every `class` is decorated with an additional field of `Ⲑid`.  `Ⲑid` represents a computed id that is tied to the file/class combination. 
-
-`Ⲑid` is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup associated data by the id.
-
-**Code: Test Class**
-```typescript
-export class TestClass {
-  async doStuff(): Promise<void> { }
-}
-```
-
-**Code: Test Class Compiled**
-```javascript
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.TestClass = void 0;
-const tslib_1 = require("tslib");
-const Δ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
-var Ⲑmod = ["@travetto/manifest", "doc/test-class.ts"];
-class TestClass {
-    static Ⲑinit = Δ_function_1.registerFunction(TestClass, Ⲑmod, { hash: 197152026, lines: [1, 3] }, { doStuff: { hash: 51337554, lines: [2, 2] } }, false, false);
-    async doStuff() { }
-}
-exports.TestClass = TestClass;
-```
-
 ## Module Indexing
 Once the manifest is created, the application runtime can now read this manifest, which allows for influencing runtime behavior. The most common patterns include:
    *  Loading all source files
@@ -119,8 +92,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
           [ "README.md", "md", 1868155200000 ]
         ],
         "doc": [
-          [ "DOC.tsx", "ts", 1868155200000, "doc" ],
-          [ "doc/test-class.ts", "ts", 1868155200000, "doc" ]
+          [ "DOC.tsx", "ts", 1868155200000, "doc" ]
         ],
         "$index": [
           [ "__index__.ts", "ts", 1868155200000 ]
