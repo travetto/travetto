@@ -1,4 +1,4 @@
-import { AppError } from '@travetto/runtime';
+import { AppError, getUniqueId } from '@travetto/runtime';
 import { ClassTarget } from './types';
 
 function getName(symbol: symbol): string {
@@ -7,11 +7,12 @@ function getName(symbol: symbol): string {
 
 export class InjectionError extends AppError {
   constructor(message: string, target: ClassTarget, qualifiers?: symbol[]) {
-    super(`${message}: [${target.Ⲑid}]${qualifiers ? `[${qualifiers.map(getName)}]` : ''}`, {
+    const targetClassId = getUniqueId(target);
+    super(`${message}: [${targetClassId}]${qualifiers ? `[${qualifiers.map(getName)}]` : ''}`, {
       category: 'notfound',
       details: {
         qualifiers: qualifiers?.map(getName),
-        target: target.Ⲑid
+        target: targetClassId
       }
     });
   }

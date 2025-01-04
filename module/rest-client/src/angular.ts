@@ -114,7 +114,7 @@ export class AngularClientGenerator extends BaseClientGenerator {
 
     return {
       file: './api.ts',
-      classId: controller.class.Ⲑid,
+      classId: getUniqueId(controller.class),
       name: service,
       content: contents,
       imports

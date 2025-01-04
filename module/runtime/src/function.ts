@@ -14,6 +14,13 @@ const MetadataSymbol = Symbol.for('@travetto/runtime:function-metadata');
 
 const pending = new Set<Function>([]);
 
+/** @private */
+export function setFunctionMetadata<T extends Function>(fn: T, meta: FunctionMetadata): T {
+  const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata }) | undefined = fn;
+  Object.defineProperty(_fn, MetadataSymbol, { value: meta });
+  return fn;
+}
+
 /**
  * Initialize the meta data for a function/class
  * @param fn Class
@@ -39,7 +46,7 @@ export function registerFunction(
     ...tag, methods, abstract, synthetic, class: abstract !== undefined
   };
   pending.add(fn);
-  Object.defineProperties(fn, { Ⲑid: { value: metadata.id }, [MetadataSymbol]: { value: metadata } });
+  setFunctionMetadata(fn, metadata);
 }
 
 /**
@@ -62,5 +69,6 @@ export function describeFunction(fn?: Function): FunctionMetadata | undefined {
 
 export function getUniqueId(fn: Function): string;
 export function getUniqueId(fn?: Function): string | undefined {
-  return fn?.Ⲑid;
+  const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata, $id?: string }) | undefined = fn;
+  return _fn?.[MetadataSymbol]?.id ?? _fn?.$id;
 }

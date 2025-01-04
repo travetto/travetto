@@ -6,7 +6,4 @@ declare global {
   interface WritableStreamDefaultWriter<W = any> {
     [write]?: (a: W) => void;
   }
-  interface Function {
-    Ⲑid: string;
-  }
 }

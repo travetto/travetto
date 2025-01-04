@@ -1,6 +1,6 @@
 import {
   Class, Runtime, asConstructable, castTo, classConstruct, describeFunction,
-  asFull, castKey, TypedFunction, hasFunction, getUniqueId
+  asFull, castKey, TypedFunction, hasFunction, getUniqueId, setFunctionMetadata
 } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
@@ -85,7 +85,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         throw new InjectionError('Dependency not found', target);
       } else if (!qualifiers.has(qualifier)) {
         if (!this.defaultSymbols.has(qualifier) && resolution === 'loose') {
-          console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: target.Ⲑid });
+          console.debug('Unable to find specific dependency, falling back to general instance', { qualifier, target: targetClassId });
           return this.resolveTarget(target);
         }
         throw new InjectionError('Dependency not found', target, [qualifier]);
@@ -98,7 +98,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     return {
       qualifier,
       config,
-      id: (config.factory ? config.target : config.class).Ⲑid
+      id: getUniqueId(config.factory ? config.target : config.class)
     };
   }
 
@@ -377,11 +377,11 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Create mock cls for DI purposes
-    const cls = asFull<Class>({ Ⲑid: config.id });
+    const fnClass = setFunctionMetadata(class { }, castTo({ id: config.id }));
 
-    finalConfig.class = cls;
+    finalConfig.class = fnClass;
 
-    this.registerClass(cls, finalConfig);
+    this.registerClass(fnClass, finalConfig);
 
     const srcClassId = getUniqueId(config.src);
 
@@ -389,7 +389,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.factories.set(srcClassId, new Map());
     }
 
-    this.factories.get(srcClassId)!.set(cls, asFull(finalConfig));
+    this.factories.get(srcClassId)!.set(fnClass, asFull(finalConfig));
   }
 
   /**

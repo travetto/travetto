@@ -410,11 +410,11 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
   }
 
   onControllerRemove(cls: Class): void {
-    this.#controllerContent.delete(cls.Ⲑid);
+    this.#controllerContent.delete(getUniqueId(cls));
   }
 
   onSchemaAdd(cls: Class): boolean {
-    if (this.#schemaContent.has(cls.Ⲑid)) {
+    if (this.#schemaContent.has(getUniqueId(cls))) {
       this.renderSchema(SchemaRegistry.get(cls), true);
       return true;
     }
@@ -422,7 +422,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
   }
 
   onSchemaRemove(cls: Class): boolean {
-    return this.#schemaContent.delete(cls.Ⲑid);
+    return this.#schemaContent.delete(getUniqueId(cls));
   }
 
   seenImport(imp: string): boolean {

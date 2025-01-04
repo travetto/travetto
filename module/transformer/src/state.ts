@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { path, ManifestIndex } from '@travetto/manifest';
 
-import { ManagedType, AnyType, ForeignType } from './resolver/types';
+import { ManagedType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor';
 import { SimpleResolver } from './resolver/service';
 import { ImportManager } from './importer';
@@ -378,14 +378,5 @@ export class TransformerState implements State {
    */
   getFileImportName(file: string): string {
     return this.#resolver.getFileImportName(file);
-  }
-
-  /**
-   * Get foreign target
-   */
-  getForeignTarget(state: TransformerState, ret: ForeignType): ts.Expression {
-    return state.fromLiteral({
-      Ⲑid: `${ret.source.split('node_modules/')[1]}+${ret.name}`
-    });
   }
 }

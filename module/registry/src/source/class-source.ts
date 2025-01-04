@@ -30,10 +30,11 @@ export class ClassSource implements ChangeSource<Class> {
   #flush(): void {
     for (const cls of flushPendingFunctions().filter(isClass)) {
       const src = Runtime.getImport(cls);
+      const classId = getUniqueId(cls);
       if (!this.#classes.has(src)) {
         this.#classes.set(src, new Map());
       }
-      this.#classes.get(src)!.set(cls.Ⲑid, cls);
+      this.#classes.get(src)!.set(classId, cls);
       this.emit({ type: 'added', curr: cls });
     }
   }
@@ -106,7 +107,7 @@ export class ClassSource implements ChangeSource<Class> {
    */
   emit(e: ChangeEvent<Class>): void {
     if (this.trace) {
-      console.debug('Emitting change', { type: e.type, curr: e.curr?.Ⲑid, prev: e.prev?.Ⲑid });
+      console.debug('Emitting change', { type: e.type, curr: getUniqueId(e.curr!), prev: getUniqueId(e.prev!) });
     }
     this.#emitter.emit('change', e);
   }

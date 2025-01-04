@@ -29,7 +29,7 @@ class $ParamExtractor {
         const exp = (r[QueryExpandedSymbol] ??= BindUtil.expandPaths(r.query));
         if (c.prefix) {
           return exp[c.prefix];
-        } else if (schema.type.Ⲑid) { // Is a complex type
+        } else if (getUniqueId(schema.type)) { // Is a complex type
           return exp; // Return whole thing
         } else {
           return exp[c.name!];

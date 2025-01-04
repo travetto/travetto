@@ -1,4 +1,4 @@
-import { Class, AppError, Runtime } from '@travetto/runtime';
+import { Class, AppError, Runtime, getUniqueId } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
@@ -95,7 +95,7 @@ export class RestApplication<T = unknown> {
    * @param e The change event
    */
   async onControllerChange(e: ChangeEvent<Class>): Promise<void> {
-    console.debug('Registry event', { type: e.type, target: (e.curr ?? e.prev)?.Ⲑid });
+    console.debug('Registry event', { type: e.type, target: getUniqueId(e.curr ?? e.prev!) });
     if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
       await this.unregisterController(e.prev);
     }
@@ -126,14 +126,15 @@ export class RestApplication<T = unknown> {
       ep.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, ep, config);
     }
 
-    await this.server.registerRoutes(config.class.Ⲑid, config.basePath, config.endpoints, this.interceptors);
+    const configClassId = getUniqueId(config.class);
+    await this.server.registerRoutes(configClassId, config.basePath, config.endpoints, this.interceptors);
 
     if (this.server.listening && this.server.updateGlobalOnChange) {
       await this.unregisterGlobal();
       await this.registerGlobal();
     }
 
-    console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: config.endpoints.length });
+    console.debug('Registering Controller Instance', { id: configClassId, path: config.basePath, endpointCount: config.endpoints.length });
   }
 
   /**
@@ -146,7 +147,7 @@ export class RestApplication<T = unknown> {
       return;
     }
 
-    await this.server.unregisterRoutes(c.Ⲑid);
+    await this.server.unregisterRoutes(getUniqueId(c));
   }
 
   /**

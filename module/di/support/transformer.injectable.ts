@@ -3,6 +3,7 @@ import ts from 'typescript';
 import {
   TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, OnSetter
 } from '@travetto/transformer';
+import { ForeignType } from '@travetto/transformer/src/resolver/types';
 
 const INJECTABLE_MOD = '@travetto/di/src/decorator';
 
@@ -10,6 +11,13 @@ const INJECTABLE_MOD = '@travetto/di/src/decorator';
  * Injectable/Injection transformer
  */
 export class InjectableTransformer {
+
+  static getForeignTarget(state: TransformerState, ret: ForeignType): ts.Expression {
+    return state.fromLiteral({
+      // Connects to the function getUniqueId
+      $id: `${ret.source.split('node_modules/')[1]}+${ret.name}`
+    });
+  }
 
   /**
    * Handle a specific declaration param/property
@@ -39,7 +47,7 @@ export class InjectableTransformer {
     if (type.key === 'managed') {
       payload.target = state.getOrImport(type);
     } else if (type.key === 'foreign') {
-      payload.target = state.getForeignTarget(state, type);
+      payload.target = this.getForeignTarget(state, type);
     } else {
       const file = param.getSourceFile().fileName;
       const src = state.getFileImportName(file);
@@ -164,7 +172,7 @@ export class InjectableTransformer {
     if (ret.key === 'managed') {
       config.target = state.getOrImport(ret);
     } else if (ret.key === 'foreign') {
-      config.target = state.getForeignTarget(state, ret);
+      config.target = this.getForeignTarget(state, ret);
     }
 
     // Build decl

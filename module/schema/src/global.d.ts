@@ -10,6 +10,16 @@ declare global {
     from<T>(this: Class<T>, data: DeepPartial<T>, view?: string): T;
   }
 
+  /**
+   * @concrete node:buffer#Blob
+   */
+  interface Blob { }
+
+  /**
+   * @concrete node:buffer#File
+   */
+  interface File { }
+
   namespace NodeJS {
     /**
      * @concrete node:stream#Readable

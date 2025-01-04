@@ -20,6 +20,7 @@ class $DynamicDependencyRegistry {
    */
   proxyInstance<T>(target: ClassTarget<T>, qual: symbol | undefined, instance: T): T {
     const { qualifier, id: classId } = this.#registryResolveTarget(target, qual);
+    const targetClassId = getUniqueId(target);
     let proxy: RetargettingProxy<unknown>;
 
     if (!this.#proxies.has(classId)) {
@@ -30,14 +31,14 @@ class $DynamicDependencyRegistry {
       proxy = new RetargettingProxy<T>(instance);
       this.#proxies.get(classId)!.set(qualifier, proxy);
       if (this.#registry.trace) {
-        console.debug('Registering proxy', { id: target.Ⲑid, qualifier: qualifier.toString() });
+        console.debug('Registering proxy', { id: targetClassId, qualifier: qualifier.toString() });
       }
     } else {
       proxy = this.#proxies.get(classId)!.get(qualifier)!;
       proxy.setTarget(instance);
       if (this.#registry.trace) {
         console.debug('Updating target', {
-          id: target.Ⲑid, qualifier: qualifier.toString(), instanceType: target.name
+          id: targetClassId, qualifier: qualifier.toString(), instanceType: target.name
         });
       }
     }

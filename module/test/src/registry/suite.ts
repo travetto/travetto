@@ -20,7 +20,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     const lines = describeFunction(cls)?.lines;
     return {
       class: cls,
-      classId: cls.Ⲑid,
+      classId: getUniqueId(cls),
       tags: [],
       import: Runtime.getImport(cls),
       lineStart: lines?.[0],

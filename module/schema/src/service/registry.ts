@@ -150,7 +150,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       this.#subTypes.get(base)!.set(config.subTypeName!, cls);
     }
     if (base !== cls) {
-      while (base && ('Ⲑid' in base)) {
+      while (base && getUniqueId(base)) {
         this.#subTypes.get(base)!.set(config.subTypeName!, cls);
         const parent = this.getParentClass(base);
         base = parent ? this.getBaseSchema(parent) : undefined;

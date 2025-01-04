@@ -1,6 +1,6 @@
 import { createClient } from 'redis';
 
-import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
+import { getUniqueId, ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
   NotFoundError, ExistsError, ModelIndexedSupport, OptionalId
@@ -179,7 +179,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
       for (const idx of ModelRegistry.get(el).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
-            console.error('Unique indices are not supported in redis for', { cls: el.Ⲑid, idx: idx.name });
+            console.error('Unique indices are not supported in redis for', { cls: getUniqueId(el), idx: idx.name });
             break;
           }
         }
