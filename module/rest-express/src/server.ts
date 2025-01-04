@@ -55,7 +55,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
 
     for (const route of routes) {
       const routePath = route.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[route.method](routePath, async (req, res) => {
+      router[route.method](routePath, async (req: express.Request, res: express.Response) => {
         await route.handlerFinalized!(
           req[TravettoEntitySymbol] ??= ExpressServerUtil.getRequest(req),
           res[TravettoEntitySymbol] ??= ExpressServerUtil.getResponse(res)
@@ -78,7 +78,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
         }
       );
 
-      router.options('*all', (req, res) => {
+      router.options('*all', (req: express.Request, res: express.Response) => {
         optionHandler(
           req[TravettoEntitySymbol] ??= ExpressServerUtil.getRequest(req),
           res[TravettoEntitySymbol] ??= ExpressServerUtil.getResponse(res)
