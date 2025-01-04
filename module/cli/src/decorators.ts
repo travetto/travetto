@@ -84,8 +84,7 @@ const FIELD_CONFIG: {
  */
 export function CliCommand(cfg: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
-    const desc = describeFunction(target);
-    if (!desc?.id || desc.abstract) {
+    if (!target.Ⲑid || describeFunction(target)?.abstract) {
       return;
     }
 
