@@ -1,12 +1,6 @@
 import { TypedObject } from '@travetto/runtime';
 import { Messages } from './messages';
 
-declare global {
-  interface RegExp {
-    name?: string;
-  }
-}
-
 /**
  * List of common regular expressions for fields
  */
@@ -18,8 +12,11 @@ export const CommonRegExp = {
   postalCode: /^\d{5}(?:[-\s]\d{4})?$/
 };
 
+export const CommonRegExpToName = new Map<RegExp, string>();
+
 // Rebind regexes
 for (const k of TypedObject.keys(CommonRegExp)) {
-  CommonRegExp[k].name = `[[:${k}:]]`;
-  Messages.set(CommonRegExp[k].name!, Messages.get(k)!);
+  const name = `[[:${k}:]]`;
+  CommonRegExpToName.set(CommonRegExp[k], name);
+  Messages.set(name, Messages.get(k)!);
 }
