@@ -126,15 +126,14 @@ export class RestApplication<T = unknown> {
       ep.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, ep, config);
     }
 
-    const configClassId = config.class.Ⲑid;
-    await this.server.registerRoutes(configClassId, config.basePath, config.endpoints, this.interceptors);
+    await this.server.registerRoutes(config.class.Ⲑid, config.basePath, config.endpoints, this.interceptors);
 
     if (this.server.listening && this.server.updateGlobalOnChange) {
       await this.unregisterGlobal();
       await this.registerGlobal();
     }
 
-    console.debug('Registering Controller Instance', { id: configClassId, path: config.basePath, endpointCount: config.endpoints.length });
+    console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: config.endpoints.length });
   }
 
   /**
