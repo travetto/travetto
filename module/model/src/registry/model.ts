@@ -71,8 +71,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {
-    const classId = cls.Ⲑid;
-    const config = asFull(this.pending.get(classId)!);
+    const config = asFull(this.pending.get(cls.Ⲑid)!);
 
     const schema = SchemaRegistry.get(cls);
     const view = schema.views[AllViewSymbol].schema;
