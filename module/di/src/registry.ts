@@ -1,6 +1,6 @@
 import {
   Class, Runtime, asConstructable, castTo, classConstruct, describeFunction,
-  asFull, castKey, TypedFunction, hasFunction, setFunctionMetadata
+  asFull, castKey, TypedFunction, hasFunction
 } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
@@ -374,7 +374,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Create mock cls for DI purposes
-    const fnClass = setFunctionMetadata(class { }, castTo({ id: config.id }));
+    const fnClass = class { static Ⲑid = config.id; };
 
     finalConfig.class = fnClass;
 

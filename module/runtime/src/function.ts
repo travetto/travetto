@@ -14,16 +14,6 @@ const MetadataSymbol = Symbol.for('@travetto/runtime:function-metadata');
 
 const pending = new Set<Function>([]);
 
-/** @private */
-export function setFunctionMetadata<T extends Function>(fn: T, meta: FunctionMetadata): T {
-  const _fn: (Function & { [MetadataSymbol]?: FunctionMetadata }) | undefined = fn;
-  Object.defineProperty(_fn, MetadataSymbol, { value: meta });
-  if (meta.id) {
-    Object.defineProperty(_fn, 'Ⲑid', { value: meta.id });
-  }
-  return fn;
-}
-
 /**
  * Initialize the meta data for a function/class
  * @param fn Class
@@ -49,7 +39,7 @@ export function registerFunction(
     ...tag, methods, abstract, synthetic, class: abstract !== undefined
   };
   pending.add(fn);
-  setFunctionMetadata(fn, metadata);
+  Object.defineProperties(fn, { Ⲑid: { value: metadata.id }, [MetadataSymbol]: { value: metadata } });
 }
 
 /**
