@@ -61,7 +61,7 @@ export class CompilerWatcher {
     const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(file);
     if (mod && action === 'create' && !entry) {
       const modRoot = mod.sourceFolder || this.#root;
-      const moduleFile = file.includes(modRoot) ? file.split(`${modRoot}/`)[1] : file;
+      const moduleFile = file.includes(`${modRoot}/`) ? file.split(`${modRoot}/`)[1] : file;
       entry = this.#state.registerInput(mod, moduleFile);
     }
     return { entry, file: entry?.sourceFile ?? file, action };

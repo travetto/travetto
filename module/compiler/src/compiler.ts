@@ -69,7 +69,7 @@ export class Compiler {
         process.exitCode = 1;
         if (err) {
           EventUtil.sendEvent('log', { level: 'error', message: err.toString(), time: Date.now() });
-          log.error('Shutting down due to failure', err.message);
+          log.error('Shutting down due to failure', err.stack);
         }
         break;
       }
