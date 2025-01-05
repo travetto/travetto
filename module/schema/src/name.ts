@@ -2,7 +2,7 @@ import { describeFunction } from '@travetto/runtime';
 import { ClassConfig } from './service/types';
 
 const SYNTHETIC_PREFIX = 'Δ_';
-const ID_RE = /(__)(\\d+)$/;
+const ID_RE = /(__)(\d+)$/;
 
 /**
  * Name resolver, specifically for synthetic types
