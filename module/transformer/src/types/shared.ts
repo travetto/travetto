@@ -35,5 +35,3 @@ export function transformCast<T>(input: unknown): T {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return input as T;
 }
-
-export const SYNTHETIC_PREFIX = 'Δ_';

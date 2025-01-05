@@ -216,20 +216,20 @@ export function work() {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.work = work;
 const tslib_1 = require("tslib");
-const Δ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
-const Ⲑcon = tslib_1.__importStar(require("@travetto/runtime/src/console.js"));
-var Ⲑmod = ["@travetto/runtime", "doc/transpile.ts"];
+const Δfunction = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
+const Δconsole = tslib_1.__importStar(require("@travetto/runtime/src/console.js"));
+var mod_1 = ["@travetto/runtime", "doc/transpile.ts"];
 function work() {
-    Ⲑcon.log({ level: "debug", import: Ⲑmod, line: 2, scope: "work", args: ['Start Work'] });
+    Δconsole.log({ level: "debug", import: mod_1, line: 2, scope: "work", args: ['Start Work'] });
     try {
         1 / 0;
     }
     catch (err) {
-        Ⲑcon.log({ level: "error", import: Ⲑmod, line: 7, scope: "work", args: ['Divide by zero', { error: err }] });
+        Δconsole.log({ level: "error", import: mod_1, line: 7, scope: "work", args: ['Divide by zero', { error: err }] });
     }
-    Ⲑcon.log({ level: "debug", import: Ⲑmod, line: 9, scope: "work", args: ['End Work'] });
+    Δconsole.log({ level: "debug", import: mod_1, line: 9, scope: "work", args: ['End Work'] });
 }
-Δ_function_1.registerFunction(work, Ⲑmod, { hash: 1030247697, lines: [1, 10, 2] });
+Δfunction.registerFunction(work, mod_1, { hash: 1030247697, lines: [1, 10, 2] });
 ```
 
 #### Filtering Debug

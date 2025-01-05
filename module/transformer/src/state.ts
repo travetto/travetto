@@ -6,7 +6,7 @@ import { ManagedType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor';
 import { SimpleResolver } from './resolver/service';
 import { ImportManager } from './importer';
-import { Import, SYNTHETIC_PREFIX } from './types/shared';
+import { Import } from './types/shared';
 
 import { DocUtil } from './util/doc';
 import { DecoratorUtil } from './util/decorator';
@@ -21,6 +21,10 @@ function hasOriginal(n: ts.Node): n is ts.Node & { original: ts.Node } {
 
 function hasEscapedName(n: ts.Node): n is ts.Node & { name: { escapedText: string } } {
   return !!n && 'name' in n && typeof n.name === 'object' && !!n.name && 'escapedText' in n.name && !!n.name.escapedText;
+}
+
+function isRedefinableDeclaration(x: ts.Node): x is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {
+  return ts.isFunctionDeclaration(x) || ts.isClassDeclaration(x) || ts.isInterfaceDeclaration(x);
 }
 
 /**
@@ -266,7 +270,7 @@ export class TransformerState implements State {
    */
   getModuleIdentifier(): ts.Expression {
     if (this.#modIdent === undefined) {
-      this.#modIdent = this.createIdentifier(`${SYNTHETIC_PREFIX}mod`);
+      this.#modIdent = this.factory.createUniqueName('mod');
       const entry = this.#resolver.getFileImport(this.source.fileName);
       const decl = this.factory.createVariableDeclaration(this.#modIdent, undefined, undefined,
         this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])
@@ -297,7 +301,7 @@ export class TransformerState implements State {
    * @param node
    * @param type
    */
-  generateUniqueIdentifier(node: ts.Node, type: AnyType): string {
+  generateUniqueIdentifier(node: ts.Node, type: AnyType, suffix?: string): string {
     let unique: string[] = [];
     let name = type.name && !type.name.startsWith('_') ? type.name : '';
     if (!name && hasEscapedName(node)) {
@@ -313,14 +317,22 @@ export class TransformerState implements State {
       if (fileName === this.source.fileName) { // if in same file suffix with location
         let child: ts.Node = tgt;
         while (child && !ts.isSourceFile(child)) {
-          if (ts.isFunctionDeclaration(child) || ts.isMethodDeclaration(child) || ts.isClassDeclaration(child) || ts.isInterfaceDeclaration(child)) {
+          if (isRedefinableDeclaration(child) || ts.isMethodDeclaration(child)) {
             if (child.name) {
               unique.push(child.name.getText());
             }
           }
           child = child.parent;
         }
-        if (!unique.length) { // a top level type
+        if (!unique.length) {
+          // Handle multiple declarations by order
+          if (isRedefinableDeclaration(tgt)) { // a top level type
+            const matching = (ts.isBlock(tgt.parent) ? tgt.parent : tgt.getSourceFile()).statements
+              .filter(isRedefinableDeclaration)
+              .filter(x => x.name?.escapedText === name);
+            unique.push(matching.indexOf(tgt).toString(), node.kind.toString());
+          }
+        } else {
           unique.push(ts.getLineAndCharacterOfPosition(tgt.getSourceFile(), tgt.getStart()).line.toString());
         }
       } else {
@@ -332,7 +344,7 @@ export class TransformerState implements State {
 
     if (unique.length) { // Make unique to file
       unique.unshift(this.#resolver.getFileImportName(this.source.fileName));
-      return `${name}__${SystemUtil.naiveHashString(unique.join(':'), 12)}`;
+      return `${name}__${SystemUtil.naiveHashString(unique.join(':'), 12)}${suffix || ''}`;
     } else {
       return name;
     }
@@ -341,8 +353,7 @@ export class TransformerState implements State {
   /**
    * Register synthetic identifier
    */
-  createSyntheticIdentifier(id: string): [identifier: ts.Identifier, exists: boolean] {
-    id = `${SYNTHETIC_PREFIX}${id}`;
+  registerIdentifier(id: string): [identifier: ts.Identifier, exists: boolean] {
     let exists = true;
     if (!this.#syntheticIdentifiers.has(id)) {
       this.#syntheticIdentifiers.set(id, this.factory.createIdentifier(id));

@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import {
   type AnyType, DeclarationUtil, LiteralUtil,
-  DecoratorUtil, DocUtil, ParamDocumentation, TransformerState, transformCast
+  DecoratorUtil, DocUtil, ParamDocumentation, TransformerState, transformCast,
 } from '@travetto/transformer';
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
@@ -33,10 +33,10 @@ export class SchemaTransformUtil {
         return state.createAccess(imp.ident, 'UnknownType');
       }
       case 'shape': {
-        const uniqueId = state.generateUniqueIdentifier(node, type);
+        const uniqueId = state.generateUniqueIdentifier(node, type, 'Δ');
 
         // Build class on the fly
-        const [id, existing] = state.createSyntheticIdentifier(uniqueId);
+        const [id, existing] = state.registerIdentifier(uniqueId);
         if (!existing) {
           const cls = state.factory.createClassDeclaration(
             [

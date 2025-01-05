@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerState, OnMethod, OnClass, AfterClass, CoreUtil, SystemUtil, Import, OnFunction, SYNTHETIC_PREFIX } from '@travetto/transformer';
+import { TransformerState, OnMethod, OnClass, AfterClass, CoreUtil, SystemUtil, Import, OnFunction } from '@travetto/transformer';
 
 import type { FunctionMetadataTag } from '../src/function';
 
@@ -92,7 +92,6 @@ export class RegisterTransformer {
         state.fromLiteral(state[cls]),
         state.extendObjectLiteral(state[methods] || {}),
         state.fromLiteral(CoreUtil.isAbstract(node)),
-        state.fromLiteral(name.startsWith(SYNTHETIC_PREFIX))
       ]
     );
 
@@ -106,7 +105,11 @@ export class RegisterTransformer {
       node.typeParameters,
       node.heritageClauses,
       [
-        state.createStaticField(`${SYNTHETIC_PREFIX}init`, meta),
+        state.factory.createClassStaticBlockDeclaration(
+          state.factory.createBlock([
+            state.factory.createExpressionStatement(meta)
+          ])
+        ),
         ...node.members
       ]
     );

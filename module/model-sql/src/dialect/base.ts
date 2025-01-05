@@ -1,6 +1,6 @@
 /* eslint-disable @stylistic/indent */
 import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
-import { Class, AppError, TypedObject, describeFunction, TimeUtil, castTo, castKey } from '@travetto/runtime';
+import { Class, AppError, TypedObject, TimeUtil, castTo, castKey } from '@travetto/runtime';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
@@ -634,11 +634,6 @@ ${this.getLimitSQL(cls, query)}`;
     const config = stack[stack.length - 1];
     const parent = stack.length > 1;
     const array = parent && config.array;
-
-    if (config.type && describeFunction(config.type)?.synthetic) {
-      throw new AppError(`Cannot create SQL tables for synthetic types, please convert ${SQLUtil.buildPath(stack)} to a concrete class`);
-    }
-
     const fields = SchemaRegistry.has(config.type) ?
       [...SQLUtil.getFieldsByLocation(stack).local] :
       (array ? [castTo<FieldConfig>(config)] : []);
