@@ -68,7 +68,6 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     assert(results3.length === 0);
   }
 
-
   @Test('verify query one behavior')
   async testQueryOne() {
     const service = await this.service;
@@ -234,7 +233,6 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     assert(all[0].age >= all[1].age);
   }
 
-
   @Test('Test within')
   async testWithin() {
     if (!this.supportsGeo) {
@@ -281,7 +279,6 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     assert(rad.length < 25);
     assert(rad.length > 0);
   }
-
 
   @Test()
   async verifyNestedQuery() {
@@ -336,7 +333,6 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     });
     assert(simple === 5);
 
-
     const simple2 = await service.queryCount(Aged, {
       where: {
         createdAt: {
@@ -345,7 +341,6 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       }
     });
     assert(simple2 === 6);
-
 
     const simple3 = await service.queryCount(Aged, {
       where: {

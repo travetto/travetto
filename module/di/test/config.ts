@@ -6,7 +6,6 @@ export class Empty {
   age = 10;
 }
 
-
 @Injectable()
 export class DbConfig {
   temp?: unknown;

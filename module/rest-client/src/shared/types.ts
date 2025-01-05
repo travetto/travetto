@@ -11,7 +11,6 @@ export type ParamConfig = {
 
 type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'head' | 'options' | 'patch';
 
-
 export type RequestDefinition = {
   method: HttpMethod;
   endpointPath: string;

@@ -218,7 +218,6 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
     assert(res3.body.name === user.name);
     assert(res3.body.age === 20);
 
-
     const res4 = await this.request<Errors>('get', '/test/schema/interface-prefix', {
       query: { ...user, user2: { ...user, age: '300' } },
       throwOnError: false

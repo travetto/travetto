@@ -10,7 +10,6 @@ import { ServerHandle } from '@travetto/rest/src/types';
 
 import { FastifyServerUtil } from './internal/util';
 
-
 function isHttps(ssl: boolean | undefined, cfg: https.ServerOptions): cfg is FastifyHttpsOptions<https.Server> {
   return !!ssl;
 }

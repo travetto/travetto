@@ -16,7 +16,6 @@ export interface Address2 {
   mode?: 'c' | 'd';
 }
 
-
 @Schema()
 export class SortAddress {
   address: Address;

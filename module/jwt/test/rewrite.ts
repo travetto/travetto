@@ -19,7 +19,6 @@ export class RewriteSuite {
     assert(decoded);
     assert(decoded.name === 'bob');
 
-
     const rewritten = await JWTUtil.rewrite<{ name: string }>(token, p => ({
       ...p,
       name: 'roger'

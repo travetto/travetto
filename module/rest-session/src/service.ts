@@ -18,7 +18,6 @@ export const SessionModelSymbol = Symbol.for('@travetto/rest-session:model');
  */
 export const SessionRawSymbol = Symbol.for('@travetto/rest-session:data');
 
-
 @Model({ autoCreate: false })
 export class SessionEntry {
   id: string;

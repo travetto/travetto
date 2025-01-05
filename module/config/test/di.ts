@@ -6,7 +6,6 @@ import { RootRegistry } from '@travetto/registry';
 
 import { CUSTOM_EMPTY, DbConfig, Empty } from './di-config';
 
-
 class TestConfig {
   @InjectableFactory(CUSTOM_EMPTY)
   static getNewDb() {

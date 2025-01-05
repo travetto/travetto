@@ -148,7 +148,6 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
     });
     assert(status === 401);
 
-
     const { headers, status: authStatus } = await this.request('post', '/test/auth/login', {
       throwOnError: false,
       body: {

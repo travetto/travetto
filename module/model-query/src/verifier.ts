@@ -5,7 +5,6 @@ import { ModelQuery, Query, PageableModelQuery } from './model/query';
 
 import { TypeUtil } from './internal/util/types';
 
-
 type SimpleType = keyof typeof TypeUtil.OPERATORS;
 
 interface State {

@@ -52,7 +52,6 @@ export class JWTVerifier {
       ...options.ignore ?? {}
     };
 
-
     if (payload.nbf !== undefined && !ignore.nbf &&
       payload.nbf > clock.timestamp + clock.tolerance
     ) {

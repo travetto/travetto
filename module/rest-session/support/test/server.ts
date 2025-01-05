@@ -149,7 +149,6 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
       maxAge: 100 * this.timeScale
     });
 
-
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
     const cookie = res.headers[key];

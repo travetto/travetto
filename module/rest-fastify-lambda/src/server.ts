@@ -5,7 +5,6 @@ import { ServerHandle } from '@travetto/rest/src/types';
 import { AwsLambdaRestServer, AwsLambdaSymbol, RestAwsConfig } from '@travetto/rest-aws-lambda';
 import { FastifyRestServer } from '@travetto/rest-fastify';
 
-
 /**
  * Aws Lambda Rest Server
  */

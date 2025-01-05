@@ -167,7 +167,6 @@ export abstract class AuthRestJWTServerSuite extends BaseRestSuite {
     assert(JWTUtil.verify(body, { key: config.signingKey }));
   }
 
-
   @Test()
   async testCookieRollingRenewAuthenticated() {
     const { headers, status } = await this.request('post', '/test/auth/login', {

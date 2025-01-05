@@ -111,7 +111,6 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await assert.rejects(() => service.getByIndex(User3, 'userAge', { name: 'bob' }));
   }
 
-
   @Test()
   async queryList() {
     const service = await this.service;

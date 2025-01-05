@@ -279,7 +279,6 @@ export class GenerateSuite {
     assert.deepStrictEqual(param4.schema, { type: 'number' });
   }
 
-
   @Test()
   async verifyHeadAll() {
     const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));

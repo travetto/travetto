@@ -13,7 +13,6 @@ export class MyCustomClass2 {
 export class MyCustomClass3 { }
 export class MyCustomClass4 { }
 
-
 class Factory {
   @InjectableFactory({ enabled: () => false })
   static getCustomClass3(): MyCustomClass {

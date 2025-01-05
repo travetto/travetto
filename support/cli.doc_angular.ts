@@ -6,7 +6,6 @@ import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
 
-
 const page = (f: string): string => path.resolve('related/travetto.github.io/src', f);
 
 /**

@@ -749,7 +749,6 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     return out;
   }
 
-
   /**
    * Get INSERT sql for a given instance and a specific stack location
    */

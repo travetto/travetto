@@ -89,7 +89,6 @@ export class ImportManager {
       false;
   }
 
-
   /**
    * Is a file or import an untyped file access
    * @param fileOrImport

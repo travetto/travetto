@@ -77,7 +77,6 @@ class PrimaryTargetFactory {
   }
 }
 
-
 @Suite('complex-di')
 class ComplexDiTest {
 

@@ -42,7 +42,6 @@ export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodVal
   };
 }
 
-
 /**
  * Register a specific view for a class
  * @param name The name of the view

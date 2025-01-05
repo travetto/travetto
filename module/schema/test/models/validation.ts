@@ -120,7 +120,6 @@ export class Grade {
   score: number;
 }
 
-
 @Schema()
 export class Opaque {
   name: string;

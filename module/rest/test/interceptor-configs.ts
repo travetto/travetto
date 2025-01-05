@@ -6,7 +6,6 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { RootRegistry } from '@travetto/registry';
 
-
 import { ConfigureInterceptor } from '../src/decorator/common';
 import { Controller } from '../src/decorator/controller';
 import { Get } from '../src/decorator/endpoint';

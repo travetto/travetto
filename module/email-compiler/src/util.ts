@@ -175,7 +175,6 @@ export class EmailCompileUtil {
       .concat('\n');
   }
 
-
   /**
    * Apply styles into a given html document
    */

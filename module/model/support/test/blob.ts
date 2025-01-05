@@ -119,7 +119,6 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     await assert.rejects(() => service.getBlob(id, { start: 30, end: 37 }));
   }
 
-
   @Test()
   async writeAndGet() {
     const service = await this.service;
@@ -133,7 +132,6 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert('asset.yml' === savedMeta.filename);
     assert(undefined === savedMeta.hash);
   }
-
 
   @Test()
   async metadataUpdate() {
@@ -153,12 +151,10 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     assert(undefined === savedMeta.hash);
   }
 
-
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   @Test({ skip: (x: unknown) => !(x as ModelBlobSuite).serviceClass.prototype.getBlobWriteUrl })
   async signedUrl() {
     const service = await this.service;
-
 
     const buffer = Buffer.alloc(1.5 * 10000);
     for (let i = 0; i < buffer.length; i++) {

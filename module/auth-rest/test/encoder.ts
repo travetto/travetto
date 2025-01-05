@@ -52,7 +52,6 @@ export class StatelessPrincipalEncoder implements PrincipalEncoder {
   }
 }
 
-
 @Suite()
 @InjectableSuite()
 export class EncoderTest {

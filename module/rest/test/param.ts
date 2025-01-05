@@ -223,7 +223,6 @@ export class ParameterTest {
     await assert.rejects(() => ParameterTest.extract(ep, { params: { jobId: '5' }, query: { age: 9 } }), ValidationResultError);
   }
 
-
   @Test()
   async realWorldQueryArrayOptional() {
     const ep = ParameterTest.getEndpoint('/array/names', 'get');

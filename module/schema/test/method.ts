@@ -23,7 +23,6 @@ const EvenValidator = MethodValidator((name: string): ValidationError | undefine
   }
 });
 
-
 class TestClass {
 
   @MethodValidator(nameValidator)
@@ -32,7 +31,6 @@ class TestClass {
     return name;
   }
 }
-
 
 @Suite('SchemaValidator - Method Level Validations')
 class SchemaValidatorMethodSuite {

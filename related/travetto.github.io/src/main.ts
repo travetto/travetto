@@ -36,7 +36,6 @@ const routes: Routes = [
   }
 ];
 
-
 bootstrapApplication(AppComponent, {
   providers: [
     importProvidersFrom(BrowserModule),

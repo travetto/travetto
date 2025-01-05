@@ -74,7 +74,6 @@ class ImageUtilSuite {
     assert((await ImageUtil.getMetadata(optimized)).format === 'jpeg');
   }
 
-
   @Test('resizeToFile')
   async resizeToFile() {
     const imgFile = await this.fixture.resolve('lincoln.jpg');

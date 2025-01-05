@@ -6,7 +6,6 @@ import { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult 
 
 export const AwsLambdaSymbol = Symbol.for('@travetto/rest-aws-lambda:entry');
 
-
 /**
  * Main contract for lambda based applications
  */

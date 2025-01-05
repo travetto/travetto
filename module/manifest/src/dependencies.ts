@@ -149,7 +149,6 @@ export class PackageModuleVisitor {
     return [...mods].sort((a, b) => a.name.localeCompare(b.name));
   }
 
-
   /**
    * Visit packages with ability to track duplicates
    */

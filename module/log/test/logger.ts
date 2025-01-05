@@ -83,7 +83,6 @@ class LoggerTest {
     console.log('Hello', { otherSecret: true });
     this.restConsole();
 
-
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
     assert(logger.values[0].message === 'Hello');
@@ -99,7 +98,6 @@ class LoggerTest {
     ConsoleManager.set(svc);
     console.log('Hello', { secret: true });
     this.restConsole();
-
 
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
@@ -118,7 +116,6 @@ class LoggerTest {
     console.error(svc);
     console.error(logger);
     this.restConsole();
-
 
     assert(logger.values.length === 3);
     assert(logger.values[0].message === 'Hello');

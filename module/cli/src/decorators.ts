@@ -76,7 +76,6 @@ const FIELD_CONFIG: {
     }
   ];
 
-
 /**
  * Decorator to register a CLI command
  * @augments `@travetto/schema:Schema`

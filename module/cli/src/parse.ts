@@ -33,7 +33,6 @@ const getInput = (cfg: { field?: CliCommandInput, rawText?: string, input: strin
   }
 };
 
-
 /**
  * Parsing support for the cli
  */

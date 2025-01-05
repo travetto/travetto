@@ -26,7 +26,6 @@ class ExtraChocolate extends Chocolate {
   beans = 10;
 }
 
-
 @Suite()
 class CustomSubtypeSuite {
   @Test()

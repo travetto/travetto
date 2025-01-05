@@ -84,7 +84,6 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     return { hash: await BinaryUtil.hashInput(loc) };
   }
 
-
   @BeforeAll()
   async init() {
     this.fixture = new TestFixtures(['@travetto/model', '@travetto/rest-upload']);
@@ -99,7 +98,6 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     const { hash } = await this.getFileMeta('/logo.png');
     assert(res.body.hash === hash);
   }
-
 
   @Test()
   async testUploadDirect() {
@@ -133,7 +131,6 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
     assert(this.getFirstHeader(res.headers, 'content-language') === 'en-GB');
   }
 
-
   @Test()
   async testMultiUpload() {
     const uploads = await this.getUploads(
@@ -158,7 +155,6 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
       throwOnError: false
     });
     assert(resBad.status === 400);
-
 
     const uploads = await this.getUploads(
       { name: 'file1', resource: 'logo.gif', type: 'image/gif' },
@@ -189,7 +185,6 @@ export abstract class ModelBlobRestUploadServerSuite extends BaseRestSuite {
       throwOnError: false
     });
     assert(resBad.status === 400);
-
 
     const uploads = await this.getUploads(
       { name: 'file1', resource: 'asset.yml', type: 'text/plain' },

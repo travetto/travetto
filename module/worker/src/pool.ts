@@ -72,7 +72,6 @@ export class WorkPool {
       min: opts?.min ?? 1,
     });
 
-
     // Listen for shutdown
     opts?.shutdown?.addEventListener('abort', async () => {
       while (pendingAcquires) {

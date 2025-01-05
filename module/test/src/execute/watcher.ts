@@ -67,7 +67,6 @@ export class TestWatcher {
       }
     });
 
-
     // If a file is changed, but doesn't emit classes, re-run whole file
     RootRegistry.onNonClassChanges(imp => itr.add({ import: imp }));
 

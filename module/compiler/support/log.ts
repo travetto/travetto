@@ -69,7 +69,6 @@ export class Logger implements LogConfig, LogShape {
   error(message: string, ...args: unknown[]): void { return this.render({ level: 'error', message, args }); }
 }
 
-
 class $RootLogger extends Logger {
   #logProgress?: boolean;
 

@@ -9,7 +9,6 @@ export class Empty {
   age = 10;
 }
 
-
 @Schema()
 class Basic {
   @Inject()

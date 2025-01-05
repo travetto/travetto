@@ -62,7 +62,6 @@ function isRegexp(o: unknown): o is { regexp: { name: string } } {
   return DataUtil.isPlainObject(o) && 'regexp' in o;
 }
 
-
 @Suite()
 export class QueryTest {
 

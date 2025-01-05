@@ -199,7 +199,6 @@ export class RouteUtil {
     return (req, res) => chain({ req, res, config: undefined }, ident);
   }
 
-
   /**
    * Order endpoints by a set of rules, to ensure consistent registration and that precedence is honored
    */

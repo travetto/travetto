@@ -4,8 +4,8 @@ import { Suite, Test } from '@travetto/test';
 
 import { CliCommand, CliFlag } from '../src/decorators';
 import { CliCommandSchemaUtil } from '../src/schema';
-import { CliParseUtil, ParsedState } from '../__index__';
-
+import { CliParseUtil } from '../src/parse';
+import { ParsedState } from '../src/types';
 
 /**
  * My command

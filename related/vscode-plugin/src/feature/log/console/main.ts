@@ -54,7 +54,6 @@ export class LogFeature extends BaseFeature {
     return this.#importToFile.get(imp);
   }
 
-
   /**
    * Handle a terminal link being clicked
    */

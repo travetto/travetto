@@ -1,7 +1,5 @@
 import { AppError, hasToJSON } from '@travetto/runtime';
-
 import { TestEvent, } from '../model/event';
-
 
 export type SerializedError = { [K in keyof Error]: Error[K] extends Function ? never : Error[K] } & { $: true };
 

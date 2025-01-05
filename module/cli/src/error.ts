@@ -46,7 +46,6 @@ ${{ identifier: install }}
   }
 }
 
-
 /**
  * Provides a basic error wrapper for cli validation issues
  */

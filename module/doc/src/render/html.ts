@@ -24,7 +24,6 @@ const std = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Pro
 const stdFull = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Promise<string> =>
   `\n<${el.type}>${await recurse()}</${el.type}>\n`;
 
-
 export const Html: RenderProvider<RenderContext> = {
   ext: 'html',
   finalize: (text, context) => {

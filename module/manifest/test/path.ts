@@ -37,7 +37,6 @@ class PathTests {
     const winResolve = (...args: string[]): string => path2.toPosix(winPath.resolve(path.resolve(), ...args.map(path2.toPosix)));
     const winJoin = (root: string, ...args: string[]): string => path2.toPosix(winPath.join(path2.toPosix(root), ...args.map(path2.toPosix)));
 
-
     assert(winResolve('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winResolve('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winResolve('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png');

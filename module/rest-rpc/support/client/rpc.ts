@@ -92,7 +92,6 @@ export function getBody(inputs: unknown[]): { body: Blob | string, headers: Reco
   };
 }
 
-
 export function consumeJSON<T>(text: string | unknown): T {
   if (typeof text !== 'string') {
     return consumeJSON(JSON.stringify(text));

@@ -22,7 +22,6 @@ class SpecificService {
   service: ServiceContract;
 }
 
-
 class ManualInvocationOfInterface {
   @InjectableFactory()
   static getCustomService(): Promise<ServiceContract> {

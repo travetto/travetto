@@ -264,7 +264,6 @@ class DataBinding {
     );
   }
 
-
   @Test()
   async validateArrayMixedBind() {
     assert.deepStrictEqual(

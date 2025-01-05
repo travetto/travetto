@@ -37,13 +37,11 @@ export function SetHeaders(headers: HeaderMap): EndpointDecorator { return regis
  */
 export function Produces(mime: string): EndpointDecorator { return register({ headers: { 'content-type': mime } }); }
 
-
 type HeaderSet = ReturnType<typeof SetHeaders>;
 type CacheControlFlag =
   'must-revalidate' | 'public' | 'private' | 'no-cache' |
   'no-store' | 'no-transform' | 'proxy-revalidate' | 'immutable' |
   'must-understand' | 'stale-if-error' | 'stale-while-revalidate';
-
 
 /**
  * Set the max-age of a response based on the config

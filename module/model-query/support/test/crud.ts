@@ -37,7 +37,6 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
       NotFoundError
     );
 
-
     const todo2 = await svc.create(Todo, Todo.from({ text: 'bob2' }));
 
     const result = await svc.updateByQuery(Todo, Todo.from({
@@ -87,7 +86,6 @@ export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudS
       assert(el.reason instanceof NotFoundError);
     }
   }
-
 
   @Test()
   async testDeleteByQuery() {

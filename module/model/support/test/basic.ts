@@ -44,7 +44,6 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     }, NotFoundError);
   }
 
-
   @Test('create, read, delete')
   async createRaw() {
     const service = await this.service;

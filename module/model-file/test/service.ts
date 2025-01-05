@@ -12,7 +12,6 @@ import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expir
 import { FileModelConfig, FileModelService } from '../src/service';
 import { DependencyRegistry } from '@travetto/di';
 
-
 @Suite()
 export class FileBasicSuite extends ModelBasicSuite {
   serviceClass = FileModelService;
@@ -36,7 +35,6 @@ export class FileExpirySuite extends ModelExpirySuite {
   serviceClass = FileModelService;
   configClass = FileModelConfig;
 
-
   @Test()
   async ensureCulled() {
     const service = await this.service;
@@ -55,7 +53,6 @@ export class FileExpirySuite extends ModelExpirySuite {
     total = await this.getSize(ExpiryUser);
     assert(total === 0);
     assert(allFiles === 0);
-
 
     // Create
     await service.upsert(ExpiryUser, ExpiryUser.from({

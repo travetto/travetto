@@ -6,7 +6,6 @@ import path from 'node:path';
 import { AfterAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-
 import { FetchClientGenerator } from '../src/fetch';
 import { AngularClientGenerator } from '../src/angular';
 

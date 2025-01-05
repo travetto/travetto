@@ -117,7 +117,6 @@ class TestConfig {
   }
 }
 
-
 @Injectable()
 export class UsableMainClass { }
 

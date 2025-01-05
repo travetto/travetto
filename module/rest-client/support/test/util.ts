@@ -42,7 +42,6 @@ export class RestClientTestUtil {
     await ExecUtil.getResult(spawn(tsc, ['-p', folder]));
   }
 
-
   static async cleanupFolder(dir: string): Promise<void> {
     if (process.env.KEEP_TEMP !== '1') {
       await fs.rm(dir, { recursive: true });

@@ -26,7 +26,6 @@ export type CommonPackConfig = {
   includeWorkspaceResources?: boolean;
 };
 
-
 export type DockerPackConfig = {
   dockerFactory: string;
   dockerBuildPlatform?: string;
@@ -46,7 +45,6 @@ export type DockerPackConfig = {
     gid: number;
   };
 } & CommonPackConfig;
-
 
 export type ShellCommandImpl = {
   var(name: string): string;

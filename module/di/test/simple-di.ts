@@ -190,7 +190,6 @@ class DiTest2 {
     const specInst = await DependencyRegistry.getInstance(UsableSubClass);
     assert(specInst.constructor === UsableSubClass);
 
-
     const specSpec = DependencyRegistry.getCandidateTypes(UsableSubSubClass);
     assert(specSpec.length === 2);
 

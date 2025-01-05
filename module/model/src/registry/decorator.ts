@@ -74,7 +74,6 @@ export function PersistValue<T>(handler: (curr: T | undefined) => T, scope: PreP
   };
 }
 
-
 /**
  * Model class decorator for post-load behavior
  */

@@ -71,7 +71,6 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     assert(res.body.hash === await BinaryUtil.hashInput(file));
   }
 
-
   @Test()
   async testUploadDirect() {
     const [sent] = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
@@ -123,7 +122,6 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
     });
     assert(resBad.status === 400);
 
-
     const uploads = await this.getUploads(
       { name: 'file1', resource: 'logo.gif', type: 'image/gif' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
@@ -156,7 +154,6 @@ export abstract class RestUploadServerSuite extends BaseRestSuite {
       throwOnError: false
     });
     assert(resBad.status === 400);
-
 
     const uploads = await this.getUploads(
       { name: 'file1', resource: 'asset.yml', type: 'text/plain' },

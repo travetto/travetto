@@ -34,7 +34,6 @@ class SimpleItem {
   name: string;
 }
 
-
 @Model()
 class SimpleList {
   id: string;
@@ -236,7 +235,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(final.createdDate.getTime() < final.updatedDate?.getTime());
   }
 
-
   @Test('verify list')
   async list() {
     const service = await this.service;
@@ -283,7 +281,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single !== undefined);
     assert(single.age === 23);
   }
-
 
   @Test('Verify update')
   async testRawUpdate() {

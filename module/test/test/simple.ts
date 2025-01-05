@@ -151,7 +151,6 @@ class Simple {
     assert(c === d);
   }
 
-
   @Test({ shouldThrow: ExecutionError, skip: true })
   async testUnhandledPromise() {
     for (let i = 0; i < 100; i += 1) {

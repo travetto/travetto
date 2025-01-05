@@ -14,6 +14,5 @@ export class LoginContextTarget { }
 
 export class PrincipalEncoderTarget { }
 
-
 // Register context providers
 ParamExtractor.registerContext(PrincipalTarget, (_, r) => r.auth);

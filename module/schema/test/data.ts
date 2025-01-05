@@ -51,7 +51,6 @@ class DataUtilTests {
     assert(DataUtil.coerceType(true, BigInt) === 1n);
   }
 
-
   @Test()
   testCoerceDateType() {
     assert(DataUtil.coerceType(2014, Date).getTime() === new Date(2014).getTime());
@@ -196,7 +195,6 @@ class DataUtilTests {
       assert(!DataUtil.isPrimitive(v));
     }
   }
-
 
   @Test()
   verifyPrimitive() {

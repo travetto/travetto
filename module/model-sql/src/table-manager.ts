@@ -95,7 +95,6 @@ export class TableManager {
     }
   }
 
-
   /**
    * Get a valid connection
    */
