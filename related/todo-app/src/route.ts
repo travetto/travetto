@@ -45,7 +45,7 @@ export class TodoController {
    * Create a todo
    */
   @Post('/')
-  async create(todo: TodoRequest): Promise<Todo> {
+  async create(todo: TodoRequest & { id?: number }): Promise<Todo> {
     return await this._svc.add({ ...todo, id: undefined! });
   }
 
