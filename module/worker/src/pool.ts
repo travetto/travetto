@@ -34,7 +34,7 @@ const isWorkerFactory = <I, O>(o: WorkerInput<I, O>): o is (() => WorkerFactoryI
 export class WorkPool {
 
   static MAX_SIZE = os.availableParallelism();
-  static DEFAULT_SIZE = Math.min(WorkPool.MAX_SIZE, 4);
+  static DEFAULT_SIZE = Math.max(Math.trunc(WorkPool.MAX_SIZE * .75), 4);
 
   /** Build worker pool */
   static #buildPool<I, O>(worker: WorkerInput<I, O>, opts?: WorkPoolConfig<I, O>): Pool<Worker<I, O>> {
