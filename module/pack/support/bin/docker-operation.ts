@@ -21,7 +21,7 @@ export class DockerPackOperation {
   static async* detectDockerImageOs(cfg: DockerPackConfig): AsyncIterable<string[]> {
     // Read os before writing
     cfg.dockerRuntime.os = await PackUtil.runCommand(
-      ['docker', 'run', '--entrypoint', '/bin/sh', cfg.dockerImage, '-c', 'cat /etc/*release*']
+      ['docker', 'run', '--rm', '--entrypoint', '/bin/sh', cfg.dockerImage, '-c', 'cat /etc/*release*']
     ).then(out => {
       const found = out.match(/\b(?:debian|alpine|centos)\b/i)?.[0].toLowerCase();
       switch (found) {
