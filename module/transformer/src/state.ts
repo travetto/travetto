@@ -317,22 +317,15 @@ export class TransformerState implements State {
       if (fileName === this.source.fileName) { // if in same file suffix with location
         let child: ts.Node = tgt;
         while (child && !ts.isSourceFile(child)) {
-          if (isRedefinableDeclaration(child) || ts.isMethodDeclaration(child)) {
+          if (isRedefinableDeclaration(child) || ts.isMethodDeclaration(child) || ts.isParameter(child)) {
             if (child.name) {
               unique.push(child.name.getText());
             }
           }
           child = child.parent;
         }
+
         if (!unique.length) {
-          // Handle multiple declarations by order
-          if (isRedefinableDeclaration(tgt)) { // a top level type
-            const matching = (ts.isBlock(tgt.parent) ? tgt.parent : tgt.getSourceFile()).statements
-              .filter(isRedefinableDeclaration)
-              .filter(x => x.name?.escapedText === name);
-            unique.push(matching.indexOf(tgt).toString(), node.kind.toString());
-          }
-        } else {
           unique.push(ts.getLineAndCharacterOfPosition(tgt.getSourceFile(), tgt.getStart()).line.toString());
         }
       } else {
@@ -344,6 +337,9 @@ export class TransformerState implements State {
 
     if (unique.length) { // Make unique to file
       unique.unshift(this.#resolver.getFileImportName(this.source.fileName));
+      if (this.source.fileName.includes('openapi/test/generate')) {
+        console.error(unique);
+      }
       return `${name}__${SystemUtil.naiveHashString(unique.join(':'), 12)}${suffix || ''}`;
     } else {
       return name;

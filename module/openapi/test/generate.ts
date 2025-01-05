@@ -2,12 +2,11 @@ import assert from 'node:assert';
 import { Readable } from 'node:stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Put, Query, Undocumented } from '@travetto/rest';
+import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, Query, Undocumented } from '@travetto/rest';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { OpenapiVisitor } from '../src/spec-generate';
 import { TestUser } from './model';
-
 
 interface UserSearch {
   name?: string;
@@ -27,6 +26,11 @@ class TestCont {
 
   @Get('/user-search')
   async search(search: UserSearch) {
+    return [new TestUser()];
+  }
+
+  @Post('/user-search')
+  async postSearch(search: UserSearch) {
     return [new TestUser()];
   }
 
@@ -185,13 +189,13 @@ export class GenerateSuite {
       content: {
         'application/json': {
           schema: {
-            $ref: '#/components/schemas/who__90472'
+            $ref: '#/components/schemas/who__12130'
           }
         }
       },
       description: '__type'
     });
-    assert.deepStrictEqual(config.components.schemas['who__90472'], {
+    assert.deepStrictEqual(config.components.schemas['who__12130'], {
       description: '__type',
       example: undefined,
       properties: {
@@ -348,6 +352,7 @@ export class GenerateSuite {
   @Test()
   async querySchema() {
     const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
+
     assert(config.paths['/test/user-search']);
     assert(config.paths['/test/user-search'].get);
     assert(config.paths['/test/user-search'].get.parameters);
@@ -359,6 +364,25 @@ export class GenerateSuite {
     assert('in' in config.paths['/test/user-search'].get.parameters[1]);
     assert(config.paths['/test/user-search'].get.parameters[1].in === 'query');
     assert(config.paths['/test/user-search'].get.parameters[1].name === 'age');
+  }
+
+  @Test()
+  async bodySchema() {
+    const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
+
+    assert(config.paths['/test/user-search']);
+    assert(config.paths['/test/user-search'].post);
+    assert.deepStrictEqual(config.paths['/test/user-search'].post.requestBody, {
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/UserSearch__86636'
+          }
+        }
+      },
+      description: 'UserSearch'
+    });
+
   }
 
   @Test()
