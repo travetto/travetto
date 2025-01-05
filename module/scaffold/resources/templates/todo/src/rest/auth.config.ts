@@ -1,10 +1,10 @@
 import { Authorizer, Authenticator, AuthenticationError } from '@travetto/auth';
-import { SessionModelⲐ } from '@travetto/rest-session';
+import { SessionModelSymbol } from '@travetto/rest-session';
 import { InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
 import { MemoryModelService } from '@travetto/model-memory';
 
-export const BasicAuthⲐ = Symbol.for('AUTH_BASIC');
+export const BasicAuthSymbol = Symbol.for('AUTH_BASIC');
 
 type User = { username: string, password: string };
 
@@ -14,12 +14,12 @@ class AuthConfig {
     return { authorize: p => p };
   }
 
-  @InjectableFactory(SessionModelⲐ)
+  @InjectableFactory(SessionModelSymbol)
   static getStore(svc: MemoryModelService): ModelExpirySupport {
     return svc;
   }
 
-  @InjectableFactory(BasicAuthⲐ)
+  @InjectableFactory(BasicAuthSymbol)
   static getAuthenticator(): Authenticator<User> {
     return {
       authenticate(u) {

@@ -1,7 +1,7 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { RestSessionServerSuite } from '@travetto/rest-session/support/test/server';
-import { SessionModelⲐ } from '@travetto/rest-session';
+import { SessionModelSymbol } from '@travetto/rest-session';
 import { AsyncContext } from '@travetto/context';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 import { ModelExpirySupport } from '@travetto/model';
@@ -14,7 +14,7 @@ class Config {
   static getSqlService(ctx: AsyncContext, config: SQLModelConfig) {
     return new PostgreSQLDialect(ctx, config);
   }
-  @InjectableFactory(SessionModelⲐ)
+  @InjectableFactory(SessionModelSymbol)
   static modelProvider(svc: SQLModelService): ModelExpirySupport {
     return svc;
   }

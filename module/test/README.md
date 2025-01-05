@@ -79,18 +79,18 @@ would translate to:
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
-const Ⲑ_debug_1 = tslib_1.__importStar(require("@travetto/runtime/src/debug.js"));
-const Ⲑ_check_1 = tslib_1.__importStar(require("@travetto/test/src/assert/check.js"));
-const Ⲑ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
-var Ⲑmod = ["@travetto/test", "doc/assert-example.ts"];
+const Δdebug = tslib_1.__importStar(require("@travetto/runtime/src/debug.js"));
+const Δcheck = tslib_1.__importStar(require("@travetto/test/src/assert/check.js"));
+const Δfunction = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
+var mod_1 = ["@travetto/test", "doc/assert-example.ts"];
 const node_assert_1 = tslib_1.__importDefault(require("node:assert"));
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
-    static Ⲑinit = Ⲑ_function_1.registerFunction(SimpleTest, Ⲑmod, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11, 10] } }, false, false);
+    static { Δfunction.registerFunction(SimpleTest, mod_1, { hash: 1887908328, lines: [5, 12] }, { test: { hash: 102834457, lines: [8, 11, 10] } }, false); }
     async test() {
-        if (Ⲑ_debug_1.tryDebugger)
+        if (Δdebug.tryDebugger)
             debugger;
-        Ⲑ_check_1.AssertCheck.check({ module: Ⲑmod, line: 10, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
+        Δcheck.AssertCheck.check({ module: mod_1, line: 10, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
     }
 };
 tslib_1.__decorate([

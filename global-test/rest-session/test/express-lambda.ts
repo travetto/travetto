@@ -5,7 +5,7 @@ import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
-import { SessionModelⲐ } from '@travetto/rest-session';
+import { SessionModelSymbol } from '@travetto/rest-session';
 
 const EXPRESS = Symbol.for('express-lambda');
 
@@ -20,7 +20,7 @@ class Config {
     return new AwsLambdaRestApplication(dep);
   }
 
-  @InjectableFactory({ primary: true, qualifier: SessionModelⲐ })
+  @InjectableFactory({ primary: true, qualifier: SessionModelSymbol })
   static provider() {
     return new MemoryModelService(new MemoryModelConfig());
   }

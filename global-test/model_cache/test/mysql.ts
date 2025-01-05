@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { CacheModelⲐ } from '@travetto/cache';
+import { CacheModelSymbol } from '@travetto/cache';
 import { CacheServiceSuite } from '@travetto/cache/support/test/service';
 import { AsyncContext } from '@travetto/context';
 import { ModelExpirySupport } from '@travetto/model';
@@ -14,11 +14,11 @@ class Config {
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
     return new MySQLDialect(ctx, config);
   }
-  @InjectableFactory(CacheModelⲐ)
+  @InjectableFactory(CacheModelSymbol)
   static modelProviderExpiry(svc: SQLModelService): ModelExpirySupport {
     return svc;
   }
-  @InjectableFactory(CacheModelⲐ)
+  @InjectableFactory(CacheModelSymbol)
   static modelProviderService(svc: SQLModelService) {
     return svc;
   }

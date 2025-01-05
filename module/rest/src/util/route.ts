@@ -5,7 +5,7 @@ import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { LightweightConfig, ManagedInterceptorConfig, RestInterceptor, RouteApplies } from '../interceptor/types';
-import { HeadersAddedⲐ, InterceptorConfigsⲐ } from '../internal/symbol';
+import { HeadersAddedSymbol, InterceptorConfigsSymbol } from '../internal/symbol';
 
 import { ParamExtractor } from './param';
 import { RouteCheckUtil } from './route-check';
@@ -47,7 +47,7 @@ export class RouteUtil {
    * Get the interceptor config for a given request and interceptor instance
    */
   static getInterceptorConfig<T extends RestInterceptor<U>, U extends ManagedInterceptorConfig>(req: Request, inst: T): U | undefined {
-    const cfg = req[InterceptorConfigsⲐ]?.[inst.constructor.Ⲑid] ?? undefined;
+    const cfg = req[InterceptorConfigsSymbol]?.[inst.constructor.Ⲑid] ?? undefined;
     return castTo(cfg);
   }
 
@@ -192,7 +192,7 @@ export class RouteUtil {
     ];
 
     if (headers && Object.keys(headers).length > 0) {
-      filterChain.unshift([({ res }): void => { res[HeadersAddedⲐ] = { ...headers }; }, undefined]);
+      filterChain.unshift([({ res }): void => { res[HeadersAddedSymbol] = { ...headers }; }, undefined]);
     }
 
     const chain = this.createFilterChain(filterChain);

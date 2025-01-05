@@ -303,7 +303,7 @@ npx trv run:rest
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:144] Initialized {
+2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:145] Initialized {
   manifest: {
     main: {
       name: '@travetto/todo-app',

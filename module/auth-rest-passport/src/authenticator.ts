@@ -2,7 +2,7 @@ import passport from 'passport';
 
 import { Authenticator, Principal } from '@travetto/auth';
 import { FilterContext, Request, Response } from '@travetto/rest';
-import { LoginContextⲐ } from '@travetto/auth-rest/src/internal/types';
+import { LoginContextSymbol } from '@travetto/auth-rest/src/internal/types';
 import { LoginContext } from '@travetto/auth-rest';
 import { castTo } from '@travetto/runtime';
 
@@ -85,7 +85,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
     return new Promise<Principal | undefined>((resolve, reject) => {
 
       // Get the login context
-      req[LoginContextⲐ] = PassportUtil.readState<LoginContext>(req);
+      req[LoginContextSymbol] = PassportUtil.readState<LoginContext>(req);
 
       const requestOptions = this.#passportOptions(req);
 

@@ -6,9 +6,9 @@ import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/inte
 
 import { CacheError } from './error';
 import { CacheUtil } from './util';
-import { CacheAware, CacheConfigⲐ, EvictConfigⲐ } from './internal/types';
+import { CacheAware, CacheConfigSymbol, EvictConfigSymbol } from './internal/types';
 
-export const CacheModelⲐ = Symbol.for('@travetto/cache:model');
+export const CacheModelSymbol = Symbol.for('@travetto/cache:model');
 
 const INFINITE_MAX_AGE = TimeUtil.asMillis(10, 'y');
 
@@ -36,7 +36,7 @@ export class CacheService {
 
   #modelService: ModelExpirySupport;
 
-  constructor(@Inject(CacheModelⲐ, { resolution: 'loose' }) modelService: ModelExpirySupport) {
+  constructor(@Inject(CacheModelSymbol, { resolution: 'loose' }) modelService: ModelExpirySupport) {
     this.#modelService = modelService;
   }
 
@@ -161,7 +161,7 @@ export class CacheService {
    * @param params input parameters
    */
   async cache(target: CacheAware, method: string, fn: Function, params: unknown[]): Promise<unknown | undefined> {
-    const config = target[CacheConfigⲐ]![method];
+    const config = target[CacheConfigSymbol]![method];
 
     const id = CacheUtil.generateKey(config, params);
 
@@ -188,7 +188,7 @@ export class CacheService {
    * @param params Input params to the function
    */
   async evict(target: CacheAware, method: string, fn: Function, params: unknown[]): Promise<unknown> {
-    const config = target[EvictConfigⲐ]![method];
+    const config = target[EvictConfigSymbol]![method];
     const id = CacheUtil.generateKey(config, params);
     const val = await fn.apply(target, params);
     try {

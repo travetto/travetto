@@ -1,9 +1,6 @@
 import ts from 'typescript';
 
-import {
-  TransformerState, OnCall, LiteralUtil,
-  OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction
-} from '@travetto/transformer';
+import { TransformerState, OnCall, LiteralUtil, OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction } from '@travetto/transformer';
 
 const CONSOLE_IMPORT = '@travetto/runtime/src/console';
 
@@ -89,7 +86,7 @@ export class ConsoleLogTransformer {
     const level = name.escapedText!;
 
     if (VALID_LEVELS[level]) {
-      const ident = state.imported ??= state.importFile(CONSOLE_IMPORT, 'Ⲑcon').ident;
+      const ident = state.imported ??= state.importFile(CONSOLE_IMPORT).ident;
       return state.factory.updateCallExpression(
         node,
         state.createAccess(ident, 'log'),

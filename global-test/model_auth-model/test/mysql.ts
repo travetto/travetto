@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/support/test/model';
+import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model';
 import { WithSuiteContext } from '@travetto/context/support/test/context';
 import { AsyncContext } from '@travetto/context';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
@@ -12,7 +12,7 @@ class Config {
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
     return new MySQLDialect(ctx, config);
   }
-  @InjectableFactory(TestModelSvcⲐ)
+  @InjectableFactory(TestModelSvcSymbol)
   static modelProvider(svc: SQLModelService) {
     return svc;
   }

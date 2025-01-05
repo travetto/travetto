@@ -1,8 +1,8 @@
 import { castTo, Util } from '@travetto/runtime';
 import { AsyncContext } from '@travetto/context';
 
-const ContextActiveⲐ: unique symbol = Symbol.for('@travetto/model:sql-active');
-const TxActiveⲐ: unique symbol = Symbol.for('@travetto/model:sql-transaction');
+const ContextActiveSymbol: unique symbol = Symbol.for('@travetto/model:sql-active');
+const TxActiveSymbol: unique symbol = Symbol.for('@travetto/model:sql-transaction');
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 
@@ -34,14 +34,14 @@ export abstract class Connection<C = unknown> {
    * Get active connection
    */
   get active(): C {
-    return this.context.get<C>(ContextActiveⲐ);
+    return this.context.get<C>(ContextActiveSymbol);
   }
 
   /**
    * Get active tx state
    */
   get activeTx(): boolean {
-    return !!this.context.get<boolean>(TxActiveⲐ);
+    return !!this.context.get<boolean>(TxActiveSymbol);
   }
 
   /**
@@ -79,7 +79,7 @@ export abstract class Connection<C = unknown> {
 
     return this.context.run(async () => {
       try {
-        this.context.set(ContextActiveⲐ, await this.acquire());
+        this.context.set(ContextActiveSymbol, await this.acquire());
         return await op();
       } finally {
         if (this.active) {
@@ -103,7 +103,7 @@ export abstract class Connection<C = unknown> {
     const self = castTo<Connection>(this);
     yield* this.context.iterate(async function* () {
       try {
-        self.context.set(ContextActiveⲐ, await self.acquire());
+        self.context.set(ContextActiveSymbol, await self.acquire());
         yield* op();
       } finally {
         if (self.active) {
@@ -134,7 +134,7 @@ export abstract class Connection<C = unknown> {
       }
     } else {
       return this.runWithActive(() => {
-        this.context.set(TxActiveⲐ, true);
+        this.context.set(TxActiveSymbol, true);
         return this.runWithTransaction('force', op);
       });
     }

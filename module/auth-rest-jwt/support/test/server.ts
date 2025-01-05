@@ -12,10 +12,10 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 import { RestJWTConfig } from '../../src/principal-encoder';
 
-const TestAuthⲐ = Symbol.for('TEST_AUTH');
+const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
 class Config {
-  @InjectableFactory(TestAuthⲐ)
+  @InjectableFactory(TestAuthSymbol)
   static getAuthenticator(): Authenticator {
     return {
       async authenticate(body: { username?: string, password?: string }) {
@@ -40,7 +40,7 @@ class TestAuthController {
   svc: AuthService;
 
   @Post('/login')
-  @Authenticate(TestAuthⲐ)
+  @Authenticate(TestAuthSymbol)
   async simpleLogin() {
   }
 

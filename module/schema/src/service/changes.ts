@@ -4,7 +4,7 @@ import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 
 import { FieldConfig, ClassConfig } from './types';
-import { AllViewⲐ } from '../internal/types';
+import { AllViewSymbol } from '../internal/types';
 
 const id = (c: Class | string): string => typeof c === 'string' ? c : c.Ⲑid;
 
@@ -111,8 +111,8 @@ class $SchemaChangeListener {
    */
   emitFieldChanges({ prev, curr }: ChangeEvent<ClassConfig>): void {
 
-    const prevView = prev?.views[AllViewⲐ] || { fields: [], schema: {} };
-    const currView = curr!.views[AllViewⲐ];
+    const prevView = prev?.views[AllViewSymbol] || { fields: [], schema: {} };
+    const currView = curr!.views[AllViewSymbol];
 
     const prevFields = new Set(prevView.fields);
     const currFields = new Set(currView.fields);
@@ -132,7 +132,7 @@ class $SchemaChangeListener {
     }
 
     // Handle class references changing, but keeping same id
-    const compareTypes = (a: Class, b: Class): boolean => 'Ⲑid' in a ? a.Ⲑid === b.Ⲑid : a === b;
+    const compareTypes = (a: Class, b: Class): boolean => a.Ⲑid ? a.Ⲑid === b.Ⲑid : a === b;
 
     for (const c of currFields) {
       if (prevFields.has(c)) {

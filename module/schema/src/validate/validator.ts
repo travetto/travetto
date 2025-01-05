@@ -6,6 +6,7 @@ import { ValidationError, ValidationKindCore, ValidationResult } from './types';
 import { Messages } from './messages';
 import { isValidationError, TypeMismatchError, ValidationResultError } from './error';
 import { DataUtil } from '../data';
+import { CommonRegExpToName } from './regexp';
 
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism
@@ -24,12 +25,6 @@ function isClassInstance<T>(o: unknown): o is ClassInstance<T> {
 
 function isRangeValue(o: unknown): o is number | string | Date {
   return typeof o === 'string' || typeof o === 'number' || o instanceof Date;
-}
-
-declare global {
-  interface RegExp {
-    name?: string;
-  }
 }
 
 /**
@@ -195,7 +190,7 @@ export class SchemaValidator {
         kind: res.kind,
         value: res.value,
         message: '',
-        re: res.re?.name ?? res.re?.source ?? '',
+        re: CommonRegExpToName.get(res.re!) ?? res.re?.source ?? '',
         path,
         type: (typeof res.type === 'function' ? res.type.name : res.type)
       };

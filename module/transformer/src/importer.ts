@@ -19,7 +19,7 @@ export class ImportManager {
   #newImports = new Map<string, Import>();
   #imports: Map<string, Import>;
   #idx: Record<string, number> = {};
-  #ids = new Map<string, string>();
+  #ids = new Map<string, ts.Identifier>();
   #importName: string;
   #resolver: TransformResolver;
 
@@ -101,15 +101,17 @@ export class ImportManager {
   }
 
   /**
-   * Produces a unique ID for a given file, importing if needed
+   * Produces a unique ID for a given file
    */
-  getId(file: string, name?: string): string {
+  getId(file: string, name?: string): ts.Identifier {
     if (!this.#ids.has(file)) {
       if (name) {
-        this.#ids.set(file, name);
+        this.#ids.set(file, this.factory.createIdentifier(name));
       } else {
-        const key = path.basename(file, path.extname(file)).replace(/[^A-Za-z0-9]+/g, '_');
-        this.#ids.set(file, `Ⲑ_${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
+        const key = path.basename(file, path.extname(file)).replace(/\W+/g, '_');
+        const suffix = this.#idx[key] = (this.#idx[key] ?? -1) + 1;
+        // eslint-disable-next-line no-bitwise
+        this.#ids.set(file, this.factory.createIdentifier(`Δ${key}${suffix ? suffix : ''}`));
       }
     }
     return this.#ids.get(file)!;
@@ -131,15 +133,15 @@ export class ImportManager {
     }
 
     if (!D_OR_D_TS_EXT_RE.test(file) && !this.#newImports.has(file)) {
-      const id = this.getId(file, name);
+      const ident = this.getId(file, name);
+      const uniqueName = ident.text;
 
-      if (this.#imports.has(id)) { // Already imported, be cool
-        return this.#imports.get(id)!;
+      if (this.#imports.has(uniqueName)) { // Already imported, be cool
+        return this.#imports.get(uniqueName)!;
       }
 
-      const ident = this.factory.createIdentifier(id);
       const newImport = { path: file, ident };
-      this.#imports.set(ident.escapedText.toString(), newImport);
+      this.#imports.set(uniqueName, newImport);
       this.#newImports.set(file, newImport);
     }
     return this.#newImports.get(file)!;

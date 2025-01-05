@@ -54,13 +54,12 @@
         "xcopy",
         "xpack",
         "xunit",
-        "Ⲑinit",
-        "Ⲑsyn",
-        "Ⲑmod",
-        "Ⲑcon"
+        "Ⲑid"
     ],
+    "ignoreRandomStrings": true,
     "ignoreWords": [],
     "ignoreRegExpList": [
+        "Δ",
         "/from\\s+(['\"]).*\\1/",
         "/import\\s+(['\"]).*\\1/",
         "/import[(](['\"]).*\\1[)]/",

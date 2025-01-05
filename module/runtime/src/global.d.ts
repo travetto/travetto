@@ -6,7 +6,9 @@ declare global {
   interface WritableStreamDefaultWriter<W = any> {
     [write]?: (a: W) => void;
   }
+
   interface Function {
-    Ⲑid: string;
+    /* Exposed for use within framework, only applies to framework managed classes */
+    readonly Ⲑid: string;
   }
 }

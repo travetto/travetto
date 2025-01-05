@@ -126,10 +126,10 @@ By design, the [CacheService](https://github.com/travetto/travetto/tree/main/mod
 import { InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
 import { MemoryModelService } from '@travetto/model-memory';
-import { CacheModelⲐ } from '@travetto/cache';
+import { CacheModelSymbol } from '@travetto/cache';
 
 class Config {
-  @InjectableFactory(CacheModelⲐ)
+  @InjectableFactory(CacheModelSymbol)
   static getModel(): ModelExpirySupport {
     return new CustomAwesomeModelService({});
   }

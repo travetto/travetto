@@ -2,8 +2,8 @@ import ts from 'typescript';
 
 import { path, ManifestIndex } from '@travetto/manifest';
 
-import { ManagedType, AnyType, ForeignType } from './resolver/types';
-import { State, DecoratorMeta, Transformer, ModuleNameⲐ } from './types/visitor';
+import { ManagedType, AnyType } from './resolver/types';
+import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor';
 import { SimpleResolver } from './resolver/service';
 import { ImportManager } from './importer';
 import { Import } from './types/shared';
@@ -23,12 +23,14 @@ function hasEscapedName(n: ts.Node): n is ts.Node & { name: { escapedText: strin
   return !!n && 'name' in n && typeof n.name === 'object' && !!n.name && 'escapedText' in n.name && !!n.name.escapedText;
 }
 
+function isRedefinableDeclaration(x: ts.Node): x is ts.InterfaceDeclaration | ts.ClassDeclaration | ts.FunctionDeclaration {
+  return ts.isFunctionDeclaration(x) || ts.isClassDeclaration(x) || ts.isInterfaceDeclaration(x);
+}
+
 /**
  * Transformer runtime state
  */
 export class TransformerState implements State {
-  static SYNTHETIC_EXT = 'Ⲑsyn';
-
   #resolver: SimpleResolver;
   #imports: ImportManager;
   #modIdent: ts.Identifier;
@@ -268,7 +270,7 @@ export class TransformerState implements State {
    */
   getModuleIdentifier(): ts.Expression {
     if (this.#modIdent === undefined) {
-      this.#modIdent = this.createIdentifier('Ⲑmod');
+      this.#modIdent = this.factory.createUniqueName('mod');
       const entry = this.#resolver.getFileImport(this.source.fileName);
       const decl = this.factory.createVariableDeclaration(this.#modIdent, undefined, undefined,
         this.fromLiteral([entry?.module, entry?.relativeFile ?? ''])
@@ -288,7 +290,7 @@ export class TransformerState implements State {
    * @param module
    */
   findDecorator(mod: string | Transformer, node: ts.Node, name: string, module?: string): ts.Decorator | undefined {
-    mod = typeof mod === 'string' ? mod : mod[ModuleNameⲐ]!;
+    mod = typeof mod === 'string' ? mod : mod[ModuleNameSymbol]!;
     const target = `${mod}:${name}`;
     const list = this.getDecoratorList(node);
     return list.find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.dec;
@@ -299,7 +301,7 @@ export class TransformerState implements State {
    * @param node
    * @param type
    */
-  generateUniqueIdentifier(node: ts.Node, type: AnyType): string {
+  generateUniqueIdentifier(node: ts.Node, type: AnyType, suffix?: string): string {
     let unique: string[] = [];
     let name = type.name && !type.name.startsWith('_') ? type.name : '';
     if (!name && hasEscapedName(node)) {
@@ -315,14 +317,15 @@ export class TransformerState implements State {
       if (fileName === this.source.fileName) { // if in same file suffix with location
         let child: ts.Node = tgt;
         while (child && !ts.isSourceFile(child)) {
-          if (ts.isFunctionDeclaration(child) || ts.isMethodDeclaration(child) || ts.isClassDeclaration(child) || ts.isInterfaceDeclaration(child)) {
+          if (isRedefinableDeclaration(child) || ts.isMethodDeclaration(child) || ts.isParameter(child)) {
             if (child.name) {
               unique.push(child.name.getText());
             }
           }
           child = child.parent;
         }
-        if (!unique.length) { // a top level type
+
+        if (!unique.length) {
           unique.push(ts.getLineAndCharacterOfPosition(tgt.getSourceFile(), tgt.getStart()).line.toString());
         }
       } else {
@@ -334,7 +337,10 @@ export class TransformerState implements State {
 
     if (unique.length) { // Make unique to file
       unique.unshift(this.#resolver.getFileImportName(this.source.fileName));
-      return `${name}__${SystemUtil.naiveHashString(unique.join(':'), 12)}`;
+      if (this.source.fileName.includes('openapi/test/generate')) {
+        console.error(unique);
+      }
+      return `${name}__${SystemUtil.naiveHashString(unique.join(':'), 12)}${suffix || ''}`;
     } else {
       return name;
     }
@@ -343,8 +349,7 @@ export class TransformerState implements State {
   /**
    * Register synthetic identifier
    */
-  createSyntheticIdentifier(id: string): [identifier: ts.Identifier, exists: boolean] {
-    id = `${id}${TransformerState.SYNTHETIC_EXT}`;
+  registerIdentifier(id: string): [identifier: ts.Identifier, exists: boolean] {
     let exists = true;
     if (!this.#syntheticIdentifiers.has(id)) {
       this.#syntheticIdentifiers.set(id, this.factory.createIdentifier(id));
@@ -380,14 +385,5 @@ export class TransformerState implements State {
    */
   getFileImportName(file: string): string {
     return this.#resolver.getFileImportName(file);
-  }
-
-  /**
-   * Get foreign target
-   */
-  getForeignTarget(state: TransformerState, ret: ForeignType): ts.Expression {
-    return state.fromLiteral({
-      Ⲑid: `${ret.source.split('node_modules/')[1]}+${ret.name}`
-    });
   }
 }

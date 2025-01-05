@@ -104,10 +104,10 @@ export class Test {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TEST = void 0;
 const tslib_1 = require("tslib");
-const Ⲑ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
-var Ⲑmod = ["@travetto/transformer", "doc/upper.ts"];
+const Δfunction = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
+var mod_1 = ["@travetto/transformer", "doc/upper.ts"];
 class TEST {
-    static Ⲑinit = Ⲑ_function_1.registerFunction(TEST, Ⲑmod, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8, 7] } }, false, false);
+    static { Δfunction.registerFunction(TEST, mod_1, { hash: 649563175, lines: [1, 9] }, { COMPUTEAGE: { hash: 1286718349, lines: [6, 8, 7] } }, false); }
     NAME;
     AGE;
     DOB;

@@ -6,9 +6,7 @@ export type Any = any;
 
 export type AnyMap = { [key: string]: Any };
 export type Class<T = Any> = abstract new (...args: Any[]) => T;
-export type ClassInstance<T = Any> = T & {
-  constructor: Class<T> & { Ⲑid: string };
-};
+export type ClassInstance<T = Any> = T & { constructor: Class<T> };
 
 export type BinaryInput = Blob | Buffer | Readable | ReadableStream;
 

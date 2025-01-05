@@ -14,7 +14,7 @@ export type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: 
 
 export type ResolutionType = 'strict' | 'loose' | 'any';
 
-const PrimaryCandidateⲐ = Symbol.for('@travetto/di:primary');
+const PrimaryCandidateSymbol = Symbol.for('@travetto/di:primary');
 
 const hasPostConstruct = hasFunction<{ postConstruct: () => Promise<unknown> }>('postConstruct');
 const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>('preDestroy');
@@ -55,8 +55,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       const resolved = [...qualifiers.keys()];
       if (!qualifier) {
         // If primary found
-        if (qualifiers.has(PrimaryCandidateⲐ)) {
-          qualifier = PrimaryCandidateⲐ;
+        if (qualifiers.has(PrimaryCandidateSymbol)) {
+          qualifier = PrimaryCandidateSymbol;
         } else {
           // If there is only one default symbol
           const filtered = resolved.filter(x => !!x).filter(x => this.defaultSymbols.has(x));
@@ -219,8 +219,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.defaultSymbols.delete(qualifier);
     this.instances.get(classId)!.delete(qualifier);
     this.instancePromises.get(classId)!.delete(qualifier);
-    this.classToTarget.get(cls.Ⲑid)!.delete(qualifier);
-    console.debug('On uninstall', { id: cls.Ⲑid, qualifier: qualifier.toString(), classId });
+    this.classToTarget.get(classId)!.delete(qualifier);
+    console.debug('On uninstall', { id: classId, qualifier: qualifier.toString(), classId });
   }
 
   override async init(): Promise<void> {
@@ -286,8 +286,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * Get all available candidate types for the target
    */
   getCandidateTypes<T, U = T>(target: Class<U>): InjectableConfig<T>[] {
-    const targetId = target.Ⲑid;
-    const qualifiers = this.targetToClass.get(targetId)!;
+    const qualifiers = this.targetToClass.get(target.Ⲑid)!;
     const uniqueQualifiers = qualifiers ? Array.from(new Set(qualifiers.values())) : [];
     return castTo(uniqueQualifiers.map(id => this.get(id)));
   }
@@ -375,17 +374,19 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // Create mock cls for DI purposes
-    const cls = asFull<Class>({ Ⲑid: config.id });
+    const fnClass = class { static Ⲑid = config.id; };
 
-    finalConfig.class = cls;
+    finalConfig.class = fnClass;
 
-    this.registerClass(cls, finalConfig);
+    this.registerClass(fnClass, finalConfig);
 
-    if (!this.factories.has(config.src.Ⲑid)) {
-      this.factories.set(config.src.Ⲑid, new Map());
+    const srcClassId = config.src.Ⲑid;
+
+    if (!this.factories.has(srcClassId)) {
+      this.factories.set(srcClassId, new Map());
     }
 
-    this.factories.get(config.src.Ⲑid)!.set(cls, asFull(finalConfig));
+    this.factories.get(srcClassId)!.set(fnClass, asFull(finalConfig));
   }
 
   /**
@@ -393,10 +394,11 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    */
   override onInstall<T>(cls: Class<T>, e: ChangeEvent<Class<T>>): void {
     super.onInstall(cls, e);
+    const classId = cls.Ⲑid;
 
     // Install factories separate from classes
-    if (this.factories.has(cls.Ⲑid)) {
-      for (const fact of this.factories.get(cls.Ⲑid)!.keys()) {
+    if (this.factories.has(classId)) {
+      for (const fact of this.factories.get(classId)!.keys()) {
         this.onInstall(fact, e);
       }
     }
@@ -456,34 +458,35 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       this.classToTarget.set(classId, new Map());
     }
 
-    const targetId = config.target.Ⲑid;
+    const targetClassId = config.target.Ⲑid;
 
-    if (!this.targetToClass.has(targetId)) {
-      this.targetToClass.set(targetId, new Map());
+    if (!this.targetToClass.has(targetClassId)) {
+      this.targetToClass.set(targetClassId, new Map());
     }
 
-    if (config.qualifier === Symbol.for(cls.Ⲑid)) {
+    if (config.qualifier === Symbol.for(classId)) {
       this.defaultSymbols.add(config.qualifier);
     }
 
-    this.targetToClass.get(targetId)!.set(config.qualifier, classId);
-    this.classToTarget.get(classId)!.set(config.qualifier, targetId);
+    this.targetToClass.get(targetClassId)!.set(config.qualifier, classId);
+    this.classToTarget.get(classId)!.set(config.qualifier, targetClassId);
 
     // If aliased
     for (const el of config.interfaces) {
-      if (!this.targetToClass.has(el.Ⲑid)) {
-        this.targetToClass.set(el.Ⲑid, new Map());
+      const elClassId = el.Ⲑid;
+      if (!this.targetToClass.has(elClassId)) {
+        this.targetToClass.set(elClassId, new Map());
       }
-      this.targetToClass.get(el.Ⲑid)!.set(config.qualifier, classId);
-      this.classToTarget.get(classId)!.set(Symbol.for(el.Ⲑid), el.Ⲑid);
+      this.targetToClass.get(elClassId)!.set(config.qualifier, classId);
+      this.classToTarget.get(classId)!.set(Symbol.for(elClassId), elClassId);
 
-      if (config.primary && (classId === targetId || config.factory)) {
-        this.targetToClass.get(el.Ⲑid)!.set(PrimaryCandidateⲐ, classId);
+      if (config.primary && (classId === targetClassId || config.factory)) {
+        this.targetToClass.get(elClassId)!.set(PrimaryCandidateSymbol, classId);
       }
     }
 
     // If targeting self (default @Injectable behavior)
-    if ((classId === targetId || config.factory) && (parentConfig || describeFunction(parentClass)?.abstract)) {
+    if ((classId === targetClassId || config.factory) && (parentConfig || describeFunction(parentClass)?.abstract)) {
       const parentId = parentClass.Ⲑid;
 
       if (!this.targetToClass.has(parentId)) {
@@ -491,7 +494,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
 
       if (config.primary) {
-        this.targetToClass.get(parentId)!.set(PrimaryCandidateⲐ, classId);
+        this.targetToClass.get(parentId)!.set(PrimaryCandidateSymbol, classId);
       }
 
       this.targetToClass.get(parentId)!.set(config.qualifier, classId);
@@ -502,19 +505,20 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       if (!this.targetToClass.has(classId)) {
         this.targetToClass.set(classId, new Map());
       }
-      this.targetToClass.get(classId)!.set(PrimaryCandidateⲐ, classId);
+      this.targetToClass.get(classId)!.set(PrimaryCandidateSymbol, classId);
 
       if (config.factory) {
-        this.targetToClass.get(targetId)!.set(PrimaryCandidateⲐ, classId);
+        this.targetToClass.get(targetClassId)!.set(PrimaryCandidateSymbol, classId);
       }
 
       // Register primary if only one interface provided and no parent config
       if (config.interfaces.length === 1 && !parentConfig) {
         const [primaryInterface] = config.interfaces;
-        if (!this.targetToClass.has(primaryInterface.Ⲑid)) {
-          this.targetToClass.set(primaryInterface.Ⲑid, new Map());
+        const primaryClassId = primaryInterface.Ⲑid;
+        if (!this.targetToClass.has(primaryClassId)) {
+          this.targetToClass.set(primaryClassId, new Map());
         }
-        this.targetToClass.get(primaryInterface.Ⲑid)!.set(PrimaryCandidateⲐ, classId);
+        this.targetToClass.get(primaryClassId)!.set(PrimaryCandidateSymbol, classId);
       }
     }
 
@@ -527,7 +531,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   override onUninstallFinalize(cls: Class): void {
     const classId = cls.Ⲑid;
 
-    if (!this.classToTarget.has(cls.Ⲑid)) {
+    if (!this.classToTarget.has(classId)) {
       return;
     }
 

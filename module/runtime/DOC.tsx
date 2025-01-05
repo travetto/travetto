@@ -31,6 +31,11 @@ export const text = <>
     </ul>
 
     <c.Code title='Runtime Shape' src='./src/context.ts' startRe={/class [$]Runtime/} endRe={/^[}]/} outline={true} />
+
+    <c.SubSection title='Class and Function Metadata'>
+      For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every {d.input('class')} is decorated with metadata, including methods, line numbers, and ultimately a unique id stored at {d.input('Ⲑid')}.
+    </c.SubSection>
+
   </c.Section>
 
   <c.Section title='Environment Support'>

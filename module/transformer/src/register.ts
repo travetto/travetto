@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { DecoratorMeta, NodeTransformer, State, TransformPhase, TransformerType, Transformer, ModuleNameⲐ } from './types/visitor';
+import { DecoratorMeta, NodeTransformer, State, TransformPhase, TransformerType, Transformer, ModuleNameSymbol } from './types/visitor';
 
 const HandlersProp = Symbol.for('@travetto/transformer:handlers');
 
@@ -18,7 +18,7 @@ export function getAllTransformers(obj: Record<string, { [HandlersProp]?: NodeTr
   return Object.values(obj)
     .flatMap(x => {
       if (isTransformer(x)) {
-        x[ModuleNameⲐ] = module;
+        x[ModuleNameSymbol] = module;
       }
       return (x[HandlersProp] ?? []);
     })

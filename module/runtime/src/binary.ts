@@ -11,7 +11,7 @@ import { BinaryInput, BlobMeta } from './types';
 import { AppError } from './error';
 import { Util } from './util';
 
-const BlobMetaⲐ = Symbol.for('@travetto/runtime:blob-meta');
+const BlobMetaSymbol = Symbol.for('@travetto/runtime:blob-meta');
 
 /**
  * Common functions for dealing with binary data/streams
@@ -86,7 +86,7 @@ export class BinaryUtil {
       arrayBuffer: { value: () => toBuffer(go()) },
       text: { value: () => toText(go()) },
       bytes: { value: () => toBuffer(go()).then(v => new Uint8Array(v)) },
-      [BlobMetaⲐ]: { value: metadata }
+      [BlobMetaSymbol]: { value: metadata }
     });
   }
 
@@ -94,8 +94,8 @@ export class BinaryUtil {
    * Get blob metadata
    */
   static getBlobMeta(blob: Blob): BlobMeta | undefined {
-    const withMeta: Blob & { [BlobMetaⲐ]?: BlobMeta } = blob;
-    return withMeta[BlobMetaⲐ];
+    const withMeta: Blob & { [BlobMetaSymbol]?: BlobMeta } = blob;
+    return withMeta[BlobMetaSymbol];
   }
 
   /**

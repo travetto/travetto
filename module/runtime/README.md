@@ -69,6 +69,9 @@ class $Runtime {
 }
 ```
 
+### Class and Function Metadata
+For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every `class` is decorated with metadata, including methods, line numbers, and ultimately a unique id stored at `Ⲑid`.
+
 ## Environment Support
 The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L111) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L8), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
 
@@ -213,20 +216,20 @@ export function work() {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.work = work;
 const tslib_1 = require("tslib");
-const Ⲑ_function_1 = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
-const Ⲑcon = tslib_1.__importStar(require("@travetto/runtime/src/console.js"));
-var Ⲑmod = ["@travetto/runtime", "doc/transpile.ts"];
+const Δfunction = tslib_1.__importStar(require("@travetto/runtime/src/function.js"));
+const Δconsole = tslib_1.__importStar(require("@travetto/runtime/src/console.js"));
+var mod_1 = ["@travetto/runtime", "doc/transpile.ts"];
 function work() {
-    Ⲑcon.log({ level: "debug", import: Ⲑmod, line: 2, scope: "work", args: ['Start Work'] });
+    Δconsole.log({ level: "debug", import: mod_1, line: 2, scope: "work", args: ['Start Work'] });
     try {
         1 / 0;
     }
     catch (err) {
-        Ⲑcon.log({ level: "error", import: Ⲑmod, line: 7, scope: "work", args: ['Divide by zero', { error: err }] });
+        Δconsole.log({ level: "error", import: mod_1, line: 7, scope: "work", args: ['Divide by zero', { error: err }] });
     }
-    Ⲑcon.log({ level: "debug", import: Ⲑmod, line: 9, scope: "work", args: ['End Work'] });
+    Δconsole.log({ level: "debug", import: mod_1, line: 9, scope: "work", args: ['End Work'] });
 }
-Ⲑ_function_1.registerFunction(work, Ⲑmod, { hash: 1030247697, lines: [1, 10, 2] });
+Δfunction.registerFunction(work, mod_1, { hash: 1030247697, lines: [1, 10, 2] });
 ```
 
 #### Filtering Debug

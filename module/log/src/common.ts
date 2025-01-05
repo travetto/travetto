@@ -6,7 +6,7 @@ import { ConsoleLogAppender } from './appender/console';
 import { FileLogAppender } from './appender/file';
 import { JsonLogFormatter } from './formatter/json';
 import { LineLogFormatter } from './formatter/line';
-import { LogAppender, LogFormatter, LogEvent, LogCommonⲐ, Logger } from './types';
+import { LogAppender, LogFormatter, LogEvent, LogCommonSymbol, Logger } from './types';
 
 @Config('log')
 export class CommonLoggerConfig {
@@ -23,10 +23,10 @@ export class CommonLogger implements Logger {
   @Inject()
   config: CommonLoggerConfig;
 
-  @Inject(LogCommonⲐ, { optional: true })
+  @Inject(LogCommonSymbol, { optional: true })
   formatter: LogFormatter;
 
-  @Inject(LogCommonⲐ, { optional: true })
+  @Inject(LogCommonSymbol, { optional: true })
   appender: LogAppender;
 
   async postConstruct(): Promise<void> {

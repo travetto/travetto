@@ -33,7 +33,7 @@ export interface Request {
     /**
      * Any additional context for login
      */
-    [LoginContextⲐ]?: LoginContext;
+    [LoginContextSymbol]?: LoginContext;
   }
 ```
 
