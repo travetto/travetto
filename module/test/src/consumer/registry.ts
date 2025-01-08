@@ -60,7 +60,6 @@ export const TestConsumerRegistry = new $TestConsumerRegistry();
 /**
  * Registers a class a valid test consumer
  * @param type The unique identifier for the consumer
- * @param isDefault Is this the default consumer.  Last one wins
  */
 export function Consumable(): (cls: Class<TestConsumer>) => void {
   return function (cls: Class<TestConsumer>): void {
