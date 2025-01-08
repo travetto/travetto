@@ -9,11 +9,24 @@ import { Consumable } from '../registry';
 
 import { TapEmitter } from './tap';
 
+type Result = {
+  key: string;
+  duration: number;
+  tests: number;
+};
+
 /**
  * Streamed summary results
  */
 @Consumable('tap-streamed')
 export class TapStreamedEmitter implements TestConsumer {
+
+  #timings = new Map([
+    ['file', new Map<string, Result>()],
+    ['module', new Map<string, Result>()],
+    ['suite', new Map<string, Result>()],
+    ['test', new Map<string, Result>()],
+  ] as const);
 
   #terminal: Terminal;
   #results = new AsyncQueue<TestResult>();
@@ -55,6 +68,38 @@ export class TapStreamedEmitter implements TestConsumer {
       if (test.status === 'failed') {
         this.#consumer.onEvent(ev);
       }
+      const tests = this.#timings.get('test')!;
+      tests.set(`${ev.test.classId}/${ev.test.methodName}`, {
+        key: `${ev.test.classId}/${ev.test.methodName}`,
+        duration: test.duration,
+        tests: 1
+      });
+    } else if (ev.type === 'suite' && ev.phase === 'after') {
+      const [module] = ev.suite.classId.split(/:/);
+      const [file] = ev.suite.classId.split(/#/);
+
+      const modules = this.#timings.get('module')!;
+      const files = this.#timings.get('file')!;
+      const suites = this.#timings.get('suite')!;
+
+      if (!modules!.has(module)) {
+        modules.set(module, { key: module, duration: 0, tests: 0 });
+      }
+
+      if (!files.has(file)) {
+        files.set(file, { key: file, duration: 0, tests: 0 });
+      }
+
+      suites.set(ev.suite.classId, {
+        key: ev.suite.classId,
+        duration: ev.suite.duration,
+        tests: ev.suite.tests.length
+      });
+
+      files.get(file)!.duration += ev.suite.duration;
+      files.get(file)!.tests += ev.suite.tests.length;
+      modules.get(module)!.duration += ev.suite.duration;
+      modules.get(module)!.tests += ev.suite.tests.length;
     }
   }
 
@@ -65,5 +110,17 @@ export class TapStreamedEmitter implements TestConsumer {
     this.#results.close();
     await this.#progress;
     await this.#consumer.onSummary?.(summary);
+
+    const enhancer = this.#consumer.enhancer;
+
+    console.log('---');
+    for (const [title, results] of [...this.#timings.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+      console.log(`${enhancer.suiteName(`Top 10 slowest ${title}s`)}: `);
+      const top10 = [...results.values()].sort((a, b) => b.duration - a.duration).slice(0, 10);
+      for (const x of top10) {
+        console.log(`  * ${enhancer.testName(x.key)} - ${enhancer.total(x.duration)}ms / ${enhancer.total(x.tests)} tests`);
+      }
+    }
+    console.log('...');
   }
 }

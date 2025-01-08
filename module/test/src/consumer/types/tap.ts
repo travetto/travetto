@@ -27,6 +27,10 @@ export class TapEmitter implements TestConsumer {
     this.#enhancer = enhancer;
   }
 
+  get enhancer(): TestResultsEnhancer {
+    return this.#enhancer;
+  }
+
   log(message: string): void {
     this.#terminal.writer.writeLine(message).commit();
   }

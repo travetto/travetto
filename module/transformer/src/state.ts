@@ -337,9 +337,6 @@ export class TransformerState implements State {
 
     if (unique.length) { // Make unique to file
       unique.unshift(this.#resolver.getFileImportName(this.source.fileName));
-      if (this.source.fileName.includes('openapi/test/generate')) {
-        console.error(unique);
-      }
       return `${name}__${SystemUtil.naiveHashString(unique.join(':'), 12)}${suffix || ''}`;
     } else {
       return name;
