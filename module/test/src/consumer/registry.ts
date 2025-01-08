@@ -59,7 +59,6 @@ export const TestConsumerRegistry = new $TestConsumerRegistry();
 
 /**
  * Registers a class a valid test consumer
- * @param type The unique identifier for the consumer
  */
 export function Consumable(): (cls: Class<TestConsumer>) => void {
   return function (cls: Class<TestConsumer>): void {
