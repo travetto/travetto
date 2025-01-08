@@ -7,7 +7,7 @@ import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
 
-import { TestFormat, TestMode } from './bin/types';
+import { selectConsumer } from './bin/run';
 
 /**
  * Launch test framework and execute tests
@@ -15,12 +15,12 @@ import { TestFormat, TestMode } from './bin/types';
 @CliCommand()
 export class TestCommand implements CliCommandShape {
   /** Output format for test results */
-  format: TestFormat = 'tap';
+  format: string = 'tap';
   /** Number of tests to run concurrently */
   @Min(1) @Max(WorkPool.MAX_SIZE)
   concurrency: number = WorkPool.DEFAULT_SIZE;
   /** Test run mode */
-  mode: TestMode = 'standard';
+  mode: 'single' | 'standard' = 'standard';
   /**
    * Tags to target or exclude
    * @alias env.TRV_TEST_TAGS
@@ -40,12 +40,15 @@ export class TestCommand implements CliCommandShape {
     return fs.stat(path.resolve(first ?? '')).then(x => x.isFile(), () => false);
   }
 
-  async resolvedMode(first: string, rest: string[]): Promise<TestMode> {
+  async resolvedMode(first: string, rest: string[]): Promise<string> {
     return (await this.isFirstFile(first)) && rest.length === 0 ? 'single' : this.mode;
   }
 
-  async validate(first: string = '**/*', rest: string[]): Promise<CliValidationError | undefined> {
+  async preValidate(): Promise<void> {
+    await selectConsumer(TestCommand, 'format');
+  }
 
+  async validate(first: string = '**/*', rest: string[]): Promise<CliValidationError | undefined> {
     const mode = await this.resolvedMode(first, rest);
 
     if (mode === 'single' && !await this.isFirstFile(first)) {

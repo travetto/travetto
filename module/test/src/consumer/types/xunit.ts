@@ -1,17 +1,17 @@
-import { Writable } from 'node:stream';
+import type { Writable } from 'node:stream';
 
 import { stringify } from 'yaml';
 
 import { RuntimeIndex } from '@travetto/runtime';
 
-import { TestEvent } from '../../model/event';
-import { SuitesSummary, TestConsumer } from '../types';
+import type { TestEvent } from '../../model/event';
+import type { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 
 /**
  * Xunit consumer, compatible with JUnit formatters
  */
-@Consumable('xunit')
+@Consumable()
 export class XunitEmitter implements TestConsumer {
   #tests: string[] = [];
   #suites: string[] = [];

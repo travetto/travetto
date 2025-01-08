@@ -3,8 +3,8 @@ import { stringify } from 'yaml';
 import { Terminal } from '@travetto/terminal';
 import { TimeUtil, Runtime, RuntimeIndex, hasToJSON } from '@travetto/runtime';
 
-import { TestEvent } from '../../model/event';
-import { SuitesSummary, TestConsumer } from '../types';
+import type { TestEvent } from '../../model/event';
+import type { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 import { SerializeUtil } from '../serialize';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
@@ -12,7 +12,7 @@ import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
 /**
   * TAP Format consumer
  */
-@Consumable('tap')
+@Consumable()
 export class TapEmitter implements TestConsumer {
   #count = 0;
   #enhancer: TestResultsEnhancer;

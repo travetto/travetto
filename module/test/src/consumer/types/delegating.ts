@@ -1,5 +1,5 @@
-import { SuitesSummary, TestConsumer, TestRunState } from '../types';
-import { TestEvent } from '../../model/event';
+import type { SuitesSummary, TestConsumer, TestRunState } from '../types';
+import type { TestEvent } from '../../model/event';
 
 /**
  * Delegating event consumer

@@ -1,10 +1,10 @@
 import { Util, AsyncQueue } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 
-import { TestEvent } from '../../model/event';
-import { TestResult } from '../../model/test';
+import type { TestEvent } from '../../model/event';
+import type { TestResult } from '../../model/test';
 
-import { SuitesSummary, TestConsumer, TestRunState } from '../types';
+import type { SuitesSummary, TestConsumer, TestRunState } from '../types';
 import { Consumable } from '../registry';
 
 import { TapEmitter } from './tap';
@@ -18,7 +18,7 @@ type Result = {
 /**
  * Streamed summary results
  */
-@Consumable('tap-streamed')
+@Consumable()
 export class TapStreamedEmitter implements TestConsumer {
 
   #timings = new Map([

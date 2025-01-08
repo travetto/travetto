@@ -1,13 +1,13 @@
-import { Writable } from 'node:stream';
+import type { Writable } from 'node:stream';
 
-import { TestEvent } from '../../model/event';
-import { SuitesSummary, TestConsumer } from '../types';
+import type { TestEvent } from '../../model/event';
+import type { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 
 /**
  * Returns the entire result set as a single JSON document
  */
-@Consumable('json')
+@Consumable()
 export class JSONEmitter implements TestConsumer {
 
   #stream: Writable;

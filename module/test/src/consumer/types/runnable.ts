@@ -1,7 +1,7 @@
-import { TestConsumer } from '../types';
+import type { TestConsumer } from '../types';
 import { TestResultsSummarizer } from './summarizer';
 import { TestConsumerRegistry } from '../registry';
-import { TestEvent } from '../../model/event';
+import type { TestEvent } from '../../model/event';
 import { DelegatingConsumer } from './delegating';
 
 /**

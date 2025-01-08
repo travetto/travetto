@@ -8,7 +8,7 @@ import { Consumable } from '../registry';
 /**
  * Streams all test events a JSON payload, in an nd-json format
  */
-@Consumable('event')
+@Consumable()
 export class EventStreamer implements TestConsumer {
   #stream: Writable;
 

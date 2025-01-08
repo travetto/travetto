@@ -1,4 +1,5 @@
-import { classConstruct, type Class } from '@travetto/runtime';
+import path from 'path';
+import { classConstruct, describeFunction, type Class } from '@travetto/runtime';
 import { TestConsumer } from './types';
 
 /**
@@ -6,7 +7,6 @@ import { TestConsumer } from './types';
  */
 class $TestConsumerRegistry {
   #registered = new Map<string, Class<TestConsumer>>();
-  #primary: Class<TestConsumer>;
 
   /**
    * Manual initialization when running outside of the bootstrap process
@@ -19,13 +19,11 @@ class $TestConsumerRegistry {
    * Add a new consumer
    * @param type The consumer unique identifier
    * @param cls The consumer class
-   * @param isDefault Set as the default consumer
    */
-  add(type: string, cls: Class<TestConsumer>, isDefault = false): void {
-    if (isDefault) {
-      this.#primary = cls;
-    }
-    this.#registered.set(type, cls);
+  add(cls: Class<TestConsumer>): void {
+    const desc = describeFunction(cls);
+    const key = desc.module?.includes('@travetto') ? path.basename(desc.modulePath) : desc.import;
+    this.#registered.set(key, cls);
   }
 
   /**
@@ -37,6 +35,13 @@ class $TestConsumerRegistry {
   }
 
   /**
+   * Get types
+   */
+  getTypes(): string[] {
+    return [...this.#registered.keys()];
+  }
+
+  /**
    * Get a consumer instance that supports summarization
    * @param consumer The consumer identifier or the actual consumer
    */
@@ -45,7 +50,7 @@ class $TestConsumerRegistry {
     await this.manualInit();
 
     return typeof consumer === 'string' ?
-      classConstruct(this.get(consumer) ?? this.#primary) :
+      classConstruct(this.get(consumer)) :
       consumer;
   }
 }
@@ -57,8 +62,8 @@ export const TestConsumerRegistry = new $TestConsumerRegistry();
  * @param type The unique identifier for the consumer
  * @param isDefault Is this the default consumer.  Last one wins
  */
-export function Consumable(type: string, isDefault = false): (cls: Class<TestConsumer>) => void {
+export function Consumable(): (cls: Class<TestConsumer>) => void {
   return function (cls: Class<TestConsumer>): void {
-    TestConsumerRegistry.add(type, cls, isDefault);
+    TestConsumerRegistry.add(cls);
   };
 }
