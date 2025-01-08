@@ -3,12 +3,12 @@ import { Writable } from 'node:stream';
 import { TestEvent } from '../../model/event';
 import { TestConsumer } from '../types';
 import { SerializeUtil } from '../serialize';
-import { Consumable } from '../registry';
+import { RegisterConsumer } from '../registry';
 
 /**
  * Streams all test events a JSON payload, in an nd-json format
  */
-@Consumable()
+@RegisterConsumer()
 export class EventStreamer implements TestConsumer {
   #stream: Writable;
 

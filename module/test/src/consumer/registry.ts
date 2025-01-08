@@ -1,5 +1,5 @@
 import path from 'path';
-import { classConstruct, describeFunction, type Class } from '@travetto/runtime';
+import { classConstruct, describeFunction, RuntimeIndex, type Class } from '@travetto/runtime';
 import { TestConsumer } from './types';
 
 /**
@@ -16,8 +16,14 @@ class $TestConsumerRegistry {
   }
 
   /**
+   * Import a specific path and load all consumers there
+   */
+  async importConsumers(pth: string): Promise<void> {
+    await import((RuntimeIndex.getEntry(pth) ?? RuntimeIndex.getFromImport(pth))!.outputFile);
+  }
+
+  /**
    * Add a new consumer
-   * @param type The consumer unique identifier
    * @param cls The consumer class
    */
   add(cls: Class<TestConsumer>): void {
@@ -60,7 +66,7 @@ export const TestConsumerRegistry = new $TestConsumerRegistry();
 /**
  * Registers a class a valid test consumer
  */
-export function Consumable(): (cls: Class<TestConsumer>) => void {
+export function RegisterConsumer(): (cls: Class<TestConsumer>) => void {
   return function (cls: Class<TestConsumer>): void {
     TestConsumerRegistry.add(cls);
   };

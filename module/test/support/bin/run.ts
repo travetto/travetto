@@ -1,4 +1,4 @@
-import { type Class, RuntimeIndex } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -30,7 +30,7 @@ export async function selectConsumer(cls: Class, fieldName: string, consumer?: s
   let types = TestConsumerRegistry.getTypes();
 
   if (consumer?.includes('/')) {
-    await import((RuntimeIndex.getEntry(consumer) ?? RuntimeIndex.getFromImport(consumer))!.outputFile);
+    await TestConsumerRegistry.importConsumers(consumer);
     types = TestConsumerRegistry.getTypes();
   }
 

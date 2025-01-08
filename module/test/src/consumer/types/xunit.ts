@@ -6,12 +6,12 @@ import { RuntimeIndex } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event';
 import type { SuitesSummary, TestConsumer } from '../types';
-import { Consumable } from '../registry';
+import { RegisterConsumer } from '../registry';
 
 /**
  * Xunit consumer, compatible with JUnit formatters
  */
-@Consumable()
+@RegisterConsumer()
 export class XunitEmitter implements TestConsumer {
   #tests: string[] = [];
   #suites: string[] = [];
