@@ -32,10 +32,15 @@ export class TapStreamedEmitter implements TestConsumer {
   #results = new AsyncQueue<TestResult>();
   #progress: Promise<unknown> | undefined;
   #consumer: TapEmitter;
+  #options?: Record<string, unknown>;
 
   constructor(terminal: Terminal = new Terminal(process.stderr)) {
     this.#terminal = terminal;
     this.#consumer = new TapEmitter(this.#terminal);
+  }
+
+  setOptions(options?: Record<string, unknown>): Promise<void> | void {
+    this.#options = options;
   }
 
   async onStart(state: TestRunState): Promise<void> {
@@ -113,14 +118,16 @@ export class TapStreamedEmitter implements TestConsumer {
 
     const enhancer = this.#consumer.enhancer;
 
-    console.log('---');
-    for (const [title, results] of [...this.#timings.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
-      console.log(`${enhancer.suiteName(`Top 10 slowest ${title}s`)}: `);
-      const top10 = [...results.values()].sort((a, b) => b.duration - a.duration).slice(0, 10);
-      for (const x of top10) {
-        console.log(`  * ${enhancer.testName(x.key)} - ${enhancer.total(x.duration)}ms / ${enhancer.total(x.tests)} tests`);
+    if (this.#options?.timings) {
+      console.log('---');
+      for (const [title, results] of [...this.#timings.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+        console.log(`${enhancer.suiteName(`Top 10 slowest ${title}s`)}: `);
+        const top10 = [...results.values()].sort((a, b) => b.duration - a.duration).slice(0, 10);
+        for (const x of top10) {
+          console.log(`  * ${enhancer.testName(x.key)} - ${enhancer.total(x.duration)}ms / ${enhancer.total(x.tests)} tests`);
+        }
       }
+      console.log('...');
     }
-    console.log('...');
   }
 }

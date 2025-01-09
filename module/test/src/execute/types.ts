@@ -6,13 +6,13 @@ import { TestRun } from '../model/test';
  */
 export interface RunState {
   /**
-   * Output format
+   * Test consumer
    */
-  format: string;
+  consumer: string;
   /**
-   * The run consumer
+   * Test consumer options?
    */
-  consumer?: TestConsumer;
+  consumerOptions?: Record<string, unknown>;
   /**
    * Number of test suites to run concurrently, when mode is not single
    */

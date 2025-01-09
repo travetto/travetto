@@ -28,6 +28,10 @@ export type TestRunState = {
  */
 export interface TestConsumer {
   /**
+   * Set options
+   */
+  setOptions?(options?: Record<string, unknown>): Promise<void> | void;
+  /**
    * Listen for start of the test run
    */
   onStart?(testState: TestRunState): Promise<void> | void;

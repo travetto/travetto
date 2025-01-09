@@ -51,13 +51,17 @@ class $TestConsumerRegistry {
    * Get a consumer instance that supports summarization
    * @param consumer The consumer identifier or the actual consumer
    */
-  async getInstance(consumer: string | TestConsumer): Promise<TestConsumer> {
+  async getInstance(consumer: string | TestConsumer, options?: Record<string, unknown>): Promise<TestConsumer> {
     // TODO: Fix consumer registry init
     await this.manualInit();
 
-    return typeof consumer === 'string' ?
+    const inst = typeof consumer === 'string' ?
       classConstruct(this.get(consumer)) :
       consumer;
+
+    await inst.setOptions?.(options);
+
+    return inst;
   }
 }
 

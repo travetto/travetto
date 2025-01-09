@@ -14,18 +14,28 @@ import { selectConsumer } from './bin/run';
  */
 @CliCommand()
 export class TestCommand implements CliCommandShape {
+
   /** Output format for test results */
   format: string = 'tap';
+
   /** Number of tests to run concurrently */
   @Min(1) @Max(WorkPool.MAX_SIZE)
   concurrency: number = WorkPool.DEFAULT_SIZE;
+
   /** Test run mode */
   mode: 'single' | 'standard' = 'standard';
+
   /**
    * Tags to target or exclude
    * @alias env.TRV_TEST_TAGS
    */
   tags?: string[];
+
+  /**
+   * Format options
+   * @alias o
+   */
+  formatOptions?: string[];
 
   preMain(): void {
     EventEmitter.defaultMaxListeners = 1000;
@@ -61,10 +71,12 @@ export class TestCommand implements CliCommandShape {
 
     const isFirst = await this.isFirstFile(first);
     const isSingle = this.mode === 'single' || (isFirst && globs.length === 0);
+    const options = Object.fromEntries((this.formatOptions ?? [])?.map(f => [...f.split(':'), true]));
 
     return runTests({
       concurrency: this.concurrency,
-      format: this.format,
+      consumer: this.format,
+      consumerOptions: options,
       tags: this.tags,
       target: isSingle ?
         {

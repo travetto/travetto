@@ -22,7 +22,7 @@ export class TestDirectCommand {
 
   main(importOrFile: string, clsId?: string, methodsNames: string[] = []): Promise<void> {
     return runTests({
-      format: this.format,
+      consumer: this.format,
       target: {
         import: importOrFile,
         classId: clsId,
