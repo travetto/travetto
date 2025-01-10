@@ -4,7 +4,7 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { AuthService } from '@travetto/auth-rest';
-import { castTo, Class, DeepPartial, Runtime } from '@travetto/runtime';
+import { castTo, Class, Runtime } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 
 @Config('growthbook')
@@ -101,32 +101,27 @@ export class FeatureFlagService {
 
   async getValidated<T>(cls: Class<T>, key: string, defValue: T): Promise<T> {
     const data = await this.getValue(key, defValue);
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const instance: T = cls.from(data as unknown as DeepPartial<T>);
+    const instance: T = cls.from(castTo(data));
     try {
       await SchemaValidator.validate(cls, instance);
       return instance;
     } catch {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return cls.from(defValue as unknown as DeepPartial<T>);
+      return cls.from(castTo(defValue));
     }
   }
 
   async getValidatedList<T>(cls: Class<T>, key: string, defValue: T[]): Promise<T[]> {
     const data = await this.getValue(key, defValue);
     if (!Array.isArray(data)) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return [cls.from(defValue as unknown as DeepPartial<T>)];
+      return [cls.from(castTo(defValue))];
     }
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const instances = data.map(x => cls.from(x as unknown as DeepPartial<T>));
+    const instances = data.map(x => cls.from(castTo(x)));
     try {
       await SchemaValidator.validateAll(cls, instances);
       return instances;
     } catch {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return [cls.from(defValue as unknown as DeepPartial<T>)];
+      return [cls.from(castTo(defValue))];
     }
   }
 }
