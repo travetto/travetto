@@ -119,13 +119,15 @@ export class TapStreamedEmitter implements TestConsumer {
     const enhancer = this.#consumer.enhancer;
 
     if (this.#options?.timings) {
-      console.log('---');
+      const count = +(this.#options?.count ?? 5);
+      console.log('\n---');
       for (const [title, results] of [...this.#timings.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
-        console.log(`${enhancer.suiteName(`Top 10 slowest ${title}s`)}: `);
-        const top10 = [...results.values()].sort((a, b) => b.duration - a.duration).slice(0, 10);
+        console.log(`${enhancer.suiteName(`Top ${count} slowest ${title}s`)}: `);
+        const top10 = [...results.values()].sort((a, b) => b.duration - a.duration).slice(0, count);
         for (const x of top10) {
           console.log(`  * ${enhancer.testName(x.key)} - ${enhancer.total(x.duration)}ms / ${enhancer.total(x.tests)} tests`);
         }
+        console.log();
       }
       console.log('...');
     }
