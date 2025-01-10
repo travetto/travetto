@@ -27,7 +27,7 @@ export class Runner {
    * Run all files
    */
   async runFiles(globs?: string[]): Promise<boolean> {
-    const target = await TestConsumerRegistry.getInstance(this.#state.consumer, this.#state.consumerOptions);
+    const target = await TestConsumerRegistry.getInstance(this.#state);
     const consumer = new RunnableTestConsumer(target);
     const tests = await RunnerUtil.getTestDigest(globs, this.#state.tags);
     const testRuns = RunnerUtil.getTestRuns(tests)
@@ -60,7 +60,7 @@ export class Runner {
       RuntimeIndex.reinitForModule(entry.module);
     }
 
-    const target = await TestConsumerRegistry.getInstance(this.#state.consumer, this.#state.consumerOptions);
+    const target = await TestConsumerRegistry.getInstance(this.#state);
 
     const consumer = new RunnableTestConsumer(target)
       .withTransformer(e => {

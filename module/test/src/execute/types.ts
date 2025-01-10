@@ -1,4 +1,3 @@
-import { TestConsumer } from '../consumer/types';
 import { TestRun } from '../model/test';
 
 /**

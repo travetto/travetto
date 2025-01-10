@@ -1,6 +1,7 @@
 import path from 'path';
 import { classConstruct, describeFunction, RuntimeIndex, type Class } from '@travetto/runtime';
 import { TestConsumer } from './types';
+import { RunState } from '../execute/types';
 
 /**
  * Test Results Handler Registry
@@ -51,16 +52,11 @@ class $TestConsumerRegistry {
    * Get a consumer instance that supports summarization
    * @param consumer The consumer identifier or the actual consumer
    */
-  async getInstance(consumer: string | TestConsumer, options?: Record<string, unknown>): Promise<TestConsumer> {
+  async getInstance(state: Pick<RunState, 'consumer' | 'consumerOptions'>): Promise<TestConsumer> {
     // TODO: Fix consumer registry init
     await this.manualInit();
-
-    const inst = typeof consumer === 'string' ?
-      classConstruct(this.get(consumer)) :
-      consumer;
-
-    await inst.setOptions?.(options);
-
+    const inst = classConstruct(this.get(state.consumer));
+    await inst.setOptions?.(state.consumerOptions ?? {});
     return inst;
   }
 }
