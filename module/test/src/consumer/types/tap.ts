@@ -4,16 +4,16 @@ import { Terminal } from '@travetto/terminal';
 import { TimeUtil, Runtime, RuntimeIndex, hasToJSON } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event';
-import type { SuitesSummary, TestConsumer } from '../types';
-import { RegisterTestConsumer } from '../registry';
+import type { SuitesSummary, TestEventHandler } from '../types';
+import { TestConsumer } from '../registry';
 import { SerializeUtil } from '../serialize';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
 
 /**
   * TAP Format consumer
  */
-@RegisterTestConsumer()
-export class TapEmitter implements TestConsumer {
+@TestConsumer()
+export class TapEmitter implements TestEventHandler {
   #count = 0;
   #enhancer: TestResultsEnhancer;
   #terminal: Terminal;

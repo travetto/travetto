@@ -1,15 +1,15 @@
 import { Writable } from 'node:stream';
 
-import { TestEvent } from '../../model/event';
-import { TestConsumer } from '../types';
+import type { TestEvent } from '../../model/event';
+import type { TestEventHandler } from '../types';
 import { SerializeUtil } from '../serialize';
-import { RegisterTestConsumer } from '../registry';
+import { TestConsumer } from '../registry';
 
 /**
  * Streams all test events a JSON payload, in an nd-json format
  */
-@RegisterTestConsumer()
-export class EventStreamer implements TestConsumer {
+@TestConsumer()
+export class EventStreamer implements TestEventHandler {
   #stream: Writable;
 
   constructor(stream: Writable = process.stdout) {

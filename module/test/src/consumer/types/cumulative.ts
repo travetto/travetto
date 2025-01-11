@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 
 import { type Class, RuntimeIndex } from '@travetto/runtime';
 
-import type { TestConsumer } from '../types';
+import type { TestEventHandler } from '../types';
 import type { TestEvent } from '../../model/event';
 import type { TestResult } from '../../model/test';
 import type { SuiteResult } from '../../model/suite';
@@ -18,7 +18,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    */
   #state: Record<string, Record<string, TestResult['status']>> = {};
 
-  constructor(target: TestConsumer) {
+  constructor(target: TestEventHandler) {
     super([target]);
   }
 

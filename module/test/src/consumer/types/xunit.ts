@@ -5,14 +5,14 @@ import { stringify } from 'yaml';
 import { RuntimeIndex } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event';
-import type { SuitesSummary, TestConsumer } from '../types';
-import { RegisterTestConsumer } from '../registry';
+import type { SuitesSummary, TestEventHandler } from '../types';
+import { TestConsumer } from '../registry';
 
 /**
  * Xunit consumer, compatible with JUnit formatters
  */
-@RegisterTestConsumer()
-export class XunitEmitter implements TestConsumer {
+@TestConsumer()
+export class XunitEmitter implements TestEventHandler {
   #tests: string[] = [];
   #suites: string[] = [];
   #stream: Writable;

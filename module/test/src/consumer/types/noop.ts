@@ -1,11 +1,11 @@
 import type { TestEvent } from '../../model/event';
-import type { TestConsumer } from '../types';
-import { RegisterTestConsumer } from '../registry';
+import type { TestEventHandler } from '../types';
+import { TestConsumer } from '../registry';
 
 /**
  * Does nothing consumer
  */
-@RegisterTestConsumer()
-export class NoopConsumer implements TestConsumer {
+@TestConsumer()
+export class NoopConsumer implements TestEventHandler {
   onEvent(event: TestEvent): void { }
 }

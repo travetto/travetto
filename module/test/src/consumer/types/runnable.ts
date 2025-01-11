@@ -1,4 +1,4 @@
-import type { TestConsumer } from '../types';
+import type { TestEventHandler } from '../types';
 import { TestResultsSummarizer } from './summarizer';
 import type { TestEvent } from '../../model/event';
 import { DelegatingConsumer } from './delegating';
@@ -10,7 +10,7 @@ export class RunnableTestConsumer extends DelegatingConsumer {
 
   #results?: TestResultsSummarizer;
 
-  constructor(...consumers: TestConsumer[]) {
+  constructor(...consumers: TestEventHandler[]) {
     super(consumers);
     this.#results = consumers.find(x => !!x.onSummary) ? new TestResultsSummarizer() : undefined;
   }
