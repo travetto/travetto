@@ -5,14 +5,14 @@ import { TimeUtil, Runtime, RuntimeIndex, hasToJSON } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event';
 import type { SuitesSummary, TestConsumer } from '../types';
-import { RegisterConsumer } from '../registry';
+import { RegisterTestConsumer } from '../registry';
 import { SerializeUtil } from '../serialize';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
 
 /**
   * TAP Format consumer
  */
-@RegisterConsumer()
+@RegisterTestConsumer()
 export class TapEmitter implements TestConsumer {
   #count = 0;
   #enhancer: TestResultsEnhancer;

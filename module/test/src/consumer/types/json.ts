@@ -2,12 +2,12 @@ import type { Writable } from 'node:stream';
 
 import type { TestEvent } from '../../model/event';
 import type { SuitesSummary, TestConsumer } from '../types';
-import { RegisterConsumer } from '../registry';
+import { RegisterTestConsumer } from '../registry';
 
 /**
  * Returns the entire result set as a single JSON document
  */
-@RegisterConsumer()
+@RegisterTestConsumer()
 export class JSONEmitter implements TestConsumer {
 
   #stream: Writable;

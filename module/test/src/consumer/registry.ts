@@ -66,7 +66,7 @@ export const TestConsumerRegistry = new $TestConsumerRegistry();
 /**
  * Registers a class a valid test consumer
  */
-export function RegisterConsumer(): (cls: Class<TestConsumer>) => void {
+export function RegisterTestConsumer(): (cls: Class<TestConsumer>) => void {
   return function (cls: Class<TestConsumer>): void {
     TestConsumerRegistry.add(cls);
   };

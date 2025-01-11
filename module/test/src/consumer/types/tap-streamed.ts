@@ -5,7 +5,7 @@ import type { TestEvent } from '../../model/event';
 import type { TestResult } from '../../model/test';
 
 import type { SuitesSummary, TestConsumer, TestRunState } from '../types';
-import { RegisterConsumer } from '../registry';
+import { RegisterTestConsumer } from '../registry';
 
 import { TapEmitter } from './tap';
 
@@ -18,7 +18,7 @@ type Result = {
 /**
  * Streamed summary results
  */
-@RegisterConsumer()
+@RegisterTestConsumer()
 export class TapStreamedEmitter implements TestConsumer {
 
   #timings = new Map([
