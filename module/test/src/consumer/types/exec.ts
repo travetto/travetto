@@ -1,15 +1,15 @@
 import { IpcChannel } from '@travetto/worker';
 
-import { TestEvent } from '../../model/event';
-import { TestConsumer } from '../types';
+import type { TestEvent } from '../../model/event';
+import type { TestConsumerShape } from '../types';
 import { SerializeUtil } from '../serialize';
-import { Consumable } from '../registry';
+import { TestConsumer } from '../registry';
 
 /**
  * Triggers each event as an IPC command to a parent process
  */
-@Consumable('exec')
-export class ExecutionEmitter extends IpcChannel<TestEvent> implements TestConsumer {
+@TestConsumer()
+export class ExecutionEmitter extends IpcChannel<TestEvent> implements TestConsumerShape {
   onEvent(event: TestEvent): void {
     this.send(event.type, JSON.parse(SerializeUtil.serializeToJSON(event)));
   }

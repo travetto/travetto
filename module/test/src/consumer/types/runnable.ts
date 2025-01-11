@@ -1,23 +1,16 @@
-import { TestConsumer } from '../types';
+import type { TestConsumerShape } from '../types';
 import { TestResultsSummarizer } from './summarizer';
-import { TestConsumerRegistry } from '../registry';
-import { TestEvent } from '../../model/event';
+import type { TestEvent } from '../../model/event';
 import { DelegatingConsumer } from './delegating';
 
 /**
  * Test consumer with support for multiple nested consumers, and summarization
  */
 export class RunnableTestConsumer extends DelegatingConsumer {
-  /**
-   * Build a runnable test consumer given a format or a full consumer
-   */
-  static async get(consumer: string | TestConsumer): Promise<RunnableTestConsumer> {
-    return new RunnableTestConsumer([await TestConsumerRegistry.getInstance(consumer)]);
-  }
 
   #results?: TestResultsSummarizer;
 
-  constructor(consumers: TestConsumer[]) {
+  constructor(...consumers: TestConsumerShape[]) {
     super(consumers);
     this.#results = consumers.find(x => !!x.onSummary) ? new TestResultsSummarizer() : undefined;
   }

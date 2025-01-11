@@ -10,6 +10,7 @@ import { TestRun } from '../model/test';
 import { TestExecutor } from './executor';
 import { RunnerUtil } from './util';
 import { RunState } from './types';
+import { TestConsumerRegistry } from '../consumer/registry';
 
 /**
  * Test Runner
@@ -26,7 +27,8 @@ export class Runner {
    * Run all files
    */
   async runFiles(globs?: string[]): Promise<boolean> {
-    const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
+    const target = await TestConsumerRegistry.getInstance(this.#state);
+    const consumer = new RunnableTestConsumer(target);
     const tests = await RunnerUtil.getTestDigest(globs, this.#state.tags);
     const testRuns = RunnerUtil.getTestRuns(tests)
       .sort((a, b) => a.runId!.localeCompare(b.runId!));
@@ -58,7 +60,9 @@ export class Runner {
       RuntimeIndex.reinitForModule(entry.module);
     }
 
-    const consumer = (await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format))
+    const target = await TestConsumerRegistry.getInstance(this.#state);
+
+    const consumer = new RunnableTestConsumer(target)
       .withTransformer(e => {
         // Copy run metadata to event
         e.metadata = run.metadata;

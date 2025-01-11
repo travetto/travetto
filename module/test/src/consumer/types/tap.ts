@@ -3,17 +3,17 @@ import { stringify } from 'yaml';
 import { Terminal } from '@travetto/terminal';
 import { TimeUtil, Runtime, RuntimeIndex, hasToJSON } from '@travetto/runtime';
 
-import { TestEvent } from '../../model/event';
-import { SuitesSummary, TestConsumer } from '../types';
-import { Consumable } from '../registry';
+import type { TestEvent } from '../../model/event';
+import type { SuitesSummary, TestConsumerShape } from '../types';
+import { TestConsumer } from '../registry';
 import { SerializeUtil } from '../serialize';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
 
 /**
   * TAP Format consumer
  */
-@Consumable('tap')
-export class TapEmitter implements TestConsumer {
+@TestConsumer()
+export class TapEmitter implements TestConsumerShape {
   #count = 0;
   #enhancer: TestResultsEnhancer;
   #terminal: Terminal;

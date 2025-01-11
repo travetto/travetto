@@ -7,25 +7,35 @@ import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
 
-import { TestFormat, TestMode } from './bin/types';
+import { selectConsumer } from './bin/run';
 
 /**
  * Launch test framework and execute tests
  */
 @CliCommand()
 export class TestCommand implements CliCommandShape {
+
   /** Output format for test results */
-  format: TestFormat = 'tap';
+  format: string = 'tap';
+
   /** Number of tests to run concurrently */
   @Min(1) @Max(WorkPool.MAX_SIZE)
   concurrency: number = WorkPool.DEFAULT_SIZE;
+
   /** Test run mode */
-  mode: TestMode = 'standard';
+  mode: 'single' | 'standard' = 'standard';
+
   /**
    * Tags to target or exclude
    * @alias env.TRV_TEST_TAGS
    */
   tags?: string[];
+
+  /**
+   * Format options
+   * @alias o
+   */
+  formatOptions?: string[];
 
   preMain(): void {
     EventEmitter.defaultMaxListeners = 1000;
@@ -40,12 +50,15 @@ export class TestCommand implements CliCommandShape {
     return fs.stat(path.resolve(first ?? '')).then(x => x.isFile(), () => false);
   }
 
-  async resolvedMode(first: string, rest: string[]): Promise<TestMode> {
+  async resolvedMode(first: string, rest: string[]): Promise<string> {
     return (await this.isFirstFile(first)) && rest.length === 0 ? 'single' : this.mode;
   }
 
-  async validate(first: string = '**/*', rest: string[]): Promise<CliValidationError | undefined> {
+  async preValidate(): Promise<void> {
+    await selectConsumer(this);
+  }
 
+  async validate(first: string = '**/*', rest: string[]): Promise<CliValidationError | undefined> {
     const mode = await this.resolvedMode(first, rest);
 
     if (mode === 'single' && !await this.isFirstFile(first)) {
@@ -58,10 +71,12 @@ export class TestCommand implements CliCommandShape {
 
     const isFirst = await this.isFirstFile(first);
     const isSingle = this.mode === 'single' || (isFirst && globs.length === 0);
+    const options = Object.fromEntries((this.formatOptions ?? [])?.map(f => [...f.split(':'), true]));
 
     return runTests({
       concurrency: this.concurrency,
-      format: this.format,
+      consumer: this.format,
+      consumerOptions: options,
       tags: this.tags,
       target: isSingle ?
         {

@@ -24,9 +24,13 @@ export type TestRunState = {
 };
 
 /**
- * A test result handler
+ * A test consumer shape
  */
-export interface TestConsumer {
+export interface TestConsumerShape {
+  /**
+   * Set options
+   */
+  setOptions?(options?: Record<string, unknown>): Promise<void> | void;
   /**
    * Listen for start of the test run
    */

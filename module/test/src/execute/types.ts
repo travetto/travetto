@@ -1,4 +1,3 @@
-import { TestConsumer } from '../consumer/types';
 import { TestRun } from '../model/test';
 
 /**
@@ -6,13 +5,13 @@ import { TestRun } from '../model/test';
  */
 export interface RunState {
   /**
-   * Output format
+   * Test result consumer
    */
-  format: string;
+  consumer: string;
   /**
-   * The run consumer
+   * Test result consumer options?
    */
-  consumer?: TestConsumer;
+  consumerOptions?: Record<string, unknown>;
   /**
    * Number of test suites to run concurrently, when mode is not single
    */

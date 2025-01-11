@@ -1,11 +1,11 @@
 import { Util, AsyncQueue } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 
-import { TestEvent } from '../../model/event';
-import { TestResult } from '../../model/test';
+import type { TestEvent } from '../../model/event';
+import type { TestResult } from '../../model/test';
 
-import { SuitesSummary, TestConsumer, TestRunState } from '../types';
-import { Consumable } from '../registry';
+import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types';
+import { TestConsumer } from '../registry';
 
 import { TapEmitter } from './tap';
 
@@ -18,8 +18,8 @@ type Result = {
 /**
  * Streamed summary results
  */
-@Consumable('tap-streamed')
-export class TapStreamedEmitter implements TestConsumer {
+@TestConsumer()
+export class TapStreamedEmitter implements TestConsumerShape {
 
   #timings = new Map([
     ['file', new Map<string, Result>()],
@@ -32,10 +32,15 @@ export class TapStreamedEmitter implements TestConsumer {
   #results = new AsyncQueue<TestResult>();
   #progress: Promise<unknown> | undefined;
   #consumer: TapEmitter;
+  #options?: Record<string, unknown>;
 
   constructor(terminal: Terminal = new Terminal(process.stderr)) {
     this.#terminal = terminal;
     this.#consumer = new TapEmitter(this.#terminal);
+  }
+
+  setOptions(options?: Record<string, unknown>): Promise<void> | void {
+    this.#options = options;
   }
 
   async onStart(state: TestRunState): Promise<void> {
@@ -113,14 +118,18 @@ export class TapStreamedEmitter implements TestConsumer {
 
     const enhancer = this.#consumer.enhancer;
 
-    console.log('---');
-    for (const [title, results] of [...this.#timings.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
-      console.log(`${enhancer.suiteName(`Top 10 slowest ${title}s`)}: `);
-      const top10 = [...results.values()].sort((a, b) => b.duration - a.duration).slice(0, 10);
-      for (const x of top10) {
-        console.log(`  * ${enhancer.testName(x.key)} - ${enhancer.total(x.duration)}ms / ${enhancer.total(x.tests)} tests`);
+    if (this.#options?.timings) {
+      const count = +(this.#options?.count ?? 5);
+      console.log('\n---');
+      for (const [title, results] of [...this.#timings.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+        console.log(`${enhancer.suiteName(`Top ${count} slowest ${title}s`)}: `);
+        const top10 = [...results.values()].sort((a, b) => b.duration - a.duration).slice(0, count);
+        for (const x of top10) {
+          console.log(`  * ${enhancer.testName(x.key)} - ${enhancer.total(x.duration)}ms / ${enhancer.total(x.tests)} tests`);
+        }
+        console.log();
       }
+      console.log('...');
     }
-    console.log('...');
   }
 }

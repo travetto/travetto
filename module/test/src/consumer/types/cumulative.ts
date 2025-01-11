@@ -1,11 +1,11 @@
 import { existsSync } from 'node:fs';
 
-import { Class, RuntimeIndex } from '@travetto/runtime';
+import { type Class, RuntimeIndex } from '@travetto/runtime';
 
-import { TestConsumer } from '../types';
-import { TestEvent } from '../../model/event';
-import { TestResult } from '../../model/test';
-import { SuiteResult } from '../../model/suite';
+import type { TestConsumerShape } from '../types';
+import type { TestEvent } from '../../model/event';
+import type { TestResult } from '../../model/test';
+import type { SuiteResult } from '../../model/suite';
 import { SuiteRegistry } from '../../registry/suite';
 import { DelegatingConsumer } from './delegating';
 
@@ -18,7 +18,7 @@ export class CumulativeSummaryConsumer extends DelegatingConsumer {
    */
   #state: Record<string, Record<string, TestResult['status']>> = {};
 
-  constructor(target: TestConsumer) {
+  constructor(target: TestConsumerShape) {
     super([target]);
   }
 

@@ -1,3 +1,8 @@
+import { castTo } from '@travetto/runtime';
+import { AllViewSymbol } from '@travetto/schema/src/internal/types';
+import { SchemaRegistry } from '@travetto/schema';
+
+import { TestConsumerRegistry } from '../../src/consumer/registry';
 import type { RunState } from '../../src/execute/types';
 
 /**
@@ -17,4 +22,22 @@ export async function runTests(opts: RunState): Promise<void> {
     console.error('Test Worker Failed', { error: err });
     process.exitCode = 1;
   }
+}
+
+export async function selectConsumer(inst: { format?: string }) {
+  await TestConsumerRegistry.manualInit();
+
+  let types = TestConsumerRegistry.getTypes();
+
+  if (inst.format?.includes('/')) {
+    await TestConsumerRegistry.importConsumers(inst.format);
+    types = TestConsumerRegistry.getTypes();
+  }
+
+  const cls = inst.constructor;
+
+  SchemaRegistry.get(castTo(cls)).views[AllViewSymbol].schema.format.enum = {
+    message: `{path} is only allowed to be "${types.join('" or "')}"`,
+    values: types
+  };
 }

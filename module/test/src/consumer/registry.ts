@@ -1,12 +1,13 @@
-import { classConstruct, type Class } from '@travetto/runtime';
-import { TestConsumer } from './types';
+import path from 'path';
+import { classConstruct, describeFunction, RuntimeIndex, type Class } from '@travetto/runtime';
+import type { TestConsumerShape } from './types';
+import { RunState } from '../execute/types';
 
 /**
  * Test Results Handler Registry
  */
 class $TestConsumerRegistry {
-  #registered = new Map<string, Class<TestConsumer>>();
-  #primary: Class<TestConsumer>;
+  #registered = new Map<string, Class<TestConsumerShape>>();
 
   /**
    * Manual initialization when running outside of the bootstrap process
@@ -16,37 +17,47 @@ class $TestConsumerRegistry {
   }
 
   /**
-   * Add a new consumer
-   * @param type The consumer unique identifier
-   * @param cls The consumer class
-   * @param isDefault Set as the default consumer
+   * Import a specific path and load all consumers there
    */
-  add(type: string, cls: Class<TestConsumer>, isDefault = false): void {
-    if (isDefault) {
-      this.#primary = cls;
-    }
-    this.#registered.set(type, cls);
+  async importConsumers(pth: string): Promise<void> {
+    await import((RuntimeIndex.getEntry(pth) ?? RuntimeIndex.getFromImport(pth))!.outputFile);
+  }
+
+  /**
+   * Add a new consumer
+   * @param cls The consumer class
+   */
+  add(cls: Class<TestConsumerShape>): void {
+    const desc = describeFunction(cls);
+    const key = desc.module?.includes('@travetto') ? path.basename(desc.modulePath) : desc.import;
+    this.#registered.set(key, cls);
   }
 
   /**
    * Retrieve a registered consumer
    * @param type The unique identifier
    */
-  get(type: string): Class<TestConsumer> {
+  get(type: string): Class<TestConsumerShape> {
     return this.#registered.get(type)!;
+  }
+
+  /**
+   * Get types
+   */
+  getTypes(): string[] {
+    return [...this.#registered.keys()];
   }
 
   /**
    * Get a consumer instance that supports summarization
    * @param consumer The consumer identifier or the actual consumer
    */
-  async getInstance(consumer: string | TestConsumer): Promise<TestConsumer> {
+  async getInstance(state: Pick<RunState, 'consumer' | 'consumerOptions'>): Promise<TestConsumerShape> {
     // TODO: Fix consumer registry init
     await this.manualInit();
-
-    return typeof consumer === 'string' ?
-      classConstruct(this.get(consumer) ?? this.#primary) :
-      consumer;
+    const inst = classConstruct(this.get(state.consumer));
+    await inst.setOptions?.(state.consumerOptions ?? {});
+    return inst;
   }
 }
 
@@ -54,11 +65,9 @@ export const TestConsumerRegistry = new $TestConsumerRegistry();
 
 /**
  * Registers a class a valid test consumer
- * @param type The unique identifier for the consumer
- * @param isDefault Is this the default consumer.  Last one wins
  */
-export function Consumable(type: string, isDefault = false): (cls: Class<TestConsumer>) => void {
-  return function (cls: Class<TestConsumer>): void {
-    TestConsumerRegistry.add(type, cls, isDefault);
+export function TestConsumer(): (cls: Class<TestConsumerShape>) => void {
+  return function (cls: Class<TestConsumerShape>): void {
+    TestConsumerRegistry.add(cls);
   };
 }

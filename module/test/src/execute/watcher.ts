@@ -34,7 +34,9 @@ export class TestWatcher {
     }
 
     const itr = new AsyncQueue(events);
-    const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistry.getInstance(format))
+    const consumer = new CumulativeSummaryConsumer(
+      await TestConsumerRegistry.getInstance({ consumer: format })
+    )
       .withFilter(x => x.metadata?.partial !== true || x.type !== 'suite');
 
     new MethodSource(RootRegistry).on(e => {

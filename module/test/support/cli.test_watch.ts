@@ -1,7 +1,7 @@
 import { Env } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';
 
-import { TestFormat } from './bin/types';
+import { selectConsumer } from './bin/run';
 
 /**
  * Invoke the test watcher
@@ -9,8 +9,12 @@ import { TestFormat } from './bin/types';
 @CliCommand()
 export class TestWatcherCommand {
 
-  format: TestFormat = 'tap';
+  format: string = 'tap';
   mode: 'all' | 'change' = 'all';
+
+  async preValidate(): Promise<void> {
+    await selectConsumer(this);
+  }
 
   preMain(): void {
     Env.TRV_ROLE.set('test');

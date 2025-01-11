@@ -1,15 +1,15 @@
-import { SuitesSummary, TestConsumer, TestRunState } from '../types';
-import { TestEvent } from '../../model/event';
+import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types';
+import type { TestEvent } from '../../model/event';
 
 /**
  * Delegating event consumer
  */
-export abstract class DelegatingConsumer implements TestConsumer {
-  #consumers: TestConsumer[];
+export abstract class DelegatingConsumer implements TestConsumerShape {
+  #consumers: TestConsumerShape[];
   #transformer?: (ev: TestEvent) => typeof ev;
   #filter?: (ev: TestEvent) => boolean;
 
-  constructor(consumers: TestConsumer[]) {
+  constructor(consumers: TestConsumerShape[]) {
     this.#consumers = consumers;
     for (const c of consumers) {
       c.onEvent = c.onEvent.bind(c);
