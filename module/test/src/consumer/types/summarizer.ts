@@ -1,11 +1,11 @@
 import type { SuiteResult } from '../../model/suite';
 import type { TestEvent } from '../../model/event';
-import type { SuitesSummary, TestEventHandler } from '../types';
+import type { SuitesSummary, TestConsumerShape } from '../types';
 
 /**
  * Test Result Collector, combines all results into a single Suite Result
  */
-export class TestResultsSummarizer implements TestEventHandler {
+export class TestResultsSummarizer implements TestConsumerShape {
 
   summary: SuitesSummary = {
     passed: 0,

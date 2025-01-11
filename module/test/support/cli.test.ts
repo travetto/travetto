@@ -55,7 +55,7 @@ export class TestCommand implements CliCommandShape {
   }
 
   async preValidate(): Promise<void> {
-    await selectConsumer(TestCommand, 'format');
+    await selectConsumer(this);
   }
 
   async validate(first: string = '**/*', rest: string[]): Promise<CliValidationError | undefined> {

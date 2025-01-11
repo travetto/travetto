@@ -10,7 +10,7 @@ export class TestDirectCommand {
   format: string = 'tap';
 
   async preValidate(): Promise<void> {
-    await selectConsumer(TestDirectCommand, 'format', this.format);
+    await selectConsumer(this);
   }
 
   preMain(): void {

@@ -13,7 +13,7 @@ export class TestWatcherCommand {
   mode: 'all' | 'change' = 'all';
 
   async preValidate(): Promise<void> {
-    await selectConsumer(TestWatcherCommand, 'format', this.format);
+    await selectConsumer(this);
   }
 
   preMain(): void {

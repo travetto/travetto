@@ -24,9 +24,9 @@ export type TestRunState = {
 };
 
 /**
- * A test event handler
+ * A test consumer shape
  */
-export interface TestEventHandler {
+export interface TestConsumerShape {
   /**
    * Set options
    */

@@ -5,11 +5,11 @@ import { TestRun } from '../model/test';
  */
 export interface RunState {
   /**
-   * Test consumer
+   * Test result consumer
    */
   consumer: string;
   /**
-   * Test consumer options?
+   * Test result consumer options?
    */
   consumerOptions?: Record<string, unknown>;
   /**

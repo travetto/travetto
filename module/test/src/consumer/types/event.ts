@@ -1,7 +1,7 @@
 import { Writable } from 'node:stream';
 
 import type { TestEvent } from '../../model/event';
-import type { TestEventHandler } from '../types';
+import type { TestConsumerShape } from '../types';
 import { SerializeUtil } from '../serialize';
 import { TestConsumer } from '../registry';
 
@@ -9,7 +9,7 @@ import { TestConsumer } from '../registry';
  * Streams all test events a JSON payload, in an nd-json format
  */
 @TestConsumer()
-export class EventStreamer implements TestEventHandler {
+export class EventStreamer implements TestConsumerShape {
   #stream: Writable;
 
   constructor(stream: Writable = process.stdout) {

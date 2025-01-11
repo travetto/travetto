@@ -4,7 +4,7 @@ import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import type { TestEvent } from '../../model/event';
 import type { TestResult } from '../../model/test';
 
-import type { SuitesSummary, TestEventHandler, TestRunState } from '../types';
+import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types';
 import { TestConsumer } from '../registry';
 
 import { TapEmitter } from './tap';
@@ -19,7 +19,7 @@ type Result = {
  * Streamed summary results
  */
 @TestConsumer()
-export class TapStreamedEmitter implements TestEventHandler {
+export class TapStreamedEmitter implements TestConsumerShape {
 
   #timings = new Map([
     ['file', new Map<string, Result>()],

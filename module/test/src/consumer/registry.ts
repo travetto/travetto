@@ -1,13 +1,13 @@
 import path from 'path';
 import { classConstruct, describeFunction, RuntimeIndex, type Class } from '@travetto/runtime';
-import type { TestEventHandler } from './types';
+import type { TestConsumerShape } from './types';
 import { RunState } from '../execute/types';
 
 /**
  * Test Results Handler Registry
  */
 class $TestConsumerRegistry {
-  #registered = new Map<string, Class<TestEventHandler>>();
+  #registered = new Map<string, Class<TestConsumerShape>>();
 
   /**
    * Manual initialization when running outside of the bootstrap process
@@ -27,7 +27,7 @@ class $TestConsumerRegistry {
    * Add a new consumer
    * @param cls The consumer class
    */
-  add(cls: Class<TestEventHandler>): void {
+  add(cls: Class<TestConsumerShape>): void {
     const desc = describeFunction(cls);
     const key = desc.module?.includes('@travetto') ? path.basename(desc.modulePath) : desc.import;
     this.#registered.set(key, cls);
@@ -37,7 +37,7 @@ class $TestConsumerRegistry {
    * Retrieve a registered consumer
    * @param type The unique identifier
    */
-  get(type: string): Class<TestEventHandler> {
+  get(type: string): Class<TestConsumerShape> {
     return this.#registered.get(type)!;
   }
 
@@ -52,7 +52,7 @@ class $TestConsumerRegistry {
    * Get a consumer instance that supports summarization
    * @param consumer The consumer identifier or the actual consumer
    */
-  async getInstance(state: Pick<RunState, 'consumer' | 'consumerOptions'>): Promise<TestEventHandler> {
+  async getInstance(state: Pick<RunState, 'consumer' | 'consumerOptions'>): Promise<TestConsumerShape> {
     // TODO: Fix consumer registry init
     await this.manualInit();
     const inst = classConstruct(this.get(state.consumer));
@@ -66,8 +66,8 @@ export const TestConsumerRegistry = new $TestConsumerRegistry();
 /**
  * Registers a class a valid test consumer
  */
-export function TestConsumer(): (cls: Class<TestEventHandler>) => void {
-  return function (cls: Class<TestEventHandler>): void {
+export function TestConsumer(): (cls: Class<TestConsumerShape>) => void {
+  return function (cls: Class<TestConsumerShape>): void {
     TestConsumerRegistry.add(cls);
   };
 }
