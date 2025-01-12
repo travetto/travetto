@@ -105,7 +105,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     // Create
     await Promise.all(
       Array(10).fill(0).map((x, i) => service.upsert(ExpiryUser, ExpiryUser.from({
-        expiresAt: this.timeFromNow(1000 + i * this.delayFactor)
+        expiresAt: this.timeFromNow(300 + i * this.delayFactor)
       })))
     );
 
@@ -116,7 +116,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
     assert(total === 10);
 
     // Let expire
-    await this.wait(1100);
+    await this.wait(400);
 
     total = await this.getSize(ExpiryUser);
     assert(total === 0);

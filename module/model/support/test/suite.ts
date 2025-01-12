@@ -51,23 +51,15 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       async function (this: T) {
         const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
         if (isStorageSupported(service)) {
-          if (service.truncateModel || service.deleteModel) {
-            for (const m of ModelRegistry.getClasses()) {
-              if (m === ModelRegistry.getBaseModel(m)) {
-                if (service.truncateModel) {
-                  await service.truncateModel(m);
-                } else if (service.deleteModel) {
-                  await service.deleteModel(m);
-                }
-              }
-            }
-            if (isBlobSupported(service)) {
-              if (service.truncateModel) {
-                await service.truncateModel(MODEL_BLOB);
-              } else if (service.deleteModel) {
-                await service.deleteModel(MODEL_BLOB);
-              }
-            }
+          const models = ModelRegistry.getClasses().filter(m => m === ModelRegistry.getBaseModel(m));
+          if (isBlobSupported(service)) {
+            models.push(MODEL_BLOB);
+          }
+
+          if (service.truncateModel) {
+            await Promise.all(models.map(x => service.truncateModel!(x)));
+          } else if (service.deleteModel) {
+            await Promise.all(models.map(x => service.deleteModel!(x)));
           } else {
             await service.deleteStorage(); // Purge it all
           }

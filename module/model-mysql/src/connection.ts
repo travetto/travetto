@@ -60,7 +60,7 @@ export class MySQLConnection extends Connection<PoolConnection> {
   }
 
   async execute<T = unknown>(conn: PoolConnection, query: string, values?: unknown[]): Promise<{ count: number, records: T[] }> {
-    console.debug('Executing Query', { query });
+    console.debug('Executing query', { query });
     let prepared;
     try {
       prepared = (values?.length ?? 0) > 0 ? await conn.prepare(query) : undefined;
