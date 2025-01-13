@@ -14,7 +14,7 @@
     "prestart": "npm ci",
     "pretest": "npx trv service start",
     "start": "trvc clean; trvc start",
-    "test": "trv test -f tap-streamed",
+    "test": "trv test -f tap-summary",
     "lint": "trv lint",
     "reinit-deps": "find . -name 'node_modules' -type d | grep -v -E '(github[.]io|vscode-plugin|[.]trv)' | xargs rm -rf; rm package-lock.json; npm i",
     "vscode:package": "cd related/vscode-plugin; npm run package"

@@ -5,6 +5,6 @@ import './json';
 import './noop';
 import './runnable';
 import './summarizer';
-import './tap-streamed';
+import './tap-summary';
 import './tap';
 import './xunit';
