@@ -81,7 +81,7 @@
       "args": [
         "test",
         "-f",
-        "tap-streamed"
+        "tap-summary"
       ]
     },
     {
