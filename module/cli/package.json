@@ -24,7 +24,7 @@
     "trv": "bin/trv.js"
   },
   "repository": {
-    "url": "https://github.com/travetto/travetto.git",
+    "url": "git+https://github.com/travetto/travetto.git",
     "directory": "module/cli"
   },
   "dependencies": {

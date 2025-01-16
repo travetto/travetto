@@ -29,7 +29,7 @@
     "@types/node": "^22.10.2"
   },
   "repository": {
-    "url": "https://github.com/travetto/travetto.git",
+    "url": "git+https://github.com/travetto/travetto.git",
     "directory": "module/manifest"
   },
   "travetto": {

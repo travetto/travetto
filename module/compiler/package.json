@@ -25,7 +25,7 @@
     "trvc": "bin/trvc.js"
   },
   "repository": {
-    "url": "https://github.com/travetto/travetto.git",
+    "url": "git+https://github.com/travetto/travetto.git",
     "directory": "module/compiler"
   },
   "dependencies": {

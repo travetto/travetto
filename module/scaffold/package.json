@@ -20,11 +20,11 @@
     "resources"
   ],
   "repository": {
-    "url": "https://github.com/travetto/travetto.git",
+    "url": "git+https://github.com/travetto/travetto.git",
     "directory": "related/scaffold"
   },
   "bin": {
-    "trv-scaffold": "./bin/trv-scaffold.js"
+    "trv-scaffold": "bin/trv-scaffold.js"
   },
   "dependencies": {
     "@travetto/cli": "^5.0.18",
