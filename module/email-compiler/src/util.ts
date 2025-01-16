@@ -11,7 +11,7 @@ type Tokenized = {
   finalize: (onToken: (token: string) => string) => string;
 };
 
-const SUPPORT_SRC = /(support|src)\//;
+const SUPPORT_SRC = /(?:support|src)\//;
 
 /**
  * Email compile tools
