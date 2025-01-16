@@ -191,7 +191,7 @@ Usage: repo:exec [options] <cmd:string> [args...:string]
 
 Options:
   -c, --changed                        Only changed modules (default: false)
-  -w, --workers <number>               Number of concurrent workers (default: 4)
+  -w, --workers <number>               Number of concurrent workers (default: 9)
   --prefix-output, --no-prefix-output  Prefix output by folder (default: true)
   --show-stdout, --no-show-stdout      Show stdout (default: true)
   -h, --help                           display help for command

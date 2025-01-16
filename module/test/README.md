@@ -224,11 +224,12 @@ $ trv test --help
 Usage: test [options] [first:string] [globs...:string]
 
 Options:
-  -f, --format <string>         Output format for test results (default: "tap")
-  -c, --concurrency <number>    Number of tests to run concurrently (default: 4)
-  -m, --mode <single|standard>  Test run mode (default: "standard")
-  -t, --tags <string>           Tags to target or exclude
-  -h, --help                    display help for command
+  -f, --format <string>          Output format for test results (default: "tap")
+  -c, --concurrency <number>     Number of tests to run concurrently (default: 9)
+  -m, --mode <single|standard>   Test run mode (default: "standard")
+  -t, --tags <string>            Tags to target or exclude
+  -o, --format-options <string>  Format options
+  -h, --help                     display help for command
 ```
 
 The regexes are the patterns of tests you want to run, and all tests must be found under the `test/` folder.
