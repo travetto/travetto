@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-file",
-  "version": "5.0.16",
+  "version": "5.0.17",
   "description": "File system backing for the travetto model module.",
   "keywords": [
     "datastore",
@@ -25,14 +25,14 @@
     "directory": "module/model-file"
   },
   "dependencies": {
-    "@travetto/config": "^5.0.15",
-    "@travetto/di": "^5.0.15",
-    "@travetto/model": "^5.0.16",
-    "@travetto/schema": "^5.0.15"
+    "@travetto/config": "^5.0.16",
+    "@travetto/di": "^5.0.16",
+    "@travetto/model": "^5.0.17",
+    "@travetto/schema": "^5.0.16"
   },
   "peerDependencies": {
-    "@travetto/cli": "^5.0.18",
-    "@travetto/test": "^5.0.17"
+    "@travetto/cli": "^5.0.19",
+    "@travetto/test": "^5.0.18"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

@@ -2,14 +2,14 @@
   "name": "@travetto-test/rest-session",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/model-memory": "^5.0.16",
-    "@travetto/rest-express": "^5.0.19",
-    "@travetto/rest-express-lambda": "^5.0.19",
-    "@travetto/rest-fastify": "^5.0.19",
-    "@travetto/rest-fastify-lambda": "^5.0.19",
-    "@travetto/rest-koa": "^5.0.19",
-    "@travetto/rest-koa-lambda": "^5.0.19",
-    "@travetto/rest-session": "^5.0.20"
+    "@travetto/model-memory": "^5.0.17",
+    "@travetto/rest-express": "^5.0.20",
+    "@travetto/rest-express-lambda": "^5.0.20",
+    "@travetto/rest-fastify": "^5.0.20",
+    "@travetto/rest-fastify-lambda": "^5.0.20",
+    "@travetto/rest-koa": "^5.0.20",
+    "@travetto/rest-koa-lambda": "^5.0.20",
+    "@travetto/rest-session": "^5.0.21"
   },
   "travetto": {},
   "private": true
