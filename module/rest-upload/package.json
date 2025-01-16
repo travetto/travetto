@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-upload",
-  "version": "5.0.18",
+  "version": "5.0.19",
   "description": "Provides integration between the travetto asset and rest module.",
   "keywords": [
     "rest",
@@ -26,14 +26,14 @@
   },
   "dependencies": {
     "@fastify/busboy": "^3.1.0",
-    "@travetto/config": "^5.0.14",
-    "@travetto/rest": "^5.0.18",
+    "@travetto/config": "^5.0.15",
+    "@travetto/rest": "^5.0.19",
     "@types/mime": "^4.0.0",
     "file-type": "^19.6.0",
     "mime": "^4.0.4"
   },
   "peerDependencies": {
-    "@travetto/test": "^5.0.16"
+    "@travetto/test": "^5.0.17"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
