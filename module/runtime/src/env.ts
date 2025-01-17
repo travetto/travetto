@@ -23,9 +23,11 @@ export class EnvProp<T> {
   }
 
   /** Export value */
-  export(val: T | undefined): Record<string, string> {
+  export(val?: T | undefined | null): Record<string, string> {
     let out: string;
-    if (val === undefined || val === '' || val === null) {
+    if (arguments.length === 0) { // If nothing passed in
+      out = `${this.val}`;
+    } else if (val === undefined || val === null) {
       out = '';
     } else if (Array.isArray(val)) {
       out = val.join(',');
