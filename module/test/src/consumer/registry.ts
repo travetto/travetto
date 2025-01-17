@@ -1,7 +1,7 @@
 import path from 'path';
-import { classConstruct, describeFunction, RuntimeIndex, type Class } from '@travetto/runtime';
+import { classConstruct, describeFunction, type Class } from '@travetto/runtime';
 import type { TestConsumerShape } from './types';
-import { RunState } from '../execute/types';
+import type { RunState } from '../execute/types';
 
 /**
  * Test Results Handler Registry
@@ -14,13 +14,6 @@ class $TestConsumerRegistry {
    */
   async manualInit(): Promise<void> {
     await import('./types/all');
-  }
-
-  /**
-   * Import a specific path and load all consumers there
-   */
-  async importConsumers(pth: string): Promise<void> {
-    await import((RuntimeIndex.getEntry(pth) ?? RuntimeIndex.getFromImport(pth))!.outputFile);
   }
 
   /**
