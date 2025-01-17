@@ -17,8 +17,10 @@ function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
   let folder = `${base}/.`;
   let prev: string;
   let pkg: Pkg | undefined;
+  const packages: Pkg[] = [];
 
   do {
+    pkg && packages.push(pkg);
     prev = folder;
     folder = path.dirname(folder);
     const folderPkg = path.resolve(folder, 'package.json');
@@ -31,6 +33,9 @@ function findPackage(base: string, pred: (_p?: Pkg) => boolean): Pkg {
 
   if (!pkg) {
     throw new Error('Could not find a package.json');
+  } else if (!pred(pkg) && packages.length) {
+    // We never matched, lets fallback to the first package.json found
+    pkg = packages[0];
   }
 
   return pkg;
