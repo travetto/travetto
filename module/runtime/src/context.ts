@@ -7,6 +7,7 @@ import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@t
 import { Env } from './env';
 import { RuntimeIndex } from './manifest-index';
 import { describeFunction } from './function';
+import { castTo } from './types';
 
 /** Constrained version of {@type ManifestContext} */
 class $Runtime {
@@ -107,7 +108,7 @@ class $Runtime {
   }
 
   /** Import from a given path */
-  importFrom<T = unknown>(imp?: string): Promise<T> {
+  async importFrom<T = unknown>(imp?: string): Promise<T> {
     const file = path.resolve(this.#idx.mainModule.sourcePath, imp!);
     if (existsSync(file)) {
       imp = this.#idx.getFromSource(file)?.import;
@@ -131,7 +132,16 @@ class $Runtime {
     }
 
     imp = ManifestModuleUtil.withOutputExtension(imp);
-    return import(imp);
+    const res = await import(imp);
+    if (res?.default?.default) {
+      // Unpack default.default, typescript does this in a way that requires recreating the whole object
+      const def = res?.default?.default;
+      return Object.defineProperties(castTo({}), {
+        ...Object.getOwnPropertyDescriptors(res),
+        default: { get: () => def, configurable: false }
+      });
+    }
+    return res;
   }
 }
 

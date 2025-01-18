@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { TypedObject, RuntimeIndex, watchCompiler, Runtime, BinaryUtil, castTo } from '@travetto/runtime';
+import { TypedObject, RuntimeIndex, watchCompiler, Runtime, BinaryUtil } from '@travetto/runtime';
 import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
 
 import { EmailCompileUtil } from './util';
@@ -15,10 +15,7 @@ export class EmailCompiler {
    * Load Template
    */
   static async loadTemplate(file: string): Promise<EmailTemplateModule> {
-    let root = (await Runtime.importFrom<{ default: EmailTemplateImport }>(file)).default;
-    if ('default' in root) {
-      root = castTo(root.default);
-    }
+    const root = (await Runtime.importFrom<{ default: EmailTemplateImport }>(file)).default;
     const entry = RuntimeIndex.getEntry(file)!;
     return await root.prepare({ file, module: entry.module });
   }
