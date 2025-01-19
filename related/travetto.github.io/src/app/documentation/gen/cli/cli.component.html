@@ -584,7 +584,7 @@ If the goal is to run a more complex application, which may include depending on
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-As noted in the example above, <code class="item input">fields</code> is specified in this execution, with support for <code class="item input">module</code>, and <code class="item input">env</code>. These env flag is directly tied to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L111">Runtime</a> <code class="item field">name</code> defined in the <a class="module-link" routerLink="/docs/runtime" title="Runtime for travetto applications.">Runtime</a> module. <br><br>
+As noted in the example above, <code class="item input">fields</code> is specified in this execution, with support for <code class="item input">module</code>, and <code class="item input">env</code>. These env flag is directly tied to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L113">Runtime</a> <code class="item field">name</code> defined in the <a class="module-link" routerLink="/docs/runtime" title="Runtime for travetto applications.">Runtime</a> module. <br><br>
 The <code class="item input">module</code> field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 <h3 id="custom-validation">Custom Validation</h3>
@@ -644,7 +644,7 @@ Available Services
  * elasticsearch&#64;8.17.0
  * firestore&#64;latest
  * mongodb&#64;8.0
- * mysql&#64;8.0
+ * mysql&#64;9.1
  * postgresql&#64;17.2
  * redis&#64;7.4
  * s3&#64;3.12.0</code></pre>
@@ -664,7 +664,7 @@ dynamodb           <span class="token number">2.5</span>.3    Running 93af422e79
 elasticsearch     <span class="token number">8.17</span>.0    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
 mongodb              <span class="token number">8.0</span>    Running 5513eba6734e
-mysql                <span class="token number">8.0</span>    Running 307bc66d442a
+mysql                <span class="token number">9.1</span>    Running 307bc66d442a
 postgresql          <span class="token number">17.2</span>    Running e78291e71040
 redis                <span class="token number">7.4</span>    Running 77ba279b4e30
 s3                <span class="token number">3.12</span>.0    Running fdacfc55b9e3</code></pre>

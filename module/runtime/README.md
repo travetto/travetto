@@ -65,7 +65,7 @@ class $Runtime {
   /** Get import for function */
   getImport(fn: Function): string;
   /** Import from a given path */
-  importFrom<T = unknown>(imp?: string): Promise<T>;
+  async importFrom<T = unknown>(imp?: string): Promise<T>;
 }
 ```
 
@@ -73,7 +73,7 @@ class $Runtime {
 For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every `class` is decorated with metadata, including methods, line numbers, and ultimately a unique id stored at `Ⲑid`.
 
 ## Environment Support
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L111) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L8), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L113) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L8), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
 
 **Code: Base Known Environment Flags**
 ```typescript
@@ -144,7 +144,7 @@ export class EnvProp<T> {
   /** Remove value */
   clear(): void;
   /** Export value */
-  export(val: T | undefined): Record<string, string>;
+  export(val?: T | undefined | null): Record<string, string>;
   /** Read value as string */
   get val(): string | undefined;
   /** Read value as list */
@@ -259,7 +259,7 @@ The primary access patterns for resources, is to directly request a file, and to
 
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) with a category of 'notfound'.  
 
-The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L111)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11) also supports tying itself to [Env](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L113)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/runtime/src/util.ts#L17) includes:
