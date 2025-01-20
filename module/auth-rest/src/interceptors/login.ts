@@ -3,7 +3,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 
-import { AuthService } from '../service';
+import { LoginService } from '../service';
 import { AuthReadWriteInterceptor } from './read-write';
 
 @Config('rest.auth.login')
@@ -25,7 +25,7 @@ export class AuthLoginInterceptor implements RestInterceptor<RestAuthLoginConfig
   config: RestAuthLoginConfig;
 
   @Inject()
-  service: AuthService;
+  service: LoginService;
 
   dependsOn = [SerializeInterceptor, AuthReadWriteInterceptor];
 

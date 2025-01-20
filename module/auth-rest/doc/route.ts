@@ -1,12 +1,12 @@
 import { Controller, Get, Redirect, Request } from '@travetto/rest';
-import { Authenticate, Authenticated, AuthService } from '@travetto/auth-rest';
+import { Authenticate, Authenticated, LoginService } from '@travetto/auth-rest';
 
 import { FB_AUTH } from './facebook';
 
 @Controller('/auth')
 export class SampleAuth {
 
-  svc: AuthService;
+  svc: LoginService;
 
   @Get('/simple')
   @Authenticate(FB_AUTH)

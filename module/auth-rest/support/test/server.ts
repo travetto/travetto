@@ -8,7 +8,7 @@ import { AuthenticationError, Authenticator, Principal } from '@travetto/auth';
 
 import { Authenticate, Authenticated } from '../../src/decorator';
 import { PrincipalEncoder } from '../../src/encoder';
-import { AuthService } from '../../src/service';
+import { LoginService } from '../../src/service';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
@@ -55,7 +55,7 @@ class Config {
 class TestAuthController {
 
   @Inject()
-  svc: AuthService;
+  svc: LoginService;
 
   @Post('/login')
   @Authenticate(TestAuthSymbol)

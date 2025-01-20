@@ -2,24 +2,16 @@ import { FilterContext, Request } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { Principal, Authorizer, Authenticator, AuthenticationError } from '@travetto/auth';
 import { AuthenticatorTarget } from '@travetto/auth/src/internal/types';
-import { AsyncContext } from '@travetto/context';
-
-import { AuthToken, AuthTokenSymbol } from './internal/types';
-
-const PrincipalSymbol = Symbol.for('@travetto/auth:principal');
 
 /**
- * Auth service to allow for rest-based interaction
+ * Auth service to handle login/logout
  */
 @Injectable()
-export class AuthService {
+export class LoginService {
   #authenticators = new Map<symbol, Promise<Authenticator>>();
 
   @Inject()
   authorizer?: Authorizer;
-
-  @Inject()
-  context: AsyncContext;
 
   async postConstruct(): Promise<void> {
     // Find all identity sources
@@ -71,36 +63,5 @@ export class AuthService {
    */
   async logout(req: Request): Promise<void> {
     req.auth = undefined;
-  }
-
-  /**
-   * Get the authentication token, if it exists
-   */
-  getAuthenticationToken(): AuthToken | undefined {
-    return this.context.get<AuthToken>(AuthTokenSymbol);
-  }
-
-  /**
-   * Set/overwrite the user's authentication token
-   */
-  setAuthenticationToken(token: AuthToken): void {
-    this.context.set(AuthTokenSymbol, token);
-  }
-
-  /**
-  * Set principal
-  * @param p The auth principal
-  */
-  setPrincipal(p: Principal | undefined): void {
-    this.context.set(PrincipalSymbol, p);
-  }
-
-  /**
-   * Get the principal from the context
-   * @returns principal if authenticated
-   * @returns undefined if not authenticated
-   */
-  getPrincipal<T = { [key: string]: unknown }>(): (Principal<T> | undefined) {
-    return this.context.get<Principal<T>>(PrincipalSymbol);
   }
 }

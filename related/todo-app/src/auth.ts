@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
-import { Authenticate, Authenticated, AuthService, Unauthenticated } from '@travetto/auth-rest';
+import { Authenticate, Authenticated, LoginService, Unauthenticated } from '@travetto/auth-rest';
 import { Principal } from '@travetto/auth';
 import { Inject } from '@travetto/di';
 
@@ -12,7 +12,7 @@ import { BasicAuthSymbol, User } from './auth.config';
 export class AuthController {
 
   @Inject()
-  svc: AuthService;
+  svc: LoginService;
 
   @Post('/login')
   @Authenticate(BasicAuthSymbol)

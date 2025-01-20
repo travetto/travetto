@@ -3,7 +3,7 @@ import { FeatureResult, GrowthBook, setPolyfills } from '@growthbook/growthbook'
 import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
-import { AuthService } from '@travetto/auth-rest';
+import { AuthContextService } from '@travetto/auth';
 import { castTo, Class, Runtime } from '@travetto/runtime';
 import { SchemaValidator } from '@travetto/schema';
 
@@ -27,29 +27,28 @@ export class FeatureFlagService {
   context: AsyncContext;
 
   @Inject()
-  auth: AuthService;
+  auth: AuthContextService;
 
   #gb: Promise<GrowthBook | undefined>;
 
-  #init(): Promise<GrowthBook | undefined> {
-    return this.#gb ??= (async (): Promise<GrowthBook | undefined> => {
-      setPolyfills({
-        EventSource: (await import('eventsource')).default
-      });
+  async #init(): Promise<GrowthBook | undefined> {
+    setPolyfills({
+      EventSource: (await import('eventsource')).default
+    });
 
-      const gb = new GrowthBook({
-        apiHost: this.config.apiHost,
-        enableDevMode: !Runtime.production,
-        clientKey: this.config.clientKey,
-        subscribeToChanges: true
-      });
-      try {
-        await gb.loadFeatures({ timeout: 5000 });
-        return gb;
-      } catch {
-        return;
-      }
-    })();
+    const gb = new GrowthBook({
+      apiHost: this.config.apiHost,
+      enableDevMode: !Runtime.production,
+      clientKey: this.config.clientKey,
+      subscribeToChanges: true
+    });
+
+    try {
+      await gb.loadFeatures({ timeout: 5000 });
+      return gb;
+    } catch {
+      return;
+    }
   }
 
   async getAuthAttributes(): Promise<FeatureAttributes> {
@@ -68,7 +67,7 @@ export class FeatureFlagService {
       return this.context.get(FEATURE_FLAG_USER);
     }
 
-    const gb = await this.#init();
+    const gb = await (this.#gb ??= this.#init());
     const scoped = new GrowthBook({
       attributes: this.context.active ? await this.getAuthAttributes() : {},
       features: { ...gb?.['_ctx'].features }
@@ -100,9 +99,9 @@ export class FeatureFlagService {
   }
 
   async getValidated<T>(cls: Class<T>, key: string, defValue: T): Promise<T> {
-    const data = await this.getValue(key, defValue);
-    const instance: T = cls.from(castTo(data));
     try {
+      const data = await this.getValue(key, defValue);
+      const instance: T = cls.from(castTo(data));
       await SchemaValidator.validate(cls, instance);
       return instance;
     } catch {
@@ -112,16 +111,17 @@ export class FeatureFlagService {
 
   async getValidatedList<T>(cls: Class<T>, key: string, defValue: T[]): Promise<T[]> {
     const data = await this.getValue(key, defValue);
+
     if (!Array.isArray(data)) {
-      return [cls.from(castTo(defValue))];
+      return defValue.map(x => cls.from(castTo(x)));
     }
 
-    const instances = data.map(x => cls.from(castTo(x)));
     try {
+      const instances = data.map(x => cls.from(castTo(x)));
       await SchemaValidator.validateAll(cls, instances);
       return instances;
     } catch {
-      return [cls.from(castTo(defValue))];
+      return defValue.map(x => cls.from(castTo(x)));
     }
   }
 }

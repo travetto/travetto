@@ -1,5 +1,5 @@
 import { Controller, Get, Redirect, Post, Request } from '@travetto/rest';
-import { AuthService, Authenticate, Authenticated, Unauthenticated } from '@travetto/auth-rest';
+import { LoginService, Authenticate, Authenticated, Unauthenticated } from '@travetto/auth-rest';
 import { Inject } from '@travetto/di';
 
 import { FB_AUTH } from './conf';
@@ -8,7 +8,7 @@ import { FB_AUTH } from './conf';
 export class SampleAuth {
 
   @Inject()
-  auth: AuthService;
+  auth: LoginService;
 
   @Get('/name')
   async getName() {
