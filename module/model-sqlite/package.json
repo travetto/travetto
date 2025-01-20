@@ -32,7 +32,7 @@
     "@travetto/model-query": "^5.0.17",
     "@travetto/model-sql": "^5.0.20",
     "@types/better-sqlite3": "^7.6.12",
-    "better-sqlite3": "^11.7.0"
+    "better-sqlite3": "^11.8.1"
   },
   "travetto": {
     "displayName": "SQLite Model Service",

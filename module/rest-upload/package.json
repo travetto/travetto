@@ -25,12 +25,12 @@
     "directory": "module/rest-upload"
   },
   "dependencies": {
-    "@fastify/busboy": "^3.1.0",
+    "@fastify/busboy": "^3.1.1",
     "@travetto/config": "^5.0.16",
     "@travetto/rest": "^5.0.20",
     "@types/mime": "^4.0.0",
     "file-type": "^19.6.0",
-    "mime": "^4.0.4"
+    "mime": "^4.0.6"
   },
   "peerDependencies": {
     "@travetto/test": "^5.0.18"

@@ -33,7 +33,7 @@
     "@travetto/runtime": "^5.0.16",
     "@travetto/schema": "^5.0.16",
     "@types/cookies": "^0.9.0",
-    "@types/express-serve-static-core": "^5.0.2",
+    "@types/express-serve-static-core": "^5.0.5",
     "@types/inflation": "^2.0.4",
     "cookies": "^0.9.1",
     "inflation": "^2.1.0",
