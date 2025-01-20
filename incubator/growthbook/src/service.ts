@@ -32,9 +32,7 @@ export class FeatureFlagService {
   #gb: Promise<GrowthBook | undefined>;
 
   async #init(): Promise<GrowthBook | undefined> {
-    setPolyfills({
-      EventSource: (await import('eventsource')).default
-    });
+    setPolyfills({ EventSource: (await import('eventsource')).default });
 
     const gb = new GrowthBook({
       apiHost: this.config.apiHost,
@@ -59,7 +57,7 @@ export class FeatureFlagService {
       return {};
     }
 
-    return castTo(p?.details) ?? {};
+    return castTo(p.details) ?? {};
   }
 
   async init(): Promise<GrowthBook | undefined> {
@@ -102,8 +100,7 @@ export class FeatureFlagService {
     try {
       const data = await this.getValue(key, defValue);
       const instance: T = cls.from(castTo(data));
-      await SchemaValidator.validate(cls, instance);
-      return instance;
+      return await SchemaValidator.validate(cls, instance);
     } catch {
       return cls.from(castTo(defValue));
     }
@@ -118,8 +115,7 @@ export class FeatureFlagService {
 
     try {
       const instances = data.map(x => cls.from(castTo(x)));
-      await SchemaValidator.validateAll(cls, instances);
-      return instances;
+      return await SchemaValidator.validateAll(cls, instances);
     } catch {
       return defValue.map(x => cls.from(castTo(x)));
     }
