@@ -13,7 +13,7 @@ export class RestAuthLoginConfig extends ManagedInterceptorConfig {
 }
 
 /**
- * Authentication interceptor
+ * Login interceptor
  *
  * - Supports the ability to encode context via request/response.
  * - Connects the principal to the request

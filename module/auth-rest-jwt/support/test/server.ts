@@ -5,7 +5,7 @@ import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthContextService, AuthenticationError, Authenticator } from '@travetto/auth';
-import { Authenticate, Authenticated, LoginService } from '@travetto/auth-rest';
+import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 import { JWTUtil } from '@travetto/jwt';
 
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
@@ -39,11 +39,8 @@ class TestAuthController {
   @Inject()
   svc: AuthContextService;
 
-  @Inject()
-  login: LoginService;
-
   @Post('/login')
-  @Authenticate(TestAuthSymbol)
+  @Login(TestAuthSymbol)
   async simpleLogin() {
   }
 
@@ -60,9 +57,8 @@ class TestAuthController {
   }
 
   @Get('/logout')
-  @Authenticated()
-  async logout(req: Request) {
-    await this.login.logout(req);
+  @Logout()
+  async logout() {
     return new Redirect('/auth/self', 301);
   }
 }

@@ -1,15 +1,13 @@
 import { Controller, Get, Redirect, Request } from '@travetto/rest';
-import { Authenticate, Authenticated, LoginService } from '@travetto/auth-rest';
+import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 
 import { FB_AUTH } from './facebook';
 
 @Controller('/auth')
 export class SampleAuth {
 
-  svc: LoginService;
-
   @Get('/simple')
-  @Authenticate(FB_AUTH)
+  @Login(FB_AUTH)
   async simpleLogin() {
     return new Redirect('/auth/self', 301);
   }
@@ -21,9 +19,8 @@ export class SampleAuth {
   }
 
   @Get('/logout')
-  @Authenticated()
-  async logout(req: Request) {
-    await this.svc.logout(req);
+  @Logout()
+  async logout() {
     return new Redirect('/auth/self', 301);
   }
 }

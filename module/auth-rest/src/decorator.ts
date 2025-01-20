@@ -2,6 +2,7 @@ import { ControllerRegistry, EndpointDecorator } from '@travetto/rest';
 
 import { AuthVerifyInterceptor } from './interceptors/authenticate';
 import { AuthLoginInterceptor } from './interceptors/login';
+import { AuthLogoutInterceptor } from './interceptors/logout';
 
 /**
  * Authenticate an endpoint with a list of available identity sources
@@ -9,7 +10,7 @@ import { AuthLoginInterceptor } from './interceptors/login';
  * @param sources Additional providers to support
  * @augments `@travetto/auth:Authenticate`
  */
-export function Authenticate(source: symbol, ...sources: symbol[]): EndpointDecorator {
+export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(AuthLoginInterceptor, {
     providers: [source, ...sources]
   });
@@ -35,4 +36,12 @@ export function Unauthenticated(): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
     state: 'unauthenticated'
   });
+}
+
+/**
+ * Logs a user out of the auth state
+ * @augments `@travetto/auth:Logout`
+ */
+export function Logout(): EndpointDecorator {
+  return ControllerRegistry.createInterceptorConfigDecorator(AuthLogoutInterceptor, {});
 }
