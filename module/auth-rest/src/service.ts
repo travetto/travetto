@@ -8,7 +8,7 @@ import { AuthenticatorTarget } from '@travetto/auth/src/internal/types';
  */
 @Injectable()
 export class LoginService {
-  #authenticators = new Map<symbol, Promise<Authenticator>>();
+  #authenticators = new Map<symbol, Promise<Authenticator<unknown, Principal, FilterContext>>>();
 
   @Inject()
   authorizer?: Authorizer;
@@ -26,7 +26,7 @@ export class LoginService {
    * @param ctx The travetto context
    * @param authenticators List of valid identity sources
    */
-  async login({ req, res }: FilterContext, authenticators: symbol[]): Promise<Principal | undefined> {
+  async login(ctx: FilterContext, authenticators: symbol[]): Promise<Principal | undefined> {
     let lastError: Error | undefined;
 
     /**
@@ -35,13 +35,12 @@ export class LoginService {
     for (const auth of authenticators) {
       try {
         const idp = await this.#authenticators.get(auth)!;
-        await idp.initialize?.({ req, res });
-        const principal = await idp.authenticate(req.body, { req, res });
+        await idp.initialize?.(ctx);
+        const principal = await idp.authenticate(ctx.req.body, ctx);
         if (!principal) { // Multi-step login process
           return;
         }
-        req.auth = this.authorizer ? await this.authorizer.authorize(principal) : principal;
-        return req.auth;
+        return ctx.req.auth = this.authorizer ? await this.authorizer.authorize(principal) : principal;
       } catch (err) {
         if (!(err instanceof Error)) {
           throw err;
