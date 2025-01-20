@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
+import { Controller, Get, Post, Redirect } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
-import { AuthenticationError, Authenticator } from '@travetto/auth';
-import { AuthService, Authenticate, Authenticated } from '@travetto/auth-rest';
+import { AuthContext, AuthenticationError, Authenticator } from '@travetto/auth';
+import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 import { JWTUtil } from '@travetto/jwt';
 
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
@@ -37,29 +37,28 @@ class Config {
 class TestAuthController {
 
   @Inject()
-  svc: AuthService;
+  authContext: AuthContext;
 
   @Post('/login')
-  @Authenticate(TestAuthSymbol)
+  @Login(TestAuthSymbol)
   async simpleLogin() {
   }
 
   @Get('/self')
   @Authenticated()
-  async getSelf(req: Request) {
-    return req.auth;
+  async getSelf() {
+    return this.authContext.principal;
   }
 
   @Get('/token')
   @Authenticated()
   async getToken() {
-    return this.svc.getAuthenticationToken()?.token;
+    return this.authContext.authToken?.value;
   }
 
   @Get('/logout')
-  @Authenticated()
-  async logout(req: Request) {
-    await this.svc.logout(req);
+  @Logout()
+  async logout() {
     return new Redirect('/auth/self', 301);
   }
 }
@@ -68,9 +67,12 @@ class TestAuthController {
 @Authenticated()
 class TestAuthAllController {
 
+  @Inject()
+  authContext: AuthContext;
+
   @Get('/self')
-  async getSelf(req: Request) {
-    return req.auth;
+  async getSelf() {
+    return this.authContext.principal;
   }
 }
 

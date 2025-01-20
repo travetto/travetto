@@ -42,12 +42,12 @@ Currently, the following are packages that provide <a target="_blank" class="sou
 <li><a class="module-link" routerLink="/docs/model-memory" title="Memory backing for the travetto model module.">Memory Model Support</a> - &#64;travetto/model-memory</li>
 <li><a class="module-link" routerLink="/docs/model-file" title="File system backing for the travetto model module.">File Model Support</a> - &#64;travetto/model-file</li>
 </ul>
-The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L9">Registered Principal</a>. <br><br>
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11">Registered Principal</a>. <br><br>
 A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 
   <figure class="code">
     <figcaption class="code">Registered Principal
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L9">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">RegisteredPrincipal</span> <span class="token keyword">extends</span> <span class="token class-name">Principal</span> <span class="token punctuation">{{'{'}}</span>
@@ -106,7 +106,7 @@ Additionally, there exists a common practice of mapping various external securit
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelAuthService<span class="token punctuation">,</span> RegisteredPrincipal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/auth-model'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelAuthService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/auth-model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelCrudSupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/model'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model'</span><span class="token punctuation">;</span>
@@ -117,10 +117,10 @@ Additionally, there exists a common practice of mapping various external securit
     <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">ModelAuthService</span><span class="token punctuation">(</span>
       svc<span class="token punctuation">,</span>
       User<span class="token punctuation">,</span>
-      <span class="token punctuation">(</span>u<span class="token operator">:</span> User<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>    <span class="token comment">// This converts User to a RegisteredPrincipal</span>
+      u <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>    <span class="token comment">// This converts User to a RegisteredPrincipal</span>
         source<span class="token operator">:</span> <span class="token string">'model'</span><span class="token punctuation">,</span>
         provider<span class="token operator">:</span> <span class="token string">'model'</span><span class="token punctuation">,</span>
-        id<span class="token operator">:</span> u<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
+        id<span class="token operator">:</span> u<span class="token punctuation">.</span>id<span class="token operator">!</span><span class="token punctuation">,</span>
         permissions<span class="token operator">:</span> u<span class="token punctuation">.</span>permissions<span class="token punctuation">,</span>
         hash<span class="token operator">:</span> u<span class="token punctuation">.</span>hash<span class="token punctuation">,</span>
         salt<span class="token operator">:</span> u<span class="token punctuation">.</span>salt<span class="token punctuation">,</span>
@@ -129,7 +129,7 @@ Additionally, there exists a common practice of mapping various external securit
         password<span class="token operator">:</span> u<span class="token punctuation">.</span>password<span class="token punctuation">,</span>
         details<span class="token operator">:</span> u<span class="token punctuation">,</span>
       <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-      <span class="token punctuation">(</span>u<span class="token operator">:</span> Partial<span class="token operator">&lt;</span>RegisteredPrincipal<span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> User<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>   <span class="token comment">// This converts a RegisteredPrincipal to a User</span>
+      u <span class="token operator">=></span> User<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>   <span class="token comment">// This converts a RegisteredPrincipal to a User</span>
         id<span class="token operator">:</span> u<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
         permissions<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token punctuation">(</span>u<span class="token punctuation">.</span>permissions <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
         hash<span class="token operator">:</span> u<span class="token punctuation">.</span>hash<span class="token punctuation">,</span>
@@ -171,5 +171,43 @@ Additionally, there exists a common practice of mapping various external securit
       <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+<h2 id="common-utilities">Common Utilities</h2>
+
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts#L11">AuthModelUtil</a> provides the following functionality:
+
+  <figure class="code">
+    <figcaption class="code">Auth util structure
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> crypto <span class="token keyword">from</span> <span class="token string">'node:crypto'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> util <span class="token keyword">from</span> <span class="token string">'node:util'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError<span class="token punctuation">,</span> Util <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> pbkdf2 <span class="token operator">=</span> util<span class="token punctuation">.</span><span class="token function">promisify</span><span class="token punctuation">(</span>crypto<span class="token punctuation">.</span>pbkdf2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">/**
+ * Standard auth utilities
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthModelUtil</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Generate a hash for a given value
+   *
+   * &#64;param value Value to hash
+   * &#64;param salt The salt value
+   * &#64;param iterations Number of iterations on hashing
+   * &#64;param keylen Length of hash
+   * &#64;param digest Digest method
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">generateHash</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> iterations <span class="token operator">=</span> <span class="token number">25000</span><span class="token punctuation">,</span> keylen <span class="token operator">=</span> <span class="token number">256</span><span class="token punctuation">,</span> digest <span class="token operator">=</span> <span class="token string">'sha256'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Generate a salted password, with the ability to validate the password
+   *
+   * &#64;param password
+   * &#64;param salt Salt value, or if a number, length of salt
+   * &#64;param validator Optional function to validate your password
+   */</span>
+  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token function">generatePassword</span><span class="token punctuation">(</span>password<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token number">32</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token punctuation">{{'{'}}</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> hash<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'}'}}</span><span class="token operator">></span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

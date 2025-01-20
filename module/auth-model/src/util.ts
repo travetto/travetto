@@ -8,7 +8,7 @@ const pbkdf2 = util.promisify(crypto.pbkdf2);
 /**
  * Standard auth utilities
  */
-export class AuthUtil {
+export class AuthModelUtil {
 
   /**
    * Generate a hash for a given value

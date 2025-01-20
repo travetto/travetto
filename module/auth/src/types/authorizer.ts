@@ -8,8 +8,7 @@ import { Principal } from './principal';
 export interface Authorizer<P extends Principal = Principal> {
   /**
    * Authorize inbound principal, verifying it's permission to access the system.
-   * @param principal
    * @returns New principal that conforms to the required principal shape
    */
-  authorize(principal: Principal): Promise<P> | P;
+  authorize(principal: P): Promise<P> | P;
 }

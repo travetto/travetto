@@ -1,5 +1,5 @@
-import { Principal } from '@travetto/auth';
-import { AuthService, PrincipalEncoder } from '@travetto/auth-rest';
+import { AuthContext, Principal } from '@travetto/auth';
+import { PrincipalEncoder } from '@travetto/auth-rest';
 import { AppError, Runtime, TimeSpan, TimeUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
@@ -49,7 +49,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   config: RestJWTConfig;
 
   @Inject()
-  auth: AuthService;
+  authContext: AuthContext;
 
   toJwtPayload(p: Principal): Payload {
     const exp = TimeUtil.asSeconds(p.expiresAt!);
@@ -96,7 +96,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   async verifyToken(token: string, setActive = false): Promise<Principal> {
     const res = (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.config.signingKey })).auth;
     if (setActive) {
-      this.auth.setAuthenticationToken({ token, type: 'jwt' });
+      this.authContext.authToken = { value: token, type: 'jwt' };
     }
     return {
       ...res,

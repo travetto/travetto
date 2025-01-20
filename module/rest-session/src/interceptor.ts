@@ -2,6 +2,7 @@ import { Class, RuntimeIndex } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext, FilterReturn, SerializeInterceptor } from '@travetto/rest';
+import { AuthContext } from '@travetto/auth';
 
 import { SessionService, SessionRawSymbol } from './service';
 
@@ -27,6 +28,9 @@ export class SessionReadInterceptor implements RestInterceptor {
   @Inject()
   config: RestSessionConfig;
 
+  @Inject()
+  authContext: AuthContext;
+
   async postConstruct(): Promise<void> {
     if (RuntimeIndex.hasModule('@travetto/auth-rest')) {
       const { AuthReadWriteInterceptor } = await import('@travetto/auth-rest');
@@ -36,7 +40,9 @@ export class SessionReadInterceptor implements RestInterceptor {
 
   async intercept({ req }: FilterContext, next: FilterNext): Promise<unknown> {
     // Use auth id if found, but auth is not required
-    await this.service.readRequest(req, req.auth?.details?.sessionId ?? req.auth?.id);
+    const principal = this.authContext.principal;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    await this.service.readRequest(req, principal?.details?.sessionId as string ?? principal?.id);
     return await next();
   }
 }

@@ -1,7 +1,7 @@
 import { Class } from '@travetto/runtime';
 import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, FilterNext, SerializeInterceptor } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
-import { Principal } from '@travetto/auth';
+import { AuthContext, Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
 
 import { PrincipalEncoder } from '../encoder';
@@ -26,22 +26,26 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   @Inject()
   config: RestAuthConfig;
 
+  @Inject()
+  authContext: AuthContext;
+
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
-    const { req } = ctx;
     let og: Principal | undefined;
     let ogExpires: Date | undefined;
     try {
-      og = req.auth = await this.encoder.decode(ctx);
+      og = await this.encoder.decode(ctx);
       ogExpires = og?.expiresAt;
+      this.authContext.principal = og;
       return await next();
     } finally {
-      if (req.auth) {
-        await this.encoder.preEncode?.(req.auth);
+      const current = this.authContext.principal;
+      if (current) {
+        await this.encoder.preEncode?.(current);
       }
-      if (req.auth !== og || ogExpires !== req.auth?.expiresAt) { // If it changed
-        await this.encoder.encode(ctx, req.auth);
+      if (current !== og || ogExpires !== current?.expiresAt) { // If it changed
+        await this.encoder.encode(ctx, current);
       }
-      req.auth = undefined;
+      this.authContext.principal = undefined;
     }
   }
 }

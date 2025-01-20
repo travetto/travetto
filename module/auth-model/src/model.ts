@@ -1,7 +1,9 @@
 import { Util, Class, TimeUtil, Runtime } from '@travetto/runtime';
 import { ModelCrudSupport, ModelType, NotFoundError, OptionalId } from '@travetto/model';
-import { AuthUtil, Principal, Authenticator, Authorizer, AuthenticationError } from '@travetto/auth';
+import { Principal, Authenticator, Authorizer, AuthenticationError } from '@travetto/auth';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
+
+import { AuthModelUtil } from './util';
 
 /**
  * A set of registration data
@@ -32,9 +34,7 @@ export interface RegisteredPrincipal extends Principal {
 /**
  * A model-based auth service
  */
-export class ModelAuthService<T extends ModelType> implements
-  Authenticator<T, RegisteredPrincipal>,
-  Authorizer<RegisteredPrincipal> {
+export class ModelAuthService<T extends ModelType> implements Authenticator<T>, Authorizer {
 
   #modelService: ModelCrudSupport;
   #cls: Class<T>;
@@ -81,7 +81,7 @@ export class ModelAuthService<T extends ModelType> implements
   async #authenticate(userId: string, password: string): Promise<RegisteredPrincipal> {
     const ident = await this.#resolvePrincipal({ id: userId, details: {} });
 
-    const hash = await AuthUtil.generateHash(password, ident.salt!);
+    const hash = await AuthModelUtil.generateHash(password, ident.salt!);
     if (hash !== ident.hash) {
       throw new AuthenticationError('Invalid password');
     } else {
@@ -114,7 +114,7 @@ export class ModelAuthService<T extends ModelType> implements
       }
     }
 
-    const fields = await AuthUtil.generatePassword(ident.password!);
+    const fields = await AuthModelUtil.generatePassword(ident.password!);
 
     ident.password = undefined; // Clear it out on set
 
@@ -139,13 +139,13 @@ export class ModelAuthService<T extends ModelType> implements
         throw new AuthenticationError('Reset token has expired', { category: 'data' });
       }
     } else if (oldPassword !== undefined) {
-      const pw = await AuthUtil.generateHash(oldPassword, ident.salt!);
+      const pw = await AuthModelUtil.generateHash(oldPassword, ident.salt!);
       if (pw !== ident.hash) {
         throw new AuthenticationError('Old password is required to change');
       }
     }
 
-    const fields = await AuthUtil.generatePassword(password);
+    const fields = await AuthModelUtil.generatePassword(password);
     Object.assign(user, this.fromPrincipal(fields));
 
     return await this.#modelService.update(this.#cls, user);
@@ -160,7 +160,7 @@ export class ModelAuthService<T extends ModelType> implements
     const ident = this.toPrincipal(user);
     const salt = await Util.uuid();
 
-    ident.resetToken = await AuthUtil.generateHash(Util.uuid(), salt, 25000, 32);
+    ident.resetToken = await AuthModelUtil.generateHash(Util.uuid(), salt, 25000, 32);
     ident.resetExpires = TimeUtil.fromNow(1, 'h');
 
     Object.assign(user, this.fromPrincipal(ident));

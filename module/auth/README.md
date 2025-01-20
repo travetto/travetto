@@ -17,14 +17,13 @@ This module provides the high-level backdrop for managing security principals.  
    *  Standard Types
    *  Authentication Contract
    *  Authorization Contract
-   *  Common security-related utilities for
-      *  Checking permissions
-      *  Generating passwords
+   *  Authorization Services
+   *  Authorization Context
 
 ## Standard Types
-The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [Principal Structure](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8).
+The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [Principal Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8).
 
-**Code: Principal Structure**
+**Code: Principal Contract**
 ```typescript
 export interface Principal<D = AnyMap> {
   /**
@@ -58,18 +57,17 @@ export interface Principal<D = AnyMap> {
 }
 ```
 
-As referenced above, a [Principal Structure](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
+As referenced above, a [Principal Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
 
-## Authentication
+## Authentication Contract
 
-**Code: Authenticator**
+**Code: Authenticator Contract**
 ```typescript
-export interface Authenticator<T = unknown, P extends Principal = Principal, C = unknown> {
+export interface Authenticator<T = unknown, C = unknown, P extends Principal = Principal> {
   /**
-   * Allows for the authenticator to be initialized if needed
-   * @param ctx
+   * Retrieve the authenticator state for the given request
    */
-  initialize?(ctx: C): Promise<void>;
+  getState?(context?: C): Promise<AuthenticatorState | undefined> | AuthenticatorState | undefined;
 
   /**
    * Verify the payload, ensuring the payload is correctly identified.
@@ -78,32 +76,31 @@ export interface Authenticator<T = unknown, P extends Principal = Principal, C =
    * @returns undefined if authentication is valid, but incomplete (multi-step)
    * @throws AppError if authentication fails
    */
-  authenticate(payload: T, ctx?: C): Promise<P | undefined> | P | undefined;
+  authenticate(payload: T, context?: C): Promise<P | undefined> | P | undefined;
 }
 ```
 
-The [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
+The [Authenticator Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L17) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
 ### Example
 The [JWT](https://github.com/travetto/travetto/tree/main/module/jwt#readme "JSON Web Token implementation") module is a good example of an authenticator. This is a common use case for simple internal auth.
 
-## Authorization
+## Authorization Contract
 
-**Code: Authorizer**
+**Code: Authorizer Contract**
 ```typescript
 export interface Authorizer<P extends Principal = Principal> {
   /**
    * Authorize inbound principal, verifying it's permission to access the system.
-   * @param principal
    * @returns New principal that conforms to the required principal shape
    */
-  authorize(principal: Principal): Promise<P> | P;
+  authorize(principal: P): Promise<P> | P;
 }
 ```
 
 Authorizers are generally seen as a secondary step post-authentication. Authentication acts as a very basic form of authorization, assuming the principal store is owned by the application. 
 
-The [Authorizer](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) only requires one method to be defined, and that is `authorizer`. This method receives an authenticated principal as an input, and is responsible for converting that to an authorized principal.
+The [Authorizer Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) only requires one method to be defined, and that is `authorizer`. This method receives an authenticated principal as an input, and is responsible for converting that to an authorized principal.
 
 ### Example
 The [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") extension is a good example of an authenticator. This is a common use case for simple internal auth. 
@@ -113,48 +110,79 @@ Overall, the structure is simple, but drives home the primary use cases of the f
    *  To have a reference to a user's set of permissions
    *  To have access to the principal
 
-## Common Utilities
-The [AuthUtil](https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts#L11) provides the following functionality:
+## Authorization Services
 
-**Code: Auth util structure**
+**Code: Authorization Service**
 ```typescript
-import crypto from 'node:crypto';
-import util from 'node:util';
-import { AppError, Util } from '@travetto/runtime';
-const pbkdf2 = util.promisify(crypto.pbkdf2);
-/**
- * Standard auth utilities
- */
-export class AuthUtil {
+export class AuthService {
+  @Inject()
   /**
-   * Generate a hash for a given value
-   *
-   * @param value Value to hash
-   * @param salt The salt value
-   * @param iterations Number of iterations on hashing
-   * @param keylen Length of hash
-   * @param digest Digest method
+   * Get authenticators by keys
    */
-  static generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256'): Promise<string>;
+  async getAuthenticators<T = unknown, C = unknown>(keys: symbol[]): Promise<Authenticator<T, C>[]>;
   /**
-   * Generate a salted password, with the ability to validate the password
-   *
-   * @param password
-   * @param salt Salt value, or if a number, length of salt
-   * @param validator Optional function to validate your password
+   * Authenticate. Supports multi-step login.
+   * @param ctx The authenticator context
+   * @param authenticators List of valid authentication sources
    */
-  static async generatePassword(password: string, salt: number | string = 32): Promise<{ salt: string, hash: string }>;
+  async authenticate<T, C>(payload: T, context: C, authenticators: symbol[]): Promise<Principal | undefined>;
 }
 ```
 
-`roleMatcher` is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.")'s Util class. 
+The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L12) operates as the owner of the current auth state for a given "request".  "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. 
 
-An example of role checks could be:
-   *  Admin
-   *  !Editor
-   *  Owner+Author
-The code would check the list in order, which would result in the following logic:
-   *  If the user is an admin, always allow
-   *  If the user has the editor role, deny
-   *  If the user is both an owner and an author allow
-   *  By default, deny due to the presence of positive checks
+The service allows for storing and retrieving the active [Principal Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8), and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") makes heavy use of this state for enforcing routes when authentication is required. 
+
+### Login
+"Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials.  Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L12) operates in this fashion, in which a set of credentials and potential [Authenticator Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L17)s are submitted, and the service will attempt to authenticate.  
+
+Upon successful authentication, an optional [Authorizer Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) may be invoked to authorize the authenticated user.  The [Authenticator Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L17) is assumed to be only one within the system, and should be tied to the specific product you are building for.  The [Authorizer Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) should be assumed to have multiple sources, and are generally specific to external third parties.  All of these values are collected via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module and will be auto-registered on startup. 
+
+If this process is too cumbersome or restrictive, manually authenticating and authorizing is still more than permissible, and setting the principal within the service is a logical equivalent to login.
+
+## Authorization Context
+When working with framework's authentication, the authenticated information is exposed via the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L18), object. 
+
+**Code: Auth Context Outline**
+```typescript
+const AuthContextSymbol = Symbol.for('@travetto/auth:context');
+type AuthContextShape = {
+  principal?: Principal;
+  authToken?: AuthToken;
+  authenticatorState?: AuthenticatorState;
+};
+@Injectable()
+export class AuthContext {
+  @Inject()
+  /**
+   * Get the principal from the context
+   * @returns principal if authenticated
+   * @returns undefined if not authenticated
+   */
+  get principal(): Principal | undefined;
+  /**
+   * Set principal
+   */
+  set principal(p: Principal | undefined);
+  /**
+   * Get the authentication token, if it exists
+   */
+  get authToken(): AuthToken | undefined;
+  /**
+   * Set/overwrite the user's authentication token
+   */
+  set authToken(token: AuthToken | undefined);
+  /**
+   * Get the authenticator state, if it exists
+   */
+  get authenticatorState(): AuthenticatorState | undefined;
+  /**
+   * Set/overwrite the authenticator state
+   */
+  set authenticatorState(state: AuthenticatorState | undefined);
+  /**
+   * Clear context
+   */
+  async clear(): Promise<void>;
+}
+```

@@ -18,10 +18,6 @@ export class RestServerUtil {
     req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
     req.method = castTo(req.method?.toUpperCase());
     req.connection = {};
-
-    if (!('uploads' in req)) { req.uploads = undefined; }
-    if (!('auth' in req)) { req.auth = undefined; }
-
     return asFull<T>(req);
   }
 

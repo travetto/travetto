@@ -19,19 +19,16 @@ This module provides the high-level backdrop for managing security principals.  
 <ul> <li>Standard Types</li>
 <li>Authentication Contract</li>
 <li>Authorization Contract</li>
-<li>Common security-related utilities for
-<ul> <li>Checking permissions</li>
-<li>Generating passwords</li>
-</ul>
-</li>
+<li>Authorization Services</li>
+<li>Authorization Context</li>
 </ul>
 
 <h2 id="standard-types">Standard Types</h2>
 
-The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal Structure</a>.
+The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal Contract</a>.
 
   <figure class="code">
-    <figcaption class="code">Principal Structure
+    <figcaption class="code">Principal Contract
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Source</a></cite>
 
 </figcaption>
@@ -67,21 +64,20 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-As referenced above, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal Structure</a> is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
+As referenced above, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal Contract</a> is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
 
-<h2 id="authentication">Authentication</h2>
+<h2 id="authentication-contract">Authentication Contract</h2>
 
   <figure class="code">
-    <figcaption class="code">Authenticator
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8">Source</a></cite>
+    <figcaption class="code">Authenticator Contract
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L17">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Authenticator<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token punctuation">,</span> <span class="token constant">C</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Authenticator<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">C</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
-   * Allows for the authenticator to be initialized if needed
-   * @param ctx
+   * Retrieve the authenticator state for the given request
    */</span>
-  initialize<span class="token operator">?</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> <span class="token constant">C</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  getState<span class="token operator">?</span><span class="token punctuation">(</span>context<span class="token operator">?</span><span class="token operator">:</span> <span class="token constant">C</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>AuthenticatorState <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token operator">|</span> AuthenticatorState <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Verify the payload, ensuring the payload is correctly identified.
@@ -90,34 +86,33 @@ As referenced above, a <a target="_blank" class="source-link" href="https://gith
    * @returns undefined if authentication is valid, but incomplete (multi-step)
    * @throws AppError if authentication fails
    */</span>
-  <span class="token function">authenticate</span><span class="token punctuation">(</span>payload<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">,</span> ctx<span class="token operator">?</span><span class="token operator">:</span> <span class="token constant">C</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">P</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token constant">P</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token function">authenticate</span><span class="token punctuation">(</span>payload<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">,</span> context<span class="token operator">?</span><span class="token operator">:</span> <span class="token constant">C</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">P</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token constant">P</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8">Authenticator</a> only requires one method to be defined, and that is <code class="item method">authenticate</code>. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L17">Authenticator Contract</a> only requires one method to be defined, and that is <code class="item method">authenticate</code>. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 <h3 id="example">Example</h3>
 
 The <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/jwt" title="JSON Web Token implementation">JWT</a> module is a good example of an authenticator. This is a common use case for simple internal auth.
 
-<h2 id="authorization">Authorization</h2>
+<h2 id="authorization-contract">Authorization Contract</h2>
 
   <figure class="code">
-    <figcaption class="code">Authorizer
+    <figcaption class="code">Authorizer Contract
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Authorizer<span class="token operator">&lt;</span><span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Authorize inbound principal, verifying it's permission to access the system.
-   * @param principal
    * @returns New principal that conforms to the required principal shape
    */</span>
-  <span class="token function">authorize</span><span class="token punctuation">(</span>principal<span class="token operator">:</span> Principal<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">P</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token constant">P</span><span class="token punctuation">;</span>
+  <span class="token function">authorize</span><span class="token punctuation">(</span>principal<span class="token operator">:</span> <span class="token constant">P</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">P</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token constant">P</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 Authorizers are generally seen as a secondary step post-authentication. Authentication acts as a very basic form of authorization, assuming the principal store is owned by the application. <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer</a> only requires one method to be defined, and that is <code class="item method">authorizer</code>. This method receives an authenticated principal as an input, and is responsible for converting that to an authorized principal.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer Contract</a> only requires one method to be defined, and that is <code class="item method">authorizer</code>. This method receives an authenticated principal as an input, and is responsible for converting that to an authorized principal.
 <h3 id="example">Example</h3>
 
 The <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> extension is a good example of an authenticator. This is a common use case for simple internal auth. <br><br>
@@ -127,53 +122,84 @@ Overall, the structure is simple, but drives home the primary use cases of the f
 <li>To have access to the principal</li>
 </ul>
 
-<h2 id="common-utilities">Common Utilities</h2>
-
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts#L11">AuthUtil</a> provides the following functionality:
+<h2 id="authorization-services">Authorization Services</h2>
 
   <figure class="code">
-    <figcaption class="code">Auth util structure
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts">Source</a></cite>
+    <figcaption class="code">Authorization Service
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L12">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> crypto <span class="token keyword">from</span> <span class="token string">'node:crypto'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> util <span class="token keyword">from</span> <span class="token string">'node:util'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError<span class="token punctuation">,</span> Util <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">const</span> pbkdf2 <span class="token operator">=</span> util<span class="token punctuation">.</span><span class="token function">promisify</span><span class="token punctuation">(</span>crypto<span class="token punctuation">.</span>pbkdf2<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment">/**
- * Standard auth utilities
- */</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthUtil</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthService</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token comment">/**
-   * Generate a hash for a given value
-   *
-   * @param value Value to hash
-   * @param salt The salt value
-   * @param iterations Number of iterations on hashing
-   * @param keylen Length of hash
-   * @param digest Digest method
+   * Get authenticators by keys
    */</span>
-  <span class="token keyword">static</span> <span class="token function">generateHash</span><span class="token punctuation">(</span>value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> iterations <span class="token operator">=</span> <span class="token number">25000</span><span class="token punctuation">,</span> keylen <span class="token operator">=</span> <span class="token number">256</span><span class="token punctuation">,</span> digest <span class="token operator">=</span> <span class="token string">'sha256'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">getAuthenticators</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">C</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>keys<span class="token operator">:</span> <span class="token builtin">symbol</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Authenticator<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token punctuation">,</span> <span class="token constant">C</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
-   * Generate a salted password, with the ability to validate the password
-   *
-   * @param password
-   * @param salt Salt value, or if a number, length of salt
-   * @param validator Optional function to validate your password
+   * Authenticate. Supports multi-step login.
+   * @param ctx The authenticator context
+   * @param authenticators List of valid authentication sources
    */</span>
-  <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token function">generatePassword</span><span class="token punctuation">(</span>password<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> salt<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token number">32</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token punctuation">{{'{'}}</span> salt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> hash<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'}'}}</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">authenticate</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token punctuation">,</span> <span class="token constant">C</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>payload<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">,</span> context<span class="token operator">:</span> <span class="token constant">C</span><span class="token punctuation">,</span> authenticators<span class="token operator">:</span> <span class="token builtin">symbol</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<code class="item method">roleMatcher</code> is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/runtime" title="Runtime for travetto applications.">Runtime</a>'s Util class. <br><br>
-An example of role checks could be:
-<ul> <li>Admin</li>
-<li>!Editor</li>
-<li>Owner+Author</li>
-</ul>
-The code would check the list in order, which would result in the following logic:
-<ul> <li>If the user is an admin, always allow</li>
-<li>If the user has the editor role, deny</li>
-<li>If the user is both an owner and an author allow</li>
-<li>By default, deny due to the presence of positive checks</li>
-</ul>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L12">AuthService</a> operates as the owner of the current auth state for a given "request".  "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. <br><br>
+The service allows for storing and retrieving the active <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal Contract</a>, and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a> makes heavy use of this state for enforcing routes when authentication is required. <br><br>
+
+<h3 id="login">Login</h3>
+
+"Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials.  Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L12">AuthService</a> operates in this fashion, in which a set of credentials and potential <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L17">Authenticator Contract</a> s are submitted, and the service will attempt to authenticate.  <br><br>
+Upon successful authentication, an optional <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer Contract</a> may be invoked to authorize the authenticated user.  The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L17">Authenticator Contract</a> is assumed to be only one within the system, and should be tied to the specific product you are building for.  The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer Contract</a> should be assumed to have multiple sources, and are generally specific to external third parties.  All of these values are collected via the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module and will be auto-registered on startup. <br><br>
+If this process is too cumbersome or restrictive, manually authenticating and authorizing is still more than permissible, and setting the principal within the service is a logical equivalent to login.
+
+<h2 id="authorization-context">Authorization Context</h2>
+
+When working with framework's authentication, the authenticated information is exposed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L18">AuthContext</a>, object. <br><br>
+
+  <figure class="code">
+    <figcaption class="code">Auth Context Outline
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L9">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">const</span> AuthContextSymbol <span class="token operator">=</span> Symbol<span class="token punctuation">.</span><span class="token function">for</span><span class="token punctuation">(</span><span class="token string">'@travetto/auth:context'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">type</span> <span class="token class-name">AuthContextShape</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+  principal<span class="token operator">?</span><span class="token operator">:</span> Principal<span class="token punctuation">;</span>
+  authToken<span class="token operator">?</span><span class="token operator">:</span> AuthToken<span class="token punctuation">;</span>
+  authenticatorState<span class="token operator">?</span><span class="token operator">:</span> AuthenticatorState<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthContext</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token comment">/**
+   * Get the principal from the context
+   * @returns principal if authenticated
+   * @returns undefined if not authenticated
+   */</span>
+  <span class="token keyword">get</span> <span class="token function">principal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Set principal
+   */</span>
+  <span class="token keyword">set</span> <span class="token function">principal</span><span class="token punctuation">(</span>p<span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Get the authentication token, if it exists
+   */</span>
+  <span class="token keyword">get</span> <span class="token function">authToken</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> AuthToken <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Set/overwrite the user's authentication token
+   */</span>
+  <span class="token keyword">set</span> <span class="token function">authToken</span><span class="token punctuation">(</span>token<span class="token operator">:</span> AuthToken <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Get the authenticator state, if it exists
+   */</span>
+  <span class="token keyword">get</span> <span class="token function">authenticatorState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> AuthenticatorState <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Set/overwrite the authenticator state
+   */</span>
+  <span class="token keyword">set</span> <span class="token function">authenticatorState</span><span class="token punctuation">(</span>state<span class="token operator">:</span> AuthenticatorState <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Clear context
+   */</span>
+  <span class="token keyword">async</span> <span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>

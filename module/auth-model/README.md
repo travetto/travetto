@@ -37,7 +37,7 @@ Currently, the following are packages that provide [CRUD](https://github.com/tra
    *  [SQLite Model Service](https://github.com/travetto/travetto/tree/main/module/model-sqlite#readme "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-sqlite
    *  [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.") - @travetto/model-memory
    *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.") - @travetto/model-file
-The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a [Registered Principal](https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L9). 
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a [Registered Principal](https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11). 
 
 A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 
@@ -92,7 +92,7 @@ Additionally, there exists a common practice of mapping various external securit
 **Code: Principal Source configuration**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { ModelAuthService, RegisteredPrincipal } from '@travetto/auth-model';
+import { ModelAuthService } from '@travetto/auth-model';
 import { ModelCrudSupport } from '@travetto/model';
 
 import { User } from './model';
@@ -103,10 +103,10 @@ class AuthConfig {
     return new ModelAuthService(
       svc,
       User,
-      (u: User) => ({    // This converts User to a RegisteredPrincipal
+      u => ({    // This converts User to a RegisteredPrincipal
         source: 'model',
         provider: 'model',
-        id: u.id,
+        id: u.id!,
         permissions: u.permissions,
         hash: u.hash,
         salt: u.salt,
@@ -115,7 +115,7 @@ class AuthConfig {
         password: u.password,
         details: u,
       }),
-      (u: Partial<RegisteredPrincipal>) => User.from(({   // This converts a RegisteredPrincipal to a User
+      u => User.from(({   // This converts a RegisteredPrincipal to a User
         id: u.id,
         permissions: [...(u.permissions || [])],
         hash: u.hash,
@@ -154,5 +154,39 @@ class UserService {
       }
     }
   }
+}
+```
+
+## Common Utilities
+The [AuthModelUtil](https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts#L11) provides the following functionality:
+
+**Code: Auth util structure**
+```typescript
+import crypto from 'node:crypto';
+import util from 'node:util';
+import { AppError, Util } from '@travetto/runtime';
+const pbkdf2 = util.promisify(crypto.pbkdf2);
+/**
+ * Standard auth utilities
+ */
+export class AuthModelUtil {
+  /**
+   * Generate a hash for a given value
+   *
+   * @param value Value to hash
+   * @param salt The salt value
+   * @param iterations Number of iterations on hashing
+   * @param keylen Length of hash
+   * @param digest Digest method
+   */
+  static generateHash(value: string, salt: string, iterations = 25000, keylen = 256, digest = 'sha256'): Promise<string>;
+  /**
+   * Generate a salted password, with the ability to validate the password
+   *
+   * @param password
+   * @param salt Salt value, or if a number, length of salt
+   * @param validator Optional function to validate your password
+   */
+  static async generatePassword(password: string, salt: number | string = 32): Promise<{ salt: string, hash: string }>;
 }
 ```
