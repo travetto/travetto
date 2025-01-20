@@ -4,7 +4,7 @@ import { Env, RuntimeIndex } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
 import { Events, TestLogEvent } from './types';
-import { TestConsumer } from '../consumer/types';
+import { TestConsumerShape } from '../consumer/types';
 import { SerializeUtil } from '../consumer/serialize';
 import { TestEvent } from '../model/event';
 import { TestRun } from '../model/test';
@@ -16,7 +16,7 @@ const log = (message: string): void => {
 /**
  *  Produce a handler for the child worker
  */
-export async function buildStandardTestManager(consumer: TestConsumer, run: TestRun): Promise<void> {
+export async function buildStandardTestManager(consumer: TestConsumerShape, run: TestRun): Promise<void> {
   log(`Worker Input ${JSON.stringify(run)}`);
   log(`Worker Executing ${run.import}`);
 

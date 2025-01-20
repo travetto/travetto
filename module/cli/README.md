@@ -501,7 +501,7 @@ export class RunRestCommand implements CliCommandShape {
 }
 ```
 
-As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L111) `name` defined in the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.") module. 
+As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L113) `name` defined in the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.") module. 
 
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
@@ -552,7 +552,7 @@ Available Services
  * elasticsearch@8.17.0
  * firestore@latest
  * mongodb@8.0
- * mysql@8.0
+ * mysql@9.1
  * postgresql@17.2
  * redis@7.4
  * s3@3.12.0
@@ -570,7 +570,7 @@ dynamodb           2.5.3    Running 93af422e793a
 elasticsearch     8.17.0    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
 mongodb              8.0    Running 5513eba6734e
-mysql                8.0    Running 307bc66d442a
+mysql                9.1    Running 307bc66d442a
 postgresql          17.2    Running e78291e71040
 redis                7.4    Running 77ba279b4e30
 s3                3.12.0    Running fdacfc55b9e3

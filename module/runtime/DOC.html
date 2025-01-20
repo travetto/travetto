@@ -37,7 +37,7 @@ While running any code within the framework, there are common patterns/goals for
 
   <figure class="code">
     <figcaption class="code">Runtime Shape
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/context.ts#L12">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/context.ts#L13">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">$Runtime</span> <span class="token punctuation">{{'{'}}</span>
@@ -73,7 +73,7 @@ While running any code within the framework, there are common patterns/goals for
   <span class="token comment">/** Get import for function */</span>
   <span class="token function">getImport</span><span class="token punctuation">(</span>fn<span class="token operator">:</span> <span class="token builtin">Function</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token comment">/** Import from a given path */</span>
-  <span class="token generic-function"><span class="token function">importFrom</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>imp<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">importFrom</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>imp<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -83,7 +83,7 @@ For the framework to work properly, metadata needs to be collected about files, 
 
 <h2 id="environment-support">Environment Support</h2>
 
-The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L111">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L8">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L113">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L8">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
 
   <figure class="code">
     <figcaption class="code">Base Known Environment Flags
@@ -161,7 +161,7 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
   <span class="token comment">/** Remove value */</span>
   <span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
   <span class="token comment">/** Export value */</span>
-  <span class="token keyword">export</span><span class="token punctuation">(</span>val<span class="token operator">:</span> <span class="token constant">T</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">export</span><span class="token punctuation">(</span>val<span class="token operator">?</span><span class="token operator">:</span> <span class="token constant">T</span> <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token operator">|</span> <span class="token keyword">null</span><span class="token punctuation">)</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/** Read value as string */</span>
   <span class="token keyword">get</span> <span class="token function">val</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
   <span class="token comment">/** Read value as list */</span>
@@ -286,7 +286,7 @@ $ <span class="token assign-left variable">DEBUG</span><span class="token operat
 
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.<br><br>
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26">AppError</a> with a category of 'notfound'.  <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L111">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/file-loader.ts#L11">FileLoader</a> also supports tying itself to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L113">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
 
 <h2 id="common-utilities">Common Utilities</h2>
 

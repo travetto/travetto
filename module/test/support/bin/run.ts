@@ -1,4 +1,4 @@
-import { castTo } from '@travetto/runtime';
+import { castTo, Runtime } from '@travetto/runtime';
 import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -30,7 +30,7 @@ export async function selectConsumer(inst: { format?: string }) {
   let types = TestConsumerRegistry.getTypes();
 
   if (inst.format?.includes('/')) {
-    await TestConsumerRegistry.importConsumers(inst.format);
+    await Runtime.importFrom(inst.format);
     types = TestConsumerRegistry.getTypes();
   }
 

@@ -8,6 +8,7 @@ import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types';
 import { TestConsumer } from '../registry';
 
 import { TapEmitter } from './tap';
+import { CONSOLE_ENHANCER, TestResultsEnhancer } from '../enhancer';
 
 type Result = {
   key: string;
@@ -19,7 +20,7 @@ type Result = {
  * Streamed summary results
  */
 @TestConsumer()
-export class TapStreamedEmitter implements TestConsumerShape {
+export class TapSummaryEmitter implements TestConsumerShape {
 
   #timings = new Map([
     ['file', new Map<string, Result>()],
@@ -32,11 +33,13 @@ export class TapStreamedEmitter implements TestConsumerShape {
   #results = new AsyncQueue<TestResult>();
   #progress: Promise<unknown> | undefined;
   #consumer: TapEmitter;
+  #enhancer: TestResultsEnhancer;
   #options?: Record<string, unknown>;
 
   constructor(terminal: Terminal = new Terminal(process.stderr)) {
     this.#terminal = terminal;
-    this.#consumer = new TapEmitter(this.#terminal);
+    this.#enhancer = CONSOLE_ENHANCER;
+    this.#consumer = new TapEmitter(this.#terminal, this.#enhancer);
   }
 
   setOptions(options?: Record<string, unknown>): Promise<void> | void {
@@ -116,20 +119,19 @@ export class TapStreamedEmitter implements TestConsumerShape {
     await this.#progress;
     await this.#consumer.onSummary?.(summary);
 
-    const enhancer = this.#consumer.enhancer;
-
     if (this.#options?.timings) {
       const count = +(this.#options?.count ?? 5);
-      console.log('\n---');
+      await this.#consumer.log('\n---');
       for (const [title, results] of [...this.#timings.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
-        console.log(`${enhancer.suiteName(`Top ${count} slowest ${title}s`)}: `);
+        await this.#consumer.log(`${this.#enhancer.suiteName(`Top ${count} slowest ${title}s`)}: `);
         const top10 = [...results.values()].sort((a, b) => b.duration - a.duration).slice(0, count);
+
         for (const x of top10) {
-          console.log(`  * ${enhancer.testName(x.key)} - ${enhancer.total(x.duration)}ms / ${enhancer.total(x.tests)} tests`);
+          console.log(`  * ${this.#enhancer.testName(x.key)} - ${this.#enhancer.total(x.duration)}ms / ${this.#enhancer.total(x.tests)} tests`);
         }
-        console.log();
+        await this.#consumer.log('');
       }
-      console.log('...');
+      await this.#consumer.log('...');
     }
   }
 }

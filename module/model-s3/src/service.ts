@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { text as toText } from 'node:stream/consumers';
+import { text as toText, buffer as toBuffer } from 'node:stream/consumers';
 import { Agent } from 'node:https';
 
 import { S3, CompletedPart, type CreateMultipartUploadRequest, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -245,9 +245,11 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (preStore) {
       prepped = await ModelCrudUtil.preStore(cls, item, this);
     }
+    const content = Buffer.from(JSON.stringify(prepped), 'utf8');
     await this.client.putObject(this.#q(cls, prepped.id, {
-      Body: JSON.stringify(prepped),
+      Body: content,
       ContentType: 'application/json',
+      ContentLength: content.length,
       ...this.#getExpiryConfig(cls, prepped)
     }));
     return prepped;
@@ -320,7 +322,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
     if (blobMeta.size && blobMeta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#q(MODEL_BLOB, location, {
-        Body: stream,
+        Body: await toBuffer(stream),
         ContentLength: blobMeta.size,
         ...this.#getMetaBase(blobMeta),
       }));
