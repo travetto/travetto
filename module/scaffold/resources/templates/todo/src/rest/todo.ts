@@ -3,8 +3,11 @@ import { NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
 import { ModelQuery } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
+// {{#modules.auth}}
+import { AuthService } from '@travetto/auth';
+// {{/modules.auth}}
 // {{#modules.auth_rest}}
-import { AuthService, Authenticated } from '@travetto/auth-rest';
+import { Authenticated } from '@travetto/auth-rest';
 // {{/modules.auth_rest}}
 // @ts-expect-error
 import { $_modelService_$ } from '$_modelImport_$';
@@ -32,10 +35,10 @@ export class TodoController {
   @Inject()
   source: $_modelService_$;
 
-  // {{#modules.auth_rest}}
+  // {{#modules.auth}}
   @Inject()
   auth: AuthService;
-  // {{/modules.auth_rest}}
+  // {{/modules.auth}}
 
   /**
    * Get all Todos

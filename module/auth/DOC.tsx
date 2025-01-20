@@ -4,7 +4,7 @@ import { d, c } from '@travetto/doc';
 import { AuthUtil } from '@travetto/auth/src/util';
 
 const Principal = <c.Code title='Principal Structure' src='@travetto/auth/src/types/principal.ts' startRe={/interface Principal/} endRe={/^}/} />;
-const Authenticator = <c.Code title='Authenticator' src='@travetto/auth/src/types/authenticator.ts' startRe={/interface Authenticator/} endRe={/^}/} />;
+const Authenticator = <c.Code title='Authenticator' src='@travetto/auth/src/types/authenticator.ts' startRe={/interface Authenticator\b/} endRe={/^}/} />;
 const Authorizer = <c.Code title='Authorizer' src='@travetto/auth/src/types/authorizer.ts' startRe={/interface Authorizer/} endRe={/^}/} />;
 
 export const text = <>

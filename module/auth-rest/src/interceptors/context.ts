@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@travetto/di';
+import { AuthService } from '@travetto/auth';
 import { RestInterceptor, AsyncContextInterceptor, ManagedInterceptorConfig, FilterContext } from '@travetto/rest';
 import { Config } from '@travetto/config';
 
 import { AuthReadWriteInterceptor } from './read-write';
-import { AuthService } from '../service';
 
 @Config('rest.auth.context')
 export class RestAuthContextConfig extends ManagedInterceptorConfig { }

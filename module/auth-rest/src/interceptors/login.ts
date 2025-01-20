@@ -2,8 +2,8 @@ import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn,
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
+import { AuthService } from '@travetto/auth';
 
-import { AuthService } from '../service';
 import { AuthReadWriteInterceptor } from './read-write';
 
 @Config('rest.auth.login')
@@ -13,7 +13,7 @@ export class RestAuthLoginConfig extends ManagedInterceptorConfig {
 }
 
 /**
- * Authentication interceptor
+ * Login interceptor
  *
  * - Supports the ability to encode context via request/response.
  * - Connects the principal to the request
@@ -37,6 +37,7 @@ export class AuthLoginInterceptor implements RestInterceptor<RestAuthLoginConfig
   }
 
   async intercept(ctx: FilterContext<RestAuthLoginConfig>): Promise<FilterReturn> {
-    return this.service.login(ctx, ctx.config.providers ?? []);
+    ctx.req.auth = await this.service.authenticate(ctx.req.body, ctx, ctx.config.providers ?? []);
+    return;
   }
 }

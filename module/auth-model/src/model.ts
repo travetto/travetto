@@ -32,9 +32,7 @@ export interface RegisteredPrincipal extends Principal {
 /**
  * A model-based auth service
  */
-export class ModelAuthService<T extends ModelType> implements
-  Authenticator<T, RegisteredPrincipal>,
-  Authorizer<RegisteredPrincipal> {
+export class ModelAuthService<T extends ModelType> implements Authenticator<T>, Authorizer {
 
   #modelService: ModelCrudSupport;
   #cls: Class<T>;

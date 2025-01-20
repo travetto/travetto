@@ -392,6 +392,7 @@ npx trv run:rest
       RestAuthConfig: {},
       RestAuthContextConfig: {},
       RestAuthLoginConfig: {},
+      RestAuthLogoutConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '1mb', parsingTypes: {} },
       RestConfig: {

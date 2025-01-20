@@ -16,7 +16,7 @@ const authenticator: passport.Authenticator<Handler> = castTo(passport);
 /**
  * Authenticator via passport
  */
-export class PassportAuthenticator<U extends object> implements Authenticator<U, Principal, FilterContext> {
+export class PassportAuthenticator<U extends object> implements Authenticator<U, FilterContext> {
 
   #passportInit = authenticator.initialize();
 
@@ -70,18 +70,12 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
   }
 
   /**
-   * Setup passport for initialization
-   * @param ctx The travetto filter context
-   */
-  initialize({ req, res }: FilterContext): Promise<void> {
-    return this.#init ??= new Promise<void>(resolve => this.#passportInit(req, res, resolve));
-  }
-
-  /**
    * Authenticate a request given passport config
    * @param ctx The travetto filter context
    */
-  authenticate(user: U, { req, res }: FilterContext): Promise<Principal | undefined> {
+  async authenticate(input: U, { req, res }: FilterContext): Promise<Principal | undefined> {
+    await (this.#init ??= new Promise<void>(resolve => this.#passportInit(req, res, resolve)));
+
     return new Promise<Principal | undefined>((resolve, reject) => {
 
       // Get the login context
