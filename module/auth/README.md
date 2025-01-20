@@ -67,7 +67,6 @@ As referenced above, a [Principal Structure](https://github.com/travetto/travett
 export interface Authenticator<T = unknown, P extends Principal = Principal, C = unknown> {
   /**
    * Allows for the authenticator to be initialized if needed
-   * @param ctx
    */
   initialize?(ctx: C): Promise<void>;
 

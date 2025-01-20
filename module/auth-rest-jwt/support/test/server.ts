@@ -4,8 +4,8 @@ import timers from 'node:timers/promises';
 import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
-import { AuthenticationError, Authenticator } from '@travetto/auth';
-import { AuthService, Authenticate, Authenticated } from '@travetto/auth-rest';
+import { AuthContextService, AuthenticationError, Authenticator } from '@travetto/auth';
+import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 import { JWTUtil } from '@travetto/jwt';
 
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
@@ -37,10 +37,10 @@ class Config {
 class TestAuthController {
 
   @Inject()
-  svc: AuthService;
+  svc: AuthContextService;
 
   @Post('/login')
-  @Authenticate(TestAuthSymbol)
+  @Login(TestAuthSymbol)
   async simpleLogin() {
   }
 
@@ -57,9 +57,8 @@ class TestAuthController {
   }
 
   @Get('/logout')
-  @Authenticated()
-  async logout(req: Request) {
-    await this.svc.logout(req);
+  @Logout()
+  async logout() {
     return new Redirect('/auth/self', 301);
   }
 }

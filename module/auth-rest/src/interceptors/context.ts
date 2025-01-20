@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@travetto/di';
+import { AuthContextService } from '@travetto/auth';
 import { RestInterceptor, AsyncContextInterceptor, ManagedInterceptorConfig, FilterContext } from '@travetto/rest';
 import { Config } from '@travetto/config';
 
 import { AuthReadWriteInterceptor } from './read-write';
-import { AuthService } from '../service';
 
 @Config('rest.auth.context')
 export class RestAuthContextConfig extends ManagedInterceptorConfig { }
@@ -22,7 +22,7 @@ export class AuthContextInterceptor implements RestInterceptor {
   config: RestAuthContextConfig;
 
   @Inject()
-  svc: AuthService;
+  svc: AuthContextService;
 
   intercept({ req }: FilterContext): void {
     Object.defineProperty(req, 'auth', { get: () => this.svc.getPrincipal(), set: v => { this.svc.setPrincipal(v); } });

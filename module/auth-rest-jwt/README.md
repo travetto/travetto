@@ -21,8 +21,8 @@ The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/
 
 **Code: JWTPrincipalEncoder**
 ```typescript
-import { Principal } from '@travetto/auth';
-import { AuthService, PrincipalEncoder } from '@travetto/auth-rest';
+import { AuthContextService, Principal } from '@travetto/auth';
+import { PrincipalEncoder } from '@travetto/auth-rest';
 import { AppError, Runtime, TimeSpan, TimeUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
@@ -72,7 +72,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   config: RestJWTConfig;
 
   @Inject()
-  auth: AuthService;
+  auth: AuthContextService;
 
   toJwtPayload(p: Principal): Payload {
     const exp = TimeUtil.asSeconds(p.expiresAt!);

@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
-import { Authenticate, Authenticated, AuthService, Unauthenticated } from '@travetto/auth-rest';
+import { Controller, Get, Post, Redirect } from '@travetto/rest';
+import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 import { Principal } from '@travetto/auth';
-import { Inject } from '@travetto/di';
 
 import { BasicAuthSymbol } from './auth.config';
 
@@ -11,11 +10,8 @@ import { BasicAuthSymbol } from './auth.config';
 @Controller('/auth')
 export class ApiController {
 
-  @Inject()
-  svc: AuthService;
-
   @Post('/login')
-  @Authenticate(BasicAuthSymbol)
+  @Login(BasicAuthSymbol)
   async getAll(): Promise<Redirect> {
     return new Redirect('/auth/self', 301);
   }
@@ -27,9 +23,8 @@ export class ApiController {
   }
 
   @Get('/logout')
-  @Unauthenticated()
-  async logout(req: Request): Promise<Redirect> {
-    await this.svc.logout(req);
+  @Logout()
+  async logout(): Promise<Redirect> {
     return new Redirect('/auth/self', 301);
   }
 }

@@ -2,7 +2,7 @@
 import { d, c } from '@travetto/doc';
 import { InjectableFactory } from '@travetto/di';
 import { Context } from '@travetto/rest';
-import { AuthService, Authenticate, Unauthenticated, Authenticated } from '@travetto/auth-rest';
+import { LoginService, Login, Unauthenticated, Authenticated, Logout } from '@travetto/auth-rest';
 import { RuntimeIndex } from '@travetto/runtime';
 
 const Principal = d.codeLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
@@ -57,9 +57,11 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Route Declaration'>
-    Like the {AuthService}, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use. <br />
+    Like the {LoginService}, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use. <br />
 
-    {Authenticate} integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
+    {Login} integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful. <br />
+
+    {Logout} integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.
 
     <c.Code title='Using provider with routes' src='doc/route.ts' />
 

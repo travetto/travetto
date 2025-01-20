@@ -3,12 +3,11 @@ import assert from 'node:assert';
 import { Controller, FilterContext, Get, Post, Redirect, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
-import { Inject, Injectable, InjectableFactory } from '@travetto/di';
+import { Injectable, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, Principal } from '@travetto/auth';
 
-import { Authenticate, Authenticated } from '../../src/decorator';
+import { Login, Authenticated, Logout } from '../../src/decorator';
 import { PrincipalEncoder } from '../../src/encoder';
-import { AuthService } from '../../src/service';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
@@ -54,11 +53,8 @@ class Config {
 @Controller('/test/auth')
 class TestAuthController {
 
-  @Inject()
-  svc: AuthService;
-
   @Post('/login')
-  @Authenticate(TestAuthSymbol)
+  @Login(TestAuthSymbol)
   async simpleLogin() {
   }
 
@@ -69,9 +65,8 @@ class TestAuthController {
   }
 
   @Get('/logout')
-  @Authenticated()
-  async logout(req: Request) {
-    await this.svc.logout(req);
+  @Logout()
+  async logout() {
     return new Redirect('/auth/self', 301);
   }
 }

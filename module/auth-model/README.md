@@ -92,7 +92,7 @@ Additionally, there exists a common practice of mapping various external securit
 **Code: Principal Source configuration**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
-import { ModelAuthService, RegisteredPrincipal } from '@travetto/auth-model';
+import { ModelAuthService } from '@travetto/auth-model';
 import { ModelCrudSupport } from '@travetto/model';
 
 import { User } from './model';
@@ -103,10 +103,10 @@ class AuthConfig {
     return new ModelAuthService(
       svc,
       User,
-      (u: User) => ({    // This converts User to a RegisteredPrincipal
+      u => ({    // This converts User to a RegisteredPrincipal
         source: 'model',
         provider: 'model',
-        id: u.id,
+        id: u.id!,
         permissions: u.permissions,
         hash: u.hash,
         salt: u.salt,
@@ -115,7 +115,7 @@ class AuthConfig {
         password: u.password,
         details: u,
       }),
-      (u: Partial<RegisteredPrincipal>) => User.from(({   // This converts a RegisteredPrincipal to a User
+      u => User.from(({   // This converts a RegisteredPrincipal to a User
         id: u.id,
         permissions: [...(u.permissions || [])],
         hash: u.hash,
