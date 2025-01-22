@@ -21,7 +21,7 @@ export interface AuthenticatorContext<I = unknown, R = unknown> {
 }
 
 /**
- * Supports validation payload of type T into an authenticated principal
+ * Supports validation payload of type I into an authenticated principal
  *
  * @concrete ../internal/types#AuthenticatorTarget
  */

@@ -16,7 +16,7 @@ const authenticator: passport.Authenticator<Handler> = castTo(passport);
 /**
  * Authenticator via passport
  */
-export class PassportAuthenticator<U extends object> implements Authenticator<U> {
+export class PassportAuthenticator<U extends object> implements Authenticator<U, FilterContext> {
 
   #passportInit = authenticator.initialize();
 
