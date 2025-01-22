@@ -1,4 +1,4 @@
-import { AuthContextService, Principal } from '@travetto/auth';
+import { AuthService, Principal } from '@travetto/auth';
 import { PrincipalEncoder } from '@travetto/auth-rest';
 import { AppError, Runtime, TimeSpan, TimeUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
@@ -49,7 +49,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   config: RestJWTConfig;
 
   @Inject()
-  auth: AuthContextService;
+  auth: AuthService;
 
   toJwtPayload(p: Principal): Payload {
     const exp = TimeUtil.asSeconds(p.expiresAt!);

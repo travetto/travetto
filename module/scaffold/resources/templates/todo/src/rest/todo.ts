@@ -4,7 +4,7 @@ import { Inject } from '@travetto/di';
 import { ModelQuery } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
 // {{#modules.auth}}
-import { AuthContextService } from '@travetto/auth';
+import { AuthService } from '@travetto/auth';
 // {{/modules.auth}}
 // {{#modules.auth_rest}}
 import { Authenticated } from '@travetto/auth-rest';
@@ -37,7 +37,7 @@ export class TodoController {
 
   // {{#modules.auth_rest}}
   @Inject()
-  auth: AuthContextService;
+  auth: AuthService;
   // {{/modules.auth_rest}}
 
   /**

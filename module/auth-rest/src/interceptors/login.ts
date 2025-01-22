@@ -2,8 +2,8 @@ import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn,
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
+import { AuthService } from '@travetto/auth';
 
-import { LoginService } from '../service';
 import { AuthReadWriteInterceptor } from './read-write';
 
 @Config('rest.auth.login')
@@ -25,7 +25,7 @@ export class AuthLoginInterceptor implements RestInterceptor<RestAuthLoginConfig
   config: RestAuthLoginConfig;
 
   @Inject()
-  service: LoginService;
+  service: AuthService;
 
   dependsOn = [SerializeInterceptor, AuthReadWriteInterceptor];
 
@@ -37,6 +37,10 @@ export class AuthLoginInterceptor implements RestInterceptor<RestAuthLoginConfig
   }
 
   async intercept(ctx: FilterContext<RestAuthLoginConfig>): Promise<FilterReturn> {
-    return this.service.login(ctx, ctx.config.providers ?? []);
+    return this.service.authenticate({
+      input: ctx.req.body,
+      request: ctx,
+      finalize: p => ctx.req.auth = p
+    }, ctx.config.providers ?? []);
   }
 }

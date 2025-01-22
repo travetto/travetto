@@ -2,8 +2,8 @@ import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn,
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
+import { AuthService } from '@travetto/auth';
 
-import { LoginService } from '../service';
 import { AuthReadWriteInterceptor } from './read-write';
 
 @Config('rest.auth.logout')
@@ -21,7 +21,7 @@ export class AuthLogoutInterceptor implements RestInterceptor<RestAuthLogoutConf
   config: RestAuthLogoutConfig;
 
   @Inject()
-  service: LoginService;
+  service: AuthService;
 
   dependsOn = [SerializeInterceptor, AuthReadWriteInterceptor];
 
@@ -39,7 +39,8 @@ export class AuthLogoutInterceptor implements RestInterceptor<RestAuthLogoutConf
       }
       return await next();
     } finally {
-      await this.service.logout(ctx.req);
+      await this.service.deauthenticate();
+      delete ctx.req.auth;
     }
   }
 }

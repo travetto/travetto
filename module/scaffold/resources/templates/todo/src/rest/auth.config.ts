@@ -1,4 +1,4 @@
-import { Authorizer, Authenticator, AuthenticationError } from '@travetto/auth';
+import { Authorizer, Authenticator, AuthenticationError, AuthenticatorContext } from '@travetto/auth';
 import { SessionModelSymbol } from '@travetto/rest-session';
 import { InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
@@ -22,11 +22,11 @@ class AuthConfig {
   @InjectableFactory(BasicAuthSymbol)
   static getAuthenticator(): Authenticator<User> {
     return {
-      authenticate(u) {
-        if (u.username && u.password === 'password') {
+      authenticate({ input }: AuthenticatorContext<User>) {
+        if (input.username && input.password === 'password') {
           return {
             issuer: 'self',
-            id: u.username,
+            id: input.username,
             permissions: [],
             details: {},
             source: 'insecure'

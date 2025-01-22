@@ -9,7 +9,6 @@ export class PrincipalTarget {
 }
 export class AuthorizerTarget { }
 export class AuthenticatorTarget { }
-export class PrincipalSerializerTarget { }
 
 export const AuthTokenSymbol = Symbol.for('@travetto/auth:token');
 export const PrincipalSymbol = Symbol.for('@travetto/auth:principal');
