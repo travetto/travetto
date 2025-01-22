@@ -17,7 +17,7 @@ export interface AuthenticatorContext<I = unknown, R = unknown> {
   /**
    * Finalize the principal
    */
-  finalize<P extends Principal>(principal: P): P | Promise<P>;
+  finalize?<P extends Principal>(principal: P): P | Promise<P>;
 }
 
 /**
@@ -25,7 +25,7 @@ export interface AuthenticatorContext<I = unknown, R = unknown> {
  *
  * @concrete ../internal/types#AuthenticatorTarget
  */
-export interface Authenticator<I = unknown, R = unknown> {
+export interface Authenticator<I = unknown, R = unknown, P extends Principal = Principal> {
   /**
    * Verify the payload, ensuring the payload is correctly identified.
    *
@@ -33,5 +33,5 @@ export interface Authenticator<I = unknown, R = unknown> {
    * @returns undefined if authentication is valid, but incomplete (multi-step)
    * @throws AppError if authentication fails
    */
-  authenticate(ctx: AuthenticatorContext<I, R>): Promise<Principal | undefined> | Principal | undefined;
+  authenticate(ctx: AuthenticatorContext<I, R>): Promise<P | undefined> | P | undefined;
 }

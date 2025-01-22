@@ -78,7 +78,7 @@ export class AuthService {
           return;
         }
         const final = this.authorizer ? await this.authorizer.authorize(principal) : principal;
-        return await ctx.finalize(final);
+        return await ctx.finalize?.(final) ?? final;
       } catch (err) {
         if (!(err instanceof Error)) {
           throw err;

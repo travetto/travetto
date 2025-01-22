@@ -64,18 +64,18 @@ export abstract class AuthModelServiceSuite {
 
   @Test()
   async authenticate() {
-    const pre = User.from({
+    const input = User.from({
       id: this.svc.idSource.create(),
       password: 'bob',
       details: {}
     });
 
     try {
-      await this.authService.authenticate(pre);
+      await this.authService.authenticate({ input, request: null });
       assert.fail('Should not have gotten here');
     } catch (err) {
       if (err instanceof AppError && err.category === 'notfound') {
-        const user = await this.authService.register(pre);
+        const user = await this.authService.register(input);
         assert.ok(user.hash);
         assert.ok(user.id);
       } else {
@@ -83,6 +83,6 @@ export abstract class AuthModelServiceSuite {
       }
     }
 
-    await assert.doesNotReject(() => this.authService.authenticate(pre));
+    await assert.doesNotReject(() => this.authService.authenticate({ input, request: null }));
   }
 }
