@@ -35,10 +35,10 @@ export class TodoController {
   @Inject()
   source: $_modelService_$;
 
-  // {{#modules.auth_rest}}
+  // {{#modules.auth}}
   @Inject()
   auth: AuthService;
-  // {{/modules.auth_rest}}
+  // {{/modules.auth}}
 
   /**
    * Get all Todos
