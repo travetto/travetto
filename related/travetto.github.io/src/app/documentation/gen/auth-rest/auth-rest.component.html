@@ -48,7 +48,7 @@ When authenticating, with a multi-step process, it is useful to share informatio
 
 <h2 id="patterns-for-integration">Patterns for Integration</h2>
 
-Every external framework integration relies upon the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8">Authenticator</a> contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
+Every external framework integration relies upon the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L6">Authenticator</a> contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
   <figure class="code">
     <figcaption class="code">Structure for the Identity Source
@@ -58,16 +58,31 @@ Every external framework integration relies upon the <a target="_blank" class="s
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Principal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./principal'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
- * Supports validation payload of type T into an authenticated principal
+ * Authenticator context
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">AuthenticatorContext<span class="token operator">&lt;</span><span class="token constant">I</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">R</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * The input data used to authenticate
+   */</span>
+  input<span class="token operator">:</span> <span class="token constant">I</span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * The request data, allows for deeper integration in certain auth flows
+   */</span>
+  request<span class="token operator">:</span> <span class="token constant">R</span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * Finalize the principal
+   */</span>
+  <span class="token generic-function"><span class="token function">finalize</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">P</span> <span class="token keyword">extends</span> Principal<span class="token operator">></span></span></span><span class="token punctuation">(</span>principal<span class="token operator">:</span> <span class="token constant">P</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token constant">P</span> <span class="token operator">|</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">P</span><span class="token operator">></span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token comment">/**
+ * Supports validation payload of type I into an authenticated principal
  *
  * &#64;concrete ../internal/types#AuthenticatorTarget
  */</span>
-<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Authenticator<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token punctuation">,</span> <span class="token constant">C</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token comment">/**
-   * Allows for the authenticator to be initialized if needed
-   */</span>
-  initialize<span class="token operator">?</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> <span class="token constant">C</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
-
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Authenticator<span class="token operator">&lt;</span><span class="token constant">I</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">R</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Verify the payload, ensuring the payload is correctly identified.
    *
@@ -75,7 +90,7 @@ Every external framework integration relies upon the <a target="_blank" class="s
    * &#64;returns undefined if authentication is valid, but incomplete (multi-step)
    * &#64;throws AppError if authentication fails
    */</span>
-  <span class="token function">authenticate</span><span class="token punctuation">(</span>payload<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">,</span> ctx<span class="token operator">?</span><span class="token operator">:</span> <span class="token constant">C</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">P</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token constant">P</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token function">authenticate</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> AuthenticatorContext<span class="token operator">&lt;</span><span class="token constant">I</span><span class="token punctuation">,</span> <span class="token constant">R</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token operator">|</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -113,7 +128,7 @@ A sample auth provider would look like:
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8">Authenticator</a>'s are collected and stored for reference at runtime, via symbol. For example:
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L6">Authenticator</a>'s are collected and stored for reference at runtime, via symbol. For example:
 
   <figure class="code">
     <figcaption class="code">Potential Facebook provider
@@ -138,8 +153,7 @@ The symbol <code class="item input">FB_AUTH</code> is what will be used to refer
 
 <h2 id="route-declaration">Route Declaration</h2>
 
-Like the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/service.ts#L10">LoginService</a>, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use. <br><br>
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L13">&#64;Login</a> integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful. <br><br>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L13">&#64;Login</a> integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.<br><br>
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L45">&#64;Logout</a> integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.
 
   <figure class="code">
