@@ -1,6 +1,6 @@
 import { ControllerRegistry, EndpointDecorator } from '@travetto/rest';
 
-import { AuthVerifyInterceptor } from './interceptors/authenticate';
+import { AuthVerifyInterceptor } from './interceptors/verify';
 import { AuthLoginInterceptor } from './interceptors/login';
 import { AuthLogoutInterceptor } from './interceptors/logout';
 
