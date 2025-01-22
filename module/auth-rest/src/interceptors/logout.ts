@@ -40,7 +40,7 @@ export class AuthLogoutInterceptor implements RestInterceptor<RestAuthLogoutConf
       return await next();
     } finally {
       await this.service.deauthenticate();
-      delete ctx.req.auth;
+      ctx.req.auth = undefined;
     }
   }
 }
