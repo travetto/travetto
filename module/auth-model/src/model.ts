@@ -182,8 +182,8 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
    * @param payload
    * @returns Authenticated principal
    */
-  authenticate(input: T): Promise<RegisteredPrincipal> {
-    const { id, password } = this.toPrincipal(input);
+  authenticate(payload: T): Promise<RegisteredPrincipal> {
+    const { id, password } = this.toPrincipal(payload);
     return this.#authenticate(id, password!);
   }
 }
