@@ -35,7 +35,7 @@ class Config {
   @InjectableFactory(TestAuthSymbol)
   static getAuthenticator(): Authenticator {
     return {
-      async authenticate(body: { username: string, password: string }) {
+      async authenticate(body: { username?: string, password?: string }) {
         if (body.username === 'super-user' && body.password === 'password') {
           return {
             id: '5',
