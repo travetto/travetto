@@ -16,7 +16,7 @@ class AuthConfig {
   @InjectableFactory(BasicAuthSymbol)
   static getAuthenticator(): Authenticator<User> {
     return {
-      authenticate({ input }): Principal {
+      authenticate(input): Principal {
         if (input.username && input.password === 'password') {
           return {
             issuer: 'self',

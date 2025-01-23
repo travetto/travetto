@@ -1,6 +1,6 @@
 import { Util, Class, TimeUtil, Runtime } from '@travetto/runtime';
 import { ModelCrudSupport, ModelType, NotFoundError, OptionalId } from '@travetto/model';
-import { AuthUtil, Principal, Authenticator, Authorizer, AuthenticationError, AuthenticatorContext } from '@travetto/auth';
+import { AuthUtil, Principal, Authenticator, Authorizer, AuthenticationError } from '@travetto/auth';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 /**
@@ -182,8 +182,8 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
    * @param payload
    * @returns Authenticated principal
    */
-  authenticate(ctx: AuthenticatorContext<T>): Promise<RegisteredPrincipal> {
-    const { id, password } = this.toPrincipal(ctx.input);
+  authenticate(input: T): Promise<RegisteredPrincipal> {
+    const { id, password } = this.toPrincipal(input);
     return this.#authenticate(id, password!);
   }
 }

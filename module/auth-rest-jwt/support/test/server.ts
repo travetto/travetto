@@ -4,7 +4,7 @@ import timers from 'node:timers/promises';
 import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
-import { AuthenticatorContext, AuthenticationError, Authenticator, AuthService } from '@travetto/auth';
+import { AuthenticationError, Authenticator, AuthService } from '@travetto/auth';
 import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 import { JWTUtil } from '@travetto/jwt';
 
@@ -18,7 +18,7 @@ class Config {
   @InjectableFactory(TestAuthSymbol)
   static getAuthenticator(): Authenticator {
     return {
-      async authenticate({ input }: AuthenticatorContext<{ username?: string, password?: string }>) {
+      async authenticate(input: { username?: string, password?: string }) {
         if (input.username === 'super-user' && input.password === 'password') {
           return {
             id: '5',

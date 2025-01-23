@@ -22,7 +22,7 @@ class AuthConfig {
   @InjectableFactory(BasicAuthSymbol)
   static getAuthenticator(): Authenticator<User> {
     return {
-      authenticate({ input }) {
+      authenticate(input) {
         if (input.username && input.password === 'password') {
           return {
             issuer: 'self',

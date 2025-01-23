@@ -1,6 +1,6 @@
 import passport from 'passport';
 
-import { AuthenticatorContext, Authenticator, Principal } from '@travetto/auth';
+import { Authenticator, Principal } from '@travetto/auth';
 import { FilterContext, Request, Response } from '@travetto/rest';
 import { LoginContextSymbol } from '@travetto/auth-rest/src/internal/types';
 import { LoginContext } from '@travetto/auth-rest';
@@ -73,8 +73,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
    * Authenticate a request given passport config
    * @param ctx The travetto filter context
    */
-  async authenticate(ctx: AuthenticatorContext<U, FilterContext>): Promise<Principal | undefined> {
-    const { req, res } = ctx.request;
+  async authenticate(input: U, { req, res }: FilterContext): Promise<Principal | undefined> {
     await (this.#init ??= new Promise<void>(resolve => this.#passportInit(req, res, resolve)));
 
     return new Promise<Principal | undefined>((resolve, reject) => {

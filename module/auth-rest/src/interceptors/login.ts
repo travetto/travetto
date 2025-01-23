@@ -37,10 +37,7 @@ export class AuthLoginInterceptor implements RestInterceptor<RestAuthLoginConfig
   }
 
   async intercept(ctx: FilterContext<RestAuthLoginConfig>): Promise<FilterReturn> {
-    return this.service.authenticate({
-      input: ctx.req.body,
-      request: ctx,
-      finalize: p => ctx.req.auth = p
-    }, ctx.config.providers ?? []);
+    ctx.req.auth = await this.service.authenticate(ctx.req.body, ctx, ctx.config.providers ?? []);
+    return;
   }
 }

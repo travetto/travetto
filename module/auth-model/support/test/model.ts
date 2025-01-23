@@ -71,7 +71,7 @@ export abstract class AuthModelServiceSuite {
     });
 
     try {
-      await this.authService.authenticate({ input, request: null });
+      await this.authService.authenticate(input);
       assert.fail('Should not have gotten here');
     } catch (err) {
       if (err instanceof AppError && err.category === 'notfound') {
@@ -83,6 +83,6 @@ export abstract class AuthModelServiceSuite {
       }
     }
 
-    await assert.doesNotReject(() => this.authService.authenticate({ input, request: null }));
+    await assert.doesNotReject(() => this.authService.authenticate(input));
   }
 }
