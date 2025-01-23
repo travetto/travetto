@@ -16,11 +16,11 @@ class AuthConfig {
   @InjectableFactory(BasicAuthSymbol)
   static getAuthenticator(): Authenticator<User> {
     return {
-      authenticate(input): Principal {
-        if (input.username && input.password === 'password') {
+      authenticate(u): Principal {
+        if (u.username && u.password === 'password') {
           return {
             issuer: 'self',
-            id: input.username,
+            id: u.username,
             permissions: [],
             details: {}
           };
