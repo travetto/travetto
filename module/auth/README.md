@@ -64,7 +64,7 @@ As referenced above, a [Principal Structure](https://github.com/travetto/travett
 
 **Code: Authenticator**
 ```typescript
-export interface Authenticator<I = unknown, R = unknown> {
+export interface Authenticator<I = unknown, R = unknown, P extends Principal = Principal> {
   /**
    * Verify the payload, ensuring the payload is correctly identified.
    *
@@ -72,11 +72,11 @@ export interface Authenticator<I = unknown, R = unknown> {
    * @returns undefined if authentication is valid, but incomplete (multi-step)
    * @throws AppError if authentication fails
    */
-  authenticate(ctx: AuthenticatorContext<I, R>): Promise<Principal | undefined> | Principal | undefined;
+  authenticate(input: I, request?: R): Promise<P | undefined> | P | undefined;
 }
 ```
 
-The [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L28) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
+The [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
 ### Example
 The [JWT](https://github.com/travetto/travetto/tree/main/module/jwt#readme "JSON Web Token implementation") module is a good example of an authenticator. This is a common use case for simple internal auth.

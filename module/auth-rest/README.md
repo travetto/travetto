@@ -42,38 +42,18 @@ This allows for any filters/middleware to access this information without deeper
 When authenticating, with a multi-step process, it is useful to share information between steps.  The `loginContext` property is intended to be a location in which that information is persisted. Currently only [passport](http://passportjs.org) support is included, when dealing with multi-step logins.
 
 ## Patterns for Integration
-Every external framework integration relies upon the [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L6) contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
+Every external framework integration relies upon the [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8) contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
 **Code: Structure for the Identity Source**
 ```typescript
 import { Principal } from './principal';
 
 /**
- * Authenticator context
- */
-export interface AuthenticatorContext<I = unknown, R = unknown> {
-  /**
-   * The input data used to authenticate
-   */
-  input: I;
-
-  /**
-   * The request data, allows for deeper integration in certain auth flows
-   */
-  request: R;
-
-  /**
-   * Finalize the principal
-   */
-  finalize<P extends Principal>(principal: P): P | Promise<P>;
-}
-
-/**
  * Supports validation payload of type I into an authenticated principal
  *
  * @concrete ../internal/types#AuthenticatorTarget
  */
-export interface Authenticator<I = unknown, R = unknown> {
+export interface Authenticator<I = unknown, R = unknown, P extends Principal = Principal> {
   /**
    * Verify the payload, ensuring the payload is correctly identified.
    *
@@ -81,7 +61,7 @@ export interface Authenticator<I = unknown, R = unknown> {
    * @returns undefined if authentication is valid, but incomplete (multi-step)
    * @throws AppError if authentication fails
    */
-  authenticate(ctx: AuthenticatorContext<I, R>): Promise<Principal | undefined> | Principal | undefined;
+  authenticate(input: I, request?: R): Promise<P | undefined> | P | undefined;
 }
 ```
 
@@ -115,7 +95,7 @@ export class SimpleAuthenticator implements Authenticator<User> {
 }
 ```
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L6)'s are collected and stored for reference at runtime, via symbol. For example:
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8)'s are collected and stored for reference at runtime, via symbol. For example:
 
 **Code: Potential Facebook provider**
 ```typescript
