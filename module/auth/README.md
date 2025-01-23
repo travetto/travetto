@@ -64,7 +64,7 @@ As referenced above, a [Principal Structure](https://github.com/travetto/travett
 
 **Code: Authenticator**
 ```typescript
-export interface Authenticator<I = unknown, R = unknown, P extends Principal = Principal> {
+export interface Authenticator<T = unknown, C = unknown, P extends Principal = Principal> {
   /**
    * Verify the payload, ensuring the payload is correctly identified.
    *
@@ -72,7 +72,7 @@ export interface Authenticator<I = unknown, R = unknown, P extends Principal = P
    * @returns undefined if authentication is valid, but incomplete (multi-step)
    * @throws AppError if authentication fails
    */
-  authenticate(input: I, request?: R): Promise<P | undefined> | P | undefined;
+  authenticate(payload: T, context?: C): Promise<P | undefined> | P | undefined;
 }
 ```
 

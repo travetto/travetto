@@ -58,11 +58,11 @@ Every external framework integration relies upon the <a target="_blank" class="s
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Principal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./principal'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
- * Supports validation payload of type I into an authenticated principal
+ * Supports validation payload of type T into an authenticated principal
  *
  * &#64;concrete ../internal/types#AuthenticatorTarget
  */</span>
-<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Authenticator<span class="token operator">&lt;</span><span class="token constant">I</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">R</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Authenticator<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">C</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Verify the payload, ensuring the payload is correctly identified.
    *
@@ -70,7 +70,7 @@ Every external framework integration relies upon the <a target="_blank" class="s
    * &#64;returns undefined if authentication is valid, but incomplete (multi-step)
    * &#64;throws AppError if authentication fails
    */</span>
-  <span class="token function">authenticate</span><span class="token punctuation">(</span>input<span class="token operator">:</span> <span class="token constant">I</span><span class="token punctuation">,</span> request<span class="token operator">?</span><span class="token operator">:</span> <span class="token constant">R</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">P</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token constant">P</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token function">authenticate</span><span class="token punctuation">(</span>payload<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">,</span> context<span class="token operator">?</span><span class="token operator">:</span> <span class="token constant">C</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">P</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token constant">P</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
