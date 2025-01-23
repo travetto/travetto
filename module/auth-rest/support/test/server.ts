@@ -33,10 +33,10 @@ class AuthorizationEncoder implements PrincipalEncoder {
 
 class Config {
   @InjectableFactory(TestAuthSymbol)
-  static getAuthenticator(): Authenticator<{ username: string, password: string }> {
+  static getAuthenticator(): Authenticator {
     return {
-      async authenticate(input) {
-        if (input.username === 'super-user' && input.password === 'password') {
+      async authenticate(body: { username: string, password: string }) {
+        if (body.username === 'super-user' && body.password === 'password') {
           return {
             id: '5',
             details: { name: 'Billy' },
