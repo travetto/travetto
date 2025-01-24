@@ -3,7 +3,6 @@ import { isStorageSupported } from '@travetto/model/src/internal/service/common'
 import { Runtime, Util } from '@travetto/runtime';
 import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
-import { Request, Response } from '@travetto/rest';
 import { AsyncContext } from '@travetto/context';
 
 import { Session } from './session';
@@ -86,12 +85,14 @@ export class SessionService {
   }
 
   /**
-   * Store session
+   * Persist session
    * @returns Session if it needs to be encoded
    * @returns null if it needs to be removed
    * @returns undefined if nothing should happen
    */
-  async #store(session: Session | undefined): Promise<Session | undefined | null> {
+  async persist(): Promise<Session | undefined | null> {
+    const session = this.context.get<Session>(SessionRawSymbol);
+
     // If missing or new and no data
     if (!session || (session.action === 'create' && session.isEmpty())) {
       return;
@@ -121,7 +122,7 @@ export class SessionService {
   /**
    * Get or recreate session
    */
-  ensureCreated(): Session {
+  get(): Session {
     let existing = this.context.get<Session>(SessionRawSymbol);
     if (existing?.action === 'destroy') {
       this.context.set(SessionRawSymbol, undefined);
@@ -134,46 +135,14 @@ export class SessionService {
   /**
    * Load from request
    */
-  async readRequest(req: Request, id?: string): Promise<Session | undefined> {
+  async load(fetchId: () => Promise<string | undefined> | string | undefined): Promise<Session | undefined> {
     const existing = this.context.get<Session>(SessionRawSymbol);
     if (!existing) {
-      id ??= this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.headerFirst(this.config.keyName);
+      const id = await fetchId();
       if (id) {
         this.context.set(SessionRawSymbol, (await this.#load(id))!);
       }
     }
     return existing ?? this.context.get<Session>(SessionRawSymbol);
-  }
-
-  /**
-   * Store to response
-   */
-  async writeResponse(res: Response): Promise<void> {
-    const raw = this.context.get<Session>(SessionRawSymbol);
-    const value = await this.#store(raw);
-
-    if (value === undefined) {
-      return;
-    }
-    if (value === null) {
-      // Send updated info only if expiry changed
-      if (this.config.transport === 'cookie') {
-        res.cookies.set(this.config.keyName, null, {
-          expires: new Date(),
-          maxAge: undefined,
-        });
-      }
-    } else {
-      if (this.config.transport === 'cookie') {
-        if (value.action === 'create' || value.isTimeChanged()) {
-          res.cookies.set(this.config.keyName, value.id, {
-            expires: value.expiresAt,
-            maxAge: undefined,
-          });
-        }
-      } else if (value.action === 'create') {
-        res.setHeader(this.config.keyName, value.id);
-      }
-    }
   }
 }

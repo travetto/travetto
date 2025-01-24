@@ -1,16 +1,28 @@
 import { Class, RuntimeIndex } from '@travetto/runtime';
 import { Config } from '@travetto/config';
-import { Injectable, Inject } from '@travetto/di';
+import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import {
   CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext,
   FilterReturn, SerializeInterceptor, AsyncContextInterceptor
 } from '@travetto/rest';
-import { AuthContext } from '@travetto/auth';
 
 import { SessionService } from './service';
 
 @Config('rest.session')
-export class RestSessionConfig extends ManagedInterceptorConfig { }
+export class RestSessionConfig extends ManagedInterceptorConfig {
+  /**
+   * Should the session be signed
+   */
+  sign = true;
+  /**
+   * Signature key name
+   */
+  keyName = 'trv_sid';
+  /**
+   * Location for auth
+   */
+  transport: 'cookie' | 'header' = 'cookie';
+}
 
 /**
  * Loads session, and provides ability to create session as needed.
@@ -31,9 +43,6 @@ export class SessionReadInterceptor implements RestInterceptor {
   @Inject()
   config: RestSessionConfig;
 
-  @Inject()
-  authContext: AuthContext;
-
   async postConstruct(): Promise<void> {
     if (RuntimeIndex.hasModule('@travetto/auth-rest')) {
       const { AuthReadWriteInterceptor } = await import('@travetto/auth-rest');
@@ -42,10 +51,22 @@ export class SessionReadInterceptor implements RestInterceptor {
   }
 
   async intercept({ req }: FilterContext, next: FilterNext): Promise<unknown> {
-    // Use auth id if found, but auth is not required
-    const principal = this.authContext.principal;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    await this.service.readRequest(req, principal?.details?.sessionId as string ?? principal?.id);
+    Object.defineProperty(req, 'session', { get: () => this.service.get() });
+
+    await this.service.load(async () => {
+      let sessionId: string | undefined;
+      // Use auth id if found, but auth is not required
+      if (RuntimeIndex.hasModule('@travetto/auth')) {
+        sessionId = await import('@travetto/auth')
+          .then(v => DependencyRegistry.getInstance(v.AuthContext))
+          .then(s => s.principal?.details.sessionId ?? s.principal?.id)
+          .catch(() => undefined);
+      }
+      return sessionId ??
+        (this.config.transport === 'cookie' ?
+          req.cookies.get(this.config.keyName) :
+          req.headerFirst(this.config.keyName));
+    });
     return await next();
   }
 }
@@ -77,12 +98,20 @@ export class SessionWriteInterceptor implements RestInterceptor {
     }
   }
 
-  async intercept({ req, res }: FilterContext, next: FilterNext): Promise<FilterReturn> {
+  async intercept({ res }: FilterContext, next: FilterNext): Promise<FilterReturn> {
     try {
-      Object.defineProperty(req, 'session', { get: () => this.service.ensureCreated() });
       return await next();
     } finally {
-      await this.service.writeResponse(res);
+      const value = await this.service.persist();
+      if (this.config.transport === 'cookie' && value !== undefined) {
+        if (value === null) {
+          res.cookies.set(this.config.keyName, null, { expires: new Date(), maxAge: undefined, signed: this.config.sign });
+        } else {
+          res.cookies.set(this.config.keyName, value.id, { expires: value.expiresAt, maxAge: undefined, signed: this.config.sign });
+        }
+      } else if (this.config.transport === 'header' && value?.action === 'create') {
+        res.setHeader(this.config.keyName, value.id);
+      }
     }
   }
 }

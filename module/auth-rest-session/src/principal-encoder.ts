@@ -16,7 +16,7 @@ export class SessionPrincipalEncoder implements PrincipalEncoder {
   service: SessionService;
 
   encode(_: FilterContext, p: Principal): void {
-    const session = this.service.ensureCreated();
+    const session = this.service.get();
     if (p) {
       p.expiresAt = session.expiresAt; // Let principal live as long as the session
       session.setValue(this.#key, p);
