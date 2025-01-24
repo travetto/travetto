@@ -33,7 +33,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
     let og: Principal | undefined;
     let ogExpires: Date | undefined;
     // Expose user field on principal
-    Object.defineProperty(ctx.req, 'user', { get: () => this.authContext.principal, writable: false });
+    Object.defineProperty(ctx.req, 'user', { get: () => this.authContext.principal, configurable: false });
 
     try {
       og = await this.encoder.decode(ctx);

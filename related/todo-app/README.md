@@ -441,9 +441,7 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/create-todo.ts <key> <port>
 
-{
-  message: 'Invalid property descriptor. Cannot both specify accessors and a value or writable attribute, #<Object>'
-}
+{ message: 'this.service.readRequest is not a function' }
 ```
 
 Now create `support/list-todo.ts` with the following contents:
@@ -460,7 +458,5 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-{
-  message: 'Invalid property descriptor. Cannot both specify accessors and a value or writable attribute, #<Object>'
-}
+{ message: 'this.service.readRequest is not a function' }
 ```
