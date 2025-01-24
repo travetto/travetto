@@ -4,8 +4,9 @@ import { Runtime, Util } from '@travetto/runtime';
 import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Request, Response } from '@travetto/rest';
+import { AsyncContext } from '@travetto/context';
 
-import { Session, SessionData } from './session';
+import { Session } from './session';
 import { SessionConfig } from './config';
 
 /**
@@ -38,6 +39,9 @@ export class SessionService {
 
   @Inject()
   config: SessionConfig;
+
+  @Inject()
+  context: AsyncContext;
 
   #modelService: ModelExpirySupport;
 
@@ -117,30 +121,35 @@ export class SessionService {
   /**
    * Get or recreate session
    */
-  ensureCreated(req: Request): Session {
-    const sub: Request | { [SessionRawSymbol]?: Session } = req;
-    if (sub[SessionRawSymbol]?.action === 'destroy') {
-      sub[SessionRawSymbol] = undefined;
+  ensureCreated(): Session {
+    let existing = this.context.get<Session>(SessionRawSymbol);
+    if (existing?.action === 'destroy') {
+      this.context.set(SessionRawSymbol, undefined);
     }
-    return sub[SessionRawSymbol] ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
+    existing ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
+    this.context.set(SessionRawSymbol, existing);
+    return existing;
   }
 
   /**
    * Load from request
    */
-  async readRequest(req: Request, id?: string): Promise<void> {
-    if (!req[SessionRawSymbol]) {
+  async readRequest(req: Request, id?: string): Promise<Session | undefined> {
+    const existing = this.context.get<Session>(SessionRawSymbol);
+    if (!existing) {
       id ??= this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.headerFirst(this.config.keyName);
       if (id) {
-        req[SessionRawSymbol] = (await this.#load(id))!;
+        this.context.set(SessionRawSymbol, (await this.#load(id))!);
       }
     }
+    return existing ?? this.context.get<Session>(SessionRawSymbol);
   }
 
   /**
    * Store to response
    */
-  async writeResponse(res: Response, raw: Session<SessionData>): Promise<void> {
+  async writeResponse(res: Response): Promise<void> {
+    const raw = this.context.get<Session>(SessionRawSymbol);
     const value = await this.#store(raw);
 
     if (value === undefined) {

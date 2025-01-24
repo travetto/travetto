@@ -1,10 +1,13 @@
 import { Class, RuntimeIndex } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
-import { CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext, FilterReturn, SerializeInterceptor } from '@travetto/rest';
+import {
+  CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext,
+  FilterReturn, SerializeInterceptor, AsyncContextInterceptor
+} from '@travetto/rest';
 import { AuthContext } from '@travetto/auth';
 
-import { SessionService, SessionRawSymbol } from './service';
+import { SessionService } from './service';
 
 @Config('rest.session')
 export class RestSessionConfig extends ManagedInterceptorConfig { }
@@ -20,7 +23,7 @@ export class RestSessionConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class SessionReadInterceptor implements RestInterceptor {
 
-  dependsOn: Class<RestInterceptor>[] = [CookiesInterceptor, SerializeInterceptor];
+  dependsOn: Class<RestInterceptor>[] = [CookiesInterceptor, SerializeInterceptor, AsyncContextInterceptor];
 
   @Inject()
   service: SessionService;
@@ -76,10 +79,10 @@ export class SessionWriteInterceptor implements RestInterceptor {
 
   async intercept({ req, res }: FilterContext, next: FilterNext): Promise<FilterReturn> {
     try {
-      Object.defineProperty(req, 'session', { get: () => this.service.ensureCreated(req) });
+      Object.defineProperty(req, 'session', { get: () => this.service.ensureCreated() });
       return await next();
     } finally {
-      await this.service.writeResponse(res, req[SessionRawSymbol]);
+      await this.service.writeResponse(res);
     }
   }
 }

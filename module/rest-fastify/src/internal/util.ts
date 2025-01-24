@@ -11,7 +11,7 @@ export class FastifyServerUtil {
   /**
    * Build a Travetto Request from a Fastify Request
    */
-  static getRequest(req: FastifyRequest & { session?: Request['session'] }): Request {
+  static getRequest(req: FastifyRequest): Request {
     return RestServerUtil.decorateRequest({
       [ProviderEntitySymbol]: req,
       [NodeEntitySymbol]: req.raw,
@@ -20,7 +20,6 @@ export class FastifyServerUtil {
       url: req.raw!.url,
       query: castTo(req.query),
       params: castTo(req.params),
-      session: req.session,
       headers: req.headers,
       pipe: req.raw.pipe.bind(req.raw),
       on: req.raw.on.bind(req.raw)

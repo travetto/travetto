@@ -11,7 +11,7 @@ export class ExpressServerUtil {
   /**
    * Build a Travetto Request from an Express Request
    */
-  static getRequest(req: express.Request & { session?: Request['session'] }): Request {
+  static getRequest(req: express.Request): Request {
     return RestServerUtil.decorateRequest<Request>({
       [ProviderEntitySymbol]: req,
       [NodeEntitySymbol]: req,
@@ -20,7 +20,6 @@ export class ExpressServerUtil {
       url: req.originalUrl,
       query: req.query,
       params: req.params,
-      session: req.session,
       headers: req.headers,
       pipe: req.pipe.bind(req),
       on: req.on.bind(req)

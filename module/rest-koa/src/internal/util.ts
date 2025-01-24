@@ -22,7 +22,6 @@ export class KoaServerUtil {
       query: ctx.request.query,
       url: ctx.originalUrl,
       params: ctx.params,
-      session: ctx.session,
       headers: ctx.request.headers,
       cookies: ctx.cookies,
       pipe: ctx.req.pipe.bind(ctx.req),
