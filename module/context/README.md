@@ -17,11 +17,15 @@ This module provides a wrapper around node's [async_hooks](https://nodejs.org/ap
 
 The most common way of utilizing the context, is via the [WithAsyncContext](https://github.com/travetto/travetto/tree/main/module/context/src/decorator.ts#L7) decorator.  The decorator requires the class it's being used in, to have a [AsyncContext](https://github.com/travetto/travetto/tree/main/module/context/src/service.ts#L12) member, as it is the source of the contextual information. 
 
-The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain.
+The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain. 
+
+**NOTE:** while access properties by string works, it is generally best practice to generate a symbol, and use that for isolated access into the shared storage.  This storage is common amongst the entire runtime (for a given async operation), and so the only way to guarantee proper isolation of data is via symbols.
 
 **Code: Usage of context within a service**
 ```typescript
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
+
+const NAME = Symbol.for('My Custom name symbol');
 
 export class ContextAwareService {
 
@@ -29,18 +33,18 @@ export class ContextAwareService {
 
   @WithAsyncContext()
   async complexOperator(name: string) {
-    this.context.set({ name });
+    this.context.set(NAME, name);
     await this.additionalOp('extra');
     await this.finalOp();
   }
 
   async additionalOp(additional: string) {
-    const { name } = this.context.get();
-    this.context.set({ name: `${name} ${additional}` });
+    const name = this.context.get(NAME);
+    this.context.set(NAME, `${name} ${additional}`);
   }
 
   async finalOp() {
-    const { name } = this.context.get();
+    const name = this.context.get(NAME);
     // Use name
     return name;
   }

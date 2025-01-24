@@ -1,16 +1,21 @@
+import { AnyMap } from '@travetto/runtime';
 import { Principal } from './principal';
+
+/**
+ * Represents the general shape of additional login context, usually across multiple calls
+ */
+export interface AuthenticatorState extends AnyMap { }
 
 /**
  * Supports validation payload of type T into an authenticated principal
  *
  * @concrete ../internal/types#AuthenticatorTarget
  */
-export interface Authenticator<T = unknown, P extends Principal = Principal, C = unknown> {
+export interface Authenticator<T = unknown, C = unknown, P extends Principal = Principal> {
   /**
-   * Allows for the authenticator to be initialized if needed
-   * @param ctx
+   * Retrieve the authenticator state for the given request
    */
-  initialize?(ctx: C): Promise<void>;
+  getState?(context?: C): Promise<AuthenticatorState | undefined> | AuthenticatorState | undefined;
 
   /**
    * Verify the payload, ensuring the payload is correctly identified.
@@ -19,5 +24,5 @@ export interface Authenticator<T = unknown, P extends Principal = Principal, C =
    * @returns undefined if authentication is valid, but incomplete (multi-step)
    * @throws AppError if authentication fails
    */
-  authenticate(payload: T, ctx?: C): Promise<P | undefined> | P | undefined;
+  authenticate(payload: T, context?: C): Promise<P | undefined> | P | undefined;
 }

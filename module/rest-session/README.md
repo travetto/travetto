@@ -21,7 +21,7 @@ This is a module that adds session support to the [RESTful API](https://github.c
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")
    *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.")
    *  [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.")
-A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) parameter as [Session](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L15) and [SessionData](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L8) respectively.  Iit can also be accessed via the [Request](https://github.com/travetto/travetto/tree/main/module/rest-session/src/trv.d.ts#L8) as a session property.
+A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) parameter as [Session](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L15) and [SessionData](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L8) respectively.  Iit can also be accessed via the [Request](https://github.com/travetto/travetto/tree/main/module/rest-session/src/trv.d.ts#L7) as a session property.
 
 **Code: Sample Session Usage**
 ```typescript
@@ -71,9 +71,8 @@ The module supports a general set of configuration that should cover the majorit
 
 **Code: Session Config**
 ```typescript
-import { AppError, Runtime, TimeUtil } from '@travetto/runtime';
+import { TimeUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
-import { Secret } from '@travetto/schema';
 
 /**
  * Rest session config
@@ -96,29 +95,7 @@ export class SessionConfig {
    * Should the session support rolling renewals
    */
   rolling = false;
-  /**
-   * Should the session be signed
-   */
-  sign = true;
-  /**
-   * Secret for signing the session
-   */
-  @Secret()
-  secret?: string;
-  /**
-   * Signature key name
-   */
-  keyName = 'trv_sid';
-  /**
-   * Location for auth
-   */
-  transport: 'cookie' | 'header' = 'cookie';
 
-  postConstruct(): void {
-    if (!this.secret && Runtime.production) {
-      throw new AppError('Default session secret is only valid for development use, please specify a config value at rest.session.secret');
-    }
-  }
 }
 ```
 

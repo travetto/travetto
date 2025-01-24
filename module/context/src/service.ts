@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 import { Injectable } from '@travetto/di';
-import { AppError, castTo } from '@travetto/runtime';
+import { AppError, AsyncQueue, castTo } from '@travetto/runtime';
 
 type Ctx<T = unknown> = Record<string | symbol, T>;
 
@@ -11,89 +11,65 @@ type Ctx<T = unknown> = Record<string | symbol, T>;
 @Injectable()
 export class AsyncContext {
 
-  alStorage = new AsyncLocalStorage<{ value?: Ctx }>();
-  active = 0;
+  alStorage = new AsyncLocalStorage<Ctx>();
 
   constructor() {
     this.run = this.run.bind(this);
     this.iterate = this.iterate.bind(this);
   }
 
-  #store<T = unknown>(setAs?: Ctx<T> | null): Ctx<T> {
-    const val = this.alStorage.getStore();
-    if (!val) {
+  #get<T = unknown>(): Ctx<T> {
+    const store = this.alStorage.getStore();
+    if (!store) {
       throw new AppError('Context is not initialized');
     }
-    if (setAs) {
-      val.value = setAs;
-    } else if (!val.value) {
-      val.value = {};
-    }
-    return castTo(val.value);
+    return castTo(store);
   }
 
   /**
-   * Get entire context or a portion by key
+   * Get context field by key
    */
-  get<T = unknown>(key: string | symbol): T;
-  get(): Ctx;
-  get<T>(key?: string | symbol): Ctx | T {
-    const root = this.#store<T>();
-    if (key) {
-      return root[key];
-    } else {
-      return root;
-    }
+  get<T>(key: string | symbol): T {
+    return this.#get<T>()[key];
   }
 
   /**
-   * Set entire context or a portion by key
+   * Set context field by key
    */
-  set(key: string | symbol, val: unknown): void;
-  set(val: Ctx): void;
-  set(keyOrVal: string | symbol | Ctx, valWithKey?: unknown): void {
-    if (typeof keyOrVal === 'string' || typeof keyOrVal === 'symbol') {
-      this.get()[keyOrVal] = valWithKey;
-    } else {
-      this.#store(keyOrVal);
-    }
+  set(key: string | symbol, val: unknown): void {
+    this.#get()[key] = val;
+  }
+
+  /**
+   * Get entire context
+   * @private
+   */
+  copy<T = unknown>(): Ctx<T> {
+    return structuredClone(this.#get<T>());
   }
 
   /**
    * Run an async function and ensure the context is available during execution
    */
   async run<T = unknown>(fn: () => Promise<T> | T, init: Ctx = {}): Promise<T> {
-    if (this.alStorage.getStore()) {
-      init = { ...this.#store(), ...init };
-    }
-    this.active += 1;
-    this.alStorage.enterWith({ value: init });
-    try {
-      return await fn();
-    } finally {
-      delete this.alStorage.getStore()?.value;
-      if ((this.active -= 1) === 0) {
-        this.alStorage.disable();
-      }
-    }
+    return this.alStorage.run({ ...this.alStorage.getStore(), ...init }, fn);
   }
 
   /**
    * Run an async function and ensure the context is available during execution
    */
-  async * iterate<T>(fn: () => AsyncGenerator<T>, init: Ctx = {}): AsyncGenerator<T> {
-    if (this.alStorage.getStore()) {
-      init = { ...this.#store(), ...init };
-    }
-    this.active += 1;
-    this.alStorage.enterWith({ value: init });
-    try {
-      return yield* fn();
-    } finally {
-      delete this.alStorage.getStore()?.value;
-      if ((this.active -= 1) === 0) {
-        this.alStorage.disable();
+  iterate<T>(fn: () => AsyncIterable<T>, init: Ctx = {}): AsyncIterable<T> {
+    const out = new AsyncQueue<T>();
+    this.alStorage.run({ ...this.alStorage.getStore(), ...init }, async () => {
+      try {
+        for await (const item of fn()) {
+          out.add(item);
+        }
+        out.close();
+      } catch (err) {
+        out.throw(castTo(err));
       }
-    }
+    });
+    return out;
   }
 }

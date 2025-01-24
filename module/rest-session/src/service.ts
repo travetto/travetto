@@ -3,9 +3,9 @@ import { isStorageSupported } from '@travetto/model/src/internal/service/common'
 import { Runtime, Util } from '@travetto/runtime';
 import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
-import { Request, Response } from '@travetto/rest';
+import { AsyncContext } from '@travetto/context';
 
-import { Session, SessionData } from './session';
+import { Session } from './session';
 import { SessionConfig } from './config';
 
 /**
@@ -39,6 +39,9 @@ export class SessionService {
   @Inject()
   config: SessionConfig;
 
+  @Inject()
+  context: AsyncContext;
+
   #modelService: ModelExpirySupport;
 
   constructor(@Inject(SessionModelSymbol) service: ModelExpirySupport) {
@@ -52,6 +55,14 @@ export class SessionService {
     if (isStorageSupported(this.#modelService) && Runtime.dynamic) {
       await this.#modelService.createModel?.(SessionEntry);
     }
+  }
+
+  get #session(): Session | undefined {
+    return this.context.get<Session>(SessionRawSymbol);
+  }
+
+  set #session(v: Session | undefined) {
+    this.context.set(SessionRawSymbol, v);
   }
 
   /**
@@ -82,12 +93,14 @@ export class SessionService {
   }
 
   /**
-   * Store session
+   * Persist session
    * @returns Session if it needs to be encoded
    * @returns null if it needs to be removed
    * @returns undefined if nothing should happen
    */
-  async #store(session: Session | undefined): Promise<Session | undefined | null> {
+  async persist(): Promise<Session | undefined | null> {
+    const session = this.#session;
+
     // If missing or new and no data
     if (!session || (session.action === 'create' && session.isEmpty())) {
       return;
@@ -117,54 +130,23 @@ export class SessionService {
   /**
    * Get or recreate session
    */
-  ensureCreated(req: Request): Session {
-    const sub: Request | { [SessionRawSymbol]?: Session } = req;
-    if (sub[SessionRawSymbol]?.action === 'destroy') {
-      sub[SessionRawSymbol] = undefined;
-    }
-    return sub[SessionRawSymbol] ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
+  get(): Session {
+    const existing = this.#session;
+    return this.#session =
+      (existing?.action === 'destroy' ? undefined : existing) ??
+      new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
   }
 
   /**
    * Load from request
    */
-  async readRequest(req: Request, id?: string): Promise<void> {
-    if (!req[SessionRawSymbol]) {
-      id ??= this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.headerFirst(this.config.keyName);
+  async load(fetchId: () => Promise<string | undefined> | string | undefined): Promise<Session | undefined> {
+    if (!this.#session) {
+      const id = await fetchId();
       if (id) {
-        req[SessionRawSymbol] = (await this.#load(id))!;
+        this.#session = await this.#load(id);
       }
     }
-  }
-
-  /**
-   * Store to response
-   */
-  async writeResponse(res: Response, raw: Session<SessionData>): Promise<void> {
-    const value = await this.#store(raw);
-
-    if (value === undefined) {
-      return;
-    }
-    if (value === null) {
-      // Send updated info only if expiry changed
-      if (this.config.transport === 'cookie') {
-        res.cookies.set(this.config.keyName, null, {
-          expires: new Date(),
-          maxAge: undefined,
-        });
-      }
-    } else {
-      if (this.config.transport === 'cookie') {
-        if (value.action === 'create' || value.isTimeChanged()) {
-          res.cookies.set(this.config.keyName, value.id, {
-            expires: value.expiresAt,
-            maxAge: undefined,
-          });
-        }
-      } else if (value.action === 'create') {
-        res.setHeader(this.config.keyName, value.id);
-      }
-    }
+    return this.#session;
   }
 }

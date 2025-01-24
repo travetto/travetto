@@ -1,6 +1,5 @@
-import { AppError, Runtime, TimeUtil } from '@travetto/runtime';
+import { TimeUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
-import { Secret } from '@travetto/schema';
 
 /**
  * Rest session config
@@ -23,27 +22,5 @@ export class SessionConfig {
    * Should the session support rolling renewals
    */
   rolling = false;
-  /**
-   * Should the session be signed
-   */
-  sign = true;
-  /**
-   * Secret for signing the session
-   */
-  @Secret()
-  secret?: string;
-  /**
-   * Signature key name
-   */
-  keyName = 'trv_sid';
-  /**
-   * Location for auth
-   */
-  transport: 'cookie' | 'header' = 'cookie';
 
-  postConstruct(): void {
-    if (!this.secret && Runtime.production) {
-      throw new AppError('Default session secret is only valid for development use, please specify a config value at rest.session.secret');
-    }
-  }
 }

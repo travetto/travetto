@@ -78,12 +78,14 @@ export abstract class Connection<C = unknown> {
     }
 
     return this.context.run(async () => {
+      let conn;
       try {
-        this.context.set(ContextActiveSymbol, await this.acquire());
+        conn = await this.acquire();
+        this.context.set(ContextActiveSymbol, conn);
         return await op();
       } finally {
-        if (this.active) {
-          this.release(this.active);
+        if (conn) {
+          this.release(conn);
         }
       }
     });

@@ -15,17 +15,18 @@ export class SessionPrincipalEncoder implements PrincipalEncoder {
   @Inject()
   service: SessionService;
 
-  encode({ req }: FilterContext, p: Principal): void {
+  encode(_: FilterContext, p: Principal): void {
+    const session = this.service.get();
     if (p) {
-      p.expiresAt = req.session.expiresAt; // Let principal live as long as the session
-      req.session.setValue(this.#key, p);
+      p.expiresAt = session.expiresAt; // Let principal live as long as the session
+      session.setValue(this.#key, p);
     } else {
-      req.session.destroy(); // Kill session
+      session.destroy(); // Kill session
     }
   }
 
   async decode({ req }: FilterContext): Promise<Principal | undefined> {
-    await this.service.readRequest(req); // Preload session if not already loaded
-    return req.session.getValue<Principal>(this.#key);
+    const session = await this.service.get(); // Preload session if not already loaded
+    return session?.getValue<Principal>(this.#key);
   }
 }

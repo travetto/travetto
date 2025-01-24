@@ -20,12 +20,12 @@ class WithSuiteContextSuite {
   @WithAsyncContext({})
   async basic() {
     assert(this.context !== null);
-    assert(this.context.get().age === 20);
+    assert(this.context.get('age') === 20);
   }
 
   @Test()
   @WithAsyncContext({ age: 30 })
   async override() {
-    assert(this.context.get().age === 30);
+    assert(this.context.get('age') === 30);
   }
 }

@@ -1,14 +1,13 @@
 import assert from 'node:assert';
 
-import { Controller, FilterContext, Get, Post, Redirect, Request } from '@travetto/rest';
+import { Controller, FilterContext, Get, Post, Redirect } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable, InjectableFactory } from '@travetto/di';
-import { AuthenticationError, Authenticator, Principal } from '@travetto/auth';
+import { AuthenticationError, Authenticator, AuthContext, Principal } from '@travetto/auth';
 
-import { Authenticate, Authenticated } from '../../src/decorator';
+import { Login, Authenticated, Logout } from '../../src/decorator';
 import { PrincipalEncoder } from '../../src/encoder';
-import { AuthService } from '../../src/service';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
@@ -55,23 +54,22 @@ class Config {
 class TestAuthController {
 
   @Inject()
-  svc: AuthService;
+  authContext: AuthContext;
 
   @Post('/login')
-  @Authenticate(TestAuthSymbol)
+  @Login(TestAuthSymbol)
   async simpleLogin() {
   }
 
   @Get('/self')
   @Authenticated()
-  async getSelf(req: Request) {
-    return req.auth;
+  async getSelf() {
+    return this.authContext.principal;
   }
 
   @Get('/logout')
-  @Authenticated()
-  async logout(req: Request) {
-    await this.svc.logout(req);
+  @Logout()
+  async logout() {
     return new Redirect('/auth/self', 301);
   }
 }
@@ -80,9 +78,12 @@ class TestAuthController {
 @Authenticated()
 class TestAuthAllController {
 
+  @Inject()
+  authContext: AuthContext;
+
   @Get('/self')
-  async getSelf(req: Request) {
-    return req.auth;
+  async getSelf() {
+    return this.authContext.principal;
   }
 }
 

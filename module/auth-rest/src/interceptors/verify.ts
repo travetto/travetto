@@ -3,7 +3,7 @@ import { RestInterceptor, ManagedInterceptorConfig, FilterContext, SerializeInte
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
-import { AuthenticationError } from '@travetto/auth';
+import { AuthenticationError, AuthContext } from '@travetto/auth';
 
 import { AuthReadWriteInterceptor } from './read-write';
 
@@ -44,6 +44,9 @@ export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConf
   @Inject()
   config: RestAuthVerifyConfig;
 
+  @Inject()
+  authContext: AuthContext;
+
   /**
    * Ensures this is an opt-in interceptor
    */
@@ -60,19 +63,21 @@ export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConf
   }
 
   async intercept({ req, config }: FilterContext<RestAuthVerifyConfig>): Promise<void> {
+    const principal = this.authContext.principal;
+
     switch (config?.state) {
       case 'authenticated': {
-        if (!req.auth) {
+        if (!principal) {
           throw new AuthenticationError('User is unauthenticated');
         } else {
-          if (!config.matcher(new Set(req.auth.permissions))) {
+          if (!config.matcher(new Set(principal.permissions))) {
             throw new AppError('Access denied', { category: 'permissions' });
           }
         }
         break;
       }
       case 'unauthenticated': {
-        if (req.auth) {
+        if (principal) {
           throw new AuthenticationError('User is authenticated');
         }
         break;

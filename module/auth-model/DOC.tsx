@@ -1,6 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c, mod } from '@travetto/doc';
 import { Links } from '@travetto/model/support/doc.support';
+import { AuthModelUtil } from './__index__';
 
 const RegisteredPrincipal = <c.Code title='Registered Principal' src='src/model.ts' startRe={/interface RegisteredPrincipal/} endRe={/^[}]/} />;
 
@@ -42,5 +43,11 @@ export const text = <>
     <c.Code title='Principal Source configuration' src='doc/config.ts' />
 
     <c.Code title='Sample usage' src='doc/usage.ts' />
+  </c.Section>
+
+  <c.Section title='Common Utilities'>
+    The {AuthModelUtil} provides the following functionality:
+
+    <c.Code title='Auth util structure' src={AuthModelUtil} outline={true} />
   </c.Section>
 </>;
