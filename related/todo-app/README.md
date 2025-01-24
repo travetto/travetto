@@ -449,9 +449,7 @@ export async function main(key: string, port: number) {
 $ trv main support/create-todo.ts <key> <port>
 
 {
-  text: 'New Todo - <key>',
-  created: '2029-03-14T04:00:01.510Z',
-  id: '<uniqueId>'
+  message: 'Invalid property descriptor. Cannot both specify accessors and a value or writable attribute, #<Object>'
 }
 ```
 
@@ -469,11 +467,7 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-[
-  {
-    id: '<uniqueId>',
-    text: 'New Todo - <key>',
-    created: '2029-03-14T04:00:01.814Z'
-  }
-]
+{
+  message: 'Invalid property descriptor. Cannot both specify accessors and a value or writable attribute, #<Object>'
+}
 ```
