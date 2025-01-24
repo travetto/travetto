@@ -440,16 +440,9 @@ First we must start the application:
       RestGetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestLogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestRpcConfig: <span class="token punctuation">{{'{'}}</span> clients: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-      RestSessionConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      RestSessionConfig: <span class="token punctuation">{{'{'}}</span> sign: true, transport: <span class="token string">'cookie'</span> <span class="token punctuation">{{'}'}}</span>,
       RestSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
-      SessionConfig: <span class="token punctuation">{{'{'}}</span>
-        autoCommit: true,
-        maxAge: <span class="token number">1800000</span>,
-        renew: true,
-        rolling: false,
-        sign: true,
-        transport: <span class="token string">'cookie'</span>
-      <span class="token punctuation">{{'}'}}</span>
+      SessionConfig: <span class="token punctuation">{{'{'}}</span> autoCommit: true, maxAge: <span class="token number">1800000</span>, renew: true, rolling: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
