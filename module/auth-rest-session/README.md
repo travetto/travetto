@@ -47,7 +47,7 @@ export class SessionPrincipalEncoder implements PrincipalEncoder {
   }
 
   async decode({ req }: FilterContext): Promise<Principal | undefined> {
-    const session = await this.service.readRequest(req); // Preload session if not already loaded
+    const session = await this.service.get(); // Preload session if not already loaded
     return session?.getValue<Principal>(this.#key);
   }
 }

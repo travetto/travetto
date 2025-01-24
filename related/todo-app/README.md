@@ -441,7 +441,11 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/create-todo.ts <key> <port>
 
-{ message: 'this.service.readRequest is not a function' }
+{
+  text: 'New Todo - <key>',
+  created: '2029-03-14T04:00:01.510Z',
+  id: '<uniqueId>'
+}
 ```
 
 Now create `support/list-todo.ts` with the following contents:
@@ -458,5 +462,11 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-{ message: 'this.service.readRequest is not a function' }
+[
+  {
+    id: '<uniqueId>',
+    text: 'New Todo - <key>',
+    created: '2029-03-14T04:00:01.814Z'
+  }
+]
 ```
