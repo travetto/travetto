@@ -35,7 +35,7 @@ export class RestSessionConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class SessionReadInterceptor implements RestInterceptor {
 
-  dependsOn: Class<RestInterceptor>[] = [CookiesInterceptor, SerializeInterceptor, AsyncContextInterceptor];
+  dependsOn: Class<RestInterceptor>[] = [CookiesInterceptor, SerializeInterceptor, AsyncContextInterceptor, SessionWriteInterceptor];
 
   @Inject()
   service: SessionService;

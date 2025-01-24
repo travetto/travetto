@@ -24,7 +24,7 @@ The integration with the <a class="module-link" href="https://github.com/travett
 
 <h2 id="patterns-for-integration">Patterns for Integration</h2>
 
-Every external framework integration relies upon the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L17">Authenticator</a> contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
+Every external framework integration relies upon the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14">Authenticator</a> contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
   <figure class="code">
     <figcaption class="code">Structure for the Identity Source
@@ -36,9 +36,6 @@ Every external framework integration relies upon the <a target="_blank" class="s
 
 <span class="token comment">/**
  * Represents the general shape of additional login context, usually across multiple calls
- *
- * @concrete ../internal/types#AuthenticatorStateTarget
- * @augments `@travetto/rest:Context`
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">AuthenticatorState</span> <span class="token keyword">extends</span> <span class="token class-name">AnyMap</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
 
@@ -98,7 +95,7 @@ A sample auth provider would look like:
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L17">Authenticator</a>'s are collected and stored for reference at runtime, via symbol. For example:
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14">Authenticator</a>'s are collected and stored for reference at runtime, via symbol. For example:
 
   <figure class="code">
     <figcaption class="code">Potential Facebook provider
@@ -163,4 +160,4 @@ The symbol <code class="item input">FB_AUTH</code> is what will be used to refer
 
 <h2 id="multi-step-login">Multi-Step Login</h2>
 
-When authenticating, with a multi-step process, it is useful to share information between steps.  The <code class="item field">authenticatorState</code> of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L18">AuthContext</a> field is intended to be a location in which that information is persisted. Currently only <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> support is included, when dealing with multi-step logins. This information can also be injected into a rest endpoint method, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L10">Authenticator</a> type;
+When authenticating, with a multi-step process, it is useful to share information between steps.  The <code class="item field">authenticatorState</code> of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L18">AuthContext</a> field is intended to be a location in which that information is persisted. Currently only <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> support is included, when dealing with multi-step logins. This information can also be injected into a rest endpoint method, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L7">Authenticator</a> type;

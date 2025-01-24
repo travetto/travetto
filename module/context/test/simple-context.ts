@@ -14,6 +14,7 @@ class VerifyContext {
 
   @BeforeEach()
   beforeEach() {
+    this.context?.alStorage.disable();
     this.context = new AsyncContext();
   }
 
@@ -21,15 +22,15 @@ class VerifyContext {
   @WithAsyncContext({})
   async loadContext() {
     assert(this.context !== null);
-    this.context.set({ user: 'bob' });
+    this.context.set('user', 'bob');
     await timers.setTimeout(1);
-    assert(this.context.get().user === 'bob');
+    assert(this.context.get('user') === 'bob');
   }
 
   @Test()
   @WithAsyncContext({})
   async nextContext() {
-    assert(this.context.get().name === undefined);
+    assert(this.context.get('name') === undefined);
   }
 
   @Test()
@@ -37,11 +38,11 @@ class VerifyContext {
     const attempts = ' '.repeat(10).split('').map((__, i) =>
       async () => {
         const start = asyncHooks.executionAsyncId();
-        this.context.set({ name: `test-${i}` });
+        this.context.set('name', `test-${i}`);
         await timers.setTimeout(1);
         const end = asyncHooks.executionAsyncId();
 
-        if (this.context.get().name !== `test-${i}`) {
+        if (this.context.get('name') !== `test-${i}`) {
           throw new Error(`Didn\'t match: ${start} - ${end}`);
         }
       }
@@ -59,13 +60,13 @@ class VerifyContext {
 
     await Promise.all([1, 2].map(async (__, i) => {
       await this.context.run(async () => {
-        this.context.get().name = `test-${i}`;
+        this.context.set('name', `test-${i}`);
         if (i === 1) {
-          this.context.get().age = 30;
+          this.context.set('age', 30);
         }
         await timers.setTimeout(20);
         await this.context.run(async () => {
-          contexts.push(structuredClone(this.context.get()));
+          contexts.push(structuredClone(this.context.copy()));
         }, { color: 'green' });
       }, { age: 20, name: 'bob' });
     }));
