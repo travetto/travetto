@@ -126,6 +126,7 @@ export class SessionService {
     let existing = this.context.get<Session>(SessionRawSymbol);
     if (existing?.action === 'destroy') {
       this.context.set(SessionRawSymbol, undefined);
+      existing = undefined!;
     }
     existing ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
     this.context.set(SessionRawSymbol, existing);
