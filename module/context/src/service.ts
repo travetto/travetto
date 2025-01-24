@@ -18,23 +18,19 @@ export class AsyncContext {
     this.iterate = this.iterate.bind(this);
   }
 
-  #value<T>(): Ctx<T> | undefined {
-    const val = this.alStorage.getStore();
-    return castTo(val);
-  }
-
   #get<T = unknown>(): Ctx<T> {
-    if (!this.alStorage.getStore()) {
+    const store = this.alStorage.getStore();
+    if (!store) {
       throw new AppError('Context is not initialized');
     }
-    return this.#value<T>()!;
+    return castTo(store);
   }
 
   /**
    * Get context field by key
    */
   get<T>(key: string | symbol): T {
-    return castTo(this.#get()[key]);
+    return this.#get<T>()[key];
   }
 
   /**
@@ -56,7 +52,7 @@ export class AsyncContext {
    * Run an async function and ensure the context is available during execution
    */
   async run<T = unknown>(fn: () => Promise<T> | T, init: Ctx = {}): Promise<T> {
-    return this.alStorage.run({ ...this.#value(), ...init }, fn);
+    return this.alStorage.run({ ...this.alStorage.getStore(), ...init }, fn);
   }
 
   /**
@@ -64,7 +60,7 @@ export class AsyncContext {
    */
   iterate<T>(fn: () => AsyncIterable<T>, init: Ctx = {}): AsyncIterable<T> {
     const out = new AsyncQueue<T>();
-    this.alStorage.run({ ...this.#value(), ...init }, async () => {
+    this.alStorage.run({ ...this.alStorage.getStore(), ...init }, async () => {
       try {
         for await (const item of fn()) {
           out.add(item);
