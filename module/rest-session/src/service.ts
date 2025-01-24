@@ -57,6 +57,14 @@ export class SessionService {
     }
   }
 
+  get #session(): Session | undefined {
+    return this.context.get<Session>(SessionRawSymbol);
+  }
+
+  set #session(v: Session | undefined) {
+    this.context.set(SessionModelSymbol, v);
+  }
+
   /**
    * Load session by id
    * @returns Session if valid
@@ -91,7 +99,7 @@ export class SessionService {
    * @returns undefined if nothing should happen
    */
   async persist(): Promise<Session | undefined | null> {
-    const session = this.context.get<Session>(SessionRawSymbol);
+    const session = this.#session;
 
     // If missing or new and no data
     if (!session || (session.action === 'create' && session.isEmpty())) {
@@ -123,27 +131,22 @@ export class SessionService {
    * Get or recreate session
    */
   get(): Session {
-    let existing = this.context.get<Session>(SessionRawSymbol);
-    if (existing?.action === 'destroy') {
-      this.context.set(SessionRawSymbol, undefined);
-      existing = undefined!;
-    }
-    existing ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
-    this.context.set(SessionRawSymbol, existing);
-    return existing;
+    const existing = this.#session;
+    return this.#session =
+      (existing?.action === 'destroy' ? undefined : existing) ??
+      new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
   }
 
   /**
    * Load from request
    */
   async load(fetchId: () => Promise<string | undefined> | string | undefined): Promise<Session | undefined> {
-    const existing = this.context.get<Session>(SessionRawSymbol);
-    if (!existing) {
+    if (!this.#session) {
       const id = await fetchId();
       if (id) {
-        this.context.set(SessionRawSymbol, (await this.#load(id))!);
+        this.#session = await this.#load(id);
       }
     }
-    return existing ?? this.context.get<Session>(SessionRawSymbol);
+    return this.#session;
   }
 }
