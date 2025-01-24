@@ -3,9 +3,6 @@ import { Principal } from './principal';
 
 /**
  * Represents the general shape of additional login context, usually across multiple calls
- *
- * @concrete ../internal/types#AuthenticatorStateTarget
- * @augments `@travetto/rest:Context`
  */
 export interface AuthenticatorState extends AnyMap { }
 

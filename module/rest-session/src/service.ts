@@ -62,7 +62,7 @@ export class SessionService {
   }
 
   set #session(v: Session | undefined) {
-    this.context.set(SessionModelSymbol, v);
+    this.context.set(SessionRawSymbol, v);
   }
 
   /**

@@ -15,7 +15,7 @@ export class RestSessionConfig extends ManagedInterceptorConfig {
    */
   sign = true;
   /**
-   * Signature key name
+   * Auth output key name
    */
   keyName = 'trv_sid';
   /**
@@ -104,11 +104,11 @@ export class SessionWriteInterceptor implements RestInterceptor {
     } finally {
       const value = await this.service.persist();
       if (this.config.transport === 'cookie' && value !== undefined) {
-        if (value === null) {
-          res.cookies.set(this.config.keyName, null, { expires: new Date(), maxAge: undefined, signed: this.config.sign });
-        } else {
-          res.cookies.set(this.config.keyName, value.id, { expires: value.expiresAt, maxAge: undefined, signed: this.config.sign });
-        }
+        res.cookies.set(this.config.keyName, value?.id ?? null, {
+          expires: value?.expiresAt ?? new Date(),
+          maxAge: undefined,
+          signed: this.config.sign
+        });
       } else if (this.config.transport === 'header' && value?.action === 'create') {
         res.setHeader(this.config.keyName, value.id);
       }
