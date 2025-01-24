@@ -19,24 +19,36 @@ export class AsyncContext {
   }
 
   #get<T = unknown>(): Ctx<T> {
-    const store = this.alStorage.getStore();
-    if (!store) {
+    if (!this.active) {
       throw new AppError('Context is not initialized');
     }
-    return castTo(store);
+    return castTo(this.alStorage.getStore());
+  }
+
+  /**
+   * Are we in an active context
+   */
+  get active(): boolean {
+    return this.alStorage.getStore() !== undefined;
   }
 
   /**
    * Get context field by key
    */
-  get<T>(key: string | symbol): T {
+  get<T = unknown>(key: string | symbol, ignoreErrors = false): T | undefined {
+    if (ignoreErrors && !this.active) {
+      return;
+    }
     return this.#get<T>()[key];
   }
 
   /**
    * Set context field by key
    */
-  set(key: string | symbol, val: unknown): void {
+  set<T = unknown>(key: string | symbol, val: T | undefined, ignoreErrors = false): void {
+    if (ignoreErrors && !this.active) {
+      return;
+    }
     this.#get()[key] = val;
   }
 
