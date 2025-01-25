@@ -23,17 +23,17 @@ const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>('preDe
  * Dependency registry
  */
 class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
-  protected pendingFinalize: Class[] = [];
+  pendingFinalize: Class[] = [];
 
-  protected defaultSymbols = new Set<symbol>();
+  defaultSymbols = new Set<symbol>();
 
-  protected instances = new Map<TargetId, Map<symbol, unknown>>();
-  protected instancePromises = new Map<TargetId, Map<symbol, Promise<unknown>>>();
+  instances = new Map<TargetId, Map<symbol, unknown>>();
+  instancePromises = new Map<TargetId, Map<symbol, Promise<unknown>>>();
 
-  protected factories = new Map<TargetId, Map<Class, InjectableConfig>>();
+  factories = new Map<TargetId, Map<Class, InjectableConfig>>();
 
-  protected targetToClass = new Map<TargetId, Map<symbol, string>>();
-  protected classToTarget = new Map<ClassId, Map<symbol, TargetId>>();
+  targetToClass = new Map<TargetId, Map<symbol, string>>();
+  classToTarget = new Map<ClassId, Map<symbol, TargetId>>();
 
   constructor() {
     super(RootRegistry);
@@ -44,7 +44,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    * @param target
    * @param qualifier
    */
-  protected resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
+  resolveTarget<T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType): Resolved<T> {
     const qualifiers = this.targetToClass.get(target.Ⲑid) ?? new Map<symbol, string>();
 
     let cls: string | undefined;
@@ -104,7 +104,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Retrieve all dependencies
    */
-  protected async fetchDependencies(managed: InjectableConfig, deps?: Dependency[]): Promise<unknown[]> {
+  async fetchDependencies(managed: InjectableConfig, deps?: Dependency[]): Promise<unknown[]> {
     if (!deps || !deps.length) {
       return [];
     }
@@ -130,7 +130,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Resolve all field dependencies
    */
-  protected async resolveFieldDependencies<T>(config: InjectableConfig<T>, instance: T): Promise<void> {
+  async resolveFieldDependencies<T>(config: InjectableConfig<T>, instance: T): Promise<void> {
     const keys = Object.keys(config.dependencies.fields ?? {})
       .filter(k => instance[castKey<T>(k)] === undefined); // Filter out already set ones
 
@@ -146,7 +146,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Actually construct an instance while resolving the dependencies
    */
-  protected async construct<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
+  async construct<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
     const managed = this.resolveTarget(target, qualifier).config;
 
     // Only fetch constructor values
@@ -180,7 +180,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Create the instance
    */
-  protected async createInstance<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
+  async createInstance<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
     const classId = this.resolveTarget(target, qualifier).id;
 
     if (!this.instances.has(classId)) {
@@ -208,7 +208,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Destroy an instance
    */
-  protected destroyInstance(cls: Class, qualifier: symbol): void {
+  destroyInstance(cls: Class, qualifier: symbol): void {
     const classId = cls.Ⲑid;
 
     const activeInstance = this.instances.get(classId)!.get(qualifier);

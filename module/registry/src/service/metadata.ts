@@ -16,19 +16,19 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   /**
    * Classes pending removal
    */
-  protected expired = new Map<string, C>();
+  expired = new Map<string, C>();
   /**
    * Classes pending creation
    */
-  protected pending = new Map<string, Partial<C>>();
+  pending = new Map<string, Partial<C>>();
   /**
    * Fields pending creation
    */
-  protected pendingFields = new Map<string, Map<F, Partial<M>>>();
+  pendingFields = new Map<string, Map<F, Partial<M>>>();
   /**
    * Active items
    */
-  protected entries = new Map<string, C>();
+  entries = new Map<string, C>();
 
   /**
    * Code to call when the installation is finalized
