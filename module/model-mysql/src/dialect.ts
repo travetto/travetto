@@ -18,7 +18,7 @@ export class MySQLDialect extends SQLDialect {
   conn: MySQLConnection;
   tablePostfix = 'COLLATE=utf8mb4_bin ENGINE=InnoDB';
 
-  constructor(context: AsyncContext, public config: SQLModelConfig) {
+  constructor(context: AsyncContext, config: SQLModelConfig) {
     super(config.namespace);
     this.conn = new MySQLConnection(context, config);
 
@@ -31,13 +31,13 @@ export class MySQLDialect extends SQLDialect {
     /**
      * Set string length limit based on version
      */
-    if (/^5[.][56]/.test(this.config.version)) {
+    if (/^5[.][56]/.test(config.version)) {
       this.DEFAULT_STRING_LEN = 191; // Mysql limitation with utf8 and keys
     } else {
       this.DEFAULT_STRING_LEN = 3072 / 4 - 1;
     }
 
-    if (/^5[.].*/.test(this.config.version)) {
+    if (/^5[.].*/.test(config.version)) {
       // Customer operators
       Object.assign(this.SQL_OPS, {
         $regex: 'REGEXP BINARY',

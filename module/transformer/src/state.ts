@@ -37,16 +37,21 @@ export class TransformerState implements State {
   #manifestIndex: ManifestIndex;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
+
   added = new Map<number, ts.Statement[]>();
   importName: string;
   file: string;
+  source: ts.SourceFile;
+  factory: ts.NodeFactory;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, manifestIndex: ManifestIndex) {
+  constructor(source: ts.SourceFile, factory: ts.NodeFactory, checker: ts.TypeChecker, manifestIndex: ManifestIndex) {
     this.#manifestIndex = manifestIndex;
     this.#resolver = new SimpleResolver(checker, manifestIndex);
     this.#imports = new ImportManager(source, factory, this.#resolver);
-    this.file = path.toPosix(this.source.fileName);
+    this.file = path.toPosix(source.fileName);
     this.importName = this.#resolver.getFileImportName(this.file, true);
+    this.source = source;
+    this.factory = factory;
   }
 
   /**

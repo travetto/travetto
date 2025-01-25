@@ -24,12 +24,14 @@ The decorator will load the context on invocation, and will keep the context act
 **Code: Usage of context within a service**
 ```typescript
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { Inject } from '@travetto/di';
 
 const NAME = Symbol.for('My Custom name symbol');
 
 export class ContextAwareService {
 
-  constructor(public context: AsyncContext) { }
+  @Inject()
+  context: AsyncContext;
 
   @WithAsyncContext()
   async complexOperator(name: string) {
@@ -56,17 +58,19 @@ The decorator also allows for a priming of the contextual information.  This is 
 **Code: Usage of context within a service**
 ```typescript
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { Inject } from '@travetto/di';
 
 export class SystemInitiatedContext {
 
-  constructor(public context: AsyncContext) { }
+  @Inject()
+  context: AsyncContext;
 
   @WithAsyncContext({
     user: 'system',
     uid: 20
   })
   async runJob(name: string) {
-    console.log('Running', { user: this.context.get().user, jobName: name });
+    console.log('Running', { user: this.context.get('user'), jobName: name });
   }
 }
 ```

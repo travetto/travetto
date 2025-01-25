@@ -43,7 +43,7 @@ type BulkErrorItem = { message: string, type: string, errors?: ValidationError[]
  * Bulk processing error
  */
 export class BulkProcessError extends AppError<{ errors: BulkErrorItem[] }> {
-  constructor(public errors: { idx: number, error: ValidationResultError }[]) {
+  constructor(errors: { idx: number, error: ValidationResultError }[]) {
     super('Bulk processing errors have occurred', {
       category: 'data',
       details: {

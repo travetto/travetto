@@ -36,7 +36,8 @@ export type ServiceAction = 'start' | 'stop' | 'status' | 'restart';
  */
 export class ServiceRunner {
 
-  constructor(public svc: ServiceDescriptor) { }
+  svc: ServiceDescriptor;
+  constructor(svc: ServiceDescriptor) { this.svc = svc; }
 
   async #isRunning(full = false): Promise<boolean> {
     const port = ports(this.svc.port!)[0];

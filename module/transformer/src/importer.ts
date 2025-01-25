@@ -23,10 +23,15 @@ export class ImportManager {
   #importName: string;
   #resolver: TransformResolver;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, resolver: TransformResolver) {
+  source: ts.SourceFile;
+  factory: ts.NodeFactory;
+
+  constructor(source: ts.SourceFile, factory: ts.NodeFactory, resolver: TransformResolver) {
     this.#imports = ImportUtil.collectImports(source);
     this.#resolver = resolver;
     this.#importName = this.#resolver.getFileImportName(source.fileName);
+    this.source = source;
+    this.factory = factory;
   }
 
   #rewriteModuleSpecifier(spec: ts.Expression | undefined): ts.Expression | undefined {
@@ -109,7 +114,6 @@ export class ImportManager {
       } else {
         const key = path.basename(file, path.extname(file)).replace(/\W+/g, '_');
         const suffix = this.#idx[key] = (this.#idx[key] ?? -1) + 1;
-        // eslint-disable-next-line no-bitwise
         this.#ids.set(file, this.factory.createIdentifier(`Δ${key}${suffix ? suffix : ''}`));
       }
     }

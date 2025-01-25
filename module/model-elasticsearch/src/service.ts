@@ -44,8 +44,9 @@ export class ElasticsearchModelService implements
   idSource = ModelCrudUtil.uuidSource();
   client: Client;
   manager: IndexManager;
+  config: ElasticsearchModelConfig;
 
-  constructor(public readonly config: ElasticsearchModelConfig) { }
+  constructor(config: ElasticsearchModelConfig) { this.config = config; }
 
   /**
    * Directly run the search

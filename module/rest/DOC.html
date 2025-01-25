@@ -115,7 +115,11 @@ Each <a target="_blank" class="source-link" href="https://github.com/travetto/tr
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Simple</span> <span class="token punctuation">{{'{'}}</span>
 
-  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token keyword">private</span> service<span class="token operator">:</span> MockService<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+  service<span class="token operator">:</span> MockService<span class="token punctuation">;</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span>service<span class="token operator">:</span> MockService<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>service <span class="token operator">=</span> service<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**
    * Get a random user by name
@@ -578,7 +582,11 @@ Additionally it is sometimes necessary to register custom interceptors.  Interce
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LoggingInterceptor</span> <span class="token keyword">implements</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{'{'}}</span>
 
-  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token keyword">private</span> appender<span class="token operator">:</span> Appender<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+  appender<span class="token operator">:</span> Appender<span class="token punctuation">;</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span>appender<span class="token operator">:</span> Appender<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>appender <span class="token operator">=</span> appender<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">intercept</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> req <span class="token punctuation">{{'}'}}</span><span class="token operator">:</span> FilterContext<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token comment">// Write request to database</span>

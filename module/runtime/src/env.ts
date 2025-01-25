@@ -6,7 +6,8 @@ const IS_FALSE = /^(false|no|off|0)$/i;
 export interface EnvData { }
 
 export class EnvProp<T> {
-  constructor(public readonly key: string) { }
+  readonly key: string;
+  constructor(key: string) { this.key = key; }
 
   /** Set value according to prop type */
   set(val: T | undefined | null): void {

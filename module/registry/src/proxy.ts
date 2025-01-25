@@ -15,7 +15,8 @@ function isFunction(o: unknown): o is Function {
  * Handler for for proxying modules while watching
  */
 export class RetargettingHandler<T> implements ProxyHandler<Any> {
-  constructor(public target: T) { }
+  target: T;
+  constructor(target: T) { this.target = target; }
 
   isExtensible(target: T): boolean {
     return !Object.isFrozen(this.target);

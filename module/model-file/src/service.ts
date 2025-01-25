@@ -43,7 +43,8 @@ const exists = (f: string): Promise<boolean> => fs.stat(f).then(() => true, () =
 @Injectable()
 export class FileModelService implements ModelCrudSupport, ModelBlobSupport, ModelExpirySupport, ModelStorageSupport {
 
-  private static async * scanFolder(folder: string, suffix: string): AsyncGenerator<[id: string, field: string]> {
+  /** @private */
+  static async * scanFolder(folder: string, suffix: string): AsyncGenerator<[id: string, field: string]> {
     for (const sub of await fs.readdir(folder)) {
       for (const file of await fs.readdir(path.resolve(folder, sub))) {
         if (file.endsWith(suffix)) {
@@ -54,15 +55,16 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
   }
 
   idSource = ModelCrudUtil.uuidSource();
+  config: FileModelConfig;
 
-  get client(): string {
-    return this.config.folder;
-  }
+  constructor(config: FileModelConfig) { this.config = config; }
 
   /**
    * The root location for all activity
    */
-  constructor(public readonly config: FileModelConfig) { }
+  get client(): string {
+    return this.config.folder;
+  }
 
   async #resolveName<T extends ModelType>(cls: Class<T> | string, suffix?: Suffix, id?: string): Promise<string> {
     const name = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);

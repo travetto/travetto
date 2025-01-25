@@ -18,7 +18,8 @@ export class CompilerState implements ts.CompilerHost {
     return new CompilerState().init(idx);
   }
 
-  private constructor() { }
+  /** @private */
+  constructor() { }
 
   #outputPath: string;
   #typingsPath: string;

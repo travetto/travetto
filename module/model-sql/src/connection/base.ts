@@ -26,14 +26,13 @@ export abstract class Connection<C = unknown> {
     commitNested: 'RELEASE SAVEPOINT $1;'
   };
 
-  constructor(public readonly context: AsyncContext) {
-
-  }
+  readonly context: AsyncContext;
+  constructor(context: AsyncContext) { this.context = context; }
 
   /**
    * Get active connection
    */
-  get active(): C {
+  get active(): C | undefined {
     return this.context.get<C>(ContextActiveSymbol);
   }
 
@@ -123,12 +122,12 @@ export abstract class Connection<C = unknown> {
       if (mode === 'isolated' || mode === 'force') {
         const txId = mode === 'isolated' ? `tx${Util.uuid()}` : undefined;
         try {
-          await this.startTx(this.active, txId);
+          await this.startTx(this.active!, txId);
           const res = await op();
-          await this.commitTx(this.active, txId);
+          await this.commitTx(this.active!, txId);
           return res;
         } catch (err) {
-          try { await this.rollbackTx(this.active, txId); } catch { }
+          try { await this.rollbackTx(this.active!, txId); } catch { }
           throw err;
         }
       } else {

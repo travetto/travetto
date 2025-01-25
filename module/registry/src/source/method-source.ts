@@ -15,7 +15,7 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
   /**
    * Define parent change source, generally will be the class source
    */
-  constructor(public classSource: ChangeSource<Class>) {
+  constructor(classSource: ChangeSource<Class>) {
     classSource.on(e => this.onClassEvent(e));
   }
 

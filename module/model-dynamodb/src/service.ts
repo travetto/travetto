@@ -60,8 +60,9 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   idSource = ModelCrudUtil.uuidSource();
   client: DynamoDB;
+  config: DynamoDBModelConfig;
 
-  constructor(public readonly config: DynamoDBModelConfig) { }
+  constructor(config: DynamoDBModelConfig) { this.config = config; }
 
   #resolveTable(cls: Class): string {
     let table = ModelRegistry.getStore(cls).toLowerCase().replace(/[^A-Za-z0-9_]+/g, '_');

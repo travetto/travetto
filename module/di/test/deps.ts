@@ -45,7 +45,10 @@ export class Database {
 @Injectable()
 export class Service {
 
-  constructor(public db: Database) {
+  db: Database;
+
+  constructor(db: Database) {
+    this.db = db;
     console.log('Creating service', { database: db.dbConfig });
   }
 

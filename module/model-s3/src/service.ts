@@ -42,8 +42,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   idSource = ModelCrudUtil.uuidSource();
   client: S3;
+  config: S3ModelConfig;
 
-  constructor(public readonly config: S3ModelConfig) { }
+  constructor(config: S3ModelConfig) { this.config = config; }
 
   #getMetaBase({ range, size, ...meta }: BlobMeta): MetaBase {
     return {

@@ -134,15 +134,13 @@ export abstract class SQLDialect implements DialectState {
   rootAlias = '_ROOT';
 
   aliasCache = new Map<Class, Map<string, Alias>>();
+  ns: string;
 
-  constructor(public ns: string) {
+  constructor(ns: string) {
     this.namespace = this.namespace.bind(this);
     this.table = this.table.bind(this);
     this.ident = this.ident.bind(this);
-
-    if (this.ns) {
-      this.ns = `${this.ns}_`;
-    }
+    this.ns = ns ? `${ns}_` : ns;
   }
 
   /**

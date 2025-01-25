@@ -17,8 +17,10 @@ export class IndexManager implements ModelStorageSupport {
   #aliasToIndex = new Map<string, string>();
   #identities = new Map<Class, { index: string }>();
   #client: Client;
+  config: ElasticsearchModelConfig;
 
-  constructor(public readonly config: ElasticsearchModelConfig, client: Client) {
+  constructor(config: ElasticsearchModelConfig, client: Client) {
+    this.config = config;
     this.#client = client;
   }
 

@@ -16,10 +16,12 @@ import { SqliteConnection } from './connection';
 export class SqliteDialect extends SQLDialect {
 
   conn: SqliteConnection;
+  config: SQLModelConfig;
 
-  constructor(context: AsyncContext, public config: SQLModelConfig) {
+  constructor(context: AsyncContext, config: SQLModelConfig) {
     super(config.namespace);
     this.conn = new SqliteConnection(context, config);
+    this.config = config;
 
     // Special operators
     Object.assign(this.SQL_OPS, {

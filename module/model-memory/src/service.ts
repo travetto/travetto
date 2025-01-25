@@ -53,9 +53,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   };
 
   idSource = ModelCrudUtil.uuidSource();
-  get client(): Map<string, StoreType> { return this.#store; }
+  config: MemoryModelConfig;
 
-  constructor(public readonly config: MemoryModelConfig) { }
+  constructor(config: MemoryModelConfig) { this.config = config; }
+
+  get client(): Map<string, StoreType> { return this.#store; }
 
   #getStore<T extends ModelType>(cls: Class<T> | string): StoreType {
     const key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);

@@ -100,7 +100,11 @@ import { MockService } from './mock';
 @Controller('/simple')
 export class Simple {
 
-  constructor(private service: MockService) { }
+  service: MockService;
+
+  constructor(service: MockService) {
+    this.service = service;
+  }
 
   /**
    * Get a random user by name
@@ -516,7 +520,11 @@ class Appender {
 @Injectable()
 export class LoggingInterceptor implements RestInterceptor {
 
-  constructor(private appender: Appender) { }
+  appender: Appender;
+
+  constructor(appender: Appender) {
+    this.appender = appender;
+  }
 
   async intercept({ req }: FilterContext) {
     // Write request to database
