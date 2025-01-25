@@ -51,8 +51,8 @@ export class AsyncContext {
   /**
    * Get context field as a defined prop
    */
-  prop<T = unknown>(key: string | symbol, failIfUnbound = true): AsyncContextProp<T> {
-    return new AsyncContextProp<T>(castTo(this.storage), key, failIfUnbound);
+  prop<T = unknown>(key?: string | symbol, failIfUnbound = true): AsyncContextProp<T> {
+    return new AsyncContextProp<T>(castTo(this.storage), key ?? Symbol(), failIfUnbound);
   }
 
   /**

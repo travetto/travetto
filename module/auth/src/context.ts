@@ -6,8 +6,6 @@ import { AuthToken } from './internal/types';
 import { Principal } from './types/principal';
 import { AuthenticatorState } from './types/authenticator';
 
-const AuthContextSymbol = Symbol.for('@travetto/auth:context');
-
 type AuthContextShape = {
   principal?: Principal;
   authToken?: AuthToken;
@@ -23,7 +21,7 @@ export class AuthContext {
   context: AsyncContext;
 
   postConstruct(): void {
-    this.#authProp = this.context.prop(AuthContextSymbol);
+    this.#authProp = this.context.prop();
   }
 
   /**

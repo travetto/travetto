@@ -1,33 +1,12 @@
 import { Injectable, Inject } from '@travetto/di';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 import { Runtime, Util } from '@travetto/runtime';
-import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
-import { Text } from '@travetto/schema';
+import { ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { AsyncContext, AsyncContextProp } from '@travetto/context';
 
 import { Session } from './session';
 import { SessionConfig } from './config';
-
-/**
- * Session model service identifier
- */
-export const SessionModelSymbol = Symbol.for('@travetto/rest-session:model');
-
-/**
- * Symbol for accessing the raw session
- */
-export const SessionRawSymbol = Symbol.for('@travetto/rest-session:data');
-
-@Model({ autoCreate: false })
-export class SessionEntry {
-  id: string;
-  @Text()
-  data: string;
-  @ExpiresAt()
-  expiresAt?: Date;
-  issuedAt: Date;
-  maxAge?: number;
-}
+import { SessionEntry, SessionModelSymbol } from './model';
 
 /**
  * Rest service for supporting the session and managing the session state
@@ -54,7 +33,7 @@ export class SessionService {
    * Initialize service if none defined
    */
   async postConstruct(): Promise<void> {
-    this.#sessionProp = this.context.prop(SessionRawSymbol);
+    this.#sessionProp = this.context.prop();
 
     if (isStorageSupported(this.#modelService) && Runtime.dynamic) {
       await this.#modelService.createModel?.(SessionEntry);

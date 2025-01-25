@@ -1,9 +1,6 @@
 import { castTo, Util } from '@travetto/runtime';
 import { AsyncContext, AsyncContextProp } from '@travetto/context';
 
-const ContextActiveSymbol: unique symbol = Symbol.for('@travetto/model:sql-active');
-const TxActiveSymbol: unique symbol = Symbol.for('@travetto/model:sql-transaction');
-
 export type TransactionType = 'required' | 'isolated' | 'force';
 
 /**
@@ -32,8 +29,8 @@ export abstract class Connection<C = unknown> {
 
   constructor(context: AsyncContext) {
     this.context = context;
-    this.#connProp = context.prop<C>(ContextActiveSymbol);
-    this.#txProp = context.prop(TxActiveSymbol);
+    this.#connProp = context.prop();
+    this.#txProp = context.prop();
   }
 
   /**
