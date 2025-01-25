@@ -17,7 +17,7 @@ export class PostgreSQLDialect extends SQLDialect {
 
   conn: PostgreSQLConnection;
 
-  constructor(context: AsyncContext, public config: SQLModelConfig) {
+  constructor(context: AsyncContext, config: SQLModelConfig) {
     super(config.namespace);
     this.conn = new PostgreSQLConnection(context, config);
 

@@ -81,7 +81,7 @@ export class Accessors {
   #area: string;
   // eslint-disable-next-line no-unused-private-class-members
   #color: string;
-  public readonly myName: string = 'name';
+  readonly myName: string = 'name';
 
   @Required()
   set color(val: string) {

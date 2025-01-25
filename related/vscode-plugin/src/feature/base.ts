@@ -8,9 +8,9 @@ import { ActivationTarget } from '../core/types';
  */
 export abstract class BaseFeature implements ActivationTarget {
 
-  public readonly module: string;
-  public readonly command: string;
-  public readonly log: Log;
+  readonly module: string;
+  readonly command: string;
+  readonly log: Log;
 
   constructor(
     module?: string,

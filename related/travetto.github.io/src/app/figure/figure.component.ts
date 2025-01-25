@@ -16,7 +16,11 @@ import { Component, OnInit, ElementRef } from '@angular/core';
 })
 export class FigureComponent implements OnInit {
 
-  constructor(private elementRef: ElementRef<HTMLElement>) { }
+  elementRef: ElementRef<HTMLElement>;
+
+  constructor(elementRef: ElementRef<HTMLElement>) {
+    this.elementRef = elementRef;
+  }
 
   ngOnInit(): void {
     const node = this.elementRef.nativeElement;

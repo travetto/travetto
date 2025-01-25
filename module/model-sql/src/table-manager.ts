@@ -15,12 +15,11 @@ import { Connection } from './connection/base';
 export class TableManager {
 
   #dialect: SQLDialect;
+  context: AsyncContext;
 
-  constructor(
-    public context: AsyncContext,
-    dialect: SQLDialect
-  ) {
+  constructor(context: AsyncContext, dialect: SQLDialect) {
     this.#dialect = dialect;
+    this.context = context;
   }
 
   #exec<T = unknown>(sql: string): Promise<{ records: T[], count: number }> {

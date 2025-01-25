@@ -15,19 +15,20 @@ import { OpenapiVisitor } from './spec-generate';
 @Injectable()
 export class OpenApiService {
 
-  @Inject()
-  private apiHostConfig: ApiHostConfig;
+  /** @private  */
+  @Inject() apiHostConfig: ApiHostConfig;
 
-  @Inject()
-  private apiInfoConfig: ApiInfoConfig;
+  /** @private  */
+  @Inject() apiInfoConfig: ApiInfoConfig;
 
-  @Inject()
-  private apiSpecConfig: ApiSpecConfig;
+  /** @private  */
+  @Inject() apiSpecConfig: ApiSpecConfig;
 
-  @Inject()
-  private restConfig: RestConfig;
+  /** @private  */
+  @Inject() restConfig: RestConfig;
 
-  private _spec: OpenAPIObject | undefined;
+  /** @private  */
+  _spec: OpenAPIObject | undefined;
 
   /**
    * Reset specification

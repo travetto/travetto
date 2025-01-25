@@ -26,8 +26,9 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
 
   idSource = ModelCrudUtil.uuidSource();
   client: RedisClient;
+  config: RedisModelConfig;
 
-  constructor(public readonly config: RedisModelConfig) { }
+  constructor(config: RedisModelConfig) { this.config = config; }
 
   #resolveKey(cls: Class | string, id?: string, extra?: string): string {
     let key = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);

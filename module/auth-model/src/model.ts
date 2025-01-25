@@ -31,6 +31,9 @@ export interface RegisteredPrincipal extends Principal {
   password?: string;
 }
 
+type ToPrincipal<T extends ModelType> = (t: OptionalId<T>) => RegisteredPrincipal;
+type FromPrincipal<T extends ModelType> = (t: Partial<RegisteredPrincipal>) => Partial<T>;;
+
 /**
  * A model-based auth service
  */
@@ -38,6 +41,9 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
 
   #modelService: ModelCrudSupport;
   #cls: Class<T>;
+
+  toPrincipal: ToPrincipal<T>;
+  fromPrincipal: FromPrincipal<T>;
 
   /**
    * Build a Model Principal Source
@@ -49,11 +55,13 @@ export class ModelAuthService<T extends ModelType> implements Authenticator<T>, 
   constructor(
     modelService: ModelCrudSupport,
     cls: Class<T>,
-    public toPrincipal: (t: OptionalId<T>) => RegisteredPrincipal,
-    public fromPrincipal: (t: Partial<RegisteredPrincipal>) => Partial<T>,
+    toPrincipal: ToPrincipal<T>,
+    fromPrincipal: FromPrincipal<T>,
   ) {
     this.#modelService = modelService;
     this.#cls = cls;
+    this.toPrincipal = toPrincipal;
+    this.fromPrincipal = fromPrincipal;
   }
 
   /**

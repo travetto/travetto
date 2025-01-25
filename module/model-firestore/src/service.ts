@@ -25,8 +25,9 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   idSource = ModelCrudUtil.uuidSource();
   client: Firestore;
+  config: FirestoreModelConfig;
 
-  constructor(public readonly config: FirestoreModelConfig) { }
+  constructor(config: FirestoreModelConfig) { this.config = config; }
 
   #resolveTable(cls: Class): string {
     let table = ModelRegistry.getStore(cls);

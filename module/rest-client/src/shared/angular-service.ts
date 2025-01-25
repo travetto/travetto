@@ -17,9 +17,14 @@ export class Configuration implements IAngularServiceConfig {
 }
 
 export abstract class BaseAngularService extends BaseRemoteService<RequestInit, Response> {
+
   // @ts-ignore
-  constructor(public client: HttpClient, cfg: IRemoteServiceConfig<RequestInit, Response>) {
+  client: HttpClient;
+
+  // @ts-ignore
+  constructor(client: HttpClient, cfg: IRemoteServiceConfig<RequestInit, Response>) {
     super(cfg);
+    this.client = client;
   }
 
   consumeJSON<T>(text: string | unknown): T {

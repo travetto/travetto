@@ -2,24 +2,24 @@ import { Component } from '@angular/core';
 import { Router, NavigationEnd, RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss'],
-    imports: [RouterLink, RouterOutlet]
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
+  imports: [RouterLink, RouterOutlet]
 })
 export class AppComponent {
   title = 'app';
 
   href = '';
 
-  constructor(private router: Router) {
+  constructor(router: Router) {
     router.events.subscribe(x => {
       this.href = router.url.split('/')[1];
     });
 
     router.events.subscribe(s => {
       if (s instanceof NavigationEnd) {
-        const tree = this.router.parseUrl(this.router.url);
+        const tree = router.parseUrl(router.url);
         if (tree.fragment) {
           const element = document.querySelector<HTMLElement>(`#${tree.fragment}`);
           if (element) {
