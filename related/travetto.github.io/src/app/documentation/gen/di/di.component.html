@@ -180,7 +180,12 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">CustomService</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token keyword">private</span> dependentService<span class="token operator">:</span> DependentService<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+
+  dependentService<span class="token operator">:</span> DependentService<span class="token punctuation">;</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span>svc<span class="token operator">:</span> DependentService<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>dependentService <span class="token operator">=</span> svc<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">coolOperation</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>dependentService<span class="token punctuation">.</span><span class="token function">doWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
