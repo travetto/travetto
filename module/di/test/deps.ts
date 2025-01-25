@@ -46,7 +46,9 @@ export class Database {
 export class Service {
 
   db: Database;
+
   constructor(db: Database) {
+    this.db = db;
     console.log('Creating service', { database: db.dbConfig });
   }
 
