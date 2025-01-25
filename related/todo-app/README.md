@@ -89,8 +89,8 @@ import { Todo, TodoSearch } from './model';
 @Injectable()
 export class TodoService {
 
-  @Inject()
-  private modelService: MongoModelService;
+  /** @private */
+  @Inject() modelService: MongoModelService;
 
   async add(todo: Todo): Promise<Todo> {
     todo.created = new Date();
