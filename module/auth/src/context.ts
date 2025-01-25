@@ -81,6 +81,6 @@ export class AuthContext {
    * @private
    */
   async clear(): Promise<void> {
-    this.#authProp.set({});
+    this.#authProp.set(undefined);
   }
 }
