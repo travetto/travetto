@@ -15,26 +15,25 @@ import { OpenapiVisitor } from './spec-generate';
 @Injectable()
 export class OpenApiService {
 
-  /** @private  */
-  @Inject() apiHostConfig: ApiHostConfig;
+  @Inject()
+  apiHostConfig: ApiHostConfig;
 
-  /** @private  */
-  @Inject() apiInfoConfig: ApiInfoConfig;
+  @Inject()
+  apiInfoConfig: ApiInfoConfig;
 
-  /** @private  */
-  @Inject() apiSpecConfig: ApiSpecConfig;
+  @Inject()
+  apiSpecConfig: ApiSpecConfig;
 
-  /** @private  */
-  @Inject() restConfig: RestConfig;
+  @Inject()
+  restConfig: RestConfig;
 
-  /** @private  */
-  _spec: OpenAPIObject | undefined;
+  #spec: OpenAPIObject | undefined;
 
   /**
    * Reset specification
    */
   async resetSpec(): Promise<void> {
-    delete this._spec;
+    this.#spec = undefined;
     if (this.apiSpecConfig.persist) {
       await this.persist();
     }
@@ -58,14 +57,14 @@ export class OpenApiService {
    * Get specification object
    */
   async getSpec(): Promise<OpenAPIObject> {
-    if (!this._spec) {
-      this._spec = {
+    if (!this.#spec) {
+      this.#spec = {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
         ...await ControllerVisitUtil.visit(new OpenapiVisitor(this.apiSpecConfig))
       };
     }
-    return this._spec!;
+    return this.#spec!;
   }
 
   /**
