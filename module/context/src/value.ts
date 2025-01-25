@@ -2,7 +2,7 @@ import { AppError, castTo } from '@travetto/runtime';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 type Payload<T> = Record<string | symbol, T | undefined>;
-type Store<T = unknown> = AsyncLocalStorage<Payload<T>>;
+type Storage<T = unknown> = AsyncLocalStorage<Payload<T>>;
 type Key = string | symbol;
 
 /**
@@ -10,25 +10,33 @@ type Key = string | symbol;
  */
 export class AsyncContextValue<T = unknown> {
 
-  #storeFn: () => Store;
-  #storage?: Store<T>;
+  #source: () => Storage<T>;
+  #storage?: Storage<T>;
   #key: Key;
   #failIfUnbound: boolean;
 
   constructor(
-    store: (() => Store) | { storage: Store } | { context: { storage: Store } },
-    cfg?: Key | { key?: Key, failIfUnbound?: boolean }
+    source: Storage | (() => Storage) | { storage: Storage } | { context: { storage: Storage } },
+    config?: Key | { key?: Key, failIfUnbound?: boolean }
   ) {
-    if (typeof cfg === 'string' || typeof cfg === 'symbol') {
-      cfg = { key: cfg };
+    if (typeof config === 'string' || typeof config === 'symbol') {
+      config = { key: config };
     }
-    this.#storeFn = typeof store === 'function' ? store : ((): Store => 'storage' in store ? store.storage : store.context.storage);
-    this.#key = cfg?.key ?? Symbol();
-    this.#failIfUnbound = cfg?.failIfUnbound ?? true;
+    this.#source = castTo(typeof source === 'function' ?
+      source :
+      ((): Storage => 'getStore' in source ?
+        source :
+        ('storage' in source ?
+          source.storage :
+          source.context.storage
+        ))
+    );
+    this.#key = config?.key ?? Symbol();
+    this.#failIfUnbound = config?.failIfUnbound ?? true;
   }
 
   get #store(): Payload<T> | undefined {
-    const store = (this.#storage ??= castTo(this.#storeFn())).getStore();
+    const store = (this.#storage ??= this.#source()).getStore();
     if (!store && this.#failIfUnbound) {
       throw new AppError('Context not initialized');
     }
