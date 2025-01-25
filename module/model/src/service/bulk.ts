@@ -38,14 +38,12 @@ export interface BulkResponse<E = unknown> {
 }
 
 type BulkErrorItem = { message: string, type: string, errors?: ValidationError[], idx: number };
-type BulkError = { idx: number, error: ValidationResultError };
 
 /**
  * Bulk processing error
  */
 export class BulkProcessError extends AppError<{ errors: BulkErrorItem[] }> {
-  errors: BulkError[];
-  constructor(errors: BulkError[]) {
+  constructor(errors: { idx: number, error: ValidationResultError }[]) {
     super('Bulk processing errors have occurred', {
       category: 'data',
       details: {
@@ -55,7 +53,6 @@ export class BulkProcessError extends AppError<{ errors: BulkErrorItem[] }> {
         })
       }
     });
-    this.errors = errors;
   }
 }
 
