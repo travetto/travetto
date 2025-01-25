@@ -1,12 +1,10 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { Inject } from '@travetto/di';
 
 export class SystemInitiatedContext {
 
+  @Inject()
   context: AsyncContext;
-
-  constructor(context: AsyncContext) {
-    this.context = context;
-  }
 
   @WithAsyncContext({
     user: 'system',

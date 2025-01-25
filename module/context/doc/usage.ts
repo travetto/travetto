@@ -1,14 +1,12 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { Inject } from '@travetto/di';
 
 const NAME = Symbol.for('My Custom name symbol');
 
 export class ContextAwareService {
 
+  @Inject()
   context: AsyncContext;
-
-  constructor(context: AsyncContext) {
-    this.context = context;
-  }
 
   @WithAsyncContext()
   async complexOperator(name: string) {
