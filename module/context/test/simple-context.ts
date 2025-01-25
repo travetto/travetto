@@ -14,7 +14,7 @@ class VerifyContext {
 
   @BeforeEach()
   beforeEach() {
-    this.context?.alStorage.disable();
+    this.context?.storage.disable();
     this.context = new AsyncContext();
   }
 
@@ -26,6 +26,18 @@ class VerifyContext {
     await timers.setTimeout(1);
     assert(this.context.get('user') === 'bob');
   }
+
+  @Test()
+  @WithAsyncContext({})
+  async loadContextProp() {
+    assert(this.context !== null);
+    const prop = this.context.prop('user');
+    prop.set('bob');
+    await timers.setTimeout(1);
+    assert(prop.get() === 'bob');
+    assert(this.context.get('user') === 'bob');
+  }
+
 
   @Test()
   @WithAsyncContext({})

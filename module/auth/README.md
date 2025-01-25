@@ -155,9 +155,11 @@ type AuthContextShape = {
 export class AuthContext {
   @Inject()
   /**
-   * Get the principal from the context
-   * @returns principal if authenticated
-   * @returns undefined if not authenticated
+   * Initialize context
+   */
+  init(): void;
+  /**
+   * Get the principal, if set
    */
   get principal(): Principal | undefined;
   /**

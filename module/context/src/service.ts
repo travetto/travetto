@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 
 import { Injectable } from '@travetto/di';
 import { AppError, AsyncQueue, castTo } from '@travetto/runtime';
+import { AsyncContextProp } from './prop';
 
 type Ctx<T = unknown> = Record<string | symbol, T>;
 
@@ -11,7 +12,7 @@ type Ctx<T = unknown> = Record<string | symbol, T>;
 @Injectable()
 export class AsyncContext {
 
-  alStorage = new AsyncLocalStorage<Ctx>();
+  storage = new AsyncLocalStorage<Ctx>();
 
   constructor() {
     this.run = this.run.bind(this);
@@ -19,37 +20,39 @@ export class AsyncContext {
   }
 
   #get<T = unknown>(): Ctx<T> {
-    if (!this.active) {
+    const store = this.storage.getStore();
+    if (!store) {
       throw new AppError('Context is not initialized');
     }
-    return castTo(this.alStorage.getStore());
+    return castTo(store);
   }
 
   /**
    * Are we in an active context
    */
   get active(): boolean {
-    return this.alStorage.getStore() !== undefined;
+    return this.storage.getStore() !== undefined;
   }
 
   /**
    * Get context field by key
    */
-  get<T = unknown>(key: string | symbol, ignoreErrors = false): T | undefined {
-    if (ignoreErrors && !this.active) {
-      return;
-    }
+  get<T = unknown>(key: string | symbol): T | undefined {
     return this.#get<T>()[key];
   }
 
   /**
    * Set context field by key
    */
-  set<T = unknown>(key: string | symbol, val: T | undefined, ignoreErrors = false): void {
-    if (ignoreErrors && !this.active) {
-      return;
-    }
+  set<T = unknown>(key: string | symbol, val: T | undefined): void {
     this.#get()[key] = val;
+  }
+
+  /**
+   * Get context field as a defined prop
+   */
+  prop<T = unknown>(key: string | symbol, failIfUnbound = true): AsyncContextProp<T> {
+    return new AsyncContextProp<T>(castTo(this.storage), key, failIfUnbound);
   }
 
   /**
@@ -64,7 +67,7 @@ export class AsyncContext {
    * Run an async function and ensure the context is available during execution
    */
   async run<T = unknown>(fn: () => Promise<T> | T, init: Ctx = {}): Promise<T> {
-    return this.alStorage.run({ ...this.alStorage.getStore(), ...init }, fn);
+    return this.storage.run({ ...this.storage.getStore(), ...init }, fn);
   }
 
   /**
@@ -72,7 +75,7 @@ export class AsyncContext {
    */
   iterate<T>(fn: () => AsyncIterable<T>, init: Ctx = {}): AsyncIterable<T> {
     const out = new AsyncQueue<T>();
-    this.alStorage.run({ ...this.alStorage.getStore(), ...init }, async () => {
+    this.storage.run({ ...this.storage.getStore(), ...init }, async () => {
       try {
         for await (const item of fn()) {
           out.add(item);

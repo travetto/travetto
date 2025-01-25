@@ -3,7 +3,7 @@ import { isStorageSupported } from '@travetto/model/src/internal/service/common'
 import { Runtime, Util } from '@travetto/runtime';
 import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
-import { AsyncContext } from '@travetto/context';
+import { AsyncContext, AsyncContextProp } from '@travetto/context';
 
 import { Session } from './session';
 import { SessionConfig } from './config';
@@ -44,6 +44,8 @@ export class SessionService {
 
   #modelService: ModelExpirySupport;
 
+  #sessionProp: AsyncContextProp<Session>;
+
   constructor(@Inject(SessionModelSymbol) service: ModelExpirySupport) {
     this.#modelService = service;
   }
@@ -52,17 +54,19 @@ export class SessionService {
    * Initialize service if none defined
    */
   async postConstruct(): Promise<void> {
+    this.#sessionProp = this.context.prop(SessionRawSymbol);
+
     if (isStorageSupported(this.#modelService) && Runtime.dynamic) {
       await this.#modelService.createModel?.(SessionEntry);
     }
   }
 
   get #session(): Session | undefined {
-    return this.context.get<Session>(SessionRawSymbol);
+    return this.#sessionProp.get();
   }
 
   set #session(v: Session | undefined) {
-    this.context.set(SessionRawSymbol, v);
+    this.#sessionProp.set(v);
   }
 
   /**

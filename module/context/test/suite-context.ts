@@ -24,8 +24,24 @@ class WithSuiteContextSuite {
   }
 
   @Test()
+  @WithAsyncContext({})
+  async basicProp() {
+    assert(this.context !== null);
+    const prop = this.context.prop('age');
+    assert(prop.get() === 20);
+  }
+
+  @Test()
   @WithAsyncContext({ age: 30 })
   async override() {
     assert(this.context.get('age') === 30);
+  }
+
+  @Test()
+  @WithAsyncContext({ age: 30 })
+  async overrideProp() {
+    assert(this.context !== null);
+    const prop = this.context.prop('age');
+    assert(prop.get() === 30);
   }
 }

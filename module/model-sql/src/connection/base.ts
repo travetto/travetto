@@ -1,5 +1,5 @@
 import { castTo, Util } from '@travetto/runtime';
-import { AsyncContext } from '@travetto/context';
+import { AsyncContext, AsyncContextProp } from '@travetto/context';
 
 const ContextActiveSymbol: unique symbol = Symbol.for('@travetto/model:sql-active');
 const TxActiveSymbol: unique symbol = Symbol.for('@travetto/model:sql-transaction');
@@ -27,20 +27,27 @@ export abstract class Connection<C = unknown> {
   };
 
   readonly context: AsyncContext;
-  constructor(context: AsyncContext) { this.context = context; }
+  #connProp: AsyncContextProp<C>;
+  #txProp: AsyncContextProp<boolean>;
+
+  constructor(context: AsyncContext) {
+    this.context = context;
+    this.#connProp = context.prop<C>(ContextActiveSymbol);
+    this.#txProp = context.prop(TxActiveSymbol);
+  }
 
   /**
    * Get active connection
    */
   get active(): C | undefined {
-    return this.context.get<C>(ContextActiveSymbol);
+    return this.#connProp.get();
   }
 
   /**
    * Get active tx state
    */
   get activeTx(): boolean {
-    return !!this.context.get<boolean>(TxActiveSymbol);
+    return !!this.#txProp.get();
   }
 
   /**
@@ -80,7 +87,7 @@ export abstract class Connection<C = unknown> {
       let conn;
       try {
         conn = await this.acquire();
-        this.context.set(ContextActiveSymbol, conn);
+        this.#connProp.set(conn);
         return await op();
       } finally {
         if (conn) {
@@ -104,7 +111,7 @@ export abstract class Connection<C = unknown> {
     const self = castTo<Connection>(this);
     yield* this.context.iterate(async function* () {
       try {
-        self.context.set(ContextActiveSymbol, await self.acquire());
+        self.#connProp.set(await self.acquire());
         yield* op();
       } finally {
         if (self.active) {
@@ -135,7 +142,7 @@ export abstract class Connection<C = unknown> {
       }
     } else {
       return this.runWithActive(() => {
-        this.context.set(TxActiveSymbol, true);
+        this.#txProp.set(true);
         return this.runWithTransaction('force', op);
       });
     }

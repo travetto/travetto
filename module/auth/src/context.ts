@@ -1,6 +1,6 @@
 
 import { Inject, Injectable } from '@travetto/di';
-import { AsyncContext } from '@travetto/context';
+import { AsyncContext, AsyncContextProp } from '@travetto/context';
 
 import { AuthToken } from './internal/types';
 import { Principal } from './types/principal';
@@ -17,65 +17,70 @@ type AuthContextShape = {
 @Injectable()
 export class AuthContext {
 
+  #authProp: AsyncContextProp<AuthContextShape>;
+
   @Inject()
   context: AsyncContext;
 
-  #getContext(setting = false): AuthContextShape | undefined {
-    let v = this.context.get<AuthContextShape>(AuthContextSymbol);
-    if (!v && setting) {
-      this.context.set(AuthContextSymbol, v = {});
-    }
-    return v;
+  postConstruct(): void {
+    this.#authProp = this.context.prop(AuthContextSymbol);
   }
 
   /**
-   * Get the principal from the context
-   * @returns principal if authenticated
-   * @returns undefined if not authenticated
+   * Initialize context
+   * @private
+   */
+  init(): void {
+    this.#authProp.set({});
+  }
+
+  /**
+   * Get the principal, if set
    */
   get principal(): Principal | undefined {
-    return this.#getContext(false)?.principal;
+    return this.#authProp.get()?.principal;
   }
 
   /**
    * Set principal
    */
   set principal(p: Principal | undefined) {
-    this.#getContext(true)!.principal = p;
+    this.#authProp.get()!.principal = p;
   }
 
   /**
    * Get the authentication token, if it exists
    */
   get authToken(): AuthToken | undefined {
-    return this.#getContext(false)?.authToken;
+    return this.#authProp.get()?.authToken;
   }
 
   /**
    * Set/overwrite the user's authentication token
    */
   set authToken(token: AuthToken | undefined) {
-    this.#getContext(true)!.authToken = token;
+    this.#authProp.get()!.authToken = token;
   }
 
   /**
    * Get the authenticator state, if it exists
    */
   get authenticatorState(): AuthenticatorState | undefined {
-    return this.#getContext(false)?.authenticatorState;
+    return this.#authProp.get()?.authenticatorState;
   }
 
   /**
    * Set/overwrite the authenticator state
    */
   set authenticatorState(state: AuthenticatorState | undefined) {
-    this.#getContext(true)!.authenticatorState = state;
+    this.#authProp.get()!.authenticatorState = state;
   }
 
   /**
    * Clear context
+   * @private
    */
   async clear(): Promise<void> {
-    this.context.set(AuthContextSymbol, undefined);
+    this.#authProp.set({});
   }
 }
