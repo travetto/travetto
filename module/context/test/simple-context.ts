@@ -6,6 +6,7 @@ import { BeforeEach, Suite, Test } from '@travetto/test';
 
 import { AsyncContext } from '../src/service';
 import { WithAsyncContext } from '../src/decorator';
+import { AsyncContextValue } from '../src/value';
 
 @Suite()
 class VerifyContext {
@@ -14,7 +15,7 @@ class VerifyContext {
 
   @BeforeEach()
   beforeEach() {
-    this.context?.alStorage.disable();
+    this.context?.storage.disable();
     this.context = new AsyncContext();
   }
 
@@ -26,6 +27,18 @@ class VerifyContext {
     await timers.setTimeout(1);
     assert(this.context.get('user') === 'bob');
   }
+
+  @Test()
+  @WithAsyncContext({})
+  async loadContextProp() {
+    assert(this.context !== null);
+    const prop = new AsyncContextValue(this, 'user');
+    prop.set('bob');
+    await timers.setTimeout(1);
+    assert(prop.get() === 'bob');
+    assert(this.context.get('user') === 'bob');
+  }
+
 
   @Test()
   @WithAsyncContext({})

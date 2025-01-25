@@ -503,7 +503,7 @@ rest.log:
 ```
 
 ### AsyncContextInterceptor
-[AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/context.ts#L32) is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
+[AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/context.ts#L18) is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
 
 ### Custom Interceptors
 Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L28) interface.  The interceptors are tied to the defined [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31) and [Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:

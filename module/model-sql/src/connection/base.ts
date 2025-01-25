@@ -1,8 +1,5 @@
 import { castTo, Util } from '@travetto/runtime';
-import { AsyncContext } from '@travetto/context';
-
-const ContextActiveSymbol: unique symbol = Symbol.for('@travetto/model:sql-active');
-const TxActiveSymbol: unique symbol = Symbol.for('@travetto/model:sql-transaction');
+import { AsyncContext, AsyncContextValue } from '@travetto/context';
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 
@@ -27,20 +24,26 @@ export abstract class Connection<C = unknown> {
   };
 
   readonly context: AsyncContext;
-  constructor(context: AsyncContext) { this.context = context; }
+
+  #active = new AsyncContextValue<C>(this);
+  #activeTx = new AsyncContextValue<boolean>(this);
+
+  constructor(context: AsyncContext) {
+    this.context = context;
+  }
 
   /**
    * Get active connection
    */
   get active(): C | undefined {
-    return this.context.get<C>(ContextActiveSymbol);
+    return this.#active.get();
   }
 
   /**
    * Get active tx state
    */
   get activeTx(): boolean {
-    return !!this.context.get<boolean>(TxActiveSymbol);
+    return !!this.#activeTx.get();
   }
 
   /**
@@ -80,7 +83,7 @@ export abstract class Connection<C = unknown> {
       let conn;
       try {
         conn = await this.acquire();
-        this.context.set(ContextActiveSymbol, conn);
+        this.#active.set(conn);
         return await op();
       } finally {
         if (conn) {
@@ -104,7 +107,7 @@ export abstract class Connection<C = unknown> {
     const self = castTo<Connection>(this);
     yield* this.context.iterate(async function* () {
       try {
-        self.context.set(ContextActiveSymbol, await self.acquire());
+        self.#active.set(await self.acquire());
         yield* op();
       } finally {
         if (self.active) {
@@ -135,7 +138,7 @@ export abstract class Connection<C = unknown> {
       }
     } else {
       return this.runWithActive(() => {
-        this.context.set(TxActiveSymbol, true);
+        this.#activeTx.set(true);
         return this.runWithTransaction('force', op);
       });
     }

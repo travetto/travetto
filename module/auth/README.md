@@ -141,11 +141,10 @@ Upon successful authentication, an optional [Authorizer Contract](https://github
 If this process is too cumbersome or restrictive, manually authenticating and authorizing is still more than permissible, and setting the principal within the service is a logical equivalent to login.
 
 ## Authorization Context
-When working with framework's authentication, the authenticated information is exposed via the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L18), object. 
+When working with framework's authentication, the authenticated information is exposed via the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16), object. 
 
 **Code: Auth Context Outline**
 ```typescript
-const AuthContextSymbol = Symbol.for('@travetto/auth:context');
 type AuthContextShape = {
   principal?: Principal;
   authToken?: AuthToken;
@@ -155,9 +154,7 @@ type AuthContextShape = {
 export class AuthContext {
   @Inject()
   /**
-   * Get the principal from the context
-   * @returns principal if authenticated
-   * @returns undefined if not authenticated
+   * Get the principal, if set
    */
   get principal(): Principal | undefined;
   /**

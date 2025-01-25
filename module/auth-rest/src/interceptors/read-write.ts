@@ -35,6 +35,8 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
     // Expose user field on principal
     Object.defineProperty(ctx.req, 'user', { get: () => this.authContext.principal, configurable: false });
 
+    this.authContext.init();
+
     try {
       og = await this.encoder.decode(ctx);
       ogExpires = og?.expiresAt;
@@ -48,7 +50,8 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
       if (current !== og || ogExpires !== current?.expiresAt) { // If it changed
         await this.encoder.encode(ctx, current);
       }
-      this.authContext.principal = undefined;
+
+      this.authContext.clear();
     }
   }
 }
