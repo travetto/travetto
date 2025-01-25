@@ -96,6 +96,7 @@ export const IGNORES = [
   'dist/**/*',
   'out/**/*',
   '**/*.d.ts',
+  '**/.trv/**',
   '**/fixtures/**/*',
   '**/resources/**/*',
   '**/compiler/bin/gen.*'

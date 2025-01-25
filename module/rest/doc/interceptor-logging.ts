@@ -8,7 +8,11 @@ class Appender {
 @Injectable()
 export class LoggingInterceptor implements RestInterceptor {
 
-  constructor(private appender: Appender) { }
+  appender: Appender;
+
+  constructor(appender: Appender) {
+    this.appender = appender;
+  }
 
   async intercept({ req }: FilterContext) {
     // Write request to database

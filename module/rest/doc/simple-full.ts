@@ -6,7 +6,11 @@ import { MockService } from './mock';
 @Controller('/simple')
 export class Simple {
 
-  constructor(private service: MockService) { }
+  service: MockService;
+
+  constructor(service: MockService) {
+    this.service = service;
+  }
 
   /**
    * Get a random user by name

@@ -6,5 +6,5 @@ export class DependentService {
 }
 
 export class CustomService {
-  constructor(private dep: DependentService) { }
+  constructor(dep: DependentService) { }
 }
