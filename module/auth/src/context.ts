@@ -1,6 +1,6 @@
 
 import { Inject, Injectable } from '@travetto/di';
-import { AsyncContext, AsyncContextProp } from '@travetto/context';
+import { AsyncContext, AsyncContextValue } from '@travetto/context';
 
 import { AuthToken } from './internal/types';
 import { Principal } from './types/principal';
@@ -15,63 +15,59 @@ type AuthContextShape = {
 @Injectable()
 export class AuthContext {
 
-  #authProp: AsyncContextProp<AuthContextShape>;
+  #auth = new AsyncContextValue<AuthContextShape>(this);
 
   @Inject()
   context: AsyncContext;
-
-  postConstruct(): void {
-    this.#authProp = this.context.prop();
-  }
 
   /**
    * Initialize context
    * @private
    */
   init(): void {
-    this.#authProp.set({});
+    this.#auth.set({});
   }
 
   /**
    * Get the principal, if set
    */
   get principal(): Principal | undefined {
-    return this.#authProp.get()?.principal;
+    return this.#auth.get()?.principal;
   }
 
   /**
    * Set principal
    */
   set principal(p: Principal | undefined) {
-    this.#authProp.get()!.principal = p;
+    this.#auth.get()!.principal = p;
   }
 
   /**
    * Get the authentication token, if it exists
    */
   get authToken(): AuthToken | undefined {
-    return this.#authProp.get()?.authToken;
+    return this.#auth.get()?.authToken;
   }
 
   /**
    * Set/overwrite the user's authentication token
    */
   set authToken(token: AuthToken | undefined) {
-    this.#authProp.get()!.authToken = token;
+    this.#auth.get()!.authToken = token;
   }
 
   /**
    * Get the authenticator state, if it exists
    */
   get authenticatorState(): AuthenticatorState | undefined {
-    return this.#authProp.get()?.authenticatorState;
+    return this.#auth.get()?.authenticatorState;
   }
 
   /**
    * Set/overwrite the authenticator state
    */
   set authenticatorState(state: AuthenticatorState | undefined) {
-    this.#authProp.get()!.authenticatorState = state;
+    this.#auth.get()!.authenticatorState = state;
   }
 
   /**
@@ -79,6 +75,6 @@ export class AuthContext {
    * @private
    */
   async clear(): Promise<void> {
-    this.#authProp.set(undefined);
+    this.#auth.set(undefined);
   }
 }

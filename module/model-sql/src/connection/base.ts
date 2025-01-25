@@ -1,5 +1,5 @@
 import { castTo, Util } from '@travetto/runtime';
-import { AsyncContext, AsyncContextProp } from '@travetto/context';
+import { AsyncContext, AsyncContextValue } from '@travetto/context';
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 
@@ -24,27 +24,26 @@ export abstract class Connection<C = unknown> {
   };
 
   readonly context: AsyncContext;
-  #connProp: AsyncContextProp<C>;
-  #txProp: AsyncContextProp<boolean>;
+
+  #active = new AsyncContextValue<C>(this);
+  #activeTx = new AsyncContextValue<boolean>(this);
 
   constructor(context: AsyncContext) {
     this.context = context;
-    this.#connProp = context.prop();
-    this.#txProp = context.prop();
   }
 
   /**
    * Get active connection
    */
   get active(): C | undefined {
-    return this.#connProp.get();
+    return this.#active.get();
   }
 
   /**
    * Get active tx state
    */
   get activeTx(): boolean {
-    return !!this.#txProp.get();
+    return !!this.#activeTx.get();
   }
 
   /**
@@ -84,7 +83,7 @@ export abstract class Connection<C = unknown> {
       let conn;
       try {
         conn = await this.acquire();
-        this.#connProp.set(conn);
+        this.#active.set(conn);
         return await op();
       } finally {
         if (conn) {
@@ -108,7 +107,7 @@ export abstract class Connection<C = unknown> {
     const self = castTo<Connection>(this);
     yield* this.context.iterate(async function* () {
       try {
-        self.#connProp.set(await self.acquire());
+        self.#active.set(await self.acquire());
         yield* op();
       } finally {
         if (self.active) {
@@ -139,7 +138,7 @@ export abstract class Connection<C = unknown> {
       }
     } else {
       return this.runWithActive(() => {
-        this.#txProp.set(true);
+        this.#activeTx.set(true);
         return this.runWithTransaction('force', op);
       });
     }

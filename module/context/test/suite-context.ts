@@ -7,6 +7,7 @@ import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { WithAsyncContext } from '../src/decorator';
 import { AsyncContext } from '../src/service';
 import { WithSuiteContext } from '../support/test/context';
+import { AsyncContextValue } from '../src/value';
 
 @Suite()
 @InjectableSuite()
@@ -27,7 +28,7 @@ class WithSuiteContextSuite {
   @WithAsyncContext({})
   async basicProp() {
     assert(this.context !== null);
-    const prop = this.context.prop('age');
+    const prop = new AsyncContextValue(this, 'age');
     assert(prop.get() === 20);
   }
 
@@ -41,7 +42,7 @@ class WithSuiteContextSuite {
   @WithAsyncContext({ age: 30 })
   async overrideProp() {
     assert(this.context !== null);
-    const prop = this.context.prop('age');
+    const prop = new AsyncContextValue(this, { key: 'age' });
     assert(prop.get() === 30);
   }
 }

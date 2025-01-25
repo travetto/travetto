@@ -6,6 +6,7 @@ import { BeforeEach, Suite, Test } from '@travetto/test';
 
 import { AsyncContext } from '../src/service';
 import { WithAsyncContext } from '../src/decorator';
+import { AsyncContextValue } from '../src/value';
 
 @Suite()
 class VerifyContext {
@@ -31,7 +32,7 @@ class VerifyContext {
   @WithAsyncContext({})
   async loadContextProp() {
     assert(this.context !== null);
-    const prop = this.context.prop('user');
+    const prop = new AsyncContextValue(this, 'user');
     prop.set('bob');
     await timers.setTimeout(1);
     assert(prop.get() === 'bob');

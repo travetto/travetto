@@ -2,7 +2,6 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 
 import { Injectable } from '@travetto/di';
 import { AppError, AsyncQueue, castTo } from '@travetto/runtime';
-import { AsyncContextProp } from './prop';
 
 type Ctx<T = unknown> = Record<string | symbol, T>;
 
@@ -46,13 +45,6 @@ export class AsyncContext {
    */
   set<T = unknown>(key: string | symbol, val: T | undefined): void {
     this.#get()[key] = val;
-  }
-
-  /**
-   * Get context field as a defined prop
-   */
-  prop<T = unknown>(key?: string | symbol, failIfUnbound = true): AsyncContextProp<T> {
-    return new AsyncContextProp<T>(castTo(this.storage), key ?? Symbol(), failIfUnbound);
   }
 
   /**
