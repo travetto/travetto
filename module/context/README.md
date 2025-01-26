@@ -19,7 +19,7 @@ The most common way of utilizing the context, is via the [WithAsyncContext](http
 
 The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain. 
 
-**NOTE:** while access properties by string works, it is generally best practice to generate a symbol, and use that for isolated access into the shared storage.  This storage is common amongst the entire runtime (for a given async operation), and so the only way to guarantee proper isolation of data is via symbols.
+**NOTE:** while access context properties directly is supported, it is recommended to use [AsyncContextValue](https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L16) instead.
 
 **Code: Usage of context within a service**
 ```typescript
@@ -53,24 +53,52 @@ export class ContextAwareService {
 }
 ```
 
-The decorator also allows for a priming of the contextual information.  This is generally useful for system generated operations that are not initiated by a user.
+## AsyncContextValue
+Within the framework that is a need to access context values, in a type safe fashion.  Additionally, we have the requirement to keep the data accesses isolated from other operations.  To this end, [AsyncContextValue](https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L16) was created to support this use case.  This class represents the ability to define a simple read/write contract for a given context field.  It also provides some supplemental functionality, e.g., the ability to suppress errors if a context is not initialized.
 
-**Code: Usage of context within a service**
+**Code: Source for AsyncContextValue**
 ```typescript
-import { AsyncContext, WithAsyncContext } from '@travetto/context';
+export class AsyncContextValue<T = unknown> {
+  constructor(source: StorageSource, config?: ContextConfig);
+  /**
+   * Get value
+   */
+  get(): T | undefined;
+  /**
+   * Set value
+   */
+  set(value: T | undefined): void;
+}
+```
+
+**Code: Usage of context value within a service**
+```typescript
+import { AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
 import { Inject } from '@travetto/di';
 
-export class SystemInitiatedContext {
+export class ContextValueService {
 
   @Inject()
   context: AsyncContext;
 
-  @WithAsyncContext({
-    user: 'system',
-    uid: 20
-  })
-  async runJob(name: string) {
-    console.log('Running', { user: this.context.get('user'), jobName: name });
+  #name = new AsyncContextValue<string>(this);
+
+  @WithAsyncContext()
+  async complexOperator(name: string) {
+    this.#name.set(name);
+    await this.additionalOp('extra');
+    await this.finalOp();
+  }
+
+  async additionalOp(additional: string) {
+    const name = this.#name.get();
+    this.#name.set(`${name} ${additional}`);
+  }
+
+  async finalOp() {
+    const name = this.#name.get();
+    // Use name
+    return name;
   }
 }
 ```

@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { AsyncContext, AsyncContextValue, WithAsyncContext } from '@travetto/context';
 
 export const text = <>
   <c.StdHeader />
@@ -11,11 +11,16 @@ export const text = <>
 
   The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain. <br />
 
-  <strong>NOTE:</strong> while access properties by string works, it is generally best practice to generate a symbol, and use that for isolated access into the shared storage.  This storage is common amongst the entire runtime (for a given async operation), and so the only way to guarantee proper isolation of data is via symbols.
+  <strong>NOTE:</strong> while access context properties directly is supported, it is recommended to use {AsyncContextValue} instead.
 
   <c.Code title='Usage of context within a service' src='doc/usage.ts' />
 
-  The decorator also allows for a priming of the contextual information.  This is generally useful for system generated operations that are not initiated by a user.
+  <c.Section title={AsyncContextValue.name}>
+    Within the framework that is a need to access context values, in a type safe fashion.  Additionally, we have the requirement to keep the data accesses isolated from other operations.  To this end, {AsyncContextValue} was created to support this use case.  This class represents the ability to define a simple read/write contract for a given context field.  It also provides some supplemental functionality, e.g., the ability to suppress errors if a context is not initialized.
 
-  <c.Code title='Usage of context within a service' src='doc/usage-primed.ts' />
+    <c.Code src={AsyncContextValue} outline={true} title={`Source for ${AsyncContextValue.name}`} startRe={/class/} />
+
+    <c.Code title='Usage of context value within a service' src='doc/usage-value.ts' />
+
+  </c.Section>
 </>;

@@ -46,7 +46,7 @@ export class TableManager {
   /**
    * Create all needed tables for a given class
    */
-  @WithAsyncContext({})
+  @WithAsyncContext()
   @Connected()
   @Transactional()
   async createTables(cls: Class): Promise<void> {
@@ -73,7 +73,7 @@ export class TableManager {
   /**
    * Drop all tables for a given class
    */
-  @WithAsyncContext({})
+  @WithAsyncContext()
   @Connected()
   @Transactional()
   async dropTables(cls: Class): Promise<void> {
@@ -85,7 +85,7 @@ export class TableManager {
   /**
    * Drop all tables for a given class
    */
-  @WithAsyncContext({})
+  @WithAsyncContext()
   @Connected()
   @Transactional()
   async truncateTables(cls: Class): Promise<void> {
@@ -104,7 +104,7 @@ export class TableManager {
   /**
    * When the schema changes, update SQL
    */
-  @WithAsyncContext({})
+  @WithAsyncContext()
   @Transactional()
   @Connected()
   async changeSchema(cls: Class, change: SchemaChange): Promise<void> {

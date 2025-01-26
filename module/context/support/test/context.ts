@@ -11,11 +11,11 @@ const Init = Symbol();
  * Allows for defining a common suite context
  * @param data
  */
-export function WithSuiteContext(data: Record<string, unknown> = {}) {
+export function WithSuiteContext() {
   return (target: Class): void => {
     function wrapped(ctx: AsyncContext, og: Function) {
       return function (this: unknown) {
-        return ctx.run(og.bind(this), structuredClone(data));
+        return ctx.run(og.bind(this));
       };
     }
 

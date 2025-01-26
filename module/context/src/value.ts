@@ -4,6 +4,11 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 type Payload<T> = Record<string | symbol, T | undefined>;
 type Storage<T = unknown> = AsyncLocalStorage<Payload<T>>;
 type Key = string | symbol;
+type StorageSource = Storage | (() => Storage) | { storage: Storage } | { context: { storage: Storage } };
+
+type ContextConfig = {
+  failIfUnbound?: boolean;
+};
 
 /**
  * Async Context Value
@@ -12,16 +17,10 @@ export class AsyncContextValue<T = unknown> {
 
   #source: () => Storage<T>;
   #storage?: Storage<T>;
-  #key: Key;
+  #key: Key = Symbol();
   #failIfUnbound: boolean;
 
-  constructor(
-    source: Storage | (() => Storage) | { storage: Storage } | { context: { storage: Storage } },
-    config?: Key | { key?: Key, failIfUnbound?: boolean }
-  ) {
-    if (typeof config === 'string' || typeof config === 'symbol') {
-      config = { key: config };
-    }
+  constructor(source: StorageSource, config?: ContextConfig) {
     this.#source = castTo(typeof source === 'function' ?
       source :
       ((): Storage => 'getStore' in source ?
@@ -31,7 +30,6 @@ export class AsyncContextValue<T = unknown> {
           source.context.storage
         ))
     );
-    this.#key = config?.key ?? Symbol();
     this.#failIfUnbound = config?.failIfUnbound ?? true;
   }
 

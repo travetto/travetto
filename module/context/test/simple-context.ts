@@ -20,7 +20,7 @@ class VerifyContext {
   }
 
   @Test()
-  @WithAsyncContext({})
+  @WithAsyncContext()
   async loadContext() {
     assert(this.context !== null);
     this.context.set('user', 'bob');
@@ -29,19 +29,18 @@ class VerifyContext {
   }
 
   @Test()
-  @WithAsyncContext({})
+  @WithAsyncContext()
   async loadContextProp() {
     assert(this.context !== null);
-    const prop = new AsyncContextValue(this, 'user');
+    const prop = new AsyncContextValue(this);
     prop.set('bob');
     await timers.setTimeout(1);
     assert(prop.get() === 'bob');
-    assert(this.context.get('user') === 'bob');
   }
 
 
   @Test()
-  @WithAsyncContext({})
+  @WithAsyncContext()
   async nextContext() {
     assert(this.context.get('name') === undefined);
   }
