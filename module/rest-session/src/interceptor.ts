@@ -3,10 +3,11 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import {
   CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext,
-  FilterReturn, SerializeInterceptor, AsyncContextInterceptor
+  SerializeInterceptor, AsyncContextInterceptor, Request, Response
 } from '@travetto/rest';
 
 import { SessionService } from './service';
+import { Session } from './session';
 
 @Config('rest.session')
 export class RestSessionConfig extends ManagedInterceptorConfig {
@@ -20,58 +21,37 @@ export class RestSessionConfig extends ManagedInterceptorConfig {
   transport: 'cookie' | 'header' = 'cookie';
 }
 
-/**
- * Loads session, and provides ability to create session as needed.
- *
- * This needs to run after the auth interceptor due to the desire to use
- * the request's auth details as potential input into the session id.
- *
- * NOTE: This is asymmetric with the writing process due to rest-auth's behavior.
- */
 @Injectable()
-export class SessionReadInterceptor implements RestInterceptor {
-
-  dependsOn: Class<RestInterceptor>[] = [CookiesInterceptor, SerializeInterceptor, AsyncContextInterceptor, SessionWriteInterceptor];
-  runsBefore: Class<RestInterceptor>[] = [];
-
-  @Inject()
-  service: SessionService;
+class SessionEncoder {
 
   @Inject()
   config: RestSessionConfig;
 
-  async postConstruct(): Promise<void> {
-    if (RuntimeIndex.hasModule('@travetto/auth-rest')) {
-      const { AuthReadWriteInterceptor } = await import('@travetto/auth-rest');
-      this.runsBefore.push(AuthReadWriteInterceptor);
-    }
+  read(req: Request): Promise<string | undefined> | string | undefined {
+    return this.config.transport === 'cookie' ?
+      req.cookies.get(this.config.keyName) :
+      req.headerFirst(this.config.keyName);
   }
 
-  async intercept({ req }: FilterContext, next: FilterNext): Promise<unknown> {
-    Object.defineProperty(req, 'session', { get: () => this.service.getOrCreate() });
-
-    await this.service.load(() =>
-      this.config.transport === 'cookie' ?
-        req.cookies.get(this.config.keyName) :
-        req.headerFirst(this.config.keyName)
-    );
-
-    return await next();
+  async write(res: Response, value: Session | null | undefined): Promise<void> {
+    if (this.config.transport === 'cookie' && value !== undefined) {
+      res.cookies.set(this.config.keyName, value?.id ?? null, {
+        expires: value?.expiresAt ?? new Date(),
+        maxAge: undefined
+      });
+    } else if (this.config.transport === 'header' && value?.action === 'create') {
+      res.setHeader(this.config.keyName, value.id);
+    }
   }
 }
 
 /**
- * Stores session.
- *
- * The write needs to occur after any potential changes to the session, which could
- * be impacted by the authentication flow, specifically principal expiry.
- *
+ * Loads session, and provides ability to create session as needed, persists when complete.
  */
 @Injectable()
-export class SessionWriteInterceptor implements RestInterceptor {
+export class SessionInterceptor implements RestInterceptor {
 
-  dependsOn = [CookiesInterceptor, SerializeInterceptor];
-
+  dependsOn: Class<RestInterceptor>[] = [CookiesInterceptor, SerializeInterceptor, AsyncContextInterceptor];
   runsBefore: Class<RestInterceptor>[] = [];
 
   @Inject()
@@ -80,6 +60,9 @@ export class SessionWriteInterceptor implements RestInterceptor {
   @Inject()
   config: RestSessionConfig;
 
+  @Inject()
+  encoder: SessionEncoder;
+
   async postConstruct(): Promise<void> {
     if (RuntimeIndex.hasModule('@travetto/auth-rest')) {
       const { AuthReadWriteInterceptor } = await import('@travetto/auth-rest');
@@ -87,19 +70,13 @@ export class SessionWriteInterceptor implements RestInterceptor {
     }
   }
 
-  async intercept({ res }: FilterContext, next: FilterNext): Promise<FilterReturn> {
+  async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
     try {
+      await this.service.load(() => this.encoder.read(req));
+      Object.defineProperty(req, 'session', { get: () => this.service.getOrCreate() });
       return await next();
     } finally {
-      const value = await this.service.persist();
-      if (this.config.transport === 'cookie' && value !== undefined) {
-        res.cookies.set(this.config.keyName, value?.id ?? null, {
-          expires: value?.expiresAt ?? new Date(),
-          maxAge: undefined
-        });
-      } else if (this.config.transport === 'header' && value?.action === 'create') {
-        res.setHeader(this.config.keyName, value.id);
-      }
+      await this.service.persist(value => this.encoder.write(res, value));
     }
   }
 }

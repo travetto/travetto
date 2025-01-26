@@ -67,11 +67,8 @@ export class SessionService {
 
   /**
    * Persist session
-   * @returns Session if it needs to be encoded
-   * @returns null if it needs to be removed
-   * @returns undefined if nothing should happen
    */
-  async persist(): Promise<Session | undefined | null> {
+  async persist(onPersist: (value: Session | null) => Promise<void>): Promise<void> {
     const session = this.#session.get();
 
     // If missing or new and no data
@@ -91,12 +88,12 @@ export class SessionService {
           ...session,
           data: Buffer.from(JSON.stringify(session.data)).toString('base64')
         }));
-        return session;
+        await onPersist(session);
       }
       // If destroying
     } else if (session.id) { // If destroy and id
       await this.#modelService.delete(SessionEntry, session.id).catch(() => { });
-      return null;
+      await onPersist(null);
     }
   }
 
