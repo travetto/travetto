@@ -9,6 +9,7 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 import { SessionData } from '../../src/session';
 import { RestSessionConfig } from '../../src/config';
+import { BasicSessionCodec } from '../../src/codec';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
@@ -39,23 +40,20 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
   timeScale = 1;
 
   @Inject()
-  config: RestSessionConfig;
+  _config: RestSessionConfig;
 
   @Inject()
-  itConfig: RestSessionConfig;
+  codec: BasicSessionCodec;
 
-  sessionConfig(opt: Partial<RestSessionConfig>) {
-    return Object.assign(this.config, opt);
-  }
-
-  intConfig(opt: Partial<RestSessionConfig>) {
-    return Object.assign(this.itConfig, opt);
+  config(opt: Partial<RestSessionConfig>) {
+    const res = Object.assign(this._config, opt);
+    this.codec.postConstruct();
+    return res;
   }
 
   @Test()
   async cookiePersistence() {
-    this.sessionConfig({ maxAge: 10000 });
-    this.intConfig({ transport: 'cookie' });
+    this.config({ maxAge: 10000, transport: 'cookie' });
 
     let res = await this.request<Aged>('get', '/test/session');
     let cookie = res.headers['set-cookie'];
@@ -75,8 +73,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async cookieComplex() {
-    this.sessionConfig({ maxAge: 3000 });
-    this.intConfig({ transport: 'cookie' });
+    this.config({ maxAge: 3000, transport: 'cookie' });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
@@ -88,8 +85,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async cookieNoSession() {
-    this.sessionConfig({ maxAge: 3000 });
-    this.intConfig({ transport: 'cookie' });
+    this.config({ maxAge: 3000, transport: 'cookie' });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
@@ -99,8 +95,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async headerPersistence() {
-    const { keyName: key } = this.intConfig({ transport: 'header' });
-    this.sessionConfig({ renew: true, maxAge: 3000 });
+    const { keyName: key } = this.config({ transport: 'header', renew: true, maxAge: 3000 });
 
     let res = await this.request('get', '/test/session');
     let header = res.headers[key];
@@ -125,8 +120,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async headerComplex() {
-    const { keyName: key } = this.intConfig({ transport: 'header' });
-    this.sessionConfig({ maxAge: 3000 });
+    const { keyName: key } = this.config({ transport: 'header', maxAge: 3000 });
 
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
@@ -139,8 +133,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async headerNoSession() {
-    const { keyName: key } = this.intConfig({ transport: 'header' });
-    this.sessionConfig({ maxAge: 100 * this.timeScale });
+    const { keyName: key } = this.config({ transport: 'header', maxAge: 100 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
@@ -150,8 +143,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryHeader() {
-    const { keyName: key } = this.intConfig({ transport: 'header' });
-    this.sessionConfig({ maxAge: 100 * this.timeScale });
+    const { keyName: key } = this.config({ transport: 'header', maxAge: 100 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
@@ -174,8 +166,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryCookie() {
-    this.intConfig({ transport: 'cookie' });
-    this.sessionConfig({ maxAge: 100 * this.timeScale });
+    this.config({ transport: 'cookie', maxAge: 100 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
@@ -194,8 +185,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryWithExtend() {
-    const { keyName: key } = this.intConfig({ transport: 'header' });
-    this.sessionConfig({ maxAge: 300 * this.timeScale });
+    const { keyName: key } = this.config({ transport: 'header', maxAge: 300 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
