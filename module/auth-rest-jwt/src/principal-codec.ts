@@ -1,35 +1,10 @@
 import { AuthContext, Principal } from '@travetto/auth';
 import { PrincipalCodec } from '@travetto/auth-rest';
-import { AppError, Runtime, TimeSpan, TimeUtil } from '@travetto/runtime';
-import { Config } from '@travetto/config';
+import { TimeUtil } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
-import { FilterContext, RestCodecTransport, RestCodecValue } from '@travetto/rest';
+import { FilterContext, RestCodecValue } from '@travetto/rest';
 import { JWTUtil, Payload } from '@travetto/jwt';
-import { Ignore } from '@travetto/schema';
-
-@Config('rest.auth.jwt')
-export class RestJWTConfig {
-  mode: RestCodecTransport | 'all' = 'header';
-  header = 'Authorization';
-  cookie = 'trv.auth';
-  signingKey?: string;
-  headerPrefix = 'Bearer';
-  maxAge: TimeSpan | number = '1h';
-  rollingRenew: boolean = false;
-
-  @Ignore()
-  maxAgeMs: number;
-
-  postConstruct(): void {
-    this.maxAgeMs = TimeUtil.asMillis(this.maxAge);
-
-    if (!this.signingKey && Runtime.production) {
-      throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.jwt.signingKey');
-
-    }
-    this.signingKey ??= 'dummy';
-  }
-}
+import { RestJWTConfig } from './config';
 
 /**
  * Principal codec via JWT
@@ -96,7 +71,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
    * @param token
    */
   async verifyToken(token: string, setActive = false): Promise<Principal> {
-    const res = (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.config.signingKey })).auth;
+    const res = await this.config.verifyToken(token);
     if (setActive) {
       this.authContext.authToken = { value: token, type: 'jwt' };
     }
