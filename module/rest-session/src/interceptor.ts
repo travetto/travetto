@@ -3,47 +3,14 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import {
   CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext,
-  SerializeInterceptor, AsyncContextInterceptor, Request, Response
+  SerializeInterceptor, AsyncContextInterceptor
 } from '@travetto/rest';
 
 import { SessionService } from './service';
-import { Session } from './session';
+import { SessionCodec } from './codec';
 
 @Config('rest.session')
-export class RestSessionConfig extends ManagedInterceptorConfig {
-  /**
-   * Auth output key name
-   */
-  keyName = 'trv_sid';
-  /**
-   * Location for auth
-   */
-  transport: 'cookie' | 'header' = 'cookie';
-}
-
-@Injectable()
-class SessionEncoder {
-
-  @Inject()
-  config: RestSessionConfig;
-
-  read(req: Request): Promise<string | undefined> | string | undefined {
-    return this.config.transport === 'cookie' ?
-      req.cookies.get(this.config.keyName) :
-      req.headerFirst(this.config.keyName);
-  }
-
-  async write(res: Response, value: Session | null | undefined): Promise<void> {
-    if (this.config.transport === 'cookie' && value !== undefined) {
-      res.cookies.set(this.config.keyName, value?.id ?? null, {
-        expires: value?.expiresAt ?? new Date(),
-        maxAge: undefined
-      });
-    } else if (this.config.transport === 'header' && value?.action === 'create') {
-      res.setHeader(this.config.keyName, value.id);
-    }
-  }
-}
+export class RestSessionConfig extends ManagedInterceptorConfig { }
 
 /**
  * Loads session, and provides ability to create session as needed, persists when complete.
@@ -61,7 +28,7 @@ export class SessionInterceptor implements RestInterceptor {
   config: RestSessionConfig;
 
   @Inject()
-  encoder: SessionEncoder;
+  codec: SessionCodec;
 
   async postConstruct(): Promise<void> {
     if (RuntimeIndex.hasModule('@travetto/auth-rest')) {
@@ -72,11 +39,11 @@ export class SessionInterceptor implements RestInterceptor {
 
   async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
     try {
-      await this.service.load(() => this.encoder.read(req));
+      await this.service.load(() => this.codec.read(req));
       Object.defineProperty(req, 'session', { get: () => this.service.getOrCreate() });
       return await next();
     } finally {
-      await this.service.persist(value => this.encoder.write(res, value));
+      await this.service.persist(value => this.codec.write(res, value));
     }
   }
 }

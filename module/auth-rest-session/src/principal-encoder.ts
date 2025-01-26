@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@travetto/di';
 import { FilterContext } from '@travetto/rest';
 import { Principal } from '@travetto/auth';
-import { PrincipalEncoder } from '@travetto/auth-rest';
+import { PrincipalCodec } from '@travetto/auth-rest';
 import { SessionService } from '@travetto/rest-session';
 
 /**
@@ -9,7 +9,7 @@ import { SessionService } from '@travetto/rest-session';
  * store for the auth principal.
  */
 @Injectable()
-export class SessionPrincipalEncoder implements PrincipalEncoder {
+export class SessionPrincipalEncoder implements PrincipalCodec {
   #key = '_trv_auth_principal'; // Must be serializable, so it cannot be a symbol
 
   @Inject()

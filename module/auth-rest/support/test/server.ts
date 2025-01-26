@@ -7,12 +7,12 @@ import { Inject, Injectable, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, Principal } from '@travetto/auth';
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
-import { PrincipalEncoder } from '../../src/encoder';
+import { PrincipalCodec } from '../../src/codec';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
 @Injectable({ primary: true })
-class AuthorizationEncoder implements PrincipalEncoder {
+class AuthorizationEncoder implements PrincipalCodec {
   async encode({ res }: FilterContext, p: Principal | undefined) {
     if (p) {
       const value = JSON.stringify(p);

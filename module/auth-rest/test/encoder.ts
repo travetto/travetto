@@ -9,7 +9,7 @@ import { Principal } from '@travetto/auth/src/types/principal';
 import { Config } from '@travetto/config';
 import { asFull } from '@travetto/runtime';
 
-import { PrincipalEncoder } from '../src/encoder';
+import { PrincipalCodec } from '../src/codec';
 
 @Config('stateless')
 class StatelessEncoderConfig {
@@ -18,7 +18,7 @@ class StatelessEncoderConfig {
 }
 
 @Injectable()
-export class StatelessPrincipalEncoder implements PrincipalEncoder {
+export class StatelessPrincipalEncoder implements PrincipalCodec {
 
   @Inject()
   config: StatelessEncoderConfig;
@@ -60,7 +60,7 @@ export class EncoderTest {
   config: StatelessEncoderConfig;
 
   @Inject()
-  instance: PrincipalEncoder;
+  instance: PrincipalCodec;
 
   @Test()
   async testHeader() {

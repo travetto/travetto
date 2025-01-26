@@ -1,5 +1,5 @@
 import { AuthContext, Principal } from '@travetto/auth';
-import { PrincipalEncoder } from '@travetto/auth-rest';
+import { PrincipalCodec } from '@travetto/auth-rest';
 import { AppError, Runtime, TimeSpan, TimeUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
@@ -43,7 +43,7 @@ export class RestJWTConfig {
  * Principal encoder via JWT
  */
 @Injectable()
-export class JWTPrincipalEncoder implements PrincipalEncoder {
+export class JWTPrincipalEncoder implements PrincipalCodec {
 
   @Inject()
   config: RestJWTConfig;

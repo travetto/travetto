@@ -4,7 +4,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { AuthContext, Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
 
-import { PrincipalEncoder } from '../encoder';
+import { PrincipalCodec } from '../codec';
 
 @Config('rest.auth.readWrite')
 export class RestAuthConfig extends ManagedInterceptorConfig { }
@@ -21,7 +21,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   dependsOn: Class<RestInterceptor>[] = [SerializeInterceptor, AsyncContextInterceptor];
 
   @Inject()
-  encoder: PrincipalEncoder;
+  encoder: PrincipalCodec;
 
   @Inject()
   config: RestAuthConfig;
