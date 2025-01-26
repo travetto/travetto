@@ -1,2 +1,2 @@
 
-export * from './src/principal-encoder';
+export * from './src/principal-codec';

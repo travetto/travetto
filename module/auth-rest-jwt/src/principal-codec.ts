@@ -32,10 +32,10 @@ export class RestJWTConfig {
 }
 
 /**
- * Principal encoder via JWT
+ * Principal codec via JWT
  */
 @Injectable()
-export class JWTPrincipalEncoder implements PrincipalCodec {
+export class JWTPrincipalCodec implements PrincipalCodec {
 
   @Inject()
   config: RestJWTConfig;

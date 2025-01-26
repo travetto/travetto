@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { JWTPrincipalEncoder } from './src/principal-encoder';
+import { JWTPrincipalCodec } from './src/principal-codec';
 
 export const text = <>
   <c.StdHeader />
@@ -9,9 +9,9 @@ export const text = <>
 
   The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. <br />
 
-  The {JWTPrincipalEncoder} is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+  The {JWTPrincipalCodec} is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
 
-  <c.Code title={JWTPrincipalEncoder.name} src={JWTPrincipalEncoder} />
+  <c.Code title={JWTPrincipalCodec.name} src={JWTPrincipalCodec} />
 
   As you can see, the encode token just creates a {d.library('JWT')} based on the principal provided, and decoding verifies the token, and returns the principal.
 </>;
