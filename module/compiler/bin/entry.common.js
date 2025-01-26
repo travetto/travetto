@@ -73,7 +73,7 @@ async function load(/** @type {(ops: import('../support/entry.main').Operations)
     try { module.enableCompileCache(); } catch { }
     return cb(res);
   } catch (err) {
-    await rm(ctx.srcPath('.'), { recursive: true, force: true });
+    await rm(ctx.destPath('.'), { recursive: true, force: true });
     throw err;
   }
 }
