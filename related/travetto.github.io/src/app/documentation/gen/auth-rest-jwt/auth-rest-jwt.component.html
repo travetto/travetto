@@ -17,11 +17,11 @@
 
 One of <a class="module-link" routerLink="/docs/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a>'s main responsibilities is being able to send and receive authentication/authorization information from the client.  This data can be encoded in many different forms, and this module provides the ability to encode into and decode from <a target="_blank" class="external-link" href="https://jwt.io/">JWT</a> s. This module fulfills the contract required by <a class="module-link" routerLink="/docs/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a> of being able to encode and decode a user principal, by leveraging <a class="module-link" routerLink="/docs/jwt" title="JSON Web Token implementation">JWT</a>'s token generation features. <br><br>
 The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L38">JWTPrincipalEncoder</a> is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-codec.ts#L38">JWTPrincipalCodec</a> is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
 
   <figure class="code">
-    <figcaption class="code">JWTPrincipalEncoder
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts">Source</a></cite>
+    <figcaption class="code">JWTPrincipalCodec
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-codec.ts">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AuthContext<span class="token punctuation">,</span> Principal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/auth'</span><span class="token punctuation">;</span>
@@ -58,10 +58,10 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token punctuation">{{'}'}}</span>
 
 <span class="token comment">/**
- * Principal encoder via JWT
+ * Principal codec via JWT
  */</span>
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">JWTPrincipalEncoder</span> <span class="token keyword">implements</span> <span class="token class-name">PrincipalCodec</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">JWTPrincipalCodec</span> <span class="token keyword">implements</span> <span class="token class-name">PrincipalCodec</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   config<span class="token operator">:</span> RestJWTConfig<span class="token punctuation">;</span>

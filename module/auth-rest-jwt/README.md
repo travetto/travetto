@@ -17,9 +17,9 @@ One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-re
 
 The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. 
 
-The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L38) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+The [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-codec.ts#L38) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
 
-**Code: JWTPrincipalEncoder**
+**Code: JWTPrincipalCodec**
 ```typescript
 import { AuthContext, Principal } from '@travetto/auth';
 import { PrincipalCodec } from '@travetto/auth-rest';
@@ -55,10 +55,10 @@ export class RestJWTConfig {
 }
 
 /**
- * Principal encoder via JWT
+ * Principal codec via JWT
  */
 @Injectable()
-export class JWTPrincipalEncoder implements PrincipalCodec {
+export class JWTPrincipalCodec implements PrincipalCodec {
 
   @Inject()
   config: RestJWTConfig;
