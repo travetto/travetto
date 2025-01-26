@@ -25,9 +25,7 @@ export class RestCodecValue {
   }
 
   /**
-   * Write to Response
-   * @param res
-   * @param value
+   * Write to response
    */
   writeValue(res: Response, value: string | undefined, cookieArgs: SetOption = {}): void {
     if (this.#cookieName) {
@@ -42,8 +40,7 @@ export class RestCodecValue {
   }
 
   /**
-   * Read form request
-   * @param req
+   * Read from request
    */
   readValue(req: Request): string | undefined {
     return (this.#cookieName ? req.cookies.get(this.#cookieName) : undefined) ??
@@ -57,12 +54,10 @@ export class RestCodecValue {
 export interface RestCodec<T> {
   /**
    * Encode data
-   * @param ctx The travetto filter context
    */
   encode(ctx: FilterContext, data: T | undefined): Promise<void> | void;
   /**
-   * Read data
-   * @param ctx The travetto filter context
+   * Decode data
    */
   decode(ctx: FilterContext): Promise<T | undefined> | T | undefined;
 }
