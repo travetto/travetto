@@ -17,22 +17,22 @@ One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-re
 
 The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. 
 
-The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L46) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L38) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
 
 **Code: JWTPrincipalEncoder**
 ```typescript
 import { AuthContext, Principal } from '@travetto/auth';
-import { PrincipalEncoder } from '@travetto/auth-rest';
+import { PrincipalCodec } from '@travetto/auth-rest';
 import { AppError, Runtime, TimeSpan, TimeUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
-import { FilterContext } from '@travetto/rest';
+import { FilterContext, RestCodecTransport, RestCodecValue } from '@travetto/rest';
 import { JWTUtil, Payload } from '@travetto/jwt';
 import { Ignore } from '@travetto/schema';
 
 @Config('rest.auth.jwt')
 export class RestJWTConfig {
-  mode: 'cookie' | 'header' | 'all' = 'header';
+  mode: RestCodecTransport | 'all' = 'header';
   header = 'Authorization';
   cookie = 'trv.auth';
   signingKey?: string;
@@ -42,14 +42,6 @@ export class RestJWTConfig {
 
   @Ignore()
   maxAgeMs: number;
-
-  get cookieMode(): boolean {
-    return this.mode === 'cookie' || this.mode === 'all';
-  }
-
-  get headerMode(): boolean {
-    return this.mode === 'header' || this.mode === 'all';
-  }
 
   postConstruct(): void {
     this.maxAgeMs = TimeUtil.asMillis(this.maxAge);
@@ -66,13 +58,23 @@ export class RestJWTConfig {
  * Principal encoder via JWT
  */
 @Injectable()
-export class JWTPrincipalEncoder implements PrincipalEncoder {
+export class JWTPrincipalEncoder implements PrincipalCodec {
 
   @Inject()
   config: RestJWTConfig;
 
   @Inject()
   authContext: AuthContext;
+
+  value: RestCodecValue;
+
+  postConstruct(): void {
+    this.value = new RestCodecValue({
+      header: this.config.mode !== 'cookie' ? this.config.header : undefined!,
+      cookie: this.config.mode !== 'header' ? this.config.cookie : undefined,
+      headerPrefix: this.config.headerPrefix
+    });
+  }
 
   toJwtPayload(p: Principal): Payload {
     const exp = TimeUtil.asSeconds(p.expiresAt!);
@@ -129,23 +131,6 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   }
 
   /**
-   * Write context
-   */
-  async encode({ res }: FilterContext, p: Principal | undefined): Promise<void> {
-    if (p) {
-      const token = await this.getToken(p);
-      if (this.config.cookieMode) {
-        res.cookies.set(this.config.cookie, token, { expires: p.expiresAt });
-      }
-      if (this.config.headerMode) {
-        res.setHeader(this.config.header, [this.config.headerPrefix, token].join(' ').trimStart());
-      }
-    } else if (this.config.cookieMode) {
-      res.cookies.set(this.config.cookie, '', { expires: TimeUtil.fromNow(-1, 'h') }); // Clear out cookie
-    }
-  }
-
-  /**
    * Run before encoding, allowing for session extending if needed
    */
   preEncode(p: Principal): void {
@@ -163,20 +148,18 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   }
 
   /**
+   * Write context
+   */
+  async encode({ res }: FilterContext, p: Principal | undefined): Promise<void> {
+    const token = p ? await this.getToken(p) : undefined;
+    this.value.writeValue(res, token, { expires: p?.expiresAt });
+  }
+
+  /**
    * Read JWT from request
    */
   async decode({ req }: FilterContext): Promise<Principal | undefined> {
-    let token: string | undefined = undefined;
-    if (this.config.cookieMode) {
-      token ??= req.cookies.get(this.config.cookie);
-    }
-    if (this.config.headerMode) {
-      const header = req.headerFirst(this.config.header);
-      if (header?.startsWith(this.config.headerPrefix)) {
-        token ??= header.replace(this.config.headerPrefix, '').trim();
-      }
-    }
-
+    const token = this.value.readValue(req);
     if (token) {
       return await this.verifyToken(token, true);
     }

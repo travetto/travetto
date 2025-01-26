@@ -15,14 +15,14 @@ yarn add @travetto/auth-rest-session
 
 One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework")'s main responsibilities is being able to send and receive authentication/authorization information from the client.  This data can be encoded in many different forms, and this module provides the ability to encode into and decode from the user's [REST Session](https://github.com/travetto/travetto/tree/main/module/rest-session#readme "Session provider for the travetto rest module.") context. This module fulfills the contract required by [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") of being able to encode and decode a user principal by storing the user principal in the session. 
 
-The [SessionPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/principal-encoder.ts#L12) is exposed as a tool for allowing for decoding/encoding principals into the session.
+The [SessionPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/principal-encoder.ts#L12) is exposed as a tool for allowing for decoding/encoding principals into the session.
 
-**Code: SessionPrincipalEncoder**
+**Code: SessionPrincipalCodec**
 ```typescript
 import { Injectable, Inject } from '@travetto/di';
 import { FilterContext } from '@travetto/rest';
 import { Principal } from '@travetto/auth';
-import { PrincipalEncoder } from '@travetto/auth-rest';
+import { PrincipalCodec } from '@travetto/auth-rest';
 import { SessionService } from '@travetto/rest-session';
 
 /**
@@ -30,24 +30,24 @@ import { SessionService } from '@travetto/rest-session';
  * store for the auth principal.
  */
 @Injectable()
-export class SessionPrincipalEncoder implements PrincipalEncoder {
+export class SessionPrincipalCodec implements PrincipalCodec {
   #key = '_trv_auth_principal'; // Must be serializable, so it cannot be a symbol
 
   @Inject()
   service: SessionService;
 
   encode(_: FilterContext, p: Principal): void {
-    const session = this.service.get();
     if (p) {
+      const session = this.service.getOrCreate();
       p.expiresAt = session.expiresAt; // Let principal live as long as the session
       session.setValue(this.#key, p);
     } else {
-      session.destroy(); // Kill session
+      this.service.get()?.destroy(); // Kill session if exists
     }
   }
 
-  async decode({ req }: FilterContext): Promise<Principal | undefined> {
-    const session = await this.service.get(); // Preload session if not already loaded
+  async decode(_: FilterContext): Promise<Principal | undefined> {
+    const session = await this.service.get();
     return session?.getValue<Principal>(this.#key);
   }
 }

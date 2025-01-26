@@ -409,9 +409,14 @@ npx trv run:rest
       RestGetCacheConfig: {},
       RestLogRoutesConfig: {},
       RestRpcConfig: { clients: {} },
-      RestSessionConfig: { sign: true, transport: 'cookie' },
-      RestSslConfig: { active: false },
-      SessionConfig: { autoCommit: true, maxAge: 1800000, renew: true, rolling: false }
+      RestSessionConfig: {
+        autoCommit: true,
+        maxAge: 1800000,
+        renew: true,
+        rolling: false,
+        transport: 'cookie'
+      },
+      RestSslConfig: { active: false }
     }
   }
 }

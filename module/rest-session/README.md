@@ -73,12 +73,13 @@ The module supports a general set of configuration that should cover the majorit
 ```typescript
 import { TimeUtil } from '@travetto/runtime';
 import { Config } from '@travetto/config';
+import { RestCodecTransport } from '@travetto/rest';
 
 /**
  * Rest session config
  */
 @Config('rest.session')
-export class SessionConfig {
+export class RestSessionConfig {
   /**
    * Should the session auto write
    */
@@ -95,7 +96,14 @@ export class SessionConfig {
    * Should the session support rolling renewals
    */
   rolling = false;
-
+  /**
+   * Auth output key name
+   */
+  keyName = 'trv_sid';
+  /**
+   * Location for auth
+   */
+  transport: RestCodecTransport = 'cookie';
 }
 ```
 

@@ -82,12 +82,13 @@ The module supports a general set of configuration that should cover the majorit
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> TimeUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/config'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestCodecTransport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/rest'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * Rest session config
  */</span>
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'rest.session'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SessionConfig</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RestSessionConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Should the session auto write
    */</span>
@@ -104,7 +105,14 @@ The module supports a general set of configuration that should cover the majorit
    * Should the session support rolling renewals
    */</span>
   rolling <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
-
+  <span class="token comment">/**
+   * Auth output key name
+   */</span>
+  keyName <span class="token operator">=</span> <span class="token string">'trv_sid'</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Location for auth
+   */</span>
+  transport<span class="token operator">:</span> RestCodecTransport <span class="token operator">=</span> <span class="token string">'cookie'</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
