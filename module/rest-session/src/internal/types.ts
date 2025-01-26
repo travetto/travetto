@@ -5,3 +5,5 @@ import { ContextProvider } from '@travetto/rest/src/decorator/param';
  */
 @ContextProvider((c, req) => req.session.data)
 export class SessionDataTarget { }
+
+export class SessionCodecTarget { }

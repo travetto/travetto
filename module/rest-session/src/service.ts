@@ -5,7 +5,7 @@ import { ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { AsyncContext, AsyncContextValue } from '@travetto/context';
 
 import { Session } from './session';
-import { SessionConfig } from './config';
+import { RestSessionConfig } from './config';
 import { SessionEntry, SessionModelSymbol } from './model';
 
 /**
@@ -16,7 +16,7 @@ import { SessionEntry, SessionModelSymbol } from './model';
 export class SessionService {
 
   @Inject()
-  config: SessionConfig;
+  config: RestSessionConfig;
 
   @Inject()
   context: AsyncContext;
@@ -68,7 +68,7 @@ export class SessionService {
   /**
    * Persist session
    */
-  async persist(onPersist: (value: Session | null) => Promise<void>): Promise<void> {
+  async persist(onPersist: (value: Session | null) => Promise<unknown> | unknown): Promise<void> {
     const session = this.#session.get();
 
     // If missing or new and no data

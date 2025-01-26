@@ -2,9 +2,8 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable } from '@travetto/di';
-import { FilterContext, Response } from '@travetto/rest';
+import { RestCodecValue, FilterContext, Response, RestCodecTransport } from '@travetto/rest';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 import { Principal } from '@travetto/auth/src/types/principal';
 import { Config } from '@travetto/config';
 import { asFull } from '@travetto/runtime';
@@ -13,29 +12,29 @@ import { PrincipalCodec } from '../src/codec';
 
 @Config('stateless')
 class StatelessEncoderConfig {
-  transport: 'header' | 'cookie' = 'header';
+  transport: RestCodecTransport = 'header';
   keyName = 'secret';
 }
 
 @Injectable()
-export class StatelessPrincipalEncoder implements PrincipalCodec {
+export class StatelessPrincipalCodec implements PrincipalCodec {
 
   @Inject()
   config: StatelessEncoderConfig;
 
-  accessor: ValueAccessor;
+  accessor: RestCodecValue;
 
   postConstruct() {
-    this.accessor = new ValueAccessor(this.config.keyName, this.config.transport);
+    this.accessor = new RestCodecValue({
+      cookie: this.config.transport !== 'header' ? this.config.keyName : undefined!,
+      header: this.config.transport !== 'cookie' ? this.config.keyName : undefined,
+      headerPrefix: 'Token'
+    });
   }
 
   async encode({ res }: FilterContext, principal?: Principal): Promise<void> {
-    if (principal) {
-      const text = Buffer.from(JSON.stringify(principal)).toString('base64');
-      this.accessor.writeValue(res, text, { expires: principal?.expiresAt });
-    } else {
-      this.accessor.writeValue(res, null, { expires: new Date() });
-    }
+    const text = principal ? Buffer.from(JSON.stringify(principal)).toString('base64') : undefined;
+    this.accessor.writeValue(res, text, { expires: principal?.expiresAt });
     return;
   }
 

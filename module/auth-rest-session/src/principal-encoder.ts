@@ -9,7 +9,7 @@ import { SessionService } from '@travetto/rest-session';
  * store for the auth principal.
  */
 @Injectable()
-export class SessionPrincipalEncoder implements PrincipalCodec {
+export class SessionPrincipalCodec implements PrincipalCodec {
   #key = '_trv_auth_principal'; // Must be serializable, so it cannot be a symbol
 
   @Inject()
@@ -25,7 +25,7 @@ export class SessionPrincipalEncoder implements PrincipalCodec {
     }
   }
 
-  async decode({ req }: FilterContext): Promise<Principal | undefined> {
+  async decode(_: FilterContext): Promise<Principal | undefined> {
     const session = await this.service.get();
     return session?.getValue<Principal>(this.#key);
   }

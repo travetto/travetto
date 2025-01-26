@@ -21,7 +21,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   dependsOn: Class<RestInterceptor>[] = [SerializeInterceptor, AsyncContextInterceptor];
 
   @Inject()
-  encoder: PrincipalCodec;
+  codec: PrincipalCodec;
 
   @Inject()
   config: RestAuthConfig;
@@ -38,17 +38,17 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
     this.authContext.init();
 
     try {
-      og = await this.encoder.decode(ctx);
+      og = await this.codec.decode(ctx);
       ogExpires = og?.expiresAt;
       this.authContext.principal = og;
       return await next();
     } finally {
       const current = this.authContext.principal;
       if (current) {
-        await this.encoder.preEncode?.(current);
+        await this.codec.preEncode?.(current);
       }
       if (current !== og || ogExpires !== current?.expiresAt) { // If it changed
-        await this.encoder.encode(ctx, current);
+        await this.codec.encode(ctx, current);
       }
 
       this.authContext.clear();

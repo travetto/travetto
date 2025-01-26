@@ -1,41 +1,33 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Config } from '@travetto/config';
-import { Request, Response } from '@travetto/rest';
+import { FilterContext, RestCodec, RestCodecValue } from '@travetto/rest';
+import { RestSessionConfig } from './config';
 
-import { Session } from './session';
-
-@Config('rest.session')
-export class RestSessionConfig {
-  /**
-   * Auth output key name
-   */
-  keyName = 'trv_sid';
-  /**
-   * Location for auth
-   */
-  transport: 'cookie' | 'header' = 'cookie';
-}
+/**
+ * Rest codec for reading/writing session id
+ * @concrete ./internal/types#SessionCodecTarget
+ */
+export interface SessionCodec extends RestCodec<string> { }
 
 @Injectable()
-export class SessionCodec {
+export class BasicSessionCodec implements SessionCodec {
 
   @Inject()
   config: RestSessionConfig;
 
-  read(req: Request): Promise<string | undefined> | string | undefined {
-    return this.config.transport === 'cookie' ?
-      req.cookies.get(this.config.keyName) :
-      req.headerFirst(this.config.keyName);
+  value: RestCodecValue;
+
+  postConstruct(): void {
+    this.value = new RestCodecValue({
+      cookie: this.config.transport === 'cookie' ? this.config.keyName : undefined!,
+      header: this.config.transport === 'header' ? this.config.keyName : undefined,
+    });
   }
 
-  async write(res: Response, value: Session | null | undefined): Promise<void> {
-    if (this.config.transport === 'cookie' && value !== undefined) {
-      res.cookies.set(this.config.keyName, value?.id ?? null, {
-        expires: value?.expiresAt ?? new Date(),
-        maxAge: undefined
-      });
-    } else if (this.config.transport === 'header' && value?.action === 'create') {
-      res.setHeader(this.config.keyName, value.id);
-    }
+  encode(ctx: FilterContext, key: string | undefined): Promise<void> | void {
+    this.value.writeValue(ctx.res, key);
+  }
+
+  decode(ctx: FilterContext): string | Promise<string | undefined> | undefined {
+    return this.value.readValue(ctx.req);
   }
 }

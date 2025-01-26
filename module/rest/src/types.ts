@@ -336,23 +336,3 @@ export interface RouteConfig {
    */
   interceptors?: [Class<RestInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
 }
-
-/**
- * Codec for rest operations
- */
-export interface RestCodec<T> {
-  /**
-   * Run before encoding, allows for any necessary modifications
-   */
-  preEncode?(data: T): void | Promise<void>;
-  /**
-   * Encode data
-   * @param ctx The travetto filter context
-   */
-  encode(ctx: FilterContext, data: T | undefined): Promise<void> | void;
-  /**
-   * Read data
-   * @param ctx The travetto filter context
-   */
-  decode(ctx: FilterContext): Promise<T | undefined> | T | undefined;
-}

@@ -1,16 +1,10 @@
 import { Class, RuntimeIndex } from '@travetto/runtime';
-import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
-import {
-  CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext,
-  SerializeInterceptor, AsyncContextInterceptor
-} from '@travetto/rest';
+import { CookiesInterceptor, RestInterceptor, FilterContext, FilterNext, SerializeInterceptor, AsyncContextInterceptor } from '@travetto/rest';
 
 import { SessionService } from './service';
 import { SessionCodec } from './codec';
-
-@Config('rest.session')
-export class RestSessionConfig extends ManagedInterceptorConfig { }
+import { RestSessionConfig } from './config';
 
 /**
  * Loads session, and provides ability to create session as needed, persists when complete.
@@ -37,13 +31,13 @@ export class SessionInterceptor implements RestInterceptor {
     }
   }
 
-  async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
+  async intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
     try {
-      await this.service.load(() => this.codec.read(req));
-      Object.defineProperty(req, 'session', { get: () => this.service.getOrCreate() });
+      await this.service.load(() => this.codec.decode(ctx));
+      Object.defineProperty(ctx.req, 'session', { get: () => this.service.getOrCreate() });
       return await next();
     } finally {
-      await this.service.persist(value => this.codec.write(res, value));
+      await this.service.persist(value => this.codec.encode(ctx, value?.id));
     }
   }
 }

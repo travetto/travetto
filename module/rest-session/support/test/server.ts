@@ -8,8 +8,7 @@ import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 import { SessionData } from '../../src/session';
-import { SessionConfig } from '../../src/config';
-import { RestSessionConfig } from '../../src/interceptor';
+import { RestSessionConfig } from '../../src/config';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
@@ -40,12 +39,12 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
   timeScale = 1;
 
   @Inject()
-  config: SessionConfig;
+  config: RestSessionConfig;
 
   @Inject()
   itConfig: RestSessionConfig;
 
-  sessionConfig(opt: Partial<SessionConfig>) {
+  sessionConfig(opt: Partial<RestSessionConfig>) {
     return Object.assign(this.config, opt);
   }
 
@@ -56,7 +55,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
   @Test()
   async cookiePersistence() {
     this.sessionConfig({ maxAge: 10000 });
-    this.intConfig({ transport: 'cookie', sign: false });
+    this.intConfig({ transport: 'cookie' });
 
     let res = await this.request<Aged>('get', '/test/session');
     let cookie = res.headers['set-cookie'];
@@ -177,7 +176,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryCookie() {
-    this.intConfig({ transport: 'cookie', sign: false });
+    this.intConfig({ transport: 'cookie' });
     this.sessionConfig({ maxAge: 100 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };

@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Controller, FilterContext, Get, Post, Redirect } from '@travetto/rest';
+import { Controller, FilterContext, Get, Post, Redirect, RestCodecValue } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable, InjectableFactory } from '@travetto/di';
@@ -12,20 +12,20 @@ import { PrincipalCodec } from '../../src/codec';
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
 @Injectable({ primary: true })
-class AuthorizationEncoder implements PrincipalCodec {
-  async encode({ res }: FilterContext, p: Principal | undefined) {
+class AuthorizationCodec implements PrincipalCodec {
+
+  value = new RestCodecValue({ header: 'Authorization', headerPrefix: 'Token' });
+
+  encode({ res }: FilterContext, p: Principal | undefined) {
     if (p) {
-      const value = JSON.stringify(p);
-      res.setHeader('Authorization', Buffer.from(value).toString('base64'));
+      this.value.writeValue(res, Buffer.from(JSON.stringify(p)).toString('base64'));
     }
   }
-  async decode({ req }: FilterContext) {
+  decode({ req }: FilterContext): Principal | undefined {
     try {
-      if (req.headers.authorization) {
-        const p = JSON.parse(Buffer.from(req.headers.authorization, 'base64').toString('utf8'));
-        if (p) {
-          return p;
-        }
+      const v = this.value.readValue(req);
+      if (v) {
+        return JSON.parse(Buffer.from(v, 'base64').toString('utf8'));
       }
     } catch { }
   }
