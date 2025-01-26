@@ -32,6 +32,8 @@ export class JWTSessionCodec implements RestCodec<string> {
     }
   }
 
-  // Do nothing
+  /**
+   * Nothing to store, rely on jwt for everything
+   */
   encode(ctx: FilterContext, data: string | undefined): Promise<void> | void { }
 }

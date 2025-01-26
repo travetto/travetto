@@ -4,6 +4,7 @@ import { TimeUtil } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
 import { FilterContext, RestCodecValue } from '@travetto/rest';
 import { JWTUtil, Payload } from '@travetto/jwt';
+
 import { RestJWTConfig } from './config';
 
 /**
@@ -100,7 +101,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   /**
-   * Write context
+   * Encode JWT to response
    */
   async encode({ res }: FilterContext, p: Principal | undefined): Promise<void> {
     const token = p ? await this.getToken(p) : undefined;
@@ -108,7 +109,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   /**
-   * Read JWT from request
+   * Decode JWT from request
    */
   async decode({ req }: FilterContext): Promise<Principal | undefined> {
     const token = this.value.readValue(req);
