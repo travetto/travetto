@@ -17,42 +17,18 @@ One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-re
 
 The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. 
 
-The [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-codec.ts#L38) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+The [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-codec.ts#L14) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
 
 **Code: JWTPrincipalCodec**
 ```typescript
 import { AuthContext, Principal } from '@travetto/auth';
 import { PrincipalCodec } from '@travetto/auth-rest';
-import { AppError, Runtime, TimeSpan, TimeUtil } from '@travetto/runtime';
-import { Config } from '@travetto/config';
+import { TimeUtil } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
-import { FilterContext, RestCodecTransport, RestCodecValue } from '@travetto/rest';
+import { FilterContext, RestCodecValue } from '@travetto/rest';
 import { JWTUtil, Payload } from '@travetto/jwt';
-import { Ignore } from '@travetto/schema';
 
-@Config('rest.auth.jwt')
-export class RestJWTConfig {
-  mode: RestCodecTransport | 'all' = 'header';
-  header = 'Authorization';
-  cookie = 'trv.auth';
-  signingKey?: string;
-  headerPrefix = 'Bearer';
-  maxAge: TimeSpan | number = '1h';
-  rollingRenew: boolean = false;
-
-  @Ignore()
-  maxAgeMs: number;
-
-  postConstruct(): void {
-    this.maxAgeMs = TimeUtil.asMillis(this.maxAge);
-
-    if (!this.signingKey && Runtime.production) {
-      throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.jwt.signingKey');
-
-    }
-    this.signingKey ??= 'dummy';
-  }
-}
+import { RestJWTConfig } from './config';
 
 /**
  * Principal codec via JWT
@@ -119,7 +95,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
    * @param token
    */
   async verifyToken(token: string, setActive = false): Promise<Principal> {
-    const res = (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.config.signingKey })).auth;
+    const res = await this.config.verifyToken(token);
     if (setActive) {
       this.authContext.authToken = { value: token, type: 'jwt' };
     }
@@ -148,7 +124,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   /**
-   * Write context
+   * Encode JWT to response
    */
   async encode({ res }: FilterContext, p: Principal | undefined): Promise<void> {
     const token = p ? await this.getToken(p) : undefined;
@@ -156,7 +132,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   /**
-   * Read JWT from request
+   * Decode JWT from request
    */
   async decode({ req }: FilterContext): Promise<Principal | undefined> {
     const token = this.value.readValue(req);
