@@ -26,8 +26,8 @@ export class StatelessPrincipalCodec implements PrincipalCodec {
 
   postConstruct() {
     this.accessor = new RestCodecValue({
-      cookie: this.config.transport !== 'header' ? this.config.keyName : undefined!,
-      header: this.config.transport !== 'cookie' ? this.config.keyName : undefined,
+      cookie: this.config.transport === 'cookie' ? this.config.keyName : undefined!,
+      header: this.config.transport === 'header' ? this.config.keyName : undefined,
       headerPrefix: 'Token'
     });
   }

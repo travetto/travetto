@@ -8,7 +8,7 @@ import { RestSessionConfig } from './config';
  */
 export interface SessionCodec extends RestCodec<string> { }
 
-@Injectable()
+@Injectable({ primary: true })
 export class BasicSessionCodec implements SessionCodec {
 
   @Inject()

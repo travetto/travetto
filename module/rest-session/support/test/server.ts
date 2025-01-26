@@ -105,23 +105,21 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     let res = await this.request('get', '/test/session');
     let header = res.headers[key];
     assert.deepStrictEqual(res.body, { age: 1 });
+
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
-
     assert.deepStrictEqual(res.body, { age: 2 });
+
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
-
     assert.deepStrictEqual(res.body, { age: 3 });
 
     res = await this.request('get', '/test/session');
     header = res.headers[key] ?? header;
-
     assert.deepStrictEqual(res.body, { age: 1 });
-    header = res.headers[key];
+
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
-
     assert.deepStrictEqual(res.body, { age: 2 });
   }
 
