@@ -103,12 +103,19 @@ export class SessionService {
   /**
    * Get or recreate session
    */
-  get(): Session {
+  getOrCreate(): Session {
     const existing = this.#session.get();
     const val = (existing?.action === 'destroy' ? undefined : existing) ??
       new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
     this.#session.set(val);
     return val;
+  }
+
+  /**
+   * Get session if defined
+   */
+  get(): Session | undefined {
+    return this.#session.get();
   }
 
   /**

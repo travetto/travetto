@@ -51,7 +51,7 @@ export class SessionReadInterceptor implements RestInterceptor {
   }
 
   async intercept({ req }: FilterContext, next: FilterNext): Promise<unknown> {
-    Object.defineProperty(req, 'session', { get: () => this.service.get() });
+    Object.defineProperty(req, 'session', { get: () => this.service.getOrCreate() });
 
     await this.service.load(async () => {
       let sessionId: string | undefined;
