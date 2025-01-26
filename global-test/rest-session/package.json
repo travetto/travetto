@@ -9,7 +9,7 @@
     "@travetto/rest-fastify-lambda": "^5.1.0",
     "@travetto/rest-koa": "^5.1.0",
     "@travetto/rest-koa-lambda": "^5.1.0",
-    "@travetto/rest-session": "^5.1.0"
+    "@travetto/rest-session": "^5.1.1"
   },
   "travetto": {},
   "private": true

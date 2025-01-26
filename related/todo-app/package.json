@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@travetto/auth-rest": "^5.1.0",
-    "@travetto/auth-rest-session": "^5.1.0",
+    "@travetto/auth-rest-session": "^5.1.1",
     "@travetto/cli": "^5.1.0",
     "@travetto/email-inky": "^5.1.0",
     "@travetto/log": "^5.1.0",
@@ -30,7 +30,7 @@
     "@travetto/openapi": "^5.1.0",
     "@travetto/rest-express": "^5.1.0",
     "@travetto/rest-rpc": "^5.1.0",
-    "@travetto/rest-session": "^5.1.0",
+    "@travetto/rest-session": "^5.1.1",
     "vue": "^3.5.13"
   },
   "devDependencies": {

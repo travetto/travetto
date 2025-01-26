@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-session",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Session provider for the travetto rest module.",
   "keywords": [
     "rest",
