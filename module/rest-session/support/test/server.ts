@@ -9,7 +9,7 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 import { SessionData } from '../../src/session';
 import { RestSessionConfig } from '../../src/config';
-import { BasicSessionCodec } from '../../src/codec';
+import { DefaultSessionCodec } from '../../src/codec';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
@@ -43,7 +43,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
   _config: RestSessionConfig;
 
   @Inject()
-  codec: BasicSessionCodec;
+  codec: DefaultSessionCodec;
 
   config(opt: Partial<RestSessionConfig>) {
     const res = Object.assign(this._config, opt);
