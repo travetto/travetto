@@ -1,6 +1,6 @@
 {
   "name": "@travetto/image",
-  "version": "5.0.20",
+  "version": "5.1.0",
   "description": "Image support, resizing, and optimization",
   "keywords": [
     "images",
@@ -23,7 +23,7 @@
     "directory": "module/image"
   },
   "dependencies": {
-    "@travetto/runtime": "^5.0.16",
+    "@travetto/runtime": "^5.1.0",
     "sharp": "^0.33.5"
   },
   "travetto": {
