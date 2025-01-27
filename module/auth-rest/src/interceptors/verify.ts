@@ -69,10 +69,8 @@ export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConf
       case 'authenticated': {
         if (!principal) {
           throw new AuthenticationError('User is unauthenticated');
-        } else {
-          if (!config.matcher(new Set(principal.permissions))) {
-            throw new AppError('Access denied', { category: 'permissions' });
-          }
+        } else if (!config.matcher(new Set(principal.permissions))) {
+          throw new AppError('Access denied', { category: 'permissions' });
         }
         break;
       }

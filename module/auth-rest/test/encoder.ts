@@ -8,7 +8,7 @@ import { Principal } from '@travetto/auth/src/types/principal';
 import { Config } from '@travetto/config';
 import { asFull } from '@travetto/runtime';
 
-import { PrincipalCodec } from '../src/codec';
+import { PrincipalCodec } from '../src/types';
 
 @Config('stateless')
 class StatelessEncoderConfig {

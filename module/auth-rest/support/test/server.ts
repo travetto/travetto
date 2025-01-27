@@ -7,7 +7,7 @@ import { Inject, Injectable, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, Principal } from '@travetto/auth';
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
-import { PrincipalCodec } from '../../src/codec';
+import { PrincipalCodec } from '../../src/types';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 

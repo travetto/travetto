@@ -1,8 +1,19 @@
 import { Principal } from '@travetto/auth';
-import { RestCodec } from '@travetto/rest';
+import { Injectable } from '@travetto/di';
+import { RestCodecValue, FilterContext } from '@travetto/rest';
 
-/**
- * Rest codec for reading/writing principal
- * @concrete ./internal/types#PrincipalCodecTarget
- */
-export interface PrincipalCodec extends RestCodec<Principal> { }
+import { PrincipalCodec } from './types';
+
+@Injectable()
+export class DefaultPrincipalCodec implements PrincipalCodec {
+
+  value = new RestCodecValue<Principal>({ cookie: 'default_auth' });
+
+  encode({ res }: FilterContext, p: Principal | undefined): void {
+    this.value.writeValue(res, p);
+  }
+
+  decode({ req }: FilterContext): Principal | undefined {
+    return this.value.readValue(req);
+  }
+}

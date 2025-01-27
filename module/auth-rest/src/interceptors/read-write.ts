@@ -9,7 +9,8 @@ import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
-import { PrincipalCodec } from '../codec';
+import { PrincipalCodec } from '../types';
+import { DefaultPrincipalCodec } from '../codec';
 
 @Config('rest.auth.readWrite')
 export class RestAuthReadWriteConfig extends ManagedInterceptorConfig {
@@ -36,7 +37,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
 
   dependsOn: Class<RestInterceptor>[] = [SerializeInterceptor, AsyncContextInterceptor];
 
-  @Inject()
+  @Inject({ optional: true })
   codec: PrincipalCodec;
 
   @Inject()
@@ -48,6 +49,10 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   @Inject()
   authService: AuthService;
 
+  postConstruct(): void {
+    this.codec ??= new DefaultPrincipalCodec();
+  }
+
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
     let decoded: Principal | undefined;
     let checked: Principal | undefined;
@@ -58,17 +63,19 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
 
     try {
       decoded = await this.codec.decode(ctx);
-      checked = this.authService.checkExpiry(decoded);
       lastExpiresAt = checked?.expiresAt;
+
+      checked = this.authService.checkExpiry(decoded);
       this.authContext.principal = checked;
+
       return await next();
     } finally {
-      const current = this.authContext.principal;
-      if (current) {
-        this.authService.enforceExpiry(current, this.config.maxAgeMs, this.config.rollingRenew);
+      const result = this.authContext.principal;
+      if (result) {
+        this.authService.enforceExpiry(result, this.config.maxAgeMs, this.config.rollingRenew);
       }
-      if ((!!decoded !== !!checked) || current !== checked || lastExpiresAt !== current?.expiresAt) { // If it changed
-        await this.codec.encode(ctx, current);
+      if ((!!decoded !== !!checked) || result !== checked || lastExpiresAt !== result?.expiresAt) { // If it changed
+        await this.codec.encode(ctx, result);
       }
 
       this.authContext.clear();
