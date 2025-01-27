@@ -1,27 +1,20 @@
 import assert from 'node:assert';
 
-import { Controller, FilterContext, Get, Post, Redirect, RestCodecValue } from '@travetto/rest';
+import { Controller, Get, Post, Redirect } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable, InjectableFactory } from '@travetto/di';
-import { AuthenticationError, Authenticator, AuthContext, Principal } from '@travetto/auth';
+import { AuthenticationError, Authenticator, AuthContext } from '@travetto/auth';
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
+import { DefaultPrincipalCodec } from '../../src/codec';
 import { PrincipalCodec } from '../../src/types';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
 @Injectable({ primary: true })
-class AuthorizationCodec implements PrincipalCodec {
-
-  value = new RestCodecValue<Principal>({ header: 'Authorization', headerPrefix: 'Token' });
-
-  encode({ res }: FilterContext, p: Principal | undefined) {
-    this.value.writeValue(res, p);
-  }
-  decode({ req }: FilterContext): Principal | undefined {
-    return this.value.readValue(req);
-  }
+class AuthorizationCodec extends DefaultPrincipalCodec implements PrincipalCodec {
+  constructor() { super({ header: 'Authorization', headerPrefix: 'Token' }); }
 }
 
 class Config {

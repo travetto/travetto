@@ -50,7 +50,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   authService: AuthService;
 
   postConstruct(): void {
-    this.codec ??= new DefaultPrincipalCodec();
+    this.codec ??= new DefaultPrincipalCodec({ cookie: 'default_auth' });
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {

@@ -4,7 +4,7 @@ import { Response, Request, FilterContext } from './types';
 
 export type RestCodecTransport = 'header' | 'cookie';
 
-type Config = ({
+export type RestCodecConfig = ({
   cookie: string;
 } | {
   header: string;
@@ -19,7 +19,7 @@ export class RestCodecValue<T extends string | AnyMap> {
   #cookieName?: string;
   #headerPrefix?: string;
 
-  constructor(config: Config) {
+  constructor(config: RestCodecConfig) {
     this.#headerName = 'header' in config ? config.header : undefined;
     this.#cookieName = 'cookie' in config ? config.cookie : undefined;
     this.#headerPrefix = 'headerPrefix' in config ? config.headerPrefix : undefined;
