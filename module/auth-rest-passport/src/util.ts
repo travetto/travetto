@@ -1,5 +1,5 @@
 import { Request } from '@travetto/rest';
-import { castTo } from '@travetto/runtime';
+import { castTo, Util } from '@travetto/runtime';
 
 /**
  * Passport utilities
@@ -14,7 +14,7 @@ export class PassportUtil {
     const state = (typeof src === 'string' ? src : (typeof src?.query.state === 'string' ? src?.query.state : ''));
     if (state) {
       try {
-        return JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
+        return Util.decodeSafeJSON(state);
       } catch { }
     }
   }
@@ -26,7 +26,7 @@ export class PassportUtil {
    */
   static writeState(state?: Record<string, unknown>): string | undefined {
     if (state) {
-      return Buffer.from(JSON.stringify(state), 'utf8').toString('base64');
+      return Util.encodeSafeJSON(state);
     }
   }
 

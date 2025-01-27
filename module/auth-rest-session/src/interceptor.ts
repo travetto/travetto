@@ -27,13 +27,7 @@ export class SessionInterceptor implements RestInterceptor {
   async intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
     try {
       await this.service.load();
-      Object.defineProperty(ctx.req, 'session', {
-        get: () => {
-          console.trace('Getting');
-          const v = this.service.getOrCreate();
-          return v;
-        }
-      });
+      Object.defineProperty(ctx.req, 'session', { get: () => this.service.getOrCreate() });
       return await next();
     } finally {
       await this.service.persist();

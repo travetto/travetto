@@ -55,7 +55,7 @@ export class SessionService {
 
       const session = new Session({
         ...record,
-        data: JSON.parse(Buffer.from(record.data, 'base64').toString('utf8'))
+        data: Util.decodeSafeJSON(record.data)
       });
 
       // Validate session
@@ -94,7 +94,7 @@ export class SessionService {
       if (session.action === 'create' || session.isChanged()) {
         await this.#modelService.upsert(SessionEntry, SessionEntry.from({
           ...session,
-          data: Buffer.from(JSON.stringify(session.data)).toString('base64')
+          data: Util.encodeSafeJSON(session.data)
         }));
       }
       // If destroying

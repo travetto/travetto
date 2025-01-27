@@ -11,7 +11,7 @@ import { SessionData } from '@travetto/auth-session/src/session';
 import { Principal } from '@travetto/auth';
 import { Authenticated, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
 import { Config } from '@travetto/config';
-import { castTo, TypedObject, Util } from '@travetto/runtime';
+import { castTo, TimeUtil, TypedObject, Util } from '@travetto/runtime';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
@@ -54,6 +54,7 @@ class AuthorizationCodec implements PrincipalCodec {
     return id ? this.cache[id] : {
       id: Util.uuid(),
       sessionId: Util.uuid(),
+      expiresAt: TimeUtil.fromNow(this.authReadwriteConfig.maxAgeMs),
       details: {}
     };
   }
@@ -66,9 +67,7 @@ class TestController {
 
   @Get('/')
   get(data: SessionData): SessionData {
-    if (data) {
-      data.age = (data.age ?? 0) + 1;
-    }
+    data.age = (data.age ?? 0) + 1;
     return data!;
   }
 
@@ -107,6 +106,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
       }
     }
     this.codec.postConstruct();
+    this._authRw.postConstruct();
     return this._config.keyName;
   }
 

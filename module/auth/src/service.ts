@@ -93,4 +93,14 @@ export class AuthService {
       }
     }
   }
+
+  /**
+   * Check expiry
+   */
+  checkExpiry(p?: Principal): Principal | undefined {
+    if (p && p.expiresAt && p.expiresAt.getTime() < Date.now()) {
+      return undefined;
+    }
+    return p;
+  }
 }

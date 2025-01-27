@@ -137,9 +137,9 @@ export class Util {
   }
 
   /**
-   * Encode value as base64url encoded string
+   * Encode JSON value as base64url encoded string
    */
-  static encodeValue<T extends string | object>(value: T | undefined): string | undefined {
+  static encodeSafeJSON<T>(value: T | undefined): string | undefined {
     if (value === undefined) {
       return;
     }
@@ -147,9 +147,9 @@ export class Util {
   }
 
   /**
-   * Decode value from base64url encoded string
+   * Decode JSON value from base64url encoded string
    */
-  static decodeValue<T>(input: string | undefined): T | undefined {
+  static decodeSafeJSON<T>(input: string | undefined): T | undefined {
     if (input === undefined) {
       return undefined;
     }
