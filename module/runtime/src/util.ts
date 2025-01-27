@@ -12,6 +12,7 @@ type PromiseWithResolvers<T> = {
 type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z/;
+const DATE_REPLACER = (key: string | symbol, value: unknown): unknown => typeof value === 'string' && DATE_RE.test(value) ? new Date(value) : value;
 
 /**
  * Grab bag of common utilities
@@ -137,25 +138,31 @@ export class Util {
   }
 
   /**
-   * Encode JSON value as base64url encoded string
+   * Encode JSON value as base64 encoded string
    */
   static encodeSafeJSON<T>(value: T | undefined): string | undefined {
     if (value === undefined) {
       return;
     }
-    return (value && typeof value === 'object') ? Buffer.from(JSON.stringify(value), 'utf8').toString('base64url') : castTo(value);
+    const res = (value && typeof value === 'object') ? JSON.stringify(value) : castTo<string>(value);
+    return Buffer.from(res, 'utf8').toString('base64');
   }
 
   /**
-   * Decode JSON value from base64url encoded string
+   * Decode JSON value from base64 encoded string
    */
-  static decodeSafeJSON<T>(input: string | undefined): T | undefined {
-    if (input === undefined) {
+  static decodeSafeJSON<T>(input: string | undefined, convertDates = true): T | undefined {
+    if (!input) {
       return undefined;
     }
-    return input && /^(\{|\[)/.test(input) ?
-      JSON.parse(Buffer.from(input, 'base64url').toString('utf8'),
-        (key, value) => typeof value === 'string' && DATE_RE.test(value) ? new Date(value) : value
-      ) : input;
+
+    let decoded = Buffer.from(input, 'base64').toString('utf8');
+
+    // Read from encoded if it happens
+    if (decoded.startsWith('%')) {
+      decoded = decodeURIComponent(decoded);
+    }
+
+    return /^(\{|\[)/.test(decoded) ? JSON.parse(decoded, convertDates ? DATE_REPLACER : undefined) : decoded;
   }
 }

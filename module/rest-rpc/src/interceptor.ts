@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
-import { AppError } from '@travetto/runtime';
+import { AppError, Util } from '@travetto/runtime';
 
 import { MissingParamSymbol, RequestParamsSymbol, RequestLoggingSymbol } from '@travetto/rest/src/internal/symbol';
 import {
@@ -47,11 +47,7 @@ export class RestRpcInterceptor implements RestInterceptor<RestRpcConfig> {
     if (isBinary) {
       const data = req.headerFirst('X-TRV-RPC-INPUTS')?.trim();
       if (data) {
-        let decoded = Buffer.from(data, 'base64').toString('utf8');
-        if (decoded.startsWith('%')) {
-          decoded = decodeURIComponent(decoded);
-        }
-        params = JSON.parse(decoded);
+        params = Util.decodeSafeJSON(data)!;
       }
     } else {
       await this.body.intercept({ req, res, config: this.body.config }, () => { });
