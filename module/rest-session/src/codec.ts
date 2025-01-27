@@ -14,7 +14,7 @@ export class DefaultSessionCodec implements SessionCodec {
   @Inject()
   config: RestSessionConfig;
 
-  value: RestCodecValue;
+  value: RestCodecValue<string>;
 
   postConstruct(): void {
     this.value = new RestCodecValue({
