@@ -171,6 +171,7 @@ export class MongoModelService implements
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const store = await this.getStore(cls);
     const result = await store.findOne(this.getIdFilter(cls, id), {});
+    console.log("Getting by id", this.getIdFilter(cls, id), !!result);
     if (result) {
       const res = await this.postLoad(cls, result);
       if (res) {

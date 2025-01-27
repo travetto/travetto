@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
-import { Runtime } from '@travetto/runtime';
+import { Runtime, Util } from '@travetto/runtime';
 import { ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { AsyncContext, AsyncContextValue } from '@travetto/context';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
@@ -88,6 +88,7 @@ export class SessionService {
     // If not destroying, write to response, and store in cache source
     if (session.action !== 'destroy') {
       session.expiresAt = p?.expiresAt;
+      session.issuedAt = p?.issuedAt ?? new Date();
 
       // If expiration time has changed, send new session information
       if (session.action === 'create' || session.isChanged()) {
@@ -113,7 +114,7 @@ export class SessionService {
     const existing = this.#session.get();
     const val = (existing?.action === 'destroy' ? undefined : existing) ??
       new Session({
-        id: principal.id,
+        id: principal.sessionId,
         expiresAt: principal.expiresAt,
         issuedAt: principal.issuedAt,
         action: 'create',

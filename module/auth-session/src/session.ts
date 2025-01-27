@@ -25,11 +25,11 @@ export class Session<T extends SessionData = SessionData> {
    * Session signature
    */
   readonly signature?: string;
+
   /**
    * Session initial issue timestamp
    */
-  readonly issuedAt: Date;
-
+  issuedAt: Date;
   /**
    * Expires at time
    */

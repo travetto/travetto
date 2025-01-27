@@ -60,6 +60,7 @@ export class ModelQueryUtil {
       clauses.push(castTo({
         $or: [
           { [conf.expiresAt]: { $exists: false } },
+          { [conf.expiresAt]: undefined },
           { [conf.expiresAt]: { $gte: new Date() } },
         ]
       }));

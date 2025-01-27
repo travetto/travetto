@@ -7,11 +7,11 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 import { SessionService } from '@travetto/auth-session';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
-import { WithSuiteContext } from '@travetto/context/support/test/context';
+import { AsyncContext, WithAsyncContext } from '@travetto/context';
+import { Util } from '@travetto/runtime';
 
 @Suite()
 @InjectableSuite()
-@WithSuiteContext()
 export abstract class AuthSessionServerSuite extends BaseRestSuite {
 
   timeScale = 1;
@@ -22,12 +22,18 @@ export abstract class AuthSessionServerSuite extends BaseRestSuite {
   @Inject()
   session: SessionService;
 
+  @Inject()
+  context: AsyncContext;
+
+  @WithAsyncContext()
   @Test()
   async testSessionEstablishment() {
+    await this.auth.init();
+
     this.auth.principal = {
       id: 'orange',
       details: {},
-      sessionId: 'blue'
+      sessionId: Util.uuid()
     };
 
     assert(this.session.get() === undefined);
@@ -43,8 +49,21 @@ export abstract class AuthSessionServerSuite extends BaseRestSuite {
     assert(await this.session.load() !== undefined);
     const sess2 = this.session.getOrCreate();
     assert(sess2.data?.name === 'bob');
+
+    this.auth.principal = {
+      id: 'orange',
+      details: {},
+      sessionId: Util.uuid()
+    };
+
+    this.session.clear(); // Disconnect
+
+    assert(await this.session.load() === undefined);
+    const sess3 = this.session.getOrCreate();
+    assert.deepStrictEqual(sess3.data, {});
   }
 
+  @WithAsyncContext()
   @Test()
   async testUnauthenticatedSession() {
     await assert.throws(() => this.session.getOrCreate(), AuthenticationError);
