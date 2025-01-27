@@ -30,6 +30,11 @@ export class JWTPrincipalCodec implements PrincipalCodec {
         issuer: v.issuer!,
         id: v.id,
         sessionId: v.sessionId
+      }),
+      v => ({
+        ...v,
+        expiresAt: typeof v.expiresAt === 'string' ? new Date(v.expiresAt) : v.expiresAt,
+        issuedAt: typeof v.issuedAt === 'string' ? new Date(v.issuedAt) : v.issuedAt
       })
     );
 
@@ -55,8 +60,6 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     const token = this.value.readValue(req);
     if (token) {
       const res = await this.signer.verify(token);
-      res.expiresAt = typeof res.expiresAt === 'string' ? new Date(res.expiresAt) : res.expiresAt;
-      res.issuedAt = typeof res.issuedAt === 'string' ? new Date(res.issuedAt) : res.issuedAt;
       this.authContext.authToken = { type: 'jwt', value: token };
       return res;
     }

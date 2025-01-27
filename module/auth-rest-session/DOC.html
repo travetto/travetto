@@ -15,46 +15,74 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/auth-rest-session</code></pre>
   </figure>
 
-One of <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a>'s main responsibilities is being able to send and receive authentication/authorization information from the client.  This data can be encoded in many different forms, and this module provides the ability to encode into and decode from the user's <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest-session" title="Session provider for the travetto rest module.">REST Session</a> context. This module fulfills the contract required by <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a> of being able to encode and decode a user principal by storing the user principal in the session. <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/principal-encoder.ts#L12">SessionPrincipalCodec</a> is exposed as a tool for allowing for decoding/encoding principals into the session.
+One of <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a>'s main responsibilities is being able to send and receive authentication/authorization information from the client. <br><br>
+This module's responsibility is, to expose <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session" title="Session provider for the travetto auth module.">Auth Session</a>'s data, within the scope of the request/response flow.
 
   <figure class="code">
-    <figcaption class="code">SessionPrincipalCodec
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/principal-encoder.ts">Source</a></cite>
+    <figcaption class="code">Anatomy of the Session Interceptor
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/interceptor.ts#L10">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FilterContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Principal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PrincipalCodec <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> SessionService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest-session'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">RestSessionConfig</span> <span class="token keyword">implements</span> <span class="token class-name">ManagedInterceptorConfig</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
 
 <span class="token comment">/**
- * Integration with the auth module, using the session as a backing
- * store for the auth principal.
+ * Loads session, and provides ability to create session as needed, persists when complete.
  */</span>
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SessionPrincipalCodec</span> <span class="token keyword">implements</span> <span class="token class-name">PrincipalCodec</span> <span class="token punctuation">{{'{'}}</span>
-  #key <span class="token operator">=</span> <span class="token string">'_trv_auth_principal'</span><span class="token punctuation">;</span> <span class="token comment">// Must be serializable, so it cannot be a symbol</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SessionInterceptor</span> <span class="token keyword">implements</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{'{'}}</span>
+
+  dependsOn<span class="token operator">:</span> Class<span class="token operator">&lt;</span>RestInterceptor<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span>AuthReadWriteInterceptor<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  runsBefore<span class="token operator">:</span> Class<span class="token operator">&lt;</span>RestInterceptor<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   service<span class="token operator">:</span> SessionService<span class="token punctuation">;</span>
 
-  <span class="token function">encode</span><span class="token punctuation">(</span>_<span class="token operator">:</span> FilterContext<span class="token punctuation">,</span> p<span class="token operator">:</span> Principal<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>p<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">const</span> session <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">getOrCreate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      p<span class="token punctuation">.</span>expiresAt <span class="token operator">=</span> session<span class="token punctuation">.</span>expiresAt<span class="token punctuation">;</span> <span class="token comment">// Let principal live as long as the session</span>
-      session<span class="token punctuation">.</span><span class="token function">setValue</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#key<span class="token punctuation">,</span> p<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">?.</span><span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Kill session if exists</span>
-    <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">{{'}'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  config<span class="token operator">:</span> RestSessionConfig<span class="token punctuation">;</span>
 
-  <span class="token keyword">async</span> <span class="token function">decode</span><span class="token punctuation">(</span>_<span class="token operator">:</span> FilterContext<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> session <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> session<span class="token operator">?.</span><span class="token generic-function"><span class="token function">getValue</span><span class="token generic class-name"><span class="token operator">&lt;</span>Principal<span class="token operator">></span></span></span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#key<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">async</span> <span class="token function">intercept</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> FilterContext<span class="token punctuation">,</span> next<span class="token operator">:</span> FilterNext<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">unknown</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>ctx<span class="token punctuation">.</span>req<span class="token punctuation">,</span> <span class="token string">'session'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token function-variable function">get</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">getOrCreate</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">finally</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">persist</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-As you can see, encode and decode just read and write from the session context.  The main feature here, is that if the authentication expires, the session should be destroyed.  Additionally, the user's expiry time is assumed to live as long as the session for simplicity's sake.
+Once operating within the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L13">Session</a> boundaries, the session state can be injected via params, or accessed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L16">SessionService</a>.
+
+  <figure class="code">
+    <figcaption class="code">Sample Usage
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-session/doc/usage.ts#L20">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token decorator"><span class="token at operator">@</span><span class="token function">Authenticated</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/session'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SessionRoutes</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  service<span class="token operator">:</span> SessionService<span class="token punctuation">;</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Put</span></span><span class="token punctuation">(</span><span class="token string">'/info'</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">storeInfo</span><span class="token punctuation">(</span>data<span class="token operator">?</span><span class="token operator">:</span> SessionData<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      data<span class="token punctuation">.</span>age <span class="token operator">=</span> <span class="token number">20</span><span class="token punctuation">;</span>
+      data<span class="token punctuation">.</span>name <span class="token operator">=</span> <span class="token string">'Roger'</span><span class="token punctuation">;</span> <span class="token comment">// Setting data</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/logout'</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">logout</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">destroy</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/info/age'</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">getInfo</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> data <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">getOrCreate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> data<span class="token operator">?.</span>age<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>

@@ -17,7 +17,7 @@
 
 One of <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a>'s main responsibilities is being able to send and receive authentication/authorization information from the client.  This data can be encoded in many different forms, and this module provides the ability to encode into and decode from <a target="_blank" class="external-link" href="https://jwt.io/">JWT</a> s. This module fulfills the contract required by <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a> of being able to encode and decode a user principal, by leveraging <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/jwt" title="JSON Web Token implementation">JWT</a>'s token generation features. <br><br>
 The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-codec.ts#L14">JWTPrincipalCodec</a> is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-codec.ts#L13">JWTPrincipalCodec</a> is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
 
   <figure class="code">
     <figcaption class="code">JWTPrincipalCodec
@@ -26,10 +26,9 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AuthContext<span class="token punctuation">,</span> Principal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PrincipalCodec <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> TimeUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject<span class="token punctuation">,</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FilterContext<span class="token punctuation">,</span> RestCodecValue <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> JWTUtil<span class="token punctuation">,</span> Payload <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/jwt'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> JWTSigner <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/jwt'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestJWTConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./config'</span><span class="token punctuation">;</span>
 
@@ -45,9 +44,26 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   authContext<span class="token operator">:</span> AuthContext<span class="token punctuation">;</span>
 
-  value<span class="token operator">:</span> RestCodecValue<span class="token punctuation">;</span>
+  signer<span class="token operator">:</span> JWTSigner<span class="token operator">&lt;</span>Principal<span class="token operator">></span><span class="token punctuation">;</span>
+
+  value<span class="token operator">:</span> RestCodecValue<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>signer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">JWTSigner</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>signingKey<span class="token operator">!</span><span class="token punctuation">,</span>
+      v <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+        expiresAt<span class="token operator">:</span> v<span class="token punctuation">.</span>expiresAt<span class="token operator">!</span><span class="token punctuation">,</span>
+        issuedAt<span class="token operator">:</span> v<span class="token punctuation">.</span>issuedAt<span class="token operator">!</span><span class="token punctuation">,</span>
+        issuer<span class="token operator">:</span> v<span class="token punctuation">.</span>issuer<span class="token operator">!</span><span class="token punctuation">,</span>
+        id<span class="token operator">:</span> v<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
+        sessionId<span class="token operator">:</span> v<span class="token punctuation">.</span>sessionId
+      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      v <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+        <span class="token operator">...</span>v<span class="token punctuation">,</span>
+        expiresAt<span class="token operator">:</span> <span class="token keyword">typeof</span> v<span class="token punctuation">.</span>expiresAt <span class="token operator">===</span> <span class="token string">'string'</span> <span class="token operator">?</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>v<span class="token punctuation">.</span>expiresAt<span class="token punctuation">)</span> <span class="token operator">:</span> v<span class="token punctuation">.</span>expiresAt<span class="token punctuation">,</span>
+        issuedAt<span class="token operator">:</span> <span class="token keyword">typeof</span> v<span class="token punctuation">.</span>issuedAt <span class="token operator">===</span> <span class="token string">'string'</span> <span class="token operator">?</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>v<span class="token punctuation">.</span>issuedAt<span class="token punctuation">)</span> <span class="token operator">:</span> v<span class="token punctuation">.</span>issuedAt
+      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
     <span class="token keyword">this</span><span class="token punctuation">.</span>value <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">RestCodecValue</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
       header<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>mode <span class="token operator">!==</span> <span class="token string">'cookie'</span> <span class="token operator">?</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>header <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token operator">!</span><span class="token punctuation">,</span>
       cookie<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>mode <span class="token operator">!==</span> <span class="token string">'header'</span> <span class="token operator">?</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>cookie <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
@@ -55,82 +71,11 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
     <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
-  <span class="token function">toJwtPayload</span><span class="token punctuation">(</span>p<span class="token operator">:</span> Principal<span class="token punctuation">)</span><span class="token operator">:</span> Payload <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> exp <span class="token operator">=</span> TimeUtil<span class="token punctuation">.</span><span class="token function">asSeconds</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>expiresAt<span class="token operator">!</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">const</span> iat <span class="token operator">=</span> TimeUtil<span class="token punctuation">.</span><span class="token function">asSeconds</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>issuedAt<span class="token operator">!</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
-      auth<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
-        <span class="token operator">...</span>p<span class="token punctuation">,</span>
-      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
-      exp<span class="token punctuation">,</span>
-      iat<span class="token punctuation">,</span>
-      iss<span class="token operator">:</span> p<span class="token punctuation">.</span>issuer<span class="token punctuation">,</span>
-      sub<span class="token operator">:</span> p<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
-    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token comment">/**
-   * Get token for principal
-   */</span>
-  <span class="token keyword">async</span> <span class="token function">getToken</span><span class="token punctuation">(</span>p<span class="token operator">:</span> Principal<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> JWTUtil<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">toJwtPayload</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> key<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>signingKey <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token comment">/**
-   * Rewrite token with new permissions
-   */</span>
-  <span class="token function">updateTokenPermissions</span><span class="token punctuation">(</span>token<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> permissions<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> JWTUtil<span class="token punctuation">.</span><span class="token generic-function"><span class="token function">rewrite</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token punctuation">{{'{'}}</span> auth<span class="token operator">:</span> Principal <span class="token punctuation">{{'}'}}</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>
-      token<span class="token punctuation">,</span>
-      p <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
-        <span class="token operator">...</span>p<span class="token punctuation">,</span>
-        auth<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
-          <span class="token operator">...</span>p<span class="token punctuation">.</span>auth<span class="token punctuation">,</span>
-          permissions
-        <span class="token punctuation">{{'}'}}</span>
-      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-      <span class="token punctuation">{{'{'}}</span> key<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>signingKey <span class="token punctuation">{{'}'}}</span>
-    <span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token comment">/**
-   * Verify token to principal
-   * @param token
-   */</span>
-  <span class="token keyword">async</span> <span class="token function">verifyToken</span><span class="token punctuation">(</span>token<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> setActive <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Principal<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span><span class="token function">verifyToken</span><span class="token punctuation">(</span>token<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>setActive<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">this</span><span class="token punctuation">.</span>authContext<span class="token punctuation">.</span>authToken <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> value<span class="token operator">:</span> token<span class="token punctuation">,</span> type<span class="token operator">:</span> <span class="token string">'jwt'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token operator">...</span>res<span class="token punctuation">,</span>
-      expiresAt<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>res<span class="token punctuation">.</span>expiresAt<span class="token operator">!</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-      issuedAt<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>res<span class="token punctuation">.</span>issuedAt<span class="token operator">!</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token comment">/**
-   * Run before encoding, allowing for session extending if needed
-   */</span>
-  <span class="token function">preEncode</span><span class="token punctuation">(</span>p<span class="token operator">:</span> Principal<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
-    p<span class="token punctuation">.</span>expiresAt <span class="token operator">??=</span> TimeUtil<span class="token punctuation">.</span><span class="token function">fromNow</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>maxAgeMs<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    p<span class="token punctuation">.</span>issuedAt <span class="token operator">??=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>rollingRenew<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">const</span> end <span class="token operator">=</span> p<span class="token punctuation">.</span>expiresAt<span class="token punctuation">.</span><span class="token function">getTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token keyword">const</span> midPoint <span class="token operator">=</span> end <span class="token operator">-</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>maxAgeMs <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">;</span>
-      <span class="token keyword">if</span> <span class="token punctuation">(</span>Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">></span> midPoint<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token comment">// If we are past the half way mark, renew the token</span>
-        p<span class="token punctuation">.</span>issuedAt <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-        p<span class="token punctuation">.</span>expiresAt <span class="token operator">=</span> TimeUtil<span class="token punctuation">.</span><span class="token function">fromNow</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>maxAgeMs<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// This will trigger a re-send</span>
-      <span class="token punctuation">{{'}'}}</span>
-    <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">{{'}'}}</span>
-
   <span class="token comment">/**
    * Encode JWT to response
    */</span>
   <span class="token keyword">async</span> <span class="token function">encode</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> res <span class="token punctuation">{{'}'}}</span><span class="token operator">:</span> FilterContext<span class="token punctuation">,</span> p<span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> token <span class="token operator">=</span> p <span class="token operator">?</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">getToken</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> token <span class="token operator">=</span> p <span class="token operator">?</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>signer<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>value<span class="token punctuation">.</span><span class="token function">writeValue</span><span class="token punctuation">(</span>res<span class="token punctuation">,</span> token<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> expires<span class="token operator">:</span> p<span class="token operator">?.</span>expiresAt <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
@@ -140,7 +85,9 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
   <span class="token keyword">async</span> <span class="token function">decode</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> req <span class="token punctuation">{{'}'}}</span><span class="token operator">:</span> FilterContext<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> token <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>value<span class="token punctuation">.</span><span class="token function">readValue</span><span class="token punctuation">(</span>req<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>token<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">verifyToken</span><span class="token punctuation">(</span>token<span class="token punctuation">,</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>signer<span class="token punctuation">.</span><span class="token function">verify</span><span class="token punctuation">(</span>token<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>authContext<span class="token punctuation">.</span>authToken <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> type<span class="token operator">:</span> <span class="token string">'jwt'</span><span class="token punctuation">,</span> value<span class="token operator">:</span> token <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span> res<span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>

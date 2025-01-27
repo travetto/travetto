@@ -389,9 +389,9 @@ npx trv run:rest
       },
       RestAcceptsConfig: { types: {} },
       RestAsyncContextConfig: {},
-      RestAuthConfig: {},
       RestAuthLoginConfig: {},
       RestAuthLogoutConfig: {},
+      RestAuthReadWriteConfig: { maxAge: '1h', rollingRenew: true },
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '1mb', parsingTypes: {} },
       RestConfig: {
@@ -409,13 +409,7 @@ npx trv run:rest
       RestGetCacheConfig: {},
       RestLogRoutesConfig: {},
       RestRpcConfig: { clients: {} },
-      RestSessionConfig: {
-        autoCommit: true,
-        maxAge: 1800000,
-        renew: true,
-        rolling: false,
-        transport: 'cookie'
-      },
+      RestSessionConfig: {},
       RestSslConfig: { active: false }
     }
   }

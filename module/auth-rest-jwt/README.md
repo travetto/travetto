@@ -17,16 +17,15 @@ One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-re
 
 The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. 
 
-The [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-codec.ts#L14) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+The [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-codec.ts#L13) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
 
 **Code: JWTPrincipalCodec**
 ```typescript
 import { AuthContext, Principal } from '@travetto/auth';
 import { PrincipalCodec } from '@travetto/auth-rest';
-import { TimeUtil } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
 import { FilterContext, RestCodecValue } from '@travetto/rest';
-import { JWTUtil, Payload } from '@travetto/jwt';
+import { JWTSigner } from '@travetto/jwt';
 
 import { RestJWTConfig } from './config';
 
@@ -42,9 +41,26 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   @Inject()
   authContext: AuthContext;
 
-  value: RestCodecValue;
+  signer: JWTSigner<Principal>;
+
+  value: RestCodecValue<string>;
 
   postConstruct(): void {
+    this.signer = new JWTSigner(this.config.signingKey!,
+      v => ({
+        expiresAt: v.expiresAt!,
+        issuedAt: v.issuedAt!,
+        issuer: v.issuer!,
+        id: v.id,
+        sessionId: v.sessionId
+      }),
+      v => ({
+        ...v,
+        expiresAt: typeof v.expiresAt === 'string' ? new Date(v.expiresAt) : v.expiresAt,
+        issuedAt: typeof v.issuedAt === 'string' ? new Date(v.issuedAt) : v.issuedAt
+      })
+    );
+
     this.value = new RestCodecValue({
       header: this.config.mode !== 'cookie' ? this.config.header : undefined!,
       cookie: this.config.mode !== 'header' ? this.config.cookie : undefined,
@@ -52,82 +68,11 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     });
   }
 
-  toJwtPayload(p: Principal): Payload {
-    const exp = TimeUtil.asSeconds(p.expiresAt!);
-    const iat = TimeUtil.asSeconds(p.issuedAt!);
-    return {
-      auth: {
-        ...p,
-      },
-      exp,
-      iat,
-      iss: p.issuer,
-      sub: p.id,
-    };
-  }
-
-  /**
-   * Get token for principal
-   */
-  async getToken(p: Principal): Promise<string> {
-    return await JWTUtil.create(this.toJwtPayload(p), { key: this.config.signingKey });
-  }
-
-  /**
-   * Rewrite token with new permissions
-   */
-  updateTokenPermissions(token: string, permissions: string[]): Promise<string> {
-    return JWTUtil.rewrite<{ auth: Principal }>(
-      token,
-      p => ({
-        ...p,
-        auth: {
-          ...p.auth,
-          permissions
-        }
-      }),
-      { key: this.config.signingKey }
-    );
-  }
-
-  /**
-   * Verify token to principal
-   * @param token
-   */
-  async verifyToken(token: string, setActive = false): Promise<Principal> {
-    const res = await this.config.verifyToken(token);
-    if (setActive) {
-      this.authContext.authToken = { value: token, type: 'jwt' };
-    }
-    return {
-      ...res,
-      expiresAt: new Date(res.expiresAt!),
-      issuedAt: new Date(res.issuedAt!),
-    };
-  }
-
-  /**
-   * Run before encoding, allowing for session extending if needed
-   */
-  preEncode(p: Principal): void {
-    p.expiresAt ??= TimeUtil.fromNow(this.config.maxAgeMs);
-    p.issuedAt ??= new Date();
-
-    if (this.config.rollingRenew) {
-      const end = p.expiresAt.getTime();
-      const midPoint = end - this.config.maxAgeMs / 2;
-      if (Date.now() > midPoint) { // If we are past the half way mark, renew the token
-        p.issuedAt = new Date();
-        p.expiresAt = TimeUtil.fromNow(this.config.maxAgeMs); // This will trigger a re-send
-      }
-    }
-  }
-
   /**
    * Encode JWT to response
    */
   async encode({ res }: FilterContext, p: Principal | undefined): Promise<void> {
-    const token = p ? await this.getToken(p) : undefined;
+    const token = p ? await this.signer.create(p) : undefined;
     this.value.writeValue(res, token, { expires: p?.expiresAt });
   }
 
@@ -137,7 +82,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   async decode({ req }: FilterContext): Promise<Principal | undefined> {
     const token = this.value.readValue(req);
     if (token) {
-      return await this.verifyToken(token, true);
+      const res = await this.signer.verify(token);
+      this.authContext.authToken = { type: 'jwt', value: token };
+      return res;
     }
   }
 }

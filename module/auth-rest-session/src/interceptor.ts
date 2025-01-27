@@ -1,7 +1,7 @@
 import { Class } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { RestInterceptor, FilterContext, FilterNext, ManagedInterceptorConfig, ParamExtractor } from '@travetto/rest';
-import { Session, SessionService } from '@travetto/auth-session';
+import { SessionService } from '@travetto/auth-session';
 import { SessionDataTarget } from '@travetto/auth-session/src/internal/types';
 import { Config } from '@travetto/config';
 import { AuthReadWriteInterceptor } from '@travetto/auth-rest';
@@ -36,4 +36,3 @@ export class SessionInterceptor implements RestInterceptor {
 }
 
 ParamExtractor.registerContext(SessionDataTarget, (_, req) => req.session?.data);
-ParamExtractor.registerContext(Session, (_, req) => req.session);

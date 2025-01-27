@@ -1,7 +1,7 @@
-import { InjectableFactory } from '@travetto/di';
+import { Inject, InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
 import { Controller, Put, Get } from '@travetto/rest';
-import { Session, SessionData, SessionModelSymbol } from '@travetto/auth-session';
+import { SessionData, SessionModelSymbol, SessionService } from '@travetto/auth-session';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Authenticated } from '@travetto/auth-rest';
 
@@ -21,19 +21,25 @@ class SessionConfig {
 @Controller('/session')
 export class SessionRoutes {
 
+  @Inject()
+  service: SessionService;
+
   @Put('/info')
-  async storeInfo(data: SessionData) {
-    data.age = 20;
-    data.name = 'Roger'; // Setting data
+  async storeInfo(data?: SessionData) {
+    if (data) {
+      data.age = 20;
+      data.name = 'Roger'; // Setting data
+    }
   }
 
   @Get('/logout')
-  async logout(session: Session) {
-    await session.destroy();
+  async logout() {
+    await this.service.destroy();
   }
 
   @Get('/info/age')
-  async getInfo(data: SessionData) {
-    return data.age;
+  async getInfo() {
+    const { data } = this.service.getOrCreate();
+    return data?.age;
   }
 }
