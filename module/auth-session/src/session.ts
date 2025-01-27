@@ -1,17 +1,13 @@
-import { AnyMap, castKey, castTo, TimeUtil } from '@travetto/runtime';
-import { ContextProvider } from '@travetto/rest';
+import { AnyMap, castKey, castTo } from '@travetto/runtime';
 
 /**
  * @concrete ./internal/types#SessionDataTarget
- * @augments `@travetto/rest:Context`
  */
 export interface SessionData extends AnyMap { }
 
 /**
  * Full session object, with metadata
- * @augments `@travetto/rest:Context`
  */
-@ContextProvider((c, req) => req.session)
 export class Session<T extends SessionData = SessionData> {
   /**
    * The expiry time when the session was loaded
@@ -25,10 +21,6 @@ export class Session<T extends SessionData = SessionData> {
    * The session identifier
    */
   readonly id: string;
-  /**
-   * Session max age in ms
-   */
-  readonly maxAge?: number;
   /**
    * Session signature
    */
@@ -64,11 +56,6 @@ export class Session<T extends SessionData = SessionData> {
     // Mark the expiry load time
     this.#expiresAtLoaded = this.expiresAt ?? new Date();
 
-    // Mark expiry time
-    if (this.maxAge && !this.expiresAt) {
-      this.refresh();
-    }
-
     // Hash the session as it stands
     this.#payload = JSON.stringify(this);
   }
@@ -103,13 +90,6 @@ export class Session<T extends SessionData = SessionData> {
   }
 
   /**
-   * See if the session is nearly expired
-   */
-  isAlmostExpired(): boolean {
-    return (!!this.maxAge && (this.expiresAt!.getTime() - Date.now()) < this.maxAge / 2);
-  }
-
-  /**
    * See if the session is truly expired
    */
   isExpired(): boolean {
@@ -121,15 +101,6 @@ export class Session<T extends SessionData = SessionData> {
    */
   isEmpty(): boolean {
     return !Object.keys(this.data ?? {}).length;
-  }
-
-  /**
-   * Refresh the session expiration time
-   */
-  refresh(): void {
-    if (this.maxAge) {
-      this.expiresAt = TimeUtil.fromNow(this.maxAge);
-    }
   }
 
   /**
@@ -148,7 +119,6 @@ export class Session<T extends SessionData = SessionData> {
       id: this.id,
       signature: this.signature,
       expiresAt: this.expiresAt?.getTime(),
-      maxAge: this.maxAge,
       issuedAt: this.issuedAt?.getTime(),
       data: this.data
     };

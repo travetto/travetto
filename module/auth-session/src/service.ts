@@ -1,11 +1,11 @@
 import { Injectable, Inject } from '@travetto/di';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
-import { Runtime, Util } from '@travetto/runtime';
+import { Runtime } from '@travetto/runtime';
 import { ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { AsyncContext, AsyncContextValue } from '@travetto/context';
+import { AuthContext, AuthenticationError } from '@travetto/auth';
 
 import { Session } from './session';
-import { RestSessionConfig } from './config';
 import { SessionEntry, SessionModelSymbol } from './model';
 
 /**
@@ -16,10 +16,10 @@ import { SessionEntry, SessionModelSymbol } from './model';
 export class SessionService {
 
   @Inject()
-  config: RestSessionConfig;
+  context: AsyncContext;
 
   @Inject()
-  context: AsyncContext;
+  auth: AuthContext;
 
   #modelService: ModelExpirySupport;
 
@@ -68,7 +68,7 @@ export class SessionService {
   /**
    * Persist session
    */
-  async persist(onPersist: (value: Session | null) => Promise<unknown> | unknown): Promise<void> {
+  async persist(): Promise<void> {
     const session = this.#session.get();
 
     // If missing or new and no data
@@ -76,11 +76,11 @@ export class SessionService {
       return;
     }
 
+    const p = this.auth.principal;
+
     // If not destroying, write to response, and store in cache source
     if (session.action !== 'destroy') {
-      if (this.config.rolling || (this.config.renew && session.isAlmostExpired())) {
-        session.refresh();
-      }
+      session.expiresAt = p?.expiresAt;
 
       // If expiration time has changed, send new session information
       if (session.action === 'create' || session.isChanged()) {
@@ -88,12 +88,10 @@ export class SessionService {
           ...session,
           data: Buffer.from(JSON.stringify(session.data)).toString('base64')
         }));
-        await onPersist(session);
       }
       // If destroying
     } else if (session.id) { // If destroy and id
       await this.#modelService.delete(SessionEntry, session.id).catch(() => { });
-      await onPersist(null);
     }
   }
 
@@ -101,9 +99,19 @@ export class SessionService {
    * Get or recreate session
    */
   getOrCreate(): Session {
+    const principal = this.auth.principal;
+    if (!principal) {
+      throw new AuthenticationError('Unable to establish session without first authenticating');
+    }
     const existing = this.#session.get();
     const val = (existing?.action === 'destroy' ? undefined : existing) ??
-      new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
+      new Session({
+        id: principal.id,
+        expiresAt: principal.expiresAt,
+        issuedAt: principal.issuedAt,
+        action: 'create',
+        data: {},
+      });
     this.#session.set(val);
     return val;
   }
@@ -118,11 +126,11 @@ export class SessionService {
   /**
    * Load from request
    */
-  async load(fetchId: () => Promise<string | undefined> | string | undefined): Promise<Session | undefined> {
+  async load(): Promise<Session | undefined> {
     if (!this.#session.get()) {
-      const id = await fetchId();
-      if (id) {
-        this.#session.set(await this.#load(id));
+      const principal = this.auth.principal;
+      if (principal?.sessionId) {
+        this.#session.set(await this.#load(principal.sessionId));
       }
     }
     return this.#session.get();

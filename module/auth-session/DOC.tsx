@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 import { Context } from '@travetto/rest';
-import { Session } from '@travetto/rest-session';
+import { Session } from '@travetto/auth-session';
 
 
 const ModelExpirySupport = d.ref('ModelExpirySupport', '@travetto/model/src/service/expiry.ts');

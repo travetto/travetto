@@ -27,9 +27,9 @@
   "dependencies": {
     "@travetto/auth": "^5.1.0",
     "@travetto/auth-rest": "^5.1.0",
+    "@travetto/auth-session": "^5.1.1",
     "@travetto/di": "^5.1.0",
-    "@travetto/rest": "^5.1.0",
-    "@travetto/rest-session": "^5.1.1"
+    "@travetto/rest": "^5.1.0"
   },
   "travetto": {
     "displayName": "Rest Auth Session"

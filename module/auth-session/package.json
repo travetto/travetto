@@ -1,9 +1,9 @@
 {
-  "name": "@travetto/rest-session",
+  "name": "@travetto/auth-session",
   "version": "5.1.1",
-  "description": "Session provider for the travetto rest module.",
+  "description": "Session provider for the travetto auth module.",
   "keywords": [
-    "rest",
+    "auth",
     "session",
     "travetto",
     "typescript"
@@ -22,12 +22,12 @@
   "main": "__index__.ts",
   "repository": {
     "url": "git+https://github.com/travetto/travetto.git",
-    "directory": "module/rest-session"
+    "directory": "module/auth-session"
   },
   "dependencies": {
+    "@travetto/auth": "^5.1.0",
     "@travetto/config": "^5.1.0",
-    "@travetto/model": "^5.1.0",
-    "@travetto/rest": "^5.1.0"
+    "@travetto/model": "^5.1.0"
   },
   "peerDependencies": {
     "@travetto/test": "^5.1.0"
@@ -38,7 +38,7 @@
     }
   },
   "travetto": {
-    "displayName": "REST Session"
+    "displayName": "Auth Session"
   },
   "publishConfig": {
     "access": "public"
