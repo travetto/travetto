@@ -2,42 +2,20 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable } from '@travetto/di';
-import { RestCodecValue, FilterContext, Response, RestCodecTransport } from '@travetto/rest';
+import { Response } from '@travetto/rest';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { Principal } from '@travetto/auth/src/types/principal';
-import { Config } from '@travetto/config';
 import { asFull } from '@travetto/runtime';
 
 import { PrincipalCodec } from '../src/types';
-
-@Config('stateless')
-class StatelessEncoderConfig {
-  transport: RestCodecTransport = 'header';
-  keyName = 'secret';
-}
+import { DefaultPrincipalCodec } from '../src/codec';
 
 @Injectable()
-export class StatelessPrincipalCodec implements PrincipalCodec {
-
-  @Inject()
-  config: StatelessEncoderConfig;
-
-  accessor: RestCodecValue<Principal>;
-
-  postConstruct() {
-    this.accessor = new RestCodecValue({
-      cookie: this.config.transport === 'cookie' ? this.config.keyName : undefined!,
-      header: this.config.transport === 'header' ? this.config.keyName : undefined,
+export class StatelessPrincipalCodec extends DefaultPrincipalCodec implements PrincipalCodec {
+  constructor() {
+    super({
+      header: 'Authorization',
       headerPrefix: 'Token'
     });
-  }
-
-  encode({ res }: FilterContext, principal?: Principal): void {
-    return this.accessor.writeValue(res, principal, { expires: principal?.expiresAt });
-  }
-
-  decode({ req }: FilterContext): Principal | undefined {
-    return this.accessor.readValue(req);
   }
 }
 
@@ -46,15 +24,10 @@ export class StatelessPrincipalCodec implements PrincipalCodec {
 export class EncoderTest {
 
   @Inject()
-  config: StatelessEncoderConfig;
-
-  @Inject()
   instance: PrincipalCodec;
 
   @Test()
   async testHeader() {
-    this.config.transport = 'header';
-
     const headers: Record<string, string> = {};
 
     await this.instance.encode(
@@ -75,13 +48,11 @@ export class EncoderTest {
       }
     );
 
-    assert(headers[this.config.keyName] !== undefined);
+    assert(headers.Authorization !== undefined);
   }
 
   @Test()
   async testHeaderMissing() {
-    this.config.transport = 'header';
-
     const headers: Record<string, string> = {};
 
     await this.instance.encode({
@@ -94,6 +65,6 @@ export class EncoderTest {
       config: {}
     }, undefined);
 
-    assert(headers[this.config.keyName] === undefined);
+    assert(headers.Authorization === undefined);
   }
 }

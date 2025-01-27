@@ -12,7 +12,7 @@ export class DefaultPrincipalCodec implements PrincipalCodec {
   }
 
   encode({ res }: FilterContext, p: Principal | undefined): void {
-    this.value.writeValue(res, p);
+    this.value.writeValue(res, p, { expires: p?.expiresAt });
   }
 
   decode({ req }: FilterContext): Principal | undefined {
