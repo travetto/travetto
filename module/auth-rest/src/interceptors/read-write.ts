@@ -47,8 +47,6 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
     let og: Principal | undefined;
     let ogExpires: Date | undefined;
-    // Expose user field on principal
-    Object.defineProperty(ctx.req, 'user', { get: () => this.authContext.principal, configurable: false });
 
     this.authContext.init();
 
