@@ -144,7 +144,7 @@ export class Util {
     if (value === undefined) {
       return;
     }
-    const res = (value && typeof value === 'object') ? JSON.stringify(value) : castTo<string>(value);
+    const res = JSON.stringify(value);
     return Buffer.from(res, 'utf8').toString('base64');
   }
 
@@ -163,6 +163,6 @@ export class Util {
       decoded = decodeURIComponent(decoded);
     }
 
-    return /^(\{|\[)/.test(decoded) ? JSON.parse(decoded, convertDates ? DATE_REPLACER : undefined) : decoded;
+    return JSON.parse(decoded, convertDates ? DATE_REPLACER : undefined);
   }
 }
