@@ -144,10 +144,6 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-upload/rest-upload.component').then(m => m.RestUploadComponent)
       },
       {
-        path: 'rest-session', title: 'Session',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-session/rest-session.component').then(m => m.RestSessionComponent)
-      },
-      {
         path: 'rest-rpc', title: 'Rest RPC',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-rpc/rest-rpc.component').then(m => m.RestRpcComponent)
       },
@@ -176,6 +172,10 @@ export const PAGES = [
       {
         path: 'auth-rest-session', title: 'Rest Session',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-rest-session/auth-rest-session.component').then(m => m.AuthRestSessionComponent)
+      },
+      {
+        path: 'auth-session', title: 'Auth Session',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-session/auth-session.component').then(m => m.AuthSessionComponent)
       },
       {
         path: 'auth-rest-jwt', title: 'Rest JWT',
