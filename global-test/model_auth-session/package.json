@@ -1,5 +1,5 @@
 {
-  "name": "@travetto-test/model_rest-session",
+  "name": "@travetto-test/model_auth-session",
   "version": "0.0.0",
   "dependencies": {
     "@travetto/auth-session": "^5.1.1",

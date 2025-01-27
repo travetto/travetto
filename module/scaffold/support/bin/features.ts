@@ -45,8 +45,7 @@ export const FEATURES: Feature[] = [
     title: 'Rest Authentication',
     package: '@travetto/auth-rest',
     addons: [
-      { title: 'Rest Session', package: ['@travetto/rest-session', '@travetto/model-memory'] },
-      { title: 'Auth Rest Session', package: ['@travetto/auth-rest-session', '@travetto/model-memory'] },
+      { title: 'Session Support', package: ['@travetto/auth-session', '@travetto/auth-rest-session', '@travetto/model-memory'] },
     ]
   },
   {

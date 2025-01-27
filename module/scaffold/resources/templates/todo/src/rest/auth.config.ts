@@ -1,5 +1,5 @@
 import { Authorizer, Authenticator, AuthenticationError } from '@travetto/auth';
-import { SessionModelSymbol } from '@travetto/rest-session';
+import { SessionModelSymbol } from '@travetto/auth-session';
 import { InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
 import { MemoryModelService } from '@travetto/model-memory';
