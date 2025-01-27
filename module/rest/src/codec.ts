@@ -1,8 +1,10 @@
 import { SetOption } from 'cookies';
+import { AnyMap, castTo } from '@travetto/runtime';
 import { Response, Request, FilterContext } from './types';
-import { castTo } from '@travetto/runtime';
 
 export type RestCodecTransport = 'header' | 'cookie';
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z/;
 
 type Config = ({
   cookie: string;
@@ -14,7 +16,7 @@ type Config = ({
 /**
  * Support for encoding/decoding a value from the rest context
  */
-export class RestCodecValue<T> {
+export class RestCodecValue<T extends string | AnyMap> {
   #headerName?: string;
   #cookieName?: string;
   #headerPrefix?: string;
@@ -29,7 +31,7 @@ export class RestCodecValue<T> {
    * Write to response
    */
   writeValue(res: Response, value: T | undefined, cookieArgs: SetOption = {}): void {
-    const output: string = value ? Buffer.from(JSON.stringify(value), 'utf8').toString('base64url') : castTo(value);
+    const output: string = (value && typeof value === 'object') ? Buffer.from(JSON.stringify(value), 'utf8').toString('base64url') : castTo(value);
 
     if (this.#cookieName) {
       res.cookies.set(this.#cookieName, output, {
@@ -49,7 +51,11 @@ export class RestCodecValue<T> {
     const input = (this.#cookieName ? req.cookies.get(this.#cookieName) : undefined) ??
       (this.#headerName ? req.headerFirst(this.#headerName)?.split(this.#headerPrefix!).pop()?.trim() : undefined);
     try {
-      return input ? JSON.parse(Buffer.from(input, 'base64url').toString('utf8')) : input;
+      return (input && /^(\{|\[)/.test(input)) ?
+        JSON.parse(Buffer.from(input, 'base64url').toString('utf8'),
+          (key, value) => typeof value === 'string' && DATE_RE.test(value) ? new Date(value) : value
+        ) :
+        input;
     } catch {
       return;
     }

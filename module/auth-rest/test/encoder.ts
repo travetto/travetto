@@ -32,20 +32,12 @@ export class StatelessPrincipalCodec implements PrincipalCodec {
     });
   }
 
-  async encode({ res }: FilterContext, principal?: Principal): Promise<void> {
-    this.accessor.writeValue(res, principal, { expires: principal?.expiresAt });
-    return;
+  encode({ res }: FilterContext, principal?: Principal): void {
+    return this.accessor.writeValue(res, principal, { expires: principal?.expiresAt });
   }
 
-  async decode({ req }: FilterContext): Promise<Principal | undefined> {
-    const principal = this.accessor.readValue(req);
-    if (principal) {
-      return {
-        ...principal,
-        expiresAt: principal.expiresAt ? new Date(principal.expiresAt) : principal.expiresAt,
-        issuedAt: principal.issuedAt ? new Date(principal.issuedAt) : principal.issuedAt
-      };
-    }
+  decode({ req }: FilterContext): Principal | undefined {
+    return this.accessor.readValue(req);
   }
 }
 

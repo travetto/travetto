@@ -8,7 +8,6 @@ import { AuthenticationError, Authenticator, AuthContext, Principal } from '@tra
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
 import { PrincipalCodec } from '../../src/codec';
-import { Util } from '@travetto/runtime';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 

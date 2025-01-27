@@ -9,24 +9,20 @@ export class JWTSigner<T extends object> {
 
   signingKey: string;
   toPayload: (v: T) => PayloadMeta;
-  fromPayload?: (v: T) => T;
 
   constructor(
     key: string,
     toPayload: (v: T) => PayloadMeta,
-    fromPayload?: (v: T) => T
   ) {
     this.signingKey = key;
     this.toPayload = toPayload;
-    this.fromPayload = fromPayload;
   }
 
   /**
    * Verify token via the signing key
    */
   async verify(token: string): Promise<T> {
-    const res = (await JWTUtil.verify<{ core: T }>(token, { key: this.signingKey })).core;
-    return this.fromPayload?.(res) ?? res;
+    return (await JWTUtil.verify<{ core: T }>(token, { key: this.signingKey })).core;
   }
 
   /**

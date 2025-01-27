@@ -33,11 +33,6 @@ export class RestJWTConfig {
         issuer: v.issuer!,
         id: v.id,
         sessionId: v.sessionId
-      }),
-      v => ({
-        ...v,
-        expiresAt: new Date(v.expiresAt!),
-        issuedAt: new Date(v.issuedAt!),
       })
     );
 
