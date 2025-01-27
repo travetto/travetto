@@ -12,7 +12,8 @@ type PromiseWithResolvers<T> = {
 type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z/;
-const DATE_REPLACER = (key: string | symbol, value: unknown): unknown => typeof value === 'string' && DATE_RE.test(value) ? new Date(value) : value;
+const DATE_REPLACER = (key: string | symbol, value: unknown): unknown =>
+  (typeof value === 'string' && value.length === 24 && DATE_RE.test(value)) ? new Date(value) : value;
 
 /**
  * Grab bag of common utilities

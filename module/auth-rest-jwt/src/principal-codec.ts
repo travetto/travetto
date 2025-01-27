@@ -55,6 +55,8 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     const token = this.value.readValue(req);
     if (token) {
       const res = await this.signer.verify(token);
+      res.expiresAt = typeof res.expiresAt === 'string' ? new Date(res.expiresAt) : res.expiresAt;
+      res.issuedAt = typeof res.issuedAt === 'string' ? new Date(res.issuedAt) : res.issuedAt;
       this.authContext.authToken = { type: 'jwt', value: token };
       return res;
     }

@@ -10,7 +10,7 @@ import { JWTUtil } from '@travetto/jwt';
 
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
-import { RestJWTConfig } from '../../src/principal-codec';
+import { RestJWTConfig } from '../../src/config';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
