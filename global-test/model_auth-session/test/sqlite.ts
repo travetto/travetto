@@ -1,7 +1,7 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { RestSessionServerSuite } from '@travetto/rest-session/support/test/server';
-import { SessionModelSymbol } from '@travetto/rest-session';
+import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server';
+import { SessionModelSymbol } from '@travetto/auth-session';
 import { AsyncContext } from '@travetto/context';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 import { ModelExpirySupport } from '@travetto/model';
@@ -22,7 +22,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class SqliteRestSessionServerSuite extends RestSessionServerSuite {
+export class SqliteAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }

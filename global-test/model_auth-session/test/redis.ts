@@ -1,8 +1,8 @@
 
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { RestSessionServerSuite } from '@travetto/rest-session/support/test/server';
-import { SessionModelSymbol } from '@travetto/rest-session';
+import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server';
+import { SessionModelSymbol } from '@travetto/auth-session';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 
 import { RedisModelService, RedisModelConfig } from '@travetto/model-redis';
@@ -16,7 +16,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class RedisRestSessionServerSuite extends RestSessionServerSuite {
+export class RedisAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
 }

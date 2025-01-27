@@ -1,8 +1,8 @@
 
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { RestSessionServerSuite } from '@travetto/rest-session/support/test/server';
-import { SessionModelSymbol } from '@travetto/rest-session';
+import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server';
+import { SessionModelSymbol } from '@travetto/auth-session';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 
 import { ElasticsearchModelService, ElasticsearchModelConfig } from '@travetto/model-elasticsearch';
@@ -16,7 +16,7 @@ class Config {
 
 @Suite()
 @ModelSuite()
-export class ElasticsearchRestSessionServerSuite extends RestSessionServerSuite {
+export class ElasticsearchAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
 }

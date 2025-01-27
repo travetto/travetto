@@ -30,6 +30,13 @@ export class SessionService {
   }
 
   /**
+   * Disconnect active session
+   */
+  clear(): void {
+    this.#session.set(undefined);
+  }
+
+  /**
    * Initialize service if none defined
    */
   async postConstruct(): Promise<void> {

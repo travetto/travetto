@@ -1,4 +1,4 @@
-import { RestSessionServerSuite } from '@travetto/rest-session/support/test/server';
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server';
 import { Suite } from '@travetto/test';
 import { AwsLambdaExpressRestServer } from '@travetto/rest-express-lambda';
 import { InjectableFactory } from '@travetto/di';
@@ -27,7 +27,7 @@ class Config {
 }
 
 @Suite()
-export class ExpressLambdaRestSessionTest extends RestSessionServerSuite {
+export class ExpressLambdaRestSessionTest extends AuthRestSessionServerSuite {
   qualifier = EXPRESS;
   type = AwsLambdaRestServerSupport;
 }
