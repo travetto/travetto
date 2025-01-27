@@ -34,6 +34,6 @@ export class SessionRoutes {
 
   @Get('/info/age')
   async getInfo(data: SessionData) {
-    return data?.age;
+    return data.age;
   }
 }
