@@ -1,17 +1,18 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Controller, Get, Body, Post, Put, Request, FilterContext, RestCodecValue } from '@travetto/rest';
+import { Controller, Get, Body, Post, Put, Request, FilterContext, RestCodecValue, RestInterceptor, RouteApplies, RouteConfig } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 import { SessionData } from '@travetto/auth-session/src/session';
-import { Principal } from '@travetto/auth';
-import { Authenticated, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
+import { AuthContext, Principal } from '@travetto/auth';
+import { AuthReadWriteInterceptor, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
 import { Config } from '@travetto/config';
 import { castTo, TimeUtil, TypedObject, Util } from '@travetto/runtime';
+import { SessionService } from '@travetto/auth-session';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
@@ -51,19 +52,41 @@ class AuthorizationCodec implements PrincipalCodec {
   decode({ req }: FilterContext): Principal | undefined {
     const id = this.value.readValue(req);
     // Auto-create anonymous user if not specified
-    return id ? this.cache[id] : {
+    return this.cache[id!];
+  }
+}
+
+@Injectable()
+class AutoLogin implements RestInterceptor {
+  dependsOn = [AuthReadWriteInterceptor];
+
+  @Inject()
+  cfg: RestAuthReadWriteConfig;
+
+  @Inject()
+  auth: AuthContext;
+
+  applies(route: RouteConfig) {
+    return !route.path.endsWith('/body');
+  }
+
+  intercept(ctx: FilterContext) {
+    this.auth.principal ??= {
       id: Util.uuid(),
       sessionId: Util.uuid(),
-      expiresAt: TimeUtil.fromNow(this.authReadwriteConfig.maxAgeMs),
+      issuedAt: new Date(),
+      expiresAt: TimeUtil.fromNow(this.cfg.maxAgeMs),
       details: {}
     };
   }
 }
 
 
-@Authenticated()
 @Controller('/test/session')
 class TestController {
+
+  @Inject()
+  session: SessionService;
 
   @Get('/')
   get(data: SessionData): SessionData {

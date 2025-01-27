@@ -49,17 +49,17 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   authService: AuthService;
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
-    let og: Principal | undefined;
+    let decoded: Principal | undefined;
     let checked: Principal | undefined;
-    let ogExpires: Date | undefined;
+    let lastExpiresAt: Date | undefined;
 
     this.authContext.init();
     Object.defineProperty(ctx.req, 'user', { get: () => this.authContext.principal });
 
     try {
-      og = await this.codec.decode(ctx);
-      checked = this.authService.checkExpiry(og);
-      ogExpires = checked?.expiresAt;
+      decoded = await this.codec.decode(ctx);
+      checked = this.authService.checkExpiry(decoded);
+      lastExpiresAt = checked?.expiresAt;
       this.authContext.principal = checked;
       return await next();
     } finally {
@@ -67,7 +67,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
       if (current) {
         this.authService.enforceExpiry(current, this.config.maxAgeMs, this.config.rollingRenew);
       }
-      if ((og && !checked) || current !== checked || ogExpires !== current?.expiresAt) { // If it changed
+      if ((!!decoded !== !!checked) || current !== checked || lastExpiresAt !== current?.expiresAt) { // If it changed
         await this.codec.encode(ctx, current);
       }
 

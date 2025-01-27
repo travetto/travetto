@@ -30,7 +30,6 @@ export class RestCodecValue<T extends string | AnyMap> {
    */
   writeValue(res: Response, value: T | undefined, cookieArgs: SetOption = {}): void {
     const output: string | undefined = Util.encodeSafeJSON(value);
-
     if (this.#cookieName) {
       res.cookies.set(this.#cookieName, output, {
         ...cookieArgs,
@@ -46,10 +45,9 @@ export class RestCodecValue<T extends string | AnyMap> {
    * Read from request
    */
   readValue(req: Request): T | undefined {
-    return Util.decodeSafeJSON(
-      (this.#cookieName ? req.cookies.get(this.#cookieName) : undefined) ??
-      (this.#headerName ? req.headerFirst(this.#headerName, this.#headerPrefix) : undefined)
-    );
+    const src = (this.#cookieName ? req.cookies.get(this.#cookieName) : undefined) ??
+      (this.#headerName ? req.headerFirst(this.#headerName, this.#headerPrefix) : undefined);
+    return Util.decodeSafeJSON(src);
   }
 }
 
