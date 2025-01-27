@@ -8,26 +8,20 @@ import { AuthenticationError, Authenticator, AuthContext, Principal } from '@tra
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
 import { PrincipalCodec } from '../../src/codec';
+import { Util } from '@travetto/runtime';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
 @Injectable({ primary: true })
 class AuthorizationCodec implements PrincipalCodec {
 
-  value = new RestCodecValue({ header: 'Authorization', headerPrefix: 'Token' });
+  value = new RestCodecValue<Principal>({ header: 'Authorization', headerPrefix: 'Token' });
 
   encode({ res }: FilterContext, p: Principal | undefined) {
-    if (p) {
-      this.value.writeValue(res, Buffer.from(JSON.stringify(p)).toString('base64'));
-    }
+    this.value.writeValue(res, p);
   }
   decode({ req }: FilterContext): Principal | undefined {
-    try {
-      const v = this.value.readValue(req);
-      if (v) {
-        return JSON.parse(Buffer.from(v, 'base64').toString('utf8'));
-      }
-    } catch { }
+    return this.value.readValue(req);
   }
 }
 

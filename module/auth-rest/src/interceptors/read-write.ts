@@ -1,13 +1,25 @@
-import { Class } from '@travetto/runtime';
+import { Class, TimeSpan, TimeUtil } from '@travetto/runtime';
 import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
-import { AuthContext, Principal } from '@travetto/auth';
+import { AuthContext, AuthService, Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
+import { Ignore } from '@travetto/schema';
 
 import { PrincipalCodec } from '../codec';
 
 @Config('rest.auth.readWrite')
-export class RestAuthConfig extends ManagedInterceptorConfig { }
+export class RestAuthReadWriteConfig extends ManagedInterceptorConfig {
+
+  maxAge: TimeSpan | number = '1h';
+  rollingRenew: boolean = false;
+
+  @Ignore()
+  maxAgeMs: number;
+
+  postConstruct(): void {
+    this.maxAgeMs = TimeUtil.asMillis(this.maxAge);
+  }
+}
 
 /**
  * Authentication interceptor
@@ -24,10 +36,13 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   codec: PrincipalCodec;
 
   @Inject()
-  config: RestAuthConfig;
+  config: RestAuthReadWriteConfig;
 
   @Inject()
   authContext: AuthContext;
+
+  @Inject()
+  authService: AuthService;
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
     let og: Principal | undefined;
@@ -45,7 +60,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
     } finally {
       const current = this.authContext.principal;
       if (current) {
-        await this.codec.preEncode?.(current);
+        this.authService.enforceExpiry(current, this.config.maxAgeMs, this.config.rollingRenew);
       }
       if (current !== og || ogExpires !== current?.expiresAt) { // If it changed
         await this.codec.encode(ctx, current);

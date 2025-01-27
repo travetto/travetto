@@ -1,9 +1,9 @@
 import { Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
-import { JWTUtil } from '@travetto/jwt';
 import { RestCodecTransport } from '@travetto/rest';
-import { TimeSpan, TimeUtil, Runtime, AppError } from '@travetto/runtime';
+import { Runtime, AppError } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
+import { JWTSigner } from '@travetto/jwt';
 
 @Config('rest.auth.jwt')
 export class RestJWTConfig {
@@ -12,23 +12,30 @@ export class RestJWTConfig {
   cookie = 'trv.auth';
   signingKey?: string;
   headerPrefix = 'Bearer';
-  maxAge: TimeSpan | number = '1h';
-  rollingRenew: boolean = false;
 
   @Ignore()
-  maxAgeMs: number;
+  signer: JWTSigner<Principal>;
 
   postConstruct(): void {
-    this.maxAgeMs = TimeUtil.asMillis(this.maxAge);
-
     if (!this.signingKey && Runtime.production) {
       throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.jwt.signingKey');
 
     }
     this.signingKey ??= 'dummy';
-  }
 
-  async verifyToken(token: string): Promise<Principal> {
-    return (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.signingKey })).auth;
+    this.signer = new JWTSigner(this.signingKey!,
+      v => ({
+        expiresAt: v.expiresAt!,
+        issuedAt: v.issuedAt!,
+        issuer: v.issuer!,
+        id: v.id,
+        sessionId: v.sessionId
+      }),
+      v => ({
+        ...v,
+        expiresAt: new Date(v.expiresAt!),
+        issuedAt: new Date(v.issuedAt!),
+      })
+    );
   }
 }

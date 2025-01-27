@@ -11,6 +11,10 @@ export interface Principal<D = AnyMap> {
    */
   id: string;
   /**
+   * Unique identifier for the principal's lifecycle
+   */
+  sessionId?: string;
+  /**
    * Date of expiration
    */
   expiresAt?: Date;

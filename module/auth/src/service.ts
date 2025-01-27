@@ -7,6 +7,7 @@ import { Authenticator } from './types/authenticator';
 import { Authorizer } from './types/authorizer';
 import { AuthenticationError } from './types/error';
 import { AuthContext } from './context';
+import { TimeUtil } from '@travetto/runtime';
 
 @Injectable()
 export class AuthService {
@@ -71,5 +72,25 @@ export class AuthService {
 
     // Take the last error and return
     throw new AuthenticationError('Unable to authenticate', { cause: lastError });
+  }
+
+  /**
+   * Enforce expiry
+   */
+  enforceExpiry(p: Principal, maxAgeMs?: number, rollingRenew?: boolean): void {
+    if (maxAgeMs) {
+      p.expiresAt ??= TimeUtil.fromNow(maxAgeMs);
+    }
+
+    p.issuedAt ??= new Date();
+
+    if (maxAgeMs && rollingRenew) { // Session behavior
+      const end = p.expiresAt!.getTime();
+      const midPoint = end - maxAgeMs / 2;
+      if (Date.now() > midPoint) { // If we are past the half way mark, renew the token
+        p.issuedAt = new Date();
+        p.expiresAt = TimeUtil.fromNow(maxAgeMs); // This will trigger a re-send
+      }
+    }
   }
 }

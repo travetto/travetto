@@ -22,7 +22,7 @@ export class StatelessPrincipalCodec implements PrincipalCodec {
   @Inject()
   config: StatelessEncoderConfig;
 
-  accessor: RestCodecValue;
+  accessor: RestCodecValue<Principal>;
 
   postConstruct() {
     this.accessor = new RestCodecValue({
@@ -33,19 +33,17 @@ export class StatelessPrincipalCodec implements PrincipalCodec {
   }
 
   async encode({ res }: FilterContext, principal?: Principal): Promise<void> {
-    const text = principal ? Buffer.from(JSON.stringify(principal)).toString('base64') : undefined;
-    this.accessor.writeValue(res, text, { expires: principal?.expiresAt });
+    this.accessor.writeValue(res, principal, { expires: principal?.expiresAt });
     return;
   }
 
   async decode({ req }: FilterContext): Promise<Principal | undefined> {
-    const text = this.accessor.readValue(req);
-    if (text) {
-      const parsed = JSON.parse(Buffer.from(text, 'base64').toString('utf8'));
+    const principal = this.accessor.readValue(req);
+    if (principal) {
       return {
-        ...parsed,
-        expiresAt: parsed.expiresAt ? new Date(parsed.expiresAt) : parsed.expiresAt,
-        issuedAt: parsed.issuedAt ? new Date(parsed.issuedAt) : parsed.issuedAt
+        ...principal,
+        expiresAt: principal.expiresAt ? new Date(principal.expiresAt) : principal.expiresAt,
+        issuedAt: principal.issuedAt ? new Date(principal.issuedAt) : principal.issuedAt
       };
     }
   }

@@ -11,7 +11,7 @@ export class JWTSessionCodec implements RestCodec<string> {
   @Inject()
   config: RestJWTConfig;
 
-  value: RestCodecValue;
+  value: RestCodecValue<string>;
 
   postConstruct(): void {
     this.value = new RestCodecValue({
@@ -27,8 +27,7 @@ export class JWTSessionCodec implements RestCodec<string> {
   async decode(ctx: FilterContext): Promise<string | undefined> {
     const token = this.value.readValue(ctx.req);
     if (token) {
-      const value = await this.config.verifyToken(token);
-      return value.details?.sessionId;
+      return (await this.config.signer.verify(token)).sessionId;
     }
   }
 

@@ -1,19 +1,20 @@
 import { SetOption } from 'cookies';
 import { Response, Request, FilterContext } from './types';
+import { castTo } from '@travetto/runtime';
 
 export type RestCodecTransport = 'header' | 'cookie';
 
-type Config = {
+type Config = ({
   cookie: string;
 } | {
   header: string;
   headerPrefix?: string;
-};
+});
 
 /**
  * Support for encoding/decoding a value from the rest context
  */
-export class RestCodecValue {
+export class RestCodecValue<T> {
   #headerName?: string;
   #cookieName?: string;
   #headerPrefix?: string;
@@ -27,24 +28,31 @@ export class RestCodecValue {
   /**
    * Write to response
    */
-  writeValue(res: Response, value: string | undefined, cookieArgs: SetOption = {}): void {
+  writeValue(res: Response, value: T | undefined, cookieArgs: SetOption = {}): void {
+    const output: string = value ? Buffer.from(JSON.stringify(value), 'utf8').toString('base64url') : castTo(value);
+
     if (this.#cookieName) {
-      res.cookies.set(this.#cookieName, value, {
+      res.cookies.set(this.#cookieName, output, {
         ...cookieArgs,
-        maxAge: (cookieArgs.expires && value !== undefined) ? undefined : -1,
+        maxAge: (cookieArgs.expires && output !== undefined) ? undefined : -1,
       });
     }
-    if (value && this.#headerName) {
-      res.setHeader(this.#headerName, this.#headerPrefix ? `${this.#headerPrefix} ${value}` : value);
+    if (output && this.#headerName) {
+      res.setHeader(this.#headerName, this.#headerPrefix ? `${this.#headerPrefix} ${output}` : output);
     }
   }
 
   /**
    * Read from request
    */
-  readValue(req: Request): string | undefined {
-    return (this.#cookieName ? req.cookies.get(this.#cookieName) : undefined) ??
+  readValue(req: Request): T | undefined {
+    const input = (this.#cookieName ? req.cookies.get(this.#cookieName) : undefined) ??
       (this.#headerName ? req.headerFirst(this.#headerName)?.split(this.#headerPrefix!).pop()?.trim() : undefined);
+    try {
+      return input ? JSON.parse(Buffer.from(input, 'base64url').toString('utf8')) : input;
+    } catch {
+      return;
+    }
   }
 }
 
