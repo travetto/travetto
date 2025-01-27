@@ -84,8 +84,8 @@ export class AuthService {
 
     p.issuedAt ??= new Date();
 
-    if (maxAgeMs && rollingRenew) { // Session behavior
-      const end = p.expiresAt!.getTime();
+    if (p.expiresAt && maxAgeMs && rollingRenew) { // Session behavior
+      const end = p.expiresAt.getTime();
       const midPoint = end - maxAgeMs / 2;
       if (Date.now() > midPoint) { // If we are past the half way mark, renew the token
         p.issuedAt = new Date();

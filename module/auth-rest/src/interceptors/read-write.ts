@@ -16,7 +16,7 @@ import { DefaultPrincipalCodec } from '../codec';
 export class RestAuthReadWriteConfig extends ManagedInterceptorConfig {
 
   maxAge: TimeSpan | number = '1h';
-  rollingRenew: boolean = false;
+  rollingRenew: boolean = true;
 
   @Ignore()
   maxAgeMs: number;
@@ -63,7 +63,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
 
     try {
       decoded = await this.codec.decode(ctx);
-      lastExpiresAt = checked?.expiresAt;
+      lastExpiresAt = decoded?.expiresAt;
 
       checked = this.authService.checkExpiry(decoded);
       this.authContext.principal = checked;

@@ -5,7 +5,7 @@ import { Controller, Get, Post, Redirect } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthContext, AuthenticationError, Authenticator } from '@travetto/auth';
-import { Login, Authenticated, Logout } from '@travetto/auth-rest';
+import { Login, Authenticated, Logout, RestAuthReadWriteConfig } from '@travetto/auth-rest';
 import { JWTUtil } from '@travetto/jwt';
 
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
@@ -16,7 +16,9 @@ const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
 class Config {
   @InjectableFactory(TestAuthSymbol)
-  static getAuthenticator(): Authenticator {
+  static getAuthenticator(cfg: RestAuthReadWriteConfig): Authenticator {
+    cfg.maxAgeMs = 2000;
+
     return {
       async authenticate(body: { username?: string, password?: string }) {
         if (body.username === 'super-user' && body.password === 'password') {
