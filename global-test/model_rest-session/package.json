@@ -2,6 +2,7 @@
   "name": "@travetto-test/model_rest-session",
   "version": "0.0.0",
   "dependencies": {
+    "@travetto/auth-session": "^5.1.1",
     "@travetto/model-dynamodb": "^5.1.0",
     "@travetto/model-elasticsearch": "^5.1.0",
     "@travetto/model-firestore": "^5.1.0",
@@ -11,8 +12,7 @@
     "@travetto/model-redis": "^5.1.0",
     "@travetto/model-s3": "^5.1.0",
     "@travetto/model-sqlite": "^5.1.0",
-    "@travetto/rest-express": "^5.1.0",
-    "@travetto/rest-session": "^5.1.1"
+    "@travetto/rest-express": "^5.1.0"
   },
   "travetto": {},
   "private": true
