@@ -1,10 +1,8 @@
 import { SetOption } from 'cookies';
-import { AnyMap, castTo } from '@travetto/runtime';
+import { AnyMap, Util } from '@travetto/runtime';
 import { Response, Request, FilterContext } from './types';
 
 export type RestCodecTransport = 'header' | 'cookie';
-
-const DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z/;
 
 type Config = ({
   cookie: string;
@@ -31,7 +29,7 @@ export class RestCodecValue<T extends string | AnyMap> {
    * Write to response
    */
   writeValue(res: Response, value: T | undefined, cookieArgs: SetOption = {}): void {
-    const output: string = (value && typeof value === 'object') ? Buffer.from(JSON.stringify(value), 'utf8').toString('base64url') : castTo(value);
+    const output: string | undefined = Util.encodeValue(value);
 
     if (this.#cookieName) {
       res.cookies.set(this.#cookieName, output, {
@@ -48,17 +46,10 @@ export class RestCodecValue<T extends string | AnyMap> {
    * Read from request
    */
   readValue(req: Request): T | undefined {
-    const input = (this.#cookieName ? req.cookies.get(this.#cookieName) : undefined) ??
-      (this.#headerName ? req.headerFirst(this.#headerName)?.split(this.#headerPrefix!).pop()?.trim() : undefined);
-    try {
-      return (input && /^(\{|\[)/.test(input)) ?
-        JSON.parse(Buffer.from(input, 'base64url').toString('utf8'),
-          (key, value) => typeof value === 'string' && DATE_RE.test(value) ? new Date(value) : value
-        ) :
-        input;
-    } catch {
-      return;
-    }
+    return Util.decodeValue(
+      (this.#cookieName ? req.cookies.get(this.#cookieName) : undefined) ??
+      (this.#headerName ? req.headerFirst(this.#headerName, this.#headerPrefix) : undefined)
+    );
   }
 }
 

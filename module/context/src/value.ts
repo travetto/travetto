@@ -36,6 +36,7 @@ export class AsyncContextValue<T = unknown> {
   get #store(): Payload<T> | undefined {
     const store = (this.#storage ??= this.#source()).getStore();
     if (!store && this.#failIfUnbound) {
+      console.trace('woo');
       throw new AppError('Context not initialized');
     }
     return store;

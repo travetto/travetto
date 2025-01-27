@@ -11,6 +11,8 @@ type PromiseWithResolvers<T> = {
 
 type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
 
+const DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z/;
+
 /**
  * Grab bag of common utilities
  */
@@ -132,5 +134,28 @@ export class Util {
     } else {
       return () => true;
     }
+  }
+
+  /**
+   * Encode value as base64url encoded string
+   */
+  static encodeValue<T extends string | object>(value: T | undefined): string | undefined {
+    if (value === undefined) {
+      return;
+    }
+    return (value && typeof value === 'object') ? Buffer.from(JSON.stringify(value), 'utf8').toString('base64url') : castTo(value);
+  }
+
+  /**
+   * Decode value from base64url encoded string
+   */
+  static decodeValue<T>(input: string | undefined): T | undefined {
+    if (input === undefined) {
+      return undefined;
+    }
+    return input && /^(\{|\[)/.test(input) ?
+      JSON.parse(Buffer.from(input, 'base64url').toString('utf8'),
+        (key, value) => typeof value === 'string' && DATE_RE.test(value) ? new Date(value) : value
+      ) : input;
   }
 }

@@ -1,8 +1,9 @@
 import { InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
 import { Controller, Put, Get } from '@travetto/rest';
-import { SessionData, Session, SessionModelSymbol } from '@travetto/rest-session';
+import { Session, SessionData, SessionModelSymbol } from '@travetto/auth-session';
 import { MemoryModelService } from '@travetto/model-memory';
+import { Authenticated } from '@travetto/auth-rest';
 
 // Applies to entire execution, not just this file
 class SessionConfig {
@@ -16,6 +17,7 @@ class SessionConfig {
   }
 }
 
+@Authenticated()
 @Controller('/session')
 export class SessionRoutes {
 
@@ -32,6 +34,6 @@ export class SessionRoutes {
 
   @Get('/info/age')
   async getInfo(data: SessionData) {
-    return data.age;
+    return data?.age;
   }
 }

@@ -5,6 +5,6 @@ import { Session } from '@travetto/auth-session';
  */
 declare module '@travetto/rest' {
   interface Request {
-    readonly session: Session;
+    readonly session?: Session;
   }
 }

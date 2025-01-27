@@ -55,7 +55,7 @@ class $ParamExtractor {
   /**
    * Register a new context provider
    * @param finalType The class to check against
-   * @param fnOrTypeOverride The Extraction class ofr type
+   * @param fnOrTypeOverride The Extraction class or type
    * @param fn Optional extraction function
    */
   registerContext(finalType: Class, fnOrTypeOverride: ExtractFn | Class, fn?: ExtractFn): void {

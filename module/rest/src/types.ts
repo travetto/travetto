@@ -126,7 +126,7 @@ export interface Request<T = unknown> {
    * Get a single header
    * @param key
    */
-  headerFirst<K extends keyof RequestHeaders>(key: K): string | undefined;
+  headerFirst<K extends keyof RequestHeaders>(key: K, prefix?: string): string | undefined;
   /**
    * Get the structured content type of the request
    */

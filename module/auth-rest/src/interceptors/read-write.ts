@@ -1,9 +1,13 @@
 import { Class, TimeSpan, TimeUtil } from '@travetto/runtime';
-import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor } from '@travetto/rest';
+import {
+  RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn,
+  FilterNext, SerializeInterceptor, AsyncContextInterceptor, ParamExtractor
+} from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
+import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
 import { PrincipalCodec } from '../codec';
 
@@ -52,6 +56,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
 
     try {
       og = await this.codec.decode(ctx);
+      Object.defineProperty(ctx.req, 'user', { get: () => this.authContext.principal });
       ogExpires = og?.expiresAt;
       this.authContext.principal = og;
       return await next();
@@ -68,3 +73,5 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
     }
   }
 }
+
+ParamExtractor.registerContext(PrincipalTarget, (_, req) => req.user);

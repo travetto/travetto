@@ -143,4 +143,9 @@ export class SessionService {
     }
     return this.#session.get();
   }
+
+  destroy(): void {
+    this.get()?.destroy();
+    this.clear();
+  }
 }

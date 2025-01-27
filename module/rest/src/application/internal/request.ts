@@ -44,9 +44,15 @@ export class RequestCore implements Partial<Request> {
   /**
    * Get the inbound request header first value
    * @param key The header to get
+   * @param prefix The optional prefix to strip
    */
-  headerFirst<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | undefined {
-    return this.headerList(key)?.[0];
+  headerFirst<K extends keyof IncomingHttpHeaders>(this: Request, key: K, prefix?: string): string | undefined {
+    const v = this.headerList(key)?.[0];
+    if (v && prefix) {
+      return v.split(prefix)[1].trim();
+    } else {
+      return v;
+    }
   }
 
   /**

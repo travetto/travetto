@@ -9,46 +9,67 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 import { SessionData } from '@travetto/auth-session/src/session';
 import { Principal } from '@travetto/auth';
-import { PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
+import { Authenticated, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
 import { Config } from '@travetto/config';
-import { castTo, TypedObject } from '@travetto/runtime';
+import { castTo, TypedObject, Util } from '@travetto/runtime';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
 @Config('unknown')
 class AuthCodecConfig {
   transport: 'cookie' | 'header' = 'cookie';
-  keyName = 'bobby';
+  keyName = 'sid';
 }
 
 @Injectable({ primary: true })
 class AuthorizationCodec implements PrincipalCodec {
 
+  cache: Record<string, Principal> = {};
+
   @Inject()
   authReadwriteConfig: RestAuthReadWriteConfig;
 
-  value: RestCodecValue<Principal>;
+  @Inject()
+  cfg: AuthCodecConfig;
+
+  value: RestCodecValue<string>;
 
   postConstruct(): void {
-    this.value = new RestCodecValue<Principal>({ header: 'Authorization', headerPrefix: 'Token' });
+    this.value = new RestCodecValue<string>(
+      this.cfg.transport === 'header' ?
+        { header: this.cfg.keyName, headerPrefix: 'Token' } :
+        { cookie: this.cfg.keyName }
+    );
   }
 
   encode({ res }: FilterContext, p: Principal | undefined) {
-    this.value.writeValue(res, p);
+    if (p) {
+      this.cache[p.sessionId!] = p;
+      this.value.writeValue(res, p.sessionId);
+    }
   }
   decode({ req }: FilterContext): Principal | undefined {
-    return this.value.readValue(req);
+    const id = this.value.readValue(req);
+    // Auto-create anonymous user if not specified
+    return id ? this.cache[id] : {
+      id: Util.uuid(),
+      sessionId: Util.uuid(),
+      details: {}
+    };
   }
 }
 
 
+@Authenticated()
 @Controller('/test/session')
 class TestController {
 
   @Get('/')
   get(data: SessionData): SessionData {
-    data.age = (data.age ?? 0) + 1;
-    return data;
+    if (data) {
+      data.age = (data.age ?? 0) + 1;
+    }
+    return data!;
   }
 
   @Post('/complex')
