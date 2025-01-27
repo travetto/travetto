@@ -1,22 +1,22 @@
-import { RestSessionServerSuite } from '@travetto/rest-session/support/test/server';
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server';
 import { Suite } from '@travetto/test';
-import { AwsLambdaKoaRestServer } from '@travetto/rest-koa-lambda';
+import { AwsLambdaExpressRestServer } from '@travetto/rest-express-lambda';
 import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
-import { SessionModelSymbol } from '@travetto/rest-session';
+import { SessionModelSymbol } from '@travetto/auth-session';
 
-const KOA = Symbol.for('koa-lambda');
+const EXPRESS = Symbol.for('express-lambda');
 
 class Config {
   @InjectableFactory()
-  static getServer(): AwsLambdaKoaRestServer {
-    return new AwsLambdaKoaRestServer();
+  static getServer(): AwsLambdaExpressRestServer {
+    return new AwsLambdaExpressRestServer();
   }
 
-  @InjectableFactory(KOA)
-  static getApp(dep: AwsLambdaKoaRestServer): AwsLambdaRestApplication {
+  @InjectableFactory(EXPRESS)
+  static getApp(dep: AwsLambdaExpressRestServer): AwsLambdaRestApplication {
     return new AwsLambdaRestApplication(dep);
   }
 
@@ -27,7 +27,7 @@ class Config {
 }
 
 @Suite()
-export class KoaLambdaRestSessionTest extends RestSessionServerSuite {
-  qualifier = KOA;
+export class ExpressLambdaRestSessionTest extends AuthRestSessionServerSuite {
+  qualifier = EXPRESS;
   type = AwsLambdaRestServerSupport;
 }

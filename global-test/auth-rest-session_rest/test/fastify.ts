@@ -1,21 +1,21 @@
-import { RestSessionServerSuite } from '@travetto/rest-session/support/test/server';
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server';
 import { Suite } from '@travetto/test';
-import { KoaRestServer } from '@travetto/rest-koa';
+import { FastifyRestServer } from '@travetto/rest-fastify';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
-import { SessionModelSymbol } from '@travetto/rest-session';
+import { SessionModelSymbol } from '@travetto/auth-session';
 
-const KOA = Symbol.for('koa');
+const FASTIFY = Symbol.for('fastify');
 
 class Config {
   @InjectableFactory()
   static getServer(): RestServer {
-    return new KoaRestServer();
+    return new FastifyRestServer();
   }
 
-  @InjectableFactory(KOA)
-  static getApp(dep: KoaRestServer): RestApplication {
+  @InjectableFactory(FASTIFY)
+  static getApp(dep: FastifyRestServer): RestApplication {
     return new class extends RestApplication {
       server = dep;
     }();
@@ -28,6 +28,6 @@ class Config {
 }
 
 @Suite()
-export class KoaRestSessionTest extends RestSessionServerSuite {
-  qualifier = KOA;
+export class FastifyRestSessionTest extends AuthRestSessionServerSuite {
+  qualifier = FASTIFY;
 }

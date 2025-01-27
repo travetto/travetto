@@ -1,21 +1,21 @@
-import { RestSessionServerSuite } from '@travetto/rest-session/support/test/server';
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server';
 import { Suite } from '@travetto/test';
-import { ExpressRestServer } from '@travetto/rest-express';
-import { SessionModelSymbol } from '@travetto/rest-session';
+import { KoaRestServer } from '@travetto/rest-koa';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
+import { SessionModelSymbol } from '@travetto/auth-session';
 
-const EXPRESS = Symbol.for('express');
+const KOA = Symbol.for('koa');
 
 class Config {
   @InjectableFactory()
   static getServer(): RestServer {
-    return new ExpressRestServer();
+    return new KoaRestServer();
   }
 
-  @InjectableFactory(EXPRESS)
-  static getApp(dep: ExpressRestServer): RestApplication {
+  @InjectableFactory(KOA)
+  static getApp(dep: KoaRestServer): RestApplication {
     return new class extends RestApplication {
       server = dep;
     }();
@@ -28,6 +28,6 @@ class Config {
 }
 
 @Suite()
-export class ExpressRestSessionTest extends RestSessionServerSuite {
-  qualifier = EXPRESS;
+export class KoaRestSessionTest extends AuthRestSessionServerSuite {
+  qualifier = KOA;
 }

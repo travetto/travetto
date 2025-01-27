@@ -1,21 +1,21 @@
-import { RestSessionServerSuite } from '@travetto/rest-session/support/test/server';
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server';
 import { Suite } from '@travetto/test';
-import { FastifyRestServer } from '@travetto/rest-fastify';
+import { ExpressRestServer } from '@travetto/rest-express';
+import { SessionModelSymbol } from '@travetto/auth-session';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
-import { SessionModelSymbol } from '@travetto/rest-session';
 
-const FASTIFY = Symbol.for('fastify');
+const EXPRESS = Symbol.for('express');
 
 class Config {
   @InjectableFactory()
   static getServer(): RestServer {
-    return new FastifyRestServer();
+    return new ExpressRestServer();
   }
 
-  @InjectableFactory(FASTIFY)
-  static getApp(dep: FastifyRestServer): RestApplication {
+  @InjectableFactory(EXPRESS)
+  static getApp(dep: ExpressRestServer): RestApplication {
     return new class extends RestApplication {
       server = dep;
     }();
@@ -28,6 +28,6 @@ class Config {
 }
 
 @Suite()
-export class FastifyRestSessionTest extends RestSessionServerSuite {
-  qualifier = FASTIFY;
+export class ExpressRestSessionTest extends AuthRestSessionServerSuite {
+  qualifier = EXPRESS;
 }
