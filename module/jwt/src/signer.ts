@@ -1,6 +1,6 @@
 import { TimeUtil } from '@travetto/runtime';
 import { JWTUtil } from './util';
-import { PayloadMeta } from './types';
+import { Payload, PayloadMeta } from './types';
 
 /**
  * Token signer
@@ -10,10 +10,7 @@ export class JWTSigner<T extends object> {
   signingKey: string;
   toPayload: (v: T) => PayloadMeta;
 
-  constructor(
-    key: string,
-    toPayload: (v: T) => PayloadMeta,
-  ) {
+  constructor(key: string, toPayload: (v: T) => PayloadMeta) {
     this.signingKey = key;
     this.toPayload = toPayload;
   }
@@ -21,15 +18,15 @@ export class JWTSigner<T extends object> {
   /**
    * Verify token via the signing key
    */
-  async verify(token: string): Promise<T> {
-    return (await JWTUtil.verify<{ core: T }>(token, { key: this.signingKey })).core;
+  verify(token: string): Promise<T> {
+    return JWTUtil.verify<{ core: T }>(token, { key: this.signingKey }).then(v => v.core);
   }
 
   /**
    * Rewrite token, transforming the core
    */
   rewrite(token: string, op: (src: T) => T): Promise<string> {
-    return JWTUtil.rewrite<{ core: T }>(
+    return JWTUtil.rewrite<Payload & { core: T }>(
       token,
       p => ({ ...p, core: op(p.core) }),
       { key: this.signingKey }
