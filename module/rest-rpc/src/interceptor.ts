@@ -47,7 +47,7 @@ export class RestRpcInterceptor implements RestInterceptor<RestRpcConfig> {
     if (isBinary) {
       const data = req.headerFirst('X-TRV-RPC-INPUTS')?.trim();
       if (data) {
-        params = Util.decodeSafeJSON(data)!;
+        params = Util.decodeSafeJSON(data, false)!;
       }
     } else {
       await this.body.intercept({ req, res, config: this.body.config }, () => { });
