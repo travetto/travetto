@@ -1,6 +1,6 @@
 import { Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
-import { RestCodecTransport } from '@travetto/rest';
+import { RestCodecTransport, RestCodecValue } from '@travetto/rest';
 import { Runtime, AppError } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 import { JWTSigner } from '@travetto/jwt';
@@ -15,6 +15,9 @@ export class RestJWTConfig {
 
   @Ignore()
   signer: JWTSigner<Principal>;
+
+  @Ignore()
+  value: RestCodecValue<string>;
 
   postConstruct(): void {
     if (!this.signingKey && Runtime.production) {
@@ -37,5 +40,11 @@ export class RestJWTConfig {
         issuedAt: new Date(v.issuedAt!),
       })
     );
+
+    this.value = new RestCodecValue({
+      header: this.mode !== 'cookie' ? this.header : undefined!,
+      cookie: this.mode !== 'header' ? this.cookie : undefined,
+      headerPrefix: this.headerPrefix
+    });
   }
 }
