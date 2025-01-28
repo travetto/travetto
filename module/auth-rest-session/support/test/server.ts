@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Controller, Get, Body, Post, Put, Request, FilterContext, RestCodecValue, RestInterceptor, RouteApplies, RouteConfig } from '@travetto/rest';
+import { Controller, Get, Body, Post, Put, Request, FilterContext, RestInterceptor, RouteConfig } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
@@ -9,7 +9,7 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 import { SessionData } from '@travetto/auth-session/src/session';
 import { AuthContext, Principal } from '@travetto/auth';
-import { AuthReadWriteInterceptor, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
+import { AuthReadWriteInterceptor, DefaultPrincipalCodec, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
 import { Config } from '@travetto/config';
 import { castTo, TimeUtil, TypedObject, Util } from '@travetto/runtime';
 import { SessionService } from '@travetto/auth-session';
@@ -22,8 +22,8 @@ class AuthCodecConfig {
   keyName = 'sid';
 }
 
-@Injectable({ primary: true })
-class AuthorizationCodec implements PrincipalCodec {
+@Injectable()
+class AuthorizationCodec extends DefaultPrincipalCodec implements PrincipalCodec {
 
   cache: Record<string, Principal> = {};
 
@@ -33,26 +33,16 @@ class AuthorizationCodec implements PrincipalCodec {
   @Inject()
   cfg: AuthCodecConfig;
 
-  value: RestCodecValue<string>;
+  constructor() {
+    super({ header: '' });
+  }
 
   postConstruct(): void {
-    this.value = new RestCodecValue<string>(
+    this.reinit(
       this.cfg.transport === 'header' ?
         { header: this.cfg.keyName, headerPrefix: 'Token' } :
         { cookie: this.cfg.keyName }
     );
-  }
-
-  encode({ res }: FilterContext, p: Principal | undefined) {
-    if (p) {
-      this.cache[p.sessionId!] = p;
-      this.value.writeValue(res, p.sessionId);
-    }
-  }
-  decode({ req }: FilterContext): Principal | undefined {
-    const id = this.value.readValue(req);
-    // Auto-create anonymous user if not specified
-    return this.cache[id!];
   }
 }
 

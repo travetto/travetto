@@ -12,7 +12,7 @@ import { PrincipalCodec } from '../../src/types';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
-@Injectable({ primary: true })
+@Injectable()
 class AuthorizationCodec extends DefaultPrincipalCodec implements PrincipalCodec {
   constructor() { super({ header: 'Authorization', headerPrefix: 'Token' }); }
 }

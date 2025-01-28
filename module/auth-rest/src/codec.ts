@@ -8,7 +8,11 @@ export class DefaultPrincipalCodec implements PrincipalCodec {
   value: RestCodecValue<Principal>;
 
   constructor(cfg: RestCodecConfig) {
-    this.value = new RestCodecValue<Principal>(cfg);
+    this.reinit(cfg);
+  }
+
+  reinit(cfg: RestCodecConfig): void {
+    this.value = new RestCodecValue<Principal>(cfg);;
   }
 
   encode({ res }: FilterContext, p: Principal | undefined): void {
