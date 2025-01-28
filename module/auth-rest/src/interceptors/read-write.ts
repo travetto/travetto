@@ -65,10 +65,6 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
       checked = this.authService.enforceExpiry(decoded);
       this.authContext.principal = checked;
 
-      if (checked && this.codec.getToken) {
-        this.authContext.authToken = await this.codec.getToken(ctx);
-      }
-
       return await next();
     } finally {
       this.authService.manageExpiry();

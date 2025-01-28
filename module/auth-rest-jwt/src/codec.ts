@@ -1,7 +1,6 @@
-import { AuthContext, AuthToken, Principal } from '@travetto/auth';
+import { AuthContext, Principal } from '@travetto/auth';
 import { CommonPrincipalCodec, PrincipalCodec } from '@travetto/auth-rest';
 import { Inject, Injectable } from '@travetto/di';
-import { FilterContext } from '@travetto/rest';
 
 import { RestJWTConfig } from './config';
 
@@ -21,12 +20,11 @@ export class JWTPrincipalCodec extends CommonPrincipalCodec<string> implements P
     return p ? await this.config.signer.create(p) : undefined;
   }
 
-  fromPayload(token: string): Promise<Principal | undefined> {
-    return this.config.signer.verify(token);
-  }
-
-  getToken(ctx: FilterContext): Promise<AuthToken | undefined> | AuthToken | undefined {
-    const token = this.readValue(ctx.req);
-    return token ? { type: 'jwt', value: token } : undefined;
+  async fromPayload(token: string): Promise<Principal | undefined> {
+    const out = await this.config.signer.verify(token);
+    if (out) {
+      this.authContext.authToken = { type: 'jwt', value: token };
+    }
+    return out;
   }
 }

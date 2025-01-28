@@ -148,7 +148,9 @@ export class Util {
   /**
    * Decode JSON value from base64 encoded string
    */
-  static decodeSafeJSON<T>(input: string | undefined): T | undefined {
+  static decodeSafeJSON<T>(input: string): T;
+  static decodeSafeJSON<T>(input?: string | undefined): T | undefined;
+  static decodeSafeJSON<T>(input?: string | undefined): T | undefined {
     if (!input) {
       return undefined;
     }

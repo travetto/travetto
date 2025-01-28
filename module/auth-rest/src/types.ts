@@ -14,8 +14,4 @@ export interface PrincipalCodec {
    * Decode data
    */
   decode(ctx: FilterContext): Promise<Principal | undefined> | Principal | undefined;
-  /**
-   * Retrieves token, if exists
-   */
-  getToken?(ctx: FilterContext): Promise<AuthToken | undefined> | AuthToken | undefined;
 }
