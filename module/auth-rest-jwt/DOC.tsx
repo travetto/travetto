@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { JWTPrincipalCodec } from './src/principal-codec';
+import { JWTPrincipalCodec } from './src/codec';
 
 export const text = <>
   <c.StdHeader />

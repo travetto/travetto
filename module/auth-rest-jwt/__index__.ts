@@ -1,3 +1,3 @@
 
-export * from './src/principal-codec';
+export * from './src/codec';
 export * from './src/config';
