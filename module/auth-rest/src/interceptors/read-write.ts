@@ -65,14 +65,14 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
       decoded = await this.codec.decode(ctx);
       lastExpiresAt = decoded?.expiresAt;
 
-      checked = this.authService.checkExpiry(decoded);
+      checked = this.authService.enforceExpiry(decoded);
       this.authContext.principal = checked;
 
       return await next();
     } finally {
       const result = this.authContext.principal;
       if (result) {
-        this.authService.enforceExpiry(result, this.config.maxAgeMs, this.config.rollingRenew);
+        this.authService.validateExpiry(result, this.config.maxAgeMs, this.config.rollingRenew);
       }
       if ((!!decoded !== !!checked) || result !== checked || lastExpiresAt !== result?.expiresAt) { // If it changed
         await this.codec.encode(ctx, result);

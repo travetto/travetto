@@ -1,14 +1,13 @@
 import { Config } from '@travetto/config';
-import { RestCodecTransport } from '@travetto/rest';
 import { Runtime, AppError } from '@travetto/runtime';
 
 @Config('rest.auth.jwt')
 export class RestJWTConfig {
-  mode: RestCodecTransport | 'all' = 'header';
-  header = 'Authorization';
-  cookie = 'trv.auth';
+  mode: 'cookie' | 'header' | 'all' = 'header';
+  header?: string;
+  cookie?: string;
   signingKey?: string;
-  headerPrefix = 'Bearer';
+  headerPrefix?: string;
 
   postConstruct(): void {
     if (!this.signingKey && Runtime.production) {
@@ -16,5 +15,14 @@ export class RestJWTConfig {
 
     }
     this.signingKey ??= 'dummy';
+
+    if (this.mode !== 'cookie') {
+      this.header ??= 'Authorization';
+      this.headerPrefix ||= 'Bearer';
+    }
+
+    if (this.mode !== 'header') {
+      this.cookie ??= 'trv_auth';
+    }
   }
 }

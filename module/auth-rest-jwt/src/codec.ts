@@ -12,19 +12,15 @@ import { RestJWTConfig } from './config';
 export class JWTPrincipalCodec extends CommonPrincipalCodec<string> implements PrincipalCodec {
 
   @Inject()
-  _config: RestJWTConfig;
+  config: RestJWTConfig = undefined!;
 
   @Inject()
   authContext: AuthContext;
 
   signer: JWTSigner<Principal>;
 
-  constructor() {
-    super({ header: '_' });
-  }
-
   postConstruct(): void {
-    this.signer = new JWTSigner(this._config.signingKey!,
+    this.signer = new JWTSigner(this.config.signingKey!,
       v => ({
         expiresAt: v.expiresAt!,
         issuedAt: v.issuedAt!,
@@ -33,14 +29,6 @@ export class JWTPrincipalCodec extends CommonPrincipalCodec<string> implements P
         sessionId: v.sessionId
       })
     );
-    Object.assign(this.config, {
-      ...{
-        header: undefined!,
-        cookie: undefined!,
-        headerPrefix: undefined!,
-      },
-      ...this._config
-    });
   }
 
   async toPayload(p: Principal | undefined): Promise<string | undefined> {

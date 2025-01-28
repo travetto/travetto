@@ -4,17 +4,16 @@ import { castTo, Util } from '@travetto/runtime';
 
 import { PrincipalCodec } from './types';
 
-type Cookie = { cookie: string };
-type Header = { header: string, headerPrefix?: string };
+type Config = { cookie?: string, header?: string, headerPrefix?: string };
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
 
 export class CommonPrincipalCodec<P = Principal> implements PrincipalCodec {
 
-  config: Cookie & Header;
+  config: Config;
 
-  constructor(config: Cookie | Header) {
-    this.config = castTo(config);
+  constructor(config: Config = {}) {
+    this.config = config;
   }
 
   toPayload?(p: Principal | undefined): Promise<P | undefined> | P | undefined;
@@ -33,8 +32,8 @@ export class CommonPrincipalCodec<P = Principal> implements PrincipalCodec {
   }
 
   readValue(req: Request): string | undefined {
-    return (this.config.cookie ? req.cookies.get(this.config.cookie) : undefined) ??
-      (this.config.header ? req.headerFirst(this.config.header, this.config.headerPrefix) : undefined);
+    return ((this.config.cookie) ? req.cookies.get(this.config.cookie) : undefined) ??
+      ((this.config.header) ? req.headerFirst(this.config.header, this.config.headerPrefix) : undefined);
   }
 
   async encode({ res }: FilterContext, principal: Principal | undefined): Promise<void> {
@@ -44,10 +43,13 @@ export class CommonPrincipalCodec<P = Principal> implements PrincipalCodec {
 
   async decode({ req }: FilterContext): Promise<Principal | undefined> {
     const payload = Util.decodeSafeJSON<P>(this.readValue(req))!;
-    const principal: Principal | undefined = this.fromPayload ? await this.fromPayload(payload) : castTo(payload);
-    if (principal) {
-      principal.expiresAt = toDate(principal.expiresAt);
-      principal.issuedAt = toDate(principal.issuedAt);
+    let principal: Principal | undefined;
+    if (payload) {
+      principal = this.fromPayload ? await this.fromPayload(payload) : castTo(payload);
+      if (principal) {
+        principal.expiresAt = toDate(principal.expiresAt);
+        principal.issuedAt = toDate(principal.issuedAt);
+      }
     }
     return principal;
   }

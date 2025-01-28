@@ -127,13 +127,13 @@ export class AuthService {
    */
   async authenticate<T, C>(payload: T, context: C, authenticators: symbol[]): Promise<Principal | undefined>;
   /**
-   * Enforce expiry
+   * Validate the expiry state, renewing if allowed
    */
-  enforceExpiry(p: Principal, maxAgeMs?: number, rollingRenew?: boolean): void;
+  validateExpiry(p: Principal, maxAgeMs?: number, rollingRenew?: boolean): void;
   /**
-   * Check expiry
+   * Enforce expiry, invalidating the principal if expired
    */
-  checkExpiry(p?: Principal): Principal | undefined;
+  enforceExpiry(p?: Principal): Principal | undefined;
 }
 ```
 

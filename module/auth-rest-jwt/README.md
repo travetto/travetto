@@ -17,14 +17,13 @@ One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-re
 
 The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. 
 
-The [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-codec.ts#L13) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+The [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/codec.ts#L12) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
 
 **Code: JWTPrincipalCodec**
 ```typescript
 import { AuthContext, Principal } from '@travetto/auth';
-import { PrincipalCodec } from '@travetto/auth-rest';
+import { CommonPrincipalCodec, PrincipalCodec } from '@travetto/auth-rest';
 import { Inject, Injectable } from '@travetto/di';
-import { FilterContext, RestCodecValue } from '@travetto/rest';
 import { JWTSigner } from '@travetto/jwt';
 
 import { RestJWTConfig } from './config';
@@ -33,17 +32,15 @@ import { RestJWTConfig } from './config';
  * Principal codec via JWT
  */
 @Injectable()
-export class JWTPrincipalCodec implements PrincipalCodec {
+export class JWTPrincipalCodec extends CommonPrincipalCodec<string> implements PrincipalCodec {
 
   @Inject()
-  config: RestJWTConfig;
+  config: RestJWTConfig = undefined!;
 
   @Inject()
   authContext: AuthContext;
 
   signer: JWTSigner<Principal>;
-
-  value: RestCodecValue<string>;
 
   postConstruct(): void {
     this.signer = new JWTSigner(this.config.signingKey!,
@@ -53,39 +50,18 @@ export class JWTPrincipalCodec implements PrincipalCodec {
         issuer: v.issuer!,
         id: v.id,
         sessionId: v.sessionId
-      }),
-      v => ({
-        ...v,
-        expiresAt: typeof v.expiresAt === 'string' ? new Date(v.expiresAt) : v.expiresAt,
-        issuedAt: typeof v.issuedAt === 'string' ? new Date(v.issuedAt) : v.issuedAt
       })
     );
-
-    this.value = new RestCodecValue({
-      header: this.config.mode !== 'cookie' ? this.config.header : undefined!,
-      cookie: this.config.mode !== 'header' ? this.config.cookie : undefined,
-      headerPrefix: this.config.headerPrefix
-    });
   }
 
-  /**
-   * Encode JWT to response
-   */
-  async encode({ res }: FilterContext, p: Principal | undefined): Promise<void> {
-    const token = p ? await this.signer.create(p) : undefined;
-    this.value.writeValue(res, token, { expires: p?.expiresAt });
+  async toPayload(p: Principal | undefined): Promise<string | undefined> {
+    return p ? await this.signer.create(p) : undefined;
   }
 
-  /**
-   * Decode JWT from request
-   */
-  async decode({ req }: FilterContext): Promise<Principal | undefined> {
-    const token = this.value.readValue(req);
-    if (token) {
-      const res = await this.signer.verify(token);
-      this.authContext.authToken = { type: 'jwt', value: token };
-      return res;
-    }
+  async fromPayload(token: string): Promise<Principal | undefined> {
+    const res = await this.signer.verify(token);
+    this.authContext.authToken = { type: 'jwt', value: token };
+    return res;
   }
 }
 ```

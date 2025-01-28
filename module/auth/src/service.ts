@@ -75,9 +75,9 @@ export class AuthService {
   }
 
   /**
-   * Enforce expiry
+   * Validate the expiry state, renewing if allowed
    */
-  enforceExpiry(p: Principal, maxAgeMs?: number, rollingRenew?: boolean): void {
+  validateExpiry(p: Principal, maxAgeMs?: number, rollingRenew?: boolean): void {
     if (maxAgeMs) {
       p.expiresAt ??= TimeUtil.fromNow(maxAgeMs);
     }
@@ -95,9 +95,9 @@ export class AuthService {
   }
 
   /**
-   * Check expiry
+   * Enforce expiry, invalidating the principal if expired
    */
-  checkExpiry(p?: Principal): Principal | undefined {
+  enforceExpiry(p?: Principal): Principal | undefined {
     if (p && p.expiresAt && p.expiresAt.getTime() < Date.now()) {
       return undefined;
     }
