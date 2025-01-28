@@ -15,14 +15,5 @@ export class RestJWTConfig {
 
     }
     this.signingKey ??= 'dummy';
-
-    if (this.mode !== 'cookie') {
-      this.header ??= 'Authorization';
-      this.headerPrefix ||= 'Bearer';
-    }
-
-    if (this.mode !== 'header') {
-      this.cookie ??= 'trv_auth';
-    }
   }
 }
