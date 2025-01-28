@@ -1,5 +1,5 @@
 import { AuthContext, Principal } from '@travetto/auth';
-import { CommonPrincipalCodec, PrincipalCodec } from '@travetto/auth-rest';
+import { CommonPrincipalCodec, PrincipalCodec, PrincipalCodecConfig } from '@travetto/auth-rest';
 import { Inject, Injectable } from '@travetto/di';
 import { JWTSigner } from '@travetto/jwt';
 
@@ -12,7 +12,7 @@ import { RestJWTConfig } from './config';
 export class JWTPrincipalCodec extends CommonPrincipalCodec<string> implements PrincipalCodec {
 
   @Inject()
-  config: RestJWTConfig = undefined!;
+  restConfig: RestJWTConfig;
 
   @Inject()
   authContext: AuthContext;
@@ -20,7 +20,7 @@ export class JWTPrincipalCodec extends CommonPrincipalCodec<string> implements P
   signer: JWTSigner<Principal>;
 
   postConstruct(): void {
-    this.signer = new JWTSigner(this.config.signingKey!,
+    this.signer = new JWTSigner(this.restConfig.signingKey!,
       v => ({
         expiresAt: v.expiresAt!,
         issuedAt: v.issuedAt!,
@@ -29,6 +29,8 @@ export class JWTPrincipalCodec extends CommonPrincipalCodec<string> implements P
         sessionId: v.sessionId
       })
     );
+
+    this.config = new PrincipalCodecConfig(this.restConfig);
   }
 
   async toPayload(p: Principal | undefined): Promise<string | undefined> {

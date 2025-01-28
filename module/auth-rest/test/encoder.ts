@@ -12,10 +12,7 @@ import { CommonPrincipalCodec } from '../src/codec';
 @Injectable()
 export class StatelessPrincipalCodec extends CommonPrincipalCodec implements PrincipalCodec {
   constructor() {
-    super({
-      header: 'Authorization',
-      headerPrefix: 'Token'
-    });
+    super({ header: 'Authorization', headerPrefix: 'Token' });
   }
 }
 

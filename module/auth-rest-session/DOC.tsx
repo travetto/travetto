@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { SessionInterceptor } from './__index__';
+import { AuthSessionInterceptor } from './__index__';
 import { Session, SessionService } from '@travetto/auth-session';
 
 export const text = <>
@@ -9,7 +9,7 @@ export const text = <>
 
   This module's responsibility is, to expose {d.mod('AuthSession')}'s data, within the scope of the request/response flow.
 
-  <c.Code src={SessionInterceptor} startRe={/class/} endRe={/^}/} title='Anatomy of the Session Interceptor' />
+  <c.Code src={AuthSessionInterceptor} startRe={/class/} endRe={/^}/} title='Anatomy of the Session Interceptor' />
 
   Once operating within the {Session} boundaries, the session state can be injected via params, or accessed via the {SessionService}.
 

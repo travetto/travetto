@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { AuthContext } from '@travetto/auth';
+import { AuthConfig, AuthContext } from '@travetto/auth';
 import { AuthReadWriteInterceptor, CommonPrincipalCodec, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
 import { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
 import { Controller, Get, Body, Post, Put, Request, FilterContext, RestInterceptor, RouteConfig } from '@travetto/rest';
-import { castTo, TimeUtil, TypedObject, Util } from '@travetto/runtime';
+import { Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite';
@@ -17,9 +17,7 @@ type Aged = { age: number, payload?: Record<string, unknown> };
 const KEY = 'trv_sid';
 
 @Injectable()
-class AuthorizationCodec extends CommonPrincipalCodec implements PrincipalCodec {
-  constructor() { super({ header: KEY }); }
-}
+class AuthorizationCodec extends CommonPrincipalCodec implements PrincipalCodec { }
 
 @Injectable()
 class AutoLogin implements RestInterceptor {
@@ -40,7 +38,6 @@ class AutoLogin implements RestInterceptor {
       id: Util.uuid(),
       sessionId: Util.uuid(),
       issuedAt: new Date(),
-      expiresAt: TimeUtil.fromNow(this.cfg.maxAgeMs),
       details: {}
     };
   }
@@ -77,28 +74,21 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
   timeScale = 1;
 
   @Inject()
-  _authRw: RestAuthReadWriteConfig;
+  authCfg: AuthConfig;
 
   @Inject()
   codec: AuthorizationCodec;
 
-  config(opt: Partial<AuthorizationCodec['config'] & RestAuthReadWriteConfig>): void {
-    for (const k of TypedObject.keys(opt)) {
-      if (!(k === 'header' || k === 'cookie' || k === 'headerPrefix')) {
-        this._authRw[k] = castTo(opt[k]);
-      }
-    }
-    Object.assign(this.codec.config, {
-      headerPrefix: opt.headerPrefix ?? this.codec.config.headerPrefix,
-      header: opt.header,
-      cookie: opt.cookie,
-    });
-    this._authRw.postConstruct();
+  config(opt: Partial<AuthorizationCodec['config'] & AuthConfig>): void {
+    this.authCfg.maxAgeMs = ('maxAgeMs' in opt) ? opt.maxAgeMs! : this.authCfg.maxAgeMs;
+    this.codec.config[opt.cookie ? 'cookie' : 'header'] = KEY;
+    this.codec.config[!opt.cookie ? 'cookie' : 'header'] = undefined;
+    this.codec.config.headerPrefix = opt.headerPrefix ?? this.codec.config.headerPrefix;
   }
 
   @Test()
   async cookiePersistence() {
-    this.config({ maxAge: 10000, cookie: KEY });
+    this.config({ maxAgeMs: 10000, cookie: KEY });
 
     let res = await this.request<Aged>('get', '/test/session');
     let cookie = res.headers['set-cookie'];
@@ -118,7 +108,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async cookieComplex() {
-    this.config({ maxAge: 3000, cookie: KEY });
+    this.config({ maxAgeMs: 3000, cookie: KEY });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
@@ -130,7 +120,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async cookieNoSession() {
-    this.config({ maxAge: 3000, cookie: KEY });
+    this.config({ maxAgeMs: 3000, cookie: KEY });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
@@ -165,7 +155,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async headerComplex() {
-    this.config({ header: KEY, maxAge: 3000 });
+    this.config({ header: KEY, maxAgeMs: 3000 });
 
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
@@ -178,7 +168,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async headerNoSession() {
-    this.config({ header: KEY, maxAge: 100 * this.timeScale });
+    this.config({ header: KEY, maxAgeMs: 100 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
@@ -188,7 +178,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryHeader() {
-    this.config({ header: KEY, maxAge: 100 * this.timeScale });
+    this.config({ header: KEY, maxAgeMs: 100 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
@@ -211,7 +201,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryCookie() {
-    this.config({ cookie: KEY, maxAge: 100 * this.timeScale });
+    this.config({ cookie: KEY, maxAgeMs: 100 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
@@ -230,7 +220,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryWithExtend() {
-    this.config({ header: KEY, maxAge: 300 * this.timeScale });
+    this.config({ header: KEY, maxAgeMs: 300 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });

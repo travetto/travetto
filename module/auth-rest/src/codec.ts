@@ -5,8 +5,38 @@ import { castTo, Util } from '@travetto/runtime';
 import { PrincipalCodec } from './types';
 
 type Config = { cookie?: string, header?: string, headerPrefix?: string };
+type WithMode = Config & { mode?: 'header' | 'cookie' };
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
+
+export class PrincipalCodecConfig implements Config {
+  #state: WithMode;
+  #defaults: Config;
+  constructor(state: WithMode, defaults?: Config) {
+    this.#state = state;
+    this.#defaults = defaults ?? {
+      header: 'Authorization',
+      headerPrefix: 'Bearer',
+      cookie: 'trv_auth'
+    };
+  }
+
+  set mode(val: WithMode['mode']) {
+    this.#state.mode = val;
+  }
+
+  get cookie(): string | undefined {
+    return (this.#state.mode === 'cookie' || !this.#state.mode) ? (this.#state.cookie ?? this.#defaults.cookie) : undefined;
+  }
+
+  get header(): string | undefined {
+    return this.#state.mode === 'header' ? (this.#state.header ?? this.#defaults.header) : undefined;
+  }
+
+  get headerPrefix(): string | undefined {
+    return this.#state.mode === 'header' ? (this.#state.headerPrefix ?? this.#defaults.headerPrefix) : undefined;
+  }
+}
 
 export class CommonPrincipalCodec<P = Principal> implements PrincipalCodec {
 

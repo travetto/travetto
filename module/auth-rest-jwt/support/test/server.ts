@@ -4,8 +4,8 @@ import timers from 'node:timers/promises';
 import { Controller, Get, Post, Redirect } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
-import { AuthContext, AuthenticationError, Authenticator } from '@travetto/auth';
-import { Login, Authenticated, Logout, RestAuthReadWriteConfig } from '@travetto/auth-rest';
+import { AuthConfig, AuthContext, AuthenticationError, Authenticator } from '@travetto/auth';
+import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 import { JWTUtil } from '@travetto/jwt';
 
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
@@ -16,7 +16,7 @@ const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
 class Config {
   @InjectableFactory(TestAuthSymbol)
-  static getAuthenticator(cfg: RestAuthReadWriteConfig): Authenticator {
+  static getAuthenticator(cfg: AuthConfig): Authenticator {
     cfg.maxAgeMs = 2000;
 
     return {

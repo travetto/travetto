@@ -3,7 +3,7 @@ import { Runtime, AppError } from '@travetto/runtime';
 
 @Config('rest.auth.jwt')
 export class RestJWTConfig {
-  mode: 'cookie' | 'header' | 'all' = 'header';
+  mode: 'cookie' | 'header' = 'header';
   header?: string;
   cookie?: string;
   signingKey?: string;

@@ -3,7 +3,7 @@ import { isStorageSupported } from '@travetto/model/src/internal/service/common'
 import { Runtime, Util } from '@travetto/runtime';
 import { ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { AsyncContext, AsyncContextValue } from '@travetto/context';
-import { AuthContext, AuthenticationError } from '@travetto/auth';
+import { AuthContext, AuthenticationError, AuthService } from '@travetto/auth';
 
 import { Session } from './session';
 import { SessionEntry, SessionModelSymbol } from './model';
@@ -20,6 +20,9 @@ export class SessionService {
 
   @Inject()
   auth: AuthContext;
+
+  @Inject()
+  authService: AuthService;
 
   #modelService: ModelExpirySupport;
 
@@ -83,12 +86,15 @@ export class SessionService {
       return;
     }
 
+    // Ensure latest expiry information before persisting
+    await this.authService.manageExpiry();
+
     const p = this.auth.principal;
 
-    // If not destroying, write to response, and store in cache source
-    if (session.action !== 'destroy') {
-      session.expiresAt = p?.expiresAt;
-      session.issuedAt = p?.issuedAt ?? new Date();
+    // If not destroying, write to response, and store
+    if (p && session.action !== 'destroy') {
+      session.expiresAt = p.expiresAt;
+      session.issuedAt = p.issuedAt!;
 
       // If expiration time has changed, send new session information
       if (session.action === 'create' || session.isChanged()) {

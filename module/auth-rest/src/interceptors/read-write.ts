@@ -1,4 +1,4 @@
-import { Class, TimeSpan, TimeUtil } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 import {
   RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn,
   FilterNext, SerializeInterceptor, AsyncContextInterceptor, ParamExtractor
@@ -6,24 +6,18 @@ import {
 import { Injectable, Inject } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
-import { Ignore } from '@travetto/schema';
+
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
 import { PrincipalCodec } from '../types';
-import { CommonPrincipalCodec } from '../codec';
+import { CommonPrincipalCodec, PrincipalCodecConfig } from '../codec';
 
 @Config('rest.auth.readWrite')
 export class RestAuthReadWriteConfig extends ManagedInterceptorConfig {
-
-  maxAge: TimeSpan | number = '1h';
-  rollingRenew: boolean = true;
-
-  @Ignore()
-  maxAgeMs: number;
-
-  postConstruct(): void {
-    this.maxAgeMs = TimeUtil.asMillis(this.maxAge);
-  }
+  mode: 'cookie' | 'header' = 'cookie';
+  header?: string;
+  cookie?: string;
+  headerPrefix?: string;
 }
 
 /**
@@ -50,7 +44,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   authService: AuthService;
 
   postConstruct(): void {
-    this.codec ??= new CommonPrincipalCodec({ cookie: 'default_auth' });
+    this.codec ??= new CommonPrincipalCodec(new PrincipalCodecConfig(this.config));
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
@@ -70,10 +64,9 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
 
       return await next();
     } finally {
+      this.authService.manageExpiry();
+
       const result = this.authContext.principal;
-      if (result) {
-        this.authService.validateExpiry(result, this.config.maxAgeMs, this.config.rollingRenew);
-      }
       if ((!!decoded !== !!checked) || result !== checked || lastExpiresAt !== result?.expiresAt) { // If it changed
         await this.codec.encode(ctx, result);
       }

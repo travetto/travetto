@@ -1,5 +1,6 @@
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
+import { TimeUtil } from '@travetto/runtime';
 
 import { AuthenticatorTarget } from './internal/types';
 import { Principal } from './types/principal';
@@ -7,13 +8,16 @@ import { Authenticator } from './types/authenticator';
 import { Authorizer } from './types/authorizer';
 import { AuthenticationError } from './types/error';
 import { AuthContext } from './context';
-import { TimeUtil } from '@travetto/runtime';
+import { AuthConfig } from './config';
 
 @Injectable()
 export class AuthService {
 
   @Inject()
   authContext: AuthContext;
+
+  @Inject()
+  config: AuthConfig;
 
   #authenticators = new Map<symbol, Promise<Authenticator>>();
 
@@ -75,21 +79,26 @@ export class AuthService {
   }
 
   /**
-   * Validate the expiry state, renewing if allowed
+   * Manage expiry state, renewing if allowed
    */
-  validateExpiry(p: Principal, maxAgeMs?: number, rollingRenew?: boolean): void {
-    if (maxAgeMs) {
-      p.expiresAt ??= TimeUtil.fromNow(maxAgeMs);
+  manageExpiry(): void {
+    const p = this.authContext.principal;
+    if (!p) {
+      return;
+    }
+
+    if (this.config.maxAgeMs) {
+      p.expiresAt ??= TimeUtil.fromNow(this.config.maxAgeMs);
     }
 
     p.issuedAt ??= new Date();
 
-    if (p.expiresAt && maxAgeMs && rollingRenew) { // Session behavior
+    if (p.expiresAt && this.config.maxAgeMs && this.config.rollingRenew) { // Session behavior
       const end = p.expiresAt.getTime();
-      const midPoint = end - maxAgeMs / 2;
+      const midPoint = end - this.config.maxAgeMs / 2;
       if (Date.now() > midPoint) { // If we are past the half way mark, renew the token
         p.issuedAt = new Date();
-        p.expiresAt = TimeUtil.fromNow(maxAgeMs); // This will trigger a re-send
+        p.expiresAt = TimeUtil.fromNow(this.config.maxAgeMs); // This will trigger a re-send
       }
     }
   }

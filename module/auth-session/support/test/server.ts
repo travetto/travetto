@@ -2,13 +2,13 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { BaseRestSuite } from '@travetto/rest/support/test/base';
-
 import { SessionService } from '@travetto/auth-session';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Util } from '@travetto/runtime';
+
+import { InjectableSuite } from '@travetto/di/support/test/suite';
+import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 @Suite()
 @InjectableSuite()
