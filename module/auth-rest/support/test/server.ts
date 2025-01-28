@@ -7,13 +7,13 @@ import { Inject, Injectable, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext } from '@travetto/auth';
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
-import { DefaultPrincipalCodec } from '../../src/codec';
+import { CommonPrincipalCodec } from '../../src/codec';
 import { PrincipalCodec } from '../../src/types';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
 @Injectable()
-class AuthorizationCodec extends DefaultPrincipalCodec implements PrincipalCodec {
+class AuthorizationCodec extends CommonPrincipalCodec implements PrincipalCodec {
   constructor() { super({ header: 'Authorization', headerPrefix: 'Token' }); }
 }
 

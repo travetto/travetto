@@ -7,10 +7,10 @@ import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { asFull } from '@travetto/runtime';
 
 import { PrincipalCodec } from '../src/types';
-import { DefaultPrincipalCodec } from '../src/codec';
+import { CommonPrincipalCodec } from '../src/codec';
 
 @Injectable()
-export class StatelessPrincipalCodec extends DefaultPrincipalCodec implements PrincipalCodec {
+export class StatelessPrincipalCodec extends CommonPrincipalCodec implements PrincipalCodec {
   constructor() {
     super({
       header: 'Authorization',

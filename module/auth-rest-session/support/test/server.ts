@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { AuthContext } from '@travetto/auth';
-import { AuthReadWriteInterceptor, DefaultPrincipalCodec, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
+import { AuthReadWriteInterceptor, CommonPrincipalCodec, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
 import { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
 import { Controller, Get, Body, Post, Put, Request, FilterContext, RestInterceptor, RouteConfig } from '@travetto/rest';
@@ -17,7 +17,7 @@ type Aged = { age: number, payload?: Record<string, unknown> };
 const KEY = 'trv_sid';
 
 @Injectable()
-class AuthorizationCodec extends DefaultPrincipalCodec implements PrincipalCodec {
+class AuthorizationCodec extends CommonPrincipalCodec implements PrincipalCodec {
   constructor() { super({ header: KEY }); }
 }
 
