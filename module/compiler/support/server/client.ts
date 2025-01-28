@@ -49,7 +49,7 @@ export class CompilerClient {
     const timeoutCtrl = new AbortController();
 
     opts?.signal?.addEventListener('abort', () => ctrl.abort());
-    timers.setTimeout(opts?.timeout ?? 250, undefined, { ref: false, signal: timeoutCtrl.signal })
+    timers.setTimeout(opts?.timeout ?? 100, undefined, { ref: false, signal: timeoutCtrl.signal })
       .then(() => {
         logTimeout && this.#log.error(`Timeout on request to ${this.#url}${rel}`);
         ctrl.abort('TIMEOUT');
@@ -72,7 +72,7 @@ export class CompilerClient {
 
   /** Clean the server */
   clean(): Promise<boolean> {
-    return this.#fetch('/clean').then(v => v.ok, () => false);
+    return this.#fetch('/clean', { timeout: 300 }).then(v => v.ok, () => false);
   }
 
   /** Stop server and wait for shutdown */
