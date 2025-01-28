@@ -29,7 +29,7 @@ This module's responsibility is, to expose <a class="module-link" routerLink="/d
  * Loads session, and provides ability to create session as needed, persists when complete.
  */</span>
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SessionInterceptor</span> <span class="token keyword">implements</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthSessionInterceptor</span> <span class="token keyword">implements</span> <span class="token class-name">RestInterceptor</span> <span class="token punctuation">{{'{'}}</span>
 
   dependsOn<span class="token operator">:</span> Class<span class="token operator">&lt;</span>RestInterceptor<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span>AuthReadWriteInterceptor<span class="token punctuation">]</span><span class="token punctuation">;</span>
   runsBefore<span class="token operator">:</span> Class<span class="token operator">&lt;</span>RestInterceptor<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>

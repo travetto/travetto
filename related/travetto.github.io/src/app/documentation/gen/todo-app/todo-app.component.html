@@ -387,6 +387,7 @@ First we must start the application:
         skipRoutes: false,
         exposeAllSchemas: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
+      AuthConfig: <span class="token punctuation">{{'{'}}</span> maxAge: <span class="token string">'1h'</span>, rollingRenew: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
       ConsoleLogAppenderConfig: <span class="token punctuation">{{'{'}}</span> logToLevel: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       FileLogAppenderConfig: <span class="token punctuation">{{'{'}}</span>
@@ -422,7 +423,7 @@ First we must start the application:
       RestAsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestAuthLoginConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestAuthLogoutConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      RestAuthReadWriteConfig: <span class="token punctuation">{{'{'}}</span> maxAge: <span class="token string">'1h'</span>, rollingRenew: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      RestAuthReadWriteConfig: <span class="token punctuation">{{'{'}}</span> mode: <span class="token string">'cookie'</span> <span class="token punctuation">{{'}'}}</span>,
       RestAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> permissions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestConfig: <span class="token punctuation">{{'{'}}</span>

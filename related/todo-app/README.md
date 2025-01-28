@@ -356,6 +356,7 @@ npx trv run:rest
         skipRoutes: false,
         exposeAllSchemas: false
       },
+      AuthConfig: { maxAge: '1h', rollingRenew: true },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       ConsoleLogAppenderConfig: { logToLevel: true },
       FileLogAppenderConfig: {
@@ -391,7 +392,7 @@ npx trv run:rest
       RestAsyncContextConfig: {},
       RestAuthLoginConfig: {},
       RestAuthLogoutConfig: {},
-      RestAuthReadWriteConfig: { maxAge: '1h', rollingRenew: true },
+      RestAuthReadWriteConfig: { mode: 'cookie' },
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '1mb', parsingTypes: {} },
       RestConfig: {

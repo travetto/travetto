@@ -35,7 +35,7 @@ class RestSessionConfig implements ManagedInterceptorConfig { }
  * Loads session, and provides ability to create session as needed, persists when complete.
  */
 @Injectable()
-export class SessionInterceptor implements RestInterceptor {
+export class AuthSessionInterceptor implements RestInterceptor {
 
   dependsOn: Class<RestInterceptor>[] = [AuthReadWriteInterceptor];
   runsBefore: Class<RestInterceptor>[] = [];

@@ -127,9 +127,9 @@ export class AuthService {
    */
   async authenticate<T, C>(payload: T, context: C, authenticators: symbol[]): Promise<Principal | undefined>;
   /**
-   * Validate the expiry state, renewing if allowed
+   * Manage expiry state, renewing if allowed
    */
-  validateExpiry(p: Principal, maxAgeMs?: number, rollingRenew?: boolean): void;
+  manageExpiry(): void;
   /**
    * Enforce expiry, invalidating the principal if expired
    */
@@ -137,12 +137,12 @@ export class AuthService {
 }
 ```
 
-The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13) operates as the owner of the current auth state for a given "request".  "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. 
+The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L14) operates as the owner of the current auth state for a given "request".  "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. 
 
 The service allows for storing and retrieving the active [Principal Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8), and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") makes heavy use of this state for enforcing routes when authentication is required. 
 
 ### Login
-"Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials.  Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13) operates in this fashion, in which a set of credentials and potential [Authenticator Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14)s are submitted, and the service will attempt to authenticate.  
+"Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials.  Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L14) operates in this fashion, in which a set of credentials and potential [Authenticator Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14)s are submitted, and the service will attempt to authenticate.  
 
 Upon successful authentication, an optional [Authorizer Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) may be invoked to authorize the authenticated user.  The [Authenticator Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14) is assumed to be only one within the system, and should be tied to the specific product you are building for.  The [Authorizer Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) should be assumed to have multiple sources, and are generally specific to external third parties.  All of these values are collected via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module and will be auto-registered on startup. 
 
