@@ -1,18 +1,17 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { Controller, Get, Body, Post, Put, Request, FilterContext, RestInterceptor, RouteConfig } from '@travetto/rest';
-import { Suite, Test } from '@travetto/test';
-import { Inject, Injectable } from '@travetto/di';
-import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { BaseRestSuite } from '@travetto/rest/support/test/base';
-
-import { SessionData } from '@travetto/auth-session/src/session';
 import { AuthContext, Principal } from '@travetto/auth';
 import { AuthReadWriteInterceptor, DefaultPrincipalCodec, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
+import { SessionService, SessionData } from '@travetto/auth-session';
 import { Config } from '@travetto/config';
+import { Inject, Injectable } from '@travetto/di';
+import { Controller, Get, Body, Post, Put, Request, FilterContext, RestInterceptor, RouteConfig } from '@travetto/rest';
 import { castTo, TimeUtil, TypedObject, Util } from '@travetto/runtime';
-import { SessionService } from '@travetto/auth-session';
+import { Suite, Test } from '@travetto/test';
+
+import { InjectableSuite } from '@travetto/di/support/test/suite';
+import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
