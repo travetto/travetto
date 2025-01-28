@@ -167,6 +167,9 @@ export class CompilerWatcher {
           this.#q.add(item);
         }
       } catch (out) {
+        if (out instanceof Error && out.message.includes('Events were dropped by the FSEvents client.')) {
+          out = new CompilerReset('FSEvents failure, requires restart');
+        }
         return this.#q.throw(out instanceof Error ? out : new Error(`${out}`));
       }
     }, { ignore });
