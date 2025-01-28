@@ -9,4 +9,3 @@ export class PrincipalTarget {
 }
 export class AuthorizerTarget { }
 export class AuthenticatorTarget { }
-export type AuthToken = { value: string, type: string };

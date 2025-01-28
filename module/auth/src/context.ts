@@ -2,7 +2,7 @@
 import { Inject, Injectable } from '@travetto/di';
 import { AsyncContext, AsyncContextValue } from '@travetto/context';
 
-import { AuthToken } from './internal/types';
+import { AuthToken } from './types/token';
 import { Principal } from './types/principal';
 import { AuthenticatorState } from './types/authenticator';
 

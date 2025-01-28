@@ -10,7 +10,7 @@ import { Config } from '@travetto/config';
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
 import { PrincipalCodec } from '../types';
-import { CommonPrincipalCodec, PrincipalCodecConfig } from '../codec';
+import { CommonPrincipalCodec } from '../codec';
 
 @Config('rest.auth.readWrite')
 export class RestAuthReadWriteConfig extends ManagedInterceptorConfig {
@@ -44,7 +44,10 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   authService: AuthService;
 
   postConstruct(): void {
-    this.codec ??= new CommonPrincipalCodec(new PrincipalCodecConfig(this.config));
+    this.codec ??= new CommonPrincipalCodec();
+    if (this.codec instanceof CommonPrincipalCodec) {
+      this.codec.init(this.config);
+    }
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
@@ -61,6 +64,10 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
 
       checked = this.authService.enforceExpiry(decoded);
       this.authContext.principal = checked;
+
+      if (checked && this.codec.getToken) {
+        this.authContext.authToken = await this.codec.getToken(ctx);
+      }
 
       return await next();
     } finally {

@@ -14,7 +14,7 @@ const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
 @Injectable()
 class AuthorizationCodec extends CommonPrincipalCodec implements PrincipalCodec {
-  constructor() { super({ header: 'Authorization', headerPrefix: 'Token' }); }
+  constructor() { super({ mode: 'header' }); }
 }
 
 class Config {

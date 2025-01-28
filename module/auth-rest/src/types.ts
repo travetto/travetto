@@ -1,4 +1,4 @@
-import { Principal } from '@travetto/auth';
+import { AuthToken, Principal } from '@travetto/auth';
 import { FilterContext } from '@travetto/rest';
 
 /**
@@ -14,4 +14,8 @@ export interface PrincipalCodec {
    * Decode data
    */
   decode(ctx: FilterContext): Promise<Principal | undefined> | Principal | undefined;
+  /**
+   * Retrieves token, if exists
+   */
+  getToken?(ctx: FilterContext): Promise<AuthToken | undefined> | AuthToken | undefined;
 }

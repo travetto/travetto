@@ -1,13 +1,15 @@
+import { Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
+import { JWTSigner } from '@travetto/jwt';
 import { Runtime, AppError } from '@travetto/runtime';
+import { Ignore } from '@travetto/schema';
 
 @Config('rest.auth.jwt')
 export class RestJWTConfig {
-  mode: 'cookie' | 'header' = 'header';
-  header?: string;
-  cookie?: string;
   signingKey?: string;
-  headerPrefix?: string;
+
+  @Ignore()
+  signer: JWTSigner<Principal>;
 
   postConstruct(): void {
     if (!this.signingKey && Runtime.production) {
@@ -15,5 +17,15 @@ export class RestJWTConfig {
 
     }
     this.signingKey ??= 'dummy';
+
+    this.signer = new JWTSigner(this.signingKey!,
+      v => ({
+        expiresAt: v.expiresAt!,
+        issuedAt: v.issuedAt!,
+        issuer: v.issuer!,
+        id: v.id,
+        sessionId: v.sessionId
+      })
+    );
   }
 }

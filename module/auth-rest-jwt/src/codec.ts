@@ -1,7 +1,7 @@
-import { AuthContext, Principal } from '@travetto/auth';
-import { CommonPrincipalCodec, PrincipalCodec, PrincipalCodecConfig } from '@travetto/auth-rest';
+import { AuthContext, AuthToken, Principal } from '@travetto/auth';
+import { CommonPrincipalCodec, PrincipalCodec } from '@travetto/auth-rest';
 import { Inject, Injectable } from '@travetto/di';
-import { JWTSigner } from '@travetto/jwt';
+import { FilterContext } from '@travetto/rest';
 
 import { RestJWTConfig } from './config';
 
@@ -12,34 +12,21 @@ import { RestJWTConfig } from './config';
 export class JWTPrincipalCodec extends CommonPrincipalCodec<string> implements PrincipalCodec {
 
   @Inject()
-  restConfig: RestJWTConfig;
+  config: RestJWTConfig;
 
   @Inject()
   authContext: AuthContext;
 
-  signer: JWTSigner<Principal>;
-
-  postConstruct(): void {
-    this.signer = new JWTSigner(this.restConfig.signingKey!,
-      v => ({
-        expiresAt: v.expiresAt!,
-        issuedAt: v.issuedAt!,
-        issuer: v.issuer!,
-        id: v.id,
-        sessionId: v.sessionId
-      })
-    );
-
-    this.config = new PrincipalCodecConfig(this.restConfig);
-  }
-
   async toPayload(p: Principal | undefined): Promise<string | undefined> {
-    return p ? await this.signer.create(p) : undefined;
+    return p ? await this.config.signer.create(p) : undefined;
   }
 
-  async fromPayload(token: string): Promise<Principal | undefined> {
-    const res = await this.signer.verify(token);
-    this.authContext.authToken = { type: 'jwt', value: token };
-    return res;
+  fromPayload(token: string): Promise<Principal | undefined> {
+    return this.config.signer.verify(token);
+  }
+
+  getToken(ctx: FilterContext): Promise<AuthToken | undefined> | AuthToken | undefined {
+    const token = this.readValue(ctx.req);
+    return token ? { type: 'jwt', value: token } : undefined;
   }
 }

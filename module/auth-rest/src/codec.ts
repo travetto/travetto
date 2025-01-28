@@ -4,66 +4,45 @@ import { castTo, Util } from '@travetto/runtime';
 
 import { PrincipalCodec } from './types';
 
-type Config = { cookie?: string, header?: string, headerPrefix?: string };
-type WithMode = Config & { mode?: 'header' | 'cookie' };
+type Config = { mode: 'cookie' | 'header', cookie: string, header: string, headerPrefix?: string };
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
 
-export class PrincipalCodecConfig implements Config {
-  #state: WithMode;
-  #defaults: Config;
-  constructor(state: WithMode, defaults?: Config) {
-    this.#state = state;
-    this.#defaults = defaults ?? {
-      header: 'Authorization',
-      headerPrefix: 'Bearer',
-      cookie: 'trv_auth'
-    };
-  }
-
-  set mode(val: WithMode['mode']) {
-    this.#state.mode = val;
-  }
-
-  get cookie(): string | undefined {
-    return (this.#state.mode === 'cookie' || !this.#state.mode) ? (this.#state.cookie ?? this.#defaults.cookie) : undefined;
-  }
-
-  get header(): string | undefined {
-    return this.#state.mode === 'header' ? (this.#state.header ?? this.#defaults.header) : undefined;
-  }
-
-  get headerPrefix(): string | undefined {
-    return this.#state.mode === 'header' ? (this.#state.headerPrefix ?? this.#defaults.headerPrefix) : undefined;
-  }
-}
-
 export class CommonPrincipalCodec<P = Principal> implements PrincipalCodec {
 
-  config: Config;
+  #config: Config;
 
-  constructor(config: Config = {}) {
-    this.config = config;
+  constructor(config: Partial<Config> = {}) {
+    this.init(config);
+  }
+
+  init(config: Partial<Config>): void {
+    const c = this.#config = castTo({ ...config });
+    c.header ??= 'Authorization';
+    c.headerPrefix ??= 'Token';
+    c.cookie ??= 'trv_auth';
+    c.mode ??= 'cookie';
   }
 
   toPayload?(p: Principal | undefined): Promise<P | undefined> | P | undefined;
   fromPayload?(p: P): Promise<Principal | undefined> | Principal | undefined;
 
   writeValue(res: Response, output: string | undefined, expires?: Date): void {
-    if (this.config.cookie) {
-      res.cookies.set(this.config.cookie, output, {
+    if (this.#config.mode === 'cookie') {
+      res.cookies.set(this.#config.cookie, output, {
         expires,
         maxAge: (expires && output !== undefined) ? undefined : -1,
       });
     }
-    if (output && this.config.header) {
-      res.setHeader(this.config.header, this.config.headerPrefix ? `${this.config.headerPrefix} ${output}` : output);
+    if (output && this.#config.mode === 'header') {
+      res.setHeader(this.#config.header, this.#config.headerPrefix ? `${this.#config.headerPrefix} ${output}` : output);
     }
   }
 
   readValue(req: Request): string | undefined {
-    return ((this.config.cookie) ? req.cookies.get(this.config.cookie) : undefined) ??
-      ((this.config.header) ? req.headerFirst(this.config.header, this.config.headerPrefix) : undefined);
+    return (this.#config.mode === 'cookie') ?
+      req.cookies.get(this.#config.cookie) :
+      req.headerFirst(this.#config.header, this.#config.headerPrefix);
   }
 
   async encode({ res }: FilterContext, principal: Principal | undefined): Promise<void> {

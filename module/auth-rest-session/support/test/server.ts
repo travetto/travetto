@@ -79,11 +79,9 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
   @Inject()
   codec: AuthorizationCodec;
 
-  config(opt: Partial<AuthorizationCodec['config'] & AuthConfig>): void {
+  config(opt: Partial<({ cookie: string } | { header: string }) & AuthConfig>): void {
     this.authCfg.maxAgeMs = ('maxAgeMs' in opt) ? opt.maxAgeMs! : this.authCfg.maxAgeMs;
-    this.codec.config[opt.cookie ? 'cookie' : 'header'] = KEY;
-    this.codec.config[!opt.cookie ? 'cookie' : 'header'] = undefined;
-    this.codec.config.headerPrefix = opt.headerPrefix ?? this.codec.config.headerPrefix;
+    this.codec.init({ mode: 'cookie' in opt ? 'cookie' : 'header', cookie: KEY, header: KEY });
   }
 
   @Test()
