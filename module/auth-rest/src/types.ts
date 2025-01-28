@@ -1,8 +1,17 @@
 import { Principal } from '@travetto/auth';
-import { RestCodec } from '@travetto/rest';
+import { FilterContext } from '@travetto/rest';
 
 /**
  * Rest codec for reading/writing principal
  * @concrete ./internal/types#PrincipalCodecTarget
  */
-export interface PrincipalCodec extends RestCodec<Principal> { }
+export interface PrincipalCodec {
+  /**
+   * Encode data
+   */
+  encode(ctx: FilterContext, data: Principal | undefined): Promise<void> | void;
+  /**
+   * Decode data
+   */
+  decode(ctx: FilterContext): Promise<Principal | undefined> | Principal | undefined;
+}

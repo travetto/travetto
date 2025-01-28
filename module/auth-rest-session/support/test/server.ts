@@ -1,10 +1,9 @@
 import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
-import { AuthContext, Principal } from '@travetto/auth';
+import { AuthContext } from '@travetto/auth';
 import { AuthReadWriteInterceptor, DefaultPrincipalCodec, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
 import { SessionService, SessionData } from '@travetto/auth-session';
-import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { Controller, Get, Body, Post, Put, Request, FilterContext, RestInterceptor, RouteConfig } from '@travetto/rest';
 import { castTo, TimeUtil, TypedObject, Util } from '@travetto/runtime';
@@ -15,34 +14,11 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
-@Config('unknown')
-class AuthCodecConfig {
-  transport: 'cookie' | 'header' = 'cookie';
-  keyName = 'sid';
-}
+const KEY = 'trv_sid';
 
 @Injectable()
 class AuthorizationCodec extends DefaultPrincipalCodec implements PrincipalCodec {
-
-  cache: Record<string, Principal> = {};
-
-  @Inject()
-  authReadwriteConfig: RestAuthReadWriteConfig;
-
-  @Inject()
-  cfg: AuthCodecConfig;
-
-  constructor() {
-    super({ header: '' });
-  }
-
-  postConstruct(): void {
-    this.reinit(
-      this.cfg.transport === 'header' ?
-        { header: this.cfg.keyName, headerPrefix: 'Token' } :
-        { cookie: this.cfg.keyName }
-    );
-  }
+  constructor() { super({ header: KEY }); }
 }
 
 @Injectable()
@@ -101,30 +77,28 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
   timeScale = 1;
 
   @Inject()
-  _config: AuthCodecConfig;
-
-  @Inject()
   _authRw: RestAuthReadWriteConfig;
 
   @Inject()
   codec: AuthorizationCodec;
 
-  config(opt: Partial<AuthCodecConfig & RestAuthReadWriteConfig>): string {
+  config(opt: Partial<AuthorizationCodec['config'] & RestAuthReadWriteConfig>): void {
     for (const k of TypedObject.keys(opt)) {
-      if (k === 'transport' || k === 'keyName') {
-        this._config[k] = castTo(opt[k]);
-      } else {
+      if (!(k === 'header' || k === 'cookie' || k === 'headerPrefix')) {
         this._authRw[k] = castTo(opt[k]);
       }
     }
-    this.codec.postConstruct();
+    Object.assign(this.codec.config, {
+      headerPrefix: opt.headerPrefix ?? this.codec.config.headerPrefix,
+      header: opt.header,
+      cookie: opt.cookie,
+    });
     this._authRw.postConstruct();
-    return this._config.keyName;
   }
 
   @Test()
   async cookiePersistence() {
-    this.config({ maxAge: 10000, transport: 'cookie' });
+    this.config({ maxAge: 10000, cookie: KEY });
 
     let res = await this.request<Aged>('get', '/test/session');
     let cookie = res.headers['set-cookie'];
@@ -144,7 +118,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async cookieComplex() {
-    this.config({ maxAge: 3000, transport: 'cookie' });
+    this.config({ maxAge: 3000, cookie: KEY });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
@@ -156,7 +130,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async cookieNoSession() {
-    this.config({ maxAge: 3000, transport: 'cookie' });
+    this.config({ maxAge: 3000, cookie: KEY });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
@@ -166,70 +140,70 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async headerPersistence() {
-    const key = this.config({ transport: 'header', rollingRenew: true, maxAge: 3000 });
+    this.config({ header: KEY, rollingRenew: true, maxAge: 3000 });
 
     let res = await this.request('get', '/test/session');
-    let header = res.headers[key];
+    let header = res.headers[KEY];
     assert.deepStrictEqual(res.body, { age: 1 });
 
-    res = await this.request('get', '/test/session', { headers: { [key]: header } });
-    header = res.headers[key] ?? header;
+    res = await this.request('get', '/test/session', { headers: { [KEY]: header } });
+    header = res.headers[KEY] ?? header;
     assert.deepStrictEqual(res.body, { age: 2 });
 
-    res = await this.request('get', '/test/session', { headers: { [key]: header } });
-    header = res.headers[key] ?? header;
+    res = await this.request('get', '/test/session', { headers: { [KEY]: header } });
+    header = res.headers[KEY] ?? header;
     assert.deepStrictEqual(res.body, { age: 3 });
 
     res = await this.request('get', '/test/session');
-    header = res.headers[key] ?? header;
+    header = res.headers[KEY] ?? header;
     assert.deepStrictEqual(res.body, { age: 1 });
 
-    res = await this.request('get', '/test/session', { headers: { [key]: header } });
-    header = res.headers[key] ?? header;
+    res = await this.request('get', '/test/session', { headers: { [KEY]: header } });
+    header = res.headers[KEY] ?? header;
     assert.deepStrictEqual(res.body, { age: 2 });
   }
 
   @Test()
   async headerComplex() {
-    const key = this.config({ transport: 'header', maxAge: 3000 });
+    this.config({ header: KEY, maxAge: 3000 });
 
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
-    const header = res.headers[key];
-    res = await this.request('get', '/test/session', { headers: { [key]: header } });
+    const header = res.headers[KEY];
+    res = await this.request('get', '/test/session', { headers: { [KEY]: header } });
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
   }
 
   @Test()
   async headerNoSession() {
-    const key = this.config({ transport: 'header', maxAge: 100 * this.timeScale });
+    this.config({ header: KEY, maxAge: 100 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
-    const sessionId = res.headers[key];
+    const sessionId = res.headers[KEY];
     assert(sessionId === undefined);
   }
 
   @Test()
   async testExpiryHeader() {
-    const key = this.config({ transport: 'header', maxAge: 100 * this.timeScale });
+    this.config({ header: KEY, maxAge: 100 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
-    let header = res.headers[key];
+    let header = res.headers[KEY];
 
-    res = await this.request('get', '/test/session', { headers: { [key]: header } });
-    header = res.headers[key] ?? header;
+    res = await this.request('get', '/test/session', { headers: { [KEY]: header } });
+    header = res.headers[KEY] ?? header;
 
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
 
     await timers.setTimeout(100 * this.timeScale);
 
-    res = await this.request('get', '/test/session', { headers: { [key]: header } });
-    header = res.headers[key] ?? header;
+    res = await this.request('get', '/test/session', { headers: { [KEY]: header } });
+    header = res.headers[KEY] ?? header;
 
     assert(res.body.payload === undefined);
     assert(res.body.age === 1);
@@ -237,7 +211,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryCookie() {
-    this.config({ transport: 'cookie', maxAge: 100 * this.timeScale });
+    this.config({ cookie: KEY, maxAge: 100 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
@@ -256,27 +230,27 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
 
   @Test()
   async testExpiryWithExtend() {
-    const key = this.config({ transport: 'header', maxAge: 300 * this.timeScale });
+    this.config({ header: KEY, maxAge: 300 * this.timeScale });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
-    let header = res.headers[key];
+    let header = res.headers[KEY];
 
     await timers.setTimeout(50 * this.timeScale);
-    res = await this.request('get', '/test/session', { headers: { [key]: header } });
-    header = res.headers[key] ?? header;
+    res = await this.request('get', '/test/session', { headers: { [KEY]: header } });
+    header = res.headers[KEY] ?? header;
 
     assert(res.body.payload === payload);
     await timers.setTimeout(50 * this.timeScale);
 
-    res = await this.request('get', '/test/session', { headers: { [key]: header } });
-    header = res.headers[key] ?? header;
+    res = await this.request('get', '/test/session', { headers: { [KEY]: header } });
+    header = res.headers[KEY] ?? header;
 
     assert(res.body.payload === payload);
     await timers.setTimeout(50 * this.timeScale);
 
-    res = await this.request('get', '/test/session', { headers: { [key]: header } });
-    header = res.headers[key] ?? header;
+    res = await this.request('get', '/test/session', { headers: { [KEY]: header } });
+    header = res.headers[KEY] ?? header;
 
     assert(res.body.payload === payload);
     assert(res.body.age === 3);
