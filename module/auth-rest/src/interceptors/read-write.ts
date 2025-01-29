@@ -1,17 +1,27 @@
 import { Class } from '@travetto/runtime';
 import {
   RestInterceptor, FilterContext, FilterReturn,
-  FilterNext, SerializeInterceptor, AsyncContextInterceptor, ParamExtractor
+  FilterNext, SerializeInterceptor, AsyncContextInterceptor, ParamExtractor,
+  RestCommonUtil
 } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
+import { Config } from '@travetto/config';
 
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
 import { PrincipalCodec } from '../types';
-import { RestAuthConfig } from '../config';
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
+
+
+@Config('rest.auth')
+export class RestAuthConfig {
+  mode: 'cookie' | 'header' = 'cookie';
+  header: string = 'Authorization';
+  cookie: string = 'trv_auth';
+  headerPrefix: string = 'Token';
+}
 
 /**
  * Authentication interceptor
@@ -39,8 +49,8 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   postConstruct(): void {
     if (this.codec) {
       const codec: PrincipalCodec = {
-        decode: ctx => this.config.readValue<Principal>(ctx.req),
-        encode: (ctx, value) => this.config.writeValue(ctx.res, value, value?.expiresAt)
+        decode: ctx => RestCommonUtil.readValue<Principal>(this.config, ctx.req),
+        encode: (ctx, value) => RestCommonUtil.writeValue(this.config, ctx.res, value, { expires: value?.expiresAt })
       };
       this.codec = codec;
     }

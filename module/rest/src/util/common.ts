@@ -1,5 +1,10 @@
+import { SetOption } from 'cookies';
+import { Util } from '@travetto/runtime';
+import { Request, Response } from '../types';
+
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
+type ValueConfig = { mode: 'header' | 'cookie', header: string, cookie: string, headerPrefix: string };
 
 export class RestCommonUtil {
 
@@ -49,5 +54,33 @@ export class RestCommonUtil {
 
     const inputMap = new Map(items.map(x => [x.key, x]));
     return keys.map(k => inputMap.get(k)!);
+  }
+
+  /**
+   * Write value to response
+   */
+  static writeValue<T = unknown>(cfg: ValueConfig, res: Response, value: T | undefined, opts?: SetOption): void {
+    const output = Util.encodeSafeJSON<T>(value);
+
+    if (cfg.mode === 'cookie') {
+      res.cookies.set(cfg.cookie, output, {
+        ...opts,
+        maxAge: (opts?.expires && output !== undefined) ? undefined : -1,
+      });
+    }
+    if (output && cfg.mode === 'header') {
+      res.setHeader(cfg.header, cfg.headerPrefix ? `${cfg.headerPrefix} ${output}` : output);
+    }
+  }
+
+  /**
+   * Read value from request
+   */
+  static readValue<T = unknown>(cfg: ValueConfig, req: Request): T | undefined {
+    const res = (cfg.mode === 'cookie') ?
+      req.cookies.get(cfg.cookie) :
+      req.headerFirst(cfg.header, cfg.headerPrefix);
+
+    return Util.decodeSafeJSON<T>(res)!;
   }
 }
