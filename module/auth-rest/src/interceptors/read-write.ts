@@ -14,7 +14,7 @@ import { CommonPrincipalCodec } from '../codec';
 
 @Config('rest.auth.readWrite')
 export class RestAuthReadWriteConfig extends ManagedInterceptorConfig {
-  mode: 'cookie' | 'header' = 'cookie';
+  mode?: 'cookie' | 'header';
   header?: string;
   cookie?: string;
   headerPrefix?: string;

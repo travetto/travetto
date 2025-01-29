@@ -13,15 +13,20 @@ export class CommonPrincipalCodec<P = Principal> implements PrincipalCodec {
   #config: Config;
 
   constructor(config: Partial<Config> = {}) {
-    this.init(config);
+    this.#config = {
+      header: 'Authorization',
+      headerPrefix: 'Token',
+      cookie: 'trv_auth',
+      mode: 'cookie',
+      ...config
+    };
   }
 
   init(config: Partial<Config>): void {
-    const c = this.#config = castTo({ ...config });
-    c.header ??= 'Authorization';
-    c.headerPrefix ??= 'Token';
-    c.cookie ??= 'trv_auth';
-    c.mode ??= 'cookie';
+    this.#config.cookie = config.cookie ?? this.#config.cookie;
+    this.#config.header = config.header ?? this.#config.header;
+    this.#config.headerPrefix = config.headerPrefix ?? this.#config.headerPrefix;
+    this.#config.mode = config.mode ?? this.#config.mode;
   }
 
   toPayload?(p: Principal | undefined): Promise<P | undefined> | P | undefined;
