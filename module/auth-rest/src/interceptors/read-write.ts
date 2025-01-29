@@ -49,7 +49,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   postConstruct(): void {
     if (this.codec) {
       const codec: PrincipalCodec = {
-        decode: ctx => RestCommonUtil.readValue<Principal>(this.config, ctx.req),
+        decode: ctx => RestCommonUtil.readValue(this.config, ctx.req),
         encode: (ctx, value) => RestCommonUtil.writeValue(this.config, ctx.res, value, { expires: value?.expiresAt })
       };
       this.codec = codec;
