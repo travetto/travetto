@@ -37,10 +37,13 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   authService: AuthService;
 
   postConstruct(): void {
-    this.codec ??= {
-      decode: (ctx): Principal | undefined => this.config.readValue<Principal>(ctx.req),
-      encode: (ctx, value): void => this.config.writeValue(ctx.res, value, value?.expiresAt)
-    };
+    if (this.codec) {
+      const codec: PrincipalCodec = {
+        decode: ctx => this.config.readValue<Principal>(ctx.req),
+        encode: (ctx, value) => this.config.writeValue(ctx.res, value, value?.expiresAt)
+      };
+      this.codec = codec;
+    }
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
