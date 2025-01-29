@@ -1,41 +1,26 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Inject, Injectable } from '@travetto/di';
-import { FilterContext, Response } from '@travetto/rest';
+import { Inject } from '@travetto/di';
+import { Response } from '@travetto/rest';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { asFull } from '@travetto/runtime';
-import { Principal } from '@travetto/auth';
 
-import { PrincipalCodec } from '../src/types';
-import { RestAuthConfig } from '../src/config';
-
-@Injectable()
-export class StatelessPrincipalCodec implements PrincipalCodec {
-  @Inject()
-  auth: RestAuthConfig;
-
-  decode(ctx: FilterContext): Promise<Principal | undefined> | Principal | undefined {
-    return this.auth.readValue(ctx.req);
-  }
-
-  encode(ctx: FilterContext, data: Principal | undefined): Promise<void> | void {
-    return this.auth.writeValue(ctx.res, data, data?.expiresAt);
-  }
-}
+import { AuthReadWriteInterceptor } from '../src/interceptors/read-write';
 
 @Suite()
 @InjectableSuite()
 export class EncoderTest {
 
   @Inject()
-  instance: PrincipalCodec;
+  interceptor: AuthReadWriteInterceptor;
 
   @Test()
   async testHeader() {
     const headers: Record<string, string> = {};
+    this.interceptor.config.mode = 'header';
 
-    await this.instance.encode(
+    await this.interceptor.codec.encode(
       {
         req: asFull({}),
         res: asFull<Response>({
@@ -59,8 +44,9 @@ export class EncoderTest {
   @Test()
   async testHeaderMissing() {
     const headers: Record<string, string> = {};
+    this.interceptor.config.mode = 'header';
 
-    await this.instance.encode({
+    await this.interceptor.codec.encode({
       req: asFull({}),
       res: asFull<Response>({
         setHeader(key: string, value: string) {

@@ -390,9 +390,14 @@ npx trv run:rest
       },
       RestAcceptsConfig: { types: {} },
       RestAsyncContextConfig: {},
+      RestAuthConfig: {
+        mode: 'cookie',
+        header: 'Authorization',
+        cookie: 'trv_auth',
+        headerPrefix: 'Token'
+      },
       RestAuthLoginConfig: {},
       RestAuthLogoutConfig: {},
-      RestAuthReadWriteConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '1mb', parsingTypes: {} },
       RestConfig: {

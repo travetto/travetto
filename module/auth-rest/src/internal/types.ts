@@ -1,1 +1,1 @@
-class PrincipalCodecTarget { }
+export class PrincipalCodecTarget { }
