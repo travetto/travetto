@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { AuthConfig, AuthContext } from '@travetto/auth';
-import { AuthReadWriteInterceptor, CommonPrincipalCodec, PrincipalCodec, RestAuthReadWriteConfig } from '@travetto/auth-rest';
+import { AuthReadWriteInterceptor } from '@travetto/auth-rest';
 import { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
 import { Controller, Get, Body, Post, Put, Request, FilterContext, RestInterceptor, RouteConfig } from '@travetto/rest';
@@ -11,20 +11,15 @@ import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
+import { RestAuthConfig } from '@travetto/auth-rest/src/config';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
 const KEY = 'trv_sid';
 
 @Injectable()
-class AuthorizationCodec extends CommonPrincipalCodec implements PrincipalCodec { }
-
-@Injectable()
 class AutoLogin implements RestInterceptor {
   dependsOn = [AuthReadWriteInterceptor];
-
-  @Inject()
-  cfg: RestAuthReadWriteConfig;
 
   @Inject()
   auth: AuthContext;
@@ -77,11 +72,15 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
   authCfg: AuthConfig;
 
   @Inject()
-  codec: AuthorizationCodec;
+  restAuthCfg: RestAuthConfig;
 
   config(opt: Partial<({ cookie: string } | { header: string }) & AuthConfig>): void {
     this.authCfg.maxAgeMs = ('maxAgeMs' in opt) ? opt.maxAgeMs! : this.authCfg.maxAgeMs;
-    this.codec.init({ mode: 'cookie' in opt ? 'cookie' : 'header', cookie: KEY, header: KEY });
+    Object.assign(this.restAuthCfg, {
+      mode: 'cookie' in opt ? 'cookie' : 'header',
+      cookie: KEY,
+      header: KEY
+    });
   }
 
   @Test()

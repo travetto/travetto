@@ -3,23 +3,19 @@ import assert from 'node:assert';
 import { Controller, Get, Post, Redirect } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
-import { Inject, Injectable, InjectableFactory } from '@travetto/di';
+import { Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext } from '@travetto/auth';
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
-import { CommonPrincipalCodec } from '../../src/codec';
-import { PrincipalCodec } from '../../src/types';
+import { RestAuthConfig } from '../../src/config';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
-@Injectable()
-class AuthorizationCodec extends CommonPrincipalCodec implements PrincipalCodec {
-  constructor() { super({ mode: 'header' }); }
-}
-
 class Config {
   @InjectableFactory(TestAuthSymbol)
-  static getAuthenticator(): Authenticator {
+  static getAuthenticator(cfg: RestAuthConfig): Authenticator {
+    cfg.mode = 'header';
+
     return {
       async authenticate(body: { username?: string, password?: string }) {
         if (body.username === 'super-user' && body.password === 'password') {

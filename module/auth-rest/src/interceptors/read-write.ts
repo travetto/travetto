@@ -1,24 +1,17 @@
 import { Class } from '@travetto/runtime';
 import {
-  RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn,
+  RestInterceptor, FilterContext, FilterReturn,
   FilterNext, SerializeInterceptor, AsyncContextInterceptor, ParamExtractor
 } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
-import { Config } from '@travetto/config';
 
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
 import { PrincipalCodec } from '../types';
-import { CommonPrincipalCodec } from '../codec';
+import { RestAuthConfig } from '../config';
 
-@Config('rest.auth.readWrite')
-export class RestAuthReadWriteConfig extends ManagedInterceptorConfig {
-  mode?: 'cookie' | 'header';
-  header?: string;
-  cookie?: string;
-  headerPrefix?: string;
-}
+const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
 
 /**
  * Authentication interceptor
@@ -35,7 +28,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   codec: PrincipalCodec;
 
   @Inject()
-  config: RestAuthReadWriteConfig;
+  config: RestAuthConfig;
 
   @Inject()
   authContext: AuthContext;
@@ -44,10 +37,10 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   authService: AuthService;
 
   postConstruct(): void {
-    this.codec ??= new CommonPrincipalCodec();
-    if (this.codec instanceof CommonPrincipalCodec) {
-      this.codec.init(this.config);
-    }
+    this.codec ??= {
+      decode: (ctx): Principal | undefined => this.config.readValue<Principal>(ctx.req),
+      encode: (ctx, value): void => this.config.writeValue(ctx.res, value, value?.expiresAt)
+    };
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
@@ -60,6 +53,11 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
 
     try {
       decoded = await this.codec.decode(ctx);
+      if (decoded) {
+        decoded.expiresAt = toDate(decoded.expiresAt);
+        decoded.issuedAt = toDate(decoded.issuedAt);
+      }
+
       lastExpiresAt = decoded?.expiresAt;
 
       checked = this.authService.enforceExpiry(decoded);
