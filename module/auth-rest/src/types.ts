@@ -1,4 +1,4 @@
-import { AuthToken, Principal } from '@travetto/auth';
+import { Principal } from '@travetto/auth';
 import { FilterContext } from '@travetto/rest';
 
 /**

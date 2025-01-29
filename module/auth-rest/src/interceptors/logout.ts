@@ -1,7 +1,7 @@
 import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, SerializeInterceptor, FilterNext } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AuthContext, AuthenticationError, AuthService } from '@travetto/auth';
+import { AuthContext, AuthenticationError } from '@travetto/auth';
 
 import { AuthReadWriteInterceptor } from './read-write';
 
