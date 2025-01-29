@@ -392,7 +392,7 @@ npx trv run:rest
       RestAsyncContextConfig: {},
       RestAuthLoginConfig: {},
       RestAuthLogoutConfig: {},
-      RestAuthReadWriteConfig: { mode: 'cookie' },
+      RestAuthReadWriteConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '1mb', parsingTypes: {} },
       RestConfig: {
