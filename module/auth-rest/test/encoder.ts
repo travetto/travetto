@@ -26,6 +26,9 @@ export class EncoderTest {
         res: asFull<Response>({
           setHeader(key: string, value: string) {
             headers[key] = value;
+          },
+          removeHeader(key: string) {
+            delete headers[key];
           }
         }),
         config: {}
@@ -51,6 +54,9 @@ export class EncoderTest {
       res: asFull<Response>({
         setHeader(key: string, value: string) {
           headers[key] = value;
+        },
+        removeHeader(key: string) {
+          delete headers[key];
         }
       }),
       config: {}

@@ -1,4 +1,4 @@
-import { Class } from '@travetto/runtime';
+import { AppError, Class, Runtime } from '@travetto/runtime';
 import {
   RestInterceptor, FilterContext, FilterReturn,
   FilterNext, SerializeInterceptor, AsyncContextInterceptor, ParamExtractor,
@@ -7,6 +7,7 @@ import {
 import { Injectable, Inject } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
+import { Secret } from '@travetto/schema';
 
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
@@ -20,6 +21,15 @@ export class RestAuthConfig {
   header: string = 'Authorization';
   cookie: string = 'trv_auth';
   headerPrefix: string = 'Token';
+  @Secret()
+  signingKey?: string;
+
+  postConstruct(): void {
+    if (!this.signingKey && Runtime.production) {
+      throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.signingKey');
+    }
+    this.signingKey ??= 'dummy';
+  }
 }
 
 /**

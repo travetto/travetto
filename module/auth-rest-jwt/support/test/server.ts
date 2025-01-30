@@ -5,12 +5,10 @@ import { Controller, Get, Post, Redirect } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthConfig, AuthContext, AuthenticationError, Authenticator } from '@travetto/auth';
-import { Login, Authenticated, Logout } from '@travetto/auth-rest';
+import { Login, Authenticated, Logout, RestAuthConfig } from '@travetto/auth-rest';
 import { JWTUtil } from '@travetto/jwt';
 
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
-
-import { RestJWTConfig } from '../../src/codec';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
@@ -149,7 +147,7 @@ export abstract class AuthRestJWTServerSuite extends BaseRestSuite {
 
   @Test()
   async testTokenRetrieval() {
-    const config = await DependencyRegistry.getInstance(RestJWTConfig);
+    const config = await DependencyRegistry.getInstance(RestAuthConfig);
 
     const { headers, status } = await this.request('post', '/test/auth/login', {
       throwOnError: false,
