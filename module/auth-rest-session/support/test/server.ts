@@ -74,10 +74,6 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
   config({ mode, ...cfg }: { mode: 'cookie' | 'header' } & Partial<AuthConfig>): string {
     Object.assign(this.authCfg, cfg);
     this.restAuthCfg.mode = mode;
-    // @ts-expect-error
-    this.restAuthCfg.id ??= 0;
-    // @ts-expect-error
-    this.restAuthCfg.id += 1;
     return this.restAuthCfg[mode].toLowerCase();
   }
 
