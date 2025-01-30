@@ -459,7 +459,7 @@ export class RestCorsConfig extends ManagedInterceptorConfig {
 ```
 
 ### CookiesInterceptor
-[CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L82) is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+[CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L50) is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
 **Code: Cookies Config**
 ```typescript
@@ -489,16 +489,6 @@ export class RestCookieConfig extends ManagedInterceptorConfig {
    * The domain of the cookie
    */
   domain?: string;
-
-  postConstruct(): void {
-    if (!this.keys || !this.keys.length) {
-      if (Runtime.production) {
-        throw new AppError('The default cookie secret is only valid for development use, please specify a config value at rest.cookie.keys');
-      } else {
-        this.keys = ['default-insecure'];
-      }
-    }
-  }
 }
 ```
 

@@ -508,7 +508,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 <h3 id="cookiesinterceptor">CookiesInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L82">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L50">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
   <figure class="code">
     <figcaption class="code">Cookies Config
@@ -541,16 +541,6 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
    * The domain of the cookie
    */</span>
   domain<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-
-  <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>keys <span class="token operator">||</span> <span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>keys<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">if</span> <span class="token punctuation">(</span>Runtime<span class="token punctuation">.</span>production<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">AppError</span><span class="token punctuation">(</span><span class="token string">'The default cookie secret is only valid for development use, please specify a config value at rest.cookie.keys'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-      <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
-        <span class="token keyword">this</span><span class="token punctuation">.</span>keys <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'default-insecure'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-      <span class="token punctuation">{{'}'}}</span>
-    <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
