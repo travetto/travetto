@@ -77,9 +77,13 @@ export class RestCommonUtil {
    * Read value from request
    */
   static readValue<T = unknown>(cfg: ValueConfig, req: Request): T | undefined {
-    const res = (cfg.mode === 'cookie' || !cfg.mode) ?
+    let res = (cfg.mode === 'cookie' || !cfg.mode) ?
       req.cookies.get(cfg.cookie) :
-      req.headerFirst(cfg.header, cfg.headerPrefix);
+      req.headerFirst(cfg.header);
+
+    if (res && cfg.mode === 'header' && cfg.headerPrefix) {
+      res = res.split(cfg.headerPrefix)[1].trim();
+    }
 
     return res ? Util.decodeSafeJSON<T>(res) : undefined;
   }
