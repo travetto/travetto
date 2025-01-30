@@ -336,6 +336,8 @@ To customize a REST server, you may need to construct an entry point using the <
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RootRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestApplication<span class="token punctuation">,</span> RestSslConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 
+<span class="token keyword">import</span> <span class="token string">'./config-override'</span><span class="token punctuation">;</span>
+
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> runTarget<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
 
@@ -389,7 +391,10 @@ Initialized <span class="token punctuation">{{'{'}}</span>
     profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
-    sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
+    sources: <span class="token punctuation">[</span>
+      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">10</span>, source: <span class="token string">'direct'</span> <span class="token punctuation">{{'}'}}</span>,
+      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
       RestAcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestAsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
@@ -503,7 +508,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 
 <h3 id="cookiesinterceptor">CookiesInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L72">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L79">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
   <figure class="code">
     <figcaption class="code">Cookies Config
@@ -527,7 +532,7 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
    * The signing keys
    */</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Secret</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  keys <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'default-insecure'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  keys<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Is the cookie only valid for https
    */</span>
@@ -536,6 +541,13 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
    * The domain of the cookie
    */</span>
   domain<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+
+  <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>keys<span class="token punctuation">.</span>length <span class="token operator">&amp;&amp;</span> Runtime<span class="token punctuation">.</span>production<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">AppError</span><span class="token punctuation">(</span><span class="token string">'The default cookie secret is only valid for development use, please specify a config value at rest.cookie.keys'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>keys<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token string">'default-insecure'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
