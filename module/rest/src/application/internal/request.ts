@@ -44,7 +44,6 @@ export class RequestCore implements Partial<Request> {
   /**
    * Get the inbound request header first value
    * @param key The header to get
-   * @param prefix The optional prefix to strip
    */
   headerFirst<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | undefined {
     return this.headerList(key)?.[0];
