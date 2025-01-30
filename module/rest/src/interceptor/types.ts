@@ -30,7 +30,7 @@ export interface RestInterceptor<C = Any> {
   /**
    * Config for interceptor
    */
-  config?: C;
+  config?: Readonly<C>;
 
   /**
    * This interceptor must run after these

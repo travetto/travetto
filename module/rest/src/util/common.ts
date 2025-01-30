@@ -4,7 +4,7 @@ import { Request, Response } from '../types';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
-type ValueConfig = { mode: 'header' | 'cookie', header: string, cookie: string, headerPrefix: string };
+type ValueConfig = { mode?: 'header' | 'cookie', header: string, cookie: string, headerPrefix: string };
 
 export class RestCommonUtil {
 
@@ -62,10 +62,10 @@ export class RestCommonUtil {
   static writeValue<T = unknown>(cfg: ValueConfig, res: Response, value: T | undefined, opts?: SetOption): void {
     const output = Util.encodeSafeJSON<T>(value);
 
-    if (cfg.mode === 'cookie') {
+    if (cfg.mode === 'cookie' || !cfg.mode) {
       res.cookies.set(cfg.cookie, output, {
         ...opts,
-        maxAge: (opts?.expires && output !== undefined) ? undefined : -1,
+        maxAge: (output !== undefined) ? undefined : -1,
       });
     }
     if (output && cfg.mode === 'header') {
@@ -77,10 +77,10 @@ export class RestCommonUtil {
    * Read value from request
    */
   static readValue<T = unknown>(cfg: ValueConfig, req: Request): T | undefined {
-    const res = (cfg.mode === 'cookie') ?
+    const res = (cfg.mode === 'cookie' || !cfg.mode) ?
       req.cookies.get(cfg.cookie) :
       req.headerFirst(cfg.header, cfg.headerPrefix);
 
-    return Util.decodeSafeJSON<T>(res)!;
+    return res ? Util.decodeSafeJSON<T>(res) : undefined;
   }
 }

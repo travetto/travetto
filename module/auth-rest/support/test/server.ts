@@ -7,7 +7,7 @@ import { Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext } from '@travetto/auth';
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
-import { RestAuthConfig } from '../../src/config';
+import { RestAuthConfig } from '../../src/interceptors/read-write';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 

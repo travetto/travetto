@@ -24,7 +24,7 @@ The [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/au
 import { AuthContext, Principal } from '@travetto/auth';
 import { PrincipalCodec, RestAuthConfig } from '@travetto/auth-rest';
 import { Inject, Injectable } from '@travetto/di';
-import { FilterContext } from '@travetto/rest';
+import { FilterContext, RestCommonUtil } from '@travetto/rest';
 
 import { RestJWTConfig } from './config';
 
@@ -44,8 +44,8 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   authContext: AuthContext;
 
   async decode(ctx: FilterContext): Promise<Principal | undefined> {
-    const token = this.restConfig.readValue<string>(ctx.req);
-    if (token) {
+    const token = RestCommonUtil.readValue(this.restConfig, ctx.req);
+    if (token && typeof token === 'string') {
       const out = await this.config.signer.verify(token);
       if (out) {
         this.authContext.authToken = { type: 'jwt', value: token };
@@ -56,7 +56,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   async encode(ctx: FilterContext, data: Principal | undefined): Promise<void> {
     const token = data ? await this.config.signer.create(data) : undefined;
-    this.restConfig.writeValue<string>(ctx.res, token);
+    RestCommonUtil.writeValue(this.restConfig, ctx.res, token);
   }
 }
 ```

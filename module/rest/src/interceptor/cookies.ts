@@ -3,7 +3,7 @@ import cookies from 'cookies';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
-import { castTo } from '@travetto/runtime';
+import { AppError, castTo, Runtime } from '@travetto/runtime';
 
 import { FilterContext, Request, Response } from '../types';
 import { RestConfig } from '../application/config';
@@ -32,7 +32,7 @@ export class RestCookieConfig extends ManagedInterceptorConfig {
    * The signing keys
    */
   @Secret()
-  keys = ['default-insecure'];
+  keys: string[] = [];
   /**
    * Is the cookie only valid for https
    */
@@ -41,6 +41,13 @@ export class RestCookieConfig extends ManagedInterceptorConfig {
    * The domain of the cookie
    */
   domain?: string;
+
+  postConstruct(): void {
+    if (!this.keys.length && Runtime.production) {
+      throw new AppError('The default cookie secret is only valid for development use, please specify a config value at rest.cookie.keys');
+    }
+    this.keys.push('default-insecure');
+  }
 }
 
 class CustomCookies extends cookies {

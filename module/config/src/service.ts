@@ -117,10 +117,10 @@ export class ConfigurationService {
     if (!SchemaRegistry.has(cls)) {
       throw new AppError(`${classId} is not a valid schema class, config is not supported`);
     }
-    const out = BindUtil.bindSchemaToObject(cls, item, this.#get(namespace));
+    BindUtil.bindSchemaToObject(cls, item, this.#get(namespace));
     if (validate) {
       try {
-        await SchemaValidator.validate(cls, out);
+        await SchemaValidator.validate(cls, item);
       } catch (err) {
         if (err instanceof ValidationResultError) {
           const ogMessage = err.message;
@@ -132,7 +132,7 @@ export class ConfigurationService {
         throw err;
       }
     }
-    return out;
+    return item;
   }
 
   /**

@@ -14,7 +14,6 @@ import { PrincipalCodec } from '../types';
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
 
-
 @Config('rest.auth')
 export class RestAuthConfig {
   mode: 'cookie' | 'header' = 'cookie';
@@ -47,13 +46,10 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   authService: AuthService;
 
   postConstruct(): void {
-    if (this.codec) {
-      const codec: PrincipalCodec = {
-        decode: ctx => RestCommonUtil.readValue(this.config, ctx.req),
-        encode: (ctx, value) => RestCommonUtil.writeValue(this.config, ctx.res, value, { expires: value?.expiresAt })
-      };
-      this.codec = codec;
-    }
+    this.codec ??= {
+      decode: (ctx): Principal | undefined => RestCommonUtil.readValue(this.config, ctx.req),
+      encode: (ctx, value): void => RestCommonUtil.writeValue(this.config, ctx.res, value, { expires: value?.expiresAt })
+    };
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
@@ -66,12 +62,11 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
 
     try {
       decoded = await this.codec.decode(ctx);
+
       if (decoded) {
-        decoded.expiresAt = toDate(decoded.expiresAt);
+        lastExpiresAt = decoded.expiresAt = toDate(decoded.expiresAt);
         decoded.issuedAt = toDate(decoded.issuedAt);
       }
-
-      lastExpiresAt = decoded?.expiresAt;
 
       checked = this.authService.enforceExpiry(decoded);
       this.authContext.principal = checked;
