@@ -15,7 +15,7 @@ type AuthContextShape = {
 @Injectable()
 export class AuthContext {
 
-  #auth = new AsyncContextValue<AuthContextShape>(this);
+  #value = new AsyncContextValue<AuthContextShape>(this);
 
   @Inject()
   context: AsyncContext;
@@ -25,49 +25,49 @@ export class AuthContext {
    * @private
    */
   init(): void {
-    this.#auth.set({});
+    this.#value.set({});
   }
 
   /**
    * Get the principal, if set
    */
   get principal(): Principal | undefined {
-    return this.#auth.get()?.principal;
+    return this.#value.get()?.principal;
   }
 
   /**
    * Set principal
    */
   set principal(p: Principal | undefined) {
-    this.#auth.get()!.principal = p;
+    this.#value.get()!.principal = p;
   }
 
   /**
    * Get the authentication token, if it exists
    */
   get authToken(): AuthToken | undefined {
-    return this.#auth.get()?.authToken;
+    return this.#value.get()?.authToken;
   }
 
   /**
    * Set/overwrite the user's authentication token
    */
   set authToken(token: AuthToken | undefined) {
-    this.#auth.get()!.authToken = token;
+    this.#value.get()!.authToken = token;
   }
 
   /**
    * Get the authenticator state, if it exists
    */
   get authenticatorState(): AuthenticatorState | undefined {
-    return this.#auth.get()?.authenticatorState;
+    return this.#value.get()?.authenticatorState;
   }
 
   /**
    * Set/overwrite the authenticator state
    */
   set authenticatorState(state: AuthenticatorState | undefined) {
-    this.#auth.get()!.authenticatorState = state;
+    this.#value.get()!.authenticatorState = state;
   }
 
   /**
@@ -75,6 +75,6 @@ export class AuthContext {
    * @private
    */
   async clear(): Promise<void> {
-    this.#auth.set(undefined);
+    this.#value.set(undefined);
   }
 }

@@ -81,8 +81,7 @@ export class AuthService {
   /**
    * Manage expiry state, renewing if allowed
    */
-  manageExpiry(): void {
-    const p = this.authContext.principal;
+  manageExpiry(p?: Principal): void {
     if (!p) {
       return;
     }

@@ -19,7 +19,7 @@ export class SessionService {
   context: AsyncContext;
 
   @Inject()
-  auth: AuthContext;
+  authContext: AuthContext;
 
   @Inject()
   authService: AuthService;
@@ -87,9 +87,9 @@ export class SessionService {
     }
 
     // Ensure latest expiry information before persisting
-    await this.authService.manageExpiry();
+    await this.authService.manageExpiry(this.authContext.principal);
 
-    const p = this.auth.principal;
+    const p = this.authContext.principal;
 
     // If not destroying, write to response, and store
     if (p && session.action !== 'destroy') {
@@ -113,7 +113,7 @@ export class SessionService {
    * Get or recreate session
    */
   getOrCreate(): Session {
-    const principal = this.auth.principal;
+    const principal = this.authContext.principal;
     if (!principal) {
       throw new AuthenticationError('Unable to establish session without first authenticating');
     }
@@ -142,7 +142,7 @@ export class SessionService {
    */
   async load(): Promise<Session | undefined> {
     if (!this.#session.get()) {
-      const principal = this.auth.principal;
+      const principal = this.authContext.principal;
       if (principal?.sessionId) {
         this.#session.set(await this.#load(principal.sessionId));
       }
