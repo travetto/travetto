@@ -32,7 +32,7 @@ export class RestCookieConfig extends ManagedInterceptorConfig {
    * The signing keys
    */
   @Secret()
-  keys: string[] = [];
+  keys?: string[];
   /**
    * Is the cookie only valid for https
    */
@@ -43,10 +43,13 @@ export class RestCookieConfig extends ManagedInterceptorConfig {
   domain?: string;
 
   postConstruct(): void {
-    if (!this.keys.length && Runtime.production) {
-      throw new AppError('The default cookie secret is only valid for development use, please specify a config value at rest.cookie.keys');
+    if (!this.keys || !this.keys.length) {
+      if (Runtime.production) {
+        throw new AppError('The default cookie secret is only valid for development use, please specify a config value at rest.cookie.keys');
+      } else {
+        this.keys = ['default-insecure'];
+      }
     }
-    this.keys.push('default-insecure');
   }
 }
 
