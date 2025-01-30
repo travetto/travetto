@@ -129,7 +129,7 @@ export class AuthService {
   /**
    * Manage expiry state, renewing if allowed
    */
-  manageExpiry(): void;
+  manageExpiry(p?: Principal): void;
   /**
    * Enforce expiry, invalidating the principal if expired
    */
