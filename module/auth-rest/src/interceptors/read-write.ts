@@ -5,7 +5,7 @@ import { AuthContext, AuthService, Principal } from '@travetto/auth';
 
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
-import { COMMON_PRINCIPAL_CODEC_SYMBOL, PrincipalCodec } from '../types';
+import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types';
 import { RestAuthConfig } from '../config';
 import { PrincipalCodecTarget } from '../internal/types';
 
@@ -35,7 +35,7 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   authService: AuthService;
 
   async postConstruct(): Promise<void> {
-    this.codec ??= await DependencyRegistry.getInstance<PrincipalCodec>(PrincipalCodecTarget, COMMON_PRINCIPAL_CODEC_SYMBOL);
+    this.codec ??= await DependencyRegistry.getInstance<PrincipalCodec>(PrincipalCodecTarget, CommonPrincipalCodecSymbol);
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {

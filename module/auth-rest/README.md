@@ -161,13 +161,13 @@ import { Injectable, Inject } from '@travetto/di';
 import { JWTSigner } from '@travetto/jwt';
 import { FilterContext, RestCommonUtil } from '@travetto/rest';
 
-import { COMMON_PRINCIPAL_CODEC_SYMBOL, PrincipalCodec } from './types';
+import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types';
 import { RestAuthConfig } from './config';
 
 /**
  * Principal codec via JWT
  */
-@Injectable(COMMON_PRINCIPAL_CODEC_SYMBOL)
+@Injectable(CommonPrincipalCodecSymbol)
 export class JWTPrincipalCodec implements PrincipalCodec {
 
   @Inject()

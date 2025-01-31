@@ -182,13 +182,13 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> JWTSigner <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/jwt'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FilterContext<span class="token punctuation">,</span> RestCommonUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/rest'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token constant">COMMON_PRINCIPAL_CODEC_SYMBOL</span><span class="token punctuation">,</span> PrincipalCodec <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./types'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CommonPrincipalCodecSymbol<span class="token punctuation">,</span> PrincipalCodec <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./types'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestAuthConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./config'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
  * Principal codec via JWT
  */</span>
-<span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token constant">COMMON_PRINCIPAL_CODEC_SYMBOL</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span>CommonPrincipalCodecSymbol<span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">JWTPrincipalCodec</span> <span class="token keyword">implements</span> <span class="token class-name">PrincipalCodec</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>

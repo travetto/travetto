@@ -1,7 +1,7 @@
 import { Principal } from '@travetto/auth';
 import { FilterContext } from '@travetto/rest';
 
-export const COMMON_PRINCIPAL_CODEC_SYMBOL = Symbol.for('@travetto/auth-rest:common-codec');
+export const CommonPrincipalCodecSymbol = Symbol.for('@travetto/auth-rest:common-codec');
 
 /**
  * Rest codec for reading/writing principal
