@@ -14,11 +14,11 @@ const toDate = (v: string | Date | undefined): Date | undefined => (typeof v ===
 /**
  * Authentication interceptor
  *
- * - Supports the ability to encode context via request/response.
+ * - Supports the ability to encode context via response and decode via the request.
  * - Connects the principal to the request
  */
 @Injectable()
-export class AuthReadWriteInterceptor implements RestInterceptor {
+export class AuthCodecInterceptor implements RestInterceptor {
 
   dependsOn: Class<RestInterceptor>[] = [SerializeInterceptor, AsyncContextInterceptor];
 

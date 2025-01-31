@@ -4,7 +4,7 @@ import { RestInterceptor, FilterContext, FilterNext, ManagedInterceptorConfig, P
 import { SessionService } from '@travetto/auth-session';
 import { SessionDataTarget } from '@travetto/auth-session/src/internal/types';
 import { Config } from '@travetto/config';
-import { AuthReadWriteInterceptor } from '@travetto/auth-rest';
+import { AuthCodecInterceptor } from '@travetto/auth-rest';
 
 @Config('rest.session')
 class RestSessionConfig implements ManagedInterceptorConfig { }
@@ -15,7 +15,7 @@ class RestSessionConfig implements ManagedInterceptorConfig { }
 @Injectable()
 export class AuthSessionInterceptor implements RestInterceptor {
 
-  dependsOn: Class<RestInterceptor>[] = [AuthReadWriteInterceptor];
+  dependsOn: Class<RestInterceptor>[] = [AuthCodecInterceptor];
   runsBefore: Class<RestInterceptor>[] = [];
 
   @Inject()
