@@ -157,3 +157,14 @@ export interface SignOptions {
    */
   encoding?: string;
 }
+
+/**
+ * Payload Metadata, in readable format
+ */
+export interface PayloadMeta {
+  expiresAt: Date;
+  issuedAt: Date;
+  issuer: string;
+  id: string;
+  sessionId?: string;
+}

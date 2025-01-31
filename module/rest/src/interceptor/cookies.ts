@@ -5,7 +5,7 @@ import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
 
-import { FilterContext, Request, Response } from '../types';
+import { FilterContext } from '../types';
 import { RestConfig } from '../application/config';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
@@ -32,7 +32,7 @@ export class RestCookieConfig extends ManagedInterceptorConfig {
    * The signing keys
    */
   @Secret()
-  keys = ['default-insecure'];
+  keys?: string[];
   /**
    * Is the cookie only valid for https
    */
@@ -41,28 +41,6 @@ export class RestCookieConfig extends ManagedInterceptorConfig {
    * The domain of the cookie
    */
   domain?: string;
-}
-
-class CustomCookies extends cookies {
-  #opts: RestCookieConfig;
-
-  constructor(req: Request, res: Response, opts: RestCookieConfig) {
-    super(castTo(req), castTo(res), opts);
-    this.#opts = opts;
-  }
-
-  // Patch all cookies to default to the cookie values
-  set(key: string, value?: string, opts: cookies.SetOption = {}): this {
-    return super.set(key, value, { ...this.#opts, ...opts });
-  }
-
-  get(key: string, opts: Partial<cookies.GetOption> & { secure?: boolean } = {}): string | undefined {
-    if (key.endsWith('.sig')) {
-      opts.secure = false;
-      opts.signed = false;
-    }
-    return super.get(key, { ...this.#opts, ...opts });
-  }
 }
 
 /**
@@ -86,7 +64,8 @@ export class CookiesInterceptor implements RestInterceptor<RestCookieConfig> {
   }
 
   intercept({ req, res, config }: FilterContext<RestCookieConfig>): void {
-    // Enforce this is set
-    req.cookies = res.cookies = new CustomCookies(req, res, config);
+    const store = new cookies(castTo(req), castTo(res), config);
+    req.cookies = { get: (key, opts?): string | undefined => store.get(key, { ...this.config, ...opts }) };
+    res.cookies = { set: (key, value, opts?): void => { store.set(key, value, { ...this.config, ...opts }); } };
   }
 }

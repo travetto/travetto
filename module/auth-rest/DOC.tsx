@@ -2,11 +2,12 @@
 import { d, c } from '@travetto/doc';
 import { InjectableFactory } from '@travetto/di';
 import { Context } from '@travetto/rest';
-import { Login, Unauthenticated, Authenticated, Logout } from '@travetto/auth-rest';
+import { Login, Unauthenticated, Authenticated, Logout, RestAuthConfig, JWTPrincipalCodec, AuthContextInterceptor } from '@travetto/auth-rest';
 import { RuntimeIndex } from '@travetto/runtime';
 import { AuthContext } from '@travetto/auth';
 
 const Principal = d.codeLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
+const PrincipalCodec = d.codeLink('PrincipalCodec', '@travetto/auth-rest/src/types.ts', /interface PrincipalCodec/);
 const Request = d.codeLink('Request', `${RuntimeIndex.getModule('@travetto/rest')?.sourcePath}/src/types.ts`, /interface Request/);
 const Response = d.codeLink('Response', `${RuntimeIndex.getModule('@travetto/rest')?.sourcePath}/src/types.ts`, /interface Response/);
 const Authenticator = d.codeLink('Authenticator', '@travetto/auth/src/types/authenticator.ts', /interface Authenticator\b/);
@@ -19,12 +20,13 @@ export const text = <>
   The integration with the {d.mod('Rest')} module touches multiple levels. Primarily:
 
   <ul>
-    <li>Patterns for auth framework integrations</li>
+    <li>Authenticating</li>
+    <li>Maintaining Auth Context</li>
     <li>Route declaration</li>
     <li>Multi-Step Login</li>
   </ul>
 
-  <c.Section title='Patterns for Integration'>
+  <c.Section title='Authenticating'>
     Every external framework integration relies upon the {Authenticator} contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
     <c.Code title='Structure for the Identity Source' src='@travetto/auth/src/types/authenticator.ts' />
@@ -45,6 +47,25 @@ export const text = <>
     <c.Code title='Potential Facebook provider' src='doc/facebook.ts' />
 
     The symbol {d.input('FB_AUTH')} is what will be used to reference providers at runtime.  This was chosen, over {d.input('class')} references due to the fact that most providers will not be defined via a new class, but via an {InjectableFactory} method.
+  </c.Section>
+
+  <c.Section title='Maintaining Auth Context'>
+    The {AuthContextInterceptor} acts as the bridge between the {d.mod('Auth')} and {d.mod('Rest')} modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the {AuthContext} and the {Request}/{Response} object. The integration, leveraging {RestAuthConfig}'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the {d.library('JWT')} appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  <br />
+
+    <strong>Note:</strong> When using cookies, the automatic renewal, and update, and seamless receipt and transmission all the {Principal} to act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. <br />
+
+    The {PrincipalCodec} contract is the primary interface for reading and writing {Principal} data out of the {Request}/{Response}. This contract is flexible by design, allowing for all sorts of usage. {JWTPrincipalCodec} is the default {PrincipalCodec}, leveraging {d.library('JWT')}s for encoding/decoding the principal information.
+
+    <c.Code title={JWTPrincipalCodec.name} src={JWTPrincipalCodec} />
+
+    As you can see, the encode token just creates a {d.library('JWT')} based on the principal provided, and decoding verifies the token, and returns the principal. <br />
+
+    A trivial/sample custom {PrincipalCodec} can be seen here:
+
+    <c.Code title='Custom Principal Codec' src='doc/codec.ts' />
+
+    This implementation is not suitable for production, but shows the general pattern needed to integrate with any principal source.
+
   </c.Section>
 
   <c.Section title='Route Declaration'>

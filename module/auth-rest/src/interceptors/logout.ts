@@ -1,9 +1,9 @@
 import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, SerializeInterceptor, FilterNext } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AuthContext, AuthenticationError, AuthService } from '@travetto/auth';
+import { AuthContext, AuthenticationError } from '@travetto/auth';
 
-import { AuthReadWriteInterceptor } from './read-write';
+import { AuthContextInterceptor } from './context';
 
 @Config('rest.auth.logout')
 export class RestAuthLogoutConfig extends ManagedInterceptorConfig { }
@@ -22,7 +22,7 @@ export class AuthLogoutInterceptor implements RestInterceptor<RestAuthLogoutConf
   @Inject()
   authContext: AuthContext;
 
-  dependsOn = [SerializeInterceptor, AuthReadWriteInterceptor];
+  dependsOn = [SerializeInterceptor, AuthContextInterceptor];
 
   /**
    * Ensures this is an opt-in interceptor

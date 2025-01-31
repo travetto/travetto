@@ -12,7 +12,6 @@ import { Schema } from '@travetto/schema';
 
 import { Cache, EvictCache } from '../../src/decorator';
 import { CacheModelSymbol, CacheService } from '../../src/service';
-import { CacheUtil } from '../../src/util';
 
 @Schema()
 class User { }
@@ -170,8 +169,6 @@ export abstract class CacheServiceSuite {
     const val5 = await service.complexInput({ a: /abc/ }, 20);
     assert(val3 !== val4);
     assert.deepStrictEqual(val3, val5);
-
-    assert(CacheUtil.toSafeJSON(/abc/, true) !== CacheUtil.toSafeJSON(/cde/, true));
   }
 
   @Test()

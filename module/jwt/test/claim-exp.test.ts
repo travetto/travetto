@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, ShouldThrow } from '@travetto/test';
+import { Util } from '@travetto/runtime';
 
 import { JWTUtil } from '../src/util';
 import { JWTError } from '../src/error';
@@ -27,7 +28,7 @@ export class ExpiresSuite {
       {},
       { foo: 'bar' },
     ]) {
-      const encodedPayload = Buffer.from(JSON.stringify({ exp })).toString('base64');
+      const encodedPayload = Util.encodeSafeJSON({ exp });
       const token = `${noneAlgorithmHeader}.${encodedPayload}.`;
       await assert.rejects(() => JWTUtil.verify(token, { alg: 'none' }), JWTError);
     }

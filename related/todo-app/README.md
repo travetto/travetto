@@ -356,6 +356,7 @@ npx trv run:rest
         skipRoutes: false,
         exposeAllSchemas: false
       },
+      AuthConfig: { maxAge: '1h', rollingRenew: true },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       ConsoleLogAppenderConfig: { logToLevel: true },
       FileLogAppenderConfig: {
@@ -389,7 +390,12 @@ npx trv run:rest
       },
       RestAcceptsConfig: { types: {} },
       RestAsyncContextConfig: {},
-      RestAuthConfig: {},
+      RestAuthConfig: {
+        mode: 'cookie',
+        header: 'Authorization',
+        cookie: 'trv_auth',
+        headerPrefix: 'Token'
+      },
       RestAuthLoginConfig: {},
       RestAuthLogoutConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
@@ -409,9 +415,8 @@ npx trv run:rest
       RestGetCacheConfig: {},
       RestLogRoutesConfig: {},
       RestRpcConfig: { clients: {} },
-      RestSessionConfig: { sign: true, transport: 'cookie' },
-      RestSslConfig: { active: false },
-      SessionConfig: { autoCommit: true, maxAge: 1800000, renew: true, rolling: false }
+      RestSessionConfig: {},
+      RestSslConfig: { active: false }
     }
   }
 }

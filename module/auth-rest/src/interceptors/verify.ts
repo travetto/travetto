@@ -5,7 +5,7 @@ import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 import { AuthenticationError, AuthContext } from '@travetto/auth';
 
-import { AuthReadWriteInterceptor } from './read-write';
+import { AuthContextInterceptor } from './context';
 
 function matchPermissionSet(rule: string[], perms: Set<string>): boolean {
   for (const el of rule) {
@@ -39,7 +39,7 @@ export class RestAuthVerifyConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConfig> {
 
-  dependsOn = [SerializeInterceptor, AuthReadWriteInterceptor];
+  dependsOn = [SerializeInterceptor, AuthContextInterceptor];
 
   @Inject()
   config: RestAuthVerifyConfig;
@@ -69,10 +69,8 @@ export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConf
       case 'authenticated': {
         if (!principal) {
           throw new AuthenticationError('User is unauthenticated');
-        } else {
-          if (!config.matcher(new Set(principal.permissions))) {
-            throw new AppError('Access denied', { category: 'permissions' });
-          }
+        } else if (!config.matcher(new Set(principal.permissions))) {
+          throw new AppError('Access denied', { category: 'permissions' });
         }
         break;
       }

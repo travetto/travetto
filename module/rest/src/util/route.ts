@@ -133,7 +133,7 @@ export class RouteUtil {
       if (inst.config) {
         let resolved =
           inst.resolveConfig?.(values) ??
-          Object.assign({}, inst.config, ...values);
+          (values.length ? Object.assign({}, inst.config, ...values) : inst.config);
 
         if (inst.finalizeConfig) {
           resolved = inst.finalizeConfig(resolved);

@@ -18,7 +18,7 @@ export type FilterReturn = void | unknown | Promise<void | unknown>;
 export type FilterNext = () => FilterReturn;
 
 export type RouteHandler = TypedFunction<Any, Any>;
-export type FilterContext<C = unknown> = { req: Request, res: Response, config: C };
+export type FilterContext<C = unknown> = { req: Request, res: Response, config: Readonly<C> };
 export type Filter<C = unknown> = (context: FilterContext<C>, next: FilterNext) => FilterReturn;
 export type RequestResponseHandler = (req: Request, res: Response) => FilterReturn;
 export type ServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };

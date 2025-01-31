@@ -39,7 +39,7 @@ In addition to the core functionality, the `rest` feature has some useful sub-fe
 [Logging](https://github.com/travetto/travetto/tree/main/module/log#readme "Logging framework that integrates at the console.log level.") support for better formatting, [debug](https://www.npmjs.com/package/debug) like support, and colorized output.  This is generally useful for server logs, especially during development.
 
 ## Authentication
-Authentication is also supported on the Restful endpoints by selecting [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") during setup.  This will support basic authentication running out of local memory, with user [REST Session](https://github.com/travetto/travetto/tree/main/module/rest-session#readme "Session provider for the travetto rest module.")s.
+Authentication is also supported on the Restful endpoints by selecting [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") during setup.  This will support basic authentication running out of local memory.
 
 ## Testing
 [Testing](https://github.com/travetto/travetto/tree/main/module/test#readme "Declarative test framework") can also be configured out of the box to provide simple test cases for the data model.

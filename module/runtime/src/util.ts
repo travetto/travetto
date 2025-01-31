@@ -133,4 +133,35 @@ export class Util {
       return () => true;
     }
   }
+
+  /**
+   * Encode JSON value as base64 encoded string
+   */
+  static encodeSafeJSON<T>(value: T | undefined): string | undefined {
+    if (value === undefined) {
+      return;
+    }
+    const res = JSON.stringify(value);
+    return Buffer.from(res, 'utf8').toString('base64');
+  }
+
+  /**
+   * Decode JSON value from base64 encoded string
+   */
+  static decodeSafeJSON<T>(input: string): T;
+  static decodeSafeJSON<T>(input?: string | undefined): T | undefined;
+  static decodeSafeJSON<T>(input?: string | undefined): T | undefined {
+    if (!input) {
+      return undefined;
+    }
+
+    let decoded = Buffer.from(input, 'base64').toString('utf8');
+
+    // Read from encoded if it happens
+    if (decoded.startsWith('%')) {
+      decoded = decodeURIComponent(decoded);
+    }
+
+    return JSON.parse(decoded, undefined);
+  }
 }

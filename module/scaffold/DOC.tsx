@@ -45,7 +45,7 @@ $ npx @travetto/scaffold@<version-or-tag>
   </c.Section>
 
   <c.Section title='Authentication'>
-    Authentication is also supported on the Restful endpoints by selecting {d.mod('AuthRest')} during setup.  This will support basic authentication running out of local memory, with user {d.mod('RestSession')}s.
+    Authentication is also supported on the Restful endpoints by selecting {d.mod('AuthRest')} during setup.  This will support basic authentication running out of local memory.
   </c.Section>
 
   <c.Section title='Testing'>

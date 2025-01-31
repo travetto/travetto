@@ -72,7 +72,7 @@ export class CompilerClient {
 
   /** Clean the server */
   clean(): Promise<boolean> {
-    return this.#fetch('/clean').then(v => v.ok, () => false);
+    return this.#fetch('/clean', { timeout: 300 }).then(v => v.ok, () => false);
   }
 
   /** Stop server and wait for shutdown */

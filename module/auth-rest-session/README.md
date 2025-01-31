@@ -13,44 +13,69 @@ npm install @travetto/auth-rest-session
 yarn add @travetto/auth-rest-session
 ```
 
-One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework")'s main responsibilities is being able to send and receive authentication/authorization information from the client.  This data can be encoded in many different forms, and this module provides the ability to encode into and decode from the user's [REST Session](https://github.com/travetto/travetto/tree/main/module/rest-session#readme "Session provider for the travetto rest module.") context. This module fulfills the contract required by [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") of being able to encode and decode a user principal by storing the user principal in the session. 
+One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework")'s main responsibilities is being able to send and receive authentication/authorization information from the client. 
 
-The [SessionPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/principal-encoder.ts#L12) is exposed as a tool for allowing for decoding/encoding principals into the session.
+This module's responsibility is, to expose [Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-session#readme "Session provider for the travetto auth module.")'s data, within the scope of the request/response flow.
 
-**Code: SessionPrincipalEncoder**
+**Code: Anatomy of the Session Interceptor**
 ```typescript
-import { Injectable, Inject } from '@travetto/di';
-import { FilterContext } from '@travetto/rest';
-import { Principal } from '@travetto/auth';
-import { PrincipalEncoder } from '@travetto/auth-rest';
-import { SessionService } from '@travetto/rest-session';
+class RestSessionConfig implements ManagedInterceptorConfig { }
 
 /**
- * Integration with the auth module, using the session as a backing
- * store for the auth principal.
+ * Loads session, and provides ability to create session as needed, persists when complete.
  */
 @Injectable()
-export class SessionPrincipalEncoder implements PrincipalEncoder {
-  #key = '_trv_auth_principal'; // Must be serializable, so it cannot be a symbol
+export class AuthSessionInterceptor implements RestInterceptor {
+
+  dependsOn: Class<RestInterceptor>[] = [AuthContextInterceptor];
+  runsBefore: Class<RestInterceptor>[] = [];
 
   @Inject()
   service: SessionService;
 
-  encode(_: FilterContext, p: Principal): void {
-    const session = this.service.get();
-    if (p) {
-      p.expiresAt = session.expiresAt; // Let principal live as long as the session
-      session.setValue(this.#key, p);
-    } else {
-      session.destroy(); // Kill session
-    }
-  }
+  @Inject()
+  config: RestSessionConfig;
 
-  async decode({ req }: FilterContext): Promise<Principal | undefined> {
-    const session = await this.service.get(); // Preload session if not already loaded
-    return session?.getValue<Principal>(this.#key);
+  async intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
+    try {
+      await this.service.load();
+      Object.defineProperty(ctx.req, 'session', { get: () => this.service.getOrCreate() });
+      return await next();
+    } finally {
+      await this.service.persist();
+    }
   }
 }
 ```
 
-As you can see, encode and decode just read and write from the session context.  The main feature here, is that if the authentication expires, the session should be destroyed.  Additionally, the user's expiry time is assumed to live as long as the session for simplicity's sake.
+Once operating within the [Session](https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L13) boundaries, the session state can be injected via params, or accessed via the [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L16).
+
+**Code: Sample Usage**
+```typescript
+@Authenticated()
+@Controller('/session')
+export class SessionRoutes {
+
+  @Inject()
+  service: SessionService;
+
+  @Put('/info')
+  async storeInfo(data?: SessionData) {
+    if (data) {
+      data.age = 20;
+      data.name = 'Roger'; // Setting data
+    }
+  }
+
+  @Get('/logout')
+  async logout() {
+    await this.service.destroy();
+  }
+
+  @Get('/info/age')
+  async getInfo() {
+    const { data } = this.service.getOrCreate();
+    return data?.age;
+  }
+}
+```

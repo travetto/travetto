@@ -1,7 +1,7 @@
 import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
-import { AppError, Runtime, TimeUtil } from '@travetto/runtime';
+import { AppError, Runtime, TimeUtil, Util } from '@travetto/runtime';
 import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 import { CacheError } from './error';
@@ -75,7 +75,7 @@ export class CacheService {
     }
 
     const res = await this.#modelService.get(CacheRecord, id);
-    return CacheUtil.fromSafeJSON(res.entry);
+    return Util.decodeSafeJSON(res.entry);
   }
 
   /**
@@ -84,7 +84,7 @@ export class CacheService {
    * @returns
    */
   async set(id: string, keySpace: string, entry: unknown, maxAge?: number): Promise<unknown> {
-    const entryText = CacheUtil.toSafeJSON(entry);
+    const entryText = Util.encodeSafeJSON(entry);
 
     const store = await this.#modelService.upsert(CacheRecord,
       CacheRecord.from({
@@ -96,7 +96,7 @@ export class CacheService {
       }),
     );
 
-    return CacheUtil.fromSafeJSON(store.entry);
+    return Util.decodeSafeJSON(store.entry);
   }
 
   /**

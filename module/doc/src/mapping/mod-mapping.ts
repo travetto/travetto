@@ -11,10 +11,6 @@ export const MOD_MAPPING = {
     name: '@travetto/auth-rest', folder: '@travetto/auth-rest', displayName: 'Rest Auth',
     description: 'Rest authentication integration support for the Travetto framework'
   },
-  AuthRestJwt: {
-    name: '@travetto/auth-rest-jwt', folder: '@travetto/auth-rest-jwt', displayName: 'Rest Auth JWT',
-    description: 'Rest authentication JWT integration support for the Travetto framework'
-  },
   AuthRestPassport: {
     name: '@travetto/auth-rest-passport', folder: '@travetto/auth-rest-passport', displayName: 'Rest Auth Passport',
     description: 'Rest authentication integration support for the Travetto framework'
@@ -22,6 +18,10 @@ export const MOD_MAPPING = {
   AuthRestSession: {
     name: '@travetto/auth-rest-session', folder: '@travetto/auth-rest-session', displayName: 'Rest Auth Session',
     description: 'Rest authentication session integration support for the Travetto framework'
+  },
+  AuthSession: {
+    name: '@travetto/auth-session', folder: '@travetto/auth-session', displayName: 'Auth Session',
+    description: 'Session provider for the travetto auth module.'
   },
   Cache: {
     name: '@travetto/cache', folder: '@travetto/cache', displayName: 'Caching',
@@ -199,9 +199,9 @@ export const MOD_MAPPING = {
     name: '@travetto/rest-koa-lambda', folder: '@travetto/rest-koa-lambda', displayName: 'Koa REST AWS Lambda Source',
     description: 'Koa provider for the travetto rest module.'
   },
-  RestSession: {
-    name: '@travetto/rest-session', folder: '@travetto/rest-session', displayName: 'REST Session',
-    description: 'Session provider for the travetto rest module.'
+  RestRpc: {
+    name: '@travetto/rest-rpc', folder: '@travetto/rest-rpc', displayName: 'RESTful RPC Support',
+    description: 'RESTful RPC support for a module'
   },
   RestUpload: {
     name: '@travetto/rest-upload', folder: '@travetto/rest-upload', displayName: 'Rest Upload Support',

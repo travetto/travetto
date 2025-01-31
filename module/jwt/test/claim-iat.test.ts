@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+import { Util } from '@travetto/runtime';
 
 import { JWTUtil } from '../src/util';
 
@@ -23,7 +24,7 @@ class IssueAtSuite {
       {},
       { foo: 'bar' },
     ]) {
-      const token = `${noneAlgorithmHeader}.${Buffer.from(JSON.stringify({ iat: val })).toString('base64')}.`;
+      const token = `${noneAlgorithmHeader}.${Util.encodeSafeJSON({ iat: val })}.`;
       await assert.rejects(async () => JWTUtil.verify(token), 'invalid');
     }
   }

@@ -1,5 +1,0 @@
-rest.auth.jwt:
-  maxAge: 2000
-  mode: cookie
-  signingKey: bob
-  rollingRenew: true

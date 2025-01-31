@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
-import { Runtime, RuntimeIndex } from '@travetto/runtime';
+import { AppError, Runtime, RuntimeIndex } from '@travetto/runtime';
 
 const ESLINT_PATTERN = /\s{0,10}\/\/ eslint.{0,300}$/g;
 const ENV_KEY = /Env.([^.]{1,100})[.]key/g;
@@ -43,6 +43,9 @@ export class DocFileUtil {
       }
     } else {
       file = Runtime.getSourceFile(src);
+      if (!existsSync(file)) {
+        throw new AppError(`Unknown file: ${typeof src === 'string' ? src : src.name} => ${file}`);
+      }
       content = readFileSync(file, 'utf8');
     }
 

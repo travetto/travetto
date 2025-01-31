@@ -1,5 +1,6 @@
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
+import { TimeUtil } from '@travetto/runtime';
 
 import { AuthenticatorTarget } from './internal/types';
 import { Principal } from './types/principal';
@@ -7,12 +8,16 @@ import { Authenticator } from './types/authenticator';
 import { Authorizer } from './types/authorizer';
 import { AuthenticationError } from './types/error';
 import { AuthContext } from './context';
+import { AuthConfig } from './config';
 
 @Injectable()
 export class AuthService {
 
   @Inject()
   authContext: AuthContext;
+
+  @Inject()
+  config: AuthConfig;
 
   #authenticators = new Map<symbol, Promise<Authenticator>>();
 
@@ -71,5 +76,39 @@ export class AuthService {
 
     // Take the last error and return
     throw new AuthenticationError('Unable to authenticate', { cause: lastError });
+  }
+
+  /**
+   * Manage expiry state, renewing if allowed
+   */
+  manageExpiry(p?: Principal): void {
+    if (!p) {
+      return;
+    }
+
+    if (this.config.maxAgeMs) {
+      p.expiresAt ??= TimeUtil.fromNow(this.config.maxAgeMs);
+    }
+
+    p.issuedAt ??= new Date();
+
+    if (p.expiresAt && this.config.maxAgeMs && this.config.rollingRenew) { // Session behavior
+      const end = p.expiresAt.getTime();
+      const midPoint = end - this.config.maxAgeMs / 2;
+      if (Date.now() > midPoint) { // If we are past the half way mark, renew the token
+        p.issuedAt = new Date();
+        p.expiresAt = TimeUtil.fromNow(this.config.maxAgeMs); // This will trigger a re-send
+      }
+    }
+  }
+
+  /**
+   * Enforce expiry, invalidating the principal if expired
+   */
+  enforceExpiry(p?: Principal): Principal | undefined {
+    if (p && p.expiresAt && p.expiresAt.getTime() < Date.now()) {
+      return undefined;
+    }
+    return p;
   }
 }

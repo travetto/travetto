@@ -302,6 +302,8 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { RestApplication, RestSslConfig } from '@travetto/rest';
 
+import './config-override';
+
 @CliCommand({ runTarget: true })
 export class SampleApp {
 
@@ -353,7 +355,10 @@ Initialized {
     profiles: []
   },
   config: {
-    sources: [ { priority: 999, source: 'memory://override' } ],
+    sources: [
+      { priority: 10, source: 'direct' },
+      { priority: 999, source: 'memory://override' }
+    ],
     active: {
       RestAcceptsConfig: { types: {} },
       RestAsyncContextConfig: {},
@@ -454,7 +459,7 @@ export class RestCorsConfig extends ManagedInterceptorConfig {
 ```
 
 ### CookiesInterceptor
-[CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L72) is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+[CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L50) is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
 **Code: Cookies Config**
 ```typescript
@@ -475,7 +480,7 @@ export class RestCookieConfig extends ManagedInterceptorConfig {
    * The signing keys
    */
   @Secret()
-  keys = ['default-insecure'];
+  keys?: string[];
   /**
    * Is the cookie only valid for https
    */
