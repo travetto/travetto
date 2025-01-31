@@ -12,13 +12,14 @@ import { PrincipalCodecTarget } from '../internal/types';
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
 
 /**
- * Authentication interceptor
+ * Auth Context interceptor
  *
  * - Supports the ability to encode context via response and decode via the request.
- * - Connects the principal to the request
+ * - Connects the principal to the AuthContext
+ * - Manages expiry checks/extensions
  */
 @Injectable()
-export class AuthCodecInterceptor implements RestInterceptor {
+export class AuthContextInterceptor implements RestInterceptor {
 
   dependsOn: Class<RestInterceptor>[] = [SerializeInterceptor, AsyncContextInterceptor];
 

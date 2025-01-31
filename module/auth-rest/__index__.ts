@@ -1,4 +1,4 @@
-export * from './src/interceptors/codec';
+export * from './src/interceptors/context';
 export * from './src/interceptors/login';
 export * from './src/interceptors/logout';
 export * from './src/interceptors/verify';

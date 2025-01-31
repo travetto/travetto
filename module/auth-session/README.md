@@ -37,7 +37,7 @@ class RestSessionConfig implements ManagedInterceptorConfig { }
 @Injectable()
 export class AuthSessionInterceptor implements RestInterceptor {
 
-  dependsOn: Class<RestInterceptor>[] = [AuthCodecInterceptor];
+  dependsOn: Class<RestInterceptor>[] = [AuthContextInterceptor];
   runsBefore: Class<RestInterceptor>[] = [];
 
   @Inject()

@@ -4,7 +4,7 @@ import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 import { AuthService } from '@travetto/auth';
 
-import { AuthCodecInterceptor } from './codec';
+import { AuthContextInterceptor } from './context';
 
 @Config('rest.auth.login')
 export class RestAuthLoginConfig extends ManagedInterceptorConfig {
@@ -27,7 +27,7 @@ export class AuthLoginInterceptor implements RestInterceptor<RestAuthLoginConfig
   @Inject()
   service: AuthService;
 
-  dependsOn = [SerializeInterceptor, AuthCodecInterceptor];
+  dependsOn = [SerializeInterceptor, AuthContextInterceptor];
 
   /**
    * Ensures this is an opt-in interceptor

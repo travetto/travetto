@@ -107,52 +107,9 @@ export class AppConfig {
 The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70) method.
 
 ## Principal Encoding/Decoding (Codec
-The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10) contract, defines the relationship between [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") for an authenticated state.  This works to define how a principal is received from the request, and how it is sent back via the response.  This contract is flexibly by design, allowing for all sorts of patterns.
+The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10) contract, defines the relationship between [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") for an authenticated state.  This works to define how a principal is received from the request, and how it is sent back via the response.  This contract is flexibly by design, allowing for all sorts of patterns.  
 
-## Route Declaration
-[@Login](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L13) integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
-
-[@Logout](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L45) integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.
-
-**Code: Using provider with routes**
-```typescript
-import { Controller, Get, Redirect, Request } from '@travetto/rest';
-import { Login, Authenticated, Logout } from '@travetto/auth-rest';
-
-import { FB_AUTH } from './facebook';
-
-@Controller('/auth')
-export class SampleAuth {
-
-  @Get('/simple')
-  @Login(FB_AUTH)
-  async simpleLogin() {
-    return new Redirect('/auth/self', 301);
-  }
-
-  @Get('/self')
-  @Authenticated()
-  async getSelf(req: Request) {
-    return req.auth;
-  }
-
-  @Get('/logout')
-  @Logout()
-  async logout() {
-    return new Redirect('/auth/self', 301);
-  }
-}
-```
-
-[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L24) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L35) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is accessible via [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) directly, without wiring in a request object, but is also accessible on the request object as [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31).auth.
-
-## Multi-Step Login
-When authenticating, with a multi-step process, it is useful to share information between steps.  The `authenticatorState` of [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16) field is intended to be a location in which that information is persisted. Currently only [passport](http://passportjs.org) support is included, when dealing with multi-step logins. This information can also be injected into a rest endpoint method, using the [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L7) type;
-
-## JWT Support
-By default, the module will automatically default to [JWT](https://jwt.io/)s for encoding/decoding the user's principal.  This can be overridden by declaring a [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10) The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. 
-
-The [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/codec.ts#L13) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+By default, the module will automatically default to [JWT](https://jwt.io/)s for encoding/decoding the user's principal.  The token can be encoded as a cookie or as a header depending on [RestAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/config.ts#L6)'s configuration.  Additionally, the encoding process allows for auto-renewing of the token (on by default).  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session.
 
 **Code: JWTPrincipalCodec**
 ```typescript
@@ -208,4 +165,74 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 }
 ```
 
-As you can see, the encode token just creates a [JWT](https://jwt.io/) based on the principal provided, and decoding verifies the token, and returns the principal.
+As you can see, the encode token just creates a [JWT](https://jwt.io/) based on the principal provided, and decoding verifies the token, and returns the principal. 
+
+A trivial/sample custom [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10) can be seen here:
+
+**Code: Custom Principal Codec**
+```typescript
+import { Principal } from '@travetto/auth';
+import { PrincipalCodec } from '@travetto/auth-rest';
+import { Injectable } from '@travetto/di';
+import { FilterContext } from '@travetto/rest';
+
+@Injectable()
+export class CustomCodec implements PrincipalCodec {
+  decode(ctx: FilterContext): Promise<Principal | undefined> | Principal | undefined {
+    const userId = ctx.req.headerFirst('USER_ID');
+    if (userId) {
+      let p: Principal | undefined;
+      // Lookup user from db, remote system, etc.,
+      return p;
+    }
+    return;
+  }
+  encode(ctx: FilterContext, data: Principal | undefined): Promise<void> | void {
+    if (data) {
+      ctx.res.setHeader('USER_ID', data.id);
+    }
+  }
+}
+```
+
+This implementation is not suitable for production, but shows the general pattern needed to integrate with any principal source.
+
+## Route Declaration
+[@Login](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L13) integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
+
+[@Logout](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L45) integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.
+
+**Code: Using provider with routes**
+```typescript
+import { Controller, Get, Redirect, Request } from '@travetto/rest';
+import { Login, Authenticated, Logout } from '@travetto/auth-rest';
+
+import { FB_AUTH } from './facebook';
+
+@Controller('/auth')
+export class SampleAuth {
+
+  @Get('/simple')
+  @Login(FB_AUTH)
+  async simpleLogin() {
+    return new Redirect('/auth/self', 301);
+  }
+
+  @Get('/self')
+  @Authenticated()
+  async getSelf(req: Request) {
+    return req.auth;
+  }
+
+  @Get('/logout')
+  @Logout()
+  async logout() {
+    return new Redirect('/auth/self', 301);
+  }
+}
+```
+
+[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L24) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L35) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is accessible via [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) directly, without wiring in a request object, but is also accessible on the request object as [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31).auth.
+
+## Multi-Step Login
+When authenticating, with a multi-step process, it is useful to share information between steps.  The `authenticatorState` of [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16) field is intended to be a location in which that information is persisted. Currently only [passport](http://passportjs.org) support is included, when dealing with multi-step logins. This information can also be injected into a rest endpoint method, using the [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L7) type;

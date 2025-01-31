@@ -3,7 +3,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
 
-import { AuthCodecInterceptor } from './codec';
+import { AuthContextInterceptor } from './context';
 
 @Config('rest.auth.logout')
 export class RestAuthLogoutConfig extends ManagedInterceptorConfig { }
@@ -22,7 +22,7 @@ export class AuthLogoutInterceptor implements RestInterceptor<RestAuthLogoutConf
   @Inject()
   authContext: AuthContext;
 
-  dependsOn = [SerializeInterceptor, AuthCodecInterceptor];
+  dependsOn = [SerializeInterceptor, AuthContextInterceptor];
 
   /**
    * Ensures this is an opt-in interceptor

@@ -6,14 +6,14 @@ import { Response } from '@travetto/rest';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { asFull } from '@travetto/runtime';
 
-import { AuthCodecInterceptor } from '../src/interceptors/codec';
+import { AuthContextInterceptor } from '../src/interceptors/context';
 
 @Suite()
 @InjectableSuite()
 export class EncoderTest {
 
   @Inject()
-  interceptor: AuthCodecInterceptor;
+  interceptor: AuthContextInterceptor;
 
   @Test()
   async testHeader() {

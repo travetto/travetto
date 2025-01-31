@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { AuthConfig, AuthContext } from '@travetto/auth';
-import { AuthCodecInterceptor, RestAuthConfig } from '@travetto/auth-rest';
+import { AuthContextInterceptor, RestAuthConfig } from '@travetto/auth-rest';
 import { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
 import { Controller, Get, Body, Post, Put, Request, FilterContext, RestInterceptor, RouteConfig } from '@travetto/rest';
@@ -16,7 +16,7 @@ type Aged = { age: number, payload?: Record<string, unknown> };
 
 @Injectable()
 class AutoLogin implements RestInterceptor {
-  dependsOn = [AuthCodecInterceptor];
+  dependsOn = [AuthContextInterceptor];
 
   @Inject()
   auth: AuthContext;

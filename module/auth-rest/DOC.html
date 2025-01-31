@@ -121,56 +121,8 @@ The symbol <code class="item input">FB_AUTH</code> is what will be used to refer
 
 <h2 id="principal-encoding-decoding-codec">Principal Encoding/Decoding (Codec</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10">PrincipalCodec</a> contract, defines the relationship between <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a> and <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> for an authenticated state.  This works to define how a principal is received from the request, and how it is sent back via the response.  This contract is flexibly by design, allowing for all sorts of patterns.
-
-<h2 id="route-declaration">Route Declaration</h2>
-
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L13">@Login</a> integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.<br><br>
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L45">@Logout</a> integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.
-
-  <figure class="code">
-    <figcaption class="code">Using provider with routes
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/doc/route.ts">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Redirect<span class="token punctuation">,</span> Request <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Login<span class="token punctuation">,</span> Authenticated<span class="token punctuation">,</span> Logout <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token constant">FB_AUTH</span> <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./facebook'</span><span class="token punctuation">;</span>
-
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/auth'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleAuth</span> <span class="token punctuation">{{'{'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Login</span></span><span class="token punctuation">(</span><span class="token constant">FB_AUTH</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">simpleLogin</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Redirect</span><span class="token punctuation">(</span><span class="token string">'/auth/self'</span><span class="token punctuation">,</span> <span class="token number">301</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/self'</span><span class="token punctuation">)</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Authenticated</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getSelf</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> req<span class="token punctuation">.</span>auth<span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/logout'</span><span class="token punctuation">)</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Logout</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">logout</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Redirect</span><span class="token punctuation">(</span><span class="token string">'/auth/self'</span><span class="token punctuation">,</span> <span class="token number">301</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
-  </figure>
-
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L24">@Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L35">@Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal</a> is accessible via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38">@Context</a> directly, without wiring in a request object, but is also accessible on the request object as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31">Request</a>.auth.
-
-<h2 id="multi-step-login">Multi-Step Login</h2>
-
-When authenticating, with a multi-step process, it is useful to share information between steps.  The <code class="item field">authenticatorState</code> of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16">AuthContext</a> field is intended to be a location in which that information is persisted. Currently only <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> support is included, when dealing with multi-step logins. This information can also be injected into a rest endpoint method, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L7">Authenticator</a> type;
-
-<h2 id="jwt-support">JWT Support</h2>
-
-By default, the module will automatically default to <a target="_blank" class="external-link" href="https://jwt.io/">JWT</a> s for encoding/decoding the user's principal.  This can be overridden by declaring a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10">PrincipalCodec</a> The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/codec.ts#L13">JWTPrincipalCodec</a> is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10">PrincipalCodec</a> contract, defines the relationship between <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a> and <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> for an authenticated state.  This works to define how a principal is received from the request, and how it is sent back via the response.  This contract is flexibly by design, allowing for all sorts of patterns.  <br><br>
+By default, the module will automatically default to <a target="_blank" class="external-link" href="https://jwt.io/">JWT</a> s for encoding/decoding the user's principal.  The token can be encoded as a cookie or as a header depending on <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/config.ts#L6">RestAuthConfig</a>'s configuration.  Additionally, the encoding process allows for auto-renewing of the token (on by default).  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session.
 
   <figure class="code">
     <figcaption class="code">JWTPrincipalCodec
@@ -229,4 +181,80 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-As you can see, the encode token just creates a <a target="_blank" class="external-link" href="https://jwt.io/">JWT</a> based on the principal provided, and decoding verifies the token, and returns the principal.
+As you can see, the encode token just creates a <a target="_blank" class="external-link" href="https://jwt.io/">JWT</a> based on the principal provided, and decoding verifies the token, and returns the principal. <br><br>
+A trivial/sample custom <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10">PrincipalCodec</a> can be seen here:
+
+  <figure class="code">
+    <figcaption class="code">Custom Principal Codec
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/doc/codec.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Principal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PrincipalCodec <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FilterContext <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomCodec</span> <span class="token keyword">implements</span> <span class="token class-name">PrincipalCodec</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">decode</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> FilterContext<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token operator">|</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> userId <span class="token operator">=</span> ctx<span class="token punctuation">.</span>req<span class="token punctuation">.</span><span class="token function">headerFirst</span><span class="token punctuation">(</span><span class="token string">'USER_ID'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>userId<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">let</span> p<span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+      <span class="token comment">// Lookup user from db, remote system, etc.,</span>
+      <span class="token keyword">return</span> p<span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">return</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+  <span class="token function">encode</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> FilterContext<span class="token punctuation">,</span> data<span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token operator">|</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      ctx<span class="token punctuation">.</span>res<span class="token punctuation">.</span><span class="token function">setHeader</span><span class="token punctuation">(</span><span class="token string">'USER_ID'</span><span class="token punctuation">,</span> data<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+This implementation is not suitable for production, but shows the general pattern needed to integrate with any principal source.
+
+<h2 id="route-declaration">Route Declaration</h2>
+
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L13">@Login</a> integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.<br><br>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L45">@Logout</a> integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.
+
+  <figure class="code">
+    <figcaption class="code">Using provider with routes
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/doc/route.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Redirect<span class="token punctuation">,</span> Request <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Login<span class="token punctuation">,</span> Authenticated<span class="token punctuation">,</span> Logout <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token constant">FB_AUTH</span> <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./facebook'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/auth'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleAuth</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Login</span></span><span class="token punctuation">(</span><span class="token constant">FB_AUTH</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">simpleLogin</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Redirect</span><span class="token punctuation">(</span><span class="token string">'/auth/self'</span><span class="token punctuation">,</span> <span class="token number">301</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/self'</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Authenticated</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">getSelf</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> req<span class="token punctuation">.</span>auth<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/logout'</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Logout</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">async</span> <span class="token function">logout</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Redirect</span><span class="token punctuation">(</span><span class="token string">'/auth/self'</span><span class="token punctuation">,</span> <span class="token number">301</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L24">@Authenticated</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L35">@Unauthenticated</a> will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal</a> is accessible via <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38">@Context</a> directly, without wiring in a request object, but is also accessible on the request object as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31">Request</a>.auth.
+
+<h2 id="multi-step-login">Multi-Step Login</h2>
+
+When authenticating, with a multi-step process, it is useful to share information between steps.  The <code class="item field">authenticatorState</code> of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16">AuthContext</a> field is intended to be a location in which that information is persisted. Currently only <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> support is included, when dealing with multi-step logins. This information can also be injected into a rest endpoint method, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L7">Authenticator</a> type;

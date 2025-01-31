@@ -5,7 +5,7 @@ import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 import { AuthenticationError, AuthContext } from '@travetto/auth';
 
-import { AuthCodecInterceptor } from './codec';
+import { AuthContextInterceptor } from './context';
 
 function matchPermissionSet(rule: string[], perms: Set<string>): boolean {
   for (const el of rule) {
@@ -39,7 +39,7 @@ export class RestAuthVerifyConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConfig> {
 
-  dependsOn = [SerializeInterceptor, AuthCodecInterceptor];
+  dependsOn = [SerializeInterceptor, AuthContextInterceptor];
 
   @Inject()
   config: RestAuthVerifyConfig;
