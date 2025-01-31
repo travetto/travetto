@@ -11,10 +11,6 @@ export const MOD_MAPPING = {
     name: '@travetto/auth-rest', folder: '@travetto/auth-rest', displayName: 'Rest Auth',
     description: 'Rest authentication integration support for the Travetto framework'
   },
-  AuthRestJwt: {
-    name: '@travetto/auth-rest-jwt', folder: '@travetto/auth-rest-jwt', displayName: 'Rest Auth JWT',
-    description: 'Rest authentication JWT integration support for the Travetto framework'
-  },
   AuthRestPassport: {
     name: '@travetto/auth-rest-passport', folder: '@travetto/auth-rest-passport', displayName: 'Rest Auth Passport',
     description: 'Rest authentication integration support for the Travetto framework'

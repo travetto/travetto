@@ -178,10 +178,6 @@ export const PAGES = [
         loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-session/auth-session.component').then(m => m.AuthSessionComponent)
       },
       {
-        path: 'auth-rest-jwt', title: 'Rest JWT',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-rest-jwt/auth-rest-jwt.component').then(m => m.AuthRestJwtComponent)
-      },
-      {
         path: 'jwt', title: 'JWT',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/jwt/jwt.component').then(m => m.JwtComponent)
       }
