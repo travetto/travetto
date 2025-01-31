@@ -2,7 +2,7 @@
   "name": "@travetto-test/auth-rest",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/auth-rest": "^6.0.0-rc.0",
+    "@travetto/auth-rest": "^6.0.0-rc.1",
     "@travetto/rest-express": "^6.0.0-rc.0",
     "@travetto/rest-express-lambda": "^6.0.0-rc.0",
     "@travetto/rest-fastify": "^6.0.0-rc.0",
