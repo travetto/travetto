@@ -34,7 +34,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   async decode(ctx: FilterContext): Promise<Principal | undefined> {
     const token = RestCommonUtil.readValue(this.config, ctx.req, { signed: false });
-    if (token && typeof token === 'string') {
+    if (token) {
       const out = await this.signer.verify(token);
       if (out) {
         this.authContext.authToken = { type: 'jwt', value: token };

@@ -1,6 +1,5 @@
-import { GetOption, SetOption } from 'cookies';
-import { Util } from '@travetto/runtime';
-import { Request, Response } from '../types';
+import type { GetOption, SetOption } from 'cookies';
+import type { Request, Response } from '../types';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
@@ -59,9 +58,7 @@ export class RestCommonUtil {
   /**
    * Write value to response
    */
-  static writeValue<T = unknown>(cfg: ValueConfig, res: Response, value: T | undefined, opts?: SetOption): void {
-    const output = Util.encodeSafeJSON<T>(value);
-
+  static writeValue(cfg: ValueConfig, res: Response, output: string | undefined, opts?: SetOption): void {
     if (cfg.mode === 'cookie' || !cfg.mode) {
       res.cookies.set(cfg.cookie, output, {
         ...opts,
@@ -80,7 +77,7 @@ export class RestCommonUtil {
   /**
    * Read value from request
    */
-  static readValue<T = unknown>(cfg: ValueConfig, req: Request, opts?: GetOption): T | undefined {
+  static readValue(cfg: ValueConfig, req: Request, opts?: GetOption): string | undefined {
     let res = (cfg.mode === 'cookie' || !cfg.mode) ?
       req.cookies.get(cfg.cookie, opts) :
       req.headerFirst(cfg.header);
@@ -89,6 +86,6 @@ export class RestCommonUtil {
       res = res.split(cfg.headerPrefix)[1].trim();
     }
 
-    return res ? Util.decodeSafeJSON<T>(res) : undefined;
+    return res;
   }
 }

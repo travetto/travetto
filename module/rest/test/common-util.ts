@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
-import { castTo, Util } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 
 import { RestCommonUtil } from '../src/util/common';
 import { Response, Request } from '../src/types';
@@ -79,7 +79,7 @@ export class RestCommonUtilTest {
     const res = mockResponse();
     RestCommonUtil.writeValue(config('cookie', false), res, 'blue');
     assert(res.cookieData.orange);
-    assert(res.cookieData.orange === Util.encodeSafeJSON('blue'));
+    assert(res.cookieData.orange === 'blue');
 
     RestCommonUtil.writeValue(config('cookie'), res, undefined);
     assert('orange' in res.cookieData);
@@ -92,7 +92,7 @@ export class RestCommonUtilTest {
     const res = mockResponse();
     RestCommonUtil.writeValue(config('header', false), res, 'blue');
     assert(res.headerData.dandy);
-    assert(res.headerData.dandy === Util.encodeSafeJSON('blue'));
+    assert(res.headerData.dandy === 'blue');
 
     const res2 = mockResponse();
     RestCommonUtil.writeValue(config('header'), res2, undefined);
@@ -104,7 +104,7 @@ export class RestCommonUtilTest {
 
   @Test()
   async readValueHeaderTest() {
-    const req = mockRequest({ headerData: { dandy: Util.encodeSafeJSON('howdy') } });
+    const req = mockRequest({ headerData: { dandy: 'howdy' } });
     const value = await RestCommonUtil.readValue(config('header', false), req);
     assert(value);
     assert(value === 'howdy');
