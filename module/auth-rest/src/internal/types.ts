@@ -3,4 +3,5 @@ import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
 export class PrincipalCodecTarget { }
 
-ParamExtractor.registerContext(PrincipalTarget, (_, req) => req.user);
+// Register context providers
+ParamExtractor.registerContext(PrincipalTarget, (c, req) => req.user);
