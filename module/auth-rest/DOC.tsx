@@ -2,10 +2,9 @@
 import { d, c } from '@travetto/doc';
 import { InjectableFactory } from '@travetto/di';
 import { Context } from '@travetto/rest';
-import { Login, Unauthenticated, Authenticated, Logout, RestAuthConfig } from '@travetto/auth-rest';
+import { Login, Unauthenticated, Authenticated, Logout, RestAuthConfig, JWTPrincipalCodec, AuthContextInterceptor } from '@travetto/auth-rest';
 import { RuntimeIndex } from '@travetto/runtime';
 import { AuthContext } from '@travetto/auth';
-import { JWTPrincipalCodec } from './src/codec';
 
 const Principal = d.codeLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
 const PrincipalCodec = d.codeLink('PrincipalCodec', '@travetto/auth-rest/src/types.ts', /interface PrincipalCodec/);
@@ -21,13 +20,13 @@ export const text = <>
   The integration with the {d.mod('Rest')} module touches multiple levels. Primarily:
 
   <ul>
-    <li>Patterns for auth framework integrations</li>
-    <li>Principal encoding/decoding</li>
+    <li>Authenticating</li>
+    <li>Maintaining Auth Context</li>
     <li>Route declaration</li>
     <li>Multi-Step Login</li>
   </ul>
 
-  <c.Section title='Patterns for Integration'>
+  <c.Section title='Authenticating'>
     Every external framework integration relies upon the {Authenticator} contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
     <c.Code title='Structure for the Identity Source' src='@travetto/auth/src/types/authenticator.ts' />
@@ -50,10 +49,12 @@ export const text = <>
     The symbol {d.input('FB_AUTH')} is what will be used to reference providers at runtime.  This was chosen, over {d.input('class')} references due to the fact that most providers will not be defined via a new class, but via an {InjectableFactory} method.
   </c.Section>
 
-  <c.Section title='Principal Encoding/Decoding (Codec'>
-    The {PrincipalCodec} contract, defines the relationship between {d.mod('Auth')} and {d.mod('Rest')} for an authenticated state.  This works to define how a principal is received from the request, and how it is sent back via the response.  This contract is flexibly by design, allowing for all sorts of patterns.  <br />
+  <c.Section title='Maintaining Auth Context'>
+    The {AuthContextInterceptor} acts as the bridge between the {d.mod('Auth')} and {d.mod('Rest')} modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the {AuthContext} and the {Request}/{Response} object. The integration, leveraging {RestAuthConfig}'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the {d.library('JWT')} appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  <br />
 
-    By default, the module will automatically default to {d.library('JWT')}s for encoding/decoding the user's principal.  The token can be encoded as a cookie or as a header depending on {RestAuthConfig}'s configuration.  Additionally, the encoding process allows for auto-renewing of the token (on by default).  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session.
+    <strong>Note:</strong> When using cookies, the automatic renewal, and update, and seamless receipt and transmission all the {Principal} to act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. <br />
+
+    The {PrincipalCodec} contract is the primary interface for reading and writing {Principal} data out of the {Request}/{Response}. This contract is flexible by design, allowing for all sorts of usage. {JWTPrincipalCodec} is the default {PrincipalCodec}, leveraging {d.library('JWT')}s for encoding/decoding the principal information.
 
     <c.Code title={JWTPrincipalCodec.name} src={JWTPrincipalCodec} />
 

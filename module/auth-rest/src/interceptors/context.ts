@@ -1,9 +1,7 @@
 import { Class } from '@travetto/runtime';
-import { RestInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor, ParamExtractor } from '@travetto/rest';
+import { RestInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor } from '@travetto/rest';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
-
-import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types';
 import { RestAuthConfig } from '../config';
@@ -71,5 +69,3 @@ export class AuthContextInterceptor implements RestInterceptor {
     }
   }
 }
-
-ParamExtractor.registerContext(PrincipalTarget, (_, req) => req.user);
