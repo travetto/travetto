@@ -44,7 +44,7 @@ export class DocFileUtil {
     } else {
       file = Runtime.getSourceFile(src);
       if (!existsSync(file)) {
-        throw new AppError(`Unknown file: ${src} => ${file}`);
+        throw new AppError(`Unknown file: ${typeof src === 'string' ? src : src.name} => ${file}`);
       }
       content = readFileSync(file, 'utf8');
     }
