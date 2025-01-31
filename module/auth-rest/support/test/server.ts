@@ -5,7 +5,7 @@ import { Controller, Get, Post, Redirect } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { AuthenticationError, Authenticator, AuthContext } from '@travetto/auth';
+import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
 import { JWTUtil } from '@travetto/jwt';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite';
@@ -17,8 +17,9 @@ const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
 class Config {
   @InjectableFactory(TestAuthSymbol)
-  static getAuthenticator(cfg: RestAuthConfig): Authenticator {
-    cfg.mode = 'header';
+  static getAuthenticator(cfg: AuthConfig): Authenticator {
+    cfg.rollingRenew = true;
+    cfg.maxAgeMs = 2000;
 
     return {
       async authenticate(body: { username?: string, password?: string }) {
@@ -52,6 +53,13 @@ class TestAuthController {
   async getSelf() {
     return this.authContext.principal;
   }
+
+  @Get('/token')
+  @Authenticated()
+  async getToken() {
+    return this.authContext.authToken?.value;
+  }
+
 
   @Get('/logout')
   @Logout()
@@ -205,7 +213,7 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
 
   @Test()
   async testTokenRetrieval() {
-    this.config.mode = 'header';
+    this.config.mode = 'cookie';
 
     const { headers, status } = await this.request('post', '/test/auth/login', {
       throwOnError: false,
@@ -258,10 +266,11 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
     assert(used < 1000);
     await timers.setTimeout((2000 - used) / 2);
 
-    const { headers: selfHeadersRenew } = await this.request('get', '/test/auth/self', {
+    const { headers: selfHeadersRenew, status: lastStatus2 } = await this.request('get', '/test/auth/self', {
       throwOnError: false,
       headers: { cookie }
     });
+    assert(lastStatus2 === 200);
     assert(this.getCookie(selfHeadersRenew));
 
     const expiresRenew = this.getCookieExpires(selfHeadersRenew);

@@ -7,7 +7,7 @@ import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types';
 import { RestAuthConfig } from './config';
 
 /**
- * Principal codec via JWT
+ * JWT Principal codec
  */
 @Injectable(CommonPrincipalCodecSymbol)
 export class JWTPrincipalCodec implements PrincipalCodec {
