@@ -18,6 +18,7 @@
 This is a primary integration for the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a> module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate. <br><br>
 The integration with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module touches multiple levels. Primarily:
 <ul> <li>Patterns for auth framework integrations</li>
+<li>Principal encoding/decoding</li>
 <li>Route declaration</li>
 <li>Multi-Step Login</li>
 </ul>
@@ -118,6 +119,10 @@ The provider must be registered with a custom symbol to be used within the frame
 
 The symbol <code class="item input">FB_AUTH</code> is what will be used to reference providers at runtime.  This was chosen, over <code class="item input">class</code> references due to the fact that most providers will not be defined via a new class, but via an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70">@InjectableFactory</a> method.
 
+<h2 id="principal-encoding-decoding-codec">Principal Encoding/Decoding (Codec</h2>
+
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10">PrincipalCodec</a> contract, defines the relationship between <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a> and <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> for an authenticated state.  This works to define how a principal is received from the request, and how it is sent back via the response.  This contract is flexibly by design, allowing for all sorts of patterns.
+
 <h2 id="route-declaration">Route Declaration</h2>
 
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L13">@Login</a> integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.<br><br>
@@ -161,3 +166,67 @@ The symbol <code class="item input">FB_AUTH</code> is what will be used to refer
 <h2 id="multi-step-login">Multi-Step Login</h2>
 
 When authenticating, with a multi-step process, it is useful to share information between steps.  The <code class="item field">authenticatorState</code> of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16">AuthContext</a> field is intended to be a location in which that information is persisted. Currently only <a target="_blank" class="external-link" href="http://passportjs.org">passport</a> support is included, when dealing with multi-step logins. This information can also be injected into a rest endpoint method, using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L7">Authenticator</a> type;
+
+<h2 id="jwt-support">JWT Support</h2>
+
+By default, the module will automatically default to <a target="_blank" class="external-link" href="https://jwt.io/">JWT</a> s for encoding/decoding the user's principal.  This can be overridden by declaring a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10">PrincipalCodec</a> The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. <br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/codec.ts#L13">JWTPrincipalCodec</a> is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+
+  <figure class="code">
+    <figcaption class="code">JWTPrincipalCodec
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest/src/codec.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AuthContext<span class="token punctuation">,</span> Principal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> JWTSigner <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/jwt'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> FilterContext<span class="token punctuation">,</span> RestCommonUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token constant">COMMON_PRINCIPAL_CODEC_SYMBOL</span><span class="token punctuation">,</span> PrincipalCodec <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./types'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestAuthConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./config'</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Principal codec via JWT
+ */</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token constant">COMMON_PRINCIPAL_CODEC_SYMBOL</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">JWTPrincipalCodec</span> <span class="token keyword">implements</span> <span class="token class-name">PrincipalCodec</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  config<span class="token operator">:</span> RestAuthConfig<span class="token punctuation">;</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  authContext<span class="token operator">:</span> AuthContext<span class="token punctuation">;</span>
+
+  #signer<span class="token operator">:</span> JWTSigner<span class="token operator">&lt;</span>Principal<span class="token operator">></span><span class="token punctuation">;</span>
+
+  <span class="token keyword">get</span> <span class="token function">signer</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> JWTSigner<span class="token operator">&lt;</span>Principal<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#signer <span class="token operator">??=</span> <span class="token keyword">new</span> <span class="token class-name">JWTSigner</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>signingKey<span class="token operator">!</span><span class="token punctuation">,</span>
+      v <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+        expiresAt<span class="token operator">:</span> v<span class="token punctuation">.</span>expiresAt<span class="token operator">!</span><span class="token punctuation">,</span>
+        issuedAt<span class="token operator">:</span> v<span class="token punctuation">.</span>issuedAt<span class="token operator">!</span><span class="token punctuation">,</span>
+        issuer<span class="token operator">:</span> v<span class="token punctuation">.</span>issuer<span class="token operator">!</span><span class="token punctuation">,</span>
+        id<span class="token operator">:</span> v<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
+        sessionId<span class="token operator">:</span> v<span class="token punctuation">.</span>sessionId
+      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">async</span> <span class="token function">decode</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> FilterContext<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> token <span class="token operator">=</span> RestCommonUtil<span class="token punctuation">.</span><span class="token function">readValue</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">,</span> ctx<span class="token punctuation">.</span>req<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> signed<span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>token <span class="token operator">&amp;&amp;</span> <span class="token keyword">typeof</span> token <span class="token operator">===</span> <span class="token string">'string'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">const</span> out <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>signer<span class="token punctuation">.</span><span class="token function">verify</span><span class="token punctuation">(</span>token<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>out<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>authContext<span class="token punctuation">.</span>authToken <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> type<span class="token operator">:</span> <span class="token string">'jwt'</span><span class="token punctuation">,</span> value<span class="token operator">:</span> token <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span>
+      <span class="token keyword">return</span> out<span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">async</span> <span class="token function">encode</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> FilterContext<span class="token punctuation">,</span> data<span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> token <span class="token operator">=</span> data <span class="token operator">?</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>signer<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+    RestCommonUtil<span class="token punctuation">.</span><span class="token function">writeValue</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">,</span> ctx<span class="token punctuation">.</span>res<span class="token punctuation">,</span> token<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> expires<span class="token operator">:</span> data<span class="token operator">?.</span>expiresAt<span class="token punctuation">,</span> signed<span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+As you can see, the encode token just creates a <a target="_blank" class="external-link" href="https://jwt.io/">JWT</a> based on the principal provided, and decoding verifies the token, and returns the principal.

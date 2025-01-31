@@ -105,7 +105,6 @@ Options:
 $ trv repo:list
 
 global-test/auth-rest
-global-test/auth-rest-jwt
 global-test/auth-rest-session_rest
 global-test/model_auth-model
 global-test/model_auth-session
@@ -119,7 +118,6 @@ global-test/transformer-test
 module/auth
 module/auth-model
 module/auth-rest
-module/auth-rest-jwt
 module/auth-rest-passport
 module/auth-rest-session
 module/auth-session
@@ -204,7 +202,6 @@ The standard format includes prefixed output to help identify which module produ
 $ trv repo:exec -w 1 pwd
 
 global-test/auth-rest <workspace-root>/global-test/auth-rest
-         global-test/auth-rest-jwt <workspace-root>/global-test/auth-rest-jwt
 global-test/auth-rest-session_rest <workspace-root>/global-test/auth-rest-session_rest
       global-test/model_auth-model <workspace-root>/global-test/model_auth-model
     global-test/model_auth-session <workspace-root>/global-test/model_auth-session
@@ -218,7 +215,6 @@ global-test/auth-rest-session_rest <workspace-root>/global-test/auth-rest-sessio
                        module/auth <workspace-root>/module/auth
                  module/auth-model <workspace-root>/module/auth-model
                   module/auth-rest <workspace-root>/module/auth-rest
-              module/auth-rest-jwt <workspace-root>/module/auth-rest-jwt
          module/auth-rest-passport <workspace-root>/module/auth-rest-passport
           module/auth-rest-session <workspace-root>/module/auth-rest-session
                module/auth-session <workspace-root>/module/auth-session

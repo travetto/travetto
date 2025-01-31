@@ -17,6 +17,7 @@ This is a primary integration for the [Authentication](https://github.com/travet
 
 The integration with the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module touches multiple levels. Primarily:
    *  Patterns for auth framework integrations
+   *  Principal encoding/decoding
    *  Route declaration
    *  Multi-Step Login
 
@@ -105,6 +106,9 @@ export class AppConfig {
 
 The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70) method.
 
+## Principal Encoding/Decoding (Codec
+The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10) contract, defines the relationship between [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") for an authenticated state.  This works to define how a principal is received from the request, and how it is sent back via the response.  This contract is flexibly by design, allowing for all sorts of patterns.
+
 ## Route Declaration
 [@Login](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L13) integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
@@ -144,3 +148,64 @@ export class SampleAuth {
 
 ## Multi-Step Login
 When authenticating, with a multi-step process, it is useful to share information between steps.  The `authenticatorState` of [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16) field is intended to be a location in which that information is persisted. Currently only [passport](http://passportjs.org) support is included, when dealing with multi-step logins. This information can also be injected into a rest endpoint method, using the [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L7) type;
+
+## JWT Support
+By default, the module will automatically default to [JWT](https://jwt.io/)s for encoding/decoding the user's principal.  This can be overridden by declaring a [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10) The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. 
+
+The [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/codec.ts#L13) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+
+**Code: JWTPrincipalCodec**
+```typescript
+import { AuthContext, Principal } from '@travetto/auth';
+import { Injectable, Inject } from '@travetto/di';
+import { JWTSigner } from '@travetto/jwt';
+import { FilterContext, RestCommonUtil } from '@travetto/rest';
+
+import { COMMON_PRINCIPAL_CODEC_SYMBOL, PrincipalCodec } from './types';
+import { RestAuthConfig } from './config';
+
+/**
+ * Principal codec via JWT
+ */
+@Injectable(COMMON_PRINCIPAL_CODEC_SYMBOL)
+export class JWTPrincipalCodec implements PrincipalCodec {
+
+  @Inject()
+  config: RestAuthConfig;
+
+  @Inject()
+  authContext: AuthContext;
+
+  #signer: JWTSigner<Principal>;
+
+  get signer(): JWTSigner<Principal> {
+    return this.#signer ??= new JWTSigner(this.config.signingKey!,
+      v => ({
+        expiresAt: v.expiresAt!,
+        issuedAt: v.issuedAt!,
+        issuer: v.issuer!,
+        id: v.id,
+        sessionId: v.sessionId
+      })
+    );
+  }
+
+  async decode(ctx: FilterContext): Promise<Principal | undefined> {
+    const token = RestCommonUtil.readValue(this.config, ctx.req, { signed: false });
+    if (token && typeof token === 'string') {
+      const out = await this.signer.verify(token);
+      if (out) {
+        this.authContext.authToken = { type: 'jwt', value: token };
+      }
+      return out;
+    }
+  }
+
+  async encode(ctx: FilterContext, data: Principal | undefined): Promise<void> {
+    const token = data ? await this.signer.create(data) : undefined;
+    RestCommonUtil.writeValue(this.config, ctx.res, token, { expires: data?.expiresAt, signed: false });
+  }
+}
+```
+
+As you can see, the encode token just creates a [JWT](https://jwt.io/) based on the principal provided, and decoding verifies the token, and returns the principal.
