@@ -1,9 +1,10 @@
-import { AppError, BinaryUtil, Util } from '@travetto/runtime';
+import { GetOption, SetOption } from 'cookies';
+import { Util } from '@travetto/runtime';
 import { Request, Response } from '../types';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
-type ValueConfig = { mode?: 'header' | 'cookie', header: string, cookie: string, headerPrefix?: string, signingKey?: string };
+type ValueConfig = { mode?: 'header' | 'cookie', header: string, cookie: string, headerPrefix?: string };
 
 export class RestCommonUtil {
 
@@ -58,12 +59,8 @@ export class RestCommonUtil {
   /**
    * Write value to response
    */
-  static writeValue<T = unknown>(cfg: ValueConfig, res: Response, value: T | undefined, opts?: { expires?: Date }): void {
-    let output = Util.encodeSafeJSON<T>(value);
-
-    if (output && cfg.signingKey) {
-      output = `${output}#${BinaryUtil.hash(output + cfg.signingKey)}`;
-    }
+  static writeValue<T = unknown>(cfg: ValueConfig, res: Response, value: T | undefined, opts?: SetOption): void {
+    const output = Util.encodeSafeJSON<T>(value);
 
     if (cfg.mode === 'cookie' || !cfg.mode) {
       res.cookies.set(cfg.cookie, output, {
@@ -83,24 +80,13 @@ export class RestCommonUtil {
   /**
    * Read value from request
    */
-  static readValue<T = unknown>(cfg: ValueConfig, req: Request): T | undefined {
+  static readValue<T = unknown>(cfg: ValueConfig, req: Request, opts?: GetOption): T | undefined {
     let res = (cfg.mode === 'cookie' || !cfg.mode) ?
-      req.cookies.get(cfg.cookie) :
+      req.cookies.get(cfg.cookie, opts) :
       req.headerFirst(cfg.header);
 
     if (res && cfg.mode === 'header' && cfg.headerPrefix) {
       res = res.split(cfg.headerPrefix)[1].trim();
-    }
-
-    if (res && cfg.signingKey) {
-      const parts = res?.split('#');
-      if (parts.length < 2) {
-        throw new AppError('Missing signature for signed field', { category: 'permissions' });
-      }
-      if (parts[1] !== BinaryUtil.hash(parts[0] + cfg.signingKey)) {
-        throw new AppError('Invalid signature for signed field', { category: 'permissions' });
-      }
-      res = parts[0];
     }
 
     return res ? Util.decodeSafeJSON<T>(res) : undefined;

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
-import { AppError, BinaryUtil, castTo, Util } from '@travetto/runtime';
+import { castTo, Util } from '@travetto/runtime';
 
 import { RestCommonUtil } from '../src/util/common';
 import { Response, Request } from '../src/types';
@@ -79,7 +79,6 @@ export class RestCommonUtilTest {
     const res = mockResponse();
     RestCommonUtil.writeValue(config('cookie', false), res, 'blue');
     assert(res.cookieData.orange);
-    assert(!res.cookieData.orange.includes('#'));
     assert(res.cookieData.orange === Util.encodeSafeJSON('blue'));
 
     RestCommonUtil.writeValue(config('cookie'), res, undefined);
@@ -89,22 +88,10 @@ export class RestCommonUtilTest {
   }
 
   @Test()
-  async writeValueCookieSignedTest() {
-    const res = mockResponse();
-    RestCommonUtil.writeValue(config('cookie'), res, 'blue', { key: KEY });
-    assert(res.cookieData.orange);
-    assert(res.cookieData.orange !== Util.encodeSafeJSON('blue'));
-    assert(res.cookieData.orange.includes('#'));
-    const parts = res.cookieData.orange.split('#');
-    assert(BinaryUtil.hash(`${parts[0]}${KEY}`) === parts[1]);
-  }
-
-  @Test()
   async writeValueHeaderTest() {
     const res = mockResponse();
     RestCommonUtil.writeValue(config('header', false), res, 'blue');
     assert(res.headerData.dandy);
-    assert(!res.headerData.dandy.includes('#'));
     assert(res.headerData.dandy === Util.encodeSafeJSON('blue'));
 
     const res2 = mockResponse();
@@ -113,17 +100,6 @@ export class RestCommonUtilTest {
 
     RestCommonUtil.writeValue(config('header'), res, undefined);
     assert(!res.headerData.dandy);
-  }
-
-  @Test()
-  async writeValueHeaderSignedTest() {
-    const res = mockResponse();
-    RestCommonUtil.writeValue(config('header'), res, 'blue');
-    assert(res.headerData.dandy);
-    assert(res.headerData.dandy !== Util.encodeSafeJSON('blue'));
-    assert(res.headerData.dandy.includes('#'));
-    const parts = res.headerData.dandy.split('#');
-    assert(BinaryUtil.hash(`${parts[0]}${KEY}`) === parts[1]);
   }
 
   @Test()
@@ -147,34 +123,5 @@ export class RestCommonUtilTest {
     const value = await RestCommonUtil.readValue(cfg, req);
 
     assert(value === 'hello');
-  }
-
-  @Test()
-  async readWriteValueSignedTest() {
-    const cfg = config('header');
-    const res = mockResponse();
-    await RestCommonUtil.writeValue(cfg, res, 'hello');
-
-    const req = mockRequest(res);
-    const value = await RestCommonUtil.readValue(cfg, req);
-
-    assert(value === 'hello');
-  }
-
-  @Test()
-  async readInvalidValueSignedTest() {
-    const cfg = config('header');
-    const res = mockResponse();
-    await RestCommonUtil.writeValue(cfg, res, 'hello');
-
-    const req = mockRequest(res);
-    await assert.rejects(async () => await RestCommonUtil.readValue({ ...cfg, signingKey: 'z' }, req), /Invalid signature/);
-
-    const req2 = mockRequest({
-      headerData: {
-        [cfg.header]: 'blah'
-      }
-    });
-    await assert.rejects(async () => await RestCommonUtil.readValue({ ...cfg, signingKey: 'z' }, req2), /Missing signature/);
   }
 }

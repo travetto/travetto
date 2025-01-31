@@ -1,36 +1,15 @@
-import { AppError, Class, Runtime } from '@travetto/runtime';
-import {
-  RestInterceptor, FilterContext, FilterReturn,
-  FilterNext, SerializeInterceptor, AsyncContextInterceptor, ParamExtractor,
-  RestCommonUtil
-} from '@travetto/rest';
-import { Injectable, Inject } from '@travetto/di';
+import { Class } from '@travetto/runtime';
+import { RestInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor, ParamExtractor } from '@travetto/rest';
+import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
-import { Config } from '@travetto/config';
-import { Secret } from '@travetto/schema';
 
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
 
-import { PrincipalCodec } from '../types';
+import { COMMON_PRINCIPAL_CODEC_SYMBOL, PrincipalCodec } from '../types';
+import { RestAuthConfig } from '../config';
+import { PrincipalCodecTarget } from '../internal/types';
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
-
-@Config('rest.auth')
-export class RestAuthConfig {
-  mode: 'cookie' | 'header' = 'cookie';
-  header: string = 'Authorization';
-  cookie: string = 'trv_auth';
-  headerPrefix: string = 'Token';
-  @Secret()
-  signingKey?: string;
-
-  postConstruct(): void {
-    if (!this.signingKey && Runtime.production) {
-      throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.signingKey');
-    }
-    this.signingKey ??= 'dummy';
-  }
-}
 
 /**
  * Authentication interceptor
@@ -55,11 +34,8 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   @Inject()
   authService: AuthService;
 
-  postConstruct(): void {
-    this.codec ??= {
-      decode: (ctx): Principal | undefined => RestCommonUtil.readValue(this.config, ctx.req),
-      encode: (ctx, value): void => RestCommonUtil.writeValue(this.config, ctx.res, value, { expires: value?.expiresAt })
-    };
+  async postConstruct(): Promise<void> {
+    this.codec ??= await DependencyRegistry.getInstance<PrincipalCodec>(PrincipalCodecTarget, COMMON_PRINCIPAL_CODEC_SYMBOL);
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {

@@ -1,13 +1,15 @@
 import { AuthContext, Principal } from '@travetto/auth';
-import { PrincipalCodec, RestAuthConfig } from '@travetto/auth-rest';
-import { Inject, Injectable } from '@travetto/di';
-import { FilterContext, RestCommonUtil } from '@travetto/rest';
+import { Injectable, Inject } from '@travetto/di';
 import { JWTSigner } from '@travetto/jwt';
+import { FilterContext, RestCommonUtil } from '@travetto/rest';
+
+import { COMMON_PRINCIPAL_CODEC_SYMBOL, PrincipalCodec } from './types';
+import { RestAuthConfig } from './config';
 
 /**
  * Principal codec via JWT
  */
-@Injectable()
+@Injectable(COMMON_PRINCIPAL_CODEC_SYMBOL)
 export class JWTPrincipalCodec implements PrincipalCodec {
 
   @Inject()
@@ -31,7 +33,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   async decode(ctx: FilterContext): Promise<Principal | undefined> {
-    const token = RestCommonUtil.readValue({ ...this.config, signingKey: undefined }, ctx.req);
+    const token = RestCommonUtil.readValue(this.config, ctx.req, { signed: false });
     if (token && typeof token === 'string') {
       const out = await this.signer.verify(token);
       if (out) {
@@ -43,6 +45,6 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   async encode(ctx: FilterContext, data: Principal | undefined): Promise<void> {
     const token = data ? await this.signer.create(data) : undefined;
-    RestCommonUtil.writeValue({ ...this.config, signingKey: undefined }, ctx.res, token, { expires: data?.expiresAt });
+    RestCommonUtil.writeValue(this.config, ctx.res, token, { expires: data?.expiresAt, signed: false });
   }
 }
