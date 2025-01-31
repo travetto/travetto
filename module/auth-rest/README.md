@@ -16,12 +16,12 @@ yarn add @travetto/auth-rest
 This is a primary integration for the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate. 
 
 The integration with the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module touches multiple levels. Primarily:
-   *  Patterns for auth framework integrations
-   *  Principal encoding/decoding
+   *  Authenticating
+   *  Maintaining Auth Context
    *  Route declaration
    *  Multi-Step Login
 
-## Patterns for Integration
+## Authenticating
 Every external framework integration relies upon the [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14) contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
 **Code: Structure for the Identity Source**
@@ -106,10 +106,12 @@ export class AppConfig {
 
 The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70) method.
 
-## Principal Encoding/Decoding (Codec
-The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10) contract, defines the relationship between [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") for an authenticated state.  This works to define how a principal is received from the request, and how it is sent back via the response.  This contract is flexibly by design, allowing for all sorts of patterns.  
+## Maintaining Auth Context
+The [AuthContextInterceptor](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/interceptors/context.ts#L20) acts as the bridge between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16) and the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31)/[Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161) object. The integration, leveraging [RestAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/config.ts#L6)'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the [JWT](https://jwt.io/) appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  
 
-By default, the module will automatically default to [JWT](https://jwt.io/)s for encoding/decoding the user's principal.  The token can be encoded as a cookie or as a header depending on [RestAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/config.ts#L6)'s configuration.  Additionally, the encoding process allows for auto-renewing of the token (on by default).  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session.
+**Note:** When using cookies, the automatic renewal, and update, and seamless receipt and transmission all the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) to act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. 
+
+The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10) contract is the primary interface for reading and writing [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) data out of the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31)/[Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161). This contract is flexible by design, allowing for all sorts of usage. [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/codec.ts#L13) is the default [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10), leveraging [JWT](https://jwt.io/)s for encoding/decoding the principal information.
 
 **Code: JWTPrincipalCodec**
 ```typescript
