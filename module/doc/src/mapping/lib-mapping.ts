@@ -70,7 +70,7 @@ export const LIB_MAPPING = {
 
   // JWT
   JWT: { title: 'JWT', href: 'https://jwt.io/' },
-  NodeJWT: { title: 'node-jsonwebtoken', href: 'https://github.com/auth0/node-jsonwebtoken' },
+  NJWT: { title: 'njwt', href: 'https://github.com/jwtk/njwt' },
 
   // Email
   NodeMailer: { title: 'nodemailer', href: 'https://nodemailer.com/about/' },

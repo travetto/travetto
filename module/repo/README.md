@@ -134,7 +134,6 @@ module/email-inky
 module/email-nodemailer
 module/eslint
 module/image
-module/jwt
 module/log
 module/manifest
 module/model
@@ -231,7 +230,6 @@ global-test/auth-rest-session_rest <workspace-root>/global-test/auth-rest-sessio
            module/email-nodemailer <workspace-root>/module/email-nodemailer
                      module/eslint <workspace-root>/module/eslint
                       module/image <workspace-root>/module/image
-                        module/jwt <workspace-root>/module/jwt
                         module/log <workspace-root>/module/log
                    module/manifest <workspace-root>/module/manifest
                       module/model <workspace-root>/module/model

@@ -28,8 +28,8 @@
   "dependencies": {
     "@travetto/auth": "^6.0.0-rc.0",
     "@travetto/config": "^6.0.0-rc.0",
-    "@travetto/jwt": "^6.0.0-rc.0",
-    "@travetto/rest": "^6.0.0-rc.0"
+    "@travetto/rest": "^6.0.0-rc.0",
+    "njwt": "^2.0.1"
   },
   "peerDependencies": {
     "@travetto/test": "^6.0.0-rc.0"
