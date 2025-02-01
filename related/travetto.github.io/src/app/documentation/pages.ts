@@ -176,10 +176,6 @@ export const PAGES = [
       {
         path: 'auth-session', title: 'Auth Session',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-session/auth-session.component').then(m => m.AuthSessionComponent)
-      },
-      {
-        path: 'jwt', title: 'JWT',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/jwt/jwt.component').then(m => m.JwtComponent)
       }
     ]
   },

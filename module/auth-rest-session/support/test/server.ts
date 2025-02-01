@@ -220,6 +220,7 @@ export abstract class AuthRestSessionServerSuite extends BaseRestSuite {
     assert(res.status === 403);
 
     res = await this.request('get', '/test/session', { headers: {} });
+    assert(res.status === 200);
     assert(res.body.payload === undefined);
     assert(res.body.age === 1);
   }

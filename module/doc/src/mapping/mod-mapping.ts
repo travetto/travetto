@@ -75,10 +75,6 @@ export const MOD_MAPPING = {
     name: '@travetto/image', folder: '@travetto/image', displayName: 'Image',
     description: 'Image support, resizing, and optimization'
   },
-  Jwt: {
-    name: '@travetto/jwt', folder: '@travetto/jwt', displayName: 'JWT',
-    description: 'JSON Web Token implementation'
-  },
   Log: {
     name: '@travetto/log', folder: '@travetto/log', displayName: 'Logging',
     description: 'Logging framework that integrates at the console.log level.'

@@ -4,14 +4,14 @@ import assert from 'node:assert';
 import { Controller, Get, Post, Redirect } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
-import { Inject, InjectableFactory } from '@travetto/di';
+import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
-import { JWTUtil } from '@travetto/jwt';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
 import { RestAuthConfig } from '../../src/config';
+import { CommonPrincipalCodecSymbol, JWTPrincipalCodec } from '../../__index__';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
@@ -232,7 +232,9 @@ export abstract class AuthRestServerSuite extends BaseRestSuite {
     });
     assert(lastStatus === 200);
     assert(typeof body === 'string');
-    assert(JWTUtil.verify(body, { key: this.config.signingKey }));
+
+    const codec = await DependencyRegistry.getInstance(JWTPrincipalCodec, CommonPrincipalCodecSymbol);
+    await assert.doesNotReject(() => codec.verify(body));
   }
 
   @Test()
