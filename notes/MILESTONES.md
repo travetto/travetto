@@ -645,6 +645,8 @@ Release 6.0 - 2025-2-1
 * Auth system has been rewritten with respect to the modules, and the relationship with the result module
 * The auth session has migrated from being the owner various contracts to the arbiter of auth state
    * AuthService/AuthContext now represent the authentication information, regardless of rest patterns
+#### Jwt is gone
+   * This is now integrated into auth-rest by default using njwt
 #### Auth-rest-jwt is gone
    * This is now integrated into auth-rest by default
 #### Rest-session is moved to auth-session
