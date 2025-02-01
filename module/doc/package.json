@@ -1,6 +1,6 @@
 {
   "name": "@travetto/doc",
-  "version": "6.0.0-rc.0",
+  "version": "6.0.0-rc.1",
   "description": "Documentation support for the Travetto framework",
   "keywords": [
     "docs",

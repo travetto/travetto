@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "dependencies": {
     "@travetto/auth-session": "^6.0.0-rc.0",
-    "@travetto/auth-rest-session": "^6.0.0-rc.1",
+    "@travetto/auth-rest-session": "^6.0.0-rc.2",
     "@travetto/model-memory": "^6.0.0-rc.0",
     "@travetto/rest-express": "^6.0.0-rc.0",
     "@travetto/rest-express-lambda": "^6.0.0-rc.0",
