@@ -37,7 +37,7 @@ export class RestTransformer {
       (paramType.key === 'managed' &&
         DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@travetto/rest:ContextParam')
       ) ||
-      (pDec && !/(Body|((Path|Header|Query)?Param))/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
+      (pDec && !/(Body|PathParam|HeaderParam|QueryParam|Param)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
 
     // Detect default behavior
     if (isContext) {
