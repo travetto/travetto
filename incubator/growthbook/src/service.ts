@@ -48,7 +48,7 @@ export class FeatureFlagService {
     } catch { }
   }
 
-  async init(): Promise<GrowthBook | undefined> {
+  async #init(): Promise<GrowthBook | undefined> {
     let scoped = this.#active.get();
     if (!scoped) {
       const attributes = this.auth.principal?.details;
@@ -64,26 +64,26 @@ export class FeatureFlagService {
     return scoped;
   }
 
-  #getFeature<T>(key: string): Promise<FeatureResult<T | null> | undefined> {
-    return this.init().then(v => v?.evalFeature<T>(key));
+  #feature<T>(key: string): Promise<FeatureResult<T | null> | undefined> {
+    return this.#init().then(v => v?.evalFeature<T>(key));
   }
 
-  isOn(key: string): Promise<boolean> {
-    return this.#getFeature<boolean>(key).then(flag => flag.on ?? false);
+  on(key: string): Promise<boolean> {
+    return this.#feature<boolean>(key).then(flag => flag.on ?? false);
   }
 
-  isOff(key: string): Promise<boolean> {
-    return this.#getFeature<boolean>(key).then(flag => flag.off ?? false);
+  off(key: string): Promise<boolean> {
+    return this.#feature<boolean>(key).then(flag => flag.off ?? false);
   }
 
-  getValue<T = unknown>(key: string, defValue: T): Promise<T> {
-    return this.#getFeature<T>(key).then(flag => flag?.value ?? defValue);
+  get<T = unknown>(key: string, defValue: T): Promise<T> {
+    return this.#feature<T>(key).then(flag => flag?.value ?? defValue);
   }
 
-  async getValidated<T>(cls: Class<T>, key: string, defValue: T[]): Promise<T[]>;
-  async getValidated<T>(cls: Class<T>, key: string, defValue: T): Promise<T>;
-  async getValidated<T>(cls: Class<T>, key: string, defValue: T | T[]): Promise<T | T[]> {
-    const data: T | T[] = await this.getValue(key, defValue);
+  async getBound<T>(cls: Class<T>, key: string, defValue: T[]): Promise<T[]>;
+  async getBound<T>(cls: Class<T>, key: string, defValue: T): Promise<T>;
+  async getBound<T>(cls: Class<T>, key: string, defValue: T | T[]): Promise<T | T[]> {
+    const data: T | T[] = await this.get(key, defValue);
 
     if (Array.isArray(defValue) && !Array.isArray(data)) {
       return read(cls, defValue);
