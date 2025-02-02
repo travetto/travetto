@@ -30,7 +30,7 @@ export class FeatureFlagService {
 
   #root: GrowthBook;
 
-  #active = new AsyncContextValue<GrowthBook>(this, { failIfUnbound: false });
+  #active = new AsyncContextValue<GrowthBook>(this, { failIfUnbound: { read: false, write: false } });
 
   async postConstruct(): Promise<void> {
     try {
@@ -51,7 +51,7 @@ export class FeatureFlagService {
   async init(): Promise<GrowthBook | undefined> {
     let scoped = this.#active.get();
     if (!scoped) {
-      const attributes = this.context.active ? this.auth.principal?.details : undefined;
+      const attributes = this.auth.principal?.details;
       if (!attributes) {
         console.debug('User not found, defaulting to environment-level attributes');
       }
