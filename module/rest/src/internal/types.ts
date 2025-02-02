@@ -2,13 +2,13 @@ import type { Request, Response } from '../types';
 import { ContextProvider } from '../decorator/param';
 
 /**
- * @augments `@travetto/rest:Context`
+ * @augments `@travetto/rest:ContextParam`
  */
 @ContextProvider((__: unknown, rq: Request) => rq)
 export class RequestTarget { }
 
 /**
- * @augments `@travetto/rest:Context`
+ * @augments `@travetto/rest:ContextParam`
  */
 @ContextProvider((__: unknown, rq: Request, rs: Response) => rs)
 export class ResponseTarget { }

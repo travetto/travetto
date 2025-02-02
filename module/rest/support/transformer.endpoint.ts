@@ -35,13 +35,13 @@ export class RestTransformer {
 
     const isContext =
       (paramType.key === 'managed' &&
-        DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@travetto/rest:Context')
+        DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@travetto/rest:ContextParam')
       ) ||
       (pDec && !/(Body|((Path|Header|Query)?Param))/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
 
     // Detect default behavior
     if (isContext) {
-      detectedParamType = 'Context';
+      detectedParamType = 'ContextParam';
       if (paramType.key === 'managed') {
         conf = state.extendObjectLiteral(conf, { contextType: state.getOrImport(paramType) });
         node = SchemaTransformUtil.computeField(state, node, { type: { key: 'unknown' } });
