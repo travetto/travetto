@@ -9,7 +9,7 @@ export type ParamConfig = {
   description?: string;
 };
 
-type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'head' | 'options' | 'patch';
+type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'head' | 'options' | 'patch' | 'query';
 
 export type RequestDefinition = {
   method: HttpMethod;

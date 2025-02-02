@@ -69,6 +69,12 @@ export function Head(path?: string): RouteDecorator { return Endpoint('head', pa
  * @augments `@travetto/rest:Endpoint`
  */
 export function Options(path?: string): RouteDecorator { return Endpoint('options', path); }
+/**
+ * Registers QUERY requests
+ * @param path The path to route the request to
+ * @augments `@travetto/rest:Endpoint`
+ */
+export function Query(path?: string): RouteDecorator { return Endpoint('query', path); }
 
 /**
  * Defines the response type of the endpoint

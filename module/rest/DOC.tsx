@@ -5,7 +5,7 @@ import { CliCommand } from '@travetto/cli';
 
 import { RestApplication } from './src/application/rest';
 import { Controller } from './src/decorator/controller';
-import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
+import { Get, Post, Put, Delete, Patch, Head, Options, Query } from './src/decorator/endpoint';
 import { PathParam, QueryParam, Body, ContextParam, Param, HeaderParam } from './src/decorator/param';
 import { BodyParseInterceptor, RestBodyParseConfig } from './src/interceptor/body-parse';
 import { CorsInterceptor, RestCorsConfig } from './src/interceptor/cors';
@@ -53,6 +53,7 @@ export const text = <>
       <li>{Patch}</li>
       <li>{Head}</li>
       <li>{Options}</li>
+      <li>{Query}</li>
     </ul>
 
 
