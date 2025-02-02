@@ -1,4 +1,4 @@
-import { Principal } from '@travetto/auth';
+import { AuthToken, Principal } from '@travetto/auth';
 import { FilterContext } from '@travetto/rest';
 
 export const CommonPrincipalCodecSymbol = Symbol.for('@travetto/auth-rest:common-codec');
@@ -8,6 +8,10 @@ export const CommonPrincipalCodecSymbol = Symbol.for('@travetto/auth-rest:common
  * @concrete ./internal/types#PrincipalCodecTarget
  */
 export interface PrincipalCodec {
+  /**
+   * Extract token for re-use elsewhere
+   */
+  token?(ctx: FilterContext): Promise<AuthToken | undefined> | AuthToken | undefined;
   /**
    * Encode data
    */

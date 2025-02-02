@@ -28,8 +28,6 @@ export abstract class AuthSessionServerSuite extends BaseRestSuite {
   @WithAsyncContext()
   @Test()
   async testSessionEstablishment() {
-    await this.auth.init();
-
     this.auth.principal = {
       id: 'orange',
       details: {},

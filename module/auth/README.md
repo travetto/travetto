@@ -150,18 +150,8 @@ When working with framework's authentication, the authenticated information is e
 
 **Code: Auth Context Outline**
 ```typescript
-type AuthContextShape = {
-  principal?: Principal;
-  authToken?: AuthToken;
-  authenticatorState?: AuthenticatorState;
-};
-@Injectable()
 export class AuthContext {
   @Inject()
-  /**
-   * Get the principal, if set
-   */
-  get principal(): Principal | undefined;
   /**
    * Set principal
    */

@@ -1,6 +1,6 @@
 import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt';
 
-import { AuthContext, Principal } from '@travetto/auth';
+import { AuthContext, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
 import { FilterContext, RestCommonUtil } from '@travetto/rest';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
@@ -43,15 +43,14 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     }
   }
 
+  token(ctx: FilterContext): AuthToken | undefined {
+    const value = RestCommonUtil.readValue(this.config, ctx.req, { signed: false });
+    return value ? { type: 'jwt', value } : undefined;
+  }
+
   async decode(ctx: FilterContext): Promise<Principal | undefined> {
-    const token = RestCommonUtil.readValue(this.config, ctx.req, { signed: false });
-    if (token) {
-      const out = await this.verify(token);
-      if (out) {
-        this.authContext.authToken = { type: 'jwt', value: token };
-      }
-      return out;
-    }
+    const token = this.token(ctx);
+    return token ? await this.verify(token.value) : undefined;
   }
 
   async create(value: Principal): Promise<string> {
