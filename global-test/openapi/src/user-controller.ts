@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Delete, Path } from '@travetto/rest';
+import { Body, Controller, Get, Post, Put, Delete, PathParam } from '@travetto/rest';
 
 import { User, UserSearch } from './model';
 
@@ -14,7 +14,7 @@ export class UserController {
    * @returns A user by name
    */
   @Get('/:name')
-  async getByName(@Path() name: string): Promise<User> {
+  async getByName(@PathParam() name: string): Promise<User> {
     return undefined!;
   }
 
@@ -24,7 +24,7 @@ export class UserController {
    * @returns Users by age
    */
   @Get('/age/:age')
-  async getByAge(@Path() age: number = 20): Promise<User[]> {
+  async getByAge(@PathParam() age: number = 20): Promise<User[]> {
     return [];
   }
 
@@ -48,7 +48,7 @@ export class UserController {
    * @param id User id
    */
   @Put('/:id')
-  async updateUser(@Path() id: number, @Body() user: User): Promise<void> {
+  async updateUser(@PathParam() id: number, @Body() user: User): Promise<void> {
 
   }
   /**
@@ -56,7 +56,7 @@ export class UserController {
    * @param id User id
    */
   @Delete('/:id')
-  async removeUser(@Path() id: number): Promise<void> {
+  async removeUser(@PathParam() id: number): Promise<void> {
 
   }
 }

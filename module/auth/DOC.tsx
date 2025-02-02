@@ -34,9 +34,6 @@ export const text = <>
 
     The {d.codeLink(AuthenticatorContract)} only requires one method to be defined, and that is {d.method('authenticate')}. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
-    <c.SubSection title='Example'>
-      The {d.mod('Jwt')} module is a good example of an authenticator. This is a common use case for simple internal auth.
-    </c.SubSection>
   </c.Section>
 
   <c.Section title='Authorization Contract'>

@@ -82,9 +82,6 @@ export interface Authenticator<T = unknown, C = unknown, P extends Principal = P
 
 The [Authenticator Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
-### Example
-The [JWT](https://github.com/travetto/travetto/tree/main/module/jwt#readme "JSON Web Token implementation") module is a good example of an authenticator. This is a common use case for simple internal auth.
-
 ## Authorization Contract
 
 **Code: Authorizer Contract**

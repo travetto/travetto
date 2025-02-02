@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { Readable } from 'node:stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, Query, Undocumented } from '@travetto/rest';
+import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam, Undocumented } from '@travetto/rest';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { OpenapiVisitor } from '../src/spec-generate';
@@ -35,7 +35,7 @@ class TestCont {
   }
 
   @Get('/user-search-prefix')
-  async searchPrefix(@Query({ prefix: 'search' }) search: UserSearch) {
+  async searchPrefix(@QueryParam({ prefix: 'search' }) search: UserSearch) {
     return [new TestUser()];
   }
 

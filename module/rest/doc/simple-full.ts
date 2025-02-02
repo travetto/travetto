@@ -1,4 +1,4 @@
-import { Get, Controller, Post, Query, Request } from '@travetto/rest';
+import { Get, Controller, Post, QueryParam, Request } from '@travetto/rest';
 import { Integer, Min } from '@travetto/schema';
 
 import { MockService } from './mock';
@@ -39,8 +39,8 @@ export class Simple {
   @Get('img/*')
   async getImage(
     req: Request,
-    @Query('w') @Integer() @Min(100) width?: number,
-    @Query('h') @Integer() @Min(100) height?: number
+    @QueryParam('w') @Integer() @Min(100) width?: number,
+    @QueryParam('h') @Integer() @Min(100) height?: number
   ) {
     const img = await this.service.fetchImage(req.path, { width, height });
     return img;
