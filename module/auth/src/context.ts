@@ -47,7 +47,7 @@ export class AuthContext {
    * Set/overwrite the user's authentication token
    */
   set authToken(token: AuthToken | undefined) {
-    this.#authState.set(token);
+    this.#authToken.set(token);
   }
 
   /**
