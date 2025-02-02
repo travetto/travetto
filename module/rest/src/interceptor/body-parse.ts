@@ -12,7 +12,7 @@ import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
 import { AcceptsInterceptor } from './accepts';
 
-const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
+const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'query'].flatMap(x => [x, x.toUpperCase]));
 
 type ParserType = 'json' | 'text' | 'form';
 

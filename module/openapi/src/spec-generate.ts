@@ -339,7 +339,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const key = `${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/');
 
     const toAdd = ep.method === 'all' ?
-      ['get', 'post', 'put', 'delete', 'patch'].reduce((acc, v) =>
+      ['get', 'post', 'put', 'delete', 'patch', 'options', 'query'].reduce((acc, v) =>
         ({ ...acc, [v]: { ...op, operationId: `${op.operationId}_${v}` } }), {}) :
       { [ep.method]: op };
 

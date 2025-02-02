@@ -12,7 +12,7 @@ import {
 import type { RestInterceptor } from './interceptor/types';
 
 export type HeaderMap = Record<string, (string | (() => string))>;
-export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
+export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'query' | 'all';
 
 export type FilterReturn = void | unknown | Promise<void | unknown>;
 export type FilterNext = () => FilterReturn;

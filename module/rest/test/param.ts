@@ -11,7 +11,7 @@ import { Controller } from '../src/decorator/controller';
 import { ControllerRegistry } from '../src/registry/controller';
 import { MethodOrAll, Request, Response } from '../src/types';
 import { ParamExtractor } from '../src/util/param';
-import { EndpointConfig } from '../__index__';
+import { EndpointConfig } from '../src/registry/types';
 
 class User {
   name: string;

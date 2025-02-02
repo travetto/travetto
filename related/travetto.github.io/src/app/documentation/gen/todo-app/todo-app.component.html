@@ -482,9 +482,20 @@ Create <code class="item path">support/create-todo.ts</code> with the following 
     <pre><code class="language-bash">$ trv main support/create-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
 <span class="token punctuation">{{'{'}}</span>
-  text: <span class="token string">'New Todo - &lt;key>'</span>,
-  created: <span class="token string">'2029-03-14T04:00:01.510Z'</span>,
-  id: <span class="token string">'&lt;uniqueId>'</span>
+  message: <span class="token string">'Validation errors have occurred'</span>,
+  category: <span class="token string">'data'</span>,
+  type: <span class="token string">'ValidationResultError'</span>,
+  at: <span class="token string">'2029-03-14T04:00:01.510Z'</span>,
+  details: <span class="token punctuation">{{'{'}}</span>
+    errors: <span class="token punctuation">[</span>
+      <span class="token punctuation">{{'{'}}</span>
+        kind: <span class="token string">'required'</span>,
+        active: true,
+        message: <span class="token string">'create.0 is required'</span>,
+        path: <span class="token string">'create.0'</span>
+      <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -507,13 +518,7 @@ Now create <code class="item path">support/list-todo.ts</code> with the followin
 </figcaption>
     <pre><code class="language-bash">$ trv main support/list-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
-<span class="token punctuation">[</span>
-  <span class="token punctuation">{{'{'}}</span>
-    id: <span class="token string">'&lt;uniqueId>'</span>,
-    text: <span class="token string">'New Todo - &lt;key>'</span>,
-    created: <span class="token string">'2029-03-14T04:00:01.814Z'</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">]</span></code></pre>
+<span class="token punctuation">[</span><span class="token punctuation">]</span></code></pre>
   </figure>
 
 </div>
