@@ -42,7 +42,6 @@ export class AuthContextInterceptor implements RestInterceptor {
     let checked: Principal | undefined;
     let lastExpiresAt: Date | undefined;
 
-    this.authContext.init();
     Object.defineProperty(ctx.req, 'user', { get: () => this.authContext.principal });
 
     try {
@@ -55,6 +54,7 @@ export class AuthContextInterceptor implements RestInterceptor {
 
       checked = this.authService.enforceExpiry(decoded);
       this.authContext.principal = checked;
+      this.authContext.authToken = await this.codec.token?.(ctx);
 
       return await next();
     } finally {

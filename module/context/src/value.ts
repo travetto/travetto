@@ -6,9 +6,9 @@ type Storage<T = unknown> = AsyncLocalStorage<Payload<T>>;
 type Key = string | symbol;
 type StorageSource = Storage | (() => Storage) | { storage: Storage } | { context: { storage: Storage } };
 
-type ContextConfig = {
-  failIfUnbound?: boolean;
-};
+type ReadWriteConfig = { read?: boolean, write?: boolean };
+
+type ContextConfig = { failIfUnbound?: ReadWriteConfig };
 
 /**
  * Async Context Value
@@ -18,7 +18,7 @@ export class AsyncContextValue<T = unknown> {
   #source: () => Storage<T>;
   #storage?: Storage<T>;
   #key: Key = Symbol();
-  #failIfUnbound: boolean;
+  #failIfUnbound: ReadWriteConfig;
 
   constructor(source: StorageSource, config?: ContextConfig) {
     this.#source = castTo(typeof source === 'function' ?
@@ -30,12 +30,12 @@ export class AsyncContextValue<T = unknown> {
           source.context.storage
         ))
     );
-    this.#failIfUnbound = config?.failIfUnbound ?? true;
+    this.#failIfUnbound = { read: true, write: true, ...config?.failIfUnbound };
   }
 
-  get #store(): Payload<T> | undefined {
+  #store(mode: keyof ReadWriteConfig): Payload<T> | undefined {
     const store = (this.#storage ??= this.#source()).getStore();
-    if (!store && this.#failIfUnbound) {
+    if (!store && this.#failIfUnbound[mode]) {
       throw new AppError('Context not initialized');
     }
     return store;
@@ -45,14 +45,17 @@ export class AsyncContextValue<T = unknown> {
    * Get value
    */
   get(): T | undefined {
-    return this.#store?.[this.#key];
+    const store = this.#store('read');
+    if (store) {
+      return store[this.#key];
+    }
   }
 
   /**
    * Set value
    */
   set(value: T | undefined): void {
-    const store = this.#store;
+    const store = this.#store('write');
     if (store) {
       store[this.#key] = value;
     }

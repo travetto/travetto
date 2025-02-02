@@ -164,21 +164,11 @@ When working with framework's authentication, the authenticated information is e
 
   <figure class="code">
     <figcaption class="code">Auth Context Outline
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L9">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">type</span> <span class="token class-name">AuthContextShape</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
-  principal<span class="token operator">?</span><span class="token operator">:</span> Principal<span class="token punctuation">;</span>
-  authToken<span class="token operator">?</span><span class="token operator">:</span> AuthToken<span class="token punctuation">;</span>
-  authenticatorState<span class="token operator">?</span><span class="token operator">:</span> AuthenticatorState<span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthContext</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthContext</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token comment">/**
-   * Get the principal, if set
-   */</span>
-  <span class="token keyword">get</span> <span class="token function">principal</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Set principal
    */</span>
