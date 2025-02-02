@@ -6,7 +6,7 @@ import { CliCommand } from '@travetto/cli';
 import { RestApplication } from './src/application/rest';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
-import { Path, Query, Body, Context, Param, Header } from './src/decorator/param';
+import { PathParam, QueryParam, Body, ContextParam, Param, HeaderParam } from './src/decorator/param';
 import { BodyParseInterceptor, RestBodyParseConfig } from './src/interceptor/body-parse';
 import { CorsInterceptor, RestCorsConfig } from './src/interceptor/cors';
 import { GetCacheInterceptor } from './src/interceptor/get-cache';
@@ -75,11 +75,11 @@ export const text = <>
     <c.SubSection title='Parameters'>
       Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
       <ul>
-        <li>{Path} - Path params</li>
-        <li>{Query} - Query params</li>
+        <li>{PathParam} - Path params</li>
+        <li>{QueryParam} - Query params</li>
         <li>{Body} - Request body (in it's entirety), with support for validation</li>
-        <li>{Header} - Header values</li>
-        <li>{Context} - Special values exposed (e.g. {Request}, {Response}, etc.)</li>
+        <li>{HeaderParam} - Header values</li>
+        <li>{ContextParam} - Special values exposed (e.g. {Request}, {Response}, etc.)</li>
       </ul>
 
       Each {Param} can be configured to indicate:

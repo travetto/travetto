@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 
 import { Controller } from '../../src/decorator/controller';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';
-import { Path, Query } from '../../src/decorator/param';
+import { PathParam, QueryParam } from '../../src/decorator/param';
 import { Request, Response } from '../../src/types';
 import { Produces, SetHeaders } from '../../src/decorator/common';
 import { Renderable } from '../../src/response/renderable';
@@ -15,12 +15,12 @@ export class TestController {
   }
 
   @Post('/param/:param')
-  withParam(@Path() param: string) {
+  withParam(@PathParam() param: string) {
     return { param };
   }
 
   @Put('/query')
-  withQuery(@Query() age: number) {
+  withQuery(@QueryParam() age: number) {
     return { query: age };
   }
 
@@ -36,7 +36,7 @@ export class TestController {
   }
 
   @Patch('/regexp/super-:special-party')
-  withRegexp(@Path() special: string) {
+  withRegexp(@PathParam() special: string) {
     return { path: special };
   }
 

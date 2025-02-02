@@ -35,25 +35,25 @@ export function Param(location: ParamConfig['location'], extra: string | Partial
  * @param param The parma configuration or name
  * @augments `@travetto/rest:Param`
  */
-export function Context(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('context', param); }
+export function ContextParam(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('context', param); }
 /**
  * Define a Path param
  * @param param The parma configuration or name
  * @augments `@travetto/rest:Param`
  */
-export function Path(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('path', param); }
+export function PathParam(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('path', param); }
 /**
  * Define a Query param
  * @param param The parma configuration or name
  * @augments `@travetto/rest:Param`
  */
-export function Query(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('query', param); }
+export function QueryParam(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('query', param); }
 /**
  * Define a Header param
  * @param param The parma configuration or name
  * @augments `@travetto/rest:Param`
  */
-export function Header(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('header', param); }
+export function HeaderParam(param: string | Partial<ParamConfig> = {}): ParamDecorator { return Param('header', param); }
 /**
  * Define a body param as an input
  * @param param The parma configuration

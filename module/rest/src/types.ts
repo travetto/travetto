@@ -33,7 +33,7 @@ export interface RequestHeaders extends IncomingHttpHeaders { }
 /**
  * Travetto request
  * @concrete ./internal/types#RequestTarget
- * @augments `@travetto/rest:Context`
+ * @augments `@travetto/rest:ContextParam`
  */
 export interface Request<T = unknown> {
   /**
@@ -156,7 +156,7 @@ export interface Request<T = unknown> {
 /**
  * Travetto response
  * @concrete ./internal/types#ResponseTarget
- * @augments `@travetto/rest:Context`
+ * @augments `@travetto/rest:ContextParam`
  */
 export interface Response<T = unknown> {
   /**

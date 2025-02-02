@@ -78,11 +78,11 @@ class SimpleController {
 
 ### Parameters
 Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
-   *  [@Path](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L44) - Path params
-   *  [@Query](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L50) - Query params
+   *  [@PathParam](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L44) - Path params
+   *  [@QueryParam](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L50) - Query params
    *  [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62) - Request body (in it's entirety), with support for validation
-   *  [@Header](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L56) - Header values
-   *  [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) - Special values exposed (e.g. [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31), [Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161), etc.)
+   *  [@HeaderParam](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L56) - Header values
+   *  [@ContextParam](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) - Special values exposed (e.g. [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31), [Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161), etc.)
 Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L25) can be configured to indicate:
    *  `name` - Name of param, field name, defaults to handler parameter name if necessary
    *  `description` - Description of param, pulled from [JSDoc](http://usejsdoc.org/about-getting-started.html), or defaults to name if empty
@@ -92,7 +92,7 @@ Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/dec
 
 **Code: Full-fledged Controller with Routes**
 ```typescript
-import { Get, Controller, Post, Query, Request } from '@travetto/rest';
+import { Get, Controller, Post, QueryParam, Request } from '@travetto/rest';
 import { Integer, Min } from '@travetto/schema';
 
 import { MockService } from './mock';
@@ -133,8 +133,8 @@ export class Simple {
   @Get('img/*')
   async getImage(
     req: Request,
-    @Query('w') @Integer() @Min(100) width?: number,
-    @Query('h') @Integer() @Min(100) height?: number
+    @QueryParam('w') @Integer() @Min(100) width?: number,
+    @QueryParam('h') @Integer() @Min(100) height?: number
   ) {
     const img = await this.service.fetchImage(req.path, { width, height });
     return img;
@@ -587,7 +587,7 @@ rest:
 
 **Code: Sample controller with route-level allow/deny**
 ```typescript
-import { Controller, Get, Query, ConfigureInterceptor, CorsInterceptor } from '@travetto/rest';
+import { Controller, Get, QueryParam, ConfigureInterceptor, CorsInterceptor } from '@travetto/rest';
 
 @Controller('/allowDeny')
 @ConfigureInterceptor(CorsInterceptor, { disabled: true })
@@ -595,7 +595,7 @@ export class AlowDenyController {
 
   @Get('/override')
   @ConfigureInterceptor(CorsInterceptor, { disabled: false })
-  cookies(@Query() value: string) {
+  cookies(@QueryParam() value: string) {
 
   }
 }
@@ -614,7 +614,7 @@ The resolution logic is as follows:
 ```typescript
 import { GetOption, SetOption } from 'cookies';
 
-import { Controller, Get, Query, Request, Response } from '@travetto/rest';
+import { Controller, Get, QueryParam, Request, Response } from '@travetto/rest';
 
 @Controller('/simple')
 export class SimpleRoutes {
@@ -623,7 +623,7 @@ export class SimpleRoutes {
   private setOptions: SetOption;
 
   @Get('/cookies')
-  cookies(req: Request, res: Response, @Query() value: string) {
+  cookies(req: Request, res: Response, @QueryParam() value: string) {
     req.cookies.get('name', this.getOptions);
     res.cookies.set('name', value, this.setOptions);
   }

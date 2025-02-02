@@ -35,13 +35,13 @@ export class RestTransformer {
 
     const isContext =
       (paramType.key === 'managed' &&
-        DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@travetto/rest:Context')
+        DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@travetto/rest:ContextParam')
       ) ||
-      (pDec && !/(Path|Header|Query|Body|Param)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
+      (pDec && !/(Body|PathParam|HeaderParam|QueryParam|Param)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
 
     // Detect default behavior
     if (isContext) {
-      detectedParamType = 'Context';
+      detectedParamType = 'ContextParam';
       if (paramType.key === 'managed') {
         conf = state.extendObjectLiteral(conf, { contextType: state.getOrImport(paramType) });
         node = SchemaTransformUtil.computeField(state, node, { type: { key: 'unknown' } });
@@ -63,14 +63,14 @@ export class RestTransformer {
             throw new Error(`Unexpected literal type: ${literal}`);
           }
           // If param name matches path param, default to @Path
-          detectedParamType = new RegExp(`:${name}\\b`).test(literal) ? 'Path' : 'Query';
+          detectedParamType = new RegExp(`:${name}\\b`).test(literal) ? 'PathParam' : 'QueryParam';
         } else {
           // Default to query for empty or regex endpoints
           detectedParamType = 'Query';
         }
       } else if (epDec.ident.getText() !== 'All') { // Treat all separate
         // Treat as schema, and see if endpoint supports a body for default behavior on untyped
-        detectedParamType = epDec.targets?.includes('@travetto/rest:RequestBody') ? 'Body' : 'Query';
+        detectedParamType = epDec.targets?.includes('@travetto/rest:RequestBody') ? 'Body' : 'QueryParam';
         config.name = '';
       }
       node = SchemaTransformUtil.computeField(state, node, config);
@@ -79,7 +79,7 @@ export class RestTransformer {
     const modifiers = (node.modifiers ?? []).filter(x => x !== pDec);
 
     if (!pDec) { // Handle default, missing
-      modifiers.push(state.createDecorator(PARAM_DEC_FILE, detectedParamType ?? 'Context', conf));
+      modifiers.push(state.createDecorator(PARAM_DEC_FILE, detectedParamType ?? 'ContextParam', conf));
     } else if (ts.isCallExpression(pDec.expression)) { // if it does exist, update
       modifiers.push(state.factory.createDecorator(
         state.factory.createCallExpression(

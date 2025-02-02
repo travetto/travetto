@@ -5,7 +5,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
 import { asFull, castTo } from '@travetto/runtime';
 
-import { Query, Header, Path, Context } from '../src/decorator/param';
+import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
 import { ControllerRegistry } from '../src/registry/controller';
@@ -20,16 +20,16 @@ class User {
 @Controller('/')
 class ParamController {
   @Post('/:name')
-  async endpoint(@Path() name: string, @Query() age: number) { }
+  async endpoint(@PathParam() name: string, @QueryParam() age: number) { }
 
   @Post('/login')
-  async login(@Header('api-key') key: string) { }
+  async login(@HeaderParam('api-key') key: string) { }
 
   @Post('/user/:id')
-  async users(@Path() id: string, @Query() age?: number) { }
+  async users(@PathParam() id: string, @QueryParam() age?: number) { }
 
   @Post('/req/res')
-  async reqRes(@Context() req: Request, @Context() res: Response, req2?: Request) { }
+  async reqRes(@ContextParam() req: Request, @ContextParam() res: Response, req2?: Request) { }
 
   @Post('/array')
   async array(values: number[]) { }
@@ -41,31 +41,31 @@ class ParamController {
   async array2(...values: boolean[]) { }
 
   @Get('/job/output/:jobId')
-  async jobOutput(@Path() jobId: string, @Required(false) @Query() time: Date) { }
+  async jobOutput(@PathParam() jobId: string, @Required(false) @QueryParam() time: Date) { }
 
   @Get('/job/output-min/:jobId')
-  async jobOutputMin(@Path() jobId: string, @Min(10) @Query() age: number) { }
+  async jobOutputMin(@PathParam() jobId: string, @Min(10) @QueryParam() age: number) { }
 
   @Get('/job/output2')
-  async jobOutput2(@Query({ name: 'optional' }) time?: Date) { }
+  async jobOutput2(@QueryParam({ name: 'optional' }) time?: Date) { }
 
   /**
    * @param name User name
    */
   @Post('/alias')
-  async alias(@Describe({ description: 'User name' }) @Query({ name: 'name' }) nm: string = 'green') { }
+  async alias(@Describe({ description: 'User name' }) @QueryParam({ name: 'name' }) nm: string = 'green') { }
 
   /**
    * @param nm User's name
    */
   @Post('/alias2')
-  async alias2(@Query() nm: string = 'green') { }
+  async alias2(@QueryParam() nm: string = 'green') { }
 
   /**
   * @param nm User's name
   */
   @Post('/alias3')
-  async alias3(@Query() nm: string | number = 'green') { }
+  async alias3(@QueryParam() nm: string | number = 'green') { }
 
   /**
   */
@@ -78,7 +78,7 @@ class ParamController {
   }
 
   @Get('/interface-prefix')
-  async ifUserPrefix(user3: User, @Query({ prefix: 'user1' }) user2: User) {
+  async ifUserPrefix(user3: User, @QueryParam({ prefix: 'user1' }) user2: User) {
     return user2;
   }
 }

@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 import { InjectableFactory } from '@travetto/di';
-import { Context } from '@travetto/rest';
+import { ContextParam } from '@travetto/rest';
 import { Login, Unauthenticated, Authenticated, Logout, RestAuthConfig, JWTPrincipalCodec, AuthContextInterceptor } from '@travetto/auth-rest';
 import { RuntimeIndex } from '@travetto/runtime';
 import { AuthContext } from '@travetto/auth';
@@ -75,7 +75,7 @@ export const text = <>
 
     <c.Code title='Using provider with routes' src='doc/route.ts' />
 
-    {Authenticated} and {Unauthenticated} will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the {Principal} is accessible via {Context} directly, without wiring in a request object, but is also accessible on the request object as {Request}.auth.
+    {Authenticated} and {Unauthenticated} will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the {Principal} is accessible via {ContextParam} directly, without wiring in a request object, but is also accessible on the request object as {Request}.auth.
   </c.Section>
 
   <c.Section title='Multi-Step Login'>

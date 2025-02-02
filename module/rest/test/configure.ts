@@ -6,7 +6,7 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { Controller, } from '../src/decorator/controller';
 import { Get } from '../src/decorator/endpoint';
-import { Path } from '../src/decorator/param';
+import { PathParam } from '../src/decorator/param';
 import { ControllerRegistry } from '../src/registry/controller';
 
 /**
@@ -20,7 +20,7 @@ class TestController {
    * @param name User name as a number
    */
   @Get('/user/:name')
-  async getUser(@Path() name: number) {
+  async getUser(@PathParam() name: number) {
 
   }
 }

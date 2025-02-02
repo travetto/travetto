@@ -5,7 +5,7 @@ import { Schema, SchemaRegistry, Validator } from '@travetto/schema';
 import { Controller, Redirect, Post, Get, MethodOrAll, ControllerRegistry } from '@travetto/rest';
 
 import { BaseRestSuite } from './base';
-import { Path, Query } from '../../src/decorator/param';
+import { PathParam, QueryParam } from '../../src/decorator/param';
 import { Response } from '../../src/types';
 
 type Errors = { details: { errors: { path: string }[] }, message: string };
@@ -60,7 +60,7 @@ class SchemaAPI {
   }
 
   @Get('/interface-prefix')
-  async ifUserPrefix(user: User, @Query({ prefix: 'user2' }) user3: User) {
+  async ifUserPrefix(user: User, @QueryParam({ prefix: 'user2' }) user3: User) {
     return user;
   }
 
@@ -85,7 +85,7 @@ class SchemaAPI {
   }
 
   @Get('/classShape/:shape')
-  async classShape(@Path('shape') sh: string) {
+  async classShape(@PathParam('shape') sh: string) {
     return new SimpleUser();
   }
 

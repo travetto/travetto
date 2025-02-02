@@ -655,6 +655,9 @@ Release 6.0 - 2025-2-1
    * Simplified to being the bridge between auth-session and rest
    * Session is tied to the principal lifecycle
 
+### Rest
+* Renamed Param type "X" to be named "X"Param.  This is in preparation for the new HTTP Verb QUERY which would have conflicted with the Query param (and is now QueryParam).
+
 ### Context
 * The context module had an unfortunate limitation that required a rewrite of the internals
 * Nested contexts, especially with Promise.all scenarios, resulted in unexpected behaviors across the board.
