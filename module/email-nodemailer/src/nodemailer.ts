@@ -14,11 +14,7 @@ type Transport = TransportType | json.Options | smtp.Options | ses.Options | sen
  */
 export class NodemailerTransport implements MailTransport {
   #transport: Transporter<SentEmail & {
-    envelope?: Record<string, string>;
-    accepted?: string[];
-    rejected?: string[];
-    pending?: string[];
-    response?: string;
+    rejected?: unknown[];
   }>;
 
   /**
