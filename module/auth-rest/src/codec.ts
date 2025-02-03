@@ -1,6 +1,6 @@
 import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt';
 
-import { AuthContext, AuthToken, Principal } from '@travetto/auth';
+import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
 import { FilterContext, RestCommonUtil } from '@travetto/rest';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
@@ -25,8 +25,11 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   postConstruct(): void {
     this.#verifier = createVerifier()
-      .setSigningKey(this.config.signingKey!)
-      .setSigningAlgorithm(this.#algorithm);
+      .setSigningAlgorithm(this.#algorithm)
+      .withKeyResolver((kid, cb) => {
+        const rec = this.config.keyMap[kid];
+        return cb(rec ? null : new AuthenticationError('Invalid'), rec.key);
+      });
   }
 
   async verify(token: string): Promise<Principal> {
@@ -37,7 +40,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
       return jwt.body.core;
     } catch (err) {
       if (err instanceof Error && err.name.startsWith('Jwt')) {
-        throw new AppError(err.message, { category: 'permissions' });
+        throw new AuthenticationError(err.message, { category: 'permissions' });
       }
       throw err;
     }
@@ -53,14 +56,21 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     return token ? await this.verify(token.value) : undefined;
   }
 
-  async create(value: Principal): Promise<string> {
-    const jwt = create({}, this.config.signingKey, this.#algorithm)
+  async create(value: Principal, keyId: string = 'default'): Promise<string> {
+    const keyRec = this.config.keyMap[keyId];
+    if (!keyRec) {
+      throw new AppError('Requested unknown key for signing');
+    }
+    const jwt = create({}, '-')
       .setExpiration(value.expiresAt!)
       .setIssuedAt(TimeUtil.asSeconds(value.issuedAt!))
       .setClaim('core', castTo({ ...value }))
       .setIssuer(value.issuer!)
       .setJti(value.sessionId!)
-      .setSubject(value.id);
+      .setSubject(value.id)
+      .setHeader('kid', keyRec.id)
+      .setSigningKey(keyRec.key)
+      .setSigningAlgorithm(this.#algorithm);
     return jwt.toString();
   }
 

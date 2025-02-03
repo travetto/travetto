@@ -107,7 +107,7 @@ export class AppConfig {
 The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70) method.
 
 ## Maintaining Auth Context
-The [AuthContextInterceptor](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/interceptors/context.ts#L20) acts as the bridge between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16) and the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31)/[Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161) object. The integration, leveraging [RestAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/config.ts#L6)'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the [JWT](https://jwt.io/) appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  
+The [AuthContextInterceptor](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/interceptors/context.ts#L20) acts as the bridge between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16) and the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31)/[Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161) object. The integration, leveraging [RestAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/config.ts#L8)'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the [JWT](https://jwt.io/) appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  
 
 **Note:** When using cookies, the automatic renewal, and update, and seamless receipt and transmission all the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) to act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. 
 
@@ -117,7 +117,7 @@ The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-
 ```typescript
 import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt';
 
-import { AuthContext, AuthToken, Principal } from '@travetto/auth';
+import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
 import { FilterContext, RestCommonUtil } from '@travetto/rest';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
@@ -142,8 +142,11 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   postConstruct(): void {
     this.#verifier = createVerifier()
-      .setSigningKey(this.config.signingKey!)
-      .setSigningAlgorithm(this.#algorithm);
+      .setSigningAlgorithm(this.#algorithm)
+      .withKeyResolver((kid, cb) => {
+        const rec = this.config.keyMap[kid];
+        return cb(rec ? null : new AuthenticationError('Invalid'), rec.key);
+      });
   }
 
   async verify(token: string): Promise<Principal> {
@@ -154,7 +157,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
       return jwt.body.core;
     } catch (err) {
       if (err instanceof Error && err.name.startsWith('Jwt')) {
-        throw new AppError(err.message, { category: 'permissions' });
+        throw new AuthenticationError(err.message, { category: 'permissions' });
       }
       throw err;
     }
@@ -170,14 +173,21 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     return token ? await this.verify(token.value) : undefined;
   }
 
-  async create(value: Principal): Promise<string> {
-    const jwt = create({}, this.config.signingKey, this.#algorithm)
+  async create(value: Principal, keyId: string = 'default'): Promise<string> {
+    const keyRec = this.config.keyMap[keyId];
+    if (!keyRec) {
+      throw new AppError('Requested unknown key for signing');
+    }
+    const jwt = create({}, '-')
       .setExpiration(value.expiresAt!)
       .setIssuedAt(TimeUtil.asSeconds(value.issuedAt!))
       .setClaim('core', castTo({ ...value }))
       .setIssuer(value.issuer!)
       .setJti(value.sessionId!)
-      .setSubject(value.id);
+      .setSubject(value.id)
+      .setHeader('kid', keyRec.id)
+      .setSigningKey(keyRec.key)
+      .setSigningAlgorithm(this.#algorithm);
     return jwt.toString();
   }
 
