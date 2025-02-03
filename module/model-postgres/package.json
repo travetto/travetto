@@ -33,7 +33,7 @@
     "@travetto/model": "^6.0.0-rc.0",
     "@travetto/model-query": "^6.0.0-rc.0",
     "@travetto/model-sql": "^6.0.0-rc.0",
-    "@types/pg": "^8.11.10",
+    "@types/pg": "^8.11.11",
     "pg": "^8.13.1"
   },
   "travetto": {
