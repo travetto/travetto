@@ -12,8 +12,6 @@ export class RestAuthConfig {
   headerPrefix: string = 'Token';
   @Secret()
   signingKey?: string | string[];
-
-  @Secret()
   @Ignore()
   keyMap: Record<string, KeyRec> & { default?: KeyRec } = {};
 
