@@ -22,13 +22,9 @@ export class RestAuthConfig {
       throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.signingKey');
     }
     this.signingKey ??= 'dummy';
-    const all = [this.signingKey].flat();
-    for (const key of all) {
-      const record: KeyRec = { key, id: BinaryUtil.hash(key, 8) };
-      if (key === all[0]) {
-        this.keyMap.default = record;
-      }
-      this.keyMap[record.id] = record;
-    }
+
+    const all = [this.signingKey].flat().map(key => ({ key, id: BinaryUtil.hash(key, 8) }));
+    this.keyMap = Object.fromEntries(all.map(k => [k.id, k]));
+    this.keyMap.default = all[0];
   }
 }
