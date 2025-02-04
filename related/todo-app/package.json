@@ -21,22 +21,22 @@
     "start": "npx trv run:rest"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^6.0.0-rc.2",
-    "@travetto/auth-rest-session": "^6.0.0-rc.2",
-    "@travetto/cli": "^6.0.0-rc.0",
-    "@travetto/email-inky": "^6.0.0-rc.0",
-    "@travetto/log": "^6.0.0-rc.0",
-    "@travetto/model-mongo": "^6.0.0-rc.0",
-    "@travetto/openapi": "^6.0.0-rc.0",
-    "@travetto/rest-express": "^6.0.0-rc.0",
-    "@travetto/rest-rpc": "^6.0.0-rc.0",
+    "@travetto/auth-rest": "^6.0.0-rc.3",
+    "@travetto/auth-rest-session": "^6.0.0-rc.3",
+    "@travetto/cli": "^6.0.0-rc.1",
+    "@travetto/email-inky": "^6.0.0-rc.1",
+    "@travetto/log": "^6.0.0-rc.1",
+    "@travetto/model-mongo": "^6.0.0-rc.1",
+    "@travetto/openapi": "^6.0.0-rc.1",
+    "@travetto/rest-express": "^6.0.0-rc.1",
+    "@travetto/rest-rpc": "^6.0.0-rc.1",
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@travetto/compiler": "^6.0.0-rc.0",
-    "@travetto/email-compiler": "^6.0.0-rc.0",
-    "@travetto/pack": "^6.0.0-rc.0",
-    "@travetto/rest-client": "^6.0.0-rc.0"
+    "@travetto/compiler": "^6.0.0-rc.1",
+    "@travetto/email-compiler": "^6.0.0-rc.1",
+    "@travetto/pack": "^6.0.0-rc.1",
+    "@travetto/rest-client": "^6.0.0-rc.1"
   },
   "travetto": {
     "displayName": "Todo Application"

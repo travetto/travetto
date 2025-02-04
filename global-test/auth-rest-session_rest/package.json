@@ -2,15 +2,15 @@
   "name": "@travetto-test/auth-rest-session_rest",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/auth-rest-session": "^6.0.0-rc.2",
-    "@travetto/auth-session": "^6.0.0-rc.0",
-    "@travetto/model-memory": "^6.0.0-rc.0",
-    "@travetto/rest-express": "^6.0.0-rc.0",
-    "@travetto/rest-express-lambda": "^6.0.0-rc.0",
-    "@travetto/rest-fastify": "^6.0.0-rc.0",
-    "@travetto/rest-fastify-lambda": "^6.0.0-rc.0",
-    "@travetto/rest-koa": "^6.0.0-rc.0",
-    "@travetto/rest-koa-lambda": "^6.0.0-rc.0"
+    "@travetto/auth-rest-session": "^6.0.0-rc.3",
+    "@travetto/auth-session": "^6.0.0-rc.1",
+    "@travetto/model-memory": "^6.0.0-rc.1",
+    "@travetto/rest-express": "^6.0.0-rc.1",
+    "@travetto/rest-express-lambda": "^6.0.0-rc.1",
+    "@travetto/rest-fastify": "^6.0.0-rc.1",
+    "@travetto/rest-fastify-lambda": "^6.0.0-rc.1",
+    "@travetto/rest-koa": "^6.0.0-rc.1",
+    "@travetto/rest-koa-lambda": "^6.0.0-rc.1"
   },
   "travetto": {},
   "private": true
