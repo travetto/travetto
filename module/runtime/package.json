@@ -30,7 +30,7 @@
     "debug": "^4.4.0"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^6.0.0-rc.1"
+    "@travetto/transformer": "^6.0.0-rc.2"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

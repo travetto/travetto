@@ -42,7 +42,7 @@
   "peerDependencies": {
     "@travetto/cli": "^6.0.0-rc.1",
     "@travetto/test": "^6.0.0-rc.1",
-    "@travetto/transformer": "^6.0.0-rc.1"
+    "@travetto/transformer": "^6.0.0-rc.2"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {
