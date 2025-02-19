@@ -1,4 +1,3 @@
-import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -110,7 +109,7 @@ class $Runtime {
   /** Import from a given path */
   async importFrom<T = unknown>(imp?: string): Promise<T> {
     const file = path.resolve(this.#idx.mainModule.sourcePath, imp!);
-    if (existsSync(file)) {
+    if (await fs.stat(file).catch(() => false)) {
       imp = this.#idx.getFromSource(file)?.import;
     }
 

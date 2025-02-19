@@ -27,7 +27,7 @@
     "@travetto/rest": "^6.0.0-rc.1",
     "@types/compression": "^1.7.5",
     "@types/express": "^5.0.0",
-    "compression": "^1.7.5",
+    "compression": "^1.8.0",
     "express": "^5.0.1"
   },
   "travetto": {

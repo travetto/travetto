@@ -12,6 +12,7 @@
     "declarationMap": true,
     "esModuleInterop": true,
     "strictPropertyInitialization": false,
+    "erasableSyntaxOnly": true,
     "experimentalDecorators": true,
     "noEmitOnError": false,
     "noErrorTruncation": true,

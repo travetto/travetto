@@ -1,6 +1,5 @@
 import vscode from 'vscode';
 import fs from 'node:fs/promises';
-import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 import { Activatible } from '../../../core/activation';
@@ -31,7 +30,7 @@ export class LogFeature extends BaseFeature {
       let file: undefined | string;
       if (imp.startsWith(Workspace.moduleName)) {
         const resolved = path.resolve(Workspace.path, imp.replace(Workspace.moduleName, '.'));
-        if (existsSync(resolved)) {
+        if (await fs.stat(resolved).catch(() => false)) {
           file = resolved;
         }
       } else {
