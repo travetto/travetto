@@ -29,16 +29,16 @@
     "@angular/compiler": "^19.0.4",
     "@angular/core": "^19.0.4",
     "@angular/platform-browser": "^19.0.4",
-    "@angular/platform-browser-dynamic": "^19.0.5",
-    "@angular/router": "^19.0.5",
+    "@angular/platform-browser-dynamic": "^19.1.6",
+    "@angular/router": "^19.1.6",
     "rxjs": "^7.8.1",
     "zone.js": "^0.15.0"
   },
   "devDependencies": {
-    "@angular/build": "^19.0.6",
-    "@angular/cli": "^19.0.6",
-    "@angular/compiler-cli": "^19.0.5",
-    "@types/node": "^22.10.2",
+    "@angular/build": "^19.1.7",
+    "@angular/cli": "^19.1.7",
+    "@angular/compiler-cli": "^19.1.6",
+    "@types/node": "^22.13.4",
     "source-map-explorer": "^2.5.3",
     "ts-node": "~10.9.1",
     "typescript": "~5.5.4"
