@@ -20,6 +20,7 @@ async function transpile(content = '', esm = true, full = true) {
   return ts.transpile(content, {
     target: ts.ScriptTarget.ES2022,
     module: esm ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS,
+    allowImportingTsExtensions: true,
     ...(full ? { esModuleInterop: true, allowSyntheticDefaultImports: true } : {})
   });
 }

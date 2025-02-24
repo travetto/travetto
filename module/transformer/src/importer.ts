@@ -229,7 +229,7 @@ export class ImportManager {
         toAdd.push(stmt);
       }
     }
-    return CoreUtil.updateSource(this.factory, ret, toAdd);
+    return CoreUtil.updateSource(this.factory, ret, []);
   }
 
   /**

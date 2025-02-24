@@ -1,7 +1,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Alias, Field, LongText, Required, Schema, SchemaRegistry, Specifier, Text } from '../__index__.ts';
+import { Alias, Field, LongText, Required, Specifier, Text } from '../src/decorator/field';
+import { Schema } from '../src/decorator/schema';
+import { SchemaRegistry } from '../src/service/registry';
 
 @Schema()
 class MyClass {

@@ -6,7 +6,7 @@ import { Test, Suite } from '@travetto/test';
 
 import { renderJSX } from './util.ts';
 import { SUMMARY_STYLE } from '../src/render/html.ts';
-import { HLine, Wrapper, Summary, Title } from '../__index__.ts';
+import { HLine, Wrapper, Summary, Title } from '../src/components.ts';
 
 @Suite('simple')
 class SimpleComponentTest {
