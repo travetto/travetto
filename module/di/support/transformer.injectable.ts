@@ -4,7 +4,7 @@ import {
   TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, OnSetter, ForeignType
 } from '@travetto/transformer';
 
-const INJECTABLE_MOD = '@travetto/di/src/decorator.ts';
+const INJECTABLE_MOD = '@travetto/di/src/decorator';
 
 /**
  * Injectable/Injection transformer
@@ -51,6 +51,8 @@ export class InjectableTransformer {
       const src = state.getFileImportName(file);
       throw new Error(`Unable to import non-external type: ${param.getText()} ${type.key}: ${src}`);
     }
+
+    process.send!({ type: 'log', payload: { level: 'info', message: `Resolved ${state.source.fileName} ${param.name.getText()} ${type.key}`, } });
 
     args.unshift(state.fromLiteral(payload));
 

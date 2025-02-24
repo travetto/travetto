@@ -41,7 +41,9 @@ const SUPPORT_FILE_RE = new RegExp(`^support[/](?<name>${Object.keys(SUPPORT_FIL
 
 export class ManifestModuleUtil {
 
+  static TYPINGS_EXT = '.d.ts';
   static OUTPUT_EXT = '.js';
+  static SOURCE_DEF_EXT = '.ts';
   static SOURCE_EXT_RE = /[.][cm]?[tj]sx?$/;
   static TYPINGS_EXT_RE = /[.]d[.][cm]?ts$/;
   static TYPINGS_WITH_MAP_EXT_RE = /[.]d[.][cm]?ts([.]map)?$/;
@@ -132,7 +134,7 @@ export class ManifestModuleUtil {
       moduleFile.startsWith('support/resources/')
     ) {
       return 'fixture';
-    } else if (moduleFile.endsWith('.d.ts')) {
+    } else if (moduleFile.endsWith(this.TYPINGS_EXT)) {
       return 'typings';
     } else {
       const ext = path.extname(moduleFile);
@@ -240,7 +242,7 @@ export class ManifestModuleUtil {
    * Get the output file name for a given input
    */
   static withOutputExtension(sourceFile: string): string {
-    if (sourceFile.endsWith('.d.ts')) {
+    if (sourceFile.endsWith(this.TYPINGS_EXT)) {
       return sourceFile;
     }
     return this.#pathToExtension(sourceFile, ManifestModuleUtil.OUTPUT_EXT);
@@ -250,7 +252,7 @@ export class ManifestModuleUtil {
    * Get the file without an extension
    */
   static withoutSourceExtension(sourceFile: string): string {
-    if (sourceFile.endsWith('.d.ts')) {
+    if (sourceFile.endsWith(this.TYPINGS_EXT)) {
       return sourceFile;
     }
     return this.#pathToExtension(sourceFile, '');

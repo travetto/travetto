@@ -19,6 +19,11 @@ export class PackAppSuite {
     });
 
     const state = await ExecUtil.getResult(proc, { catch: true });
+
+    if (!state.valid) {
+      assert(state.stderr === '');
+    }
+
     assert(state.valid);
 
     const proc2 = spawn('docker', ['run', '--rm', `${imageName}:${tag}`, '30']);

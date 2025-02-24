@@ -6,7 +6,7 @@ import { RuntimeResources } from '@travetto/runtime';
 /**
  * Mail interpolation engine
  *
- * @concrete ./internal/types#MailInterpolatorTarget
+ * @concrete ./internal/types.ts#MailInterpolatorTarget
  */
 export interface MailInterpolator {
   /**

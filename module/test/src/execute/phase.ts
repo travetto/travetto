@@ -68,6 +68,7 @@ export class TestPhaseManager {
    * On error, handle stubbing out error for the phases in progress
    */
   async onError(err: Error | unknown): Promise<void> {
+    console.error(err);
     if (!(err instanceof Error)) {
       throw err;
     }

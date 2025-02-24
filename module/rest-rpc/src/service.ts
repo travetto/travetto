@@ -57,7 +57,7 @@ export class RestRpcClientGeneratorService implements AutoCreate {
 
     const factoryOutputFile = path.resolve(config.output, 'factory.ts');
     const factorySourceContents = [
-      `import { ${clientFactory.name} } from './rpc.ts';`,
+      `import { ${clientFactory.name} } from './rpc';`,
       ...classes.map((n) => `import type { ${n.name} } from '${n.import}';`),
       '',
       `export const factory = ${clientFactory.name}<{`,

@@ -38,7 +38,7 @@ export class SimpleResolver implements TransformResolver {
     const type = ManifestModuleUtil.getFileType(file);
 
     if (type !== 'js' && type !== 'ts') {
-      sourceFile = `${sourceFile}.ts`;
+      sourceFile = `${sourceFile}${ManifestModuleUtil.SOURCE_DEF_EXT}`;
     }
 
     const sourceType = ManifestModuleUtil.getFileType(sourceFile);

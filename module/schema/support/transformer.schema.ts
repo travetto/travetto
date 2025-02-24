@@ -14,9 +14,6 @@ interface AutoState {
   [accessors]?: Set<string>;
 }
 
-const SCHEMA_IMPORT = '@travetto/schema/src/decorator/schema.ts';
-const COMMON_IMPORT = '@travetto/schema/src/decorator/common.ts';
-
 /**
  * Processes `@Schema` to register class as a valid Schema
  */
@@ -41,12 +38,12 @@ export class SchemaTransformer {
 
     const comments = DocUtil.describeDocs(node);
 
-    if (!state.findDecorator(this, node, 'Schema', SCHEMA_IMPORT)) {
-      modifiers.unshift(state.createDecorator(SCHEMA_IMPORT, 'Schema'));
+    if (!state.findDecorator(this, node, 'Schema', SchemaTransformUtil.SCHEMA_IMPORT)) {
+      modifiers.unshift(state.createDecorator(SchemaTransformUtil.SCHEMA_IMPORT, 'Schema'));
     }
 
     if (comments.description) {
-      modifiers.push(state.createDecorator(COMMON_IMPORT, 'Describe', state.fromLiteral({
+      modifiers.push(state.createDecorator(SchemaTransformUtil.COMMON_IMPORT, 'Describe', state.fromLiteral({
         title: comments.description
       })));
     }

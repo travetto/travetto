@@ -3,11 +3,12 @@ import ts from 'typescript';
 import {
   TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, DecoratorMeta, LiteralUtil, AnyType
 } from '@travetto/transformer';
+
 import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util.ts';
 
-const PARAM_DEC_FILE = '@travetto/rest/src/decorator/param.ts';
-const COMMON_DEC_FILE = '@travetto/rest/src/decorator/common.ts';
-const ENDPOINT_DEC_FILE = '@travetto/rest/src/decorator/endpoint.ts';
+const PARAM_DEC_IMPORT = '@travetto/rest/src/decorator/param.ts';
+const COMMON_DEC_IMPORT = '@travetto/rest/src/decorator/common.ts';
+const ENDPOINT_DEC_IMPORT = '@travetto/rest/src/decorator/endpoint.ts';
 
 /**
  * Handle @Controller, @Endpoint
@@ -79,7 +80,7 @@ export class RestTransformer {
     const modifiers = (node.modifiers ?? []).filter(x => x !== pDec);
 
     if (!pDec) { // Handle default, missing
-      modifiers.push(state.createDecorator(PARAM_DEC_FILE, detectedParamType ?? 'ContextParam', conf));
+      modifiers.push(state.createDecorator(PARAM_DEC_IMPORT, detectedParamType ?? 'ContextParam', conf));
     } else if (ts.isCallExpression(pDec.expression)) { // if it does exist, update
       modifiers.push(state.factory.createDecorator(
         state.factory.createCallExpression(
@@ -114,7 +115,7 @@ export class RestTransformer {
 
     // Handle description/title/summary w/e
     if (comments.description) {
-      newDecls.push(state.createDecorator(COMMON_DEC_FILE, 'Describe', state.fromLiteral({
+      newDecls.push(state.createDecorator(COMMON_DEC_IMPORT, 'Describe', state.fromLiteral({
         title: comments.description
       })));
     }
@@ -138,7 +139,7 @@ export class RestTransformer {
     const inner = SchemaTransformUtil.findInnerReturnMethod(state, node, 'render');
     const returnType = SchemaTransformUtil.ensureType(state, state.resolveReturnType(inner ?? node), node);
     if (returnType.type) {
-      newDecls.push(state.createDecorator(ENDPOINT_DEC_FILE, 'ResponseType', state.fromLiteral({
+      newDecls.push(state.createDecorator(ENDPOINT_DEC_IMPORT, 'ResponseType', state.fromLiteral({
         ...returnType,
         title: comments.return
       })));
@@ -176,7 +177,7 @@ export class RestTransformer {
         node,
         [
           ...(node.modifiers ?? []),
-          state.createDecorator(COMMON_DEC_FILE, 'Describe', state.fromLiteral({
+          state.createDecorator(COMMON_DEC_IMPORT, 'Describe', state.fromLiteral({
             title: comments.description
           }))
         ],

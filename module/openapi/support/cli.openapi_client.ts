@@ -16,9 +16,9 @@ export class OpenApiClientCommand implements CliCommandShape {
   @CliFlag({ desc: 'Additional Properties', short: '-a', name: '--additional-properties' })
   props: string[] = [];
   @CliFlag({ desc: 'Input file' })
-  input = './openapi.yml.ts';
+  input = './openapi.yml';
   @CliFlag({ desc: 'Output folder' })
-  output = './api-client.ts';
+  output = './api-client';
   @CliFlag({ desc: 'Docker Image to user' })
   dockerImage = 'openapitools/openapi-generator-cli:latest';
 

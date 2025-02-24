@@ -22,7 +22,7 @@ function NodeList({ src }: { src: string }): DocJSXElement {
 }
 
 export const text = async () => {
-  const nodeContents = await fs.readFile(RuntimeIndex.getSourceFile('@travetto/doc/src/jsx.ts'), 'utf8.ts');
+  const nodeContents = await fs.readFile(RuntimeIndex.getSourceFile('@travetto/doc/src/jsx.ts'), 'utf8');
 
   return <>
     <c.StdHeader />

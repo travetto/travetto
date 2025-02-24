@@ -104,12 +104,12 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Retrieve all dependencies
    */
-  async fetchDependencies(managed: InjectableConfig, deps?: Dependency[]): Promise<unknown[]> {
+  async fetchDependencies(managed: InjectableConfig, deps?: Dependency[], keys?: string[]): Promise<unknown[]> {
     if (!deps || !deps.length) {
       return [];
     }
 
-    const promises = deps.map(async x => {
+    const promises = deps.map(async (x, i) => {
       try {
         return await this.getInstance(x.target, x.qualifier, x.resolution);
       } catch (err) {
@@ -117,7 +117,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
           return undefined;
         } else {
           if (err && err instanceof Error) {
-            err.message = `${err.message} via=${managed.class.Ⲑid}`;
+            err.message = `${err.message} via=${managed.class.Ⲑid} prop=${keys?.[i] ?? 'constructor'}`;
           }
           throw err;
         }
@@ -136,7 +136,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // And auto-wire
     if (keys.length) {
-      const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]));
+      const deps = await this.fetchDependencies(config, keys.map(x => config.dependencies.fields[x]), keys);
       for (let i = 0; i < keys.length; i++) {
         instance[castKey<T>(keys[i])] = castTo(deps[i]);
       }

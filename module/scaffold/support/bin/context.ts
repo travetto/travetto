@@ -114,7 +114,7 @@ export class Context {
 
     /** Get framework version at runtime */
     const { version: frameworkVersion } = PackageUtil.readPackage(
-      PackageUtil.resolveImport('@travetto/manifest/package.json.ts')
+      PackageUtil.resolveImport('@travetto/manifest/package.json')
     );
 
     const context = Object.assign({

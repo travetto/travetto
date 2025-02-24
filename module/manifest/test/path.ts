@@ -12,7 +12,7 @@ class PathTests {
   @Test()
   verifyRelative() {
     const pwd = path.resolve().replace(/[a-z\- ]+/g, '..');
-    assert(pwd.includes('../../...ts'));
+    assert(pwd.includes('../../..'));
     assert(path.resolve(`${pwd}/test`) === '/test');
   }
 
@@ -39,10 +39,10 @@ class PathTests {
 
     assert(winResolve('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winResolve('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');
-    assert(winResolve('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png.ts');
+    assert(winResolve('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png');
 
     assert(winJoin('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winJoin('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');
-    assert(winJoin('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png.ts');
+    assert(winJoin('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png');
   }
 }

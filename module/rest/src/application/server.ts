@@ -1,11 +1,11 @@
-import { RestInterceptor } from '../interceptor/types.ts';
-import { RouteConfig, ServerHandle } from '../types.ts';
+import type { RestInterceptor } from '../interceptor/types.ts';
+import type { RouteConfig, ServerHandle } from '../types.ts';
 
 /**
  * Defines the contract for any rest server to support the
  * framework.
  *
- * @concrete ../internal/server#RestServerTarget
+ * @concrete ../internal/server.ts#RestServerTarget
  */
 export interface RestServer<T = unknown> {
 

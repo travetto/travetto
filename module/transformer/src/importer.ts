@@ -128,7 +128,7 @@ export class ImportManager {
   importFile(file: string, name?: string): Import {
     file = this.#resolver.getFileImportName(file);
 
-    if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
+    if (file.endsWith(ManifestModuleUtil.SOURCE_DEF_EXT) && !file.endsWith(ManifestModuleUtil.TYPINGS_EXT)) {
       file = ManifestModuleUtil.withOutputExtension(file);
     }
 
@@ -231,7 +231,7 @@ export class ImportManager {
         toAdd.push(stmt);
       }
     }
-    return CoreUtil.updateSource(this.factory, ret, []);
+    return CoreUtil.updateSource(this.factory, ret, toAdd);
   }
 
   /**

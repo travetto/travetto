@@ -5,7 +5,7 @@ import { Env, TimeUtil, Runtime, castTo } from '@travetto/runtime';
 import { SuiteRegistry } from '../registry/suite.ts';
 import { TestConfig, TestResult, TestRun } from '../model/test.ts';
 import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
-import { TestConsumer } from '../consumer/types.ts';
+import { TestConsumerShape } from '../consumer/types.ts';
 import { AssertCheck } from '../assert/check.ts';
 import { AssertCapture } from '../assert/capture.ts';
 import { ConsoleCapture } from './console.ts';
@@ -21,9 +21,9 @@ const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.val) ?? 5000;
  */
 export class TestExecutor {
 
-  #consumer: TestConsumer;
+  #consumer: TestConsumerShape;
 
-  constructor(consumer: TestConsumer) {
+  constructor(consumer: TestConsumerShape) {
     this.#consumer = consumer;
   }
 

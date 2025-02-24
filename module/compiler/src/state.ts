@@ -184,8 +184,8 @@ export class CompilerState implements ts.CompilerHost {
     this.#tscOutputFileToOuptut.set(`${tscOutputFile}.map`, `${outputFile}.map`);
 
     if (!isTypings) {
-      const srcBase = `${ManifestModuleUtil.withoutSourceExtension(tscOutputFile)}.d.ts`;
-      const outBase = `${ManifestModuleUtil.withoutSourceExtension(outputFile)}.d.ts`;
+      const srcBase = `${ManifestModuleUtil.withoutSourceExtension(tscOutputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
+      const outBase = `${ManifestModuleUtil.withoutSourceExtension(outputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
       this.#tscOutputFileToOuptut.set(`${srcBase}.map`, `${outBase}.map`);
       this.#tscOutputFileToOuptut.set(srcBase, outBase);
     }
@@ -221,7 +221,7 @@ export class CompilerState implements ts.CompilerHost {
     this.#sourceToEntry.delete(sourceFile);
     this.#sourceFiles.delete(sourceFile);
 
-    const tscOutputDts = `${ManifestModuleUtil.withoutSourceExtension(entry.tscOutputFile)}.d.ts`;
+    const tscOutputDts = `${ManifestModuleUtil.withoutSourceExtension(entry.tscOutputFile)}${ManifestModuleUtil.TYPINGS_EXT}`;
     this.#tscOutputFileToOuptut.delete(entry.tscOutputFile);
     this.#tscOutputFileToOuptut.delete(`${entry.tscOutputFile}.map`);
     this.#tscOutputFileToOuptut.delete(tscOutputDts);
