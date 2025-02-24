@@ -18,6 +18,7 @@ export class TapEmitter implements TestConsumerShape {
   #enhancer: TestResultsEnhancer;
   #terminal: Terminal;
   #start: number;
+  #options?: Record<string, unknown>;
 
   constructor(
     terminal = new Terminal(),
@@ -26,6 +27,11 @@ export class TapEmitter implements TestConsumerShape {
     this.#terminal = terminal;
     this.#enhancer = enhancer;
   }
+
+  setOptions(options?: Record<string, unknown>): Promise<void> | void {
+    this.#options = options;
+  }
+
 
   log(message: string): void {
     this.#terminal.writer.writeLine(message).commit();
@@ -47,6 +53,22 @@ export class TapEmitter implements TestConsumerShape {
     let body = stringify(obj, { lineWidth: lineLength, indent: 2 });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
+  }
+
+  toError(error?: Error): string | undefined {
+    if (error && error.name !== 'AssertionError') {
+      const err = SerializeUtil.deserializeError(error);
+      if (hasToJSON(err)) {
+        const obj = err.toJSON();
+        let out = JSON.stringify(obj, null, 2);
+        if (this.#options?.verbose && err.stack) {
+          out = `${out}\n${err.stack}`;
+        }
+        return out;
+      } else {
+        return `${err}`;
+      }
+    }
   }
 
   /**
@@ -102,9 +124,9 @@ export class TapEmitter implements TestConsumerShape {
 
       // Handle error
       if (test.status === 'failed') {
-        if (test.error && test.error.name !== 'AssertionError') {
-          const err = SerializeUtil.deserializeError(test.error);
-          this.logMeta({ error: hasToJSON(err) ? err.toJSON() : err });
+        const error = this.toError(test.error);
+        if (error) {
+          this.logMeta({ error });
         }
       }
 
@@ -128,7 +150,7 @@ export class TapEmitter implements TestConsumerShape {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.#enhancer.failure(hasToJSON(err) ? JSON.stringify(err.toJSON(), null, 2) : `${err}`));
+        this.log(this.#enhancer.failure(this.toError(err)!));
       }
     }
 

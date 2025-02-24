@@ -1,6 +1,6 @@
 import {
   Class, Runtime, asConstructable, castTo, classConstruct, describeFunction,
-  asFull, castKey, TypedFunction, hasFunction
+  asFull, castKey, TypedFunction, hasFunction, AppError
 } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
@@ -117,7 +117,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
           return undefined;
         } else {
           if (err && err instanceof Error) {
-            err.message = `${err.message} via=${managed.class.Ⲑid} prop=${keys?.[i] ?? 'constructor'}`;
+            err.message = `${err.message} via=${managed.class.Ⲑid}[${keys?.[i] ?? 'constructor'}]`;
           }
           throw err;
         }
@@ -274,6 +274,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    */
   async getInstance<T>(target: ClassTarget<T>, qual?: symbol, resolution?: ResolutionType): Promise<T> {
     this.verifyInitialized();
+
+    if (!target) {
+      throw new AppError('Unable to get instance when target is undefined');
+    }
 
     const { id: classId, qualifier } = this.resolveTarget(target, qual, resolution);
     if (!this.instances.has(classId) || !this.instances.get(classId)!.has(qualifier)) {
