@@ -2,8 +2,6 @@ import { castTo, Class } from '@travetto/runtime';
 
 import { InjectableConfig, DependencyRegistry } from '@travetto/di';
 
-// Isolated import to speed up cli performance
-import { ModelRegistry } from '@travetto/model/src/registry/model.ts';
 import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/common.ts';
 
 import type { ModelStorageSupport } from '../../src/service/storage.ts';
@@ -25,6 +23,8 @@ export class ModelCandidateUtil {
    * Get all models
    */
   static async #getModels(models?: string[]): Promise<Class<ModelType>[]> {
+    const { ModelRegistry } = await import('@travetto/model/src/registry/model.ts');
+
     const names = new Set(models ?? []);
     const all = names.has('*');
     return ModelRegistry.getClasses()
@@ -36,6 +36,8 @@ export class ModelCandidateUtil {
    * Get model names
    */
   static async getModelNames(): Promise<string[]> {
+    const { ModelRegistry } = await import('@travetto/model/src/registry/model.ts');
+
     return (await this.#getModels()).map(x => ModelRegistry.getStore(x)).sort();
   }
 

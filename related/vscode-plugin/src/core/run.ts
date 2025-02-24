@@ -14,7 +14,7 @@ export class RunUtil {
   static #cliFile: string;
 
   static get cliFile(): string {
-    return this.#cliFile ??= Workspace.resolveImport('@travetto/cli/bin/trv.js.ts');
+    return this.#cliFile ??= Workspace.resolveImport('@travetto/cli/bin/trv.js');
   }
 
   static buildEnv(cliModule?: string): EnvDict {

@@ -5,7 +5,7 @@
  * @typedef {import('../../../src/model.ts').Todo} Todo 
  */
 
-import { factory } from './api-client/factory.js.ts';
+import { factory } from './api-client/factory.js';
 
 const { TodoController: api, AuthController: auth } = factory({
   url: 'https://localhost:3000'

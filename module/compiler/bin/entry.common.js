@@ -28,7 +28,7 @@ async function getContext() {
   const ctxSrc = require.resolve('@travetto/manifest/src/context.ts');
   const ctxDest = path.resolve(__dirname, 'gen.context.mjs');
   await writeIfStale(ctxSrc, ctxDest, content => transpile(content, true, false));
-  const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest/src/context.ts')} */ v) => v.getManifestContext());
+  const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest')} */ v) => v.getManifestContext());
 
   const srcPath = path.resolve.bind(path, ctx.workspace.path, ctx.build.compilerModuleFolder);
   const destPath = (file = '', mod = COMP_MOD) => {

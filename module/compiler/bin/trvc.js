@@ -17,7 +17,7 @@ Available Commands:
 const toJson = (/** @type {number} */ depth) => v => process.stdout.write(`${JSON.stringify(v, undefined, depth)}\n`) ||
   new Promise(r => process.stdout.once('drain', r));
 
-require('./entry.common.js.ts').load(ops => {
+require('./entry.common.js').load(ops => {
   const [op, ...all] = process.argv.slice(2);
   const args = all.filter(x => !x.startsWith('-'));
 

@@ -71,7 +71,7 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
 
   @Test({ timeout: 10000 })
   async fetchWebClient() {
-    const result = await RestClientTestUtil.runWebClient(fetchRequestBody('./api.js.ts', this.port!));
+    const result = await RestClientTestUtil.runWebClient(fetchRequestBody('./api.js', this.port!));
     this.validateFetchResponses(result);
   }
 
