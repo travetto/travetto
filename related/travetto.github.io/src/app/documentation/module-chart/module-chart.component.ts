@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { PAGES } from '../pages';
+import { PAGES } from '../pages.ts';
 
 @Component({
   selector: 'app-module-chart',
   imports: [RouterLink],
-  templateUrl: './module-chart.component.html',
-  styleUrls: ['./module-chart.component.scss', './module-chart.layout.scss']
+  templateUrl: './module-chart.component.html.ts',
+  styleUrls: ['./module-chart.component.scss', './module-chart.layout.scss.ts']
 })
 export class ModuleChartComponent {
 

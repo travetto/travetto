@@ -2,10 +2,10 @@
 /** eslint-env browser */ /* global Vue */
 
 /** 
- * @typedef {import('../../../src/model').Todo} Todo 
+ * @typedef {import('../../../src/model.ts').Todo} Todo 
  */
 
-import { factory } from './api-client/factory.js';
+import { factory } from './api-client/factory.js.ts';
 
 const { TodoController: api, AuthController: auth } = factory({
   url: 'https://localhost:3000'

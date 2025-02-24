@@ -3,7 +3,7 @@ import { pipeline } from 'node:stream/promises';
 import type koa from 'koa';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
-import { NodeEntitySymbol, ProviderEntitySymbol } from '@travetto/rest/src/internal/symbol';
+import { NodeEntitySymbol, ProviderEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
 import { castTo } from '@travetto/runtime';
 
 /**

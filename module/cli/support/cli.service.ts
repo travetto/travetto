@@ -2,7 +2,7 @@ import { CliCommandShape, CliCommand, cliTpl, CliValidationError } from '@travet
 import { Terminal } from '@travetto/terminal';
 import { AsyncQueue, Runtime, RuntimeIndex, Util } from '@travetto/runtime';
 
-import { ServiceRunner, ServiceDescriptor, ServiceAction } from '../src/service';
+import { ServiceRunner, ServiceDescriptor, ServiceAction } from '../src/service.ts';
 
 /**
  * Allows for running services

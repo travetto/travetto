@@ -33,7 +33,7 @@ async function getVersion(cwd) {
 
   spawn('npx', [
     'trvc', 'exec',
-    '@travetto/cli/support/entry.trv.js',
+    '@travetto/cli/support/entry.trv.js.ts',
     'scaffold',
     '-c', process.cwd(),
     ...process.argv.slice(2)

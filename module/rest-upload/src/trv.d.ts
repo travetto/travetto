@@ -1,4 +1,4 @@
-import { UploadMap } from './types';
+import { UploadMap } from './types.ts';
 
 declare module '@travetto/rest' {
   interface Request {

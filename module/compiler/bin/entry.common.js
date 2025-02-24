@@ -28,7 +28,7 @@ async function getContext() {
   const ctxSrc = require.resolve('@travetto/manifest/src/context.ts');
   const ctxDest = path.resolve(__dirname, 'gen.context.mjs');
   await writeIfStale(ctxSrc, ctxDest, content => transpile(content, true, false));
-  const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest/src/context')} */ v) => v.getManifestContext());
+  const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest/src/context.ts')} */ v) => v.getManifestContext());
 
   const srcPath = path.resolve.bind(path, ctx.workspace.path, ctx.build.compilerModuleFolder);
   const destPath = (file = '', mod = COMP_MOD) => {
@@ -45,14 +45,14 @@ async function getContext() {
       .replace(/from '([.][^']+)'/g, (_, i) => `from '${i.replace(/[.]js$/, '')}.js'`)
       .replace(/from '(@travetto\/[^/']+)([/][^']+)?'/g, (_, mod, modFile) => `from '${destPath(modFile, mod)}'`),
     loadMain: () => import(destPath('support/entry.main.ts'))
-      .then((/** @type {import('../support/entry.main')} */ v) => v.main(ctx)),
+      .then((/** @type {import('../support/entry.main.ts')} */ v) => v.main(ctx)),
     supportFiles: () => readdir(srcPath('support'), { recursive: true, encoding: 'utf8' })
       .then(v => v.filter(f => f.endsWith('.ts')).map(j => `support/${j}`))
   };
 }
 
 /** @template T */
-async function load(/** @type {(ops: import('../support/entry.main').Operations) => T} */ cb) {
+async function load(/** @type {(ops: import('../support/entry.main.ts').Operations) => T} */ cb) {
   const ctx = await getContext();
 
   try {

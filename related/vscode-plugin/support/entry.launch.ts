@@ -16,9 +16,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   }
 
   process.env.TRV_MANIFEST = manifest;
-  return (await import('../src/extension')).activate(context);
+  return (await import('../src/extension.ts')).activate(context);
 }
 
 export async function deactivate(): Promise<void> {
-  return (await import('../src/extension')).deactivate();
+  return (await import('../src/extension.ts')).deactivate();
 }

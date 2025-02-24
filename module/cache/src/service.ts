@@ -2,11 +2,11 @@ import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError } from '@tra
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, Runtime, TimeUtil, Util } from '@travetto/runtime';
-import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
+import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/internal/service/common.ts';
 
-import { CacheError } from './error';
-import { CacheUtil } from './util';
-import { CacheAware, CacheConfigSymbol, EvictConfigSymbol } from './internal/types';
+import { CacheError } from './error.ts';
+import { CacheUtil } from './util.ts';
+import { CacheAware, CacheConfigSymbol, EvictConfigSymbol } from './internal/types.ts';
 
 export const CacheModelSymbol = Symbol.for('@travetto/cache:model');
 

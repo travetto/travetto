@@ -6,8 +6,8 @@ import { DefaultContextExtends, HttpError } from 'koa';
 import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
 
-import { DependencyRegistry } from '../src/registry';
-import { Inject, Injectable, InjectableFactory } from '../__index__';
+import { DependencyRegistry } from '../src/registry.ts';
+import { Inject, Injectable, InjectableFactory } from '../__index__.ts';
 
 class Item {
   follow: number;

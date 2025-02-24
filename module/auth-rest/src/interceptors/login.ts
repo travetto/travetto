@@ -4,7 +4,7 @@ import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 import { AuthService } from '@travetto/auth';
 
-import { AuthContextInterceptor } from './context';
+import { AuthContextInterceptor } from './context.ts';
 
 @Config('rest.auth.login')
 export class RestAuthLoginConfig extends ManagedInterceptorConfig {

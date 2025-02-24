@@ -3,11 +3,11 @@ import { d, c } from '@travetto/doc';
 import { Runtime } from '@travetto/runtime';
 import { Max, Min, Schema, Match, Enum, Integer, Float, Precision, MinLength, MaxLength } from '@travetto/schema';
 
-import { CliCommand } from './src/decorators';
+import { CliCommand } from './src/decorators.ts';
 
 const EnvLink = d.codeLink('Runtime', '@travetto/runtime/src/env.ts', /const Env/);
 
-const cfg = { cwd: './doc-exec' };
+const cfg = { cwd: './doc-exec.ts' };
 
 export const text = <>
   <c.StdHeader />

@@ -1,7 +1,7 @@
 import path from 'path';
 import { classConstruct, describeFunction, type Class } from '@travetto/runtime';
-import type { TestConsumerShape } from './types';
-import type { RunState } from '../execute/types';
+import type { TestConsumerShape } from './types.ts';
+import type { RunState } from '../execute/types.ts';
 
 /**
  * Test Results Handler Registry
@@ -13,7 +13,7 @@ class $TestConsumerRegistry {
    * Manual initialization when running outside of the bootstrap process
    */
   async manualInit(): Promise<void> {
-    await import('./types/all');
+    await import('./types/all.ts');
   }
 
   /**

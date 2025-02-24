@@ -6,7 +6,7 @@ import native from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import { Log } from './log';
+import { Log } from './log.ts';
 
 const toPosix = (file: string): string => file.replaceAll('\\', '/');
 

@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-runtime',
-    templateUrl: './runtime.component.html',
+    templateUrl: './runtime.component.html.ts',
     styleUrls: []
 })
 export class BaseComponent { }

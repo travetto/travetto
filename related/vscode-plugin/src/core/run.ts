@@ -2,8 +2,8 @@ import vscode from 'vscode';
 
 import { Env } from '@travetto/runtime';
 
-import { EnvDict, LaunchConfig } from './types';
-import { Workspace } from './workspace';
+import { EnvDict, LaunchConfig } from './types.ts';
+import { Workspace } from './workspace.ts';
 
 // eslint-disable-next-line no-template-curly-in-string
 const WORKSPACE = '${workspaceFolder}';
@@ -14,7 +14,7 @@ export class RunUtil {
   static #cliFile: string;
 
   static get cliFile(): string {
-    return this.#cliFile ??= Workspace.resolveImport('@travetto/cli/bin/trv.js');
+    return this.#cliFile ??= Workspace.resolveImport('@travetto/cli/bin/trv.js.ts');
   }
 
   static buildEnv(cliModule?: string): EnvDict {

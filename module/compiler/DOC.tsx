@@ -1,11 +1,11 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { DocRunUtil } from '@travetto/doc/src/util/run';
+import { DocRunUtil } from '@travetto/doc/src/util/run.ts';
 
 const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /entry.common/);
 
 export const text = async () => {
-  await DocRunUtil.run('npx', ['trvc', 'build'], { cwd: './doc-exec' });
+  await DocRunUtil.run('npx', ['trvc', 'build'], { cwd: './doc-exec.ts' });
 
   const output =
     (await DocRunUtil.run('npx', ['trvc', 'help']))
@@ -46,7 +46,7 @@ export const text = async () => {
 
       <c.Execution title='Sample trv output with debug logging' cmd='trvc' args={['build']} config={{
         env: { TRV_BUILD: 'debug' },
-        cwd: './doc-exec',
+        cwd: './doc-exec.ts',
         rewrite: val => val.replace(/pid=\d+/g, 'pid=000000'),
         formatCommand: (cmd, args) => `TRV_BUILD=debug ${cmd} ${args.join(' ')}`
       }} />
@@ -71,7 +71,7 @@ export const text = async () => {
 
       <c.SubSection title='Bootstrapping'>
 
-        Given that the framework is distributed as {d.library('Typescript')} only files, there is a bootstrapping problem that needs to be mitigated.  The {TrvcEntry} entrypoint, along with a small context utility in {d.mod('Manifest')} are the only {d.library('Javascript')} files needed to run the project.  The {TrvcEntry} entry point will compile {d.path('@travetto/compiler/support/*')} files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.
+        Given that the framework is distributed as {d.library('Typescript')} only files, there is a bootstrapping problem that needs to be mitigated.  The {TrvcEntry} entrypoint, along with a small context utility in {d.mod('Manifest')} are the only {d.library('Javascript')} files needed to run the project.  The {TrvcEntry} entry point will compile {d.path('@travetto/compiler/support/*.ts')} files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.
       </c.SubSection>
     </c.Section>
   </>;

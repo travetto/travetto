@@ -3,8 +3,8 @@ import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 import { Ignore } from '@travetto/schema';
 
-import { AngularClientGenerator } from '../src/angular';
-import { FetchClientGenerator } from '../src/fetch';
+import { AngularClientGenerator } from '../src/angular.ts';
+import { FetchClientGenerator } from '../src/fetch.ts';
 
 /**
  * Run client rest operation

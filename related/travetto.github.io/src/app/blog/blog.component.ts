@@ -19,9 +19,9 @@ interface Post {
 }
 
 @Component({
-    selector: 'app-blog',
-    imports: [DatePipe],
-    template: `
+  selector: 'app-blog',
+  imports: [DatePipe],
+  template: `
 <div class="documentation">
   @for (post of posts; track $index) {
     <article>
@@ -41,7 +41,7 @@ interface Post {
   }
 </div>
 `,
-    styleUrls: ['./blog.component.scss']
+  styleUrls: ['./blog.component.scss.ts']
 })
 export class BlogComponent implements OnInit {
 

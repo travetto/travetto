@@ -2,12 +2,12 @@ import type { Package } from '@travetto/manifest';
 import { Class, Runtime } from '@travetto/runtime';
 import { ControllerConfig } from '@travetto/rest';
 
-import { BaseClientGenerator } from './base';
-import type { Imp, RenderContent } from './types';
+import { BaseClientGenerator } from './base.ts';
+import type { Imp, RenderContent } from './types.ts';
 
-import { BaseFetchService } from './shared/fetch-service';
-import { CommonUtil } from './shared/util';
-import { BaseRemoteService } from './shared/types';
+import { BaseFetchService } from './shared/fetch-service.ts';
+import { CommonUtil } from './shared/util.ts';
+import { BaseRemoteService } from './shared/types.ts';
 
 const SVC = './shared/fetch-service.ts';
 
@@ -30,7 +30,7 @@ export class FetchClientGenerator extends BaseClientGenerator<{ node?: boolean }
 
   async init(): Promise<void> {
     if (this.config.node) {
-      const pkg = await Runtime.importFrom<Package>('@travetto/runtime/package.json');
+      const pkg = await Runtime.importFrom<Package>('@travetto/runtime/package.json.ts');
 
       this.registerContent('_pkgId', {
         imports: [],

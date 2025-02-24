@@ -1,5 +1,5 @@
 import type ts from 'typescript';
-import { TemplateLiteral } from '../types/shared';
+import { TemplateLiteral } from '../types/shared.ts';
 
 /**
  * Base type for a simplistic type structure

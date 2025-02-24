@@ -3,7 +3,7 @@ import { FastifyRestServer } from '@travetto/rest-fastify';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
 
-import { ModelBlobRestUploadServerSuite } from './server';
+import { ModelBlobRestUploadServerSuite } from './server.ts';
 
 const FASTIFY = Symbol.for('fastify');
 

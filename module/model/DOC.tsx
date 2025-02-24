@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { Model } from './src/registry/decorator';
-import { Links } from './support/doc.support';
+import { Model } from './src/registry/decorator.ts';
+import { Links } from './support/doc.support.ts';
 
 const ModelTypeSnippet = <c.Code title='ModelType' src='src/types/model.ts' startRe={/export interface/} endRe={/^}/} />;
 
@@ -97,12 +97,12 @@ export const text = <>
   <c.Section title='CLI - model:export'>
     The module provides the ability to generate an export of the model structure from all the various {Model}s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
 
-    <c.Execution title='Running model export' cmd='trv' args={['model:export', '--help']} config={{ cwd: './doc-exec' }} />
+    <c.Execution title='Running model export' cmd='trv' args={['model:export', '--help']} config={{ cwd: './doc-exec.ts' }} />
   </c.Section>
   <c.Section title='CLI - model:install'>
 
     The module provides the ability to install all the various {Model}s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
 
-    <c.Execution title='Running model install' cmd='trv' args={['model:install', '--help']} config={{ cwd: './doc-exec' }} />
+    <c.Execution title='Running model install' cmd='trv' args={['model:install', '--help']} config={{ cwd: './doc-exec.ts' }} />
   </c.Section>
 </>;

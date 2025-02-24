@@ -5,7 +5,8 @@ import path from 'node:path';
 import { d, c } from '@travetto/doc';
 import type { ManifestRoot } from '@travetto/manifest';
 import { RuntimeIndex } from '@travetto/runtime';
-import { COMMON_DATE } from '@travetto/doc/src/util/run';
+
+import { COMMON_DATE } from '@travetto/doc/src/util/run.ts';
 
 const DeltaRef = d.codeLink('ManifestDeltaUtil', 'src/delta.ts', /class ManifestDeltaUtil/);
 
@@ -69,7 +70,7 @@ export const text = <>
     </ul>
   </c.Section>
   <c.Section title='Path Normalization' >
-    By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up <c.CodeLink title='path' src='./src/path.ts' startRe={/export/} /> as an equivalent to {d.library('Node')}'s {d.library('Path')} library.  This allows for consistent behavior across all file-interactions.
+    By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up <c.CodeLink title='path' src='./src/path.ts' startRe={/export/} /> as an equivalent to {d.library('Node')}'s {d.library('Path.ts')} library.  This allows for consistent behavior across all file-interactions.
   </c.Section>
   <c.Section title='Anatomy of a Manifest'>
 

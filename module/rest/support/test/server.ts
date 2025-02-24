@@ -2,9 +2,9 @@ import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 
-import { BaseRestSuite } from './base';
-import { TestController } from './controller';
-import { ControllerRegistry } from '../../src/registry/controller';
+import { BaseRestSuite } from './base.ts';
+import { TestController } from './controller.ts';
+import { ControllerRegistry } from '../../src/registry/controller.ts';
 
 @Suite()
 export abstract class RestServerSuite extends BaseRestSuite {

@@ -3,11 +3,11 @@ import ts from 'typescript';
 import {
   TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, DecoratorMeta, LiteralUtil, AnyType
 } from '@travetto/transformer';
-import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util';
+import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util.ts';
 
-const PARAM_DEC_FILE = '@travetto/rest/src/decorator/param';
-const COMMON_DEC_FILE = '@travetto/rest/src/decorator/common';
-const ENDPOINT_DEC_FILE = '@travetto/rest/src/decorator/endpoint';
+const PARAM_DEC_FILE = '@travetto/rest/src/decorator/param.ts';
+const COMMON_DEC_FILE = '@travetto/rest/src/decorator/common.ts';
+const ENDPOINT_DEC_FILE = '@travetto/rest/src/decorator/endpoint.ts';
 
 /**
  * Handle @Controller, @Endpoint

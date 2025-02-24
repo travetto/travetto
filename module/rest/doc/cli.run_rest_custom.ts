@@ -4,7 +4,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { RestApplication, RestSslConfig } from '@travetto/rest';
 
-import './config-override';
+import './config-override.ts';
 
 @CliCommand({ runTarget: true })
 export class SampleApp {

@@ -9,7 +9,7 @@ import { cliTpl } from '@travetto/cli';
 import { NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
 
-import { Feature } from './features';
+import { Feature } from './features.ts';
 
 type ListingEntry = { requires?: string[], rename?: string };
 type Listing = Record<string, ListingEntry>;
@@ -114,7 +114,7 @@ export class Context {
 
     /** Get framework version at runtime */
     const { version: frameworkVersion } = PackageUtil.readPackage(
-      PackageUtil.resolveImport('@travetto/manifest/package.json')
+      PackageUtil.resolveImport('@travetto/manifest/package.json.ts')
     );
 
     const context = Object.assign({

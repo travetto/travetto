@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-model-mongo',
-    templateUrl: './model-mongo.component.html',
+    templateUrl: './model-mongo.component.html.ts',
     styleUrls: []
 })
 export class ModelMongoComponent { }

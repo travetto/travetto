@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-model-s3',
-    templateUrl: './model-s3.component.html',
+    templateUrl: './model-s3.component.html.ts',
     styleUrls: []
 })
 export class ModelS3Component { }

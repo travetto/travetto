@@ -1,4 +1,4 @@
-import './types';
+import './types.ts';
 
 declare global {
   /**

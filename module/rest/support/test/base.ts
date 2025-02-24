@@ -6,10 +6,10 @@ import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { MethodOrAll, Request, ServerHandle } from '../../src/types';
-import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
-import { CoreRestServerSupport } from './server-support/core';
-import { RestNetUtil } from '../../src/util/net';
+import { MethodOrAll, Request, ServerHandle } from '../../src/types.ts';
+import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base.ts';
+import { CoreRestServerSupport } from './server-support/core.ts';
+import { RestNetUtil } from '../../src/util/net.ts';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 

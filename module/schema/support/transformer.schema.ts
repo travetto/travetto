@@ -4,7 +4,7 @@ import {
   TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, OnGetter, OnSetter
 } from '@travetto/transformer';
 
-import { SchemaTransformUtil } from './transformer/util';
+import { SchemaTransformUtil } from './transformer/util.ts';
 
 const inSchema = Symbol.for('@travetto/schema:schema');
 const accessors = Symbol.for('@travetto/schema:accessors');
@@ -14,8 +14,8 @@ interface AutoState {
   [accessors]?: Set<string>;
 }
 
-const SCHEMA_IMPORT = '@travetto/schema/src/decorator/schema';
-const COMMON_IMPORT = '@travetto/schema/src/decorator/common';
+const SCHEMA_IMPORT = '@travetto/schema/src/decorator/schema.ts';
+const COMMON_IMPORT = '@travetto/schema/src/decorator/common.ts';
 
 /**
  * Processes `@Schema` to register class as a valid Schema

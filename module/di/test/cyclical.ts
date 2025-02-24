@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { DependencyRegistry } from '../src/registry';
+import { DependencyRegistry } from '../src/registry.ts';
 
 @Suite('cycle')
 class CycleTest {
@@ -12,12 +12,12 @@ class CycleTest {
   @ShouldThrow('dependency')
   async tryCycle() {
     try {
-      const A = await import('./cycle/a');
-      const B = await import('./cycle/b');
+      const A = await import('./cycle/a.ts');
+      const B = await import('./cycle/b.ts');
       assert(B !== undefined);
       await RootRegistry.init();
 
-      const { ABC } = await import('./cycle/a');
+      const { ABC } = await import('./cycle/a.ts');
       const res = await DependencyRegistry.getInstance(ABC);
       console.log('Loaded dependency', { instance: res.constructor.name });
     } catch {

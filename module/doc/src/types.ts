@@ -1,5 +1,5 @@
-import { JSXElement, ValidHtmlTags } from '@travetto/doc/jsx-runtime';
-import { JSXElementByFn, c } from './jsx';
+import { JSXElement, ValidHtmlTags } from '@travetto/doc/jsx-runtime.ts';
+import { JSXElementByFn, c } from './jsx.ts';
 
 export type Wrapper = Record<string, (cnt: string) => string>;
 

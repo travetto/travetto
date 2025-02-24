@@ -22,7 +22,7 @@ function NodeList({ src }: { src: string }): DocJSXElement {
 }
 
 export const text = async () => {
-  const nodeContents = await fs.readFile(RuntimeIndex.getSourceFile('@travetto/doc/src/jsx.ts'), 'utf8');
+  const nodeContents = await fs.readFile(RuntimeIndex.getSourceFile('@travetto/doc/src/jsx.ts'), 'utf8.ts');
 
   return <>
     <c.StdHeader />
@@ -53,11 +53,11 @@ export const text = async () => {
     <c.Section title='CLI - doc'>
       The run command allows for generating documentation output.
       <c.Execution title='CLI Doc Help' cmd='trv' args={['doc', '--help']}
-        config={{ cwd: './doc-exec' }} />
+        config={{ cwd: './doc-exec.ts' }} />
 
       By default, running the command will output the {d.library('Markdown')} content directly to the terminal.
       <c.Execution title='Sample CLI Output' cmd='trv' args={['doc', '-o', 'html']}
-        config={{ cwd: './doc-exec' }} />
+        config={{ cwd: './doc-exec.ts' }} />
     </c.Section>
   </>;
 };

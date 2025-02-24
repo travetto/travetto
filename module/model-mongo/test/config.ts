@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test } from '@travetto/test';
 
-import { MongoModelConfig } from '../__index__';
+import { MongoModelConfig } from '../__index__.ts';
 
 @Suite()
 class MongoConfigSuite {

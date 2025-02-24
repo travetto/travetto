@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-model-redis',
-    templateUrl: './model-redis.component.html',
+    templateUrl: './model-redis.component.html.ts',
     styleUrls: []
 })
 export class ModelRedisComponent { }

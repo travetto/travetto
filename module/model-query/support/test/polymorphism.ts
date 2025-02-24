@@ -1,18 +1,18 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { BaseModelSuite } from '@travetto/model/support/test/base';
-import { ModelCrudSupport } from '@travetto/model/src/service/crud';
-import { Doctor, Engineer, Worker, Firefighter } from '@travetto/model/support/test/polymorphism';
+import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
+import { ModelCrudSupport } from '@travetto/model/src/service/crud.ts';
+import { Doctor, Engineer, Worker, Firefighter } from '@travetto/model/support/test/polymorphism.ts';
 import { NotFoundError } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
 
-import { ModelQueryCrudSupport } from '../../src/service/crud';
-import { ModelQuerySupport } from '../../src/service/query';
-import { ModelQueryFacetSupport } from '../../src/service/facet';
-import { ModelQuerySuggestSupport } from '../../src/service/suggest';
+import { ModelQueryCrudSupport } from '../../src/service/crud.ts';
+import { ModelQuerySupport } from '../../src/service/query.ts';
+import { ModelQueryFacetSupport } from '../../src/service/facet.ts';
+import { ModelQuerySuggestSupport } from '../../src/service/suggest.ts';
 
-import { isQueryCrudSupported, isQueryFacetSupported, isQuerySuggestSupported } from '../../src/internal/service/common';
+import { isQueryCrudSupported, isQueryFacetSupported, isQuerySuggestSupported } from '../../src/internal/service/common.ts';
 
 @Suite()
 export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {

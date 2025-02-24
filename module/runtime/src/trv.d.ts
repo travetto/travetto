@@ -1,5 +1,5 @@
 import { type ManifestModuleRole } from '@travetto/manifest';
-import { type TimeSpan } from './time';
+import { type TimeSpan } from './time.ts';
 type Role = Exclude<ManifestModuleRole, 'std' | 'compile'>;
 
 declare module "@travetto/runtime" {

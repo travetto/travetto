@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import type { CompilerOptions } from 'typescript';
 
 import type { ManifestContext } from '@travetto/manifest';
-import { CommonUtil } from './util';
+import { CommonUtil } from './util.ts';
 
 const OPT_CACHE: Record<string, CompilerOptions> = {};
 

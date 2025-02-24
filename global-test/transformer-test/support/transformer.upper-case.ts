@@ -6,7 +6,7 @@ export class MakeUpper {
 
   @AfterMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): typeof node {
-    if (!state.importName.startsWith('@travetto-test/transformer/src/tree')) { // Only apply to my source code
+    if (!state.importName.startsWith('@travetto-test/transformer/src/tree.ts')) { // Only apply to my source code
       return node;
     }
     return state.factory.updateMethodDeclaration(

@@ -4,10 +4,10 @@ import {
   DecoratorUtil, DocUtil, ParamDocumentation, TransformerState, transformCast,
 } from '@travetto/transformer';
 
-const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
-const FIELD_MOD = '@travetto/schema/src/decorator/field';
-const COMMON_MOD = '@travetto/schema/src/decorator/common';
-const TYPES_FILE = '@travetto/schema/src/internal/types';
+const SCHEMA_MOD = '@travetto/schema/src/decorator/schema.ts';
+const FIELD_MOD = '@travetto/schema/src/decorator/field.ts';
+const COMMON_MOD = '@travetto/schema/src/decorator/common.ts';
+const TYPES_FILE = '@travetto/schema/src/internal/types.ts';
 
 export class SchemaTransformUtil {
 

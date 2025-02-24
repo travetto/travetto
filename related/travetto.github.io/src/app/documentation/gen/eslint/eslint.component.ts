@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-eslint',
-    templateUrl: './eslint.component.html',
-    styleUrls: ['./eslint.component.scss']
+    templateUrl: './eslint.component.html.ts',
+    styleUrls: ['./eslint.component.scss.ts']
 })
 export class EslintComponent { }

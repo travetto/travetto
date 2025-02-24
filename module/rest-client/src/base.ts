@@ -4,10 +4,10 @@ import path from 'node:path';
 import { BinaryUtil, Class, Runtime, Util, castTo, describeFunction } from '@travetto/runtime';
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, ControllerVisitUtil, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
-import { AllViewSymbol, UnknownType } from '@travetto/schema/src/internal/types';
+import { AllViewSymbol, UnknownType } from '@travetto/schema/src/internal/types.ts';
 
-import { ParamConfig } from './shared/types';
-import type { EndpointDesc, Imp, RenderContent } from './types';
+import { ParamConfig } from './shared/types.ts';
+import type { EndpointDesc, Imp, RenderContent } from './types.ts';
 
 export const TYPE_MAPPING = new Map<Function, string>([
   [String, 'string'],
@@ -274,7 +274,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
     const paramArr = JSON.stringify(paramNames).replaceAll('"', '').replace(/,/g, ', ');
 
     imports.push(...[...this.endpointResponseWrapper].filter(x => typeof x !== 'string'));
-    const opts: Imp = { name: 'RequestDefinition', file: './shared/types.ts', classId: '_common' };
+    const opts: Imp = { name: 'RequestDefinition', file: './shared/types.ts', classId: '_common.ts' };
 
     return {
       imports,

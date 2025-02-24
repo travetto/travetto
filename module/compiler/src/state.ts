@@ -3,11 +3,11 @@ import ts from 'typescript';
 import { path, ManifestModuleUtil, type ManifestModule, type ManifestRoot, ManifestIndex, ManifestModuleFolderType } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
-import { TypescriptUtil } from '../support/ts-util';
+import { TypescriptUtil } from '../support/ts-util.ts';
 
-import { CompilerUtil } from './util';
-import { CompileEmitError, CompileStateEntry } from './types';
-import { CommonUtil } from '../support/util';
+import { CompilerUtil } from './util.ts';
+import { CompileEmitError, CompileStateEntry } from './types.ts';
+import { CommonUtil } from '../support/util.ts';
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
 const TYPINGS_EXT_RE = /[.]d[.][cm]?ts([.]map)?$/;

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Redirect } from '@travetto/rest';
 import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 import { Principal } from '@travetto/auth';
 
-import { BasicAuthSymbol, User } from './auth.config';
+import { BasicAuthSymbol, User } from './auth.config.ts';
 
 /**
  * Auth API

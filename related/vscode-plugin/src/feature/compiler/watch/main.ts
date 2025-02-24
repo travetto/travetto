@@ -1,13 +1,13 @@
 import vscode from 'vscode';
 import { ChildProcess, spawn } from 'node:child_process';
 
-import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
+import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types.ts';
 import { Env, ExecUtil, Util } from '@travetto/runtime';
 
-import { BaseFeature } from '../../base';
-import { Log } from '../../../core/log';
-import { Workspace } from '../../../core/workspace';
-import { Activatible } from '../../../core/activation';
+import { BaseFeature } from '../../base.ts';
+import { Log } from '../../../core/log.ts';
+import { Workspace } from '../../../core/workspace.ts';
+import { Activatible } from '../../../core/activation.ts';
 
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };

@@ -4,15 +4,15 @@ import path from 'node:path';
 
 import type { IndexedModule, ManifestModule } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/runtime';
-import type { TestWatchEvent } from '@travetto/test/src/worker/types';
+import type { TestWatchEvent } from '@travetto/test/src/worker/types.ts';
 
-import { Workspace } from '../../../core/workspace';
-import { Activatible } from '../../../core/activation';
-import { RunUtil } from '../../../core/run';
+import { Workspace } from '../../../core/workspace.ts';
+import { Activatible } from '../../../core/activation.ts';
+import { RunUtil } from '../../../core/run.ts';
 
-import { BaseFeature } from '../../base';
+import { BaseFeature } from '../../base.ts';
 
-import { WorkspaceResultsManager } from './workspace';
+import { WorkspaceResultsManager } from './workspace.ts';
 
 /**
  * Test Runner Feature

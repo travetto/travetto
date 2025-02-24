@@ -3,7 +3,7 @@ import { spawn } from 'node:child_process';
 
 import { ExecUtil } from '@travetto/runtime';
 
-import { ServerHandle } from '../types';
+import { ServerHandle } from '../types.ts';
 
 type Server = { listen(port: number, hostname?: string): Listener };
 type Listener = {

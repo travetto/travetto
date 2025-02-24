@@ -2,15 +2,15 @@ import { Suite } from '@travetto/test';
 import { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 
-import { WithSuiteContext } from '@travetto/context/support/test/context';
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query';
-import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud';
-import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet';
-import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism';
-import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest';
+import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
+import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
+import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
+import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
+import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
+import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 
-import { SqliteDialect } from '../src/dialect';
+import { SqliteDialect } from '../src/dialect.ts';
 
 class Config {
   @InjectableFactory({ primary: true })

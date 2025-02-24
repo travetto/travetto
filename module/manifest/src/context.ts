@@ -2,8 +2,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
-import type { Package } from './types/package';
-import type { ManifestContext } from './types/context';
+import type { Package } from './types/package.ts';
+import type { ManifestContext } from './types/context.ts';
 
 type Pkg = Package & { path: string };
 
@@ -64,7 +64,7 @@ export function getManifestContext(root: string = process.cwd()): ManifestContex
     },
     build: {
       compilerUrl: build.compilerUrl ?? `http://localhost:${toPort(wsPrefix)}`,
-      compilerModuleFolder: toPosix(path.dirname(resolve('@travetto/compiler/package.json'))).replace(wsPrefix, ''),
+      compilerModuleFolder: toPosix(path.dirname(resolve('@travetto/compiler/package.json'))).replace(wsPrefix, '.ts'),
       compilerFolder: toPosix(build.compilerFolder ?? '.trv/compiler'),
       outputFolder: toPosix(build.outputFolder ?? '.trv/output'),
       toolFolder: toPosix(build.toolFolder ?? '.trv/tool'),

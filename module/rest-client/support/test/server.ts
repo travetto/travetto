@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { BaseRestSuite } from '@travetto/rest/support/test/base';
+import { BaseRestSuite } from '@travetto/rest/support/test/base.ts';
 import { RootRegistry } from '@travetto/registry';
 
-import { Todo } from './service';
-import { RestClientTestUtil } from './util';
+import { Todo } from './service.ts';
+import { RestClientTestUtil } from './util.ts';
 
 function fetchRequestBody(from: string, port: number): string {
   return `
@@ -64,13 +64,13 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
 
   @Test({ timeout: 10000 })
   async fetchNodeClient() {
-    const result = await RestClientTestUtil.runNodeClient(fetchRequestBody('./src', this.port!));
+    const result = await RestClientTestUtil.runNodeClient(fetchRequestBody('./src.ts', this.port!));
     this.validateFetchResponses(result);
   }
 
   @Test({ timeout: 10000 })
   async fetchWebClient() {
-    const result = await RestClientTestUtil.runWebClient(fetchRequestBody('./api.js', this.port!));
+    const result = await RestClientTestUtil.runWebClient(fetchRequestBody('./api.js.ts', this.port!));
     this.validateFetchResponses(result);
   }
 

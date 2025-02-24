@@ -1,5 +1,5 @@
-import type { } from './src/trv';
-export * from './src/style';
-export * from './src/terminal';
-export * from './src/writer';
-export * from './src/util';
+import type { } from './src/trv.ts';
+export * from './src/style.ts';
+export * from './src/terminal.ts';
+export * from './src/writer.ts';
+export * from './src/util.ts';

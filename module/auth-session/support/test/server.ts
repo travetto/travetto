@@ -7,8 +7,8 @@ import { AuthContext, AuthenticationError } from '@travetto/auth';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Util } from '@travetto/runtime';
 
-import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { BaseRestSuite } from '@travetto/rest/support/test/base';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { BaseRestSuite } from '@travetto/rest/support/test/base.ts';
 
 @Suite()
 @InjectableSuite()

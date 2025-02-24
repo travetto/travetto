@@ -2,8 +2,8 @@
 // #UNCOMMENT import { Observable, map } from 'rxjs';
 // #UNCOMMENT import { timeout } from 'rxjs/operators';
 
-import { BaseRemoteService, IRemoteService, IRemoteServiceConfig, RequestDefinition, RequestOptions } from './types';
-import { CommonUtil, restCast } from './util';
+import { BaseRemoteService, IRemoteService, IRemoteServiceConfig, RequestDefinition, RequestOptions } from './types.ts';
+import { CommonUtil, restCast } from './util.ts';
 
 // @ts-ignore
 export type AngularResponse<T> = Observable<T> & { events: Observable<HttpEvent<T>>, response: Observable<HttpResponse<T>> };

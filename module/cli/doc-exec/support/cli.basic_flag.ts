@@ -1,1 +1,1 @@
-export * from '@travetto/cli/doc/cli.basic_flag';
+export * from '@travetto/cli/doc/cli.basic_flag.ts';

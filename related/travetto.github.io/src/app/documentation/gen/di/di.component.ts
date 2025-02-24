@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-di',
-    templateUrl: './di.component.html',
+    templateUrl: './di.component.html.ts',
     styleUrls: []
 })
 export class DiComponent { }

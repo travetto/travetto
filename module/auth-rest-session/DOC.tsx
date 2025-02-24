@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { AuthSessionInterceptor } from './__index__';
+import { AuthSessionInterceptor } from './__index__.ts';
 import { Session, SessionService } from '@travetto/auth-session';
 
 export const text = <>
@@ -13,5 +13,5 @@ export const text = <>
 
   Once operating within the {Session} boundaries, the session state can be injected via params, or accessed via the {SessionService}.
 
-  <c.Code src='./doc/usage.ts' title='Sample Usage' startRe={/@Authenticated/} />
+  <c.Code src='./doc/usage.ts' title='Sample Usage.ts' startRe={/@Authenticated/} />
 </>;

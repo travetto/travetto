@@ -1,7 +1,7 @@
 // #UNCOMMENT import { Observable, catchError, mergeMap, timeout } from 'rxjs';
 // #UNCOMMENT import type { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { type RpcRequest, consumeError, consumeJSON, getBody, } from './rpc';
+import { type RpcRequest, consumeError, consumeJSON, getBody, } from './rpc.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PromiseFn = (...args: any) => Promise<unknown>;

@@ -1,12 +1,12 @@
 import { Class } from '@travetto/runtime';
 import { ControllerConfig } from '@travetto/rest';
 
-import { BaseClientGenerator } from './base';
-import type { Imp, RenderContent } from './types';
+import { BaseClientGenerator } from './base.ts';
+import type { Imp, RenderContent } from './types.ts';
 
-import { BaseAngularService, Configuration } from './shared/angular-service';
-import { CommonUtil } from './shared/util';
-import { BaseRemoteService } from './shared/types';
+import { BaseAngularService, Configuration } from './shared/angular-service.ts';
+import { CommonUtil } from './shared/util.ts';
+import { BaseRemoteService } from './shared/types.ts';
 
 const SVC = './shared/angular-service.ts';
 
@@ -47,7 +47,7 @@ export class AngularClientGenerator extends BaseClientGenerator {
     const skipSelf: Imp = { file: '@angular/core', name: 'SkipSelf', classId: '__ngSkipSelf' };
     const optional: Imp = { file: '@angular/core', name: 'Optional', classId: '__optional' };
     const httpClient: Imp = { file: '@angular/common/http', name: 'HttpClient', classId: '_http' };
-    const config: Imp = { file: './shared/angular-service', name: 'Configuration', classId: Configuration.Ⲑid };
+    const config: Imp = { file: './shared/angular-service', name: 'Configuration.ts', classId: Configuration.Ⲑid };
     const self: Imp = { file: '', name: 'RestClientModule', classId: '_restClientMod' };
 
     return {

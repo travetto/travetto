@@ -1,8 +1,8 @@
 import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { Runtime } from '@travetto/runtime';
 
-import { PackageManager } from './bin/package-manager';
-import { RepoExecUtil } from './bin/exec';
+import { PackageManager } from './bin/package-manager.ts';
+import { RepoExecUtil } from './bin/exec.ts';
 
 /**
  * Publish all pending modules

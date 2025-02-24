@@ -7,12 +7,12 @@ import {
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry.ts';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed.ts';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage.ts';
 
-import { RedisModelConfig } from './config';
+import { RedisModelConfig } from './config.ts';
 
 type RedisScan = { key: string } | { match: string };
 type RedisClient = ReturnType<typeof createClient>;

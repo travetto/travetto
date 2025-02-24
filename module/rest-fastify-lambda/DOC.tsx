@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { RestApplication } from '@travetto/rest/src/application/rest';
+import { RestApplication } from '@travetto/rest/src/application/rest.ts';
 
 export const text = <>
   <c.StdHeader />

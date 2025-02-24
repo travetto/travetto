@@ -1,9 +1,9 @@
-import type { } from './src/trv';
-export * from './src/decorator/suite';
-export * from './src/decorator/test';
-export * from './src/model/suite';
-export * from './src/model/test';
-export * from './src/model/event';
-export * from './src/registry/suite';
-export * from './src/fixture';
-export * from './src/consumer/types';
+import type { } from './src/trv.ts';
+export * from './src/decorator/suite.ts';
+export * from './src/decorator/test.ts';
+export * from './src/model/suite.ts';
+export * from './src/model/test.ts';
+export * from './src/model/event.ts';
+export * from './src/registry/suite.ts';
+export * from './src/fixture.ts';
+export * from './src/consumer/types.ts';

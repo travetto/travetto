@@ -1,9 +1,9 @@
 import { IpcChannel } from '@travetto/worker';
 
-import type { TestEvent } from '../../model/event';
-import type { TestConsumerShape } from '../types';
-import { SerializeUtil } from '../serialize';
-import { TestConsumer } from '../registry';
+import type { TestEvent } from '../../model/event.ts';
+import type { TestConsumerShape } from '../types.ts';
+import { SerializeUtil } from '../serialize.ts';
+import { TestConsumer } from '../registry.ts';
 
 /**
  * Triggers each event as an IPC command to a parent process

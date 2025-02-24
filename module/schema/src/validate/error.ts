@@ -1,5 +1,5 @@
 import { Class, AppError } from '@travetto/runtime';
-import { ValidationError } from './types';
+import { ValidationError } from './types.ts';
 
 /**
  * Validation results error.

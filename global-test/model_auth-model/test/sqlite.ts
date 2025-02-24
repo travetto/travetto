@@ -1,8 +1,8 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model';
+import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model.ts';
 import { AsyncContext } from '@travetto/context';
-import { WithSuiteContext } from '@travetto/context/support/test/context';
+import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 
 import { SqliteDialect } from '@travetto/model-sqlite';

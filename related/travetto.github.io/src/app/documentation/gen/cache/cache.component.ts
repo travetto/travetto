@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-cache',
-    templateUrl: './cache.component.html',
+    templateUrl: './cache.component.html.ts',
     styleUrls: []
 })
 export class CacheComponent { }

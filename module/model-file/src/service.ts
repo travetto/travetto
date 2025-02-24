@@ -13,9 +13,9 @@ import {
   NotFoundError, OptionalId, ExistsError, ModelBlobSupport
 } from '@travetto/model';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry.ts';
+import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob.ts';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 

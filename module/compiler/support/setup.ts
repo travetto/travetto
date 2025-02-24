@@ -4,9 +4,9 @@ import path from 'node:path';
 
 import type { DeltaEvent, ManifestContext, Package } from '@travetto/manifest';
 
-import { Log } from './log';
-import { CommonUtil } from './util';
-import { TypescriptUtil } from './ts-util';
+import { Log } from './log.ts';
+import { CommonUtil } from './util.ts';
+import { TypescriptUtil } from './ts-util.ts';
 
 type ModFile = { input: string, output: string, stale: boolean };
 

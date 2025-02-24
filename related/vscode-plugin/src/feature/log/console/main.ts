@@ -2,9 +2,9 @@ import vscode from 'vscode';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { Activatible } from '../../../core/activation';
-import { Workspace } from '../../../core/workspace';
-import { BaseFeature } from '../../base';
+import { Activatible } from '../../../core/activation.ts';
+import { Workspace } from '../../../core/workspace.ts';
+import { BaseFeature } from '../../base.ts';
 
 interface Link extends vscode.TerminalLink {
   file: string;

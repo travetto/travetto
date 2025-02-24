@@ -1,9 +1,9 @@
 import { Writable } from 'node:stream';
 
-import type { TestEvent } from '../../model/event';
-import type { TestConsumerShape } from '../types';
-import { SerializeUtil } from '../serialize';
-import { TestConsumer } from '../registry';
+import type { TestEvent } from '../../model/event.ts';
+import type { TestConsumerShape } from '../types.ts';
+import { SerializeUtil } from '../serialize.ts';
+import { TestConsumer } from '../registry.ts';
 
 /**
  * Streams all test events a JSON payload, in an nd-json format

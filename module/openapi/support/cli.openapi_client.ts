@@ -4,7 +4,7 @@ import cp from 'node:child_process';
 import { CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
 import { ExecUtil } from '@travetto/runtime';
 
-import { OpenApiClientHelp } from './bin/help';
+import { OpenApiClientHelp } from './bin/help.ts';
 
 /**
  * CLI for generating the cli client
@@ -16,9 +16,9 @@ export class OpenApiClientCommand implements CliCommandShape {
   @CliFlag({ desc: 'Additional Properties', short: '-a', name: '--additional-properties' })
   props: string[] = [];
   @CliFlag({ desc: 'Input file' })
-  input = './openapi.yml';
+  input = './openapi.yml.ts';
   @CliFlag({ desc: 'Output folder' })
-  output = './api-client';
+  output = './api-client.ts';
   @CliFlag({ desc: 'Docker Image to user' })
   dockerImage = 'openapitools/openapi-generator-cli:latest';
 

@@ -2,12 +2,12 @@ import path from 'node:path';
 
 import { EmailTemplateModule, EmailTemplateLocation, EmailResourceLoader } from '@travetto/email';
 import { PackageUtil } from '@travetto/manifest';
-import { JSXElement } from '@travetto/email-inky/jsx-runtime';
+import { JSXElement } from '@travetto/email-inky/jsx-runtime.ts';
 
-import { InkyRenderer } from './render/renderer';
-import { Html } from './render/html';
-import { Markdown } from './render/markdown';
-import { Subject } from './render/subject';
+import { InkyRenderer } from './render/renderer.ts';
+import { Html } from './render/html.ts';
+import { Markdown } from './render/markdown.ts';
+import { Subject } from './render/subject.ts';
 
 export async function prepare(node: JSXElement, loc: EmailTemplateLocation): Promise<EmailTemplateModule> {
   const ctx = {

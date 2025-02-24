@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { Todo } from './doc/model';
+import { Todo } from './doc/model.ts';
 
 export const text = <>
   <c.StdHeader install={false} />

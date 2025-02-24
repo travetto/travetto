@@ -3,9 +3,9 @@ import assert from 'node:assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { Schema } from '../src/decorator/schema';
-import { SchemaValidator } from '../src/validate/validator';
-import { SchemaRegistry } from '../src/service/registry';
+import { Schema } from '../src/decorator/schema.ts';
+import { SchemaValidator } from '../src/validate/validator.ts';
+import { SchemaRegistry } from '../src/service/registry.ts';
 
 @Schema()
 export class OptionalAsUnion {

@@ -4,7 +4,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Precision, Max, Min, Schema } from '@travetto/schema';
 
-import { SchemaFaker } from '../src/faker';
+import { SchemaFaker } from '../src/faker.ts';
 
 @Schema()
 class Tag {

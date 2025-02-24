@@ -1,7 +1,7 @@
 import { Env } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';
 
-import { selectConsumer } from './bin/run';
+import { selectConsumer } from './bin/run.ts';
 
 /**
  * Invoke the test watcher
@@ -27,7 +27,7 @@ export class TestWatcherCommand {
     }
 
     try {
-      const { TestWatcher } = await import('../src/execute/watcher');
+      const { TestWatcher } = await import('../src/execute/watcher.ts');
       await TestWatcher.watch(this.format, this.mode === 'all');
     } catch (err) {
       console.error(err);

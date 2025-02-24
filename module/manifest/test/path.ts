@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
 
-import { path as path2 } from '../src/path';
+import { path as path2 } from '../src/path.ts';
 
 @Suite()
 class PathTests {
@@ -12,7 +12,7 @@ class PathTests {
   @Test()
   verifyRelative() {
     const pwd = path.resolve().replace(/[a-z\- ]+/g, '..');
-    assert(pwd.includes('../../..'));
+    assert(pwd.includes('../../...ts'));
     assert(path.resolve(`${pwd}/test`) === '/test');
   }
 
@@ -39,10 +39,10 @@ class PathTests {
 
     assert(winResolve('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winResolve('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');
-    assert(winResolve('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png');
+    assert(winResolve('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png.ts');
 
     assert(winJoin('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
     assert(winJoin('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');
-    assert(winJoin('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png');
+    assert(winJoin('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png.ts');
   }
 }

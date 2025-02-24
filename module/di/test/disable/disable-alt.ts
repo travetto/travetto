@@ -2,9 +2,9 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
-import { DependencyRegistry } from '../../src/registry';
+import { DependencyRegistry } from '../../src/registry.ts';
 
-import { MyCustomClass3, MyCustomClass4 } from './types';
+import { MyCustomClass3, MyCustomClass4 } from './types.ts';
 
 @Suite()
 class AltDisableSuite {

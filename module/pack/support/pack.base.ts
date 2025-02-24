@@ -7,8 +7,8 @@ import { Terminal } from '@travetto/terminal';
 import { Ignore, Required, Schema } from '@travetto/schema';
 import { PackageUtil } from '@travetto/manifest';
 
-import { PackOperation } from './bin/operation';
-import { PackUtil } from './bin/util';
+import { PackOperation } from './bin/operation.ts';
+import { PackUtil } from './bin/util.ts';
 
 export type PackOperationShape<T> = ((config: T) => AsyncIterable<string[]>);
 
@@ -46,7 +46,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
   @CliFlag({ desc: 'Entry point', short: 'e' })
   @Required(false)
-  entryPoint: string = '@travetto/cli/support/entry.trv';
+  entryPoint: string = '@travetto/cli/support/entry.trv.ts';
 
   @CliFlag({ desc: 'Minify output' })
   minify = true;
@@ -61,7 +61,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   ejectFile?: string;
 
   @CliFlag({ desc: 'Rollup configuration file', short: 'r' })
-  rollupConfiguration = '@travetto/pack/support/rollup/build';
+  rollupConfiguration = '@travetto/pack/support/rollup/build.ts';
 
   @CliFlag({ desc: 'Env Flag File Name' })
   envFile = '.env';

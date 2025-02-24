@@ -1,4 +1,4 @@
-import { CacheConfig, CoreCacheConfig } from '../types';
+import { CacheConfig, CoreCacheConfig } from '../types.ts';
 
 export const CacheConfigSymbol = Symbol.for('@travetto/cache:cache');
 export const EvictConfigSymbol = Symbol.for('@travetto/cache:evict');

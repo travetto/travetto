@@ -6,8 +6,8 @@ import path from 'node:path';
 import { ExecUtil, Util, Runtime } from '@travetto/runtime';
 import { TestFixtures } from '@travetto/test';
 
-import { FetchClientGenerator } from '../../src/fetch';
-import { AngularClientGenerator } from '../../src/angular';
+import { FetchClientGenerator } from '../../src/fetch.ts';
+import { AngularClientGenerator } from '../../src/angular.ts';
 
 const fixtures = new TestFixtures(['@travetto/rest-client']);
 
@@ -60,7 +60,7 @@ export class RestClientTestUtil {
       await ExecUtil.getResult(spawn('npm', ['i'], { cwd: tmp }));
       await this.compileTypescript(tmp, 'node');
 
-      const result = await ExecUtil.getResult(spawn('node', ['./main'], { cwd: tmp }));
+      const result = await ExecUtil.getResult(spawn('node', ['./main.ts'], { cwd: tmp }));
       return result.stdout;
     } finally {
       await this.cleanupFolder(tmp);

@@ -2,8 +2,8 @@ import { Runtime } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 
-import { ServerHandle } from '../src/types';
-import { RestNetUtil } from '../src/util/net';
+import { ServerHandle } from '../src/types.ts';
+import { RestNetUtil } from '../src/util/net.ts';
 
 /**
  * Run a rest server as an application
@@ -24,7 +24,7 @@ export class RunRestCommand implements CliCommandShape {
   }
 
   async main(): Promise<ServerHandle | void> {
-    const { RestApplication } = await import('../src/application/rest');
+    const { RestApplication } = await import('../src/application/rest.ts');
     try {
       return await DependencyRegistry.runInstance(RestApplication);
     } catch (err) {

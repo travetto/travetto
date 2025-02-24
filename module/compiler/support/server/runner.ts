@@ -3,10 +3,10 @@ import { rmSync } from 'node:fs';
 
 import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
 
-import type { CompilerEvent, CompilerMode } from '../types';
-import { AsyncQueue } from '../queue';
-import { Log } from '../log';
-import { CommonUtil } from '../util';
+import type { CompilerEvent, CompilerMode } from '../types.ts';
+import { AsyncQueue } from '../queue.ts';
+import { Log } from '../log.ts';
+import { CommonUtil } from '../util.ts';
 
 const log = Log.scoped('compiler-exec');
 const isEvent = (msg: unknown): msg is CompilerEvent => !!msg && typeof msg === 'object' && 'type' in msg;
@@ -34,7 +34,7 @@ export class CompilerRunner {
       log.debug(`Started watch=${watch} changed=${changed.slice(0, 10).map(x => `${x.module}/${x.file}`)}`);
     }
 
-    const main = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
+    const main = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js.ts');
     const deltaFile = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, `manifest-delta-${Date.now()}.json`);
 
     const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev => ev.sourceFile);

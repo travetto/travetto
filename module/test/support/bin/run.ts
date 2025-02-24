@@ -1,17 +1,17 @@
 import { castTo, Runtime } from '@travetto/runtime';
-import { AllViewSymbol } from '@travetto/schema/src/internal/types';
+import { AllViewSymbol } from '@travetto/schema/src/internal/types.ts';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { TestConsumerRegistry } from '../../src/consumer/registry';
-import type { RunState } from '../../src/execute/types';
+import { TestConsumerRegistry } from '../../src/consumer/registry.ts';
+import type { RunState } from '../../src/execute/types.ts';
 
 /**
  * Run tests given the input state
  * @param opts
  */
 export async function runTests(opts: RunState): Promise<void> {
-  const { RunnerUtil } = await import('../../src/execute/util');
-  const { Runner } = await import('../../src/execute/runner');
+  const { RunnerUtil } = await import('../../src/execute/util.ts');
+  const { Runner } = await import('../../src/execute/runner.ts');
 
   RunnerUtil.registerCleanup('runner');
 

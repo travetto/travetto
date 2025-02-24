@@ -1,4 +1,4 @@
-import { SchemaRestServerSuite } from '@travetto/rest/support/test/schema';
+import { SchemaRestServerSuite } from '@travetto/rest/support/test/schema.ts';
 import { Suite } from '@travetto/test';
 
 @Suite()

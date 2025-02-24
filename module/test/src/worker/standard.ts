@@ -3,11 +3,11 @@ import { fork } from 'node:child_process';
 import { Env, RuntimeIndex } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
-import { Events, TestLogEvent } from './types';
-import { TestConsumerShape } from '../consumer/types';
-import { SerializeUtil } from '../consumer/serialize';
-import { TestEvent } from '../model/event';
-import { TestRun } from '../model/test';
+import { Events, TestLogEvent } from './types.ts';
+import { TestConsumerShape } from '../consumer/types.ts';
+import { SerializeUtil } from '../consumer/serialize.ts';
+import { TestEvent } from '../model/event.ts';
+import { TestRun } from '../model/test.ts';
 
 const log = (message: string): void => {
   process.send?.({ type: 'log', message } satisfies TestLogEvent);
@@ -25,7 +25,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   const channel = new IpcChannel<TestEvent & { error?: Error }>(
     fork(
-      RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'), ['test:child'],
+      RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'), ['test:child.ts'],
       {
         cwd: suiteMod.sourcePath,
         env: {

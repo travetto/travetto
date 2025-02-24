@@ -2,8 +2,8 @@
 import { d, c } from '@travetto/doc';
 import { RuntimeIndex } from '@travetto/runtime';
 
-import { Suite } from './src/decorator/suite';
-import { Test } from './src/decorator/test';
+import { Suite } from './src/decorator/suite.ts';
+import { Test } from './src/decorator/test.ts';
 
 export const text = <>
   <c.StdHeader />
@@ -33,7 +33,7 @@ export const text = <>
 
     would translate to:
 
-    <c.Code title='Transpiled test Code' src={RuntimeIndex.resolveFileImport('@travetto/test/doc/assert-example.ts')} language='javascript' />
+    <c.Code title='Transpiled test Code' src={RuntimeIndex.resolveFileImport('@travetto/test/doc/assert-example.ts')} language='javascript.ts' />
 
     This would ultimately produce the error like:
 

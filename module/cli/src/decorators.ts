@@ -1,11 +1,11 @@
 import { Class, ClassInstance, Env, Runtime, RuntimeIndex, describeFunction } from '@travetto/runtime';
 import { FieldConfig, SchemaRegistry } from '@travetto/schema';
 
-import { CliCommandShape, CliCommandShapeFields } from './types';
-import { CliCommandRegistry } from './registry';
-import { CliModuleUtil } from './module';
-import { CliParseUtil } from './parse';
-import { CliUtil } from './util';
+import { CliCommandShape, CliCommandShapeFields } from './types.ts';
+import { CliCommandRegistry } from './registry.ts';
+import { CliModuleUtil } from './module.ts';
+import { CliParseUtil } from './parse.ts';
+import { CliUtil } from './util.ts';
 
 type Cmd = CliCommandShape & { env?: string };
 

@@ -7,9 +7,9 @@ import type { ByteRange, Any, Class, TypedFunction } from '@travetto/runtime';
 import {
   HeadersAddedSymbol, InterceptorConfigsSymbol, NodeEntitySymbol, ProviderEntitySymbol, RequestParamsSymbol,
   RequestLoggingSymbol, QueryExpandedSymbol
-} from './internal/symbol';
+} from './internal/symbol.ts';
 
-import type { RestInterceptor } from './interceptor/types';
+import type { RestInterceptor } from './interceptor/types.ts';
 
 export type HeaderMap = Record<string, (string | (() => string))>;
 export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';

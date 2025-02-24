@@ -1,7 +1,7 @@
 import { asConstructable, asFull, TypedFunction, type Class } from '@travetto/runtime';
 
-import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
-import { DependencyRegistry, ResolutionType } from './registry';
+import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types.ts';
+import { DependencyRegistry, ResolutionType } from './registry.ts';
 
 function collapseConfig<T extends { qualifier?: symbol }>(...args: (symbol | Partial<InjectConfig> | undefined)[]): T {
   let out: Partial<T> = {};

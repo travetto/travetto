@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-rest',
-    templateUrl: './rest.component.html',
+    templateUrl: './rest.component.html.ts',
     styleUrls: []
 })
 export class RestComponent { }

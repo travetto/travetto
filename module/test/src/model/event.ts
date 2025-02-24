@@ -1,5 +1,5 @@
-import { Assertion, TestConfig, TestResult } from './test';
-import { SuiteConfig, SuiteResult } from './suite';
+import { Assertion, TestConfig, TestResult } from './test.ts';
+import { SuiteConfig, SuiteResult } from './suite.ts';
 
 /**
  * Targets

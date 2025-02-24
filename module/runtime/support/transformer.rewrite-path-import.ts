@@ -3,7 +3,7 @@ import ts from 'typescript';
 import { TransformerState, OnFile } from '@travetto/transformer';
 
 const PATH_REGEX = /^['"](node:)?path['"]$/;
-const PATH_TARGET = '@travetto/manifest/src/path';
+const PATH_TARGET = '@travetto/manifest/src/path.ts';
 
 /**
  * Rewriting path imports to use manifest's path
