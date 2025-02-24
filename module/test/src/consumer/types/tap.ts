@@ -55,12 +55,16 @@ export class TapEmitter implements TestConsumerShape {
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
   }
 
+  /**
+   * Convert error to a stringed output
+   * @param error 
+   * @returns 
+   */
   toError(error?: Error): string | undefined {
     if (error && error.name !== 'AssertionError') {
       const err = SerializeUtil.deserializeError(error);
-      if (hasToJSON(err)) {
-        const obj = err.toJSON();
-        let out = JSON.stringify(obj, null, 2);
+      if (err instanceof Error) {
+        let out = JSON.stringify(hasToJSON(err) ? err.toJSON() : err, null, 2);
         if (this.#options?.verbose && err.stack) {
           out = `${out}\n${err.stack}`;
         }

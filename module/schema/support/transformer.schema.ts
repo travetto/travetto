@@ -38,7 +38,7 @@ export class SchemaTransformer {
 
     const comments = DocUtil.describeDocs(node);
 
-    if (!state.findDecorator(this, node, 'Schema', SchemaTransformUtil.SCHEMA_IMPORT)) {
+    if (!state.findDecorator(this, node, 'Schema', SchemaTransformUtil.SCHEMA_MOD)) {
       modifiers.unshift(state.createDecorator(SchemaTransformUtil.SCHEMA_IMPORT, 'Schema'));
     }
 

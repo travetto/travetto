@@ -7,8 +7,10 @@ import {
 
 export class SchemaTransformUtil {
 
-  static SCHEMA_IMPORT = '@travetto/schema/src/decorator/schema.ts';
-  static FIELD_IMPORT = '@travetto/schema/src/decorator/field.ts';
+  static SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
+  static SCHEMA_IMPORT = `${this.SCHEMA_MOD}.ts`;
+  static FIELD_MOD = '@travetto/schema/src/decorator/field';
+  static FIELD_IMPORT = `${this.FIELD_MOD}.ts`;
   static COMMON_IMPORT = '@travetto/schema/src/decorator/common.ts';
   static TYPES_IMPORT = '@travetto/schema/src/internal/types.ts';
 
@@ -164,7 +166,7 @@ export class SchemaTransformUtil {
 
     const params: ts.Expression[] = [];
 
-    const existing = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_IMPORT);
+    const existing = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_MOD);
     if (!existing) {
       const resolved = this.toConcreteType(state, typeExpr, node, config.root);
       params.push(resolved);

@@ -53,9 +53,9 @@ export class SerializeUtil {
    * Serialize to JSON
    */
   static serializeToJSON(out: TestEvent): string {
-    return JSON.stringify(out, (_, v) =>
-      v instanceof Error ? this.serializeError(v) :
+    return JSON.stringify(out, function (k, v) {
+      return this[k] instanceof Error ? SerializeUtil.serializeError(this[k]) :
         typeof v === 'bigint' ? v.toString() : v
-    );
+    });
   }
 }
