@@ -26,4 +26,5 @@ export * from './src/util/route.ts';
 export * from './src/util/mime.ts';
 export * from './src/util/common.ts';
 export * from './src/util/net.ts';
+export * from './src/util/serialize.ts';
 export * from './src/util/route-check.ts';

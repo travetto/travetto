@@ -1,10 +1,10 @@
 import { importProvidersFrom } from '@angular/core';
-import { AppComponent } from './app/app.component.ts';
-import { BlogComponent } from './app/blog/blog.component.ts';
-import { LandingComponent } from './app/landing/landing.component.ts';
+import { AppComponent } from './app/app.component';
+import { BlogComponent } from './app/blog/blog.component';
+import { LandingComponent } from './app/landing/landing.component';
 import { withInMemoryScrolling, provideRouter, Routes } from '@angular/router';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import { DocumentationComponent } from './app/documentation/documentation.component.ts';
+import { DocumentationComponent } from './app/documentation/documentation.component';
 
 const routes: Routes = [
   {
@@ -17,7 +17,7 @@ const routes: Routes = [
       },
       {
         path: 'guide',
-        loadComponent: () => import('./app/documentation/gen/todo-app/todo-app.component.ts').then(m => m.GuideComponent),
+        loadComponent: () => import('./app/documentation/gen/todo-app/todo-app.component').then(m => m.GuideComponent),
       },
       {
         path: 'blog',
@@ -26,7 +26,7 @@ const routes: Routes = [
       {
         path: 'docs',
         component: DocumentationComponent,
-        loadChildren: () => import('./app/documentation/documentation.module.ts').then(m => m.ROUTES)
+        loadChildren: () => import('./app/documentation/documentation.module').then(m => m.ROUTES)
       }
     ]
   }, {

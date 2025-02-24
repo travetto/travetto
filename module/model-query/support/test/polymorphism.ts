@@ -1,11 +1,12 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+import { NotFoundError } from '@travetto/model';
+import { castTo } from '@travetto/runtime';
+
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 import { ModelCrudSupport } from '@travetto/model/src/service/crud.ts';
 import { Doctor, Engineer, Worker, Firefighter } from '@travetto/model/support/test/polymorphism.ts';
-import { NotFoundError } from '@travetto/model';
-import { castTo } from '@travetto/runtime';
 
 import { ModelQueryCrudSupport } from '../../src/service/crud.ts';
 import { ModelQuerySupport } from '../../src/service/query.ts';

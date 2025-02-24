@@ -2,9 +2,10 @@ import { pipeline } from 'node:stream/promises';
 
 import type koa from 'koa';
 
-import { RestServerUtil, Request, Response } from '@travetto/rest';
-import { NodeEntitySymbol, ProviderEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
 import { castTo } from '@travetto/runtime';
+import { RestServerUtil, Request, Response } from '@travetto/rest';
+
+import { NodeEntitySymbol, ProviderEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
 
 /**
  * Provides translation between koa request/response objects and the framework

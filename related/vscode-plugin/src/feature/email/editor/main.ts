@@ -2,8 +2,9 @@ import { ChildProcess, spawn } from 'node:child_process';
 import vscode from 'vscode';
 
 import { ExecUtil } from '@travetto/runtime';
-import type { EditorResponse } from '@travetto/email-compiler/support/bin/types.ts';
 import type { EmailCompiled } from '@travetto/email';
+
+import type { EditorResponse } from '@travetto/email-compiler/support/bin/types.ts';
 
 import { Activatible } from '../../../core/activation.ts';
 import { RunUtil } from '../../../core/run.ts';

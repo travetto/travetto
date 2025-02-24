@@ -1,7 +1,12 @@
 import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
-import { MaxLength, MethodValidator, SchemaValidator, ValidationError, ValidationResultError } from '../__index__.ts';
 import { RootRegistry } from '@travetto/registry';
+
+import { SchemaValidator } from '../src/validate/validator.ts';
+import { ValidationResultError } from '../src/validate/error.ts';
+import { ValidationError } from '../src/validate/types.ts';
+import { MaxLength } from '../src/decorator/field.ts';
+import { MethodValidator } from '../src/decorator/schema.ts';
 
 const nameValidator = (name: string): ValidationError | undefined => {
   if (name === 'bob') {

@@ -1,6 +1,7 @@
-import { TravettoEntitySymbol, NodeEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
 import * as rest from '@travetto/rest';
 import * as express from 'express';
+
+import { TravettoEntitySymbol, NodeEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
 
 // Support typings
 declare module 'express' {
