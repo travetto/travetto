@@ -52,8 +52,6 @@ export class InjectableTransformer {
       throw new Error(`Unable to import non-external type: ${param.getText()} ${type.key}: ${src}`);
     }
 
-    process.send!({ type: 'log', payload: { level: 'info', message: `Resolved ${state.source.fileName} ${param.name.getText()} ${type.key}`, } });
-
     args.unshift(state.fromLiteral(payload));
 
     return args;
