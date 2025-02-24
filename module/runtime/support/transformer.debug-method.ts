@@ -4,6 +4,8 @@ import { TransformerState, OnMethod, CoreUtil } from '@travetto/transformer';
 
 const DebugSymbol = Symbol.for('@travetto/runtime:debug');
 
+const DEBUG_IMPORT = '@travetto/runtime/src/debug.ts';
+
 /**
  * Debug transformation state
  */
@@ -19,7 +21,7 @@ export class DebugEntryTransformer {
   @OnMethod('DebugBreak')
   static debugOnEntry(state: TransformerState & DebugState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (!state[DebugSymbol]) {
-      const imp = state.importFile('@travetto/runtime/src/debug.ts').ident;
+      const imp = state.importFile(DEBUG_IMPORT).ident;
       state[DebugSymbol] = CoreUtil.createAccess(state.factory, imp, 'tryDebugger');
     }
 
