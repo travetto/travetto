@@ -120,7 +120,7 @@ class $Runtime {
       return fs.readFile(imp, 'utf8').then(JSON.parse);
     }
 
-    if (!/[.][cm]?[tj]sx?$/.test(imp)) {
+    if (!ManifestModuleUtil.SOURCE_EXT_RE.test(imp)) {
       if (imp.startsWith('@')) {
         if (/[/].*?[/]/.test(imp)) {
           imp = `${imp}.ts`;

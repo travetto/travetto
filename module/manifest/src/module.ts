@@ -41,6 +41,11 @@ const SUPPORT_FILE_RE = new RegExp(`^support[/](?<name>${Object.keys(SUPPORT_FIL
 
 export class ManifestModuleUtil {
 
+  static OUTPUT_EXT = '.js';
+  static SOURCE_EXT_RE = /[.][cm]?[tj]sx?$/;
+  static TYPINGS_EXT_RE = /[.]d[.][cm]?ts$/;
+  static TYPINGS_WITH_MAP_EXT_RE = /[.]d[.][cm]?ts([.]map)?$/;
+
   static #scanCache: Record<string, string[]> = {};
 
   static #getNewest(stat: { mtimeMs: number, ctimeMs: number }): number {
@@ -51,7 +56,7 @@ export class ManifestModuleUtil {
    * Replace a source file's extension with a given value
    */
   static #pathToExtension(sourceFile: string, ext: string): string {
-    return sourceFile.replace(/[.][cm]?[tj]sx?$/, ext);
+    return sourceFile.replace(ManifestModuleUtil.SOURCE_EXT_RE, ext);
   }
 
   /**
@@ -238,7 +243,7 @@ export class ManifestModuleUtil {
     if (sourceFile.endsWith('.d.ts')) {
       return sourceFile;
     }
-    return this.#pathToExtension(sourceFile, '.js');
+    return this.#pathToExtension(sourceFile, ManifestModuleUtil.OUTPUT_EXT);
   }
 
   /**

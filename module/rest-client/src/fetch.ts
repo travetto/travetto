@@ -30,7 +30,7 @@ export class FetchClientGenerator extends BaseClientGenerator<{ node?: boolean }
 
   async init(): Promise<void> {
     if (this.config.node) {
-      const pkg = await Runtime.importFrom<Package>('@travetto/runtime/package.json.ts');
+      const pkg = await Runtime.importFrom<Package>('@travetto/runtime/package.json');
 
       this.registerContent('_pkgId', {
         imports: [],

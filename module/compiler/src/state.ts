@@ -10,7 +10,6 @@ import { CompileEmitError, CompileStateEntry } from './types.ts';
 import { CommonUtil } from '../support/util.ts';
 
 const TYPINGS_FOLDER_KEYS = new Set<ManifestModuleFolderType>(['$index', 'support', 'src', '$package']);
-const TYPINGS_EXT_RE = /[.]d[.][cm]?ts([.]map)?$/;
 
 export class CompilerState implements ts.CompilerHost {
 
@@ -47,7 +46,7 @@ export class CompilerState implements ts.CompilerHost {
   #writeExternalTypings(location: string, text: string, bom: boolean): void {
     let core = location.replace('.map', '');
     if (!this.#outputToEntry.has(core)) {
-      core = core.replace('.d.ts', '.js');
+      core = core.replace(ManifestModuleUtil.TYPINGS_EXT_RE, ManifestModuleUtil.OUTPUT_EXT);
     }
     const entry = this.#outputToEntry.get(core);
     if (entry) {
@@ -262,7 +261,7 @@ export class CompilerState implements ts.CompilerHost {
     }
     const location = this.#tscOutputFileToOuptut.get(outputFile) ?? outputFile;
 
-    if (TYPINGS_EXT_RE.test(outputFile) || outputFile.endsWith('package.json')) {
+    if (ManifestModuleUtil.TYPINGS_WITH_MAP_EXT_RE.test(outputFile) || outputFile.endsWith('package.json')) {
       this.#writeExternalTypings(location, text, bom);
     }
 

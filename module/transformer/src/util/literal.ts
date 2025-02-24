@@ -39,7 +39,9 @@ export class LiteralUtil {
   static fromLiteral(factory: ts.NodeFactory, val: null): ts.NullLiteral;
   static fromLiteral(factory: ts.NodeFactory, val: object): ts.ObjectLiteralExpression;
   static fromLiteral(factory: ts.NodeFactory, val: unknown[]): ts.ArrayLiteralExpression;
-  static fromLiteral(factory: ts.NodeFactory, val: string | boolean | number): ts.LiteralExpression;
+  static fromLiteral(factory: ts.NodeFactory, val: string): ts.StringLiteral;
+  static fromLiteral(factory: ts.NodeFactory, val: number): ts.NumericLiteral;
+  static fromLiteral(factory: ts.NodeFactory, val: boolean): ts.BooleanLiteral;
   static fromLiteral(factory: ts.NodeFactory, val: unknown): ts.Node {
     if (isNode(val)) { // If already a node
       return val;

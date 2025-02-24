@@ -1,6 +1,7 @@
 import ts from 'typescript';
 
 import { TransformerState, DecoratorMeta, AfterClass } from '@travetto/transformer';
+
 import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util.ts';
 
 /**

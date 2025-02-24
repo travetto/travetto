@@ -4,6 +4,8 @@ const { stat, readFile, writeFile, mkdir, rm, readdir } = require('node:fs/promi
 const path = require('node:path');
 
 const COMP_MOD = '@travetto/compiler';
+const SOURCE_EXT_RE = /[.][cm]?[tj]sx?$/;
+const OUTPUT_EXT = '.js';
 
 async function writeIfStale(src = '', dest = '', transform = async (x = '') => x) {
   const [srcStat, destStat] = await Promise.all([src, dest].map(x => stat(`${x}`).then(z => z.mtimeMs, () => 0)));
@@ -32,10 +34,8 @@ async function getContext() {
   const ctx = await import(ctxDest).then((/** @type {import('@travetto/manifest')} */ v) => v.getManifestContext());
 
   const srcPath = path.resolve.bind(path, ctx.workspace.path, ctx.build.compilerModuleFolder);
-  const destPath = (file = '', mod = COMP_MOD) => {
-    const base = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, mod, file);
-    return `${base}${file.includes('.') ? '' : file.includes('/') ? '.ts' : '/__index__.ts'}`.replace('.ts', '.js');
-  };
+  const destPath = (file = '') =>
+    path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', file).replace(SOURCE_EXT_RE, OUTPUT_EXT);
 
   return {
     packageType: ctx.workspace.type,
@@ -43,9 +43,12 @@ async function getContext() {
     destPath,
     tsconfig: path.resolve(ctx.workspace.path, 'tsconfig.json'),
     cleanImports: (t = '') => t
-      .replace(/from '([.][^']+)'/g, (_, i) => `from '${i.replace(/[.]js$/, '')}.js'`)
-      .replace(/from '(@travetto\/[^/']+)([/][^']+)?'/g, (_, mod, modFile) => `from '${destPath(modFile, mod)}'`),
-    loadMain: () => import(destPath('support/entry.main.ts'))
+      .replace(/from ['"]((@travetto|[.]+)[^'"]+)['"]/g, (_, v, m) => {
+        const s = (m === '@travetto' ? destPath(v) : v).replace(SOURCE_EXT_RE, OUTPUT_EXT);
+        const suf = s.endsWith(OUTPUT_EXT) ? '' : `/__index__${OUTPUT_EXT}`;
+        return `from '${s}${suf}'`;
+      }),
+    loadMain: () => import(destPath(`${COMP_MOD}/support/entry.main.ts`))
       .then((/** @type {import('../support/entry.main.ts')} */ v) => v.main(ctx)),
     supportFiles: () => readdir(srcPath('support'), { recursive: true, encoding: 'utf8' })
       .then(v => v.filter(f => f.endsWith('.ts')).map(j => `support/${j}`))
@@ -60,12 +63,12 @@ async function load(/** @type {(ops: import('../support/entry.main.ts').Operatio
     await writeIfStale('', ctx.tsconfig,
       async () => JSON.stringify({ extends: `${COMP_MOD}/tsconfig.trv.json` }, null, 2));
 
-    await writeIfStale(ctx.srcPath('package.json'), ctx.destPath('package.json'),
+    await writeIfStale(ctx.srcPath('package.json'), ctx.destPath(`${COMP_MOD}/package.json`),
       async text => JSON.stringify({ ...JSON.parse(text || '{}'), type: ctx.packageType }, null, 2));
 
     await Promise.all((await ctx.supportFiles()).map(f =>
-      writeIfStale(ctx.srcPath(f), ctx.destPath(f),
-        t => transpile(t, ctx.packageType === 'module').then(ctx.cleanImports))));
+      writeIfStale(ctx.srcPath(f), ctx.destPath(`${COMP_MOD}/${f}`),
+        t => transpile(ctx.cleanImports(t), ctx.packageType === 'module'))));
 
     process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
     process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
@@ -74,7 +77,7 @@ async function load(/** @type {(ops: import('../support/entry.main.ts').Operatio
     try { module.enableCompileCache(); } catch { }
     return cb(res);
   } catch (err) {
-    await rm(ctx.destPath('.'), { recursive: true, force: true });
+    await rm(ctx.destPath(COMP_MOD), { recursive: true, force: true });
     throw err;
   }
 }
