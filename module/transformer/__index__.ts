@@ -3,7 +3,7 @@ export * from './src/visitor.ts';
 export * from './src/register.ts';
 export * from './src/types/visitor.ts';
 export * from './src/types/shared.ts';
-export type { AnyType } from './src/resolver/types.ts';
+export type { AnyType, ForeignType, ManagedType, PointerType, LiteralType, ShapeType, CompositionType, TupleType, UnknownType, TemplateType } from './src/resolver/types.ts';
 export * from './src/manager.ts';
 
 export * from './src/util/core.ts';

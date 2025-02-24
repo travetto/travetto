@@ -3,8 +3,8 @@ import { Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { ModelType } from '@travetto/model';
 import { castTo, Class } from '@travetto/runtime';
-
 import { SQLDialect, SQLModelConfig } from '@travetto/model-sql';
+
 import { SQLUtil, VisitStack } from '@travetto/model-sql/src/internal/util.ts';
 
 import { PostgreSQLConnection } from './connection.ts';

@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import type { IndexedModule, ManifestModule } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/runtime';
-import type { TestWatchEvent } from '@travetto/test/src/worker/types.ts';
+import type { TestWatchEvent } from '@travetto/test';
 
 import { Workspace } from '../../../core/workspace.ts';
 import { Activatible } from '../../../core/activation.ts';

@@ -7,3 +7,5 @@ export * from './src/model/event.ts';
 export * from './src/registry/suite.ts';
 export * from './src/fixture.ts';
 export * from './src/consumer/types.ts';
+export * from './src/execute/error.ts';
+export { TestWatchEvent } from './src/worker/types.ts';

@@ -2,10 +2,9 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { TimeUtil } from '@travetto/runtime';
-import { NotFoundError } from '@travetto/model';
+import { NotFoundError, ModelCrudSupport } from '@travetto/model';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
-import { ModelCrudSupport } from '@travetto/model/src/service/crud.ts';
 
 import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './types.ts';
 

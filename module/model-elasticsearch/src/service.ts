@@ -11,7 +11,7 @@ import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySupport, PageableModelQuery, Query, ValidStringFields,
-  QueryVerifier
+  QueryVerifier, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
@@ -21,7 +21,6 @@ import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest.ts';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry.ts';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry.ts';
-import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest.ts';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk.ts';
 
 import { ElasticsearchModelConfig } from './config.ts';
