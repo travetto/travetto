@@ -37,16 +37,16 @@ export abstract class AuthSessionServerSuite extends BaseRestSuite {
     assert(this.session.get() === undefined);
     assert(await this.session.load() === undefined);
 
-    const sess = this.session.getOrCreate();
-    assert(sess.id === this.auth.principal.sessionId);
-    sess.data = { name: 'bob' };
+    const session = this.session.getOrCreate();
+    assert(session.id === this.auth.principal.sessionId);
+    session.data = { name: 'bob' };
     await this.session.persist();
 
     this.session.clear(); // Disconnect
 
     assert(await this.session.load() !== undefined);
-    const sess2 = this.session.getOrCreate();
-    assert(sess2.data?.name === 'bob');
+    const session2 = this.session.getOrCreate();
+    assert(session2.data?.name === 'bob');
 
     this.auth.principal = {
       id: 'orange',
@@ -57,8 +57,8 @@ export abstract class AuthSessionServerSuite extends BaseRestSuite {
     this.session.clear(); // Disconnect
 
     assert(await this.session.load() === undefined);
-    const sess3 = this.session.getOrCreate();
-    assert.deepStrictEqual(sess3.data, {});
+    const session3 = this.session.getOrCreate();
+    assert.deepStrictEqual(session3.data, {});
   }
 
   @WithAsyncContext()

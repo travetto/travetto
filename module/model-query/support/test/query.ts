@@ -41,8 +41,8 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const none = await svc.queryCount(Person, { where: { id: { $ne: people[0].id } } });
     assert(none === 3);
 
-    const noneids = await svc.query(Person, { where: { id: { $ne: people[0].id } } });
-    assert(noneids.every(x => x.id !== people[0].id));
+    const noneIds = await svc.query(Person, { where: { id: { $ne: people[0].id } } });
+    assert(noneIds.every(x => x.id !== people[0].id));
   }
 
   @Test('verify word boundary')
