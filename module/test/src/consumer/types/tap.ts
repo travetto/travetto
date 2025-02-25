@@ -56,7 +56,7 @@ export class TapEmitter implements TestConsumerShape {
 
   /**
    * Error to string
-   * @param error 
+   * @param err
    */
   errorToString(err?: Error): string | undefined {
     if (err && err.name !== 'AssertionError') {
