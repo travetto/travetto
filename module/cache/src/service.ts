@@ -2,7 +2,6 @@ import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError } from '@tra
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, Runtime, TimeUtil, Util } from '@travetto/runtime';
-
 import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 import { CacheError } from './error';
