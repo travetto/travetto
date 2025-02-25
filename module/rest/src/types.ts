@@ -7,7 +7,7 @@ import type { ByteRange, Any, Class, TypedFunction } from '@travetto/runtime';
 import {
   HeadersAddedSymbol, InterceptorConfigsSymbol, NodeEntitySymbol, ProviderEntitySymbol, RequestParamsSymbol,
   RequestLoggingSymbol, QueryExpandedSymbol
-} from './internal/symbol.ts';
+} from './internal/symbol';
 
 import type { RestInterceptor } from './interceptor/types';
 

@@ -6,7 +6,7 @@ import {
   LongText, Match, Max, MaxLength, Min, MinLength, Readonly,
   Required, Telephone, Url, Writeonly, Text, Secret, Specifier,
   SubTypeField
-} from './src/decorator/field.ts';
+} from './src/decorator/field';
 
 import { Schema } from './src/decorator/schema';
 import { Describe } from './src/decorator/common';

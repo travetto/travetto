@@ -13,7 +13,7 @@ import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaaz,
   CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque, TemplateLit,
   RangeSchema
-} from './models/validation.ts';
+} from './models/validation';
 import { Accessors } from './models/binding';
 
 function findError(errors: ValidationError[], path: string, message: string) {

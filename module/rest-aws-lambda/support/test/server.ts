@@ -8,7 +8,7 @@ import { asFull, castTo, Util } from '@travetto/runtime';
 import {
   RestServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
-} from '@travetto/rest/support/test/server-support/base.ts';
+} from '@travetto/rest/support/test/server-support/base';
 
 import { AwsLambdaRestApplication } from '../../src/server';
 

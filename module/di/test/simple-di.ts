@@ -13,7 +13,7 @@ import {
   LooseResolutionClass,
   LOOSE_SYM,
   SetterInject
-} from './deps.ts';
+} from './deps';
 
 import { DbConfig } from './config';
 import { InjectionError } from '../src/error';
