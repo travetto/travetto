@@ -7,6 +7,8 @@ import { TransformerState, OnCall, DeclarationUtil, CoreUtil, OnMethod, AfterMet
  */
 export const DEEP_LITERAL_TYPES = new Set(['Set', 'Map', 'Array', 'String', 'Number', 'Object', 'Boolean']);
 
+const ASSERT_IMPORT = '@travetto/test/src/assert/check.ts';
+
 /**
  * Mapping of assert equal methods to assert deep equal methods
  */
@@ -137,7 +139,7 @@ export class AssertTransformer {
    */
   static initState(state: TransformerState & AssertState): void {
     if (!state[AssertSymbol]) {
-      const asrt = state.importFile('@travetto/test/src/assert/check').ident;
+      const asrt = state.importFile(ASSERT_IMPORT).ident;
       state[AssertSymbol] = {
         assert: asrt,
         assertCheck: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'check'),

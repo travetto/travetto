@@ -24,7 +24,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   const channel = new IpcChannel<TestEvent & { error?: Error }>(
     fork(
-      RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'), ['test:child'],
+      RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv.ts'), ['test:child'],
       {
         cwd: suiteMod.sourcePath,
         env: {
