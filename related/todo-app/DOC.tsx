@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
-import { DocRunUtil } from '@travetto/doc/src/util/run';
+import { DocRunUtil } from '@travetto/doc/src/util/run.ts';
 import { Model } from '@travetto/model';
 import { Env, ShutdownManager, Util, RuntimeIndex, castTo } from '@travetto/runtime';
 

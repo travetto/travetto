@@ -3,13 +3,13 @@ import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema'
 import { Class, AppError, TypedObject, TimeUtil, castTo, castKey } from '@travetto/runtime';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
-import { PointImpl } from '@travetto/model-query/src/internal/model/point';
-import { ModelType } from '@travetto/model/src/types/model';
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
+import { PointImpl } from '@travetto/model-query/src/internal/model/point.ts';
+import { ModelType } from '@travetto/model/src/types/model.ts';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query.ts';
 
-import { SQLUtil, VisitStack } from '../internal/util';
-import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
-import { Connection } from '../connection/base';
+import { SQLUtil, VisitStack } from '../internal/util.ts';
+import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types.ts';
+import { Connection } from '../connection/base.ts';
 
 interface Alias {
   alias: string;

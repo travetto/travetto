@@ -1,7 +1,7 @@
-import { RuntimeIndex } from './manifest-index';
-import { ExecUtil } from './exec';
-import { ShutdownManager } from './shutdown';
-import { Util } from './util';
+import { RuntimeIndex } from './manifest-index.ts';
+import { ExecUtil } from './exec.ts';
+import { ShutdownManager } from './shutdown.ts';
+import { Util } from './util.ts';
 
 export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete', output: string, module: string, time: number };
 

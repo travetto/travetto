@@ -2,12 +2,12 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { InjectableSuite } from '@travetto/di/support/test/suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
-import { WithAsyncContext } from '../src/decorator';
-import { AsyncContext } from '../src/service';
-import { WithSuiteContext } from '../support/test/context';
-import { AsyncContextValue } from '../src/value';
+import { WithAsyncContext } from '../src/decorator.ts';
+import { AsyncContext } from '../src/service.ts';
+import { WithSuiteContext } from '../support/test/context.ts';
+import { AsyncContextValue } from '../src/value.ts';
 
 @Suite()
 @InjectableSuite()

@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { PassportUtil } from '../__index__';
+import { PassportUtil } from '../__index__.ts';
 import { Util } from '@travetto/runtime';
 
 @Suite()

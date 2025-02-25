@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { BaseModelSuite } from '@travetto/model/support/test/base';
-import { ModelCrudSupport } from '@travetto/model/src/service/crud';
+import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
+import { ModelCrudSupport } from '@travetto/model/src/service/crud.ts';
 import { NotFoundError } from '@travetto/model';
 
-import { Address, Person, Todo } from './types';
-import { ModelQueryCrudSupport } from '../../src/service/crud';
+import { Address, Person, Todo } from './types.ts';
+import { ModelQueryCrudSupport } from '../../src/service/crud.ts';
 
 @Suite()
 export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudSupport & ModelCrudSupport> {

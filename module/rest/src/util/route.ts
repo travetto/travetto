@@ -2,13 +2,13 @@ import { isPromise } from 'node:util/types';
 
 import { asConstructable, castTo, Class } from '@travetto/runtime';
 
-import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
-import { EndpointConfig, ControllerConfig } from '../registry/types';
-import { LightweightConfig, ManagedInterceptorConfig, RestInterceptor, RouteApplies } from '../interceptor/types';
-import { HeadersAddedSymbol, InterceptorConfigsSymbol } from '../internal/symbol';
+import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types.ts';
+import { EndpointConfig, ControllerConfig } from '../registry/types.ts';
+import { LightweightConfig, ManagedInterceptorConfig, RestInterceptor, RouteApplies } from '../interceptor/types.ts';
+import { HeadersAddedSymbol, InterceptorConfigsSymbol } from '../internal/symbol.ts';
 
-import { ParamExtractor } from './param';
-import { RouteCheckUtil } from './route-check';
+import { ParamExtractor } from './param.ts';
+import { RouteCheckUtil } from './route-check.ts';
 
 const RouteChecker = Symbol.for('@travetto/rest:route-checker');
 

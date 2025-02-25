@@ -3,7 +3,7 @@ import { Class } from '@travetto/runtime';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry } from '@travetto/test';
 
-import { AsyncContext } from '../../src/service';
+import { AsyncContext } from '../../src/service.ts';
 
 const Init = Symbol();
 

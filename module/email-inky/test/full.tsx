@@ -5,8 +5,8 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Runtime } from '@travetto/runtime';
 
-import { Container, If, Unless, Summary, Title, Value, InkyTemplate } from '../src/components';
-import { prepare } from '../src/wrapper';
+import { Container, If, Unless, Summary, Title, Value, InkyTemplate } from '../src/components.ts';
+import { prepare } from '../src/wrapper.ts';
 
 @Suite('InkyTemplate')
 class ContainerTest {

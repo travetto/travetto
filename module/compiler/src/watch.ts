@@ -3,12 +3,12 @@ import { watch } from 'node:fs';
 
 import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
-import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types';
-import { CompilerState } from './state';
-import { CompilerUtil } from './util';
+import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
+import { CompilerState } from './state.ts';
+import { CompilerUtil } from './util.ts';
 
-import { AsyncQueue } from '../support/queue';
-import { IpcLogger } from '../support/log';
+import { AsyncQueue } from '../support/queue.ts';
+import { IpcLogger } from '../support/log.ts';
 
 const log = new IpcLogger({ level: 'debug' });
 

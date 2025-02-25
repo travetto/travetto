@@ -4,7 +4,7 @@ import {
   TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, OnGetter, OnSetter
 } from '@travetto/transformer';
 
-import { SchemaTransformUtil } from './transformer/util';
+import { SchemaTransformUtil } from './transformer/util.ts';
 
 const inSchema = Symbol.for('@travetto/schema:schema');
 const accessors = Symbol.for('@travetto/schema:accessors');

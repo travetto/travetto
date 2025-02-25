@@ -1,7 +1,7 @@
 import { Schema } from '@travetto/schema';
 import { PageableModelQuery } from '@travetto/model-query';
 
-import { QueryLanguageParser } from './parser';
+import { QueryLanguageParser } from './parser.ts';
 
 const convert = <T>(k?: string, query?: boolean): T | undefined =>
   !k || typeof k !== 'string' ? undefined : (/^[\{\[]/.test(k) ?

@@ -1,7 +1,7 @@
 import { ClassInstance } from '@travetto/runtime';
 
-import { SuiteRegistry } from '../registry/suite';
-import { TestConfig, ThrowableError } from '../model/test';
+import { SuiteRegistry } from '../registry/suite.ts';
+import { TestConfig, ThrowableError } from '../model/test.ts';
 
 /**
  * The `@AssertCheck` indicates that a function's assert calls should be transformed

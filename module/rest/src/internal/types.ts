@@ -1,5 +1,5 @@
-import type { Request, Response } from '../types';
-import { ContextProvider } from '../decorator/param';
+import type { Request, Response } from '../types.ts';
+import { ContextProvider } from '../decorator/param.ts';
 
 /**
  * @augments `@travetto/rest:ContextParam`

@@ -1,9 +1,9 @@
 import { castKey, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { CliCommandRegistry } from './registry';
-import { ParsedState, CliCommandInput, CliCommandSchema, CliCommandShape } from './types';
-import { CliValidationResultError } from './error';
+import { CliCommandRegistry } from './registry.ts';
+import { ParsedState, CliCommandInput, CliCommandSchema, CliCommandShape } from './types.ts';
+import { CliValidationResultError } from './error.ts';
 
 const LONG_FLAG = /^--[a-z][^= ]+/i;
 const SHORT_FLAG = /^-[a-z]/i;

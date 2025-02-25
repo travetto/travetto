@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { AuthSessionInterceptor } from './__index__';
+import { AuthSessionInterceptor } from './__index__.ts';
 import { Session, SessionService } from '@travetto/auth-session';
 
 export const text = <>

@@ -1,5 +1,5 @@
 import { Util } from '@travetto/runtime';
-import { ContentType } from '../types';
+import { ContentType } from '../types.ts';
 
 /**
  * Utils for checking mime patterns

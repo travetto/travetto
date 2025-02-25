@@ -3,14 +3,14 @@ import path from 'node:path';
 import { TimeUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
 import { WorkPool } from '@travetto/worker';
 
-import { buildStandardTestManager } from '../worker/standard';
-import { RunnableTestConsumer } from '../consumer/types/runnable';
-import { TestRun } from '../model/test';
+import { buildStandardTestManager } from '../worker/standard.ts';
+import { RunnableTestConsumer } from '../consumer/types/runnable.ts';
+import { TestRun } from '../model/test.ts';
 
-import { TestExecutor } from './executor';
-import { RunnerUtil } from './util';
-import { RunState } from './types';
-import { TestConsumerRegistry } from '../consumer/registry';
+import { TestExecutor } from './executor.ts';
+import { RunnerUtil } from './util.ts';
+import { RunState } from './types.ts';
+import { TestConsumerRegistry } from '../consumer/registry.ts';
 
 /**
  * Test Runner

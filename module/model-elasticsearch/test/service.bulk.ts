@@ -1,9 +1,9 @@
 import { Suite } from '@travetto/test';
 
-import { ModelBulkSuite } from '@travetto/model/support/test/bulk';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
 
-import { ElasticsearchModelConfig } from '../src/config';
-import { ElasticsearchModelService } from '../src/service';
+import { ElasticsearchModelConfig } from '../src/config.ts';
+import { ElasticsearchModelService } from '../src/service.ts';
 
 @Suite()
 export class ElasticsearchBulkSuite extends ModelBulkSuite {

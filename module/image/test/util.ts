@@ -8,7 +8,7 @@ import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
-import { ImageUtil } from '../src/util';
+import { ImageUtil } from '../src/util.ts';
 
 @Suite()
 class ImageUtilSuite {

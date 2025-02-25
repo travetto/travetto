@@ -1,6 +1,6 @@
 import { Runtime, BinaryUtil } from '@travetto/runtime';
 
-import { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types';
+import { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types.ts';
 
 /**
  * Utilities for email

@@ -3,13 +3,13 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { Response } from '@travetto/rest';
-import { InjectableSuite } from '@travetto/di/support/test/suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 import { asFull } from '@travetto/runtime';
 
-import { AuthContextInterceptor } from '../src/interceptors/context';
-import { JWTPrincipalCodec } from '../src/codec';
-import { RestAuthConfig } from '../src/config';
-import { CommonPrincipalCodecSymbol } from '../src/types';
+import { AuthContextInterceptor } from '../src/interceptors/context.ts';
+import { JWTPrincipalCodec } from '../src/codec.ts';
+import { RestAuthConfig } from '../src/config.ts';
+import { CommonPrincipalCodecSymbol } from '../src/types.ts';
 
 @Suite()
 @InjectableSuite()

@@ -1,4 +1,4 @@
-import { consumeError } from './rpc';
+import { consumeError } from './rpc.ts';
 
 export async function toNodeError(payload: unknown): Promise<Error> {
   try {

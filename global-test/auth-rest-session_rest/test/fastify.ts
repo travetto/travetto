@@ -1,4 +1,4 @@
-import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server';
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server.ts';
 import { Suite } from '@travetto/test';
 import { FastifyRestServer } from '@travetto/rest-fastify';
 import { InjectableFactory } from '@travetto/di';

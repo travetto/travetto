@@ -6,16 +6,16 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { RootRegistry } from '@travetto/registry';
 
-import { ConfigureInterceptor } from '../src/decorator/common';
-import { Controller } from '../src/decorator/controller';
-import { Get } from '../src/decorator/endpoint';
-import { ManagedInterceptorConfig, RestInterceptor } from '../src/interceptor/types';
-import { ControllerRegistry } from '../src/registry/controller';
-import { Response, FilterContext, RouteConfig, ServerHandle } from '../src/types';
-import { RestServer } from '../src/application/server';
-import { RestApplication } from '../src/application/rest';
-import { CorsInterceptor } from '../src/interceptor/cors';
-import { GetCacheInterceptor } from '../src/interceptor/get-cache';
+import { ConfigureInterceptor } from '../src/decorator/common.ts';
+import { Controller } from '../src/decorator/controller.ts';
+import { Get } from '../src/decorator/endpoint.ts';
+import { ManagedInterceptorConfig, RestInterceptor } from '../src/interceptor/types.ts';
+import { ControllerRegistry } from '../src/registry/controller.ts';
+import { Response, FilterContext, RouteConfig, ServerHandle } from '../src/types.ts';
+import { RestServer } from '../src/application/server.ts';
+import { RestApplication } from '../src/application/rest.ts';
+import { CorsInterceptor } from '../src/interceptor/cors.ts';
+import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
 
 @Injectable()
 @Config('rest.custom')

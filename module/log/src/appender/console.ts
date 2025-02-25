@@ -1,7 +1,7 @@
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { LogAppender, LogEvent } from '../types';
+import { LogAppender, LogEvent } from '../types.ts';
 
 @Config('log')
 export class ConsoleLogAppenderConfig {

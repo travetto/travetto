@@ -95,7 +95,7 @@ import { InjectableFactory } from '@travetto/di';
 import { ModelAuthService } from '@travetto/auth-model';
 import { ModelCrudSupport } from '@travetto/model';
 
-import { User } from './model';
+import { User } from './model.ts';
 
 class AuthConfig {
   @InjectableFactory()
@@ -135,7 +135,7 @@ import { AppError } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { ModelAuthService } from '@travetto/auth-model';
 
-import { User } from './model';
+import { User } from './model.ts';
 
 @Injectable()
 class UserService {

@@ -1,4 +1,4 @@
-import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
+import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
 import * as rest from '@travetto/rest';
 
 // Support typings

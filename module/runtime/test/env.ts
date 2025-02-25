@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
-import { EnvProp } from '../src/env';
+import { EnvProp } from '../src/env.ts';
 
 @Suite()
 export class EnvTest {

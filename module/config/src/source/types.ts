@@ -1,4 +1,4 @@
-import { ConfigData } from '../parser/types';
+import { ConfigData } from '../parser/types.ts';
 
 type OrProm<T> = T | Promise<T>;
 type OneOf<T> = T[] | T | undefined;

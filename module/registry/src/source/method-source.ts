@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events';
 
 import { Class, describeFunction } from '@travetto/runtime';
 
-import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
+import { ChangeSource, ChangeEvent, ChangeHandler } from '../types.ts';
 
 /**
  * Change source specific to individual methods of classes.  Useful

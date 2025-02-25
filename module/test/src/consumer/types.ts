@@ -1,5 +1,5 @@
-import { TestEvent } from '../model/event';
-import { Counts, SuiteResult } from '../model/suite';
+import { TestEvent } from '../model/event.ts';
+import { Counts, SuiteResult } from '../model/suite.ts';
 
 /**
  * All suite results

@@ -1,7 +1,7 @@
 import { Env } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 
-import { runTests, selectConsumer } from './bin/run';
+import { runTests, selectConsumer } from './bin/run.ts';
 
 /**  Direct test invocation */
 @CliCommand({ hidden: true })

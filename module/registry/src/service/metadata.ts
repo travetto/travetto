@@ -1,7 +1,7 @@
 import { Class } from '@travetto/runtime';
 
-import { Registry } from '../registry';
-import { ChangeEvent } from '../types';
+import { Registry } from '../registry.ts';
+import { ChangeEvent } from '../types.ts';
 
 function id(cls: string | Class): string {
   return cls && typeof cls !== 'string' ? cls.Ⲑid : cls;

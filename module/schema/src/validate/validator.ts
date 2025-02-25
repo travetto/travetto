@@ -1,12 +1,12 @@
 import { castKey, castTo, Class, ClassInstance, TypedObject } from '@travetto/runtime';
 
-import { FieldConfig, SchemaConfig } from '../service/types';
-import { SchemaRegistry } from '../service/registry';
-import { ValidationError, ValidationKindCore, ValidationResult } from './types';
-import { Messages } from './messages';
-import { isValidationError, TypeMismatchError, ValidationResultError } from './error';
-import { DataUtil } from '../data';
-import { CommonRegExpToName } from './regexp';
+import { FieldConfig, SchemaConfig } from '../service/types.ts';
+import { SchemaRegistry } from '../service/registry.ts';
+import { ValidationError, ValidationKindCore, ValidationResult } from './types.ts';
+import { Messages } from './messages.ts';
+import { isValidationError, TypeMismatchError, ValidationResultError } from './error.ts';
+import { DataUtil } from '../data.ts';
+import { CommonRegExpToName } from './regexp.ts';
 
 /**
  * Get the schema config for Class/Schema config, including support for polymorphism

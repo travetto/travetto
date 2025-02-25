@@ -1,7 +1,7 @@
 import { Env } from '@travetto/runtime';
 import { CliCommand, CliUtil } from '@travetto/cli';
 
-import { selectConsumer } from './bin/run';
+import { selectConsumer } from './bin/run.ts';
 
 /**
  * Invoke the test watcher

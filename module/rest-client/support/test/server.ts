@@ -1,11 +1,11 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { BaseRestSuite } from '@travetto/rest/support/test/base';
+import { BaseRestSuite } from '@travetto/rest/support/test/base.ts';
 import { RootRegistry } from '@travetto/registry';
 
-import { Todo } from './service';
-import { RestClientTestUtil } from './util';
+import { Todo } from './service.ts';
+import { RestClientTestUtil } from './util.ts';
 
 function fetchRequestBody(from: string, port: number): string {
   return `

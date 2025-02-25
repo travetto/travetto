@@ -1,5 +1,5 @@
-import { Injectable, Inject } from '../src/decorator';
-import { Util } from './util';
+import { Injectable, Inject } from '../src/decorator.ts';
+import { Util } from './util.ts';
 
 @Injectable()
 export class Empty {

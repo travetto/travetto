@@ -1,10 +1,10 @@
 import { castTo, Class } from '@travetto/runtime';
-import { ModelRegistry } from '@travetto/model/src/registry/model';
+import { ModelRegistry } from '@travetto/model/src/registry/model.ts';
 import { InjectableConfig, DependencyRegistry } from '@travetto/di';
-import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/common';
+import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/common.ts';
 
-import type { ModelStorageSupport } from '../../src/service/storage';
-import type { ModelType } from '../../src/types/model';
+import type { ModelStorageSupport } from '../../src/service/storage.ts';
+import type { ModelType } from '../../src/types/model.ts';
 
 /**
  * Utilities for finding candidates for model operations

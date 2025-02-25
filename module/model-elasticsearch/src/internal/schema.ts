@@ -2,10 +2,10 @@ import { estypes } from '@elastic/elasticsearch';
 
 import { Class } from '@travetto/runtime';
 import { ModelRegistry } from '@travetto/model';
-import { PointImpl } from '@travetto/model-query/src/internal/model/point';
+import { PointImpl } from '@travetto/model-query/src/internal/model/point.ts';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
 
-import { EsSchemaConfig } from './types';
+import { EsSchemaConfig } from './types.ts';
 
 /**
  * Utils for ES Schema management

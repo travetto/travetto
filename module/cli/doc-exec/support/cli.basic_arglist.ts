@@ -1,1 +1,1 @@
-export * from '@travetto/cli/doc/cli.basic_arglist';
+export * from '@travetto/cli/doc/cli.basic_arglist.ts';

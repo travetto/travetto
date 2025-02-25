@@ -1,4 +1,4 @@
-import { ClassConfig } from './service/types';
+import { ClassConfig } from './service/types.ts';
 
 const ID_RE = /(\d{1,100})Δ$/;
 

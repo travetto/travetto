@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
-import { MaxLength, MethodValidator, SchemaValidator, ValidationError, ValidationResultError } from '../__index__';
+import { MaxLength, MethodValidator, SchemaValidator, ValidationError, ValidationResultError } from '../__index__.ts';
 import { RootRegistry } from '@travetto/registry';
 
 const nameValidator = (name: string): ValidationError | undefined => {

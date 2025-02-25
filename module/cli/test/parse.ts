@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Env } from '@travetto/runtime';
 
-import { CliCommand, CliCommandSchemaUtil, CliParseUtil } from '../__index__';
+import { CliCommand, CliCommandSchemaUtil, CliParseUtil } from '../__index__.ts';
 
 /**
  * My command

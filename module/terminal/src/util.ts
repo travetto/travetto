@@ -1,5 +1,5 @@
-import { StyleUtil, TermStyleFn, TermStyleInput } from './style';
-import { Terminal, WAIT_TOKEN } from './terminal';
+import { StyleUtil, TermStyleFn, TermStyleInput } from './style.ts';
+import { Terminal, WAIT_TOKEN } from './terminal.ts';
 
 type ProgressEvent<T> = { total?: number, idx: number, value: T };
 type ProgressStyle = { complete: TermStyleFn, incomplete?: TermStyleFn };

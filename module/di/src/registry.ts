@@ -4,9 +4,9 @@ import {
 } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
-import { InjectionError } from './error';
-import { AutoCreateTarget } from './internal/types';
+import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types.ts';
+import { InjectionError } from './error.ts';
+import { AutoCreateTarget } from './internal/types.ts';
 
 type TargetId = string;
 type ClassId = string;

@@ -1,4 +1,4 @@
-import { RestClientServerSuite } from '@travetto/rest-client/support/test/server';
+import { RestClientServerSuite } from '@travetto/rest-client/support/test/server.ts';
 import { Suite } from '@travetto/test';
 import { FastifyRestServer } from '@travetto/rest-fastify';
 import { InjectableFactory } from '@travetto/di';

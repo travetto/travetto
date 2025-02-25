@@ -4,9 +4,9 @@ import { RuntimeIndex } from '@travetto/runtime';
 import { CliCommand, CliFlag, CliUtil, CliValidationError } from '@travetto/cli';
 import { Ignore, Required } from '@travetto/schema';
 
-import { DockerPackOperation } from './bin/docker-operation';
-import { BasePackCommand, PackOperationShape } from './pack.base';
-import { DockerPackConfig } from '../src/types';
+import { DockerPackOperation } from './bin/docker-operation.ts';
+import { BasePackCommand, PackOperationShape } from './pack.base.ts';
+import { DockerPackConfig } from '../src/types.ts';
 
 const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
 

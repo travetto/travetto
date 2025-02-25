@@ -1,8 +1,8 @@
 import ts from 'typescript';
 
-import { transformCast, DeclDocumentation } from '../types/shared';
-import { CoreUtil } from './core';
-import { DeclarationUtil } from './declaration';
+import { transformCast, DeclDocumentation } from '../types/shared.ts';
+import { CoreUtil } from './core.ts';
+import { DeclarationUtil } from './declaration.ts';
 
 /**
  * Utilities for dealing with docs

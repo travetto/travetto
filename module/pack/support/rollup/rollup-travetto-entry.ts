@@ -3,7 +3,7 @@ import { Plugin } from 'rollup';
 
 import { RuntimeIndex } from '@travetto/runtime';
 
-import { CoreRollupConfig } from '../../src/types';
+import { CoreRollupConfig } from '../../src/types.ts';
 
 export const GLOBAL_IMPORT = '__trv_imp';
 

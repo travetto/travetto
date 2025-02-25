@@ -1,9 +1,9 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server';
+import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 import { SessionModelSymbol } from '@travetto/auth-session';
 import { AsyncContext } from '@travetto/context';
-import { ModelSuite } from '@travetto/model/support/test/suite';
+import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 import { ModelExpirySupport } from '@travetto/model';
 import { SQLModelConfig, SQLModelService, SQLDialect } from '@travetto/model-sql';
 

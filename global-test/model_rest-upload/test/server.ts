@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { DataUtil } from '@travetto/schema';
 import { Controller, Get, Post, Request } from '@travetto/rest';
-import { BaseRestSuite } from '@travetto/rest/support/test/base';
+import { BaseRestSuite } from '@travetto/rest/support/test/base.ts';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';

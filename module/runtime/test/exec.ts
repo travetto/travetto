@@ -9,8 +9,8 @@ import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
-import { Runtime } from '../src/context';
-import { ExecUtil } from '../src/exec';
+import { Runtime } from '../src/context.ts';
+import { ExecUtil } from '../src/exec.ts';
 
 @Suite()
 export class ExecUtilTest {
