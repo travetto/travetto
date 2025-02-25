@@ -1,4 +1,4 @@
-import { Schema } from '../../src/decorator/schema';
+import { Schema } from '../../src/decorator/schema.ts';
 
 @Schema()
 export class ReadonlyUser {

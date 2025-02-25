@@ -2,8 +2,8 @@ import { Class, ClassInstance } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ConfigurationService } from './service';
-import { ConfigTarget, ConfigOverrides, CONFIG_OVERRIDES } from './internal/types';
+import { ConfigurationService } from './service.ts';
+import { ConfigTarget, ConfigOverrides, CONFIG_OVERRIDES } from './internal/types.ts';
 
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation

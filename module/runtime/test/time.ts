@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
 
-import { TimeUtil } from '../src/time';
+import { TimeUtil } from '../src/time.ts';
 
 @Suite()
 class TimeSuite {

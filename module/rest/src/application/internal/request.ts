@@ -3,9 +3,9 @@ import { PassThrough, Readable } from 'node:stream';
 
 import { ByteRange, castTo } from '@travetto/runtime';
 
-import { Request, ContentType } from '../../types';
-import { MimeUtil } from '../../util/mime';
-import { NodeEntitySymbol, ParsedTypeSymbol } from '../../internal/symbol';
+import { Request, ContentType } from '../../types.ts';
+import { MimeUtil } from '../../util/mime.ts';
+import { NodeEntitySymbol, ParsedTypeSymbol } from '../../internal/symbol.ts';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 

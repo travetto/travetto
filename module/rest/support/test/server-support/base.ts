@@ -1,4 +1,4 @@
-import type { Request, RestServerHandle } from '../../../src/types';
+import type { Request, RestServerHandle } from '../../../src/types.ts';
 
 export type MakeRequestConfig<T> = {
   query?: Record<string, unknown>;

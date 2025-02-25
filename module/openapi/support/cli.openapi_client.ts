@@ -4,7 +4,7 @@ import cp from 'node:child_process';
 import { CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
 import { ExecUtil } from '@travetto/runtime';
 
-import { OpenApiClientHelp } from './bin/help';
+import { OpenApiClientHelp } from './bin/help.ts';
 
 /**
  * CLI for generating the cli client

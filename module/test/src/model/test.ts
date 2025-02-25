@@ -1,5 +1,5 @@
 import type { Class, TimeSpan } from '@travetto/runtime';
-import { Skip, TestCore } from './common';
+import { Skip, TestCore } from './common.ts';
 
 export type ThrowableError = string | RegExp | Class<Error> | ((e: Error | string) => boolean | void | undefined);
 

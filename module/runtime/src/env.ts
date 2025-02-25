@@ -1,4 +1,4 @@
-import { castKey, castTo } from './types';
+import { castKey, castTo } from './types.ts';
 
 const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;

@@ -5,8 +5,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { FilterContext, RestCommonUtil } from '@travetto/rest';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
-import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types';
-import { RestAuthConfig } from './config';
+import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
+import { RestAuthConfig } from './config.ts';
 
 /**
  * JWT Principal codec

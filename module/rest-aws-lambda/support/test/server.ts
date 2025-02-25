@@ -6,10 +6,10 @@ import { Request, RestServerHandle, RestCookieConfig } from '@travetto/rest';
 import {
   RestServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
-} from '@travetto/rest/support/test/server-support/base';
+} from '@travetto/rest/support/test/server-support/base.ts';
 import { asFull, castTo, Util } from '@travetto/runtime';
 
-import { AwsLambdaRestApplication } from '../../src/server';
+import { AwsLambdaRestApplication } from '../../src/server.ts';
 
 const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {
   resource: '/{proxy+}',

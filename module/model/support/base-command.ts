@@ -2,9 +2,9 @@ import { Env } from '@travetto/runtime';
 import { CliValidationError, CliCommandShape, cliTpl } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 
-import type { ModelStorageSupport } from '../src/service/storage';
+import type { ModelStorageSupport } from '../src/service/storage.ts';
 
-import { ModelCandidateUtil } from './bin/candidate';
+import { ModelCandidateUtil } from './bin/candidate.ts';
 
 /**
  * CLI Entry point for exporting model schemas

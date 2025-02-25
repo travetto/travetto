@@ -1,6 +1,6 @@
 // @trv-no-transform
-import type { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from '../src/types';
-import type { AwsLambdaHandler } from '../src/server';
+import type { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from '../src/types.ts';
+import type { AwsLambdaHandler } from '../src/server.ts';
 
 type HandleFunction = (event: LambdaAPIGatewayProxyEvent, context: LambdaContext) => Promise<LambdaAPIGatewayProxyResult>;
 

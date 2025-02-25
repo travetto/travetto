@@ -1,5 +1,5 @@
-import type { } from './src/global';
-export * from './src/decorator';
-export * from './src/error';
-export * from './src/registry';
-export * from './src/types';
+import type { } from './src/global.ts';
+export * from './src/decorator.ts';
+export * from './src/error.ts';
+export * from './src/registry.ts';
+export * from './src/types.ts';

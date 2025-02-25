@@ -6,8 +6,8 @@ import path from 'node:path';
 import { ExecUtil, Util, Runtime } from '@travetto/runtime';
 import { TestFixtures } from '@travetto/test';
 
-import { FetchClientGenerator } from '../../src/fetch';
-import { AngularClientGenerator } from '../../src/angular';
+import { FetchClientGenerator } from '../../src/fetch.ts';
+import { AngularClientGenerator } from '../../src/angular.ts';
 
 const fixtures = new TestFixtures(['@travetto/rest-client']);
 

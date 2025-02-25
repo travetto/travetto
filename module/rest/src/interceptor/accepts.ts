@@ -3,11 +3,11 @@ import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 
-import { FilterContext } from '../types';
-import { MimeUtil } from '../util/mime';
+import { FilterContext } from '../types.ts';
+import { MimeUtil } from '../util/mime.ts';
 
-import { ManagedInterceptorConfig, RestInterceptor } from './types';
-import { SerializeInterceptor } from './serialize';
+import { ManagedInterceptorConfig, RestInterceptor } from './types.ts';
+import { SerializeInterceptor } from './serialize.ts';
 
 @Config('rest.accepts')
 class RestAcceptsConfig extends ManagedInterceptorConfig {

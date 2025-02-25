@@ -3,10 +3,10 @@ import { createWriteStream } from 'node:fs';
 import { ConsoleManager, Env, Util, Runtime } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
-import { RunnerUtil } from '../execute/util';
-import { Runner } from '../execute/runner';
-import { Events } from './types';
-import { TestRun } from '../model/test';
+import { RunnerUtil } from '../execute/util.ts';
+import { Runner } from '../execute/runner.ts';
+import { Events } from './types.ts';
+import { TestRun } from '../model/test.ts';
 
 /**
  * Child Worker for the Test Runner.  Receives events as commands

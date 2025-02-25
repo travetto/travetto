@@ -3,8 +3,8 @@ import path from 'node:path';
 
 import { asFull, Class, hasFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { TestConfig, Assertion, TestResult } from '../model/test';
-import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite';
+import { TestConfig, Assertion, TestResult } from '../model/test.ts';
+import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
 
 const isCleanable = hasFunction<{ toClean(): unknown }>('toClean');
 

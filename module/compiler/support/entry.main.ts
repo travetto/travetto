@@ -3,13 +3,13 @@ import fs from 'node:fs/promises';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerMode, CompilerServerInfo } from './types';
-import { Log } from './log';
-import { CompilerSetup } from './setup';
-import { CompilerServer } from './server/server';
-import { CompilerRunner } from './server/runner';
-import { CompilerClient } from './server/client';
-import { CommonUtil } from './util';
+import type { CompilerMode, CompilerServerInfo } from './types.ts';
+import { Log } from './log.ts';
+import { CompilerSetup } from './setup.ts';
+import { CompilerServer } from './server/server.ts';
+import { CompilerRunner } from './server/runner.ts';
+import { CompilerClient } from './server/client.ts';
+import { CommonUtil } from './util.ts';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {

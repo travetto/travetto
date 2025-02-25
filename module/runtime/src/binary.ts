@@ -7,9 +7,9 @@ import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toBuffer } from 'node:stream/consumers';
 
-import { BinaryInput, BlobMeta } from './types';
-import { AppError } from './error';
-import { Util } from './util';
+import { BinaryInput, BlobMeta } from './types.ts';
+import { AppError } from './error.ts';
+import { Util } from './util.ts';
 
 const BlobMetaSymbol = Symbol.for('@travetto/runtime:blob-meta');
 

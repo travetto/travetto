@@ -1,6 +1,6 @@
 import { SchemaValidator } from '@travetto/schema';
 
-import { Person } from './person';
+import { Person } from './person.ts';
 
 export async function validate(): Promise<void> {
 

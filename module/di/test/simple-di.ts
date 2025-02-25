@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { DependencyRegistry } from '../src/registry';
+import { DependencyRegistry } from '../src/registry.ts';
 
 import {
   ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT,
@@ -13,10 +13,10 @@ import {
   LooseResolutionClass,
   LOOSE_SYM,
   SetterInject
-} from './deps';
+} from './deps.ts';
 
-import { DbConfig } from './config';
-import { InjectionError } from '../src/error';
+import { DbConfig } from './config.ts';
+import { InjectionError } from '../src/error.ts';
 
 const FOUR = 4;
 

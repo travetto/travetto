@@ -6,10 +6,10 @@ import kRouter from 'koa-router';
 import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig, RestNetUtil } from '@travetto/rest';
 
-import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
-import { RestServerHandle } from '@travetto/rest/src/types';
+import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
+import { RestServerHandle } from '@travetto/rest/src/types.ts';
 
-import { KoaServerUtil } from './internal/util';
+import { KoaServerUtil } from './internal/util.ts';
 
 type Keyed = { key?: symbol | string };
 type Routes = ReturnType<kRouter<unknown, koa.Context>['routes']>;

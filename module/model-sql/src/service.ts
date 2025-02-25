@@ -13,22 +13,22 @@ import {
   PageableModelQuery, ValidStringFields, WhereClauseRaw, QueryVerifier
 } from '@travetto/model-query';
 
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
-import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
-import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query.ts';
+import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest.ts';
+import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry.ts';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry.ts';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage.ts';
+import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest.ts';
+import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk.ts';
 
-import { SQLModelConfig } from './config';
-import { Connected, ConnectedIterator, Transactional } from './connection/decorator';
-import { SQLUtil } from './internal/util';
-import { SQLDialect } from './dialect/base';
-import { TableManager } from './table-manager';
-import { Connection } from './connection/base';
-import { InsertWrapper } from './internal/types';
+import { SQLModelConfig } from './config.ts';
+import { Connected, ConnectedIterator, Transactional } from './connection/decorator.ts';
+import { SQLUtil } from './internal/util.ts';
+import { SQLDialect } from './dialect/base.ts';
+import { TableManager } from './table-manager.ts';
+import { Connection } from './connection/base.ts';
+import { InsertWrapper } from './internal/types.ts';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,

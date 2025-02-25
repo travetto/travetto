@@ -1,4 +1,4 @@
-import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server';
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server.ts';
 import { Suite } from '@travetto/test';
 import { ExpressRestServer } from '@travetto/rest-express';
 import { SessionModelSymbol } from '@travetto/auth-session';

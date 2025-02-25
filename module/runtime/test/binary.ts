@@ -6,8 +6,8 @@ import { pipeline } from 'node:stream/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
-import { BinaryUtil } from '../src/binary';
-import { BlobMeta } from '../src/types';
+import { BinaryUtil } from '../src/binary.ts';
+import { BlobMeta } from '../src/types.ts';
 
 @Suite()
 export class BytesUtilTest {

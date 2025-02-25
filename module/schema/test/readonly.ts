@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { ReadonlyUser } from './models/readonly';
+import { ReadonlyUser } from './models/readonly.ts';
 
 @Suite('Readonly')
 class ReadonlySuite {

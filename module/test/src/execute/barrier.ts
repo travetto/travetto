@@ -3,7 +3,7 @@ import { createHook, executionAsyncId } from 'node:async_hooks';
 
 import { TimeSpan, TimeUtil, Util } from '@travetto/runtime';
 
-import { ExecutionError, TimeoutError } from './error';
+import { ExecutionError, TimeoutError } from './error.ts';
 
 const UNCAUGHT_ERR_EVENTS = ['unhandledRejection', 'uncaughtException'] as const;
 

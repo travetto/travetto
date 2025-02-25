@@ -1,7 +1,7 @@
 import type { Class } from '@travetto/runtime';
 
-import { Assertion, TestConfig, TestResult } from './test';
-import { Skip, SuiteCore } from './common';
+import { Assertion, TestConfig, TestResult } from './test.ts';
+import { Skip, SuiteCore } from './common.ts';
 
 /**
  * Suite configuration

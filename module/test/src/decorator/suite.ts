@@ -1,7 +1,7 @@
 import { castTo, Class, ClassInstance, describeFunction } from '@travetto/runtime';
 
-import { SuiteRegistry } from '../registry/suite';
-import { SuiteConfig } from '../model/suite';
+import { SuiteRegistry } from '../registry/suite.ts';
+import { SuiteConfig } from '../model/suite.ts';
 
 export type SuitePhase = 'beforeAll' | 'beforeEach' | 'afterAll' | 'afterEach';
 

@@ -1,13 +1,13 @@
 import path from 'node:path';
 
-import { createElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
+import { createElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime.ts';
 
 import { PackageUtil } from '@travetto/manifest';
 import { castTo, RuntimeIndex } from '@travetto/runtime';
 
-import { JSXElementByFn, c } from '../jsx';
-import { DocResolveUtil, ResolvedCode, ResolvedRef, ResolvedSnippetLink } from '../util/resolve';
-import { DocRunUtil } from '../util/run';
+import { JSXElementByFn, c } from '../jsx.ts';
+import { DocResolveUtil, ResolvedCode, ResolvedRef, ResolvedSnippetLink } from '../util/resolve.ts';
+import { DocRunUtil } from '../util/run.ts';
 
 /**
  * Render Context

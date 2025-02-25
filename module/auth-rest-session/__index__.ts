@@ -1,2 +1,2 @@
-import type { } from './src/trv';
-export * from './src/interceptor';
+import type { } from './src/trv.ts';
+export * from './src/interceptor.ts';

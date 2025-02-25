@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { RestSslConfig } from '../src/application/ssl';
+import { RestSslConfig } from '../src/application/ssl.ts';
 
 @Suite()
 export class SSLTest {

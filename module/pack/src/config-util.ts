@@ -1,4 +1,4 @@
-import { DockerPackConfig } from './types';
+import { DockerPackConfig } from './types.ts';
 
 /**
  * Common utils for setting up pack config

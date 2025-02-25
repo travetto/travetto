@@ -5,8 +5,8 @@ import { prompt } from 'enquirer';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { Terminal } from '@travetto/terminal';
 
-import { Context } from './bin/context';
-import { Feature, FEATURES } from './bin/features';
+import { Context } from './bin/context.ts';
+import { Feature, FEATURES } from './bin/features.ts';
 
 /**
  * Command to run scaffolding

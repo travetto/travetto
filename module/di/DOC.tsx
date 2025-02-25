@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 import { Injectable, InjectableFactory, Inject } from '@travetto/di';
-import { DependencyRegistry } from '@travetto/di/src/registry';
+import { DependencyRegistry } from '@travetto/di/src/registry.ts';
 
 export const text = <>
   <c.StdHeader />

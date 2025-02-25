@@ -1,7 +1,7 @@
 import { Controller, Get, Redirect, Request } from '@travetto/rest';
 import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 
-import { FB_AUTH } from './facebook';
+import { FB_AUTH } from './facebook.ts';
 
 @Controller('/auth')
 export class SampleAuth {

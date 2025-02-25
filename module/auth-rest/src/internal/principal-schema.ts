@@ -1,5 +1,5 @@
 import { ClassList, SchemaRegistry } from '@travetto/schema';
-import { PrincipalTarget } from '@travetto/auth/src/internal/types';
+import { PrincipalTarget } from '@travetto/auth/src/internal/types.ts';
 import { Class, TypedObject } from '@travetto/runtime';
 
 const FIELDS: Record<keyof PrincipalTarget, Class | ClassList> = {

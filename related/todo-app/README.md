@@ -84,7 +84,7 @@ Now we need to create `src/service.ts`
 import { MongoModelService } from '@travetto/model-mongo';
 import { Injectable, Inject } from '@travetto/di';
 
-import { Todo, TodoSearch } from './model';
+import { Todo, TodoSearch } from './model.ts';
 
 @Injectable()
 export class TodoService {
@@ -142,11 +142,11 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
-import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { ModelSuite } from '@travetto/model/support/test/suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
-import { TodoService } from '../src/service';
-import { Todo } from '../src/model';
+import { TodoService } from '../src/service.ts';
+import { Todo } from '../src/model.ts';
 
 @Suite()
 @ModelSuite()
@@ -213,8 +213,8 @@ Finally, we establish the controller at `src/route.ts`
 import { Controller, Get, Post, Put, Delete } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 
-import { TodoService } from './service';
-import { Todo, TodoSearch } from './model';
+import { TodoService } from './service.ts';
+import { Todo, TodoSearch } from './model.ts';
 
 type TodoRequest = Omit<Todo, 'id'>;
 

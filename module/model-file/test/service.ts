@@ -4,12 +4,12 @@ import fs from 'fs/promises';
 import { Suite, Test } from '@travetto/test';
 import { TimeUtil } from '@travetto/runtime';
 import { ModelRegistry } from '@travetto/model';
-import { ModelBlobSuite } from '@travetto/model/support/test/blob';
-import { ModelBasicSuite } from '@travetto/model/support/test/basic';
-import { ModelCrudSuite } from '@travetto/model/support/test/crud';
-import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expiry';
+import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
+import { ExpiryUser, ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 
-import { FileModelConfig, FileModelService } from '../src/service';
+import { FileModelConfig, FileModelService } from '../src/service.ts';
 import { DependencyRegistry } from '@travetto/di';
 
 @Suite()

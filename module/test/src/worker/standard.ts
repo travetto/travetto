@@ -3,10 +3,10 @@ import { fork } from 'node:child_process';
 import { Env, RuntimeIndex, Util } from '@travetto/runtime';
 import { IpcChannel } from '@travetto/worker';
 
-import { Events, TestLogEvent } from './types';
-import { TestConsumerShape } from '../consumer/types';
-import { TestEvent } from '../model/event';
-import { TestRun } from '../model/test';
+import { Events, TestLogEvent } from './types.ts';
+import { TestConsumerShape } from '../consumer/types.ts';
+import { TestEvent } from '../model/event.ts';
+import { TestRun } from '../model/test.ts';
 
 const log = (message: string): void => {
   process.send?.({ type: 'log', message } satisfies TestLogEvent);

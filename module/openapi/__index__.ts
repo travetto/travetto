@@ -1,3 +1,3 @@
-export * from './src/spec-generate';
-export * from './src/service';
-export * from './src/config';
+export * from './src/spec-generate.ts';
+export * from './src/service.ts';
+export * from './src/config.ts';

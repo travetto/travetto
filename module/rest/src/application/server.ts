@@ -1,5 +1,5 @@
-import type { RestInterceptor } from '../interceptor/types';
-import type { RouteConfig, RestServerHandle } from '../types';
+import type { RestInterceptor } from '../interceptor/types.ts';
+import type { RouteConfig, RestServerHandle } from '../types.ts';
 
 /**
  * Defines the contract for any rest server to support the

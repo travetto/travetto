@@ -2,13 +2,13 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { ModelCrudSupport } from '@travetto/model';
-import { BaseModelSuite } from '@travetto/model/support/test/base';
+import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 import { $_modelConfig_$, $_modelService_$ } from '$_modelImport_$';
 
-import { Todo } from '../../src/model/todo';
+import { Todo } from '../../src/model/todo.ts';
 
 @Suite('Simple CRUD')
-class TestCRUD extends BaseModelSuite<ModelCrudSupport>  {
+class TestCRUD extends BaseModelSuite<ModelCrudSupport> {
 
   serviceClass = $_modelService_$;
   configClass = $_modelConfig_$;

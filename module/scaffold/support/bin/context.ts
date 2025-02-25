@@ -9,7 +9,7 @@ import { cliTpl } from '@travetto/cli';
 import { NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { Terminal } from '@travetto/terminal';
 
-import { Feature } from './features';
+import { Feature } from './features.ts';
 
 type ListingEntry = { requires?: string[], rename?: string };
 type Listing = Record<string, ListingEntry>;
