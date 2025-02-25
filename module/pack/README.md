@@ -34,12 +34,12 @@ Options:
   -o, --output <string>                Output location
   --main-scripts, --no-main-scripts    Create entry scripts (default: true)
   -f, --main-name <string>             Main name for build artifact
-  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv.ts")
+  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv")
   --minify, --no-minify                Minify output (default: true)
   -sm, --sourcemap                     Bundle source maps (default: false)
   -is, --include-sources               Include source with source maps (default: false)
   -x, --eject-file <string>            Eject commands to file
-  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
+  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
   -wr, --include-workspace-resources   Include workspace resources (default: false)
@@ -100,12 +100,12 @@ Options:
   -o, --output <string>                Output location (default: "travetto_pack.zip")
   --main-scripts, --no-main-scripts    Create entry scripts (default: true)
   -f, --main-name <string>             Main name for build artifact
-  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv.ts")
+  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv")
   --minify, --no-minify                Minify output (default: true)
   -sm, --sourcemap                     Bundle source maps (default: false)
   -is, --include-sources               Include source with source maps (default: false)
   -x, --eject-file <string>            Eject commands to file
-  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
+  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                  Env Flag File Name (default: ".env")
   --manifest-file <string>             Manifest File Name (default: "manifest.json")
   -wr, --include-workspace-resources   Include workspace resources (default: false)
@@ -129,17 +129,17 @@ Options:
   -o, --output <string>                  Output location
   --main-scripts, --no-main-scripts      Create entry scripts (default: true)
   -f, --main-name <string>               Main name for build artifact
-  -e, --entry-point <string>             Entry point (default: "@travetto/cli/support/entry.trv.ts")
+  -e, --entry-point <string>             Entry point (default: "@travetto/cli/support/entry.trv")
   --minify, --no-minify                  Minify output (default: true)
   -sm, --sourcemap                       Bundle source maps (default: false)
   -is, --include-sources                 Include source with source maps (default: false)
   -x, --eject-file <string>              Eject commands to file
-  -r, --rollup-configuration <string>    Rollup configuration file (default: "@travetto/pack/support/rollup/build.ts")
+  -r, --rollup-configuration <string>    Rollup configuration file (default: "@travetto/pack/support/rollup/build")
   --env-file <string>                    Env Flag File Name (default: ".env")
   --manifest-file <string>               Manifest File Name (default: "manifest.json")
   -wr, --include-workspace-resources     Include workspace resources (default: false)
   -np, --npm-package <string>            External NPM Packages (default: [])
-  -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile.ts")
+  -df, --docker-factory <string>         Docker Factory source (default: "@travetto/pack/support/pack.dockerfile")
   -di, --docker-image <string>           Docker Image to extend (default: "node:23-alpine")
   -dn, --docker-name <string>            Docker Image Name (default: "travetto_pack")
   -ru, --runtime-user <string>           Docker Runtime user
@@ -227,9 +227,9 @@ echo "Writing Manifest manifest.json"
 
 TRV_MODULE=$MOD npx trvc manifest --prod $DIST/manifest.json
 
-# Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv.ts 
+# Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv 
 
-echo "Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv.ts"
+echo "Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv"
 
 export BUNDLE_ENTRY=node_modules/@travetto/cli/support/entry.trv.js
 export BUNDLE_MAIN_FILE=todo-app.js
@@ -254,9 +254,9 @@ docker pull node:23-alpine
 
 echo "Detected Image OS node:23-alpine as alpine"
 
-# Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile.ts 
+# Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile 
 
-echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile.ts"
+echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile"
 
 echo "FROM node:23-alpine" > $DIST/Dockerfile
 echo "RUN addgroup -g 2000 app && adduser -D -G app -u 2000 app" >> $DIST/Dockerfile

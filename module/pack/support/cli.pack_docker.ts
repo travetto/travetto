@@ -16,7 +16,7 @@ const NODE_MAJOR = process.version.match(/\d+/)?.[0] ?? '22';
 @CliCommand({ with: { module: true } })
 export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Factory source', short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
-  dockerFactory = '@travetto/pack/support/pack.dockerfile.ts';
+  dockerFactory = '@travetto/pack/support/pack.dockerfile';
   @CliFlag({ desc: 'Docker Image to extend', short: 'di', envVars: ['PACK_DOCKER_IMAGE'] })
   dockerImage = `node:${NODE_MAJOR}-alpine`;
   @CliFlag({ desc: 'Docker Image Name', short: 'dn', envVars: ['PACK_DOCKER_IMAGE'] })
