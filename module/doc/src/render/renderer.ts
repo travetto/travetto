@@ -1,7 +1,9 @@
+
 import path from 'node:path';
 
-import { type ManifestContext, PackageUtil } from '@travetto/manifest';
 import { isJSXElement, JSXElement, JSXFragmentType } from '@travetto/doc/jsx-runtime.ts';
+
+import { type ManifestContext, PackageUtil } from '@travetto/manifest';
 import { castTo, Runtime } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../jsx.ts';

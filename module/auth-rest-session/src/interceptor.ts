@@ -2,9 +2,10 @@ import { Class } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { RestInterceptor, FilterContext, FilterNext, ManagedInterceptorConfig, ParamExtractor } from '@travetto/rest';
 import { SessionService } from '@travetto/auth-session';
-import { SessionDataTarget } from '@travetto/auth-session/src/internal/types.ts';
 import { Config } from '@travetto/config';
 import { AuthContextInterceptor } from '@travetto/auth-rest';
+
+import { SessionDataTarget } from '@travetto/auth-session/src/internal/types.ts';
 
 @Config('rest.session')
 class RestSessionConfig implements ManagedInterceptorConfig { }

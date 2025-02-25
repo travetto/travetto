@@ -1,9 +1,10 @@
 import alf from '@fastify/aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
-import { ServerHandle } from '@travetto/rest/src/types.ts';
 import { AwsLambdaRestServer, AwsLambdaSymbol, RestAwsConfig } from '@travetto/rest-aws-lambda';
 import { FastifyRestServer } from '@travetto/rest-fastify';
+
+import { ServerHandle } from '@travetto/rest/src/types.ts';
 
 /**
  * Aws Lambda Rest Server

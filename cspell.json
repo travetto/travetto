@@ -20,6 +20,7 @@
         "creds",
         "cullable",
         "darkgrey",
+        "estypes",
         "Fastify",
         "Firestore",
         "fnames",

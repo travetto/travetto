@@ -1,8 +1,8 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model.ts';
-
 import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
+
+import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model.ts';
 
 class Init {
   @InjectableFactory(TestModelSvcSymbol)

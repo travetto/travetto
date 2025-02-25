@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+import { ModelCrudSupport, NotFoundError } from '@travetto/model';
+
 import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
-import { ModelCrudSupport } from '@travetto/model/src/service/crud.ts';
-import { NotFoundError } from '@travetto/model';
 
 import { Address, Person, Todo } from './types.ts';
 import { ModelQueryCrudSupport } from '../../src/service/crud.ts';

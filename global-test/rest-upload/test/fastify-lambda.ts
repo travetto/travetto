@@ -1,9 +1,10 @@
-import { RestUploadServerSuite } from '@travetto/rest-upload/support/test/server.ts';
 import { Suite } from '@travetto/test';
 import { AwsLambdaFastifyRestServer } from '@travetto/rest-fastify-lambda';
 import { InjectableFactory } from '@travetto/di';
-import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server.ts';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
+
+import { RestUploadServerSuite } from '@travetto/rest-upload/support/test/server.ts';
+import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server.ts';
 
 const FASTIFY = Symbol.for('fastify-lambda');
 

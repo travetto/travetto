@@ -1,11 +1,12 @@
-import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server.ts';
 import { Suite } from '@travetto/test';
 import { AwsLambdaExpressRestServer } from '@travetto/rest-express-lambda';
 import { InjectableFactory } from '@travetto/di';
-import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server.ts';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { SessionModelSymbol } from '@travetto/auth-session';
+
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server.ts';
+import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server.ts';
 
 const EXPRESS = Symbol.for('express-lambda');
 

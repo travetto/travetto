@@ -1,10 +1,11 @@
-import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server.ts';
 import { Suite } from '@travetto/test';
 import { ExpressRestServer } from '@travetto/rest-express';
 import { SessionModelSymbol } from '@travetto/auth-session';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
+
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server.ts';
 
 const EXPRESS = Symbol.for('express');
 

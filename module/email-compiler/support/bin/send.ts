@@ -1,6 +1,7 @@
 import { MailService, EmailOptions } from '@travetto/email';
-import { MailTransportTarget } from '@travetto/email/src/internal/types.ts';
 import { DependencyRegistry, Injectable } from '@travetto/di';
+
+import { MailTransportTarget } from '@travetto/email/src/internal/types.ts';
 
 import { EditorConfig } from './config.ts';
 
