@@ -76,7 +76,7 @@ $ trvc build
 
 ## Compilation Architecture
 The compiler will move through the following phases on a given compilation execution:
-   *  `Bootstrapping` - Initial compilation of [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s `support/*` files
+   *  `Bootstrapping` - Initial compilation of [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s `support/*.ts` files
    *  `Compiler Server` - Provides a simple HTTP interface to watching compiler file and state changes, and synchronizing multiple processes
    *  `Build Compiler` - Leverages [Typescript](https://typescriptlang.org) to build files needed to execute compiler
    *  `Build Manifest` - Produces the manifest for the given execution
@@ -87,4 +87,4 @@ The compiler will move through the following phases on a given compilation execu
    *  `Invoke Compiler` - Run [Typescript](https://typescriptlang.org) compiler with the aforementioned enhancements
 
 ### Bootstrapping
-Given that the framework is distributed as [Typescript](https://typescriptlang.org) only files, there is a bootstrapping problem that needs to be mitigated.  The [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L20) entrypoint, along with a small context utility in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching") are the only [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) files needed to run the project.  The [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L20) entry point will compile `@travetto/compiler/support/*.ts` files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.
+Given that the framework is distributed as [Typescript](https://typescriptlang.org) only files, there is a bootstrapping problem that needs to be mitigated.  The [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L20) entrypoint, along with a small context utility in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching") are the only [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) files needed to run the project.  The [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L20) entry point will compile `@travetto/compiler/support/*` files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.
