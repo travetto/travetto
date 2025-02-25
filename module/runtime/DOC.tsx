@@ -90,7 +90,7 @@ export const text = <>
 
       <c.Code title='Sample logging at various levels' src='doc/transpile.ts' />
 
-      <c.Code title='Sample After Transpilation' src={RuntimeIndex.resolveFileImport('@travetto/runtime/doc/transpile.ts')} language='javascript.ts' />
+      <c.Code title='Sample After Transpilation' src={RuntimeIndex.resolveFileImport('@travetto/runtime/doc/transpile.ts')} language='javascript' />
 
       <c.SubSubSection title='Filtering Debug'>
 

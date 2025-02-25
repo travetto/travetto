@@ -6,7 +6,7 @@ export class MakeUpper {
 
   @OnProperty()
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
-    if (!state.importName.startsWith('@travetto/transformer/doc/upper.ts')) {
+    if (!state.importName.startsWith('@travetto/transformer/doc/upper')) {
       return node;
     }
     return state.factory.updatePropertyDeclaration(
@@ -21,7 +21,7 @@ export class MakeUpper {
 
   @OnClass()
   static handleClass(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (!state.importName.startsWith('@travetto/transformer/doc/upper.ts')) {
+    if (!state.importName.startsWith('@travetto/transformer/doc/upper')) {
       return node;
     }
     return state.factory.updateClassDeclaration(
@@ -36,7 +36,7 @@ export class MakeUpper {
 
   @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (!state.importName.startsWith('@travetto/transformer/doc/upper.ts')) {
+    if (!state.importName.startsWith('@travetto/transformer/doc/upper')) {
       return node;
     }
     return state.factory.updateMethodDeclaration(

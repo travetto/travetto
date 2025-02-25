@@ -42,12 +42,12 @@ Currently, the following are packages that provide <a target="_blank" class="sou
 <li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-memory" title="Memory backing for the travetto model module.">Memory Model Support</a> - @travetto/model-memory</li>
 <li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-file" title="File system backing for the travetto model module.">File Model Support</a> - @travetto/model-file</li>
 </ul>
-The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11">Registered Principal</a>. <br><br>
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L12">Registered Principal</a>. <br><br>
 A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 
   <figure class="code">
     <figcaption class="code">Registered Principal
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L12">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">RegisteredPrincipal</span> <span class="token keyword">extends</span> <span class="token class-name">Principal</span> <span class="token punctuation">{{'{'}}</span>
@@ -109,7 +109,7 @@ Additionally, there exists a common practice of mapping various external securit
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelAuthService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelCrudSupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model.ts'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">class</span> <span class="token class-name">AuthConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -152,7 +152,7 @@ Additionally, there exists a common practice of mapping various external securit
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelAuthService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-model'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./model.ts'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">UserService</span> <span class="token punctuation">{{'{'}}</span>

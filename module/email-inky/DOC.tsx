@@ -1,10 +1,10 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-const IfLink = <c.CodeLink src='./src/components.ts' startRe={/const If/} title='If Component.ts' />;
-const UnlessLink = <c.CodeLink src='./src/components.ts' startRe={/const Unless/} title='Unless Component.ts' />;
-const ForLink = <c.CodeLink src='./src/components.ts' startRe={/const For/} title='For Component.ts' />;
-const ValueLink = <c.CodeLink src='./src/components.ts' startRe={/const Value/} title='Value Component.ts' />;
+const IfLink = <c.CodeLink src='./src/components.ts' startRe={/const If/} title='If Component' />;
+const UnlessLink = <c.CodeLink src='./src/components.ts' startRe={/const Unless/} title='Unless Component' />;
+const ForLink = <c.CodeLink src='./src/components.ts' startRe={/const For/} title='For Component' />;
+const ValueLink = <c.CodeLink src='./src/components.ts' startRe={/const Value/} title='Value Component' />;
 
 export const text = <>
   <c.StdHeader />

@@ -136,7 +136,7 @@ export const text = <>
     By default, the framework provides a default {CliCommand} for {RestApplication} that will follow default behaviors, and spin up the REST server.
 
     <c.Execution title='Standard application' cmd='trv' args={['run:rest']} config={{
-      cwd: './doc-exec.ts'
+      cwd: './doc-exec'
     }} />
 
     <c.SubSection title='Creating a Custom CLI Entry Point'>
@@ -147,7 +147,7 @@ export const text = <>
 
       And using the pattern established in the {d.mod('Cli')} module, you would run your program using {d.command('npx trv run:rest:custom')}.
 
-      <c.Execution title='Custom application' cmd='trv' args={['run:rest:custom']} config={{ cwd: './doc-exec.ts' }} />
+      <c.Execution title='Custom application' cmd='trv' args={['run:rest:custom']} config={{ cwd: './doc-exec' }} />
     </c.SubSection>
   </c.Section>
 

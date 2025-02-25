@@ -7,7 +7,7 @@ import { CliCommand } from './src/decorators.ts';
 
 const EnvLink = d.codeLink('Runtime', '@travetto/runtime/src/env.ts', /const Env/);
 
-const cfg = { cwd: './doc-exec.ts' };
+const cfg = { cwd: './doc-exec' };
 
 export const text = <>
   <c.StdHeader />

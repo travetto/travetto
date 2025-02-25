@@ -33,7 +33,7 @@ export const text = <>
 
     would translate to:
 
-    <c.Code title='Transpiled test Code' src={RuntimeIndex.resolveFileImport('@travetto/test/doc/assert-example.ts')} language='javascript.ts' />
+    <c.Code title='Transpiled test Code' src={RuntimeIndex.resolveFileImport('@travetto/test/doc/assert-example.ts')} language='javascript' />
 
     This would ultimately produce the error like:
 

@@ -12,7 +12,7 @@ export const text = <>
 
     <ol>
       <li>{d.path('%ROOT%/resources/email')}</li>
-      <li>{d.path('@travetto/email-{engine}/resources/email.ts')}</li>
+      <li>{d.path('@travetto/email-{engine}/resources/email')}</li>
     </ol>
 
     When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process will convert {d.path('.email.html')} files into {d.path('.compiled.html')}, {d.path('.compiled.text')} and {d.path('.compiled.subject')} suffixes to generate the outputs respectively.

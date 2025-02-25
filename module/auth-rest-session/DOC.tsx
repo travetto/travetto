@@ -13,5 +13,5 @@ export const text = <>
 
   Once operating within the {Session} boundaries, the session state can be injected via params, or accessed via the {SessionService}.
 
-  <c.Code src='./doc/usage.ts' title='Sample Usage.ts' startRe={/@Authenticated/} />
+  <c.Code src='./doc/usage.ts' title='Sample Usage' startRe={/@Authenticated/} />
 </>;

@@ -53,11 +53,11 @@ export const text = async () => {
     <c.Section title='CLI - doc'>
       The run command allows for generating documentation output.
       <c.Execution title='CLI Doc Help' cmd='trv' args={['doc', '--help']}
-        config={{ cwd: './doc-exec.ts' }} />
+        config={{ cwd: './doc-exec' }} />
 
       By default, running the command will output the {d.library('Markdown')} content directly to the terminal.
       <c.Execution title='Sample CLI Output' cmd='trv' args={['doc', '-o', 'html']}
-        config={{ cwd: './doc-exec.ts' }} />
+        config={{ cwd: './doc-exec' }} />
     </c.Section>
   </>;
 };
