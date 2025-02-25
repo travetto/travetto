@@ -1,6 +1,6 @@
 import vscode from 'vscode';
 
-import type { TestWatchEvent } from '@travetto/test';
+import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
 
 import { Log } from '../../../core/log';
 import { Workspace } from '../../../core/workspace';

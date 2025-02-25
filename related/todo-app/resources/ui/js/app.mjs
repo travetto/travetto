@@ -2,7 +2,7 @@
 /** eslint-env browser */ /* global Vue */
 
 /** 
- * @typedef {import('../../../src/model.ts').Todo} Todo 
+ * @typedef {import('../../../src/model').Todo} Todo 
  */
 
 import { factory } from './api-client/factory.js';

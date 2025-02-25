@@ -3,7 +3,6 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
-
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 
