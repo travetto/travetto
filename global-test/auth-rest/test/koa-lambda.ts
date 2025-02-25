@@ -1,10 +1,9 @@
+import { AuthRestServerSuite } from '@travetto/auth-rest/support/test/server';
 import { Suite } from '@travetto/test';
 import { AwsLambdaKoaRestServer } from '@travetto/rest-koa-lambda';
 import { InjectableFactory } from '@travetto/di';
-import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
-
-import { AuthRestServerSuite } from '@travetto/auth-rest/support/test/server';
 import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
+import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
 
 const KOA = Symbol.for('koa-lambda');
 

@@ -1,5 +1,7 @@
 import { Class } from '@travetto/runtime';
-import { ModelRegistry, ModelType, ModelCrudSupport } from '@travetto/model';
+import { ModelCrudSupport } from '@travetto/model';
+import { ModelRegistry } from '@travetto/model/src/registry/model';
+import { ModelType } from '@travetto/model/src/types/model';
 
 import { ModelQueryCrudSupport } from '../../service/crud';
 

@@ -5,7 +5,6 @@ import { WhereClause } from '@travetto/model-query';
 import { castTo, Class } from '@travetto/runtime';
 import { ModelType } from '@travetto/model';
 import { SQLModelConfig, SQLDialect } from '@travetto/model-sql';
-
 import { VisitStack } from '@travetto/model-sql/src/internal/util';
 
 import { MySQLConnection } from './connection';

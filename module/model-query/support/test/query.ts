@@ -1,10 +1,10 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { TimeUtil } from '@travetto/runtime';
-import { NotFoundError, ModelCrudSupport } from '@travetto/model';
-
 import { BaseModelSuite } from '@travetto/model/support/test/base';
+import { ModelCrudSupport } from '@travetto/model/src/service/crud';
+import { TimeUtil } from '@travetto/runtime';
+import { NotFoundError } from '@travetto/model';
 
 import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './types';
 
@@ -41,8 +41,8 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const none = await svc.queryCount(Person, { where: { id: { $ne: people[0].id } } });
     assert(none === 3);
 
-    const noneIds = await svc.query(Person, { where: { id: { $ne: people[0].id } } });
-    assert(noneIds.every(x => x.id !== people[0].id));
+    const noneids = await svc.query(Person, { where: { id: { $ne: people[0].id } } });
+    assert(noneids.every(x => x.id !== people[0].id));
   }
 
   @Test('verify word boundary')

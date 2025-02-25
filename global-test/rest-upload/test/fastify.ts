@@ -1,9 +1,8 @@
+import { RestUploadServerSuite } from '@travetto/rest-upload/support/test/server';
 import { Suite } from '@travetto/test';
 import { FastifyRestServer } from '@travetto/rest-fastify';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
-
-import { RestUploadServerSuite } from '@travetto/rest-upload/support/test/server';
 
 const FASTIFY = Symbol.for('fastify');
 

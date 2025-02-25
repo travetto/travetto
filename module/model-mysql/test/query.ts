@@ -1,7 +1,6 @@
 import { Suite } from '@travetto/test';
 import { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
-import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 
 import { WithSuiteContext } from '@travetto/context/support/test/context';
 import { ModelQuerySuite } from '@travetto/model-query/support/test/query';
@@ -9,6 +8,7 @@ import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest';
+import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 
 import { MySQLDialect } from '../src/dialect';
 

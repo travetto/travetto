@@ -1,7 +1,6 @@
 import { castTo, Class } from '@travetto/runtime';
-
+import { ModelRegistry } from '@travetto/model/src/registry/model';
 import { InjectableConfig, DependencyRegistry } from '@travetto/di';
-
 import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/common';
 
 import type { ModelStorageSupport } from '../../src/service/storage';
@@ -23,8 +22,6 @@ export class ModelCandidateUtil {
    * Get all models
    */
   static async #getModels(models?: string[]): Promise<Class<ModelType>[]> {
-    const { ModelRegistry } = await import('@travetto/model/src/registry/model');
-
     const names = new Set(models ?? []);
     const all = names.has('*');
     return ModelRegistry.getClasses()
@@ -36,8 +33,6 @@ export class ModelCandidateUtil {
    * Get model names
    */
   static async getModelNames(): Promise<string[]> {
-    const { ModelRegistry } = await import('@travetto/model/src/registry/model');
-
     return (await this.#getModels()).map(x => ModelRegistry.getStore(x)).sort();
   }
 
