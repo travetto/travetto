@@ -19,7 +19,7 @@ The most common way of utilizing the context, is via the [WithAsyncContext](http
 
 The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain. 
 
-**NOTE:** while access context properties directly is supported, it is recommended to use [AsyncContextValue](https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L16) instead.
+**NOTE:** while access context properties directly is supported, it is recommended to use [AsyncContextValue](https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L17) instead.
 
 **Code: Usage of context within a service**
 ```typescript
@@ -54,7 +54,7 @@ export class ContextAwareService {
 ```
 
 ## AsyncContextValue
-Within the framework that is a need to access context values, in a type safe fashion.  Additionally, we have the requirement to keep the data accesses isolated from other operations.  To this end, [AsyncContextValue](https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L16) was created to support this use case.  This class represents the ability to define a simple read/write contract for a given context field.  It also provides some supplemental functionality, e.g., the ability to suppress errors if a context is not initialized.
+Within the framework that is a need to access context values, in a type safe fashion.  Additionally, we have the requirement to keep the data accesses isolated from other operations.  To this end, [AsyncContextValue](https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L17) was created to support this use case.  This class represents the ability to define a simple read/write contract for a given context field.  It also provides some supplemental functionality, e.g., the ability to suppress errors if a context is not initialized.
 
 **Code: Source for AsyncContextValue**
 ```typescript

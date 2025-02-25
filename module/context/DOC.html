@@ -18,7 +18,7 @@
 This module provides a wrapper around node's <a target="_blank" class="external-link" href="https://nodejs.org/api/async_hooks.html">async_hooks</a> to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow. <br><br>
 The most common way of utilizing the context, is via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/context/src/decorator.ts#L7">WithAsyncContext</a> decorator.  The decorator requires the class it's being used in, to have a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/context/src/service.ts#L12">AsyncContext</a> member, as it is the source of the contextual information. <br><br>
 The decorator will load the context on invocation, and will keep the context active during the entire asynchronous call chain. <br><br>
-<strong>NOTE:</strong> while access context properties directly is supported, it is recommended to use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L16">AsyncContextValue</a> instead.
+<strong>NOTE:</strong> while access context properties directly is supported, it is recommended to use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L17">AsyncContextValue</a> instead.
 
   <figure class="code">
     <figcaption class="code">Usage of context within a service
@@ -57,11 +57,11 @@ The decorator will load the context on invocation, and will keep the context act
 
 <h2 id="asynccontextvalue">AsyncContextValue</h2>
 
-Within the framework that is a need to access context values, in a type safe fashion.  Additionally, we have the requirement to keep the data accesses isolated from other operations.  To this end, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L16">AsyncContextValue</a> was created to support this use case.  This class represents the ability to define a simple read/write contract for a given context field.  It also provides some supplemental functionality, e.g., the ability to suppress errors if a context is not initialized.
+Within the framework that is a need to access context values, in a type safe fashion.  Additionally, we have the requirement to keep the data accesses isolated from other operations.  To this end, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L17">AsyncContextValue</a> was created to support this use case.  This class represents the ability to define a simple read/write contract for a given context field.  It also provides some supplemental functionality, e.g., the ability to suppress errors if a context is not initialized.
 
   <figure class="code">
     <figcaption class="code">Source for AsyncContextValue
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L16">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/context/src/value.ts#L17">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AsyncContextValue<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>

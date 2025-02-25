@@ -1,6 +1,5 @@
 import type { Class } from '@travetto/runtime';
-import type { ModelStorageSupport } from '@travetto/model/src/service/storage.ts';
-import type { ModelType } from '@travetto/model/src/types/model.ts';
+import type { ModelType, ModelStorageSupport } from '@travetto/model';
 
 export class ModelInstallUtil {
   static async run(provider: ModelStorageSupport, models: Class<ModelType>[]): Promise<void> {

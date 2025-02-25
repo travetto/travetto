@@ -4,10 +4,9 @@ import kCompress from 'koa-compress';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { RestConfig, RestServer, RouteConfig, RestCookieConfig, RestNetUtil } from '@travetto/rest';
+import { RestConfig, RestServer, RouteConfig, RestCookieConfig, RestNetUtil, RestServerHandle } from '@travetto/rest';
 
 import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
-import { RestServerHandle } from '@travetto/rest/src/types.ts';
 
 import { KoaServerUtil } from './internal/util.ts';
 

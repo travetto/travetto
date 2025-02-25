@@ -10,7 +10,7 @@ import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClauseRaw, QueryVerifier
+  PageableModelQuery, ValidStringFields, WhereClauseRaw, QueryVerifier, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query.ts';
@@ -19,7 +19,6 @@ import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry.ts';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage.ts';
-import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest.ts';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk.ts';
 
 import { SQLModelConfig } from './config.ts';

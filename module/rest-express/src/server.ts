@@ -3,11 +3,9 @@ import express from 'express';
 import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil } from '@travetto/rest';
-
+import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil, RestServerHandle } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types.ts';
 import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
-import { RestServerHandle } from '@travetto/rest/src/types.ts';
 
 import { RouteStack } from './internal/types.ts';
 import { ExpressServerUtil } from './internal/util.ts';
