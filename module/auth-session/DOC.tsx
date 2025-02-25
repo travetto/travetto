@@ -3,7 +3,7 @@ import { d, c } from '@travetto/doc';
 import { AuthContext } from '@travetto/auth';
 import { Runtime } from '@travetto/runtime';
 
-import { SessionService } from './src/service.ts';
+import { SessionService } from './src/service';
 
 const PrincipalContract = d.codeLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
 const ModelExpirySupport = d.ref('ModelExpirySupport', '@travetto/model/src/service/expiry.ts');

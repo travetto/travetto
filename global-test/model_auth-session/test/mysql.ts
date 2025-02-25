@@ -6,8 +6,8 @@ import { ModelExpirySupport } from '@travetto/model';
 import { SQLModelConfig, SQLModelService, SQLDialect } from '@travetto/model-sql';
 import { MySQLDialect } from '@travetto/model-mysql';
 
-import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
-import { ModelSuite } from '@travetto/model/support/test/suite.ts';
+import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server';
+import { ModelSuite } from '@travetto/model/support/test/suite';
 
 class Config {
   @InjectableFactory({ primary: true })

@@ -1,8 +1,8 @@
 import { Any, ClassInstance } from '@travetto/runtime';
 
-import { SchemaRegistry } from '../service/registry.ts';
-import { CommonRegExp } from '../validate/regexp.ts';
-import { ClassList, FieldConfig } from '../service/types.ts';
+import { SchemaRegistry } from '../service/registry';
+import { CommonRegExp } from '../validate/regexp';
+import { ClassList, FieldConfig } from '../service/types';
 
 type PropType<V> = (<T extends Partial<Record<K, V | Function>>, K extends string>(t: T, k: K, idx?: TypedPropertyDescriptor<Any> | number) => void);
 

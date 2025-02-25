@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
 
-import { path } from './path.ts';
-import { PackageModuleVisitor } from './dependencies.ts';
+import { path } from './path';
+import { PackageModuleVisitor } from './dependencies';
 
-import type { ManifestModuleFileType, ManifestModuleRole, ManifestModuleFolderType } from './types/common.ts';
-import type { ManifestModuleFile, ManifestModule, PackageModule } from './types/manifest.ts';
-import type { ManifestContext } from './types/context.ts';
+import type { ManifestModuleFileType, ManifestModuleRole, ManifestModuleFolderType } from './types/common';
+import type { ManifestModuleFile, ManifestModule, PackageModule } from './types/manifest';
+import type { ManifestContext } from './types/context';
 
 const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
   '.js': 'js',

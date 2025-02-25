@@ -4,7 +4,7 @@ import path from 'node:path';
 import { TypedObject, RuntimeIndex, watchCompiler, Runtime, BinaryUtil } from '@travetto/runtime';
 import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
 
-import { EmailCompileUtil } from './util.ts';
+import { EmailCompileUtil } from './util';
 
 /**
  * Email compilation support

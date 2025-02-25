@@ -1,10 +1,10 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
-import { DynamoDBModelService } from './src/service.ts';
-import { DynamoDBModelConfig } from './src/config.ts';
+import { DynamoDBModelService } from './src/service';
+import { DynamoDBModelConfig } from './src/config';
 
 export const text = <>
   <c.StdHeader />

@@ -1,9 +1,9 @@
 import { Class } from '@travetto/runtime';
 import { ModelType } from '@travetto/model';
 
-import { ModelQuery } from '../model/query.ts';
-import { ModelQuerySupport } from './query.ts';
-import { ValidStringFields } from '../model/where-clause.ts';
+import { ModelQuery } from '../model/query';
+import { ModelQuerySupport } from './query';
+import { ValidStringFields } from '../model/where-clause';
 
 /**
  * The contract for a model service with faceting support

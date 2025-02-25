@@ -4,10 +4,10 @@ import { ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { AsyncContext, AsyncContextValue } from '@travetto/context';
 import { AuthContext, AuthenticationError, AuthService } from '@travetto/auth';
 
-import { isStorageSupported } from '@travetto/model/src/internal/service/common.ts';
+import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 
-import { Session } from './session.ts';
-import { SessionEntry, SessionModelSymbol } from './model.ts';
+import { Session } from './session';
+import { SessionEntry, SessionModelSymbol } from './model';
 
 /**
  * Rest service for supporting the session and managing the session state

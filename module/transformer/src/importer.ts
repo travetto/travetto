@@ -2,12 +2,12 @@ import ts from 'typescript';
 
 import { ManifestModuleUtil, PackageUtil, path } from '@travetto/manifest';
 
-import { AnyType, TransformResolver, ManagedType } from './resolver/types.ts';
-import { ImportUtil } from './util/import.ts';
-import { CoreUtil } from './util/core.ts';
-import { Import } from './types/shared.ts';
-import { LiteralUtil } from './util/literal.ts';
-import { DeclarationUtil } from './util/declaration.ts';
+import { AnyType, TransformResolver, ManagedType } from './resolver/types';
+import { ImportUtil } from './util/import';
+import { CoreUtil } from './util/core';
+import { Import } from './types/shared';
+import { LiteralUtil } from './util/literal';
+import { DeclarationUtil } from './util/declaration';
 
 const D_OR_D_TS_EXT_RE = /[.]d([.]ts)?$/;
 

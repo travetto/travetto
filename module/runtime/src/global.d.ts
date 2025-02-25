@@ -1,4 +1,4 @@
-import './types.ts';
+import './types';
 
 declare const write: unique symbol;
 declare global {

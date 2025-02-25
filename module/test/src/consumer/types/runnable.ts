@@ -1,7 +1,7 @@
-import type { TestConsumerShape } from '../types.ts';
-import { TestResultsSummarizer } from './summarizer.ts';
-import type { TestEvent } from '../../model/event.ts';
-import { DelegatingConsumer } from './delegating.ts';
+import type { TestConsumerShape } from '../types';
+import { TestResultsSummarizer } from './summarizer';
+import type { TestEvent } from '../../model/event';
+import { DelegatingConsumer } from './delegating';
 
 /**
  * Test consumer with support for multiple nested consumers, and summarization

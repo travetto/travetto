@@ -1,7 +1,7 @@
 import { Class } from '@travetto/runtime';
 import { ModelRegistry, ModelType, ModelCrudSupport } from '@travetto/model';
 
-import { ModelQueryCrudSupport } from '../../service/crud.ts';
+import { ModelQueryCrudSupport } from '../../service/crud';
 
 /**
  * Utils for query expiry support

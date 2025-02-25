@@ -2,12 +2,12 @@ import { existsSync } from 'node:fs';
 
 import { type Class, RuntimeIndex } from '@travetto/runtime';
 
-import type { TestConsumerShape } from '../types.ts';
-import type { TestEvent } from '../../model/event.ts';
-import type { TestResult } from '../../model/test.ts';
-import type { SuiteResult } from '../../model/suite.ts';
-import { SuiteRegistry } from '../../registry/suite.ts';
-import { DelegatingConsumer } from './delegating.ts';
+import type { TestConsumerShape } from '../types';
+import type { TestEvent } from '../../model/event';
+import type { TestResult } from '../../model/test';
+import type { SuiteResult } from '../../model/suite';
+import { SuiteRegistry } from '../../registry/suite';
+import { DelegatingConsumer } from './delegating';
 
 /**
  * Cumulative Summary consumer

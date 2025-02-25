@@ -1,1 +1,1 @@
-export * from '@travetto/cli/doc/cli.custom_env-arg.ts';
+export * from '@travetto/cli/doc/cli.custom_env-arg';

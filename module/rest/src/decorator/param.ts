@@ -1,8 +1,8 @@
 import { ClassInstance } from '@travetto/runtime';
 
-import { ParamConfig } from '../types.ts';
-import { ControllerRegistry } from '../registry/controller.ts';
-import { ParamExtractor } from '../util/param.ts';
+import { ParamConfig } from '../types';
+import { ControllerRegistry } from '../registry/controller';
+import { ParamExtractor } from '../util/param';
 
 type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx: number) => void;
 

@@ -1,4 +1,4 @@
-import type { ColorLevel } from './style.ts';
+import type { ColorLevel } from './style';
 
 declare module '@travetto/runtime' {
   interface EnvData {

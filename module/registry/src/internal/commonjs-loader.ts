@@ -3,7 +3,7 @@ import { Module } from 'node:module';
 import { path } from '@travetto/manifest';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { RetargettingProxy } from '../proxy.ts';
+import { RetargettingProxy } from '../proxy';
 
 declare module 'module' {
   // eslint-disable-next-line @typescript-eslint/naming-convention

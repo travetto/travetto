@@ -3,9 +3,9 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { Unknowable } from './models/unknown.ts';
-import { SchemaRegistry } from '../src/service/registry.ts';
-import { UnknownType } from '../src/internal/types.ts';
+import { Unknowable } from './models/unknown';
+import { SchemaRegistry } from '../src/service/registry';
+import { UnknownType } from '../src/internal/types';
 
 @Suite()
 export class UnknownTest {

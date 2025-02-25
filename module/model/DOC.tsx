@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { Model } from './src/registry/decorator.ts';
-import { Links } from './support/doc.support.ts';
+import { Model } from './src/registry/decorator';
+import { Links } from './support/doc.support';
 
 const ModelTypeSnippet = <c.Code title='ModelType' src='src/types/model.ts' startRe={/export interface/} endRe={/^}/} />;
 

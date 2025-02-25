@@ -1,2 +1,2 @@
-import type { } from './src/global.ts';
-export * from './src/server.ts';
+import type { } from './src/global';
+export * from './src/server';

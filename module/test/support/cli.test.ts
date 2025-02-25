@@ -7,7 +7,7 @@ import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
 
-import { selectConsumer } from './bin/run.ts';
+import { selectConsumer } from './bin/run';
 
 /**
  * Launch test framework and execute tests

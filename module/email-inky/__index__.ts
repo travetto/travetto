@@ -1,2 +1,2 @@
-export * from './src/components.ts';
-export * from './src/wrapper.ts';
+export * from './src/components';
+export * from './src/wrapper';

@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { ManagedInterceptorConfig, RestInterceptor } from './types.ts';
-import { FilterContext, FilterNext } from '../types.ts';
-import { RequestLoggingSymbol } from '../internal/symbol.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { ManagedInterceptorConfig, RestInterceptor } from './types';
+import { FilterContext, FilterNext } from '../types';
+import { RequestLoggingSymbol } from '../internal/symbol';
+import { SerializeInterceptor } from './serialize';
 
 /**
  * Rest logging configuration

@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
 
-import { path as path2 } from '../src/path.ts';
+import { path as path2 } from '../src/path';
 
 @Suite()
 class PathTests {

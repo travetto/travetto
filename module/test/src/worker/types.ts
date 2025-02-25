@@ -1,5 +1,5 @@
-import { TestEvent } from '../model/event.ts';
-import { TestRun } from '../model/test.ts';
+import { TestEvent } from '../model/event';
+import { TestRun } from '../model/test';
 
 /**
  * Test Run Event Keys

@@ -1,5 +1,5 @@
 import { CliCommandShape, CliCommand } from '@travetto/cli';
-import { PackageManager } from './bin/package-manager.ts';
+import { PackageManager } from './bin/package-manager';
 
 /**
  * Enforces all packages to write out their versions and dependencies

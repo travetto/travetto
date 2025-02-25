@@ -2,8 +2,8 @@ import vscode from 'vscode';
 
 import { Env } from '@travetto/runtime';
 
-import { EnvDict, LaunchConfig } from './types.ts';
-import { Workspace } from './workspace.ts';
+import { EnvDict, LaunchConfig } from './types';
+import { Workspace } from './workspace';
 
 // eslint-disable-next-line no-template-curly-in-string
 const WORKSPACE = '${workspaceFolder}';

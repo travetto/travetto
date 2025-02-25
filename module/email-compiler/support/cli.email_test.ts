@@ -5,7 +5,7 @@ import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { Env } from '@travetto/runtime';
 
-import { EditorService } from './bin/editor.ts';
+import { EditorService } from './bin/editor';
 
 /**
  * CLI Entry point for running the email server

@@ -4,11 +4,11 @@ import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types.ts';
-import { Log } from '../log.ts';
-import { CommonUtil } from '../util.ts';
-import { CompilerClient } from './client.ts';
-import { ProcessHandle } from './process-handle.ts';
+import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types';
+import { Log } from '../log';
+import { CommonUtil } from '../util';
+import { CompilerClient } from './client';
+import { ProcessHandle } from './process-handle';
 
 const log = Log.scoped('server');
 

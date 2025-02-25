@@ -5,8 +5,8 @@ import { RootRegistry } from '@travetto/registry';
 import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam, Undocumented } from '@travetto/rest';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
-import { OpenapiVisitor } from '../src/spec-generate.ts';
-import { TestUser } from './model.ts';
+import { OpenapiVisitor } from '../src/spec-generate';
+import { TestUser } from './model';
 
 interface UserSearch {
   name?: string;

@@ -465,8 +465,8 @@ import { Runtime } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 
-import { ServerHandle } from '../src/types.ts';
-import { RestNetUtil } from '../src/util/net.ts';
+import { ServerHandle } from '../src/types';
+import { RestNetUtil } from '../src/util/net';
 
 /**
  * Run a rest server as an application

@@ -3,9 +3,9 @@ import { RestInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInte
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
 
-import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types.ts';
-import { RestAuthConfig } from '../config.ts';
-import { PrincipalCodecTarget } from '../internal/types.ts';
+import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types';
+import { RestAuthConfig } from '../config';
+import { PrincipalCodecTarget } from '../internal/types';
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
 

@@ -1,5 +1,5 @@
 import { TypedObject } from '@travetto/runtime';
-import { Messages } from './messages.ts';
+import { Messages } from './messages';
 
 /**
  * List of common regular expressions for fields

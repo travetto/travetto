@@ -1,5 +1,5 @@
 import { AsyncItrMethodDescriptor, AsyncMethodDescriptor } from '@travetto/runtime';
-import { Connection, TransactionType } from './base.ts';
+import { Connection, TransactionType } from './base';
 
 /**
  * Indicating something is aware of connections

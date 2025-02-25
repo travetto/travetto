@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { Class, Env } from '@travetto/runtime';
-import { ChangeSource, ChangeEvent, ChangeHandler } from './types.ts';
+import { ChangeSource, ChangeEvent, ChangeHandler } from './types';
 
 /**
  * Base registry class, designed to listen to changes over time

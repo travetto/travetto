@@ -1,2 +1,2 @@
-export * from './src/compiler.ts';
-export * from './src/util.ts';
+export * from './src/compiler';
+export * from './src/util';

@@ -4,10 +4,10 @@ import { Test, Suite, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { AppError } from '@travetto/runtime';
 
-import { BindUtil } from '../src/bind-util.ts';
-import { Address } from './models/address.ts';
-import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple, Accessors } from './models/binding.ts';
-import { SchemaValidator } from '../src/validate/validator.ts';
+import { BindUtil } from '../src/bind-util';
+import { Address } from './models/address';
+import { Person, Count, Response, SuperAddress, BasePoly, Poly1, Poly2, RegexSimple, Accessors } from './models/binding';
+import { SchemaValidator } from '../src/validate/validator';
 
 @Suite('Data Binding')
 class DataBinding {

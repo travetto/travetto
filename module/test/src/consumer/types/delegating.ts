@@ -1,5 +1,5 @@
-import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts';
-import type { TestEvent } from '../../model/event.ts';
+import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types';
+import type { TestEvent } from '../../model/event';
 
 /**
  * Delegating event consumer

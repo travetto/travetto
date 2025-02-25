@@ -5,13 +5,13 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
 import { asFull, castTo } from '@travetto/runtime';
 
-import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param.ts';
-import { Post, Get } from '../src/decorator/endpoint.ts';
-import { Controller } from '../src/decorator/controller.ts';
-import { ControllerRegistry } from '../src/registry/controller.ts';
-import { MethodOrAll, Request, Response } from '../src/types.ts';
-import { ParamExtractor } from '../src/util/param.ts';
-import { EndpointConfig } from '../src/registry/types.ts';
+import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param';
+import { Post, Get } from '../src/decorator/endpoint';
+import { Controller } from '../src/decorator/controller';
+import { ControllerRegistry } from '../src/registry/controller';
+import { MethodOrAll, Request, Response } from '../src/types';
+import { ParamExtractor } from '../src/util/param';
+import { EndpointConfig } from '../src/registry/types';
 
 class User {
   name: string;

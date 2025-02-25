@@ -1,4 +1,4 @@
-import { Util } from './util.ts';
+import { Util } from './util';
 
 /**
  * An asynchronous queue

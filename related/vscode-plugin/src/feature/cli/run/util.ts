@@ -3,11 +3,11 @@ import { spawn } from 'child_process';
 
 import { ExecUtil, Env } from '@travetto/runtime';
 
-import { RunChoice, ResolvedRunChoice } from './types.ts';
-import { Workspace } from '../../../core/workspace.ts';
-import { ParameterSelector } from '../../../core/parameter.ts';
-import { LaunchConfig } from '../../../core/types.ts';
-import { RunUtil } from '../../../core/run.ts';
+import { RunChoice, ResolvedRunChoice } from './types';
+import { Workspace } from '../../../core/workspace';
+import { ParameterSelector } from '../../../core/parameter';
+import { LaunchConfig } from '../../../core/types';
+import { RunUtil } from '../../../core/run';
 
 type PickItem = vscode.QuickPickItem & { target: RunChoice };
 

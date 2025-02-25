@@ -1,4 +1,4 @@
-import { DocFileUtil } from './file.ts';
+import { DocFileUtil } from './file';
 
 export type ResolvedRef = { title: string, file: string, line: number };
 export type ResolvedCode = { text: string, language: string, file?: string };

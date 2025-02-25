@@ -4,9 +4,9 @@ import { Suite, Test } from '@travetto/test';
 import { ModelCrudSupport } from '@travetto/model';
 import { $_modelConfig_$, $_modelService_$ } from '$_modelImport_$';
 
-import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
+import { BaseModelSuite } from '@travetto/model/support/test/base';
 
-import { Todo } from '../../src/model/todo.ts';
+import { Todo } from '../../src/model/todo';
 
 @Suite('Simple CRUD')
 class TestCRUD extends BaseModelSuite<ModelCrudSupport> {

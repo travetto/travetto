@@ -1,8 +1,8 @@
 import { Util } from '@travetto/runtime';
 
-import { RouteApplies } from '../interceptor/types.ts';
-import { ControllerConfig } from '../registry/types.ts';
-import { RouteConfig } from '../types.ts';
+import { RouteApplies } from '../interceptor/types';
+import { ControllerConfig } from '../registry/types';
+import { RouteConfig } from '../types';
 
 interface RouteRule {
   sub: string | RegExp;

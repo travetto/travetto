@@ -1,7 +1,7 @@
 import { Precision, Schema, Text } from '@travetto/schema';
 import { Model, ModelType } from '@travetto/model';
 
-import { Point } from '../../src/model/where-clause.ts';
+import { Point } from '../../src/model/where-clause';
 
 @Schema()
 export class Address {

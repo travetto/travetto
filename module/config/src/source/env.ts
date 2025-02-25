@@ -1,4 +1,4 @@
-import { ConfigSource, ConfigSpec } from './types.ts';
+import { ConfigSource, ConfigSpec } from './types';
 
 /**
  * Represents the environment mapped data as a JSON blob

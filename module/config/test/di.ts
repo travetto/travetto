@@ -4,7 +4,7 @@ import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
-import { CUSTOM_EMPTY, DbConfig, Empty } from './di-config.ts';
+import { CUSTOM_EMPTY, DbConfig, Empty } from './di-config';
 
 class TestConfig {
   @InjectableFactory(CUSTOM_EMPTY)

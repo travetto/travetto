@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { AuthVerifyInterceptor } from '../src/interceptors/verify.ts';
+import { AuthVerifyInterceptor } from '../src/interceptors/verify';
 
 const base = { matcher: (key: Set<string>) => { throw new Error('Function not implemented.'); } } as const;
 

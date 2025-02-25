@@ -7,10 +7,10 @@ import {
   ModelIndexedSupport, ModelType, NotFoundError, OptionalId,
 } from '@travetto/model';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed.ts';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 
-import { FirestoreModelConfig } from './config.ts';
+import { FirestoreModelConfig } from './config';
 
 const clone = structuredClone;
 

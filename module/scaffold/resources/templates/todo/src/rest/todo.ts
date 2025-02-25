@@ -12,7 +12,7 @@ import { Authenticated } from '@travetto/auth-rest';
 // @ts-expect-error
 import { $_modelService_$ } from '$_modelImport_$';
 
-import { Todo } from '../model/todo.ts';
+import { Todo } from '../model/todo';
 
 @Schema()
 class Query {

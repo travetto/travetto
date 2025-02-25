@@ -3,8 +3,8 @@ import util from 'node:util';
 
 import type { TestResult, Assertion, TestConfig } from '@travetto/test';
 
-import type { ErrorHoverAssertion, StatusUnknown, TestLevel } from './types.ts';
-import { Workspace } from '../../../core/workspace.ts';
+import type { ErrorHoverAssertion, StatusUnknown, TestLevel } from './types';
+import { Workspace } from '../../../core/workspace';
 
 /**
  * Make a color

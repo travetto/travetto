@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { Assertion, TestConfig } from '../model/test.ts';
+import { Assertion, TestConfig } from '../model/test';
 
 export interface CaptureAssert extends Partial<Assertion> {
   module?: [string, string];

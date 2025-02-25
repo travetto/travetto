@@ -1,4 +1,4 @@
-import { Response } from '../types.ts';
+import { Response } from '../types';
 
 /**
  * Renderable contract

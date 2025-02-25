@@ -1,10 +1,10 @@
-import { path } from './path.ts';
-import { ManifestModuleUtil } from './module.ts';
-import { ManifestFileUtil } from './file.ts';
-import { PackageUtil } from './package.ts';
+import { path } from './path';
+import { ManifestModuleUtil } from './module';
+import { ManifestFileUtil } from './file';
+import { PackageUtil } from './package';
 
-import type { ManifestContext } from './types/context.ts';
-import type { ManifestRoot } from './types/manifest.ts';
+import type { ManifestContext } from './types/context';
+import type { ManifestRoot } from './types/manifest';
 
 const MANIFEST_FILE = 'manifest.json';
 

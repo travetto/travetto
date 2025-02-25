@@ -3,9 +3,9 @@ import { AwsLambdaKoaRestServer } from '@travetto/rest-koa-lambda';
 import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
 
-import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server.ts';
+import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 
-import { ModelBlobRestUploadServerSuite } from './server.ts';
+import { ModelBlobRestUploadServerSuite } from './server';
 
 const KOA = Symbol.for('koa-lambda');
 

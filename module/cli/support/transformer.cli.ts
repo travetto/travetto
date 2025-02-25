@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { TransformerState, DecoratorMeta, AfterClass } from '@travetto/transformer';
 
-import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util.ts';
+import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util';
 
 /**
  * Converts classes with `@CliCommand` to `@Schema` and maps the main method

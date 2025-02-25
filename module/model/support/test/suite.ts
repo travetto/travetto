@@ -3,9 +3,9 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry, TestFixtures } from '@travetto/test';
 
-import { isBlobSupported, isStorageSupported } from '../../src/internal/service/common.ts';
-import { MODEL_BLOB } from '../../src/internal/service/blob.ts';
-import { ModelRegistry } from '../../src/registry/model.ts';
+import { isBlobSupported, isStorageSupported } from '../../src/internal/service/common';
+import { MODEL_BLOB } from '../../src/internal/service/blob';
+import { ModelRegistry } from '../../src/registry/model';
 
 const Loaded = Symbol();
 

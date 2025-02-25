@@ -1,8 +1,8 @@
 import { Class } from '@travetto/runtime';
 
-import { ModelType, OptionalId, ModelIdSource } from '../types/model.ts';
+import { ModelType, OptionalId, ModelIdSource } from '../types/model';
 
-import { ModelBasicSupport } from './basic.ts';
+import { ModelBasicSupport } from './basic';
 
 /**
  * Interface for simple CRUD

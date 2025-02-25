@@ -10,7 +10,7 @@ import {
   headerToShape as valuesToShape
 } from '@travetto/rest/support/test/server-support/base.ts';
 
-import { AwsLambdaRestApplication } from '../../src/server.ts';
+import { AwsLambdaRestApplication } from '../../src/server';
 
 const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {
   resource: '/{proxy+}',

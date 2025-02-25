@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 
-import { AsyncQueue } from '../src/queue.ts';
+import { AsyncQueue } from '../src/queue';
 
 @Suite()
 export class WorkSetTest {

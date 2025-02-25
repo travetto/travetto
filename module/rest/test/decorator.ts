@@ -4,10 +4,10 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { TimeUtil } from '@travetto/runtime';
 
-import { ControllerRegistry } from '../src/registry/controller.ts';
-import { Controller } from '../src/decorator/controller.ts';
-import { Patch } from '../src/decorator/endpoint.ts';
-import { CacheControl, SetHeaders } from '../src/decorator/common.ts';
+import { ControllerRegistry } from '../src/registry/controller';
+import { Controller } from '../src/decorator/controller';
+import { Patch } from '../src/decorator/endpoint';
+import { CacheControl, SetHeaders } from '../src/decorator/common';
 
 @Controller('/test')
 class TestController {

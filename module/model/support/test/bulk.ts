@@ -2,9 +2,9 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { Model } from '../../src/registry/decorator.ts';
-import { ModelBulkSupport } from '../../src/service/bulk.ts';
-import { BaseModelSuite } from './base.ts';
+import { Model } from '../../src/registry/decorator';
+import { ModelBulkSupport } from '../../src/service/bulk';
+import { BaseModelSuite } from './base';
 
 @Model('bulk-user')
 class User {

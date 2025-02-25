@@ -3,14 +3,14 @@ import ts from 'typescript';
 
 import { path, ManifestModuleUtil } from '@travetto/manifest';
 
-import { DocUtil } from '../util/doc.ts';
-import { CoreUtil } from '../util/core.ts';
-import { DeclarationUtil } from '../util/declaration.ts';
-import { LiteralUtil } from '../util/literal.ts';
-import { transformCast, TemplateLiteralPart } from '../types/shared.ts';
+import { DocUtil } from '../util/doc';
+import { CoreUtil } from '../util/core';
+import { DeclarationUtil } from '../util/declaration';
+import { LiteralUtil } from '../util/literal';
+import { transformCast, TemplateLiteralPart } from '../types/shared';
 
-import { Type, AnyType, CompositionType, TransformResolver, TemplateType } from './types.ts';
-import { CoerceUtil } from './coerce.ts';
+import { Type, AnyType, CompositionType, TransformResolver, TemplateType } from './types';
+import { CoerceUtil } from './coerce';
 
 /**
  * List of global types that can be parameterized

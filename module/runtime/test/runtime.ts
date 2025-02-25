@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { RuntimeIndex } from '../src/manifest-index.ts';
+import { RuntimeIndex } from '../src/manifest-index';
 
 @Suite()
 class RuntimeIndexTests {

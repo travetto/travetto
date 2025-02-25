@@ -6,10 +6,10 @@ import path from 'node:path';
 import { AfterAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { FetchClientGenerator } from '../src/fetch.ts';
-import { AngularClientGenerator } from '../src/angular.ts';
+import { FetchClientGenerator } from '../src/fetch';
+import { AngularClientGenerator } from '../src/angular';
 
-import './sample.ts';
+import './sample';
 
 @Suite()
 export class SimpleSuite {

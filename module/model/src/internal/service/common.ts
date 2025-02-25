@@ -1,11 +1,11 @@
 import { hasFunction } from '@travetto/runtime';
 
-import type { ModelBulkSupport } from '../../service/bulk.ts';
-import type { ModelCrudSupport } from '../../service/crud.ts';
-import type { ModelExpirySupport } from '../../service/expiry.ts';
-import type { ModelIndexedSupport } from '../../service/indexed.ts';
-import type { ModelStorageSupport } from '../../service/storage.ts';
-import type { ModelBlobSupport } from '../../service/blob.ts';
+import type { ModelBulkSupport } from '../../service/bulk';
+import type { ModelCrudSupport } from '../../service/crud';
+import type { ModelExpirySupport } from '../../service/expiry';
+import type { ModelIndexedSupport } from '../../service/indexed';
+import type { ModelStorageSupport } from '../../service/storage';
+import type { ModelBlobSupport } from '../../service/blob';
 
 export class ModelBasicSupportTarget { }
 export class ModelCrudSupportTarget { }

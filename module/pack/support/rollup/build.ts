@@ -4,10 +4,10 @@ import terser from '@rollup/plugin-terser';
 import jsonImport from '@rollup/plugin-json';
 import type { RollupOptions } from 'rollup';
 
-import { getCoreConfig } from './config.ts';
-import { travettoImportPlugin } from './rollup-travetto-import.ts';
-import { travettoSourcemaps } from './rollup-travetto-sourcemaps.ts';
-import { travettoEntryPlugin } from './rollup-travetto-entry.ts';
+import { getCoreConfig } from './config';
+import { travettoImportPlugin } from './rollup-travetto-import';
+import { travettoSourcemaps } from './rollup-travetto-sourcemaps';
+import { travettoEntryPlugin } from './rollup-travetto-entry';
 
 export default function buildConfig(): RollupOptions {
   // Load up if not defined

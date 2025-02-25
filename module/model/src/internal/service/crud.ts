@@ -1,12 +1,12 @@
 import { castTo, Class, Util, asConstructable, AppError } from '@travetto/runtime';
 import { DataUtil, SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
-import { ModelRegistry } from '../../registry/model.ts';
-import { ModelIdSource, ModelType, OptionalId } from '../../types/model.ts';
-import { NotFoundError } from '../../error/not-found.ts';
-import { ExistsError } from '../../error/exists.ts';
-import { SubTypeNotSupportedError } from '../../error/invalid-sub-type.ts';
-import { DataHandler, PrePersistScope } from '../../registry/types.ts';
+import { ModelRegistry } from '../../registry/model';
+import { ModelIdSource, ModelType, OptionalId } from '../../types/model';
+import { NotFoundError } from '../../error/not-found';
+import { ExistsError } from '../../error/exists';
+import { SubTypeNotSupportedError } from '../../error/invalid-sub-type';
+import { DataHandler, PrePersistScope } from '../../registry/types';
 
 export type ModelCrudProvider = {
   idSource: ModelIdSource;

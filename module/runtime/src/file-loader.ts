@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { AppError } from './error.ts';
+import { AppError } from './error';
 
 /**
  * File loader that will search for files across the provided search paths

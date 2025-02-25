@@ -1,2 +1,2 @@
-export * from './src/model.ts';
-export * from './src/util.ts';
+export * from './src/model';
+export * from './src/util';

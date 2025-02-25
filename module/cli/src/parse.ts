@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { Runtime } from '@travetto/runtime';
-import { CliCommandInput, CliCommandSchema, ParsedState } from './types.ts';
+import { CliCommandInput, CliCommandSchema, ParsedState } from './types';
 
 type ParsedInput = ParsedState['all'][number];
 

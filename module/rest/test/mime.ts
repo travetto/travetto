@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { MimeUtil } from '../src/util/mime.ts';
+import { MimeUtil } from '../src/util/mime';
 
 @Suite()
 export class MimeUtilSuite {

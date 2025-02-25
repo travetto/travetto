@@ -1,4 +1,4 @@
-import { ParamConfig } from './shared/types.ts';
+import { ParamConfig } from './shared/types';
 
 export type Imp = { name: string, file: string, classId: string };
 

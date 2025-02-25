@@ -136,7 +136,7 @@ A binding operation could look like:
 
 **Code: Binding from JSON to Schema**
 ```typescript
-import { Person } from './person.ts';
+import { Person } from './person';
 
 export function Test(): Person {
   return Person.from({
@@ -192,7 +192,7 @@ But now with an invalid json object
 ```typescript
 import { SchemaValidator } from '@travetto/schema';
 
-import { Person } from './person.ts';
+import { Person } from './person';
 
 export async function validate(): Promise<void> {
 
@@ -345,7 +345,7 @@ What you can see here is that the `Point` type is now backed by a class that sup
 **Code: Simple Custom Type Usage**
 ```typescript
 import { Schema } from '@travetto/schema';
-import { Point } from './custom-type.ts';
+import { Point } from './custom-type';
 
 @Schema()
 export class LocationAware {

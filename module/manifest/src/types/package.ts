@@ -1,5 +1,5 @@
-import type { ManifestModuleRole, NodeModuleType } from './common.ts';
-import type { ManifestContext } from './context.ts';
+import type { ManifestModuleRole, NodeModuleType } from './common';
+import type { ManifestContext } from './context';
 
 export const PackagePath = Symbol.for('@travetto/manifest:package-path');
 

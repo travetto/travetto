@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { CoreUtil } from './core.ts';
+import { CoreUtil } from './core';
 
 /**
  * Declaration utils

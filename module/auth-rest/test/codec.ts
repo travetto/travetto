@@ -5,12 +5,12 @@ import { Inject } from '@travetto/di';
 import { Response } from '@travetto/rest';
 import { asFull } from '@travetto/runtime';
 
-import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { InjectableSuite } from '@travetto/di/support/test/suite';
 
-import { AuthContextInterceptor } from '../src/interceptors/context.ts';
-import { JWTPrincipalCodec } from '../src/codec.ts';
-import { RestAuthConfig } from '../src/config.ts';
-import { CommonPrincipalCodecSymbol } from '../src/types.ts';
+import { AuthContextInterceptor } from '../src/interceptors/context';
+import { JWTPrincipalCodec } from '../src/codec';
+import { RestAuthConfig } from '../src/config';
+import { CommonPrincipalCodecSymbol } from '../src/types';
 
 @Suite()
 @InjectableSuite()

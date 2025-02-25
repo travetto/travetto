@@ -2,7 +2,7 @@ import { asFull, Class } from '@travetto/runtime';
 import { ModelType, OptionalId } from '@travetto/model';
 import { ModelQueryCrudSupport, ModelQuerySuggestSupport, ModelQueryFacetSupport, ValidStringFields, ModelQuery, PageableModelQuery } from '@travetto/model-query';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 
 export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {
   idSource = ModelCrudUtil.uuidSource();

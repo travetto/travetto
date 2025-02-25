@@ -14,20 +14,20 @@ import {
   QueryVerifier, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed.ts';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage.ts';
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query.ts';
-import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest.ts';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry.ts';
-import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry.ts';
-import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk.ts';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
+import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
+import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
-import { ElasticsearchModelConfig } from './config.ts';
-import { EsBulkError } from './internal/types.ts';
-import { ElasticsearchQueryUtil } from './internal/query.ts';
-import { ElasticsearchSchemaUtil } from './internal/schema.ts';
-import { IndexManager } from './index-manager.ts';
+import { ElasticsearchModelConfig } from './config';
+import { EsBulkError } from './internal/types';
+import { ElasticsearchQueryUtil } from './internal/query';
+import { ElasticsearchSchemaUtil } from './internal/schema';
+import { IndexManager } from './index-manager';
 
 /**
  * Elasticsearch model source.

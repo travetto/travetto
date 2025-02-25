@@ -5,7 +5,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Model } from '@travetto/model';
 import { Currency, Integer, Precision, Float, Text, Schema } from '@travetto/schema';
 
-import { ElasticsearchSchemaUtil } from '../src/internal/schema.ts';
+import { ElasticsearchSchemaUtil } from '../src/internal/schema';
 
 @Schema()
 class Address {

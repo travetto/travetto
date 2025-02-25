@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { MongoUtil } from '../src/internal/util.ts';
+import { MongoUtil } from '../src/internal/util';
 
 class User {
   id: string;

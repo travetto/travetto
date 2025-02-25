@@ -1,8 +1,8 @@
 import { Class, describeFunction } from '@travetto/runtime';
 import { RetargettingProxy } from '@travetto/registry';
 
-import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry.ts';
-import type { ClassTarget, InjectableConfig } from '../src/types.ts';
+import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
+import type { ClassTarget, InjectableConfig } from '../src/types';
 
 /**
  * Wraps the Dependency Registry to support proxying instances

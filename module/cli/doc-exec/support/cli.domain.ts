@@ -1,1 +1,1 @@
-export * from '@travetto/cli/doc/domain.ts';
+export * from '@travetto/cli/doc/domain';

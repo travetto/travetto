@@ -1,8 +1,8 @@
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ConfigOverrides, CONFIG_OVERRIDES } from '../internal/types.ts';
-import { ConfigData } from '../parser/types.ts';
-import { ConfigSource, ConfigSpec } from './types.ts';
+import { ConfigOverrides, CONFIG_OVERRIDES } from '../internal/types';
+import { ConfigData } from '../parser/types';
+import { ConfigSource, ConfigSpec } from './types';
 
 /**
  * Overridable config source, provides ability to override field level values, currently used by

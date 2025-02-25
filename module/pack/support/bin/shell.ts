@@ -1,7 +1,7 @@
 import util from 'node:util';
 import path from 'node:path';
 
-import { ShellCommandImpl } from '../../src/types.ts';
+import { ShellCommandImpl } from '../../src/types';
 
 const escape = (text: string): string =>
   text

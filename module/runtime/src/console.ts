@@ -1,7 +1,7 @@
 import util from 'node:util';
 import debug from 'debug';
 
-import { RuntimeIndex } from './manifest-index.ts';
+import { RuntimeIndex } from './manifest-index';
 
 export type ConsoleEvent = {
   /** Time of event */

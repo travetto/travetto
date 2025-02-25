@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { Runtime } from '@travetto/runtime';
 
-import { buildEslintConfig } from './bin/eslint-config-file.ts';
+import { buildEslintConfig } from './bin/eslint-config-file';
 
 /**
  * Writes the lint configuration file

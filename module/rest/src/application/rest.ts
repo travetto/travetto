@@ -3,14 +3,14 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
-import { RouteConfig, Request, ServerHandle } from '../types.ts';
-import { RestConfig } from './config.ts';
-import { RouteUtil } from '../util/route.ts';
-import { RestInterceptor } from '../interceptor/types.ts';
-import { ControllerRegistry } from '../registry/controller.ts';
-import { GlobalRoute, RestInterceptorTarget } from '../internal/types.ts';
-import { RestServer } from './server.ts';
-import { RestCommonUtil } from '../util/common.ts';
+import { RouteConfig, Request, ServerHandle } from '../types';
+import { RestConfig } from './config';
+import { RouteUtil } from '../util/route';
+import { RestInterceptor } from '../interceptor/types';
+import { ControllerRegistry } from '../registry/controller';
+import { GlobalRoute, RestInterceptorTarget } from '../internal/types';
+import { RestServer } from './server';
+import { RestCommonUtil } from '../util/common';
 
 /**
  * The rest application

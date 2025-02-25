@@ -3,8 +3,8 @@ import assert from 'node:assert';
 import { Test, Suite } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
 
-import { RestCommonUtil } from '../src/util/common.ts';
-import { Response, Request } from '../src/types.ts';
+import { RestCommonUtil } from '../src/util/common';
+import { Response, Request } from '../src/types';
 
 type Meta = Record<'headerData' | 'cookieData', Record<string, string | undefined>>;
 type MockResponse = Response & Meta;

@@ -1,8 +1,8 @@
 import { AppError, Runtime } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
 
-import { cliTpl } from './color.ts';
-import { CliValidationError, CliCommandShape } from './types.ts';
+import { cliTpl } from './color';
+import { CliValidationError, CliCommandShape } from './types';
 
 const COMMAND_PACKAGE = [
   [/^test(:watch)?$/, 'test', false],

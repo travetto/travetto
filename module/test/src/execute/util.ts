@@ -5,7 +5,7 @@ import readline from 'node:readline/promises';
 import path from 'node:path';
 
 import { Env, ExecUtil, ShutdownManager, Util, RuntimeIndex, Runtime } from '@travetto/runtime';
-import { TestConfig, TestRun } from '../model/test.ts';
+import { TestConfig, TestRun } from '../model/test';
 
 /**
  * Simple Test Utilities

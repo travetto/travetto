@@ -9,10 +9,10 @@ import {
   NotFoundError, SubTypeNotSupportedError, PersistValue
 } from '@travetto/model';
 
-import { isIndexedSupported } from '../../src/internal/service/common.ts';
-import { ExistsError } from '../../src/error/exists.ts';
+import { isIndexedSupported } from '../../src/internal/service/common';
+import { ExistsError } from '../../src/error/exists';
 
-import { BaseModelSuite } from './base.ts';
+import { BaseModelSuite } from './base';
 
 @Model({ baseType: true })
 export class Worker {

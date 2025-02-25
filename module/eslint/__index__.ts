@@ -1,1 +1,1 @@
-export * from './support/bin/types.ts';
+export * from './support/bin/types';

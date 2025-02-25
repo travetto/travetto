@@ -3,7 +3,7 @@ import { KoaRestServer } from '@travetto/rest-koa';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
 
-import { ModelBlobRestUploadServerSuite } from './server.ts';
+import { ModelBlobRestUploadServerSuite } from './server';
 
 const KOA = Symbol.for('koa');
 

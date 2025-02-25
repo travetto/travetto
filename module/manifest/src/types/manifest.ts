@@ -1,6 +1,6 @@
-import type { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleRole } from './common.ts';
-import type { ManifestContext } from './context.ts';
-import { Package } from './package.ts';
+import type { ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleRole } from './common';
+import type { ManifestContext } from './context';
+import { Package } from './package';
 
 export type ManifestModuleFile =
   [path: string, type: ManifestModuleFileType, updated: number] |

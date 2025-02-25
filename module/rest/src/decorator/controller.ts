@@ -1,5 +1,5 @@
 import { Class } from '@travetto/runtime';
-import { ControllerRegistry } from '../registry/controller.ts';
+import { ControllerRegistry } from '../registry/controller';
 
 /**
  * Decorator to register a new rest controller

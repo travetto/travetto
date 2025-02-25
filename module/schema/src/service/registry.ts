@@ -1,10 +1,10 @@
 import { Class, AppError, describeFunction, castTo, classConstruct, asFull, castKey } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types.ts';
-import { SchemaChangeListener } from './changes.ts';
-import { AllViewSymbol } from '../internal/types.ts';
-import { MethodValidatorFn } from '../validate/types.ts';
+import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types';
+import { SchemaChangeListener } from './changes';
+import { AllViewSymbol } from '../internal/types';
+import { MethodValidatorFn } from '../validate/types';
 
 const classToSubTypeName = (cls: Class): string => cls.name
   .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)

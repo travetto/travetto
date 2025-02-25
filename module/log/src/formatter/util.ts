@@ -1,6 +1,6 @@
 import { inspect, type InspectOptions } from 'node:util';
 import { DataUtil } from '@travetto/schema';
-import { LogEvent } from '../types.ts';
+import { LogEvent } from '../types';
 
 export class LogFormatUtil {
   static #inspectOptions = { colors: false, showHidden: false, depth: 5, breakLength: 200 };

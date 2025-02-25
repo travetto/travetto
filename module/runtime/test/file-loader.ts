@@ -4,8 +4,8 @@ import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
 
-import { FileLoader } from '../src/file-loader.ts';
-import { Runtime } from '../src/context.ts';
+import { FileLoader } from '../src/file-loader';
+import { Runtime } from '../src/context';
 
 @Suite()
 class FileLoaderSuite {

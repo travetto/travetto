@@ -3,14 +3,14 @@ import { setMaxListeners } from 'node:events';
 
 import { ManifestIndex, ManifestModuleUtil } from '@travetto/manifest';
 
-import { CompilerUtil } from './util.ts';
-import { CompilerState } from './state.ts';
-import { CompilerWatcher } from './watch.ts';
-import { CompileEmitEvent, CompileEmitter, CompilerReset } from './types.ts';
-import { EventUtil } from './event.ts';
+import { CompilerUtil } from './util';
+import { CompilerState } from './state';
+import { CompilerWatcher } from './watch';
+import { CompileEmitEvent, CompileEmitter, CompilerReset } from './types';
+import { EventUtil } from './event';
 
-import { IpcLogger } from '../support/log.ts';
-import { CommonUtil } from '../support/util.ts';
+import { IpcLogger } from '../support/log';
+import { CommonUtil } from '../support/util';
 
 const log = new IpcLogger({ level: 'debug' });
 

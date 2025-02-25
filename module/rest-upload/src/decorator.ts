@@ -2,10 +2,10 @@ import { AppError, asConstructable, AsyncMethodDescriptor, ClassInstance } from 
 import { ControllerRegistry, ParamConfig, Param } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { RequestTarget } from '@travetto/rest/src/internal/types.ts';
+import { RequestTarget } from '@travetto/rest/src/internal/types';
 
-import { RestUploadInterceptor } from './interceptor.ts';
-import { RestUploadConfig } from './config.ts';
+import { RestUploadInterceptor } from './interceptor';
+import { RestUploadConfig } from './config';
 
 type UploadConfig = Partial<Pick<RestUploadConfig, 'types' | 'maxSize' | 'cleanupFiles'>>;
 

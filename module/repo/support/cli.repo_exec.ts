@@ -5,7 +5,7 @@ import { WorkPool } from '@travetto/worker';
 import { Env } from '@travetto/runtime';
 import { Ignore, Max, Min } from '@travetto/schema';
 
-import { RepoExecUtil } from './bin/exec.ts';
+import { RepoExecUtil } from './bin/exec';
 
 /**
  * Repo execution

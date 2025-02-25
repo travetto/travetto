@@ -1,7 +1,7 @@
 import { Class, DeepPartial } from '@travetto/runtime';
 
-import { ModelType, OptionalId } from '../types/model.ts';
-import { ModelBasicSupport } from './basic.ts';
+import { ModelType, OptionalId } from '../types/model';
+import { ModelBasicSupport } from './basic';
 
 /**
  * Support for simple indexed activity

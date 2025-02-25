@@ -1,12 +1,12 @@
 import { Suite } from '@travetto/test';
 
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
-import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
-import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
-import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
+import { ModelQuerySuite } from '@travetto/model-query/support/test/query';
+import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud';
+import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet';
+import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest';
 
-import { ElasticsearchModelConfig } from '../src/config.ts';
-import { ElasticsearchModelService } from '../src/service.ts';
+import { ElasticsearchModelConfig } from '../src/config';
+import { ElasticsearchModelService } from '../src/service';
 
 @Suite()
 export class ElasticsearchQuerySuite extends ModelQuerySuite {

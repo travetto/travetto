@@ -4,13 +4,13 @@ import vscode from 'vscode';
 import { ExecUtil } from '@travetto/runtime';
 import type { EmailCompiled } from '@travetto/email';
 
-import type { EditorResponse } from '@travetto/email-compiler/support/bin/types.ts';
+import type { EditorResponse } from '@travetto/email-compiler/support/bin/types';
 
-import { Activatible } from '../../../core/activation.ts';
-import { RunUtil } from '../../../core/run.ts';
-import { Workspace } from '../../../core/workspace.ts';
+import { Activatible } from '../../../core/activation';
+import { RunUtil } from '../../../core/run';
+import { Workspace } from '../../../core/workspace';
 
-import { BaseFeature } from '../../base.ts';
+import { BaseFeature } from '../../base';
 
 const isResource = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml|html)$/.test(file) && !/[.]compiled[.]/.test(file);
 const isTemplate = (f?: string): boolean => /[.]email[.]tsx$/.test(f ?? '');

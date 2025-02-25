@@ -1,7 +1,7 @@
 import { Get, Controller, Post, QueryParam, Request } from '@travetto/rest';
 import { Integer, Min } from '@travetto/schema';
 
-import { MockService } from './mock.ts';
+import { MockService } from './mock';
 
 @Controller('/simple')
 export class Simple {

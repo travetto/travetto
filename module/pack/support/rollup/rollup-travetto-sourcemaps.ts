@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 
 import { LoadResult, Plugin, PluginContext } from 'rollup';
 
-import { CoreRollupConfig } from '../../src/types.ts';
+import { CoreRollupConfig } from '../../src/types';
 
 function toString(error: unknown): string {
   return error instanceof Error ? error.stack ?? error.toString() : JSON.stringify(error);

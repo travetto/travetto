@@ -1,7 +1,7 @@
 import { Suite } from '@travetto/test';
 
-import { SchemaRestServerSuite } from '@travetto/rest/support/test/schema.ts';
-import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server.ts';
+import { SchemaRestServerSuite } from '@travetto/rest/support/test/schema';
+import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 
 @Suite()
 export class FastifyLambdaSchemaTest extends SchemaRestServerSuite {

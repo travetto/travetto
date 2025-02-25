@@ -1,8 +1,8 @@
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-import { Response } from '../../types.ts';
-import { NodeEntitySymbol } from '../../internal/symbol.ts';
+import { Response } from '../../types';
+import { NodeEntitySymbol } from '../../internal/symbol';
 
 /**
  * Base response object

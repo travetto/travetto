@@ -10,9 +10,9 @@ import busboy from '@fastify/busboy';
 import { Request, MimeUtil } from '@travetto/rest';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
-import { NodeEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
+import { NodeEntitySymbol } from '@travetto/rest/src/internal/symbol';
 
-import { RestUploadConfig } from './config.ts';
+import { RestUploadConfig } from './config';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 

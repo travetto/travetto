@@ -2,13 +2,13 @@
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { TimeUtil } from '@travetto/runtime';
 
-import { AuthenticatorTarget } from './internal/types.ts';
-import { Principal } from './types/principal.ts';
-import { Authenticator } from './types/authenticator.ts';
-import { Authorizer } from './types/authorizer.ts';
-import { AuthenticationError } from './types/error.ts';
-import { AuthContext } from './context.ts';
-import { AuthConfig } from './config.ts';
+import { AuthenticatorTarget } from './internal/types';
+import { Principal } from './types/principal';
+import { Authenticator } from './types/authenticator';
+import { Authorizer } from './types/authorizer';
+import { AuthenticationError } from './types/error';
+import { AuthContext } from './context';
+import { AuthConfig } from './config';
 
 @Injectable()
 export class AuthService {

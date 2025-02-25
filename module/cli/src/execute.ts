@@ -1,12 +1,12 @@
 import { ConsoleManager, Runtime, ShutdownManager } from '@travetto/runtime';
 
-import { HelpUtil } from './help.ts';
-import { CliCommandRegistry } from './registry.ts';
-import { CliCommandSchemaUtil } from './schema.ts';
-import { CliUnknownCommandError, CliValidationResultError } from './error.ts';
-import { CliParseUtil } from './parse.ts';
-import { CliUtil } from './util.ts';
-import { CliCommandShape } from './types.ts';
+import { HelpUtil } from './help';
+import { CliCommandRegistry } from './registry';
+import { CliCommandSchemaUtil } from './schema';
+import { CliUnknownCommandError, CliValidationResultError } from './error';
+import { CliParseUtil } from './parse';
+import { CliUtil } from './util';
+import { CliCommandShape } from './types';
 
 /**
  * Execution manager

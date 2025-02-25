@@ -1,8 +1,8 @@
 import { castTo, asFull } from '@travetto/runtime';
 
-import { Response, Request } from '../types.ts';
-import { RequestCore } from './internal/request.ts';
-import { ResponseCore } from './internal/response.ts';
+import { Response, Request } from '../types';
+import { RequestCore } from './internal/request';
+import { ResponseCore } from './internal/response';
 
 /**
  * Rest server utilities

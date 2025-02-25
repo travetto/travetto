@@ -1,5 +1,5 @@
 import { RootRegistry } from '@travetto/registry';
-import { Test } from './person-binding.ts';
+import { Test } from './person-binding';
 
 export async function main(): Promise<void> {
   await RootRegistry.init();

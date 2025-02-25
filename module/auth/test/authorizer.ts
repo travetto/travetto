@@ -2,9 +2,9 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { Authorizer } from '../src/types/authorizer.ts';
-import { Principal } from '../src/types/principal.ts';
-import { AuthenticationError } from '../src/types/error.ts';
+import { Authorizer } from '../src/types/authorizer';
+import { Principal } from '../src/types/principal';
+import { AuthenticationError } from '../src/types/error';
 
 const USERS: Record<string, Principal> = {
   a: {

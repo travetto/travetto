@@ -1,10 +1,10 @@
 import { castTo, Runtime } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { AllViewSymbol } from '@travetto/schema/src/internal/types.ts';
+import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 
-import { TestConsumerRegistry } from '../../src/consumer/registry.ts';
-import type { RunState } from '../../src/execute/types.ts';
+import { TestConsumerRegistry } from '../../src/consumer/registry';
+import type { RunState } from '../../src/execute/types';
 
 /**
  * Run tests given the input state

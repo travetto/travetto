@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { AppError, ExecUtil, RuntimeIndex } from '@travetto/runtime';
 
-import { ActiveShellCommand } from './shell.ts';
+import { ActiveShellCommand } from './shell';
 
 export class PackUtil {
   /**

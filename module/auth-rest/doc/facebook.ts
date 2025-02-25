@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
 
-import { SimpleAuthenticator } from './source.ts';
+import { SimpleAuthenticator } from './source';
 
 export const FB_AUTH = Symbol.for('auth-facebook');
 

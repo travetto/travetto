@@ -4,7 +4,7 @@ import {
   TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, DecoratorMeta, LiteralUtil, AnyType
 } from '@travetto/transformer';
 
-import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util.ts';
+import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util';
 
 const PARAM_DEC_IMPORT = '@travetto/rest/src/decorator/param.ts';
 const COMMON_DEC_IMPORT = '@travetto/rest/src/decorator/common.ts';

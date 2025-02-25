@@ -1,5 +1,5 @@
 import { Injectable } from '@travetto/di';
-import { DependentService } from './dep.ts';
+import { DependentService } from './dep';
 
 @Injectable()
 class CustomService {

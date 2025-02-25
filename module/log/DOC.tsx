@@ -1,11 +1,11 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { CommonLogger, CommonLoggerConfig } from './src/common.ts';
-import { FileLogAppender } from './src/appender/file.ts';
-import { ConsoleLogAppender } from './src/appender/console.ts';
-import { JsonLogFormatter } from './src/formatter/json.ts';
-import { LineLogFormatter } from './src/formatter/line.ts';
+import { CommonLogger, CommonLoggerConfig } from './src/common';
+import { FileLogAppender } from './src/appender/file';
+import { ConsoleLogAppender } from './src/appender/console';
+import { JsonLogFormatter } from './src/formatter/json';
+import { LineLogFormatter } from './src/formatter/line';
 
 const Logger = d.codeLink('Logger', 'src/types.ts', /interface Logger/);
 const LogDecorator = d.codeLink('Logger', 'src/types.ts', /interface LogDecorator/);

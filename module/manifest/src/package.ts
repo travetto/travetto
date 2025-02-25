@@ -2,12 +2,12 @@ import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 
-import { path } from './path.ts';
-import { ManifestFileUtil } from './file.ts';
+import { path } from './path';
+import { ManifestFileUtil } from './file';
 
-import { PackagePath, type Package, type PackageWorkspaceEntry } from './types/package.ts';
-import type { ManifestContext } from './types/context.ts';
-import type { NodePackageManager } from './types/common.ts';
+import { PackagePath, type Package, type PackageWorkspaceEntry } from './types/package';
+import type { ManifestContext } from './types/context';
+import type { NodePackageManager } from './types/common';
 
 /**
  * Utilities for querying, traversing and reading package.json files.

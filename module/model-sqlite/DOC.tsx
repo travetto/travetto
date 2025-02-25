@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
+import { ModelQueryTypes } from '@travetto/model-query/support/doc.support';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 

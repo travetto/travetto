@@ -9,11 +9,11 @@ import {
   ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport
 } from '@travetto/model';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry.ts';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed.ts';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage.ts';
-import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob.ts';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
 

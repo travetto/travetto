@@ -2,12 +2,12 @@ import ts from 'typescript';
 
 import { path, ManifestIndex, ManifestModuleUtil, IndexedFile } from '@travetto/manifest';
 
-import type { AnyType, TransformResolver } from './types.ts';
-import { TypeCategorize, TypeBuilder } from './builder.ts';
-import { VisitCache } from './cache.ts';
-import { DocUtil } from '../util/doc.ts';
-import { DeclarationUtil } from '../util/declaration.ts';
-import { transformCast } from '../types/shared.ts';
+import type { AnyType, TransformResolver } from './types';
+import { TypeCategorize, TypeBuilder } from './builder';
+import { VisitCache } from './cache';
+import { DocUtil } from '../util/doc';
+import { DeclarationUtil } from '../util/declaration';
+import { transformCast } from '../types/shared';
 
 /**
  * Implementation of TransformResolver

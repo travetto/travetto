@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { TransformerState, OnMethod, OnClass, AfterClass, CoreUtil, SystemUtil, Import, OnFunction } from '@travetto/transformer';
 
-import type { FunctionMetadataTag } from '../src/function.ts';
+import type { FunctionMetadataTag } from '../src/function';
 
 const RUNTIME_MOD = '@travetto/runtime';
 const RUNTIME_MOD_SRC = `${RUNTIME_MOD}/src`;

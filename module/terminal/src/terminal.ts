@@ -2,7 +2,7 @@ import tty from 'node:tty';
 
 import { Env, Util } from '@travetto/runtime';
 
-import { TerminalWriter } from './writer.ts';
+import { TerminalWriter } from './writer';
 
 type TerminalStreamingConfig = { minDelay?: number, outputStreamToMain?: boolean };
 type Coord = { x: number, y: number };

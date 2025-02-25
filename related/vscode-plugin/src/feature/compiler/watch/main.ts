@@ -3,12 +3,12 @@ import { ChildProcess, spawn } from 'node:child_process';
 
 import { Env, ExecUtil, Util } from '@travetto/runtime';
 
-import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types.ts';
+import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
 
-import { BaseFeature } from '../../base.ts';
-import { Log } from '../../../core/log.ts';
-import { Workspace } from '../../../core/workspace.ts';
-import { Activatible } from '../../../core/activation.ts';
+import { BaseFeature } from '../../base';
+import { Log } from '../../../core/log';
+import { Workspace } from '../../../core/workspace';
+import { Activatible } from '../../../core/activation';
 
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };

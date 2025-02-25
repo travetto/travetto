@@ -2,8 +2,8 @@ import { AstNode, Plugin } from 'rollup';
 import { walk } from 'estree-walker';
 import magicString from 'magic-string';
 
-import { GLOBAL_IMPORT } from './rollup-travetto-entry.ts';
-import { CoreRollupConfig } from '../../src/types.ts';
+import { GLOBAL_IMPORT } from './rollup-travetto-entry';
+import { CoreRollupConfig } from '../../src/types';
 
 type TNode = AstNode & { source?: { type: string }, callee?: TNode & { name?: string }, args?: TNode[] };
 

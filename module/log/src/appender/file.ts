@@ -5,7 +5,7 @@ import { Env, Runtime } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 
-import { LogAppender, LogEvent } from '../types.ts';
+import { LogAppender, LogEvent } from '../types';
 
 @Config('log')
 export class FileLogAppenderConfig {

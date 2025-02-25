@@ -5,7 +5,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { hasToJSON } from '@travetto/runtime';
 
-import { DBConfig } from '@travetto/config/doc/dbconfig.ts';
+import { DBConfig } from '@travetto/config/doc/dbconfig';
 
 util.inspect.defaultOptions.depth = 5;
 

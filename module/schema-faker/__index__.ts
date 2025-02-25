@@ -1,1 +1,1 @@
-export * from './src/faker.ts';
+export * from './src/faker';

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete } from '@travetto/rest';
 
-import { User, UserSearch } from './model.ts';
+import { User, UserSearch } from './model';
 
 /**
  * Relationships for the win

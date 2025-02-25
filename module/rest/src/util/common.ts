@@ -1,5 +1,5 @@
 import type { GetOption, SetOption } from 'cookies';
-import type { Request, Response } from '../types.ts';
+import type { Request, Response } from '../types';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };

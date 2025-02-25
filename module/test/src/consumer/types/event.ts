@@ -2,9 +2,9 @@ import { Writable } from 'node:stream';
 
 import { SerializeUtil } from '@travetto/worker';
 
-import type { TestEvent } from '../../model/event.ts';
-import type { TestConsumerShape } from '../types.ts';
-import { TestConsumer } from '../registry.ts';
+import type { TestEvent } from '../../model/event';
+import type { TestConsumerShape } from '../types';
+import { TestConsumer } from '../registry';
 
 /**
  * Streams all test events a JSON payload, in an nd-json format

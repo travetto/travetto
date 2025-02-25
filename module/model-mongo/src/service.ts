@@ -23,18 +23,18 @@ import {
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed.ts';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage.ts';
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query.ts';
-import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest.ts';
-import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry.ts';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry.ts';
-import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk.ts';
-import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob.ts';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
+import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
+import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
+import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 
-import { MongoUtil, PlainIdx, WithId } from './internal/util.ts';
-import { MongoModelConfig } from './config.ts';
+import { MongoUtil, PlainIdx, WithId } from './internal/util';
+import { MongoModelConfig } from './config';
 
 const ListIndexSymbol = Symbol.for('@travetto/mongo-model:list-index');
 

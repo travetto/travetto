@@ -5,9 +5,9 @@ import { Controller, Post, Request } from '@travetto/rest';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { BaseRestSuite } from '@travetto/rest/support/test/base.ts';
+import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
-import { Upload, UploadAll } from '../../src/decorator.ts';
+import { Upload, UploadAll } from '../../src/decorator';
 
 type FileUpload = { name: string, resource: string, type: string };
 

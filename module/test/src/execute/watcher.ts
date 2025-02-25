@@ -2,13 +2,13 @@ import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool } from '@travetto/worker';
 import { AsyncQueue, Runtime, RuntimeIndex, castTo, describeFunction } from '@travetto/runtime';
 
-import { SuiteRegistry } from '../registry/suite.ts';
-import { buildStandardTestManager } from '../worker/standard.ts';
-import { TestConsumerRegistry } from '../consumer/registry.ts';
-import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
-import { TestRun } from '../model/test.ts';
-import { RunnerUtil } from './util.ts';
-import { TestReadyEvent, TestRemovedEvent } from '../worker/types.ts';
+import { SuiteRegistry } from '../registry/suite';
+import { buildStandardTestManager } from '../worker/standard';
+import { TestConsumerRegistry } from '../consumer/registry';
+import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
+import { TestRun } from '../model/test';
+import { RunnerUtil } from './util';
+import { TestReadyEvent, TestRemovedEvent } from '../worker/types';
 /**
  * Test Watcher.
  *

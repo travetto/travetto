@@ -1,8 +1,8 @@
 import type { Class } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
-import type { RestInterceptor } from '../interceptor/types.ts';
-import type { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types.ts';
+import type { RestInterceptor } from '../interceptor/types';
+import type { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
 
 /**
  * Endpoint decorator for composition of routing logic

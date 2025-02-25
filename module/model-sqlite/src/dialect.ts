@@ -5,9 +5,9 @@ import { WhereClause } from '@travetto/model-query';
 import { castTo } from '@travetto/runtime';
 
 import { SQLModelConfig, SQLDialect } from '@travetto/model-sql';
-import { VisitStack } from '@travetto/model-sql/src/internal/util.ts';
+import { VisitStack } from '@travetto/model-sql/src/internal/util';
 
-import { SqliteConnection } from './connection.ts';
+import { SqliteConnection } from './connection';
 
 /**
  * Sqlite Dialect for the SQL Model Source

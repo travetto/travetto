@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
-import { RestUploadUtil } from '../src/util.ts';
+import { RestUploadUtil } from '../src/util';
 
 @Suite()
 export class BytesUtilTest {

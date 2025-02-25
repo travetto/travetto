@@ -1,9 +1,9 @@
-import type { } from './src/trv.ts';
-export * from './src/interceptors/context.ts';
-export * from './src/interceptors/login.ts';
-export * from './src/interceptors/logout.ts';
-export * from './src/interceptors/verify.ts';
-export * from './src/codec.ts';
-export * from './src/config.ts';
-export * from './src/decorator.ts';
-export * from './src/types.ts';
+import type { } from './src/trv';
+export * from './src/interceptors/context';
+export * from './src/interceptors/login';
+export * from './src/interceptors/logout';
+export * from './src/interceptors/verify';
+export * from './src/codec';
+export * from './src/config';
+export * from './src/decorator';
+export * from './src/types';

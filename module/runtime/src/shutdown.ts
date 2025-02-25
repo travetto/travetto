@@ -1,6 +1,6 @@
-import { Env } from './env.ts';
-import { Util } from './util.ts';
-import { TimeUtil } from './time.ts';
+import { Env } from './env';
+import { Util } from './util';
+import { TimeUtil } from './time';
 
 /**
  * Shutdown manager, allowing for listening for graceful shutdowns

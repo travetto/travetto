@@ -5,7 +5,7 @@ import { SessionService } from '@travetto/auth-session';
 import { Config } from '@travetto/config';
 import { AuthContextInterceptor } from '@travetto/auth-rest';
 
-import { SessionDataTarget } from '@travetto/auth-session/src/internal/types.ts';
+import { SessionDataTarget } from '@travetto/auth-session/src/internal/types';
 
 @Config('rest.session')
 class RestSessionConfig implements ManagedInterceptorConfig { }

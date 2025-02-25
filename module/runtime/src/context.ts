@@ -3,10 +3,10 @@ import path from 'node:path';
 
 import { type ManifestIndex, type ManifestContext, ManifestModuleUtil } from '@travetto/manifest';
 
-import { Env } from './env.ts';
-import { RuntimeIndex } from './manifest-index.ts';
-import { describeFunction } from './function.ts';
-import { castTo } from './types.ts';
+import { Env } from './env';
+import { RuntimeIndex } from './manifest-index';
+import { describeFunction } from './function';
+import { castTo } from './types';
 
 /** Constrained version of {@type ManifestContext} */
 class $Runtime {

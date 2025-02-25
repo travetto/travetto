@@ -1,8 +1,8 @@
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { LogEvent, LogFormatter } from '../types.ts';
-import { LogFormatUtil } from './util.ts';
+import { LogEvent, LogFormatter } from '../types';
+import { LogFormatUtil } from './util';
 
 @Config('log')
 export class JSONLogFormatterConfig {

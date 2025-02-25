@@ -2,7 +2,7 @@ import { ChildProcess } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
 
-import { castTo } from './types.ts';
+import { castTo } from './types';
 
 const MINUTE = (1000 * 60);
 

@@ -1,8 +1,8 @@
-import { JSXElement } from '@travetto/email-inky/jsx-runtime.ts';
+import { JSXElement } from '@travetto/email-inky/jsx-runtime';
 import { castTo } from '@travetto/runtime';
 
-import { RenderProvider, RenderState } from '../types.ts';
-import { RenderContext } from './context.ts';
+import { RenderProvider, RenderState } from '../types';
+import { RenderContext } from './context';
 
 const visit = ({ recurse }: RenderState<JSXElement, RenderContext>): Promise<string> => recurse();
 const ignore = async ({ recurse: _ }: RenderState<JSXElement, RenderContext>): Promise<string> => '';

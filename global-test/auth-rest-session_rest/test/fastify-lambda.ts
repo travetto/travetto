@@ -5,8 +5,8 @@ import { SessionModelSymbol } from '@travetto/auth-session';
 import { AwsLambdaRestApplication } from '@travetto/rest-aws-lambda';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
-import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server.ts';
-import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server.ts';
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server';
+import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test/server';
 
 const FASTIFY = Symbol.for('fastify-lambda');
 

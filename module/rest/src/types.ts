@@ -9,7 +9,7 @@ import {
   RequestLoggingSymbol, QueryExpandedSymbol
 } from './internal/symbol.ts';
 
-import type { RestInterceptor } from './interceptor/types.ts';
+import type { RestInterceptor } from './interceptor/types';
 
 export type HeaderMap = Record<string, (string | (() => string))>;
 export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';

@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { NullTransport } from './src/transport.ts';
-import { MailConfig } from './src/config.ts';
+import { NullTransport } from './src/transport';
+import { MailConfig } from './src/config';
 
 export const text = <>
   <c.StdHeader />

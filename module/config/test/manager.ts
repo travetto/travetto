@@ -6,10 +6,10 @@ import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
 
-import { ConfigurationService } from '../src/service.ts';
-import { Config } from '../src/decorator.ts';
-import { ConfigSource } from '../src/source/types.ts';
-import { MemoryConfigSource } from '../src/source/memory.ts';
+import { ConfigurationService } from '../src/service';
+import { Config } from '../src/decorator';
+import { ConfigSource } from '../src/source/types';
+import { MemoryConfigSource } from '../src/source/memory';
 
 @Config('ignore')
 class TestConfig {

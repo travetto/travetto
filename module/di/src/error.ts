@@ -1,5 +1,5 @@
 import { AppError } from '@travetto/runtime';
-import { ClassTarget } from './types.ts';
+import { ClassTarget } from './types';
 
 function getName(symbol: symbol): string {
   return symbol.toString().split(/[()]/g)[1];

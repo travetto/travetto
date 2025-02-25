@@ -1,6 +1,6 @@
 import type { Class, Primitive } from '@travetto/runtime';
 
-import { ModelType } from '../types/model.ts';
+import { ModelType } from '../types/model';
 
 type ValidFieldNames<T> = {
   [K in keyof T]:

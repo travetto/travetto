@@ -3,11 +3,11 @@ import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, Runtime, TimeUtil, Util } from '@travetto/runtime';
 
-import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/internal/service/common.ts';
+import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 
-import { CacheError } from './error.ts';
-import { CacheUtil } from './util.ts';
-import { CacheAware, CacheConfigSymbol, EvictConfigSymbol } from './internal/types.ts';
+import { CacheError } from './error';
+import { CacheUtil } from './util';
+import { CacheAware, CacheConfigSymbol, EvictConfigSymbol } from './internal/types';
 
 export const CacheModelSymbol = Symbol.for('@travetto/cache:model');
 

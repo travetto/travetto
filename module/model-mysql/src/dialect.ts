@@ -6,9 +6,9 @@ import { castTo, Class } from '@travetto/runtime';
 import { ModelType } from '@travetto/model';
 import { SQLModelConfig, SQLDialect } from '@travetto/model-sql';
 
-import { VisitStack } from '@travetto/model-sql/src/internal/util.ts';
+import { VisitStack } from '@travetto/model-sql/src/internal/util';
 
-import { MySQLConnection } from './connection.ts';
+import { MySQLConnection } from './connection';
 
 /**
  * MYSQL Dialect for the SQL Model Source

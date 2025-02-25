@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import timers from 'node:timers/promises';
 
-import { castTo } from './types.ts';
+import { castTo } from './types';
 
 type PromiseWithResolvers<T> = {
   resolve: (v: T) => void;

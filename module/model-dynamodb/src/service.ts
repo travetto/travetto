@@ -11,12 +11,12 @@ import {
   IndexNotSupported, OptionalId
 } from '@travetto/model';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry.ts';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed.ts';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage.ts';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
-import { DynamoDBModelConfig } from './config.ts';
+import { DynamoDBModelConfig } from './config';
 
 const EXP_ATTR = 'expires_at__';
 

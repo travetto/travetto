@@ -1,6 +1,6 @@
-import { Runtime } from './context.ts';
-import { Env } from './env.ts';
-import { FileLoader } from './file-loader.ts';
+import { Runtime } from './context';
+import { Env } from './env';
+import { FileLoader } from './file-loader';
 
 /**
  * Environment aware file loader

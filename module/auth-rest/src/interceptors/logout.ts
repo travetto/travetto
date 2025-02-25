@@ -3,7 +3,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
 
-import { AuthContextInterceptor } from './context.ts';
+import { AuthContextInterceptor } from './context';
 
 @Config('rest.auth.logout')
 export class RestAuthLogoutConfig extends ManagedInterceptorConfig { }

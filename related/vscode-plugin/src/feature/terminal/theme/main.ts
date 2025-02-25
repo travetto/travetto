@@ -2,9 +2,9 @@ import vscode from 'vscode';
 
 import { Env } from '@travetto/runtime';
 
-import { Activatible } from '../../../core/activation.ts';
-import { BaseFeature } from '../../base.ts';
-import { RunUtil } from '../../../core/run.ts';
+import { Activatible } from '../../../core/activation';
+import { BaseFeature } from '../../base';
+import { RunUtil } from '../../../core/run';
 
 @Activatible('@travetto/terminal', true)
 export class TerminalThemeFeature extends BaseFeature {

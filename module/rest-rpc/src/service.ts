@@ -6,8 +6,8 @@ import { ControllerRegistry } from '@travetto/rest';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { ManifestModuleUtil } from '@travetto/manifest';
 
-import { clientFactory } from '../support/client/rpc.ts';
-import { RestRpcClient, RestRpcConfig } from './config.ts';
+import { clientFactory } from '../support/client/rpc';
+import { RestRpcClient, RestRpcConfig } from './config';
 
 @Injectable()
 export class RestRpcClientGeneratorService implements AutoCreate {

@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { PassportAuthenticator } from './src/authenticator.ts';
+import { PassportAuthenticator } from './src/authenticator';
 
 export const text = <>
   <c.StdHeader />

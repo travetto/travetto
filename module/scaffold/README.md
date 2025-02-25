@@ -79,7 +79,7 @@ import { Inject } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
 
-import { Todo } from './model.ts';
+import { Todo } from './model';
 
 @Schema()
 class Query {

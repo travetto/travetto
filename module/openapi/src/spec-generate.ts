@@ -7,9 +7,9 @@ import type {
 import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
-import { AllViewSymbol } from '@travetto/schema/src/internal/types.ts';
+import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 
-import { ApiSpecConfig } from './config.ts';
+import { ApiSpecConfig } from './config';
 
 const DEFINITION = '#/components/schemas';
 

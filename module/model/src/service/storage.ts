@@ -1,7 +1,7 @@
 import { Class } from '@travetto/runtime';
 import { SchemaChange } from '@travetto/schema';
 
-import { ModelType } from '../types/model.ts';
+import { ModelType } from '../types/model';
 
 /**
  * This interface defines the behavior for dealing with the

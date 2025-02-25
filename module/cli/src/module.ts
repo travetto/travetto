@@ -1,7 +1,7 @@
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import type { IndexedModule } from '@travetto/manifest';
 
-import { CliScmUtil } from './scm.ts';
+import { CliScmUtil } from './scm';
 
 type ModuleGraphEntry = { children: Set<string>, name: string, active: Set<string>, parents?: string[] };
 

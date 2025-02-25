@@ -1,4 +1,4 @@
-import { WhereClauseRaw, RetainFields } from './where-clause.ts';
+import { WhereClauseRaw, RetainFields } from './where-clause';
 
 type SelectClauseRaw<T> = {
   [P in keyof T]?:

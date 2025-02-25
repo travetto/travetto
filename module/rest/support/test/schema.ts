@@ -4,9 +4,9 @@ import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry, Validator } from '@travetto/schema';
 import { Controller, Redirect, Post, Get, MethodOrAll, ControllerRegistry } from '@travetto/rest';
 
-import { BaseRestSuite } from './base.ts';
-import { PathParam, QueryParam } from '../../src/decorator/param.ts';
-import { Response } from '../../src/types.ts';
+import { BaseRestSuite } from './base';
+import { PathParam, QueryParam } from '../../src/decorator/param';
+import { Response } from '../../src/types';
 
 type Errors = { details: { errors: { path: string }[] }, message: string };
 

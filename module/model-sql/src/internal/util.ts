@@ -2,9 +2,9 @@ import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
-import { AllViewSymbol } from '@travetto/schema/src/internal/types.ts';
+import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 
-import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types.ts';
+import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
 
 const TableSymbol = Symbol.for('@travetto/model-sql:table');
 

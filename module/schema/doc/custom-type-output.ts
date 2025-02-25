@@ -1,7 +1,7 @@
 import { RootRegistry } from '@travetto/registry';
 import { SchemaValidator } from '@travetto/schema';
 
-import { LocationAware } from './custom-type-usage.ts';
+import { LocationAware } from './custom-type-usage';
 
 export async function main(): Promise<void> {
   await RootRegistry.init();

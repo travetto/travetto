@@ -3,7 +3,7 @@ import util from 'node:util';
 import { RootRegistry } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 import { DependencyRegistry } from '@travetto/di';
-import { DBConfig } from '@travetto/config/doc/dbconfig.ts';
+import { DBConfig } from '@travetto/config/doc/dbconfig';
 
 util.inspect.defaultOptions.depth = 5;
 

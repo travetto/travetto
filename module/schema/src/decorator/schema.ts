@@ -1,9 +1,9 @@
 import { Any, castTo, Class, ClassInstance, DeepPartial } from '@travetto/runtime';
 
-import { BindUtil } from '../bind-util.ts';
-import { SchemaRegistry } from '../service/registry.ts';
-import { ClassConfig, ViewFieldsConfig } from '../service/types.ts';
-import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
+import { BindUtil } from '../bind-util';
+import { SchemaRegistry } from '../service/registry';
+import { ClassConfig, ViewFieldsConfig } from '../service/types';
+import { MethodValidatorFn, ValidatorFn } from '../validate/types';
 
 /**
  * Register a class as a Schema

@@ -4,10 +4,10 @@ import path from 'node:path';
 import { Runtime } from '@travetto/runtime';
 import { cliTpl } from '@travetto/cli';
 
-import { ActiveShellCommand } from './shell.ts';
-import { DockerPackConfig, DockerPackFactoryModule } from '../../src/types.ts';
-import { PackOperation } from './operation.ts';
-import { PackUtil } from './util.ts';
+import { ActiveShellCommand } from './shell';
+import { DockerPackConfig, DockerPackFactoryModule } from '../../src/types';
+import { PackOperation } from './operation';
+import { PackUtil } from './util';
 
 export class DockerPackOperation {
 

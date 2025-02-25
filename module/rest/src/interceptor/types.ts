@@ -1,7 +1,7 @@
 import type { Any, Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
-import type { RouteConfig, Filter } from '../types.ts';
+import type { RouteConfig, Filter } from '../types';
 
 export type RouteApplies = (route: RouteConfig, config?: { basePath: string }) => boolean;
 

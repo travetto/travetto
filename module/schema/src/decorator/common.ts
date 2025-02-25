@@ -1,7 +1,7 @@
 import { Class, ClassInstance } from '@travetto/runtime';
 
-import { DescribableConfig } from '../service/types.ts';
-import { SchemaRegistry } from '../service/registry.ts';
+import { DescribableConfig } from '../service/types';
+import { SchemaRegistry } from '../service/registry';
 
 function isClassInstance(o: Class | ClassInstance, property?: string): o is ClassInstance {
   return !!property;

@@ -4,8 +4,8 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { renderJSX } from './util.ts';
-import { Center, Item, Menu } from '../src/components.ts';
+import { renderJSX } from './util';
+import { Center, Item, Menu } from '../src/components';
 
 @Suite()
 export class CenterComponentTest {

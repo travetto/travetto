@@ -2,17 +2,17 @@ import { AssertionError } from 'node:assert';
 
 import { Env, TimeUtil, Runtime, castTo } from '@travetto/runtime';
 
-import { SuiteRegistry } from '../registry/suite.ts';
-import { TestConfig, TestResult, TestRun } from '../model/test.ts';
-import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite.ts';
-import { TestConsumerShape } from '../consumer/types.ts';
-import { AssertCheck } from '../assert/check.ts';
-import { AssertCapture } from '../assert/capture.ts';
-import { ConsoleCapture } from './console.ts';
-import { TestPhaseManager } from './phase.ts';
-import { AssertUtil } from '../assert/util.ts';
-import { Barrier } from './barrier.ts';
-import { ExecutionError } from './error.ts';
+import { SuiteRegistry } from '../registry/suite';
+import { TestConfig, TestResult, TestRun } from '../model/test';
+import { SuiteConfig, SuiteFailure, SuiteResult } from '../model/suite';
+import { TestConsumerShape } from '../consumer/types';
+import { AssertCheck } from '../assert/check';
+import { AssertCapture } from '../assert/capture';
+import { ConsoleCapture } from './console';
+import { TestPhaseManager } from './phase';
+import { AssertUtil } from '../assert/util';
+import { Barrier } from './barrier';
+import { ExecutionError } from './error';
 
 const TEST_TIMEOUT = TimeUtil.fromValue(Env.TRV_TEST_TIMEOUT.val) ?? 5000;
 

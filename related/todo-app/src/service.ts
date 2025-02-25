@@ -1,7 +1,7 @@
 import { MongoModelService } from '@travetto/model-mongo';
 import { Injectable, Inject } from '@travetto/di';
 
-import { Todo, TodoSearch } from './model.ts';
+import { Todo, TodoSearch } from './model';
 
 @Injectable()
 export class TodoService {

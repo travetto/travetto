@@ -1,9 +1,9 @@
 import { Class, AppError } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { EndpointConfig } from '../registry/types.ts';
-import { ParamConfig, Request, Response } from '../types.ts';
-import { MissingParamSymbol, RequestParamsSymbol, QueryExpandedSymbol } from '../internal/symbol.ts';
+import { EndpointConfig } from '../registry/types';
+import { ParamConfig, Request, Response } from '../types';
+import { MissingParamSymbol, RequestParamsSymbol, QueryExpandedSymbol } from '../internal/symbol';
 
 export type ExtractFn = (c: ParamConfig, req: Request, res: Response, schema: FieldConfig) => unknown;
 

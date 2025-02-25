@@ -4,9 +4,9 @@ import { stringify } from 'yaml';
 
 import { RuntimeIndex } from '@travetto/runtime';
 
-import type { TestEvent } from '../../model/event.ts';
-import type { SuitesSummary, TestConsumerShape } from '../types.ts';
-import { TestConsumer } from '../registry.ts';
+import type { TestEvent } from '../../model/event';
+import type { SuitesSummary, TestConsumerShape } from '../types';
+import { TestConsumer } from '../registry';
 
 /**
  * Xunit consumer, compatible with JUnit formatters

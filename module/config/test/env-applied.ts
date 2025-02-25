@@ -5,7 +5,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { Env } from '@travetto/runtime';
 
-import { NameConfig, TestConfig } from './shared.ts';
+import { NameConfig, TestConfig } from './shared';
 
 @Suite()
 export class EnvConfigTest {

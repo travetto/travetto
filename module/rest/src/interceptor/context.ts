@@ -3,10 +3,10 @@ import { Config } from '@travetto/config';
 import { AsyncContext, AsyncContextValue } from '@travetto/context';
 import { Request, Response } from '@travetto/rest';
 
-import { FilterContext, FilterNext } from '../types.ts';
+import { FilterContext, FilterNext } from '../types';
 
-import { ManagedInterceptorConfig, RestInterceptor } from './types.ts';
-import { BodyParseInterceptor } from './body-parse.ts';
+import { ManagedInterceptorConfig, RestInterceptor } from './types';
+import { BodyParseInterceptor } from './body-parse';
 
 @Config('rest.context')
 class RestAsyncContextConfig extends ManagedInterceptorConfig { }

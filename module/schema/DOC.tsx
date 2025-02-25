@@ -8,9 +8,9 @@ import {
   SubTypeField
 } from './src/decorator/field.ts';
 
-import { Schema } from './src/decorator/schema.ts';
-import { Describe } from './src/decorator/common.ts';
-import { DataUtil } from './src/data.ts';
+import { Schema } from './src/decorator/schema';
+import { Describe } from './src/decorator/common';
+import { DataUtil } from './src/data';
 
 export const text = <>
   <c.StdHeader />

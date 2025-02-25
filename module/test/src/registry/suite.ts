@@ -1,8 +1,8 @@
 import { Class, Runtime, classConstruct, describeFunction, asFull } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
-import { SuiteConfig } from '../model/suite.ts';
-import { TestConfig, TestRun } from '../model/test.ts';
+import { SuiteConfig } from '../model/suite';
+import { TestConfig, TestRun } from '../model/test';
 
 /**
  * Test Suite registry

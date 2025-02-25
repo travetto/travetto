@@ -4,8 +4,8 @@ import http from 'node:http';
 import { Env } from '@travetto/runtime';
 import type { } from '@travetto/cli';
 
-import { TargetEvent } from './types.ts';
-import { Log } from './log.ts';
+import { TargetEvent } from './types';
+import { Log } from './log';
 
 export class IpcSupport {
 

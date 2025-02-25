@@ -1,9 +1,9 @@
 import vscode from 'vscode';
 
-import { IpcSupport } from './ipc.ts';
-import { ActivationTarget, TargetEvent } from './types.ts';
-import { Workspace } from './workspace.ts';
-import { Log } from './log.ts';
+import { IpcSupport } from './ipc';
+import { ActivationTarget, TargetEvent } from './types';
+import { Workspace } from './workspace';
+import { Log } from './log';
 
 interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {
   new(module: string, command?: string): T;

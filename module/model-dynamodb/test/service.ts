@@ -1,13 +1,13 @@
 import { Suite } from '@travetto/test';
 
-import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
-import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
-import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
-import { ModelIndexedSuite } from '@travetto/model/support/test/indexed.ts';
-import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud';
+import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
+import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
+import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 
-import { DynamoDBModelConfig } from '../src/config.ts';
-import { DynamoDBModelService } from '../src/service.ts';
+import { DynamoDBModelConfig } from '../src/config';
+import { DynamoDBModelService } from '../src/service';
 
 @Suite()
 export class DynamoDBBasicSuite extends ModelBasicSuite {

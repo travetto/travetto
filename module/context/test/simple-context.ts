@@ -4,9 +4,9 @@ import timers from 'node:timers/promises';
 
 import { BeforeEach, Suite, Test } from '@travetto/test';
 
-import { AsyncContext } from '../src/service.ts';
-import { WithAsyncContext } from '../src/decorator.ts';
-import { AsyncContextValue } from '../src/value.ts';
+import { AsyncContext } from '../src/service';
+import { WithAsyncContext } from '../src/decorator';
+import { AsyncContextValue } from '../src/value';
 
 @Suite()
 class VerifyContext {

@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { Links } from './support/doc.support.ts';
+import { Links } from './support/doc.support';
 
 export const text = <>
   <c.StdHeader />

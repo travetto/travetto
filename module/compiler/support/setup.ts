@@ -4,9 +4,9 @@ import path from 'node:path';
 
 import type { DeltaEvent, ManifestContext, Package } from '@travetto/manifest';
 
-import { Log } from './log.ts';
-import { CommonUtil } from './util.ts';
-import { TypescriptUtil } from './ts-util.ts';
+import { Log } from './log';
+import { CommonUtil } from './util';
+import { TypescriptUtil } from './ts-util';
 
 type ModFile = { input: string, output: string, stale: boolean };
 
@@ -16,6 +16,7 @@ const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math
 const REQ = createRequire(path.resolve('node_modules')).resolve.bind(null);
 
 const SOURCE_EXT_RE = /[.][cm]?[tj]s$/;
+const BARE_IMPORT_RE = /^(@[^/]+[/])?[^.][^@/]+$/;
 const OUTPUT_EXT = '.js';
 
 /**
@@ -58,7 +59,7 @@ export class CompilerSetup {
       const text = (await fs.readFile(sourceFile, 'utf8'))
         .replace(/from ['"](([.]+|@travetto)[/][^']+)['"]/g, (_, clause, m) => {
           const s = this.#sourceToOutputExt(clause);
-          const suf = s.endsWith(OUTPUT_EXT) ? '' : `/__index__${OUTPUT_EXT}`;
+          const suf = s.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(clause) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
           const pre = m === '@travetto' ? `${compilerOut}/` : '';
           return `from '${pre}${s}${suf}'`;
         });
@@ -68,6 +69,7 @@ export class CompilerSetup {
         ...await TypescriptUtil.getCompilerOptions(ctx),
         sourceMap: false,
         inlineSourceMap: true,
+        importHelpers: true,
       }, sourceFile);
       await CommonUtil.writeTextFile(outputFile, content);
     } else if (type === 'package-json') {

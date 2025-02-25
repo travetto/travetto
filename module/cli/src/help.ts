@@ -2,12 +2,12 @@ import util from 'node:util';
 
 import { castKey, castTo, Primitive } from '@travetto/runtime';
 
-import { cliTpl } from './color.ts';
-import { CliCommandShape } from './types.ts';
-import { CliCommandRegistry } from './registry.ts';
-import { CliCommandSchemaUtil } from './schema.ts';
-import { CliValidationResultError } from './error.ts';
-import { isBoolFlag } from './parse.ts';
+import { cliTpl } from './color';
+import { CliCommandShape } from './types';
+import { CliCommandRegistry } from './registry';
+import { CliCommandSchemaUtil } from './schema';
+import { CliValidationResultError } from './error';
+import { isBoolFlag } from './parse';
 
 const validationSourceMap = {
   custom: '',

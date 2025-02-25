@@ -101,8 +101,8 @@ The framework provides two simple base classes that assist with existing pattern
 
 **Code: Memory Provider**
 ```typescript
-import { ConfigData } from '../parser/types.ts';
-import { ConfigSource, ConfigSpec } from './types.ts';
+import { ConfigData } from '../parser/types';
+import { ConfigSource, ConfigSpec } from './types';
 
 /**
  * Meant to be instantiated and provided as a unique config source
@@ -122,7 +122,7 @@ export class MemoryConfigSource implements ConfigSource {
 
 **Code: Environment JSON Provider**
 ```typescript
-import { ConfigSource, ConfigSpec } from './types.ts';
+import { ConfigSource, ConfigSpec } from './types';
 
 /**
  * Represents the environment mapped data as a JSON blob

@@ -27,7 +27,7 @@ Every external framework integration relies upon the [Authenticator](https://git
 **Code: Structure for the Identity Source**
 ```typescript
 import { AnyMap } from '@travetto/runtime';
-import { Principal } from './principal.ts';
+import { Principal } from './principal';
 
 /**
  * Represents the general shape of additional login context, usually across multiple calls
@@ -92,7 +92,7 @@ The provider must be registered with a custom symbol to be used within the frame
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 
-import { SimpleAuthenticator } from './source.ts';
+import { SimpleAuthenticator } from './source';
 
 export const FB_AUTH = Symbol.for('auth-facebook');
 
@@ -122,8 +122,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { FilterContext, RestCommonUtil } from '@travetto/rest';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
-import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
-import { RestAuthConfig } from './config.ts';
+import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types';
+import { RestAuthConfig } from './config';
 
 /**
  * JWT Principal codec
@@ -240,7 +240,7 @@ This implementation is not suitable for production, but shows the general patter
 import { Controller, Get, Redirect, Request } from '@travetto/rest';
 import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 
-import { FB_AUTH } from './facebook.ts';
+import { FB_AUTH } from './facebook';
 
 @Controller('/auth')
 export class SampleAuth {

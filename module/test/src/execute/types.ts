@@ -1,4 +1,4 @@
-import { TestRun } from '../model/test.ts';
+import { TestRun } from '../model/test';
 
 /**
  * Run state

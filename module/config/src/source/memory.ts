@@ -1,5 +1,5 @@
-import { ConfigData } from '../parser/types.ts';
-import { ConfigSource, ConfigSpec } from './types.ts';
+import { ConfigData } from '../parser/types';
+import { ConfigSource, ConfigSpec } from './types';
 
 /**
  * Meant to be instantiated and provided as a unique config source

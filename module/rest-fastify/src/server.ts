@@ -5,9 +5,9 @@ import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 import { RestConfig, RouteConfig, RestServer, ServerHandle } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
 
-import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
+import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
 
-import { FastifyServerUtil } from './internal/util.ts';
+import { FastifyServerUtil } from './internal/util';
 
 function isHttps(ssl: boolean | undefined, cfg: https.ServerOptions): cfg is FastifyHttpsOptions<https.Server> {
   return !!ssl;

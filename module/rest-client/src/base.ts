@@ -5,10 +5,10 @@ import { BinaryUtil, Class, Runtime, Util, castTo, describeFunction } from '@tra
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, ControllerVisitUtil, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 
-import { AllViewSymbol, UnknownType } from '@travetto/schema/src/internal/types.ts';
+import { AllViewSymbol, UnknownType } from '@travetto/schema/src/internal/types';
 
-import { ParamConfig } from './shared/types.ts';
-import type { EndpointDesc, Imp, RenderContent } from './types.ts';
+import { ParamConfig } from './shared/types';
+import type { EndpointDesc, Imp, RenderContent } from './types';
 
 export const TYPE_MAPPING = new Map<Function, string>([
   [String, 'string'],

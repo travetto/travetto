@@ -1,9 +1,9 @@
 import { Class, Runtime } from '@travetto/runtime';
 import { SchemaChangeListener } from '@travetto/schema';
 
-import { ModelRegistry } from '../../registry/model.ts';
-import { ModelStorageSupport } from '../../service/storage.ts';
-import { ModelType } from '../../types/model.ts';
+import { ModelRegistry } from '../../registry/model';
+import { ModelStorageSupport } from '../../service/storage';
+import { ModelType } from '../../types/model';
 
 /**
  * Model storage util

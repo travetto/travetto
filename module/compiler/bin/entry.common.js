@@ -5,6 +5,7 @@ const path = require('node:path');
 
 const COMP_MOD = '@travetto/compiler';
 const SOURCE_EXT_RE = /[.][cm]?[tj]sx?$/;
+const BARE_IMPORT_RE = /^(@[^/]+[/])?[^.][^@/]+$/;
 const OUTPUT_EXT = '.js';
 
 async function writeIfStale(src = '', dest = '', transform = async (x = '') => x) {
@@ -22,6 +23,9 @@ async function transpile(content = '', esm = true, full = true) {
   return ts.transpile(content, {
     target: ts.ScriptTarget.ES2022,
     module: esm ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS,
+    importHelpers: true,
+    sourceMap: false,
+    inlineSourceMap: true,
     allowImportingTsExtensions: true,
     ...(full ? { esModuleInterop: true, allowSyntheticDefaultImports: true } : {})
   });
@@ -45,7 +49,7 @@ async function getContext() {
     cleanImports: (t = '') => t
       .replace(/from ['"]((@travetto|[.]+)[^'"]+)['"]/g, (_, v, m) => {
         const s = (m === '@travetto' ? destPath(v) : v).replace(SOURCE_EXT_RE, OUTPUT_EXT);
-        const suf = s.endsWith(OUTPUT_EXT) ? '' : `/__index__${OUTPUT_EXT}`;
+        const suf = s.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(v) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
         return `from '${s}${suf}'`;
       }),
     loadMain: () => import(destPath(`${COMP_MOD}/support/entry.main.ts`))

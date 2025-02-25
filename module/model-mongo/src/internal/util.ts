@@ -7,9 +7,9 @@ import type { DistanceUnit, PageableModelQuery, WhereClause } from '@travetto/mo
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
 
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query.ts';
-import { AllViewSymbol } from '@travetto/schema/src/internal/types.ts';
-import { PointImpl } from '@travetto/model-query/src/internal/model/point.ts';
+import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
+import { AllViewSymbol } from '@travetto/schema/src/internal/types';
+import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 
 type IdxCfg = CreateIndexesOptions;
 

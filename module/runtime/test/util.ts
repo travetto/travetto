@@ -2,8 +2,8 @@ import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
 
-import { AsyncQueue } from '../src/queue.ts';
-import { Util } from '../src/util.ts';
+import { AsyncQueue } from '../src/queue';
+import { Util } from '../src/util';
 
 @Suite()
 export class UtilTest {

@@ -1,8 +1,8 @@
 import { CliCommand } from '@travetto/cli';
 
-import { BaseModelCommand } from './base-command.ts';
-import { ModelExportUtil } from './bin/export.ts';
-import { ModelCandidateUtil } from './bin/candidate.ts';
+import { BaseModelCommand } from './base-command';
+import { ModelExportUtil } from './bin/export';
+import { ModelCandidateUtil } from './bin/candidate';
 
 /**
  * Exports model schemas

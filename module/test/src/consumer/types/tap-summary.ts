@@ -1,14 +1,14 @@
 import { Util, AsyncQueue } from '@travetto/runtime';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 
-import type { TestEvent } from '../../model/event.ts';
-import type { TestResult } from '../../model/test.ts';
+import type { TestEvent } from '../../model/event';
+import type { TestResult } from '../../model/test';
 
-import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types.ts';
-import { TestConsumer } from '../registry.ts';
+import type { SuitesSummary, TestConsumerShape, TestRunState } from '../types';
+import { TestConsumer } from '../registry';
 
-import { TapEmitter } from './tap.ts';
-import { CONSOLE_ENHANCER, TestResultsEnhancer } from '../enhancer.ts';
+import { TapEmitter } from './tap';
+import { CONSOLE_ENHANCER, TestResultsEnhancer } from '../enhancer';
 
 type Result = {
   key: string;

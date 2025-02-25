@@ -1,8 +1,8 @@
 import { Class } from '@travetto/runtime';
 
-import { Registry } from '../registry.ts';
-import { ClassSource } from '../source/class-source.ts';
-import { ChangeEvent } from '../types.ts';
+import { Registry } from '../registry';
+import { ClassSource } from '../source/class-source';
+import { ChangeEvent } from '../types';
 
 /**
  * The root registry that controls all registries

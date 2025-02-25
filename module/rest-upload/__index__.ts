@@ -1,4 +1,4 @@
-import type { } from './src/trv.ts';
-export * from './src/decorator.ts';
-export * from './src/config.ts';
-export * from './src/util.ts';
+import type { } from './src/trv';
+export * from './src/decorator';
+export * from './src/config';
+export * from './src/util';

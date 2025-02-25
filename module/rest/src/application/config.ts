@@ -3,7 +3,7 @@ import os from 'node:os';
 import { Config, EnvVar } from '@travetto/config';
 import { Required } from '@travetto/schema';
 
-import { RestSslConfig } from './ssl.ts';
+import { RestSslConfig } from './ssl';
 
 /**
  * Restful configuration

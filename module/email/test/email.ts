@@ -2,10 +2,10 @@ import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { InjectableSuite } from '@travetto/di/support/test/suite';
 
-import { MailService } from '../src/service.ts';
-import { MailTransport, NullTransport } from '../src/transport.ts';
+import { MailService } from '../src/service';
+import { MailTransport, NullTransport } from '../src/transport';
 
 class Config {
   @InjectableFactory()

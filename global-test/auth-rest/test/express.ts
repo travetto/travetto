@@ -3,7 +3,7 @@ import { ExpressRestServer } from '@travetto/rest-express';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
 
-import { AuthRestServerSuite } from '@travetto/auth-rest/support/test/server.ts';
+import { AuthRestServerSuite } from '@travetto/auth-rest/support/test/server';
 
 const EXPRESS = Symbol.for('express');
 

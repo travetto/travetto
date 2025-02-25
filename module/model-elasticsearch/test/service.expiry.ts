@@ -1,9 +1,9 @@
 import { Suite } from '@travetto/test';
 
-import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
+import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 
-import { ElasticsearchModelConfig } from '../src/config.ts';
-import { ElasticsearchModelService } from '../src/service.ts';
+import { ElasticsearchModelConfig } from '../src/config';
+import { ElasticsearchModelService } from '../src/service';
 
 @Suite()
 export class ElasticsearchExpirySuite extends ModelExpirySuite {

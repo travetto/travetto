@@ -3,11 +3,11 @@ import fs from 'node:fs/promises';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
 
-import { RenderProvider } from '../types.ts';
-import { c, getComponentName } from '../jsx.ts';
-import { MOD_MAPPING } from '../mapping/mod-mapping.ts';
-import { LIB_MAPPING } from '../mapping/lib-mapping.ts';
-import { RenderContext } from './context.ts';
+import { RenderProvider } from '../types';
+import { c, getComponentName } from '../jsx';
+import { MOD_MAPPING } from '../mapping/mod-mapping';
+import { LIB_MAPPING } from '../mapping/lib-mapping';
+import { RenderContext } from './context';
 
 export const Markdown: RenderProvider<RenderContext> = {
   ext: 'md',

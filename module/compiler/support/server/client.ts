@@ -4,10 +4,10 @@ import http, { Agent } from 'node:http';
 
 import { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerEvent, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types.ts';
-import type { LogShape } from '../log.ts';
-import { CommonUtil } from '../util.ts';
-import { ProcessHandle } from './process-handle.ts';
+import type { CompilerEvent, CompilerEventType, CompilerServerInfo, CompilerStateType } from '../types';
+import type { LogShape } from '../log';
+import { CommonUtil } from '../util';
+import { ProcessHandle } from './process-handle';
 
 type FetchEventsConfig<T> = {
   signal?: AbortSignal;

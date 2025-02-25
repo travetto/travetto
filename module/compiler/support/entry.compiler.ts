@@ -1,3 +1,3 @@
 // @trv-no-transform
-import { Compiler } from '../src/compiler.ts';
+import { Compiler } from '../src/compiler';
 Compiler.main();

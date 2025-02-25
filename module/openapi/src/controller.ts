@@ -3,7 +3,7 @@ import { stringify } from 'yaml';
 import { ConfigureInterceptor, Controller, CorsInterceptor, Get, SetHeaders, Undocumented } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 
-import { OpenApiService } from './service.ts';
+import { OpenApiService } from './service';
 
 /**
  * Basic controller for surfacing the api spec

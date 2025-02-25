@@ -2,7 +2,7 @@ import { InjectableFactory } from '@travetto/di';
 import { ModelAuthService } from '@travetto/auth-model';
 import { ModelCrudSupport } from '@travetto/model';
 
-import { User } from './model.ts';
+import { User } from './model';
 
 class AuthConfig {
   @InjectableFactory()

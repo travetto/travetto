@@ -4,9 +4,9 @@ import timers from 'node:timers/promises';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { Schema, Validator } from '../src/decorator/schema.ts';
-import { SchemaValidator } from '../src/validate/validator.ts';
-import { ValidationResultError } from '../src/validate/error.ts';
+import { Schema, Validator } from '../src/decorator/schema';
+import { SchemaValidator } from '../src/validate/validator';
+import { ValidationResultError } from '../src/validate/error';
 
 @Schema()
 @Validator((user: User) => {

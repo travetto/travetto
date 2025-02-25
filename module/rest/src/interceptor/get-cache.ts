@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { RouteConfig, FilterContext, FilterNext } from '../types.ts';
+import { RouteConfig, FilterContext, FilterNext } from '../types';
 
-import { ManagedInterceptorConfig, RestInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { ManagedInterceptorConfig, RestInterceptor } from './types';
+import { SerializeInterceptor } from './serialize';
 
 @Config('rest.getCache')
 export class RestGetCacheConfig extends ManagedInterceptorConfig { }

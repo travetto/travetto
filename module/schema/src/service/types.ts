@@ -1,7 +1,7 @@
 import { Any, Class, Primitive } from '@travetto/runtime';
 
-import { AllViewSymbol } from '../internal/types.ts';
-import { MethodValidatorFn, ValidatorFn } from '../validate/types.ts';
+import { AllViewSymbol } from '../internal/types';
+import { MethodValidatorFn, ValidatorFn } from '../validate/types';
 
 export type ClassList = Class | [Class];
 

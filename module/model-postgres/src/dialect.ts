@@ -5,9 +5,9 @@ import { ModelType } from '@travetto/model';
 import { castTo, Class } from '@travetto/runtime';
 import { SQLDialect, SQLModelConfig } from '@travetto/model-sql';
 
-import { SQLUtil, VisitStack } from '@travetto/model-sql/src/internal/util.ts';
+import { SQLUtil, VisitStack } from '@travetto/model-sql/src/internal/util';
 
-import { PostgreSQLConnection } from './connection.ts';
+import { PostgreSQLConnection } from './connection';
 
 /**
  * Postgresql Dialect for the SQL Model Source

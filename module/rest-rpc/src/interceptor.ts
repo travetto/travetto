@@ -6,9 +6,9 @@ import {
   RestInterceptor, SerializeInterceptor, SerializeUtil
 } from '@travetto/rest';
 
-import { MissingParamSymbol, RequestParamsSymbol, RequestLoggingSymbol } from '@travetto/rest/src/internal/symbol.ts';
+import { MissingParamSymbol, RequestParamsSymbol, RequestLoggingSymbol } from '@travetto/rest/src/internal/symbol';
 
-import { RestRpcConfig } from './config.ts';
+import { RestRpcConfig } from './config';
 
 /**
  * Exposes functionality for RPC behavior

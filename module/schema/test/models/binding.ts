@@ -1,6 +1,6 @@
 import { Schema, View, Field, Float, Integer, Alias, Url, Required } from '@travetto/schema';
 
-import { Address } from './address.ts';
+import { Address } from './address';
 
 @Schema()
 export class SuperAddress extends Address {

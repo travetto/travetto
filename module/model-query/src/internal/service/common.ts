@@ -1,9 +1,9 @@
 import { hasFunction } from '@travetto/runtime';
 
-import type { ModelQueryCrudSupport } from '../../service/crud.ts';
-import type { ModelQueryFacetSupport } from '../../service/facet.ts';
-import type { ModelQuerySupport } from '../../service/query.ts';
-import type { ModelQuerySuggestSupport } from '../../service/suggest.ts';
+import type { ModelQueryCrudSupport } from '../../service/crud';
+import type { ModelQueryFacetSupport } from '../../service/facet';
+import type { ModelQuerySupport } from '../../service/query';
+import type { ModelQuerySuggestSupport } from '../../service/suggest';
 
 export class ModelQuerySupportTarget { }
 export class ModelQueryCrudSupportTarget { }

@@ -5,7 +5,7 @@ import { RestApplication, RestServer } from '@travetto/rest';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { SessionModelSymbol } from '@travetto/auth-session';
 
-import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server.ts';
+import { AuthRestSessionServerSuite } from '@travetto/auth-rest-session/support/test/server';
 
 const FASTIFY = Symbol.for('fastify');
 

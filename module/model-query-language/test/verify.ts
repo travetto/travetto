@@ -7,7 +7,7 @@ import { Schema } from '@travetto/schema';
 import { Model, ModelType } from '@travetto/model';
 import { QueryVerifier, Query, ModelQuery } from '@travetto/model-query';
 
-import { QueryLanguageParser } from '../src/parser.ts';
+import { QueryLanguageParser } from '../src/parser';
 
 @Schema()
 class Preferences {

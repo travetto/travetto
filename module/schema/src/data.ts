@@ -1,7 +1,7 @@
 import { isNumberObject as isNum, isBooleanObject as isBool, isStringObject as isStr } from 'node:util/types';
 
 import { asConstructable, castTo, Class, asFull, TypedObject } from '@travetto/runtime';
-import { UnknownType } from './internal/types.ts';
+import { UnknownType } from './internal/types';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 

@@ -1,9 +1,9 @@
 import { asConstructable } from '@travetto/runtime';
 
-import { MethodOrAll, RouteHandler } from '../types.ts';
+import { MethodOrAll, RouteHandler } from '../types';
 
-import { ControllerRegistry } from '../registry/controller.ts';
-import { EndpointConfig, EndpointIOType } from '../registry/types.ts';
+import { ControllerRegistry } from '../registry/controller';
+import { EndpointConfig, EndpointIOType } from '../registry/types';
 
 type RouteDescriptor = TypedPropertyDescriptor<RouteHandler>;
 type RouteDecorator = <T>(target: T, prop: symbol | string, descriptor: RouteDescriptor) => RouteDescriptor;

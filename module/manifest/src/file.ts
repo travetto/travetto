@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import os from 'node:os';
 
-import { path } from './path.ts';
+import { path } from './path';
 
 export class ManifestFileUtil {
   /**

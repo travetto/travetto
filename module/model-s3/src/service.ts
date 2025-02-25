@@ -14,12 +14,12 @@ import {
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil, TimeSpan, TimeUtil } from '@travetto/runtime';
 
-import { MODEL_BLOB, ModelBlobUtil } from '@travetto/model/src/internal/service/blob.ts';
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud.ts';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry.ts';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage.ts';
+import { MODEL_BLOB, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
+import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
-import { S3ModelConfig } from './config.ts';
+import { S3ModelConfig } from './config';
 
 function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && typeof o === 'object' && '$metadata' in o;

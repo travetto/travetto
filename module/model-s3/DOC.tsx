@@ -1,9 +1,9 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
-import { S3ModelConfig } from './src/config.ts';
-import { S3ModelService } from './src/service.ts';
+import { S3ModelConfig } from './src/config';
+import { S3ModelService } from './src/service';
 
 export const text = <>
   <c.StdHeader />

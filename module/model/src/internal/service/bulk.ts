@@ -1,8 +1,8 @@
 import { Class } from '@travetto/runtime';
 
-import { BulkOp } from '../../service/bulk.ts';
-import { ModelType } from '../../types/model.ts';
-import { ModelCrudProvider, ModelCrudUtil } from './crud.ts';
+import { BulkOp } from '../../service/bulk';
+import { ModelType } from '../../types/model';
+import { ModelCrudProvider, ModelCrudUtil } from './crud';
 
 export type BulkPreStore<T extends ModelType> = {
   insertedIds: Map<number, string>;

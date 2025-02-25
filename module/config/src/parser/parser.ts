@@ -4,8 +4,8 @@ import path from 'node:path';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { AppError } from '@travetto/runtime';
 
-import { ConfigParserTarget } from '../internal/types.ts';
-import { ConfigData, ConfigParser } from './types.ts';
+import { ConfigParserTarget } from '../internal/types';
+import { ConfigData, ConfigParser } from './types';
 
 @Injectable()
 export class ParserManager {
