@@ -6,7 +6,6 @@ import { TimeUtil, Runtime, RuntimeIndex, hasToJSON } from '@travetto/runtime';
 import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary, TestConsumerShape } from '../types.ts';
 import { TestConsumer } from '../registry.ts';
-import { SerializeUtil } from '../serialize.ts';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer.ts';
 
 /**
@@ -56,13 +55,11 @@ export class TapEmitter implements TestConsumerShape {
   }
 
   /**
-   * Convert error to a stringed output
+   * Error to string
    * @param error 
-   * @returns 
    */
-  toError(error?: Error): string | undefined {
-    if (error && error.name !== 'AssertionError') {
-      const err = SerializeUtil.deserializeError(error);
+  errorToString(err?: Error): string | undefined {
+    if (err && err.name !== 'AssertionError') {
       if (err instanceof Error) {
         let out = JSON.stringify(hasToJSON(err) ? err.toJSON() : err, null, 2);
         if (this.#options?.verbose && err.stack) {
@@ -127,10 +124,10 @@ export class TapEmitter implements TestConsumerShape {
       this.log(status);
 
       // Handle error
-      if (test.status === 'failed') {
-        const error = this.toError(test.error);
-        if (error) {
-          this.logMeta({ error });
+      if (test.status === 'failed' && test.error) {
+        const msg = this.errorToString(test.error);
+        if (msg) {
+          this.logMeta({ error: msg });
         }
       }
 
@@ -154,7 +151,10 @@ export class TapEmitter implements TestConsumerShape {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.#enhancer.failure(this.toError(err)!));
+        const msg = this.errorToString(err);
+        if (msg) {
+          this.log(this.#enhancer.failure(msg));
+        }
       }
     }
 

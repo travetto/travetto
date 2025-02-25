@@ -1,8 +1,9 @@
 import { Writable } from 'node:stream';
 
+import { SerializeUtil } from '@travetto/worker';
+
 import type { TestEvent } from '../../model/event.ts';
 import type { TestConsumerShape } from '../types.ts';
-import { SerializeUtil } from '../serialize.ts';
 import { TestConsumer } from '../registry.ts';
 
 /**
