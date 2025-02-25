@@ -2,9 +2,9 @@
 import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
 import { Class, AppError, TypedObject, TimeUtil, castTo, castKey } from '@travetto/runtime';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
-import { BulkResponse, IndexConfig } from '@travetto/model';
+import { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
+
 import { PointImpl } from '@travetto/model-query/src/internal/model/point.ts';
-import { ModelType } from '@travetto/model/src/types/model.ts';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query.ts';
 
 import { SQLUtil, VisitStack } from '../internal/util.ts';

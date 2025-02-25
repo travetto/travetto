@@ -1,4 +1,4 @@
-process.env.TRV_MANIFEST = './.trv/output/node_modules/@travetto/mono-repo';
+process.env.TRV_MANIFEST = './.trv/output/node_modules/@travetto/eslint';
 
 const { buildConfig } = require('./.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js');
 const { RuntimeIndex } = require('./.trv/output/node_modules/@travetto/runtime/__index__.js');
