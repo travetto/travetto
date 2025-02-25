@@ -3,7 +3,7 @@ import { EmailOptions, SentEmail } from './types.ts';
 /**
  * Default mail transport
  *
- * @concrete ./internal/types#MailTransportTarget
+ * @concrete ./internal/types.ts#MailTransportTarget
  */
 export interface MailTransport {
   send<S extends SentEmail = SentEmail>(mail: EmailOptions): Promise<S>;

@@ -7,7 +7,7 @@ import { ModelBasicSupport } from './basic.ts';
  * Support for simple indexed activity
  *
  *
- * @concrete ../internal/service/common#ModelIndexedSupportTarget
+ * @concrete ../internal/service/common.ts#ModelIndexedSupportTarget
  */
 export interface ModelIndexedSupport extends ModelBasicSupport {
   /**

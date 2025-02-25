@@ -1,7 +1,7 @@
 import { AnyMap, castKey, castTo } from '@travetto/runtime';
 
 /**
- * @concrete ./internal/types#SessionDataTarget
+ * @concrete ./internal/types.ts#SessionDataTarget
  * @augments `@travetto/rest:ContextParam`
  */
 export interface SessionData extends AnyMap { }

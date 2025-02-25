@@ -6,7 +6,7 @@ import { ModelBasicSupport } from './basic.ts';
 
 /**
  * Interface for simple CRUD
- * @concrete ../internal/service/common#ModelCrudSupportTarget
+ * @concrete ../internal/service/common.ts#ModelCrudSupportTarget
  */
 export interface ModelCrudSupport extends ModelBasicSupport {
 
