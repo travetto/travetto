@@ -6,8 +6,8 @@ import { PAGES } from './pages.ts';
 
 @Component({
   selector: 'app-documentation',
-  styleUrls: ['./documentation.component.scss.ts'],
-  templateUrl: './documentation.component.html.ts',
+  styleUrls: ['./documentation.component.scss'],
+  templateUrl: './documentation.component.html',
   encapsulation: ViewEncapsulation.Emulated,
   imports: [RouterLinkActive, RouterLink, NgClass, RouterOutlet]
 })

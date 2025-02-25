@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-repo',
-    templateUrl: './repo.component.html.ts',
-    styleUrls: ['./repo.component.scss.ts']
+    templateUrl: './repo.component.html',
+    styleUrls: ['./repo.component.scss']
 })
 export class RepoComponent { }

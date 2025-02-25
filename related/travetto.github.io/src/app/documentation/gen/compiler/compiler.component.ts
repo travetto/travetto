@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-compiler',
-    templateUrl: './compiler.component.html.ts',
+    templateUrl: './compiler.component.html',
     styleUrls: []
 })
 export class CompilerComponent { }

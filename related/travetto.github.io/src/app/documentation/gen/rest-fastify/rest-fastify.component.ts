@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-rest-fastify',
-    templateUrl: './rest-fastify.component.html.ts',
+    templateUrl: './rest-fastify.component.html',
     styleUrls: []
 })
 export class RestFastifyComponent { }

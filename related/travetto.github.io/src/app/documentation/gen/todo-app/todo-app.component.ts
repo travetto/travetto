@@ -3,8 +3,8 @@ import { RouterLink, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-guide',
-  templateUrl: './todo-app.component.html.ts',
-  styleUrls: ['./todo-app.component.scss.ts'],
+  templateUrl: './todo-app.component.html',
+  styleUrls: ['./todo-app.component.scss'],
   imports: [RouterLink, RouterModule]
 })
 export class GuideComponent {

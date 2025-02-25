@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-auth-rest-passport',
-    templateUrl: './auth-rest-passport.component.html.ts',
+    templateUrl: './auth-rest-passport.component.html',
     styleUrls: []
 })
 export class AuthRestPassportComponent { }

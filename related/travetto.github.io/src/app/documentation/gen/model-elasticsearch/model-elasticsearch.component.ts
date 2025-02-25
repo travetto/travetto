@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-model-elasticsearch',
-    templateUrl: './model-elasticsearch.component.html.ts',
+    templateUrl: './model-elasticsearch.component.html',
     styleUrls: []
 })
 export class ModelElasticsearchComponent { }

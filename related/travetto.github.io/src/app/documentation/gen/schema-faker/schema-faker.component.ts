@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-schema-faker',
-    templateUrl: './schema-faker.component.html.ts',
+    templateUrl: './schema-faker.component.html',
     styleUrls: []
 })
 export class SchemaFakerComponent { }

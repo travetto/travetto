@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-model-firestore',
-    templateUrl: './model-firestore.component.html.ts',
+    templateUrl: './model-firestore.component.html',
     styleUrls: []
 })
 export class ModelFirestoreComponent { }

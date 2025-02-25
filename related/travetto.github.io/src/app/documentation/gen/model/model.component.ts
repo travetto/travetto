@@ -4,7 +4,7 @@ import { RouterLink, RouterModule } from '@angular/router';
 @Component({
     imports: [RouterLink, RouterModule],
     selector: 'app-model',
-    templateUrl: './model.component.html.ts',
+    templateUrl: './model.component.html',
     styleUrls: []
 })
 export class ModelComponent { }
