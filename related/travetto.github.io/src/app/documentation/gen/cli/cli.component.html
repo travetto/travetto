@@ -191,7 +191,8 @@ the following data types for flags:
       href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L101">&#64;Min</a> and
     <a target="_blank" class="source-link"
       href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L111">&#64;Max</a>
-    decorators help provide additional validation.</li>
+    decorators help provide additional validation.
+  </li>
   <li>String values. <a target="_blank" class="source-link"
       href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L101">&#64;MinLength</a>,
     <a target="_blank" class="source-link"
@@ -200,12 +201,14 @@ the following data types for flags:
       href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L93">&#64;Match</a> and
     <a target="_blank" class="source-link"
       href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L72">&#64;Enum</a>
-    provide additional constraints</li>
+    provide additional constraints
+  </li>
   <li>Date values. The <a target="_blank" class="source-link"
       href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L101">&#64;Min</a> and
     <a target="_blank" class="source-link"
       href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L111">&#64;Max</a>
-    decorators help provide additional validation.</li>
+    decorators help provide additional validation.
+  </li>
   <li>String lists. Same as String, but allowing multiple values.</li>
   <li>Numeric lists. Same as Number, but allowing multiple values.</li>
 </ul>
@@ -659,7 +662,7 @@ can take a look at <a class="module-link" routerLink="/docs/rest"
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>RestServerHandle <span class="token operator">|</span> <span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> RestApplication <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'../src/application/rest'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> RestApplication <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'../src/application/rest.ts'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">return</span> <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">runInstance</span><span class="token punctuation">(</span>RestApplication<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
