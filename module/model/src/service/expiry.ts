@@ -6,7 +6,7 @@ import { ModelCrudSupport } from './crud.ts';
 /**
  * Support for managing expiration of data
  *
- * @concrete ../internal/service/common#ModelExpirySupportTarget
+ * @concrete ../internal/service/common.ts#ModelExpirySupportTarget
  */
 export interface ModelExpirySupport extends ModelCrudSupport {
   /**
