@@ -29,7 +29,7 @@ Options:
   -o, --output <string>                Output location (default: "<module>.zip")
   -es, --main-scripts                  Create entry scripts (default: false)
   -f, --main-name <string>             Main name for build artifact
-  -e, --entry-point <string>           Entry point (default: "@travetto/rest-aws-lambda/support/entry.handler.ts")
+  -e, --entry-point <string>           Entry point (default: "@travetto/rest-aws-lambda/support/entry.handler")
   --minify, --no-minify                Minify output (default: true)
   -sm, --sourcemap                     Bundle source maps (default: false)
   -is, --include-sources               Include source with source maps (default: false)
