@@ -1,6 +1,7 @@
 import { castTo, Runtime } from '@travetto/runtime';
-import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 import { SchemaRegistry } from '@travetto/schema';
+
+import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 
 import { TestConsumerRegistry } from '../../src/consumer/registry';
 import type { RunState } from '../../src/execute/types';

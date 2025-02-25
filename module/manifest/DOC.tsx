@@ -2,10 +2,9 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { d, c } from '@travetto/doc';
+import { d, c, COMMON_DATE } from '@travetto/doc';
 import type { ManifestRoot } from '@travetto/manifest';
 import { RuntimeIndex } from '@travetto/runtime';
-import { COMMON_DATE } from '@travetto/doc/src/util/run';
 
 const DeltaRef = d.codeLink('ManifestDeltaUtil', 'src/delta.ts', /class ManifestDeltaUtil/);
 

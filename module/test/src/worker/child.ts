@@ -1,9 +1,8 @@
 import { createWriteStream } from 'node:fs';
 
 import { ConsoleManager, Env, Util, Runtime } from '@travetto/runtime';
-import { IpcChannel } from '@travetto/worker';
+import { IpcChannel, SerializeUtil } from '@travetto/worker';
 
-import { SerializeUtil } from '../consumer/serialize';
 import { RunnerUtil } from '../execute/util';
 import { Runner } from '../execute/runner';
 import { Events } from './types';
@@ -26,7 +25,7 @@ export class TestChildWorker extends IpcChannel<TestRun> {
         throw err;
       }
       // Mark as errored out
-      this.send(type, { error: SerializeUtil.serializeError(err) });
+      this.send(type, SerializeUtil.beforeSend({ error: err }));
     }
   }
 

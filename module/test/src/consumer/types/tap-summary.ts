@@ -44,6 +44,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
 
   setOptions(options?: Record<string, unknown>): Promise<void> | void {
     this.#options = options;
+    this.#consumer.setOptions(options);
   }
 
   async onStart(state: TestRunState): Promise<void> {

@@ -7,3 +7,5 @@ export * from './src/model/event';
 export * from './src/registry/suite';
 export * from './src/fixture';
 export * from './src/consumer/types';
+export * from './src/execute/error';
+export { TestWatchEvent } from './src/worker/types';

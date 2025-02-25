@@ -17,7 +17,7 @@ export class CommonUtil {
   static getFileType(file: string): 'ts' | 'js' | 'package-json' | 'typings' | undefined {
     return file.endsWith('package.json') ? 'package-json' :
       (file.endsWith('.js') ? 'js' :
-        (file.endsWith('.d.ts') ? 'typings' : (/[.]tsx?$/.test(file) ? 'ts' : undefined)));
+        (file.endsWith('.d.ts') ? 'typings' : (/[.][cm]?tsx?$/.test(file) ? 'ts' : undefined)));
   }
 
   /**

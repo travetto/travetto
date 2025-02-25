@@ -15,6 +15,10 @@ const PRECOMPILE_MODS = ['@travetto/manifest', '@travetto/transformer', '@travet
 const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
 const REQ = createRequire(path.resolve('node_modules')).resolve.bind(null);
 
+const SOURCE_EXT_RE = /[.][cm]?[tj]s$/;
+const BARE_IMPORT_RE = /^(@[^/]+[/])?[^.][^@/]+$/;
+const OUTPUT_EXT = '.js';
+
 /**
  * Compiler Setup Utilities
  */
@@ -27,21 +31,21 @@ export class CompilerSetup {
     Pick<typeof import('@travetto/manifest'), 'ManifestDeltaUtil' | 'ManifestUtil'>
   > => {
     const all = ['util', 'delta'].map(f =>
-      import(CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}.js`))
+      import(CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}${OUTPUT_EXT}`))
     );
     return Promise.all(all).then(props => Object.assign({}, ...props));
   };
 
   /**  Convert a file to a given ext */
   static #sourceToExtension(sourceFile: string, ext: string): string {
-    return sourceFile.replace(/[.][tj]sx?$/, ext);
+    return sourceFile.replace(SOURCE_EXT_RE, ext);
   }
 
   /**
    * Get the output file name for a given input
    */
   static #sourceToOutputExt(sourceFile: string): string {
-    return this.#sourceToExtension(sourceFile, '.js');
+    return this.#sourceToExtension(sourceFile, OUTPUT_EXT);
   }
 
   /**
@@ -53,14 +57,19 @@ export class CompilerSetup {
       const compilerOut = CommonUtil.resolveWorkspace(ctx, ctx.build.compilerFolder, 'node_modules');
 
       const text = (await fs.readFile(sourceFile, 'utf8'))
-        .replace(/from '([.][^']+)'/g, (_, i) => `from '${i.replace(/[.]js$/, '')}.js'`)
-        .replace(/from '(@travetto\/(.*?))'/g, (_, i, s) => `from '${compilerOut}/${i}${s.includes('/') ? '.js' : '/__index__.js'}'`);
+        .replace(/from ['"](([.]+|@travetto)[/][^']+)['"]/g, (_, clause, m) => {
+          const s = this.#sourceToOutputExt(clause);
+          const suf = s.endsWith(OUTPUT_EXT) ? '' : (BARE_IMPORT_RE.test(clause) ? `/__index__${OUTPUT_EXT}` : OUTPUT_EXT);
+          const pre = m === '@travetto' ? `${compilerOut}/` : '';
+          return `from '${pre}${s}${suf}'`;
+        });
 
       const ts = (await import('typescript')).default;
       const content = ts.transpile(text, {
         ...await TypescriptUtil.getCompilerOptions(ctx),
         sourceMap: false,
         inlineSourceMap: true,
+        importHelpers: true,
       }, sourceFile);
       await CommonUtil.writeTextFile(outputFile, content);
     } else if (type === 'package-json') {

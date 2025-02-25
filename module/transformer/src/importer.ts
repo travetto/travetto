@@ -34,19 +34,12 @@ export class ImportManager {
     this.factory = factory;
   }
 
-  #rewriteModuleSpecifier(spec: ts.Expression | undefined): ts.Expression | undefined {
-    if (spec && ts.isStringLiteral(spec) && this.isUntypedImport(spec)) {
-      return LiteralUtil.fromLiteral(this.factory, `${spec.text.replace(/['"]/g, '')}.js`);
-    }
-    return spec;
-  }
-
   #rewriteImportClause(spec: ts.Expression | undefined, clause: ts.ImportClause | undefined): ts.ImportClause | undefined {
     if (!(spec && clause?.namedBindings && ts.isNamedImports(clause.namedBindings))) {
       return clause;
     }
 
-    if (spec && ts.isStringLiteral(spec) && !this.isKnownImport(spec)) {
+    if (spec && ts.isStringLiteral(spec) && !this.#isKnownImport(spec)) {
       return clause;
     }
 
@@ -80,7 +73,7 @@ export class ImportManager {
    * Is a known import an untyped file access
    * @param fileOrImport
    */
-  isKnownImport(fileOrImport: ts.StringLiteral | string | undefined): boolean {
+  #isKnownImport(fileOrImport: ts.StringLiteral | string | undefined): boolean {
     if (fileOrImport && typeof fileOrImport !== 'string') {
       if (ts.isStringLiteral(fileOrImport)) {
         fileOrImport = fileOrImport.text.replace(/['"]g/, '');
@@ -95,13 +88,22 @@ export class ImportManager {
   }
 
   /**
-   * Is a file or import an untyped file access
-   * @param fileOrImport
+   * Normalize module specifier
    */
-  isUntypedImport(fileOrImport: ts.StringLiteral | string | undefined): boolean {
-    return this.isKnownImport(fileOrImport) &&
-      !/[.](([mc]?[jt]s)|json)['"]?$/
-        .test(typeof fileOrImport === 'string' ? fileOrImport : fileOrImport!.text);
+  normalizeModuleSpecifier<T extends ts.Expression | undefined>(spec: T): T {
+    if (spec && ts.isStringLiteral(spec) && this.#isKnownImport(spec.text)) {
+      const specText = spec.text.replace(/['"]/g, '');
+
+      const type = ManifestModuleUtil.getFileType(specText);
+      if (type === 'js' || type === 'ts') {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        return LiteralUtil.fromLiteral(this.factory, ManifestModuleUtil.withOutputExtension(specText)) as unknown as T;
+      } else {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        return LiteralUtil.fromLiteral(this.factory, `${specText}${ManifestModuleUtil.OUTPUT_EXT}`) as unknown as T;
+      }
+    }
+    return spec;
   }
 
   /**
@@ -126,7 +128,7 @@ export class ImportManager {
   importFile(file: string, name?: string): Import {
     file = this.#resolver.getFileImportName(file);
 
-    if (file.endsWith('.ts') && !file.endsWith('.d.ts')) {
+    if (file.endsWith(ManifestModuleUtil.SOURCE_DEF_EXT) && !file.endsWith(ManifestModuleUtil.TYPINGS_EXT)) {
       file = ManifestModuleUtil.withOutputExtension(file);
     }
 
@@ -211,7 +213,7 @@ export class ImportManager {
             stmt.modifiers,
             stmt.isTypeOnly,
             stmt.exportClause,
-            this.#rewriteModuleSpecifier(stmt.moduleSpecifier),
+            this.normalizeModuleSpecifier(stmt.moduleSpecifier),
             stmt.attributes
           ));
         }
@@ -221,7 +223,7 @@ export class ImportManager {
             stmt,
             stmt.modifiers,
             this.#rewriteImportClause(stmt.moduleSpecifier, stmt.importClause)!,
-            this.#rewriteModuleSpecifier(stmt.moduleSpecifier)!,
+            this.normalizeModuleSpecifier(stmt.moduleSpecifier)!,
             stmt.attributes
           ));
         }

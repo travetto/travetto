@@ -1,5 +1,7 @@
-import path from 'path';
+import path from 'node:path';
+
 import { classConstruct, describeFunction, type Class } from '@travetto/runtime';
+
 import type { TestConsumerShape } from './types';
 import type { RunState } from '../execute/types';
 

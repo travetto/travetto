@@ -1,8 +1,7 @@
-import { IpcChannel } from '@travetto/worker';
+import { IpcChannel, SerializeUtil } from '@travetto/worker';
 
 import type { TestEvent } from '../../model/event';
 import type { TestConsumerShape } from '../types';
-import { SerializeUtil } from '../serialize';
 import { TestConsumer } from '../registry';
 
 /**
@@ -11,6 +10,6 @@ import { TestConsumer } from '../registry';
 @TestConsumer()
 export class ExecutionEmitter extends IpcChannel<TestEvent> implements TestConsumerShape {
   onEvent(event: TestEvent): void {
-    this.send(event.type, JSON.parse(SerializeUtil.serializeToJSON(event)));
+    this.send(event.type, SerializeUtil.beforeSend(event));
   }
 }

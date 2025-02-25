@@ -6,7 +6,6 @@ import { TimeUtil, Runtime, RuntimeIndex, hasToJSON } from '@travetto/runtime';
 import type { TestEvent } from '../../model/event';
 import type { SuitesSummary, TestConsumerShape } from '../types';
 import { TestConsumer } from '../registry';
-import { SerializeUtil } from '../serialize';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
 
 /**
@@ -18,6 +17,7 @@ export class TapEmitter implements TestConsumerShape {
   #enhancer: TestResultsEnhancer;
   #terminal: Terminal;
   #start: number;
+  #options?: Record<string, unknown>;
 
   constructor(
     terminal = new Terminal(),
@@ -26,6 +26,11 @@ export class TapEmitter implements TestConsumerShape {
     this.#terminal = terminal;
     this.#enhancer = enhancer;
   }
+
+  setOptions(options?: Record<string, unknown>): Promise<void> | void {
+    this.#options = options;
+  }
+
 
   log(message: string): void {
     this.#terminal.writer.writeLine(message).commit();
@@ -47,6 +52,24 @@ export class TapEmitter implements TestConsumerShape {
     let body = stringify(obj, { lineWidth: lineLength, indent: 2 });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
+  }
+
+  /**
+   * Error to string
+   * @param error 
+   */
+  errorToString(err?: Error): string | undefined {
+    if (err && err.name !== 'AssertionError') {
+      if (err instanceof Error) {
+        let out = JSON.stringify(hasToJSON(err) ? err.toJSON() : err, null, 2);
+        if (this.#options?.verbose && err.stack) {
+          out = `${out}\n${err.stack}`;
+        }
+        return out;
+      } else {
+        return `${err}`;
+      }
+    }
   }
 
   /**
@@ -101,10 +124,10 @@ export class TapEmitter implements TestConsumerShape {
       this.log(status);
 
       // Handle error
-      if (test.status === 'failed') {
-        if (test.error && test.error.name !== 'AssertionError') {
-          const err = SerializeUtil.deserializeError(test.error);
-          this.logMeta({ error: hasToJSON(err) ? err.toJSON() : err });
+      if (test.status === 'failed' && test.error) {
+        const msg = this.errorToString(test.error);
+        if (msg) {
+          this.logMeta({ error: msg });
         }
       }
 
@@ -128,7 +151,10 @@ export class TapEmitter implements TestConsumerShape {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.#enhancer.failure(hasToJSON(err) ? JSON.stringify(err.toJSON(), null, 2) : `${err}`));
+        const msg = this.errorToString(err);
+        if (msg) {
+          this.log(this.#enhancer.failure(msg));
+        }
       }
     }
 

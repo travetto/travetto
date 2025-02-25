@@ -1,8 +1,9 @@
 import { Writable } from 'node:stream';
 
+import { SerializeUtil } from '@travetto/worker';
+
 import type { TestEvent } from '../../model/event';
 import type { TestConsumerShape } from '../types';
-import { SerializeUtil } from '../serialize';
 import { TestConsumer } from '../registry';
 
 /**

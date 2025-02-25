@@ -5,7 +5,7 @@ import { DataUtil } from '@travetto/schema';
 import { RestInterceptor } from './types';
 
 import { FilterContext, FilterNext } from '../types';
-import { SerializeUtil } from './serialize-util';
+import { SerializeUtil } from '../util/serialize';
 
 /**
  * Serialization interceptor

@@ -1,3 +1,5 @@
+import { ManifestModuleUtil } from '@travetto/manifest';
+
 export type FunctionMetadataTag = { hash: number, lines: [start: number, end: number, bodyStart?: number] };
 export type FunctionMetadata = FunctionMetadataTag & {
   id: string;
@@ -27,7 +29,7 @@ export function registerFunction(
   fn: Function, [pkg, pth]: [string, string], tag: FunctionMetadataTag,
   methods?: Record<string, FunctionMetadataTag>, abstract?: boolean,
 ): void {
-  const modulePath = pth.replace(/[.][cm]?[tj]sx?$/, '');
+  const modulePath = ManifestModuleUtil.withoutSourceExtension(pth);
 
   const metadata: FunctionMetadata = {
     id: (fn.name ? `${pkg}:${modulePath}#${fn.name}` : `${pkg}:${modulePath}`),
