@@ -57,7 +57,7 @@ export const text = async () => {
 
       The compiler will move through the following phases on a given compilation execution:
       <ul>
-        <li>{d.method('Bootstrapping')} - Initial compilation of {d.mod('Compiler')}'s {d.path('support/*.ts')} files</li>
+        <li>{d.method('Bootstrapping')} - Initial compilation of {d.mod('Compiler')}'s {d.path('support/*')} files</li>
         <li>{d.method('Compiler Server')} - Provides a simple HTTP interface to watching compiler file and state changes, and synchronizing multiple processes</li>
         <li>{d.method('Build Compiler')} - Leverages {d.library('Typescript')} to build files needed to execute compiler</li>
         <li>{d.method('Build Manifest')} - Produces the manifest for the given execution</li>

@@ -76,7 +76,7 @@ $ trvc build
 
 ## Compilation Architecture
 The compiler will move through the following phases on a given compilation execution:
-   *  `Bootstrapping` - Initial compilation of [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s `support/*.ts` files
+   *  `Bootstrapping` - Initial compilation of [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s `support/*` files
    *  `Compiler Server` - Provides a simple HTTP interface to watching compiler file and state changes, and synchronizing multiple processes
    *  `Build Compiler` - Leverages [Typescript](https://typescriptlang.org) to build files needed to execute compiler
    *  `Build Manifest` - Produces the manifest for the given execution
