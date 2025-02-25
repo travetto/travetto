@@ -24,6 +24,7 @@
     "importHelpers": true,
     "noEmitHelpers": true,
     "outDir": "build/",
+    "noEmit": true
   },
   "watchOptions": {
     "excludeDirectories": [

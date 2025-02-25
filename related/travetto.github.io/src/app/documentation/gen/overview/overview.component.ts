@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { ModuleChartComponent } from '../../module-chart/module-chart.component';
-import { RouterLink, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 @Component({
-    imports: [RouterLink, RouterModule, ModuleChartComponent],
+    imports: [RouterModule, ModuleChartComponent],
     selector: 'app-overview',
     templateUrl: './overview.component.html',
     styleUrls: ['./overview.component.scss']

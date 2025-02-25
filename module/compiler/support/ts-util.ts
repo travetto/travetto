@@ -26,6 +26,8 @@ export class TypescriptUtil {
 
       OPT_CACHE[ctx.workspace.path] = {
         ...options,
+        noEmit: false,
+        emitDeclarationOnly: false,
         allowJs: true,
         resolveJsonModule: true,
         sourceRoot: ctx.workspace.path,

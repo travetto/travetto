@@ -10,8 +10,5 @@
     "**/.trv/**": true,
     "related/vscode-plugin/out/**": true,
     "**/.angular/**": true,
-  },
-  "cSpell.words": [
-    "Trvc"
-  ]
+  }
 }
