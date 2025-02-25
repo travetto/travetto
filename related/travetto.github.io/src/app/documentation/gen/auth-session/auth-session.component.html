@@ -30,7 +30,7 @@ While the expiry is not necessarily a hard requirement, the implementation witho
 
   <figure class="code">
     <figcaption class="code">Sample usage of Session Service
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/interceptor.ts#L11">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/interceptor.ts#L10">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">class</span> <span class="token class-name">RestSessionConfig</span> <span class="token keyword">implements</span> <span class="token class-name">ManagedInterceptorConfig</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
@@ -62,7 +62,7 @@ While the expiry is not necessarily a hard requirement, the implementation witho
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L17">SessionService</a> provides the basic integration with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16">AuthContext</a> to authenticate and isolate session data.  The usage is fairly simple, but the import pattern to follow is:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L16">SessionService</a> provides the basic integration with the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16">AuthContext</a> to authenticate and isolate session data.  The usage is fairly simple, but the import pattern to follow is:
 <ul> <li>load</li>
 <li>read/modify</li>
 <li>persist</li>
