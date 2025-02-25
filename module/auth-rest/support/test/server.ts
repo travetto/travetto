@@ -11,7 +11,8 @@ import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
 import { Login, Authenticated, Logout } from '../../src/decorator.ts';
 import { RestAuthConfig } from '../../src/config.ts';
-import { CommonPrincipalCodecSymbol, JWTPrincipalCodec } from '../../__index__.ts';
+import { JWTPrincipalCodec } from '../../src/codec.ts';
+import { CommonPrincipalCodecSymbol } from '../../src/types.ts';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 

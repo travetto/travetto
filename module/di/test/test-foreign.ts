@@ -7,7 +7,7 @@ import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
 
 import { DependencyRegistry } from '../src/registry.ts';
-import { Inject, Injectable, InjectableFactory } from '../__index__.ts';
+import { Inject, Injectable, InjectableFactory } from '../src/decorator.ts';
 
 class Item {
   follow: number;
