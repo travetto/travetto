@@ -71,7 +71,7 @@ export function createRootElement<T extends string | Class | JSXComponentFunctio
 
   Object.assign(res, {
     prepare(loc: EmailTemplateLocation): Promise<EmailTemplateModule> {
-      return import('@travetto/email-inky').then(v => v.prepare(castTo(res), loc));
+      return import('@travetto/email-inky/src/wrapper').then(v => v.prepare(castTo(res), loc));
     }
   });
 

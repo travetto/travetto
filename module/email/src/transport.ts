@@ -1,4 +1,3 @@
-import { castTo } from '@travetto/runtime';
 import { EmailOptions, SentEmail } from './types';
 
 /**
@@ -15,6 +14,6 @@ export interface MailTransport {
  */
 export class NullTransport implements MailTransport {
   async send<S extends SentEmail = SentEmail>(mail: EmailOptions): Promise<S> {
-    return castTo({});
+    return undefined! ?? {};
   }
 }
