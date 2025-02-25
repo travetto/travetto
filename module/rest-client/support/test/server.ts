@@ -1,8 +1,9 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { BaseRestSuite } from '@travetto/rest/support/test/base.ts';
 import { RootRegistry } from '@travetto/registry';
+
+import { BaseRestSuite } from '@travetto/rest/support/test/base.ts';
 
 import { Todo } from './service.ts';
 import { RestClientTestUtil } from './util.ts';

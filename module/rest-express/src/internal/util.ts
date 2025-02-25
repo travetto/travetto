@@ -1,8 +1,9 @@
 import type express from 'express';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
-import { NodeEntitySymbol, ProviderEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
 import { castTo } from '@travetto/runtime';
+
+import { NodeEntitySymbol, ProviderEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
 
 /**
  * Provide a mapping between express request/response and the framework analogs

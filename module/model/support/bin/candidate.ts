@@ -1,6 +1,7 @@
 import { castTo, Class } from '@travetto/runtime';
-import { ModelRegistry } from '@travetto/model/src/registry/model.ts';
 import { InjectableConfig, DependencyRegistry } from '@travetto/di';
+import { ModelRegistry } from '@travetto/model';
+
 import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/common.ts';
 
 import type { ModelStorageSupport } from '../../src/service/storage.ts';

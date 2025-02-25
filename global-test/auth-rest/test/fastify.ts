@@ -1,8 +1,9 @@
-import { AuthRestServerSuite } from '@travetto/auth-rest/support/test/server.ts';
 import { Suite } from '@travetto/test';
 import { FastifyRestServer } from '@travetto/rest-fastify';
 import { InjectableFactory } from '@travetto/di';
 import { RestApplication, RestServer } from '@travetto/rest';
+
+import { AuthRestServerSuite } from '@travetto/auth-rest/support/test/server.ts';
 
 const FASTIFY = Symbol.for('fastify');
 

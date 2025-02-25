@@ -2,9 +2,9 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { CacheModelSymbol } from '@travetto/cache';
-import { CacheServiceSuite } from '@travetto/cache/support/test/service.ts';
-
 import { S3ModelService, S3ModelConfig } from '@travetto/model-s3';
+
+import { CacheServiceSuite } from '@travetto/cache/support/test/service.ts';
 
 class Config {
   @InjectableFactory(CacheModelSymbol)
