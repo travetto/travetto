@@ -20,7 +20,7 @@ export class OpenApiSpecCommand implements CliCommandShape {
   }
 
   async main(): Promise<void> {
-    const { OpenApiService } = await import('../src/service.ts');
+    const { OpenApiService } = await import('../src/service');
 
     await RootRegistry.init();
 

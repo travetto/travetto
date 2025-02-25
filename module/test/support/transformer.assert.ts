@@ -137,7 +137,7 @@ export class AssertTransformer {
    */
   static initState(state: TransformerState & AssertState): void {
     if (!state[AssertSymbol]) {
-      const asrt = state.importFile('@travetto/test/src/assert/check.ts').ident;
+      const asrt = state.importFile('@travetto/test/src/assert/check').ident;
       state[AssertSymbol] = {
         assert: asrt,
         assertCheck: CoreUtil.createAccess(state.factory, asrt, ASSERT_UTIL, 'check'),

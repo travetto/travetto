@@ -67,7 +67,7 @@ export class TestCommand implements CliCommandShape {
   }
 
   async main(first: string = '**/*', globs: string[] = []): Promise<void> {
-    const { runTests } = await import('./bin/run.ts');
+    const { runTests } = await import('./bin/run');
 
     const isFirst = await this.isFirstFile(first);
     const isSingle = this.mode === 'single' || (isFirst && globs.length === 0);

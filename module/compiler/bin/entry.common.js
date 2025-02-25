@@ -53,14 +53,14 @@ async function getContext() {
         return `from '${s}${suf}'`;
       }),
     loadMain: () => import(destPath(`${COMP_MOD}/support/entry.main.ts`))
-      .then((/** @type {import('../support/entry.main.ts')} */ v) => v.main(ctx)),
+      .then((/** @type {import('../support/entry.main')} */ v) => v.main(ctx)),
     supportFiles: () => readdir(srcPath('support'), { recursive: true, encoding: 'utf8' })
       .then(v => v.filter(f => f.endsWith('.ts')).map(j => `support/${j}`))
   };
 }
 
 /** @template T */
-async function load(/** @type {(ops: import('../support/entry.main.ts').Operations) => T} */ cb) {
+async function load(/** @type {(ops: import('../support/entry.main').Operations) => T} */ cb) {
   const ctx = await getContext();
 
   try {

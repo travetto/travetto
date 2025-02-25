@@ -12,12 +12,12 @@ class CycleTest {
   @ShouldThrow('dependency')
   async tryCycle() {
     try {
-      const A = await import('./cycle/a.ts');
-      const B = await import('./cycle/b.ts');
+      const A = await import('./cycle/a');
+      const B = await import('./cycle/b');
       assert(B !== undefined);
       await RootRegistry.init();
 
-      const { ABC } = await import('./cycle/a.ts');
+      const { ABC } = await import('./cycle/a');
       const res = await DependencyRegistry.getInstance(ABC);
       console.log('Loaded dependency', { instance: res.constructor.name });
     } catch {

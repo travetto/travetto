@@ -7,7 +7,7 @@ export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete',
 
 export async function* watchCompiler(cfg?: { restartOnExit?: boolean, signal?: AbortSignal }): AsyncIterable<WatchEvent> {
   // Load at runtime
-  const { CompilerClient } = await import('@travetto/compiler/support/server/client.ts');
+  const { CompilerClient } = await import('@travetto/compiler/support/server/client');
 
   const client = new CompilerClient(RuntimeIndex.manifest, {
     warn(message, ...args): void { console.error('warn', message, ...args); },

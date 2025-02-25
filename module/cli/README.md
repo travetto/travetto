@@ -487,7 +487,7 @@ export class RunRestCommand implements CliCommandShape {
   }
 
   async main(): Promise<ServerHandle | void> {
-    const { RestApplication } = await import('../src/application/rest.ts');
+    const { RestApplication } = await import('../src/application/rest');
     try {
       return await DependencyRegistry.runInstance(RestApplication);
     } catch (err) {
