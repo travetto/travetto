@@ -15,7 +15,7 @@ export class SerializeUtil {
           name: ov.name,
           message: ov.message,
           stack: ov.stack?.replace(/.*\[ERR_ASSERTION\]:\s*/, ''),
-        }
+        };
       } else if (typeof v === 'bigint') {
         return v.toString();
       } else {
