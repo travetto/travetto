@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { TransformerState, OnCall, LiteralUtil, OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction } from '@travetto/transformer';
 
-const CONSOLE_IMPORT = '@travetto/runtime/src/console.ts';
+const CONSOLE_IMPORT = '@travetto/runtime/src/console';
 
 type CustomState = TransformerState & {
   scope: { type: 'method' | 'class' | 'function', name: string }[];
