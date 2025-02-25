@@ -4,15 +4,12 @@ import {
   DecoratorUtil, DocUtil, ParamDocumentation, TransformerState, transformCast,
 } from '@travetto/transformer';
 
+const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
+const FIELD_MOD = '@travetto/schema/src/decorator/field';
+const COMMON_MOD = '@travetto/schema/src/decorator/common';
+const TYPES_FILE = '@travetto/schema/src/internal/types';
 
 export class SchemaTransformUtil {
-
-  static SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
-  static SCHEMA_IMPORT = `${this.SCHEMA_MOD}.ts`;
-  static FIELD_MOD = '@travetto/schema/src/decorator/field';
-  static FIELD_IMPORT = `${this.FIELD_MOD}.ts`;
-  static COMMON_IMPORT = '@travetto/schema/src/decorator/common.ts';
-  static TYPES_IMPORT = '@travetto/schema/src/internal/types.ts';
 
   /**
    * Produce concrete type given transformer type
@@ -32,7 +29,7 @@ export class SchemaTransformUtil {
         break;
       }
       case 'unknown': {
-        const imp = state.importFile(this.TYPES_IMPORT);
+        const imp = state.importFile(TYPES_FILE);
         return state.createAccess(imp.ident, 'UnknownType');
       }
       case 'shape': {
@@ -43,8 +40,8 @@ export class SchemaTransformUtil {
         if (!existing) {
           const cls = state.factory.createClassDeclaration(
             [
-              state.createDecorator(this.SCHEMA_IMPORT, 'Schema'),
-              state.createDecorator(this.COMMON_IMPORT, 'Describe',
+              state.createDecorator(SCHEMA_MOD, 'Schema'),
+              state.createDecorator(COMMON_MOD, 'Describe',
                 state.fromLiteral({
                   title: type.name,
                   description: type.comment
@@ -166,7 +163,7 @@ export class SchemaTransformUtil {
 
     const params: ts.Expression[] = [];
 
-    const existing = state.findDecorator('@travetto/schema', node, 'Field', this.FIELD_MOD);
+    const existing = state.findDecorator('@travetto/schema', node, 'Field', FIELD_MOD);
     if (!existing) {
       const resolved = this.toConcreteType(state, typeExpr, node, config.root);
       params.push(resolved);
@@ -186,14 +183,14 @@ export class SchemaTransformUtil {
 
     const newModifiers = [
       ...(node.modifiers ?? []).filter(x => x !== existing),
-      state.createDecorator(this.FIELD_IMPORT, 'Field', ...params)
+      state.createDecorator(FIELD_MOD, 'Field', ...params)
     ];
 
     let ret: unknown;
     if (ts.isPropertyDeclaration(node)) {
       const comments = DocUtil.describeDocs(node);
       if (comments.description) {
-        newModifiers.push(state.createDecorator(this.COMMON_IMPORT, 'Describe', state.fromLiteral({
+        newModifiers.push(state.createDecorator(COMMON_MOD, 'Describe', state.fromLiteral({
           description: comments.description
         })));
       }
