@@ -6,7 +6,7 @@ import {
   BodyParseInterceptor, LoggingInterceptor, RouteConfig, FilterContext, FilterNext, ControllerRegistry,
   RestInterceptor, SerializeInterceptor
 } from '@travetto/rest';
-import { SerializeUtil } from '@travetto/rest/src/interceptor/serialize-util';
+import { SerializeUtil } from '@travetto/rest/src/util/serialize';
 import { RestRpcConfig } from './config';
 
 /**
