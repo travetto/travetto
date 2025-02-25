@@ -1,7 +1,7 @@
 export type ConfigData = Record<string, unknown>;
 
 /**
- * @concrete ../internal/types.ts#ConfigParserTarget
+ * @concrete ../internal/types#ConfigParserTarget
  */
 export interface ConfigParser {
   ext: string[];

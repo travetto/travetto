@@ -7,7 +7,7 @@ import { ValidStringFields } from '../model/where-clause';
 
 /**
  * The contract for a model service with faceting support
- * @concrete ../internal/service/common.ts#ModelQueryFacetSupportTarget
+ * @concrete ../internal/service/common#ModelQueryFacetSupportTarget
  */
 export interface ModelQueryFacetSupport extends ModelQuerySupport {
   /**

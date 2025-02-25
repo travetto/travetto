@@ -5,7 +5,7 @@ export const CommonPrincipalCodecSymbol = Symbol.for('@travetto/auth-rest:common
 
 /**
  * Rest codec for reading/writing principal
- * @concrete ./internal/types.ts#PrincipalCodecTarget
+ * @concrete ./internal/types#PrincipalCodecTarget
  */
 export interface PrincipalCodec {
   /**

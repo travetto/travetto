@@ -7,7 +7,7 @@ import { ValidStringFields } from '../model/where-clause';
 
 /**
  * The contract for a model service with suggesting support
- * @concrete ../internal/service/common.ts#ModelQuerySuggestSupportTarget
+ * @concrete ../internal/service/common#ModelQuerySuggestSupportTarget
  */
 export interface ModelQuerySuggestSupport extends ModelQuerySupport {
   /**

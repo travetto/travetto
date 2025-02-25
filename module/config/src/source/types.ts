@@ -6,7 +6,7 @@ type OneOf<T> = T[] | T | undefined;
 export type ConfigSpec = { data: ConfigData, priority: number, source: string, detail?: string };
 
 /**
- * @concrete ../internal/types.ts#ConfigSourceTarget
+ * @concrete ../internal/types#ConfigSourceTarget
  */
 export interface ConfigSource {
   get(): OrProm<OneOf<ConfigSpec>>;

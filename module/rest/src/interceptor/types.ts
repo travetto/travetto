@@ -23,7 +23,7 @@ export abstract class ManagedInterceptorConfig {
 /**
  * Basic interceptor structure
  *
- * @concrete ../internal/types.ts#RestInterceptorTarget
+ * @concrete ../internal/types#RestInterceptorTarget
  */
 export interface RestInterceptor<C = Any> {
 

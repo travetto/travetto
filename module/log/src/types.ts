@@ -13,7 +13,7 @@ export interface LogEvent extends ConsoleEvent {
 }
 
 /**
- * @concrete ./internal/types.ts#LogDecoratorTarget
+ * @concrete ./internal/types#LogDecoratorTarget
  */
 export interface LogDecorator {
   decorate(ev: LogEvent): LogEvent;
@@ -21,7 +21,7 @@ export interface LogDecorator {
 
 /**
  * Output appender for the logger
- * @concrete ./internal/types.ts#LogAppenderTarget
+ * @concrete ./internal/types#LogAppenderTarget
  */
 export interface LogAppender {
   append(ev: LogEvent, formatted: string): void;
@@ -29,14 +29,14 @@ export interface LogAppender {
 
 /**
  * Output formatter
- * @concrete ./internal/types.ts#LogFormatterTarget
+ * @concrete ./internal/types#LogFormatterTarget
  */
 export interface LogFormatter {
   format(e: LogEvent): string;
 }
 
 /**
- * @concrete ./internal/types.ts#LoggerTarget
+ * @concrete ./internal/types#LoggerTarget
  */
 export interface Logger {
   log(ev: LogEvent): unknown;
