@@ -1,6 +1,5 @@
-import { Suite } from '@travetto/test';
-
 import { SchemaRestServerSuite } from '@travetto/rest/support/test/schema';
+import { Suite } from '@travetto/test';
 
 @Suite()
 export class KoaSchemaTest extends SchemaRestServerSuite { }

@@ -4,7 +4,6 @@ import path from 'node:path';
 import { BinaryUtil, Class, Runtime, Util, castTo, describeFunction } from '@travetto/runtime';
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, ControllerVisitUtil, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
-
 import { AllViewSymbol, UnknownType } from '@travetto/schema/src/internal/types';
 
 import { ParamConfig } from './shared/types';
@@ -275,7 +274,7 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
     const paramArr = JSON.stringify(paramNames).replaceAll('"', '').replace(/,/g, ', ');
 
     imports.push(...[...this.endpointResponseWrapper].filter(x => typeof x !== 'string'));
-    const opts: Imp = { name: 'RequestDefinition', file: './shared/types.ts', classId: '_common.ts' };
+    const opts: Imp = { name: 'RequestDefinition', file: './shared/types.ts', classId: '_common' };
 
     return {
       imports,

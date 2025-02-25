@@ -2,10 +2,11 @@ import https from 'node:https';
 import compress from '@fastify/compress';
 import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 
-import { RestConfig, RouteConfig, RestServer, ServerHandle } from '@travetto/rest';
+import { RestConfig, RouteConfig, RestServer } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
 
 import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
+import { ServerHandle } from '@travetto/rest/src/types';
 
 import { FastifyServerUtil } from './internal/util';
 

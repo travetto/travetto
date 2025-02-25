@@ -3,12 +3,11 @@ import type lambda from 'aws-lambda';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { Request, ServerHandle, RestCookieConfig } from '@travetto/rest';
-import { asFull, castTo, Util } from '@travetto/runtime';
-
 import {
   RestServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
 } from '@travetto/rest/support/test/server-support/base';
+import { asFull, castTo, Util } from '@travetto/runtime';
 
 import { AwsLambdaRestApplication } from '../../src/server';
 

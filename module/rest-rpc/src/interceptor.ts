@@ -1,13 +1,12 @@
 import { Injectable, Inject } from '@travetto/di';
 import { AppError, Util } from '@travetto/runtime';
 
+import { MissingParamSymbol, RequestParamsSymbol, RequestLoggingSymbol } from '@travetto/rest/src/internal/symbol';
 import {
   BodyParseInterceptor, LoggingInterceptor, RouteConfig, FilterContext, FilterNext, ControllerRegistry,
-  RestInterceptor, SerializeInterceptor, SerializeUtil
+  RestInterceptor, SerializeInterceptor
 } from '@travetto/rest';
-
-import { MissingParamSymbol, RequestParamsSymbol, RequestLoggingSymbol } from '@travetto/rest/src/internal/symbol';
-
+import { SerializeUtil } from '@travetto/rest/src/interceptor/serialize-util';
 import { RestRpcConfig } from './config';
 
 /**

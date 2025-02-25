@@ -1,9 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
-import { castTo } from '@travetto/runtime';
-
 import { NodeEntitySymbol, ProviderEntitySymbol } from '@travetto/rest/src/internal/symbol';
+import { castTo } from '@travetto/runtime';
 
 /**
  * Provide a mapping between fastify request/response and the framework analogs

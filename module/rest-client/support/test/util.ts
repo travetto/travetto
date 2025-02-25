@@ -60,7 +60,7 @@ export class RestClientTestUtil {
       await ExecUtil.getResult(spawn('npm', ['i'], { cwd: tmp }));
       await this.compileTypescript(tmp, 'node');
 
-      const result = await ExecUtil.getResult(spawn('node', ['./main.ts'], { cwd: tmp }));
+      const result = await ExecUtil.getResult(spawn('node', ['./main'], { cwd: tmp }));
       return result.stdout;
     } finally {
       await this.cleanupFolder(tmp);

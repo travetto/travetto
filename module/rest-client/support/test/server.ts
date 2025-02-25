@@ -1,9 +1,8 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
-
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
+import { RootRegistry } from '@travetto/registry';
 
 import { Todo } from './service';
 import { RestClientTestUtil } from './util';
@@ -65,7 +64,7 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
 
   @Test({ timeout: 10000 })
   async fetchNodeClient() {
-    const result = await RestClientTestUtil.runNodeClient(fetchRequestBody('./src.ts', this.port!));
+    const result = await RestClientTestUtil.runNodeClient(fetchRequestBody('./src', this.port!));
     this.validateFetchResponses(result);
   }
 

@@ -8,9 +8,8 @@ import { pipeline } from 'node:stream/promises';
 import busboy from '@fastify/busboy';
 
 import { Request, MimeUtil } from '@travetto/rest';
-import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
-
 import { NodeEntitySymbol } from '@travetto/rest/src/internal/symbol';
+import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
 
