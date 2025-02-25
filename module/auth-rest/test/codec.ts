@@ -3,9 +3,8 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { Response } from '@travetto/rest';
-import { asFull } from '@travetto/runtime';
-
 import { InjectableSuite } from '@travetto/di/support/test/suite';
+import { asFull } from '@travetto/runtime';
 
 import { AuthContextInterceptor } from '../src/interceptors/context';
 import { JWTPrincipalCodec } from '../src/codec';

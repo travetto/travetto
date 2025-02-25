@@ -2,17 +2,16 @@ import timers from 'node:timers/promises';
 import assert from 'node:assert';
 
 import { Controller, Get, Post, Redirect } from '@travetto/rest';
+import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
 
-import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
 import { RestAuthConfig } from '../../src/config';
-import { JWTPrincipalCodec } from '../../src/codec';
-import { CommonPrincipalCodecSymbol } from '../../src/types';
+import { CommonPrincipalCodecSymbol, JWTPrincipalCodec } from '../../__index__';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 

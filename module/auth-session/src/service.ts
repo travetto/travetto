@@ -1,10 +1,9 @@
 import { Injectable, Inject } from '@travetto/di';
+import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 import { Runtime, Util } from '@travetto/runtime';
 import { ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { AsyncContext, AsyncContextValue } from '@travetto/context';
 import { AuthContext, AuthenticationError, AuthService } from '@travetto/auth';
-
-import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 import { Session } from './session';
 import { SessionEntry, SessionModelSymbol } from './model';
