@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { PAGES } from './pages.ts';
+import { PAGES } from './pages';
 
 export const ROUTES: Route[] = [
   {
@@ -9,7 +9,7 @@ export const ROUTES: Route[] = [
   },
   {
     path: 'overview',
-    loadComponent: () => import('./gen/overview/overview.component.ts').then(m => m.OverviewComponent)
+    loadComponent: () => import('./gen/overview/overview.component').then(m => m.OverviewComponent)
   },
   ...PAGES.map(x => [x, ...(x.subs ?? [])]).flat().filter(x => !!x.loadComponent)
 ];
