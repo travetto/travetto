@@ -3,7 +3,7 @@ import express from 'express';
 import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil, ServerHandle } from '@travetto/rest';
+import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil, RestServerHandle } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types.ts';
 import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
 
@@ -89,7 +89,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
     this.raw.use(path, router);
   }
 
-  async listen(): Promise<ServerHandle> {
+  async listen(): Promise<RestServerHandle> {
     let raw: express.Application | https.Server = this.raw;
     if (this.config.ssl?.active) {
       const keys = await this.config.ssl?.getKeys();

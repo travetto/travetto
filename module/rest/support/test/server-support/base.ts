@@ -1,4 +1,4 @@
-import type { Request, ServerHandle } from '../../../src/types.ts';
+import type { Request, RestServerHandle } from '../../../src/types.ts';
 
 export type MakeRequestConfig<T> = {
   query?: Record<string, unknown>;
@@ -13,7 +13,7 @@ export type MakeRequestResponse<T> = {
 };
 
 export interface RestServerSupport {
-  init(qualifier?: symbol): Promise<ServerHandle>;
+  init(qualifier?: symbol): Promise<RestServerHandle>;
   execute(method: Request['method'], path: string, cfg?: MakeRequestConfig<Buffer>): Promise<MakeRequestResponse<Buffer>>;
 }
 

@@ -3,7 +3,7 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
-import { RouteConfig, Request, ServerHandle } from '../types.ts';
+import { RouteConfig, Request, RestServerHandle } from '../types.ts';
 import { RestConfig } from './config.ts';
 import { RouteUtil } from '../util/route.ts';
 import { RestInterceptor } from '../interceptor/types.ts';
@@ -186,7 +186,7 @@ export class RestApplication<T = unknown> {
   /**
    * Run the application
    */
-  async run(): Promise<ServerHandle> {
+  async run(): Promise<RestServerHandle> {
     console.info('Listening', { port: this.config.port });
     return await this.server.listen();
   }

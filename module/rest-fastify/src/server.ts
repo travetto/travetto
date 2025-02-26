@@ -2,7 +2,7 @@ import https from 'node:https';
 import compress from '@fastify/compress';
 import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 
-import { RestConfig, RouteConfig, RestServer, ServerHandle } from '@travetto/rest';
+import { RestConfig, RouteConfig, RestServer, RestServerHandle } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
 
 import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
@@ -70,7 +70,7 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
     }
   }
 
-  async listen(): Promise<ServerHandle> {
+  async listen(): Promise<RestServerHandle> {
     await this.raw.listen({ port: this.config.port, host: this.config.bindAddress });
     this.listening = true;
     return {
