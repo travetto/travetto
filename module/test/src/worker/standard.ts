@@ -1,7 +1,7 @@
 import { fork } from 'node:child_process';
 
-import { Env, RuntimeIndex } from '@travetto/runtime';
-import { IpcChannel, SerializeUtil } from '@travetto/worker';
+import { Env, RuntimeIndex, Util } from '@travetto/runtime';
+import { IpcChannel } from '@travetto/worker';
 
 import { Events, TestLogEvent } from './types';
 import { TestConsumerShape } from '../consumer/types';
@@ -43,7 +43,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   channel.on('*', async ev => {
     try {
-      await consumer.onEvent(SerializeUtil.afterReceive(ev));  // Connect the consumer with the event stream from the child
+      await consumer.onEvent(Util.deserializeFromJson(JSON.stringify(ev)));  // Connect the consumer with the event stream from the child
     } catch {
       // Do nothing
     }
@@ -55,7 +55,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
   channel.send(Events.RUN, run);
 
   // Wait for complete
-  const result = await complete.then(ev => SerializeUtil.afterReceive(ev));
+  const result = await complete.then(ev => Util.deserializeFromJson<typeof ev>(JSON.stringify(ev)));
 
   // Kill on complete
   await channel.destroy();
