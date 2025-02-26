@@ -29,32 +29,6 @@ export type ValidHtmlTags =
   'td' | 'tr' | 'th' | 'table' | 'thead' | 'tbody' |
   'span' | 'div' | 'center' | 'title';
 
-type BasicElements = { [K in ValidHtmlTags]: JSX.IntrinsicAttributes };
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    interface Element extends JSXElement { }
-    interface IntrinsicAttributes {
-      className?: string;
-      id?: string;
-      dir?: string;
-      name?: string;
-      src?: string | Function;
-      alt?: string;
-      href?: string;
-      title?: string;
-      height?: string;
-      target?: string;
-      width?: string;
-      style?: string;
-      align?: string;
-      valign?: string;
-    }
-    interface IntrinsicElements extends BasicElements { }
-  }
-}
-
 let createFrag: Function | undefined = undefined;
 
 export function createElement<T extends string | Class | JSXComponentFunction<P>, P extends {}>(
@@ -90,3 +64,26 @@ export function isJSXElement(el: unknown): el is JSXElement {
 }
 
 createFrag = Fragment;
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace JSX {
+  export interface Element extends JSXElement { }
+  export interface IntrinsicAttributes extends JSXProps {
+    className?: string;
+    id?: string;
+    dir?: string;
+    name?: string;
+    src?: string | Function;
+    alt?: string;
+    href?: string;
+    title?: string;
+    height?: string;
+    target?: string;
+    width?: string;
+    style?: string;
+    align?: string;
+    valign?: string;
+  }
+  type BasicElements = { [K in ValidHtmlTags]: IntrinsicAttributes };
+  export interface IntrinsicElements extends BasicElements { }
+}

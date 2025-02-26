@@ -24,17 +24,6 @@ export interface JSXElement<
 export type ValidHtmlTags = 'strong' | 'em' | 'br' | 'hr' | 'li' | 'ul' | 'ol' |
   'h2' | 'h3' | 'h4' | 'td' | 'tr' | 'table' | 'thead' | 'tbody';
 
-type BasicElements = { [K in ValidHtmlTags]: JSX.IntrinsicAttributes };
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace JSX {
-    interface Element extends JSXElement { }
-    interface IntrinsicAttributes { }
-    interface IntrinsicElements extends BasicElements { }
-  }
-}
-
 let createFrag: Function | undefined = undefined;
 
 export function createElement<T extends string | Class | JSXComponentFunction<P>, P extends {}>(
@@ -55,4 +44,12 @@ export const jsxs = createElement;
 export const Fragment = createFragment;
 export function isJSXElement(el: unknown): el is JSXElement {
   return el !== undefined && el !== null && typeof el === 'object' && JSXRuntimeTag in el;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace JSX {
+  export interface Element extends JSXElement { }
+  export interface IntrinsicAttributes extends JSXProps { }
+  type BasicElements = { [K in ValidHtmlTags]: IntrinsicAttributes };
+  export interface IntrinsicElements extends BasicElements { }
 }
