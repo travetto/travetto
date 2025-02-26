@@ -6,7 +6,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
 import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
-import { ServerHandle } from '@travetto/rest/src/types';
+import { RestServerHandle } from '@travetto/rest/src/types';
 
 import { RouteStack } from './internal/types';
 import { ExpressServerUtil } from './internal/util';
@@ -90,7 +90,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
     this.raw.use(path, router);
   }
 
-  async listen(): Promise<ServerHandle> {
+  async listen(): Promise<RestServerHandle> {
     let raw: express.Application | https.Server = this.raw;
     if (this.config.ssl?.active) {
       const keys = await this.config.ssl?.getKeys();

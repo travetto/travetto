@@ -3,13 +3,13 @@ import { spawn } from 'node:child_process';
 
 import { ExecUtil } from '@travetto/runtime';
 
-import { ServerHandle } from '../types';
+import { RestServerHandle } from '../types';
 
 type Server = { listen(port: number, hostname?: string): Listener };
 type Listener = {
   on(type: 'error' | 'listening', cb: Function): Listener;
   off(type: 'error' | 'listening', cb: Function): Listener;
-} & ServerHandle;
+} & RestServerHandle;
 
 /** Net utilities */
 export class RestNetUtil {
@@ -21,8 +21,8 @@ export class RestNetUtil {
   /**
    * Listen for an http server to startup
    */
-  static listen(server: Server, port: number, hostname?: string): Promise<ServerHandle> {
-    return new Promise<ServerHandle>((resolve, reject) => {
+  static listen(server: Server, port: number, hostname?: string): Promise<RestServerHandle> {
+    return new Promise<RestServerHandle>((resolve, reject) => {
       try {
         const handle = server.listen(port, hostname);
         handle

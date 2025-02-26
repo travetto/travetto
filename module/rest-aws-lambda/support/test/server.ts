@@ -2,7 +2,7 @@ import type lambda from 'aws-lambda';
 
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { Request, ServerHandle, RestCookieConfig } from '@travetto/rest';
+import { Request, RestServerHandle, RestCookieConfig } from '@travetto/rest';
 import {
   RestServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
@@ -62,7 +62,7 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
 
   #lambda: AwsLambdaRestApplication;
 
-  async init(qualifier?: symbol): Promise<ServerHandle> {
+  async init(qualifier?: symbol): Promise<RestServerHandle> {
     await RootRegistry.init();
 
     Object.assign(

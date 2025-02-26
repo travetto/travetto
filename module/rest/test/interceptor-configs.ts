@@ -11,7 +11,7 @@ import { Controller } from '../src/decorator/controller';
 import { Get } from '../src/decorator/endpoint';
 import { ManagedInterceptorConfig, RestInterceptor } from '../src/interceptor/types';
 import { ControllerRegistry } from '../src/registry/controller';
-import { Response, FilterContext, RouteConfig, ServerHandle } from '../src/types';
+import { Response, FilterContext, RouteConfig, RestServerHandle } from '../src/types';
 import { RestServer } from '../src/application/server';
 import { RestApplication } from '../src/application/rest';
 import { CorsInterceptor } from '../src/interceptor/cors';
@@ -32,7 +32,7 @@ class Server implements RestServer {
   async init(): Promise<void> { }
   async registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[], interceptors?: RestInterceptor<unknown>[] | undefined): Promise<void> { }
   async unregisterRoutes(key: string | symbol): Promise<void> { }
-  listen(): ServerHandle | Promise<ServerHandle> {
+  listen(): RestServerHandle | Promise<RestServerHandle> {
     return {
       close(cb?: Function) { },
       on(type: 'close', cb: Function) { }

@@ -1,7 +1,7 @@
 import { configure } from '@codegenie/serverless-express';
 
 import { Inject, Injectable } from '@travetto/di';
-import { ServerHandle } from '@travetto/rest';
+import { RestServerHandle } from '@travetto/rest';
 import { ExpressRestServer } from '@travetto/rest-express';
 import { castTo, asFull } from '@travetto/runtime';
 import {
@@ -33,7 +33,7 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
     return ret;
   }
 
-  override async listen(): Promise<ServerHandle> {
+  override async listen(): Promise<RestServerHandle> {
     this.listening = true;
     return asFull({});
   }

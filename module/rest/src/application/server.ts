@@ -1,5 +1,5 @@
 import type { RestInterceptor } from '../interceptor/types';
-import type { RouteConfig, ServerHandle } from '../types';
+import type { RouteConfig, RestServerHandle } from '../types';
 
 /**
  * Defines the contract for any rest server to support the
@@ -41,5 +41,5 @@ export interface RestServer<T = unknown> {
   /**
    * Start the listening process
    */
-  listen(): ServerHandle | Promise<ServerHandle>;
+  listen(): RestServerHandle | Promise<RestServerHandle>;
 }

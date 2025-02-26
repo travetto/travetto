@@ -7,7 +7,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig, RestNetUtil } from '@travetto/rest';
 
 import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
-import { ServerHandle } from '@travetto/rest/src/types';
+import { RestServerHandle } from '@travetto/rest/src/types';
 
 import { KoaServerUtil } from './internal/util';
 
@@ -80,7 +80,7 @@ export class KoaRestServer implements RestServer<koa> {
     this.raw.use(middleware);
   }
 
-  async listen(): Promise<ServerHandle> {
+  async listen(): Promise<RestServerHandle> {
     let raw: https.Server | koa = this.raw;
     if (this.config.ssl?.active) {
       raw = https

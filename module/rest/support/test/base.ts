@@ -6,7 +6,7 @@ import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { MethodOrAll, Request, ServerHandle } from '../../src/types';
+import { MethodOrAll, Request, RestServerHandle } from '../../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
 import { CoreRestServerSupport } from './server-support/core';
 import { RestNetUtil } from '../../src/util/net';
@@ -20,7 +20,7 @@ type FullRequest = MakeRequestConfig<Buffer | string | { stream: Readable } | Re
  */
 export abstract class BaseRestSuite {
 
-  #handle?: ServerHandle;
+  #handle?: RestServerHandle;
   #support: RestServerSupport;
 
   type: Class<RestServerSupport>;

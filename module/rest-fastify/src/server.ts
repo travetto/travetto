@@ -6,7 +6,7 @@ import { RestConfig, RouteConfig, RestServer } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
 
 import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
-import { ServerHandle } from '@travetto/rest/src/types';
+import { RestServerHandle } from '@travetto/rest/src/types';
 
 import { FastifyServerUtil } from './internal/util';
 
@@ -71,7 +71,7 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
     }
   }
 
-  async listen(): Promise<ServerHandle> {
+  async listen(): Promise<RestServerHandle> {
     await this.raw.listen({ port: this.config.port, host: this.config.bindAddress });
     this.listening = true;
     return {
