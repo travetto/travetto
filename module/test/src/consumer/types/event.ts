@@ -1,6 +1,6 @@
 import { Writable } from 'node:stream';
 
-import { SerializeUtil } from '@travetto/worker';
+import { Util } from '@travetto/runtime';
 
 import type { TestEvent } from '../../model/event.ts';
 import type { TestConsumerShape } from '../types.ts';
@@ -18,6 +18,6 @@ export class EventStreamer implements TestConsumerShape {
   }
 
   onEvent(event: TestEvent): void {
-    this.#stream.write(`${SerializeUtil.serializeToJSON(event)}\n`);
+    this.#stream.write(`${Util.serializeToJSON(event)}\n`);
   }
 }
