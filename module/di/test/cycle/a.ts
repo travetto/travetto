@@ -1,6 +1,6 @@
-import { Injectable, Inject } from '../../src/decorator';
+import { Injectable, Inject } from '../../src/decorator.ts';
 
-import { BCD } from './b';
+import { BCD } from './b.ts';
 
 @Injectable()
 export class ABC {

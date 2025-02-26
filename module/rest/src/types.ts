@@ -7,9 +7,9 @@ import type { ByteRange, Any, Class, TypedFunction } from '@travetto/runtime';
 import {
   HeadersAddedSymbol, InterceptorConfigsSymbol, NodeEntitySymbol, ProviderEntitySymbol, RequestParamsSymbol,
   RequestLoggingSymbol, QueryExpandedSymbol
-} from './internal/symbol';
+} from './internal/symbol.ts';
 
-import type { RestInterceptor } from './interceptor/types';
+import type { RestInterceptor } from './interceptor/types.ts';
 
 export type HeaderMap = Record<string, (string | (() => string))>;
 export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
@@ -21,7 +21,7 @@ export type RouteHandler = TypedFunction<Any, Any>;
 export type FilterContext<C = unknown> = { req: Request, res: Response, config: Readonly<C> };
 export type Filter<C = unknown> = (context: FilterContext<C>, next: FilterNext) => FilterReturn;
 export type RequestResponseHandler = (req: Request, res: Response) => FilterReturn;
-export type ServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
+export type RestServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
 
 export type ContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
@@ -32,7 +32,7 @@ export interface RequestHeaders extends IncomingHttpHeaders { }
 
 /**
  * Travetto request
- * @concrete ./internal/types#RequestTarget
+ * @concrete ./internal/types.ts#RequestTarget
  * @augments `@travetto/rest:ContextParam`
  */
 export interface Request<T = unknown> {
@@ -155,7 +155,7 @@ export interface Request<T = unknown> {
 
 /**
  * Travetto response
- * @concrete ./internal/types#ResponseTarget
+ * @concrete ./internal/types.ts#ResponseTarget
  * @augments `@travetto/rest:ContextParam`
  */
 export interface Response<T = unknown> {

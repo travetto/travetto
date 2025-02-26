@@ -2,14 +2,15 @@ import type lambda from 'aws-lambda';
 
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { Request, ServerHandle, RestCookieConfig } from '@travetto/rest';
+import { Request, RestServerHandle, RestCookieConfig } from '@travetto/rest';
+import { asFull, castTo, Util } from '@travetto/runtime';
+
 import {
   RestServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
-} from '@travetto/rest/support/test/server-support/base';
-import { asFull, castTo, Util } from '@travetto/runtime';
+} from '@travetto/rest/support/test/server-support/base.ts';
 
-import { AwsLambdaRestApplication } from '../../src/server';
+import { AwsLambdaRestApplication } from '../../src/server.ts';
 
 const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {
   resource: '/{proxy+}',
@@ -62,7 +63,7 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
 
   #lambda: AwsLambdaRestApplication;
 
-  async init(qualifier?: symbol): Promise<ServerHandle> {
+  async init(qualifier?: symbol): Promise<RestServerHandle> {
     await RootRegistry.init();
 
     Object.assign(

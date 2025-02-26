@@ -1,12 +1,12 @@
 import { Class } from '@travetto/runtime';
 
-import { ModelType, OptionalId, ModelIdSource } from '../types/model';
+import { ModelType, OptionalId, ModelIdSource } from '../types/model.ts';
 
-import { ModelBasicSupport } from './basic';
+import { ModelBasicSupport } from './basic.ts';
 
 /**
  * Interface for simple CRUD
- * @concrete ../internal/service/common#ModelCrudSupportTarget
+ * @concrete ../internal/service/common.ts#ModelCrudSupportTarget
  */
 export interface ModelCrudSupport extends ModelBasicSupport {
 

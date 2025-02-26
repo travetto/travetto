@@ -1,7 +1,8 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c, mod } from '@travetto/doc';
-import { Links } from '@travetto/model/support/doc.support';
-import { AuthModelUtil } from './__index__';
+import { AuthModelUtil } from '@travetto/auth-model';
+
+import { Links } from '@travetto/model/support/doc.support.ts';
 
 const RegisteredPrincipal = <c.Code title='Registered Principal' src='src/model.ts' startRe={/interface RegisteredPrincipal/} endRe={/^[}]/} />;
 

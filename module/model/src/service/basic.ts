@@ -1,10 +1,10 @@
 import { Class } from '@travetto/runtime';
-import { ModelType, OptionalId } from '../types/model';
+import { ModelType, OptionalId } from '../types/model.ts';
 
 /**
  * Interface for basic data interface
  *
- * @concrete ../internal/service/common#ModelBasicSupportTarget
+ * @concrete ../internal/service/common.ts#ModelBasicSupportTarget
  */
 export interface ModelBasicSupport<C = unknown> {
   /**

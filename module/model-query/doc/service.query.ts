@@ -1,17 +1,15 @@
 import { Suite } from '@travetto/test';
-
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query';
-import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud';
-import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet';
-import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism';
-import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest';
-import { ModelQueryCrudSupport } from '@travetto/model-query/src/service/crud';
-import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
-import { ModelQueryFacetSupport } from '@travetto/model-query/src/service/facet';
 import { Config } from '@travetto/config';
 import { Injectable } from '@travetto/di';
+import { ModelQueryFacetSupport, ModelQuerySuggestSupport, ModelQueryCrudSupport } from '@travetto/model-query';
 
-import { QueryModelService } from './query-service';
+import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
+import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
+import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
+import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
+import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
+
+import { QueryModelService } from './query-service.ts';
 
 @Config('model.custom')
 class CustomModelConfig { }

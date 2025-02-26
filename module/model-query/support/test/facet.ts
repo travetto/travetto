@@ -1,11 +1,12 @@
 import assert from 'node:assert';
 
 import { ModelCrudSupport } from '@travetto/model';
-import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { Suite, Test } from '@travetto/test';
 
-import { Person } from './types';
-import { ModelQueryFacetSupport } from '../../src/service/facet';
+import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
+
+import { Person } from './types.ts';
+import { ModelQueryFacetSupport } from '../../src/service/facet.ts';
 
 const pick = <T>(arr: T[] | readonly T[]): T => arr[Math.trunc(Math.random() * arr.length)]!;
 

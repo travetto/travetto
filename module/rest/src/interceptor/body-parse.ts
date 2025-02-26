@@ -5,12 +5,12 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
-import { NodeEntitySymbol } from '../internal/symbol';
-import { RouteConfig, Request, FilterContext, FilterNext } from '../types';
+import { NodeEntitySymbol } from '../internal/symbol.ts';
+import { RouteConfig, Request, FilterContext, FilterNext } from '../types.ts';
 
-import { ManagedInterceptorConfig, RestInterceptor } from './types';
-import { SerializeInterceptor } from './serialize';
-import { AcceptsInterceptor } from './accepts';
+import { ManagedInterceptorConfig, RestInterceptor } from './types.ts';
+import { SerializeInterceptor } from './serialize.ts';
+import { AcceptsInterceptor } from './accepts.ts';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 

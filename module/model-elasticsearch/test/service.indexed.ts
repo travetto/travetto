@@ -1,9 +1,9 @@
 import { Suite } from '@travetto/test';
 
-import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
+import { ModelIndexedSuite } from '@travetto/model/support/test/indexed.ts';
 
-import { ElasticsearchModelConfig } from '../src/config';
-import { ElasticsearchModelService } from '../src/service';
+import { ElasticsearchModelConfig } from '../src/config.ts';
+import { ElasticsearchModelService } from '../src/service.ts';
 
 @Suite()
 export class ElasticsearchIndexedSuite extends ModelIndexedSuite {

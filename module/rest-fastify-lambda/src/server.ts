@@ -1,9 +1,9 @@
 import alf from '@fastify/aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
-import { ServerHandle } from '@travetto/rest/src/types';
 import { AwsLambdaRestServer, AwsLambdaSymbol, RestAwsConfig } from '@travetto/rest-aws-lambda';
 import { FastifyRestServer } from '@travetto/rest-fastify';
+import { RestServerHandle } from '@travetto/rest';
 
 /**
  * Aws Lambda Rest Server
@@ -25,7 +25,7 @@ export class AwsLambdaFastifyRestServer extends FastifyRestServer implements Aws
     return ret;
   }
 
-  override async listen(): Promise<ServerHandle> {
+  override async listen(): Promise<RestServerHandle> {
     this.listening = true;
     return {
       close: this.raw.close.bind(this.raw),

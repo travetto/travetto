@@ -4,10 +4,10 @@ import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 import { SchemaChange } from '@travetto/schema';
 
-import { Connected, Transactional } from './connection/decorator';
-import { SQLDialect } from './dialect/base';
-import { SQLUtil, VisitStack } from './internal/util';
-import { Connection } from './connection/base';
+import { Connected, Transactional } from './connection/decorator.ts';
+import { SQLDialect } from './dialect/base.ts';
+import { SQLUtil, VisitStack } from './internal/util.ts';
+import { Connection } from './connection/base.ts';
 
 /**
  * Manage creation/updating of all tables

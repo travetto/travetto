@@ -1,5 +1,5 @@
 import { ParamExtractor } from '@travetto/rest';
-import { PrincipalTarget } from '@travetto/auth/src/internal/types';
+import { PrincipalTarget } from '@travetto/auth/src/internal/types.ts';
 
 export class PrincipalCodecTarget { }
 

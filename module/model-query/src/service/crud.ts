@@ -1,12 +1,12 @@
 import { Class } from '@travetto/runtime';
 import { ModelCrudSupport, ModelType } from '@travetto/model';
 
-import { ModelQuerySupport } from './query';
-import { ModelQuery } from '../model/query';
+import { ModelQuerySupport } from './query.ts';
+import { ModelQuery } from '../model/query.ts';
 
 /**
  * The contract for a model service with query support
- * @concrete ../internal/service/common#ModelQueryCrudSupportTarget
+ * @concrete ../internal/service/common.ts#ModelQueryCrudSupportTarget
  */
 export interface ModelQueryCrudSupport extends ModelCrudSupport, ModelQuerySupport {
   /**

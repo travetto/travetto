@@ -1,9 +1,9 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
-import { FirestoreModelConfig } from './src/config';
-import { FirestoreModelService } from './src/service';
+import { FirestoreModelConfig } from './src/config.ts';
+import { FirestoreModelService } from './src/service.ts';
 
 export const text = <>
   <c.StdHeader />

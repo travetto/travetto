@@ -1,7 +1,7 @@
 import { FieldConfig } from '@travetto/schema';
 import { Class } from '@travetto/runtime';
 
-import { PointImpl } from '../model/point';
+import { PointImpl } from '../model/point.ts';
 
 const st = (t: string | string[], isArr: boolean = false): Set<string> =>
   new Set((Array.isArray(t) ? t : [t]).map(v => isArr ? `${v}[]` : v));

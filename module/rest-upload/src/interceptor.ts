@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@travetto/di';
 import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, RestInterceptor } from '@travetto/rest';
 
-import { RestUploadConfig } from './config';
-import { RestUploadUtil } from './util';
+import { RestUploadConfig } from './config.ts';
+import { RestUploadUtil } from './util.ts';
 
 @Injectable()
 export class RestUploadInterceptor implements RestInterceptor<RestUploadConfig> {

@@ -5,7 +5,7 @@ import { Suite, Test } from '@travetto/test';
 import { Schema, Text, Precision, Required, } from '@travetto/schema';
 import { ModelCrudSupport, Model, NotFoundError, PersistValue } from '@travetto/model';
 
-import { BaseModelSuite } from './base';
+import { BaseModelSuite } from './base.ts';
 
 @Schema()
 class Address {

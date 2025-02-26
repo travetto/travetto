@@ -1,12 +1,12 @@
 import { Suite } from '@travetto/test';
 
-import { ModelBasicSuite } from '@travetto/model/support/test/basic';
-import { ModelCrudSuite } from '@travetto/model/support/test/crud';
-import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
-import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
+import { ModelIndexedSuite } from '@travetto/model/support/test/indexed.ts';
+import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 
-import { FirestoreModelConfig } from '../src/config';
-import { FirestoreModelService } from '../src/service';
+import { FirestoreModelConfig } from '../src/config.ts';
+import { FirestoreModelService } from '../src/service.ts';
 
 @Suite()
 export class FirestoreBasicSuite extends ModelBasicSuite {

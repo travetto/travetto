@@ -1,5 +1,5 @@
-import { BaseRemoteService, IRemoteServiceConfig, PostResponseHandler, PreRequestHandler, RequestDefinition } from './types';
-import { CommonUtil, restCast } from './util';
+import { BaseRemoteService, IRemoteServiceConfig, PostResponseHandler, PreRequestHandler, RequestDefinition } from './types.ts';
+import { CommonUtil, restCast } from './util.ts';
 
 function isResponse(v: unknown): v is Response {
   return !!v && typeof v === 'object' && 'status' in v && !!v.status && 'headers' in v && !!v.headers;

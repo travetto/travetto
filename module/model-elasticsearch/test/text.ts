@@ -4,7 +4,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { LongText, Text, Schema } from '@travetto/schema';
 
-import { ElasticsearchSchemaUtil } from '../src/internal/schema';
+import { ElasticsearchSchemaUtil } from '../src/internal/schema.ts';
 
 @Schema()
 class TextAble {

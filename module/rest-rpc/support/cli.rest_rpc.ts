@@ -6,8 +6,8 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { Ignore } from '@travetto/schema';
 
-import type { RestRpcClient } from '../src/config';
-import { RestRpcClientGeneratorService } from '../src/service';
+import type { RestRpcClient } from '../src/config.ts';
+import { RestRpcClientGeneratorService } from '../src/service.ts';
 
 /**
  * Run client rest operation

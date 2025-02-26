@@ -1,7 +1,7 @@
 import { Class } from '@travetto/runtime';
 import { SchemaChange } from '@travetto/schema';
 
-import { ModelType } from '../types/model';
+import { ModelType } from '../types/model.ts';
 
 /**
  * This interface defines the behavior for dealing with the
@@ -10,7 +10,7 @@ import { ModelType } from '../types/model';
  *
  * This is intended to be used during development only for rapid prototyping.
  *
- * @concrete ../internal/service/common#ModelStorageSupportTarget
+ * @concrete ../internal/service/common.ts#ModelStorageSupportTarget
  */
 export interface ModelStorageSupport {
 

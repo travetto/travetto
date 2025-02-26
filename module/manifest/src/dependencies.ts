@@ -1,9 +1,9 @@
-import { PackageUtil } from './package';
-import { path } from './path';
+import { PackageUtil } from './package.ts';
+import { path } from './path.ts';
 
-import type { Package, PackageDepType } from './types/package';
-import type { ManifestContext } from './types/context';
-import type { PackageModule } from './types/manifest';
+import type { Package, PackageDepType } from './types/package.ts';
+import type { ManifestContext } from './types/context.ts';
+import type { PackageModule } from './types/manifest.ts';
 
 type CreateOpts = Partial<Pick<PackageModule, 'main' | 'workspace' | 'prod'>> & { roleRoot?: boolean, parent?: PackageModule };
 

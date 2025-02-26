@@ -1,4 +1,4 @@
-import { Config, EnvVar } from '../src/decorator';
+import { Config, EnvVar } from '../src/decorator.ts';
 
 @Config('name')
 export class NameConfig {

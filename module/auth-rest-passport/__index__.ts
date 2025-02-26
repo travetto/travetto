@@ -1,2 +1,2 @@
-export * from './src/authenticator';
-export * from './src/util';
+export * from './src/authenticator.ts';
+export * from './src/util.ts';

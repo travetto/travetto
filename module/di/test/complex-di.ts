@@ -4,8 +4,8 @@ import { Suite, Test, BeforeEach } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { asFull } from '@travetto/runtime';
 
-import { DependencyRegistry } from '../src/registry';
-import { Injectable, InjectableFactory } from '../src/decorator';
+import { DependencyRegistry } from '../src/registry.ts';
+import { Injectable, InjectableFactory } from '../src/decorator.ts';
 
 abstract class Common { }
 @Injectable()

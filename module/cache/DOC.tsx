@@ -1,10 +1,10 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c, mod } from '@travetto/doc';
 
-import { Links } from '@travetto/model/support/doc.support';
+import { Links } from '@travetto/model/support/doc.support.ts';
 
-import { Cache, EvictCache } from './src/decorator';
-import { CacheModelSymbol, CacheService } from './src/service';
+import { Cache, EvictCache } from './src/decorator.ts';
+import { CacheModelSymbol, CacheService } from './src/service.ts';
 
 export const text = <>
   <c.StdHeader />

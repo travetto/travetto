@@ -1,2 +1,2 @@
-export * from './src/dialect';
-export * from './src/connection';
+export * from './src/dialect.ts';
+export * from './src/connection.ts';

@@ -6,11 +6,11 @@ import {
   LongText, Match, Max, MaxLength, Min, MinLength, Readonly,
   Required, Telephone, Url, Writeonly, Text, Secret, Specifier,
   SubTypeField
-} from './src/decorator/field';
+} from './src/decorator/field.ts';
 
-import { Schema } from './src/decorator/schema';
-import { Describe } from './src/decorator/common';
-import { DataUtil } from './src/data';
+import { Schema } from './src/decorator/schema.ts';
+import { Describe } from './src/decorator/common.ts';
+import { DataUtil } from './src/data.ts';
 
 export const text = <>
   <c.StdHeader />

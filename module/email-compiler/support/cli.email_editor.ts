@@ -3,7 +3,7 @@ import { CliCommand, CliUtil } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 
-import { EditorService } from './bin/editor';
+import { EditorService } from './bin/editor.ts';
 
 /** The email editor compilation service and output serving */
 @CliCommand({ with: { env: true } })

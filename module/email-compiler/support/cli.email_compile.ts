@@ -2,7 +2,7 @@ import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { Env, Runtime } from '@travetto/runtime';
 
-import { EmailCompiler } from '../src/compiler';
+import { EmailCompiler } from '../src/compiler.ts';
 
 /**
  * CLI Entry point for running the email server

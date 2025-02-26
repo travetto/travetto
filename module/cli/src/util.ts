@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 
 import { Env, ExecUtil, ShutdownManager, Runtime } from '@travetto/runtime';
 
-import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
+import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types.ts';
 
 const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
 const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);

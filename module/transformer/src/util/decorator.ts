@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { CoreUtil } from './core';
+import { CoreUtil } from './core.ts';
 
 /**
  * Utilities for dealing with decorators

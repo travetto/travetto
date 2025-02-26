@@ -2,10 +2,10 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { CliCommand, CliFlag } from '../src/decorators';
-import { CliCommandSchemaUtil } from '../src/schema';
-import { CliParseUtil } from '../src/parse';
-import { ParsedState } from '../src/types';
+import { CliCommand, CliFlag } from '../src/decorators.ts';
+import { CliCommandSchemaUtil } from '../src/schema.ts';
+import { CliParseUtil } from '../src/parse.ts';
+import { ParsedState } from '../src/types.ts';
 
 /**
  * My command

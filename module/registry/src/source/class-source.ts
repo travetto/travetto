@@ -2,8 +2,8 @@ import { EventEmitter } from 'node:events';
 
 import { Class, Env, Runtime, RuntimeIndex, describeFunction, flushPendingFunctions } from '@travetto/runtime';
 
-import { DynamicFileLoader } from '../internal/file-loader';
-import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
+import { DynamicFileLoader } from '../internal/file-loader.ts';
+import { ChangeSource, ChangeEvent, ChangeHandler } from '../types.ts';
 
 function isClass(cls: Function): cls is Class {
   return !!describeFunction(cls).class;

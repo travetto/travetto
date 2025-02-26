@@ -6,8 +6,8 @@ import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 import { StyleUtil } from '@travetto/terminal';
 
-import { LogEvent, LogFormatter } from '../types';
-import { LogFormatUtil } from './util';
+import { LogEvent, LogFormatter } from '../types.ts';
+import { LogFormatUtil } from './util.ts';
 
 /**
  * Level coloring

@@ -1,4 +1,4 @@
-import { Person } from './person';
+import { Person } from './person.ts';
 
 export function Test(): Person {
   return Person.from({

@@ -1,7 +1,7 @@
 import type { Any, Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
-import type { RouteConfig, Filter } from '../types';
+import type { RouteConfig, Filter } from '../types.ts';
 
 export type RouteApplies = (route: RouteConfig, config?: { basePath: string }) => boolean;
 
@@ -23,7 +23,7 @@ export abstract class ManagedInterceptorConfig {
 /**
  * Basic interceptor structure
  *
- * @concrete ../internal/types#RestInterceptorTarget
+ * @concrete ../internal/types.ts#RestInterceptorTarget
  */
 export interface RestInterceptor<C = Any> {
 

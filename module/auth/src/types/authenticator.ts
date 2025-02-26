@@ -1,5 +1,5 @@
 import { AnyMap } from '@travetto/runtime';
-import { Principal } from './principal';
+import { Principal } from './principal.ts';
 
 /**
  * Represents the general shape of additional login context, usually across multiple calls
@@ -9,7 +9,7 @@ export interface AuthenticatorState extends AnyMap { }
 /**
  * Supports validation payload of type T into an authenticated principal
  *
- * @concrete ../internal/types#AuthenticatorTarget
+ * @concrete ../internal/types.ts#AuthenticatorTarget
  */
 export interface Authenticator<T = unknown, C = unknown, P extends Principal = Principal> {
   /**

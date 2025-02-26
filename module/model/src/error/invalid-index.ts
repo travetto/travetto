@@ -1,7 +1,7 @@
 import { Class, AppError } from '@travetto/runtime';
 
-import { IndexConfig } from '../registry/types';
-import { ModelType } from '../types/model';
+import { IndexConfig } from '../registry/types.ts';
+import { ModelType } from '../types/model.ts';
 
 /**
  * Represents when an index is invalid

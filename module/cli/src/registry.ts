@@ -1,7 +1,7 @@
 import { asConstructable, Class, classConstruct, describeFunction, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { CliCommandConfig, CliCommandShape } from './types';
-import { CliUnknownCommandError } from './error';
+import { CliCommandConfig, CliCommandShape } from './types.ts';
+import { CliUnknownCommandError } from './error.ts';
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.{0,100}?)([.]tsx?)?$/;
 const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');

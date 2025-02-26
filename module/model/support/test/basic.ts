@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { ModelCrudSupport, Model, NotFoundError } from '@travetto/model';
 
-import { BaseModelSuite } from './base';
+import { BaseModelSuite } from './base.ts';
 
 @Model('basic_person')
 class Person {

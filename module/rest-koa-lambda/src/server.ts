@@ -5,7 +5,7 @@ import {
   AwsLambdaHandle, AwsLambdaRestServer, AwsLambdaSymbol,
   RestAwsConfig, LambdaContext, LambdaAPIGatewayProxyEvent
 } from '@travetto/rest-aws-lambda';
-import type { ServerHandle } from '@travetto/rest';
+import type { RestServerHandle } from '@travetto/rest';
 import { KoaRestServer } from '@travetto/rest-koa';
 import { castTo, asFull } from '@travetto/runtime';
 
@@ -33,8 +33,8 @@ export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRe
     return ret;
   }
 
-  override async listen(): Promise<ServerHandle> {
+  override async listen(): Promise<RestServerHandle> {
     this.listening = true;
-    return asFull<ServerHandle>({});
+    return asFull<RestServerHandle>({});
   }
 }

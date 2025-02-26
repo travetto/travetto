@@ -1,12 +1,12 @@
 import { fork } from 'node:child_process';
 
-import { Env, RuntimeIndex } from '@travetto/runtime';
-import { IpcChannel, SerializeUtil } from '@travetto/worker';
+import { Env, RuntimeIndex, Util } from '@travetto/runtime';
+import { IpcChannel } from '@travetto/worker';
 
-import { Events, TestLogEvent } from './types';
-import { TestConsumerShape } from '../consumer/types';
-import { TestEvent } from '../model/event';
-import { TestRun } from '../model/test';
+import { Events, TestLogEvent } from './types.ts';
+import { TestConsumerShape } from '../consumer/types.ts';
+import { TestEvent } from '../model/event.ts';
+import { TestRun } from '../model/test.ts';
 
 const log = (message: string): void => {
   process.send?.({ type: 'log', message } satisfies TestLogEvent);
@@ -24,7 +24,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   const channel = new IpcChannel<TestEvent & { error?: Error }>(
     fork(
-      RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'), ['test:child'],
+      RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv.ts'), ['test:child'],
       {
         cwd: suiteMod.sourcePath,
         env: {
@@ -43,7 +43,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
 
   channel.on('*', async ev => {
     try {
-      await consumer.onEvent(SerializeUtil.afterReceive(ev));  // Connect the consumer with the event stream from the child
+      await consumer.onEvent(Util.deserializeFromJson(JSON.stringify(ev)));  // Connect the consumer with the event stream from the child
     } catch {
       // Do nothing
     }
@@ -55,7 +55,7 @@ export async function buildStandardTestManager(consumer: TestConsumerShape, run:
   channel.send(Events.RUN, run);
 
   // Wait for complete
-  const result = await complete.then(ev => SerializeUtil.afterReceive(ev));
+  const result = await complete.then(ev => Util.deserializeFromJson<typeof ev>(JSON.stringify(ev)));
 
   // Kill on complete
   await channel.destroy();

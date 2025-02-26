@@ -3,10 +3,10 @@ import { isPromise } from 'node:util/types';
 
 import { AppError, Class, castTo, castKey, asConstructable } from '@travetto/runtime';
 
-import { ThrowableError, TestConfig, Assertion } from '../model/test';
-import { AssertCapture, CaptureAssert } from './capture';
-import { AssertUtil } from './util';
-import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types';
+import { ThrowableError, TestConfig, Assertion } from '../model/test.ts';
+import { AssertCapture, CaptureAssert } from './capture.ts';
+import { AssertUtil } from './util.ts';
+import { ASSERT_FN_OPERATOR, OP_MAPPING } from './types.ts';
 
 type StringFields<T> = {
   [K in Extract<keyof T, string>]:

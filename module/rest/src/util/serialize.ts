@@ -2,9 +2,9 @@ import { Readable } from 'node:stream';
 
 import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
-import { HeadersAddedSymbol } from '../internal/symbol';
-import { Renderable } from '../response/renderable';
-import { Request, Response } from '../types';
+import { HeadersAddedSymbol } from '../internal/symbol.ts';
+import { Renderable } from '../response/renderable.ts';
+import { Request, Response } from '../types.ts';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 

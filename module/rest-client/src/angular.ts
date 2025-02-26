@@ -1,12 +1,12 @@
 import { Class } from '@travetto/runtime';
 import { ControllerConfig } from '@travetto/rest';
 
-import { BaseClientGenerator } from './base';
-import type { Imp, RenderContent } from './types';
+import { BaseClientGenerator } from './base.ts';
+import type { Imp, RenderContent } from './types.ts';
 
-import { BaseAngularService, Configuration } from './shared/angular-service';
-import { CommonUtil } from './shared/util';
-import { BaseRemoteService } from './shared/types';
+import { BaseAngularService, Configuration } from './shared/angular-service.ts';
+import { CommonUtil } from './shared/util.ts';
+import { BaseRemoteService } from './shared/types.ts';
 
 const SVC = './shared/angular-service.ts';
 

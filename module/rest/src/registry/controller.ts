@@ -2,9 +2,9 @@ import { DependencyRegistry } from '@travetto/di';
 import { type Primitive, type Class, asFull, castTo, asConstructable } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
-import { EndpointConfig, ControllerConfig, EndpointDecorator } from './types';
-import { Filter, RouteHandler, ParamConfig } from '../types';
-import { RestInterceptor } from '../interceptor/types';
+import { EndpointConfig, ControllerConfig, EndpointDecorator } from './types.ts';
+import { Filter, RouteHandler, ParamConfig } from '../types.ts';
+import { RestInterceptor } from '../interceptor/types.ts';
 
 type ValidFieldNames<T> = {
   [K in keyof T]:

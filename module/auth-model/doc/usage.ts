@@ -2,7 +2,7 @@ import { AppError } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { ModelAuthService } from '@travetto/auth-model';
 
-import { User } from './model';
+import { User } from './model.ts';
 
 @Injectable()
 class UserService {

@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 import { DependencyRegistry } from '@travetto/di';
 import { type Request, RestCookieConfig, RestConfig, RestSslConfig, RestApplication } from '@travetto/rest';
 
-import { RestServerSupport, MakeRequestConfig, headerToShape } from './base';
+import { RestServerSupport, MakeRequestConfig, headerToShape } from './base.ts';
 
 /**
  * Support for invoking http requests against the server

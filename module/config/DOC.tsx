@@ -3,9 +3,7 @@ import { d, c } from '@travetto/doc';
 import { Field, Schema } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 
-import { Config as ConfigDec, EnvVar } from '@travetto/config/src/decorator';
-import { ConfigurationService } from '@travetto/config/src/service';
-import { OverrideConfigSource } from '@travetto/config/src/source/override';
+import { Config as ConfigDec, EnvVar, ConfigurationService, OverrideConfigSource } from '@travetto/config';
 
 const ConfigSource = d.codeLink('ConfigSource', 'src/source/types.ts', /interface ConfigSource/);
 

@@ -1,10 +1,10 @@
 import { Env } from '@travetto/runtime';
 
-import { CliCommand } from '../src/decorators';
-import { CliCommandSchema, CliCommandShape, CliValidationError } from '../src/types';
-import { CliCommandRegistry } from '../src/registry';
-import { CliCommandSchemaUtil } from '../src/schema';
-import { CliUtil } from '../src/util';
+import { CliCommand } from '../src/decorators.ts';
+import { CliCommandSchema, CliCommandShape, CliValidationError } from '../src/types.ts';
+import { CliCommandRegistry } from '../src/registry.ts';
+import { CliCommandSchemaUtil } from '../src/schema.ts';
+import { CliUtil } from '../src/util.ts';
 
 /**
  * Generates the schema for all CLI operations

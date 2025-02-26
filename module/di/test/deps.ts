@@ -1,5 +1,5 @@
-import { Injectable, Inject, InjectableFactory } from '../src/decorator';
-import { DbConfig, AltConfig, Empty } from './config';
+import { Injectable, Inject, InjectableFactory } from '../src/decorator.ts';
+import { DbConfig, AltConfig, Empty } from './config.ts';
 
 export abstract class BasePattern { }
 

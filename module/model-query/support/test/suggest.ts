@@ -1,11 +1,12 @@
 import assert from 'node:assert';
 
 import { ModelCrudSupport } from '@travetto/model';
-import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { Suite, Test } from '@travetto/test';
 
-import { Person } from './types';
-import { ModelQuerySuggestSupport } from '../../src/service/suggest';
+import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
+
+import { Person } from './types.ts';
+import { ModelQuerySuggestSupport } from '../../src/service/suggest.ts';
 
 @Suite()
 export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySuggestSupport & ModelCrudSupport> {

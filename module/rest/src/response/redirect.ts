@@ -1,5 +1,5 @@
-import { Renderable } from './renderable';
-import { Response } from '../types';
+import { Renderable } from './renderable.ts';
+import { Response } from '../types.ts';
 
 /**
  * Simple redirect response

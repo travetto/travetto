@@ -4,12 +4,11 @@ import kCompress from 'koa-compress';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { RestConfig, RestServer, RouteConfig, RestCookieConfig, RestNetUtil } from '@travetto/rest';
+import { RestConfig, RestServer, RouteConfig, RestCookieConfig, RestNetUtil, RestServerHandle } from '@travetto/rest';
 
-import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
-import { ServerHandle } from '@travetto/rest/src/types';
+import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol.ts';
 
-import { KoaServerUtil } from './internal/util';
+import { KoaServerUtil } from './internal/util.ts';
 
 type Keyed = { key?: symbol | string };
 type Routes = ReturnType<kRouter<unknown, koa.Context>['routes']>;
@@ -80,7 +79,7 @@ export class KoaRestServer implements RestServer<koa> {
     this.raw.use(middleware);
   }
 
-  async listen(): Promise<ServerHandle> {
+  async listen(): Promise<RestServerHandle> {
     let raw: https.Server | koa = this.raw;
     if (this.config.ssl?.active) {
       raw = https

@@ -1,8 +1,8 @@
 import { CliCommand } from '@travetto/cli';
 import { Env, Runtime, describeFunction } from '@travetto/runtime';
 
-import { SuiteRegistry } from '../src/registry/suite';
-import { RunnerUtil } from '../src/execute/util';
+import { SuiteRegistry } from '../src/registry/suite.ts';
+import { RunnerUtil } from '../src/execute/util.ts';
 
 @CliCommand({ hidden: true })
 export class TestDigestCommand {

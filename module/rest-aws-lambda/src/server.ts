@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { RestServer, RestApplication } from '@travetto/rest';
 
-import { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from './types';
+import { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from './types.ts';
 
 export const AwsLambdaSymbol = Symbol.for('@travetto/rest-aws-lambda:entry');
 

@@ -5,11 +5,11 @@ import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
 
-import { FilterContext } from '../types';
-import { RestConfig } from '../application/config';
+import { FilterContext } from '../types.ts';
+import { RestConfig } from '../application/config.ts';
 
-import { ManagedInterceptorConfig, RestInterceptor } from './types';
-import { SerializeInterceptor } from './serialize';
+import { ManagedInterceptorConfig, RestInterceptor } from './types.ts';
+import { SerializeInterceptor } from './serialize.ts';
 
 /**
  * Rest cookie configuration

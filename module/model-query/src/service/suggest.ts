@@ -1,13 +1,13 @@
 import { Class } from '@travetto/runtime';
 import { ModelType } from '@travetto/model';
 
-import { PageableModelQuery } from '../model/query';
-import { ModelQuerySupport } from './query';
-import { ValidStringFields } from '../model/where-clause';
+import { PageableModelQuery } from '../model/query.ts';
+import { ModelQuerySupport } from './query.ts';
+import { ValidStringFields } from '../model/where-clause.ts';
 
 /**
  * The contract for a model service with suggesting support
- * @concrete ../internal/service/common#ModelQuerySuggestSupportTarget
+ * @concrete ../internal/service/common.ts#ModelQuerySuggestSupportTarget
  */
 export interface ModelQuerySuggestSupport extends ModelQuerySupport {
   /**

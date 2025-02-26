@@ -1,6 +1,6 @@
 import { CliCommand } from '@travetto/cli';
 
-import { BasePackCommand } from './pack.base';
+import { BasePackCommand } from './pack.base.ts';
 
 /**
  * Standard pack support

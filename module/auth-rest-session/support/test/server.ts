@@ -9,8 +9,8 @@ import { Controller, Get, Body, Post, Put, Request, FilterContext, RestIntercept
 import { Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
-import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { BaseRestSuite } from '@travetto/rest/support/test/base';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { BaseRestSuite } from '@travetto/rest/support/test/base.ts';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 

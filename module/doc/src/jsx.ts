@@ -1,9 +1,9 @@
-import { createElement, JSXElement, JSXComponentFunction as CompFn } from '@travetto/doc/jsx-runtime';
+import { createElement, JSXElement, JSXComponentFunction as CompFn } from '@travetto/doc/jsx-runtime.ts';
 import { castTo, TypedObject } from '@travetto/runtime';
 
-import { LIB_MAPPING } from './mapping/lib-mapping';
-import { MOD_MAPPING } from './mapping/mod-mapping';
-import { RunConfig } from './util/run';
+import { LIB_MAPPING } from './mapping/lib-mapping.ts';
+import { MOD_MAPPING } from './mapping/mod-mapping.ts';
+import { RunConfig } from './util/run.ts';
 
 type CodeProps = { title: string, src: string | Function, language?: string, outline?: boolean, startRe?: RegExp, endRe?: RegExp };
 type InstallProps = { title: string, pkg: string };

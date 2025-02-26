@@ -1,4 +1,4 @@
-import { IRemoteService, ParamConfig, RequestDefinition, RequestOptions } from './types';
+import { IRemoteService, ParamConfig, RequestDefinition, RequestOptions } from './types.ts';
 
 type BodyPart = { param: unknown, config: ParamConfig };
 
