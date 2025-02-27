@@ -4,12 +4,12 @@ import { AppError, toConcrete, castTo, Class, ClassInstance, Env, Runtime, Runti
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { ConfigTarget } from './internal/types';
 import { ParserManager } from './parser/parser';
 import { ConfigData } from './parser/types';
 import { ConfigSource, ConfigSpec } from './source/types';
 import { FileConfigSource } from './source/file';
 import { OverrideConfigSource } from './source/override';
+import { Configuration } from './types';
 
 type ConfigSpecSimple = Omit<ConfigSpec, 'data'>;
 
@@ -89,7 +89,7 @@ export class ConfigurationService {
    *   - Will not show fields marked as secret
    */
   async exportActive(): Promise<{ sources: ConfigSpecSimple[], active: ConfigData }> {
-    const configTargets = await DependencyRegistry.getCandidateTypes(ConfigTarget);
+    const configTargets = await DependencyRegistry.getCandidateTypes(toConcrete<Configuration>());
     const configs = await Promise.all(
       configTargets
         .filter(el => el.qualifier === DependencyRegistry.get(el.class).qualifier) // Is primary?
