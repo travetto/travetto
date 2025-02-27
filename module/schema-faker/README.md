@@ -27,7 +27,7 @@ By default all types are mapped as-is:
       *  url
       *  telephone
       *  postalCode
-   *  Sub-schemas as registered via [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) decorators
+   *  Sub-schemas as registered via [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) decorators
 In addition to the general types, the code relies upon name matching to provide additional refinement:
 
 **Code: Supported Mappings**

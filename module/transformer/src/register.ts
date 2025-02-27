@@ -134,6 +134,24 @@ export function OnClass(...target: string[]) {
 }
 
 /**
+ * Listens for a `ts.TypeAliasDeclaration` on descent
+ */
+export function OnTypeAlias(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.TypeAliasDeclaration) => R>
+  ): void => storeHandler(inst, d.value!, 'before', 'type', target);
+}
+
+/**
+ * Listens for a `ts.InterfaceDeclaration` on descent
+ */
+export function OnInterface(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.InterfaceDeclaration) => R>
+  ): void => storeHandler(inst, d.value!, 'before', 'interface', target);
+}
+
+/**
  * Listens for a `ts.CallExpression`, on ascent
  */
 export function AfterCall(...target: string[]) {
@@ -212,4 +230,23 @@ export function AfterClass(...target: string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.ClassDeclaration, dm?: DecoratorMeta) => R>
   ): void => storeHandler(inst, d.value!, 'after', 'class', target);
+}
+
+
+/**
+ * Listens for a `ts.TypeAliasDeclaration` on ascent
+ */
+export function AfterTypeAlias(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.TypeAliasDeclaration) => R>
+  ): void => storeHandler(inst, d.value!, 'after', 'type', target);
+}
+
+/**
+ * Listens for a `ts.InterfaceDeclaration` on ascent
+ */
+export function AfterInterface(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.InterfaceDeclaration) => R>
+  ): void => storeHandler(inst, d.value!, 'after', 'interface', target);
 }

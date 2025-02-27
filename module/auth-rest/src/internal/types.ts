@@ -1,7 +1,6 @@
 import { ParamExtractor } from '@travetto/rest';
-import { PrincipalTarget } from '@travetto/auth/src/internal/types';
-
-export class PrincipalCodecTarget { }
+import { toConcrete } from '@travetto/runtime';
+import { Principal } from '@travetto/auth';
 
 // Register context providers
-ParamExtractor.registerContext(PrincipalTarget, (c, req) => req.user);
+ParamExtractor.registerContext(toConcrete<Principal>(), (c, req) => req.user);

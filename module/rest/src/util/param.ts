@@ -1,4 +1,4 @@
-import { Class, AppError } from '@travetto/runtime';
+import { Class, AppError, toConcrete } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { EndpointConfig } from '../registry/types';
@@ -39,6 +39,10 @@ class $ParamExtractor {
       body: (__, r): unknown => r.body,
       context: (c, req, res, schema): unknown => this.getExtractor(c.contextType!)(c, req, res, schema)
     };
+
+
+    this.registerContext(toConcrete<Request>(), (_, req) => req);
+    this.registerContext(toConcrete<Response>(), (_, __, res) => res);
   }
 
   /**

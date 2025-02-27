@@ -1,15 +1,15 @@
 import util from 'node:util';
 
-import { AppError, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
+import { AppError, toConcrete, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { ConfigSourceTarget, ConfigTarget } from './internal/types';
 import { ParserManager } from './parser/parser';
 import { ConfigData } from './parser/types';
 import { ConfigSource, ConfigSpec } from './source/types';
 import { FileConfigSource } from './source/file';
 import { OverrideConfigSource } from './source/override';
+import { ConfigBase } from './internal/types';
 
 type ConfigSpecSimple = Omit<ConfigSpec, 'data'>;
 
@@ -46,10 +46,10 @@ export class ConfigurationService {
    *  - If of the same priority, then alpha sort on the source
    */
   async postConstruct(): Promise<void> {
-    const providers = await DependencyRegistry.getCandidateTypes(ConfigSourceTarget);
+    const providers = await DependencyRegistry.getCandidateTypes(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(
-      providers.map(async (el) => await DependencyRegistry.getInstance<ConfigSource>(el.class, el.qualifier))
+      providers.map(async (el) => await DependencyRegistry.getInstance(el.class, el.qualifier))
     );
 
     const parser = await DependencyRegistry.getInstance(ParserManager);
@@ -89,7 +89,7 @@ export class ConfigurationService {
    *   - Will not show fields marked as secret
    */
   async exportActive(): Promise<{ sources: ConfigSpecSimple[], active: ConfigData }> {
-    const configTargets = await DependencyRegistry.getCandidateTypes(ConfigTarget);
+    const configTargets = await DependencyRegistry.getCandidateTypes(toConcrete<ConfigBase>());
     const configs = await Promise.all(
       configTargets
         .filter(el => el.qualifier === DependencyRegistry.get(el.class).qualifier) // Is primary?

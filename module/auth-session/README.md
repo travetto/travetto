@@ -58,7 +58,7 @@ export class AuthSessionInterceptor implements RestInterceptor {
 }
 ```
 
-The [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L16) provides the basic integration with the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16) to authenticate and isolate session data.  The usage is fairly simple, but the import pattern to follow is:
+The [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L16) provides the basic integration with the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15) to authenticate and isolate session data.  The usage is fairly simple, but the import pattern to follow is:
    *  load
    *  read/modify
    *  persist

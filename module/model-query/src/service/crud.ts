@@ -6,7 +6,7 @@ import { ModelQuery } from '../model/query';
 
 /**
  * The contract for a model service with query support
- * @concrete ../internal/service/common#ModelQueryCrudSupportTarget
+ * @concrete
  */
 export interface ModelQueryCrudSupport extends ModelCrudSupport, ModelQuerySupport {
   /**

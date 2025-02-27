@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import { AutoCreate, Inject, Injectable } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 import { ControllerRegistry } from '@travetto/rest';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { ManifestModuleUtil } from '@travetto/manifest';
@@ -9,8 +9,8 @@ import { ManifestModuleUtil } from '@travetto/manifest';
 import { clientFactory } from '../support/client/rpc';
 import { RestRpcClient, RestRpcConfig } from './config';
 
-@Injectable()
-export class RestRpcClientGeneratorService implements AutoCreate {
+@Injectable({ autoCreate: true })
+export class RestRpcClientGeneratorService {
 
   @Inject()
   config: RestRpcConfig;

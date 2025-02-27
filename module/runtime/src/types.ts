@@ -49,6 +49,10 @@ export const hasFunction = <T>(key: keyof T) => (o: unknown): o is T =>
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 
+export function toConcrete<T extends unknown>(): Class<T> {
+  return arguments[0];
+}
+
 /**
  * Range of bytes, inclusive
  */

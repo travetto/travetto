@@ -1,6 +1,6 @@
-import { MailService, EmailOptions } from '@travetto/email';
-import { MailTransportTarget } from '@travetto/email/src/internal/types';
+import { MailService, EmailOptions, MailTransport } from '@travetto/email';
 import { DependencyRegistry, Injectable } from '@travetto/di';
+import { toConcrete } from '@travetto/runtime';
 
 import { EditorConfig } from './config';
 
@@ -13,6 +13,8 @@ export class EditorSendService {
   ethereal = false;
 
   async service(): Promise<MailService> {
+    const MailTransportTarget = toConcrete<MailTransport>();
+
     const transports = DependencyRegistry.getCandidateTypes(MailTransportTarget);
 
     if (!transports.length) {

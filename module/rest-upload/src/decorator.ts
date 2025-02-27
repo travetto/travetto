@@ -1,7 +1,6 @@
-import { AppError, asConstructable, AsyncMethodDescriptor, ClassInstance } from '@travetto/runtime';
-import { ControllerRegistry, ParamConfig, Param } from '@travetto/rest';
+import { AppError, toConcrete, asConstructable, AsyncMethodDescriptor, ClassInstance } from '@travetto/runtime';
+import { ControllerRegistry, ParamConfig, Param, Request } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
-import { RequestTarget } from '@travetto/rest/src/internal/types';
 
 import { RestUploadInterceptor } from './interceptor';
 import { RestUploadConfig } from './config';
@@ -61,6 +60,8 @@ export function Upload(
  * @augments `@travetto/rest:Endpoint`
  */
 export function UploadAll(config: Partial<ParamConfig> & UploadConfig = {}) {
+  const RequestTarget = toConcrete<Request>();
+
   return function <T>(target: T, propertyKey: string, desc: AsyncMethodDescriptor): void {
     const targetClass = asConstructable(target).constructor;
 

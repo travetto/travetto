@@ -104,7 +104,7 @@ The pattern is that underscores(_) translate to colons (:), and the <code class=
 
 <h2 id="binding-flags">Binding Flags</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> is a wrapper for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a>, and so every class that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> decorator is now a full <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a> class. The fields of the class represent the flags that are available to the command.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> is a wrapper for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">@Schema</a>, and so every class that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> decorator is now a full <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">@Schema</a> class. The fields of the class represent the flags that are available to the command.
 
   <figure class="code">
     <figcaption class="code">Basic Command with Flag
@@ -293,7 +293,7 @@ Options:
 
 <h2 id="customization">Customization</h2>
 
-By default, all fields are treated as flags and all parameters of <code class="item method">main()</code> are treated as arguments within the validation process.  Like the standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a> behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
+By default, all fields are treated as flags and all parameters of <code class="item method">main()</code> are treated as arguments within the validation process.  Like the standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">@Schema</a> behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
 
   <figure class="code">
     <figcaption class="code">Custom Command with Metadata

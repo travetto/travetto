@@ -16,7 +16,7 @@ yarn add @travetto/model
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
 ## Contracts
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19).
 
 ### Basic
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9) contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -99,7 +99,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
 ```
 
 ### Indexed
-Additionally, an implementation may support the ability for basic [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12) queries. This is not the full featured query support of [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support."), but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
+Additionally, an implementation may support the ability for basic [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11) queries. This is not the full featured query support of [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support."), but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
 
 **Code: Indexed Contract**
 ```typescript

@@ -1,13 +1,15 @@
 import { ClassList, SchemaRegistry } from '@travetto/schema';
-import { PrincipalTarget } from '@travetto/auth/src/internal/types';
-import { Class, TypedObject } from '@travetto/runtime';
+import { toConcrete, Class, TypedObject } from '@travetto/runtime';
+import { Principal } from '@travetto/auth';
 
-const FIELDS: Record<keyof PrincipalTarget, Class | ClassList> = {
+const PrincipalTarget = toConcrete<Principal>();
+
+const FIELDS: Record<keyof Principal, Class | ClassList> = {
   id: String,
   expiresAt: Date,
   issuedAt: Date,
-  maxAge: Number,
   issuer: String,
+  sessionId: String,
   permissions: [String],
   details: Object,
 };

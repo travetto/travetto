@@ -6,8 +6,8 @@ import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry'
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
-import { AutoCreateTarget } from './internal/types';
 
+class AutoCreate { }
 type TargetId = string;
 type ClassId = string;
 export type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: string };
@@ -229,10 +229,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       const { DependencyRegistration } = await import('../support/dynamic.injection');
       DependencyRegistration.init(this);
     }
-    // Allow for auto-creation
-    for (const cfg of await this.getCandidateTypes(AutoCreateTarget)) {
-      await this.getInstance(cfg.class, cfg.qualifier);
-    }
+
+    await this.getCandidateInstances(AutoCreate);
   }
 
   /**
@@ -289,7 +287,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Get all available candidate types for the target
    */
-  getCandidateTypes<T, U = T>(target: Class<U>): InjectableConfig<T>[] {
+  getCandidateTypes<T>(target: Class<T>): InjectableConfig<T>[] {
     const qualifiers = this.targetToClass.get(target.Ⲑid)!;
     const uniqueQualifiers = qualifiers ? Array.from(new Set(qualifiers.values())) : [];
     return castTo(uniqueQualifiers.map(id => this.get(id)));
@@ -298,7 +296,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Get candidate instances by target type, with an optional filter
    */
-  getCandidateInstances<T>(target: Class, predicate?: (cfg: InjectableConfig<T>) => boolean): Promise<T[]> {
+  getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectableConfig<T>) => boolean): Promise<T[]> {
     const inputs = this.getCandidateTypes<T>(target).filter(x => !predicate || predicate(x));
     return Promise.all(inputs.map(l => this.getInstance<T>(l.class, l.qualifier)));
   }
@@ -329,7 +327,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     config.class = cls;
     config.qualifier = pConfig.qualifier ?? config.qualifier ?? Symbol.for(cls.Ⲑid);
     if (pConfig.interfaces) {
-      config.interfaces?.push(...pConfig.interfaces);
+      (config.interfaces ??= []).push(...pConfig.interfaces);
     }
     if (pConfig.primary !== undefined) {
       config.primary = pConfig.primary;
@@ -347,6 +345,9 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
           ...pConfig.dependencies.fields
         }
       };
+    }
+    if (pConfig.autoCreate) {
+      (config.interfaces ??= []).push(AutoCreate);
     }
   }
 
@@ -416,7 +417,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     const config: InjectableConfig<T> = castTo(this.getOrCreatePending(cls));
 
-    if (!(typeof config.enabled === 'boolean' ? config.enabled : config.enabled())) {
+    if (config.enabled !== undefined && !(typeof config.enabled === 'boolean' ? config.enabled : config.enabled())) {
       return config; // Do not setup if disabled
     }
 
