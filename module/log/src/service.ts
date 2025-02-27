@@ -1,5 +1,5 @@
 import { ConsoleListener, ConsoleManager, ConsoleEvent, toConcrete } from '@travetto/runtime';
-import { AutoCreate, DependencyRegistry, Injectable } from '@travetto/di';
+import { DependencyRegistry, Injectable } from '@travetto/di';
 
 import { LogDecorator, LogEvent, Logger } from './types';
 import { CommonLogger } from './common';
@@ -7,8 +7,8 @@ import { CommonLogger } from './common';
 /**
  * Logger service
  */
-@Injectable()
-export class LogService implements ConsoleListener, AutoCreate {
+@Injectable({ autoCreate: true })
+export class LogService implements ConsoleListener {
 
   /**
    * Log listeners

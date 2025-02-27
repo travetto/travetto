@@ -1,12 +1,13 @@
 import {
   Class, Runtime, asConstructable, castTo, classConstruct, describeFunction,
-  asFull, castKey, TypedFunction, hasFunction, AppError, toConcrete
+  asFull, castKey, TypedFunction, hasFunction, AppError
 } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig, AutoCreate } from './types';
+import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
 
+class AutoCreate { }
 type TargetId = string;
 type ClassId = string;
 export type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: string };
@@ -229,7 +230,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       DependencyRegistration.init(this);
     }
 
-    await this.getCandidateInstances(toConcrete<AutoCreate>());
+    await this.getCandidateInstances(AutoCreate);
   }
 
   /**
@@ -326,7 +327,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     config.class = cls;
     config.qualifier = pConfig.qualifier ?? config.qualifier ?? Symbol.for(cls.Ⲑid);
     if (pConfig.interfaces) {
-      config.interfaces?.push(...pConfig.interfaces);
+      (config.interfaces ??= []).push(...pConfig.interfaces);
     }
     if (pConfig.primary !== undefined) {
       config.primary = pConfig.primary;
@@ -344,6 +345,9 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
           ...pConfig.dependencies.fields
         }
       };
+    }
+    if (pConfig.autoCreate) {
+      (config.interfaces ??= []).push(AutoCreate);
     }
   }
 
@@ -413,7 +417,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     const config: InjectableConfig<T> = castTo(this.getOrCreatePending(cls));
 
-    if (!(typeof config.enabled === 'boolean' ? config.enabled : config.enabled())) {
+    if (config.enabled !== undefined && !(typeof config.enabled === 'boolean' ? config.enabled : config.enabled())) {
       return config; // Do not setup if disabled
     }
 

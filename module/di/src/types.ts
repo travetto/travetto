@@ -17,6 +17,24 @@ interface Core<T = unknown> {
 }
 
 /**
+ * State of a Dependency Target
+ */
+interface CoreTarget<T = unknown> extends Core<T> {
+  /**
+   * Is this injectable enabled
+   */
+  enabled?: boolean | (() => boolean);
+  /**
+   * Is this the primary instance
+   */
+  primary?: boolean;
+  /**
+   * Should the target be auto-created
+   */
+  autoCreate?: boolean;
+}
+
+/**
  * State of a Dependency
  */
 export interface Dependency<T = unknown> extends Core<T> {
@@ -35,11 +53,7 @@ export interface Dependency<T = unknown> extends Core<T> {
 /**
  * Injectable configuration
  */
-export interface InjectableConfig<T = unknown> extends Core<T> {
-  /**
-   * Is this injectable enabled
-   */
-  enabled: boolean | (() => boolean);
+export interface InjectableConfig<T = unknown> extends CoreTarget<T> {
   /**
    * Reference for the class
    */
@@ -48,10 +62,6 @@ export interface InjectableConfig<T = unknown> extends Core<T> {
    * Factory function for the injectable
    */
   factory?: (...args: unknown[]) => T;
-  /**
-   * Is this the primary instance
-   */
-  primary: boolean;
   /**
    * List of dependencies as fields or as constructor arguments
    */
@@ -68,26 +78,13 @@ export interface InjectableConfig<T = unknown> extends Core<T> {
 /**
  * Factory configuration
  */
-export interface InjectableFactoryConfig<T = unknown> extends Core<T> {
-  /**
-   * Is this injectable enabled
-   */
-  enabled?: boolean | (() => boolean);
+export interface InjectableFactoryConfig<T = unknown> extends CoreTarget<T> {
   /**
    * Src of the factory method
    */
   src: Class<T>;
   /**
-   * Is this the primary instance
-   */
-  primary?: boolean;
-  /**
    * List of all dependencies as function arguments
    */
   dependencies?: Dependency[];
 }
-
-/**
- * @concrete
- */
-export interface AutoCreate { }
