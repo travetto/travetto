@@ -94,7 +94,7 @@ Examples of mappings:
 The pattern is that underscores(_) translate to colons (:), and the `cli.` prefix, and `.ts` suffix are dropped.
 
 ## Binding Flags
-[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class. The fields of the class represent the flags that are available to the command.
+[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) class. The fields of the class represent the flags that are available to the command.
 
 **Code: Basic Command with Flag**
 ```typescript
@@ -251,7 +251,7 @@ $ trv basic:arglist -r 10 5 3 9 8 1
 ```
 
 ## Customization
-By default, all fields are treated as flags and all parameters of `main()` are treated as arguments within the validation process.  Like the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
+By default, all fields are treated as flags and all parameters of `main()` are treated as arguments within the validation process.  Like the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
 
 **Code: Custom Command with Metadata**
 ```typescript

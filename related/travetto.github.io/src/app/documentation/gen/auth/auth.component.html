@@ -123,7 +123,7 @@ Overall, the structure is simple, but drives home the primary use cases of the f
 
   <figure class="code">
     <figcaption class="code">Authorization Service
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L14">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthService</span> <span class="token punctuation">{{'{'}}</span>
@@ -149,22 +149,22 @@ Overall, the structure is simple, but drives home the primary use cases of the f
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L14">AuthService</a> operates as the owner of the current auth state for a given "request".  "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. <br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13">AuthService</a> operates as the owner of the current auth state for a given "request".  "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. <br><br>
 The service allows for storing and retrieving the active <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal Contract</a>, and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  <a class="module-link" routerLink="/docs/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a> makes heavy use of this state for enforcing routes when authentication is required. <br><br>
 
 <h3 id="login">Login</h3>
 
-"Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials.  Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L14">AuthService</a> operates in this fashion, in which a set of credentials and potential <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14">Authenticator Contract</a> s are submitted, and the service will attempt to authenticate.  <br><br>
+"Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials.  Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13">AuthService</a> operates in this fashion, in which a set of credentials and potential <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14">Authenticator Contract</a> s are submitted, and the service will attempt to authenticate.  <br><br>
 Upon successful authentication, an optional <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer Contract</a> may be invoked to authorize the authenticated user.  The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14">Authenticator Contract</a> is assumed to be only one within the system, and should be tied to the specific product you are building for.  The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer Contract</a> should be assumed to have multiple sources, and are generally specific to external third parties.  All of these values are collected via the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module and will be auto-registered on startup. <br><br>
 If this process is too cumbersome or restrictive, manually authenticating and authorizing is still more than permissible, and setting the principal within the service is a logical equivalent to login.
 
 <h2 id="authorization-context">Authorization Context</h2>
 
-When working with framework's authentication, the authenticated information is exposed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16">AuthContext</a>, object. <br><br>
+When working with framework's authentication, the authenticated information is exposed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15">AuthContext</a>, object. <br><br>
 
   <figure class="code">
     <figcaption class="code">Auth Context Outline
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L16">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthContext</span> <span class="token punctuation">{{'{'}}</span>
