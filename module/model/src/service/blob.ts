@@ -3,7 +3,7 @@ import { BinaryInput, BlobMeta, ByteRange, TimeSpan } from '@travetto/runtime';
 /**
  * Support for Blobs CRUD.
  *
- * @concrete .
+ * @concrete
  */
 export interface ModelBlobSupport {
 

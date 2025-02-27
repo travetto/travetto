@@ -5,7 +5,7 @@ import { ModelQuery, PageableModelQuery } from '../model/query';
 
 /**
  * The contract for a model service with query support
- * @concrete .
+ * @concrete
  */
 export interface ModelQuerySupport {
   /**

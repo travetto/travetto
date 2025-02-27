@@ -3,7 +3,7 @@ import { EmailOptions, SentEmail } from './types';
 /**
  * Default mail transport
  *
- * @concrete .
+ * @concrete
  */
 export interface MailTransport {
   send<S extends SentEmail = SentEmail>(mail: EmailOptions): Promise<S>;

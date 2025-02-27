@@ -3,7 +3,7 @@ import { Principal } from './principal';
 /**
  * Definition of an authorization source, which validates a principal into an authorized principal
  *
- * @concrete .
+ * @concrete
  */
 export interface Authorizer<P extends Principal = Principal> {
   /**

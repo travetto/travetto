@@ -6,7 +6,7 @@ import { ModelBasicSupport } from './basic';
 
 /**
  * Interface for simple CRUD
- * @concrete .
+ * @concrete
  */
 export interface ModelCrudSupport extends ModelBasicSupport {
 

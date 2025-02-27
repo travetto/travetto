@@ -20,7 +20,7 @@ export type AwsLambdaHandle = AwsLambdaHandler['handle'];
 
 /**
  * Interface for lambda rest servers
- * @concrete .
+ * @concrete
  */
 export interface AwsLambdaRestServer extends RestServer, AwsLambdaHandler { }
 

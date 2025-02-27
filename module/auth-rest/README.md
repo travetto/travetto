@@ -37,7 +37,7 @@ export interface AuthenticatorState extends AnyMap { }
 /**
  * Supports validation payload of type T into an authenticated principal
  *
- * @concrete .
+ * @concrete
  */
 export interface Authenticator<T = unknown, C = unknown, P extends Principal = Principal> {
   /**

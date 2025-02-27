@@ -1,7 +1,7 @@
 export type ConfigData = Record<string, unknown>;
 
 /**
- * @concrete .
+ * @concrete
  */
 export interface ConfigParser {
   ext: string[];

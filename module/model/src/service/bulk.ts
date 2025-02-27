@@ -59,7 +59,7 @@ export class BulkProcessError extends AppError<{ errors: BulkErrorItem[] }> {
 /**
  * Determines if model allows for bulk operations
  *
- * @concrete .
+ * @concrete
  */
 export interface ModelBulkSupport extends ModelCrudSupport {
   processBulk<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[]): Promise<BulkResponse>;

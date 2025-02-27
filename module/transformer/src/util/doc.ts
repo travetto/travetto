@@ -77,6 +77,15 @@ export class DocUtil {
   }
 
   /**
+   * Has JS Doc tags for a type
+   */
+  static hasDocTag(type: ts.Type | ts.Symbol, name: string): boolean {
+    const tags = CoreUtil.getSymbol(type)?.getJsDocTags() ?? [];
+    return tags.some(el => el.name === name);
+  }
+
+
+  /**
    * Read augments information
    * @param type
    */

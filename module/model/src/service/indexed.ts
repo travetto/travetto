@@ -6,7 +6,7 @@ import { ModelBasicSupport } from './basic';
 /**
  * Support for simple indexed activity
  *
- * @concrete .
+ * @concrete
  */
 export interface ModelIndexedSupport extends ModelBasicSupport {
   /**

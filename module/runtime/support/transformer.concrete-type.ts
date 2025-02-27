@@ -12,7 +12,7 @@ const SRC = '@travetto/runtime/src/types.ts';
 export class ConcreteTransformer {
 
   static #isConcreteSimple(node: ts.InterfaceDeclaration | ts.TypeAliasDeclaration): boolean {
-    return /^\s*[*]\s+@concrete\s+[.]\s*$/gm.test(node.getFullText());
+    return /^\s*[*]\s+@concrete\s*$/gm.test(node.getFullText());
   }
 
   static #createConcreteFunction(state: TransformerState, name: string | ts.Identifier): ts.FunctionDeclaration {

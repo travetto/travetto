@@ -50,7 +50,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     return { category: 'void', type };
   } else if (flags & ts.TypeFlags.Undefined) {
     return { category: 'undefined', type };
-  } else if (DocUtil.readDocTag(type, 'concrete').length) {
+  } else if (DocUtil.hasDocTag(type, 'concrete')) {
     return { category: 'concrete', type };
   } else if (flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never)) { // Any or unknown
     return { category: 'unknown', type };
@@ -70,7 +70,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     if (CoreUtil.hasTarget(resolvedType)) {
       resolvedType = resolvedType.target;
       // If resolved target has a concrete type
-      if (DocUtil.readDocTag(resolvedType, 'concrete').length) {
+      if (DocUtil.hasDocTag(resolvedType, 'concrete')) {
         return { category: 'concrete', type: resolvedType };
       }
     }
@@ -273,32 +273,34 @@ export const TypeBuilder: {
   },
   concrete: {
     build: (resolver, type) => {
-      const [tag] = DocUtil.readDocTag(type, 'concrete');
-      if (tag) {
-        let [importName, name] = tag.split('#');
-
-        // Resolving relative to source file
-        if (!importName || importName.startsWith('.')) {
-          const rawSourceFile: string = DeclarationUtil.getDeclarations(type)
-            ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
-            ?.getSourceFile().fileName ?? '';
-
-          if (!importName || importName === '.') {
-            importName = resolver.getFileImportName(rawSourceFile);
-          } else {
-            const base = path.dirname(rawSourceFile);
-            importName = resolver.getFileImportName(path.resolve(base, importName));
-          }
-        }
-
-        // Convert name to $Concrete suffix if not provided
-        if (!name) {
-          const [decl] = DeclarationUtil.getDeclarations(type).filter(x => ts.isInterfaceDeclaration(x) || ts.isTypeAliasDeclaration(x));
-          name = `${decl.name.text}$Concrete`;
-        }
-
-        return { key: 'managed', name, importName };
+      if (!DocUtil.hasDocTag(type, 'concrete')) {
+        return;
       }
+
+      const [tag] = DocUtil.readDocTag(type, 'concrete');
+      let [importName, name] = tag?.split('#') ?? [];
+
+      // Resolving relative to source file
+      if (!importName || importName.startsWith('.')) {
+        const rawSourceFile: string = DeclarationUtil.getDeclarations(type)
+          ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
+          ?.getSourceFile().fileName ?? '';
+
+        if (!importName || importName === '.') {
+          importName = resolver.getFileImportName(rawSourceFile);
+        } else {
+          const base = path.dirname(rawSourceFile);
+          importName = resolver.getFileImportName(path.resolve(base, importName));
+        }
+      }
+
+      // Convert name to $Concrete suffix if not provided
+      if (!name) {
+        const [decl] = DeclarationUtil.getDeclarations(type).filter(x => ts.isInterfaceDeclaration(x) || ts.isTypeAliasDeclaration(x));
+        name = `${decl.name.text}$Concrete`;
+      }
+
+      return { key: 'managed', name, importName };
     }
   }
 };

@@ -7,6 +7,6 @@ export type ConfigOverrides = {
 
 /**
  * Contract for all configuration classes
- * @concrete .
+ * @concrete
  */
 export interface ConfigBase { }
