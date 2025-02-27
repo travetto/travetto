@@ -10,7 +10,7 @@ import { ModelType } from '../types/model';
  *
  * This is intended to be used during development only for rapid prototyping.
  *
- * @concrete ../internal/service/common#ModelStorageSupportTarget
+ * @concrete .
  */
 export interface ModelStorageSupport {
 

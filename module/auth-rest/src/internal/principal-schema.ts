@@ -1,19 +1,21 @@
 import { ClassList, SchemaRegistry } from '@travetto/schema';
-import { PrincipalTarget } from '@travetto/auth/src/internal/types';
-import { Class, TypedObject } from '@travetto/runtime';
+import { asConcrete, Class, TypedObject } from '@travetto/runtime';
+import { Principal } from '@travetto/auth';
 
-const FIELDS: Record<keyof PrincipalTarget, Class | ClassList> = {
+const PrincipalTarget = asConcrete<Principal>();
+
+const FIELDS: Record<keyof Principal, Class | ClassList> = {
   id: String,
   expiresAt: Date,
   issuedAt: Date,
-  maxAge: Number,
   issuer: String,
+  sessionId: String,
   permissions: [String],
   details: Object,
 };
 
 for (const [field, type] of TypedObject.entries(FIELDS)) {
-  SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, field, type, { required: { active: field === 'id' } });
+  SchemaRegistry.registerPendingFieldConfig(asConcrete<Principal>(), field, type, { required: { active: field === 'id' } });
 }
 
 SchemaRegistry.register(PrincipalTarget, { class: PrincipalTarget });

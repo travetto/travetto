@@ -1,18 +1,9 @@
+import { ParamExtractor } from '@travetto/rest';
+import { asConcrete } from '@travetto/runtime';
+
 import type { Request, Response } from '../types';
-import { ContextProvider } from '../decorator/param';
 
-/**
- * @augments `@travetto/rest:ContextParam`
- */
-@ContextProvider((__: unknown, rq: Request) => rq)
-export class RequestTarget { }
-
-/**
- * @augments `@travetto/rest:ContextParam`
- */
-@ContextProvider((__: unknown, rq: Request, rs: Response) => rs)
-export class ResponseTarget { }
-
-export class RestInterceptorTarget { }
+ParamExtractor.registerContext(asConcrete<Request>(), (_, req) => req);
+ParamExtractor.registerContext(asConcrete<Response>(), (_, __, res) => res);
 
 export const GlobalRoute = Symbol.for('@travetto/rest:global-route');

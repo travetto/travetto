@@ -88,6 +88,6 @@ export interface InjectableFactoryConfig<T = unknown> extends Core<T> {
 }
 
 /**
- * @concrete ./internal/types#AutoCreateTarget
+ * @concrete .
  */
 export interface AutoCreate { }

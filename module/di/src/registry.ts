@@ -1,12 +1,11 @@
 import {
   Class, Runtime, asConstructable, castTo, classConstruct, describeFunction,
-  asFull, castKey, TypedFunction, hasFunction, AppError
+  asFull, castKey, TypedFunction, hasFunction, AppError, asConcrete
 } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
+import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig, AutoCreate } from './types';
 import { InjectionError } from './error';
-import { AutoCreateTarget } from './internal/types';
 
 type TargetId = string;
 type ClassId = string;
@@ -230,7 +229,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       DependencyRegistration.init(this);
     }
     // Allow for auto-creation
-    for (const cfg of await this.getCandidateTypes(AutoCreateTarget)) {
+    for (const cfg of await this.getCandidateTypes(asConcrete<AutoCreate>())) {
       await this.getInstance(cfg.class, cfg.qualifier);
     }
   }

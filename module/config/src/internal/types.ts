@@ -1,6 +1,4 @@
-export abstract class ConfigSourceTarget { }
 export abstract class ConfigTarget { }
-export abstract class ConfigParserTarget { }
 
 export const CONFIG_OVERRIDES = Symbol.for('@travetto/config:field-override');
 

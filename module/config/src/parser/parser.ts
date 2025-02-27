@@ -2,9 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { DependencyRegistry, Injectable } from '@travetto/di';
-import { AppError } from '@travetto/runtime';
+import { AppError, asConcrete } from '@travetto/runtime';
 
-import { ConfigParserTarget } from '../internal/types';
 import { ConfigData, ConfigParser } from './types';
 
 @Injectable()
@@ -14,8 +13,8 @@ export class ParserManager {
   #parsers: Record<string, ConfigParser>;
 
   async postConstruct(): Promise<void> {
-    const parserClasses = await DependencyRegistry.getCandidateTypes(ConfigParserTarget);
-    const parsers = await Promise.all(parserClasses.map(x => DependencyRegistry.getInstance<ConfigParser>(x.class, x.qualifier)));
+    const parserClasses = await DependencyRegistry.getCandidateTypes<ConfigParser>(asConcrete<ConfigParser>());
+    const parsers = await Promise.all(parserClasses.map(x => DependencyRegistry.getInstance(x.class, x.qualifier)));
 
     // Register parsers
     this.#parsers = Object.fromEntries(parsers.flatMap(p => p.ext.map(e => [e, p])));

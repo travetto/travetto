@@ -7,14 +7,6 @@ import type { ModelIndexedSupport } from '../../service/indexed';
 import type { ModelStorageSupport } from '../../service/storage';
 import type { ModelBlobSupport } from '../../service/blob';
 
-export class ModelBasicSupportTarget { }
-export class ModelCrudSupportTarget { }
-export class ModelBulkSupportTarget { }
-export class ModelStorageSupportTarget { }
-export class ModelBlobSupportTarget { }
-export class ModelExpirySupportTarget { }
-export class ModelIndexedSupportTarget { }
-
 /**
  * Type guard for determining if service supports basic operations
  */

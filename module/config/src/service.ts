@@ -1,10 +1,10 @@
 import util from 'node:util';
 
-import { AppError, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
+import { AppError, asConcrete, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { ConfigSourceTarget, ConfigTarget } from './internal/types';
+import { ConfigTarget } from './internal/types';
 import { ParserManager } from './parser/parser';
 import { ConfigData } from './parser/types';
 import { ConfigSource, ConfigSpec } from './source/types';
@@ -46,10 +46,10 @@ export class ConfigurationService {
    *  - If of the same priority, then alpha sort on the source
    */
   async postConstruct(): Promise<void> {
-    const providers = await DependencyRegistry.getCandidateTypes(ConfigSourceTarget);
+    const providers = await DependencyRegistry.getCandidateTypes<ConfigSource>(asConcrete<ConfigSource>());
 
     const configs = await Promise.all(
-      providers.map(async (el) => await DependencyRegistry.getInstance<ConfigSource>(el.class, el.qualifier))
+      providers.map(async (el) => await DependencyRegistry.getInstance(el.class, el.qualifier))
     );
 
     const parser = await DependencyRegistry.getInstance(ParserManager);

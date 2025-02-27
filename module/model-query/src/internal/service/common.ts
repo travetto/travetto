@@ -5,11 +5,6 @@ import type { ModelQueryFacetSupport } from '../../service/facet';
 import type { ModelQuerySupport } from '../../service/query';
 import type { ModelQuerySuggestSupport } from '../../service/suggest';
 
-export class ModelQuerySupportTarget { }
-export class ModelQueryCrudSupportTarget { }
-export class ModelQueryFacetSupportTarget { }
-export class ModelQuerySuggestSupportTarget { }
-
 /**
  * Type guard for determining if service supports query operations
  */

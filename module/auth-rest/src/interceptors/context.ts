@@ -1,11 +1,10 @@
-import { Class } from '@travetto/runtime';
+import { asConcrete, Class } from '@travetto/runtime';
 import { RestInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor } from '@travetto/rest';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types';
 import { RestAuthConfig } from '../config';
-import { PrincipalCodecTarget } from '../internal/types';
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
 
@@ -34,7 +33,7 @@ export class AuthContextInterceptor implements RestInterceptor {
   authService: AuthService;
 
   async postConstruct(): Promise<void> {
-    this.codec ??= await DependencyRegistry.getInstance<PrincipalCodec>(PrincipalCodecTarget, CommonPrincipalCodecSymbol);
+    this.codec ??= await DependencyRegistry.getInstance(asConcrete<PrincipalCodec>(), CommonPrincipalCodecSymbol);
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {

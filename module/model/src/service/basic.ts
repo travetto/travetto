@@ -4,7 +4,7 @@ import { ModelType, OptionalId } from '../types/model';
 /**
  * Interface for basic data interface
  *
- * @concrete ../internal/service/common#ModelBasicSupportTarget
+ * @concrete .
  */
 export interface ModelBasicSupport<C = unknown> {
   /**

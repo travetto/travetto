@@ -18,11 +18,9 @@ export interface AwsLambdaHandler {
 
 export type AwsLambdaHandle = AwsLambdaHandler['handle'];
 
-export class AwsLambdaRestServerTarget { }
-
 /**
  * Interface for lambda rest servers
- * @concrete #AwsLambdaRestServerTarget
+ * @concrete .
  */
 export interface AwsLambdaRestServer extends RestServer, AwsLambdaHandler { }
 

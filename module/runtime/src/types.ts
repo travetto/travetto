@@ -49,7 +49,7 @@ export const hasFunction = <T>(key: keyof T) => (o: unknown): o is T =>
 
 export const hasToJSON = hasFunction<{ toJSON(): object }>('toJSON');
 
-export function asConcrete<T>(): Class<T> {
+export function asConcrete<T extends unknown>(): Class<T> {
   return arguments[0];
 }
 
