@@ -253,7 +253,7 @@ export const TypeBuilder: {
       const tsTypeArguments = resolver.getAllTypeArguments(type);
       const props = resolver.getPropertiesOfType(type);
       if (props.length === 0) {
-        return { key: 'literal', name: 'Object', ctor: Object };
+        return { key: 'literal', name: 'Object', ctor: Object, importName };
       }
 
       for (const member of props) {
