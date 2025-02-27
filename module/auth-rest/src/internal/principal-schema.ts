@@ -1,8 +1,8 @@
 import { ClassList, SchemaRegistry } from '@travetto/schema';
-import { asConcrete, Class, TypedObject } from '@travetto/runtime';
+import { toConcrete, Class, TypedObject } from '@travetto/runtime';
 import { Principal } from '@travetto/auth';
 
-const PrincipalTarget = asConcrete<Principal>();
+const PrincipalTarget = toConcrete<Principal>();
 
 const FIELDS: Record<keyof Principal, Class | ClassList> = {
   id: String,
@@ -15,7 +15,7 @@ const FIELDS: Record<keyof Principal, Class | ClassList> = {
 };
 
 for (const [field, type] of TypedObject.entries(FIELDS)) {
-  SchemaRegistry.registerPendingFieldConfig(asConcrete<Principal>(), field, type, { required: { active: field === 'id' } });
+  SchemaRegistry.registerPendingFieldConfig(toConcrete<Principal>(), field, type, { required: { active: field === 'id' } });
 }
 
 SchemaRegistry.register(PrincipalTarget, { class: PrincipalTarget });

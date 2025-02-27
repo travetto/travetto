@@ -1,4 +1,4 @@
-import { ConsoleListener, ConsoleManager, ConsoleEvent, asConcrete } from '@travetto/runtime';
+import { ConsoleListener, ConsoleManager, ConsoleEvent, toConcrete } from '@travetto/runtime';
 import { AutoCreate, DependencyRegistry, Injectable } from '@travetto/di';
 
 import { LogDecorator, LogEvent, Logger } from './types';
@@ -21,12 +21,12 @@ export class LogService implements ConsoleListener, AutoCreate {
   #decorators: LogDecorator[] = [];
 
   async postConstruct(): Promise<void> {
-    this.#listeners = await DependencyRegistry.getCandidateInstances(asConcrete<Logger>(), c => c.class !== CommonLogger);
+    this.#listeners = await DependencyRegistry.getCandidateInstances(toConcrete<Logger>(), c => c.class !== CommonLogger);
     if (!this.#listeners.length) {
       this.#listeners = [await DependencyRegistry.getInstance(CommonLogger)];
     }
 
-    this.#decorators = await DependencyRegistry.getCandidateInstances(asConcrete<LogDecorator>());
+    this.#decorators = await DependencyRegistry.getCandidateInstances(toConcrete<LogDecorator>());
 
     ConsoleManager.set(this);
   }

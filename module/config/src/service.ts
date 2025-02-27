@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { AppError, asConcrete, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
+import { AppError, toConcrete, castTo, Class, ClassInstance, Env, Runtime, RuntimeResources } from '@travetto/runtime';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
@@ -46,7 +46,7 @@ export class ConfigurationService {
    *  - If of the same priority, then alpha sort on the source
    */
   async postConstruct(): Promise<void> {
-    const providers = await DependencyRegistry.getCandidateTypes(asConcrete<ConfigSource>());
+    const providers = await DependencyRegistry.getCandidateTypes(toConcrete<ConfigSource>());
 
     const configs = await Promise.all(
       providers.map(async (el) => await DependencyRegistry.getInstance(el.class, el.qualifier))

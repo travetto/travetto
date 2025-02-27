@@ -44,7 +44,7 @@ export class ConcreteTransformer {
 
   @OnCall()
   static onAsConcreteCall(state: TransformerState, node: ts.CallExpression): typeof node {
-    if (ts.isIdentifier(node.expression) && node.expression.text === 'asConcrete' && node.typeArguments?.length && node.arguments.length === 0) {
+    if (ts.isIdentifier(node.expression) && node.expression.text === 'toConcrete' && node.typeArguments?.length && node.arguments.length === 0) {
       const type = state.resolveType(node.expression);
       if ('importName' in type && type.importName === SRC) {
         const [target] = node.typeArguments;

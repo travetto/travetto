@@ -1,6 +1,6 @@
 import {
   Class, Runtime, asConstructable, castTo, classConstruct, describeFunction,
-  asFull, castKey, TypedFunction, hasFunction, AppError, asConcrete
+  asFull, castKey, TypedFunction, hasFunction, AppError, toConcrete
 } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
@@ -229,7 +229,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       DependencyRegistration.init(this);
     }
     // Allow for auto-creation
-    for (const cfg of await this.getCandidateTypes(asConcrete<AutoCreate>())) {
+    for (const cfg of await this.getCandidateTypes(toConcrete<AutoCreate>())) {
       await this.getInstance(cfg.class, cfg.qualifier);
     }
   }

@@ -1,4 +1,4 @@
-import { Class, AppError, Runtime, asConcrete } from '@travetto/runtime';
+import { Class, AppError, Runtime, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
@@ -82,7 +82,7 @@ export class RestApplication<T = unknown> {
    * Get the list of installed interceptors
    */
   async getInterceptors(): Promise<RestInterceptor[]> {
-    const instances = await DependencyRegistry.getCandidateInstances(asConcrete<RestInterceptor>());
+    const instances = await DependencyRegistry.getCandidateInstances(toConcrete<RestInterceptor>());
     const ordered = instances.map(x => ({ key: x.constructor, before: x.runsBefore, after: x.dependsOn, target: x }));
     const sorted = RestCommonUtil.ordered(ordered).map(x => x.target);
 

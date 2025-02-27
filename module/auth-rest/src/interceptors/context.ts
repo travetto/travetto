@@ -1,4 +1,4 @@
-import { asConcrete, Class } from '@travetto/runtime';
+import { toConcrete, Class } from '@travetto/runtime';
 import { RestInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor } from '@travetto/rest';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
@@ -33,7 +33,7 @@ export class AuthContextInterceptor implements RestInterceptor {
   authService: AuthService;
 
   async postConstruct(): Promise<void> {
-    this.codec ??= await DependencyRegistry.getInstance(asConcrete<PrincipalCodec>(), CommonPrincipalCodecSymbol);
+    this.codec ??= await DependencyRegistry.getInstance(toConcrete<PrincipalCodec>(), CommonPrincipalCodecSymbol);
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
