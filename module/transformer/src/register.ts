@@ -136,7 +136,7 @@ export function OnClass(...target: string[]) {
 /**
  * Listens for a `ts.TypeAliasDeclaration` on descent
  */
-export function OnType(...target: string[]) {
+export function OnTypeAlias(...target: string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.TypeAliasDeclaration) => R>
   ): void => storeHandler(inst, d.value!, 'before', 'type', target);
@@ -236,7 +236,7 @@ export function AfterClass(...target: string[]) {
 /**
  * Listens for a `ts.TypeAliasDeclaration` on ascent
  */
-export function AfterType(...target: string[]) {
+export function AfterTypeAlias(...target: string[]) {
   return <S extends State = State, R extends ts.Node = ts.Node>(
     inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.TypeAliasDeclaration) => R>
   ): void => storeHandler(inst, d.value!, 'after', 'type', target);

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerState, OnInterface, OnCall } from '@travetto/transformer';
+import { TransformerState, OnInterface, OnCall, OnTypeAlias } from '@travetto/transformer';
 
 import { MetadataRegistrationUtil } from './transformer/metadata';
 
@@ -12,7 +12,7 @@ const SRC = '@travetto/runtime/src/types.ts';
 export class ConcreteTransformer {
 
   static #isConcreteSimple(node: ts.InterfaceDeclaration | ts.TypeAliasDeclaration): boolean {
-    return /^\s*[*]\s+@concrete\s+#\s*$/gm.test(node.getFullText());
+    return /^\s*[*]\s+@concrete\s+[.]\s*$/gm.test(node.getFullText());
   }
 
   static #createConcreteFunction(state: TransformerState, name: string | ts.Identifier): ts.FunctionDeclaration {
@@ -34,7 +34,19 @@ export class ConcreteTransformer {
    * Handle concrete interface
    */
   @OnInterface()
-  static afterInterface(state: TransformerState, node: ts.InterfaceDeclaration): typeof node {
+  static onInterface(state: TransformerState, node: ts.InterfaceDeclaration): typeof node {
+    if (this.#isConcreteSimple(node)) {
+      const func = this.#createConcreteFunction(state, node.name);
+      MetadataRegistrationUtil.registerFunction(state, func.name!.text, func, func.name!.text);
+    }
+    return node;
+  }
+
+  /**
+   * Handle type alias
+   */
+  @OnTypeAlias()
+  static onTypeAlias(state: TransformerState, node: ts.TypeAliasDeclaration): typeof node {
     if (this.#isConcreteSimple(node)) {
       const func = this.#createConcreteFunction(state, node.name);
       MetadataRegistrationUtil.registerFunction(state, func.name!.text, func, func.name!.text);
@@ -43,7 +55,7 @@ export class ConcreteTransformer {
   }
 
   @OnCall()
-  static onAsConcreteCall(state: TransformerState, node: ts.CallExpression): typeof node {
+  static onToConcreteCall(state: TransformerState, node: ts.CallExpression): typeof node {
     if (ts.isIdentifier(node.expression) && node.expression.text === 'toConcrete' && node.typeArguments?.length && node.arguments.length === 0) {
       const type = state.resolveType(node.expression);
       if ('importName' in type && type.importName === SRC) {
