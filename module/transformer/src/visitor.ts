@@ -35,6 +35,10 @@ export class VisitorFactory<S extends State = State> {
       return 'setter';
     } else if (ts.isSourceFile(node)) {
       return 'file';
+    } else if (ts.isInterfaceDeclaration(node)) {
+      return 'interface';
+    } else if (ts.isTypeAliasDeclaration(node)) {
+      return 'type';
     }
   }
 
