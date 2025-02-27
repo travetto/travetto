@@ -228,10 +228,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       const { DependencyRegistration } = await import('../support/dynamic.injection');
       DependencyRegistration.init(this);
     }
-    // Allow for auto-creation
-    for (const cfg of await this.getCandidateTypes(toConcrete<AutoCreate>())) {
-      await this.getInstance(cfg.class, cfg.qualifier);
-    }
+
+    await this.getCandidateInstances(toConcrete<AutoCreate>());
   }
 
   /**
