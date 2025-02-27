@@ -9,3 +9,4 @@ export const HeadersAddedSymbol: unique symbol = Symbol.for('@travetto/rest:head
 export const InterceptorConfigsSymbol: unique symbol = Symbol.for('@travetto/rest:interceptors');
 export const ParsedTypeSymbol = Symbol.for('@travetto/rest:content-type');
 export const QueryExpandedSymbol = Symbol.for('@travetto/rest:query-expanded');
+export const GlobalRoute = Symbol.for('@travetto/rest:global-route');

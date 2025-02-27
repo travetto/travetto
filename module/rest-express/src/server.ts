@@ -4,8 +4,7 @@ import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
 import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil } from '@travetto/rest';
-import { GlobalRoute } from '@travetto/rest/src/internal/types';
-import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
+import { GlobalRoute, TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
 import { RestServerHandle } from '@travetto/rest/src/types';
 
 import { RouteStack } from './internal/types';
