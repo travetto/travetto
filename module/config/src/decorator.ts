@@ -3,8 +3,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ConfigurationService } from './service';
-import { Configuration } from './types';
-import { ConfigOverrides, CONFIG_OVERRIDES } from './internal/types';
+import { ConfigOverrides, ConfigBase, CONFIG_OVERRIDES } from './internal/types';
 
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation
@@ -15,7 +14,7 @@ export function Config(ns: string) {
   return <T extends Class>(target: T): T => {
     const og: Function = target.prototype.postConstruct;
     // Declare as part of global config
-    (DependencyRegistry.getOrCreatePending(target).interfaces ??= []).push(toConcrete<Configuration>());
+    (DependencyRegistry.getOrCreatePending(target).interfaces ??= []).push(toConcrete<ConfigBase>());
     const env = SchemaRegistry.getOrCreatePendingMetadata<ConfigOverrides>(target, CONFIG_OVERRIDES, { ns, fields: {} });
     env.ns = ns;
 
