@@ -9,7 +9,6 @@ import { AuthenticatorState } from './types/authenticator';
 /**
  * Provides the primary context for the authenticated state
  *
- *
  * Will silently fail on reads, but will error on writes if the context is not established.
  */
 @Injectable()
