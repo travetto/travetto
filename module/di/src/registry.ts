@@ -288,7 +288,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Get all available candidate types for the target
    */
-  getCandidateTypes<T, U = T>(target: Class<U>): InjectableConfig<T>[] {
+  getCandidateTypes<T>(target: Class<T>): InjectableConfig<T>[] {
     const qualifiers = this.targetToClass.get(target.Ⲑid)!;
     const uniqueQualifiers = qualifiers ? Array.from(new Set(qualifiers.values())) : [];
     return castTo(uniqueQualifiers.map(id => this.get(id)));
@@ -297,7 +297,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Get candidate instances by target type, with an optional filter
    */
-  getCandidateInstances<T>(target: Class, predicate?: (cfg: InjectableConfig<T>) => boolean): Promise<T[]> {
+  getCandidateInstances<T>(target: Class<T>, predicate?: (cfg: InjectableConfig<T>) => boolean): Promise<T[]> {
     const inputs = this.getCandidateTypes<T>(target).filter(x => !predicate || predicate(x));
     return Promise.all(inputs.map(l => this.getInstance<T>(l.class, l.qualifier)));
   }

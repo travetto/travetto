@@ -46,7 +46,7 @@ export class ConfigurationService {
    *  - If of the same priority, then alpha sort on the source
    */
   async postConstruct(): Promise<void> {
-    const providers = await DependencyRegistry.getCandidateTypes<ConfigSource>(asConcrete<ConfigSource>());
+    const providers = await DependencyRegistry.getCandidateTypes(asConcrete<ConfigSource>());
 
     const configs = await Promise.all(
       providers.map(async (el) => await DependencyRegistry.getInstance(el.class, el.qualifier))

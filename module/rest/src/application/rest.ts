@@ -82,7 +82,7 @@ export class RestApplication<T = unknown> {
    * Get the list of installed interceptors
    */
   async getInterceptors(): Promise<RestInterceptor[]> {
-    const instances = await DependencyRegistry.getCandidateInstances<RestInterceptor>(asConcrete<RestInterceptor>());
+    const instances = await DependencyRegistry.getCandidateInstances(asConcrete<RestInterceptor>());
     const ordered = instances.map(x => ({ key: x.constructor, before: x.runsBefore, after: x.dependsOn, target: x }));
     const sorted = RestCommonUtil.ordered(ordered).map(x => x.target);
 
