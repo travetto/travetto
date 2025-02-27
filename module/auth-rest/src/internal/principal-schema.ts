@@ -15,7 +15,7 @@ const FIELDS: Record<keyof Principal, Class | ClassList> = {
 };
 
 for (const [field, type] of TypedObject.entries(FIELDS)) {
-  SchemaRegistry.registerPendingFieldConfig(toConcrete<Principal>(), field, type, { required: { active: field === 'id' } });
+  SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, field, type, { required: { active: field === 'id' } });
 }
 
 SchemaRegistry.register(PrincipalTarget, { class: PrincipalTarget });
