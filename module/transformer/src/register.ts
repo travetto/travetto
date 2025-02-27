@@ -231,3 +231,22 @@ export function AfterClass(...target: string[]) {
     inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.ClassDeclaration, dm?: DecoratorMeta) => R>
   ): void => storeHandler(inst, d.value!, 'after', 'class', target);
 }
+
+
+/**
+ * Listens for a `ts.TypeAliasDeclaration` on ascent
+ */
+export function AfterType(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.TypeAliasDeclaration) => R>
+  ): void => storeHandler(inst, d.value!, 'after', 'type', target);
+}
+
+/**
+ * Listens for a `ts.InterfaceDeclaration` on ascent
+ */
+export function AfterInterface(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.InterfaceDeclaration) => R>
+  ): void => storeHandler(inst, d.value!, 'after', 'interface', target);
+}

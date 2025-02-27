@@ -275,7 +275,6 @@ export const TypeBuilder: {
     build: (resolver, type) => {
       const [tag] = DocUtil.readDocTag(type, 'concrete');
       if (tag) {
-        // eslint-disable-next-line prefer-const
         let [importName, name] = tag.split('#');
 
         // Resolving relative to source file
@@ -291,6 +290,13 @@ export const TypeBuilder: {
             importName = resolver.getFileImportName(path.resolve(base, importName));
           }
         }
+
+        // Convert name to $Concrete suffix if not provided
+        if (!name) {
+          const [decl] = DeclarationUtil.getDeclarations(type).filter(x => ts.isInterfaceDeclaration(x) || ts.isTypeAliasDeclaration(x));
+          name = `${decl.name.text}$Concrete`;
+        }
+
         return { key: 'managed', name, importName };
       }
     }

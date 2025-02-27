@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerState, OnMethod, OnClass, AfterClass, CoreUtil, SystemUtil, Import, OnFunction } from '@travetto/transformer';
+import { TransformerState, OnMethod, OnClass, AfterClass, CoreUtil, SystemUtil, Import, OnFunction, OnInterface } from '@travetto/transformer';
 
 import type { FunctionMetadataTag } from '../src/function';
 
@@ -26,8 +26,8 @@ interface MetadataInfo {
  */
 export class RegisterTransformer {
 
-  static #tag(state: TransformerState, node: ts.Node): FunctionMetadataTag {
-    const hash = SystemUtil.naiveHash(node.getText());
+  static #tag(state: TransformerState, node: ts.Node, text: string): FunctionMetadataTag {
+    const hash = SystemUtil.naiveHash(text);
     try {
       const range = CoreUtil.getRangeOf(state.source, node) ?? [0, 0];
       if (ts.isMethodDeclaration(node) || ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
@@ -42,8 +42,43 @@ export class RegisterTransformer {
     }
   }
 
+  static #registerFunction(state: TransformerState & MetadataInfo, name: string, node: ts.FunctionDeclaration | ts.FunctionExpression, text: string): void {
+    // If we have a class like function
+    state[registerImport] ??= state.importFile(REGISTER_IMPORT);
+    const tag = this.#tag(state, node, text);
+    const meta = state.factory.createCallExpression(
+      state.createAccess(state[registerImport].ident, registerFn),
+      [],
+      [
+        state.createIdentifier(name),
+        state.getModuleIdentifier(),
+        state.fromLiteral(tag),
+      ]
+    );
+    state.addStatements([state.factory.createExpressionStatement(meta)]);
+  }
+
   static #valid({ importName: imp }: TransformerState): boolean {
     return !imp.startsWith(REGISTER_IMPORT);
+  }
+
+  static #isConcreteSimple(node: ts.InterfaceDeclaration | ts.TypeAliasDeclaration): boolean {
+    return /^\s*[*]\s+@concrete\s+#\s*$/gm.test(node.getFullText());
+  }
+
+  static #createConcreteFunction(state: TransformerState, name: string | ts.Identifier): ts.FunctionDeclaration {
+    const final = typeof name === 'string' ? name : name.getText();
+
+    const dec = state.factory.createFunctionDeclaration(
+      // eslint-disable-next-line no-bitwise
+      state.factory.createModifiersFromModifierFlags(ts.ModifierFlags.Export | ts.ModifierFlags.Const),
+      undefined, `${final}$Concrete`, [], [], undefined,
+      state.factory.createBlock([])
+    );
+
+    state.addStatements([dec]);
+
+    return dec;
   }
 
   /**
@@ -54,7 +89,7 @@ export class RegisterTransformer {
     if (!this.#valid(state)) {
       return node; // Exclude self
     }
-    state[cls] = this.#tag(state, node);
+    state[cls] = this.#tag(state, node, node.getText());
     return node;
   }
 
@@ -65,7 +100,7 @@ export class RegisterTransformer {
   static collectMethodMetadata(state: TransformerState & MetadataInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (state[cls] && ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
       state[methods] ??= {};
-      state[methods]![node.name.escapedText.toString()] = this.#tag(state, node);
+      state[methods]![node.name.escapedText.toString()] = this.#tag(state, node, node.getText());
     }
     return node;
   }
@@ -125,19 +160,19 @@ export class RegisterTransformer {
     }
 
     if (ts.isFunctionDeclaration(node) && node.name && node.parent && ts.isSourceFile(node.parent)) {
-      // If we have a class like function
-      state[registerImport] ??= state.importFile(REGISTER_IMPORT);
-      const tag = this.#tag(state, node);
-      const meta = state.factory.createCallExpression(
-        state.createAccess(state[registerImport].ident, registerFn),
-        [],
-        [
-          state.createIdentifier(node.name),
-          state.getModuleIdentifier(),
-          state.fromLiteral(tag),
-        ]
-      );
-      state.addStatements([state.factory.createExpressionStatement(meta)]);
+      this.#registerFunction(state, node.name.text, node, node.getText());
+    }
+    return node;
+  }
+
+  /**
+   * Handle concrete interface
+   */
+  @OnInterface()
+  static afterInterface(state: TransformerState, node: ts.InterfaceDeclaration): typeof node {
+    if (this.#isConcreteSimple(node)) {
+      const func = this.#createConcreteFunction(state, node.name);
+      this.#registerFunction(state, func.name!.text, func, func.name!.text);
     }
     return node;
   }
