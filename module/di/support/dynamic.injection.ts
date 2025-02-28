@@ -89,14 +89,14 @@ class $DynamicDependencyRegistry {
 
   register(registry: typeof DependencyRegistry): void {
     this.#registry = registry;
-    this.#registryCreateInstance = registry['createInstance'].bind(registry);
-    this.#registryResolveTarget = registry['resolveTarget'].bind(registry);
-    this.#registryOnInstallFinalize = registry['onInstallFinalize'].bind(registry);
-    this.#registryDestroyInstance = registry['destroyInstance'].bind(registry);
+    this.#registryCreateInstance = registry.createInstance.bind(registry);
+    this.#registryResolveTarget = registry.resolveTarget.bind(registry);
+    this.#registryOnInstallFinalize = registry.onInstallFinalize.bind(registry);
+    this.#registryDestroyInstance = registry.destroyInstance.bind(registry);
 
-    this.#registry['createInstance'] = this.createInstance.bind(this);
-    this.#registry['destroyInstance'] = this.destroyInstance.bind(this);
-    this.#registry['onInstallFinalize'] = this.onInstallFinalize.bind(this);
+    this.#registry.createInstance = this.createInstance.bind(this);
+    this.#registry.destroyInstance = this.destroyInstance.bind(this);
+    this.#registry.onInstallFinalize = this.onInstallFinalize.bind(this);
   }
 }
 

@@ -2,12 +2,12 @@ import timers from 'node:timers/promises';
 import assert from 'node:assert';
 
 import { Controller, Get, Post, Redirect } from '@travetto/rest';
-import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite';
+import { BaseRestSuite } from '@travetto/rest/support/test/base';
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
 import { RestAuthConfig } from '../../src/config';
