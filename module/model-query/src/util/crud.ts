@@ -1,12 +1,14 @@
-import { Class } from '@travetto/runtime';
-import { ModelRegistry, ModelType, ModelCrudSupport } from '@travetto/model';
+import { Class, hasFunction } from '@travetto/runtime';
 
-import { ModelQueryCrudSupport } from '../../service/crud';
+import { ModelQueryCrudSupport } from '../types/crud';
+import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model';
 
-/**
- * Utils for query expiry support
- */
-export class ModelQueryExpiryUtil {
+export class ModelQueryCrudUtil {
+  /**
+   * Type guard for determining if service supports query crud operations
+   */
+  static isSupported = hasFunction<ModelQueryCrudSupport>('deleteByQuery');
+
   /**
    * Delete all expired
    */

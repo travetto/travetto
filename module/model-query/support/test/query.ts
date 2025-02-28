@@ -6,9 +6,9 @@ import { NotFoundError, ModelCrudSupport } from '@travetto/model';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 
-import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './types';
+import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './model';
 
-import { ModelQuerySupport } from '../../src/service/query';
+import { ModelQuerySupport } from '../../src/types/query';
 
 @Suite()
 export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {

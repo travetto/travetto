@@ -1,10 +1,8 @@
 /* eslint-disable @stylistic/indent */
 import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
 import { Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete } from '@travetto/runtime';
-import { SelectClause, Query, SortClause, WhereClause, RetainFields, Point } from '@travetto/model-query';
+import { SelectClause, Query, SortClause, WhereClause, RetainFields, Point, ModelQueryUtil } from '@travetto/model-query';
 import { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
-
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 
 import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';

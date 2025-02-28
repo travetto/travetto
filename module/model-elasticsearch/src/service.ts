@@ -11,12 +11,10 @@ import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySupport, PageableModelQuery, Query, ValidStringFields,
-  QueryVerifier, ModelQuerySuggestSupport
+  QueryVerifier, ModelQuerySuggestSupport,
+  ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
 } from '@travetto/model-query';
 
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
-import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 
 import { ElasticsearchModelConfig } from './config';
 import { EsBulkError } from './internal/types';
@@ -347,7 +345,7 @@ export class ElasticsearchModelService implements
 
   // Expiry
   deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
-    return ModelQueryExpiryUtil.deleteExpired(this, cls);
+    return ModelQueryCrudUtil.deleteExpired(this, cls);
   }
 
   // Indexed

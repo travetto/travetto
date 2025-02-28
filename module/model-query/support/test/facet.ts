@@ -4,8 +4,8 @@ import { ModelCrudSupport } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { Suite, Test } from '@travetto/test';
 
-import { Person } from './types';
-import { ModelQueryFacetSupport } from '../../src/service/facet';
+import { Person } from './model';
+import { ModelQueryFacetSupport } from '../../src/types/facet';
 
 const pick = <T>(arr: T[] | readonly T[]): T => arr[Math.trunc(Math.random() * arr.length)]!;
 

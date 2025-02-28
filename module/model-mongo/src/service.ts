@@ -16,7 +16,7 @@ import {
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport,
-  QueryVerifier
+  QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
 } from '@travetto/model-query';
 
 import {
@@ -24,10 +24,6 @@ import {
   castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
-
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
-import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 
 import { MongoUtil, PlainIdx, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
@@ -392,7 +388,7 @@ export class MongoModelService implements
 
   // Expiry
   deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
-    return ModelQueryExpiryUtil.deleteExpired(this, cls);
+    return ModelQueryCrudUtil.deleteExpired(this, cls);
   }
 
   // Indexed

@@ -1,11 +1,9 @@
 import { estypes } from '@elastic/elasticsearch';
 
 import { castTo, Class, TypedObject } from '@travetto/runtime';
-import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
+import { WhereClause, SelectClause, SortClause, Query, ModelQueryUtil } from '@travetto/model-query';
 import { IndexConfig, ModelType, ModelRegistry } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
-
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 
 import { EsSchemaConfig } from './types';
 

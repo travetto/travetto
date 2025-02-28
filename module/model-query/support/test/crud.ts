@@ -5,8 +5,8 @@ import { ModelCrudSupport, NotFoundError } from '@travetto/model';
 
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 
-import { Address, Person, Todo } from './types';
-import { ModelQueryCrudSupport } from '../../src/service/crud';
+import { Address, Person, Todo } from './model';
+import { ModelQueryCrudSupport } from '../../src/types/crud';
 
 @Suite()
 export abstract class ModelQueryCrudSuite extends BaseModelSuite<ModelQueryCrudSupport & ModelCrudSupport> {

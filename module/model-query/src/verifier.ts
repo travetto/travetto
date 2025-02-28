@@ -3,7 +3,7 @@ import { Class } from '@travetto/runtime';
 
 import { ModelQuery, Query, PageableModelQuery } from './model/query';
 
-import { TypeUtil } from './internal/util/types';
+import { TypeUtil } from './internal/types';
 
 type SimpleType = keyof typeof TypeUtil.OPERATORS;
 
