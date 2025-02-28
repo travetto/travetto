@@ -116,7 +116,7 @@ export class RenderContext {
    */
   async resolveCode(node: JSXElementByFn<'Code' | 'Config'>): Promise<ResolvedCode> {
     const type = typeof node.props.src === 'function' ? node.props.src : undefined;
-    const startRe = node.props.startRe ?? (type ? new RegExp(`^(export)?\\s*(interface|class)s+${type.name}\b`) : undefined);
+    const startRe = node.props.startRe ?? (type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${type.name.replaceAll('$', '\\$')}\\b`) : undefined);
     const endRe = node.props.endRe ?? (type ? /^}$/ : undefined);
 
     return startRe ?

@@ -37,6 +37,8 @@ const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
  *
  * The transpiler will replace all console.* calls in the typescript files for the framework and those provided by the user.
  * Any console.log statements elsewhere will not be affected.
+ *
+ * @alias ConsoleManager
  */
 class $ConsoleManager implements ConsoleListener {
 
