@@ -2,10 +2,10 @@
 import { d, DocJSXElementByFn, DocJSXElement, DocFileUtil } from '@travetto/doc';
 
 export const Links = {
-  QueryCrud: d.codeLink('Query Crud', '@travetto/model-query/src/service/crud.ts', /export interface/),
-  QueryFacet: d.codeLink('Facet', '@travetto/model-query/src/service/facet.ts', /export interface/),
-  QuerySuggest: d.codeLink('Suggest', '@travetto/model-query/src/service/suggest.ts', /export interface/),
-  Query: d.codeLink('Query', '@travetto/model-query/src/service/query.ts', /export interface/),
+  QueryCrud: d.codeLink('Query Crud', '@travetto/model-query/src/types/crud.ts', /export interface/),
+  QueryFacet: d.codeLink('Facet', '@travetto/model-query/src/types/facet.ts', /export interface/),
+  QuerySuggest: d.codeLink('Suggest', '@travetto/model-query/src/types/suggest.ts', /export interface/),
+  Query: d.codeLink('Query', '@travetto/model-query/src/types/query.ts', /export interface/),
 };
 
 export const ModelQueryTypes = (fn: Function): DocJSXElement[] => {

@@ -3,12 +3,12 @@ import { d, c, DocJSXElementByFn, DocJSXElement, DocFileUtil } from '@travetto/d
 import { Config } from '@travetto/config';
 
 export const Links = {
-  Basic: d.codeLink('Basic', '@travetto/model/src/service/basic.ts', /export interface/),
-  Crud: d.codeLink('CRUD', '@travetto/model/src/service/crud.ts', /export interface/),
-  Expiry: d.codeLink('Expiry', '@travetto/model/src/service/expiry.ts', /export interface/),
-  Indexed: d.codeLink('Indexed', '@travetto/model/src/service/indexed.ts', /export interface/),
-  Bulk: d.codeLink('Bulk', '@travetto/model/src/service/bulk.ts', /export interface/),
-  Blob: d.codeLink('Blob', '@travetto/model/src/service/blob.ts', /export interface/),
+  Basic: d.codeLink('Basic', '@travetto/model/src/types/basic.ts', /export interface/),
+  Crud: d.codeLink('CRUD', '@travetto/model/src/types/crud.ts', /export interface/),
+  Expiry: d.codeLink('Expiry', '@travetto/model/src/types/expiry.ts', /export interface/),
+  Indexed: d.codeLink('Indexed', '@travetto/model/src/types/indexed.ts', /export interface/),
+  Bulk: d.codeLink('Bulk', '@travetto/model/src/types/bulk.ts', /export interface/),
+  Blob: d.codeLink('Blob', '@travetto/model/src/types/blob.ts', /export interface/),
 };
 
 export const ModelTypes = (fn: | Function): DocJSXElement[] => {

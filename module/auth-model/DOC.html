@@ -16,7 +16,7 @@
   </figure>
 
 This module supports the integration between the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a> module and the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>. <br><br>
-The asset module requires a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a>-model to provide functionality for reading and storing user information. You can use any existing providers to serve as your <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a>, or you can roll your own.
+The asset module requires a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">CRUD</a>-model to provide functionality for reading and storing user information. You can use any existing providers to serve as your <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">CRUD</a>, or you can roll your own.
 
   <figure class="install">
     <figcaption class="install">Install provider
@@ -29,7 +29,7 @@ The asset module requires a <a target="_blank" class="source-link" href="https:/
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/model-<span class="token punctuation">{{'{'}}</span>provider<span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-Currently, the following are packages that provide <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a>:
+Currently, the following are packages that provide <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">CRUD</a>:
 <ul> <li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-dynamodb" title="DynamoDB backing for the travetto model module.">DynamoDB Model Support</a> - @travetto/model-dynamodb</li>
 <li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-elasticsearch" title="Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.">Elasticsearch Model Source</a> - @travetto/model-elasticsearch</li>
 <li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-firestore" title="Firestore backing for the travetto model module.">Firestore Model Support</a> - @travetto/model-firestore</li>
@@ -42,12 +42,12 @@ Currently, the following are packages that provide <a target="_blank" class="sou
 <li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-memory" title="Memory backing for the travetto model module.">Memory Model Support</a> - @travetto/model-memory</li>
 <li><a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-file" title="File system backing for the travetto model module.">File Model Support</a> - @travetto/model-file</li>
 </ul>
-The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11">Registered Principal</a>. <br><br>
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L10">Registered Principal</a>. <br><br>
 A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 
   <figure class="code">
     <figcaption class="code">Registered Principal
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L10">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">RegisteredPrincipal</span> <span class="token keyword">extends</span> <span class="token class-name">Principal</span> <span class="token punctuation">{{'{'}}</span>

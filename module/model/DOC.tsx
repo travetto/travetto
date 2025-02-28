@@ -39,36 +39,36 @@ export const text = <>
     <c.SubSection title='Basic'>
       All {d.mod('Model')} implementations, must honor the {Links.Basic} contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
 
-      <c.Code title='Basic Contract' src='src/service/basic.ts' startRe={/export interface ModelBasic/} endRe={/^}/} />
+      <c.Code title='Basic Contract' src='src/types/basic.ts' startRe={/export interface ModelBasic/} endRe={/^}/} />
     </c.SubSection>
 
     <c.SubSection title='CRUD'>
       The {Links.Crud} contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in {d.mod('Auth')}, is an example of a module that only needs create, read and delete, and so any implementation of {d.mod('Model')} that honors this contract, can be used with the {d.mod('Auth')} model extension.
 
-      <c.Code title='Crud Contract' src='src/service/crud.ts' startRe={/export interface ModelCrud/} endRe={/^}/} />
+      <c.Code title='Crud Contract' src='src/types/crud.ts' startRe={/export interface ModelCrud/} endRe={/^}/} />
     </c.SubSection>
 
     <c.SubSection title='Indexed' >
       Additionally, an implementation may support the ability for basic {Links.Indexed} queries. This is not the full featured query support of {d.mod('ModelQuery')}, but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
 
-      <c.Code title='Indexed Contract' src='src/service/indexed.ts' startRe={/export interface ModelIndexed/} endRe={/^}/} />
+      <c.Code title='Indexed Contract' src='src/types/indexed.ts' startRe={/export interface ModelIndexed/} endRe={/^}/} />
     </c.SubSection>
 
     <c.SubSection title='Expiry'>
       Certain implementations will also provide support for automatic {Links.Expiry} of data at runtime.  This is extremely useful for temporary data as, and is used in the {d.mod('Cache')} module for expiring data accordingly.
 
-      <c.Code title='Expiry Contract' src='src/service/expiry.ts' startRe={/export interface ModelExpiry/} endRe={/^}/} />
+      <c.Code title='Expiry Contract' src='src/types/expiry.ts' startRe={/export interface ModelExpiry/} endRe={/^}/} />
     </c.SubSection>
 
     <c.SubSection title='Blob'>
       Some implementations also allow for the ability to read/write binary data as {Links.Blob}.  Given that all implementations can store {d.library('Base64')} encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
 
-      <c.Code title='Blob Contract' src='src/service/blob.ts' startRe={/export interface ModelBlob/} endRe={/^}/} />
+      <c.Code title='Blob Contract' src='src/types/blob.ts' startRe={/export interface ModelBlob/} endRe={/^}/} />
     </c.SubSection>
     <c.SubSection title='Bulk'>
       Finally, there is support for {Links.Bulk} operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
 
-      <c.Code title='Bulk Contract' src='src/service/bulk.ts' startRe={/export interface ModelBulk/} endRe={/^}/} />
+      <c.Code title='Bulk Contract' src='src/types/bulk.ts' startRe={/export interface ModelBulk/} endRe={/^}/} />
     </c.SubSection>
   </c.Section>
 
