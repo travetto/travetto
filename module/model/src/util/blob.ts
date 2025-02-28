@@ -1,9 +1,6 @@
 import { Readable } from 'node:stream';
-import { Class, AppError, BinaryInput, BinaryUtil, BlobMeta, ByteRange, hasFunction } from '@travetto/runtime';
-import { ModelType } from '../types/model';
+import { AppError, BinaryInput, BinaryUtil, BlobMeta, ByteRange, hasFunction } from '@travetto/runtime';
 import { ModelBlobSupport } from '../types/blob';
-
-export const MODEL_BLOB: Class<ModelType> = class { id: string; };
 
 /**
  * Utilities for processing blobs

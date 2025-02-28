@@ -7,8 +7,7 @@ import { Config } from '@travetto/config';
 import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
   ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
-  MODEL_BLOB, ModelBlobUtil,
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil, ModelBlobUtil,
 } from '@travetto/model';
 
 const ModelBlobNamespace = '__blobs';
@@ -311,12 +310,12 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    if (cls === MODEL_BLOB) {
-      this.#getStore(ModelBlobNamespace).clear();
-      this.#getStore(ModelBlobMetaNamespace).clear();
-    } else {
-      this.#getStore(cls).clear();
-    }
+    this.#getStore(cls).clear();
+  }
+
+  async truncateBlobModels(): Promise<void> {
+    this.#getStore(ModelBlobNamespace).clear();
+    this.#getStore(ModelBlobMetaNamespace).clear();
   }
 
   // Indexed

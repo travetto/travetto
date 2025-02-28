@@ -3,7 +3,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry, TestFixtures } from '@travetto/test';
 
-import { MODEL_BLOB, ModelBlobUtil } from '../../src/util/blob';
+import { ModelBlobUtil } from '../../src/util/blob';
 import { ModelStorageUtil } from '../../src/util/storage';
 import { ModelRegistry } from '../../src/registry/model';
 
@@ -52,8 +52,9 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
         const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
         if (ModelStorageUtil.isSupported(service)) {
           const models = ModelRegistry.getClasses().filter(m => m === ModelRegistry.getBaseModel(m));
-          if (ModelBlobUtil.isSupported(service)) {
-            models.push(MODEL_BLOB);
+
+          if (ModelBlobUtil.isSupported(service) && service.truncateBlobModels) {
+            await service.truncateBlobModels();
           }
 
           if (service.truncateModel) {

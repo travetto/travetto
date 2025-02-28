@@ -10,8 +10,7 @@ import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
   NotFoundError, ExistsError, ModelBlobSupport,
-  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil,
-  ModelBulkUtil, MODEL_BLOB, ModelBlobUtil,
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelBlobUtil,
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -146,12 +145,12 @@ export class MongoModelService implements
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    if (cls === MODEL_BLOB) {
-      await this.#bucket.drop().catch(() => { });
-    } else {
-      const col = await this.getStore(cls);
-      await col.deleteMany({});
-    }
+    const col = await this.getStore(cls);
+    await col.deleteMany({});
+  }
+
+  async truncateBlobModels(): Promise<void> {
+    await this.#bucket.drop().catch(() => { });
   }
 
   /**
