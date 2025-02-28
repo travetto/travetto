@@ -50,7 +50,7 @@ export const text = <>
 
   <c.Section title='Standard Error Support'>
 
-    While the framework is 100 % compatible with standard {d.input('Error')} instances, there are cases in which additional functionality is desired. Within the framework we use {AppError} (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the {d.mod('Rest')} module and HTTP status codes). <br />
+    While the framework is 100 % compatible with standard {d.input('Error')} instances, there are cases in which additional functionality is desired. Within the framework we use {AppError} (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the {d.mod('Web')} module and HTTP status codes). <br />
 
     The {AppError} takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
     <ul>
@@ -99,7 +99,7 @@ export const text = <>
 # Debug
 $ DEBUG=-@travetto/model npx trv run app
 $ DEBUG=-@travetto/registry npx trv run app
-$ DEBUG=@travetto/rest npx trv run app
+$ DEBUG=@travetto/web npx trv run app
 $ DEBUG=@travetto/*,-@travetto/model npx trv run app
 `} />
 
@@ -107,7 +107,7 @@ $ DEBUG=@travetto/*,-@travetto/model npx trv run app
 
         <c.Terminal title='Sample environment flags for standard usage' src={`
 # Debug
-$ DEBUG=express:*,@travetto/rest npx trv run rest
+$ DEBUG=express:*,@travetto/web npx trv run web
 `} />
       </c.SubSubSection>
     </c.SubSection>

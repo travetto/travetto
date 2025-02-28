@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "dependencies": {
     "@travetto/openapi": "^6.0.0-rc.1",
-    "@travetto/rest": "^6.0.0-rc.1"
+    "@travetto/web": "^6.0.0-rc.1"
   },
   "travetto": {},
   "private": true

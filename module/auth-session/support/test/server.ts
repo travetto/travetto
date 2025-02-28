@@ -8,11 +8,11 @@ import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Util } from '@travetto/runtime';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { BaseRestSuite } from '@travetto/rest/support/test/base';
+import { BaseWebSuite } from '@travetto/web/support/test/base';
 
 @Suite()
 @InjectableSuite()
-export abstract class AuthSessionServerSuite extends BaseRestSuite {
+export abstract class AuthSessionServerSuite extends BaseWebSuite {
 
   timeScale = 1;
 

@@ -8,8 +8,7 @@ import { Session } from './session';
 import { SessionEntry, SessionModelSymbol } from './model';
 
 /**
- * Rest service for supporting the session and managing the session state
- * during the normal lifecycle of requests.
+ * Service for supporting the session and managing the session state
  */
 @Injectable()
 export class SessionService {

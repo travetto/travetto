@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Redirect } from '@travetto/rest';
-import { Login, Authenticated, Logout } from '@travetto/auth-rest';
+import { Controller, Get, Post, Redirect } from '@travetto/web';
+import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import { Principal } from '@travetto/auth';
 
 import { BasicAuthSymbol, User } from './auth.config';

@@ -1,0 +1,39 @@
+{
+  "name": "@travetto/web-express-lambda",
+  "version": "6.0.0-rc.1",
+  "description": "Express AWS Lambda provider for the travetto web module.",
+  "keywords": [
+    "web",
+    "aws-lambda",
+    "express",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/web-express-lambda"
+  },
+  "dependencies": {
+    "@codegenie/serverless-express": "^4.16.0",
+    "@travetto/web": "^6.0.0-rc.1",
+    "@travetto/web-aws-lambda": "^6.0.0-rc.1",
+    "@travetto/web-express": "^6.0.0-rc.1"
+  },
+  "travetto": {
+    "displayName": "Express REST AWS Lambda Source"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

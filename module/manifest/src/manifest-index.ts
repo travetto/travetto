@@ -202,7 +202,7 @@ export class ManifestIndex {
   }
 
   /**
-   * Build module list from an expression list (e.g. `@travetto/rest,-@travetto/log)
+   * Build module list from an expression list (e.g. `@travetto/web,-@travetto/log)
    */
   getModuleList(mode: 'workspace' | 'all', exprList: string = ''): Set<string> {
     const allMods = Object.keys(this.#manifest.modules);

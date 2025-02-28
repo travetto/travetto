@@ -3,9 +3,9 @@ import { d, c } from '@travetto/doc';
 
 export const text = <>
   <c.StdHeader />
-  In the {d.mod('Rest')} module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap. <br />
+  In the {d.mod('Web')} module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap. <br />
 
-  The module is provides an {d.library('OpenAPI')} v3.x representation of the API metadata provided via the {d.mod('Rest')} and {d.mod('Schema')} modules.
+  The module is provides an {d.library('OpenAPI')} v3.x representation of the API metadata provided via the {d.mod('Web')} and {d.mod('Schema')} modules.
 
   <c.Section title='Configuration'>
     By installing the dependency, the {d.library('OpenAPI')} endpoint is automatically generated and exposed at the root of the application as {d.path('/openapi.yml')} or {d.path('/openapi.json')} (by default). <br />

@@ -1,3 +1,0 @@
-{
-  "extends": "@travetto/compiler/tsconfig.trv.json"
-}

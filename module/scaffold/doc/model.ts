@@ -5,7 +5,7 @@ export class Todo implements ModelType {
   id: string;
   text: string;
   completed?: boolean;
-  // {{#modules.auth-rest}}
+  // {{#modules.auth-web}}
   userId?: string;
-  // {{/modules.auth-rest}}
+  // {{/modules.auth-web}}
 }

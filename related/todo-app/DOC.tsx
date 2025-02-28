@@ -72,7 +72,7 @@ $ cd todo-project
 $ git init .
 
 $ npm init -f
-$ npm i @travetto/{log,rest-express,model-mongo,cli}
+$ npm i @travetto/{log,web-express,model-mongo,cli}
 $ npm i -D @travetto/{eslint,compiler,test}
 
 $ npx trv lint:register
@@ -122,7 +122,7 @@ $ npx trv lint:register
       <c.Code title='Test bed' src='test/service.ts' />
     </c.Section>
 
-    <c.Section title='Adding Rest Routes'>
+    <c.Section title='Adding Web Routes'>
       Now we establish the routes, providing an interface to the service layer.<br />
 
       Finally, we establish the controller at {d.path('src/route.ts')}

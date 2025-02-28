@@ -3,7 +3,7 @@
   "version": "6.0.0-rc.1",
   "description": "OpenAPI integration support for the Travetto framework",
   "keywords": [
-    "rest",
+    "web",
     "travetto",
     "decorators",
     "schema",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@travetto/config": "^6.0.0-rc.1",
-    "@travetto/rest": "^6.0.0-rc.1",
+    "@travetto/web": "^6.0.0-rc.1",
     "@travetto/schema": "^6.0.0-rc.1",
     "openapi3-ts": "^4.4.0",
     "yaml": "^2.7.0"

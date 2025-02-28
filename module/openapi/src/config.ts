@@ -32,7 +32,7 @@ export class ApiInfoConfig {
 }
 
 /**
- * The API host, infers from rest host configuration
+ * The API host, infers from web host configuration
  */
 @Config('api.host')
 export class ApiHostConfig {
