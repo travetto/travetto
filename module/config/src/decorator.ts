@@ -2,8 +2,12 @@ import { Class, ClassInstance, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 
+import { OverrideConfig, OverrideConfigSymbol } from './source/override';
+
 import { ConfigurationService } from './service';
-import { ConfigOverrides, ConfigBase, CONFIG_OVERRIDES } from './internal/types';
+import { ConfigTarget } from './types';
+
+const ConfigBaseImpl = toConcrete<ConfigTarget>();
 
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation
@@ -14,8 +18,8 @@ export function Config(ns: string) {
   return <T extends Class>(target: T): T => {
     const og: Function = target.prototype.postConstruct;
     // Declare as part of global config
-    (DependencyRegistry.getOrCreatePending(target).interfaces ??= []).push(toConcrete<ConfigBase>());
-    const env = SchemaRegistry.getOrCreatePendingMetadata<ConfigOverrides>(target, CONFIG_OVERRIDES, { ns, fields: {} });
+    (DependencyRegistry.getOrCreatePending(target).interfaces ??= []).push(ConfigBaseImpl);
+    const env = SchemaRegistry.getOrCreatePendingMetadata<OverrideConfig>(target, OverrideConfigSymbol, { ns, fields: {} });
     env.ns = ns;
 
     target.prototype.postConstruct = async function (): Promise<void> {
@@ -33,7 +37,7 @@ export function Config(ns: string) {
  */
 export function EnvVar(name: string) {
   return (inst: ClassInstance, prop: string): void => {
-    const env = SchemaRegistry.getOrCreatePendingMetadata<ConfigOverrides>(inst.constructor, CONFIG_OVERRIDES, { ns: '', fields: {} });
+    const env = SchemaRegistry.getOrCreatePendingMetadata<OverrideConfig>(inst.constructor, OverrideConfigSymbol, { ns: '', fields: {} });
     env.fields[prop] = (): string | undefined => process.env[name];
   };
 }
