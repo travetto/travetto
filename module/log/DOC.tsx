@@ -1,20 +1,20 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
+import { ConsoleEvent, ConsoleManager, toConcrete } from '@travetto/runtime';
 
 import { CommonLogger, CommonLoggerConfig } from './src/common';
 import { FileLogAppender } from './src/appender/file';
 import { ConsoleLogAppender } from './src/appender/console';
 import { JsonLogFormatter } from './src/formatter/json';
 import { LineLogFormatter } from './src/formatter/line';
+import { LogAppender, LogDecorator, LogEvent, LogFormatter, Logger } from './src/types';
 
-const Logger = d.codeLink('Logger', 'src/types.ts', /interface Logger/);
-const LogDecorator = d.codeLink('Logger', 'src/types.ts', /interface LogDecorator/);
-const LogFormatter = d.codeLink('LogFormatter', 'src/types.ts', /interface LogFormatter/);
-const LogAppender = d.codeLink('LogAppender', 'src/types.ts', /interface LogAppender/);
-const LogEvent = d.codeLink('LogEvent', 'src/types.ts', /interface LogEvent/);
-const ConsolEvent = d.codeLink('ConsoleEvent', '@travetto/runtime/src/console.ts', /type ConsoleEvent/);
-
-const ConsoleManager = d.ref('ConsoleManager', '@travetto/runtime/src/console.ts');
+const LoggerContract = toConcrete<Logger>();
+const LogDecoratorContract = toConcrete<LogDecorator>();
+const LogFormatterContract = toConcrete<LogFormatter>();
+const LogAppenderContract = toConcrete<LogAppender>();
+const LogEventContract = toConcrete<LogEvent>();
+const ConsoleEventContract = toConcrete<ConsoleEvent>();
 
 export const text = <>
   <c.StdHeader />
@@ -23,25 +23,25 @@ export const text = <>
   <c.Section title='Extending the Common Logger'>
     By default, the system ships with the {CommonLogger}, and by default will leverage the {LineLogFormatter} and the {ConsoleLogAppender}. The configuration {CommonLoggerConfig} provides two configuration variables that allows for switching out {LineLogFormatter} for the {JsonLogFormatter}, depending on the value of {d.field('CommonLoggerConfig.format')}.  Additionally the {ConsoleLogAppender} can be swapped out for the {FileLogAppender} depending on the value of {d.field('CommonLoggerConfig.output')}.
 
-    <c.Code title='Standard Logging Config' src='src/common.ts' startRe={/class CommonLoggerConfig/} endRe={/^[}]/} />
+    <c.Code src={CommonLoggerConfig} title='Standard Logging Config' />
 
-    In addition to these simple overrides, the {CommonLogger} can be extended by providing an implementation of either a {LogFormatter} or {LogAppender}, with the declared symbol of {d.field('LogCommonSymbol')}.
+    In addition to these simple overrides, the {CommonLogger} can be extended by providing an implementation of either a {LogFormatterContract} or {LogAppenderContract}, with the declared symbol of {d.field('LogCommonSymbol')}.
 
     <c.Code title='Sample Common Formatter' src='doc/formatter.ts' />
 
-    As you can see, implementing {LogFormatter}/{LogAppender} with the appropriate symbol is all that is necessary to customize the general logging functionality.
+    As you can see, implementing {LogFormatterContract}/{LogAppenderContract} with the appropriate symbol is all that is necessary to customize the general logging functionality.
   </c.Section>
 
   <c.Section title='Creating a Logger'>
-    The default pattern for logging is to create a {Logger} which simply consumes a logging event. The method is not asynchronous as ensuring the ordering of append calls will be the responsibility of the logger.  The default logger uses {d.method('console.log')} and that is synchronous by default.
+    The default pattern for logging is to create a {LoggerContract} which simply consumes a logging event. The method is not asynchronous as ensuring the ordering of append calls will be the responsibility of the logger.  The default logger uses {d.method('console.log')} and that is synchronous by default.
 
-    <c.Code title='Logger Shape' src='src/types.ts' startRe={/interface Logger/} endRe={/^[}]/} />
+    <c.Code title='Logger Shape' src={LoggerContract} />
 
-    <c.Code title='Log Event' src='src/types.ts' startRe={/interface LogEvent/} endRe={/^[}]/} />
+    <c.Code title='Log Event' src={LogEventContract} />
 
-    <c.Code title='Console Event' src='@travetto/runtime/src/console.ts' startRe={/type ConsoleEvent/} endRe={/^[}]/} />
+    <c.Code title='Console Event' src={ConsoleEventContract} />
 
-    The {LogEvent} is an extension of the {ConsolEvent} with the addition of two fields:
+    The {LogEventContract} is an extension of the {ConsoleEventContract} with the addition of two fields:
 
     <ul>
       <li>{d.field('message')} - This is the primary argument passed to the console statement, if it happens to be a string, otherwise the field is left empty</li>
@@ -53,9 +53,9 @@ export const text = <>
 
 
   <c.Section title='Creating a Decorator'>
-    In addition to being able to control the entire logging experience, there are also scenarios in which the caller may want to only add information to the log event, without affecting control of the formatting or appending. The {LogDecorator} is an interface that provides a contract that allows transforming the {LogEvent} data. A common scenario for this would be to add additional metadata data (e.g. server name, ip, code revision, CPU usage, memory usage, etc) into the log messages.
+    In addition to being able to control the entire logging experience, there are also scenarios in which the caller may want to only add information to the log event, without affecting control of the formatting or appending. The {LogDecoratorContract} is an interface that provides a contract that allows transforming the {LogEventContract} data. A common scenario for this would be to add additional metadata data (e.g. server name, ip, code revision, CPU usage, memory usage, etc) into the log messages.
 
-    <c.Code title='Log Decorator Shape' src='src/types.ts' startRe={/interface LogDecorator/} endRe={/^[}]/} />
+    <c.Code title='Log Decorator Shape' src={LogDecoratorContract} />
 
     <c.Code title='Custom Logger' src='doc/custom-decorator.ts' />
   </c.Section>
@@ -67,7 +67,7 @@ export const text = <>
 
   <c.Section title='Environment Configuration'>
 
-    <c.Code title='Standard Logging Config' src='src/common.ts' startRe={/class CommonLoggerConfig/} endRe={/^[}]/} />
+    <c.Code title='Standard Logging Config' src={CommonLoggerConfig} />
 
     The following environment variables have control over the default logging config:
     <ul>

@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { createElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
+import { createElement, JSXElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
 
 import { PackageUtil } from '@travetto/manifest';
 import { castTo, RuntimeIndex } from '@travetto/runtime';
@@ -66,7 +66,7 @@ export class RenderContext {
   link(text: string, line?: number | { [key: string]: unknown, line?: number }): string {
     const num = typeof line === 'number' ? line : line?.line;
     return `${text.replace(this.repoRoot, this.baseUrl)
-      .replace(/.*@travetto\//, `${this.travettoBaseUrl}/module/`)}${num ? `#L${num}` : ''}`;
+      .replace(/.*@travetto\//, `${this.travettoBaseUrl}/module/`)}${num && num > 1 ? `#L${num}` : ''}`;
   }
 
   /**
@@ -115,13 +115,9 @@ export class RenderContext {
    * Resolve code/config
    */
   async resolveCode(node: JSXElementByFn<'Code' | 'Config'>): Promise<ResolvedCode> {
-    const type = typeof node.props.src === 'function' ? node.props.src : undefined;
-    const startRe = node.props.startRe ?? (type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${type.name.replaceAll('$', '\\$')}\\b`) : undefined);
-    const endRe = node.props.endRe ?? (type ? /^}$/ : undefined);
-
-    return startRe ?
-      DocResolveUtil.resolveSnippet(node.props.src, startRe, endRe, node.props.outline) :
-      DocResolveUtil.resolveCode(node.props.src, node.props.language ?? 'typescript', node.props.outline);
+    return node.props.startRe ?
+      DocResolveUtil.resolveSnippet(node.props.src, node.props.startRe, node.props.endRe, node.props.outline) :
+      DocResolveUtil.resolveCode(node.props.src, node.props.language, node.props.outline);
   }
 
   /**

@@ -1,12 +1,13 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { AuthContext } from '@travetto/auth';
-import { Runtime } from '@travetto/runtime';
+import { AuthContext, Principal } from '@travetto/auth';
+import { Runtime, toConcrete } from '@travetto/runtime';
 
 import { SessionService } from './src/service';
+import { ModelExpirySupport } from '@travetto/model';
 
-const PrincipalContract = d.codeLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
-const ModelExpirySupport = d.ref('ModelExpirySupport', '@travetto/model/src/service/expiry.ts');
+const PrincipalContract = toConcrete<Principal>();
+const ModelExpirySupportContract = toConcrete<ModelExpirySupport>();
 
 export const text = <>
   <c.StdHeader />
@@ -14,7 +15,7 @@ export const text = <>
 
   This session identifier, is then used when retrieving data from {d.mod('Model')} storage. This storage mechanism is not tied to a request/response model, but the {d.mod('AuthRestSession')} does provide a natural integration with the {d.mod('Rest')} module.   <br />
 
-  Within the framework the sessions are stored against any {d.mod('Model')} implementation that provides {ModelExpirySupport}, as the data needs to be able to be expired appropriately.  The list of supported model providers are:
+  Within the framework the sessions are stored against any {d.mod('Model')} implementation that provides {ModelExpirySupportContract}, as the data needs to be able to be expired appropriately.  The list of supported model providers are:
 
   <ul>
     <li>{d.mod('ModelRedis')}</li>
@@ -26,7 +27,7 @@ export const text = <>
     <li>{d.mod('ModelMemory')}</li>
   </ul>
 
-  While the expiry is not necessarily a hard requirement, the implementation without it can be quite messy.  To that end, the ability to add {ModelExpirySupport} to the model provider would be the natural extension point if more expiry support is needed.
+  While the expiry is not necessarily a hard requirement, the implementation without it can be quite messy.  To that end, the ability to add {ModelExpirySupportContract} to the model provider would be the natural extension point if more expiry support is needed.
 
   <c.Code src={Runtime.workspaceRelative('module/auth-rest-session/src/interceptor.ts')} startRe={/class/} endRe={/^[}]/} title='Sample usage of Session Service' />
 

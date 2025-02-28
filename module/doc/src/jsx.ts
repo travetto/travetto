@@ -3,9 +3,8 @@ import { castTo, TypedObject } from '@travetto/runtime';
 
 import { LIB_MAPPING } from './mapping/lib-mapping';
 import { MOD_MAPPING } from './mapping/mod-mapping';
-import { RunConfig } from './util/run';
+import { CodeProps, RunConfig } from './util/types';
 
-type CodeProps = { title?: string, src: string | Function, language?: string, outline?: boolean, startRe?: RegExp, endRe?: RegExp };
 type InstallProps = { title: string, pkg: string };
 type ExecProps = { title: string, cmd: string, args?: string[], config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string } };
 type StdHeaderProps = { mod?: string, install?: boolean };

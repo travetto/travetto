@@ -1,4 +1,5 @@
 import { DocFileUtil } from './file';
+import { CodeProps } from './types';
 
 export type ResolvedRef = { title: string, file: string, line: number };
 export type ResolvedCode = { text: string, language: string, file?: string };
@@ -18,7 +19,7 @@ export class DocResolveUtil {
 
     if (res.content) {
       line = res.content.split(/\n/g)
-        .findIndex(x => new RegExp(`(class|function)[ ]+${title}`).test(x));
+        .findIndex(x => new RegExp(`(class|interface|function)[ ]+${title.replaceAll('$', '\\$')}`).test(x));
       if (line < 0) {
         line = 0;
       } else {
@@ -62,5 +63,13 @@ export class DocResolveUtil {
   static async resolveCodeLink(file: Function | string, startPattern: RegExp): Promise<ResolvedSnippetLink> {
     const { startIdx, file: resolvedFile } = await DocFileUtil.readCodeSnippet(file, startPattern);
     return { file: resolvedFile, line: startIdx + 1 };
+  }
+
+  static applyCodePropDefaults(props: CodeProps) {
+    const type = typeof props.src === 'function' ? props.src : undefined;
+    props.startRe ??= props.startRe ?? (type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${type.name.replaceAll('$', '\\$')}\\b`) : undefined);
+    props.language ??= (type ? 'typescript' : undefined);
+    props.endRe ??= (type ? /^[}]/ : undefined);
+    props.title ??= typeof props.src == 'function' ? props.src.name.replace(/^[$]/, '') : undefined;
   }
 }

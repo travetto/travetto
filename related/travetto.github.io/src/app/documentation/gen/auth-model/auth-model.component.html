@@ -42,12 +42,12 @@ Currently, the following are packages that provide <a target="_blank" class="sou
 <li><a class="module-link" routerLink="/docs/model-memory" title="Memory backing for the travetto model module.">Memory Model Support</a> - &#64;travetto/model-memory</li>
 <li><a class="module-link" routerLink="/docs/model-file" title="File system backing for the travetto model module.">File Model Support</a> - &#64;travetto/model-file</li>
 </ul>
-The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L10">Registered Principal</a>. <br><br>
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11">RegisteredPrincipal</a>. <br><br>
 A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 
   <figure class="code">
-    <figcaption class="code">Registered Principal
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L10">Source</a></cite>
+    <figcaption class="code">RegisteredPrincipal
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">RegisteredPrincipal</span> <span class="token keyword">extends</span> <span class="token class-name">Principal</span> <span class="token punctuation">{{'{'}}</span>
@@ -180,17 +180,10 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
   <figure class="code">
     <figcaption class="code">Auth util structure
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-model/src/util.ts#L11">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> crypto <span class="token keyword">from</span> <span class="token string">'node:crypto'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> util <span class="token keyword">from</span> <span class="token string">'node:util'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError<span class="token punctuation">,</span> Util <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">const</span> pbkdf2 <span class="token operator">=</span> util<span class="token punctuation">.</span><span class="token function">promisify</span><span class="token punctuation">(</span>crypto<span class="token punctuation">.</span>pbkdf2<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token comment">/**
- * Standard auth utilities
- */</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthModelUtil</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthModelUtil</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Generate a hash for a given value
    *

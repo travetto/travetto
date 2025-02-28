@@ -223,7 +223,7 @@ export interface ModelBulkSupport extends ModelCrudSupport {
 ```
 
 ## Declaration
-Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L9)
+Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10)
 
 **Code: ModelType**
 ```typescript

@@ -33,7 +33,7 @@ export const ModelCustomConfig = ({ cfg }: { cfg: Function }): DocJSXElement => 
 
   where the {cfg} is defined by:
 
-  <c.Code title={`Structure of ${cfg.name}`} src={cfg} />
+  <c.Code title={`Structure of ${cfg.name}`} src={cfg} startRe={/./} />
 
   Additionally, you can see that the class is registered with the {Config} annotation, and so these values can be overridden using the
   standard {d.mod('Config')}resolution paths.

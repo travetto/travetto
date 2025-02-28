@@ -1,5 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
+import { toConcrete } from '@travetto/runtime';
 
 import {
   Currency, Email, Enum, Field, Float, Ignore, Integer,
@@ -7,10 +8,10 @@ import {
   Required, Telephone, Url, Writeonly, Text, Secret, Specifier,
   SubTypeField
 } from './src/decorator/field';
-
 import { Schema } from './src/decorator/schema';
 import { Describe } from './src/decorator/common';
 import { DataUtil } from './src/data';
+import { ValidationError } from './src/validate/types';
 
 export const text = <>
   <c.StdHeader />
@@ -128,7 +129,7 @@ export const text = <>
 
       When the validator is executed, it has access to the entire object, and you can check any of the values.  The validator expects an object of a specific structure if you are looking to indicate an error has occurred.
 
-      <c.Code title='Validation Error Structure' src='src/validate/types.ts' startRe={/interface ValidationError/} endRe={/^\}/} />
+      <c.Code title='Validation Error Structure' src={toConcrete<ValidationError>()} />
     </c.SubSection>
   </c.Section>
 

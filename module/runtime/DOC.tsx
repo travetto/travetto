@@ -1,8 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex } from '@travetto/runtime';
+import { ExecUtil, AppError, Util, FileLoader, TimeUtil, EnvProp, RuntimeIndex, Runtime, ConsoleManager } from '@travetto/runtime';
 
-const ConsoleManager = d.codeLink('ConsoleManager', 'src/console.ts', /(class|function)\s*[$]ConsoleManager/);
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
 
 export const text = <>
@@ -30,7 +29,7 @@ export const text = <>
       <li>Resolving paths within the workspace (e.g. standard, tooling, resourcing, modules)</li>
     </ul>
 
-    <c.Code title='Runtime Shape' src='./src/context.ts' startRe={/class [$]Runtime/} endRe={/^[}]/} outline={true} />
+    <c.Code title='Runtime Shape' src={Runtime.constructor} outline={true} />
 
     <c.SubSection title='Class and Function Metadata'>
       For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every {d.input('class')} is decorated with metadata, including methods, line numbers, and ultimately a unique id stored at {d.input('Ⲑid')}.
@@ -45,7 +44,7 @@ export const text = <>
 
     <c.SubSection title='Environment Property'>
       For a given {EnvProp}, we support the ability to access different properties as a means to better facilitate environment variable usage.
-      <c.Code title='EnvProp Shape' src='./src/env.ts' startRe={/class EnvProp/} endRe={/^[}]/} outline={true} />
+      <c.Code title='EnvProp Shape' src={EnvProp} outline={true} />
     </c.SubSection>
   </c.Section>
 
@@ -144,7 +143,7 @@ tpl\`{{age:20}} {{name: 'bob'}}\</>;
 
     {TimeUtil} contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
-    <c.Code title='Time Utilities' src='src/time.ts' startRe={/TimeUtil/} endRe={/^}/} outline={true} />
+    <c.Code title='Time Utilities' src={TimeUtil} outline={true} />
   </c.Section>
 
   <c.Section title='Process Execution'>

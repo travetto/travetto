@@ -48,7 +48,7 @@ export class AuthSessionInterceptor implements RestInterceptor {
 }
 ```
 
-Once operating within the [Session](https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L13) boundaries, the session state can be injected via params, or accessed via the [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L15).
+Once operating within the [Session](https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L7) boundaries, the session state can be injected via params, or accessed via the [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L15).
 
 **Code: Sample Usage**
 ```typescript
