@@ -8,8 +8,10 @@ import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
   ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport,
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
-  MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil,
+  MODEL_BLOB, ModelBlobUtil,
 } from '@travetto/model';
+
+const ModelBlobNamespace = '__blobs';
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
 
 type StoreType = Map<string, Buffer>;

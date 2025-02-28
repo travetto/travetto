@@ -11,10 +11,12 @@ import { Required } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistry,
   NotFoundError, OptionalId, ExistsError, ModelBlobSupport,
-  ModelCrudUtil, ModelExpiryUtil, MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil
+  ModelCrudUtil, ModelExpiryUtil, MODEL_BLOB, ModelBlobUtil
 } from '@travetto/model';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
+
+const ModelBlobNamespace = '__blobs';
 
 const BIN = '.bin';
 const META = '.meta';

@@ -11,7 +11,7 @@ import {
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
   NotFoundError, ExistsError, ModelBlobSupport,
   ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil,
-  ModelBulkUtil, MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil,
+  ModelBulkUtil, MODEL_BLOB, ModelBlobUtil,
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -33,6 +33,8 @@ const ListIndexSymbol = Symbol.for('@travetto/mongo-model:list-index');
 type BlobRaw = GridFSFile & { metadata?: BlobMeta };
 
 type MongoTextSearch = RootFilterOperators<unknown>['$text'];
+
+export const ModelBlobNamespace = '__blobs';
 
 /**
  * Mongo-based model source
