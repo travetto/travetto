@@ -2,8 +2,7 @@ import { estypes } from '@elastic/elasticsearch';
 
 import { Class, toConcrete } from '@travetto/runtime';
 import { ModelRegistry } from '@travetto/model';
-import { DataUtil, SchemaRegistry } from '@travetto/schema';
-import { Point } from '@travetto/model-query';
+import { Point, DataUtil, SchemaRegistry } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types';
 

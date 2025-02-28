@@ -1,11 +1,5 @@
 import type { Primitive, TimeSpan } from '@travetto/runtime';
-
-/**
- * Point as [number,number] with validation and binding support
- *
- * @concrete ../internal/types#PointImpl
- */
-export type Point = [number, number];
+import { Point } from '@travetto/schema';
 
 export type QueryPrimitive = Primitive | Point;
 export type QueryPrimitiveArray = QueryPrimitive[];

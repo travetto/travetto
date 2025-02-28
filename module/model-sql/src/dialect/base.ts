@@ -1,7 +1,7 @@
 /* eslint-disable @stylistic/indent */
-import { DataUtil, SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
+import { DataUtil, SchemaRegistry, FieldConfig, Schema, type Point } from '@travetto/schema';
 import { Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete } from '@travetto/runtime';
-import { SelectClause, Query, SortClause, WhereClause, RetainFields, Point, ModelQueryUtil } from '@travetto/model-query';
+import { SelectClause, Query, SortClause, WhereClause, RetainFields, ModelQueryUtil } from '@travetto/model-query';
 import { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
 
 import { SQLModelUtil } from '../util';

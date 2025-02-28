@@ -3,9 +3,9 @@ import {
 } from 'mongodb';
 
 import { AppError, castTo, Class, toConcrete, TypedObject } from '@travetto/runtime';
-import { type DistanceUnit, type PageableModelQuery, type Point, type WhereClause, ModelQueryUtil } from '@travetto/model-query';
+import { type DistanceUnit, type PageableModelQuery, type WhereClause, ModelQueryUtil } from '@travetto/model-query';
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
-import { DataUtil, SchemaRegistry } from '@travetto/schema';
+import { DataUtil, SchemaRegistry, type Point } from '@travetto/schema';
 
 const PointImpl = toConcrete<Point>();
 
