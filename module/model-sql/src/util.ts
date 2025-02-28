@@ -3,17 +3,7 @@ import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
 
-import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types';
-
-const TableSymbol = Symbol.for('@travetto/model-sql:table');
-
-export type VisitStack = {
-  [TableSymbol]?: string;
-  array?: boolean;
-  type: Class;
-  name: string;
-  index?: number;
-};
+import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy, VisitStack, TableSymbol } from './internal/types';
 
 type FieldCacheEntry = {
   local: FieldConfig[];

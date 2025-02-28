@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { BinaryUtil, Class, Runtime, Util, castTo, describeFunction } from '@travetto/runtime';
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, ControllerVisitUtil, EndpointConfig } from '@travetto/rest';
-import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
+import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral, UnknownType } from '@travetto/schema';
 
 import { ParamConfig } from './shared/types';
 import type { EndpointDesc, Imp, RenderContent } from './types';
@@ -15,6 +15,7 @@ export const TYPE_MAPPING = new Map<Function, string>([
   [Date, 'Date'],
   [Boolean, 'boolean'],
   [Object, 'Record<string, unknown>'],
+  [UnknownType, 'unknown']
 ]);
 
 /**
