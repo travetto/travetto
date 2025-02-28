@@ -3,7 +3,7 @@ import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResul
 
 import { EndpointConfig } from '../registry/types';
 import { ParamConfig, Request, Response } from '../types';
-import { MissingParamSymbol, RequestParamsSymbol, QueryExpandedSymbol } from '../symbol';
+import { RestSymbols } from '../symbol';
 
 export type ExtractFn = (c: ParamConfig, req: Request, res: Response, schema: FieldConfig) => unknown;
 
@@ -26,7 +26,7 @@ class $ParamExtractor {
     this.defaultExtractors = {
       path: (c, r): unknown => r.params[c.name!],
       query: (c, r, _, schema): unknown => {
-        const exp = (r[QueryExpandedSymbol] ??= BindUtil.expandPaths(r.query));
+        const exp = (r[RestSymbols.QueryExpanded] ??= BindUtil.expandPaths(r.query));
         if (c.prefix) {
           return exp[c.prefix];
         } else if (schema.type.Ⲑid) { // Is a complex type
@@ -93,10 +93,11 @@ class $ParamExtractor {
     const method = route.handlerName;
 
     const methodParams = SchemaRegistry.getMethodSchema(cls, method);
-    const routed = route.params.map((c, i) =>
-      (req[RequestParamsSymbol] && req[RequestParamsSymbol][i] !== MissingParamSymbol) ?
-        req[RequestParamsSymbol][i] :
-        (c.extract ?? this.defaultExtractors[c.location])(c, req, res, methodParams[i]));
+    const routed = route.params.map((c, i) => {
+      const vals = req[RestSymbols.RequestParams];
+      return (vals && vals[i] !== RestSymbols.MissingParam) ? vals[i] :
+        (c.extract ?? this.defaultExtractors[c.location])(c, req, res, methodParams[i]);
+    });
 
     const params = BindUtil.coerceMethodParams(cls, method, routed);
 

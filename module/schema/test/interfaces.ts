@@ -8,7 +8,7 @@ import { Schema } from '../src/decorator/schema';
 import { SchemaRegistry } from '../src/service/registry';
 import { SchemaValidator } from '../src/validate/validator';
 import { ValidationError } from '../src/validate/types';
-import { AllViewSymbol } from '../src/internal/types';
+import { AllViewSymbol } from '../src/service/types';
 import { ValidationResultError } from '../src/validate/error';
 
 import { Address2 } from './models/address';

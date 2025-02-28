@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 
 import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
-import { HeadersAddedSymbol } from '../symbol.ts
+import { RestSymbols } from '../symbol';
 import { Renderable } from '../response/renderable';
 import { Request, Response } from '../types';
 
@@ -171,7 +171,7 @@ export class SerializeUtil {
    * Determine serialization type based on output
    */
   static serializeStandard(req: Request, res: Response, output: unknown): void | Promise<void> {
-    this.setHeaders(res, res[HeadersAddedSymbol]);
+    this.setHeaders(res, res[RestSymbols.HeadersAdded]);
     switch (typeof output) {
       case 'undefined': return this.serializeEmpty(req, res);
       case 'string': return this.serializeText(res, output);

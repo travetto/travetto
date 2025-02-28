@@ -33,7 +33,7 @@ export class KoaRestServer implements RestServer<koa> {
     const app = new koa();
     app.use(kCompress());
 
-    app.keys = this.cookies.keys;
+    app.keys = this.cookies.keys!;
 
     // Enable proxy for cookies
     if (this.config.trustProxy) {

@@ -1,9 +1,8 @@
 import { castTo, Class, classConstruct, asFull, TypedObject, castKey } from '@travetto/runtime';
 
 import { DataUtil } from './data';
-import { AllViewSymbol } from './internal/types';
 import { SchemaRegistry } from './service/registry';
-import { FieldConfig } from './service/types';
+import { AllViewSymbol, FieldConfig } from './service/types';
 
 type BindConfig = {
   view?: string | typeof AllViewSymbol;

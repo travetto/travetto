@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { Response } from '../../types';
-import { NodeEntitySymbol } from '../../symbol.ts
+import { RestSymbols } from '../../symbol';
 
 /**
  * Base response object
@@ -57,7 +57,7 @@ export class ResponseCore implements Partial<Response> {
    * Send a stream to the response and wait for completion
    */
   async sendStream(this: Response, data: Readable): Promise<void> {
-    await pipeline(data, this[NodeEntitySymbol], { end: false });
+    await pipeline(data, this[RestSymbols.NodeEntity], { end: false });
     this.end();
   }
 }

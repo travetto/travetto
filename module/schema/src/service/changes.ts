@@ -3,8 +3,7 @@ import { EventEmitter } from 'node:events';
 import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 
-import { FieldConfig, ClassConfig } from './types';
-import { AllViewSymbol } from '../internal/types';
+import { AllViewSymbol, FieldConfig, ClassConfig } from './types';
 
 const id = (c: Class | string): string => typeof c === 'string' ? c : c.Ⲑid;
 

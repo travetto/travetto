@@ -5,7 +5,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
-import { NodeEntitySymbol } from '../symbol.ts
+import { RestSymbols } from '../symbol';
 import { RouteConfig, Request, FilterContext, FilterNext } from '../types';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
@@ -45,7 +45,7 @@ export class BodyParseInterceptor implements RestInterceptor<RestBodyParseConfig
   async read(req: Request, limit: string | number): Promise<{ text: string, raw: Buffer }> {
     const cfg = req.getContentType();
 
-    const text = await rawBody(inflation(req[NodeEntitySymbol]), {
+    const text = await rawBody(inflation(req[RestSymbols.NodeEntity]), {
       limit,
       encoding: cfg?.parameters.charset ?? 'utf8'
     });
@@ -87,7 +87,7 @@ export class BodyParseInterceptor implements RestInterceptor<RestBodyParseConfig
     const parserType = this.detectParserType(req, config.parsingTypes);
 
     if (!parserType) {
-      req.body = req[NodeEntitySymbol];
+      req.body = req[RestSymbols.NodeEntity];
       return next();
     } else {
       let malformed: unknown;

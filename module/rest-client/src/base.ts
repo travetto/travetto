@@ -5,6 +5,8 @@ import { BinaryUtil, Class, Runtime, Util, castTo, describeFunction } from '@tra
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, ControllerVisitUtil, EndpointConfig } from '@travetto/rest';
 import { AllViewSymbol, ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 
+import { UnknownType } from '@travetto/schema/src/internal/types';
+
 import { ParamConfig } from './shared/types';
 import type { EndpointDesc, Imp, RenderContent } from './types';
 
