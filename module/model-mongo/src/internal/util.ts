@@ -87,7 +87,7 @@ export class MongoUtil {
     for (const key of keys) {
       const subpath = `${path}${key}`;
       const v: Record<string, unknown> = castTo(sub[key]);
-      const subField = schema?.allView.schema[key];
+      const subField = schema?.totalView.schema[key];
 
       const isPlain = v && DataUtil.isPlainObject(v);
       const firstKey = isPlain ? Object.keys(v)[0] : '';

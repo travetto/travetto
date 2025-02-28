@@ -205,7 +205,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         };
 
         const properties: Record<string, SchemaObject> = {};
-        const def = config.allView;
+        const def = config.totalView;
         const required: string[] = [];
 
         for (const fieldName of def.fields) {

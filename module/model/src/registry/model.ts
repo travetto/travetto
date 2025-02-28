@@ -73,7 +73,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     const config = asFull(this.pending.get(cls.Ⲑid)!);
 
     const schema = SchemaRegistry.get(cls);
-    const view = schema.allView.schema;
+    const view = schema.totalView.schema;
     delete view.id.required; // Allow ids to be optional
 
     if (schema.subTypeField in view && this.getBaseModel(cls) !== cls) {

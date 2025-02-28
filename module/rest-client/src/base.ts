@@ -320,10 +320,10 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
     const fields: (string | Imp)[] = [];
 
     const parentFieldNames = new Set(
-      parent ? SchemaRegistry.get(parent.classId).allView.fields : []
+      parent ? SchemaRegistry.get(parent.classId).totalView.fields : []
     );
 
-    const view = schema.allView;
+    const view = schema.totalView;
     for (const fieldName of view.fields) {
       if (!schema.subTypeName && parentFieldNames.has(fieldName)) {
         continue;

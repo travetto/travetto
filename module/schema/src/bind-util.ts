@@ -180,7 +180,7 @@ export class BindUtil {
           obj[k] = data[k];
         }
       } else {
-        let viewConf = conf.allView;
+        let viewConf = conf.totalView;
         if (view) {
           viewConf = conf.views[view];
           if (!viewConf) {

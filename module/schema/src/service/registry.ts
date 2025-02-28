@@ -72,7 +72,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   ensureInstanceTypeField<T>(cls: Class, o: T): void {
     const schema = this.get(cls);
     const typeField = castKey<T>(schema.subTypeField);
-    if (schema.subTypeName && typeField in schema.allView.schema && !o[typeField]) {  // Do we have a type field defined
+    if (schema.subTypeName && typeField in schema.totalView.schema && !o[typeField]) {  // Do we have a type field defined
       o[typeField] = castTo(schema.subTypeName); // Assign if missing
     }
   }
@@ -168,7 +168,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.get(cls));
 
     // Read children
-    const view = config.allView;
+    const view = config.totalView;
     for (const k of view.fields) {
       if (this.has(view.schema[k].type) && view.schema[k].type !== cls) {
         this.trackSchemaDependencies(cls, view.schema[k].type, [...path, view.schema[k]]);
@@ -184,7 +184,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       baseType: describeFunction(cls)?.abstract,
       metadata: {},
       methods: {},
-      allView: {
+      totalView: {
         schema: {},
         fields: [],
       },
@@ -202,7 +202,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (!schema) {
       throw new Error(`Unknown schema class ${cls.name}`);
     }
-    let res = schema.allView;
+    let res = schema.totalView;
     if (view) {
       res = schema.views[view];
       if (!res) {
@@ -295,24 +295,24 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param config The config to register
    */
   registerPendingFieldFacet(target: Class, prop: string, config: Partial<FieldConfig>): Class {
-    const allViewConf = this.getOrCreatePending(target).allView!;
+    const totalViewConf = this.getOrCreatePending(target).totalView!;
 
-    if (!allViewConf.schema[prop]) {
-      allViewConf.fields.push(prop);
+    if (!totalViewConf.schema[prop]) {
+      totalViewConf.fields.push(prop);
       // Partial config while building
-      allViewConf.schema[prop] = asFull<FieldConfig>({});
+      totalViewConf.schema[prop] = asFull<FieldConfig>({});
     }
     if (config.aliases) {
-      config.aliases = [...allViewConf.schema[prop].aliases ?? [], ...config.aliases];
+      config.aliases = [...totalViewConf.schema[prop].aliases ?? [], ...config.aliases];
     }
     if (config.specifiers) {
-      config.specifiers = [...allViewConf.schema[prop].specifiers ?? [], ...config.specifiers];
+      config.specifiers = [...totalViewConf.schema[prop].specifiers ?? [], ...config.specifiers];
     }
     if (config.enum?.values) {
       config.enum.values = config.enum.values.slice().sort();
     }
 
-    Object.assign(allViewConf.schema[prop], config);
+    Object.assign(totalViewConf.schema[prop], config);
 
     return target;
   }
@@ -358,9 +358,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param src Source config
    */
   mergeConfigs(dest: ClassConfig, src: Partial<ClassConfig>, inherited = false): ClassConfig {
-    dest.allView = {
-      schema: { ...dest.allView.schema, ...src.allView?.schema },
-      fields: [...dest.allView.fields, ...src.allView?.fields ?? []]
+    dest.totalView = {
+      schema: { ...dest.totalView.schema, ...src.totalView?.schema },
+      fields: [...dest.totalView.fields, ...src.totalView?.fields ?? []]
     };
     if (!inherited) {
       dest.baseType = src.baseType ?? dest.baseType;
@@ -380,20 +380,20 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param conf The class config
    */
   finalizeViews<T>(target: Class<T>, conf: ClassConfig): ClassConfig {
-    const allViewConf = conf.allView;
+    const totalViewConf = conf.totalView;
     const pending = this.#pendingViews.get(target) ?? new Map<string, ViewFieldsConfig<string>>();
     this.#pendingViews.delete(target);
 
     for (const [view, fields] of pending.entries()) {
       const withoutSet = 'without' in fields ? new Set<string>(fields.without) : undefined;
       const fieldList = withoutSet ?
-        allViewConf.fields.filter(x => !withoutSet.has(x)) :
+        totalViewConf.fields.filter(x => !withoutSet.has(x)) :
         ('with' in fields ? fields.with : []);
 
       conf.views![view] = {
         fields: fieldList,
         schema: fieldList.reduce<SchemaConfig>((acc, v) => {
-          acc[v] = allViewConf.schema[v];
+          acc[v] = totalViewConf.schema[v];
           return acc;
         }, {})
       };
@@ -426,9 +426,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     // Write views out
     config = this.finalizeViews(cls, config);
 
-    if (config.subTypeName && config.subTypeField in config.allView.schema) {
-      const field = config.allView.schema[config.subTypeField];
-      config.allView.schema[config.subTypeField] = {
+    if (config.subTypeName && config.subTypeField in config.totalView.schema) {
+      const field = config.totalView.schema[config.subTypeField];
+      config.totalView.schema[config.subTypeField] = {
         ...field,
         enum: {
           values: [config.subTypeName],

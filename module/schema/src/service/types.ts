@@ -72,7 +72,7 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * Composite of all views
    */
-  allView: ViewConfig;
+  totalView: ViewConfig;
   /**
    * Global validators
    */

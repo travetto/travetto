@@ -44,7 +44,7 @@ class ViewsTest {
 
   @Test()
   async testRegister() {
-    assert(SchemaRegistry.get(User).allView.schema.address.type);
+    assert(SchemaRegistry.get(User).totalView.schema.address.type);
   }
 
   @Test('Url and message')

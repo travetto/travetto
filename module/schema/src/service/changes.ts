@@ -110,8 +110,8 @@ class $SchemaChangeListener {
    */
   emitFieldChanges({ prev, curr }: ChangeEvent<ClassConfig>): void {
 
-    const prevView = prev?.allView || { fields: [], schema: {} };
-    const currView = curr!.allView;
+    const prevView = prev?.totalView || { fields: [], schema: {} };
+    const currView = curr!.totalView;
 
     const prevFields = new Set(prevView.fields);
     const currFields = new Set(currView.fields);
