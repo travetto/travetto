@@ -49,9 +49,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param key
    * @returns
    */
-  getMetadata<K>(cls: Class, key: symbol | Class<K>): K | undefined {
+  getMetadata<K>(cls: Class, key: symbol): K | undefined {
     const cfg = this.get(cls);
-    return castTo(cfg.metadata?.[typeof key === 'function' ? key.Ⲑid : key]);
+    return castTo(cfg.metadata?.[key]);
   }
 
   /**
@@ -61,9 +61,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param key
    * @returns
    */
-  getOrCreatePendingMetadata<K>(cls: Class, key: symbol | Class<K>, value: K): K {
+  getOrCreatePendingMetadata<K>(cls: Class, key: symbol, value: K): K {
     const cfg = this.getOrCreatePending(cls);
-    return castTo((cfg.metadata ??= {})[typeof key === 'function' ? key.Ⲑid : key] ??= value);
+    return castTo((cfg.metadata ??= {})[key] ??= value);
   }
 
   /**

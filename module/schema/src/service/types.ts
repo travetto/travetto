@@ -92,7 +92,7 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * Metadata that is related to the schema structure
    */
-  metadata?: Record<symbol | string, unknown>;
+  metadata?: Record<symbol, unknown>;
   /**
    * Method parameter configs
    */
