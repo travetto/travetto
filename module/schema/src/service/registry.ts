@@ -295,6 +295,10 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param config The config to register
    */
   registerPendingFieldFacet(target: Class, prop: string, config: Partial<FieldConfig>): Class {
+    if (prop === '__proto__' || prop === 'constructor' || prop === 'prototype') {
+      throw new AppError('Invalid property name');
+    }
+
     const totalViewConf = this.getOrCreatePending(target).totalView!;
 
     if (!totalViewConf.schema[prop]) {
