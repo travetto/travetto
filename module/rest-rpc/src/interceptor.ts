@@ -1,12 +1,11 @@
 import { Injectable, Inject } from '@travetto/di';
 import { AppError, Util } from '@travetto/runtime';
 
-import { MissingParamSymbol, RequestParamsSymbol, RequestLoggingSymbol } from '@travetto/rest/src/internal/symbol';
 import {
   BodyParseInterceptor, LoggingInterceptor, RouteConfig, FilterContext, FilterNext, ControllerRegistry,
-  RestInterceptor, SerializeInterceptor
+  RestInterceptor, SerializeInterceptor, RestSymbols, SerializeUtil
 } from '@travetto/rest';
-import { SerializeUtil } from '@travetto/rest/src/util/serialize';
+
 import { RestRpcConfig } from './config';
 
 /**
@@ -63,9 +62,9 @@ export class RestRpcInterceptor implements RestInterceptor<RestRpcConfig> {
       return SerializeUtil.serializeError(req, res, new AppError('Invalid parameters, must be an array'));
     }
 
-    req[RequestLoggingSymbol] = { controller: ep.class.name, endpoint: ep.handlerName };
-    req[RequestParamsSymbol] = ep.params.map((x, i) =>
-      (x.location === 'context' || (x.location === 'body' && isBinary)) ? MissingParamSymbol : params[i]);
+    req[RestSymbols.RequestLogging] = { controller: ep.class.name, endpoint: ep.handlerName };
+    req[RestSymbols.RequestParams] = ep.params.map((x, i) =>
+      (x.location === 'context' || (x.location === 'body' && isBinary)) ? RestSymbols.MissingParam : params[i]);
 
     return await ep.handlerFinalized!(req, res);
   }

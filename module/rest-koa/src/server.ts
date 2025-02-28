@@ -4,10 +4,7 @@ import kCompress from 'koa-compress';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { RestConfig, RestServer, RouteConfig, RestCookieConfig, RestNetUtil } from '@travetto/rest';
-
-import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
-import { RestServerHandle } from '@travetto/rest/src/types';
+import { RestConfig, RestServer, RouteConfig, RestCookieConfig, RestNetUtil, RestServerHandle, RestSymbols } from '@travetto/rest';
 
 import { KoaServerUtil } from './internal/util';
 
@@ -66,7 +63,7 @@ export class KoaRestServer implements RestServer<koa> {
     for (const route of routes) {
       const routePath = route.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
       router[route.method](routePath, async (ctx) => {
-        const [req, res] = ctx[TravettoEntitySymbol] ??= [
+        const [req, res] = ctx[RestSymbols.TravettoEntity] ??= [
           KoaServerUtil.getRequest(ctx),
           KoaServerUtil.getResponse(ctx)
         ];

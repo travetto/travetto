@@ -3,7 +3,7 @@ import { Config } from '@travetto/config';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { FilterContext, FilterNext } from '../types';
-import { RequestLoggingSymbol } from '../internal/symbol';
+import { RequestLoggingSymbol } from '../symbol.ts
 import { SerializeInterceptor } from './serialize';
 
 /**

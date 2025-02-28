@@ -2,11 +2,8 @@ import https from 'node:https';
 import compress from '@fastify/compress';
 import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 
-import { RestConfig, RouteConfig, RestServer } from '@travetto/rest';
+import { RestConfig, RouteConfig, RestServer, RestServerHandle, RestSymbols } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
-
-import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
-import { RestServerHandle } from '@travetto/rest/src/types';
 
 import { FastifyServerUtil } from './internal/util';
 
@@ -64,8 +61,8 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
       sub = sub.replace(/\/{1,3}/g, '/').replace(/\/{1,3}$/, '');
       this.raw[route.method](sub, async (req, reply) => {
         await route.handlerFinalized!(
-          req[TravettoEntitySymbol] ??= FastifyServerUtil.getRequest(req),
-          reply[TravettoEntitySymbol] ??= FastifyServerUtil.getResponse(reply)
+          req[RestSymbols.TravettoEntity] ??= FastifyServerUtil.getRequest(req),
+          reply[RestSymbols.TravettoEntity] ??= FastifyServerUtil.getResponse(reply)
         );
       });
     }

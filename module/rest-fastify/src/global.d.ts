@@ -1,12 +1,11 @@
-import { TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
-import * as rest from '@travetto/rest';
+import { Request as RestRequest, Response as RestResponse, RestSymbols } from '@travetto/rest';
 
 // Support typings
 declare module 'fastify' {
   interface FastifyRequest {
-    [TravettoEntitySymbol]?: rest.Request;
+    [RestSymbols.TravettoEntity]?: RestRequest;
   }
   interface FastifyReply {
-    [TravettoEntitySymbol]?: rest.Response;
+    [RestSymbols.TravettoEntity]?: RestResponse;
   }
 }

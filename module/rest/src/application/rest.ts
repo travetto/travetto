@@ -8,7 +8,7 @@ import { RestConfig } from './config';
 import { RouteUtil } from '../util/route';
 import { RestInterceptor } from '../interceptor/types';
 import { ControllerRegistry } from '../registry/controller';
-import { GlobalRoute } from '../internal/symbol';
+import { RestSymbols } from '../symbol';
 import { RestServer } from './server';
 import { RestCommonUtil } from '../util/common';
 
@@ -168,7 +168,7 @@ export class RestApplication<T = unknown> {
       method: 'all', path: '*',
     };
     route.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, route);
-    await this.server.registerRoutes(GlobalRoute, '/', [route]);
+    await this.server.registerRoutes(RestSymbols.GlobalRoute, '/', [route]);
   }
 
   /**
@@ -180,7 +180,7 @@ export class RestApplication<T = unknown> {
       return;
     }
 
-    await this.server.unregisterRoutes(GlobalRoute);
+    await this.server.unregisterRoutes(RestSymbols.GlobalRoute);
   }
 
   /**

@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { Response } from '../../types';
-import { NodeEntitySymbol } from '../../internal/symbol';
+import { NodeEntitySymbol } from '../../symbol.ts
 
 /**
  * Base response object

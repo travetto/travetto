@@ -3,7 +3,7 @@ import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResul
 
 import { EndpointConfig } from '../registry/types';
 import { ParamConfig, Request, Response } from '../types';
-import { MissingParamSymbol, RequestParamsSymbol, QueryExpandedSymbol } from '../internal/symbol';
+import { MissingParamSymbol, RequestParamsSymbol, QueryExpandedSymbol } from '../symbol';
 
 export type ExtractFn = (c: ParamConfig, req: Request, res: Response, schema: FieldConfig) => unknown;
 

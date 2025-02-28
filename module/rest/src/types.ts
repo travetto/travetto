@@ -4,10 +4,7 @@ import { Readable, Writable } from 'node:stream';
 
 import type { ByteRange, Any, Class, TypedFunction } from '@travetto/runtime';
 
-import {
-  HeadersAddedSymbol, InterceptorConfigsSymbol, NodeEntitySymbol, ProviderEntitySymbol, RequestParamsSymbol,
-  RequestLoggingSymbol, QueryExpandedSymbol
-} from './internal/symbol';
+import { RestSymbols } from './symbol';
 
 import type { RestInterceptor } from './interceptor/types';
 
@@ -39,27 +36,27 @@ export interface Request<T = unknown> {
   /**
    * The parsed params for the target handler
    */
-  [RequestParamsSymbol]?: unknown[];
+  [RestSymbols.RequestParams]?: unknown[];
   /**
    * Additional logging context
    */
-  [RequestLoggingSymbol]?: Record<string, unknown>;
+  [RestSymbols.RequestLogging]?: Record<string, unknown>;
   /**
    * The original request of the underlying framework
    */
-  [ProviderEntitySymbol]?: T;
+  [RestSymbols.ProviderEntity]?: T;
   /**
    * The raw http Incoming Message object
    */
-  [NodeEntitySymbol]: IncomingMessage;
+  [RestSymbols.NodeEntity]: IncomingMessage;
   /**
    * Interceptor-related configs, providing request-awareness of route-level configurations
    */
-  [InterceptorConfigsSymbol]?: Record<string, Record<string, unknown>>;
+  [RestSymbols.InterceptorConfigs]?: Record<string, Record<string, unknown>>;
   /**
    * Expanded representation of query
    */
-  [QueryExpandedSymbol]: Record<string, unknown>;
+  [RestSymbols.QueryExpanded]: Record<string, unknown>;
   /**
    * The http method
    */
@@ -162,15 +159,15 @@ export interface Response<T = unknown> {
   /**
    * The underlying request object
    */
-  [ProviderEntitySymbol]?: T;
+  [RestSymbols.ProviderEntity]?: T;
   /**
    * The raw http server response object
    */
-  [NodeEntitySymbol]: ServerResponse;
+  [RestSymbols.NodeEntity]: ServerResponse;
   /**
    * The additional headers for this request, provided by controllers/route config
    */
-  [HeadersAddedSymbol]?: HeaderMap;
+  [RestSymbols.HeadersAdded]?: HeaderMap;
   /**
    * Outbound status code
    */

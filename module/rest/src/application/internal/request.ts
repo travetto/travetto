@@ -5,7 +5,7 @@ import { ByteRange, castTo } from '@travetto/runtime';
 
 import { Request, ContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
-import { NodeEntitySymbol, ParsedTypeSymbol } from '../../internal/symbol';
+import { NodeEntitySymbol, ParsedTypeSymbol } from '../../symbol';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 

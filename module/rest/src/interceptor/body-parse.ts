@@ -5,7 +5,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
-import { NodeEntitySymbol } from '../internal/symbol';
+import { NodeEntitySymbol } from '../symbol.ts
 import { RouteConfig, Request, FilterContext, FilterNext } from '../types';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';

@@ -1,6 +1,5 @@
 import { Any, Class, Primitive } from '@travetto/runtime';
 
-import { AllViewSymbol } from '../internal/types';
 import { MethodValidatorFn, ValidatorFn } from '../validate/types';
 
 export type ClassList = Class | [Class];
@@ -8,6 +7,7 @@ export type ClassList = Class | [Class];
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
 export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
 
+export const AllViewSymbol: unique symbol = Symbol.for('@travetto/schema:all');
 /**
  * Basic describable configuration
  */

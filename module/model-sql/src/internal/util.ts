@@ -1,8 +1,7 @@
 import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
-import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
-import { AllViewSymbol } from '@travetto/schema/src/internal/types';
+import { AllViewSymbol, SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
 

@@ -1,8 +1,7 @@
-import { SchemaRegistry } from '@travetto/schema';
+import { SchemaRegistry, AllViewSymbol } from '@travetto/schema';
 import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, castTo, Class, describeFunction, asFull } from '@travetto/runtime';
-import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 
 import { IndexConfig, IndexType, ModelOptions } from './types';
 import { NotFoundError } from '../error/not-found';

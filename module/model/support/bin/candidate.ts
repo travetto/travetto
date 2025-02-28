@@ -1,7 +1,7 @@
 import { toConcrete, Class } from '@travetto/runtime';
-import { ModelRegistry } from '@travetto/model/src/registry/model';
 import { InjectableConfig, DependencyRegistry } from '@travetto/di';
 
+import { ModelRegistry } from '../../src/registry/model';
 import type { ModelStorageSupport } from '../../src/service/storage';
 import type { ModelType } from '../../src/types/model';
 

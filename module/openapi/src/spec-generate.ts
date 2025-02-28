@@ -6,8 +6,7 @@ import type {
 
 import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
 import { Class, describeFunction } from '@travetto/runtime';
-import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
-import { AllViewSymbol } from '@travetto/schema/src/internal/types';
+import { AllViewSymbol, SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 
 import { ApiSpecConfig } from './config';
 

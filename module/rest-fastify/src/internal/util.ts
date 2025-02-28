@@ -1,7 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { RestServerUtil, Request, Response } from '@travetto/rest';
-import { NodeEntitySymbol, ProviderEntitySymbol } from '@travetto/rest/src/internal/symbol';
+import { RestSymbols, RestServerUtil, Request, Response } from '@travetto/rest';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -13,8 +12,8 @@ export class FastifyServerUtil {
    */
   static getRequest(req: FastifyRequest): Request {
     return RestServerUtil.decorateRequest({
-      [ProviderEntitySymbol]: req,
-      [NodeEntitySymbol]: req.raw,
+      [RestSymbols.ProviderEntity]: req,
+      [RestSymbols.NodeEntity]: req.raw,
       protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
       method: castTo(req.raw.method),
       url: req.raw!.url,
@@ -31,8 +30,8 @@ export class FastifyServerUtil {
    */
   static getResponse(reply: FastifyReply): Response {
     return RestServerUtil.decorateResponse({
-      [ProviderEntitySymbol]: reply,
-      [NodeEntitySymbol]: reply.raw,
+      [RestSymbols.ProviderEntity]: reply,
+      [RestSymbols.NodeEntity]: reply.raw,
       get headersSent(): boolean {
         return reply.sent;
       },

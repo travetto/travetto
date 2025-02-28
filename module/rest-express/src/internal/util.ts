@@ -1,7 +1,6 @@
 import type express from 'express';
 
-import { RestServerUtil, Request, Response } from '@travetto/rest';
-import { NodeEntitySymbol, ProviderEntitySymbol } from '@travetto/rest/src/internal/symbol';
+import { RestSymbols, RestServerUtil, Request, Response } from '@travetto/rest';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -13,8 +12,8 @@ export class ExpressServerUtil {
    */
   static getRequest(req: express.Request): Request {
     return RestServerUtil.decorateRequest<Request>({
-      [ProviderEntitySymbol]: req,
-      [NodeEntitySymbol]: req,
+      [RestSymbols.ProviderEntity]: req,
+      [RestSymbols.NodeEntity]: req,
       protocol: castTo(req.protocol),
       method: castTo(req.method),
       url: req.originalUrl,
@@ -31,8 +30,8 @@ export class ExpressServerUtil {
    */
   static getResponse(res: express.Response): Response {
     return RestServerUtil.decorateResponse<Response>({
-      [ProviderEntitySymbol]: res,
-      [NodeEntitySymbol]: res,
+      [RestSymbols.ProviderEntity]: res,
+      [RestSymbols.NodeEntity]: res,
       get headersSent(): boolean {
         return res.headersSent;
       },

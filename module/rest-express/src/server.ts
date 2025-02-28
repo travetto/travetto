@@ -3,9 +3,7 @@ import express from 'express';
 import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil } from '@travetto/rest';
-import { GlobalRoute, TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
-import { RestServerHandle } from '@travetto/rest/src/types';
+import { RestSymbols, RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil, RestServerHandle } from '@travetto/rest';
 
 import { RouteStack } from './internal/types';
 import { ExpressServerUtil } from './internal/util';
@@ -56,14 +54,14 @@ export class ExpressRestServer implements RestServer<express.Application> {
       const routePath = route.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
       router[route.method](routePath, async (req: express.Request, res: express.Response) => {
         await route.handlerFinalized!(
-          req[TravettoEntitySymbol] ??= ExpressServerUtil.getRequest(req),
-          res[TravettoEntitySymbol] ??= ExpressServerUtil.getResponse(res)
+          req[RestSymbols.TravettoEntity] ??= ExpressServerUtil.getRequest(req),
+          res[RestSymbols.TravettoEntity] ??= ExpressServerUtil.getResponse(res)
         );
       });
     }
 
     // Register options handler for each controller, working with a bug in express
-    if (key !== GlobalRoute) {
+    if (key !== RestSymbols.GlobalRoute) {
       const optionHandler = RouteUtil.createRouteHandler(
         interceptors,
         {
@@ -79,8 +77,8 @@ export class ExpressRestServer implements RestServer<express.Application> {
 
       router.options('*all', (req: express.Request, res: express.Response) => {
         optionHandler(
-          req[TravettoEntitySymbol] ??= ExpressServerUtil.getRequest(req),
-          res[TravettoEntitySymbol] ??= ExpressServerUtil.getResponse(res)
+          req[RestSymbols.TravettoEntity] ??= ExpressServerUtil.getRequest(req),
+          res[RestSymbols.TravettoEntity] ??= ExpressServerUtil.getResponse(res)
         );
       });
     }

@@ -1,9 +1,8 @@
 import { Class, AppError, describeFunction, castTo, classConstruct, asFull, castKey } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types';
+import { AllViewSymbol, ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types';
 import { SchemaChangeListener } from './changes';
-import { AllViewSymbol } from '../internal/types';
 import { MethodValidatorFn } from '../validate/types';
 
 const classToSubTypeName = (cls: Class): string => cls.name

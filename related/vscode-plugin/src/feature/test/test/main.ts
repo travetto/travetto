@@ -3,8 +3,8 @@ import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 import path from 'node:path';
 
 import type { IndexedModule, ManifestModule } from '@travetto/manifest';
+import type { TestWatchEvent } from '@travetto/test';
 import { Env, ExecUtil } from '@travetto/runtime';
-import type { TestWatchEvent } from '@travetto/test/src/worker/types';
 
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
