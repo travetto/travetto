@@ -21,6 +21,7 @@
         "cullable",
         "darkgrey",
         "estypes",
+        "expirable",
         "Fastify",
         "Firestore",
         "fnames",
