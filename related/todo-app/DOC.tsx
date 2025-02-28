@@ -12,7 +12,7 @@ async function init() {
 
   const startupBuffer: Buffer[] = [];
 
-  const cmd = DocRunUtil.spawn('trv', ['run:rest'], {
+  const cmd = DocRunUtil.spawn('trv', ['run:web'], {
     env: { ...process.env, WEB_LOG_PATHS: '!*', WEB_PORT: `${port}`, WEB_SSL: '0' }
   });
 

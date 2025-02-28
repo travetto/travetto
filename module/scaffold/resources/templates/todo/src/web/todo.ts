@@ -6,9 +6,9 @@ import { Schema } from '@travetto/schema';
 // {{#modules.auth}}
 import { AuthContext } from '@travetto/auth';
 // {{/modules.auth}}
-// {{#modules.auth_rest}}
+// {{#modules.auth_web}}
 import { Authenticated } from '@travetto/auth-web';
-// {{/modules.auth_rest}}
+// {{/modules.auth_web}}
 // @ts-expect-error
 import { $_modelService_$ } from '$_modelImport_$';
 
@@ -17,9 +17,9 @@ import { Todo } from '../model/todo';
 @Schema()
 class Query {
   q: {
-    // {{#modules.auth_rest}}
+    // {{#modules.auth_web}}
     userId?: string;
-    // {{/modules.auth_rest}}
+    // {{/modules.auth_web}}
   } = {};
 }
 
@@ -27,9 +27,9 @@ class Query {
  * Controller for managing all aspects of the Todo lifecycle
  */
 @Controller('/todo')
-// {{#modules.auth_rest}}
+// {{#modules.auth_web}}
 @Authenticated()
-// {{/modules.auth_rest}}
+// {{/modules.auth_web}}
 export class TodoController {
 
   @Inject()
@@ -46,9 +46,9 @@ export class TodoController {
   @Get('/')
   async getAll(query: Query): Promise<Todo[]> {
     query.q ??= {};
-    // {{#modules.auth_rest}}
+    // {{#modules.auth_web}}
     query.q.userId = this.authContext.principal?.id;
-    // {{/modules.auth_rest}}
+    // {{/modules.auth_web}}
     return this.source.query(Todo, { where: query.q });
   }
 
@@ -58,11 +58,11 @@ export class TodoController {
   @Get('/:id')
   async getOne(id: string): Promise<Todo> {
     const q: ModelQuery<Todo> = { where: { id } };
-    // {{#modules.auth_rest}}
+    // {{#modules.auth_web}}
     if (typeof q.where !== 'string') {
       q.where!.userId = this.authContext.principal?.id;
     }
-    // {{/modules.auth_rest}}
+    // {{/modules.auth_web}}
     return this.source.queryOne(Todo, q);
   }
 
@@ -71,9 +71,9 @@ export class TodoController {
    */
   @Post('/')
   async save(todo: Todo): Promise<Todo> {
-    // {{#modules.auth_rest}}
+    // {{#modules.auth_web}}
     todo.userId = this.authContext.principal?.id;
-    // {{/modules.auth_rest}}
+    // {{/modules.auth_web}}
     return this.source.create(Todo, todo);
   }
 
@@ -82,9 +82,9 @@ export class TodoController {
    */
   @Put('/:id')
   async update(todo: Todo): Promise<Todo> {
-    // {{#modules.auth_rest}}
+    // {{#modules.auth_web}}
     todo.userId = this.authContext.principal?.id;
-    // {{/modules.auth_rest}}
+    // {{/modules.auth_web}}
     return this.source.update(Todo, todo);
   }
 
@@ -94,11 +94,11 @@ export class TodoController {
   @Delete('/:id')
   async remove(id: string): Promise<void> {
     const q: ModelQuery<Todo> = { where: { id } };
-    // {{#modules.auth_rest}}
+    // {{#modules.auth_web}}
     if (typeof q.where !== 'string') {
       q.where!.userId = this.authContext.principal?.id;
     }
-    // {{/modules.auth_rest}}
+    // {{/modules.auth_web}}
     if (await this.source.deleteByQuery(Todo, q) !== 1) {
       throw new NotFoundError(Todo, id);
     }

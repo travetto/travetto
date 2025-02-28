@@ -11,7 +11,7 @@ The following tutorial wil walk you through setting up a [Travetto](https://trav
    1. [Establishing The Model](#establishing-the-model)
    1. [Building the Service Layer](#building-the-service-layer)
    1. [Writing Unit tests](#writing-unit-tests)
-   1. [Adding Rest Routes](#adding-rest-routes)
+   1. [Adding Web Routes](#adding-web-routes)
    1. [Running the App](#running-the-app)
 
 ## Prerequisites
@@ -31,7 +31,7 @@ $ cd todo-project
 $ git init .
 
 $ npm init -f
-$ npm i @travetto/{log,rest-express,model-mongo,cli}
+$ npm i @travetto/{log,web-express,model-mongo,cli}
 $ npm i -D @travetto/{eslint,compiler,test}
 
 $ npx trv lint:register
@@ -203,14 +203,14 @@ export class TodoTest {
 }
 ```
 
-## Adding Rest Routes
+## Adding Web Routes
 Now we establish the routes, providing an interface to the service layer.
 
 Finally, we establish the controller at `src/route.ts`
 
 **Code: Controller contents**
 ```typescript
-import { Controller, Get, Post, Put, Delete } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete } from '@travetto/web';
 import { Inject } from '@travetto/di';
 
 import { TodoService } from './service';
@@ -388,19 +388,19 @@ npx trv run:rest
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
       },
-      RestAcceptsConfig: { types: {} },
-      RestAsyncContextConfig: {},
-      RestAuthConfig: {
+      WebAcceptsConfig: { types: {} },
+      WebAsyncContextConfig: {},
+      WebAuthConfig: {
         mode: 'cookie',
         header: 'Authorization',
         cookie: 'trv_auth',
         headerPrefix: 'Token'
       },
-      RestAuthLoginConfig: {},
-      RestAuthLogoutConfig: {},
-      RestAuthVerifyConfig: { permissions: {} },
-      RestBodyParseConfig: { limit: '1mb', parsingTypes: {} },
-      RestConfig: {
+      WebAuthLoginConfig: {},
+      WebAuthLogoutConfig: {},
+      WebAuthVerifyConfig: { permissions: {} },
+      WebBodyParseConfig: { limit: '1mb', parsingTypes: {} },
+      WebConfig: {
         serve: true,
         port: 12555,
         trustProxy: false,
@@ -410,17 +410,17 @@ npx trv run:rest
         defaultMessage: true,
         ssl: { active: false }
       },
-      RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-      RestCorsConfig: {},
-      RestGetCacheConfig: {},
-      RestLogRoutesConfig: {},
-      RestRpcConfig: { clients: {} },
-      RestSessionConfig: {},
-      RestSslConfig: { active: false }
+      WebCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      WebCorsConfig: {},
+      WebGetCacheConfig: {},
+      WebLogRoutesConfig: {},
+      WebRpcConfig: { clients: {} },
+      WebSessionConfig: {},
+      WebSslConfig: { active: false }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:190] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web:src/application/app.ts:190] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

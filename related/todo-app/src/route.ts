@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete } from '@travetto/web';
 import { Inject } from '@travetto/di';
 
 import { TodoService } from './service';

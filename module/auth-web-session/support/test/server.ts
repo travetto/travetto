@@ -67,12 +67,12 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
   authCfg: AuthConfig;
 
   @Inject()
-  restAuthCfg: WebAuthConfig;
+  webAuthCfg: WebAuthConfig;
 
   config({ mode, ...cfg }: { mode: 'cookie' | 'header' } & Partial<AuthConfig>): string {
     Object.assign(this.authCfg, { rollingRenew: true, ...cfg });
-    this.restAuthCfg.mode = mode;
-    return this.restAuthCfg[mode].toLowerCase();
+    this.webAuthCfg.mode = mode;
+    return this.webAuthCfg[mode].toLowerCase();
   }
 
   @Test()
