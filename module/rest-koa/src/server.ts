@@ -6,7 +6,7 @@ import kRouter from 'koa-router';
 import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig, RestNetUtil, RestServerHandle, RestSymbols } from '@travetto/rest';
 
-import { KoaServerUtil } from './internal/util';
+import { KoaRestServerUtil } from './util';
 
 type Keyed = { key?: symbol | string };
 type Routes = ReturnType<kRouter<unknown, koa.Context>['routes']>;
@@ -64,8 +64,8 @@ export class KoaRestServer implements RestServer<koa> {
       const routePath = route.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
       router[route.method](routePath, async (ctx) => {
         const [req, res] = ctx[RestSymbols.TravettoEntity] ??= [
-          KoaServerUtil.getRequest(ctx),
-          KoaServerUtil.getResponse(ctx)
+          KoaRestServerUtil.getRequest(ctx),
+          KoaRestServerUtil.getResponse(ctx)
         ];
         return await route.handlerFinalized!(req, res);
       });

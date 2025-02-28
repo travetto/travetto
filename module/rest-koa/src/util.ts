@@ -8,7 +8,7 @@ import { castTo } from '@travetto/runtime';
 /**
  * Provides translation between koa request/response objects and the framework
  */
-export class KoaServerUtil {
+export class KoaRestServerUtil {
   /**
    * Build a Travetto Request from a koa context
    */

@@ -6,7 +6,7 @@ import { castTo } from '@travetto/runtime';
 /**
  * Provide a mapping between fastify request/response and the framework analogs
  */
-export class FastifyServerUtil {
+export class FastifyRestServerUtil {
   /**
    * Build a Travetto Request from a Fastify Request
    */

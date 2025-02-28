@@ -6,7 +6,7 @@ import { castTo } from '@travetto/runtime';
 /**
  * Provide a mapping between express request/response and the framework analogs
  */
-export class ExpressServerUtil {
+export class ExpressRestServerUtil {
   /**
    * Build a Travetto Request from an Express Request
    */
