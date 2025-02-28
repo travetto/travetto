@@ -31,7 +31,7 @@
     "@travetto/web-fastify": "^6.0.0-rc.1"
   },
   "travetto": {
-    "displayName": "Fastify REST AWS Lambda Source"
+    "displayName": "Fastify Web AWS Lambda Server"
   },
   "publishConfig": {
     "access": "public"

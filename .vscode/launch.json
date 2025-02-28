@@ -53,7 +53,7 @@
         "${workspaceFolder}/.trv/output/**/*.js"
       ],
       "env": {
-        "REST_PORT": "4000",
+        "WEB_PORT": "4000",
         "TRV_MODULE": "@travetto/todo-app",
         "TRV_DYNAMIC": "1"
       },

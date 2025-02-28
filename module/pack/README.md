@@ -167,7 +167,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 **Terminal: Sample Ejected File**
 ```bash
-$ trv pack:docker -x /dev/stdout run:rest
+$ trv pack:docker -x /dev/stdout run:web
 
 #!/bin/sh
 export DIST=/tmp/<temp-folder>
@@ -198,21 +198,21 @@ echo "Writing package.json"
 
 echo "{\"type\":\"commonjs\",\"main\":\"todo-app.js\"}" > $DIST/package.json
 
-# Writing entry scripts todo-app.sh args=(run:rest) 
+# Writing entry scripts todo-app.sh args=(run:web) 
 
-echo "Writing entry scripts todo-app.sh args=(run:rest)"
+echo "Writing entry scripts todo-app.sh args=(run:web)"
 
 echo "#!/bin/sh" > $DIST/todo-app.sh
 echo "cd \$(dirname \"\$0\")" >> $DIST/todo-app.sh
-echo "node todo-app.js run:rest \$@" >> $DIST/todo-app.sh
+echo "node todo-app.js run:web \$@" >> $DIST/todo-app.sh
 chmod 755 $DIST/todo-app.sh
 
-# Writing entry scripts todo-app.cmd args=(run:rest) 
+# Writing entry scripts todo-app.cmd args=(run:web) 
 
-echo "Writing entry scripts todo-app.cmd args=(run:rest)"
+echo "Writing entry scripts todo-app.cmd args=(run:web)"
 
 echo "cd %~p0" > $DIST/todo-app.cmd
-echo "node todo-app.js run:rest %*" >> $DIST/todo-app.cmd
+echo "node todo-app.js run:web %*" >> $DIST/todo-app.cmd
 chmod 755 $DIST/todo-app.cmd
 
 # Copying over module resources 

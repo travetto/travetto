@@ -31,7 +31,7 @@
     "express": "^5.0.1"
   },
   "travetto": {
-    "displayName": "Express REST Source"
+    "displayName": "Express Web Server"
   },
   "publishConfig": {
     "access": "public"

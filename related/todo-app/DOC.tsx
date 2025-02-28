@@ -13,7 +13,7 @@ async function init() {
   const startupBuffer: Buffer[] = [];
 
   const cmd = DocRunUtil.spawn('trv', ['run:rest'], {
-    env: { ...process.env, REST_LOG_PATHS: '!*', REST_PORT: `${port}`, REST_SSL: '0' }
+    env: { ...process.env, WEB_LOG_PATHS: '!*', WEB_PORT: `${port}`, WEB_SSL: '0' }
   });
 
   ShutdownManager.onGracefulShutdown(async () => { cmd.kill(); });

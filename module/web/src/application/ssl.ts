@@ -9,7 +9,7 @@ export class WebSslConfig {
    * Generate SSL key pair on demand
    * @param subj The subject for the app
    */
-  static async generateSslKeyPair(subj = { C: 'US', ST: 'CA', O: 'TRAVETTO', OU: 'REST', CN: 'DEV' }): Promise<{ cert: string, key: string }> {
+  static async generateSslKeyPair(subj = { C: 'US', ST: 'CA', O: 'TRAVETTO', OU: 'WEB', CN: 'DEV' }): Promise<{ cert: string, key: string }> {
     let forge;
 
     try {
@@ -49,7 +49,7 @@ export class WebSslConfig {
   /**
    * Enabled
    */
-  @EnvVar('REST_SSL')
+  @EnvVar('WEB_SSL')
   active: boolean = false;
   /**
    * SSL Keys

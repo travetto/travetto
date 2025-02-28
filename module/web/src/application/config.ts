@@ -17,7 +17,7 @@ export class WebConfig {
   /**
    * The port to listen to
    */
-  @EnvVar('REST_PORT')
+  @EnvVar('WEB_PORT')
   port = 3000;
   /**
    * Should we trust the proxy requests implicitly

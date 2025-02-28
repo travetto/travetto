@@ -135,7 +135,7 @@ export const text = <>
 
   <c.Section title='Running an App'>
 
-    By default, the framework provides a default {CliCommand} for {WebApplication} that will follow default behaviors, and spin up the REST server.
+    By default, the framework provides a default {CliCommand} for {WebApplication} that will follow default behaviors, and spin up the Web server.
 
     <c.Execution title='Standard application' cmd='trv' args={['run:web']} config={{
       cwd: './doc-exec'
@@ -143,7 +143,7 @@ export const text = <>
 
     <c.SubSection title='Creating a Custom CLI Entry Point'>
 
-      To customize a REST server, you may need to construct an entry point using the {CliCommand} decorator. This could look like:
+      To customize a Web server, you may need to construct an entry point using the {CliCommand} decorator. This could look like:
 
       <c.Code title='Application entry point for Web Applications' src='doc/cli.run_web_custom.ts' />
 

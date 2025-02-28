@@ -19,7 +19,7 @@ export class RunWebCommand implements CliCommandShape {
 
   preMain(): void {
     if (this.port) {
-      process.env.REST_PORT = `${this.port}`;
+      process.env.WEB_PORT = `${this.port}`;
     }
   }
 

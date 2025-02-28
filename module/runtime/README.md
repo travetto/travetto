@@ -168,7 +168,7 @@ export class EnvProp<T> {
 ```
 
 ## Standard Error Support
-While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
+While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module and HTTP status codes). 
 
 The [AppError](https://github.com/travetto/travetto/tree/main/module/runtime/src/error.ts#L26) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
    *  `general` - General purpose errors
@@ -242,7 +242,7 @@ The `debug` messages can be filtered using the patterns from the [debug](https:/
 # Debug
 $ DEBUG=-@travetto/model npx trv run app
 $ DEBUG=-@travetto/registry npx trv run app
-$ DEBUG=@travetto/rest npx trv run app
+$ DEBUG=@travetto/web npx trv run app
 $ DEBUG=@travetto/*,-@travetto/model npx trv run app
 ```
 
@@ -252,7 +252,7 @@ Additionally, the logging framework will merge [debug](https://www.npmjs.com/pac
 ```bash
 
 # Debug
-$ DEBUG=express:*,@travetto/rest npx trv run rest
+$ DEBUG=express:*,@travetto/web npx trv run web
 ```
 
 ## Resource Access

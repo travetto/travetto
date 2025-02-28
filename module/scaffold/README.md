@@ -24,22 +24,22 @@ $ npx @travetto/scaffold@<version-or-tag>
 
 The generator will ask about enabling the following features:
 
-## Restful Architecture
-The [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") provides the necessary integration for exposing restful apis.  When selecting the `rest` feature, you will need to specify which backend you want to include with your application, the default being [express](https://expressjs.com).  Currently you can select from:
+## Web Application
+The [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") provides the necessary integration for exposing web apis.  When selecting the `web` feature, you will need to specify which backend you want to include with your application, the default being [express](https://expressjs.com).  Currently you can select from:
    *  [express](https://expressjs.com)
    *  [koa](https://koajs.com/)
    *  [fastify](https://www.fastify.io/)
 The code will establish some basic routes, specifically, `GET / ` as the root endpoint.  This will return the contents of your `package.json` as an identification operation.
 
-### Additional Rest Features
-In addition to the core functionality, the `rest` feature has some useful sub-features.  Specifically:
+### Additional Web Features
+In addition to the core functionality, the `web` feature has some useful sub-features.  Specifically:
 
-[OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the Travetto framework") support for the restful api.  This will automatically expose a `openapi.yml` endpoint, and provide the necessary plumbing to support client generation. 
+[OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the Travetto framework") support for the web api.  This will automatically expose a `openapi.yml` endpoint, and provide the necessary plumbing to support client generation. 
 
 [Logging](https://github.com/travetto/travetto/tree/main/module/log#readme "Logging framework that integrates at the console.log level.") support for better formatting, [debug](https://www.npmjs.com/package/debug) like support, and colorized output.  This is generally useful for server logs, especially during development.
 
 ## Authentication
-Authentication is also supported on the Restful endpoints by selecting [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") during setup.  This will support basic authentication running out of local memory.
+Authentication is also supported on the Web endpoints by selecting [Web Auth](https://github.com/travetto/travetto/tree/main/module/auth-web#readme "Web authentication integration support for the Travetto framework") during setup.  This will support basic authentication running out of local memory.
 
 ## Testing
 [Testing](https://github.com/travetto/travetto/tree/main/module/test#readme "Declarative test framework") can also be configured out of the box to provide simple test cases for the data model.
@@ -68,12 +68,12 @@ export class Todo implements ModelType {
 
 Basic tests are also included for the `model` to verify that database interaction and functionality is working properly.
 
-## Rest + Model
-In the case both `rest` and `model` features are enabled, the code will produce a controller that exposes the [Todo](https://github.com/travetto/travetto/tree/main/module/scaffold/doc/model.ts#L4) model via restful patterns.
+## Web + Model
+In the case both `web` and `model` features are enabled, the code will produce a controller that exposes the [Todo](https://github.com/travetto/travetto/tree/main/module/scaffold/doc/model.ts#L4) model via web patterns.
 
 **Code: Todo controller**
 ```typescript
-import { Controller, Get, Put, Post, Delete } from '@travetto/rest';
+import { Controller, Get, Put, Post, Delete } from '@travetto/web';
 import { NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
@@ -147,7 +147,7 @@ export class TodoController {
 ```
 
 ## Running
-Once finished the application will reflect the modules chosen, and will be ready for execution, if you have configured a runnable application.  Currently, this requires the `rest` feature to be selected.
+Once finished the application will reflect the modules chosen, and will be ready for execution, if you have configured a runnable application.  Currently, this requires the `web` feature to be selected.
 
 **Terminal: Starting the App**
 ```bash

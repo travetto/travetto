@@ -33,7 +33,7 @@
     "koa-router": "^13.0.1"
   },
   "travetto": {
-    "displayName": "Koa REST Source"
+    "displayName": "Koa Web Server"
   },
   "publishConfig": {
     "access": "public"

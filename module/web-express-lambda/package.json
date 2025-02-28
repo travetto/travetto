@@ -31,7 +31,7 @@
     "@travetto/web-express": "^6.0.0-rc.1"
   },
   "travetto": {
-    "displayName": "Express REST AWS Lambda Source"
+    "displayName": "Express Web AWS Lambda Server"
   },
   "publishConfig": {
     "access": "public"
