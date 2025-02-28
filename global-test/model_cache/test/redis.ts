@@ -1,13 +1,13 @@
 
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { CacheModelSymbol } from '@travetto/cache';
-import { CacheServiceSuite } from '@travetto/cache/support/test/service';
-
+import { CacheSymbols } from '@travetto/cache';
 import { RedisModelService, RedisModelConfig } from '@travetto/model-redis';
 
+import { CacheServiceSuite } from '@travetto/cache/support/test/service';
+
 class Config {
-  @InjectableFactory(CacheModelSymbol)
+  @InjectableFactory(CacheSymbols.Model)
   static getModel(config: RedisModelConfig) {
     return new RedisModelService(config);
   }
