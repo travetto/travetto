@@ -226,7 +226,7 @@ export const text = <>
     </c.SubSection>
   </c.Section>
   <c.Section title='Cookie Support'>
-    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {RequestContract}/{Response} obContractject following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {RequestContract}/{ResponseContract} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
     <c.Code title='Sample Cookie Usage' src='doc/cookie-routes.ts' />
   </c.Section>
