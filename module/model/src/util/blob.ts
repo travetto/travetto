@@ -3,7 +3,6 @@ import { Class, AppError, BinaryInput, BinaryUtil, BlobMeta, ByteRange, hasFunct
 import { ModelType } from '../types/model';
 import { ModelBlobSupport } from '../types/blob';
 
-export const ModelBlobNamespace = '__blobs';
 export const MODEL_BLOB: Class<ModelType> = class { id: string; };
 
 /**
