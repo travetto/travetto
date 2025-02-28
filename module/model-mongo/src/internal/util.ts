@@ -2,13 +2,14 @@ import {
   Binary, type CreateIndexesOptions, type Filter, type FindCursor, type IndexDirection, ObjectId, type WithId as MongoWithId
 } from 'mongodb';
 
-import { AppError, castTo, Class, TypedObject } from '@travetto/runtime';
-import type { DistanceUnit, PageableModelQuery, WhereClause } from '@travetto/model-query';
+import { AppError, castTo, Class, toConcrete, TypedObject } from '@travetto/runtime';
+import type { DistanceUnit, PageableModelQuery, Point, WhereClause } from '@travetto/model-query';
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
 import { AllViewSymbol, DataUtil, SchemaRegistry } from '@travetto/schema';
 
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { PointImpl } from '@travetto/model-query/src/internal/model/point';
+
+const PointImpl = toConcrete<Point>();
 
 type IdxCfg = CreateIndexesOptions;
 
