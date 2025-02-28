@@ -5,7 +5,7 @@ import {
 import { AppError, castTo, Class, toConcrete, TypedObject } from '@travetto/runtime';
 import { type DistanceUnit, type PageableModelQuery, type Point, type WhereClause, ModelQueryUtil } from '@travetto/model-query';
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
-import { AllViewSymbol, DataUtil, SchemaRegistry } from '@travetto/schema';
+import { DataUtil, SchemaRegistry } from '@travetto/schema';
 
 const PointImpl = toConcrete<Point>();
 
@@ -87,7 +87,7 @@ export class MongoUtil {
     for (const key of keys) {
       const subpath = `${path}${key}`;
       const v: Record<string, unknown> = castTo(sub[key]);
-      const subField = schema?.views[AllViewSymbol].schema[key];
+      const subField = schema?.allView.schema[key];
 
       const isPlain = v && DataUtil.isPlainObject(v);
       const firstKey = isPlain ? Object.keys(v)[0] : '';

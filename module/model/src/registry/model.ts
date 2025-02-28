@@ -1,4 +1,4 @@
-import { SchemaRegistry, AllViewSymbol } from '@travetto/schema';
+import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, castTo, Class, describeFunction, asFull } from '@travetto/runtime';
@@ -73,7 +73,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     const config = asFull(this.pending.get(cls.Ⲑid)!);
 
     const schema = SchemaRegistry.get(cls);
-    const view = schema.views[AllViewSymbol].schema;
+    const view = schema.allView.schema;
     delete view.id.required; // Allow ids to be optional
 
     if (schema.subTypeField in view && this.getBaseModel(cls) !== cls) {

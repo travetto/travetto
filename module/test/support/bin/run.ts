@@ -1,5 +1,5 @@
 import { castTo, Runtime } from '@travetto/runtime';
-import { AllViewSymbol, SchemaRegistry } from '@travetto/schema';
+import { SchemaRegistry } from '@travetto/schema';
 
 import { TestConsumerRegistry } from '../../src/consumer/registry';
 import type { RunState } from '../../src/execute/types';
@@ -35,7 +35,7 @@ export async function selectConsumer(inst: { format?: string }) {
 
   const cls = inst.constructor;
 
-  SchemaRegistry.get(castTo(cls)).views[AllViewSymbol].schema.format.enum = {
+  SchemaRegistry.get(castTo(cls)).allView.schema.format.enum = {
     message: `{path} is only allowed to be "${types.join('" or "')}"`,
     values: types
   };

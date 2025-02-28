@@ -5,7 +5,7 @@ import { RootRegistry } from '@travetto/registry';
 
 import { Unknowable } from './models/unknown';
 import { SchemaRegistry } from '../src/service/registry';
-import { UnknownType } from '../src/internal/types';
+import { UnknownType } from '../src/types';
 
 @Suite()
 export class UnknownTest {
@@ -13,6 +13,7 @@ export class UnknownTest {
   @Test()
   async basic() {
     await RootRegistry.init();
-    assert(SchemaRegistry.getViewSchema(Unknowable).schema.value.type === UnknownType);
+    const config = SchemaRegistry.getViewSchema(Unknowable).schema.value;
+    assert(config.type === UnknownType);
   }
 }

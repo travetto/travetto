@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { BinaryUtil, Class, Runtime, Util, castTo, describeFunction } from '@travetto/runtime';
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, ControllerVisitUtil, EndpointConfig } from '@travetto/rest';
-import { AllViewSymbol, ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
+import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 
 import { ParamConfig } from './shared/types';
 import type { EndpointDesc, Imp, RenderContent } from './types';
@@ -320,10 +320,10 @@ export abstract class BaseClientGenerator<C = unknown> implements ControllerVisi
     const fields: (string | Imp)[] = [];
 
     const parentFieldNames = new Set(
-      parent ? SchemaRegistry.get(parent.classId).views[AllViewSymbol].fields : []
+      parent ? SchemaRegistry.get(parent.classId).allView.fields : []
     );
 
-    const view = schema.views[AllViewSymbol];
+    const view = schema.allView;
     for (const fieldName of view.fields) {
       if (!schema.subTypeName && parentFieldNames.has(fieldName)) {
         continue;

@@ -7,7 +7,6 @@ export type ClassList = Class | [Class];
 type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
 export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
 
-export const AllViewSymbol: unique symbol = Symbol.for('@travetto/schema:all');
 /**
  * Basic describable configuration
  */
@@ -69,7 +68,11 @@ export interface ClassConfig extends DescribableConfig {
   /**
    * List of all views
    */
-  views: Record<string, ViewConfig> & { [AllViewSymbol]: ViewConfig };
+  views: Record<string, ViewConfig>;
+  /**
+   * Composite of all views
+   */
+  allView: ViewConfig;
   /**
    * Global validators
    */

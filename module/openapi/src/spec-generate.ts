@@ -6,7 +6,7 @@ import type {
 
 import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
 import { Class, describeFunction } from '@travetto/runtime';
-import { AllViewSymbol, SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
+import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 
 import { ApiSpecConfig } from './config';
 
@@ -205,7 +205,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         };
 
         const properties: Record<string, SchemaObject> = {};
-        const def = config.views[AllViewSymbol];
+        const def = config.allView;
         const required: string[] = [];
 
         for (const fieldName of def.fields) {

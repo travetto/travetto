@@ -13,3 +13,4 @@ export * from './src/validate/types';
 export * from './src/bind-util';
 export * from './src/data';
 export * from './src/name';
+export * from './src/symbols';

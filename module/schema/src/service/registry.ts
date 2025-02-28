@@ -1,7 +1,7 @@
 import { Class, AppError, describeFunction, castTo, classConstruct, asFull, castKey } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { AllViewSymbol, ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types';
+import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig, SchemaMethodConfig } from './types';
 import { SchemaChangeListener } from './changes';
 import { MethodValidatorFn } from '../validate/types';
 
@@ -72,7 +72,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   ensureInstanceTypeField<T>(cls: Class, o: T): void {
     const schema = this.get(cls);
     const typeField = castKey<T>(schema.subTypeField);
-    if (schema.subTypeName && typeField in schema.views[AllViewSymbol].schema && !o[typeField]) {  // Do we have a type field defined
+    if (schema.subTypeName && typeField in schema.allView.schema && !o[typeField]) {  // Do we have a type field defined
       o[typeField] = castTo(schema.subTypeName); // Assign if missing
     }
   }
@@ -168,7 +168,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     SchemaChangeListener.trackSchemaDependency(curr, cls, path, this.get(cls));
 
     // Read children
-    const view = config.views[AllViewSymbol];
+    const view = config.allView;
     for (const k of view.fields) {
       if (this.has(view.schema[k].type) && view.schema[k].type !== cls) {
         this.trackSchemaDependencies(cls, view.schema[k].type, [...path, view.schema[k]]);
@@ -184,12 +184,11 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       baseType: describeFunction(cls)?.abstract,
       metadata: {},
       methods: {},
-      views: {
-        [AllViewSymbol]: {
-          schema: {},
-          fields: []
-        }
-      }
+      allView: {
+        schema: {},
+        fields: [],
+      },
+      views: {}
     };
   }
 
@@ -198,16 +197,17 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param cls The class to retrieve the schema for
    * @param view The view name
    */
-  getViewSchema<T>(cls: Class<T>, view?: string | typeof AllViewSymbol): ViewConfig {
-    view = view ?? AllViewSymbol;
-
+  getViewSchema<T>(cls: Class<T>, view?: string): ViewConfig {
     const schema = this.get(cls)!;
     if (!schema) {
       throw new Error(`Unknown schema class ${cls.name}`);
     }
-    const res = schema.views[view];
-    if (!res) {
-      throw new Error(`Unknown view ${view.toString()} for ${cls.name}`);
+    let res = schema.allView;
+    if (view) {
+      res = schema.views[view];
+      if (!res) {
+        throw new Error(`Unknown view ${view.toString()} for ${cls.name}`);
+      }
     }
     return res;
   }
@@ -295,7 +295,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param config The config to register
    */
   registerPendingFieldFacet(target: Class, prop: string, config: Partial<FieldConfig>): Class {
-    const allViewConf = this.getOrCreatePending(target).views![AllViewSymbol];
+    const allViewConf = this.getOrCreatePending(target).allView!;
 
     if (!allViewConf.schema[prop]) {
       allViewConf.fields.push(prop);
@@ -358,9 +358,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param src Source config
    */
   mergeConfigs(dest: ClassConfig, src: Partial<ClassConfig>, inherited = false): ClassConfig {
-    dest.views[AllViewSymbol] = {
-      schema: { ...dest.views[AllViewSymbol].schema, ...src.views?.[AllViewSymbol].schema },
-      fields: [...dest.views[AllViewSymbol].fields, ...src.views?.[AllViewSymbol].fields ?? []]
+    dest.allView = {
+      schema: { ...dest.allView.schema, ...src.allView?.schema },
+      fields: [...dest.allView.fields, ...src.allView?.fields ?? []]
     };
     if (!inherited) {
       dest.baseType = src.baseType ?? dest.baseType;
@@ -380,7 +380,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param conf The class config
    */
   finalizeViews<T>(target: Class<T>, conf: ClassConfig): ClassConfig {
-    const allViewConf = conf.views![AllViewSymbol];
+    const allViewConf = conf.allView;
     const pending = this.#pendingViews.get(target) ?? new Map<string, ViewFieldsConfig<string>>();
     this.#pendingViews.delete(target);
 
@@ -426,9 +426,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     // Write views out
     config = this.finalizeViews(cls, config);
 
-    if (config.subTypeName && config.subTypeField in config.views[AllViewSymbol].schema) {
-      const field = config.views[AllViewSymbol].schema[config.subTypeField];
-      config.views[AllViewSymbol].schema[config.subTypeField] = {
+    if (config.subTypeName && config.subTypeField in config.allView.schema) {
+      const field = config.allView.schema[config.subTypeField];
+      config.allView.schema[config.subTypeField] = {
         ...field,
         enum: {
           values: [config.subTypeName],

@@ -7,7 +7,7 @@ import {
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
 const FIELD_MOD = '@travetto/schema/src/decorator/field';
 const COMMON_MOD = '@travetto/schema/src/decorator/common';
-const TYPES_FILE = '@travetto/schema/src/internal/types';
+const TYPES_FILE = '@travetto/schema/src/types';
 
 export class SchemaTransformUtil {
 

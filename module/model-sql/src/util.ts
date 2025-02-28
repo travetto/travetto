@@ -1,7 +1,7 @@
 import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
-import { AllViewSymbol, SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
+import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types';
 
@@ -78,14 +78,14 @@ export class SQLModelUtil {
     }
 
     const model = ModelRegistry.get(cls.class)!;
-    const conf = cls.views[AllViewSymbol];
+    const conf = cls.allView;
     const fields = conf.fields.map(x => ({ ...conf.schema[x] }));
 
     // Polymorphic
     if (model && (model.baseType ?? model.subType)) {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of ModelRegistry.getClassesByBaseType(ModelRegistry.getBaseModel(cls.class))) {
-        const typeConf = SchemaRegistry.get(type).views[AllViewSymbol];
+        const typeConf = SchemaRegistry.get(type).allView;
         for (const f of typeConf.fields) {
           if (!fieldMap.has(f)) {
             fieldMap.add(f);
@@ -231,7 +231,7 @@ export class SQLModelUtil {
       if (typeof k === 'string' && !DataUtil.isPlainObject(select[k]) && localMap[k]) {
         if (!v) {
           if (toGet.size === 0) {
-            toGet = new Set(SchemaRegistry.get(cls).views[AllViewSymbol].fields);
+            toGet = new Set(SchemaRegistry.get(cls).allView.fields);
           }
           toGet.delete(k);
         } else {
@@ -253,7 +253,7 @@ export class SQLModelUtil {
       while (!found) {
         const key = Object.keys(cl)[0];
         const val = cl[key];
-        const field = { ...schema.views[AllViewSymbol].schema[key] };
+        const field = { ...schema.allView.schema[key] };
         if (DataUtil.isPrimitive(val)) {
           stack.push(field);
           found = { stack, asc: val === 1 };
