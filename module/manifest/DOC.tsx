@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { d, c, COMMON_DATE } from '@travetto/doc';
-import type { ManifestRoot } from '@travetto/manifest';
+import { ManifestDeltaUtil, type ManifestRoot } from '@travetto/manifest';
 import { RuntimeIndex } from '@travetto/runtime';
 
-const DeltaRef = d.codeLink('ManifestDeltaUtil', 'src/delta.ts', /class ManifestDeltaUtil/);
+const DeltaRef = d.codeLink(ManifestDeltaUtil.name, 'src/delta.ts', new RegExp(`class ${ManifestDeltaUtil.name}`));
 
 
 const manifest = () => {
