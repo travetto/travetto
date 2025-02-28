@@ -1,7 +1,5 @@
-import { FieldConfig } from '@travetto/schema';
+import { DataUtil, FieldConfig } from '@travetto/schema';
 import { Class } from '@travetto/runtime';
-
-import { PointImpl } from './point';
 
 const st = (t: string | string[], isArr: boolean = false): Set<string> =>
   new Set((Array.isArray(t) ? t : [t]).map(v => isArr ? `${v}[]` : v));
@@ -17,6 +15,22 @@ const geo = (type: string): Record<string, Set<string>> => ({
   $geoWithin: st(type, true),
   $geoIntersects: st(type, true)
 });
+
+
+export class PointImpl {
+  static validateSchema(input: unknown): 'type' | undefined {
+    const ret = this.bindSchema(input);
+    return ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
+  }
+  static bindSchema(input: unknown): [number, number] | undefined {
+    if (Array.isArray(input) && input.length === 2) {
+      return [
+        DataUtil.coerceType(input[0], Number, false),
+        DataUtil.coerceType(input[1], Number, false)
+      ];
+    }
+  }
+}
 
 /**
  * Basic type support
