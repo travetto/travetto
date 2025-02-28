@@ -5,7 +5,7 @@ import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { LightweightConfig, ManagedInterceptorConfig, RestInterceptor, RouteApplies } from '../interceptor/types';
-import { HeadersAddedSymbol, InterceptorConfigsSymbol } from '../internal/symbol';
+import { RestSymbols } from '../symbols';
 
 import { ParamExtractor } from './param';
 import { RouteCheckUtil } from './route-check';
@@ -47,7 +47,7 @@ export class RouteUtil {
    * Get the interceptor config for a given request and interceptor instance
    */
   static getInterceptorConfig<T extends RestInterceptor<U>, U extends ManagedInterceptorConfig>(req: Request, inst: T): U | undefined {
-    const cfg = req[InterceptorConfigsSymbol]?.[inst.constructor.Ⲑid] ?? undefined;
+    const cfg = req[RestSymbols.InterceptorConfigs]?.[inst.constructor.Ⲑid] ?? undefined;
     return castTo(cfg);
   }
 
@@ -60,7 +60,7 @@ export class RouteUtil {
     return function filterChain(ctx: FilterContext, next: FilterNext, idx: number = 0): FilterReturn {
       const [it, cfg] = filters[idx]!;
       const chainedNext = idx === len ? next : filterChain.bind(null, ctx, next, idx + 1);
-      const out = it({ req: ctx.req, res: ctx.res, config: cfg }, chainedNext);
+      const out = it({ req: ctx.req, res: ctx.res, config: castTo(cfg) }, chainedNext);
       if (it.length === 2) {
         return out;
       } else if (isPromise(out)) {
@@ -192,11 +192,11 @@ export class RouteUtil {
     ];
 
     if (headers && Object.keys(headers).length > 0) {
-      filterChain.unshift([({ res }): void => { res[HeadersAddedSymbol] = { ...headers }; }, undefined]);
+      filterChain.unshift([({ res }): void => { res[RestSymbols.HeadersAdded] = { ...headers }; }, undefined]);
     }
 
     const chain = this.createFilterChain(filterChain);
-    return (req, res) => chain({ req, res, config: undefined }, ident);
+    return (req, res) => chain({ req, res, config: undefined! }, ident);
   }
 
   /**

@@ -15,7 +15,7 @@ yarn add @travetto/cache
 
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.").  The code aims to handle use cases surrounding common/basic usage.
 
-The cache module requires an [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), or you can roll your own.
+The cache module requires an [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), or you can roll your own.
 
 **Install: provider**
 ```bash
@@ -25,7 +25,7 @@ npm install @travetto/model-{provider}
 
 yarn add @travetto/model-{provider}
 ```
-Currently, the following are packages that provide [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11):
+Currently, the following are packages that provide [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10):
    *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - @travetto/model-dynamodb
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.") - @travetto/model-elasticsearch
    *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.") - @travetto/model-mongo
@@ -40,7 +40,7 @@ Currently, the following are packages that provide [Expiry](https://github.com/t
 ## Decorators
 The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into [JSON](https://www.json.org).  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.
 
-Additionally, to use the decorators you will need to have a [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35) object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.
+Additionally, to use the decorators you will need to have a [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L33) object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.
 
 [@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L13) is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. [redis](https://redis.io), [memcached](https://memcached.org)), only asynchronous methods are supported.
 
@@ -119,17 +119,17 @@ export class UserService {
 ```
 
 ## Extending the Cache Service
-By design, the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35) relies solely on the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35).  The [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L35) is expecting the model service to be registered using the @travetto/cache:model:
+By design, the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L33) relies solely on the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L33).  The [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L33) is expecting the model service to be registered using the @travetto/cache:model:
 
 **Code: Registering a Custom Model Source**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
 import { MemoryModelService } from '@travetto/model-memory';
-import { CacheModelSymbol } from '@travetto/cache';
+import { CacheSymbols } from '@travetto/cache';
 
 class Config {
-  @InjectableFactory(CacheModelSymbol)
+  @InjectableFactory(CacheSymbols.Model)
   static getModel(): ModelExpirySupport {
     return new CustomAwesomeModelService({});
   }

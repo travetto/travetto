@@ -16,10 +16,10 @@ yarn add @travetto/model
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
 ## Contracts
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64).
 
 ### Basic
-All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9) contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
+All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8) contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
 
 **Code: Basic Contract**
 ```typescript
@@ -53,7 +53,7 @@ export interface ModelBasicSupport<C = unknown> {
 ```
 
 ### CRUD
-The [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11) contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework"), is an example of a module that only needs create, read and delete, and so any implementation of [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") that honors this contract, can be used with the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") model extension.
+The [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11) contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework"), is an example of a module that only needs create, read and delete, and so any implementation of [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") that honors this contract, can be used with the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") model extension.
 
 **Code: Crud Contract**
 ```typescript
@@ -99,7 +99,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
 ```
 
 ### Indexed
-Additionally, an implementation may support the ability for basic [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11) queries. This is not the full featured query support of [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support."), but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
+Additionally, an implementation may support the ability for basic [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11) queries. This is not the full featured query support of [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support."), but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
 
 **Code: Indexed Contract**
 ```typescript
@@ -139,7 +139,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
 ```
 
 ### Expiry
-Certain implementations will also provide support for automatic [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11) of data at runtime.  This is extremely useful for temporary data as, and is used in the [Caching](https://github.com/travetto/travetto/tree/main/module/cache#readme "Caching functionality with decorators for declarative use.") module for expiring data accordingly.
+Certain implementations will also provide support for automatic [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10) of data at runtime.  This is extremely useful for temporary data as, and is used in the [Caching](https://github.com/travetto/travetto/tree/main/module/cache#readme "Caching functionality with decorators for declarative use.") module for expiring data accordingly.
 
 **Code: Expiry Contract**
 ```typescript
@@ -154,7 +154,7 @@ export interface ModelExpirySupport extends ModelCrudSupport {
 ```
 
 ### Blob
-Some implementations also allow for the ability to read/write binary data as [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8).  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
+Some implementations also allow for the ability to read/write binary data as [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8).  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
 
 **Code: Blob Contract**
 ```typescript
@@ -213,7 +213,7 @@ export interface ModelBlobSupport {
 ```
 
 ### Bulk
-Finally, there is support for [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19) operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
+Finally, there is support for [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64) operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
 
 **Code: Bulk Contract**
 ```typescript
@@ -223,7 +223,7 @@ export interface ModelBulkSupport extends ModelCrudSupport {
 ```
 
 ## Declaration
-Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L9)
+Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10)
 
 **Code: ModelType**
 ```typescript
@@ -262,7 +262,8 @@ To enforce that these contracts are honored, the module provides shared test sui
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
 
-import { isBulkSupported, isCrudSupported } from '../../src/internal/service/common';
+import { ModelBulkUtil } from '../../src/util/bulk';
+import { ModelCrudUtil } from '../../src/util/crud';
 import { ModelType } from '../../src/types/model';
 import { ModelSuite } from './suite';
 
@@ -280,7 +281,7 @@ export abstract class BaseModelSuite<T> {
 
   async getSize<U extends ModelType>(cls: Class<U>): Promise<number> {
     const svc = (await this.service);
-    if (isCrudSupported(svc)) {
+    if (ModelCrudUtil.isSupported(svc)) {
       let i = 0;
       for await (const __el of svc.list(cls)) {
         i += 1;
@@ -293,10 +294,10 @@ export abstract class BaseModelSuite<T> {
 
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
     const svc = await this.service;
-    if (isBulkSupported(svc)) {
+    if (ModelBulkUtil.isSupported(svc)) {
       const res = await svc.processBulk(cls, items.map(x => ({ insert: x })));
       return res.counts.insert;
-    } else if (isCrudSupported(svc)) {
+    } else if (ModelCrudUtil.isSupported(svc)) {
       const out: Promise<M>[] = [];
       for (const el of items) {
         out.push(svc.create(cls, el));

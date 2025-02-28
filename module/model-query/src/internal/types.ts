@@ -1,7 +1,5 @@
-import { FieldConfig } from '@travetto/schema';
-import { Class } from '@travetto/runtime';
-
-import { PointImpl } from '../model/point';
+import { FieldConfig, Point } from '@travetto/schema';
+import { Class, toConcrete } from '@travetto/runtime';
 
 const st = (t: string | string[], isArr: boolean = false): Set<string> =>
   new Set((Array.isArray(t) ? t : [t]).map(v => isArr ? `${v}[]` : v));
@@ -17,6 +15,8 @@ const geo = (type: string): Record<string, Set<string>> => ({
   $geoWithin: st(type, true),
   $geoIntersects: st(type, true)
 });
+
+const PointImpl = toConcrete<Point>();
 
 /**
  * Basic type support

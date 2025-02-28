@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { createElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
+import { createElement, JSXElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
 
 import { PackageUtil } from '@travetto/manifest';
 import { castTo, RuntimeIndex } from '@travetto/runtime';
@@ -66,7 +66,7 @@ export class RenderContext {
   link(text: string, line?: number | { [key: string]: unknown, line?: number }): string {
     const num = typeof line === 'number' ? line : line?.line;
     return `${text.replace(this.repoRoot, this.baseUrl)
-      .replace(/.*@travetto\//, `${this.travettoBaseUrl}/module/`)}${num ? `#L${num}` : ''}`;
+      .replace(/.*@travetto\//, `${this.travettoBaseUrl}/module/`)}${num && num > 1 ? `#L${num}` : ''}`;
   }
 
   /**

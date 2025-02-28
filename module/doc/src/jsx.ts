@@ -3,9 +3,8 @@ import { castTo, TypedObject } from '@travetto/runtime';
 
 import { LIB_MAPPING } from './mapping/lib-mapping';
 import { MOD_MAPPING } from './mapping/mod-mapping';
-import { RunConfig } from './util/run';
+import { CodeProps, RunConfig } from './util/types';
 
-type CodeProps = { title: string, src: string | Function, language?: string, outline?: boolean, startRe?: RegExp, endRe?: RegExp };
 type InstallProps = { title: string, pkg: string };
 type ExecProps = { title: string, cmd: string, args?: string[], config?: RunConfig & { formatCommand?(cmd: string, args: string[]): string } };
 type StdHeaderProps = { mod?: string, install?: boolean };
@@ -82,8 +81,9 @@ function CodeLinker(titleOrNode: string | JSXElement, src?: string, startRe?: Re
     props = { title: titleOrNode, src: src!, startRe: startRe! };
   } else if (titleOrNode.type === Code) {
     const node: JSXElementByFn<'Code'> = castTo(titleOrNode);
+    const srcName = typeof node.props.src === 'string' ? node.props.src : node.props.src.name;
     props = {
-      title: node.props.title,
+      title: node.props.title ?? srcName,
       src: node.props.src,
       startRe: node.props.startRe!
     };

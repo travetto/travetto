@@ -53,4 +53,8 @@ export interface ModelStorageSupport {
    * An event listener for whenever a model schema is changed
    */
   changeSchema?(cls: Class, changes: SchemaChange): Promise<void>;
+  /**
+   * Truncate blob storage data
+   */
+  truncateBlob?(): Promise<void>;
 }

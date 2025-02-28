@@ -3,8 +3,7 @@ import vscode from 'vscode';
 
 import { TypedObject } from '@travetto/runtime';
 
-import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
-import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig } from '@travetto/test';
+import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig, TestWatchEvent } from '@travetto/test';
 
 import { Decorations } from './decoration';
 import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown } from './types';

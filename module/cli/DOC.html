@@ -487,7 +487,7 @@ By default, cli commands do not expose themselves to the VSCode extension, as th
 
   <figure class="code">
     <figcaption class="code">Anatomy of a Command
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L51">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L53">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CliCommandShape<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
@@ -584,19 +584,19 @@ If the goal is to run a more complex application, which may include depending on
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-As noted in the example above, <code class="item input">fields</code> is specified in this execution, with support for <code class="item input">module</code>, and <code class="item input">env</code>. These env flag is directly tied to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114">Runtime</a> <code class="item field">name</code> defined in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/runtime" title="Runtime for travetto applications.">Runtime</a> module. <br><br>
+As noted in the example above, <code class="item input">fields</code> is specified in this execution, with support for <code class="item input">module</code>, and <code class="item input">env</code>. These env flag is directly tied to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/runtime/src/context.ts#L12">Runtime</a> <code class="item field">name</code> defined in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/runtime" title="Runtime for travetto applications.">Runtime</a> module. <br><br>
 The <code class="item input">module</code> field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 <h3 id="custom-validation">Custom Validation</h3>
 
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L37">CliValidationError</a> errors that are returned will be shared with the user, and fail to invoke the <code class="item method">main</code> method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L38">CliValidationError</a> errors that are returned will be shared with the user, and fail to invoke the <code class="item method">main</code> method.
 
   <figure class="code">
     <figcaption class="code">CliValidationError
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L37">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L38">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">CliValidationError</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CliValidationError</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * The error message
    */</span>

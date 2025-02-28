@@ -5,7 +5,6 @@ import { ModelCrudSupport } from './crud';
 
 /**
  * Support for managing expiration of data
- *
  * @concrete
  */
 export interface ModelExpirySupport extends ModelCrudSupport {

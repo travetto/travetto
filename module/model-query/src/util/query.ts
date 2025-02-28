@@ -1,14 +1,19 @@
-import { Class, AppError, TimeUtil, castTo } from '@travetto/runtime';
-import { ModelRegistry, NotFoundError } from '@travetto/model';
-import { ModelType } from '@travetto/model/src/types/model';
+import { Class, AppError, TimeUtil, castTo, hasFunction } from '@travetto/runtime';
+import { ModelType, ModelRegistry, NotFoundError } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { WhereClause, WhereClauseRaw } from '../../model/where-clause';
+import { WhereClause, WhereClauseRaw } from '../model/where-clause';
+import { ModelQuerySupport } from '../types/query';
 
 /**
  * Common model utils, that should be usable by end users
  */
 export class ModelQueryUtil {
+
+  /**
+   * Type guard for determining if service supports query operations
+   */
+  static isSupported = hasFunction<ModelQuerySupport>('query');
 
   /**
    * Resolve comparator

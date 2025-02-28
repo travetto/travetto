@@ -4,8 +4,7 @@ import { AsyncContext } from '@travetto/context';
 import { ModelType } from '@travetto/model';
 import { castTo, Class } from '@travetto/runtime';
 
-import { SQLDialect, SQLModelConfig } from '@travetto/model-sql';
-import { SQLUtil, VisitStack } from '@travetto/model-sql/src/internal/util';
+import { SQLDialect, SQLModelConfig, SQLModelUtil, VisitStack } from '@travetto/model-sql';
 
 import { PostgreSQLConnection } from './connection';
 
@@ -62,6 +61,6 @@ export class PostgreSQLDialect extends SQLDialect {
    * Suppress foreign key checks
    */
   override getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
-    return [`TRUNCATE ${this.table(SQLUtil.classToStack(cls))} CASCADE;`];
+    return [`TRUNCATE ${this.table(SQLModelUtil.classToStack(cls))} CASCADE;`];
   }
 }

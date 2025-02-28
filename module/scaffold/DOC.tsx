@@ -66,7 +66,7 @@ $ npx @travetto/scaffold@<version-or-tag>
 
     A default model is constructed, a {Todo} class:
 
-    <c.Code title='Todo Model' src={Todo} />
+    <c.Code title='Todo Model' src={Todo} startRe={/./} />
 
     Basic tests are also included for the {d.input('model')} to verify that database interaction and functionality is working properly.
   </c.Section>

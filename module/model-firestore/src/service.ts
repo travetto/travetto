@@ -5,10 +5,8 @@ import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelRegistry, ModelStorageSupport,
   ModelIndexedSupport, ModelType, NotFoundError, OptionalId,
+  ModelCrudUtil, ModelIndexedUtil,
 } from '@travetto/model';
-
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 
 import { FirestoreModelConfig } from './config';
 

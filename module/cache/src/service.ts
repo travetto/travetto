@@ -1,14 +1,12 @@
-import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
+import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError, ModelStorageUtil, ModelIndexedUtil } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, Runtime, TimeUtil, Util } from '@travetto/runtime';
-import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 import { CacheError } from './error';
 import { CacheUtil } from './util';
-import { CacheAware, CacheConfigSymbol, EvictConfigSymbol } from './internal/types';
-
-export const CacheModelSymbol = Symbol.for('@travetto/cache:model');
+import { CacheSymbols } from './symbols';
+import { CacheAware } from './types';
 
 const INFINITE_MAX_AGE = TimeUtil.asMillis(10, 'y');
 
@@ -36,12 +34,12 @@ export class CacheService {
 
   #modelService: ModelExpirySupport;
 
-  constructor(@Inject(CacheModelSymbol, { resolution: 'loose' }) modelService: ModelExpirySupport) {
+  constructor(@Inject(CacheSymbols.Model, { resolution: 'loose' }) modelService: ModelExpirySupport) {
     this.#modelService = modelService;
   }
 
   async postConstruct(): Promise<void> {
-    if (isStorageSupported(this.#modelService) && (Runtime.dynamic || this.#modelService.config?.autoCreate)) {
+    if (ModelStorageUtil.isSupported(this.#modelService) && (Runtime.dynamic || this.#modelService.config?.autoCreate)) {
       await this.#modelService.createModel?.(CacheRecord);
     }
   }
@@ -112,7 +110,7 @@ export class CacheService {
    * @param id
    */
   async deleteAll(keySpace: string): Promise<void> {
-    if (isIndexedSupported(this.#modelService)) {
+    if (ModelIndexedUtil.isSupported(this.#modelService)) {
       const removes: Promise<void>[] = [];
       for await (const item of this.#modelService.listByIndex(CacheRecord, 'keySpace', { keySpace })) {
         removes.push(this.#modelService.delete(CacheRecord, item.id));
@@ -127,7 +125,7 @@ export class CacheService {
    * Purge the cache store of all data, if supported
    */
   async purge(): Promise<void> {
-    if (isStorageSupported(this.#modelService) && this.#modelService.truncateModel) {
+    if (ModelStorageUtil.isSupported(this.#modelService) && this.#modelService.truncateModel) {
       await this.#modelService.truncateModel(CacheRecord);
     } else {
       console.warn(`${this.#modelService.constructor.name} does not support truncating the data set`);
@@ -161,7 +159,7 @@ export class CacheService {
    * @param params input parameters
    */
   async cache(target: CacheAware, method: string, fn: Function, params: unknown[]): Promise<unknown | undefined> {
-    const config = target[CacheConfigSymbol]![method];
+    const config = target[CacheSymbols.CacheConfig]![method];
 
     const id = CacheUtil.generateKey(config, params);
 
@@ -188,7 +186,7 @@ export class CacheService {
    * @param params Input params to the function
    */
   async evict(target: CacheAware, method: string, fn: Function, params: unknown[]): Promise<unknown> {
-    const config = target[EvictConfigSymbol]![method];
+    const config = target[CacheSymbols.EvictConfig]![method];
     const id = CacheUtil.generateKey(config, params);
     const val = await fn.apply(target, params);
     try {

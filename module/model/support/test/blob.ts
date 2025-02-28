@@ -4,8 +4,8 @@ import { Suite, Test, TestFixtures } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { BinaryUtil, Util } from '@travetto/runtime';
 
-import { ModelBlobSupport } from '../../src/service/blob';
-import { ModelBlobUtil } from '../../src/internal/service/blob';
+import { ModelBlobSupport } from '../../src/types/blob';
+import { ModelBlobUtil } from '../../src/util/blob';
 
 const meta = BinaryUtil.getBlobMeta;
 

@@ -2,7 +2,9 @@
 import { d, c } from '@travetto/doc';
 import { Field, Schema } from '@travetto/schema';
 import { CliCommand } from '@travetto/cli';
+import { RuntimeResources, toConcrete } from '@travetto/runtime';
 
+import { RestInterceptor } from './src/interceptor/types';
 import { RestApplication } from './src/application/rest';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
@@ -14,16 +16,16 @@ import { LoggingInterceptor } from './src/interceptor/logging';
 import { SerializeInterceptor } from './src/interceptor/serialize';
 import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies';
 import { RestConfig } from './src/application/config';
+import { Request, Response } from './src/types';
 import { AsyncContextInterceptor } from './src/interceptor/context';
 
-const Request = d.codeLink('Request', 'src/types.ts', /interface Request/);
-const Response = d.codeLink('Response', 'src/types.ts', /interface Response/);
-const RestInterceptor = d.codeLink('RestInterceptor', 'src/interceptor/types.ts', /interface RestInterceptor/);
-const RuntimeResources = d.codeLink('RuntimeResources', '@travetto/runtime/src/resources.ts', /RuntimeResources/);
+const RequestContract = toConcrete<Request>();
+const ResponseContract = toConcrete<Response>();
+const RestInterceptorContract = toConcrete<RestInterceptor>();
 
 export const text = <>
   <c.StdHeader />
-  The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles {d.library('Express')} in the {Request} and {Response} objects). This module is built upon the {d.mod('Schema')} structure, and all controller method parameters follow the same rules/abilities as any {Field} in a standard {Schema} class.
+  The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles {d.library('Express')} in the {RequestContract} and {ResponseContract} objects). This module is built upon the {d.mod('Schema')} structure, and all controller method parameters follow the same rules/abilities as any {Field} in a standard {Schema} class.
 
   <c.Section title='Routes: Controller'>
     To define a route, you must first declare a {Controller} which is only allowed on classes. Controllers can be configured with:
@@ -79,7 +81,7 @@ export const text = <>
         <li>{QueryParam} - Query params</li>
         <li>{Body} - Request body (in it's entirety), with support for validation</li>
         <li>{HeaderParam} - Header values</li>
-        <li>{ContextParam} - Special values exposed (e.g. {Request}, {Response}, etc.)</li>
+        <li>{ContextParam} - Special values exposed (e.g. {RequestContract}, {ResponseContract}, etc.)</li>
       </ul>
 
       Each {Param} can be configured to indicate:
@@ -153,7 +155,7 @@ export const text = <>
 
   <c.Section title='Interceptors'>
 
-    {RestInterceptor}s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+    {RestInterceptorContract}s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
     <c.Code title='A Trivial Interceptor' src='doc/interceptor-hello-world.ts' />
 
@@ -164,7 +166,7 @@ export const text = <>
     <c.SubSection title={BodyParseInterceptor.name}>
       {BodyParseInterceptor} handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
-      <c.Code title='Body Parse Config' src={RestBodyParseConfig} startRe={/class.*Config/} endRe={/^\}/} />
+      <c.Code title='Body Parse Config' src={RestBodyParseConfig} />
     </c.SubSection>
     <c.SubSection title={SerializeInterceptor.name}>
       {SerializeInterceptor} is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
@@ -172,12 +174,12 @@ export const text = <>
     <c.SubSection title={CorsInterceptor.name}>
       {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, {d.input('rest.cors.active: true')}
 
-      <c.Code title='Cors Config' src={RestCorsConfig} startRe={/class.*Config/} endRe={/^\}/} />
+      <c.Code title='Cors Config' src={RestCorsConfig} />
     </c.SubSection>
     <c.SubSection title={CookiesInterceptor.name}>
       {CookiesInterceptor} is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
-      <c.Code title='Cookies Config' src={RestCookieConfig} startRe={/class.*Config/} endRe={/^\}/} />
+      <c.Code title='Cookies Config' src={RestCookieConfig} />
     </c.SubSection>
     <c.SubSection title={GetCacheInterceptor.name}>
       {GetCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting {d.input('rest.disableGetCache: true')} in your config.
@@ -192,7 +194,7 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='Custom Interceptors'>
-      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {RestInterceptor} interface.  The interceptors are tied to the defined {Request} and {Response} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {RestInterceptorContract} interface.  The interceptors are tied to the defined {RequestContract} and {ResponseContract} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
       <c.Code title='Defining a new Interceptor' src='doc/interceptor-logging.ts' />
 
@@ -224,7 +226,7 @@ export const text = <>
     </c.SubSection>
   </c.Section>
   <c.Section title='Cookie Support'>
-    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {Request}/{Response} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {RequestContract}/{ResponseContract} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
     <c.Code title='Sample Cookie Usage' src='doc/cookie-routes.ts' />
   </c.Section>

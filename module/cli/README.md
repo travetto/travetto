@@ -501,16 +501,16 @@ export class RunRestCommand implements CliCommandShape {
 }
 ```
 
-As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime/src/env.ts#L114) `name` defined in the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.") module. 
+As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime/src/context.ts#L12) `name` defined in the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#readme "Runtime for travetto applications.") module. 
 
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 ### Custom Validation
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L37) errors that are returned will be shared with the user, and fail to invoke the `main` method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L38) errors that are returned will be shared with the user, and fail to invoke the `main` method.
 
 **Code: CliValidationError**
 ```typescript
-export type CliValidationError = {
+export interface CliValidationError {
   /**
    * The error message
    */

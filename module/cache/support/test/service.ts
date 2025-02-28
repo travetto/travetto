@@ -2,16 +2,17 @@ import assert from 'node:assert';
 import timers from 'node:timers/promises';
 
 import { Suite, Test } from '@travetto/test';
-import { ModelExpirySupport } from '@travetto/model';
+import { ModelExpirySupport, ModelIndexedUtil } from '@travetto/model';
 import { Inject, Injectable } from '@travetto/di';
-import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { ModelSuite } from '@travetto/model/support/test/suite';
-import { isIndexedSupported } from '@travetto/model/src/internal/service/common';
 import { castTo, Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
+import { InjectableSuite } from '@travetto/di/support/test/suite';
+import { ModelSuite } from '@travetto/model/support/test/suite';
+
 import { Cache, EvictCache } from '../../src/decorator';
-import { CacheModelSymbol, CacheService } from '../../src/service';
+import { CacheService } from '../../src/service';
+import { CacheSymbols } from '../../src/symbols';
 
 @Schema()
 class User { }
@@ -81,7 +82,7 @@ class SampleService {
 }
 
 @Suite()
-@ModelSuite(CacheModelSymbol)
+@ModelSuite(CacheSymbols.Model)
 @InjectableSuite()
 export abstract class CacheServiceSuite {
 
@@ -216,7 +217,7 @@ export abstract class CacheServiceSuite {
 
   @Test()
   async allEviction() {
-    if (!isIndexedSupported(this.serviceClass.prototype)) {
+    if (!ModelIndexedUtil.isSupported(this.serviceClass.prototype)) {
       return;
     }
 

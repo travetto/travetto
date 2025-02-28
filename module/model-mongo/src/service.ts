@@ -9,12 +9,13 @@ import {
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, ModelBlobSupport
+  NotFoundError, ExistsError, ModelBlobSupport,
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil, ModelBlobUtil,
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport,
-  QueryVerifier
+  QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
 } from '@travetto/model-query';
 
 import {
@@ -22,16 +23,6 @@ import {
   castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
-
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
-import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
-import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 
 import { MongoUtil, PlainIdx, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
@@ -41,6 +32,8 @@ const ListIndexSymbol = Symbol.for('@travetto/mongo-model:list-index');
 type BlobRaw = GridFSFile & { metadata?: BlobMeta };
 
 type MongoTextSearch = RootFilterOperators<unknown>['$text'];
+
+export const ModelBlobNamespace = '__blobs';
 
 /**
  * Mongo-based model source
@@ -152,12 +145,12 @@ export class MongoModelService implements
   }
 
   async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> {
-    if (cls === MODEL_BLOB) {
-      await this.#bucket.drop().catch(() => { });
-    } else {
-      const col = await this.getStore(cls);
-      await col.deleteMany({});
-    }
+    const col = await this.getStore(cls);
+    await col.deleteMany({});
+  }
+
+  async truncateBlob(): Promise<void> {
+    await this.#bucket.drop().catch(() => { });
   }
 
   /**
@@ -396,7 +389,7 @@ export class MongoModelService implements
 
   // Expiry
   deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
-    return ModelQueryExpiryUtil.deleteExpired(this, cls);
+    return ModelQueryCrudUtil.deleteExpired(this, cls);
   }
 
   // Indexed

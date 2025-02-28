@@ -5,8 +5,8 @@ import { Suite, Test } from '@travetto/test';
 import { TimeSpan, TimeUnit, TimeUtil } from '@travetto/runtime';
 
 import { ExpiresAt, Model } from '../../src/registry/decorator';
-import { ModelExpirySupport } from '../../src/service/expiry';
-import { ModelExpiryUtil } from '../../src/internal/service/expiry';
+import { ModelExpirySupport } from '../../src/types/expiry';
+import { ModelExpiryUtil } from '../../src/util/expiry';
 import { NotFoundError } from '../../src/error/not-found';
 import { BaseModelSuite } from './base';
 

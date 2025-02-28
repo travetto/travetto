@@ -1,10 +1,10 @@
 import { InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
 import { MemoryModelService } from '@travetto/model-memory';
-import { CacheModelSymbol } from '@travetto/cache';
+import { CacheSymbols } from '@travetto/cache';
 
 class Config {
-  @InjectableFactory(CacheModelSymbol)
+  @InjectableFactory(CacheSymbols.Model)
   static getModel(): ModelExpirySupport {
     return new CustomAwesomeModelService({});
   }

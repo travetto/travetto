@@ -71,6 +71,8 @@ yarn add ${el.props.pkg}
   Terminal: state => Html.Code(state),
   Config: state => Html.Code(state),
   Code: async ({ context, el, props }) => {
+    DocResolveUtil.applyCodePropDefaults(el.props);
+
     const cls = getComponentName(el.type).replace(/^[A-Z]/g, v => v.toLowerCase());
     const content = await context.resolveCode(el);
     let link: string = '';

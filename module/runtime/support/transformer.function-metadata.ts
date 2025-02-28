@@ -31,7 +31,7 @@ export class RegisterTransformer {
       return node; // Exclude self
     }
 
-    state[cls] = MetadataRegistrationUtil.tag(state, node, node.getText());
+    state[cls] = MetadataRegistrationUtil.tag(state, node);
     state[methods] = {};
     return node;
   }
@@ -42,7 +42,7 @@ export class RegisterTransformer {
   @OnMethod()
   static collectMethodMetadata(state: TransformerState & MetadataInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (state[cls] && ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
-      state[methods]![node.name.escapedText.toString()] = MetadataRegistrationUtil.tag(state, node, node.getText());
+      state[methods]![node.name.escapedText.toString()] = MetadataRegistrationUtil.tag(state, node);
     }
     return node;
   }
@@ -71,7 +71,7 @@ export class RegisterTransformer {
     }
 
     if (node.name && node.parent && ts.isSourceFile(node.parent)) {
-      MetadataRegistrationUtil.registerFunction(state, node.name.text, node, node.getText());
+      MetadataRegistrationUtil.registerFunction(state, node);
     }
     return node;
   }

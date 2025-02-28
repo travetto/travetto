@@ -1,5 +1,7 @@
 import { TypedFunction } from '@travetto/runtime';
 
+import { CacheSymbols } from './symbols';
+
 /**
  * A minimal config for a cache operation
  */
@@ -36,3 +38,12 @@ export interface CacheConfig extends CoreCacheConfig {
    */
   extendOnAccess?: boolean;
 }
+
+/**
+ * Describes a class as being cache aware or not
+ */
+export interface CacheAware {
+  [CacheSymbols.CacheConfig]?: Record<string, CacheConfig>;
+  [CacheSymbols.EvictConfig]?: Record<string, CoreCacheConfig>;
+}
+

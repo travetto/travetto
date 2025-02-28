@@ -4,17 +4,9 @@ import { spawn, ChildProcess } from 'node:child_process';
 import path from 'node:path';
 
 import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { RunConfig } from './types';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
-
-export type RunConfig = {
-  filter?: (line: string) => boolean;
-  rewrite?: (text: string) => string;
-  module?: string;
-  env?: Record<string, string>;
-  envName?: string;
-  cwd?: string;
-};
 
 class DocState {
   baseline = COMMON_DATE;

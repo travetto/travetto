@@ -3,8 +3,8 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry, TestFixtures } from '@travetto/test';
 
-import { isBlobSupported, isStorageSupported } from '../../src/internal/service/common';
-import { MODEL_BLOB } from '../../src/internal/service/blob';
+import { ModelBlobUtil } from '../../src/util/blob';
+import { ModelStorageUtil } from '../../src/util/storage';
 import { ModelRegistry } from '../../src/registry/model';
 
 const Loaded = Symbol();
@@ -35,7 +35,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       target,
       async function (this: T) {
         const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
-        if (isStorageSupported(service)) {
+        if (ModelStorageUtil.isSupported(service)) {
           await service.createStorage();
           if (service.createModel) {
             await Promise.all(ModelRegistry.getClasses()
@@ -50,10 +50,11 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       target,
       async function (this: T) {
         const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
-        if (isStorageSupported(service)) {
+        if (ModelStorageUtil.isSupported(service)) {
           const models = ModelRegistry.getClasses().filter(m => m === ModelRegistry.getBaseModel(m));
-          if (isBlobSupported(service)) {
-            models.push(MODEL_BLOB);
+
+          if (ModelBlobUtil.isSupported(service) && service.truncateBlob) {
+            await service.truncateBlob();
           }
 
           if (service.truncateModel) {
@@ -71,7 +72,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       target,
       async function (this: T) {
         const service = await DependencyRegistry.getInstance(this.serviceClass, qualifier);
-        if (isStorageSupported(service)) {
+        if (ModelStorageUtil.isSupported(service)) {
           if (service.deleteModel) {
             for (const m of ModelRegistry.getClasses()) {
               if (m === ModelRegistry.getBaseModel(m)) {

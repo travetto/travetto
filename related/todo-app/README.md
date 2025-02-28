@@ -69,7 +69,7 @@ export class TodoSearch {
 }
 ```
 
-as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) services needs to implement [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L1).
+as you can see, the model structure is simple.  Everything that uses the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) services needs to implement [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10).
 
 ## Building the Service Layer
 Next we establish the functionality for the service layer. The operations we need are:
@@ -303,7 +303,7 @@ npx trv run:rest
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:145] Initialized {
+2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:149] Initialized {
   manifest: {
     main: {
       name: '@travetto/todo-app',

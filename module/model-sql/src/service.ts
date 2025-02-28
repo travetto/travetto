@@ -1,8 +1,8 @@
 import {
   ModelType,
   BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
-  NotFoundError, ModelRegistry, ExistsError, OptionalId,
-  ModelIdSource
+  NotFoundError, ModelRegistry, ExistsError, OptionalId, ModelIdSource,
+  ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
 } from '@travetto/model';
 import { castTo, Class } from '@travetto/runtime';
 import { DataUtil, SchemaChange } from '@travetto/schema';
@@ -10,21 +10,13 @@ import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClauseRaw, QueryVerifier
+  PageableModelQuery, ValidStringFields, WhereClauseRaw, QueryVerifier, ModelQuerySuggestSupport,
+  ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
 } from '@travetto/model-query';
-
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
-import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
-import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
 import { SQLModelConfig } from './config';
 import { Connected, ConnectedIterator, Transactional } from './connection/decorator';
-import { SQLUtil } from './internal/util';
+import { SQLModelUtil } from './util';
 import { SQLDialect } from './dialect/base';
 import { TableManager } from './table-manager';
 import { Connection } from './connection/base';
@@ -75,7 +67,7 @@ export class SQLModelService implements
     const all = toCheck.size ?
       (await this.#exec<ModelType>(
         this.#dialect.getSelectRowsByIdsSQL(
-          SQLUtil.classToStack(cls), [...toCheck.keys()], [this.#dialect.idField]
+          SQLModelUtil.classToStack(cls), [...toCheck.keys()], [this.#dialect.idField]
         )
       )).records : [];
 
@@ -225,9 +217,9 @@ export class SQLModelService implements
       operations.map(x => x[k]).filter((x): x is Required<BulkOp<T>>[K] => !!x);
 
     const getStatements = async (k: keyof BulkOp<T>): Promise<InsertWrapper[]> =>
-      (await SQLUtil.getInserts(cls, get(k))).filter(x => !!x.records.length);
+      (await SQLModelUtil.getInserts(cls, get(k))).filter(x => !!x.records.length);
 
-    const deletes = [{ stack: SQLUtil.classToStack(cls), ids: get('delete').map(x => x.id) }].filter(x => !!x.ids.length);
+    const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(x => x.id) }].filter(x => !!x.ids.length);
 
     const [inserts, upserts, updates] = await Promise.all([
       getStatements('insert'),
@@ -243,7 +235,7 @@ export class SQLModelService implements
   // Expiry
   @Transactional()
   async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
-    return ModelQueryExpiryUtil.deleteExpired(this, cls);
+    return ModelQueryCrudUtil.deleteExpired(this, cls);
   }
 
   @Connected()
@@ -254,7 +246,7 @@ export class SQLModelService implements
       await this.#dialect.fetchDependents(cls, res, query && query.select);
     }
 
-    const cleaned = SQLUtil.cleanResults<T>(this.#dialect, res);
+    const cleaned = SQLModelUtil.cleanResults<T>(this.#dialect, res);
     return await Promise.all(cleaned.map(m => ModelCrudUtil.load(cls, m)));
   }
 
@@ -286,7 +278,7 @@ export class SQLModelService implements
   async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
-    const { count } = await this.#exec(this.#dialect.getUpdateSQL(SQLUtil.classToStack(cls), item, ModelQueryUtil.getWhereClause(cls, query.where)));
+    const { count } = await this.#exec(this.#dialect.getUpdateSQL(SQLModelUtil.classToStack(cls), item, ModelQueryUtil.getWhereClause(cls, query.where)));
     return count;
   }
 
@@ -294,7 +286,7 @@ export class SQLModelService implements
   @Transactional()
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
-    const { count } = await this.#exec(this.#dialect.getDeleteSQL(SQLUtil.classToStack(cls), ModelQueryUtil.getWhereClause(cls, query.where, false)));
+    const { count } = await this.#exec(this.#dialect.getDeleteSQL(SQLModelUtil.classToStack(cls), ModelQueryUtil.getWhereClause(cls, query.where, false)));
     return count;
   }
 

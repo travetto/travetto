@@ -1,6 +1,8 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 import { Links } from './support/doc.support';
+import { toConcrete } from '@travetto/runtime';
+import { ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport, ModelQuerySupport } from '@travetto/model-query';
 
 export const text = <>
   <c.StdHeader />
@@ -9,23 +11,23 @@ export const text = <>
   <c.Section title='Contracts'>
     <c.SubSection title='Query'>
       This contract provides the ability to apply the query support to return one or many items, as well as providing counts against a specific query.
-      <c.Code title='Query' src='src/service/query.ts' startRe={/export interface/} endRe={/^}/} />
+      <c.Code title='Query' src={toConcrete<ModelQuerySupport>()} />
     </c.SubSection>
     <c.SubSection title='Crud'>
       Reinforcing the complexity provided in these contracts, the {Links.QueryCrud} contract allows for bulk update/deletion by query.  This requires the underlying implementation to support these operations.
 
-      <c.Code title='Query Crud' src='src/service/crud.ts' startRe={/export interface/} endRe={/^}/} />
+      <c.Code title='Query Crud' src={toConcrete<ModelQueryCrudSupport>()} />
     </c.SubSection>
 
     <c.SubSection title='Facet'>
       With the complex nature of the query support, the ability to find counts by groups is a common and desirable pattern. This contract allows for faceting on a given field, with query filtering.
 
-      <c.Code title='Query Facet' src='src/service/facet.ts' startRe={/export interface/} endRe={/^}/} />
+      <c.Code title='Query Facet' src={toConcrete<ModelQueryFacetSupport>()} />
     </c.SubSection>
     <c.SubSection title='Suggest'>
       Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and type-ahead functionalities.
 
-      <c.Code title='Query Suggest' src='src/service/suggest.ts' startRe={/export interface/} endRe={/^}/} />
+      <c.Code title='Query Suggest' src={toConcrete<ModelQuerySuggestSupport>()} />
     </c.SubSection>
   </c.Section>
 

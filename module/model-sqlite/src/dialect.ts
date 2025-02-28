@@ -4,8 +4,7 @@ import { AsyncContext } from '@travetto/context';
 import { WhereClause } from '@travetto/model-query';
 import { castTo } from '@travetto/runtime';
 
-import { SQLModelConfig, SQLDialect } from '@travetto/model-sql';
-import { VisitStack } from '@travetto/model-sql/src/internal/util';
+import { SQLModelConfig, SQLDialect, VisitStack } from '@travetto/model-sql';
 
 import { SqliteConnection } from './connection';
 

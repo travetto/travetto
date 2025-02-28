@@ -16,15 +16,15 @@ yarn add @travetto/model-mongo
 This module provides an [mongodb](https://mongodb.com)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [mongodb](https://mongodb.com).. Given the dynamic nature of [mongodb](https://mongodb.com), during development when models are modified, nothing needs to be done to adapt to the latest schema. 
 
 Supported features:
-   *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
-   *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11)
-   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19)
-   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11)
-   *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8)
-   *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/crud.ts#L11)
-   *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/facet.ts#L12)
-   *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/query.ts#L10)
-   *  [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/suggest.ts#L12)
+   *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11)
+   *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
+   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64)
+   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11)
+   *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8)
+   *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
+   *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L12)
+   *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)
+   *  [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/suggest.ts#L12)
 Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module.
 
 **Code: Wiring up a custom Model Source**

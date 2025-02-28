@@ -1,10 +1,8 @@
 /** @jsxImportSource @travetto/doc */
-import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
-import { DocRunUtil } from '@travetto/doc/src/util/run';
-import { Model } from '@travetto/model';
-import { Env, ShutdownManager, Util, RuntimeIndex, castTo } from '@travetto/runtime';
+import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement, DocRunUtil } from '@travetto/doc';
+import { Model, ModelType } from '@travetto/model';
+import { Env, ShutdownManager, Util, RuntimeIndex, castTo, toConcrete } from '@travetto/runtime';
 
-const ModelType = d.codeLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 const TodoRoot = d.ref('Todo App', RuntimeIndex.mainModule.outputPath);
 
 const port = 12555;
@@ -95,7 +93,7 @@ $ npx trv lint:register
 
       <c.Code title='Models' src='src/model.ts' />
 
-      as you can see, the model structure is simple.  Everything that uses the {Model} services needs to implement {ModelType}.
+      as you can see, the model structure is simple.  Everything that uses the {Model} services needs to implement {toConcrete<ModelType>()}.
     </c.Section>
 
     <c.Section title='Building the Service Layer'>

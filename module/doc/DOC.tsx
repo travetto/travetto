@@ -2,8 +2,10 @@
 
 import fs from 'node:fs/promises';
 
-import { RuntimeIndex } from '@travetto/runtime';
+import { RuntimeIndex, toConcrete } from '@travetto/runtime';
 import { c, d, DocJSXElement } from '@travetto/doc';
+
+import { DocumentShape } from './src/types';
 
 function NodeList({ src }: { src: string }): DocJSXElement {
   const lines = src.split(/\n/g);
@@ -30,7 +32,7 @@ export const text = async () => {
 
     <c.Code title='Document Sample' src='doc/sample.tsx' />
 
-    <c.Code title='Document Context' src='src/types.ts' startRe={/interface DocumentShape/} endRe={/^[}]/} />
+    <c.Code title='Document Context' src={toConcrete<DocumentShape>()} />
 
     As you can see, you need to export a field named {d.field('text')} as the body of the help text. The {d.field('text')} field can be either a direct invocation or an async function that returns the expected document output.
 

@@ -18,14 +18,14 @@
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>, which is used for data model validation.
 <h2 id="contracts">Contracts</h2>
 
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8">Blob</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19">Bulk</a>.
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8">Basic</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">CRUD</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11">Indexed</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8">Blob</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64">Bulk</a>.
 <h3 id="basic">Basic</h3>
 
-All <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations, must honor the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9">Basic</a> contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
+All <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> implementations, must honor the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8">Basic</a> contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
 
   <figure class="code">
     <figcaption class="code">Basic Contract
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelBasicSupport<span class="token operator">&lt;</span><span class="token constant">C</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
@@ -59,11 +59,11 @@ All <a class="module-link" href="https://github.com/travetto/travetto/tree/main/
 
 <h3 id="crud">CRUD</h3>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">CRUD</a> contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a>, is an example of a module that only needs create, read and delete, and so any implementation of <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> that honors this contract, can be used with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a> model extension.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">CRUD</a> contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a>, is an example of a module that only needs create, read and delete, and so any implementation of <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> that honors this contract, can be used with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a> model extension.
 
   <figure class="code">
     <figcaption class="code">Crud Contract
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelCrudSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelBasicSupport</span> <span class="token punctuation">{{'{'}}</span>
@@ -109,11 +109,11 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h3 id="indexed">Indexed</h3>
 
-Additionally, an implementation may support the ability for basic <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11">Indexed</a> queries. This is not the full featured query support of <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a>, but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
+Additionally, an implementation may support the ability for basic <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11">Indexed</a> queries. This is not the full featured query support of <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a>, but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
 
   <figure class="code">
     <figcaption class="code">Indexed Contract
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelIndexedSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelBasicSupport</span> <span class="token punctuation">{{'{'}}</span>
@@ -153,11 +153,11 @@ Additionally, an implementation may support the ability for basic <a target="_bl
 
 <h3 id="expiry">Expiry</h3>
 
-Certain implementations will also provide support for automatic <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Expiry</a> of data at runtime.  This is extremely useful for temporary data as, and is used in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cache" title="Caching functionality with decorators for declarative use.">Caching</a> module for expiring data accordingly.
+Certain implementations will also provide support for automatic <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Expiry</a> of data at runtime.  This is extremely useful for temporary data as, and is used in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cache" title="Caching functionality with decorators for declarative use.">Caching</a> module for expiring data accordingly.
 
   <figure class="code">
     <figcaption class="code">Expiry Contract
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelExpirySupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelCrudSupport</span> <span class="token punctuation">{{'{'}}</span>
@@ -172,11 +172,11 @@ Certain implementations will also provide support for automatic <a target="_blan
 
 <h3 id="blob">Blob</h3>
 
-Some implementations also allow for the ability to read/write binary data as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8">Blob</a>.  Given that all implementations can store <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
+Some implementations also allow for the ability to read/write binary data as <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8">Blob</a>.  Given that all implementations can store <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Base64">Base64</a> encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
 
   <figure class="code">
     <figcaption class="code">Blob Contract
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelBlobSupport</span> <span class="token punctuation">{{'{'}}</span>
@@ -235,11 +235,11 @@ Some implementations also allow for the ability to read/write binary data as <a 
 
 <h3 id="bulk">Bulk</h3>
 
-Finally, there is support for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19">Bulk</a> operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
+Finally, there is support for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64">Bulk</a> operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
 
   <figure class="code">
     <figcaption class="code">Bulk Contract
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L64">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelBulkSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelCrudSupport</span> <span class="token punctuation">{{'{'}}</span>
@@ -249,11 +249,11 @@ Finally, there is support for <a target="_blank" class="source-link" href="https
 
 <h2 id="declaration">Declaration</h2>
 
-Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L9">ModelType</a>
+Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13">@Model</a> decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">ModelType</a>
 
   <figure class="code">
     <figcaption class="code">ModelType
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L9">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L10">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelType</span> <span class="token punctuation">{{'{'}}</span>
@@ -367,7 +367,8 @@ To enforce that these contracts are honored, the module provides shared test sui
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError<span class="token punctuation">,</span> castTo<span class="token punctuation">,</span> Class<span class="token punctuation">,</span> classConstruct <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> isBulkSupported<span class="token punctuation">,</span> isCrudSupported <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../../src/internal/service/common'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelBulkUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../../src/util/bulk'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelCrudUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../../src/util/crud'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelType <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../../src/types/model'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelSuite <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./suite'</span><span class="token punctuation">;</span>
 
@@ -385,7 +386,7 @@ To enforce that these contracts are honored, the module provides shared test sui
 
   <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">getSize</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">U</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">U</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">number</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> svc <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isCrudSupported</span><span class="token punctuation">(</span>svc<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>ModelCrudUtil<span class="token punctuation">.</span><span class="token function">isSupported</span><span class="token punctuation">(</span>svc<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
       <span class="token keyword">for</span> <span class="token keyword">await</span> <span class="token punctuation">(</span><span class="token keyword">const</span> __el <span class="token keyword">of</span> svc<span class="token punctuation">.</span><span class="token function">list</span><span class="token punctuation">(</span>cls<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
         i <span class="token operator">+=</span> <span class="token number">1</span><span class="token punctuation">;</span>
@@ -398,10 +399,10 @@ To enforce that these contracts are honored, the module provides shared test sui
 
   <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">saveAll</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">M</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">M</span><span class="token operator">></span><span class="token punctuation">,</span> items<span class="token operator">:</span> <span class="token constant">M</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">number</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> svc <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isBulkSupported</span><span class="token punctuation">(</span>svc<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>ModelBulkUtil<span class="token punctuation">.</span><span class="token function">isSupported</span><span class="token punctuation">(</span>svc<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> svc<span class="token punctuation">.</span><span class="token function">processBulk</span><span class="token punctuation">(</span>cls<span class="token punctuation">,</span> items<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>x <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> insert<span class="token operator">:</span> x <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token keyword">return</span> res<span class="token punctuation">.</span>counts<span class="token punctuation">.</span>insert<span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isCrudSupported</span><span class="token punctuation">(</span>svc<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>ModelCrudUtil<span class="token punctuation">.</span><span class="token function">isSupported</span><span class="token punctuation">(</span>svc<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">const</span> out<span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">M</span><span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
       <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> el <span class="token keyword">of</span> items<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
         out<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>svc<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span>cls<span class="token punctuation">,</span> el<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>

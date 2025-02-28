@@ -3,7 +3,10 @@ import debug from 'debug';
 
 import { RuntimeIndex } from './manifest-index';
 
-export type ConsoleEvent = {
+/**
+ * @concrete
+ */
+export interface ConsoleEvent {
   /** Time of event */
   timestamp: Date;
   /** The level of the console event */
@@ -20,6 +23,9 @@ export type ConsoleEvent = {
   args: unknown[];
 };
 
+/**
+ * @concrete
+ */
 export interface ConsoleListener {
   log(ev: ConsoleEvent): void;
 }
@@ -31,6 +37,8 @@ const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
  *
  * The transpiler will replace all console.* calls in the typescript files for the framework and those provided by the user.
  * Any console.log statements elsewhere will not be affected.
+ *
+ * @alias ConsoleManager
  */
 class $ConsoleManager implements ConsoleListener {
 

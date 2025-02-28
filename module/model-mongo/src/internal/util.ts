@@ -2,14 +2,12 @@ import {
   Binary, type CreateIndexesOptions, type Filter, type FindCursor, type IndexDirection, ObjectId, type WithId as MongoWithId
 } from 'mongodb';
 
-import { AppError, castTo, Class, TypedObject } from '@travetto/runtime';
-import type { DistanceUnit, PageableModelQuery, WhereClause } from '@travetto/model-query';
+import { AppError, castTo, Class, toConcrete, TypedObject } from '@travetto/runtime';
+import { type DistanceUnit, type PageableModelQuery, type WhereClause, ModelQueryUtil } from '@travetto/model-query';
 import type { ModelType, IndexField, IndexConfig } from '@travetto/model';
-import { DataUtil, SchemaRegistry } from '@travetto/schema';
+import { DataUtil, SchemaRegistry, type Point } from '@travetto/schema';
 
-import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { AllViewSymbol } from '@travetto/schema/src/internal/types';
-import { PointImpl } from '@travetto/model-query/src/internal/model/point';
+const PointImpl = toConcrete<Point>();
 
 type IdxCfg = CreateIndexesOptions;
 
@@ -89,7 +87,7 @@ export class MongoUtil {
     for (const key of keys) {
       const subpath = `${path}${key}`;
       const v: Record<string, unknown> = castTo(sub[key]);
-      const subField = schema?.views[AllViewSymbol].schema[key];
+      const subField = schema?.totalView.schema[key];
 
       const isPlain = v && DataUtil.isPlainObject(v);
       const firstKey = isPlain ? Object.keys(v)[0] : '';

@@ -1,12 +1,12 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
+import { RuntimeResources } from '@travetto/runtime';
+
 import { ModelQueryTypes } from '@travetto/model-query/support/doc.support';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
 import { MongoModelConfig } from './src/config';
 import { MongoModelService } from './src/service';
-
-const RuntimeResources = d.codeLink('RuntimeResources', '@travetto/runtime/src/resources.ts', /RuntimeResources/);
 
 export const text = <>
   <c.StdHeader />

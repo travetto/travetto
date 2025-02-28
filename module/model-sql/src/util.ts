@@ -2,19 +2,9 @@ import { castKey, castTo, Class, TypedObject } from '@travetto/runtime';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
-import { AllViewSymbol } from '@travetto/schema/src/internal/types';
 
-import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
-
-const TableSymbol = Symbol.for('@travetto/model-sql:table');
-
-export type VisitStack = {
-  [TableSymbol]?: string;
-  array?: boolean;
-  type: Class;
-  name: string;
-  index?: number;
-};
+import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types';
+import { TableSymbol, VisitStack } from './types';
 
 type FieldCacheEntry = {
   local: FieldConfig[];
@@ -26,7 +16,7 @@ type FieldCacheEntry = {
 /**
  * Utilities for dealing with SQL operations
  */
-export class SQLUtil {
+export class SQLModelUtil {
 
   static SCHEMA_FIELDS_CACHE = new Map<Class, FieldCacheEntry>();
 
@@ -79,14 +69,14 @@ export class SQLUtil {
     }
 
     const model = ModelRegistry.get(cls.class)!;
-    const conf = cls.views[AllViewSymbol];
+    const conf = cls.totalView;
     const fields = conf.fields.map(x => ({ ...conf.schema[x] }));
 
     // Polymorphic
     if (model && (model.baseType ?? model.subType)) {
       const fieldMap = new Set(fields.map(f => f.name));
       for (const type of ModelRegistry.getClassesByBaseType(ModelRegistry.getBaseModel(cls.class))) {
-        const typeConf = SchemaRegistry.get(type).views[AllViewSymbol];
+        const typeConf = SchemaRegistry.get(type).totalView;
         for (const f of typeConf.fields) {
           if (!fieldMap.has(f)) {
             fieldMap.add(f);
@@ -232,7 +222,7 @@ export class SQLUtil {
       if (typeof k === 'string' && !DataUtil.isPlainObject(select[k]) && localMap[k]) {
         if (!v) {
           if (toGet.size === 0) {
-            toGet = new Set(SchemaRegistry.get(cls).views[AllViewSymbol].fields);
+            toGet = new Set(SchemaRegistry.get(cls).totalView.fields);
           }
           toGet.delete(k);
         } else {
@@ -254,7 +244,7 @@ export class SQLUtil {
       while (!found) {
         const key = Object.keys(cl)[0];
         const val = cl[key];
-        const field = { ...schema.views[AllViewSymbol].schema[key] };
+        const field = { ...schema.totalView.schema[key] };
         if (DataUtil.isPrimitive(val)) {
           stack.push(field);
           found = { stack, asc: val === 1 };

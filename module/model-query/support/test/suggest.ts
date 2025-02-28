@@ -4,8 +4,8 @@ import { ModelCrudSupport } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { Suite, Test } from '@travetto/test';
 
-import { Person } from './types';
-import { ModelQuerySuggestSupport } from '../../src/service/suggest';
+import { Person } from './model';
+import { ModelQuerySuggestSupport } from '../../src/types/suggest';
 
 @Suite()
 export abstract class ModelQuerySuggestSuite extends BaseModelSuite<ModelQuerySuggestSupport & ModelCrudSupport> {

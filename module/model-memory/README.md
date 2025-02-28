@@ -14,7 +14,7 @@ yarn add @travetto/model-memory
 ```
 
 This module provides a memory-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."). Supported features:
-   *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
-   *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11)
-   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L11)
-   *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/service/blob.ts#L8)
+   *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11)
+   *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
+   *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11)
+   *  [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8)

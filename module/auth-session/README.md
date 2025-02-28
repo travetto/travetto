@@ -17,7 +17,7 @@ This is a module that adds session support to the [Authentication](https://githu
 
 This session identifier, is then used when retrieving data from [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") storage. This storage mechanism is not tied to a request/response model, but the [Rest Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-rest-session#readme "Rest authentication session integration support for the Travetto framework") does provide a natural integration with the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.   
 
-Within the framework the sessions are stored against any [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementation that provides [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts), as the data needs to be able to be expired appropriately.  The list of supported model providers are:
+Within the framework the sessions are stored against any [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementation that provides [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), as the data needs to be able to be expired appropriately.  The list of supported model providers are:
    *  [Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.")
    *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.")
    *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")
@@ -25,7 +25,7 @@ Within the framework the sessions are stored against any [Data Modeling Support]
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")
    *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.")
    *  [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.")
-While the expiry is not necessarily a hard requirement, the implementation without it can be quite messy.  To that end, the ability to add [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts) to the model provider would be the natural extension point if more expiry support is needed.
+While the expiry is not necessarily a hard requirement, the implementation without it can be quite messy.  To that end, the ability to add [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10) to the model provider would be the natural extension point if more expiry support is needed.
 
 **Code: Sample usage of Session Service**
 ```typescript
@@ -58,7 +58,7 @@ export class AuthSessionInterceptor implements RestInterceptor {
 }
 ```
 
-The [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L16) provides the basic integration with the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15) to authenticate and isolate session data.  The usage is fairly simple, but the import pattern to follow is:
+The [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L15) provides the basic integration with the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15) to authenticate and isolate session data.  The usage is fairly simple, but the import pattern to follow is:
    *  load
    *  read/modify
    *  persist

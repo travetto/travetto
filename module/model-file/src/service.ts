@@ -10,14 +10,13 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistry,
-  NotFoundError, OptionalId, ExistsError, ModelBlobSupport
+  NotFoundError, OptionalId, ExistsError, ModelBlobSupport,
+  ModelCrudUtil, ModelExpiryUtil, ModelBlobUtil
 } from '@travetto/model';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
-
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
+
+const ModelBlobNamespace = '__blobs';
 
 const BIN = '.bin';
 const META = '.meta';
@@ -240,7 +239,11 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     await fs.rm(path.resolve(this.config.folder, this.config.namespace), { recursive: true, force: true });
   }
 
-  async truncate(cls: Class<ModelType>): Promise<void> {
-    await fs.rm(await this.#resolveName(cls === MODEL_BLOB ? ModelBlobNamespace : cls), { recursive: true, force: true });
+  async truncateModel(cls: Class<ModelType>): Promise<void> {
+    await fs.rm(await this.#resolveName(cls), { recursive: true, force: true });
+  }
+
+  async truncateBlob(): Promise<void> {
+    await fs.rm(await this.#resolveName(ModelBlobNamespace), { recursive: true, force: true });
   }
 }

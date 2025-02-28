@@ -21,9 +21,9 @@ This module provides the high-level backdrop for managing security principals.  
    *  Authorization Context
 
 ## Standard Types
-The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [Principal Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8).
+The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8).
 
-**Code: Principal Contract**
+**Code: Principal**
 ```typescript
 export interface Principal<D = AnyMap> {
   /**
@@ -57,11 +57,11 @@ export interface Principal<D = AnyMap> {
 }
 ```
 
-As referenced above, a [Principal Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
+As referenced above, a [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
 
 ## Authentication Contract
 
-**Code: Authenticator Contract**
+**Code: Authenticator**
 ```typescript
 export interface Authenticator<T = unknown, C = unknown, P extends Principal = Principal> {
   /**
@@ -80,11 +80,11 @@ export interface Authenticator<T = unknown, C = unknown, P extends Principal = P
 }
 ```
 
-The [Authenticator Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
+The [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
 ## Authorization Contract
 
-**Code: Authorizer Contract**
+**Code: Authorizer**
 ```typescript
 export interface Authorizer<P extends Principal = Principal> {
   /**
@@ -97,7 +97,7 @@ export interface Authorizer<P extends Principal = Principal> {
 
 Authorizers are generally seen as a secondary step post-authentication. Authentication acts as a very basic form of authorization, assuming the principal store is owned by the application. 
 
-The [Authorizer Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) only requires one method to be defined, and that is `authorizer`. This method receives an authenticated principal as an input, and is responsible for converting that to an authorized principal.
+The [Authorizer](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) only requires one method to be defined, and that is `authorize`. This method receives an authenticated principal as an input, and is responsible for converting that to an authorized principal.
 
 ### Example
 The [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") extension is a good example of an authenticator. This is a common use case for simple internal auth. 
@@ -136,12 +136,12 @@ export class AuthService {
 
 The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13) operates as the owner of the current auth state for a given "request".  "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. 
 
-The service allows for storing and retrieving the active [Principal Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8), and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") makes heavy use of this state for enforcing routes when authentication is required. 
+The service allows for storing and retrieving the active [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8), and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") makes heavy use of this state for enforcing routes when authentication is required. 
 
 ### Login
-"Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials.  Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13) operates in this fashion, in which a set of credentials and potential [Authenticator Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14)s are submitted, and the service will attempt to authenticate.  
+"Logging in" can be thought of going through the action of finding a single source that can authenticate the identity for the request credentials.  Some times there may be more than one valid source of authentication that you want to leverage, and the first one to authenticate wins. The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13) operates in this fashion, in which a set of credentials and potential [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9)s are submitted, and the service will attempt to authenticate.  
 
-Upon successful authentication, an optional [Authorizer Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) may be invoked to authorize the authenticated user.  The [Authenticator Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14) is assumed to be only one within the system, and should be tied to the specific product you are building for.  The [Authorizer Contract](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) should be assumed to have multiple sources, and are generally specific to external third parties.  All of these values are collected via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module and will be auto-registered on startup. 
+Upon successful authentication, an optional [Authorizer](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) may be invoked to authorize the authenticated user.  The [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9) is assumed to be only one within the system, and should be tied to the specific product you are building for.  The [Authorizer](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) should be assumed to have multiple sources, and are generally specific to external third parties.  All of these values are collected via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module and will be auto-registered on startup. 
 
 If this process is too cumbersome or restrictive, manually authenticating and authorizing is still more than permissible, and setting the principal within the service is a logical equivalent to login.
 

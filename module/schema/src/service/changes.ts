@@ -4,7 +4,6 @@ import { Class } from '@travetto/runtime';
 import { ChangeEvent } from '@travetto/registry';
 
 import { FieldConfig, ClassConfig } from './types';
-import { AllViewSymbol } from '../internal/types';
 
 const id = (c: Class | string): string => typeof c === 'string' ? c : c.Ⲑid;
 
@@ -111,8 +110,8 @@ class $SchemaChangeListener {
    */
   emitFieldChanges({ prev, curr }: ChangeEvent<ClassConfig>): void {
 
-    const prevView = prev?.views[AllViewSymbol] || { fields: [], schema: {} };
-    const currView = curr!.views[AllViewSymbol];
+    const prevView = prev?.totalView || { fields: [], schema: {} };
+    const currView = curr!.totalView;
 
     const prevFields = new Set(prevView.fields);
     const currFields = new Set(currView.fields);

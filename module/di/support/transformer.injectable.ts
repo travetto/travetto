@@ -1,9 +1,8 @@
 import ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, OnSetter
+  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, OnSetter, ForeignType
 } from '@travetto/transformer';
-import { ForeignType } from '@travetto/transformer/src/resolver/types';
 
 const INJECTABLE_MOD = '@travetto/di/src/decorator';
 

@@ -1,10 +1,15 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
+import { toConcrete } from '@travetto/runtime';
+import {
+  ModelBasicSupport, ModelBlobSupport, ModelBulkSupport, ModelCrudSupport,
+  ModelExpirySupport, ModelIndexedSupport, ModelType
+} from '@travetto/model';
 
 import { Model } from './src/registry/decorator';
 import { Links } from './support/doc.support';
 
-const ModelTypeSnippet = <c.Code title='ModelType' src='src/types/model.ts' startRe={/export interface/} endRe={/^}/} />;
+const ModelTypeContract = toConcrete<ModelType>();
 
 const ModelImplementations = () => {
   const modelImplHeader = ['Service', 'Basic', 'CRUD', 'Indexed', 'Expiry', 'Blob', 'Bulk'].map(v => <td>{v}</td>);
@@ -39,43 +44,43 @@ export const text = <>
     <c.SubSection title='Basic'>
       All {d.mod('Model')} implementations, must honor the {Links.Basic} contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
 
-      <c.Code title='Basic Contract' src='src/service/basic.ts' startRe={/export interface ModelBasic/} endRe={/^}/} />
+      <c.Code src={toConcrete<ModelBasicSupport>()} title='Basic Contract' />
     </c.SubSection>
 
     <c.SubSection title='CRUD'>
       The {Links.Crud} contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in {d.mod('Auth')}, is an example of a module that only needs create, read and delete, and so any implementation of {d.mod('Model')} that honors this contract, can be used with the {d.mod('Auth')} model extension.
 
-      <c.Code title='Crud Contract' src='src/service/crud.ts' startRe={/export interface ModelCrud/} endRe={/^}/} />
+      <c.Code src={toConcrete<ModelCrudSupport>()} title='Crud Contract' />
     </c.SubSection>
 
     <c.SubSection title='Indexed' >
       Additionally, an implementation may support the ability for basic {Links.Indexed} queries. This is not the full featured query support of {d.mod('ModelQuery')}, but allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.
 
-      <c.Code title='Indexed Contract' src='src/service/indexed.ts' startRe={/export interface ModelIndexed/} endRe={/^}/} />
+      <c.Code src={toConcrete<ModelIndexedSupport>()} title='Indexed Contract' />
     </c.SubSection>
 
     <c.SubSection title='Expiry'>
       Certain implementations will also provide support for automatic {Links.Expiry} of data at runtime.  This is extremely useful for temporary data as, and is used in the {d.mod('Cache')} module for expiring data accordingly.
 
-      <c.Code title='Expiry Contract' src='src/service/expiry.ts' startRe={/export interface ModelExpiry/} endRe={/^}/} />
+      <c.Code src={toConcrete<ModelExpirySupport>()} title='Expiry Contract' />
     </c.SubSection>
 
     <c.SubSection title='Blob'>
       Some implementations also allow for the ability to read/write binary data as {Links.Blob}.  Given that all implementations can store {d.library('Base64')} encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.
 
-      <c.Code title='Blob Contract' src='src/service/blob.ts' startRe={/export interface ModelBlob/} endRe={/^}/} />
+      <c.Code src={toConcrete<ModelBlobSupport>()} title='Blob Contract' />
     </c.SubSection>
     <c.SubSection title='Bulk'>
       Finally, there is support for {Links.Bulk} operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
 
-      <c.Code title='Bulk Contract' src='src/service/bulk.ts' startRe={/export interface ModelBulk/} endRe={/^}/} />
+      <c.Code src={toConcrete<ModelBulkSupport>()} title='Bulk Contract' />
     </c.SubSection>
   </c.Section>
 
   <c.Section title='Declaration'>
-    Models are declared via the {Model} decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the {d.codeLink(ModelTypeSnippet)}
+    Models are declared via the {Model} decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the {ModelTypeContract}
 
-    {ModelTypeSnippet}
+    <c.Code src={ModelTypeContract} />
 
     The {d.field('id')} is the only required field for a model, as this is a hard requirement on naming and type.  This may make using existing data models impossible if types other than strings are required.  Additionally, the {d.field('type')} field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in {d.mod('Model')}, but also in {d.mod('Schema')}.
   </c.Section>

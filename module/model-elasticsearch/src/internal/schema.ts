@@ -1,11 +1,12 @@
 import { estypes } from '@elastic/elasticsearch';
 
-import { Class } from '@travetto/runtime';
+import { Class, toConcrete } from '@travetto/runtime';
 import { ModelRegistry } from '@travetto/model';
-import { PointImpl } from '@travetto/model-query/src/internal/model/point';
-import { DataUtil, SchemaRegistry } from '@travetto/schema';
+import { Point, DataUtil, SchemaRegistry } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types';
+
+const PointImpl = toConcrete<Point>();
 
 /**
  * Utils for ES Schema management

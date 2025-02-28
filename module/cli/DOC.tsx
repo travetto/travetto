@@ -1,11 +1,12 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { Runtime } from '@travetto/runtime';
+import { Runtime, toConcrete } from '@travetto/runtime';
 import { Max, Min, Schema, Match, Enum, Integer, Float, Precision, MinLength, MaxLength } from '@travetto/schema';
 
 import { CliCommand } from './src/decorators';
+import { CliValidationError } from './src/types';
 
-const EnvLink = d.codeLink('Runtime', '@travetto/runtime/src/env.ts', /const Env/);
+const CliValidationErrorContract = toConcrete<CliValidationError>();
 
 const cfg = { cwd: './doc-exec' };
 
@@ -145,15 +146,15 @@ export const text = <>
 
       <c.Code title='Simple Run Target' src='../rest/support/cli.run_rest.ts' />
 
-      As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, and {d.input('env')}. These env flag is directly tied to the {EnvLink} {d.field('name')} defined in the {d.mod('Runtime')} module. <br />
+      As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, and {d.input('env')}. These env flag is directly tied to the {Runtime} {d.field('name')} defined in the {d.mod('Runtime')} module. <br />
 
       The {d.input('module')} field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
     </c.SubSection>
 
     <c.SubSection title='Custom Validation'>
-      In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any {d.codeLink('CliValidationError', 'src/types.ts', /type CliValidationError/)} errors that are returned will be shared with the user, and fail to invoke the {d.method('main')} method.
+      In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any {CliValidationErrorContract} errors that are returned will be shared with the user, and fail to invoke the {d.method('main')} method.
 
-      <c.Code title='CliValidationError' src='src/types.ts' startRe={/type CliValidationError/} endRe={/^\}/} />
+      <c.Code title='CliValidationError' src={CliValidationErrorContract} />
 
       A simple example of the validation can be found in the {d.input('doc')} command:
       <c.Code title='Simple Validation Example' src='@travetto/doc/support/cli.doc.ts' startRe={/validate\(/} endRe={/^[ ]{2}\}/} />

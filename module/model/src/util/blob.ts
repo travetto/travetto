@@ -1,14 +1,16 @@
 import { Readable } from 'node:stream';
-import { Class, AppError, BinaryInput, BinaryUtil, BlobMeta, ByteRange } from '@travetto/runtime';
-import { ModelType } from '../../types/model';
-
-export const ModelBlobNamespace = '__blobs';
-export const MODEL_BLOB: Class<ModelType> = class { id: string; };
+import { AppError, BinaryInput, BinaryUtil, BlobMeta, ByteRange, hasFunction } from '@travetto/runtime';
+import { ModelBlobSupport } from '../types/blob';
 
 /**
- * Utilities for processing assets
+ * Utilities for processing blobs
  */
 export class ModelBlobUtil {
+
+  /**
+   * Type guard for determining if service supports blob operations
+   */
+  static isSupported = hasFunction<ModelBlobSupport>('getBlob');
 
   /**
    * Convert input to a Readable, and get what metadata is available

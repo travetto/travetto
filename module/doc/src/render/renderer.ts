@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { type ManifestContext, PackageUtil } from '@travetto/manifest';
 import { isJSXElement, JSXElement, JSXFragmentType } from '@travetto/doc/jsx-runtime';
-import { castTo, Runtime } from '@travetto/runtime';
+import { castTo, Class, Runtime } from '@travetto/runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../jsx';
 import { DocumentShape, RenderProvider, RenderState } from '../types';
@@ -37,18 +37,44 @@ export class DocRenderer {
     this.#support = support;
   }
 
+  async #buildLink(
+    renderer: RenderProvider<RenderContext>,
+    cls: Class,
+    title?: string
+  ) {
+    const source = DocFileUtil.readSource(cls);
+    if (source) {
+      title = (await DocFileUtil.isDecorator(cls.name, source.file)) ? `@${title ?? cls.name}` : (title ?? cls.name);
+      const el = this.#support.createElement('CodeLink', {
+        src: source.file,
+        startRe: new RegExp(`(class|function|interface)\\s+(${cls.name.replaceAll('$', '\\$')})`),
+        title
+      });
+      // @ts-expect-error
+      const state: RenderState<JSXElementByFn<'CodeLink'>, RenderContext> = {
+        el, props: el.props, recurse: async () => '', context: this.#support, stack: []
+      };
+      // @ts-expect-error
+      state.createState = (key, props) => this.createState(state, key, props);
+      return renderer.CodeLink(state);
+    }
+  }
+
   async #render(
     renderer: RenderProvider<RenderContext>,
     node: JSXElement[] | JSXElement | string | bigint | object | number | boolean | null | undefined,
     stack: JSXElement[] = []
-  ): Promise<string> {
+  ): Promise<string | undefined> {
 
     if (node === null || node === undefined) {
       return '';
     } else if (Array.isArray(node)) {
       const out: string[] = [];
       for (const el of node) {
-        out.push(await this.#render(renderer, el, stack));
+        const sub = await this.#render(renderer, el, stack);
+        if (sub) {
+          out.push(sub);
+        }
       }
       return out.join('');
     } else if (isJSXElement(node)) {
@@ -87,24 +113,14 @@ export class DocRenderer {
         case 'number':
         case 'bigint':
         case 'boolean': return `${node}`;
-        case 'function': {
-          const source = DocFileUtil.readSource(node);
-          if (source.file) {
-            const title = (await DocFileUtil.isDecorator(node.name, source.file)) ? `@${node.name}` : node.name;
-            const el = this.#support.createElement('CodeLink', {
-              src: source.file,
-              startRe: new RegExp(`(class|function)\\s+(${node.name})`),
-              title
-            });
-            // @ts-expect-error
-            const state: RenderState<JSXElementByFn<'CodeLink'>, RenderContext> = {
-              el, props: el.props, recurse: async () => '', context: this.#support, stack: []
-            };
-            // @ts-expect-error
-            state.createState = (key, props) => this.createState(state, key, props);
-            return await renderer.CodeLink(state);
+        case 'object': {
+          if (node) {
+            return await this.#buildLink(renderer, castTo(node.constructor), node.constructor.name.replace(/^[$]/, ''));
           }
           break;
+        }
+        case 'function': {
+          return await this.#buildLink(renderer, castTo(node));
         }
       }
       throw new Error(`Unknown object type: ${typeof node}`);

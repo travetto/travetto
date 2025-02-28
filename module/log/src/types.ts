@@ -4,6 +4,7 @@ export const LogCommonSymbol = Symbol.for('@travetto/log:common');
 
 /**
  * Logging event
+ * @concrete
  */
 export interface LogEvent extends ConsoleEvent {
   /**
@@ -13,6 +14,7 @@ export interface LogEvent extends ConsoleEvent {
 }
 
 /**
+ * Log event decorator
  * @concrete
  */
 export interface LogDecorator {
@@ -36,6 +38,7 @@ export interface LogFormatter {
 }
 
 /**
+ * Basic logging contract
  * @concrete
  */
 export interface Logger {

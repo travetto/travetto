@@ -8,6 +8,7 @@ import { c, getComponentName } from '../jsx';
 import { MOD_MAPPING } from '../mapping/mod-mapping';
 import { LIB_MAPPING } from '../mapping/lib-mapping';
 import { RenderContext } from './context';
+import { DocResolveUtil } from '../util/resolve';
 
 export const Markdown: RenderProvider<RenderContext> = {
   ext: 'md',
@@ -61,10 +62,12 @@ npm install ${el.props.pkg}
 yarn add ${el.props.pkg}
 \`\`\`
 `,
-  Code: async ({ context, el }) => {
+  Code: async ({ context, el, props }) => {
+    DocResolveUtil.applyCodePropDefaults(el.props);
+
     const name = getComponentName(el.type);
     const content = await context.resolveCode(el);
-    let lang = el.props.language ?? content.language;
+    let lang = props.language ?? content.language;
     if (!lang) {
       if (el.type === c.Terminal) {
         lang = 'bash';
@@ -72,7 +75,7 @@ yarn add ${el.props.pkg}
         lang = 'typescript';
       }
     }
-    return `\n\n**${name}: ${el.props.title}**
+    return `\n\n**${name}: ${props.title}**
 \`\`\`${lang}
 ${context.cleanText(content.text)}
 \`\`\`\n\n`;

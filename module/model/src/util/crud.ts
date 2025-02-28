@@ -1,12 +1,13 @@
-import { castTo, Class, Util, asConstructable, AppError } from '@travetto/runtime';
+import { castTo, Class, Util, asConstructable, AppError, hasFunction } from '@travetto/runtime';
 import { DataUtil, SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
-import { ModelRegistry } from '../../registry/model';
-import { ModelIdSource, ModelType, OptionalId } from '../../types/model';
-import { NotFoundError } from '../../error/not-found';
-import { ExistsError } from '../../error/exists';
-import { SubTypeNotSupportedError } from '../../error/invalid-sub-type';
-import { DataHandler, PrePersistScope } from '../../registry/types';
+import { ModelRegistry } from '../registry/model';
+import { ModelIdSource, ModelType, OptionalId } from '../types/model';
+import { NotFoundError } from '../error/not-found';
+import { ExistsError } from '../error/exists';
+import { SubTypeNotSupportedError } from '../error/invalid-sub-type';
+import { DataHandler, PrePersistScope } from '../registry/types';
+import { ModelCrudSupport } from '../types/crud';
 
 export type ModelCrudProvider = {
   idSource: ModelIdSource;
@@ -16,6 +17,11 @@ export type ModelCrudProvider = {
  * Crud utilities
  */
 export class ModelCrudUtil {
+
+  /**
+   * Type guard for determining if service supports crud operations
+   */
+  static isSupported = hasFunction<ModelCrudSupport>('upsert');
 
   /**
    * Build a uuid generator

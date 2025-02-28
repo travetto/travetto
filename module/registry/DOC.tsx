@@ -1,9 +1,8 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-
-const RootReg = d.codeLink('RootRegistry', 'src/service/root.ts', /class.*RootRegistry/);
-const MetadataReg = d.codeLink('MetadataRegistry', 'src/service/metadata.ts', /class.*MetadataRegistry/);
-const DynamicFileLoader = d.codeLink('DynamicFileLoader', 'src/internal/file-loader.ts', /class.*DynamicFileLoader/);
+import { MetadataRegistry } from './src/service/metadata';
+import { RootRegistry } from './src/service/root';
+import { DynamicFileLoader } from './src/internal/file-loader';
 
 export const text = <>
   <c.StdHeader />
@@ -16,21 +15,21 @@ export const text = <>
     <c.SubSection title='Initial Flows'>
       The primary flow occurs on initialization of the application. At that point, the module will:
       <ol>
-        <li>Initialize {RootReg} and will automatically register/load all relevant files</li>
+        <li>Initialize {RootRegistry} and will automatically register/load all relevant files</li>
         <li>As files are imported, decorators within the files will record various metadata relevant to the respective registries</li>
-        <li>When all files are processed, the {RootReg} is finished, and it will signal to anything waiting on registered data that its free to use it.</li>
+        <li>When all files are processed, the {RootRegistry} is finished, and it will signal to anything waiting on registered data that its free to use it.</li>
       </ol>
 
       This flow ensures all files are loaded and processed before application starts. A sample registry could like:
 
       <c.Code title='Sample Registry' src='doc/registry.ts' />
 
-      The registry is a {MetadataReg} that similar to the {d.mod('Schema')}'s Schema registry and {d.mod('Di')}'s Dependency registry.
+      The registry is a {MetadataRegistry} that similar to the {d.mod('Schema')}'s Schema registry and {d.mod('Di')}'s Dependency registry.
     </c.SubSection>
     <c.SubSection title='Live Flow'>
       At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries. <br />
 
-      As the {DynamicFileLoader} notifies that a file has been changed, the {RootReg} will pick it up, and process it accordingly.
+      As the {DynamicFileLoader} notifies that a file has been changed, the {RootRegistry} will pick it up, and process it accordingly.
     </c.SubSection>
   </c.Section>
 

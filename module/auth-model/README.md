@@ -15,7 +15,7 @@ yarn add @travetto/auth-model
 
 This module supports the integration between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") module and the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."). 
 
-The asset module requires a [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)-model to provide functionality for reading and storing user information. You can use any existing providers to serve as your [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), or you can roll your own.
+The asset module requires a [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11)-model to provide functionality for reading and storing user information. You can use any existing providers to serve as your [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11), or you can roll your own.
 
 **Install: provider**
 ```bash
@@ -25,7 +25,7 @@ npm install @travetto/model-{provider}
 
 yarn add @travetto/model-{provider}
 ```
-Currently, the following are packages that provide [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11):
+Currently, the following are packages that provide [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11):
    *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - @travetto/model-dynamodb
    *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.") - @travetto/model-elasticsearch
    *  [Firestore Model Support](https://github.com/travetto/travetto/tree/main/module/model-firestore#readme "Firestore backing for the travetto model module.") - @travetto/model-firestore
@@ -37,11 +37,11 @@ Currently, the following are packages that provide [CRUD](https://github.com/tra
    *  [SQLite Model Service](https://github.com/travetto/travetto/tree/main/module/model-sqlite#readme "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-sqlite
    *  [Memory Model Support](https://github.com/travetto/travetto/tree/main/module/model-memory#readme "Memory backing for the travetto model module.") - @travetto/model-memory
    *  [File Model Support](https://github.com/travetto/travetto/tree/main/module/model-file#readme "File system backing for the travetto model module.") - @travetto/model-file
-The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a [Registered Principal](https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11). 
+The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a [RegisteredPrincipal](https://github.com/travetto/travetto/tree/main/module/auth-model/src/model.ts#L11). 
 
 A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 
-**Code: Registered Principal**
+**Code: RegisteredPrincipal**
 ```typescript
 export interface RegisteredPrincipal extends Principal {
   /**
@@ -162,13 +162,6 @@ The [AuthModelUtil](https://github.com/travetto/travetto/tree/main/module/auth-m
 
 **Code: Auth util structure**
 ```typescript
-import crypto from 'node:crypto';
-import util from 'node:util';
-import { AppError, Util } from '@travetto/runtime';
-const pbkdf2 = util.promisify(crypto.pbkdf2);
-/**
- * Standard auth utilities
- */
 export class AuthModelUtil {
   /**
    * Generate a hash for a given value

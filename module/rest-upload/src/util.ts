@@ -7,8 +7,7 @@ import { pipeline } from 'node:stream/promises';
 
 import busboy from '@fastify/busboy';
 
-import { Request, MimeUtil } from '@travetto/rest';
-import { NodeEntitySymbol } from '@travetto/rest/src/internal/symbol';
+import { Request, MimeUtil, RestSymbols } from '@travetto/rest';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
@@ -49,7 +48,7 @@ export class RestUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: req.body ?? req[NodeEntitySymbol], filename: req.getFilename(), field: 'file' };
+      yield { stream: req.body ?? req[RestSymbols.NodeEntity], filename: req.getFilename(), field: 'file' };
     }
   }
 

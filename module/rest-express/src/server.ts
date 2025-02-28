@@ -3,12 +3,9 @@ import express from 'express';
 import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil } from '@travetto/rest';
-import { GlobalRoute, TravettoEntitySymbol } from '@travetto/rest/src/internal/symbol';
-import { RestServerHandle } from '@travetto/rest/src/types';
+import { RestSymbols, RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil, RestServerHandle } from '@travetto/rest';
 
-import { RouteStack } from './internal/types';
-import { ExpressServerUtil } from './internal/util';
+import { ExpressRestServerUtil } from './util';
 
 /**
  * An express rest server
@@ -41,9 +38,8 @@ export class ExpressRestServer implements RestServer<express.Application> {
   }
 
   async unregisterRoutes(key: string | symbol): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const routes = (this.raw.router as unknown as { stack: RouteStack[] }).stack;
-    const pos = routes.findIndex(x => x.handle.key === key);
+    const routes = this.raw.router.stack;
+    const pos = routes.findIndex(x => 'key' in x.handle && x.handle.key === key);
     if (pos >= 0) {
       routes.splice(pos, 1);
     }
@@ -56,14 +52,14 @@ export class ExpressRestServer implements RestServer<express.Application> {
       const routePath = route.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
       router[route.method](routePath, async (req: express.Request, res: express.Response) => {
         await route.handlerFinalized!(
-          req[TravettoEntitySymbol] ??= ExpressServerUtil.getRequest(req),
-          res[TravettoEntitySymbol] ??= ExpressServerUtil.getResponse(res)
+          req[RestSymbols.TravettoEntity] ??= ExpressRestServerUtil.getRequest(req),
+          res[RestSymbols.TravettoEntity] ??= ExpressRestServerUtil.getResponse(res)
         );
       });
     }
 
     // Register options handler for each controller, working with a bug in express
-    if (key !== GlobalRoute) {
+    if (key !== RestSymbols.GlobalRoute) {
       const optionHandler = RouteUtil.createRouteHandler(
         interceptors,
         {
@@ -79,8 +75,8 @@ export class ExpressRestServer implements RestServer<express.Application> {
 
       router.options('*all', (req: express.Request, res: express.Response) => {
         optionHandler(
-          req[TravettoEntitySymbol] ??= ExpressServerUtil.getRequest(req),
-          res[TravettoEntitySymbol] ??= ExpressServerUtil.getResponse(res)
+          req[RestSymbols.TravettoEntity] ??= ExpressRestServerUtil.getRequest(req),
+          res[RestSymbols.TravettoEntity] ??= ExpressRestServerUtil.getResponse(res)
         );
       });
     }

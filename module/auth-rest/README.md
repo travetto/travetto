@@ -22,7 +22,7 @@ The integration with the [RESTful API](https://github.com/travetto/travetto/tree
    *  Multi-Step Login
 
 ## Authenticating
-Every external framework integration relies upon the [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14) contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
+Every external framework integration relies upon the [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9) contract.  This contract defines the boundaries between both frameworks and what is needed to pass between. As stated elsewhere, the goal is to be as flexible as possible, and so the contract is as minimal as possible:
 
 **Code: Structure for the Identity Source**
 ```typescript
@@ -31,6 +31,8 @@ import { Principal } from './principal';
 
 /**
  * Represents the general shape of additional login context, usually across multiple calls
+ *
+ * @concrete
  */
 export interface AuthenticatorState extends AnyMap { }
 
@@ -56,7 +58,7 @@ export interface Authenticator<T = unknown, C = unknown, P extends Principal = P
 }
 ```
 
-The only required method to be defined is the `authenticate` method.  This takes in a pre-principal payload and a filter context with a [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31) and [Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161), and is responsible for:
+The only required method to be defined is the `authenticate` method.  This takes in a pre-principal payload and a filter context with a [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L28) and [Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158), and is responsible for:
    *  Returning an [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) if authentication was successful
    *  Throwing an error if it failed
    *  Returning undefined if the authentication is multi-staged and has not completed yet
@@ -86,7 +88,7 @@ export class SimpleAuthenticator implements Authenticator<User> {
 }
 ```
 
-The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L14)'s are collected and stored for reference at runtime, via symbol. For example:
+The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9)'s are collected and stored for reference at runtime, via symbol. For example:
 
 **Code: Potential Facebook provider**
 ```typescript
@@ -107,11 +109,11 @@ export class AppConfig {
 The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70) method.
 
 ## Maintaining Auth Context
-The [AuthContextInterceptor](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/interceptors/context.ts#L19) acts as the bridge between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15) and the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31)/[Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161) object. The integration, leveraging [RestAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/config.ts#L8)'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the [JWT](https://jwt.io/) appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  
+The [AuthContextInterceptor](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/interceptors/context.ts#L19) acts as the bridge between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15) and the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L28)/[Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158) object. The integration, leveraging [RestAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/config.ts#L8)'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the [JWT](https://jwt.io/) appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  
 
 **Note:** When using cookies, the automatic renewal, and update, and seamless receipt and transmission all the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) to act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. 
 
-The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10) contract is the primary interface for reading and writing [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) data out of the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31)/[Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L161). This contract is flexible by design, allowing for all sorts of usage. [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/codec.ts#L15) is the default [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10), leveraging [JWT](https://jwt.io/)s for encoding/decoding the principal information.
+The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10) contract is the primary interface for reading and writing [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) data out of the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L28)/[Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158). This contract is flexible by design, allowing for all sorts of usage. [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/codec.ts#L15) is the default [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/types.ts#L10), leveraging [JWT](https://jwt.io/)s for encoding/decoding the principal information.
 
 **Code: JWTPrincipalCodec**
 ```typescript
@@ -265,7 +267,7 @@ export class SampleAuth {
 }
 ```
 
-[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L24) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L35) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is accessible via [@ContextParam](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) directly, without wiring in a request object, but is also accessible on the request object as [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L31).auth.
+[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L24) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L35) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is accessible via [@ContextParam](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) directly, without wiring in a request object, but is also accessible on the request object as [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L28).auth.
 
 ## Multi-Step Login
-When authenticating, with a multi-step process, it is useful to share information between steps.  The `authenticatorState` of [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15) field is intended to be a location in which that information is persisted. Currently only [passport](http://passportjs.org) support is included, when dealing with multi-step logins. This information can also be injected into a rest endpoint method, using the [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L7) type;
+When authenticating, with a multi-step process, it is useful to share information between steps.  The `authenticatorState` of [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15) field is intended to be a location in which that information is persisted. Currently only [passport](http://passportjs.org) support is included, when dealing with multi-step logins. This information can also be injected into a rest endpoint method, using the [AuthenticatorState](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L9) type;

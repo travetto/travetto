@@ -2,12 +2,8 @@
 import { d, c } from '@travetto/doc';
 import { Field, Schema } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
-
-import { Config as ConfigDec, EnvVar } from '@travetto/config/src/decorator';
-import { ConfigurationService } from '@travetto/config/src/service';
-import { OverrideConfigSource } from '@travetto/config/src/source/override';
-
-const ConfigSource = d.codeLink('ConfigSource', 'src/source/types.ts', /interface ConfigSource/);
+import { Config as ConfigDec, EnvVar, ConfigurationService, OverrideConfigSource, ConfigSource } from '@travetto/config';
+import { toConcrete } from '@travetto/runtime';
 
 export const text = <>
   <c.StdHeader />
@@ -28,7 +24,7 @@ export const text = <>
       <li>{d.path('resources/application.<ext>')} - Priority {d.input('100')} - Load the default {d.path('application.<ext>')} if available.</li>
       <li>{d.path('resources/{env}.<ext>')} - Priority {d.input('200')} - Load environment specific profile configurations as defined by the values of {d.field('process.env.TRV_ENV')}.</li>
       <li>{d.path('resources/*.<ext>')} - Priority {d.input('300')} - Load profile specific configurations as defined by the values in {d.field('process.env.TRV_PROFILES')}</li>
-      <li>{Injectable} {ConfigSource} - Priority {d.input('???')} - These are custom config sources provided by the module, and are able to define their own priorities</li>
+      <li>{Injectable} {toConcrete<ConfigSource>()} - Priority {d.input('???')} - These are custom config sources provided by the module, and are able to define their own priorities</li>
       <li>{OverrideConfigSource} - Priority {d.input('999')} - This is for {EnvVar} overrides, and is at the top priority for all built-in config sources.</li>
     </ol>
 

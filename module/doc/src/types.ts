@@ -5,6 +5,7 @@ export type Wrapper = Record<string, (cnt: string) => string>;
 
 /**
  * Document file shape
+ * @concrete
  */
 export interface DocumentShape {
   text: JSXElement | JSXElement[] | (() => Promise<JSXElement | JSXElement[]>);
@@ -14,7 +15,7 @@ export interface DocumentShape {
 export type RenderState<T extends JSXElement, C> = {
   el: T;
   props: T['props'];
-  recurse: () => Promise<string>;
+  recurse: () => Promise<string | undefined>;
   stack: JSXElement[];
   // @ts-expect-error
   createState: <K extends keyof typeof c>(key: K, props: JSXElementByFn<K>['props']) => RenderState<JSXElementByFn<K>, C>;

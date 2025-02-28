@@ -1,5 +1,6 @@
-import { FieldConfig, ClassConfig } from '@travetto/schema';
-import { VisitStack } from './util';
+import type { FieldConfig, ClassConfig } from '@travetto/schema';
+
+import { VisitStack } from '../types';
 
 /**
  * Insertion wrapper

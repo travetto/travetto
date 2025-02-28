@@ -1,9 +1,11 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c, mod } from '@travetto/doc';
-import { Links } from '@travetto/model/support/doc.support';
-import { AuthModelUtil } from './__index__';
+import { toConcrete } from '@travetto/runtime';
+import { AuthModelUtil, RegisteredPrincipal } from '@travetto/auth-model';
 
-const RegisteredPrincipal = <c.Code title='Registered Principal' src='src/model.ts' startRe={/interface RegisteredPrincipal/} endRe={/^[}]/} />;
+import { Links } from '@travetto/model/support/doc.support';
+
+const RegisteredPrincipalContract = toConcrete<RegisteredPrincipal>();
 
 export const text = <>
   <c.StdHeader />
@@ -28,11 +30,11 @@ export const text = <>
     <li>{d.mod('ModelFile')} - {mod.ModelFile.name}</li>
   </ul>
 
-  The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a {d.codeLink(RegisteredPrincipal)}. <br />
+  The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a {RegisteredPrincipalContract}. <br />
 
   A registered principal extends the base concept of an principal, by adding in additional fields needed for local registration, specifically password management information.
 
-  {RegisteredPrincipal}
+  <c.Code src={RegisteredPrincipalContract} />
 
   <c.Code title='A valid user model' src='doc/model.ts' />
 

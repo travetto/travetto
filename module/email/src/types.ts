@@ -40,6 +40,7 @@ export type EmailIdentityList = EmailIdentity | EmailIdentity[];
 
 /**
  * Full message options
+ * @concrete
  */
 export interface EmailOptions {
   html: string;
