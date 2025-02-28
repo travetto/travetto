@@ -9,9 +9,13 @@ import { ConfigData } from './parser/types';
 import { ConfigSource, ConfigSpec } from './source/types';
 import { FileConfigSource } from './source/file';
 import { OverrideConfigSource } from './source/override';
-import { ConfigTarget } from './types';
 
 type ConfigSpecSimple = Omit<ConfigSpec, 'data'>;
+
+/**
+ * Common Type for all configuration classes
+ */
+export class ConfigBaseType { }
 
 /**
  * Manager for application configuration
@@ -89,7 +93,7 @@ export class ConfigurationService {
    *   - Will not show fields marked as secret
    */
   async exportActive(): Promise<{ sources: ConfigSpecSimple[], active: ConfigData }> {
-    const configTargets = await DependencyRegistry.getCandidateTypes(toConcrete<ConfigTarget>());
+    const configTargets = await DependencyRegistry.getCandidateTypes(ConfigBaseType);
     const configs = await Promise.all(
       configTargets
         .filter(el => el.qualifier === DependencyRegistry.get(el.class).qualifier) // Is primary?

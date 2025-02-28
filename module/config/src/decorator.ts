@@ -1,13 +1,9 @@
-import { Class, ClassInstance, toConcrete } from '@travetto/runtime';
+import { Class, ClassInstance } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { OverrideConfig, OverrideConfigSymbol } from './source/override';
-
-import { ConfigurationService } from './service';
-import { ConfigTarget } from './types';
-
-const ConfigBaseImpl = toConcrete<ConfigTarget>();
+import { ConfigurationService, ConfigBaseType } from './service';
 
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation
@@ -18,7 +14,7 @@ export function Config(ns: string) {
   return <T extends Class>(target: T): T => {
     const og: Function = target.prototype.postConstruct;
     // Declare as part of global config
-    (DependencyRegistry.getOrCreatePending(target).interfaces ??= []).push(ConfigBaseImpl);
+    (DependencyRegistry.getOrCreatePending(target).interfaces ??= []).push(ConfigBaseType);
     const env = SchemaRegistry.getOrCreatePendingMetadata<OverrideConfig>(target, OverrideConfigSymbol, { ns, fields: {} });
     env.ns = ns;
 
