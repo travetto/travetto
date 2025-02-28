@@ -19,7 +19,7 @@ The schema generated will not generally map to existing tables as it is attempti
 
 Supported features:
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11)
-   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L19)
+   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64)
    *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
    *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/facet.ts#L12)
    *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/query.ts#L10)

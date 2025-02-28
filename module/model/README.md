@@ -16,7 +16,7 @@ yarn add @travetto/model
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
 ## Contracts
-The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L19).
+The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10), [Blob](https://github.com/travetto/travetto/tree/main/module/model/src/types/blob.ts#L8) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64).
 
 ### Basic
 All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/types/basic.ts#L8) contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
@@ -213,7 +213,7 @@ export interface ModelBlobSupport {
 ```
 
 ### Bulk
-Finally, there is support for [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L19) operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
+Finally, there is support for [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64) operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.
 
 **Code: Bulk Contract**
 ```typescript

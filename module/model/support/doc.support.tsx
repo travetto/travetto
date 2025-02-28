@@ -1,25 +1,31 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c, DocJSXElementByFn, DocJSXElement, DocFileUtil } from '@travetto/doc';
 import { Config } from '@travetto/config';
+import { Runtime, toConcrete } from '@travetto/runtime';
+import { ModelBasicSupport, ModelBlobSupport, ModelBulkSupport, ModelCrudSupport, ModelExpirySupport, ModelIndexedSupport } from '../__index__';
+
+const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> =>
+  d.codeLink(title, Runtime.getSourceFile(target), new RegExp(`\\binterface\\s+${target.name}`));
 
 export const Links = {
-  Basic: d.codeLink('Basic', '@travetto/model/src/types/basic.ts', /export interface/),
-  Crud: d.codeLink('CRUD', '@travetto/model/src/types/crud.ts', /export interface/),
-  Expiry: d.codeLink('Expiry', '@travetto/model/src/types/expiry.ts', /export interface/),
-  Indexed: d.codeLink('Indexed', '@travetto/model/src/types/indexed.ts', /export interface/),
-  Bulk: d.codeLink('Bulk', '@travetto/model/src/types/bulk.ts', /export interface/),
-  Blob: d.codeLink('Blob', '@travetto/model/src/types/blob.ts', /export interface/),
+  Basic: toLink('Basic', toConcrete<ModelBasicSupport>()),
+  Crud: toLink('CRUD', toConcrete<ModelCrudSupport>()),
+  Expiry: toLink('Expiry', toConcrete<ModelExpirySupport>()),
+  Indexed: toLink('Indexed', toConcrete<ModelIndexedSupport>()),
+  Bulk: toLink('Bulk', toConcrete<ModelBulkSupport>()),
+  Blob: toLink('Blob', toConcrete<ModelBlobSupport>()),
 };
 
 export const ModelTypes = (fn: | Function): DocJSXElement[] => {
   const { content } = DocFileUtil.readSource(fn);
   const found: DocJSXElementByFn<'CodeLink'>[] = [];
-  const seen = new Set();
-  for (const [, key] of content.matchAll(/Model(Crud|Expiry|Indexed|Bulk|Blob)Support/g)) {
-    if (!seen.has(key)) {
+  const seen = new Set<string>();
+  for (const [, key] of content.matchAll(/Model([A-Za-z]+)Support/g)) {
+    if (!seen.has(key) && key in Links) {
       seen.add(key);
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      found.push(Links[key as keyof typeof Links]);
+      const link = Links[key as keyof typeof Links];
+      found.push(link);
     }
   }
   return found.map(v => <li>{v}</li>);

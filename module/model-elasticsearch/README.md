@@ -17,7 +17,7 @@ This module provides an [elasticsearch](https://elastic.co)-based implementation
 
 Supported features:
    *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types/crud.ts#L11)
-   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L19)
+   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/types/bulk.ts#L64)
    *  [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10)
    *  [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/types/indexed.ts#L11)
    *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/types/crud.ts#L11)
