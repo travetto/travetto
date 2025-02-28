@@ -3,7 +3,7 @@ import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
 import { AllViewSymbol, SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
 
-import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
+import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types';
 
 const TableSymbol = Symbol.for('@travetto/model-sql:table');
 
@@ -25,7 +25,7 @@ type FieldCacheEntry = {
 /**
  * Utilities for dealing with SQL operations
  */
-export class SQLUtil {
+export class SQLModelUtil {
 
   static SCHEMA_FIELDS_CACHE = new Map<Class, FieldCacheEntry>();
 

@@ -4,7 +4,7 @@ import { Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete } f
 import { SelectClause, Query, SortClause, WhereClause, RetainFields, Point, ModelQueryUtil } from '@travetto/model-query';
 import { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
 
-import { SQLUtil, VisitStack } from '../internal/util';
+import { SQLModelUtil, VisitStack } from '../util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
 import { Connection } from '../connection/base';
 
@@ -268,7 +268,7 @@ export abstract class SQLDialect implements DialectState {
    * Delete query and return count removed
    */
   async deleteAndGetCount<T>(cls: Class<T>, query: Query<T>): Promise<number> {
-    const { count } = await this.executeSQL<T>(this.getDeleteSQL(SQLUtil.classToStack(cls), query.where));
+    const { count } = await this.executeSQL<T>(this.getDeleteSQL(SQLModelUtil.classToStack(cls), query.where));
     return count;
   }
 
@@ -306,7 +306,7 @@ export abstract class SQLDialect implements DialectState {
    * Determine table/field namespace for a given stack location
    */
   namespace(stack: VisitStack[]): string {
-    return `${this.ns}${SQLUtil.buildTable(stack)}`;
+    return `${this.ns}${SQLModelUtil.buildTable(stack)}`;
   }
 
   /**
@@ -357,7 +357,7 @@ export abstract class SQLDialect implements DialectState {
     const clauses = new Map<string, Alias>();
     let idx = 0;
 
-    SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+    SQLModelUtil.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: ({ descend, path }) => {
         const table = resolve(path);
         clauses.set(table, { alias: this.rootAlias, path });
@@ -395,7 +395,7 @@ export abstract class SQLDialect implements DialectState {
    */
   getWhereFieldSQL(stack: VisitStack[], o: Record<string, unknown>): string {
     const items = [];
-    const { foreignMap, localMap } = SQLUtil.getFieldsByLocation(stack);
+    const { foreignMap, localMap } = SQLModelUtil.getFieldsByLocation(stack);
     const SQL_OPS = this.SQL_OPS;
 
     for (const key of Object.keys(o)) {
@@ -532,7 +532,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (ModelQueryUtil.has$Not(o)) {
       return `${SQL_OPS.$not} (${this.getWhereGroupingSQL<T>(cls, o.$not)})`;
     } else {
-      return this.getWhereFieldSQL(SQLUtil.classToStack(cls), o);
+      return this.getWhereFieldSQL(SQLModelUtil.classToStack(cls), o);
     }
   }
 
@@ -551,7 +551,7 @@ export abstract class SQLDialect implements DialectState {
   getOrderBySQL<T>(cls: Class<T>, sortBy?: SortClause<T>[]): string {
     return !sortBy ?
       '' :
-      `ORDER BY ${SQLUtil.orderBy(cls, sortBy).map((ob) =>
+      `ORDER BY ${SQLModelUtil.orderBy(cls, sortBy).map((ob) =>
         `${this.resolveName(ob.stack)} ${ob.asc ? 'ASC' : 'DESC'}`
       ).join(', ')}`;
   }
@@ -560,8 +560,8 @@ export abstract class SQLDialect implements DialectState {
    * Generate SELECT clause
    */
   getSelectSQL<T>(cls: Class<T>, select?: SelectClause<T>): string {
-    const stack = SQLUtil.classToStack(cls);
-    const columns = select && SQLUtil.select(cls, select).map((sel) => this.resolveName([...stack, sel]));
+    const stack = SQLModelUtil.classToStack(cls);
+    const columns = select && SQLModelUtil.select(cls, select).map((sel) => this.resolveName([...stack, sel]));
     if (columns) {
       columns.unshift(this.alias(this.pathField));
     }
@@ -574,7 +574,7 @@ export abstract class SQLDialect implements DialectState {
    * Generate FROM clause
    */
   getFromSQL<T>(cls: Class<T>): string {
-    const stack = SQLUtil.classToStack(cls);
+    const stack = SQLModelUtil.classToStack(cls);
     const aliases = this.getAliasCache(stack, this.namespace);
     const tables = [...aliases.keys()].sort((a, b) => a.length - b.length); // Shortest first
     return `FROM ${tables.map((table, i) => {
@@ -614,7 +614,7 @@ LEFT OUTER JOIN ${from} ON
   getQuerySQL<T>(cls: Class<T>, query: Query<T>, where?: WhereClause<T>): string {
     const sortFields = !query.sort ?
       '' :
-      SQLUtil.orderBy(cls, query.sort)
+      SQLModelUtil.orderBy(cls, query.sort)
         .map(x => this.resolveName(x.stack))
         .join(', ');
 
@@ -632,7 +632,7 @@ ${this.getLimitSQL(cls, query)}`;
     const parent = stack.length > 1;
     const array = parent && config.array;
     const fields = SchemaRegistry.has(config.type) ?
-      [...SQLUtil.getFieldsByLocation(stack).local] :
+      [...SQLModelUtil.getFieldsByLocation(stack).local] :
       (array ? [castTo<FieldConfig>(config)] : []);
 
     if (!parent) {
@@ -686,7 +686,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getCreateAllTablesSQL(cls: Class): string[] {
     const out: string[] = [];
-    SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+    SQLModelUtil.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
       onSub: ({ path, descend }) => { out.push(this.getCreateTableSQL(path)); descend(); },
       onSimple: ({ path }) => out.push(this.getCreateTableSQL(path))
@@ -705,7 +705,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    * Get CREATE INDEX sql
    */
   getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
-    const table = this.namespace(SQLUtil.classToStack(cls));
+    const table = this.namespace(SQLModelUtil.classToStack(cls));
     const fields: [string, boolean][] = idx.fields.map(x => {
       const key = TypedObject.keys(x)[0];
       const val = x[key];
@@ -725,7 +725,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getDropAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     const out: string[] = [];
-    SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+    SQLModelUtil.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
       onSub: ({ path, descend }) => { descend(); out.push(this.getDropTableSQL(path)); },
       onSimple: ({ path }) => out.push(this.getDropTableSQL(path))
@@ -738,7 +738,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getTruncateAllTablesSQL<T extends ModelType>(cls: Class<T>): string[] {
     const out: string[] = [];
-    SQLUtil.visitSchemaSync(SchemaRegistry.get(cls), {
+    SQLModelUtil.visitSchemaSync(SchemaRegistry.get(cls), {
       onRoot: ({ path, descend }) => { descend(); out.push(this.getTruncateTableSQL(path)); },
       onSub: ({ path, descend }) => { descend(); out.push(this.getTruncateTableSQL(path)); },
       onSimple: ({ path }) => out.push(this.getTruncateTableSQL(path))
@@ -751,7 +751,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
    */
   getInsertSQL(stack: VisitStack[], instances: InsertWrapper['records']): string | undefined {
     const config = stack[stack.length - 1];
-    const columns = SQLUtil.getFieldsByLocation(stack).local
+    const columns = SQLModelUtil.getFieldsByLocation(stack).local
       .filter(x => !SchemaRegistry.has(x.type))
       .sort((a, b) => a.name.localeCompare(b.name));
     const columnNames = columns.map(c => c.name);
@@ -800,13 +800,13 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     for (let i = 0; i < matrix.length; i++) {
       const { stack: elStack } = instances[i];
       if (hasParent) {
-        matrix[i].push(this.hash(`${SQLUtil.buildPath(elStack)}${isArray ? `[${i + idx}]` : ''}`));
-        matrix[i].push(this.hash(SQLUtil.buildPath(elStack.slice(0, elStack.length - 1))));
+        matrix[i].push(this.hash(`${SQLModelUtil.buildPath(elStack)}${isArray ? `[${i + idx}]` : ''}`));
+        matrix[i].push(this.hash(SQLModelUtil.buildPath(elStack.slice(0, elStack.length - 1))));
         if (isArray) {
           matrix[i].push(this.resolveValue(this.idxField, i + idx));
         }
       } else {
-        matrix[i].push(this.hash(SQLUtil.buildPath(elStack)));
+        matrix[i].push(this.hash(SQLModelUtil.buildPath(elStack)));
       }
     }
 
@@ -822,7 +822,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
   getAllInsertSQL<T extends ModelType>(cls: Class<T>, instance: T): string[] {
     const out: string[] = [];
     const add = (text?: string): void => { text && out.push(text); };
-    SQLUtil.visitSchemaInstance(cls, instance, {
+    SQLModelUtil.visitSchemaInstance(cls, instance, {
       onRoot: ({ value, path }) => add(this.getInsertSQL(path, [{ stack: path, value }])),
       onSub: ({ value, path }) => add(this.getInsertSQL(path, [{ stack: path, value }])),
       onSimple: ({ value, path }) => add(this.getInsertSQL(path, [{ stack: path, value }]))
@@ -835,7 +835,7 @@ ${matrix.map(row => `(${row.join(', ')})`).join(',\n')};`;
    */
   getUpdateSQL(stack: VisitStack[], data: Record<string, unknown>, where?: WhereClause<unknown>): string {
     const { type } = stack[stack.length - 1];
-    const { localMap } = SQLUtil.getFieldsByLocation(stack);
+    const { localMap } = SQLModelUtil.getFieldsByLocation(stack);
     return `
 UPDATE ${this.table(stack)} ${this.rootAlias}
 SET
@@ -887,9 +887,9 @@ ${this.getWhereSQL(cls, where!)}`;
     const selectStack: (SelectClause<T> | undefined)[] = [];
 
     const buildSet = (children: unknown[], field?: FieldConfig): Record<string, unknown> =>
-      SQLUtil.collectDependents(this, stack[stack.length - 1], children, field);
+      SQLModelUtil.collectDependents(this, stack[stack.length - 1], children, field);
 
-    await SQLUtil.visitSchema(SchemaRegistry.get(cls), {
+    await SQLModelUtil.visitSchema(SchemaRegistry.get(cls), {
       onRoot: async (config) => {
         const res = buildSet(items); // Already filtered by initial select query
         selectStack.push(select);

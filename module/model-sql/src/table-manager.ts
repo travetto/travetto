@@ -6,7 +6,7 @@ import { SchemaChange } from '@travetto/schema';
 
 import { Connected, Transactional } from './connection/decorator';
 import { SQLDialect } from './dialect/base';
-import { SQLUtil, VisitStack } from './internal/util';
+import { SQLModelUtil, VisitStack } from './util';
 import { Connection } from './connection/base';
 
 /**
@@ -109,7 +109,7 @@ export class TableManager {
   @Connected()
   async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
     try {
-      const rootStack = SQLUtil.classToStack(cls);
+      const rootStack = SQLModelUtil.classToStack(cls);
 
       const changes = change.subs.reduce<Record<ChangeEvent<unknown>['type'], VisitStack[][]>>((acc, v) => {
         const path = v.path.map(f => ({ ...f }));

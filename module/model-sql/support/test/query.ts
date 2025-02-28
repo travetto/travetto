@@ -5,7 +5,7 @@ import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 
-import { VisitStack } from '../../src/internal/util';
+import { VisitStack } from '../../src/util';
 import { SQLModelService } from '../../src/service';
 
 @Schema()

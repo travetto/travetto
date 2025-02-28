@@ -16,7 +16,7 @@ import {
 
 import { SQLModelConfig } from './config';
 import { Connected, ConnectedIterator, Transactional } from './connection/decorator';
-import { SQLUtil } from './internal/util';
+import { SQLModelUtil } from './util';
 import { SQLDialect } from './dialect/base';
 import { TableManager } from './table-manager';
 import { Connection } from './connection/base';
@@ -67,7 +67,7 @@ export class SQLModelService implements
     const all = toCheck.size ?
       (await this.#exec<ModelType>(
         this.#dialect.getSelectRowsByIdsSQL(
-          SQLUtil.classToStack(cls), [...toCheck.keys()], [this.#dialect.idField]
+          SQLModelUtil.classToStack(cls), [...toCheck.keys()], [this.#dialect.idField]
         )
       )).records : [];
 
@@ -217,9 +217,9 @@ export class SQLModelService implements
       operations.map(x => x[k]).filter((x): x is Required<BulkOp<T>>[K] => !!x);
 
     const getStatements = async (k: keyof BulkOp<T>): Promise<InsertWrapper[]> =>
-      (await SQLUtil.getInserts(cls, get(k))).filter(x => !!x.records.length);
+      (await SQLModelUtil.getInserts(cls, get(k))).filter(x => !!x.records.length);
 
-    const deletes = [{ stack: SQLUtil.classToStack(cls), ids: get('delete').map(x => x.id) }].filter(x => !!x.ids.length);
+    const deletes = [{ stack: SQLModelUtil.classToStack(cls), ids: get('delete').map(x => x.id) }].filter(x => !!x.ids.length);
 
     const [inserts, upserts, updates] = await Promise.all([
       getStatements('insert'),
@@ -246,7 +246,7 @@ export class SQLModelService implements
       await this.#dialect.fetchDependents(cls, res, query && query.select);
     }
 
-    const cleaned = SQLUtil.cleanResults<T>(this.#dialect, res);
+    const cleaned = SQLModelUtil.cleanResults<T>(this.#dialect, res);
     return await Promise.all(cleaned.map(m => ModelCrudUtil.load(cls, m)));
   }
 
@@ -278,7 +278,7 @@ export class SQLModelService implements
   async updatePartialByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
     const item = await ModelCrudUtil.prePartialUpdate(cls, data);
-    const { count } = await this.#exec(this.#dialect.getUpdateSQL(SQLUtil.classToStack(cls), item, ModelQueryUtil.getWhereClause(cls, query.where)));
+    const { count } = await this.#exec(this.#dialect.getUpdateSQL(SQLModelUtil.classToStack(cls), item, ModelQueryUtil.getWhereClause(cls, query.where)));
     return count;
   }
 
@@ -286,7 +286,7 @@ export class SQLModelService implements
   @Transactional()
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     await QueryVerifier.verify(cls, query);
-    const { count } = await this.#exec(this.#dialect.getDeleteSQL(SQLUtil.classToStack(cls), ModelQueryUtil.getWhereClause(cls, query.where, false)));
+    const { count } = await this.#exec(this.#dialect.getDeleteSQL(SQLModelUtil.classToStack(cls), ModelQueryUtil.getWhereClause(cls, query.where, false)));
     return count;
   }
 
