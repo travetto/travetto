@@ -135,7 +135,7 @@ $ npx trv lint:register
       First we must start the application:
 
       <c.Terminal
-        title='Start the Application' src='npx trv run:rest'
+        title='Start the Application' src='npx trv run:web'
       />
 
       <c.Terminal title='Application Startup' src={startupOutput} />

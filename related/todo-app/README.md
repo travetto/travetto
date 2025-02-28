@@ -298,7 +298,7 @@ First we must start the application:
 
 **Terminal: Start the Application**
 ```bash
-npx trv run:rest
+npx trv run:web
 ```
 
 **Terminal: Application Startup**
