@@ -1,15 +1,6 @@
-import { Class } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
-export const TableSymbol = Symbol.for('@travetto/model-sql:table');
-
-export type VisitStack = {
-  [TableSymbol]?: string;
-  array?: boolean;
-  type: Class;
-  name: string;
-  index?: number;
-};
+import { VisitStack } from '../types';
 
 /**
  * Insertion wrapper

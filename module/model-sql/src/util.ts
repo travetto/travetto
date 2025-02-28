@@ -3,7 +3,8 @@ import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType, OptionalId } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, FieldConfig, DataUtil } from '@travetto/schema';
 
-import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy, VisitStack, TableSymbol } from './internal/types';
+import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './internal/types';
+import { TableSymbol, VisitStack } from './types';
 
 type FieldCacheEntry = {
   local: FieldConfig[];

@@ -21,7 +21,7 @@ export * from './src/interceptor/types';
 export * from './src/interceptor/logging';
 export * from './src/interceptor/serialize';
 export * from './src/types';
-export * from './src/symbol';
+export * from './src/symbols';
 export * from './src/util/param';
 export * from './src/util/route';
 export * from './src/util/mime';

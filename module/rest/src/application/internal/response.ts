@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { Response } from '../../types';
-import { RestSymbols } from '../../symbol';
+import { RestSymbols } from '../../symbols';
 
 /**
  * Base response object

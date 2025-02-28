@@ -3,7 +3,7 @@ import { Config } from '@travetto/config';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { FilterContext, FilterNext } from '../types';
-import { RestSymbols } from '../symbol';
+import { RestSymbols } from '../symbols';
 import { SerializeInterceptor } from './serialize';
 
 /**

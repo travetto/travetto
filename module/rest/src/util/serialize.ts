@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 
 import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
-import { RestSymbols } from '../symbol';
+import { RestSymbols } from '../symbols';
 import { Renderable } from '../response/renderable';
 import { Request, Response } from '../types';
 

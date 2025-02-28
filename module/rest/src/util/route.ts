@@ -5,7 +5,7 @@ import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { LightweightConfig, ManagedInterceptorConfig, RestInterceptor, RouteApplies } from '../interceptor/types';
-import { RestSymbols } from '../symbol';
+import { RestSymbols } from '../symbols';
 
 import { ParamExtractor } from './param';
 import { RouteCheckUtil } from './route-check';

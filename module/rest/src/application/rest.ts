@@ -8,7 +8,7 @@ import { RestConfig } from './config';
 import { RouteUtil } from '../util/route';
 import { RestInterceptor } from '../interceptor/types';
 import { ControllerRegistry } from '../registry/controller';
-import { RestSymbols } from '../symbol';
+import { RestSymbols } from '../symbols';
 import { RestServer } from './server';
 import { RestCommonUtil } from '../util/common';
 

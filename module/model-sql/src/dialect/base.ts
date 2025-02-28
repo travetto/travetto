@@ -4,9 +4,10 @@ import { Class, AppError, TypedObject, TimeUtil, castTo, castKey, toConcrete } f
 import { SelectClause, Query, SortClause, WhereClause, RetainFields, Point, ModelQueryUtil } from '@travetto/model-query';
 import { BulkResponse, IndexConfig, ModelType } from '@travetto/model';
 
-import { SQLModelUtil, VisitStack } from '../util';
+import { SQLModelUtil } from '../util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
 import { Connection } from '../connection/base';
+import { VisitStack } from '../types';
 
 const PointImpl = toConcrete<Point>();
 
