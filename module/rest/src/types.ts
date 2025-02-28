@@ -15,9 +15,9 @@ export type FilterReturn = void | unknown | Promise<void | unknown>;
 export type FilterNext = () => FilterReturn;
 
 export type RouteHandler = TypedFunction<Any, Any>;
-export type FilterContext<C = unknown> = { req: Request, res: Response, config: Readonly<C> };
+export type FilterContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: Readonly<C> };
 export type Filter<C = unknown> = (context: FilterContext<C>, next: FilterNext) => FilterReturn;
-export type RequestResponseHandler = (req: Request, res: Response) => FilterReturn;
+export type RequestResponseHandler = (req: HttpRequest, res: HttpResponse) => FilterReturn;
 export type RestServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
 
 export type ContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
@@ -32,7 +32,7 @@ export interface RequestHeaders extends IncomingHttpHeaders { }
  * @concrete
  * @augments `@travetto/rest:ContextParam`
  */
-export interface Request<T = unknown> {
+export interface HttpRequest<T = unknown> {
   /**
    * The parsed params for the target handler
    */
@@ -155,7 +155,7 @@ export interface Request<T = unknown> {
  * @concrete
  * @augments `@travetto/rest:ContextParam`
  */
-export interface Response<T = unknown> {
+export interface HttpResponse<T = unknown> {
   /**
    * The underlying request object
    */
@@ -293,7 +293,7 @@ export interface ParamConfig {
    * @param req The request
    * @param res The response
    */
-  extract?(config: ParamConfig, req?: Request, res?: Response): unknown;
+  extract?(config: ParamConfig, req?: HttpRequest, res?: HttpResponse): unknown;
   /**
    * Input prefix for parameter
    */

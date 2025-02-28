@@ -1,4 +1,4 @@
-import { Controller, Get, Redirect, Post, Request } from '@travetto/rest';
+import { Controller, Get, Redirect, Post, HttpRequest } from '@travetto/rest';
 import { Login, Authenticated, Logout } from '@travetto/auth-rest';
 
 import { FB_AUTH } from './conf';
@@ -19,8 +19,8 @@ export class SampleAuth {
 
   @Get('/self')
   @Authenticated()
-  async getSelf(req: Request) {
-    return req.auth;
+  async getSelf(req: HttpRequest) {
+    return req.user;
   }
 
   @Get('/facebook/callback')
@@ -37,7 +37,7 @@ export class SampleAuth {
    * Simple Echo
    */
   @Post('/')
-  async echo(req: Request): Promise<object> {
+  async echo(req: HttpRequest): Promise<object> {
     return req.body;
   }
 }

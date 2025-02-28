@@ -1,14 +1,14 @@
-import { RestSymbols, Request as RestRequest, Response as RestResponse } from '@travetto/rest';
+import { RestSymbols, HttpRequest, HttpResponse } from '@travetto/rest';
 import * as express from 'express';
 
 // Support typings
 declare module 'express' {
   interface Request {
-    [RestSymbols.TravettoEntity]?: RestRequest;
+    [RestSymbols.TravettoEntity]?: HttpRequest;
     [RestSymbols.NodeEntity]?: express.Request;
   }
   interface Response {
-    [RestSymbols.TravettoEntity]?: RestResponse;
+    [RestSymbols.TravettoEntity]?: HttpResponse;
     [RestSymbols.NodeEntity]?: express.Response;
   }
 }

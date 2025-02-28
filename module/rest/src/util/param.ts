@@ -2,10 +2,10 @@ import { Class, AppError, toConcrete } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { EndpointConfig } from '../registry/types';
-import { ParamConfig, Request, Response } from '../types';
+import { ParamConfig, HttpRequest, HttpResponse } from '../types';
 import { RestSymbols } from '../symbols';
 
-export type ExtractFn = (c: ParamConfig, req: Request, res: Response, schema: FieldConfig) => unknown;
+export type ExtractFn = (c: ParamConfig, req: HttpRequest, res: HttpResponse, schema: FieldConfig) => unknown;
 
 function isClass(o: unknown): o is Class {
   return !!o && typeof o === 'function' && !!o.Ⲑid;
@@ -41,8 +41,8 @@ class $ParamExtractor {
     };
 
 
-    this.registerContext(toConcrete<Request>(), (_, req) => req);
-    this.registerContext(toConcrete<Response>(), (_, __, res) => res);
+    this.registerContext(toConcrete<HttpRequest>(), (_, req) => req);
+    this.registerContext(toConcrete<HttpResponse>(), (_, __, res) => res);
   }
 
   /**
@@ -88,7 +88,7 @@ class $ParamExtractor {
    * @param req The request
    * @param res The response
    */
-  async extract(route: EndpointConfig, req: Request, res: Response): Promise<unknown[]> {
+  async extract(route: EndpointConfig, req: HttpRequest, res: HttpResponse): Promise<unknown[]> {
     const cls = route.class;
     const method = route.handlerName;
 

@@ -5,7 +5,7 @@ import { AuthConfig, AuthContext } from '@travetto/auth';
 import { AuthContextInterceptor, RestAuthConfig } from '@travetto/auth-rest';
 import { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
-import { Controller, Get, Body, Post, Put, Request, FilterContext, RestInterceptor, RouteConfig } from '@travetto/rest';
+import { Controller, Get, Body, Post, Put, HttpRequest, FilterContext, RestInterceptor, RouteConfig } from '@travetto/rest';
 import { Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
@@ -54,7 +54,7 @@ class TestController {
   }
 
   @Put('/body')
-  withBody(req: Request) {
+  withBody(req: HttpRequest) {
     return { body: req.body.age };
   }
 }

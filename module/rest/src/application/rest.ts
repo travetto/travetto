@@ -3,7 +3,7 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
-import { RouteConfig, Request, RestServerHandle } from '../types';
+import { RouteConfig, HttpRequest, RestServerHandle } from '../types';
 import { RestConfig } from './config';
 import { RouteUtil } from '../util/route';
 import { RestInterceptor } from '../interceptor/types';
@@ -68,7 +68,7 @@ export class RestApplication<T = unknown> {
    * Handle the global request
    * @param req The http request
    */
-  async globalHandler(req: Request): Promise<string | Record<string, unknown>> {
+  async globalHandler(req: HttpRequest): Promise<string | Record<string, unknown>> {
     if (req.method === 'OPTIONS') {
       return '';
     } else if (req.path === '/' && this.config.defaultMessage) {

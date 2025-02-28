@@ -1,4 +1,4 @@
-import type { Request, RestServerHandle } from '../../../src/types';
+import type { HttpRequest, RestServerHandle } from '../../../src/types';
 
 export type MakeRequestConfig<T> = {
   query?: Record<string, unknown>;
@@ -14,7 +14,7 @@ export type MakeRequestResponse<T> = {
 
 export interface RestServerSupport {
   init(qualifier?: symbol): Promise<RestServerHandle>;
-  execute(method: Request['method'], path: string, cfg?: MakeRequestConfig<Buffer>): Promise<MakeRequestResponse<Buffer>>;
+  execute(method: HttpRequest['method'], path: string, cfg?: MakeRequestConfig<Buffer>): Promise<MakeRequestResponse<Buffer>>;
 }
 
 export const headerToShape = {

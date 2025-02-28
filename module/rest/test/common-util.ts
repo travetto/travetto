@@ -4,13 +4,13 @@ import { Test, Suite } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
 
 import { RestCommonUtil } from '../src/util/common';
-import { Response, Request } from '../src/types';
+import { HttpResponse, HttpRequest } from '../src/types';
 
 type Meta = Record<'headerData' | 'cookieData', Record<string, string | undefined>>;
-type MockResponse = Response & Meta;
-type MockRequest = Request;
+type MockHttpResponse = HttpResponse & Meta;
+type MockHttpRequest = HttpRequest;
 
-const mockResponse = (data?: Partial<Meta>): MockResponse => {
+const mockResponse = (data?: Partial<Meta>): MockHttpResponse => {
   const meta = { headerData: {}, cookieData: {}, ...data };
   return castTo({
     headerData: meta.headerData,
@@ -21,7 +21,7 @@ const mockResponse = (data?: Partial<Meta>): MockResponse => {
   });
 };
 
-const mockRequest = (data: Partial<Meta> = {}): MockRequest => {
+const mockRequest = (data: Partial<Meta> = {}): MockHttpRequest => {
   const meta = { headerData: {}, cookieData: {}, ...data };
   return castTo({
     headerFirst(key: string) { return meta.headerData[key]; },

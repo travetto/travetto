@@ -6,7 +6,7 @@ import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
 import { RestSymbols } from '../symbols';
-import { RouteConfig, Request, FilterContext, FilterNext } from '../types';
+import { RouteConfig, HttpRequest, FilterContext, FilterNext } from '../types';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
@@ -42,7 +42,7 @@ export class BodyParseInterceptor implements RestInterceptor<RestBodyParseConfig
   @Inject()
   config: RestBodyParseConfig;
 
-  async read(req: Request, limit: string | number): Promise<{ text: string, raw: Buffer }> {
+  async read(req: HttpRequest, limit: string | number): Promise<{ text: string, raw: Buffer }> {
     const cfg = req.getContentType();
 
     const text = await rawBody(inflation(req[RestSymbols.NodeEntity]), {
@@ -52,7 +52,7 @@ export class BodyParseInterceptor implements RestInterceptor<RestBodyParseConfig
     return { text, raw: Buffer.from(text) };
   }
 
-  detectParserType(req: Request, parsingTypes: Record<string, ParserType>): ParserType | undefined {
+  detectParserType(req: HttpRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
     const { full = '' } = req.getContentType() ?? {};
     if (!full) {
       return;

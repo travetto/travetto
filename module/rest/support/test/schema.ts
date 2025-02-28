@@ -6,7 +6,7 @@ import { Controller, Redirect, Post, Get, MethodOrAll, ControllerRegistry } from
 
 import { BaseRestSuite } from './base';
 import { PathParam, QueryParam } from '../../src/decorator/param';
-import { Response } from '../../src/types';
+import { HttpResponse } from '../../src/types';
 
 type Errors = { details: { errors: { path: string }[] }, message: string };
 
@@ -110,7 +110,7 @@ class SchemaAPI {
    * @returns {Promise<User>}
    */
   @Get('/customRender2')
-  async customRender2(res: Response) {
+  async customRender2(res: HttpResponse) {
   }
 }
 

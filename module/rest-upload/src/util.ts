@@ -7,7 +7,7 @@ import { pipeline } from 'node:stream/promises';
 
 import busboy from '@fastify/busboy';
 
-import { Request, MimeUtil, RestSymbols } from '@travetto/rest';
+import { HttpRequest, MimeUtil, RestSymbols } from '@travetto/rest';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { RestUploadConfig } from './config';
@@ -33,7 +33,7 @@ export class RestUploadUtil {
   /**
    * Get all the uploads, separating multipart from direct
    */
-  static async* getUploads(req: Request, config: Partial<RestUploadConfig>): AsyncIterable<UploadItem> {
+  static async* getUploads(req: HttpRequest, config: Partial<RestUploadConfig>): AsyncIterable<UploadItem> {
     if (MULTIPART.has(req.getContentType()?.full!)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;

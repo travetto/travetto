@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BinaryUtil } from '@travetto/runtime';
-import { Controller, Post, Request } from '@travetto/rest';
+import { Controller, Post, HttpRequest } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
@@ -17,7 +17,7 @@ class TestUploadController {
 
   @Post('/all')
   @UploadAll()
-  async uploadAll({ uploads }: Request): Promise<{ hash?: string } | undefined> {
+  async uploadAll({ uploads }: HttpRequest): Promise<{ hash?: string } | undefined> {
     for (const [, blob] of Object.entries(uploads)) {
       return { hash: bHash(blob) };
     }

@@ -4,7 +4,7 @@ import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/run
 
 import { RestSymbols } from '../symbols';
 import { Renderable } from '../response/renderable';
-import { Request, Response } from '../types';
+import { HttpRequest, HttpResponse } from '../types';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -30,10 +30,10 @@ export class SerializeUtil {
 
   /**
    * Set outbound content type if not defined
-   * @param res Response
+   * @param res HttpResponse
    * @param type mime type
    */
-  static ensureContentType(res: Response, defaultType: string, redefine = false): void {
+  static ensureContentType(res: HttpResponse, defaultType: string, redefine = false): void {
     if (redefine || !res.getHeader('Content-Type')) {
       res.setHeader('Content-Type', defaultType);
     }
@@ -42,7 +42,7 @@ export class SerializeUtil {
   /**
    * Set outbound headers
    */
-  static setHeaders(res: Response, headers?: Record<string, string | (() => string)>): void {
+  static setHeaders(res: HttpResponse, headers?: Record<string, string | (() => string)>): void {
     if (headers) {
       for (const [k, v] of Object.entries(headers)) {
         res.setHeader(k, typeof v === 'string' ? v : v());
@@ -53,7 +53,7 @@ export class SerializeUtil {
   /**
    * Standard json
    */
-  static serializeJSON(req: Request, res: Response, output: unknown, forceHeader = false): void {
+  static serializeJSON(req: HttpRequest, res: HttpResponse, output: unknown, forceHeader = false): void {
     const val = hasToJSON(output) ? output.toJSON() : output;
     this.ensureContentType(res, 'application/json', forceHeader);
     res.send(JSON.stringify(val, undefined, '__pretty' in req.query ? 2 : 0));
@@ -62,7 +62,7 @@ export class SerializeUtil {
   /**
    * Primitive json
    */
-  static serializePrimitive(res: Response, output: unknown): void {
+  static serializePrimitive(res: HttpResponse, output: unknown): void {
     this.ensureContentType(res, 'application/json');
     res.send(JSON.stringify(output));
   }
@@ -70,7 +70,7 @@ export class SerializeUtil {
   /**
    * Serialize text
    */
-  static serializeText(res: Response, output: string): void {
+  static serializeText(res: HttpResponse, output: string): void {
     this.ensureContentType(res, 'text/plain');
     res.send(output);
   }
@@ -78,7 +78,7 @@ export class SerializeUtil {
   /**
    * Serialize buffer
    */
-  static serializeBuffer(res: Response, output: Buffer): void {
+  static serializeBuffer(res: HttpResponse, output: Buffer): void {
     this.ensureContentType(res, 'application/octet-stream');
     res.send(output);
   }
@@ -86,7 +86,7 @@ export class SerializeUtil {
   /**
    * Serialize stream
    */
-  static async serializeStream(res: Response, output: Readable): Promise<void> {
+  static async serializeStream(res: HttpResponse, output: Readable): Promise<void> {
     this.ensureContentType(res, 'application/octet-stream');
     await res.sendStream(output);
   }
@@ -94,7 +94,7 @@ export class SerializeUtil {
   /**
    * Serialize file/blob
    */
-  static async serializeBlob(res: Response, output: Blob | File): Promise<void> {
+  static async serializeBlob(res: HttpResponse, output: Blob | File): Promise<void> {
     const meta = BinaryUtil.getBlobMeta(output);
     if (meta) {
       res.statusCode = meta?.range ? 206 : 200;
@@ -130,7 +130,7 @@ export class SerializeUtil {
   /**
    * Send empty response
    */
-  static serializeEmpty(req: Request, res: Response): void {
+  static serializeEmpty(req: HttpRequest, res: HttpResponse): void {
     res.status(req.method === 'POST' || req.method === 'PUT' ? 201 : 204);
     res.send('');
   }
@@ -140,7 +140,7 @@ export class SerializeUtil {
    * @param res
    * @param error
    */
-  static serializeError(req: Request, res: Response, error: ErrorResponse): void {
+  static serializeError(req: HttpRequest, res: HttpResponse, error: ErrorResponse): void {
     const status = error.status ?? error.statusCode ?? categoryToCode[error.category!] ?? 500;
     res.status(status);
     res.statusError = error;
@@ -150,7 +150,7 @@ export class SerializeUtil {
   /**
    * Serialize renderable
    */
-  static async serializeRenderable(req: Request, res: Response, output: Renderable): Promise<void> {
+  static async serializeRenderable(req: HttpRequest, res: HttpResponse, output: Renderable): Promise<void> {
     if (output.headers) {
       for (const [k, v] of Object.entries(output.headers())) {
         res.setHeader(k, v);
@@ -170,7 +170,7 @@ export class SerializeUtil {
   /**
    * Determine serialization type based on output
    */
-  static serializeStandard(req: Request, res: Response, output: unknown): void | Promise<void> {
+  static serializeStandard(req: HttpRequest, res: HttpResponse, output: unknown): void | Promise<void> {
     this.setHeaders(res, res[RestSymbols.HeadersAdded]);
     switch (typeof output) {
       case 'undefined': return this.serializeEmpty(req, res);

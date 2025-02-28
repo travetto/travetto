@@ -1,5 +1,5 @@
 import { Renderable } from './renderable';
-import { Response } from '../types';
+import { HttpResponse } from '../types';
 
 /**
  * Simple redirect response
@@ -23,7 +23,7 @@ export class Redirect implements Renderable {
    * Render the response
    * @returns {void}
    */
-  render(res: Response): void {
+  render(res: HttpResponse): void {
     res.redirect(this.#status, this.#location);
   }
 }

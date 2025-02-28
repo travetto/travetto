@@ -3,7 +3,7 @@ import express from 'express';
 import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { RestSymbols, RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil, RestServerHandle } from '@travetto/rest';
+import { RestSymbols, RestInterceptor, HttpRequest, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor, RestNetUtil, RestServerHandle } from '@travetto/rest';
 
 import { ExpressRestServerUtil } from './util';
 
@@ -65,7 +65,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
         {
           method: 'options',
           path: '*all',
-          handler: (__req: Request) => '',
+          handler: (__req: HttpRequest) => '',
           params: [{ extract: (__, r: unknown): unknown => r, location: 'context' }],
           interceptors: [
             [LoggingInterceptor, { disabled: true }]

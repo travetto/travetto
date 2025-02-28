@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { Response } from '@travetto/rest';
+import { HttpResponse } from '@travetto/rest';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { asFull } from '@travetto/runtime';
 
@@ -32,7 +32,7 @@ export class CodecTest {
     await this.interceptor.codec.encode(
       {
         req: asFull({}),
-        res: asFull<Response>({
+        res: asFull<HttpResponse>({
           setHeader(key: string, value: string) {
             headers[key] = value;
           },
@@ -60,7 +60,7 @@ export class CodecTest {
 
     await this.interceptor.codec.encode({
       req: asFull({}),
-      res: asFull<Response>({
+      res: asFull<HttpResponse>({
         setHeader(key: string, value: string) {
           headers[key] = value;
         },

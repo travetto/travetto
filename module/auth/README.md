@@ -134,7 +134,7 @@ export class AuthService {
 }
 ```
 
-The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13) operates as the owner of the current auth state for a given "request".  "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. 
+The [AuthService](https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13) operates as the owner of the current auth state for a given "request". "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. 
 
 The service allows for storing and retrieving the active [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8), and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") makes heavy use of this state for enforcing routes when authentication is required. 
 

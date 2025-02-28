@@ -1,6 +1,6 @@
 import { GetOption, SetOption } from 'cookies';
 
-import { Controller, Get, QueryParam, Request, Response } from '@travetto/rest';
+import { Controller, Get, QueryParam, HttpRequest, HttpResponse } from '@travetto/rest';
 
 @Controller('/simple')
 export class SimpleRoutes {
@@ -9,7 +9,7 @@ export class SimpleRoutes {
   private setOptions: SetOption;
 
   @Get('/cookies')
-  cookies(req: Request, res: Response, @QueryParam() value: string) {
+  cookies(req: HttpRequest, res: HttpResponse, @QueryParam() value: string) {
     req.cookies.get('name', this.getOptions);
     res.cookies.set('name', value, this.setOptions);
   }

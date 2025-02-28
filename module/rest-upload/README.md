@@ -21,7 +21,7 @@ A simple example:
 
 **Code: Rest controller with upload support**
 ```typescript
-import { Controller, Post, Get, Request } from '@travetto/rest';
+import { Controller, Post, Get, HttpRequest } from '@travetto/rest';
 import { Upload, UploadAll } from '@travetto/rest-upload';
 
 @Controller('/simple')
@@ -50,7 +50,7 @@ export class Simple {
    */
   @Post('/files')
   @UploadAll()
-  async loadFiles({ uploads }: Request) {
+  async loadFiles({ uploads }: HttpRequest) {
     for (const [, upload] of Object.entries(uploads)) {
       return upload;
     }

@@ -2,7 +2,7 @@ import { isPromise } from 'node:util/types';
 
 import { asConstructable, castTo, Class } from '@travetto/runtime';
 
-import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
+import { HttpRequest, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { LightweightConfig, ManagedInterceptorConfig, RestInterceptor, RouteApplies } from '../interceptor/types';
 import { RestSymbols } from '../symbols';
@@ -46,7 +46,7 @@ export class RouteUtil {
   /**
    * Get the interceptor config for a given request and interceptor instance
    */
-  static getInterceptorConfig<T extends RestInterceptor<U>, U extends ManagedInterceptorConfig>(req: Request, inst: T): U | undefined {
+  static getInterceptorConfig<T extends RestInterceptor<U>, U extends ManagedInterceptorConfig>(req: HttpRequest, inst: T): U | undefined {
     const cfg = req[RestSymbols.InterceptorConfigs]?.[inst.constructor.Ⲑid] ?? undefined;
     return castTo(cfg);
   }

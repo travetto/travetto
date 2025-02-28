@@ -83,7 +83,7 @@ After that, the provider is no different than any other, and can be used accordi
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-passport/doc/simple.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Redirect<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Request <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Redirect<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> HttpRequest <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Login<span class="token punctuation">,</span> Authenticated<span class="token punctuation">,</span> Logout <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> <span class="token constant">FB_AUTH</span> <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./conf'</span><span class="token punctuation">;</span>
@@ -104,8 +104,8 @@ After that, the provider is no different than any other, and can be used accordi
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/self'</span><span class="token punctuation">)</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Authenticated</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getSelf</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> req<span class="token punctuation">.</span>auth<span class="token punctuation">;</span>
+  <span class="token keyword">async</span> <span class="token function">getSelf</span><span class="token punctuation">(</span>req<span class="token operator">:</span> HttpRequest<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> req<span class="token punctuation">.</span>user<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/facebook/callback'</span><span class="token punctuation">)</span>
@@ -122,7 +122,7 @@ After that, the provider is no different than any other, and can be used accordi
    * Simple Echo
    */</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Post</span></span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">echo</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>object<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">echo</span><span class="token punctuation">(</span>req<span class="token operator">:</span> HttpRequest<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>object<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> req<span class="token punctuation">.</span>body<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>

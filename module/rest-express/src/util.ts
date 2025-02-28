@@ -1,6 +1,6 @@
 import type express from 'express';
 
-import { RestSymbols, RestServerUtil, Request, Response } from '@travetto/rest';
+import { RestSymbols, RestServerUtil, HttpRequest, HttpResponse } from '@travetto/rest';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -8,10 +8,10 @@ import { castTo } from '@travetto/runtime';
  */
 export class ExpressRestServerUtil {
   /**
-   * Build a Travetto Request from an Express Request
+   * Build a Travetto HttpRequest from an Express Request
    */
-  static getRequest(req: express.Request): Request {
-    return RestServerUtil.decorateRequest<Request>({
+  static getRequest(req: express.Request): HttpRequest {
+    return RestServerUtil.decorateRequest<HttpRequest>({
       [RestSymbols.ProviderEntity]: req,
       [RestSymbols.NodeEntity]: req,
       protocol: castTo(req.protocol),
@@ -26,10 +26,10 @@ export class ExpressRestServerUtil {
   }
 
   /**
-   * Build a Travetto Response from an Express Response
+   * Build a Travetto HttpResponse from an Express Response
    */
-  static getResponse(res: express.Response): Response {
-    return RestServerUtil.decorateResponse<Response>({
+  static getResponse(res: express.Response): HttpResponse {
+    return RestServerUtil.decorateResponse<HttpResponse>({
       [RestSymbols.ProviderEntity]: res,
       [RestSymbols.NodeEntity]: res,
       get headersSent(): boolean {

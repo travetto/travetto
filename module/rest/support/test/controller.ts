@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 import { Controller } from '../../src/decorator/controller';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';
 import { PathParam, QueryParam } from '../../src/decorator/param';
-import { Request, Response } from '../../src/types';
+import { HttpRequest, HttpResponse } from '../../src/types';
 import { Produces, SetHeaders } from '../../src/decorator/common';
 import { Renderable } from '../../src/response/renderable';
 
@@ -25,12 +25,12 @@ export class TestController {
   }
 
   @Put('/body')
-  withBody(req: Request) {
+  withBody(req: HttpRequest) {
     return { body: req.body.age };
   }
 
   @Delete('/cookie')
-  withCookie(req: Request, res: Response) {
+  withCookie(req: HttpRequest, res: HttpResponse) {
     res.cookies.set('flavor', 'oreo');
     return { cookie: req.cookies.get('orange') };
   }
@@ -66,7 +66,7 @@ export class TestController {
   }
 
   @Get('/fullUrl')
-  getFullUrl(req: Request) {
+  getFullUrl(req: HttpRequest) {
     return {
       url: req.url,
       path: req.path
@@ -74,28 +74,28 @@ export class TestController {
   }
 
   @Get('/headerFirst')
-  getHeaderFirst(req: Request) {
+  getHeaderFirst(req: HttpRequest) {
     return {
       header: req.headerFirst('age')
     };
   }
 
   @Post('/rawBody')
-  postRawBody(req: Request) {
+  postRawBody(req: HttpRequest) {
     return {
       size: req.raw?.length
     };
   }
 
   @Get('/fun/*')
-  getFun(req: Request) {
+  getFun(req: HttpRequest) {
     return {
       path: req.url.split('fun/')[1]
     };
   }
 
   @Get('/ip')
-  getIp(req: Request) {
+  getIp(req: HttpRequest) {
     return {
       ip: req.getIp()
     };

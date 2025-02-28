@@ -2,7 +2,7 @@ import type lambda from 'aws-lambda';
 
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { Request, RestServerHandle, RestCookieConfig } from '@travetto/rest';
+import { HttpRequest, RestServerHandle, RestCookieConfig } from '@travetto/rest';
 import {
   RestServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
@@ -74,7 +74,7 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
     return await this.#lambda.run();
   }
 
-  async execute(method: Request['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {
+  async execute(method: HttpRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {
     const multiValueHeaders = valuesToShape.multi(headers);
 
     const res = (await this.#lambda.handle({

@@ -3,16 +3,16 @@ import { PassThrough, Readable } from 'node:stream';
 
 import { ByteRange, castTo } from '@travetto/runtime';
 
-import { Request, ContentType } from '../../types';
+import { HttpRequest, ContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
 import { RestSymbols } from '../../symbols';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
 /**
- * Base Request object
+ * Base Http Request object
  */
-export class RequestCore implements Partial<Request> {
+export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Content type parsed
    */
@@ -22,14 +22,14 @@ export class RequestCore implements Partial<Request> {
    * Get the inbound request header as a string
    * @param key The header to get
    */
-  header<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | string[] | undefined {
+  header<K extends keyof IncomingHttpHeaders>(this: HttpRequest, key: K): string | string[] | undefined {
     return this.headers[castTo<string>(key).toLowerCase()];
   }
   /**
    * Get the inbound request header as a string[]
    * @param key The header to get
    */
-  headerList<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string[] | undefined {
+  headerList<K extends keyof IncomingHttpHeaders>(this: HttpRequest, key: K): string[] | undefined {
     const res = this.header(key);
     if (res === undefined) {
       return res;
@@ -45,23 +45,23 @@ export class RequestCore implements Partial<Request> {
    * Get the inbound request header first value
    * @param key The header to get
    */
-  headerFirst<K extends keyof IncomingHttpHeaders>(this: Request, key: K): string | undefined {
+  headerFirst<K extends keyof IncomingHttpHeaders>(this: HttpRequest, key: K): string | undefined {
     return this.headerList(key)?.[0];
   }
 
   /**
    * Get the fully parsed content type
    */
-  getContentType(this: Request): ContentType | undefined {
-    const self: Request & Partial<RequestCore> = castTo(this);
+  getContentType(this: HttpRequest): ContentType | undefined {
+    const self: HttpRequest & Partial<HttpRequestCore> = castTo(this);
     return self[RestSymbols.ParsedType] ??= MimeUtil.parse(this.headerFirst('content-type'));
   }
 
   /**
    * Attempt to read the remote IP address of the connection
    */
-  getIp(this: Request): string | undefined {
-    const self: Request & Partial<RequestCore> = castTo(this);
+  getIp(this: HttpRequest): string | undefined {
+    const self: HttpRequest & Partial<HttpRequestCore> = castTo(this);
     const raw = self[RestSymbols.NodeEntity];
     return self.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
   }
@@ -69,7 +69,7 @@ export class RequestCore implements Partial<Request> {
   /**
    * Get requested byte range for a given request
    */
-  getRange(this: Request, chunkSize: number = 100 * 1024): ByteRange | undefined {
+  getRange(this: HttpRequest, chunkSize: number = 100 * 1024): ByteRange | undefined {
     const rangeHeader = this.headerFirst('range');
 
     if (rangeHeader) {
@@ -84,7 +84,7 @@ export class RequestCore implements Partial<Request> {
   /**
    * Read the filename from the content disposition
    */
-  getFilename(this: Request): string | undefined {
+  getFilename(this: HttpRequest): string | undefined {
     const [, match] = (this.header('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
     return match;
   }
@@ -92,7 +92,7 @@ export class RequestCore implements Partial<Request> {
   /**
    * Get request body as a stream
    */
-  stream(this: Request): Readable {
+  stream(this: HttpRequest): Readable {
     const out = new PassThrough();
     this.pipe(out);
     return out;

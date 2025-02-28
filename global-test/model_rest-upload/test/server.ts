@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { DataUtil } from '@travetto/schema';
-import { Controller, Get, Post, Request } from '@travetto/rest';
+import { Controller, Get, Post, HttpRequest } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
@@ -22,7 +22,7 @@ class TestUploadController {
 
   @Post('/all')
   @UploadAll()
-  async uploadAll({ uploads }: Request) {
+  async uploadAll({ uploads }: HttpRequest) {
     for (const [, file] of Object.entries(uploads)) {
       return meta(file);
     }
@@ -61,7 +61,7 @@ class TestUploadController {
   }
 
   @Get('*')
-  async get(req: Request) {
+  async get(req: HttpRequest) {
     const range = req.getRange();
     return await this.service.getBlob(req.url.replace(/^\/test\/upload\//, ''), range);
   }

@@ -11,7 +11,7 @@ import { Controller } from '../src/decorator/controller';
 import { Get } from '../src/decorator/endpoint';
 import { ManagedInterceptorConfig, RestInterceptor } from '../src/interceptor/types';
 import { ControllerRegistry } from '../src/registry/controller';
-import { Response, FilterContext, RouteConfig, RestServerHandle } from '../src/types';
+import { HttpResponse, FilterContext, RouteConfig, RestServerHandle } from '../src/types';
 import { RestServer } from '../src/application/server';
 import { RestApplication } from '../src/application/rest';
 import { CorsInterceptor } from '../src/interceptor/cors';
@@ -106,7 +106,7 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const res = asFull<Response & { name: string }>({ name: undefined, status: () => 200, send: () => { } });
+    const res = asFull<HttpResponse & { name: string }>({ name: undefined, status: () => 200, send: () => { } });
     await endpoint.handlerFinalized!(asFull({}), res);
     return res.name;
   }

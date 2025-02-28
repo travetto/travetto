@@ -6,14 +6,14 @@ import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { MethodOrAll, Request, RestServerHandle } from '../../src/types';
+import { MethodOrAll, HttpRequest, RestServerHandle } from '../../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
 import { CoreRestServerSupport } from './server-support/core';
 import { RestNetUtil } from '../../src/util/net';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
-type FullRequest = MakeRequestConfig<Buffer | string | { stream: Readable } | Record<string, unknown>> & { throwOnError?: boolean };
+type FullHttpRequest = MakeRequestConfig<Buffer | string | { stream: Readable } | Record<string, unknown>> & { throwOnError?: boolean };
 
 /**
  * Base Rest Suite
@@ -68,7 +68,7 @@ export abstract class BaseRestSuite {
     }
   }
 
-  getMultipartRequest(chunks: Multipart[]): FullRequest {
+  getMultipartRequest(chunks: Multipart[]): FullHttpRequest {
     const boundary = `-------------------------multipart-${Util.uuid()}`;
 
     const nl = '\r\n';
@@ -99,12 +99,12 @@ export abstract class BaseRestSuite {
   }
 
   async request<T>(
-    method: Request['method'] | Exclude<MethodOrAll, 'all'>,
+    method: HttpRequest['method'] | Exclude<MethodOrAll, 'all'>,
     path: string,
-    cfg: FullRequest = {}
+    cfg: FullHttpRequest = {}
   ): Promise<MakeRequestResponse<T>> {
 
-    method = castTo<Request['method']>(method.toUpperCase());
+    method = castTo<HttpRequest['method']>(method.toUpperCase());
 
     cfg.headers ??= {};
 

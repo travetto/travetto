@@ -1,7 +1,7 @@
 import timers from 'node:timers/promises';
 
 import { DependencyRegistry } from '@travetto/di';
-import { type Request, RestCookieConfig, RestConfig, RestSslConfig, RestApplication } from '@travetto/rest';
+import { type HttpRequest, RestCookieConfig, RestConfig, RestSslConfig, RestApplication } from '@travetto/rest';
 
 import { RestServerSupport, MakeRequestConfig, headerToShape } from './base';
 
@@ -50,7 +50,7 @@ export class CoreRestServerSupport implements RestServerSupport {
     return handle;
   }
 
-  async execute(method: Request['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}) {
+  async execute(method: HttpRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}) {
 
     let q = '';
     if (query && Object.keys(query).length) {

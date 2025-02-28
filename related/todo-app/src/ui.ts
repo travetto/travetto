@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { Controller, Get, Produces, Request, Undocumented } from '@travetto/rest';
+import { Controller, Get, Produces, HttpRequest, Undocumented } from '@travetto/rest';
 import { RuntimeResources } from '@travetto/runtime';
 
 @Controller('/ui')
@@ -15,13 +15,13 @@ export class UIController {
 
   @Get('js/*')
   @Produces('application/javascript')
-  getJs(req: Request): Promise<Readable> {
+  getJs(req: HttpRequest): Promise<Readable> {
     return RuntimeResources.readStream(req.url);
   }
 
   @Get('css/*')
   @Produces('text/css')
-  getCss(req: Request): Promise<Readable> {
+  getCss(req: HttpRequest): Promise<Readable> {
     return RuntimeResources.readStream(req.url);
   }
 }

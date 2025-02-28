@@ -1,14 +1,14 @@
 import passport from 'passport';
 
 import { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
-import { FilterContext, Request, Response } from '@travetto/rest';
+import { FilterContext, HttpRequest, HttpResponse } from '@travetto/rest';
 import { castTo } from '@travetto/runtime';
 
 import { PassportUtil } from './util';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
 
-type Handler = (req: Request, res: Response, next: Function) => unknown;
+type Handler = (req: HttpRequest, res: HttpResponse, next: Function) => unknown;
 const authenticator: passport.Authenticator<Handler> = castTo(passport);
 
 /**
@@ -22,7 +22,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
   #strategyName: string;
   #strategy: passport.Strategy;
   #toPrincipal: (user: U) => SimplePrincipal;
-  #passportOptions: (req: Request) => passport.AuthenticateOptions;
+  #passportOptions: (req: HttpRequest) => passport.AuthenticateOptions;
   session = false;
 
   /**
@@ -37,7 +37,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
     strategyName: string,
     strategy: passport.Strategy,
     toPrincipal: (user: U) => SimplePrincipal,
-    opts: passport.AuthenticateOptions | ((req: Request) => passport.AuthenticateOptions) = {},
+    opts: passport.AuthenticateOptions | ((req: HttpRequest) => passport.AuthenticateOptions) = {},
   ) {
     this.#strategyName = strategyName;
     this.#strategy = strategy;

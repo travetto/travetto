@@ -1,5 +1,5 @@
 import type { GetOption, SetOption } from 'cookies';
-import type { Request, Response } from '../types';
+import type { HttpRequest, HttpResponse } from '../types';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
@@ -58,7 +58,7 @@ export class RestCommonUtil {
   /**
    * Write value to response
    */
-  static writeValue(cfg: ValueConfig, res: Response, output: string | undefined, opts?: SetOption): void {
+  static writeValue(cfg: ValueConfig, res: HttpResponse, output: string | undefined, opts?: SetOption): void {
     if (cfg.mode === 'cookie' || !cfg.mode) {
       res.cookies.set(cfg.cookie, output, {
         ...opts,
@@ -77,7 +77,7 @@ export class RestCommonUtil {
   /**
    * Read value from request
    */
-  static readValue(cfg: ValueConfig, req: Request, opts?: GetOption): string | undefined {
+  static readValue(cfg: ValueConfig, req: HttpRequest, opts?: GetOption): string | undefined {
     let res = (cfg.mode === 'cookie' || !cfg.mode) ?
       req.cookies.get(cfg.cookie, opts) :
       req.headerFirst(cfg.header);

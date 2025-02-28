@@ -2,7 +2,7 @@ import { pipeline } from 'node:stream/promises';
 
 import type koa from 'koa';
 
-import { RestServerUtil, Request, Response, RestSymbols } from '@travetto/rest';
+import { RestServerUtil, HttpRequest, HttpResponse, RestSymbols } from '@travetto/rest';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -10,9 +10,9 @@ import { castTo } from '@travetto/runtime';
  */
 export class KoaRestServerUtil {
   /**
-   * Build a Travetto Request from a koa context
+   * Build a Travetto HttpRequest from a koa context
    */
-  static getRequest(ctx: koa.Context): Request {
+  static getRequest(ctx: koa.Context): HttpRequest {
     return RestServerUtil.decorateRequest({
       [RestSymbols.ProviderEntity]: ctx,
       [RestSymbols.NodeEntity]: ctx.req,
@@ -29,9 +29,9 @@ export class KoaRestServerUtil {
   }
 
   /**
-   * Build a Travetto Response from a koa context
+   * Build a Travetto HttpResponse from a koa context
    */
-  static getResponse(ctx: koa.Context): Response {
+  static getResponse(ctx: koa.Context): HttpResponse {
     return RestServerUtil.decorateResponse({
       [RestSymbols.ProviderEntity]: ctx,
       [RestSymbols.NodeEntity]: ctx.res,

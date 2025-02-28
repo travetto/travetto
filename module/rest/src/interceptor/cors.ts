@@ -2,7 +2,7 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import { FilterContext, Request } from '../types';
+import { FilterContext, HttpRequest } from '../types';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
@@ -19,7 +19,7 @@ export class RestCorsConfig extends ManagedInterceptorConfig {
   /**
    * Allowed http methods
    */
-  methods?: Request['method'][];
+  methods?: HttpRequest['method'][];
   /**
    * Allowed http headers
    */

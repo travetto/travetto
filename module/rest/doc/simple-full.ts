@@ -1,4 +1,4 @@
-import { Get, Controller, Post, QueryParam, Request } from '@travetto/rest';
+import { Get, Controller, Post, QueryParam, HttpRequest } from '@travetto/rest';
 import { Integer, Min } from '@travetto/schema';
 
 import { MockService } from './mock';
@@ -38,7 +38,7 @@ export class Simple {
 
   @Get('img/*')
   async getImage(
-    req: Request,
+    req: HttpRequest,
     @QueryParam('w') @Integer() @Min(100) width?: number,
     @QueryParam('h') @Integer() @Min(100) height?: number
   ) {

@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { RestSymbols, RestServerUtil, Request, Response } from '@travetto/rest';
+import { RestSymbols, RestServerUtil, HttpRequest, HttpResponse } from '@travetto/rest';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -8,9 +8,9 @@ import { castTo } from '@travetto/runtime';
  */
 export class FastifyRestServerUtil {
   /**
-   * Build a Travetto Request from a Fastify Request
+   * Build a Travetto HttpRequest from a Fastify Request
    */
-  static getRequest(req: FastifyRequest): Request {
+  static getRequest(req: FastifyRequest): HttpRequest {
     return RestServerUtil.decorateRequest({
       [RestSymbols.ProviderEntity]: req,
       [RestSymbols.NodeEntity]: req.raw,
@@ -26,9 +26,9 @@ export class FastifyRestServerUtil {
   }
 
   /**
-   * Build a Travetto Response from a Fastify Reply
+   * Build a Travetto HttpResponse from a Fastify Reply
    */
-  static getResponse(reply: FastifyReply): Response {
+  static getResponse(reply: FastifyReply): HttpResponse {
     return RestServerUtil.decorateResponse({
       [RestSymbols.ProviderEntity]: reply,
       [RestSymbols.NodeEntity]: reply.raw,

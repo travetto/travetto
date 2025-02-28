@@ -1,7 +1,7 @@
 import { UploadMap } from './types';
 
 declare module '@travetto/rest' {
-  interface Request {
+  interface HttpRequest {
     uploads: UploadMap
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AsyncContext, AsyncContextValue } from '@travetto/context';
-import { Request, Response } from '@travetto/rest';
+import { HttpRequest, HttpResponse } from '@travetto/rest';
 
 import { FilterContext, FilterNext } from '../types';
 
@@ -34,11 +34,11 @@ export class AsyncContextInterceptor implements RestInterceptor {
     });
   }
 
-  get request(): Request | undefined {
+  get request(): HttpRequest | undefined {
     return this.#active.get()?.req;
   }
 
-  get response(): Response | undefined {
+  get response(): HttpResponse | undefined {
     return this.#active.get()?.res;
   }
 }

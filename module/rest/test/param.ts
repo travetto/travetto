@@ -9,7 +9,7 @@ import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorat
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
 import { ControllerRegistry } from '../src/registry/controller';
-import { MethodOrAll, Request, Response } from '../src/types';
+import { MethodOrAll, HttpRequest, HttpResponse } from '../src/types';
 import { ParamExtractor } from '../src/util/param';
 import { EndpointConfig } from '../src/registry/types';
 
@@ -29,7 +29,7 @@ class ParamController {
   async users(@PathParam() id: string, @QueryParam() age?: number) { }
 
   @Post('/req/res')
-  async reqRes(@ContextParam() req: Request, @ContextParam() res: Response, req2?: Request) { }
+  async reqRes(@ContextParam() req: HttpRequest, @ContextParam() res: HttpResponse, req2?: HttpRequest) { }
 
   @Post('/array')
   async array(values: number[]) { }
@@ -89,7 +89,7 @@ export class ParameterTest {
     return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.method === method)!;
   }
 
-  static async extract(ep: EndpointConfig, req: Partial<Request>, res: Partial<Response> = {}): Promise<unknown[]> {
+  static async extract(ep: EndpointConfig, req: Partial<HttpRequest>, res: Partial<HttpResponse> = {}): Promise<unknown[]> {
     return await ParamExtractor.extract(ep, asFull(req), asFull(res));
   }
 

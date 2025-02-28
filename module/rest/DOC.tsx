@@ -16,16 +16,16 @@ import { LoggingInterceptor } from './src/interceptor/logging';
 import { SerializeInterceptor } from './src/interceptor/serialize';
 import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies';
 import { RestConfig } from './src/application/config';
-import { Request, Response } from './src/types';
+import { HttpRequest, HttpResponse } from './src/types';
 import { AsyncContextInterceptor } from './src/interceptor/context';
 
-const RequestContract = toConcrete<Request>();
-const ResponseContract = toConcrete<Response>();
+const HttpRequestContract = toConcrete<HttpRequest>();
+const HttpResponseContract = toConcrete<HttpResponse>();
 const RestInterceptorContract = toConcrete<RestInterceptor>();
 
 export const text = <>
   <c.StdHeader />
-  The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles {d.library('Express')} in the {RequestContract} and {ResponseContract} objects). This module is built upon the {d.mod('Schema')} structure, and all controller method parameters follow the same rules/abilities as any {Field} in a standard {Schema} class.
+  The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles {d.library('Express')} in the {HttpRequestContract} and {HttpResponseContract} objects). This module is built upon the {d.mod('Schema')} structure, and all controller method parameters follow the same rules/abilities as any {Field} in a standard {Schema} class.
 
   <c.Section title='Routes: Controller'>
     To define a route, you must first declare a {Controller} which is only allowed on classes. Controllers can be configured with:
@@ -81,7 +81,7 @@ export const text = <>
         <li>{QueryParam} - Query params</li>
         <li>{Body} - Request body (in it's entirety), with support for validation</li>
         <li>{HeaderParam} - Header values</li>
-        <li>{ContextParam} - Special values exposed (e.g. {RequestContract}, {ResponseContract}, etc.)</li>
+        <li>{ContextParam} - Special values exposed (e.g. {HttpRequestContract}, {HttpResponseContract}, etc.)</li>
       </ul>
 
       Each {Param} can be configured to indicate:
@@ -194,7 +194,7 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='Custom Interceptors'>
-      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {RestInterceptorContract} interface.  The interceptors are tied to the defined {RequestContract} and {ResponseContract} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {RestInterceptorContract} interface.  The interceptors are tied to the defined {HttpRequestContract} and {HttpResponseContract} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
       <c.Code title='Defining a new Interceptor' src='doc/interceptor-logging.ts' />
 
@@ -226,7 +226,7 @@ export const text = <>
     </c.SubSection>
   </c.Section>
   <c.Section title='Cookie Support'>
-    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {RequestContract}/{ResponseContract} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {HttpRequestContract}/{HttpResponseContract} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
     <c.Code title='Sample Cookie Usage' src='doc/cookie-routes.ts' />
   </c.Section>

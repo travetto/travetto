@@ -13,7 +13,7 @@ npm install @travetto/rest
 yarn add @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L28) and [Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) class.
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [HttpRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L35) and [HttpResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) class.
 
 ## Routes: Controller
 To define a route, you must first declare a [@Controller](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/controller.ts#L9) which is only allowed on classes. Controllers can be configured with:
@@ -82,7 +82,7 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
    *  [@QueryParam](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L50) - Query params
    *  [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62) - Request body (in it's entirety), with support for validation
    *  [@HeaderParam](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L56) - Header values
-   *  [@ContextParam](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) - Special values exposed (e.g. [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L28), [Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158), etc.)
+   *  [@ContextParam](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) - Special values exposed (e.g. [HttpRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L35), [HttpResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158), etc.)
 Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L25) can be configured to indicate:
    *  `name` - Name of param, field name, defaults to handler parameter name if necessary
    *  `description` - Description of param, pulled from [JSDoc](http://usejsdoc.org/about-getting-started.html), or defaults to name if empty
@@ -92,7 +92,7 @@ Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/dec
 
 **Code: Full-fledged Controller with Routes**
 ```typescript
-import { Get, Controller, Post, QueryParam, Request } from '@travetto/rest';
+import { Get, Controller, Post, QueryParam, HttpRequest } from '@travetto/rest';
 import { Integer, Min } from '@travetto/schema';
 
 import { MockService } from './mock';
@@ -132,7 +132,7 @@ export class Simple {
 
   @Get('img/*')
   async getImage(
-    req: Request,
+    req: HttpRequest,
     @QueryParam('w') @Integer() @Min(100) width?: number,
     @QueryParam('h') @Integer() @Min(100) height?: number
   ) {
@@ -438,7 +438,7 @@ export class RestCorsConfig extends ManagedInterceptorConfig {
   /**
    * Allowed http methods
    */
-  methods?: Request['method'][];
+  methods?: HttpRequest['method'][];
   /**
    * Allowed http headers
    */
@@ -511,7 +511,7 @@ rest.log:
 [AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/context.ts#L18) is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
 
 ### Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L28) interface.  The interceptors are tied to the defined [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L28) and [Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L28) interface.  The interceptors are tied to the defined [HttpRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L35) and [HttpResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
@@ -608,13 +608,13 @@ The resolution logic is as follows:
    *  By default, if nothing else matched, assume the interceptor is valid.
 
 ## Cookie Support
-[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [Request](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L28)/[Response](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [HttpRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L35)/[HttpResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.ts#L158) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 **Code: Sample Cookie Usage**
 ```typescript
 import { GetOption, SetOption } from 'cookies';
 
-import { Controller, Get, QueryParam, Request, Response } from '@travetto/rest';
+import { Controller, Get, QueryParam, HttpRequest, HttpResponse } from '@travetto/rest';
 
 @Controller('/simple')
 export class SimpleRoutes {
@@ -623,7 +623,7 @@ export class SimpleRoutes {
   private setOptions: SetOption;
 
   @Get('/cookies')
-  cookies(req: Request, res: Response, @QueryParam() value: string) {
+  cookies(req: HttpRequest, res: HttpResponse, @QueryParam() value: string) {
     req.cookies.get('name', this.getOptions);
     res.cookies.set('name', value, this.setOptions);
   }

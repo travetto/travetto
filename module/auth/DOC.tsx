@@ -59,7 +59,7 @@ export const text = <>
   <c.Section title='Authorization Services'>
     <c.Code src={AuthService} title='Authorization Service' outline={true} />
 
-    The {AuthService} operates as the owner of the current auth state for a given "request".  "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. <br />
+    The {AuthService} operates as the owner of the current auth state for a given "request". "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. <br />
 
     The service allows for storing and retrieving the active {PrincipalContract}, and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  {d.mod('AuthRest')} makes heavy use of this state for enforcing routes when authentication is required. <br />
 
