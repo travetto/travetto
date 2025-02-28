@@ -330,38 +330,57 @@ And using the pattern established in the [Command Line Interface](https://github
 ```bash
 $ trv run:web:custom
 
-Error: Cannot find module '@travetto/web/doc/cli.run_rest_custom'
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto-doc/web/support/cli.run_web_custom.js
-    at Function._resolveFilename (node:internal/modules/cjs/loader:1394:15)
-    at defaultResolveImpl (node:internal/modules/cjs/loader:1050:19)
-    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1055:22)
-    at Function._load (node:internal/modules/cjs/loader:1204:37)
-    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:234:24)
-    at Module.require (node:internal/modules/cjs/loader:1480:12)
-    at require (node:internal/modules/helpers:135:16)
-    at Object.<anonymous> (./doc-exec/support/cli.run_web_custom.ts:2:1)
-    at Module._compile (node:internal/modules/cjs/loader:1723:14)
-    at Object..js (node:internal/modules/cjs/loader:1888:10)
-    at Module.load (node:internal/modules/cjs/loader:1458:32)
-    at Function._load (node:internal/modules/cjs/loader:1275:12)
-    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:234:24)
-    at cjsLoader (node:internal/modules/esm/translators:311:5)
-    at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:204:7)
-    at ModuleJob.run (node:internal/modules/esm/module_job:272:25)
-    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:583:26)
-    at async $Runtime.importFrom (<workspace-root>/module/runtime/src/context.ts:134:17)
-    at async $CliCommandRegistry.getInstance (<workspace-root>/module/cli/src/registry.ts:77:36)
-    at async Function.#bindCommand (<workspace-root>/module/cli/src/execute.ts:37:21)
-    at async Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:49:36)
-    at async Function.run (<workspace-root>/module/cli/src/execute.ts:75:9) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    './doc-exec/.trv/output/node_modules/@travetto-doc/web/support/cli.run_web_custom.js'
-  ]
+CUSTOM STARTUP
+Initialized {
+  manifest: {
+    main: {
+      name: '@travetto-doc/web',
+      folder: './doc-exec'
+    },
+    workspace: {
+      name: '@travetto-doc/web',
+      path: './doc-exec',
+      mono: false,
+      manager: 'npm',
+      type: 'commonjs',
+      defaultEnv: 'local'
+    }
+  },
+  runtime: {
+    env: 'prod',
+    debug: false,
+    production: true,
+    dynamic: false,
+    resourcePaths: [ './doc-exec/resources' ],
+    profiles: []
+  },
+  config: {
+    sources: [
+      { priority: 10, source: 'direct' },
+      { priority: 999, source: 'memory://override' }
+    ],
+    active: {
+      WebAcceptsConfig: { types: {} },
+      WebAsyncContextConfig: {},
+      WebBodyParseConfig: { limit: '1mb', parsingTypes: {} },
+      WebConfig: {
+        serve: true,
+        port: 3000,
+        trustProxy: false,
+        hostname: 'localhost',
+        bindAddress: '0.0.0.0',
+        baseUrl: 'http://localhost:3000',
+        defaultMessage: true
+      },
+      WebCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      WebCorsConfig: {},
+      WebGetCacheConfig: {},
+      WebLogRoutesConfig: {},
+      WebSslConfig: { active: true }
+    }
+  }
 }
+Listening { port: 3000 }
 ```
 
 ## Interceptors

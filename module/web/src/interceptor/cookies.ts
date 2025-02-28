@@ -55,11 +55,11 @@ export class CookiesInterceptor implements WebInterceptor<WebCookieConfig> {
   config: WebCookieConfig;
 
   @Inject()
-  restConfig: WebConfig;
+  webConfig: WebConfig;
 
   finalizeConfig(config: WebCookieConfig): WebCookieConfig {
-    config.secure ??= this.restConfig.ssl?.active;
-    config.domain ??= this.restConfig.hostname;
+    config.secure ??= this.webConfig.ssl?.active;
+    config.domain ??= this.webConfig.hostname;
     return config;
   }
 

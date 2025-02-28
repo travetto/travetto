@@ -366,38 +366,57 @@ And using the pattern established in the <a class="module-link" href="https://gi
 </figcaption>
     <pre><code class="language-bash">$ trv run:web:custom
 
-Error: Cannot <span class="token function">find</span> module <span class="token string">'@travetto/web/doc/cli.run_rest_custom'</span>
-Require stack:
-- ./doc-exec/.trv/output/node_modules/@travetto-doc/web/support/cli.run_web_custom.js
-    at Function._resolveFilename <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1394:15<span class="token punctuation">)</span>
-    at defaultResolveImpl <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1050:19<span class="token punctuation">)</span>
-    at resolveForCJSWithHooks <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1055:22<span class="token punctuation">)</span>
-    at Function._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1204:37<span class="token punctuation">)</span>
-    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:322:14<span class="token punctuation">)</span>
-    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:234:24<span class="token punctuation">)</span>
-    at Module.require <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1480:12<span class="token punctuation">)</span>
-    at require <span class="token punctuation">(</span>node:internal/modules/helpers:135:16<span class="token punctuation">)</span>
-    at Object.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>./doc-exec/support/cli.run_web_custom.ts:2:1<span class="token punctuation">)</span>
-    at Module._compile <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1723:14<span class="token punctuation">)</span>
-    at Object<span class="token punctuation">..</span>js <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1888:10<span class="token punctuation">)</span>
-    at Module.load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1458:32<span class="token punctuation">)</span>
-    at Function._load <span class="token punctuation">(</span>node:internal/modules/cjs/loader:1275:12<span class="token punctuation">)</span>
-    at TracingChannel.traceSync <span class="token punctuation">(</span>node:diagnostics_channel:322:14<span class="token punctuation">)</span>
-    at wrapModuleLoad <span class="token punctuation">(</span>node:internal/modules/cjs/loader:234:24<span class="token punctuation">)</span>
-    at cjsLoader <span class="token punctuation">(</span>node:internal/modules/esm/translators:311:5<span class="token punctuation">)</span>
-    at ModuleWrap.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>node:internal/modules/esm/translators:204:7<span class="token punctuation">)</span>
-    at ModuleJob.run <span class="token punctuation">(</span>node:internal/modules/esm/module_job:272:25<span class="token punctuation">)</span>
-    at async onImport.tracePromise.__proto__ <span class="token punctuation">(</span>node:internal/modules/esm/loader:583:26<span class="token punctuation">)</span>
-    at async <span class="token variable">$Runtime</span>.importFrom <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/runtime/src/context.ts:134:17<span class="token punctuation">)</span>
-    at async <span class="token variable">$CliCommandRegistry</span>.getInstance <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/registry.ts:77:36<span class="token punctuation">)</span>
-    at async Function.<span class="token comment">#bindCommand (&lt;workspace-root>/module/cli/src/execute.ts:37:21)</span>
-    at async Function.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:49:36)</span>
-    at async Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:75:9<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  code: <span class="token string">'MODULE_NOT_FOUND'</span>,
-  requireStack: <span class="token punctuation">[</span>
-    <span class="token string">'./doc-exec/.trv/output/node_modules/@travetto-doc/web/support/cli.run_web_custom.js'</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
+CUSTOM STARTUP
+Initialized <span class="token punctuation">{{'{'}}</span>
+  manifest: <span class="token punctuation">{{'{'}}</span>
+    main: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'@travetto-doc/web'</span>,
+      folder: <span class="token string">'./doc-exec'</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    workspace: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'@travetto-doc/web'</span>,
+      path: <span class="token string">'./doc-exec'</span>,
+      mono: false,
+      manager: <span class="token string">'npm'</span>,
+      type: <span class="token string">'commonjs'</span>,
+      defaultEnv: <span class="token string">'local'</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  runtime: <span class="token punctuation">{{'{'}}</span>
+    env: <span class="token string">'prod'</span>,
+    debug: false,
+    production: true,
+    dynamic: false,
+    resourcePaths: <span class="token punctuation">[</span> <span class="token string">'./doc-exec/resources'</span> <span class="token punctuation">]</span>,
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  config: <span class="token punctuation">{{'{'}}</span>
+    sources: <span class="token punctuation">[</span>
+      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">10</span>, source: <span class="token string">'direct'</span> <span class="token punctuation">{{'}'}}</span>,
+      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">]</span>,
+    active: <span class="token punctuation">{{'{'}}</span>
+      WebAcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      WebAsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      WebBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      WebConfig: <span class="token punctuation">{{'{'}}</span>
+        serve: true,
+        port: <span class="token number">3000</span>,
+        trustProxy: false,
+        hostname: <span class="token string">'localhost'</span>,
+        bindAddress: <span class="token string">'0.0.0.0'</span>,
+        baseUrl: <span class="token string">'http://localhost:3000'</span>,
+        defaultMessage: <span class="token boolean">true</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      WebCookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
+      WebCorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      WebGetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      WebLogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 <h2 id="interceptors">Interceptors</h2>
