@@ -4,7 +4,7 @@ import { Readable, Writable } from 'node:stream';
 
 import type { ByteRange, Any, Class, TypedFunction } from '@travetto/runtime';
 
-import { RestSymbols } from './symbol';
+import type { RestSymbols } from './symbol';
 
 import type { RestInterceptor } from './interceptor/types';
 
