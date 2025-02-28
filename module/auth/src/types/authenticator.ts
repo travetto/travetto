@@ -3,6 +3,8 @@ import { Principal } from './principal';
 
 /**
  * Represents the general shape of additional login context, usually across multiple calls
+ *
+ * @concrete
  */
 export interface AuthenticatorState extends AnyMap { }
 

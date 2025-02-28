@@ -93,7 +93,7 @@ export class DocRenderer {
             const title = (await DocFileUtil.isDecorator(node.name, source.file)) ? `@${node.name}` : node.name;
             const el = this.#support.createElement('CodeLink', {
               src: source.file,
-              startRe: new RegExp(`(class|function)\\s+(${node.name})`),
+              startRe: new RegExp(`(class|function|interface)\\s+(${node.name})`),
               title
             });
             // @ts-expect-error

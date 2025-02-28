@@ -3,6 +3,7 @@ export type ValidationKind = ValidationKindCore | string;
 
 /**
  * Individual Validation Error
+ * @concrete
  */
 export interface ValidationError {
   /**

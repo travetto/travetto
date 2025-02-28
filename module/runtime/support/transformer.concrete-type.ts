@@ -25,7 +25,20 @@ export class ConcreteTransformer {
       state.factory.createBlock([])
     );
 
-    state.addStatements([dec]);
+    state.addStatements([
+      dec,
+      state.factory.createExpressionStatement(
+        state.factory.createCallExpression(
+          state.createAccess('Object', 'defineProperty'),
+          undefined,
+          [
+            dec.name!,
+            state.fromLiteral('name'),
+            state.fromLiteral({ value: final })
+          ]
+        )
+      )
+    ]);
 
     return dec;
   }
@@ -37,7 +50,7 @@ export class ConcreteTransformer {
   static onInterface(state: TransformerState, node: ts.InterfaceDeclaration): typeof node {
     if (this.#isConcreteSimple(node)) {
       const func = this.#createConcreteFunction(state, node.name);
-      MetadataRegistrationUtil.registerFunction(state, func.name!.text, func, func.name!.text);
+      MetadataRegistrationUtil.registerFunction(state, func, node);
     }
     return node;
   }
@@ -49,7 +62,7 @@ export class ConcreteTransformer {
   static onTypeAlias(state: TransformerState, node: ts.TypeAliasDeclaration): typeof node {
     if (this.#isConcreteSimple(node)) {
       const func = this.#createConcreteFunction(state, node.name);
-      MetadataRegistrationUtil.registerFunction(state, func.name!.text, func, func.name!.text);
+      MetadataRegistrationUtil.registerFunction(state, func, node);
     }
     return node;
   }

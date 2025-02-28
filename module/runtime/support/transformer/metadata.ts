@@ -24,7 +24,8 @@ export class MetadataRegistrationUtil {
     return !imp.startsWith(this.REGISTER_IMPORT);
   }
 
-  static tag(state: TransformerState, node: ts.Node, text: string): FunctionMetadataTag {
+  static tag(state: TransformerState, node: ts.Node): FunctionMetadataTag {
+    const text = node.getText();
     const hash = SystemUtil.naiveHash(text);
     try {
       const range = CoreUtil.getRangeOf(state.source, node) ?? [0, 0];
@@ -43,16 +44,19 @@ export class MetadataRegistrationUtil {
   /**
    * Register metadata on a function
    */
-  static registerFunction(state: TransformerState & MetadataInfo, name: string, node: ts.FunctionDeclaration | ts.FunctionExpression, text: string): void {
+  static registerFunction(state: TransformerState & MetadataInfo,
+    node: ts.FunctionDeclaration | ts.FunctionExpression,
+    src?: ts.FunctionDeclaration | ts.FunctionExpression | ts.InterfaceDeclaration | ts.TypeAliasDeclaration
+  ): void {
     // If we have a class like function
     state[registerImport] ??= state.importFile(this.REGISTER_IMPORT);
 
-    const tag = this.tag(state, node, text);
+    const tag = this.tag(state, src ?? node);
     const meta = state.factory.createCallExpression(
       state.createAccess(state[registerImport].ident, this.REGISTER_FN),
       [],
       [
-        state.createIdentifier(name),
+        state.createIdentifier(node.name!.text),
         state.getModuleIdentifier(),
         state.fromLiteral(tag),
       ]

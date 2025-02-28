@@ -115,9 +115,13 @@ export class RenderContext {
    * Resolve code/config
    */
   async resolveCode(node: JSXElementByFn<'Code' | 'Config'>): Promise<ResolvedCode> {
-    return node.props.startRe ?
-      DocResolveUtil.resolveSnippet(node.props.src, node.props.startRe, node.props.endRe, node.props.outline) :
-      DocResolveUtil.resolveCode(node.props.src, node.props.language, node.props.outline);
+    const type = typeof node.props.src === 'function' ? node.props.src : undefined;
+    const startRe = node.props.startRe ?? (type ? new RegExp(`^(export)?\\s*(interface|class)s+${type.name}\b`) : undefined);
+    const endRe = node.props.endRe ?? (type ? /^}$/ : undefined);
+
+    return startRe ?
+      DocResolveUtil.resolveSnippet(node.props.src, startRe, endRe, node.props.outline) :
+      DocResolveUtil.resolveCode(node.props.src, node.props.language ?? 'typescript', node.props.outline);
   }
 
   /**

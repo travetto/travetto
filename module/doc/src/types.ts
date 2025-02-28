@@ -5,6 +5,7 @@ export type Wrapper = Record<string, (cnt: string) => string>;
 
 /**
  * Document file shape
+ * @concrete
  */
 export interface DocumentShape {
   text: JSXElement | JSXElement[] | (() => Promise<JSXElement | JSXElement[]>);

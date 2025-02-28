@@ -6,6 +6,7 @@ import { AuthModelUtil } from './util';
 
 /**
  * A set of registration data
+ * @concrete
  */
 export interface RegisteredPrincipal extends Principal {
   /**

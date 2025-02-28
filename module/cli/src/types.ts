@@ -33,8 +33,9 @@ export type ParsedState = {
 
 /**
  * Constrained version of Schema's Validation Error
+ * @concrete
  */
-export type CliValidationError = {
+export interface CliValidationError {
   /**
    * The error message
    */
@@ -47,6 +48,7 @@ export type CliValidationError = {
 
 /**
  * CLI Command Contract
+ * @concrete
  */
 export interface CliCommandShape<T extends unknown[] = unknown[]> {
 

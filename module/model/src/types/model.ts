@@ -5,6 +5,7 @@ export type ModelIdSource = { create: () => string, valid: (id: string) => boole
 
 /**
  * Simple model interface
+ * @concrete
  */
 export interface ModelType {
   /**
