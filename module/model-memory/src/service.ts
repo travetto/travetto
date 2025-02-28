@@ -313,7 +313,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
     this.#getStore(cls).clear();
   }
 
-  async truncateBlobModels(): Promise<void> {
+  async truncateBlob(): Promise<void> {
     this.#getStore(ModelBlobNamespace).clear();
     this.#getStore(ModelBlobMetaNamespace).clear();
   }

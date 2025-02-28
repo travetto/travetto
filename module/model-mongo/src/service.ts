@@ -149,7 +149,7 @@ export class MongoModelService implements
     await col.deleteMany({});
   }
 
-  async truncateBlobModels(): Promise<void> {
+  async truncateBlob(): Promise<void> {
     await this.#bucket.drop().catch(() => { });
   }
 

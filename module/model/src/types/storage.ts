@@ -56,5 +56,5 @@ export interface ModelStorageSupport {
   /**
    * Truncate blob storage data
    */
-  truncateBlobModels?(): Promise<void>;
+  truncateBlob?(): Promise<void>;
 }

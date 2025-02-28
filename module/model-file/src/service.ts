@@ -243,7 +243,7 @@ export class FileModelService implements ModelCrudSupport, ModelBlobSupport, Mod
     await fs.rm(await this.#resolveName(cls), { recursive: true, force: true });
   }
 
-  async truncateBlobModels(): Promise<void> {
+  async truncateBlob(): Promise<void> {
     await fs.rm(await this.#resolveName(ModelBlobNamespace), { recursive: true, force: true });
   }
 }

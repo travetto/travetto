@@ -53,8 +53,8 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
         if (ModelStorageUtil.isSupported(service)) {
           const models = ModelRegistry.getClasses().filter(m => m === ModelRegistry.getBaseModel(m));
 
-          if (ModelBlobUtil.isSupported(service) && service.truncateBlobModels) {
-            await service.truncateBlobModels();
+          if (ModelBlobUtil.isSupported(service) && service.truncateBlob) {
+            await service.truncateBlob();
           }
 
           if (service.truncateModel) {
