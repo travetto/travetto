@@ -150,10 +150,6 @@ export const PAGES = [
       {
         path: 'openapi', title: 'OpenAPI',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/openapi/openapi.component').then(m => m.OpenapiComponent)
-      },
-      {
-        path: 'rest-client', title: 'Rest Client',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-client/rest-client.component').then(m => m.RestClientComponent)
       }
     ]
   },
