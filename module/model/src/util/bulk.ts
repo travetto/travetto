@@ -1,7 +1,7 @@
-import { Class } from '@travetto/runtime';
+import { Class, hasFunction } from '@travetto/runtime';
 
-import { BulkOp } from '../../service/bulk';
-import { ModelType } from '../../types/model';
+import { BulkOp, ModelBulkSupport } from '../types/bulk';
+import { ModelType } from '../types/model';
 import { ModelCrudProvider, ModelCrudUtil } from './crud';
 
 export type BulkPreStore<T extends ModelType> = {
@@ -13,6 +13,12 @@ export type BulkPreStore<T extends ModelType> = {
 };
 
 export class ModelBulkUtil {
+
+  /**
+   * Type guard for determining if service supports bulk operation
+   */
+  static isSupported = hasFunction<ModelBulkSupport>('processBulk');
+
   /**
    * Prepares bulk ops for storage
    * @param cls

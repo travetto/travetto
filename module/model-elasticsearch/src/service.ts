@@ -2,8 +2,8 @@ import { Client, errors, estypes } from '@elastic/elasticsearch';
 
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
-  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
-  OptionalId
+  ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry, OptionalId,
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil, ModelBulkUtil
 } from '@travetto/model';
 import { ShutdownManager, type DeepPartial, type Class, castTo, asFull, TypedObject, asConstructable } from '@travetto/runtime';
 import { SchemaChange, BindUtil } from '@travetto/schema';
@@ -14,14 +14,9 @@ import {
   QueryVerifier, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
-import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
 import { ElasticsearchModelConfig } from './config';
 import { EsBulkError } from './internal/types';

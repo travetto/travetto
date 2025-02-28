@@ -1,8 +1,8 @@
 import {
   ModelType,
   BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
-  NotFoundError, ModelRegistry, ExistsError, OptionalId,
-  ModelIdSource
+  NotFoundError, ModelRegistry, ExistsError, OptionalId, ModelIdSource,
+  ModelExpiryUtil, ModelCrudUtil, ModelStorageUtil, ModelBulkUtil,
 } from '@travetto/model';
 import { castTo, Class } from '@travetto/runtime';
 import { DataUtil, SchemaChange } from '@travetto/schema';
@@ -16,10 +16,6 @@ import {
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
 import { SQLModelConfig } from './config';
 import { Connected, ConnectedIterator, Transactional } from './connection/decorator';

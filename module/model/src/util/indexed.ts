@@ -1,12 +1,12 @@
-import { castTo, Class, DeepPartial, TypedObject } from '@travetto/runtime';
+import { castTo, Class, DeepPartial, hasFunction, TypedObject } from '@travetto/runtime';
 
-import { IndexNotSupported } from '../../error/invalid-index';
-import { NotFoundError } from '../../error/not-found';
-import { ModelRegistry } from '../../registry/model';
-import { IndexConfig } from '../../registry/types';
-import { ModelCrudSupport } from '../../service/crud';
-import { ModelIndexedSupport } from '../../service/indexed';
-import { ModelType, OptionalId } from '../../types/model';
+import { IndexNotSupported } from '../error/invalid-index';
+import { NotFoundError } from '../error/not-found';
+import { ModelRegistry } from '../registry/model';
+import type { IndexConfig } from '../registry/types';
+import type { ModelCrudSupport } from '../types/crud';
+import type { ModelIndexedSupport } from '../types/indexed';
+import type { ModelType, OptionalId } from '../types/model';
 
 type ComputeConfig = {
   includeSortInFields?: boolean;
@@ -23,6 +23,11 @@ const DEFAULT_SEP = '\u8203';
  * Utils for working with indexed model services
  */
 export class ModelIndexedUtil {
+
+  /**
+   * Type guard for determining if service supports indexed operation
+   */
+  static isSupported = hasFunction<ModelIndexedSupport>('getByIndex');
 
   /**
    * Compute flattened field to value mappings

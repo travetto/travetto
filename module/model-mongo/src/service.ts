@@ -9,7 +9,9 @@ import {
 import {
   ModelRegistry, ModelType, OptionalId, ModelCrudSupport, ModelStorageSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, ModelBlobSupport
+  NotFoundError, ExistsError, ModelBlobSupport,
+  ModelCrudUtil, ModelIndexedUtil, ModelStorageUtil, ModelExpiryUtil,
+  ModelBulkUtil, MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil,
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -23,15 +25,9 @@ import {
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/service/suggest';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
-import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 
 import { MongoUtil, PlainIdx, WithId } from './internal/util';
 import { MongoModelConfig } from './config';

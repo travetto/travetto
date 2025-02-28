@@ -10,12 +10,9 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelType, ModelRegistry,
-  NotFoundError, OptionalId, ExistsError, ModelBlobSupport
+  NotFoundError, OptionalId, ExistsError, ModelBlobSupport,
+  ModelCrudUtil, ModelExpiryUtil, MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil
 } from '@travetto/model';
-
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 

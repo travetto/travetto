@@ -1,7 +1,8 @@
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
 
-import { isBulkSupported, isCrudSupported } from '../../src/internal/service/common';
+import { ModelBulkUtil } from '../../src/util/bulk';
+import { ModelCrudUtil } from '../../src/util/crud';
 import { ModelType } from '../../src/types/model';
 import { ModelSuite } from './suite';
 
@@ -19,7 +20,7 @@ export abstract class BaseModelSuite<T> {
 
   async getSize<U extends ModelType>(cls: Class<U>): Promise<number> {
     const svc = (await this.service);
-    if (isCrudSupported(svc)) {
+    if (ModelCrudUtil.isSupported(svc)) {
       let i = 0;
       for await (const __el of svc.list(cls)) {
         i += 1;
@@ -32,10 +33,10 @@ export abstract class BaseModelSuite<T> {
 
   async saveAll<M extends ModelType>(cls: Class<M>, items: M[]): Promise<number> {
     const svc = await this.service;
-    if (isBulkSupported(svc)) {
+    if (ModelBulkUtil.isSupported(svc)) {
       const res = await svc.processBulk(cls, items.map(x => ({ insert: x })));
       return res.counts.insert;
-    } else if (isCrudSupported(svc)) {
+    } else if (ModelCrudUtil.isSupported(svc)) {
       const out: Promise<M>[] = [];
       for (const el of items) {
         out.push(svc.create(cls, el));

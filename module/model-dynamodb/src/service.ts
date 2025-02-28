@@ -8,13 +8,9 @@ import { Injectable } from '@travetto/di';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelStorageSupport,
   ModelIndexedSupport, ModelType, NotFoundError, ExistsError,
-  IndexNotSupported, OptionalId
+  IndexNotSupported, OptionalId,
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
 } from '@travetto/model';
-
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { DynamoDBModelConfig } from './config';
 

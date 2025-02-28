@@ -1,14 +1,20 @@
-import { Class, Runtime } from '@travetto/runtime';
+import { Class, hasFunction, Runtime } from '@travetto/runtime';
 import { SchemaChangeListener } from '@travetto/schema';
 
-import { ModelRegistry } from '../../registry/model';
-import { ModelStorageSupport } from '../../service/storage';
-import { ModelType } from '../../types/model';
+import { ModelRegistry } from '../registry/model';
+import { ModelStorageSupport } from '../types/storage';
+import { ModelType } from '../types/model';
 
 /**
  * Model storage util
  */
 export class ModelStorageUtil {
+
+  /**
+   * Type guard for determining if service supports storage operation
+   */
+  static isSupported = hasFunction<ModelStorageSupport>('createStorage');
+
   /**
    * Register change listener on startup
    */

@@ -3,14 +3,10 @@ import { createClient } from 'redis';
 import { ShutdownManager, type Class, type DeepPartial } from '@travetto/runtime';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,
-  NotFoundError, ExistsError, ModelIndexedSupport, OptionalId
+  NotFoundError, ExistsError, ModelIndexedSupport, OptionalId,
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { RedisModelConfig } from './config';
 

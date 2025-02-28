@@ -6,15 +6,10 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   ModelType, IndexConfig, ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport,
-  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport
+  ModelRegistry, NotFoundError, ExistsError, OptionalId, ModelBlobSupport,
+  ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil,
+  MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil,
 } from '@travetto/model';
-
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { MODEL_BLOB, ModelBlobNamespace, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
-
 const ModelBlobMetaNamespace = `${ModelBlobNamespace}_meta`;
 
 type StoreType = Map<string, Buffer>;

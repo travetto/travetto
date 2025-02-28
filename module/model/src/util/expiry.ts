@@ -1,13 +1,18 @@
-import { ShutdownManager, Class, TimeSpan, TimeUtil, Util, castTo } from '@travetto/runtime';
+import { ShutdownManager, Class, TimeSpan, TimeUtil, Util, castTo, hasFunction } from '@travetto/runtime';
 
-import { ModelRegistry } from '../../registry/model';
-import { ModelExpirySupport } from '../../service/expiry';
-import { ModelType } from '../../types/model';
+import { ModelRegistry } from '../registry/model';
+import { ModelExpirySupport } from '../types/expiry';
+import { ModelType } from '../types/model';
 
 /**
  * Utils for model expiry
  */
 export class ModelExpiryUtil {
+
+  /**
+   * Type guard for determining if model supports expiry
+   */
+  static isSupported = hasFunction<ModelExpirySupport>('deleteExpired');
 
   /**
    * Get expiry info for a given item

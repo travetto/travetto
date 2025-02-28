@@ -9,7 +9,7 @@ import {
   NotFoundError, SubTypeNotSupportedError, PersistValue
 } from '@travetto/model';
 
-import { isIndexedSupported } from '../../src/internal/service/common';
+import { ModelIndexedUtil } from '../../src/util/indexed';
 import { ExistsError } from '../../src/error/exists';
 
 import { BaseModelSuite } from './base';
@@ -207,7 +207,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     );
   }
 
-  @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(isIndexedSupported) })
+  @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(ModelIndexedUtil.isSupported) })
   async polymorphicIndexGet() {
     const service: ModelIndexedSupport = castTo(await this.service);
     const now = 30;
@@ -237,7 +237,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     }
   }
 
-  @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(isIndexedSupported) })
+  @Test('Polymorphic index', { skip: BaseModelSuite.ifNot(ModelIndexedUtil.isSupported) })
   async polymorphicIndexDelete() {
     const service: ModelIndexedSupport = castTo(await this.service);
     const now = 30;

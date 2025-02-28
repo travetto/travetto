@@ -1,8 +1,7 @@
-import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
+import { ExpiresAt, Index, Model, ModelExpirySupport, NotFoundError, ModelStorageUtil, ModelIndexedUtil } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, Runtime, TimeUtil, Util } from '@travetto/runtime';
-import { isIndexedSupported, isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 import { CacheError } from './error';
 import { CacheUtil } from './util';
@@ -41,7 +40,7 @@ export class CacheService {
   }
 
   async postConstruct(): Promise<void> {
-    if (isStorageSupported(this.#modelService) && (Runtime.dynamic || this.#modelService.config?.autoCreate)) {
+    if (ModelStorageUtil.isSupported(this.#modelService) && (Runtime.dynamic || this.#modelService.config?.autoCreate)) {
       await this.#modelService.createModel?.(CacheRecord);
     }
   }
@@ -112,7 +111,7 @@ export class CacheService {
    * @param id
    */
   async deleteAll(keySpace: string): Promise<void> {
-    if (isIndexedSupported(this.#modelService)) {
+    if (ModelIndexedUtil.isSupported(this.#modelService)) {
       const removes: Promise<void>[] = [];
       for await (const item of this.#modelService.listByIndex(CacheRecord, 'keySpace', { keySpace })) {
         removes.push(this.#modelService.delete(CacheRecord, item.id));
@@ -127,7 +126,7 @@ export class CacheService {
    * Purge the cache store of all data, if supported
    */
   async purge(): Promise<void> {
-    if (isStorageSupported(this.#modelService) && this.#modelService.truncateModel) {
+    if (ModelStorageUtil.isSupported(this.#modelService) && this.#modelService.truncateModel) {
       await this.#modelService.truncateModel(CacheRecord);
     } else {
       console.warn(`${this.#modelService.constructor.name} does not support truncating the data set`);

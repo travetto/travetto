@@ -9,15 +9,13 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 import {
   ModelCrudSupport, ModelStorageSupport, ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId,
-  ModelBlobSupport, ModelExpirySupport
+  ModelBlobSupport, ModelExpirySupport,
+  MODEL_BLOB,
+  ModelBlobUtil, ModelCrudUtil, ModelExpiryUtil, ModelStorageUtil,
+
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil, TimeSpan, TimeUtil } from '@travetto/runtime';
-
-import { MODEL_BLOB, ModelBlobUtil } from '@travetto/model/src/internal/service/blob';
-import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
-import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { S3ModelConfig } from './config';
 
