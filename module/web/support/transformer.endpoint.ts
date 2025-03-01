@@ -78,7 +78,7 @@ export class WebTransformer {
 
     // Expose type
     if (paramType.key === 'managed') {
-      conf = state.extendObjectLiteral(conf, { contextType: state.getOrImport(paramType) });
+      conf = state.extendObjectLiteral(conf, { type: state.getOrImport(paramType) });
     }
 
     const modifiers = (node.modifiers ?? []).filter(x => x !== pDec);

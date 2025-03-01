@@ -21,52 +21,52 @@ function Endpoint(method: HttpMethodOrAll, path: string = '/', extra: Partial<En
  * Registers for ALL HTTP verbs
  * @param path The endpoint path for the request
  * @augments `@travetto/web:HttpRequestBody`
- * @augments `@travetto/web:HttpEndpoint`
+ * @augments `@travetto/web:Endpoint`
  */
 export function All(path?: string): HttpEndpointDecorator { return Endpoint('all', path); }
 /**
  * Registers GET requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpEndpoint`
+ * @augments `@travetto/web:Endpoint`
  */
 export function Get(path?: string): HttpEndpointDecorator { return Endpoint('get', path); }
 /**
  * Registers POST requests
  * @param path The endpoint path for the request
  * @augments `@travetto/web:HttpRequestBody`
- * @augments `@travetto/web:HttpEndpoint`
+ * @augments `@travetto/web:Endpoint`
  */
 export function Post(path?: string): HttpEndpointDecorator { return Endpoint('post', path); }
 /**
  * Registers PUT requests
  * @param path The endpoint path for the request
  * @augments `@travetto/web:HttpRequestBody`
- * @augments `@travetto/web:HttpEndpoint`
+ * @augments `@travetto/web:Endpoint`
  */
 export function Put(path?: string): HttpEndpointDecorator { return Endpoint('put', path); }
 /**
  * Registers PATCH requests
  * @param path The endpoint path for the request
  * @augments `@travetto/web:HttpRequestBody`
- * @augments `@travetto/web:HttpEndpoint`
+ * @augments `@travetto/web:Endpoint`
  */
 export function Patch(path?: string): HttpEndpointDecorator { return Endpoint('patch', path); }
 /**
  * Registers DELETE requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpEndpoint`
+ * @augments `@travetto/web:Endpoint`
  */
 export function Delete(path?: string): HttpEndpointDecorator { return Endpoint('delete', path); }
 /**
  * Registers HEAD requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpEndpoint`
+ * @augments `@travetto/web:Endpoint`
  */
 export function Head(path?: string): HttpEndpointDecorator { return Endpoint('head', path); }
 /**
  * Registers OPTIONS requests
  * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpEndpoint`
+ * @augments `@travetto/web:Endpoint`
  */
 export function Options(path?: string): HttpEndpointDecorator { return Endpoint('options', path); }
 

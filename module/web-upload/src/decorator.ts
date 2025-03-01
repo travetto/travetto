@@ -13,7 +13,7 @@ type UploadConfig = Partial<Pick<WebUploadConfig, 'types' | 'maxSize' | 'cleanup
  * Allows for supporting uploads
  *
  * @augments `@travetto/web-upload:Upload`
- * @augments `@travetto/web:HttpParam`
+ * @augments `@travetto/web:Param`
  */
 export function Upload(
   param: string | Partial<EndpointParamConfig> & UploadConfig = {}
@@ -59,7 +59,7 @@ export function Upload(
  * Allows for supporting uploads
  *
  * @augments `@travetto/web-upload:Upload`
- * @augments `@travetto/web:HttpEndpoint`
+ * @augments `@travetto/web:Endpoint`
  */
 export function UploadAll(config: Partial<EndpointParamConfig> & UploadConfig = {}) {
   return function <T>(target: T, propertyKey: string, desc: AsyncMethodDescriptor): void {
