@@ -73,7 +73,7 @@ As you can see, [PassportAuthenticator](https://github.com/travetto/travetto/tre
 **Note**: You will need to provide the callback for the strategy to ensure you pass the external principal back into the framework
 After that, the provider is no different than any other, and can be used accordingly.  Additionally, because [passport](http://passportjs.org) runs first, in it's entirety, you can use the provider as you normally would any [passport](http://passportjs.org) middleware.
 
-**Code: Sample routes using Facebook/passport provider**
+**Code: Sample endpoints using Facebook/passport provider**
 ```typescript
 import { Controller, Get, Redirect, Post, HttpRequest } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';

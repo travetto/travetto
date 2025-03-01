@@ -1,9 +1,10 @@
 import type { Any, Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
-import type { RouteConfig, Filter } from '../types';
+import type { EndpointConfig } from '../registry/types';
+import type { Filter } from '../types';
 
-export type RouteApplies = (route: RouteConfig, config?: { basePath: string }) => boolean;
+export type EndpointApplies = (endpoint: EndpointConfig, config?: { basePath: string }) => boolean;
 
 export type LightweightConfig = ({ disabled?: boolean } & Record<string, unknown>);
 
@@ -43,11 +44,11 @@ export interface HttpInterceptor<C = Any> {
   runsBefore?: Class<HttpInterceptor>[];
 
   /**
-   * Determines the current route is applicable for the interceptor
-   * @param route The route to check
-   * @param controller The controller the route belongs to
+   * Determines the current endpoint is applicable for the interceptor
+   * @param endpoint The endpoint to check
+   * @param controller The controller the endpoint belongs to
    */
-  applies?: RouteApplies;
+  applies?: EndpointApplies;
 
   /**
    * Resolve set of partial configs against core configuration

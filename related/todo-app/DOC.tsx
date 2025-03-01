@@ -122,12 +122,12 @@ $ npx trv lint:register
       <c.Code title='Test bed' src='test/service.ts' />
     </c.Section>
 
-    <c.Section title='Adding Web Routes'>
-      Now we establish the routes, providing an interface to the service layer.<br />
+    <c.Section title='Adding Web Endpoints'>
+      Now we establish the endpoints, providing an interface to the service layer.<br />
 
-      Finally, we establish the controller at {d.path('src/route.ts')}
+      Finally, we establish the controller at {d.path('src/web.ts')}
 
-      <c.Code title='Controller contents' src='src/route.ts' />
+      <c.Code title='Controller contents' src='src/web.ts' />
     </c.Section>
 
     <c.Section title='Running the App'>

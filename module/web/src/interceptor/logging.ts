@@ -10,7 +10,7 @@ import { SerializeInterceptor } from './serialize';
  * Web logging configuration
  */
 @Config('web.log')
-export class LogRoutesConfig extends ManagedInterceptorConfig { }
+export class WebLogConfig extends ManagedInterceptorConfig { }
 
 /**
  * Logging interceptor, to show activity for all requests
@@ -21,7 +21,7 @@ export class LoggingInterceptor implements HttpInterceptor {
   runsBefore = [SerializeInterceptor];
 
   @Inject()
-  config: LogRoutesConfig;
+  config: WebLogConfig;
 
   async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
     const start = Date.now();

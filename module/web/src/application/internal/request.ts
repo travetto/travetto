@@ -2,8 +2,9 @@ import { IncomingHttpHeaders } from 'node:http';
 import { PassThrough, Readable } from 'node:stream';
 
 import { ByteRange, castTo } from '@travetto/runtime';
+import { BindUtil } from '@travetto/schema';
 
-import { HttpRequest, ContentType } from '../../types';
+import { HttpRequest, HttpContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
 import { WebSymbols } from '../../symbols';
 
@@ -16,7 +17,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Content type parsed
    */
-  [WebSymbols.ParsedType]?: ContentType;
+  [WebSymbols.ParsedType]?: HttpContentType;
 
   /**
    * Get the inbound request header as a string
@@ -52,7 +53,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Get the fully parsed content type
    */
-  getContentType(this: HttpRequest): ContentType | undefined {
+  getContentType(this: HttpRequest): HttpContentType | undefined {
     const self: HttpRequest & Partial<HttpRequestCore> = castTo(this);
     return self[WebSymbols.ParsedType] ??= MimeUtil.parse(this.headerFirst('content-type'));
   }
@@ -87,6 +88,13 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   getFilename(this: HttpRequest): string | undefined {
     const [, match] = (this.header('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
     return match;
+  }
+
+  /**
+   * Get the expanded query object
+   */
+  getExpandedQuery(this: HttpRequest): Record<string, unknown> {
+    return (this[WebSymbols.QueryExpanded] ??= BindUtil.expandPaths(this.query));
   }
 
   /**

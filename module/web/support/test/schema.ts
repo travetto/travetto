@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry, Validator } from '@travetto/schema';
-import { Controller, Redirect, Post, Get, MethodOrAll, ControllerRegistry } from '@travetto/web';
+import { Controller, Redirect, Post, Get, HttpMethodOrAll, ControllerRegistry } from '@travetto/web';
 
 import { BaseWebSuite } from './base';
 import { PathParam, QueryParam } from '../../src/decorator/param';
@@ -114,7 +114,7 @@ class SchemaAPI {
   }
 }
 
-function getEndpoint(path: string, method: MethodOrAll) {
+function getEndpoint(path: string, method: HttpMethodOrAll) {
   return ControllerRegistry.get(SchemaAPI)
     .endpoints.find(x => x.path === path && x.method === method)!;
 }

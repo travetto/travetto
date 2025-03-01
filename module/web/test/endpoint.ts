@@ -6,10 +6,10 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
 import { ControllerRegistry } from '../src/registry/controller';
-import { RouteUtil } from '../src/util/route';
+import { EndpointUtil } from '../src/util/endpoint';
 
 @Controller('/')
-class RouteController {
+class EndpointController {
   @Post('/:name')
   async endpoint() { }
 
@@ -63,7 +63,7 @@ class RouteController {
 }
 
 @Suite()
-export class RouteTest {
+export class EndpointTest {
 
   @BeforeAll()
   async init() {
@@ -72,8 +72,8 @@ export class RouteTest {
 
   @Test()
   async testOrder() {
-    const controller = ControllerRegistry.get(RouteController);
-    const endpoints = RouteUtil.orderEndpoints(controller.endpoints);
+    const controller = ControllerRegistry.get(EndpointController);
+    const endpoints = EndpointUtil.orderEndpoints(controller.endpoints);
 
     assert.deepStrictEqual(endpoints.map(x => x.path), [
       '/a/b/c',

@@ -1,5 +1,5 @@
 import { toConcrete, Class } from '@travetto/runtime';
-import { HttpInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor } from '@travetto/web';
+import { HttpInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor, EndpointUtil } from '@travetto/web';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
 
@@ -68,3 +68,5 @@ export class AuthContextInterceptor implements HttpInterceptor {
     }
   }
 }
+
+EndpointUtil.registerContextParam(toConcrete<Principal>(), (_, req) => req.user);

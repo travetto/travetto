@@ -1,9 +1,10 @@
 import { DependencyRegistry } from '@travetto/di';
 import { type Primitive, type Class, asFull, castTo, asConstructable } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
+import { SchemaRegistry } from '@travetto/schema';
 
-import { EndpointConfig, ControllerConfig, EndpointDecorator } from './types';
-import { Filter, RouteHandler, ParamConfig } from '../types';
+import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig } from './types';
+import { Filter, EndpointHandler } from '../types';
 import { HttpInterceptor } from '../interceptor/types';
 
 type ValidFieldNames<T> = {
@@ -42,7 +43,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     };
   }
 
-  createPendingField(cls: Class, handler: RouteHandler): EndpointConfig {
+  createPendingField(cls: Class, handler: EndpointHandler): EndpointConfig {
     const controllerConf = this.getOrCreatePending(cls);
 
     const fieldConf: EndpointConfig = {
@@ -66,9 +67,9 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   /**
    * Register the endpoint config
    * @param cls Controller class
-   * @param handler Route handler
+   * @param handler Endpoint handler
    */
-  getOrCreateEndpointConfig<T>(cls: Class<T>, handler: RouteHandler): EndpointConfig {
+  getOrCreateEndpointConfig<T>(cls: Class<T>, handler: EndpointHandler): EndpointConfig {
     const fieldConf = this.getOrCreatePendingField(cls, handler);
     return asFull(fieldConf);
   }
@@ -86,10 +87,10 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   /**
    * Register the controller filter
    * @param cls Controller class
-   * @param handler Route handler
+   * @param handler Endpoint handler
    * @param fn The filter to call
    */
-  registerEndpointFilter(target: Class, handler: RouteHandler, fn: Filter): void {
+  registerEndpointFilter(target: Class, handler: EndpointHandler, fn: Filter): void {
     const config = this.getOrCreateEndpointConfig(target, handler);
     config.filters!.unshift(fn);
   }
@@ -97,11 +98,11 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   /**
    * Register the endpoint parameter
    * @param cls Controller class
-   * @param handler Route handler
+   * @param handler Endpoint handler
    * @param param The param config
    * @param index The parameter index
    */
-  registerEndpointParameter(target: Class, handler: RouteHandler, param: ParamConfig, index: number): void {
+  registerEndpointParameter(target: Class, handler: EndpointHandler, param: EndpointParamConfig, index: number): void {
     const config = this.getOrCreateEndpointConfig(target, handler);
     if (index >= config.params.length) {
       config.params.length = index + 1;
@@ -112,11 +113,11 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   /**
    * Register the endpoint interceptor config
    * @param cls Controller class
-   * @param handler Route handler
+   * @param handler Endpoint handler
    * @param param The param config
    * @param index The parameter index
    */
-  registerEndpointInterceptorConfig<T extends HttpInterceptor>(target: Class, handler: RouteHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
+  registerEndpointInterceptorConfig<T extends HttpInterceptor>(target: Class, handler: EndpointHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const endpointConfig = this.getOrCreateEndpointConfig(target, handler);
     (endpointConfig.interceptors ??= []).push([interceptorCls, { disabled: false, ...config }]);
   }
@@ -137,7 +138,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param fn The filter to call
    */
   createFilterDecorator(fn: Filter): EndpointDecorator {
-    return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>): void => {
+    return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<EndpointHandler>): void => {
       if (prop) {
         this.registerEndpointFilter(asConstructable(target).constructor, descriptor!.value!, fn);
       } else {
@@ -155,7 +156,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     cls: Class<T>,
     cfg: Partial<Omit<RetainFields<T['config']>, 'paths'>>
   ): EndpointDecorator {
-    return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>): void => {
+    return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<EndpointHandler>): void => {
       if (prop && descriptor) {
         this.registerEndpointInterceptorConfig(asConstructable(target).constructor, descriptor!.value!, cls, castTo(cfg));
       } else {
@@ -186,7 +187,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param descriptor Prop descriptor
    * @param config The endpoint config
    */
-  registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<RouteHandler>, config: Partial<EndpointConfig>): typeof descriptor {
+  registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<EndpointHandler>, config: Partial<EndpointConfig>): typeof descriptor {
     const srcConf = this.getOrCreateEndpointConfig(target, descriptor.value!);
     srcConf.method = config.method ?? srcConf.method;
     srcConf.path = config.path || srcConf.path;
@@ -221,7 +222,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   /**
-   * Finalize routes, removing duplicates based on ids
+   * Finalize endpoints, removing duplicates based on ids
    */
   onInstallFinalize(cls: Class): ControllerConfig {
     const final = asFull(this.getOrCreatePending(cls));

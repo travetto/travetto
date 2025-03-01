@@ -2,14 +2,16 @@ import type { Class } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../interceptor/types';
-import type { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
+import type { Filter, HttpHandler, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointHandler, HttpResponse } from '../types';
+
+export type EndpointParamExtractor = (config: EndpointParamConfig, req: HttpRequest, res: HttpResponse) => unknown;
 
 /**
  * Endpoint decorator for composition of routing logic
  */
 export type EndpointDecorator = (
   (<T extends Class>(target: T) => void) &
-  (<U>(target: U, prop: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) => void)
+  (<U>(target: U, prop: string, descriptor?: TypedPropertyDescriptor<EndpointHandler>) => void)
 );
 
 /**
@@ -62,13 +64,45 @@ interface CoreConfig {
   /**
    * List of headers to add to the response
    */
-  headers: HeaderMap;
+  headers: HttpHeaderMap;
+}
+
+/**
+ * Endpoint param configuration
+ */
+export interface EndpointParamConfig {
+  /**
+   * Name of the parameter
+   */
+  name?: string;
+  /**
+   * Raw text of parameter at source
+   */
+  sourceText?: string;
+  /**
+   * Location of the parameter
+   */
+  location: 'path' | 'query' | 'body' | 'header' | 'context';
+  /**
+   * Resolves the value by executing with req/res as input
+   */
+  resolve?: Filter;
+  /**
+   * Extract the value from request
+   * @param config Param configuration
+   * @param req The request
+   */
+  extract?: EndpointParamExtractor;
+  /**
+   * Input prefix for parameter
+   */
+  prefix?: string;
 }
 
 /**
  * Endpoint configuration
  */
-export interface EndpointConfig extends RouteConfig, CoreConfig, DescribableConfig {
+export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * Unique identifier
    */
@@ -77,6 +111,34 @@ export interface EndpointConfig extends RouteConfig, CoreConfig, DescribableConf
    * The name of the method
    */
   handlerName: string;
+  /**
+   * Instance the endpoint is for
+   */
+  instance?: unknown;
+  /**
+   * The HTTP method the endpoint is for
+   */
+  method: HttpMethodOrAll;
+  /**
+   * The path of the endpoint
+   */
+  path: string;
+  /**
+   * The function the endpoint will call
+   */
+  handler: EndpointHandler;
+  /**
+   * The compiled and finalized handler
+   */
+  handlerFinalized?: HttpHandler;
+  /**
+   * List of params for the endpoint
+   */
+  params: EndpointParamConfig[];
+  /**
+   * Endpoint-based interceptor enable/disabling
+   */
+  interceptors?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
   /**
    * The response type
    */

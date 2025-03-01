@@ -3,7 +3,10 @@ import express from 'express';
 import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebSymbols, HttpInterceptor, HttpRequest, WebConfig, RouteUtil, WebServer, RouteConfig, LoggingInterceptor, WebNetUtil, WebServerHandle } from '@travetto/web';
+import {
+  WebSymbols, HttpInterceptor, HttpRequest, WebConfig, EndpointUtil, WebServer,
+  LoggingInterceptor, NetUtil, WebServerHandle, EndpointConfig
+} from '@travetto/web';
 
 import { ExpressWebServerUtil } from './util';
 
@@ -37,21 +40,21 @@ export class ExpressWebServer implements WebServer<express.Application> {
     return app;
   }
 
-  async unregisterRoutes(key: string | symbol): Promise<void> {
-    const routes = this.raw.router.stack;
-    const pos = routes.findIndex(x => 'key' in x.handle && x.handle.key === key);
+  async unregisterEndpoints(key: string | symbol): Promise<void> {
+    const layers = this.raw.router.stack;
+    const pos = layers.findIndex(x => 'key' in x.handle && x.handle.key === key);
     if (pos >= 0) {
-      routes.splice(pos, 1);
+      layers.splice(pos, 1);
     }
   }
 
-  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[], interceptors: HttpInterceptor[]): Promise<void> {
+  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors: HttpInterceptor[]): Promise<void> {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
-    for (const route of routes) {
-      const routePath = route.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[route.method](routePath, async (req: express.Request, res: express.Response) => {
-        await route.handlerFinalized!(
+    for (const endpoint of endpoints) {
+      const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
+      router[endpoint.method](endpointPath, async (req: express.Request, res: express.Response) => {
+        await endpoint.handlerFinalized!(
           req[WebSymbols.TravettoEntity] ??= ExpressWebServerUtil.getRequest(req),
           res[WebSymbols.TravettoEntity] ??= ExpressWebServerUtil.getResponse(res)
         );
@@ -59,14 +62,19 @@ export class ExpressWebServer implements WebServer<express.Application> {
     }
 
     // Register options handler for each controller, working with a bug in express
-    if (key !== WebSymbols.GlobalRoute) {
-      const optionHandler = RouteUtil.createRouteHandler(
+    if (key !== WebSymbols.GlobalEndpoint) {
+      const optionHandler = EndpointUtil.createEndpointHandler(
         interceptors,
         {
           method: 'options',
           path: '*all',
-          handler: (__req: HttpRequest) => '',
-          params: [{ extract: (__, r: unknown): unknown => r, location: 'context' }],
+          id: 'express-all',
+          filters: [],
+          headers: {},
+          handlerName: 'express-all',
+          class: ExpressWebServer,
+          handler: () => '',
+          params: [{ extract: (_, r): unknown => r, location: 'context' }],
           interceptors: [
             [LoggingInterceptor, { disabled: true }]
           ]
@@ -92,6 +100,6 @@ export class ExpressWebServer implements WebServer<express.Application> {
       raw = https.createServer(keys!, this.raw);
     }
     this.listening = true;
-    return await WebNetUtil.listen(raw, this.config.port, this.config.bindAddress);
+    return await NetUtil.listen(raw, this.config.port, this.config.bindAddress);
   }
 }

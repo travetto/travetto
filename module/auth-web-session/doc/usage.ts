@@ -19,7 +19,7 @@ class SessionConfig {
 
 @Authenticated()
 @Controller('/session')
-export class SessionRoutes {
+export class SessionEndpoints {
 
   @Inject()
   service: SessionService;

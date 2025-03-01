@@ -9,7 +9,7 @@ class Config {
     return asFull<WebServer>({
       init: () => { },
       listen: () => asFull<WebServerHandle>({}),
-      registerRoutes: async () => { }
+      registerEndpoints: async () => { }
     });
   }
 }

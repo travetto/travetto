@@ -7,7 +7,7 @@ import { WebSymbols } from '../../symbols';
 /**
  * Base response object
  */
-export class ResponseCore implements Partial<HttpResponse> {
+export class HttpResponseCore implements Partial<HttpResponse> {
   /**
    * Get the status code
    */
@@ -38,9 +38,9 @@ export class ResponseCore implements Partial<HttpResponse> {
    * @param code The HTTP code to send
    * @param path The new location for the request
    */
-  redirect(this: HttpResponse & ResponseCore, code: number, path: string): void;
-  redirect(this: HttpResponse & ResponseCore, path: string): void;
-  redirect(this: HttpResponse & ResponseCore, pathOrCode: number | string, path?: string): void {
+  redirect(this: HttpResponse & HttpResponseCore, code: number, path: string): void;
+  redirect(this: HttpResponse & HttpResponseCore, path: string): void;
+  redirect(this: HttpResponse & HttpResponseCore, pathOrCode: number | string, path?: string): void {
     let code = 302;
     if (typeof pathOrCode === 'number') {
       code = pathOrCode;

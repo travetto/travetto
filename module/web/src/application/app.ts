@@ -3,14 +3,15 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
-import { RouteConfig, HttpRequest, WebServerHandle } from '../types';
+import { HttpRequest, WebServerHandle } from '../types';
 import { WebConfig } from './config';
-import { RouteUtil } from '../util/route';
+import { EndpointUtil } from '../util/endpoint';
 import { HttpInterceptor } from '../interceptor/types';
 import { ControllerRegistry } from '../registry/controller';
 import { WebSymbols } from '../symbols';
 import { WebServer } from './server';
 import { WebCommonUtil } from '../util/common';
+import { EndpointConfig } from '@travetto/web';
 
 /**
  * The web application
@@ -121,12 +122,12 @@ export class WebApplication<T = unknown> {
       config.instance = RetargettingProxy.unwrap(config.instance);
     }
 
-    for (const ep of RouteUtil.orderEndpoints(config.endpoints)) {
+    for (const ep of EndpointUtil.orderEndpoints(config.endpoints)) {
       ep.instance = config.instance;
-      ep.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, ep, config);
+      ep.handlerFinalized = EndpointUtil.createEndpointHandler(this.interceptors, ep, config);
     }
 
-    await this.server.registerRoutes(config.class.Ⲑid, config.basePath, config.endpoints, this.interceptors);
+    await this.server.registerEndpoints(config.class.Ⲑid, config.basePath, config.endpoints, this.interceptors);
 
     if (this.server.listening && this.server.updateGlobalOnChange) {
       await this.unregisterGlobal();
@@ -146,7 +147,7 @@ export class WebApplication<T = unknown> {
       return;
     }
 
-    await this.server.unregisterRoutes(c.Ⲑid);
+    await this.server.unregisterEndpoints(c.Ⲑid);
   }
 
   /**
@@ -158,17 +159,19 @@ export class WebApplication<T = unknown> {
       return;
     }
 
-    const route: RouteConfig = {
-      params: [{
-        extract: (c: unknown, r: unknown) => r,
-        location: 'context'
-      }],
+    const endpoint: EndpointConfig = {
+      id: 'global-all',
+      filters: [],
+      headers: {},
+      class: WebApplication,
+      handlerName: this.globalHandler.name,
+      params: [{ extract: (_, r) => r, location: 'context' }],
       instance: {},
       handler: this.globalHandler,
       method: 'all', path: '*',
     };
-    route.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, route);
-    await this.server.registerRoutes(WebSymbols.GlobalRoute, '/', [route]);
+    endpoint.handlerFinalized = EndpointUtil.createEndpointHandler(this.interceptors, endpoint);
+    await this.server.registerEndpoints(WebSymbols.GlobalEndpoint, '/', [endpoint]);
   }
 
   /**
@@ -180,7 +183,7 @@ export class WebApplication<T = unknown> {
       return;
     }
 
-    await this.server.unregisterRoutes(WebSymbols.GlobalRoute);
+    await this.server.unregisterEndpoints(WebSymbols.GlobalEndpoint);
   }
 
   /**

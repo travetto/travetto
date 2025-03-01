@@ -86,9 +86,9 @@ export class ApiSpecConfig {
    */
   persist?: boolean;
   /**
-   * Skip emitting all routes
+   * Skip emitting all endpoints
    */
-  skipRoutes: boolean = false;
+  skipEndpoints: boolean = false;
   /**
    * Expose all schemas, even if not referenced
    */
@@ -128,9 +128,9 @@ Options:
   -h, --help             display help for command
 ```
 
-The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
+The command will run your application, in non-server mode, to collect all the endpoints and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
 
-**Note**: The module supports generating the OpenAPI spec in real-time while listening for changes to routes and models.
+**Note**: The module supports generating the OpenAPI spec in real-time while listening for changes to endpoints and models.
 
 ## CLI - openapi:client
 The module provides a command for the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") to allow client generation from the API structure.

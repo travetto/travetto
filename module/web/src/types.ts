@@ -2,25 +2,22 @@ import { SetOption, GetOption } from 'cookies';
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'node:http';
 import { Readable, Writable } from 'node:stream';
 
-import type { ByteRange, Any, Class, TypedFunction } from '@travetto/runtime';
+import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
 
 import type { WebSymbols } from './symbols';
 
-import type { HttpInterceptor } from './interceptor/types';
-
-export type HeaderMap = Record<string, (string | (() => string))>;
-export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
-
 export type FilterReturn = void | unknown | Promise<void | unknown>;
 export type FilterNext = () => FilterReturn;
-
-export type RouteHandler = TypedFunction<Any, Any>;
 export type FilterContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: Readonly<C> };
 export type Filter<C = unknown> = (context: FilterContext<C>, next: FilterNext) => FilterReturn;
-export type RequestResponseHandler = (req: HttpRequest, res: HttpResponse) => FilterReturn;
+
+export type EndpointHandler = TypedFunction<Any, Any>;
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
 
-export type ContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
+export type HttpHandler = (req: HttpRequest, res: HttpResponse) => FilterReturn;
+export type HttpHeaderMap = Record<string, (string | (() => string))>;
+export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
+export type HttpContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
 /**
  * Extension point for supporting new request headers
@@ -50,7 +47,7 @@ export interface HttpRequest<T = unknown> {
    */
   [WebSymbols.NodeEntity]: IncomingMessage;
   /**
-   * Interceptor-related configs, providing request-awareness of route-level configurations
+   * Interceptor-related configs, providing request-awareness of endpoint-level configurations
    */
   [WebSymbols.InterceptorConfigs]?: Record<string, Record<string, unknown>>;
   /**
@@ -127,7 +124,7 @@ export interface HttpRequest<T = unknown> {
   /**
    * Get the structured content type of the request
    */
-  getContentType(): ContentType | undefined;
+  getContentType(): HttpContentType | undefined;
   /**
    * Listen for request events
    */
@@ -144,6 +141,10 @@ export interface HttpRequest<T = unknown> {
    * Read the file name from the request content disposition
    */
   getFilename(): string | undefined;
+  /**
+   * Get expanded query
+   */
+  getExpandedQuery(): Record<string, unknown>;
   /**
    * Readable stream for the request body
    */
@@ -165,9 +166,9 @@ export interface HttpResponse<T = unknown> {
    */
   [WebSymbols.NodeEntity]: ServerResponse;
   /**
-   * The additional headers for this request, provided by controllers/route config
+   * The additional headers for this request, provided by controllers/endpoint config
    */
-  [WebSymbols.HeadersAdded]?: HeaderMap;
+  [WebSymbols.HeadersAdded]?: HttpHeaderMap;
   /**
    * Outbound status code
    */
@@ -261,75 +262,4 @@ export interface HttpResponse<T = unknown> {
    * @param stream
    */
   sendStream(stream: Readable): Promise<void>;
-}
-
-/**
- * Param configuration
- */
-export interface ParamConfig {
-  /**
-   * Name of the parameter
-   */
-  name?: string;
-  /**
-   * Raw text of parameter at source
-   */
-  sourceText?: string;
-  /**
-   * Location of the parameter
-   */
-  location: 'path' | 'query' | 'body' | 'header' | 'context';
-  /**
-   * Context type
-   */
-  contextType?: Class;
-  /**
-   * Resolves the value by executing with req/res as input
-   */
-  resolve?: Filter;
-  /**
-   * Extract the value from request
-   * @param config Param configuration
-   * @param req The request
-   * @param res The response
-   */
-  extract?(config: ParamConfig, req?: HttpRequest, res?: HttpResponse): unknown;
-  /**
-   * Input prefix for parameter
-   */
-  prefix?: string;
-}
-
-/**
- * The route configuration
- */
-export interface RouteConfig {
-  /**
-   * Instance the route is for
-   */
-  instance?: unknown;
-  /**
-   * The HTTP method the route is for
-   */
-  method: MethodOrAll;
-  /**
-   * The path of the route
-   */
-  path: string;
-  /**
-   * The function the route will call
-   */
-  handler: RouteHandler;
-  /**
-   * The compiled and finalized handler
-   */
-  handlerFinalized?: RequestResponseHandler;
-  /**
-   * List of params for the route
-   */
-  params: ParamConfig[];
-  /**
-   * Route-based interceptor enable/disabling
-   */
-  interceptors?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
 }

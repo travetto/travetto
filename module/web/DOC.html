@@ -15,10 +15,10 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/web</code></pre>
   </figure>
 
-The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L35">HttpRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L158">HttpResponse</a> objects). This module is built upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25">@Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">@Schema</a> class.
-<h2 id="routes-controller">Routes: Controller</h2>
+The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32">HttpRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L159">HttpResponse</a> objects). This module is built upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25">@Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">@Schema</a> class.
+<h2 id="controller">Controller</h2>
 
-To define a route, you must first declare a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9">@Controller</a> which is only allowed on classes. Controllers can be configured with:
+To define an endpoint, you must first declare a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9">@Controller</a> which is only allowed on classes. Controllers can be configured with:
 <ul> <li><code class="item input">title</code> - The definition of the controller</li>
 <li><code class="item input">description</code> - High level description fo the controller</li>
 </ul>
@@ -34,11 +34,11 @@ Additionally, the module is predicated upon <a class="module-link" href="https:/
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">SimpleController</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token comment">// routes</span>
+  <span class="token comment">// endpoints</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<h2 id="routes-endpoints">Routes: Endpoints</h2>
+<h2 id="endpoints">Endpoints</h2>
 
 Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported. <br><br>
 The HTTP methods that are supported via:
@@ -60,8 +60,8 @@ Each endpoint decorator handles the following config:
 Additionally, the return type of the method will also be used to describe the <code class="item input">responseType</code> if not specified manually.
 
   <figure class="code">
-    <figcaption class="code">Controller with Sample Route
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/simple-route.ts">Source</a></cite>
+    <figcaption class="code">Controller with Sample Endpoint
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/simple-endpoint.ts">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Get<span class="token punctuation">,</span> Controller <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
@@ -83,18 +83,18 @@ Additionally, the return type of the method will also be used to describe the <c
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<p class="note"><strong>Note</strong> In development mode the module supports hot reloading of <code class="item input">class</code>es.  Routes can be added/modified/removed at runtime.</p>
+<p class="note"><strong>Note</strong> In development mode the module supports hot reloading of <code class="item input">class</code>es.  Endpoints can be added/modified/removed at runtime.</p>
 
 <h3 id="parameters">Parameters</h3>
 
 Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L44">@PathParam</a> - Path params</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L50">@QueryParam</a> - Query params</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L62">@Body</a> - Request body (in it's entirety), with support for validation</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L56">@HeaderParam</a> - Header values</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L38">@ContextParam</a> - Special values exposed (e.g. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L35">HttpRequest</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L158">HttpResponse</a>, etc.)</li>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L43">@PathParam</a> - Path params</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L49">@QueryParam</a> - Query params</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">@Body</a> - Request body (in it's entirety), with support for validation</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L55">@HeaderParam</a> - Header values</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L37">@ContextParam</a> - Special values exposed (e.g. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32">HttpRequest</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L159">HttpResponse</a>, etc.)</li>
 </ul>
-Each <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L25">@Param</a> can be configured to indicate:
+Each <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L24">@Param</a> can be configured to indicate:
 <ul> <li><code class="item input">name</code> - Name of param, field name, defaults to handler parameter name if necessary</li>
 <li><code class="item input">description</code> - Description of param, pulled from <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a>, or defaults to name if empty</li>
 <li><code class="item input">required?</code> - Is the field required?, defaults to whether or not the parameter itself is optional</li>
@@ -103,7 +103,7 @@ Each <a target="_blank" class="source-link" href="https://github.com/travetto/tr
 <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a> comments can also be used to describe parameters using <code class="item input">@param</code> tags in the comment.
 
   <figure class="code">
-    <figcaption class="code">Full-fledged Controller with Routes
+    <figcaption class="code">Full-fledged Controller with Endpoints
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/simple-full.ts">Source</a></cite>
 
 </figcaption>
@@ -160,7 +160,7 @@ Each <a target="_blank" class="source-link" href="https://github.com/travetto/tr
 <h3 id="body-and-queryschema">Body and QuerySchema</h3>
 
 The module provides high level access for <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> support, via decorators, for validating and typing request bodies. <br><br>
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L62">@Body</a> provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">@Body</a> provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
 
   <figure class="code">
     <figcaption class="code">Using Body for POST requests
@@ -264,7 +264,7 @@ Additionally, the <a class="module-link" href="https://github.com/travetto/trave
 
 <h2 id="running-an-app">Running an App</h2>
 
-By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L19">WebApplication</a> that will follow default behaviors, and spin up the Web server.
+By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">@CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L20">WebApplication</a> that will follow default behaviors, and spin up the Web server.
 
   <figure class="terminal">
     <figcaption class="terminal">Standard application
@@ -304,7 +304,6 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       CookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
       CorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      LogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,
@@ -314,6 +313,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
         baseUrl: <span class="token string">'http://localhost:3000'</span>,
         defaultMessage: <span class="token boolean">true</span>
       <span class="token punctuation">{{'}'}}</span>,
+      WebLogConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -402,7 +402,6 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       CookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
       CorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      LogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,
@@ -412,6 +411,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
         baseUrl: <span class="token string">'http://localhost:3000'</span>,
         defaultMessage: <span class="token boolean">true</span>
       <span class="token punctuation">{{'}'}}</span>,
+      WebLogConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -421,7 +421,7 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 
 <h2 id="interceptors">Interceptors</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L28">HttpInterceptor</a> s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L29">HttpInterceptor</a> s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every endpoint, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
   <figure class="code">
     <figcaption class="code">A Trivial Interceptor
@@ -446,11 +446,11 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 <h3 id="bodyparseinterceptor">BodyParseInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L38">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L39">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
   <figure class="code">
     <figcaption class="code">Body Parse Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L23">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L24">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BodyParseConfig</span> <span class="token keyword">extends</span> <span class="token class-name">ManagedInterceptorConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -546,11 +546,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="getcacheinterceptor">GetCacheInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/get-cache.ts#L16">GetCacheInterceptor</a> by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting <code class="item input">web.disableGetCache: true</code> in your config.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/get-cache.ts#L17">GetCacheInterceptor</a> by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting <code class="item input">web.disableGetCache: true</code> in your config.
 
 <h3 id="logginginterceptor">LoggingInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L19">LoggingInterceptor</a> allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L19">LoggingInterceptor</a> allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
 
   <figure class="code">
     <figcaption class="code">Control Logging
@@ -570,7 +570,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="custom-interceptors">Custom Interceptors</h3>
 
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L28">HttpInterceptor</a> interface.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L35">HttpRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L158">HttpResponse</a> objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L29">HttpInterceptor</a> interface.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32">HttpRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L159">HttpResponse</a> objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
   <figure class="code">
     <figcaption class="code">Defining a new Interceptor
@@ -635,30 +635,30 @@ All framework-provided interceptors, follow the same patterns for general config
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/disable.yml">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-yaml">web.
+    <pre><code class="language-yaml"><span class="token key atrule">web</span><span class="token punctuation">:</span>
   <span class="token key atrule">cors</span><span class="token punctuation">:</span>
     <span class="token key atrule">disabled</span><span class="token punctuation">:</span> <span class="token boolean important">true</span></code></pre>
   </figure>
 
-<h4 id="path-based-control-for-various-routes-within-the-application">Path-based control for various routes within the application</h4>
+<h4 id="path-based-control-for-various-endpoints-within-the-application">Path-based control for various endpoints within the application</h4>
 
   <figure class="code">
     <figcaption class="code">Sample interceptor path managed configuration
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/route-allow-deny.yml">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/endpoint-allow-deny.yml">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-yaml">web.
+    <pre><code class="language-yaml"><span class="token key atrule">web</span><span class="token punctuation">:</span>
   <span class="token key atrule">cors</span><span class="token punctuation">:</span>
     <span class="token key atrule">paths</span><span class="token punctuation">:</span>
       <span class="token punctuation">-</span> <span class="token string">'!/public/user'</span>
       <span class="token punctuation">-</span> <span class="token string">'/public/*'</span></code></pre>
   </figure>
 
-<h4 id="route-enabled-control-via-decorators">Route-enabled control via decorators</h4>
+<h4 id="endpoint-enabled-control-via-decorators">Endpoint-enabled control via decorators</h4>
 
   <figure class="code">
-    <figcaption class="code">Sample controller with route-level allow/deny
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/controller-route-deny.ts">Source</a></cite>
+    <figcaption class="code">Sample controller with endpoint-level allow/deny
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/controller-endpoint-deny.ts">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> ConfigureInterceptor<span class="token punctuation">,</span> CorsInterceptor <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
@@ -677,18 +677,18 @@ All framework-provided interceptors, follow the same patterns for general config
 
 The resolution logic is as follows:
 <ul> <li>Determine if interceptor is disabled, this takes precedence.</li>
-<li>Check the route against the path allow/deny list.  If matched (positive or negative), this wins.</li>
-<li>Finally check to see if the interceptor has custom applies logic.  If it does, match against the configuration for the route.</li>
+<li>Check the endpoint against the path allow/deny list.  If matched (positive or negative), this wins.</li>
+<li>Finally check to see if the interceptor has custom applies logic.  If it does, match against the configuration for the endpoint.</li>
 <li>By default, if nothing else matched, assume the interceptor is valid.</li>
 </ul>
 
 <h2 id="cookie-support">Cookie Support</h2>
 
-<a target="_blank" class="external-link" href="https://expressjs.com">express</a>/<a target="_blank" class="external-link" href="https://koajs.com/">koa</a>/<a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using <a target="_blank" class="external-link" href="https://www.npmjs.com/package/cookies">cookies</a>.  This functionality is exposed onto the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L35">HttpRequest</a>/<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L158">HttpResponse</a> object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+<a target="_blank" class="external-link" href="https://expressjs.com">express</a>/<a target="_blank" class="external-link" href="https://koajs.com/">koa</a>/<a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using <a target="_blank" class="external-link" href="https://www.npmjs.com/package/cookies">cookies</a>.  This functionality is exposed onto the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32">HttpRequest</a>/<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L159">HttpResponse</a> object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
   <figure class="code">
     <figcaption class="code">Sample Cookie Usage
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/cookie-routes.ts">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/cookie-endpoints.ts">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> GetOption<span class="token punctuation">,</span> SetOption <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'cookies'</span><span class="token punctuation">;</span>
@@ -696,7 +696,7 @@ The resolution logic is as follows:
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> HttpRequest<span class="token punctuation">,</span> HttpResponse <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SimpleRoutes</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SimpleEndpoints</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token keyword">private</span> getOptions<span class="token operator">:</span> GetOption<span class="token punctuation">;</span>
   <span class="token keyword">private</span> setOptions<span class="token operator">:</span> SetOption<span class="token punctuation">;</span>

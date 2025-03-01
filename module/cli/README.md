@@ -465,7 +465,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 
 import { WebServerHandle } from '../src/types';
-import { WebNetUtil } from '../src/util/net';
+import { NetUtil } from '../src/util/net';
 
 /**
  * Run a web server as an application
@@ -490,8 +490,8 @@ export class RunWebCommand implements CliCommandShape {
     try {
       return await DependencyRegistry.runInstance(WebApplication);
     } catch (err) {
-      if (WebNetUtil.isInuseError(err) && !Runtime.production && this.killConflict) {
-        await WebNetUtil.freePort(err.port);
+      if (NetUtil.isInuseError(err) && !Runtime.production && this.killConflict) {
+        await NetUtil.freePort(err.port);
         return await DependencyRegistry.runInstance(WebApplication);
       }
       throw err;

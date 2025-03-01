@@ -31,7 +31,6 @@ export class WebTransformer {
       name = `param__${idx + 1}`;
     }
 
-    let conf = state.extendObjectLiteral({ name, sourceText: node.name.getText() }, pDecArg);
     let detectedParamType: string | undefined;
 
     const isContext =
@@ -40,19 +39,16 @@ export class WebTransformer {
       ) ||
       (pDec && !/(Body|PathParam|HeaderParam|QueryParam|Param)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
 
+    const config: { type: AnyType, name?: string } = { type: paramType };
+
     // Detect default behavior
     if (isContext) {
       detectedParamType = 'ContextParam';
-      if (paramType.key === 'managed') {
-        conf = state.extendObjectLiteral(conf, { contextType: state.getOrImport(paramType) });
-        node = SchemaTransformUtil.computeField(state, node, { type: { key: 'unknown' } });
-      } else {
+      if (paramType.key !== 'managed') {
         throw new Error(`Unexpected parameter type, should be an external type but got: ${paramType.key}`);
       }
     } else {
       // If not contextual
-      const config: { type: AnyType, name?: string } = { type: paramType };
-
       // If primitive
       if (paramType.key !== 'managed' && paramType.key !== 'shape') {
         // Get path of endpoint
@@ -74,10 +70,12 @@ export class WebTransformer {
         detectedParamType = epDec.targets?.includes('@travetto/web:HttpRequestBody') ? 'Body' : 'QueryParam';
         config.name = '';
       }
-      node = SchemaTransformUtil.computeField(state, node, config);
     }
 
+    node = SchemaTransformUtil.computeField(state, node, config);
+
     const modifiers = (node.modifiers ?? []).filter(x => x !== pDec);
+    const conf = state.extendObjectLiteral({ name, sourceText: node.name.getText() }, pDecArg);
 
     if (!pDec) { // Handle default, missing
       modifiers.push(state.createDecorator(PARAM_DEC_IMPORT, detectedParamType ?? 'ContextParam', conf));

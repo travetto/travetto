@@ -1,5 +1,6 @@
 import type { HttpInterceptor } from '../interceptor/types';
-import type { RouteConfig, WebServerHandle } from '../types';
+import type { WebServerHandle } from '../types';
+import type { EndpointConfig } from '../registry/types';
 
 /**
  * Defines the contract for any http server to support the framework.
@@ -24,18 +25,18 @@ export interface WebServer<T = unknown> {
   init(): Promise<T> | T;
 
   /**
-   * Register new routes
-   * @param key The identifier for the set of routes
-   * @param path The path to add the routes to
+   * Register new endpoints
+   * @param key The identifier for the set of endpoints
+   * @param path The path to add the endpoints to
    * @param endpoints The list of endpoints to add
    */
-  registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[], interceptors?: HttpInterceptor[]): Promise<void>;
+  registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors?: HttpInterceptor[]): Promise<void>;
 
   /**
-   * The routes to unregister
+   * The endpoints to unregister
    * @param key The key to unregister by
    */
-  unregisterRoutes(key: string | symbol): Promise<void>;
+  unregisterEndpoints(key: string | symbol): Promise<void>;
 
   /**
    * Start the listening process

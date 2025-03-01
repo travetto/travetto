@@ -4,7 +4,7 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/web';
+import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/web';
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 
@@ -270,7 +270,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(ep: EndpointConfig, param: ParamConfig, field: FieldConfig): (
+  #processEndpointParam(ep: EndpointConfig, param: EndpointParamConfig, field: FieldConfig): (
     { requestBody: RequestBodyObject } |
     { parameters: ParameterObject[] } |
     undefined
@@ -302,7 +302,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Process controller endpoint
    */
   onEndpointEnd(ep: EndpointConfig, ctrl: ControllerConfig): void {
-    if (this.#config.skipRoutes) {
+    if (this.#config.skipEndpoints) {
       return;
     }
 
@@ -349,7 +349,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   }
 
   onControllerEnd(controller: ControllerConfig): void {
-    if (this.#config.skipRoutes) {
+    if (this.#config.skipEndpoints) {
       return;
     }
     this.#tags.push({

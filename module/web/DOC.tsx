@@ -27,8 +27,8 @@ export const text = <>
   <c.StdHeader />
   The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles {d.library('Express')} in the {HttpRequestContract} and {HttpResponseContract} objects). This module is built upon the {d.mod('Schema')} structure, and all controller method parameters follow the same rules/abilities as any {Field} in a standard {Schema} class.
 
-  <c.Section title='Routes: Controller'>
-    To define a route, you must first declare a {Controller} which is only allowed on classes. Controllers can be configured with:
+  <c.Section title='Controller'>
+    To define an endpoint, you must first declare a {Controller} which is only allowed on classes. Controllers can be configured with:
 
     <ul>
       <li>{d.input('title')} - The definition of the controller</li>
@@ -42,7 +42,7 @@ export const text = <>
     <c.Code title='Basic Controller Registration' src='doc/simple-controller.ts' />
   </c.Section>
 
-  <c.Section title='Routes: Endpoints'>
+  <c.Section title='Endpoints'>
 
     Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported. <br />
 
@@ -70,9 +70,9 @@ export const text = <>
 
     Additionally, the return type of the method will also be used to describe the {d.input('responseType')} if not specified manually.
 
-    <c.Code title='Controller with Sample Route' src='doc/simple-route.ts' />
+    <c.Code title='Controller with Sample Endpoint' src='doc/simple-endpoint.ts' />
 
-    <c.Note>In development mode the module supports hot reloading of {d.input('class')}es.  Routes can be added/modified/removed at runtime.</c.Note>
+    <c.Note>In development mode the module supports hot reloading of {d.input('class')}es.  Endpoints can be added/modified/removed at runtime.</c.Note>
 
     <c.SubSection title='Parameters'>
       Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
@@ -94,7 +94,7 @@ export const text = <>
 
       {d.library('JSDoc')} comments can also be used to describe parameters using {d.input('@param')} tags in the comment.
 
-      <c.Code title='Full-fledged Controller with Routes' src='doc/simple-full.ts' />
+      <c.Code title='Full-fledged Controller with Endpoints' src='doc/simple-full.ts' />
     </c.SubSection>
 
     <c.SubSection title='Body and QuerySchema'>
@@ -155,7 +155,7 @@ export const text = <>
 
   <c.Section title='Interceptors'>
 
-    {HttpInterceptorContract}s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+    {HttpInterceptorContract}s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every endpoint, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
     <c.Code title='A Trivial Interceptor' src='doc/interceptor-hello-world.ts' />
 
@@ -185,7 +185,7 @@ export const text = <>
       {GetCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting {d.input('web.disableGetCache: true')} in your config.
     </c.SubSection>
     <c.SubSection title={LoggingInterceptor.name}>
-      {LoggingInterceptor} allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
+      {LoggingInterceptor} allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
 
       <c.Code title='Control Logging' src='doc/log.yml' />
     </c.SubSection>
@@ -209,18 +209,18 @@ export const text = <>
       <c.SubSubSection title='Enable/disable of individual interceptors via configuration'>
         <c.Code title='Sample interceptor disabling configuration' src='doc/disable.yml' />
       </c.SubSubSection>
-      <c.SubSubSection title='Path-based control for various routes within the application'>
-        <c.Code title='Sample interceptor path managed configuration' src='doc/route-allow-deny.yml' />
+      <c.SubSubSection title='Path-based control for various endpoints within the application'>
+        <c.Code title='Sample interceptor path managed configuration' src='doc/endpoint-allow-deny.yml' />
       </c.SubSubSection>
-      <c.SubSubSection title='Route-enabled control via decorators'>
-        <c.Code title='Sample controller with route-level allow/deny' src='doc/controller-route-deny.ts' />
+      <c.SubSubSection title='Endpoint-enabled control via decorators'>
+        <c.Code title='Sample controller with endpoint-level allow/deny' src='doc/controller-endpoint-deny.ts' />
       </c.SubSubSection>
 
       The resolution logic is as follows:
       <ul>
         <li>Determine if interceptor is disabled, this takes precedence.</li>
-        <li>Check the route against the path allow/deny list.  If matched (positive or negative), this wins.</li>
-        <li>Finally check to see if the interceptor has custom applies logic.  If it does, match against the configuration for the route.</li>
+        <li>Check the endpoint against the path allow/deny list.  If matched (positive or negative), this wins.</li>
+        <li>Finally check to see if the interceptor has custom applies logic.  If it does, match against the configuration for the endpoint.</li>
         <li>By default, if nothing else matched, assume the interceptor is valid.</li>
       </ul>
     </c.SubSection>
@@ -228,7 +228,7 @@ export const text = <>
   <c.Section title='Cookie Support'>
     {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {HttpRequestContract}/{HttpResponseContract} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
-    <c.Code title='Sample Cookie Usage' src='doc/cookie-routes.ts' />
+    <c.Code title='Sample Cookie Usage' src='doc/cookie-endpoints.ts' />
   </c.Section>
 
   <c.Section title='SSL Support'>

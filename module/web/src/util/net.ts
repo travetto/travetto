@@ -12,7 +12,7 @@ type Listener = {
 } & WebServerHandle;
 
 /** Net utilities */
-export class WebNetUtil {
+export class NetUtil {
 
   /** Is an error an address in use error */
   static isInuseError(err: unknown): err is Error & { port: number } {

@@ -6,10 +6,10 @@ import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { MethodOrAll, HttpRequest, WebServerHandle } from '../../src/types';
+import { HttpMethodOrAll, HttpRequest, WebServerHandle } from '../../src/types';
 import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base';
 import { CoreWebServerSupport } from './server-support/core';
-import { WebNetUtil } from '../../src/util/net';
+import { NetUtil } from '../../src/util/net';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
@@ -29,7 +29,7 @@ export abstract class BaseWebSuite {
   @BeforeAll()
   async initServer(): Promise<void> {
     if (!this.type || this.type === CoreWebServerSupport) {
-      this.#support = new CoreWebServerSupport(await WebNetUtil.getFreePort());
+      this.#support = new CoreWebServerSupport(await NetUtil.getFreePort());
     } else {
       this.#support = classConstruct(this.type);
     }
@@ -99,7 +99,7 @@ export abstract class BaseWebSuite {
   }
 
   async request<T>(
-    method: HttpRequest['method'] | Exclude<MethodOrAll, 'all'>,
+    method: HttpRequest['method'] | Exclude<HttpMethodOrAll, 'all'>,
     path: string,
     cfg: FullHttpRequest = {}
   ): Promise<MakeRequestResponse<T>> {

@@ -1,6 +1,6 @@
 import { Class, toConcrete } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
-import { HttpInterceptor, FilterContext, FilterNext, ManagedInterceptorConfig, ParamExtractor } from '@travetto/web';
+import { HttpInterceptor, FilterContext, FilterNext, ManagedInterceptorConfig, EndpointUtil } from '@travetto/web';
 import { SessionData, SessionService } from '@travetto/auth-session';
 
 import { Config } from '@travetto/config';
@@ -35,4 +35,4 @@ export class AuthSessionInterceptor implements HttpInterceptor {
   }
 }
 
-ParamExtractor.registerContext(toConcrete<SessionData>(), (_, req) => req.session?.data);
+EndpointUtil.registerContextParam(toConcrete<SessionData>(), (_, req) => req.session?.data);

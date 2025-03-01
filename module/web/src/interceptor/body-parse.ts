@@ -6,7 +6,8 @@ import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
 import { WebSymbols } from '../symbols';
-import { RouteConfig, HttpRequest, FilterContext, FilterNext } from '../types';
+import { HttpRequest, FilterContext, FilterNext } from '../types';
+import { EndpointConfig } from '../registry/types';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
@@ -75,8 +76,8 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     }
   }
 
-  applies(route: RouteConfig): boolean {
-    return route.method === 'all' || METHODS_WITH_BODIES.has(route.method);
+  applies(endpoint: EndpointConfig): boolean {
+    return endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method);
   }
 
   async intercept({ req, res, config }: FilterContext<BodyParseConfig>, next: FilterNext): Promise<unknown> {

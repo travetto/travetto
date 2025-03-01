@@ -1,7 +1,8 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { RouteConfig, FilterContext, FilterNext } from '../types';
+import { FilterContext, FilterNext } from '../types';
+import { EndpointConfig } from '../registry/types';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
@@ -20,8 +21,8 @@ export class GetCacheInterceptor implements HttpInterceptor {
   @Inject()
   config: GetCacheConfig;
 
-  applies(route: RouteConfig): boolean {
-    return route.method === 'get';
+  applies(endpoint: EndpointConfig): boolean {
+    return endpoint.method === 'get';
   }
 
   async intercept({ res }: FilterContext, next: FilterNext): Promise<unknown> {

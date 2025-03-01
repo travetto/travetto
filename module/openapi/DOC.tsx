@@ -23,9 +23,9 @@ export const text = <>
 
     <c.Execution title='OpenAPI usage' cmd='trv' args={['openapi:spec', '--help']} />
 
-    The command will run your application, in non-server mode, to collect all the routes and model information, to produce the {d.path('openapi.yml')}.  Once produced, the code will store the output in the specified location.
+    The command will run your application, in non-server mode, to collect all the endpoints and model information, to produce the {d.path('openapi.yml')}.  Once produced, the code will store the output in the specified location.
 
-    <c.Note>The module supports generating the OpenAPI spec in real-time while listening for changes to routes and models.</c.Note>
+    <c.Note>The module supports generating the OpenAPI spec in real-time while listening for changes to endpoints and models.</c.Note>
   </c.Section>
   <c.Section title='CLI - openapi:client'>
 

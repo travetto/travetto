@@ -1,9 +1,11 @@
 import { AppError, toConcrete, asConstructable, AsyncMethodDescriptor, ClassInstance } from '@travetto/runtime';
-import { ControllerRegistry, ParamConfig, Param, HttpRequest } from '@travetto/web';
+import { ControllerRegistry, EndpointParamConfig, Param, HttpRequest } from '@travetto/web';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { WebUploadInterceptor } from './interceptor';
 import { WebUploadConfig } from './config';
+
+const HttpRequestTarget = toConcrete<HttpRequest>();
 
 type UploadConfig = Partial<Pick<WebUploadConfig, 'types' | 'maxSize' | 'cleanupFiles'>>;
 
@@ -11,10 +13,10 @@ type UploadConfig = Partial<Pick<WebUploadConfig, 'types' | 'maxSize' | 'cleanup
  * Allows for supporting uploads
  *
  * @augments `@travetto/web-upload:Upload`
- * @augments `@travetto/web:HttpParam`
+ * @augments `@travetto/web:Param`
  */
 export function Upload(
-  param: string | Partial<ParamConfig> & UploadConfig = {}
+  param: string | Partial<EndpointParamConfig> & UploadConfig = {}
 ): (inst: ClassInstance, prop: string, idx: number) => void {
 
   if (typeof param === 'string') {
@@ -23,8 +25,8 @@ export function Upload(
 
   const finalConf = { ...param };
 
-  if (!(finalConf.contextType === Blob || finalConf.contextType === File)) {
-    throw new AppError(`Cannot use upload decorator with ${finalConf.contextType}, but only an Blob or File`);
+  if (!(finalConf.field?.type === Blob || finalConf.field?.type === File)) {
+    throw new AppError(`Cannot use upload decorator with ${finalConf.field?.type}, but only an Blob or File`);
   }
 
   return (inst: ClassInstance, prop: string, idx: number): void => {
@@ -46,10 +48,7 @@ export function Upload(
       }
     );
 
-    return Param('body', {
-      ...finalConf,
-      extract: (config, req) => req?.uploads[config.name!]
-    })(inst, prop, idx);
+    return Param('body', { ...finalConf, extract: (c, r) => r?.uploads[c.name!] })(inst, prop, idx);
   };
 }
 
@@ -57,11 +56,9 @@ export function Upload(
  * Allows for supporting uploads
  *
  * @augments `@travetto/web-upload:Upload`
- * @augments `@travetto/web:HttpEndpoint`
+ * @augments `@travetto/web:Endpoint`
  */
-export function UploadAll(config: Partial<ParamConfig> & UploadConfig = {}) {
-  const RequestTarget = toConcrete<HttpRequest>();
-
+export function UploadAll(config: Partial<EndpointParamConfig> & UploadConfig = {}) {
   return function <T>(target: T, propertyKey: string, desc: AsyncMethodDescriptor): void {
     const targetClass = asConstructable(target).constructor;
 
@@ -69,7 +66,7 @@ export function UploadAll(config: Partial<ParamConfig> & UploadConfig = {}) {
 
     // Find the request object, and mark it as a file param
     params?.some((el, i) => {
-      if (el.contextType === RequestTarget) {
+      if (el.field?.type === HttpRequestTarget) {
         SchemaRegistry.registerPendingParamConfig(targetClass, propertyKey, i, Object, { specifiers: ['file'] });
         return true;
       }

@@ -33,7 +33,7 @@ $ npx @travetto/scaffold@<version-or-tag>
       <li>{d.library('Fastify')}</li>
     </ul>
 
-    The code will establish some basic routes, specifically, {d.input('GET / ')} as the root endpoint.  This will return the contents of your {d.path('package.json')} as an identification operation.
+    The code will establish some basic endpoints, specifically, {d.input('GET / ')} as the root endpoint.  This will return the contents of your {d.path('package.json')} as an identification operation.
 
     <c.SubSection title='Additional Web Features'>
       In addition to the core functionality, the {d.input('web')} feature has some useful sub-features.  Specifically:<br />

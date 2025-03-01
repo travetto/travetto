@@ -2,8 +2,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { AppError, Util } from '@travetto/runtime';
 
 import {
-  BodyParseInterceptor, LoggingInterceptor, RouteConfig, FilterContext, FilterNext, ControllerRegistry,
-  HttpInterceptor, SerializeInterceptor, WebSymbols, SerializeUtil
+  BodyParseInterceptor, LoggingInterceptor, FilterContext, FilterNext, ControllerRegistry,
+  HttpInterceptor, SerializeInterceptor, WebSymbols, SerializeUtil, EndpointConfig
 } from '@travetto/web';
 
 import { WebRpcConfig } from './config';
@@ -22,9 +22,9 @@ export class WebRpcInterceptor implements HttpInterceptor<WebRpcConfig> {
   @Inject()
   body: BodyParseInterceptor;
 
-  applies(route: RouteConfig): boolean {
+  applies(endpoint: EndpointConfig): boolean {
     // Global handler
-    return route.path === '*';
+    return endpoint.path === '*';
   }
 
   async intercept({ req, res }: FilterContext<WebRpcConfig>, next: FilterNext): Promise<unknown> {

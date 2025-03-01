@@ -1,12 +1,12 @@
 import { asConstructable, castTo, Class, TimeSpan, TimeUtil } from '@travetto/runtime';
 
-import { HeaderMap, RouteHandler } from '../types';
+import { HttpHeaderMap, EndpointHandler } from '../types';
 import { ControllerRegistry } from '../registry/controller';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator } from '../registry/types';
 import { AcceptsInterceptor } from '../interceptor/accepts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
-  return function <T>(target: T | Class<T>, property?: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) {
+  return function <T>(target: T | Class<T>, property?: string, descriptor?: TypedPropertyDescriptor<EndpointHandler>) {
     if (descriptor) {
       return ControllerRegistry.registerPendingEndpoint(asConstructable(target).constructor, descriptor, config);
     } else {
@@ -30,7 +30,7 @@ export function Undocumented(): EndpointDecorator { return register({ documented
  * Set response headers on success
  * @param headers The response headers to set
  */
-export function SetHeaders(headers: HeaderMap): EndpointDecorator { return register({ headers }); }
+export function SetHeaders(headers: HttpHeaderMap): EndpointDecorator { return register({ headers }); }
 
 /**
  * Specifies content type for response
