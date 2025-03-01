@@ -2,7 +2,7 @@ import { SetOption, GetOption } from 'cookies';
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'node:http';
 import { Readable, Writable } from 'node:stream';
 
-import type { ByteRange, Any, Class, TypedFunction } from '@travetto/runtime';
+import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
 
 import type { WebSymbols } from './symbols';
 
@@ -141,6 +141,10 @@ export interface HttpRequest<T = unknown> {
    * Read the file name from the request content disposition
    */
   getFilename(): string | undefined;
+  /**
+   * Get expanded query
+   */
+  getExpandedQuery(): Record<string, unknown>;
   /**
    * Readable stream for the request body
    */

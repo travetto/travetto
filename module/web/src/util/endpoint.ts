@@ -1,6 +1,6 @@
 import { isPromise } from 'node:util/types';
 
-import { AppError, asConstructable, castTo, Class, toConcrete, Util } from '@travetto/runtime';
+import { asConstructable, castTo, Class, toConcrete, Util } from '@travetto/runtime';
 import { BindUtil, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { HttpRequest, Filter, FilterContext, FilterNext, FilterReturn, HttpHandler, HttpResponse } from '../types';
@@ -184,23 +184,21 @@ export class EndpointUtil {
    * @param res
    * @param value
    */
-  static extractParameter(param: EndpointParamConfig, req: HttpRequest, res: HttpResponse, value: unknown): unknown {
-    if (value !== WebSymbols.MissingParam) {
-      return value;
-    } else if (param.type === HttpResponseImpl) {
+  static extractParameter(param: EndpointParamConfig, req: HttpRequest, res: HttpResponse): unknown {
+    if (param.type === HttpResponseImpl) {
       return res;
     } else if (param.type === HttpRequestImpl) {
       return req;
-    } else {
-      switch (param.location) {
-        case 'path': return req.params[param.name!];
-        case 'header': return req.header(param.name!);
-        case 'body': return req.body;
-        case 'context': return this.#contextExtractors.get(param.type!)!(req);
-        case 'query': {
-          const q = (req[WebSymbols.QueryExpanded] ??= BindUtil.expandPaths(req.query));
-          return param.prefix ? q[param.prefix] : (!param.type?.Ⲑid ? q[param.name!] : q);
-        }
+    }
+
+    switch (param.location) {
+      case 'path': return req.params[param.name!];
+      case 'header': return req.header(param.name!);
+      case 'body': return req.body;
+      case 'context': return this.#contextExtractors.get(param.type!)!(req);
+      case 'query': {
+        const q = req.getExpandedQuery();
+        return param.prefix ? q[param.prefix] : (!param.type?.Ⲑid ? q[param.name!] : q);
       }
     }
   }
@@ -217,7 +215,7 @@ export class EndpointUtil {
     const vals = req[WebSymbols.RequestParams];
 
     try {
-      const extracted = endpoint.params.map((c, i) => this.extractParameter(c, req, res, vals ? vals[i] : WebSymbols.MissingParam));
+      const extracted = endpoint.params.map((c, i) => vals?.[i] ?? this.extractParameter(c, req, res));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;

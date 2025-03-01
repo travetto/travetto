@@ -2,6 +2,7 @@ import { IncomingHttpHeaders } from 'node:http';
 import { PassThrough, Readable } from 'node:stream';
 
 import { ByteRange, castTo } from '@travetto/runtime';
+import { BindUtil } from '@travetto/schema';
 
 import { HttpRequest, HttpContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
@@ -87,6 +88,13 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   getFilename(this: HttpRequest): string | undefined {
     const [, match] = (this.header('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
     return match;
+  }
+
+  /**
+   * Get the expanded query object
+   */
+  getExpandedQuery(this: HttpRequest): Record<string, unknown> {
+    return (this[WebSymbols.QueryExpanded] ??= BindUtil.expandPaths(this.query));
   }
 
   /**
