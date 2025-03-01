@@ -54,7 +54,7 @@ Once operating within the [Session](https://github.com/travetto/travetto/tree/ma
 ```typescript
 @Authenticated()
 @Controller('/session')
-export class SessionRoutes {
+export class SessionEndpoints {
 
   @Inject()
   service: SessionService;

@@ -89,9 +89,9 @@ All of the high level configurations can be found in the following structure:
    */</span>
   persist<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
-   * Skip emitting all routes
+   * Skip emitting all endpoints
    */</span>
-  skipRoutes<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  skipEndpoints<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Expose all schemas, even if not referenced
    */</span>
@@ -135,9 +135,9 @@ Options:
   -h, <span class="token parameter variable">--help</span>             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
-The command will run your application, in non-server mode, to collect all the routes and model information, to produce the <code class="item path">openapi.yml</code>.  Once produced, the code will store the output in the specified location.
+The command will run your application, in non-server mode, to collect all the endpoints and model information, to produce the <code class="item path">openapi.yml</code>.  Once produced, the code will store the output in the specified location.
 
-<p class="note"><strong>Note</strong> The module supports generating the OpenAPI spec in real-time while listening for changes to routes and models.</p>
+<p class="note"><strong>Note</strong> The module supports generating the OpenAPI spec in real-time while listening for changes to endpoints and models.</p>
 
 <h2 id="cli-openapi-client">CLI - openapi:client</h2>
 

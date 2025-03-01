@@ -2,7 +2,6 @@ import { ClassInstance } from '@travetto/runtime';
 
 import { ControllerRegistry } from '../registry/controller';
 import { EndpointParamConfig } from '../registry/types';
-import { EndpointParamExtractor } from '../util/param';
 
 type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx: number) => void;
 

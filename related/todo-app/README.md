@@ -11,7 +11,7 @@ The following tutorial wil walk you through setting up a [Travetto](https://trav
    1. [Establishing The Model](#establishing-the-model)
    1. [Building the Service Layer](#building-the-service-layer)
    1. [Writing Unit tests](#writing-unit-tests)
-   1. [Adding Web Routes](#adding-web-routes)
+   1. [Adding Web Endpoints](#adding-web-endpoints)
    1. [Running the App](#running-the-app)
 
 ## Prerequisites
@@ -203,10 +203,10 @@ export class TodoTest {
 }
 ```
 
-## Adding Web Routes
-Now we establish the routes, providing an interface to the service layer.
+## Adding Web Endpoints
+Now we establish the endpoints, providing an interface to the service layer.
 
-Finally, we establish the controller at `src/route.ts`
+Finally, we establish the controller at `src/web.ts`
 
 **Code: Controller contents**
 ```typescript
@@ -354,7 +354,7 @@ npx trv run:web
       ApiSpecConfig: {
         output: './openapi.yml',
         persist: false,
-        skipRoutes: false,
+        skipEndpoints: false,
         exposeAllSchemas: false
       },
       AsyncContextConfig: {},
@@ -378,7 +378,6 @@ npx trv run:web
         level: true,
         location: true
       },
-      LogRoutesConfig: {},
       MailConfig: {
         transport: {},
         defaults: {
@@ -414,13 +413,14 @@ npx trv run:web
         defaultMessage: true,
         ssl: { active: false }
       },
+      WebLogConfig: {},
       WebRpcConfig: { clients: {} },
       WebSessionConfig: {},
       WebSslConfig: { active: false }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web:src/application/app.ts:190] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web:src/application/app.ts:196] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 
