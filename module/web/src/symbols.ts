@@ -9,7 +9,8 @@ const HeadersAdded: unique symbol = Symbol.for('@travetto/web:headers');
 const InterceptorConfigs: unique symbol = Symbol.for('@travetto/web:interceptors');
 const ParsedType: unique symbol = Symbol.for('@travetto/web:content-type');
 const QueryExpanded: unique symbol = Symbol.for('@travetto/web:query-expanded');
-const GlobalRoute: unique symbol = Symbol.for('@travetto/web:global-route');
+const GlobalEndpoint: unique symbol = Symbol.for('@travetto/web:global-endpoint');
+const EndpointChecker: unique symbol = Symbol.for('@travetto/web:endpoint-checker');
 
 export const WebSymbols = {
   ProviderEntity,
@@ -23,5 +24,6 @@ export const WebSymbols = {
   InterceptorConfigs,
   ParsedType,
   QueryExpanded,
-  GlobalRoute,
+  GlobalEndpoint,
+  EndpointChecker
 } as const;

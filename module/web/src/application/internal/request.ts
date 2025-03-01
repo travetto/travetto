@@ -3,7 +3,7 @@ import { PassThrough, Readable } from 'node:stream';
 
 import { ByteRange, castTo } from '@travetto/runtime';
 
-import { HttpRequest, ContentType } from '../../types';
+import { HttpRequest, HttpContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
 import { WebSymbols } from '../../symbols';
 
@@ -16,7 +16,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Content type parsed
    */
-  [WebSymbols.ParsedType]?: ContentType;
+  [WebSymbols.ParsedType]?: HttpContentType;
 
   /**
    * Get the inbound request header as a string
@@ -52,7 +52,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Get the fully parsed content type
    */
-  getContentType(this: HttpRequest): ContentType | undefined {
+  getContentType(this: HttpRequest): HttpContentType | undefined {
     const self: HttpRequest & Partial<HttpRequestCore> = castTo(this);
     return self[WebSymbols.ParsedType] ??= MimeUtil.parse(this.headerFirst('content-type'));
   }

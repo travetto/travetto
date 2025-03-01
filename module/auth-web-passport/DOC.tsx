@@ -21,5 +21,5 @@ export const text = <>
 
   After that, the provider is no different than any other, and can be used accordingly.  Additionally, because {d.library('Passport')} runs first, in it's entirety, you can use the provider as you normally would any {d.library('Passport')} middleware.
 
-  <c.Code title='Sample routes using Facebook/passport provider' src='doc/simple.ts' />
+  <c.Code title='Sample endpoints using Facebook/passport provider' src='doc/simple.ts' />
 </>;

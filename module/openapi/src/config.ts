@@ -60,9 +60,9 @@ export class ApiSpecConfig {
    */
   persist?: boolean;
   /**
-   * Skip emitting all routes
+   * Skip emitting all endpoints
    */
-  skipRoutes: boolean = false;
+  skipEndpoints: boolean = false;
   /**
    * Expose all schemas, even if not referenced
    */

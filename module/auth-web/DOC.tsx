@@ -22,7 +22,7 @@ export const text = <>
   <ul>
     <li>Authenticating</li>
     <li>Maintaining Auth Context</li>
-    <li>Route declaration</li>
+    <li>Endpoint declaration</li>
     <li>Multi-Step Login</li>
   </ul>
 
@@ -68,12 +68,12 @@ export const text = <>
 
   </c.Section>
 
-  <c.Section title='Route Declaration'>
+  <c.Section title='Endpoint Declaration'>
     {Login} integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.<br />
 
     {Logout} integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.
 
-    <c.Code title='Using provider with routes' src='doc/route.ts' />
+    <c.Code title='Using provider with endpoints' src='doc/endpoints.ts' />
 
     {Authenticated} and {Unauthenticated} will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the {PrincipalContract} is accessible via {ContextParam} directly, without wiring in a request object, but is also accessible on the request object as {HttpRequestContract}.auth.
   </c.Section>

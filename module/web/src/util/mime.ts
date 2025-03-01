@@ -1,5 +1,5 @@
 import { Util } from '@travetto/runtime';
-import { ContentType } from '../types';
+import { HttpContentType } from '../types';
 
 /**
  * Utils for checking mime patterns
@@ -8,11 +8,11 @@ export class MimeUtil {
 
   static #convert(rule: string): RegExp {
     const core = (rule.endsWith('/*') || !rule.includes('/')) ?
-      `${rule.replace(/[/].{0,10}$/, '')}\/.*` : rule;
+      `${rule.replace(/[/].{0,20}$/, '')}\/.*` : rule;
     return new RegExp(`^${core}$`);
   }
 
-  static parse(mimeType?: string): ContentType | undefined {
+  static parse(mimeType?: string): HttpContentType | undefined {
     if (mimeType) {
       const [full, ...params] = mimeType.split(/;/).map(x => x.trim());
       const [type, subtype] = full.split('/');

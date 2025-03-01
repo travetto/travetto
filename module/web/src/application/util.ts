@@ -2,7 +2,7 @@ import { castTo, asFull } from '@travetto/runtime';
 
 import { HttpResponse, HttpRequest } from '../types';
 import { HttpRequestCore } from './internal/request';
-import { ResponseCore } from './internal/response';
+import { HttpResponseCore } from './internal/response';
 
 /**
  * Web server utilities
@@ -26,7 +26,7 @@ export class WebServerUtil {
    * @param req Outbound response
    */
   static decorateResponse<T extends HttpResponse>(res: Partial<T> & Record<string, unknown>): T {
-    Object.setPrototypeOf(res, ResponseCore.prototype);
+    Object.setPrototypeOf(res, HttpResponseCore.prototype);
     return asFull<T>(res);
   }
 }

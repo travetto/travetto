@@ -11,11 +11,12 @@ import { Controller } from '../src/decorator/controller';
 import { Get } from '../src/decorator/endpoint';
 import { ManagedInterceptorConfig, HttpInterceptor } from '../src/interceptor/types';
 import { ControllerRegistry } from '../src/registry/controller';
-import { HttpResponse, FilterContext, RouteConfig, WebServerHandle } from '../src/types';
+import { HttpResponse, FilterContext, WebServerHandle } from '../src/types';
 import { WebServer } from '../src/application/server';
 import { WebApplication } from '../src/application/app';
 import { CorsInterceptor } from '../src/interceptor/cors';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache';
+import { EndpointConfig } from '../src/registry/types';
 
 @Injectable()
 @Config('web.custom')
@@ -30,8 +31,8 @@ class CustomInterceptorConfig extends ManagedInterceptorConfig {
 class Server implements WebServer {
   listening: boolean;
   async init(): Promise<void> { }
-  async registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[], interceptors?: HttpInterceptor<unknown>[] | undefined): Promise<void> { }
-  async unregisterRoutes(key: string | symbol): Promise<void> { }
+  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors?: HttpInterceptor<unknown>[] | undefined): Promise<void> { }
+  async unregisterEndpoints(key: string | symbol): Promise<void> { }
   listen(): WebServerHandle | Promise<WebServerHandle> {
     return {
       close(cb?: Function) { },
@@ -46,8 +47,8 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
   @Inject()
   config: CustomInterceptorConfig;
 
-  applies(route: RouteConfig) {
-    return !/opt-in/.test(`${route.path}`);
+  applies(endpoint: EndpointConfig) {
+    return !/opt-in/.test(`${endpoint.path}`);
   }
 
   intercept(ctx: FilterContext<CustomInterceptorConfig>) {

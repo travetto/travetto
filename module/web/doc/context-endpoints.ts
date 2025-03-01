@@ -12,14 +12,14 @@ class PreferenceService {
 
   async update(preferences: Preferences) {
     // Get user id from an authenticated request
-    const userId = this.context.get().userId;
+    const userId = this.context.get<string>('userId');
     // Update user
     return userId;
   }
 }
 
 @Controller('/user')
-class PrefRoutes {
+class PrefEndpoints {
   @Inject()
   service: PreferenceService;
 

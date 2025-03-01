@@ -1,4 +1,4 @@
-web.
+web:
   cors:
     paths: 
       - '!/public/user'

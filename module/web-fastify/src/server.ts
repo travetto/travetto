@@ -2,7 +2,7 @@ import https from 'node:https';
 import compress from '@fastify/compress';
 import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 
-import { WebConfig, RouteConfig, WebServer, WebServerHandle, WebSymbols } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, WebSymbols, EndpointConfig } from '@travetto/web';
 import { Inject, Injectable } from '@travetto/di';
 
 import { FastifyWebServerUtil } from './util';
@@ -45,22 +45,22 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
     return this.raw;
   }
 
-  async unregisterRoutes(key: string | symbol): Promise<void> {
-    console.debug('Fastify does not allow for route reloading');
+  async unregisterEndpoints(key: string | symbol): Promise<void> {
+    console.debug('Fastify does not allow for endpoint reloading');
   }
 
-  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]): Promise<void> {
+  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void> {
     if (this.listening) { // Does not support live reload
       return;
     }
-    for (const route of routes) {
+    for (const endpoint of endpoints) {
       let sub = path;
-      if (route.path) {
-        sub = `${path}/${route.path}`;
+      if (endpoint.path) {
+        sub = `${path}/${endpoint.path}`;
       }
       sub = sub.replace(/\/{1,3}/g, '/').replace(/\/{1,3}$/, '');
-      this.raw[route.method](sub, async (req, reply) => {
-        await route.handlerFinalized!(
+      this.raw[endpoint.method](sub, async (req, reply) => {
+        await endpoint.handlerFinalized!(
           req[WebSymbols.TravettoEntity] ??= FastifyWebServerUtil.getRequest(req),
           reply[WebSymbols.TravettoEntity] ??= FastifyWebServerUtil.getResponse(reply)
         );

@@ -4,12 +4,9 @@ import kCompress from 'koa-compress';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { WebConfig, WebServer, RouteConfig, CookieConfig, WebNetUtil, WebServerHandle, WebSymbols } from '@travetto/web';
+import { WebConfig, WebServer, CookieConfig, NetUtil, WebServerHandle, WebSymbols, EndpointConfig } from '@travetto/web';
 
 import { KoaWebServerUtil } from './util';
-
-type Keyed = { key?: symbol | string };
-type Routes = ReturnType<kRouter<unknown, koa.Context>['routes']>;
 
 /**
  * Koa-based Web server
@@ -45,7 +42,7 @@ export class KoaWebServer implements WebServer<koa> {
     return app;
   }
 
-  async unregisterRoutes(key: string | symbol): Promise<void> {
+  async unregisterEndpoints(key: string | symbol): Promise<void> {
     // Delete previous
     const pos = this.raw.middleware.findIndex(x => {
       const _x: (typeof x) & { key?: string } = x;
@@ -56,23 +53,23 @@ export class KoaWebServer implements WebServer<koa> {
     }
   }
 
-  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[]): Promise<void> {
+  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void> {
     const router = new kRouter<unknown, koa.Context>(path !== '/' ? { prefix: path } : {});
 
-    // Register all routes to extract the proper request/response for the framework
-    for (const route of routes) {
-      const routePath = route.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[route.method](routePath, async (ctx) => {
+    // Register all endpoints to extract the proper request/response for the framework
+    for (const endpoint of endpoints) {
+      const finalPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
+      router[endpoint.method](finalPath, async (ctx) => {
         const [req, res] = ctx[WebSymbols.TravettoEntity] ??= [
           KoaWebServerUtil.getRequest(ctx),
           KoaWebServerUtil.getResponse(ctx)
         ];
-        return await route.handlerFinalized!(req, res);
+        return await endpoint.handlerFinalized!(req, res);
       });
     }
 
-    // Register routes
-    const middleware: Routes & Keyed = router.routes();
+    // Register endpoints
+    const middleware: ReturnType<kRouter<unknown, koa.Context>['routes']> & { key?: symbol | string } = router.routes();
     middleware.key = key;
     this.raw.use(middleware);
   }
@@ -84,6 +81,6 @@ export class KoaWebServer implements WebServer<koa> {
         .createServer((await this.config.ssl?.getKeys())!, this.raw.callback());
     }
     this.listening = true;
-    return await WebNetUtil.listen(raw, this.config.port, this.config.bindAddress!);
+    return await NetUtil.listen(raw, this.config.port, this.config.bindAddress!);
   }
 }

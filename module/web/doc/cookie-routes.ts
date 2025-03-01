@@ -3,7 +3,7 @@ import { GetOption, SetOption } from 'cookies';
 import { Controller, Get, QueryParam, HttpRequest, HttpResponse } from '@travetto/web';
 
 @Controller('/simple')
-export class SimpleRoutes {
+export class SimpleEndpoints {
 
   private getOptions: GetOption;
   private setOptions: SetOption;

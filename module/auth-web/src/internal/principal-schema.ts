@@ -1,21 +1,19 @@
-import { ClassList, SchemaRegistry } from '@travetto/schema';
-import { toConcrete, Class, TypedObject } from '@travetto/runtime';
+import { Schema, SchemaRegistry } from '@travetto/schema';
+import { toConcrete, AnyMap, asFull } from '@travetto/runtime';
 import { Principal } from '@travetto/auth';
 
-const PrincipalTarget = toConcrete<Principal>();
-
-const FIELDS: Record<keyof Principal, Class | ClassList> = {
-  id: String,
-  expiresAt: Date,
-  issuedAt: Date,
-  issuer: String,
-  sessionId: String,
-  permissions: [String],
-  details: Object,
-};
-
-for (const [field, type] of TypedObject.entries(FIELDS)) {
-  SchemaRegistry.registerPendingFieldConfig(PrincipalTarget, field, type, { required: { active: field === 'id' } });
+@Schema()
+export class PrincipalSchema implements Principal {
+  id: string;
+  details: AnyMap;
+  expiresAt?: Date | undefined;
+  issuedAt?: Date | undefined;
+  issuer?: string | undefined;
+  sessionId?: string | undefined;
+  permissions?: string[] | undefined;
 }
 
-SchemaRegistry.register(PrincipalTarget, { class: PrincipalTarget });
+SchemaRegistry.mergeConfigs(
+  asFull(SchemaRegistry.getOrCreatePending(toConcrete<Principal>())),
+  SchemaRegistry.getOrCreatePending(PrincipalSchema)
+);

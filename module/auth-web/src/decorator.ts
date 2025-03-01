@@ -17,7 +17,7 @@ export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
 }
 
 /**
- * Ensure the controller/route is authenticated, give a set of permissions
+ * Ensure the controller/endpoint is authenticated, give a set of permissions
  * @param permissions Set of required/disallowed permissions
  * @augments `@travetto/auth:Authenticated`
  */
@@ -29,7 +29,7 @@ export function Authenticated(permissions: string[] = []): EndpointDecorator {
 }
 
 /**
- * Require the controller/route to be unauthenticated
+ * Require the controller/endpoint to be unauthenticated
  * @augments `@travetto/auth:Unauthenticated`
  */
 export function Unauthenticated(): EndpointDecorator {

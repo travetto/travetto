@@ -38,7 +38,7 @@ export class WebConfig {
   baseUrl: string;
 
   /**
-   * Should the app provide the global route for app info
+   * Should the app provide the global endpoint for app info
    */
   defaultMessage = true;
 
