@@ -4,7 +4,7 @@ import { asConstructable, castTo, Class } from '@travetto/runtime';
 
 import { HttpRequest, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
-import { LightweightConfig, ManagedInterceptorConfig, WebInterceptor, RouteApplies } from '../interceptor/types';
+import { LightweightConfig, ManagedInterceptorConfig, HttpInterceptor, RouteApplies } from '../interceptor/types';
 import { WebSymbols } from '../symbols';
 
 import { ParamExtractor } from './param';
@@ -46,7 +46,7 @@ export class RouteUtil {
   /**
    * Get the interceptor config for a given request and interceptor instance
    */
-  static getInterceptorConfig<T extends WebInterceptor<U>, U extends ManagedInterceptorConfig>(req: HttpRequest, inst: T): U | undefined {
+  static getInterceptorConfig<T extends HttpInterceptor<U>, U extends ManagedInterceptorConfig>(req: HttpRequest, inst: T): U | undefined {
     const cfg = req[WebSymbols.InterceptorConfigs]?.[inst.constructor.Ⲑid] ?? undefined;
     return castTo(cfg);
   }
@@ -78,7 +78,7 @@ export class RouteUtil {
    * - Interceptor level applies
    */
   static verifyRouteApplies(
-    interceptor: WebInterceptor,
+    interceptor: HttpInterceptor,
     resolvedConfig: LightweightConfig | undefined,
     route: RouteConfig | EndpointConfig,
     router?: ControllerConfig
@@ -112,10 +112,10 @@ export class RouteUtil {
    * @param router
    */
   static resolveInterceptorsWithConfig(
-    interceptors: WebInterceptor<LightweightConfig>[],
+    interceptors: HttpInterceptor<LightweightConfig>[],
     route: RouteConfig | EndpointConfig,
     router?: ControllerConfig
-  ): (readonly [WebInterceptor, LightweightConfig | undefined])[] {
+  ): (readonly [HttpInterceptor, LightweightConfig | undefined])[] {
     const resolvedConfigs =
       [...router?.interceptors ?? [], ...route.interceptors ?? []]
         .reduce((acc, [cls, cfg]) => {
@@ -156,7 +156,7 @@ export class RouteUtil {
    * @param router The controller to tie to
    */
   static createRouteHandler(
-    interceptors: WebInterceptor[],
+    interceptors: HttpInterceptor[],
     route: RouteConfig | EndpointConfig,
     router?: ControllerConfig
   ): RequestResponseHandler {

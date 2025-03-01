@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { ManagedInterceptorConfig, WebInterceptor } from './types';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { FilterContext, FilterNext } from '../types';
 import { WebSymbols } from '../symbols';
 import { SerializeInterceptor } from './serialize';
@@ -16,7 +16,7 @@ export class WebLogRoutesConfig extends ManagedInterceptorConfig { }
  * Logging interceptor, to show activity for all requests
  */
 @Injectable()
-export class LoggingInterceptor implements WebInterceptor {
+export class LoggingInterceptor implements HttpInterceptor {
 
   runsBefore = [SerializeInterceptor];
 

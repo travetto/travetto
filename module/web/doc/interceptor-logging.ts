@@ -1,4 +1,4 @@
-import { FilterContext, WebInterceptor } from '@travetto/web';
+import { FilterContext, HttpInterceptor } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 class Appender {
@@ -6,7 +6,7 @@ class Appender {
 }
 
 @Injectable()
-export class LoggingInterceptor implements WebInterceptor {
+export class LoggingInterceptor implements HttpInterceptor {
 
   appender: Appender;
 

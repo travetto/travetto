@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@travetto/di';
-import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, WebInterceptor } from '@travetto/web';
+import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, HttpInterceptor } from '@travetto/web';
 
 import { WebUploadConfig } from './config';
 import { WebUploadUtil } from './util';
 
 @Injectable()
-export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
+export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
 
   @Inject()
   config: WebUploadConfig;

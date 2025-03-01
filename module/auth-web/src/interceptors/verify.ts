@@ -1,5 +1,5 @@
 import { AppError, Util } from '@travetto/runtime';
-import { WebInterceptor, ManagedInterceptorConfig, FilterContext, SerializeInterceptor } from '@travetto/web';
+import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, SerializeInterceptor } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -37,7 +37,7 @@ export class WebAuthVerifyConfig extends ManagedInterceptorConfig {
  * Enforces if the user should be authenticated
  */
 @Injectable()
-export class AuthVerifyInterceptor implements WebInterceptor<WebAuthVerifyConfig> {
+export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfig> {
 
   dependsOn = [SerializeInterceptor, AuthContextInterceptor];
 

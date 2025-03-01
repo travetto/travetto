@@ -6,7 +6,7 @@ import type { ByteRange, Any, Class, TypedFunction } from '@travetto/runtime';
 
 import type { WebSymbols } from './symbols';
 
-import type { WebInterceptor } from './interceptor/types';
+import type { HttpInterceptor } from './interceptor/types';
 
 export type HeaderMap = Record<string, (string | (() => string))>;
 export type MethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
@@ -331,5 +331,5 @@ export interface RouteConfig {
   /**
    * Route-based interceptor enable/disabling
    */
-  interceptors?: [Class<WebInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
+  interceptors?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
 }

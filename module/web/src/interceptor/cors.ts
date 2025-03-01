@@ -4,7 +4,7 @@ import { Ignore } from '@travetto/schema';
 
 import { FilterContext, HttpRequest } from '../types';
 
-import { ManagedInterceptorConfig, WebInterceptor } from './types';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
 
 /**
@@ -42,7 +42,7 @@ export class WebCorsConfig extends ManagedInterceptorConfig {
  * Interceptor that will provide cors support across all requests
  */
 @Injectable()
-export class CorsInterceptor implements WebInterceptor<WebCorsConfig> {
+export class CorsInterceptor implements HttpInterceptor<WebCorsConfig> {
 
   @Inject()
   config: WebCorsConfig;

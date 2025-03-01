@@ -35,10 +35,10 @@ class WebSessionConfig implements ManagedInterceptorConfig { }
  * Loads session, and provides ability to create session as needed, persists when complete.
  */
 @Injectable()
-export class AuthSessionInterceptor implements WebInterceptor {
+export class AuthSessionInterceptor implements HttpInterceptor {
 
-  dependsOn: Class<WebInterceptor>[] = [AuthContextInterceptor];
-  runsBefore: Class<WebInterceptor>[] = [];
+  dependsOn: Class<HttpInterceptor>[] = [AuthContextInterceptor];
+  runsBefore: Class<HttpInterceptor>[] = [];
 
   @Inject()
   service: SessionService;

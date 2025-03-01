@@ -1,4 +1,4 @@
-import type { WebInterceptor } from '../interceptor/types';
+import type { HttpInterceptor } from '../interceptor/types';
 import type { RouteConfig, WebServerHandle } from '../types';
 
 /**
@@ -29,7 +29,7 @@ export interface WebServer<T = unknown> {
    * @param path The path to add the routes to
    * @param endpoints The list of endpoints to add
    */
-  registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[], interceptors?: WebInterceptor[]): Promise<void>;
+  registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[], interceptors?: HttpInterceptor[]): Promise<void>;
 
   /**
    * The routes to unregister

@@ -8,7 +8,7 @@ import { AppError } from '@travetto/runtime';
 import { WebSymbols } from '../symbols';
 import { RouteConfig, HttpRequest, FilterContext, FilterNext } from '../types';
 
-import { ManagedInterceptorConfig, WebInterceptor } from './types';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
 import { AcceptsInterceptor } from './accepts';
 
@@ -35,7 +35,7 @@ export class WebBodyParseConfig extends ManagedInterceptorConfig {
  * Parses the body input content
  */
 @Injectable()
-export class BodyParseInterceptor implements WebInterceptor<WebBodyParseConfig> {
+export class BodyParseInterceptor implements HttpInterceptor<WebBodyParseConfig> {
 
   dependsOn = [SerializeInterceptor, AcceptsInterceptor];
 

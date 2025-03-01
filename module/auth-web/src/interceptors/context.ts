@@ -1,5 +1,5 @@
 import { toConcrete, Class } from '@travetto/runtime';
-import { WebInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor } from '@travetto/web';
+import { HttpInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor } from '@travetto/web';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, Principal } from '@travetto/auth';
 
@@ -16,9 +16,9 @@ const toDate = (v: string | Date | undefined): Date | undefined => (typeof v ===
  * - Manages expiry checks/extensions
  */
 @Injectable()
-export class AuthContextInterceptor implements WebInterceptor {
+export class AuthContextInterceptor implements HttpInterceptor {
 
-  dependsOn: Class<WebInterceptor>[] = [SerializeInterceptor, AsyncContextInterceptor];
+  dependsOn: Class<HttpInterceptor>[] = [SerializeInterceptor, AsyncContextInterceptor];
 
   @Inject({ optional: true })
   codec: PrincipalCodec;

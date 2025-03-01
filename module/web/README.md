@@ -384,15 +384,15 @@ Listening { port: 3000 }
 ```
 
 ## Interceptors
-[WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L28)s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+[HttpInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L28)s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
 **Code: A Trivial Interceptor**
 ```typescript
-import { WebInterceptor, SerializeInterceptor, FilterContext } from '@travetto/web';
+import { HttpInterceptor, SerializeInterceptor, FilterContext } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
-export class HelloWorldInterceptor implements WebInterceptor {
+export class HelloWorldInterceptor implements HttpInterceptor {
 
   dependsOn = [SerializeInterceptor];
 
@@ -511,11 +511,11 @@ web.log:
 [AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/context.ts#L18) is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
 
 ### Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L28) interface.  The interceptors are tied to the defined [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L35) and [HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L158) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [HttpInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L28) interface.  The interceptors are tied to the defined [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L35) and [HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L158) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
-import { FilterContext, WebInterceptor } from '@travetto/web';
+import { FilterContext, HttpInterceptor } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 class Appender {
@@ -523,7 +523,7 @@ class Appender {
 }
 
 @Injectable()
-export class LoggingInterceptor implements WebInterceptor {
+export class LoggingInterceptor implements HttpInterceptor {
 
   appender: Appender;
 
@@ -542,11 +542,11 @@ A `next` parameter is also available to allow for controlling the flow of the re
 
 **Code: Defining a fully controlled Interceptor**
 ```typescript
-import { WebInterceptor, FilterContext, FilterNext } from '@travetto/web';
+import { HttpInterceptor, FilterContext, FilterNext } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
-export class LoggingInterceptor implements WebInterceptor {
+export class LoggingInterceptor implements HttpInterceptor {
   async intercept(ctx: FilterContext, next: FilterNext) {
     const start = Date.now();
     try {

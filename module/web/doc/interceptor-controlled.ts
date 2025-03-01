@@ -1,8 +1,8 @@
-import { WebInterceptor, FilterContext, FilterNext } from '@travetto/web';
+import { HttpInterceptor, FilterContext, FilterNext } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
-export class LoggingInterceptor implements WebInterceptor {
+export class LoggingInterceptor implements HttpInterceptor {
   async intercept(ctx: FilterContext, next: FilterNext) {
     const start = Date.now();
     try {

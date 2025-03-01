@@ -6,7 +6,7 @@ import { Ignore } from '@travetto/schema';
 import { FilterContext } from '../types';
 import { MimeUtil } from '../util/mime';
 
-import { ManagedInterceptorConfig, WebInterceptor } from './types';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
 
 @Config('web.accepts')
@@ -21,7 +21,7 @@ class WebAcceptsConfig extends ManagedInterceptorConfig {
  * Enables access to contextual data when running in a web application
  */
 @Injectable()
-export class AcceptsInterceptor implements WebInterceptor<WebAcceptsConfig> {
+export class AcceptsInterceptor implements HttpInterceptor<WebAcceptsConfig> {
 
   dependsOn = [SerializeInterceptor];
 

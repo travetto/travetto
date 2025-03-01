@@ -3,7 +3,7 @@ import { AppError, Util } from '@travetto/runtime';
 
 import {
   BodyParseInterceptor, LoggingInterceptor, RouteConfig, FilterContext, FilterNext, ControllerRegistry,
-  WebInterceptor, SerializeInterceptor, WebSymbols, SerializeUtil
+  HttpInterceptor, SerializeInterceptor, WebSymbols, SerializeUtil
 } from '@travetto/web';
 
 import { WebRpcConfig } from './config';
@@ -12,7 +12,7 @@ import { WebRpcConfig } from './config';
  * Exposes functionality for RPC behavior
  */
 @Injectable()
-export class WebRpcInterceptor implements WebInterceptor<WebRpcConfig> {
+export class WebRpcInterceptor implements HttpInterceptor<WebRpcConfig> {
 
   runsBefore = [LoggingInterceptor, SerializeInterceptor];
 

@@ -1,4 +1,4 @@
-import { WebInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, SerializeInterceptor, FilterNext } from '@travetto/web';
+import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, SerializeInterceptor, FilterNext } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
@@ -14,7 +14,7 @@ export class WebAuthLogoutConfig extends ManagedInterceptorConfig { }
  * Throws an error if the user is not logged in at time of logout
  */
 @Injectable()
-export class AuthLogoutInterceptor implements WebInterceptor<WebAuthLogoutConfig> {
+export class AuthLogoutInterceptor implements HttpInterceptor<WebAuthLogoutConfig> {
 
   @Inject()
   config: WebAuthLogoutConfig;

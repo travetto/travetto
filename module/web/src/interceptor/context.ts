@@ -5,7 +5,7 @@ import { HttpRequest, HttpResponse } from '@travetto/web';
 
 import { FilterContext, FilterNext } from '../types';
 
-import { ManagedInterceptorConfig, WebInterceptor } from './types';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { BodyParseInterceptor } from './body-parse';
 
 @Config('web.context')
@@ -15,7 +15,7 @@ class WebAsyncContextConfig extends ManagedInterceptorConfig { }
  * Enables access to contextual data when running in a web application
  */
 @Injectable()
-export class AsyncContextInterceptor implements WebInterceptor {
+export class AsyncContextInterceptor implements HttpInterceptor {
 
   #active = new AsyncContextValue<FilterContext>(this);
 

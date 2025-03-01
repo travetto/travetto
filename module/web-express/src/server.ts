@@ -3,7 +3,7 @@ import express from 'express';
 import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebSymbols, WebInterceptor, HttpRequest, WebConfig, RouteUtil, WebServer, RouteConfig, LoggingInterceptor, WebNetUtil, WebServerHandle } from '@travetto/web';
+import { WebSymbols, HttpInterceptor, HttpRequest, WebConfig, RouteUtil, WebServer, RouteConfig, LoggingInterceptor, WebNetUtil, WebServerHandle } from '@travetto/web';
 
 import { ExpressWebServerUtil } from './util';
 
@@ -45,7 +45,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
     }
   }
 
-  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[], interceptors: WebInterceptor[]): Promise<void> {
+  async registerRoutes(key: string | symbol, path: string, routes: RouteConfig[], interceptors: HttpInterceptor[]): Promise<void> {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {

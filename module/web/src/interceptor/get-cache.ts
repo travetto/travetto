@@ -3,7 +3,7 @@ import { Config } from '@travetto/config';
 
 import { RouteConfig, FilterContext, FilterNext } from '../types';
 
-import { ManagedInterceptorConfig, WebInterceptor } from './types';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
 
 @Config('web.getCache')
@@ -13,7 +13,7 @@ export class WebGetCacheConfig extends ManagedInterceptorConfig { }
  * Determines if we should cache all get requests
  */
 @Injectable()
-export class GetCacheInterceptor implements WebInterceptor {
+export class GetCacheInterceptor implements HttpInterceptor {
 
   dependsOn = [SerializeInterceptor];
 

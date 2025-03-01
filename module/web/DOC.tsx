@@ -4,7 +4,7 @@ import { Field, Schema } from '@travetto/schema';
 import { CliCommand } from '@travetto/cli';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';
 
-import { WebInterceptor } from './src/interceptor/types';
+import { HttpInterceptor } from './src/interceptor/types';
 import { WebApplication } from './src/application/app';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
@@ -21,7 +21,7 @@ import { AsyncContextInterceptor } from './src/interceptor/context';
 
 const HttpRequestContract = toConcrete<HttpRequest>();
 const HttpResponseContract = toConcrete<HttpResponse>();
-const WebInterceptorContract = toConcrete<WebInterceptor>();
+const HttpInterceptorContract = toConcrete<HttpInterceptor>();
 
 export const text = <>
   <c.StdHeader />
@@ -155,7 +155,7 @@ export const text = <>
 
   <c.Section title='Interceptors'>
 
-    {WebInterceptorContract}s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+    {HttpInterceptorContract}s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
     <c.Code title='A Trivial Interceptor' src='doc/interceptor-hello-world.ts' />
 
@@ -194,7 +194,7 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='Custom Interceptors'>
-      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {WebInterceptorContract} interface.  The interceptors are tied to the defined {HttpRequestContract} and {HttpResponseContract} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {HttpInterceptorContract} interface.  The interceptors are tied to the defined {HttpRequestContract} and {HttpResponseContract} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
       <c.Code title='Defining a new Interceptor' src='doc/interceptor-logging.ts' />
 

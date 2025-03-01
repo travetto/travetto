@@ -9,7 +9,7 @@ import { RootRegistry } from '@travetto/registry';
 import { ConfigureInterceptor } from '../src/decorator/common';
 import { Controller } from '../src/decorator/controller';
 import { Get } from '../src/decorator/endpoint';
-import { ManagedInterceptorConfig, WebInterceptor } from '../src/interceptor/types';
+import { ManagedInterceptorConfig, HttpInterceptor } from '../src/interceptor/types';
 import { ControllerRegistry } from '../src/registry/controller';
 import { HttpResponse, FilterContext, RouteConfig, WebServerHandle } from '../src/types';
 import { WebServer } from '../src/application/server';
@@ -30,7 +30,7 @@ class CustomInterceptorConfig extends ManagedInterceptorConfig {
 class Server implements WebServer {
   listening: boolean;
   async init(): Promise<void> { }
-  async registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[], interceptors?: WebInterceptor<unknown>[] | undefined): Promise<void> { }
+  async registerRoutes(key: string | symbol, path: string, endpoints: RouteConfig[], interceptors?: HttpInterceptor<unknown>[] | undefined): Promise<void> { }
   async unregisterRoutes(key: string | symbol): Promise<void> { }
   listen(): WebServerHandle | Promise<WebServerHandle> {
     return {
@@ -41,7 +41,7 @@ class Server implements WebServer {
 }
 
 @Injectable()
-class CustomInterceptor implements WebInterceptor<CustomInterceptorConfig> {
+class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
 
   @Inject()
   config: CustomInterceptorConfig;

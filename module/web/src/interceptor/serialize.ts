@@ -2,7 +2,7 @@ import { AppError } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 import { DataUtil } from '@travetto/schema';
 
-import { WebInterceptor } from './types';
+import { HttpInterceptor } from './types';
 
 import { FilterContext, FilterNext } from '../types';
 import { SerializeUtil } from '../util/serialize';
@@ -11,7 +11,7 @@ import { SerializeUtil } from '../util/serialize';
  * Serialization interceptor
  */
 @Injectable()
-export class SerializeInterceptor implements WebInterceptor {
+export class SerializeInterceptor implements HttpInterceptor {
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<void> {
     try {

@@ -8,7 +8,7 @@ import { castTo } from '@travetto/runtime';
 import { FilterContext } from '../types';
 import { WebConfig } from '../application/config';
 
-import { ManagedInterceptorConfig, WebInterceptor } from './types';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
 
 /**
@@ -47,7 +47,7 @@ export class WebCookieConfig extends ManagedInterceptorConfig {
  * Loads cookies from the request, verifies, exposes, and then signs and sets
  */
 @Injectable()
-export class CookiesInterceptor implements WebInterceptor<WebCookieConfig> {
+export class CookiesInterceptor implements HttpInterceptor<WebCookieConfig> {
 
   dependsOn = [SerializeInterceptor];
 

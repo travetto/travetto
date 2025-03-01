@@ -4,7 +4,7 @@ import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator } from './types';
 import { Filter, RouteHandler, ParamConfig } from '../types';
-import { WebInterceptor } from '../interceptor/types';
+import { HttpInterceptor } from '../interceptor/types';
 
 type ValidFieldNames<T> = {
   [K in keyof T]:
@@ -116,7 +116,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param param The param config
    * @param index The parameter index
    */
-  registerEndpointInterceptorConfig<T extends WebInterceptor>(target: Class, handler: RouteHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
+  registerEndpointInterceptorConfig<T extends HttpInterceptor>(target: Class, handler: RouteHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const endpointConfig = this.getOrCreateEndpointConfig(target, handler);
     (endpointConfig.interceptors ??= []).push([interceptorCls, { disabled: false, ...config }]);
   }
@@ -127,7 +127,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param param The param config
    * @param index The parameter index
    */
-  registerControllerInterceptorConfig<T extends WebInterceptor>(target: Class, interceptorCls: Class<T>, config: Partial<T['config']>): void {
+  registerControllerInterceptorConfig<T extends HttpInterceptor>(target: Class, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const controllerConfig = this.getOrCreatePending(target);
     (controllerConfig.interceptors ??= []).push([interceptorCls, { disabled: false, ...config }]);
   }
@@ -151,7 +151,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param cls The interceptor to register data for
    * @param cfg The partial config override
    */
-  createInterceptorConfigDecorator<T extends WebInterceptor>(
+  createInterceptorConfigDecorator<T extends HttpInterceptor>(
     cls: Class<T>,
     cfg: Partial<Omit<RetainFields<T['config']>, 'paths'>>
   ): EndpointDecorator {

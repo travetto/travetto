@@ -1,7 +1,7 @@
 import type { Class } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
-import type { WebInterceptor } from '../interceptor/types';
+import type { HttpInterceptor } from '../interceptor/types';
 import type { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
 
 /**
@@ -58,7 +58,7 @@ interface CoreConfig {
   /**
    * Set of interceptor configs
    */
-  interceptors?: [Class<WebInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
+  interceptors?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
   /**
    * List of headers to add to the response
    */

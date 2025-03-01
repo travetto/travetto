@@ -25,7 +25,7 @@ export abstract class ManagedInterceptorConfig {
  *
  * @concrete
  */
-export interface WebInterceptor<C = Any> {
+export interface HttpInterceptor<C = Any> {
 
   /**
    * Config for interceptor
@@ -35,12 +35,12 @@ export interface WebInterceptor<C = Any> {
   /**
    * This interceptor must run after these
    */
-  dependsOn?: Class<WebInterceptor>[];
+  dependsOn?: Class<HttpInterceptor>[];
 
   /**
    * This interceptor must run before these
    */
-  runsBefore?: Class<WebInterceptor>[];
+  runsBefore?: Class<HttpInterceptor>[];
 
   /**
    * Determines the current route is applicable for the interceptor

@@ -1,4 +1,4 @@
-import { WebInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, SerializeInterceptor } from '@travetto/web';
+import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, SerializeInterceptor } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -19,7 +19,7 @@ export class WebAuthLoginConfig extends ManagedInterceptorConfig {
  * - Connects the principal to the request
  */
 @Injectable()
-export class AuthLoginInterceptor implements WebInterceptor<WebAuthLoginConfig> {
+export class AuthLoginInterceptor implements HttpInterceptor<WebAuthLoginConfig> {
 
   @Inject()
   config: WebAuthLoginConfig;

@@ -1,8 +1,8 @@
-import { WebInterceptor, SerializeInterceptor, FilterContext } from '@travetto/web';
+import { HttpInterceptor, SerializeInterceptor, FilterContext } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
-export class HelloWorldInterceptor implements WebInterceptor {
+export class HelloWorldInterceptor implements HttpInterceptor {
 
   dependsOn = [SerializeInterceptor];
 

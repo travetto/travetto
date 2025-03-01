@@ -6,7 +6,7 @@ import { ConfigurationService } from '@travetto/config';
 import { RouteConfig, HttpRequest, WebServerHandle } from '../types';
 import { WebConfig } from './config';
 import { RouteUtil } from '../util/route';
-import { WebInterceptor } from '../interceptor/types';
+import { HttpInterceptor } from '../interceptor/types';
 import { ControllerRegistry } from '../registry/controller';
 import { WebSymbols } from '../symbols';
 import { WebServer } from './server';
@@ -27,7 +27,7 @@ export class WebApplication<T = unknown> {
   /**
    * List of provided interceptors
    */
-  interceptors: WebInterceptor[] = [];
+  interceptors: HttpInterceptor[] = [];
 
   /**
    * Provide the base information for the app
@@ -81,8 +81,8 @@ export class WebApplication<T = unknown> {
   /**
    * Get the list of installed interceptors
    */
-  async getInterceptors(): Promise<WebInterceptor[]> {
-    const instances = await DependencyRegistry.getCandidateInstances(toConcrete<WebInterceptor>());
+  async getInterceptors(): Promise<HttpInterceptor[]> {
+    const instances = await DependencyRegistry.getCandidateInstances(toConcrete<HttpInterceptor>());
     const ordered = instances.map(x => ({ key: x.constructor, before: x.runsBefore, after: x.dependsOn, target: x }));
     const sorted = WebCommonUtil.ordered(ordered).map(x => x.target);
 
