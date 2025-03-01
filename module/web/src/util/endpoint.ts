@@ -198,7 +198,7 @@ export class EndpointUtil {
       case 'context': return this.#contextExtractors.get(param.type!)!(req);
       case 'query': {
         const q = req.getExpandedQuery();
-        return param.prefix ? q[param.prefix] : (!param.type?.Ⲑid ? q[param.name!] : q);
+        return param.prefix ? q[param.prefix] : (param.type?.Ⲑid ? q : q[param.name!]);
       }
     }
   }
@@ -215,7 +215,7 @@ export class EndpointUtil {
     const vals = req[WebSymbols.RequestParams];
 
     try {
-      const extracted = endpoint.params.map((c, i) => vals?.[i] ?? this.extractParameter(c, req, res));
+      const extracted = endpoint.params.map((c, i) => (vals && vals[i] !== WebSymbols.MissingParam) ? vals[i] : this.extractParameter(c, req, res));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;
