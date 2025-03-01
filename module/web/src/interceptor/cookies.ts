@@ -15,7 +15,7 @@ import { SerializeInterceptor } from './serialize';
  * Web cookie configuration
  */
 @Config('web.cookie')
-export class WebCookieConfig extends ManagedInterceptorConfig {
+export class CookieConfig extends ManagedInterceptorConfig {
   /**
    * Are they signed
    */
@@ -47,23 +47,23 @@ export class WebCookieConfig extends ManagedInterceptorConfig {
  * Loads cookies from the request, verifies, exposes, and then signs and sets
  */
 @Injectable()
-export class CookiesInterceptor implements HttpInterceptor<WebCookieConfig> {
+export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
 
   dependsOn = [SerializeInterceptor];
 
   @Inject()
-  config: WebCookieConfig;
+  config: CookieConfig;
 
   @Inject()
   webConfig: WebConfig;
 
-  finalizeConfig(config: WebCookieConfig): WebCookieConfig {
+  finalizeConfig(config: CookieConfig): CookieConfig {
     config.secure ??= this.webConfig.ssl?.active;
     config.domain ??= this.webConfig.hostname;
     return config;
   }
 
-  intercept({ req, res, config }: FilterContext<WebCookieConfig>): void {
+  intercept({ req, res, config }: FilterContext<CookieConfig>): void {
     const store = new cookies(castTo(req), castTo(res), config);
     req.cookies = { get: (key, opts?): string | undefined => store.get(key, { ...this.config, ...opts }) };
     res.cookies = { set: (key, value, opts?): void => { store.set(key, value, { ...this.config, ...opts }); } };

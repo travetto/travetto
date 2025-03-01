@@ -268,9 +268,13 @@ Initialized {
   config: {
     sources: [ { priority: 999, source: 'memory://override' } ],
     active: {
-      WebAcceptsConfig: { types: {} },
-      WebAsyncContextConfig: {},
-      WebBodyParseConfig: { limit: '1mb', parsingTypes: {} },
+      AcceptsConfig: { types: {} },
+      AsyncContextConfig: {},
+      BodyParseConfig: { limit: '1mb', parsingTypes: {} },
+      CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      CorsConfig: {},
+      GetCacheConfig: {},
+      LogRoutesConfig: {},
       WebConfig: {
         serve: true,
         port: 3000,
@@ -280,10 +284,6 @@ Initialized {
         baseUrl: 'http://localhost:3000',
         defaultMessage: true
       },
-      WebCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-      WebCorsConfig: {},
-      WebGetCacheConfig: {},
-      WebLogRoutesConfig: {},
       WebSslConfig: { active: false }
     }
   }
@@ -360,9 +360,13 @@ Initialized {
       { priority: 999, source: 'memory://override' }
     ],
     active: {
-      WebAcceptsConfig: { types: {} },
-      WebAsyncContextConfig: {},
-      WebBodyParseConfig: { limit: '1mb', parsingTypes: {} },
+      AcceptsConfig: { types: {} },
+      AsyncContextConfig: {},
+      BodyParseConfig: { limit: '1mb', parsingTypes: {} },
+      CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      CorsConfig: {},
+      GetCacheConfig: {},
+      LogRoutesConfig: {},
       WebConfig: {
         serve: true,
         port: 3000,
@@ -372,10 +376,6 @@ Initialized {
         baseUrl: 'http://localhost:3000',
         defaultMessage: true
       },
-      WebCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-      WebCorsConfig: {},
-      WebGetCacheConfig: {},
-      WebLogRoutesConfig: {},
       WebSslConfig: { active: true }
     }
   }
@@ -410,7 +410,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 **Code: Body Parse Config**
 ```typescript
-export class WebBodyParseConfig extends ManagedInterceptorConfig {
+export class BodyParseConfig extends ManagedInterceptorConfig {
   /**
    * Max body size limit
    */
@@ -430,7 +430,7 @@ export class WebBodyParseConfig extends ManagedInterceptorConfig {
 
 **Code: Cors Config**
 ```typescript
-export class WebCorsConfig extends ManagedInterceptorConfig {
+export class CorsConfig extends ManagedInterceptorConfig {
   /**
    * Allowed origins
    */
@@ -463,7 +463,7 @@ export class WebCorsConfig extends ManagedInterceptorConfig {
 
 **Code: Cookies Config**
 ```typescript
-export class WebCookieConfig extends ManagedInterceptorConfig {
+export class CookieConfig extends ManagedInterceptorConfig {
   /**
    * Are they signed
    */
@@ -567,7 +567,7 @@ All framework-provided interceptors, follow the same patterns for general config
 
 **Code: Sample interceptor disabling configuration**
 ```yaml
-web:
+web.
   cors:
     disabled: true
 ```
@@ -576,7 +576,7 @@ web:
 
 **Code: Sample interceptor path managed configuration**
 ```yaml
-web:
+web.
   cors:
     paths: 
       - '!/public/user'

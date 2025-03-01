@@ -1,10 +1,11 @@
-import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server';
 import { Suite } from '@travetto/test';
 import { FastifyWebServer } from '@travetto/web-fastify';
 import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { SessionModelSymbol } from '@travetto/auth-session';
+
+import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server';
 
 const FASTIFY = Symbol.for('fastify');
 

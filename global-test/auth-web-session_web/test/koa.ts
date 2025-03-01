@@ -1,10 +1,11 @@
-import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server';
 import { Suite } from '@travetto/test';
 import { KoaWebServer } from '@travetto/web-koa';
 import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { SessionModelSymbol } from '@travetto/auth-session';
+
+import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server';
 
 const KOA = Symbol.for('koa');
 

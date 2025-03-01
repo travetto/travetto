@@ -9,12 +9,12 @@ import { WebApplication } from './src/application/app';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
 import { PathParam, QueryParam, Body, ContextParam, Param, HeaderParam } from './src/decorator/param';
-import { BodyParseInterceptor, WebBodyParseConfig } from './src/interceptor/body-parse';
-import { CorsInterceptor, WebCorsConfig } from './src/interceptor/cors';
+import { BodyParseInterceptor, BodyParseConfig } from './src/interceptor/body-parse';
+import { CorsInterceptor, CorsConfig } from './src/interceptor/cors';
 import { GetCacheInterceptor } from './src/interceptor/get-cache';
 import { LoggingInterceptor } from './src/interceptor/logging';
 import { SerializeInterceptor } from './src/interceptor/serialize';
-import { CookiesInterceptor, WebCookieConfig } from './src/interceptor/cookies';
+import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies';
 import { WebConfig } from './src/application/config';
 import { HttpRequest, HttpResponse } from './src/types';
 import { AsyncContextInterceptor } from './src/interceptor/context';
@@ -166,7 +166,7 @@ export const text = <>
     <c.SubSection title={BodyParseInterceptor.name}>
       {BodyParseInterceptor} handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
-      <c.Code title='Body Parse Config' src={WebBodyParseConfig} />
+      <c.Code title='Body Parse Config' src={BodyParseConfig} />
     </c.SubSection>
     <c.SubSection title={SerializeInterceptor.name}>
       {SerializeInterceptor} is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
@@ -174,12 +174,12 @@ export const text = <>
     <c.SubSection title={CorsInterceptor.name}>
       {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, {d.input('web.cors.active: true')}
 
-      <c.Code title='Cors Config' src={WebCorsConfig} />
+      <c.Code title='Cors Config' src={CorsConfig} />
     </c.SubSection>
     <c.SubSection title={CookiesInterceptor.name}>
       {CookiesInterceptor} is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
-      <c.Code title='Cookies Config' src={WebCookieConfig} />
+      <c.Code title='Cookies Config' src={CookieConfig} />
     </c.SubSection>
     <c.SubSection title={GetCacheInterceptor.name}>
       {GetCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting {d.input('web.disableGetCache: true')} in your config.

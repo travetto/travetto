@@ -20,7 +20,7 @@ type ParserType = 'json' | 'text' | 'form';
  * Web body parse configuration
  */
 @Config('web.bodyParse')
-export class WebBodyParseConfig extends ManagedInterceptorConfig {
+export class BodyParseConfig extends ManagedInterceptorConfig {
   /**
    * Max body size limit
    */
@@ -35,12 +35,12 @@ export class WebBodyParseConfig extends ManagedInterceptorConfig {
  * Parses the body input content
  */
 @Injectable()
-export class BodyParseInterceptor implements HttpInterceptor<WebBodyParseConfig> {
+export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
 
   dependsOn = [SerializeInterceptor, AcceptsInterceptor];
 
   @Inject()
-  config: WebBodyParseConfig;
+  config: BodyParseConfig;
 
   async read(req: HttpRequest, limit: string | number): Promise<{ text: string, raw: Buffer }> {
     const cfg = req.getContentType();
@@ -79,7 +79,7 @@ export class BodyParseInterceptor implements HttpInterceptor<WebBodyParseConfig>
     return route.method === 'all' || METHODS_WITH_BODIES.has(route.method);
   }
 
-  async intercept({ req, res, config }: FilterContext<WebBodyParseConfig>, next: FilterNext): Promise<unknown> {
+  async intercept({ req, res, config }: FilterContext<BodyParseConfig>, next: FilterNext): Promise<unknown> {
     if (!METHODS_WITH_BODIES.has(req.method) || req.body) { // If body is already set
       return next();
     }

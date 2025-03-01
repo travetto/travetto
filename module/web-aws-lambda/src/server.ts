@@ -25,7 +25,7 @@ export type AwsLambdaHandle = AwsLambdaHandler['handle'];
 export interface AwsLambdaWebServer extends WebServer, AwsLambdaHandler { }
 
 @Config('web.aws')
-export class WebAwsConfig {
+export class AwsLambdaConfig {
   binaryMimeTypes?: string[];
 
   toJSON(): Record<string, unknown> {

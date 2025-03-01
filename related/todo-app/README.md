@@ -348,6 +348,7 @@ npx trv run:web
       { priority: 999, source: 'memory://override' }
     ],
     active: {
+      AcceptsConfig: { types: {} },
       ApiHostConfig: { openapi: '3.0.0' },
       ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
       ApiSpecConfig: {
@@ -356,13 +357,18 @@ npx trv run:web
         skipRoutes: false,
         exposeAllSchemas: false
       },
+      AsyncContextConfig: {},
       AuthConfig: { maxAge: '1h', rollingRenew: true },
+      BodyParseConfig: { limit: '1mb', parsingTypes: {} },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       ConsoleLogAppenderConfig: { logToLevel: true },
+      CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      CorsConfig: {},
       FileLogAppenderConfig: {
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
+      GetCacheConfig: {},
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,
@@ -372,6 +378,7 @@ npx trv run:web
         level: true,
         location: true
       },
+      LogRoutesConfig: {},
       MailConfig: {
         transport: {},
         defaults: {
@@ -388,8 +395,6 @@ npx trv run:web
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
       },
-      WebAcceptsConfig: { types: {} },
-      WebAsyncContextConfig: {},
       WebAuthConfig: {
         mode: 'cookie',
         header: 'Authorization',
@@ -399,7 +404,6 @@ npx trv run:web
       WebAuthLoginConfig: {},
       WebAuthLogoutConfig: {},
       WebAuthVerifyConfig: { permissions: {} },
-      WebBodyParseConfig: { limit: '1mb', parsingTypes: {} },
       WebConfig: {
         serve: true,
         port: 12555,
@@ -410,10 +414,6 @@ npx trv run:web
         defaultMessage: true,
         ssl: { active: false }
       },
-      WebCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-      WebCorsConfig: {},
-      WebGetCacheConfig: {},
-      WebLogRoutesConfig: {},
       WebRpcConfig: { clients: {} },
       WebSessionConfig: {},
       WebSslConfig: { active: false }
@@ -447,9 +447,20 @@ export async function main(key: string, port: number) {
 $ trv main support/create-todo.ts <key> <port>
 
 {
-  text: 'New Todo - <key>',
-  created: '2029-03-14T04:00:01.510Z',
-  id: '<uniqueId>'
+  message: 'Validation errors have occurred',
+  category: 'data',
+  type: 'ValidationResultError',
+  at: '2029-03-14T04:00:01.510Z',
+  details: {
+    errors: [
+      {
+        kind: 'required',
+        active: true,
+        message: 'text is required',
+        path: 'text'
+      }
+    ]
+  }
 }
 ```
 
@@ -467,11 +478,5 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-[
-  {
-    id: '<uniqueId>',
-    text: 'New Todo - <key>',
-    created: '2029-03-14T04:00:01.814Z'
-  }
-]
+{ message: "Cannot read properties of undefined (reading 'q')" }
 ```

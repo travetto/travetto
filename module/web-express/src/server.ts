@@ -8,7 +8,7 @@ import { WebSymbols, HttpInterceptor, HttpRequest, WebConfig, RouteUtil, WebServ
 import { ExpressWebServerUtil } from './util';
 
 /**
- * An express web server
+ * An express http server
  */
 @Injectable()
 export class ExpressWebServer implements WebServer<express.Application> {

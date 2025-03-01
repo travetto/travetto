@@ -3,7 +3,7 @@ import { configure } from '@codegenie/serverless-express';
 import { Inject, Injectable } from '@travetto/di';
 import {
   AwsLambdaHandle, AwsLambdaWebServer, AwsLambdaSymbol,
-  WebAwsConfig, LambdaContext, LambdaAPIGatewayProxyEvent
+  AwsLambdaConfig, LambdaContext, LambdaAPIGatewayProxyEvent
 } from '@travetto/web-aws-lambda';
 import type { WebServerHandle } from '@travetto/web';
 import { KoaWebServer } from '@travetto/web-koa';
@@ -18,7 +18,7 @@ export class AwsLambdaKoaWebServer extends KoaWebServer implements AwsLambdaWebS
   #handler: AwsLambdaHandle;
 
   @Inject()
-  awsConfig: WebAwsConfig;
+  awsConfig: AwsLambdaConfig;
 
   /**
    * Handler method for the proxy

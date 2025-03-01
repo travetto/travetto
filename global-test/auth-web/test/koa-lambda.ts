@@ -1,9 +1,10 @@
-import { AuthWebServerSuite } from '@travetto/auth-web/support/test/server';
 import { Suite } from '@travetto/test';
 import { AwsLambdaKoaWebServer } from '@travetto/web-koa-lambda';
 import { InjectableFactory } from '@travetto/di';
-import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server';
 import { AwsLambdaWebApplication } from '@travetto/web-aws-lambda';
+
+import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server';
+import { AuthWebServerSuite } from '@travetto/auth-web/support/test/server';
 
 const KOA = Symbol.for('koa-lambda');
 

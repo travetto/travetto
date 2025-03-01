@@ -88,7 +88,7 @@ export abstract class BaseWebSuite {
       '--', boundary, '--', nl
     ];
 
-    const body = Buffer.concat(lines.map(l => Buffer.from(l)));
+    const body = Buffer.concat(lines.map(l => Buffer.isBuffer(l) ? l : Buffer.from(l)));
 
     const headers = {
       'Content-Type': `multipart/form-data; boundary=${boundary}`,

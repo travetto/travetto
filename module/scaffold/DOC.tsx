@@ -74,7 +74,7 @@ $ npx @travetto/scaffold@<version-or-tag>
   <c.Section title='Web + Model'>
     In the case both {d.input('web')} and {d.input('model')} features are enabled, the code will produce a controller that exposes the {Todo} model via web patterns.
 
-    <c.Code title='Todo controller' src='./doc/web.ts' />
+    <c.Code title='Todo controller' src='./doc/controller.ts' />
   </c.Section>
 
   <c.Section title='Running'>

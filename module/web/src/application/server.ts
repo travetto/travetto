@@ -2,7 +2,7 @@ import type { HttpInterceptor } from '../interceptor/types';
 import type { RouteConfig, WebServerHandle } from '../types';
 
 /**
- * Defines the contract for any web server to support the framework.
+ * Defines the contract for any http server to support the framework.
  *
  * @concrete
  */

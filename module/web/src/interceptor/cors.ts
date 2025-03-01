@@ -11,7 +11,7 @@ import { SerializeInterceptor } from './serialize';
  * Web cors support
  */
 @Config('web.cors')
-export class WebCorsConfig extends ManagedInterceptorConfig {
+export class CorsConfig extends ManagedInterceptorConfig {
   /**
    * Allowed origins
    */
@@ -42,14 +42,14 @@ export class WebCorsConfig extends ManagedInterceptorConfig {
  * Interceptor that will provide cors support across all requests
  */
 @Injectable()
-export class CorsInterceptor implements HttpInterceptor<WebCorsConfig> {
+export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
 
   @Inject()
-  config: WebCorsConfig;
+  config: CorsConfig;
 
   dependsOn = [SerializeInterceptor];
 
-  finalizeConfig(config: WebCorsConfig): WebCorsConfig {
+  finalizeConfig(config: CorsConfig): CorsConfig {
     config.resolved = {
       origins: new Set(config.origins ?? []),
       methods: (config.methods ?? ['PUT', 'POST', 'GET', 'DELETE', 'PATCH', 'HEAD', 'TRACE']).join(',').toUpperCase(),
@@ -59,7 +59,7 @@ export class CorsInterceptor implements HttpInterceptor<WebCorsConfig> {
     return config;
   }
 
-  intercept({ req, res, config: { resolved } }: FilterContext<WebCorsConfig>): void {
+  intercept({ req, res, config: { resolved } }: FilterContext<CorsConfig>): void {
     const origin = req.header('origin');
     if (!resolved.origins.size || resolved.origins.has('*') || (origin && resolved.origins.has(origin))) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');

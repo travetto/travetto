@@ -2,9 +2,10 @@ import assert from 'node:assert';
 
 import { BinaryUtil } from '@travetto/runtime';
 import { Controller, Post, HttpRequest } from '@travetto/web';
-import { BaseWebSuite } from '@travetto/web/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
+
+import { BaseWebSuite } from '@travetto/web/support/test/base';
 
 import { Upload, UploadAll } from '../../src/decorator';
 

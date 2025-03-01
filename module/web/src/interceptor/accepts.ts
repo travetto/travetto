@@ -10,7 +10,7 @@ import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
 
 @Config('web.accepts')
-class WebAcceptsConfig extends ManagedInterceptorConfig {
+class AcceptsConfig extends ManagedInterceptorConfig {
   types: string[] = [];
 
   @Ignore()
@@ -21,14 +21,14 @@ class WebAcceptsConfig extends ManagedInterceptorConfig {
  * Enables access to contextual data when running in a web application
  */
 @Injectable()
-export class AcceptsInterceptor implements HttpInterceptor<WebAcceptsConfig> {
+export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
 
   dependsOn = [SerializeInterceptor];
 
   @Inject()
-  config: WebAcceptsConfig;
+  config: AcceptsConfig;
 
-  finalizeConfig(cfg: WebAcceptsConfig): WebAcceptsConfig {
+  finalizeConfig(cfg: AcceptsConfig): AcceptsConfig {
     cfg.matcher = MimeUtil.matcher(cfg.types ?? []);
     return cfg;
   }
@@ -38,7 +38,7 @@ export class AcceptsInterceptor implements HttpInterceptor<WebAcceptsConfig> {
     return false;
   }
 
-  intercept({ req, config }: FilterContext<WebAcceptsConfig>): void {
+  intercept({ req, config }: FilterContext<AcceptsConfig>): void {
     const contentType = req.header('content-type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });

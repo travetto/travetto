@@ -4,7 +4,7 @@ import kCompress from 'koa-compress';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { WebConfig, WebServer, RouteConfig, WebCookieConfig, WebNetUtil, WebServerHandle, WebSymbols } from '@travetto/web';
+import { WebConfig, WebServer, RouteConfig, CookieConfig, WebNetUtil, WebServerHandle, WebSymbols } from '@travetto/web';
 
 import { KoaWebServerUtil } from './util';
 
@@ -24,7 +24,7 @@ export class KoaWebServer implements WebServer<koa> {
   updateGlobalOnChange = true;
 
   @Inject()
-  cookies: WebCookieConfig;
+  cookies: CookieConfig;
 
   @Inject()
   config: WebConfig;

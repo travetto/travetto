@@ -2,13 +2,14 @@ import assert from 'node:assert';
 
 import { DataUtil } from '@travetto/schema';
 import { Controller, Get, Post, HttpRequest } from '@travetto/web';
-import { BaseWebSuite } from '@travetto/web/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, UploadAll } from '@travetto/web-upload';
 import { Util, BlobMeta, BinaryUtil } from '@travetto/runtime';
+
+import { BaseWebSuite } from '@travetto/web/support/test/base';
 
 type FileUpload = { name: string, resource: string, type: string };
 

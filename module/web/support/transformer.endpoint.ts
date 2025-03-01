@@ -71,7 +71,7 @@ export class WebTransformer {
         }
       } else if (epDec.ident.getText() !== 'All') { // Treat all separate
         // Treat as schema, and see if endpoint supports a body for default behavior on untyped
-        detectedParamType = epDec.targets?.includes('@travetto/web:RequestBody') ? 'Body' : 'QueryParam';
+        detectedParamType = epDec.targets?.includes('@travetto/web:HttpRequestBody') ? 'Body' : 'QueryParam';
         config.name = '';
       }
       node = SchemaTransformUtil.computeField(state, node, config);

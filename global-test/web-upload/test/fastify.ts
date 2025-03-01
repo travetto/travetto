@@ -1,8 +1,9 @@
-import { WebUploadServerSuite } from '@travetto/web-upload/support/test/server';
 import { Suite } from '@travetto/test';
 import { FastifyWebServer } from '@travetto/web-fastify';
 import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
+
+import { WebUploadServerSuite } from '@travetto/web-upload/support/test/server';
 
 const FASTIFY = Symbol.for('fastify');
 

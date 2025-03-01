@@ -1,7 +1,7 @@
 import timers from 'node:timers/promises';
 
 import { DependencyRegistry } from '@travetto/di';
-import { type HttpRequest, WebCookieConfig, WebConfig, WebSslConfig, WebApplication } from '@travetto/web';
+import { type HttpRequest, CookieConfig, WebConfig, WebSslConfig, WebApplication } from '@travetto/web';
 
 import { WebServerSupport, MakeRequestConfig, headerToShape } from './base';
 
@@ -23,7 +23,7 @@ export class CoreWebServerSupport implements WebServerSupport {
 
   async init(qualifier?: symbol) {
     Object.assign(
-      await DependencyRegistry.getInstance(WebCookieConfig),
+      await DependencyRegistry.getInstance(CookieConfig),
       { active: true, secure: false, signed: false }
     );
 

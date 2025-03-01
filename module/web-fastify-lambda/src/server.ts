@@ -2,7 +2,7 @@ import alf from '@fastify/aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebServerHandle } from '@travetto/web';
-import { AwsLambdaWebServer, AwsLambdaSymbol, WebAwsConfig } from '@travetto/web-aws-lambda';
+import { AwsLambdaWebServer, AwsLambdaSymbol, AwsLambdaConfig } from '@travetto/web-aws-lambda';
 import { FastifyWebServer } from '@travetto/web-fastify';
 
 /**
@@ -12,7 +12,7 @@ import { FastifyWebServer } from '@travetto/web-fastify';
 export class AwsLambdaFastifyWebServer extends FastifyWebServer implements AwsLambdaWebServer {
 
   @Inject()
-  awsConfig: WebAwsConfig;
+  awsConfig: AwsLambdaConfig;
 
   /**
    * Handler method for the proxy, will get initialized on first request

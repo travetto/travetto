@@ -2,12 +2,13 @@ import type lambda from 'aws-lambda';
 
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { HttpRequest, WebServerHandle, WebCookieConfig } from '@travetto/web';
+import { HttpRequest, WebServerHandle, CookieConfig } from '@travetto/web';
+import { asFull, castTo, Util } from '@travetto/runtime';
+
 import {
   WebServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
 } from '@travetto/web/support/test/server-support/base';
-import { asFull, castTo, Util } from '@travetto/runtime';
 
 import { AwsLambdaWebApplication } from '../../src/server';
 
@@ -66,7 +67,7 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
     await RootRegistry.init();
 
     Object.assign(
-      await DependencyRegistry.getInstance(WebCookieConfig),
+      await DependencyRegistry.getInstance(CookieConfig),
       { active: true, secure: false, signed: false }
     );
 

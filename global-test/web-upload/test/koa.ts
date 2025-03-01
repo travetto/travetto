@@ -1,8 +1,9 @@
-import { WebUploadServerSuite } from '@travetto/web-upload/support/test/server';
 import { Suite } from '@travetto/test';
 import { KoaWebServer } from '@travetto/web-koa';
 import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
+
+import { WebUploadServerSuite } from '@travetto/web-upload/support/test/server';
 
 const KOA = Symbol.for('koa');
 

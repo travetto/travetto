@@ -9,7 +9,7 @@ import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { BodyParseInterceptor } from './body-parse';
 
 @Config('web.context')
-class WebAsyncContextConfig extends ManagedInterceptorConfig { }
+class AsyncContextConfig extends ManagedInterceptorConfig { }
 
 /**
  * Enables access to contextual data when running in a web application
@@ -25,7 +25,7 @@ export class AsyncContextInterceptor implements HttpInterceptor {
   context: AsyncContext;
 
   @Inject()
-  config: WebAsyncContextConfig;
+  config: AsyncContextConfig;
 
   intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
     return this.context.run(() => {

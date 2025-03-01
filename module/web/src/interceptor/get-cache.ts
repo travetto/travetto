@@ -7,7 +7,7 @@ import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
 
 @Config('web.getCache')
-export class WebGetCacheConfig extends ManagedInterceptorConfig { }
+export class GetCacheConfig extends ManagedInterceptorConfig { }
 
 /**
  * Determines if we should cache all get requests
@@ -18,7 +18,7 @@ export class GetCacheInterceptor implements HttpInterceptor {
   dependsOn = [SerializeInterceptor];
 
   @Inject()
-  config: WebGetCacheConfig;
+  config: GetCacheConfig;
 
   applies(route: RouteConfig): boolean {
     return route.method === 'get';
