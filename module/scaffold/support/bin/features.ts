@@ -23,15 +23,15 @@ export const FEATURES: Feature[] = [
     default: 'npm'
   },
   {
-    title: 'Rest Framework',
-    package: '@travetto/rest',
+    title: 'Web Framework',
+    package: '@travetto/web',
     choices: [
-      { title: 'Express.js', package: '@travetto/rest-express' },
-      { title: 'Express.js Lambda', package: '@travetto/rest-express-lambda' },
-      { title: 'KOA', package: '@travetto/rest-koa' },
-      { title: 'KOA Lambda', package: '@travetto/rest-koa-lambda' },
-      { title: 'Fastify', package: '@travetto/rest-fastify' },
-      { title: 'Fastify Lambda', package: '@travetto/rest-fastify-lambda' },
+      { title: 'Express.js', package: '@travetto/web-express' },
+      { title: 'Express.js Lambda', package: '@travetto/web-express-lambda' },
+      { title: 'KOA', package: '@travetto/web-koa' },
+      { title: 'KOA Lambda', package: '@travetto/web-koa-lambda' },
+      { title: 'Fastify', package: '@travetto/web-fastify' },
+      { title: 'Fastify Lambda', package: '@travetto/web-fastify-lambda' },
     ],
     addons: [
       { title: 'OpenAPI', package: '@travetto/openapi' },
@@ -42,10 +42,10 @@ export const FEATURES: Feature[] = [
   { title: 'Test Framework', package: '@travetto/test' },
   { title: 'ESLint Support', package: '@travetto/eslint' },
   {
-    title: 'Rest Authentication',
-    package: '@travetto/auth-rest',
+    title: 'Web Authentication',
+    package: '@travetto/auth-web',
     addons: [
-      { title: 'Session Support', package: ['@travetto/auth-session', '@travetto/auth-rest-session', '@travetto/model-memory'] },
+      { title: 'Session Support', package: ['@travetto/auth-session', '@travetto/auth-web-session', '@travetto/model-memory'] },
     ]
   },
   {

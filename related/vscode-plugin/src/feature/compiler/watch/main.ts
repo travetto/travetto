@@ -1,8 +1,9 @@
 import vscode from 'vscode';
 import { ChildProcess, spawn } from 'node:child_process';
 
-import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
 import { Env, ExecUtil, Util } from '@travetto/runtime';
+
+import type { CompilerEvent, CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
 
 import { BaseFeature } from '../../base';
 import { Log } from '../../../core/log';

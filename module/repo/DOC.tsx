@@ -29,7 +29,7 @@ Author: Travetto Framework <travetto.framework@gmail.com>
 Date:   Thu Feb 23 17:51:37 2023 -0500
 Date:   Thu Feb 23 17:51:37 2023 -0500
 
-    Publish @travetto/asset,@travetto/asset-rest,@travetto/auth,@travetto/auth-model,@travetto/auth-rest,@travetto/auth-rest-jwt,@travetto/auth-rest-passport,@travetto/auth-rest-session,...
+    Publish @travetto/asset,@travetto/asset-web,@travetto/auth,@travetto/auth-model,@travetto/auth-web,@travetto/auth-web-jwt,@travetto/auth-web-passport,@travetto/auth-web-session,...
 `} language='bash' />
   </c.Section>
 

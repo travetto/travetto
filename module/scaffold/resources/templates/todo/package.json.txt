@@ -27,7 +27,7 @@
   "scripts": {
     "watch": "npx trvc watch",
     "build": "npx trvc build",
-    "start": "npx trv run:rest",
+    "start": "npx trv run:web",
     "test": "npx trv test",
     "lint": "npx trv lint"
   },

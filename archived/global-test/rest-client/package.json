@@ -1,0 +1,12 @@
+{
+  "name": "@travetto-test/rest-client",
+  "version": "0.0.0",
+  "dependencies": {
+    "@travetto/web-client": "^6.0.0-rc.1",
+    "@travetto/web-express": "^6.0.0-rc.1",
+    "@travetto/web-fastify": "^6.0.0-rc.1",
+    "@travetto/web-koa": "^6.0.0-rc.1"
+  },
+  "travetto": {},
+  "private": true
+}

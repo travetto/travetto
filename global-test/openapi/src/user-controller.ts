@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Delete, PathParam } from '@travetto/rest';
+import { Body, Controller, Get, Post, Put, Delete, PathParam } from '@travetto/web';
 
 import { User, UserSearch } from './model';
 

@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { Readable } from 'node:stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam, Undocumented } from '@travetto/rest';
+import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Post, Put, QueryParam, Undocumented } from '@travetto/web';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { OpenapiVisitor } from '../src/spec-generate';

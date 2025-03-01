@@ -15,28 +15,28 @@
       "@travetto/model"
     ]
   },
-  "src/rest/todo.ts": {
+  "src/web/todo.ts": {
     "requires": [
-      "@travetto/rest",
+      "@travetto/web",
       "@travetto/model"
     ]
   },
-  "src/rest/auth.ts": {
+  "src/web/auth.ts": {
     "requires": [
-      "@travetto/rest",
-      "@travetto/auth-rest"
+      "@travetto/web",
+      "@travetto/auth-web"
     ]
   },
-  "src/rest/auth.config.ts": {
+  "src/web/auth.config.ts": {
     "requires": [
-      "@travetto/rest",
+      "@travetto/web",
       "@travetto/model-memory",
-      "@travetto/auth-rest"
+      "@travetto/auth-web"
     ]
   },
-  "src/rest/primary.ts": {
+  "src/web/primary.ts": {
     "requires": [
-      "@travetto/rest"
+      "@travetto/web"
     ]
   },
   "test/model/todo.ts": {

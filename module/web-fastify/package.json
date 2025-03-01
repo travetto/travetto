@@ -1,0 +1,37 @@
+{
+  "name": "@travetto/web-fastify",
+  "version": "6.0.0-rc.1",
+  "description": "Fastify provider for the travetto web module.",
+  "keywords": [
+    "web",
+    "fastify",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/web-fastify"
+  },
+  "dependencies": {
+    "@fastify/compress": "^8.0.1",
+    "@travetto/web": "^6.0.0-rc.1",
+    "fastify": "^5.2.1"
+  },
+  "travetto": {
+    "displayName": "Fastify Web Server"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -3,7 +3,7 @@ import { stringify } from 'yaml';
 
 import { BinaryUtil } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
-import { ControllerRegistry, ControllerVisitUtil, RestConfig } from '@travetto/rest';
+import { ControllerRegistry, ControllerVisitUtil, WebConfig } from '@travetto/web';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config';
@@ -25,7 +25,7 @@ export class OpenApiService {
   apiSpecConfig: ApiSpecConfig;
 
   @Inject()
-  restConfig: RestConfig;
+  webConfig: WebConfig;
 
   #spec: OpenAPIObject | undefined;
 
@@ -47,7 +47,7 @@ export class OpenApiService {
     SchemaRegistry.on(() => this.resetSpec());
 
     if (!this.apiHostConfig.servers) {
-      this.apiHostConfig.servers = [{ url: this.restConfig.baseUrl }];
+      this.apiHostConfig.servers = [{ url: this.webConfig.baseUrl }];
     }
 
     await this.resetSpec();

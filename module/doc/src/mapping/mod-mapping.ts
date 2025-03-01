@@ -7,21 +7,21 @@ export const MOD_MAPPING = {
     name: '@travetto/auth-model', folder: '@travetto/auth-model', displayName: 'Authentication Model',
     description: 'Authentication model support for the Travetto framework'
   },
-  AuthRest: {
-    name: '@travetto/auth-rest', folder: '@travetto/auth-rest', displayName: 'Rest Auth',
-    description: 'Rest authentication integration support for the Travetto framework'
-  },
-  AuthRestPassport: {
-    name: '@travetto/auth-rest-passport', folder: '@travetto/auth-rest-passport', displayName: 'Rest Auth Passport',
-    description: 'Rest authentication integration support for the Travetto framework'
-  },
-  AuthRestSession: {
-    name: '@travetto/auth-rest-session', folder: '@travetto/auth-rest-session', displayName: 'Rest Auth Session',
-    description: 'Rest authentication session integration support for the Travetto framework'
-  },
   AuthSession: {
     name: '@travetto/auth-session', folder: '@travetto/auth-session', displayName: 'Auth Session',
     description: 'Session provider for the travetto auth module.'
+  },
+  AuthWeb: {
+    name: '@travetto/auth-web', folder: '@travetto/auth-web', displayName: 'Web Auth',
+    description: 'Web authentication integration support for the Travetto framework'
+  },
+  AuthWebPassport: {
+    name: '@travetto/auth-web-passport', folder: '@travetto/auth-web-passport', displayName: 'Web Auth Passport',
+    description: 'Web authentication integration support for the Travetto framework'
+  },
+  AuthWebSession: {
+    name: '@travetto/auth-web-session', folder: '@travetto/auth-web-session', displayName: 'Web Auth Session',
+    description: 'Web authentication session integration support for the Travetto framework'
   },
   Cache: {
     name: '@travetto/cache', folder: '@travetto/cache', displayName: 'Caching',
@@ -159,50 +159,6 @@ export const MOD_MAPPING = {
     name: '@travetto/repo', folder: '@travetto/repo', displayName: 'Repo',
     description: 'Monorepo utilities'
   },
-  Rest: {
-    name: '@travetto/rest', folder: '@travetto/rest', displayName: 'RESTful API',
-    description: 'Declarative api for RESTful APIs with support for the dependency injection module.'
-  },
-  RestAwsLambda: {
-    name: '@travetto/rest-aws-lambda', folder: '@travetto/rest-aws-lambda', displayName: 'RESTful AWS Lambda',
-    description: 'RESTful APIs entry point support for AWS Lambdas.'
-  },
-  RestClient: {
-    name: '@travetto/rest-client', folder: '@travetto/rest-client', displayName: 'RESTful Client Support',
-    description: 'RESTful support for generating clients for controller endpoints'
-  },
-  RestExpress: {
-    name: '@travetto/rest-express', folder: '@travetto/rest-express', displayName: 'Express REST Source',
-    description: 'Express provider for the travetto rest module.'
-  },
-  RestExpressLambda: {
-    name: '@travetto/rest-express-lambda', folder: '@travetto/rest-express-lambda', displayName: 'Express REST AWS Lambda Source',
-    description: 'Express AWS Lambda provider for the travetto rest module.'
-  },
-  RestFastify: {
-    name: '@travetto/rest-fastify', folder: '@travetto/rest-fastify', displayName: 'Fastify REST Source',
-    description: 'Fastify provider for the travetto rest module.'
-  },
-  RestFastifyLambda: {
-    name: '@travetto/rest-fastify-lambda', folder: '@travetto/rest-fastify-lambda', displayName: 'Fastify REST AWS Lambda Source',
-    description: 'Fastify AWS Lambda provider for the travetto rest module.'
-  },
-  RestKoa: {
-    name: '@travetto/rest-koa', folder: '@travetto/rest-koa', displayName: 'Koa REST Source',
-    description: 'Koa provider for the travetto rest module.'
-  },
-  RestKoaLambda: {
-    name: '@travetto/rest-koa-lambda', folder: '@travetto/rest-koa-lambda', displayName: 'Koa REST AWS Lambda Source',
-    description: 'Koa provider for the travetto rest module.'
-  },
-  RestRpc: {
-    name: '@travetto/rest-rpc', folder: '@travetto/rest-rpc', displayName: 'RESTful RPC Support',
-    description: 'RESTful RPC support for a module'
-  },
-  RestUpload: {
-    name: '@travetto/rest-upload', folder: '@travetto/rest-upload', displayName: 'Rest Upload Support',
-    description: 'Provides integration between the travetto asset and rest module.'
-  },
   Runtime: {
     name: '@travetto/runtime', folder: '@travetto/runtime', displayName: 'Runtime',
     description: 'Runtime for travetto applications.'
@@ -234,6 +190,46 @@ export const MOD_MAPPING = {
   Transformer: {
     name: '@travetto/transformer', folder: '@travetto/transformer', displayName: 'Transformation',
     description: 'Functionality for AST transformations, with transformer registration, and general utils'
+  },
+  Web: {
+    name: '@travetto/web', folder: '@travetto/web', displayName: 'Web API',
+    description: 'Declarative api for Web Applications with support for the dependency injection.'
+  },
+  WebAwsLambda: {
+    name: '@travetto/web-aws-lambda', folder: '@travetto/web-aws-lambda', displayName: 'Web AWS Lambda',
+    description: 'Web APIs entry point support for AWS Lambdas.'
+  },
+  WebExpress: {
+    name: '@travetto/web-express', folder: '@travetto/web-express', displayName: 'Express Web Server',
+    description: 'Express provider for the travetto web module.'
+  },
+  WebExpressLambda: {
+    name: '@travetto/web-express-lambda', folder: '@travetto/web-express-lambda', displayName: 'Express Web AWS Lambda Server',
+    description: 'Express AWS Lambda provider for the travetto web module.'
+  },
+  WebFastify: {
+    name: '@travetto/web-fastify', folder: '@travetto/web-fastify', displayName: 'Fastify Web Server',
+    description: 'Fastify provider for the travetto web module.'
+  },
+  WebFastifyLambda: {
+    name: '@travetto/web-fastify-lambda', folder: '@travetto/web-fastify-lambda', displayName: 'Fastify Web AWS Lambda Server',
+    description: 'Fastify AWS Lambda provider for the travetto web module.'
+  },
+  WebKoa: {
+    name: '@travetto/web-koa', folder: '@travetto/web-koa', displayName: 'Koa Web Server',
+    description: 'Koa provider for the travetto web module.'
+  },
+  WebKoaLambda: {
+    name: '@travetto/web-koa-lambda', folder: '@travetto/web-koa-lambda', displayName: 'Koa Web AWS Lambda Source',
+    description: 'Koa provider for the travetto web module.'
+  },
+  WebRpc: {
+    name: '@travetto/web-rpc', folder: '@travetto/web-rpc', displayName: 'Web RPC Support',
+    description: 'RPC support for a Web Application'
+  },
+  WebUpload: {
+    name: '@travetto/web-upload', folder: '@travetto/web-upload', displayName: 'Web Upload Support',
+    description: 'Provides integration between the travetto asset and web module.'
   },
   Worker: {
     name: '@travetto/worker', folder: '@travetto/worker', displayName: 'Worker',

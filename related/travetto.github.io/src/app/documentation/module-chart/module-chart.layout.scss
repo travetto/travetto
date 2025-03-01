@@ -34,7 +34,7 @@
   .auth          { grid-row: 2;     @extend .mid-third;   @extend .group-lib;      }
   .email         { grid-row: 2;     @extend .right-third; @extend .group-lib;      }
   .model         { grid-row: 3;     @extend .left-half;   @extend .group-core;     }
-  .rest          { grid-row: 3;     @extend .right-half;  @extend .group-core;     }
+  .web           { grid-row: 3;     @extend .right-half;  @extend .group-core;     }
   .core          { grid-row: 4;     @extend .full;        @extend .group-system-2  }  
   .foundation    { grid-row: 5;     @extend .full;        @extend .group-system;   }  
 }

@@ -31,7 +31,7 @@ export const text = <>
     In this example, the enabled flag is specified in relationship to the deployment environment.  When coupled with optional properties, and optional chaining, allows for seamless inclusion of optional dependencies at runtime.
 
     <c.Note>
-      Other modules are able to provide aliases to {Injectable} that also provide additional functionality.  For example, the {d.mod('Config')} module @Config or the {d.mod('Rest')} module @Controller decorator registers the associated class as an injectable element.
+      Other modules are able to provide aliases to {Injectable} that also provide additional functionality.  For example, the {d.mod('Config')} module @Config or the {d.mod('Web')} module @Controller decorator registers the associated class as an injectable element.
     </c.Note>
   </c.Section>
 

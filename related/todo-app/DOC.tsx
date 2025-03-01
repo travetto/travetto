@@ -12,8 +12,8 @@ async function init() {
 
   const startupBuffer: Buffer[] = [];
 
-  const cmd = DocRunUtil.spawn('trv', ['run:rest'], {
-    env: { ...process.env, REST_LOG_PATHS: '!*', REST_PORT: `${port}`, REST_SSL: '0' }
+  const cmd = DocRunUtil.spawn('trv', ['run:web'], {
+    env: { ...process.env, WEB_LOG_PATHS: '!*', WEB_PORT: `${port}`, WEB_SSL: '0' }
   });
 
   ShutdownManager.onGracefulShutdown(async () => { cmd.kill(); });
@@ -72,7 +72,7 @@ $ cd todo-project
 $ git init .
 
 $ npm init -f
-$ npm i @travetto/{log,rest-express,model-mongo,cli}
+$ npm i @travetto/{log,web-express,model-mongo,cli}
 $ npm i -D @travetto/{eslint,compiler,test}
 
 $ npx trv lint:register
@@ -122,12 +122,12 @@ $ npx trv lint:register
       <c.Code title='Test bed' src='test/service.ts' />
     </c.Section>
 
-    <c.Section title='Adding Rest Routes'>
-      Now we establish the routes, providing an interface to the service layer.<br />
+    <c.Section title='Adding Web Endpoints'>
+      Now we establish the endpoints, providing an interface to the service layer.<br />
 
-      Finally, we establish the controller at {d.path('src/route.ts')}
+      Finally, we establish the controller at {d.path('src/web.ts')}
 
-      <c.Code title='Controller contents' src='src/route.ts' />
+      <c.Code title='Controller contents' src='src/web.ts' />
     </c.Section>
 
     <c.Section title='Running the App'>
@@ -135,7 +135,7 @@ $ npx trv lint:register
       First we must start the application:
 
       <c.Terminal
-        title='Start the Application' src='npx trv run:rest'
+        title='Start the Application' src='npx trv run:web'
       />
 
       <c.Terminal title='Application Startup' src={startupOutput} />

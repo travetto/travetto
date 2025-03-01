@@ -108,44 +108,44 @@ export const PAGES = [
     ]
   },
   {
-    path: 'rest', title: 'Rest',
-    loadComponent: (): Promise<Type<unknown>> => import('./gen/rest/rest.component').then(m => m.RestComponent),
+    path: 'web', title: 'Web',
+    loadComponent: (): Promise<Type<unknown>> => import('./gen/web/web.component').then(m => m.WebComponent),
     subs: [
       {
-        path: 'rest-express', title: 'Express',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-express/rest-express.component').then(m => m.RestExpressComponent)
+        path: 'web-express', title: 'Express',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-express/web-express.component').then(m => m.WebExpressComponent)
       },
       {
-        path: 'rest-koa', title: 'Koa',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-koa/rest-koa.component').then(m => m.RestKoaComponent)
+        path: 'web-koa', title: 'Koa',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-koa/web-koa.component').then(m => m.WebKoaComponent)
       },
       {
-        path: 'rest-fastify', title: 'Fastify',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-fastify/rest-fastify.component').then(m => m.RestFastifyComponent)
+        path: 'web-fastify', title: 'Fastify',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-fastify/web-fastify.component').then(m => m.WebFastifyComponent)
       },
       {
-        path: 'rest-aws-lambda', title: 'AWS Lambda',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-aws-lambda/rest-aws-lambda.component').then(m => m.RestAwsLambdaComponent)
+        path: 'web-aws-lambda', title: 'AWS Lambda',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-aws-lambda/web-aws-lambda.component').then(m => m.WebAwsLambdaComponent)
       },
       {
-        path: 'rest-express-lambda', title: 'Express Lambda',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-express-lambda/rest-express-lambda.component').then(m => m.RestExpressLambdaComponent)
+        path: 'web-express-lambda', title: 'Express Lambda',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-express-lambda/web-express-lambda.component').then(m => m.WebExpressLambdaComponent)
       },
       {
-        path: 'rest-koa-lambda', title: 'Koa Lambda',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-koa-lambda/rest-koa-lambda.component').then(m => m.RestKoaLambdaComponent)
+        path: 'web-koa-lambda', title: 'Koa Lambda',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-koa-lambda/web-koa-lambda.component').then(m => m.WebKoaLambdaComponent)
       },
       {
-        path: 'rest-fastify-lambda', title: 'Fastify Lambda',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-fastify-lambda/rest-fastify-lambda.component').then(m => m.RestFastifyLambdaComponent)
+        path: 'web-fastify-lambda', title: 'Fastify Lambda',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-fastify-lambda/web-fastify-lambda.component').then(m => m.WebFastifyLambdaComponent)
       },
       {
-        path: 'rest-upload', title: 'Upload',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-upload/rest-upload.component').then(m => m.RestUploadComponent)
+        path: 'web-upload', title: 'Upload',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-upload/web-upload.component').then(m => m.WebUploadComponent)
       },
       {
-        path: 'rest-rpc', title: 'Rest RPC',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/rest-rpc/rest-rpc.component').then(m => m.RestRpcComponent)
+        path: 'web-rpc', title: 'Web RPC',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-rpc/web-rpc.component').then(m => m.WebRpcComponent)
       },
       {
         path: 'openapi', title: 'OpenAPI',
@@ -158,16 +158,16 @@ export const PAGES = [
     loadComponent: (): Promise<Type<unknown>> => import('./gen/auth/auth.component').then(m => m.AuthComponent),
     subs: [
       {
-        path: 'auth-rest', title: 'Rest',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-rest/auth-rest.component').then(m => m.AuthRestComponent)
+        path: 'auth-web', title: 'Web',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-web/auth-web.component').then(m => m.AuthWebComponent)
       },
       {
-        path: 'auth-rest-passport', title: 'Rest Passport',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-rest-passport/auth-rest-passport.component').then(m => m.AuthRestPassportComponent)
+        path: 'auth-web-passport', title: 'Web Passport',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-web-passport/auth-web-passport.component').then(m => m.AuthWebPassportComponent)
       },
       {
-        path: 'auth-rest-session', title: 'Rest Session',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-rest-session/auth-rest-session.component').then(m => m.AuthRestSessionComponent)
+        path: 'auth-web-session', title: 'Web Session',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/auth-web-session/auth-web-session.component').then(m => m.AuthWebSessionComponent)
       },
       {
         path: 'auth-session', title: 'Auth Session',

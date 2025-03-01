@@ -3,6 +3,6 @@ model.elasticsearch:
     - search-ig-telemetry-output-dj6gzfuzxrqi6fypzon56dxluy.us-east-1.es.amazonaws.com
   port: 80
 
-rest.session.secret: 'bob'
+web.session.secret: 'bob'
 
-rest.ssl.active: false
+web.ssl.active: false

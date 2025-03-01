@@ -97,7 +97,7 @@ export const LIB_MAPPING = {
   Firestore: { title: 'Firestore', href: 'https://firebase.google.com/docs/firestore' },
   SQLite: { title: 'SQLite', href: 'https://www.sqlite.org/' },
 
-  // Rest
+  // Web
   Express: { title: 'express', href: 'https://expressjs.com' },
   Passport: { title: 'passport', href: 'http://passportjs.org' },
   Busboy: { title: '@fastify/busboy', href: 'https://github.com/fastify/busboy' },

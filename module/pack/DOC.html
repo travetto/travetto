@@ -183,7 +183,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
     <figcaption class="terminal">Sample Ejected File
 
 </figcaption>
-    <pre><code class="language-bash">$ trv pack:docker <span class="token parameter variable">-x</span> /dev/stdout run:rest
+    <pre><code class="language-bash">$ trv pack:docker <span class="token parameter variable">-x</span> /dev/stdout run:web
 
 <span class="token comment">#!/bin/sh</span>
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">DIST</span><span class="token operator">=</span>/tmp/<span class="token operator">&lt;</span>temp-folder<span class="token operator">></span>
@@ -214,21 +214,21 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token builtin class-name">echo</span> <span class="token string">"{{'{'}}<span class="token entity" title="\&quot;">\"</span>type<span class="token entity" title="\&quot;">\"</span>:<span class="token entity" title="\&quot;">\"</span>commonjs<span class="token entity" title="\&quot;">\"</span>,<span class="token entity" title="\&quot;">\"</span>main<span class="token entity" title="\&quot;">\"</span>:<span class="token entity" title="\&quot;">\"</span>todo-app.js<span class="token entity" title="\&quot;">\"</span>{{'}'}}"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/package.json
 
-<span class="token comment"># Writing entry scripts todo-app.sh args=(run:rest)</span>
+<span class="token comment"># Writing entry scripts todo-app.sh args=(run:web)</span>
 
-<span class="token builtin class-name">echo</span> <span class="token string">"Writing entry scripts todo-app.sh args=(run:rest)"</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"Writing entry scripts todo-app.sh args=(run:web)"</span>
 
 <span class="token builtin class-name">echo</span> <span class="token string">"#!/bin/sh"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/todo-app.sh
 <span class="token builtin class-name">echo</span> <span class="token string">"cd \<span class="token variable"><span class="token variable">$(</span><span class="token function">dirname</span> <span class="token punctuation">\</span>"<span class="token punctuation">\</span>$0<span class="token punctuation">\</span>"<span class="token variable">)</span></span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.sh
-<span class="token builtin class-name">echo</span> <span class="token string">"node todo-app.js run:rest \<span class="token variable">$@</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.sh
+<span class="token builtin class-name">echo</span> <span class="token string">"node todo-app.js run:web \<span class="token variable">$@</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.sh
 <span class="token function">chmod</span> <span class="token number">755</span> <span class="token variable">$DIST</span>/todo-app.sh
 
-<span class="token comment"># Writing entry scripts todo-app.cmd args=(run:rest)</span>
+<span class="token comment"># Writing entry scripts todo-app.cmd args=(run:web)</span>
 
-<span class="token builtin class-name">echo</span> <span class="token string">"Writing entry scripts todo-app.cmd args=(run:rest)"</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"Writing entry scripts todo-app.cmd args=(run:web)"</span>
 
 <span class="token builtin class-name">echo</span> <span class="token string">"cd %~p0"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/todo-app.cmd
-<span class="token builtin class-name">echo</span> <span class="token string">"node todo-app.js run:rest %*"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.cmd
+<span class="token builtin class-name">echo</span> <span class="token string">"node todo-app.js run:web %*"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.cmd
 <span class="token function">chmod</span> <span class="token number">755</span> <span class="token variable">$DIST</span>/todo-app.cmd
 
 <span class="token comment"># Copying over module resources</span>

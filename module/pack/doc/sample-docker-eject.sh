@@ -18,18 +18,18 @@ echo "process.env.TRV_CLI_IPC = '';" >> $DIST/.env.js
 
 echo "{\"type\":\"commonjs\"}" > $DIST/package.json
 
-# Writing entry scripts cli.sh args=(run rest) 
+# Writing entry scripts cli.sh args=(run web) 
 
 echo "#!/bin/sh" > $DIST/cli.sh
 echo "cd \$(dirname \"\$0\")" >> $DIST/cli.sh
-echo "node cli run rest \$@" >> $DIST/cli.sh
+echo "node cli run web \$@" >> $DIST/cli.sh
 chmod 755 $DIST/cli.sh
 
-# Writing entry scripts cli.cmd args=(run rest) 
+# Writing entry scripts cli.cmd args=(run web) 
 
 echo "" > $DIST/cli.cmd
 echo "cd %~p0" >> $DIST/cli.cmd
-echo "node cli run rest %*" >> $DIST/cli.cmd
+echo "node cli run web %*" >> $DIST/cli.cmd
 chmod 755 $DIST/cli.cmd
 
 # Copying over resources 
