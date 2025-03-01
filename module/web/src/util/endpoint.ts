@@ -11,8 +11,8 @@ import { WebSymbols } from '../symbols';
 type EndpointRule = { sub: string | RegExp, base: string };
 type ExtractFn = (req: HttpRequest) => unknown;
 
-const HttpResponseImpl = toConcrete<HttpResponse>();
-const HttpRequestImpl = toConcrete<HttpRequest>();
+const HttpResponseContract = toConcrete<HttpResponse>();
+const HttpRequestContract = toConcrete<HttpRequest>();
 const ident: FilterNext = ((x?: unknown) => x);
 const hasDisabled = (o: unknown): o is { disabled: boolean } => !!o && typeof o === 'object' && 'disabled' in o;
 const hasPaths = (o: unknown): o is { paths: string[] } => !!o && typeof o === 'object' && 'paths' in o && Array.isArray(o['paths']);
@@ -185,9 +185,9 @@ export class EndpointUtil {
    * @param value
    */
   static extractParameter(param: EndpointParamConfig, req: HttpRequest, res: HttpResponse): unknown {
-    if (param.type === HttpResponseImpl) {
+    if (param.type === HttpResponseContract) {
       return res;
-    } else if (param.type === HttpRequestImpl) {
+    } else if (param.type === HttpRequestContract) {
       return req;
     }
 
