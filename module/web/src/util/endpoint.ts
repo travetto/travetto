@@ -1,15 +1,14 @@
 import { isPromise } from 'node:util/types';
 
 import { asConstructable, castTo, Class, toConcrete, Util } from '@travetto/runtime';
-import { BindUtil, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { HttpRequest, Filter, FilterContext, FilterNext, FilterReturn, HttpHandler, HttpResponse } from '../types';
-import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types';
+import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointParamExtractor } from '../registry/types';
 import { LightweightConfig, ManagedInterceptorConfig, HttpInterceptor, EndpointApplies } from '../interceptor/types';
 import { WebSymbols } from '../symbols';
 
 type EndpointRule = { sub: string | RegExp, base: string };
-type ExtractFn = (req: HttpRequest) => unknown;
 
 const HttpResponseContract = toConcrete<HttpResponse>();
 const HttpRequestContract = toConcrete<HttpRequest>();
@@ -43,7 +42,10 @@ function compareRule({ sub, base }: EndpointRule, endpoint: EndpointConfig, cont
  */
 export class EndpointUtil {
 
-  static #contextExtractors = new Map<Class, ExtractFn>();
+  static #contextExtractors = new Map<Class, EndpointParamExtractor>([
+    [HttpResponseContract, (_, __, res): unknown => res],
+    [HttpRequestContract, (_, req): unknown => req]
+  ]);
 
   static #compareEndpoints(a: number[], b: number[]): number {
     const al = a.length;
@@ -66,7 +68,7 @@ export class EndpointUtil {
    * @param type The class to check against
    * @param fn The extraction function
    */
-  static registerContextParam(type: Class, fn: ExtractFn): void {
+  static registerContextParam(type: Class, fn: EndpointParamExtractor): void {
     this.#contextExtractors.set(type, fn);
   }
 
@@ -179,26 +181,20 @@ export class EndpointUtil {
 
   /**
    * Extract parameter from request
-   * @param param
-   * @param req
-   * @param res
-   * @param value
    */
-  static extractParameter(param: EndpointParamConfig, req: HttpRequest, res: HttpResponse): unknown {
-    if (param.type === HttpResponseContract) {
-      return res;
-    } else if (param.type === HttpRequestContract) {
-      return req;
+  static extractParameter(param: EndpointParamConfig, req: HttpRequest, res: HttpResponse, value?: unknown, type?: Class): unknown {
+    if (value !== undefined && value !== WebSymbols.MissingParam) {
+      return value;
     }
 
     switch (param.location) {
       case 'path': return req.params[param.name!];
       case 'header': return req.header(param.name!);
       case 'body': return req.body;
-      case 'context': return this.#contextExtractors.get(param.type!)!(req);
+      case 'context': return (param.extract ?? this.#contextExtractors.get(param.contextType!))!(param, req, res);
       case 'query': {
         const q = req.getExpandedQuery();
-        return param.prefix ? q[param.prefix] : (param.type?.Ⲑid ? q : q[param.name!]);
+        return param.prefix ? q[param.prefix] : (type?.Ⲑid ? q : q[param.name!]);
       }
     }
   }
@@ -215,7 +211,8 @@ export class EndpointUtil {
     const vals = req[WebSymbols.RequestParams];
 
     try {
-      const extracted = endpoint.params.map((c, i) => (vals && vals[i] !== WebSymbols.MissingParam) ? vals[i] : this.extractParameter(c, req, res));
+      const types = SchemaRegistry.getMethodSchema(cls, method);
+      const extracted = endpoint.params.map((c, i) => this.extractParameter(c, req, res, vals?.[i], types[i].type));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;

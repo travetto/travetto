@@ -2,7 +2,9 @@ import type { Class } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../interceptor/types';
-import type { Filter, HttpHandler, HttpHeaderMap, HttpMethodOrAll, HttpRequest, HttpResponse, EndpointHandler } from '../types';
+import type { Filter, HttpHandler, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointHandler, HttpResponse } from '../types';
+
+export type EndpointParamExtractor = (config: EndpointParamConfig, req: HttpRequest, res: HttpResponse) => unknown;
 
 /**
  * Endpoint decorator for composition of routing logic
@@ -84,7 +86,7 @@ export interface EndpointParamConfig {
   /**
    * The provided type, if any for the parameter
    */
-  type?: Class;
+  contextType?: Class;
   /**
    * Resolves the value by executing with req/res as input
    */
@@ -93,9 +95,8 @@ export interface EndpointParamConfig {
    * Extract the value from request
    * @param config Param configuration
    * @param req The request
-   * @param res The response
    */
-  extract?(config: EndpointParamConfig, req?: HttpRequest, res?: HttpResponse): unknown;
+  extract?: EndpointParamExtractor;
   /**
    * Input prefix for parameter
    */

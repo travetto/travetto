@@ -69,4 +69,4 @@ export class AuthContextInterceptor implements HttpInterceptor {
   }
 }
 
-EndpointUtil.registerContextParam(toConcrete<Principal>(), req => req.user);
+EndpointUtil.registerContextParam(toConcrete<Principal>(), (_, req) => req.user);

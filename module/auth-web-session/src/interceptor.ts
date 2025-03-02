@@ -35,4 +35,4 @@ export class AuthSessionInterceptor implements HttpInterceptor {
   }
 }
 
-EndpointUtil.registerContextParam(toConcrete<SessionData>(), req => req.session?.data);
+EndpointUtil.registerContextParam(toConcrete<SessionData>(), (_, req) => req.session?.data);

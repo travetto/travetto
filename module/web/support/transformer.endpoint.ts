@@ -44,6 +44,7 @@ export class WebTransformer {
     if (isContext) {
       detectedParamType = 'ContextParam';
       if (paramType.key === 'managed') {
+        conf = state.extendObjectLiteral(conf, { contextType: state.getOrImport(paramType) });
         node = SchemaTransformUtil.computeField(state, node, { type: { key: 'unknown' } });
       } else {
         throw new Error(`Unexpected parameter type, should be an external type but got: ${paramType.key}`);
@@ -74,11 +75,6 @@ export class WebTransformer {
         config.name = '';
       }
       node = SchemaTransformUtil.computeField(state, node, config);
-    }
-
-    // Expose type
-    if (paramType.key === 'managed') {
-      conf = state.extendObjectLiteral(conf, { type: state.getOrImport(paramType) });
     }
 
     const modifiers = (node.modifiers ?? []).filter(x => x !== pDec);
