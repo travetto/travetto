@@ -23,7 +23,7 @@ export class Simple {
   }
 
   /**
-   * @param file A file to upload
+   * @param uploads A map of files that were uploaded
    */
   @Post('/files')
   async loadFiles(@Upload() uploads: FileMap) {
