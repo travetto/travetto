@@ -1,2 +1,4 @@
-
-export type UploadMap = Record<string, File>;
+/**
+ * @concrete
+ */
+export interface FileMap extends Record<string, File> { }

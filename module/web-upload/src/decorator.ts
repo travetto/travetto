@@ -1,13 +1,14 @@
-import { AppError, toConcrete, asConstructable, AsyncMethodDescriptor, ClassInstance } from '@travetto/runtime';
-import { ControllerRegistry, EndpointParamConfig, Param, HttpRequest } from '@travetto/web';
+import { AppError, toConcrete, ClassInstance } from '@travetto/runtime';
+import { ControllerRegistry, EndpointParamConfig, Param } from '@travetto/web';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { WebUploadInterceptor } from './interceptor';
 import { WebUploadConfig } from './config';
-
-const HttpRequestTarget = toConcrete<HttpRequest>();
+import { FileMap } from './types';
 
 type UploadConfig = Partial<Pick<WebUploadConfig, 'types' | 'maxSize' | 'cleanupFiles'>>;
+
+const UploadMapClass = toConcrete<FileMap>();
 
 /**
  * Allows for supporting uploads
@@ -25,20 +26,23 @@ export function Upload(
 
   const finalConf = { ...param };
 
-  if (!(finalConf.field?.type === Blob || finalConf.field?.type === File)) {
-    throw new AppError(`Cannot use upload decorator with ${finalConf.field?.type}, but only an Blob or File`);
-  }
-
   return (inst: ClassInstance, prop: string, idx: number): void => {
+    const field = SchemaRegistry.getMethodSchema(inst.constructor, prop)[idx];
+
+    if (!(field.type === Blob || field.type === File || field.type === UploadMapClass)) {
+      throw new AppError(`Cannot use upload decorator with ${field.type.name}, but only an ${Blob.name}, ${File.name} or ${UploadMapClass.name}`);
+    }
+
+    const isMap = field.type === UploadMapClass;
+
     // Register field
-    SchemaRegistry.registerPendingParamConfig(inst.constructor, prop, idx, Object, { specifiers: ['file'] });
     ControllerRegistry.registerEndpointInterceptorConfig(
       inst.constructor, inst[prop], WebUploadInterceptor,
       {
         maxSize: finalConf.maxSize,
         types: finalConf.types,
         cleanupFiles: finalConf.cleanupFiles,
-        uploads: {
+        uploads: isMap ? {} : {
           [finalConf.name ?? prop]: {
             maxSize: finalConf.maxSize,
             types: finalConf.types,
@@ -48,38 +52,6 @@ export function Upload(
       }
     );
 
-    return Param('body', { ...finalConf, extract: (c, r) => r?.uploads[c.name!] })(inst, prop, idx);
-  };
-}
-
-/**
- * Allows for supporting uploads
- *
- * @augments `@travetto/web-upload:Upload`
- * @augments `@travetto/web:Endpoint`
- */
-export function UploadAll(config: Partial<EndpointParamConfig> & UploadConfig = {}) {
-  return function <T>(target: T, propertyKey: string, desc: AsyncMethodDescriptor): void {
-    const targetClass = asConstructable(target).constructor;
-
-    const { params } = ControllerRegistry.getOrCreatePendingField(targetClass, desc.value!);
-
-    // Find the request object, and mark it as a file param
-    params?.some((el, i) => {
-      if (el.field?.type === HttpRequestTarget) {
-        SchemaRegistry.registerPendingParamConfig(targetClass, propertyKey, i, Object, { specifiers: ['file'] });
-        return true;
-      }
-    });
-
-    ControllerRegistry.registerEndpointInterceptorConfig(
-      targetClass, desc.value!,
-      WebUploadInterceptor,
-      {
-        maxSize: config.maxSize,
-        types: config.types,
-        cleanupFiles: config.cleanupFiles
-      }
-    );
+    return Param('body', { ...finalConf, extract: (c, r) => isMap ? r?.uploads : r?.uploads[c.name!] })(inst, prop, idx);
   };
 }

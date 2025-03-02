@@ -1,13 +1,14 @@
 import assert from 'node:assert';
 
 import { BinaryUtil } from '@travetto/runtime';
-import { Controller, Post, HttpRequest } from '@travetto/web';
+import { Controller, Post } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
 import { BaseWebSuite } from '@travetto/web/support/test/base';
 
-import { Upload, UploadAll } from '../../src/decorator';
+import { Upload } from '../../src/decorator';
+import { FileMap } from '../../src/types';
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -17,8 +18,7 @@ const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
 class TestUploadController {
 
   @Post('/all')
-  @UploadAll()
-  async uploadAll({ uploads }: HttpRequest): Promise<{ hash?: string } | undefined> {
+  async uploadAll(@Upload() uploads: FileMap): Promise<{ hash?: string } | undefined> {
     for (const [, blob] of Object.entries(uploads)) {
       return { hash: bHash(blob) };
     }
