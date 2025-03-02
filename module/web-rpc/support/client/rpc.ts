@@ -5,6 +5,12 @@ type MethodKeys<C extends {}> = {
 type PromiseFn = (...args: any) => Promise<unknown>;
 type PromiseRes<V extends PromiseFn> = Awaited<ReturnType<V>>;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isBlobMap = (x: any): x is Record<string, Blob> => x && typeof x === 'object' && x[Object.keys(x)[0]] instanceof Blob;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isBlobLike = (x: any): x is Record<string, Blob> | Blob => x instanceof Blob || isBlobMap(x);
+
 export type PreRequestHandler = (item: RequestInit) => Promise<RequestInit | undefined | void>;
 export type PostResponseHandler = (item: Response) => Promise<Response | undefined | void>;
 
@@ -67,9 +73,9 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
   };
 }
 
-export function getBody(inputs: unknown[]): { body: Blob | string, headers: Record<string, string> } {
-  // If we have a blob, upload
-  if (!inputs.some(x => x instanceof Blob)) {
+export function getBody(inputs: unknown[]): { body: FormData | string, headers: Record<string, string> } {
+  // If we do not have a blob, easy-peasy
+  if (!inputs.some(isBlobLike)) {
     return {
       body: JSON.stringify(inputs),
       headers: {
@@ -78,17 +84,24 @@ export function getBody(inputs: unknown[]): { body: Blob | string, headers: Reco
     };
   }
 
-  const plainInputs = inputs.map(x => x instanceof Blob ? null : x);
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  const blob: Blob = inputs.find(x => x instanceof Blob)! as Blob;
+  const plainInputs = inputs.map(x => isBlobLike(x) ? null : x);
+  const form = new FormData();
+
+  for (const inp of inputs.filter(isBlobLike)) {
+    if (inp instanceof Blob) {
+      form.append('file', inp, (inp instanceof File) ? inp.name : undefined);
+    } else {
+      for (const [name, blob] of Object.entries(inp)) {
+        form.append(name, blob, (blob instanceof File) ? blob.name : undefined);
+      }
+    }
+  }
 
   return {
-    body: blob,
-    headers: blob instanceof File ? {
-      'Content-Disposition': `inline; filename="${blob.name}"`,
-      'Content-Type': blob.type ?? 'binary/octet-stream',
+    body: form,
+    headers: {
       'X-TRV-RPC-INPUTS': btoa(encodeURIComponent(JSON.stringify(plainInputs)))
-    } : {}
+    }
   };
 }
 
