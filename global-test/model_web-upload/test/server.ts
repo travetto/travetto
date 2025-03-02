@@ -6,7 +6,7 @@ import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
-import { Upload, UploadAll } from '@travetto/web-upload';
+import { Upload, FileMap } from '@travetto/web-upload';
 import { Util, BlobMeta, BinaryUtil } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/base';
@@ -22,8 +22,7 @@ class TestUploadController {
   service: MemoryModelService;
 
   @Post('/all')
-  @UploadAll()
-  async uploadAll({ uploads }: HttpRequest) {
+  async uploadAll(@Upload() uploads: FileMap) {
     for (const [, file] of Object.entries(uploads)) {
       return meta(file);
     }
