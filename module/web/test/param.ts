@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
-import { asFull, castTo } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 
 import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
@@ -12,6 +12,7 @@ import { ControllerRegistry } from '../src/registry/controller';
 import { HttpMethodOrAll, HttpRequest, HttpResponse } from '../src/types';
 import { EndpointConfig } from '../src/registry/types';
 import { EndpointUtil } from '../src/util/endpoint';
+import { WebServerUtil } from '../src/application/util';
 
 class User {
   name: string;
@@ -90,7 +91,7 @@ export class EndpointParameterTest {
   }
 
   static async extract(ep: EndpointConfig, req: Partial<HttpRequest>, res: Partial<HttpResponse> = {}): Promise<unknown[]> {
-    return await EndpointUtil.extractParameters(ep, asFull(req), asFull(res));
+    return await EndpointUtil.extractParameters(ep, WebServerUtil.decorateRequest(req), WebServerUtil.decorateResponse(res));
   }
 
   @BeforeAll()

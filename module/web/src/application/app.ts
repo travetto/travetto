@@ -165,10 +165,7 @@ export class WebApplication<T = unknown> {
       headers: {},
       class: WebApplication,
       handlerName: this.globalHandler.name,
-      params: [{
-        extract: (c: unknown, r: unknown) => r,
-        location: 'context'
-      }],
+      params: [{ extract: (_, r) => r, location: 'context' }],
       instance: {},
       handler: this.globalHandler,
       method: 'all', path: '*',

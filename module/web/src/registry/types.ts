@@ -84,10 +84,6 @@ export interface EndpointParamConfig {
    */
   location: 'path' | 'query' | 'body' | 'header' | 'context';
   /**
-   * The provided type, if any for the parameter
-   */
-  contextType?: Class;
-  /**
    * Resolves the value by executing with req/res as input
    */
   resolve?: Filter;

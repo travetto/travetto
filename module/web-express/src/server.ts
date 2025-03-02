@@ -73,8 +73,8 @@ export class ExpressWebServer implements WebServer<express.Application> {
           headers: {},
           handlerName: 'express-all',
           class: ExpressWebServer,
-          handler: (__req: HttpRequest) => '',
-          params: [{ extract: (__, r: unknown): unknown => r, location: 'context' }],
+          handler: () => '',
+          params: [{ extract: (_, r): unknown => r, location: 'context' }],
           interceptors: [
             [LoggingInterceptor, { disabled: true }]
           ]

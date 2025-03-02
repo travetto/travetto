@@ -1,7 +1,7 @@
 import { isPromise } from 'node:util/types';
 
 import { asConstructable, castTo, Class, toConcrete, Util } from '@travetto/runtime';
-import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { HttpRequest, Filter, FilterContext, FilterNext, FilterReturn, HttpHandler, HttpResponse } from '../types';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointParamExtractor } from '../registry/types';
@@ -182,19 +182,21 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(param: EndpointParamConfig, req: HttpRequest, res: HttpResponse, value?: unknown, type?: Class): unknown {
+  static extractParameter(param: EndpointParamConfig, req: HttpRequest, res: HttpResponse, field: FieldConfig, value?: unknown): unknown {
     if (value !== undefined && value !== WebSymbols.MissingParam) {
       return value;
+    } else if (param.extract) {
+      return param.extract(param, req, res);
     }
 
     switch (param.location) {
       case 'path': return req.params[param.name!];
       case 'header': return req.header(param.name!);
       case 'body': return req.body;
-      case 'context': return (param.extract ?? this.#contextExtractors.get(param.contextType!))!(param, req, res);
+      case 'context': return this.#contextExtractors.get(field.type)!(param, req, res);
       case 'query': {
         const q = req.getExpandedQuery();
-        return param.prefix ? q[param.prefix] : (type?.Ⲑid ? q : q[param.name!]);
+        return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[param.name!]);
       }
     }
   }
@@ -211,8 +213,8 @@ export class EndpointUtil {
     const vals = req[WebSymbols.RequestParams];
 
     try {
-      const types = SchemaRegistry.getMethodSchema(cls, method);
-      const extracted = endpoint.params.map((c, i) => this.extractParameter(c, req, res, vals?.[i], types[i].type));
+      const fields = SchemaRegistry.getMethodSchema(cls, method);
+      const extracted = endpoint.params.map((c, i) => this.extractParameter(c, req, res, fields[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;

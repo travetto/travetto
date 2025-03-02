@@ -25,8 +25,8 @@ export function Upload(
 
   const finalConf = { ...param };
 
-  if (!(finalConf.contextType === Blob || finalConf.contextType === File)) {
-    throw new AppError(`Cannot use upload decorator with ${finalConf.contextType}, but only an Blob or File`);
+  if (!(finalConf.field?.type === Blob || finalConf.field?.type === File)) {
+    throw new AppError(`Cannot use upload decorator with ${finalConf.field?.type}, but only an Blob or File`);
   }
 
   return (inst: ClassInstance, prop: string, idx: number): void => {
@@ -48,10 +48,7 @@ export function Upload(
       }
     );
 
-    return Param('body', {
-      ...finalConf,
-      extract: (config, req) => req?.uploads[config.name!]
-    })(inst, prop, idx);
+    return Param('body', { ...finalConf, extract: (c, r) => r?.uploads[c.name!] })(inst, prop, idx);
   };
 }
 
@@ -69,7 +66,7 @@ export function UploadAll(config: Partial<EndpointParamConfig> & UploadConfig = 
 
     // Find the request object, and mark it as a file param
     params?.some((el, i) => {
-      if (el.contextType === HttpRequestTarget) {
+      if (el.field?.type === HttpRequestTarget) {
         SchemaRegistry.registerPendingParamConfig(targetClass, propertyKey, i, Object, { specifiers: ['file'] });
         return true;
       }

@@ -420,7 +420,7 @@ npx trv run:web
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web:src/application/app.ts:196] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web:src/application/app.ts:193] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 
@@ -447,20 +447,9 @@ export async function main(key: string, port: number) {
 $ trv main support/create-todo.ts <key> <port>
 
 {
-  message: 'Validation errors have occurred',
-  category: 'data',
-  type: 'ValidationResultError',
-  at: '2029-03-14T04:00:01.510Z',
-  details: {
-    errors: [
-      {
-        kind: 'required',
-        active: true,
-        message: 'text is required',
-        path: 'text'
-      }
-    ]
-  }
+  text: 'New Todo - <key>',
+  created: '2029-03-14T04:00:01.510Z',
+  id: '<uniqueId>'
 }
 ```
 
@@ -478,5 +467,11 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-{ message: "Cannot read properties of undefined (reading 'q')" }
+[
+  {
+    id: '<uniqueId>',
+    text: 'New Todo - <key>',
+    created: '2029-03-14T04:00:01.814Z'
+  }
+]
 ```
