@@ -1,10 +1,14 @@
-import { Controller, Get, Redirect, HttpRequest } from '@travetto/web';
+import { Controller, Get, Redirect, ContextParam } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
+import { Principal } from '@travetto/auth';
 
 import { FB_AUTH } from './facebook';
 
 @Controller('/auth')
 export class SampleAuth {
+
+  @ContextParam()
+  user: Principal;
 
   @Get('/simple')
   @Login(FB_AUTH)
@@ -14,8 +18,8 @@ export class SampleAuth {
 
   @Get('/self')
   @Authenticated()
-  async getSelf(req: HttpRequest) {
-    return req.user;
+  async getSelf() {
+    return this.user;
   }
 
   @Get('/logout')

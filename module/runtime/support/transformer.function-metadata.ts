@@ -5,11 +5,9 @@ import { TransformerState, OnMethod, OnClass, AfterClass, CoreUtil, OnFunction }
 import type { FunctionMetadataTag } from '../src/function';
 import { MetadataRegistrationUtil } from './transformer/metadata';
 
-const RUNTIME_MOD = '@travetto/runtime';
-
-const methods = Symbol.for(`${RUNTIME_MOD}:methods`);
-const cls = Symbol.for(`${RUNTIME_MOD}:class`);
-const fn = Symbol.for(`${RUNTIME_MOD}:function`);
+const methods = Symbol.for('@travetto/runtime:methods');
+const cls = Symbol.for('@travetto/runtime:class');
+const fn = Symbol.for('@travetto/runtime:function');
 
 interface MetadataInfo {
   [methods]?: Record<string, FunctionMetadataTag>;

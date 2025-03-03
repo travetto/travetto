@@ -2,7 +2,7 @@ import { pipeline } from 'node:stream/promises';
 
 import type koa from 'koa';
 
-import { WebServerUtil, HttpRequest, HttpResponse, WebSymbols } from '@travetto/web';
+import { HttpRequest, HttpResponse, WebSymbols, HttpResponseCore, HttpRequestCore } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -13,7 +13,7 @@ export class KoaWebServerUtil {
    * Build a Travetto HttpRequest from a koa context
    */
   static getRequest(ctx: koa.Context): HttpRequest {
-    return WebServerUtil.decorateRequest({
+    return HttpRequestCore.create({
       [WebSymbols.ProviderEntity]: ctx,
       [WebSymbols.NodeEntity]: ctx.req,
       protocol: castTo(ctx.protocol),
@@ -32,7 +32,7 @@ export class KoaWebServerUtil {
    * Build a Travetto HttpResponse from a koa context
    */
   static getResponse(ctx: koa.Context): HttpResponse {
-    return WebServerUtil.decorateResponse({
+    return HttpResponseCore.create({
       [WebSymbols.ProviderEntity]: ctx,
       [WebSymbols.NodeEntity]: ctx.res,
       get headersSent(): boolean {

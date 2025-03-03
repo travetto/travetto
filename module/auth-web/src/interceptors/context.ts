@@ -1,9 +1,10 @@
 import { toConcrete, Class } from '@travetto/runtime';
-import { HttpInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor, EndpointUtil } from '@travetto/web';
+import { HttpInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor, WebContext } from '@travetto/web';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
-import { AuthContext, AuthService, Principal } from '@travetto/auth';
+import { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types';
+
 import { WebAuthConfig } from '../config';
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
@@ -32,16 +33,19 @@ export class AuthContextInterceptor implements HttpInterceptor {
   @Inject()
   authService: AuthService;
 
+  @Inject()
+  webContext: WebContext;
+
   async postConstruct(): Promise<void> {
     this.codec ??= await DependencyRegistry.getInstance(toConcrete<PrincipalCodec>(), CommonPrincipalCodecSymbol);
+    this.webContext.registerType(toConcrete<Principal>(), () => this.authContext.principal);
+    this.webContext.registerType(toConcrete<AuthToken>(), () => this.authContext.authToken);
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
     let decoded: Principal | undefined;
     let checked: Principal | undefined;
     let lastExpiresAt: Date | undefined;
-
-    Object.defineProperty(ctx.req, 'user', { get: () => this.authContext.principal });
 
     try {
       decoded = await this.codec.decode(ctx);
@@ -68,5 +72,3 @@ export class AuthContextInterceptor implements HttpInterceptor {
     }
   }
 }
-
-EndpointUtil.registerContextParam(toConcrete<Principal>(), (_, req) => req.user);

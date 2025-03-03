@@ -5,7 +5,7 @@ import { AuthConfig, AuthContext } from '@travetto/auth';
 import { AuthContextInterceptor, WebAuthConfig } from '@travetto/auth-web';
 import { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
-import { Controller, Get, Body, Post, Put, HttpRequest, FilterContext, HttpInterceptor, EndpointConfig } from '@travetto/web';
+import { Controller, Get, Body, Post, Put, HttpRequest, FilterContext, HttpInterceptor, EndpointConfig, ContextParam } from '@travetto/web';
 import { Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
@@ -42,20 +42,26 @@ class TestController {
   @Inject()
   session: SessionService;
 
+  @ContextParam()
+  req: HttpRequest;
+
+  @ContextParam()
+  data: SessionData;
+
   @Get('/')
-  get(data: SessionData): SessionData {
-    data.age = (data.age ?? 0) + 1;
-    return data!;
+  get(): SessionData {
+    this.data.age = (this.data.age ?? 0) + 1;
+    return this.data;
   }
 
   @Post('/complex')
-  withParam(@Body() payload: unknown, data: SessionData) {
-    data.payload = payload;
+  withParam(@Body() payload: unknown) {
+    this.data.payload = payload;
   }
 
   @Put('/body')
-  withBody(req: HttpRequest) {
-    return { body: req.body.age };
+  withBody() {
+    return { body: this.req.body.age };
   }
 }
 

@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { WebSymbols, WebServerUtil, HttpRequest, HttpResponse } from '@travetto/web';
+import { WebSymbols, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -11,7 +11,7 @@ export class FastifyWebServerUtil {
    * Build a Travetto HttpRequest from a Fastify Request
    */
   static getRequest(req: FastifyRequest): HttpRequest {
-    return WebServerUtil.decorateRequest({
+    return HttpRequestCore.create({
       [WebSymbols.ProviderEntity]: req,
       [WebSymbols.NodeEntity]: req.raw,
       protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
@@ -29,7 +29,7 @@ export class FastifyWebServerUtil {
    * Build a Travetto HttpResponse from a Fastify Reply
    */
   static getResponse(reply: FastifyReply): HttpResponse {
-    return WebServerUtil.decorateResponse({
+    return HttpResponseCore.create({
       [WebSymbols.ProviderEntity]: reply,
       [WebSymbols.NodeEntity]: reply.raw,
       get headersSent(): boolean {

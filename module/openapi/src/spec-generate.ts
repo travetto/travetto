@@ -283,7 +283,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         };
       } else if (complex && (param.location === 'query' || param.location === 'header')) {
         return { parameters: this.#schemaToDotParams(param.location, field, param.prefix ? `${param.prefix}.` : '') };
-      } else if (param.location !== 'context') {
+      } else {
         const epParam: ParameterObject = {
           in: param.location,
           name: param.name || param.location,
@@ -292,8 +292,6 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
           schema: field.array ? { type: 'array', items: this.#getType(field) } : this.#getType(field)
         };
         return { parameters: [epParam] };
-      } else if (field.specifiers?.includes('file')) {
-        return { requestBody: this.#buildUploadBody() };
       }
     }
   }

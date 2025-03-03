@@ -27,7 +27,6 @@ export interface RequestHeaders extends IncomingHttpHeaders { }
 /**
  * Travetto request
  * @concrete
- * @augments `@travetto/web:ContextParam`
  */
 export interface HttpRequest<T = unknown> {
   /**
@@ -154,7 +153,6 @@ export interface HttpRequest<T = unknown> {
 /**
  * Travetto response
  * @concrete
- * @augments `@travetto/web:ContextParam`
  */
 export interface HttpResponse<T = unknown> {
   /**

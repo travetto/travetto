@@ -1,11 +1,11 @@
 import { DependencyRegistry } from '@travetto/di';
-import { type Primitive, type Class, asFull, castTo, asConstructable } from '@travetto/runtime';
+import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInstance } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
-import { SchemaRegistry } from '@travetto/schema';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig } from './types';
 import { Filter, EndpointHandler } from '../types';
 import { HttpInterceptor } from '../interceptor/types';
+import { WebContext } from '../context';
 
 type ValidFieldNames<T> = {
   [K in keyof T]:
@@ -27,6 +27,14 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     super(DependencyRegistry);
   }
 
+  async #bindContextParams<T>(inst: ClassInstance<T>): Promise<void> {
+    const ctx = await DependencyRegistry.getInstance(WebContext);
+    const map = this.get(inst.constructor).contextParams;
+    for (const [field, type] of Object.entries(map)) {
+      Object.defineProperty(inst, field, { get: ctx.getByType(type) });
+    }
+  }
+
   getEndpointByNames(id: string): EndpointConfig | undefined {
     return this.#endpointsById.get(id);
   }
@@ -40,6 +48,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       basePath: '',
       externalName: cls.name.replace(/(Controller|Web|Service)$/, ''),
       endpoints: [],
+      contextParams: {}
     };
   }
 
@@ -134,6 +143,18 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   /**
+   * Register a controller context param
+   * @param target Controller class
+   * @param field Field on controller to bind context param to
+   * @param type The context type to bind to field
+   */
+  registerControllerContextParam<T>(target: Class, field: string, type: Class<T>): void {
+    const controllerConfig = this.getOrCreatePending(target);
+    controllerConfig.contextParams![field] = type;
+    DependencyRegistry.registerPostConstructHandler(target, 'ContextParam', inst => this.#bindContextParams(inst));
+  }
+
+  /**
    * Create a filter decorator
    * @param fn The filter to call
    */
@@ -217,6 +238,9 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     if (!srcConf.basePath!.startsWith('/')) {
       srcConf.basePath = `/${srcConf.basePath}`;
     }
+
+    srcConf.contextParams = { ...srcConf.contextParams, ...config.contextParams };
+
 
     this.mergeDescribable(config, srcConf);
   }

@@ -4,15 +4,16 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
+import { ContextParam } from '@travetto/context';
 
-import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param';
+import { QueryParam, HeaderParam, PathParam } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
 import { ControllerRegistry } from '../src/registry/controller';
 import { HttpMethodOrAll, HttpRequest, HttpResponse } from '../src/types';
 import { EndpointConfig } from '../src/registry/types';
 import { EndpointUtil } from '../src/util/endpoint';
-import { WebServerUtil } from '../src/application/util';
+import { HttpRequestCore, HttpResponseCore } from '@travetto/web';
 
 class User {
   name: string;
@@ -20,6 +21,13 @@ class User {
 
 @Controller('/')
 class ParamController {
+
+  @ContextParam()
+  req: HttpRequest;
+
+  @ContextParam()
+  res: HttpResponse;
+
   @Post('/:name')
   async endpoint(@PathParam() name: string, @QueryParam() age: number) { }
 
@@ -30,7 +38,9 @@ class ParamController {
   async users(@PathParam() id: string, @QueryParam() age?: number) { }
 
   @Post('/req/res')
-  async reqRes(@ContextParam() req: HttpRequest, @ContextParam() res: HttpResponse, req2?: HttpRequest) { }
+  async reqRes() {
+    return this.req.url;
+  }
 
   @Post('/array')
   async array(values: number[]) { }
@@ -91,7 +101,7 @@ export class EndpointParameterTest {
   }
 
   static async extract(ep: EndpointConfig, req: Partial<HttpRequest>, res: Partial<HttpResponse> = {}): Promise<unknown[]> {
-    return await EndpointUtil.extractParameters(ep, WebServerUtil.decorateRequest(req), WebServerUtil.decorateResponse(res));
+    return await EndpointUtil.extractParameters(ep, HttpRequestCore.create(req), HttpResponseCore.create(res));
   }
 
   @BeforeAll()
@@ -171,9 +181,7 @@ export class EndpointParameterTest {
     const res = { statusCode: 200 };
     const items = await EndpointParameterTest.extract(ep, req, res);
 
-    assert(req === items[0]);
-    assert(res === items[1]);
-    assert(req === items[2]);
+    assert(items.length === 0);
   }
 
   @Test()

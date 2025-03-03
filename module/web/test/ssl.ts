@@ -1,13 +1,14 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { WebSslConfig } from '../src/application/ssl';
+
+import { WebSslUtil } from '../src/util/ssl';
 
 @Suite()
 export class SSLTest {
   @Test()
   async verify() {
-    const res = await WebSslConfig.generateSslKeyPair();
+    const res = await WebSslUtil.generateKeyPair();
 
     assert(!!res.cert);
     assert(!!res.key);

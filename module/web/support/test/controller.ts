@@ -2,13 +2,20 @@ import { Readable } from 'node:stream';
 
 import { Controller } from '../../src/decorator/controller';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';
-import { PathParam, QueryParam } from '../../src/decorator/param';
+import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param';
 import { HttpRequest, HttpResponse } from '../../src/types';
 import { Produces, SetHeaders } from '../../src/decorator/common';
 import { Renderable } from '../../src/response/renderable';
 
 @Controller('/test')
 export class TestController {
+
+  @ContextParam()
+  req: HttpRequest;
+
+  @ContextParam()
+  res: HttpResponse;
+
   @Get('/json')
   getJSON() {
     return { json: true };
@@ -25,14 +32,14 @@ export class TestController {
   }
 
   @Put('/body')
-  withBody(req: HttpRequest) {
-    return { body: req.body.age };
+  withBody() {
+    return { body: this.req.body.age };
   }
 
   @Delete('/cookie')
-  withCookie(req: HttpRequest, res: HttpResponse) {
-    res.cookies.set('flavor', 'oreo');
-    return { cookie: req.cookies.get('orange') };
+  withCookie() {
+    this.res.cookies.set('flavor', 'oreo');
+    return { cookie: this.req.cookies.get('orange') };
   }
 
   @Patch('/regexp/super-:special-party')
@@ -66,38 +73,30 @@ export class TestController {
   }
 
   @Get('/fullUrl')
-  getFullUrl(req: HttpRequest) {
+  getFullUrl() {
     return {
-      url: req.url,
-      path: req.path
+      url: this.req.url,
+      path: this.req.path
     };
   }
 
   @Get('/headerFirst')
-  getHeaderFirst(req: HttpRequest) {
-    return {
-      header: req.headerFirst('age')
-    };
+  getHeaderFirst() {
+    return { header: this.req.headerFirst('age') };
   }
 
   @Post('/rawBody')
-  postRawBody(req: HttpRequest) {
-    return {
-      size: req.raw?.length
-    };
+  postRawBody() {
+    return { size: this.req.raw?.length };
   }
 
   @Get('/fun/*')
-  getFun(req: HttpRequest) {
-    return {
-      path: req.url.split('fun/')[1]
-    };
+  getFun() {
+    return { path: this.req.url.split('fun/')[1] };
   }
 
   @Get('/ip')
-  getIp(req: HttpRequest) {
-    return {
-      ip: req.getIp()
-    };
+  getIp() {
+    return { ip: this.req.getIp() };
   }
 }

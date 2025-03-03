@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { SessionService } from '@travetto/auth-session';
+import { SessionContext, SessionService } from '@travetto/auth-session';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Util } from '@travetto/runtime';
@@ -23,6 +23,9 @@ export abstract class AuthSessionServerSuite extends BaseWebSuite {
   session: SessionService;
 
   @Inject()
+  sessionContext: SessionContext;
+
+  @Inject()
   context: AsyncContext;
 
   @WithAsyncContext()
@@ -34,18 +37,18 @@ export abstract class AuthSessionServerSuite extends BaseWebSuite {
       sessionId: Util.uuid()
     };
 
-    assert(this.session.get() === undefined);
+    assert(this.sessionContext.get() === undefined);
     assert(await this.session.load() === undefined);
 
-    const sess = this.session.getOrCreate();
+    const sess = this.sessionContext.get(true);
     assert(sess.id === this.auth.principal.sessionId);
     sess.data = { name: 'bob' };
     await this.session.persist();
 
-    this.session.clear(); // Disconnect
+    this.sessionContext.set(undefined); // Disconnect
 
     assert(await this.session.load() !== undefined);
-    const sess2 = this.session.getOrCreate();
+    const sess2 = this.sessionContext.get(true);
     assert(sess2.data?.name === 'bob');
 
     this.auth.principal = {
@@ -54,17 +57,17 @@ export abstract class AuthSessionServerSuite extends BaseWebSuite {
       sessionId: Util.uuid()
     };
 
-    this.session.clear(); // Disconnect
+    this.sessionContext.set(undefined); // Disconnect
 
     assert(await this.session.load() === undefined);
-    const sess3 = this.session.getOrCreate();
+    const sess3 = this.sessionContext.get(true);
     assert.deepStrictEqual(sess3.data, {});
   }
 
   @WithAsyncContext()
   @Test()
   async testUnauthenticatedSession() {
-    await assert.throws(() => this.session.getOrCreate(), AuthenticationError);
+    await assert.throws(() => this.sessionContext.get(true), AuthenticationError);
 
   }
 }

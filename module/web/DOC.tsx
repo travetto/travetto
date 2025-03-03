@@ -8,7 +8,7 @@ import { HttpInterceptor } from './src/interceptor/types';
 import { WebApplication } from './src/application/app';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
-import { PathParam, QueryParam, Body, ContextParam, Param, HeaderParam } from './src/decorator/param';
+import { PathParam, QueryParam, Body, Param, HeaderParam, ContextParam } from './src/decorator/param';
 import { BodyParseInterceptor, BodyParseConfig } from './src/interceptor/body-parse';
 import { CorsInterceptor, CorsConfig } from './src/interceptor/cors';
 import { GetCacheInterceptor } from './src/interceptor/get-cache';
@@ -18,6 +18,8 @@ import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies';
 import { WebConfig } from './src/application/config';
 import { HttpRequest, HttpResponse } from './src/types';
 import { AsyncContextInterceptor } from './src/interceptor/context';
+import { CacheControl } from './src/decorator/common';
+import { WebContext } from './src/context';
 
 const HttpRequestContract = toConcrete<HttpRequest>();
 const HttpResponseContract = toConcrete<HttpResponse>();
@@ -81,7 +83,6 @@ export const text = <>
         <li>{QueryParam} - Query params</li>
         <li>{Body} - Request body (in it's entirety), with support for validation</li>
         <li>{HeaderParam} - Header values</li>
-        <li>{ContextParam} - Special values exposed (e.g. {HttpRequestContract}, {HttpResponseContract}, etc.)</li>
       </ul>
 
       Each {Param} can be configured to indicate:
@@ -95,6 +96,14 @@ export const text = <>
       {d.library('JSDoc')} comments can also be used to describe parameters using {d.input('@param')} tags in the comment.
 
       <c.Code title='Full-fledged Controller with Endpoints' src='doc/simple-full.ts' />
+    </c.SubSection>
+
+    <c.SubSection title='ContextParam'>
+      In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire {HttpRequestContract} or {HttpResponseContract}.  These are able to be injected using the {ContextParam} on a class-level field from the {WebContext}.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+
+      <c.Code title='Example ContextParam usage' src='doc/context-param.ts'></c.Code>
+
+      <c.Note>When referencing the {ContextParam} values, the contract for idempotency needs to be carefully inspected to ensure idempotency, if expected. You can see in the example above that the {CacheControl} decorator is used to ensure that the response is not cached.</c.Note>
     </c.SubSection>
 
     <c.SubSection title='Body and QuerySchema'>

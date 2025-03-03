@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 
 @Component({
-    imports: [RouterLink, RouterModule],
-    selector: 'app-context',
-    templateUrl: './context.component.html',
-    styleUrls: []
+  imports: [RouterLink, RouterModule],
+  selector: 'app-context',
+  templateUrl: './context.component.html',
+  styleUrls: []
 })
 export class ContextComponent { }

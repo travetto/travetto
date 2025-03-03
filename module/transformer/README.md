@@ -33,12 +33,13 @@ import { OnProperty, TransformerState, OnMethod, OnClass } from '@travetto/trans
 
 export class MakeUpper {
 
+  static isValid(state: TransformerState): boolean {
+    return state.importName !== '@travetto/transformer/doc/upper.ts';
+  }
+
   @OnProperty()
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
-    if (!state.importName.startsWith('@travetto/transformer/doc/upper')) {
-      return node;
-    }
-    return state.factory.updatePropertyDeclaration(
+    return !this.isValid(state) ? node : state.factory.updatePropertyDeclaration(
       node,
       node.modifiers,
       node.name.getText().toUpperCase(),
@@ -50,10 +51,7 @@ export class MakeUpper {
 
   @OnClass()
   static handleClass(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (!state.importName.startsWith('@travetto/transformer/doc/upper')) {
-      return node;
-    }
-    return state.factory.updateClassDeclaration(
+    return !this.isValid(state) ? node : state.factory.updateClassDeclaration(
       node,
       node.modifiers,
       state.createIdentifier(node.name!.getText().toUpperCase()),
@@ -65,10 +63,7 @@ export class MakeUpper {
 
   @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (!state.importName.startsWith('@travetto/transformer/doc/upper')) {
-      return node;
-    }
-    return state.factory.updateMethodDeclaration(
+    return !this.isValid(state) ? node : state.factory.updateMethodDeclaration(
       node,
       node.modifiers,
       undefined,

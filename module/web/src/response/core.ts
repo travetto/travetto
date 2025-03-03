@@ -1,13 +1,24 @@
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-import { HttpResponse } from '../../types';
-import { WebSymbols } from '../../symbols';
+import { asFull } from '@travetto/runtime';
+
+import { HttpResponse } from '../types';
+import { WebSymbols } from '../symbols';
 
 /**
  * Base response object
  */
 export class HttpResponseCore implements Partial<HttpResponse> {
+
+  /**
+   * Add base response as support for the provided
+   */
+  static create<T extends HttpResponse>(res: Partial<T> & Record<string, unknown>): T {
+    Object.setPrototypeOf(res, HttpResponseCore.prototype);
+    return asFull<T>(res);
+  }
+
   /**
    * Get the status code
    */

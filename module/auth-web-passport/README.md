@@ -75,13 +75,20 @@ After that, the provider is no different than any other, and can be used accordi
 
 **Code: Sample endpoints using Facebook/passport provider**
 ```typescript
-import { Controller, Get, Redirect, Post, HttpRequest } from '@travetto/web';
+import { Controller, Get, Redirect, Post, HttpRequest, ContextParam } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
+import { Principal } from '@travetto/auth';
 
 import { FB_AUTH } from './conf';
 
 @Controller('/auth')
 export class SampleAuth {
+
+  @ContextParam()
+  req: HttpRequest;
+
+  @ContextParam()
+  user: Principal;
 
   @Get('/name')
   async getName() {
@@ -96,8 +103,8 @@ export class SampleAuth {
 
   @Get('/self')
   @Authenticated()
-  async getSelf(req: HttpRequest) {
-    return req.user;
+  async getSelf() {
+    return this.user;
   }
 
   @Get('/facebook/callback')
@@ -114,8 +121,8 @@ export class SampleAuth {
    * Simple Echo
    */
   @Post('/')
-  async echo(req: HttpRequest): Promise<object> {
-    return req.body;
+  async echo(): Promise<object> {
+    return this.req.body;
   }
 }
 ```

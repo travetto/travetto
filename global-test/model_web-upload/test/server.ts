@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { DataUtil } from '@travetto/schema';
-import { Controller, Get, Post, HttpRequest } from '@travetto/web';
+import { Controller, Get, Post, HttpRequest, ContextParam } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
@@ -20,6 +20,9 @@ class TestUploadController {
 
   @Inject()
   service: MemoryModelService;
+
+  @ContextParam()
+  req: HttpRequest;
 
   @Post('/all')
   async uploadAll(@Upload() uploads: FileMap) {
@@ -61,9 +64,9 @@ class TestUploadController {
   }
 
   @Get('*')
-  async get(req: HttpRequest) {
-    const range = req.getRange();
-    return await this.service.getBlob(req.url.replace(/^\/test\/upload\//, ''), range);
+  async get() {
+    const range = this.req.getRange();
+    return await this.service.getBlob(this.req.url.replace(/^\/test\/upload\//, ''), range);
   }
 }
 

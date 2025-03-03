@@ -13,7 +13,7 @@ npm install @travetto/auth-session
 yarn add @travetto/auth-session
 ```
 
-This is a module that adds session support to the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") framework, via [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") storage.  The concept here, is that the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") module provides the solid foundation for ensuring authentication to the system, and transitively to the session data. The [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) provides a session identifier, which refers to a unique authentication session.  Each login will produce a novel session id.  This id provides the contract between [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and[Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-session#readme "Session provider for the travetto auth module.").  
+This is a module that adds session support to the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") framework, via [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") storage.  The concept here, is that the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") module provides the solid foundation for ensuring authentication to the system, and transitively to the session data. The [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) provides a session identifier, which refers to a unique authentication session.  Each login will produce a novel session id.  This id provides the contract between [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and[Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-session#readme "Session provider for the travetto auth module.").  
 
 This session identifier, is then used when retrieving data from [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") storage. This storage mechanism is not tied to a request/response model, but the [Web Auth Session](https://github.com/travetto/travetto/tree/main/module/auth-web-session#readme "Web authentication session integration support for the Travetto framework") does provide a natural integration with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.   
 
@@ -44,12 +44,22 @@ export class AuthSessionInterceptor implements HttpInterceptor {
   service: SessionService;
 
   @Inject()
+  context: SessionContext;
+
+  @Inject()
   config: WebSessionConfig;
+
+  @Inject()
+  webContext: WebContext;
+
+  postConstruct(): void {
+    this.webContext.registerType(toConcrete<Session>(), () => this.context.get(true));
+    this.webContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
+  }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
     try {
       await this.service.load();
-      Object.defineProperty(ctx.req, 'session', { get: () => this.service.getOrCreate() });
       return await next();
     } finally {
       await this.service.persist();
@@ -58,7 +68,7 @@ export class AuthSessionInterceptor implements HttpInterceptor {
 }
 ```
 
-The [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14) provides the basic integration with the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15) to authenticate and isolate session data.  The usage is fairly simple, but the import pattern to follow is:
+The [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14) provides the basic integration with the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14) to authenticate and isolate session data.  The usage is fairly simple, but the import pattern to follow is:
    *  load
    *  read/modify
    *  persist

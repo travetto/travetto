@@ -4,7 +4,7 @@ import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
 import {
-  WebSymbols, HttpInterceptor, HttpRequest, WebConfig, EndpointUtil, WebServer,
+  WebSymbols, HttpInterceptor, WebConfig, EndpointUtil, WebServer,
   LoggingInterceptor, NetUtil, WebServerHandle, EndpointConfig
 } from '@travetto/web';
 
@@ -74,7 +74,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
           handlerName: 'express-all',
           class: ExpressWebServer,
           handler: () => '',
-          params: [{ extract: (_, r): unknown => r, location: 'context' }],
+          params: [],
           interceptors: [
             [LoggingInterceptor, { disabled: true }]
           ]

@@ -13,7 +13,7 @@ npm install @travetto/web
 yarn add @travetto/web
 ```
 
-The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32) and [HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L159) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) class.
+The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L31) and [HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L157) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) class.
 
 ## Controller
 To define an endpoint, you must first declare a [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9) which is only allowed on classes. Controllers can be configured with:
@@ -78,11 +78,10 @@ class SimpleController {
 
 ### Parameters
 Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
-   *  [@PathParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L43) - Path params
-   *  [@QueryParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L49) - Query params
-   *  [@Body](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) - Request body (in it's entirety), with support for validation
-   *  [@HeaderParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L55) - Header values
-   *  [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L37) - Special values exposed (e.g. [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32), [HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L159), etc.)
+   *  [@PathParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L37) - Path params
+   *  [@QueryParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L43) - Query params
+   *  [@Body](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L55) - Request body (in it's entirety), with support for validation
+   *  [@HeaderParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L49) - Header values
 Each [@Param](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L24) can be configured to indicate:
    *  `name` - Name of param, field name, defaults to handler parameter name if necessary
    *  `description` - Description of param, pulled from [JSDoc](http://usejsdoc.org/about-getting-started.html), or defaults to name if empty
@@ -142,10 +141,42 @@ export class Simple {
 }
 ```
 
+### ContextParam
+In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L31) or [HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L157).  These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) on a class-level field from the [WebContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L8).  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+
+**Code: Example ContextParam usage**
+```typescript
+import { CacheControl, ContextParam, Controller, Get, HttpRequest, HttpResponse, Post } from '@travetto/web';
+
+@Controller('/context')
+class ContextController {
+
+  @ContextParam()
+  req: HttpRequest;
+
+  @ContextParam()
+  res: HttpResponse;
+
+  /**
+   * Gets the ip of the user, ensure no caching
+   */
+  @CacheControl(0)
+  @Get('/ip')
+  async getIp() {
+    this.res.setHeader('Content-Type', 'application/json');
+    this.res.send(JSON.stringify({
+      ip: this.req.getIp()
+    }));
+  }
+}
+```
+
+**Note**: When referencing the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) values, the contract for idempotency needs to be carefully inspected to ensure idempotency, if expected. You can see in the example above that the [CacheControl](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L51) decorator is used to ensure that the response is not cached.
+
 ### Body and QuerySchema
 The module provides high level access for [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") support, via decorators, for validating and typing request bodies. 
 
-[@Body](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+[@Body](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L55) provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
 
 **Code: Using Body for POST requests**
 ```typescript
@@ -236,7 +267,7 @@ Per the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#
 Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module supports typing requests and request bodies for run-time validation of requests.
 
 ## Running an App
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L20) that will follow default behaviors, and spin up the Web server.
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L21) that will follow default behaviors, and spin up the Web server.
 
 **Terminal: Standard application**
 ```bash
@@ -508,10 +539,10 @@ web.log:
 ```
 
 ### AsyncContextInterceptor
-[AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/context.ts#L18) is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
+[AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/context.ts#L16) is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
 
 ### Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [HttpInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L29) interface.  The interceptors are tied to the defined [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32) and [HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L159) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [HttpInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L29) interface.  The interceptors are tied to the defined [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L31) and [HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L157) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
@@ -608,7 +639,7 @@ The resolution logic is as follows:
    *  By default, if nothing else matched, assume the interceptor is valid.
 
 ## Cookie Support
-[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32)/[HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L159) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L31)/[HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L157) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 **Code: Sample Cookie Usage**
 ```typescript

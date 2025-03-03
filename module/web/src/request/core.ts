@@ -1,12 +1,12 @@
 import { IncomingHttpHeaders } from 'node:http';
 import { PassThrough, Readable } from 'node:stream';
 
-import { ByteRange, castTo } from '@travetto/runtime';
+import { asFull, ByteRange, castTo } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpRequest, HttpContentType } from '../../types';
-import { MimeUtil } from '../../util/mime';
-import { WebSymbols } from '../../symbols';
+import { HttpRequest, HttpContentType } from '../types';
+import { MimeUtil } from '../util/mime';
+import { WebSymbols } from '../symbols';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
@@ -14,6 +14,19 @@ const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
  * Base Http Request object
  */
 export class HttpRequestCore implements Partial<HttpRequest> {
+
+  /**
+   * Decorate a given request, extending from the request core
+   */
+  static create<T extends HttpRequest>(req: Partial<T> & Record<string, unknown> & { connection?: unknown }): T {
+    delete req.redirect;
+    Object.setPrototypeOf(req, HttpRequestCore.prototype);
+    req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
+    req.method = castTo(req.method?.toUpperCase());
+    req.connection = {};
+    return asFull<T>(req);
+  }
+
   /**
    * Content type parsed
    */

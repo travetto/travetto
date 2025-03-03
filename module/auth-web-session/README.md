@@ -34,12 +34,22 @@ export class AuthSessionInterceptor implements HttpInterceptor {
   service: SessionService;
 
   @Inject()
+  context: SessionContext;
+
+  @Inject()
   config: WebSessionConfig;
+
+  @Inject()
+  webContext: WebContext;
+
+  postConstruct(): void {
+    this.webContext.registerType(toConcrete<Session>(), () => this.context.get(true));
+    this.webContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
+  }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
     try {
       await this.service.load();
-      Object.defineProperty(ctx.req, 'session', { get: () => this.service.getOrCreate() });
       return await next();
     } finally {
       await this.service.persist();
@@ -48,7 +58,7 @@ export class AuthSessionInterceptor implements HttpInterceptor {
 }
 ```
 
-Once operating within the [Session](https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L7) boundaries, the session state can be injected via params, or accessed via the [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14).
+Once operating within the [Session](https://github.com/travetto/travetto/tree/main/module/auth-session/src/session.ts#L6) boundaries, the session state can be injected via params, or accessed via the [SessionService](https://github.com/travetto/travetto/tree/main/module/auth-session/src/service.ts#L14).
 
 **Code: Sample Usage**
 ```typescript
@@ -57,24 +67,27 @@ Once operating within the [Session](https://github.com/travetto/travetto/tree/ma
 export class SessionEndpoints {
 
   @Inject()
-  service: SessionService;
+  session: SessionContext;
+
+  @ContextParam()
+  data: SessionData;
 
   @Put('/info')
-  async storeInfo(data?: SessionData) {
-    if (data) {
-      data.age = 20;
-      data.name = 'Roger'; // Setting data
+  async storeInfo() {
+    if (this.data) {
+      this.data.age = 20;
+      this.data.name = 'Roger'; // Setting data
     }
   }
 
   @Get('/logout')
   async logout() {
-    await this.service.destroy();
+    await this.session.destroy();
   }
 
   @Get('/info/age')
   async getInfo() {
-    const { data } = this.service.getOrCreate();
+    const { data } = this.session.get(true);
     return data?.age;
   }
 }

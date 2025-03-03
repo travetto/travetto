@@ -3,9 +3,7 @@ import * as ts from 'typescript';
 import { FunctionMetadataTag } from '@travetto/runtime';
 import { CoreUtil, Import, SystemUtil, TransformerState } from '@travetto/transformer';
 
-const RUNTIME_MOD = '@travetto/runtime';
-
-const registerImport = Symbol.for(`${RUNTIME_MOD}:registerImport`);
+const registerImport = Symbol.for('@travetto/runtime:registerImport');
 
 interface MetadataInfo {
   [registerImport]?: Import;
@@ -16,12 +14,11 @@ interface MetadataInfo {
  */
 export class MetadataRegistrationUtil {
 
-  static RUNTIME_MOD_SRC = `${RUNTIME_MOD}/src`;
-  static REGISTER_IMPORT = `${this.RUNTIME_MOD_SRC}/function`;
+  static REGISTER_IMPORT = '@travetto/runtime/src/function.ts';
   static REGISTER_FN = 'registerFunction';
 
   static isValid({ importName: imp }: TransformerState): boolean {
-    return !imp.startsWith(this.REGISTER_IMPORT);
+    return imp !== this.REGISTER_IMPORT;
   }
 
   static tag(state: TransformerState, node: ts.Node): FunctionMetadataTag {

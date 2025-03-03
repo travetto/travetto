@@ -1,6 +1,6 @@
 import type express from 'express';
 
-import { WebSymbols, WebServerUtil, HttpRequest, HttpResponse } from '@travetto/web';
+import { WebSymbols, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -11,7 +11,7 @@ export class ExpressWebServerUtil {
    * Build a Travetto HttpRequest from an Express Request
    */
   static getRequest(req: express.Request): HttpRequest {
-    return WebServerUtil.decorateRequest<HttpRequest>({
+    return HttpRequestCore.create({
       [WebSymbols.ProviderEntity]: req,
       [WebSymbols.NodeEntity]: req,
       protocol: castTo(req.protocol),
@@ -29,7 +29,7 @@ export class ExpressWebServerUtil {
    * Build a Travetto HttpResponse from an Express Response
    */
   static getResponse(res: express.Response): HttpResponse {
-    return WebServerUtil.decorateResponse<HttpResponse>({
+    return HttpResponseCore.create({
       [WebSymbols.ProviderEntity]: res,
       [WebSymbols.NodeEntity]: res,
       get headersSent(): boolean {

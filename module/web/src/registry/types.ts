@@ -82,7 +82,7 @@ export interface EndpointParamConfig {
   /**
    * Location of the parameter
    */
-  location: 'path' | 'query' | 'body' | 'header' | 'context';
+  location: 'path' | 'query' | 'body' | 'header';
   /**
    * Resolves the value by executing with req/res as input
    */
@@ -165,6 +165,10 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
    * Client name, used by consuming tools/clients
    */
   externalName: string;
+  /**
+   * Context parameters to bind at create
+   */
+  contextParams: Record<string, Class>;
 }
 
 /**

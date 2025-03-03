@@ -1,32 +1,19 @@
 import ts from 'typescript';
 
-import {
-  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, OnSetter, ForeignType
-} from '@travetto/transformer';
+import { TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, OnSetter } from '@travetto/transformer';
 
-const INJECTABLE_MOD = '@travetto/di/src/decorator';
+const INJECTABLE_IMPORT = '@travetto/di/src/decorator.ts';
 
 /**
  * Injectable/Injection transformer
  */
 export class InjectableTransformer {
 
-  static getForeignTarget(state: TransformerState, ret: ForeignType): ts.Expression {
-    return state.fromLiteral({
-      Ⲑid: `${ret.source.split('node_modules/')[1]}+${ret.name}`
-    });
-  }
-
   /**
    * Handle a specific declaration param/property
    */
   static processDeclaration(state: TransformerState, param: ts.ParameterDeclaration | ts.SetAccessorDeclaration | ts.PropertyDeclaration): ts.Expression[] {
-    const existing = state.findDecorator(this, param, 'Inject', INJECTABLE_MOD);
-
-    if (!(existing || ts.isParameter(param))) {
-      return [];
-    }
-
+    const existing = state.findDecorator(this, param, 'Inject', INJECTABLE_IMPORT);
     const args: ts.Expression[] = [];
 
     if (existing && ts.isCallExpression(existing.expression)) {
@@ -40,18 +27,7 @@ export class InjectableTransformer {
     }
 
     const keyParam = ts.isSetAccessorDeclaration(param) ? param.parameters[0] : param;
-    const type = state.resolveType(keyParam);
-
-    if (type.key === 'managed') {
-      payload.target = state.getOrImport(type);
-    } else if (type.key === 'foreign') {
-      payload.target = this.getForeignTarget(state, type);
-    } else {
-      const file = param.getSourceFile().fileName;
-      const src = state.getFileImportName(file);
-      throw new Error(`Unable to import non-external type: ${param.getText()} ${type.key}: ${src}`);
-    }
-
+    payload.target = state.getConcreteType(keyParam);
     args.unshift(state.fromLiteral(payload));
 
     return args;
@@ -81,15 +57,15 @@ export class InjectableTransformer {
     }
 
     // Add injectable decorator if not there
-    const decl = state.findDecorator(this, node, 'Injectable', INJECTABLE_MOD);
+    const decl = state.findDecorator(this, node, 'Injectable', INJECTABLE_IMPORT);
     const args = decl && ts.isCallExpression(decl.expression) ? decl.expression.arguments : [undefined];
 
     return state.factory.updateClassDeclaration(node,
       DecoratorUtil.spliceDecorators(node, decl, [
-        state.createDecorator(INJECTABLE_MOD, 'Injectable', ...args, LiteralUtil.extendObjectLiteral(ts.factory, {}, {
+        state.createDecorator(INJECTABLE_IMPORT, 'Injectable', ...args, LiteralUtil.extendObjectLiteral(ts.factory, {}, {
           interfaces
         })),
-        state.createDecorator(INJECTABLE_MOD, 'InjectArgs', injectArgs)
+        state.createDecorator(INJECTABLE_IMPORT, 'InjectArgs', injectArgs)
       ]),
       node.name,
       node.typeParameters,
@@ -103,13 +79,13 @@ export class InjectableTransformer {
    */
   @OnProperty('Inject')
   static registerInjectProperty(state: TransformerState, node: ts.PropertyDeclaration, dm?: DecoratorMeta): typeof node {
-    const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_MOD);
+    const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_IMPORT);
 
     // Doing decls
     return state.factory.updatePropertyDeclaration(
       node,
       DecoratorUtil.spliceDecorators(node, decl, [
-        state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)),
+        state.createDecorator(INJECTABLE_IMPORT, 'Inject', ...this.processDeclaration(state, node)),
       ], 0),
       node.name,
       node.questionToken,
@@ -123,10 +99,10 @@ export class InjectableTransformer {
   */
   @OnSetter('Inject')
   static registerInjectSetter(state: TransformerState, node: ts.SetAccessorDeclaration, dm?: DecoratorMeta): typeof node {
-    const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_MOD);
+    const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_IMPORT);
 
     const modifiers = DecoratorUtil.spliceDecorators(node, decl, [
-      state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)),
+      state.createDecorator(INJECTABLE_IMPORT, 'Inject', ...this.processDeclaration(state, node)),
     ], 0);
 
     // Doing decls
@@ -170,7 +146,7 @@ export class InjectableTransformer {
     if (ret.key === 'managed') {
       config.target = state.getOrImport(ret);
     } else if (ret.key === 'foreign') {
-      config.target = this.getForeignTarget(state, ret);
+      config.target = state.getForeignTarget(ret);
     }
 
     // Build decl
@@ -182,7 +158,7 @@ export class InjectableTransformer {
     return state.factory.updateMethodDeclaration(
       node,
       DecoratorUtil.spliceDecorators(node, dec, [
-        state.createDecorator(INJECTABLE_MOD, 'InjectableFactory', ...args)
+        state.createDecorator(INJECTABLE_IMPORT, 'InjectableFactory', ...args)
       ]),
       node.asteriskToken,
       node.name,

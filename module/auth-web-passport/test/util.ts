@@ -1,9 +1,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-
-import { PassportUtil } from '../__index__';
 import { Util } from '@travetto/runtime';
+
+import { PassportUtil } from '../src/util';
 
 @Suite()
 class PassportUtilSuite {

@@ -3,7 +3,7 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
-import { HttpRequest, WebServerHandle } from '../types';
+import { WebServerHandle } from '../types';
 import { WebConfig } from './config';
 import { EndpointUtil } from '../util/endpoint';
 import { HttpInterceptor } from '../interceptor/types';
@@ -11,7 +11,8 @@ import { ControllerRegistry } from '../registry/controller';
 import { WebSymbols } from '../symbols';
 import { WebServer } from './server';
 import { WebCommonUtil } from '../util/common';
-import { EndpointConfig } from '@travetto/web';
+import { EndpointConfig } from '../registry/types';
+import { WebContext } from '../context';
 
 /**
  * The web application
@@ -67,9 +68,10 @@ export class WebApplication<T = unknown> {
 
   /**
    * Handle the global request
-   * @param req The http request
    */
-  async globalHandler(req: HttpRequest): Promise<string | Record<string, unknown>> {
+  async globalHandler(): Promise<string | Record<string, unknown>> {
+    const { request: req } = await DependencyRegistry.getInstance(WebContext);
+
     if (req.method === 'OPTIONS') {
       return '';
     } else if (req.path === '/' && this.config.defaultMessage) {
@@ -165,7 +167,7 @@ export class WebApplication<T = unknown> {
       headers: {},
       class: WebApplication,
       handlerName: this.globalHandler.name,
-      params: [{ extract: (_, r) => r, location: 'context' }],
+      params: [],
       instance: {},
       handler: this.globalHandler,
       method: 'all', path: '*',

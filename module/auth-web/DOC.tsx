@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { InjectableFactory } from '@travetto/di';
-import { HttpRequest, HttpResponse, ContextParam } from '@travetto/web';
+import { InjectableFactory, Inject, Injectable } from '@travetto/di';
+import { ContextParam, HttpRequest, HttpResponse } from '@travetto/web';
 import { Login, Unauthenticated, Authenticated, Logout, WebAuthConfig, JWTPrincipalCodec, AuthContextInterceptor, PrincipalCodec } from '@travetto/auth-web';
 import { toConcrete } from '@travetto/runtime';
 import { AuthContext, Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
@@ -75,7 +75,7 @@ export const text = <>
 
     <c.Code title='Using provider with endpoints' src='doc/endpoints.ts' />
 
-    {Authenticated} and {Unauthenticated} will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the {PrincipalContract} is accessible via {ContextParam} directly, without wiring in a request object, but is also accessible on the request object as {HttpRequestContract}.auth.
+    {Authenticated} and {Unauthenticated} will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the {PrincipalContract} is accessible as a resource that can be exposed as a {ContextParam} on an {Injectable} class.
   </c.Section>
 
   <c.Section title='Multi-Step Login'>

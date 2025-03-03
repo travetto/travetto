@@ -4,7 +4,7 @@ import {
 } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
+import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig, PostConstructHandler } from './types';
 import { InjectionError } from './error';
 
 class AutoCreate { }
@@ -104,7 +104,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   /**
    * Retrieve all dependencies
    */
-  async fetchDependencies(managed: InjectableConfig, deps?: Dependency[], keys?: string[]): Promise<unknown[]> {
+  async fetchDependencies<T>(managed: InjectableConfig<T>, deps?: Dependency[], keys?: string[]): Promise<unknown[]> {
     if (!deps || !deps.length) {
       return [];
     }
@@ -172,6 +172,11 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     // Run post construct, if it wasn't passed in, otherwise it was already created
     if (hasPostConstruct(inst) && !consValues.includes(inst)) {
       await inst.postConstruct();
+    }
+
+    // Run post constructors
+    for (const op of Object.values(managed.postConstruct)) {
+      await op(inst);
     }
 
     return inst;
@@ -263,7 +268,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       dependencies: {
         fields: {},
         cons: []
-      }
+      },
+      postConstruct: {}
     };
   }
 
@@ -307,6 +313,14 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   registerConstructor<T>(cls: Class<T>, dependencies?: Dependency[]): void {
     const conf = this.getOrCreatePending(cls);
     conf.dependencies!.cons = dependencies;
+  }
+
+  /**
+   * Register a post construct handler
+   */
+  registerPostConstructHandler<T>(cls: Class<T>, name: string, handler: PostConstructHandler<T>): void {
+    const conf = this.getOrCreatePending(cls);
+    conf.postConstruct![name] = castTo(handler);
   }
 
   /**
@@ -448,6 +462,11 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         ...parentConfig.interfaces,
         ...config.interfaces
       ];
+
+      config.postConstruct = {
+        ...parentConfig.postConstruct,
+        ...config.postConstruct
+      };
 
       // Inherit cons deps if no constructor defined
       if (config.dependencies.cons === undefined) {

@@ -1,4 +1,4 @@
-import { ClassInstance } from '@travetto/runtime';
+import { asConstructable, Class, ClassInstance } from '@travetto/runtime';
 
 import { ControllerRegistry } from '../registry/controller';
 import { EndpointParamConfig } from '../registry/types';
@@ -30,12 +30,6 @@ export function Param(location: EndpointParamConfig['location'], extra: string |
 }
 
 /**
- * Define a Context param
- * @param param The param configuration or name
- * @augments `@travetto/web:Param`
- */
-export function ContextParam(param: string | Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('context', param); }
-/**
  * Define a Path param
  * @param param The param configuration or name
  * @augments `@travetto/web:Param`
@@ -59,3 +53,12 @@ export function HeaderParam(param: string | Partial<EndpointParamConfig> = {}): 
  * @augments `@travetto/web:Param`
  */
 export function Body(param: Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('body', param); }
+
+/**
+ * A contextual field as provided by the WebAsyncContext
+ * @augments `@travetto/web:ContextParam`
+ */
+export function ContextParam(config?: { target: Class }) {
+  return (inst: unknown, field: string): void =>
+    ControllerRegistry.registerControllerContextParam(asConstructable(inst).constructor, field, config!.target);
+}
