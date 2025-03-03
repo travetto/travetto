@@ -1,8 +1,9 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { Links } from './support/doc.support';
 import { toConcrete } from '@travetto/runtime';
 import { ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport, ModelQuerySupport } from '@travetto/model-query';
+
+import { Links } from './support/doc.support';
 
 export const text = <>
   <c.StdHeader />

@@ -1,8 +1,8 @@
 import { Controller, Get, Redirect, HttpRequest } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
+import { AsyncContextField } from '@travetto/context';
 
 import { FB_AUTH } from './facebook';
-import { AsyncContextField } from '@travetto/context';
 
 @Controller('/auth')
 export class SampleAuth {

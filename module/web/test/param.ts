@@ -4,6 +4,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
+import { AsyncContextField } from '@travetto/context';
 
 import { QueryParam, HeaderParam, PathParam } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
@@ -13,7 +14,6 @@ import { HttpMethodOrAll, HttpRequest, HttpResponse } from '../src/types';
 import { EndpointConfig } from '../src/registry/types';
 import { EndpointUtil } from '../src/util/endpoint';
 import { WebServerUtil } from '../src/application/util';
-import { AsyncContextField } from '@travetto/context';
 
 class User {
   name: string;

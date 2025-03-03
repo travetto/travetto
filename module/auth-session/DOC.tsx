@@ -2,9 +2,9 @@
 import { d, c } from '@travetto/doc';
 import { AuthContext, Principal } from '@travetto/auth';
 import { Runtime, toConcrete } from '@travetto/runtime';
+import { ModelExpirySupport } from '@travetto/model';
 
 import { SessionService } from './src/service';
-import { ModelExpirySupport } from '@travetto/model';
 
 const PrincipalContract = toConcrete<Principal>();
 const ModelExpirySupportContract = toConcrete<ModelExpirySupport>();

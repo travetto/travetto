@@ -1,7 +1,7 @@
 import { Class, hasFunction } from '@travetto/runtime';
+import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model';
 
 import { ModelQueryCrudSupport } from '../types/crud';
-import { ModelType, ModelCrudSupport, ModelRegistry } from '@travetto/model';
 
 export class ModelQueryCrudUtil {
   /**
