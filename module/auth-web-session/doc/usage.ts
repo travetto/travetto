@@ -4,6 +4,7 @@ import { Controller, Put, Get } from '@travetto/web';
 import { SessionData, SessionModelSymbol, SessionService } from '@travetto/auth-session';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Authenticated } from '@travetto/auth-web';
+import { AsyncContextField } from '@travetto/context';
 
 // Applies to entire execution, not just this file
 class SessionConfig {
@@ -24,11 +25,14 @@ export class SessionEndpoints {
   @Inject()
   service: SessionService;
 
+  @AsyncContextField()
+  readonly data: SessionData;
+
   @Put('/info')
-  async storeInfo(data?: SessionData) {
-    if (data) {
-      data.age = 20;
-      data.name = 'Roger'; // Setting data
+  async storeInfo() {
+    if (this.data) {
+      this.data.age = 20;
+      this.data.name = 'Roger'; // Setting data
     }
   }
 

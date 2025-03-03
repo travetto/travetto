@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Runtime, Util } from '@travetto/runtime';
+import { Runtime, toConcrete, Util } from '@travetto/runtime';
 import { ModelExpirySupport, NotFoundError, ModelStorageUtil } from '@travetto/model';
-import { AsyncContext, AsyncContextValue } from '@travetto/context';
+import { AsyncContext, AsyncContextValue, AsyncContextValueRegistry } from '@travetto/context';
 import { AuthContext, AuthenticationError, AuthService } from '@travetto/auth';
 
-import { Session } from './session';
+import { Session, SessionData } from './session';
 import { SessionEntry, SessionModelSymbol } from './model';
 
 /**
@@ -44,6 +44,8 @@ export class SessionService {
     if (ModelStorageUtil.isSupported(this.#modelService) && Runtime.dynamic) {
       await this.#modelService.createModel?.(SessionEntry);
     }
+    AsyncContextValueRegistry.register(toConcrete<Session>(), () => (this.getOrCreate(), this.#session));
+    AsyncContextValueRegistry.register(toConcrete<SessionData>(), () => (this.getOrCreate(), this.#session), v => v.data);
   }
 
   /**

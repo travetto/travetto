@@ -8,7 +8,7 @@ import { HttpInterceptor } from './src/interceptor/types';
 import { WebApplication } from './src/application/app';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
-import { PathParam, QueryParam, Body, ContextParam, Param, HeaderParam } from './src/decorator/param';
+import { PathParam, QueryParam, Body, Param, HeaderParam } from './src/decorator/param';
 import { BodyParseInterceptor, BodyParseConfig } from './src/interceptor/body-parse';
 import { CorsInterceptor, CorsConfig } from './src/interceptor/cors';
 import { GetCacheInterceptor } from './src/interceptor/get-cache';
@@ -81,7 +81,6 @@ export const text = <>
         <li>{QueryParam} - Query params</li>
         <li>{Body} - Request body (in it's entirety), with support for validation</li>
         <li>{HeaderParam} - Header values</li>
-        <li>{ContextParam} - Special values exposed (e.g. {HttpRequestContract}, {HttpResponseContract}, etc.)</li>
       </ul>
 
       Each {Param} can be configured to indicate:
@@ -96,6 +95,10 @@ export const text = <>
 
       <c.Code title='Full-fledged Controller with Endpoints' src='doc/simple-full.ts' />
     </c.SubSection>
+
+    {
+      // TODO: Comeback
+    }
 
     <c.SubSection title='Body and QuerySchema'>
 

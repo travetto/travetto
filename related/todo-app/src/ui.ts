@@ -2,10 +2,14 @@ import { Readable } from 'node:stream';
 
 import { Controller, Get, Produces, HttpRequest, Undocumented } from '@travetto/web';
 import { RuntimeResources } from '@travetto/runtime';
+import { AsyncContextField } from '@travetto/context';
 
 @Controller('/ui')
 @Undocumented()
 export class UIController {
+
+  @AsyncContextField()
+  readonly req: HttpRequest;
 
   @Get('/')
   @Produces('text/html')
@@ -15,13 +19,13 @@ export class UIController {
 
   @Get('js/*')
   @Produces('application/javascript')
-  getJs(req: HttpRequest): Promise<Readable> {
-    return RuntimeResources.readStream(req.url);
+  getJs(): Promise<Readable> {
+    return RuntimeResources.readStream(this.req.url);
   }
 
   @Get('css/*')
   @Produces('text/css')
-  getCss(req: HttpRequest): Promise<Readable> {
-    return RuntimeResources.readStream(req.url);
+  getCss(): Promise<Readable> {
+    return RuntimeResources.readStream(this.req.url);
   }
 }

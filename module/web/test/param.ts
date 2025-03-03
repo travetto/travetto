@@ -5,7 +5,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
 
-import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param';
+import { QueryParam, HeaderParam, PathParam } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
 import { Controller } from '../src/decorator/controller';
 import { ControllerRegistry } from '../src/registry/controller';
@@ -13,6 +13,7 @@ import { HttpMethodOrAll, HttpRequest, HttpResponse } from '../src/types';
 import { EndpointConfig } from '../src/registry/types';
 import { EndpointUtil } from '../src/util/endpoint';
 import { WebServerUtil } from '../src/application/util';
+import { AsyncContextField } from '@travetto/context';
 
 class User {
   name: string;
@@ -20,6 +21,13 @@ class User {
 
 @Controller('/')
 class ParamController {
+
+  @AsyncContextField()
+  readonly req: HttpRequest;
+
+  @AsyncContextField()
+  readonly res: HttpResponse;
+
   @Post('/:name')
   async endpoint(@PathParam() name: string, @QueryParam() age: number) { }
 
@@ -30,7 +38,9 @@ class ParamController {
   async users(@PathParam() id: string, @QueryParam() age?: number) { }
 
   @Post('/req/res')
-  async reqRes(@ContextParam() req: HttpRequest, @ContextParam() res: HttpResponse, req2?: HttpRequest) { }
+  async reqRes() {
+    return this.req.url;
+  }
 
   @Post('/array')
   async array(values: number[]) { }

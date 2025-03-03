@@ -63,9 +63,7 @@ export class WebRpcInterceptor implements HttpInterceptor<WebRpcConfig> {
     }
 
     req[WebSymbols.RequestLogging] = { controller: ep.class.name, endpoint: ep.handlerName };
-    req[WebSymbols.RequestParams] = ep.params.map((x, i) =>
-      (x.location === 'context' || (x.location === 'body' && isBinary)) ? WebSymbols.MissingParam : params[i]);
-
+    req[WebSymbols.RequestParams] = ep.params.map((x, i) => (x.location === 'body' && isBinary) ? WebSymbols.MissingParam : params[i]);
     return await ep.handlerFinalized!(req, res);
   }
 }

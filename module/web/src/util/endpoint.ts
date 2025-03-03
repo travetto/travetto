@@ -1,17 +1,15 @@
 import { isPromise } from 'node:util/types';
 
-import { asConstructable, castTo, Class, toConcrete, Util } from '@travetto/runtime';
+import { asConstructable, castTo, Class, Util } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { HttpRequest, Filter, FilterContext, FilterNext, FilterReturn, HttpHandler, HttpResponse } from '../types';
-import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointParamExtractor } from '../registry/types';
+import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types';
 import { LightweightConfig, ManagedInterceptorConfig, HttpInterceptor, EndpointApplies } from '../interceptor/types';
 import { WebSymbols } from '../symbols';
 
 type EndpointRule = { sub: string | RegExp, base: string };
 
-const HttpResponseContract = toConcrete<HttpResponse>();
-const HttpRequestContract = toConcrete<HttpRequest>();
 const ident: FilterNext = ((x?: unknown) => x);
 const hasDisabled = (o: unknown): o is { disabled: boolean } => !!o && typeof o === 'object' && 'disabled' in o;
 const hasPaths = (o: unknown): o is { paths: string[] } => !!o && typeof o === 'object' && 'paths' in o && Array.isArray(o['paths']);
@@ -42,11 +40,6 @@ function compareRule({ sub, base }: EndpointRule, endpoint: EndpointConfig, cont
  */
 export class EndpointUtil {
 
-  static #contextExtractors = new Map<Class, EndpointParamExtractor>([
-    [HttpResponseContract, (_, __, res): unknown => res],
-    [HttpRequestContract, (_, req): unknown => req]
-  ]);
-
   static #compareEndpoints(a: number[], b: number[]): number {
     const al = a.length;
     const bl = b.length;
@@ -61,15 +54,6 @@ export class EndpointUtil {
       i += 1;
     }
     return 0;
-  }
-
-  /**
-   * Register a new ContextParam type
-   * @param type The class to check against
-   * @param fn The extraction function
-   */
-  static registerContextParam(type: Class, fn: EndpointParamExtractor): void {
-    this.#contextExtractors.set(type, fn);
   }
 
   /**
@@ -193,7 +177,6 @@ export class EndpointUtil {
       case 'path': return req.params[param.name!];
       case 'header': return req.header(param.name!);
       case 'body': return req.body;
-      case 'context': return this.#contextExtractors.get(field.type)!(param, req, res);
       case 'query': {
         const q = req.getExpandedQuery();
         return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[param.name!]);

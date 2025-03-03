@@ -30,12 +30,6 @@ export function Param(location: EndpointParamConfig['location'], extra: string |
 }
 
 /**
- * Define a Context param
- * @param param The param configuration or name
- * @augments `@travetto/web:Param`
- */
-export function ContextParam(param: string | Partial<EndpointParamConfig> = {}): ParamDecorator { return Param('context', param); }
-/**
  * Define a Path param
  * @param param The param configuration or name
  * @augments `@travetto/web:Param`

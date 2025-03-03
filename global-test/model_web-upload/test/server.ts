@@ -10,6 +10,7 @@ import { Upload, FileMap } from '@travetto/web-upload';
 import { Util, BlobMeta, BinaryUtil } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/base';
+import { AsyncContextField } from '@travetto/context';
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -20,6 +21,9 @@ class TestUploadController {
 
   @Inject()
   service: MemoryModelService;
+
+  @AsyncContextField()
+  readonly req: HttpRequest;
 
   @Post('/all')
   async uploadAll(@Upload() uploads: FileMap) {
@@ -61,9 +65,9 @@ class TestUploadController {
   }
 
   @Get('*')
-  async get(req: HttpRequest) {
-    const range = req.getRange();
-    return await this.service.getBlob(req.url.replace(/^\/test\/upload\//, ''), range);
+  async get() {
+    const range = this.req.getRange();
+    return await this.service.getBlob(this.req.url.replace(/^\/test\/upload\//, ''), range);
   }
 }
 

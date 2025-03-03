@@ -33,43 +33,29 @@ export class WebTransformer {
 
     let detectedParamType: string | undefined;
 
-    const isContext =
-      (paramType.key === 'managed' &&
-        DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@travetto/web:ContextParam')
-      ) ||
-      (pDec && !/(Body|PathParam|HeaderParam|QueryParam|Param)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
-
     const config: { type: AnyType, name?: string } = { type: paramType };
 
     // Detect default behavior
-    if (isContext) {
-      detectedParamType = 'ContextParam';
-      if (paramType.key !== 'managed') {
-        throw new Error(`Unexpected parameter type, should be an external type but got: ${paramType.key}`);
-      }
-    } else {
-      // If not contextual
-      // If primitive
-      if (paramType.key !== 'managed' && paramType.key !== 'shape') {
-        // Get path of endpoint
-        const arg = DecoratorUtil.getPrimaryArgument(epDec.dec);
-        // If non-regex
-        if (arg && ts.isStringLiteral(arg)) {
-          const literal = LiteralUtil.toLiteral(arg);
-          if (typeof literal !== 'string') {
-            throw new Error(`Unexpected literal type: ${literal}`);
-          }
-          // If param name matches path param, default to @Path
-          detectedParamType = new RegExp(`:${name}\\b`).test(literal) ? 'PathParam' : 'QueryParam';
-        } else {
-          // Default to query for empty or regex endpoints
-          detectedParamType = 'Query';
+    // If primitive
+    if (paramType.key !== 'managed' && paramType.key !== 'shape') {
+      // Get path of endpoint
+      const arg = DecoratorUtil.getPrimaryArgument(epDec.dec);
+      // If non-regex
+      if (arg && ts.isStringLiteral(arg)) {
+        const literal = LiteralUtil.toLiteral(arg);
+        if (typeof literal !== 'string') {
+          throw new Error(`Unexpected literal type: ${literal}`);
         }
-      } else if (epDec.ident.getText() !== 'All') { // Treat all separate
-        // Treat as schema, and see if endpoint supports a body for default behavior on untyped
-        detectedParamType = epDec.targets?.includes('@travetto/web:HttpRequestBody') ? 'Body' : 'QueryParam';
-        config.name = '';
+        // If param name matches path param, default to @Path
+        detectedParamType = new RegExp(`:${name}\\b`).test(literal) ? 'PathParam' : 'QueryParam';
+      } else {
+        // Default to query for empty or regex endpoints
+        detectedParamType = 'Query';
       }
+    } else if (epDec.ident.getText() !== 'All') { // Treat all separate
+      // Treat as schema, and see if endpoint supports a body for default behavior on untyped
+      detectedParamType = epDec.targets?.includes('@travetto/web:HttpRequestBody') ? 'Body' : 'QueryParam';
+      config.name = '';
     }
 
     node = SchemaTransformUtil.computeField(state, node, config);
@@ -78,7 +64,7 @@ export class WebTransformer {
     const conf = state.extendObjectLiteral({ name, sourceText: node.name.getText() }, pDecArg);
 
     if (!pDec) { // Handle default, missing
-      modifiers.push(state.createDecorator(PARAM_DEC_IMPORT, detectedParamType ?? 'ContextParam', conf));
+      modifiers.push(state.createDecorator(PARAM_DEC_IMPORT, detectedParamType ?? 'QueryParam', conf));
     } else if (ts.isCallExpression(pDec.expression)) { // if it does exist, update
       modifiers.push(state.factory.createDecorator(
         state.factory.createCallExpression(

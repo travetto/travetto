@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Redirect } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import { Principal } from '@travetto/auth';
+import { AsyncContextField } from '@travetto/context';
 
 import { BasicAuthSymbol } from './auth.config';
 
@@ -10,6 +11,9 @@ import { BasicAuthSymbol } from './auth.config';
 @Controller('/auth')
 export class ApiController {
 
+  @AsyncContextField()
+  readonly user: Principal;
+
   @Post('/login')
   @Login(BasicAuthSymbol)
   async getAll(): Promise<Redirect> {
@@ -18,8 +22,8 @@ export class ApiController {
 
   @Get('/self')
   @Authenticated()
-  async getSelf(user: Principal): Promise<Principal> {
-    return user;
+  async getSelf(): Promise<Principal> {
+    return this.user;
   }
 
   @Get('/logout')

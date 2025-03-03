@@ -8,7 +8,7 @@ import { FileMap } from './types';
 
 type UploadConfig = Partial<Pick<WebUploadConfig, 'types' | 'maxSize' | 'cleanupFiles'>>;
 
-const UploadMapClass = toConcrete<FileMap>();
+const UploadMapContract = toConcrete<FileMap>();
 
 /**
  * Allows for supporting uploads
@@ -29,11 +29,11 @@ export function Upload(
   return (inst: ClassInstance, prop: string, idx: number): void => {
     const field = SchemaRegistry.getMethodSchema(inst.constructor, prop)[idx];
 
-    if (!(field.type === Blob || field.type === File || field.type === UploadMapClass)) {
-      throw new AppError(`Cannot use upload decorator with ${field.type.name}, but only an ${Blob.name}, ${File.name} or ${UploadMapClass.name}`);
+    if (!(field.type === Blob || field.type === File || field.type === UploadMapContract)) {
+      throw new AppError(`Cannot use upload decorator with ${field.type.name}, but only an ${Blob.name}, ${File.name} or ${UploadMapContract.name}`);
     }
 
-    const isMap = field.type === UploadMapClass;
+    const isMap = field.type === UploadMapContract;
 
     // Register field
     ControllerRegistry.registerEndpointInterceptorConfig(

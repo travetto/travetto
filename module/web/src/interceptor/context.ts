@@ -1,10 +1,9 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AsyncContext, AsyncContextValue } from '@travetto/context';
-import { HttpRequest, HttpResponse } from '@travetto/web';
+import { AsyncContext, AsyncContextValue, AsyncContextValueRegistry } from '@travetto/context';
+import { toConcrete } from '@travetto/runtime';
 
-import { FilterContext, FilterNext } from '../types';
-
+import { FilterContext, FilterNext, HttpRequest, HttpResponse } from '../types';
 import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { BodyParseInterceptor } from './body-parse';
 
@@ -26,6 +25,11 @@ export class AsyncContextInterceptor implements HttpInterceptor {
 
   @Inject()
   config: AsyncContextConfig;
+
+  postConstruct(): void {
+    AsyncContextValueRegistry.register(toConcrete<HttpResponse>(), this.#active, ctx => ctx.res);
+    AsyncContextValueRegistry.register(toConcrete<HttpRequest>(), this.#active, ctx => ctx.req);
+  }
 
   intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
     return this.context.run(() => {

@@ -1,6 +1,6 @@
-
+import { toConcrete } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
-import { AsyncContext, AsyncContextValue } from '@travetto/context';
+import { AsyncContext, AsyncContextValue, AsyncContextValueRegistry } from '@travetto/context';
 
 import { AuthToken } from './types/token';
 import { Principal } from './types/principal';
@@ -20,6 +20,11 @@ export class AuthContext {
 
   @Inject()
   context: AsyncContext;
+
+  postConstruct(): void {
+    AsyncContextValueRegistry.register(toConcrete<Principal>(), this.#principal);
+    AsyncContextValueRegistry.register(toConcrete<AuthToken>(), this.#authToken);
+  }
 
   /**
    * Get the principal, if set

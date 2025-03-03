@@ -82,7 +82,7 @@ export interface EndpointParamConfig {
   /**
    * Location of the parameter
    */
-  location: 'path' | 'query' | 'body' | 'header' | 'context';
+  location: 'path' | 'query' | 'body' | 'header';
   /**
    * Resolves the value by executing with req/res as input
    */

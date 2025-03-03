@@ -23,4 +23,8 @@ export const text = <>
     <c.Code title='Usage of context value within a service' src='doc/usage-value.ts' />
 
   </c.Section>
+
+  {
+    // TODO: Write docs for new decorator
+  }
 </>;

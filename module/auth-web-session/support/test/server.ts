@@ -11,6 +11,7 @@ import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseWebSuite } from '@travetto/web/support/test/base';
+import { AsyncContextField } from '@travetto/context';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
@@ -42,20 +43,26 @@ class TestController {
   @Inject()
   session: SessionService;
 
+  @AsyncContextField()
+  readonly req: HttpRequest;
+
+  @AsyncContextField()
+  readonly data: SessionData;
+
   @Get('/')
-  get(data: SessionData): SessionData {
-    data.age = (data.age ?? 0) + 1;
-    return data!;
+  get(): SessionData {
+    this.data.age = (this.data.age ?? 0) + 1;
+    return this.data;
   }
 
   @Post('/complex')
-  withParam(@Body() payload: unknown, data: SessionData) {
-    data.payload = payload;
+  withParam(@Body() payload: unknown) {
+    this.data.payload = payload;
   }
 
   @Put('/body')
-  withBody(req: HttpRequest) {
-    return { body: req.body.age };
+  withBody() {
+    return { body: this.req.body.age };
   }
 }
 
