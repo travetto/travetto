@@ -26,8 +26,8 @@
   },
   "dependencies": {
     "@travetto/auth": "^6.0.0-rc.1",
-    "@travetto/auth-web": "^6.0.0-rc.3",
     "@travetto/auth-session": "^6.0.0-rc.1",
+    "@travetto/auth-web": "^6.0.0-rc.3",
     "@travetto/di": "^6.0.0-rc.1",
     "@travetto/web": "^6.0.0-rc.1"
   },

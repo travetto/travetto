@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@travetto/config": "^6.0.0-rc.1",
-    "@travetto/web": "^6.0.0-rc.1",
-    "@travetto/schema": "^6.0.0-rc.1"
+    "@travetto/schema": "^6.0.0-rc.1",
+    "@travetto/web": "^6.0.0-rc.1"
   },
   "travetto": {
     "displayName": "Web RPC Support"

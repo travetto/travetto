@@ -2,8 +2,8 @@
   "name": "@travetto-test/auth-web-session_web",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/auth-web-session": "^6.0.0-rc.3",
     "@travetto/auth-session": "^6.0.0-rc.1",
+    "@travetto/auth-web-session": "^6.0.0-rc.3",
     "@travetto/model-memory": "^6.0.0-rc.1",
     "@travetto/web-express": "^6.0.0-rc.1",
     "@travetto/web-express-lambda": "^6.0.0-rc.1",
