@@ -25,11 +25,11 @@ This module provides the high-level backdrop for managing security principals.  
 
 <h2 id="standard-types">Standard Types</h2>
 
-The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal</a>.
+The module's goal is to be as flexible as possible.  To that end, the primary contract that this module defines, is that of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Principal</a>.
 
   <figure class="code">
     <figcaption class="code">Principal
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Principal<span class="token operator">&lt;</span><span class="token constant">D</span> <span class="token operator">=</span> AnyMap<span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
@@ -64,7 +64,7 @@ The module's goal is to be as flexible as possible.  To that end, the primary co
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-As referenced above, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal</a> is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
+As referenced above, a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Principal</a> is defined as a user with respect to a security context. This can be information the application knows about the user (authorized) or what a separate service may know about a user (3rd-party authentication).
 
 <h2 id="authentication-contract">Authentication Contract</h2>
 
@@ -150,7 +150,7 @@ Overall, the structure is simple, but drives home the primary use cases of the f
   </figure>
 
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/service.ts#L13">AuthService</a> operates as the owner of the current auth state for a given "request". "Request" here implies a set of operations over a period of time, with the http request/response model being an easy point of reference.  This could also tie to a CLI operation, or any other invocation that requires some concept of authentication and authorization. <br><br>
-The service allows for storing and retrieving the active <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8">Principal</a>, and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  <a class="module-link" routerLink="/docs/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a> makes heavy use of this state for enforcing routes when authentication is required. <br><br>
+The service allows for storing and retrieving the active <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Principal</a>, and/or the actively persisted auth token.  This is extremely useful for other parts of the framework that may request authenticated information (if available).  <a class="module-link" routerLink="/docs/auth-web" title="Web authentication integration support for the Travetto framework">Web Auth</a> makes heavy use of this state for enforcing endpoints when authentication is required. <br><br>
 
 <h3 id="login">Login</h3>
 
@@ -160,11 +160,11 @@ If this process is too cumbersome or restrictive, manually authenticating and au
 
 <h2 id="authorization-context">Authorization Context</h2>
 
-When working with framework's authentication, the authenticated information is exposed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15">AuthContext</a>, object. <br><br>
+When working with framework's authentication, the authenticated information is exposed via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14">AuthContext</a>, object. <br><br>
 
   <figure class="code">
     <figcaption class="code">Auth Context Outline
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L15">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthContext</span> <span class="token punctuation">{{'{'}}</span>

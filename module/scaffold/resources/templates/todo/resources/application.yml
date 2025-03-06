@@ -1,9 +1,9 @@
-# {{#modules.rest}}
-rest:
+# {{#modules.web}}
+web:
   ssl:
     active: false
   context:
     active: true
   cors:
     active: true
-# {{/modules.rest}}
+# {{/modules.web}}

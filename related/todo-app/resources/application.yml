@@ -1,11 +1,11 @@
 api.spec:
   output: ./openapi.yml
 
-rest:
+web:
   cors: { active : true }
   ssl: { active: true }
 
-rest.client:
+web.client:
   providers:
     - type: fetch-node
       output: related/todo-app/api-client

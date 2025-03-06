@@ -2,7 +2,6 @@ import { AnyMap } from '@travetto/runtime';
 
 /**
  * A user principal, including permissions and details
- * @augments `@travetto/rest:ContextParam`
  * @concrete
  */
 export interface Principal<D = AnyMap> {

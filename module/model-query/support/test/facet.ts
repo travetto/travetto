@@ -1,8 +1,9 @@
 import assert from 'node:assert';
 
 import { ModelCrudSupport } from '@travetto/model';
-import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { Suite, Test } from '@travetto/test';
+
+import { BaseModelSuite } from '@travetto/model/support/test/base';
 
 import { Person } from './model';
 import { ModelQueryFacetSupport } from '../../src/types/facet';

@@ -4,7 +4,7 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
+import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/web';
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 
@@ -270,7 +270,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Process endpoint parameter
    */
-  #processEndpointParam(ep: EndpointConfig, param: ParamConfig, field: FieldConfig): (
+  #processEndpointParam(ep: EndpointConfig, param: EndpointParamConfig, field: FieldConfig): (
     { requestBody: RequestBodyObject } |
     { parameters: ParameterObject[] } |
     undefined
@@ -283,7 +283,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         };
       } else if (complex && (param.location === 'query' || param.location === 'header')) {
         return { parameters: this.#schemaToDotParams(param.location, field, param.prefix ? `${param.prefix}.` : '') };
-      } else if (param.location !== 'context') {
+      } else {
         const epParam: ParameterObject = {
           in: param.location,
           name: param.name || param.location,
@@ -292,8 +292,6 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
           schema: field.array ? { type: 'array', items: this.#getType(field) } : this.#getType(field)
         };
         return { parameters: [epParam] };
-      } else if (field.specifiers?.includes('file')) {
-        return { requestBody: this.#buildUploadBody() };
       }
     }
   }
@@ -302,7 +300,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Process controller endpoint
    */
   onEndpointEnd(ep: EndpointConfig, ctrl: ControllerConfig): void {
-    if (this.#config.skipRoutes) {
+    if (this.#config.skipEndpoints) {
       return;
     }
 
@@ -349,7 +347,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   }
 
   onControllerEnd(controller: ControllerConfig): void {
-    if (this.#config.skipRoutes) {
+    if (this.#config.skipEndpoints) {
       return;
     }
     this.#tags.push({

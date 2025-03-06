@@ -11,7 +11,7 @@ The following tutorial wil walk you through setting up a [Travetto](https://trav
    1. [Establishing The Model](#establishing-the-model)
    1. [Building the Service Layer](#building-the-service-layer)
    1. [Writing Unit tests](#writing-unit-tests)
-   1. [Adding Rest Routes](#adding-rest-routes)
+   1. [Adding Web Endpoints](#adding-web-endpoints)
    1. [Running the App](#running-the-app)
 
 ## Prerequisites
@@ -31,7 +31,7 @@ $ cd todo-project
 $ git init .
 
 $ npm init -f
-$ npm i @travetto/{log,rest-express,model-mongo,cli}
+$ npm i @travetto/{log,web-express,model-mongo,cli}
 $ npm i -D @travetto/{eslint,compiler,test}
 
 $ npx trv lint:register
@@ -203,14 +203,14 @@ export class TodoTest {
 }
 ```
 
-## Adding Rest Routes
-Now we establish the routes, providing an interface to the service layer.
+## Adding Web Endpoints
+Now we establish the endpoints, providing an interface to the service layer.
 
-Finally, we establish the controller at `src/route.ts`
+Finally, we establish the controller at `src/web.ts`
 
 **Code: Controller contents**
 ```typescript
-import { Controller, Get, Post, Put, Delete } from '@travetto/rest';
+import { Controller, Get, Post, Put, Delete } from '@travetto/web';
 import { Inject } from '@travetto/di';
 
 import { TodoService } from './service';
@@ -298,7 +298,7 @@ First we must start the application:
 
 **Terminal: Start the Application**
 ```bash
-npx trv run:rest
+npx trv run:web
 ```
 
 **Terminal: Application Startup**
@@ -348,21 +348,27 @@ npx trv run:rest
       { priority: 999, source: 'memory://override' }
     ],
     active: {
+      AcceptsConfig: { types: {} },
       ApiHostConfig: { openapi: '3.0.0' },
       ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
       ApiSpecConfig: {
         output: './openapi.yml',
         persist: false,
-        skipRoutes: false,
+        skipEndpoints: false,
         exposeAllSchemas: false
       },
+      AsyncContextConfig: {},
       AuthConfig: { maxAge: '1h', rollingRenew: true },
+      BodyParseConfig: { limit: '1mb', parsingTypes: {} },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       ConsoleLogAppenderConfig: { logToLevel: true },
+      CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      CorsConfig: {},
       FileLogAppenderConfig: {
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
+      GetCacheConfig: {},
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,
@@ -388,19 +394,16 @@ npx trv run:rest
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
       },
-      RestAcceptsConfig: { types: {} },
-      RestAsyncContextConfig: {},
-      RestAuthConfig: {
+      WebAuthConfig: {
         mode: 'cookie',
         header: 'Authorization',
         cookie: 'trv_auth',
         headerPrefix: 'Token'
       },
-      RestAuthLoginConfig: {},
-      RestAuthLogoutConfig: {},
-      RestAuthVerifyConfig: { permissions: {} },
-      RestBodyParseConfig: { limit: '1mb', parsingTypes: {} },
-      RestConfig: {
+      WebAuthLoginConfig: {},
+      WebAuthLogoutConfig: {},
+      WebAuthVerifyConfig: { permissions: {} },
+      WebConfig: {
         serve: true,
         port: 12555,
         trustProxy: false,
@@ -410,17 +413,14 @@ npx trv run:rest
         defaultMessage: true,
         ssl: { active: false }
       },
-      RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-      RestCorsConfig: {},
-      RestGetCacheConfig: {},
-      RestLogRoutesConfig: {},
-      RestRpcConfig: { clients: {} },
-      RestSessionConfig: {},
-      RestSslConfig: { active: false }
+      WebLogConfig: {},
+      WebRpcConfig: { clients: {} },
+      WebSessionConfig: {},
+      WebSslConfig: { active: false }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:190] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web:src/application/app.ts:195] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

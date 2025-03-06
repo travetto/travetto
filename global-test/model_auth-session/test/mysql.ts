@@ -1,13 +1,13 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server';
 import { SessionModelSymbol } from '@travetto/auth-session';
 import { AsyncContext } from '@travetto/context';
-import { ModelSuite } from '@travetto/model/support/test/suite';
 import { ModelExpirySupport } from '@travetto/model';
 import { SQLModelConfig, SQLModelService, SQLDialect } from '@travetto/model-sql';
-
 import { MySQLDialect } from '@travetto/model-mysql';
+
+import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server';
+import { ModelSuite } from '@travetto/model/support/test/suite';
 
 class Config {
   @InjectableFactory({ primary: true })

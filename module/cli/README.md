@@ -43,14 +43,13 @@ Commands:
   repo:publish      Publish all pending modules
   repo:version      Version all changed dependencies
   repo:version-sync Enforces all packages to write out their versions and dependencies
-  rest:client       Run client rest operation
-  rest:rpc          Run client rest operation
   run:double        Doubles a number
-  run:rest          Run a rest server as an application
+  run:web           Run a web server as an application
   scaffold          Command to run scaffolding
   service           Allows for running services
   test              Launch test framework and execute tests
   test:watch        Invoke the test watcher
+  web:rpc           Run client web operation
 ```
 
 This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 
@@ -389,7 +388,7 @@ npx trv call:db --host localhost --port 3306 --username app --password <custom>
 ```
 
 ## VSCode Integration
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") does expose a cli target `run:rest` that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator.  This means the target will be visible within the editor tooling.
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") does expose a cli target `run:web` that will show up, to help run/debug a web application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) decorator.  This means the target will be visible within the editor tooling.
 
 **Code: Simple Run Target**
 ```typescript
@@ -457,7 +456,7 @@ export interface CliCommandShape<T extends unknown[] = unknown[]> {
 ```
 
 ### Dependency Injection
-If the goal is to run a more complex application, which may include depending on [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), we can take a look at [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.")'s target:
+If the goal is to run a more complex application, which may include depending on [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), we can take a look at [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.")'s target:
 
 **Code: Simple Run Target**
 ```typescript
@@ -465,14 +464,14 @@ import { Runtime } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 
-import { RestServerHandle } from '../src/types';
-import { RestNetUtil } from '../src/util/net';
+import { WebServerHandle } from '../src/types';
+import { NetUtil } from '../src/util/net';
 
 /**
- * Run a rest server as an application
+ * Run a web server as an application
  */
 @CliCommand({ runTarget: true, with: { debugIpc: true, canRestart: true, module: true, env: true } })
-export class RunRestCommand implements CliCommandShape {
+export class RunWebCommand implements CliCommandShape {
 
   /** Port to run on */
   port?: number;
@@ -482,18 +481,18 @@ export class RunRestCommand implements CliCommandShape {
 
   preMain(): void {
     if (this.port) {
-      process.env.REST_PORT = `${this.port}`;
+      process.env.WEB_PORT = `${this.port}`;
     }
   }
 
-  async main(): Promise<RestServerHandle | void> {
-    const { RestApplication } = await import('../src/application/rest');
+  async main(): Promise<WebServerHandle | void> {
+    const { WebApplication } = await import('../src/application/app');
     try {
-      return await DependencyRegistry.runInstance(RestApplication);
+      return await DependencyRegistry.runInstance(WebApplication);
     } catch (err) {
-      if (RestNetUtil.isInuseError(err) && !Runtime.production && this.killConflict) {
-        await RestNetUtil.freePort(err.port);
-        return await DependencyRegistry.runInstance(RestApplication);
+      if (NetUtil.isInuseError(err) && !Runtime.production && this.killConflict) {
+        await NetUtil.freePort(err.port);
+        return await DependencyRegistry.runInstance(WebApplication);
       }
       throw err;
     }

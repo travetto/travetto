@@ -3,7 +3,6 @@ import { type Pool, type PoolClient, default as pg } from 'pg';
 import { castTo, ShutdownManager } from '@travetto/runtime';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
-
 import { SQLModelConfig, Connection } from '@travetto/model-sql';
 
 /**

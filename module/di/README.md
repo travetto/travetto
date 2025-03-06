@@ -125,7 +125,7 @@ class RuntimeService {
 
 In this example, the enabled flag is specified in relationship to the deployment environment.  When coupled with optional properties, and optional chaining, allows for seamless inclusion of optional dependencies at runtime.
 
-**Note**: Other modules are able to provide aliases to [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29) that also provide additional functionality.  For example, the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") module @Config or the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module @Controller decorator registers the associated class as an injectable element.
+**Note**: Other modules are able to provide aliases to [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29) that also provide additional functionality.  For example, the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") module @Config or the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module @Controller decorator registers the associated class as an injectable element.
 
 ## Injection
 Once all of your necessary dependencies are defined, now is the time to provide those [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L29) instances to your code.  There are three primary methods for injection: 

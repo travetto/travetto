@@ -48,7 +48,7 @@ class LoggerTest {
     (await DependencyRegistry.getInstance(CustomLogger)).reset();
   }
 
-  restConsole(): void {
+  resetConsole(): void {
     ConsoleManager.set(this.mgr);
   }
 
@@ -59,7 +59,7 @@ class LoggerTest {
 
     console.log('Hello', { args: [1, 2, 3] });
 
-    this.restConsole();
+    this.resetConsole();
 
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
@@ -81,7 +81,7 @@ class LoggerTest {
 
     ConsoleManager.set(svc);
     console.log('Hello', { otherSecret: true });
-    this.restConsole();
+    this.resetConsole();
 
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
@@ -97,7 +97,7 @@ class LoggerTest {
 
     ConsoleManager.set(svc);
     console.log('Hello', { secret: true });
-    this.restConsole();
+    this.resetConsole();
 
     const logger = await DependencyRegistry.getInstance(CustomLogger);
     assert(logger.values.length === 1);
@@ -115,7 +115,7 @@ class LoggerTest {
     console.log('Hello', 'Roger', { secret: true });
     console.error(svc);
     console.error(logger);
-    this.restConsole();
+    this.resetConsole();
 
     assert(logger.values.length === 3);
     assert(logger.values[0].message === 'Hello');

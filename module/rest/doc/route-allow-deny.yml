@@ -1,5 +1,0 @@
-rest:
-  cors:
-    paths: 
-      - '!/public/user'
-      - '/public/*'      

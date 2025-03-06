@@ -35,7 +35,7 @@
         "**/@travetto/log/src/common.js",
         "**/@travetto/log/src/appender/console.js",
         "**/@travetto/context/src/service.js",
-        "**/@travetto/rest/src/util/route.js",
+        "**/@travetto/web/src/util/route.js",
         "**/tslib/**"
       ],
       "type": "node"
@@ -43,7 +43,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Todo Rest",
+      "name": "Launch Todo Web",
       "skipFiles": [
         "<node_internals>/**"
       ],
@@ -53,13 +53,13 @@
         "${workspaceFolder}/.trv/output/**/*.js"
       ],
       "env": {
-        "REST_PORT": "4000",
+        "WEB_PORT": "4000",
         "TRV_MODULE": "@travetto/todo-app",
         "TRV_DYNAMIC": "1"
       },
       "cwd": "${workspaceFolder}/related/todo-app",
       "args": [
-        "run:rest"
+        "run:web"
       ]
     },
     {

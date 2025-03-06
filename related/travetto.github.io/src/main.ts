@@ -1,9 +1,10 @@
 import { importProvidersFrom } from '@angular/core';
+import { withInMemoryScrolling, provideRouter, Routes } from '@angular/router';
+import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
+
 import { AppComponent } from './app/app.component';
 import { BlogComponent } from './app/blog/blog.component';
 import { LandingComponent } from './app/landing/landing.component';
-import { withInMemoryScrolling, provideRouter, Routes } from '@angular/router';
-import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { DocumentationComponent } from './app/documentation/documentation.component';
 
 const routes: Routes = [

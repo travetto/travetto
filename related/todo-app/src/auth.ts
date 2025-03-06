@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Redirect } from '@travetto/rest';
-import { Login, Authenticated, Logout } from '@travetto/auth-rest';
+import { Controller, Get, Post, Redirect, ContextParam } from '@travetto/web';
+import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import { Principal } from '@travetto/auth';
 
 import { BasicAuthSymbol, User } from './auth.config';
@@ -10,6 +10,9 @@ import { BasicAuthSymbol, User } from './auth.config';
 @Controller('/auth')
 export class AuthController {
 
+  @ContextParam()
+  user: Principal;
+
   @Post('/login')
   @Login(BasicAuthSymbol)
   async login(user: User): Promise<Redirect> {
@@ -18,8 +21,8 @@ export class AuthController {
 
   @Get('/self')
   @Authenticated()
-  async getSelf(user: Principal): Promise<Principal> {
-    return user;
+  async getSelf(): Promise<Principal> {
+    return this.user;
   }
 
   @Get('/logout')

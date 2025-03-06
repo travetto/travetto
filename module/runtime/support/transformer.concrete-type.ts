@@ -73,15 +73,12 @@ export class ConcreteTransformer {
       const type = state.resolveType(node.expression);
       if ('importName' in type && type.importName === SRC) {
         const [target] = node.typeArguments;
-        const og = state.resolveType(target);
-        if (og.key === 'managed') {
-          return state.factory.updateCallExpression(
-            node,
-            node.expression,
-            node.typeArguments,
-            [state.getOrImport(og)]
-          );
-        }
+        return state.factory.updateCallExpression(
+          node,
+          node.expression,
+          node.typeArguments,
+          [state.getConcreteType(target)]
+        );
       }
     }
 

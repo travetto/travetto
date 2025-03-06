@@ -13,9 +13,9 @@ npm install @travetto/openapi
 yarn add @travetto/openapi
 ```
 
-In the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap. 
+In the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap. 
 
-The module is provides an [OpenAPI](https://github.com/OAI/OpenAPI-Specification) v3.x representation of the API metadata provided via the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") and [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") modules.
+The module is provides an [OpenAPI](https://github.com/OAI/OpenAPI-Specification) v3.x representation of the API metadata provided via the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") and [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") modules.
 
 ## Configuration
 By installing the dependency, the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) endpoint is automatically generated and exposed at the root of the application as `/openapi.yml` or `/openapi.json` (by default). 
@@ -58,7 +58,7 @@ export class ApiInfoConfig {
 }
 
 /**
- * The API host, infers from rest host configuration
+ * The API host, infers from web host configuration
  */
 @Config('api.host')
 export class ApiHostConfig {
@@ -86,9 +86,9 @@ export class ApiSpecConfig {
    */
   persist?: boolean;
   /**
-   * Skip emitting all routes
+   * Skip emitting all endpoints
    */
-  skipRoutes: boolean = false;
+  skipEndpoints: boolean = false;
   /**
    * Expose all schemas, even if not referenced
    */
@@ -128,9 +128,9 @@ Options:
   -h, --help             display help for command
 ```
 
-The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
+The command will run your application, in non-server mode, to collect all the endpoints and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
 
-**Note**: The module supports generating the OpenAPI spec in real-time while listening for changes to routes and models.
+**Note**: The module supports generating the OpenAPI spec in real-time while listening for changes to endpoints and models.
 
 ## CLI - openapi:client
 The module provides a command for the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") to allow client generation from the API structure.
