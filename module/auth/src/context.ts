@@ -1,4 +1,4 @@
-import { Inject, Injectable, InjectableFactory } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 import { AsyncContext, AsyncContextValue } from '@travetto/context';
 
 import { AuthToken } from './types/token';
