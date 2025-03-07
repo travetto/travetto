@@ -5,10 +5,13 @@ import compression from 'compression';
 import { Inject, Injectable } from '@travetto/di';
 import {
   WebSymbols, HttpInterceptor, WebConfig, EndpointUtil, WebServer,
-  LoggingInterceptor, NetUtil, WebServerHandle, EndpointConfig
+  LoggingInterceptor, WebServerHandle, EndpointConfig
 } from '@travetto/web';
+import { castTo, Util } from '@travetto/runtime';
 
 import { ExpressWebServerUtil } from './util';
+
+type Keyed = { key?: string | symbol };
 
 /**
  * An express http server
@@ -27,7 +30,6 @@ export class ExpressWebServer implements WebServer<express.Application> {
 
   async init(): Promise<express.Application> {
     const app = express();
-    app.set('query parser', 'simple');
     app.disable('x-powered-by');
     app.use(compression());
 
@@ -42,22 +44,19 @@ export class ExpressWebServer implements WebServer<express.Application> {
 
   async unregisterEndpoints(key: string | symbol): Promise<void> {
     const layers = this.raw.router.stack;
-    const pos = layers.findIndex(x => 'key' in x.handle && x.handle.key === key);
+    const pos = layers.findIndex(x => castTo<Keyed>(x.handle).key === key);
     if (pos >= 0) {
       layers.splice(pos, 1);
     }
   }
 
   async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors: HttpInterceptor[]): Promise<void> {
-    const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
+    const router: express.Router & Keyed = express.Router({ mergeParams: true });
 
     for (const endpoint of endpoints) {
       const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[endpoint.method](endpointPath, async (req: express.Request, res: express.Response) => {
-        await endpoint.handlerFinalized!(
-          req[WebSymbols.TravettoEntity] ??= ExpressWebServerUtil.getRequest(req),
-          res[WebSymbols.TravettoEntity] ??= ExpressWebServerUtil.getResponse(res)
-        );
+      router[endpoint.method](endpointPath, async (req, res) => {
+        await endpoint.handlerFinalized!(...ExpressWebServerUtil.convert(req, res));
       });
     }
 
@@ -81,11 +80,8 @@ export class ExpressWebServer implements WebServer<express.Application> {
         }
       );
 
-      router.options('*all', (req: express.Request, res: express.Response) => {
-        optionHandler(
-          req[WebSymbols.TravettoEntity] ??= ExpressWebServerUtil.getRequest(req),
-          res[WebSymbols.TravettoEntity] ??= ExpressWebServerUtil.getResponse(res)
-        );
+      router.options('*all', (req, res) => {
+        optionHandler(...ExpressWebServerUtil.convert(req, res));
       });
     }
 
@@ -96,10 +92,12 @@ export class ExpressWebServer implements WebServer<express.Application> {
   async listen(): Promise<WebServerHandle> {
     let raw: express.Application | https.Server = this.raw;
     if (this.config.ssl?.active) {
-      const keys = await this.config.ssl?.getKeys();
-      raw = https.createServer(keys!, this.raw);
+      raw = https.createServer((await this.config.ssl?.getKeys())!, this.raw);
     }
     this.listening = true;
-    return await NetUtil.listen(raw, this.config.port, this.config.bindAddress);
+
+    const { reject, resolve, promise } = Util.resolvablePromise<WebServerHandle>();
+    const handle = raw.listen(this.config.port, this.config.hostname, err => err ? reject(err) : resolve(handle));
+    return promise;
   }
 }

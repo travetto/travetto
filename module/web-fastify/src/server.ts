@@ -2,14 +2,10 @@ import https from 'node:https';
 import compress from '@fastify/compress';
 import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 
-import { WebConfig, WebServer, WebServerHandle, WebSymbols, EndpointConfig } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
 import { Inject, Injectable } from '@travetto/di';
 
 import { FastifyWebServerUtil } from './util';
-
-function isHttps(ssl: boolean | undefined, cfg: https.ServerOptions): cfg is FastifyHttpsOptions<https.Server> {
-  return !!ssl;
-}
 
 /**
  * Fastify-based web server
@@ -28,18 +24,19 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
    * Build the fastify server
    */
   async init(): Promise<FastifyInstance> {
-    const fastConf: https.ServerOptions = {};
-    if (isHttps(this.config.ssl?.active, fastConf)) {
+    const fastConf: Partial<FastifyHttpsOptions<https.Server>> = {};
+
+    if (this.config.ssl?.active) {
       fastConf.https = (await this.config.ssl?.getKeys())!;
     }
     if (this.config.trustProxy) {
-      Object.assign(fastConf, { trustProxy: true });
+      fastConf.trustProxy = true;
     }
 
     const app = fastify(fastConf);
     app.register(compress);
     app.removeAllContentTypeParsers();
-    app.addContentTypeParser(/^.*/, (req, body, done) => done(null, body));
+    app.addContentTypeParser(/^.*/, (_, body, done) => done(null, body));
 
     this.raw = app;
     return this.raw;
@@ -60,10 +57,7 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
       }
       sub = sub.replace(/\/{1,3}/g, '/').replace(/\/{1,3}$/, '');
       this.raw[endpoint.method](sub, async (req, reply) => {
-        await endpoint.handlerFinalized!(
-          req[WebSymbols.TravettoEntity] ??= FastifyWebServerUtil.getRequest(req),
-          reply[WebSymbols.TravettoEntity] ??= FastifyWebServerUtil.getResponse(reply)
-        );
+        await endpoint.handlerFinalized!(...FastifyWebServerUtil.convert(req, reply));
       });
     }
   }

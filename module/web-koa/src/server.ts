@@ -4,9 +4,12 @@ import kCompress from 'koa-compress';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { WebConfig, WebServer, CookieConfig, NetUtil, WebServerHandle, WebSymbols, EndpointConfig } from '@travetto/web';
+import { WebConfig, WebServer, CookieConfig, WebServerHandle, EndpointConfig } from '@travetto/web';
+import { castTo, Util } from '@travetto/runtime';
 
 import { KoaWebServerUtil } from './util';
+
+type Keyed = { key?: string | symbol };
 
 /**
  * Koa-based Web server
@@ -44,10 +47,7 @@ export class KoaWebServer implements WebServer<koa> {
 
   async unregisterEndpoints(key: string | symbol): Promise<void> {
     // Delete previous
-    const pos = this.raw.middleware.findIndex(x => {
-      const _x: (typeof x) & { key?: string } = x;
-      return _x.key === key;
-    });
+    const pos = this.raw.middleware.findIndex(x => castTo<Keyed>(x).key === key);
     if (pos >= 0) {
       this.raw.middleware.splice(pos, 1);
     }
@@ -59,28 +59,26 @@ export class KoaWebServer implements WebServer<koa> {
     // Register all endpoints to extract the proper request/response for the framework
     for (const endpoint of endpoints) {
       const finalPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[endpoint.method](finalPath, async (ctx) => {
-        const [req, res] = ctx[WebSymbols.TravettoEntity] ??= [
-          KoaWebServerUtil.getRequest(ctx),
-          KoaWebServerUtil.getResponse(ctx)
-        ];
-        return await endpoint.handlerFinalized!(req, res);
-      });
+      router[endpoint.method](finalPath, ctx => endpoint.handlerFinalized!(...KoaWebServerUtil.convert(ctx)));
     }
 
     // Register endpoints
-    const middleware: ReturnType<kRouter<unknown, koa.Context>['routes']> & { key?: symbol | string } = router.routes();
-    middleware.key = key;
+    const middleware = router.routes();
+    castTo<Keyed>(middleware).key = key;
     this.raw.use(middleware);
   }
 
   async listen(): Promise<WebServerHandle> {
     let raw: https.Server | koa = this.raw;
     if (this.config.ssl?.active) {
-      raw = https
-        .createServer((await this.config.ssl?.getKeys())!, this.raw.callback());
+      raw = https.createServer((await this.config.ssl?.getKeys())!, this.raw.callback());
     }
     this.listening = true;
-    return await NetUtil.listen(raw, this.config.port, this.config.bindAddress!);
+
+    const { reject, resolve, promise } = Util.resolvablePromise<WebServerHandle>();
+    const handle = raw.listen(this.config.port, this.config.bindAddress)
+      .on('error', reject)
+      .on('listening', () => resolve(handle));
+    return promise;
   }
 }

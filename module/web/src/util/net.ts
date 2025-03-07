@@ -3,35 +3,12 @@ import { spawn } from 'node:child_process';
 
 import { ExecUtil } from '@travetto/runtime';
 
-import { WebServerHandle } from '../types';
-
-type Server = { listen(port: number, hostname?: string): Listener };
-type Listener = {
-  on(type: 'error' | 'listening', cb: Function): Listener;
-  off(type: 'error' | 'listening', cb: Function): Listener;
-} & WebServerHandle;
-
 /** Net utilities */
 export class NetUtil {
 
   /** Is an error an address in use error */
   static isInuseError(err: unknown): err is Error & { port: number } {
     return !!err && err instanceof Error && err.message.includes('EADDRINUSE');
-  }
-  /**
-   * Listen for an http server to startup
-   */
-  static listen(server: Server, port: number, hostname?: string): Promise<WebServerHandle> {
-    return new Promise<WebServerHandle>((resolve, reject) => {
-      try {
-        const handle = server.listen(port, hostname);
-        handle
-          .on('error', reject)
-          .on('listening', () => { resolve(handle); handle.off('error', reject); });
-      } catch (err) {
-        reject(err);
-      }
-    });
   }
 
   /** Free port if in use */

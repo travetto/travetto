@@ -40,7 +40,7 @@ export interface HttpRequest<T = unknown> {
   /**
    * The original request of the underlying framework
    */
-  [WebSymbols.ProviderEntity]?: T;
+  [WebSymbols.ProviderEntity]: T;
   /**
    * The raw http Incoming Message object
    */
@@ -53,6 +53,10 @@ export interface HttpRequest<T = unknown> {
    * Expanded representation of query
    */
   [WebSymbols.QueryExpanded]: Record<string, unknown>;
+  /**
+   * Expanded representation of query
+   */
+  [WebSymbols.ParsedType]?: HttpContentType;
   /**
    * The http method
    */

@@ -7,6 +7,18 @@ import { castTo } from '@travetto/runtime';
  * Provide a mapping between fastify request/response and the framework analogs
  */
 export class FastifyWebServerUtil {
+
+  /**
+   * Convert request, response object from provider to framework
+   */
+  static convert(req: FastifyRequest, res: FastifyReply): [HttpRequest, HttpResponse] {
+    const fullReq: typeof req & { [WebSymbols.TravettoEntity]?: HttpRequest } = req;
+    const fullRes: typeof res & { [WebSymbols.TravettoEntity]?: HttpResponse } = res;
+    const finalReq = fullReq[WebSymbols.TravettoEntity] ??= this.getRequest(req);
+    const finalRes = fullRes[WebSymbols.TravettoEntity] ??= this.getResponse(res);
+    return [finalReq, finalRes];
+  }
+
   /**
    * Build a Travetto HttpRequest from a Fastify Request
    */

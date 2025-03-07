@@ -3,6 +3,7 @@ import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, HttpInte
 
 import { WebUploadConfig } from './config';
 import { WebUploadUtil } from './util';
+import { FileMap, WebUploadSymbol } from './types';
 
 @Injectable()
 export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
@@ -36,16 +37,18 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
   }
 
   async intercept({ req, config }: FilterContext<WebUploadConfig>, next: FilterNext): Promise<FilterReturn> {
-    try {
-      req.uploads = {};
+    const uploads: FileMap = {};
 
+    try {
       for await (const item of WebUploadUtil.getUploads(req, config)) {
-        req.uploads[item.field] = await WebUploadUtil.toFile(item, config.uploads?.[item.field] ?? config);
+        uploads[item.field] = await WebUploadUtil.toFile(item, config.uploads?.[item.field] ?? config);
       }
+
+      req[WebUploadSymbol] = uploads;
 
       return await next();
     } finally {
-      for (const [field, item] of Object.entries(req.uploads)) {
+      for (const [field, item] of Object.entries(uploads)) {
         await WebUploadUtil.finishUpload(item, config.uploads?.[field] ?? config);
       }
     }

@@ -10,6 +10,14 @@ import { castTo } from '@travetto/runtime';
  */
 export class KoaWebServerUtil {
   /**
+   * Convert context object from provider to framework
+   */
+  static convert(ctx: koa.Context): [HttpRequest, HttpResponse] {
+    const fullCtx: typeof ctx & { [WebSymbols.TravettoEntity]?: [HttpRequest, HttpResponse] } = ctx;
+    return fullCtx[WebSymbols.TravettoEntity] ??= [this.getRequest(ctx), this.getResponse(ctx)];
+  }
+
+  /**
    * Build a Travetto HttpRequest from a koa context
    */
   static getRequest(ctx: koa.Context): HttpRequest {

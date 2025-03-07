@@ -4,11 +4,11 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { WebUploadInterceptor } from './interceptor';
 import { WebUploadConfig } from './config';
-import { FileMap } from './types';
+import { FileMap, WebUploadSymbol } from './types';
 
 type UploadConfig = Partial<Pick<WebUploadConfig, 'types' | 'maxSize' | 'cleanupFiles'>>;
 
-const UploadMapContract = toConcrete<FileMap>();
+const FileMapContract = toConcrete<FileMap>();
 
 /**
  * Allows for supporting uploads
@@ -29,11 +29,11 @@ export function Upload(
   return (inst: ClassInstance, prop: string, idx: number): void => {
     const field = SchemaRegistry.getMethodSchema(inst.constructor, prop)[idx];
 
-    if (!(field.type === Blob || field.type === File || field.type === UploadMapContract)) {
-      throw new AppError(`Cannot use upload decorator with ${field.type.name}, but only an ${Blob.name}, ${File.name} or ${UploadMapContract.name}`);
+    if (!(field.type === Blob || field.type === File || field.type === FileMapContract)) {
+      throw new AppError(`Cannot use upload decorator with ${field.type.name}, but only an ${Blob.name}, ${File.name} or ${FileMapContract.name}`);
     }
 
-    const isMap = field.type === UploadMapContract;
+    const isMap = field.type === FileMapContract;
 
     // Register field
     ControllerRegistry.registerEndpointInterceptorConfig(
@@ -52,6 +52,12 @@ export function Upload(
       }
     );
 
-    return Param('body', { ...finalConf, extract: (c, r) => isMap ? r?.uploads : r?.uploads[c.name!] })(inst, prop, idx);
+    return Param('body', {
+      ...finalConf,
+      extract: (c, r) => {
+        const map = r[WebUploadSymbol];
+        return isMap ? map : map[c.name!];
+      }
+    })(inst, prop, idx);
   };
 }

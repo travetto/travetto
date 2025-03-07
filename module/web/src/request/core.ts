@@ -28,11 +28,6 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   }
 
   /**
-   * Content type parsed
-   */
-  [WebSymbols.ParsedType]?: HttpContentType;
-
-  /**
    * Get the inbound request header as a string
    * @param key The header to get
    */
@@ -67,17 +62,15 @@ export class HttpRequestCore implements Partial<HttpRequest> {
    * Get the fully parsed content type
    */
   getContentType(this: HttpRequest): HttpContentType | undefined {
-    const self: HttpRequest & Partial<HttpRequestCore> = castTo(this);
-    return self[WebSymbols.ParsedType] ??= MimeUtil.parse(this.headerFirst('content-type'));
+    return this[WebSymbols.ParsedType] ??= MimeUtil.parse(this.headerFirst('content-type'));
   }
 
   /**
    * Attempt to read the remote IP address of the connection
    */
   getIp(this: HttpRequest): string | undefined {
-    const self: HttpRequest & Partial<HttpRequestCore> = castTo(this);
-    const raw = self[WebSymbols.NodeEntity];
-    return self.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
+    const raw = this[WebSymbols.NodeEntity];
+    return this.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
   }
 
   /**
@@ -107,7 +100,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
    * Get the expanded query object
    */
   getExpandedQuery(this: HttpRequest): Record<string, unknown> {
-    return (this[WebSymbols.QueryExpanded] ??= BindUtil.expandPaths(this.query));
+    return this[WebSymbols.QueryExpanded] ??= BindUtil.expandPaths(this.query);
   }
 
   /**

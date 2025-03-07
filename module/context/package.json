@@ -5,7 +5,7 @@
   "keywords": [
     "async-hooks",
     "decorators",
-    "continuation-local-storage",
+    "async-local-storage",
     "travetto",
     "typescript"
   ],

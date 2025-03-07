@@ -8,7 +8,7 @@ import { FilterContext, FilterNext, HttpRequest, HttpResponse } from './types';
 export class WebContext {
 
   #active = new AsyncContextValue<FilterContext>(this);
-  #byType = new Map<Class, () => unknown>();
+  #byType = new Map<string, () => unknown>();
 
   @Inject()
   context: AsyncContext;
@@ -34,11 +34,11 @@ export class WebContext {
   }
 
   registerType<T>(cls: Class<T>, provider: () => T): void {
-    this.#byType.set(cls, provider);
+    this.#byType.set(cls.Ⲑid, provider);
   }
 
   getByType<T>(cls: Class<T>): () => T {
-    const item = this.#byType.get(cls);
+    const item = this.#byType.get(cls.Ⲑid);
     if (!item) {
       throw new AppError('Unknown type for web context');
     }
