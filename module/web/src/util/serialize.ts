@@ -11,7 +11,7 @@ type ErrorResponse = Error & { category?: ErrorCategory, status?: number, status
 /**
  * Mapping from error category to standard http error codes
  */
-const categoryToCode: Record<ErrorCategory, number> = {
+const CATEGORY_STATUS: Record<ErrorCategory, number> = {
   general: 500,
   notfound: 404,
   data: 400,
@@ -141,7 +141,7 @@ export class SerializeUtil {
    * @param error
    */
   static serializeError(req: HttpRequest, res: HttpResponse, error: ErrorResponse): void {
-    const status = error.status ?? error.statusCode ?? categoryToCode[error.category!] ?? 500;
+    const status = error.status ?? error.statusCode ?? CATEGORY_STATUS[error.category!] ?? 500;
     res.status(status);
     res.statusError = error;
     return this.serializeJSON(req, res, hasToJSON(error) ? error.toJSON() : { message: error.message }, true);
@@ -173,13 +173,10 @@ export class SerializeUtil {
   static serializeStandard(req: HttpRequest, res: HttpResponse, output: unknown): void | Promise<void> {
     this.setHeaders(res, res[WebSymbols.HeadersAdded]);
     switch (typeof output) {
-      case 'undefined': return this.serializeEmpty(req, res);
       case 'string': return this.serializeText(res, output);
       case 'number':
       case 'boolean':
       case 'bigint': return this.serializePrimitive(res, output);
-      case 'function':
-      case 'object':
       default: {
         if (!output) {
           return this.serializeEmpty(req, res);
