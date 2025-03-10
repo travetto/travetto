@@ -25,42 +25,52 @@ export type HttpContentType = { type: string, subtype: string, full: string, par
 export interface RequestHeaders extends IncomingHttpHeaders { }
 
 /**
+ * Internal request information
+ */
+export interface HttpRequestInternal<T = unknown> {
+  /**
+   * The created timestamp of the request object
+   */
+  createdDate?: number;
+  /**
+   * The parsed params for the target handler
+   */
+  requestParams?: unknown[];
+  /**
+   * Additional logging context
+   */
+  requestLogging?: false | Record<string, unknown>;
+  /**
+   * The original request of the underlying framework
+   */
+  providerEntity: T;
+  /**
+   * The raw http Incoming Message object
+   */
+  nodeEntity: IncomingMessage;
+  /**
+   * Interceptor-related configs, providing request-awareness of endpoint-level configurations
+   */
+  interceptorConfigs?: Record<string, Record<string, unknown>>;
+  /**
+   * Expanded representation of query
+   */
+  queryExpanded?: Record<string, unknown>;
+  /**
+   * Expanded representation of query
+   */
+  parsedType?: HttpContentType;
+}
+
+/**
  * Travetto request
  * @concrete
  */
 export interface HttpRequest<T = unknown> {
   /**
-   * The created timestamp of the request object
+   * Internal state for the request
    */
-  [WebSymbols.CreatedDate]: number;
-  /**
-   * The parsed params for the target handler
-   */
-  [WebSymbols.RequestParams]?: unknown[];
-  /**
-   * Additional logging context
-   */
-  [WebSymbols.RequestLogging]?: false | Record<string, unknown>;
-  /**
-   * The original request of the underlying framework
-   */
-  [WebSymbols.ProviderEntity]: T;
-  /**
-   * The raw http Incoming Message object
-   */
-  [WebSymbols.NodeEntity]: IncomingMessage;
-  /**
-   * Interceptor-related configs, providing request-awareness of endpoint-level configurations
-   */
-  [WebSymbols.InterceptorConfigs]?: Record<string, Record<string, unknown>>;
-  /**
-   * Expanded representation of query
-   */
-  [WebSymbols.QueryExpanded]: Record<string, unknown>;
-  /**
-   * Expanded representation of query
-   */
-  [WebSymbols.ParsedType]?: HttpContentType;
+  [WebSymbols.Internal]: HttpRequestInternal<T>;
   /**
    * The http method
    */
@@ -159,22 +169,32 @@ export interface HttpRequest<T = unknown> {
 }
 
 /**
+ * Internal response information
+ */
+export interface HttpResponseInternal<T = unknown> {
+  /**
+   * The underlying request object
+   */
+  providerEntity?: T;
+  /**
+   * The raw http server response object
+   */
+  nodeEntity: ServerResponse;
+  /**
+   * The additional headers for this request, provided by controllers/endpoint config
+   */
+  headersAdded?: HttpHeaderMap;
+}
+
+/**
  * Travetto response
  * @concrete
  */
 export interface HttpResponse<T = unknown> {
   /**
-   * The underlying request object
+   * Internal state for the response
    */
-  [WebSymbols.ProviderEntity]?: T;
-  /**
-   * The raw http server response object
-   */
-  [WebSymbols.NodeEntity]: ServerResponse;
-  /**
-   * The additional headers for this request, provided by controllers/endpoint config
-   */
-  [WebSymbols.HeadersAdded]?: HttpHeaderMap;
+  [WebSymbols.Internal]: HttpResponseInternal<T>;
   /**
    * Outbound status code
    */

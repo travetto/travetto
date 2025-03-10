@@ -13,8 +13,8 @@ export class KoaWebServerUtil {
    * Convert context object from provider to framework
    */
   static convert(ctx: koa.Context): [HttpRequest, HttpResponse] {
-    const fullCtx: typeof ctx & { [WebSymbols.TravettoEntity]?: [HttpRequest, HttpResponse] } = ctx;
-    return fullCtx[WebSymbols.TravettoEntity] ??= [this.getRequest(ctx), this.getResponse(ctx)];
+    const fullCtx: typeof ctx & { [WebSymbols.Internal]?: [HttpRequest, HttpResponse] } = ctx;
+    return fullCtx[WebSymbols.Internal] ??= [this.getRequest(ctx), this.getResponse(ctx)];
   }
 
   /**
@@ -22,8 +22,10 @@ export class KoaWebServerUtil {
    */
   static getRequest(ctx: koa.Context): HttpRequest {
     return HttpRequestCore.create({
-      [WebSymbols.ProviderEntity]: ctx,
-      [WebSymbols.NodeEntity]: ctx.req,
+      [WebSymbols.Internal]: {
+        providerEntity: ctx,
+        nodeEntity: ctx.req,
+      },
       protocol: castTo(ctx.protocol),
       method: castTo(ctx.request.method),
       query: ctx.request.query,
@@ -41,8 +43,10 @@ export class KoaWebServerUtil {
    */
   static getResponse(ctx: koa.Context): HttpResponse {
     return HttpResponseCore.create({
-      [WebSymbols.ProviderEntity]: ctx,
-      [WebSymbols.NodeEntity]: ctx.res,
+      [WebSymbols.Internal]: {
+        providerEntity: ctx,
+        nodeEntity: ctx.res,
+      },
       get headersSent(): boolean {
         return ctx.headerSent;
       },

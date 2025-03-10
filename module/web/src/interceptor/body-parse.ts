@@ -46,7 +46,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
   async read(req: HttpRequest, limit: string | number): Promise<{ text: string, raw: Buffer }> {
     const cfg = req.getContentType();
 
-    const text = await rawBody(inflation(req[WebSymbols.NodeEntity]), {
+    const text = await rawBody(inflation(req[WebSymbols.Internal].nodeEntity), {
       limit,
       encoding: cfg?.parameters.charset ?? 'utf8'
     });
@@ -88,7 +88,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     const parserType = this.detectParserType(req, config.parsingTypes);
 
     if (!parserType) {
-      req.body = req[WebSymbols.NodeEntity];
+      req.body = req[WebSymbols.Internal].nodeEntity;
       return next();
     } else {
       let malformed: unknown;

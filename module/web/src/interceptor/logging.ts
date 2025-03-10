@@ -19,14 +19,14 @@ export class WebLogConfig extends ManagedInterceptorConfig { }
 export class LoggingInterceptor implements HttpInterceptor {
 
   static logResult(req: HttpRequest, res: HttpResponse): void {
-    const duration = Date.now() - req[WebSymbols.CreatedDate];
+    const duration = Date.now() - req[WebSymbols.Internal].createdDate!;
 
     const reqLog = {
       method: req.method,
       path: req.path,
       query: { ...req.query },
       params: req.params,
-      ...req[WebSymbols.RequestLogging] ?? {},
+      ...req[WebSymbols.Internal].requestLogging ?? {},
       statusCode: res.statusCode,
       duration,
     };
@@ -49,7 +49,7 @@ export class LoggingInterceptor implements HttpInterceptor {
     try {
       return await next();
     } finally {
-      if (req[WebSymbols.RequestLogging] !== false) {
+      if (req[WebSymbols.Internal].requestLogging !== false) {
         LoggingInterceptor.logResult(req, res);
       }
     }

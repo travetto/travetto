@@ -20,7 +20,7 @@ export class SerializeInterceptor implements HttpInterceptor {
       const output = await next();
 
       // Set implicit headers
-      res.setHeaders(SerializeUtil.convertHeaders(res[WebSymbols.HeadersAdded]) ?? {});
+      res.setHeaders(SerializeUtil.convertHeaders(res[WebSymbols.Internal].headersAdded) ?? {});
 
       if (SerializeUtil.isRenderable(output)) {
         result = await SerializeUtil.serializeRenderable(req, res, output);

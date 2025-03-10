@@ -61,12 +61,12 @@ export class WebRpcInterceptor implements HttpInterceptor<WebRpcConfig> {
       throw new AppError('Invalid parameters, must be an array');
     }
 
-    req[WebSymbols.RequestLogging] = false; // Disable logging on sub request
-    req[WebSymbols.RequestParams] = endpoint.params.map((x, i) => (x.location === 'body' && isBinary) ? WebSymbols.MissingParam : params[i]);
+    req[WebSymbols.Internal].requestLogging = false; // Disable logging on sub request
+    req[WebSymbols.Internal].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && isBinary) ? WebSymbols.MissingParam : params[i]);
     try {
       return await endpoint.handlerFinalized!(req, res);
     } finally {
-      req[WebSymbols.RequestLogging] = { controller: endpoint.class.name, endpoint: endpoint.handlerName };
+      req[WebSymbols.Internal].requestLogging = { controller: endpoint.class.name, endpoint: endpoint.handlerName };
     }
   }
 }

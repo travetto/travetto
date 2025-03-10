@@ -14,7 +14,7 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   /**
    * Add base response as support for the provided
    */
-  static create<T extends HttpResponse>(res: Partial<T> & Record<string, unknown>): T {
+  static create<T extends HttpResponse>(res: Partial<T>): T {
     Object.setPrototypeOf(res, HttpResponseCore.prototype);
     return asFull<T>(res);
   }
@@ -77,7 +77,7 @@ export class HttpResponseCore implements Partial<HttpResponse> {
    * Send a stream to the response and wait for completion
    */
   async sendStream(this: HttpResponse, data: Readable): Promise<void> {
-    await pipeline(data, this[WebSymbols.NodeEntity], { end: false });
+    await pipeline(data, this[WebSymbols.Internal].nodeEntity, { end: false });
     this.end();
   }
 }

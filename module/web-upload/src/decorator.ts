@@ -1,10 +1,10 @@
 import { AppError, toConcrete, ClassInstance } from '@travetto/runtime';
-import { ControllerRegistry, EndpointParamConfig, Param } from '@travetto/web';
+import { ControllerRegistry, EndpointParamConfig, Param, WebSymbols } from '@travetto/web';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { WebUploadInterceptor } from './interceptor';
 import { WebUploadConfig } from './config';
-import { FileMap, WebUploadSymbol } from './types';
+import { FileMap } from './types';
 
 type UploadConfig = Partial<Pick<WebUploadConfig, 'types' | 'maxSize' | 'cleanupFiles'>>;
 
@@ -55,7 +55,7 @@ export function Upload(
     return Param('body', {
       ...finalConf,
       extract: (c, r) => {
-        const map = r[WebUploadSymbol];
+        const map = r[WebSymbols.Internal].uploads!;
         return isMap ? map : map[c.name!];
       }
     })(inst, prop, idx);

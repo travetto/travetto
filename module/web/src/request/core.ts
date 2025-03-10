@@ -18,13 +18,15 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Decorate a given request, extending from the request core
    */
-  static create<T extends HttpRequest>(req: Partial<T> & Record<string, unknown> & { connection?: unknown }): T {
-    delete req.redirect;
+  static create<T extends HttpRequest>(req: Partial<T> & { connection?: unknown }): T {
+    if ('redirect' in req) {
+      delete req.redirect;
+    }
     Object.setPrototypeOf(req, HttpRequestCore.prototype);
     req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
     req.method = castTo(req.method?.toUpperCase());
     req.connection = {};
-    req[WebSymbols.CreatedDate] = Date.now();
+    req[WebSymbols.Internal]!.createdDate = Date.now();
     return asFull<T>(req);
   }
 
@@ -63,14 +65,14 @@ export class HttpRequestCore implements Partial<HttpRequest> {
    * Get the fully parsed content type
    */
   getContentType(this: HttpRequest): HttpContentType | undefined {
-    return this[WebSymbols.ParsedType] ??= MimeUtil.parse(this.headerFirst('content-type'));
+    return this[WebSymbols.Internal].parsedType ??= MimeUtil.parse(this.headerFirst('content-type'));
   }
 
   /**
    * Attempt to read the remote IP address of the connection
    */
   getIp(this: HttpRequest): string | undefined {
-    const raw = this[WebSymbols.NodeEntity];
+    const raw = this[WebSymbols.Internal].nodeEntity;
     return this.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
   }
 
@@ -101,7 +103,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
    * Get the expanded query object
    */
   getExpandedQuery(this: HttpRequest): Record<string, unknown> {
-    return this[WebSymbols.QueryExpanded] ??= BindUtil.expandPaths(this.query);
+    return this[WebSymbols.Internal].queryExpanded ??= BindUtil.expandPaths(this.query);
   }
 
   /**

@@ -62,8 +62,8 @@ export class CompressInterceptor implements HttpInterceptor {
     if (!ctx.config.disabled) {
       // Decorate response with compression support
       this.#compression(
-        castTo(ctx.req[WebSymbols.NodeEntity]),
-        castTo(ctx.res[WebSymbols.NodeEntity]),
+        castTo(ctx.req[WebSymbols.Internal].nodeEntity),
+        castTo(ctx.res[WebSymbols.Internal].nodeEntity),
         err => { err ? reject(err) : resolve(); }
       );
       await promise;
