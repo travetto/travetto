@@ -24,6 +24,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
     req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
     req.method = castTo(req.method?.toUpperCase());
     req.connection = {};
+    req[WebSymbols.CreatedDate] = Date.now();
     return asFull<T>(req);
   }
 

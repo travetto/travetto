@@ -2,6 +2,7 @@ const ProviderEntity: unique symbol = Symbol.for('@travetto/web:provider');
 const TravettoEntity: unique symbol = Symbol.for('@travetto/web:travetto');
 const NodeEntity: unique symbol = Symbol.for('@travetto/web:node');
 const RequestParams: unique symbol = Symbol.for('@travetto/web:request-params');
+const CreatedDate: unique symbol = Symbol.for('@travetto/web:created-date');
 const RequestLogging: unique symbol = Symbol.for('@travetto/web:request-logging');
 const MissingParam: unique symbol = Symbol.for('@travetto/web:request-param-missing');
 const HeadersAdded: unique symbol = Symbol.for('@travetto/web:headers');
@@ -16,6 +17,7 @@ export const WebSymbols = {
   TravettoEntity,
   NodeEntity,
   RequestParams,
+  CreatedDate,
   RequestLogging,
   MissingParam,
   HeadersAdded,

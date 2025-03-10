@@ -2,14 +2,42 @@ import compression from 'compression';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { Util } from '@travetto/runtime';
+import { castTo, Util } from '@travetto/runtime';
 
 import { FilterContext } from '../types';
 import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
+import { WebSymbols } from '../symbols';
+
+type Digit = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 @Config('web.compress')
-class CompressConfig extends ManagedInterceptorConfig { }
+class CompressConfig extends ManagedInterceptorConfig {
+  /**
+   * zlib chunk size
+   */
+  chunkSize = 2 ** 14;
+
+  /**
+   * zlib compression Level
+   */
+  level?: Digit | -1 | 0 = -1;
+
+  /**
+   * zlib memory usage
+   */
+  memLevel?: Digit = 8;
+
+  /**
+   * Limit before sending bytes
+   */
+  threshold = 2 ** 10;
+
+  /**
+   * The size of the memory window in bits for compressing
+   */
+  windowBits = 15;
+}
 
 /**
  * Enables access to contextual data when running in a web application
@@ -25,13 +53,20 @@ export class CompressInterceptor implements HttpInterceptor {
   #compression: ReturnType<typeof compression>;
 
   postConstruct(): void {
-    this.#compression = compression({});
+    this.#compression = compression(this.config);
   }
 
-  async intercept(ctx: FilterContext): Promise<void> {
+  async intercept(ctx: FilterContext<CompressConfig>): Promise<void> {
     const { promise, resolve, reject } = Util.resolvablePromise();
-    // Decorate response with compression support
-    this.#compression(ctx.req, ctx.res, (err) => { err ? reject(err) : resolve(); });
-    await promise;
+
+    if (!ctx.config.disabled) {
+      // Decorate response with compression support
+      this.#compression(
+        castTo(ctx.req[WebSymbols.NodeEntity]),
+        castTo(ctx.res[WebSymbols.NodeEntity]),
+        err => { err ? reject(err) : resolve(); }
+      );
+      await promise;
+    }
   }
 }

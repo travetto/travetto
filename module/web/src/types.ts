@@ -30,13 +30,17 @@ export interface RequestHeaders extends IncomingHttpHeaders { }
  */
 export interface HttpRequest<T = unknown> {
   /**
+   * The created timestamp of the request object
+   */
+  [WebSymbols.CreatedDate]: number;
+  /**
    * The parsed params for the target handler
    */
   [WebSymbols.RequestParams]?: unknown[];
   /**
    * Additional logging context
    */
-  [WebSymbols.RequestLogging]?: Record<string, unknown>;
+  [WebSymbols.RequestLogging]?: false | Record<string, unknown>;
   /**
    * The original request of the underlying framework
    */
@@ -204,6 +208,11 @@ export interface HttpResponse<T = unknown> {
    * @param value The header value as a single or list of values
    */
   setHeader(key: string, value: string | string[]): void;
+  /**
+   * Set a map of headers to be sent. Fails if headers have already been sent.
+   * @param map The map of header values to set
+   */
+  setHeaders(map: Record<string, string | string[]>): void;
   /**
    * Remove a header from being sent.  Fails if headers have already been set.
    * @param key The header key to remove

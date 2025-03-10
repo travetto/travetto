@@ -3,9 +3,9 @@ import { Injectable } from '@travetto/di';
 import { DataUtil } from '@travetto/schema';
 
 import { HttpInterceptor } from './types';
-
 import { FilterContext, FilterNext } from '../types';
-import { SerializeUtil } from '../util/serialize';
+import { SerializedResult, SerializeUtil } from '../util/serialize';
+import { WebSymbols } from '../symbols';
 
 /**
  * Serialization interceptor
@@ -13,11 +13,19 @@ import { SerializeUtil } from '../util/serialize';
 @Injectable()
 export class SerializeInterceptor implements HttpInterceptor {
 
-  async intercept(ctx: FilterContext, next: FilterNext): Promise<void> {
+  async intercept({ res, req }: FilterContext, next: FilterNext): Promise<void> {
+    let result: SerializedResult | undefined;
+
     try {
       const output = await next();
-      if (!ctx.res.headersSent) {
-        await SerializeUtil.serializeStandard(ctx.req, ctx.res, output);
+
+      // Set implicit headers
+      res.setHeaders(SerializeUtil.convertHeaders(res[WebSymbols.HeadersAdded]) ?? {});
+
+      if (SerializeUtil.isRenderable(output)) {
+        result = await SerializeUtil.serializeRenderable(req, res, output);
+      } else if (output !== undefined && !res.headersSent) {
+        result = SerializeUtil.serializeStandard(output);
       }
     } catch (err) {
       const resolved = err instanceof Error ? err : (
@@ -25,11 +33,36 @@ export class SerializeInterceptor implements HttpInterceptor {
           new AppError(`${err['message'] || 'Unexpected error'}`, { details: err }) :
           new AppError(`${err}`)
       );
-      if (ctx.res.headersSent) {
-        console.error('Failed to serialize, already sent partially', resolved);
+
+      console.error(resolved.message, { error: resolved });
+      result = SerializeUtil.serializeError(resolved);
+    }
+
+    if (!result) { // Nothing to do
+      return;
+    } else if (res.headersSent) { // Already sent, do nothing
+      if (Buffer.isBuffer(result)) {
+        console.error('Failed to send, already sent data', result.toString('utf8'));
       } else {
-        await SerializeUtil.serializeError(ctx.req, ctx.res, resolved);
+        console.error('Failed to send, already sent data');
       }
+      return;
+    }
+
+    res.setHeaders(result?.headers ?? {});
+
+    // Set header if not defined
+    if (result?.defaultContentType && !res.getHeader('Content-Type')) {
+      res.setHeader('Content-Type', result.defaultContentType);
+    }
+
+    if (!result.data) {
+      res.statusCode ??= ((req.method === 'POST' || req.method === 'PUT') ? 201 : 204);
+      res.send('');
+    } else if (Buffer.isBuffer(result.data) || typeof result.data === 'string') {
+      res.send(result);
+    } else {
+      await res.sendStream(result.data);
     }
   }
 }
