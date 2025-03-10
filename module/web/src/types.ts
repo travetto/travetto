@@ -229,11 +229,6 @@ export interface HttpResponse<T = unknown> {
    */
   setHeader(key: string, value: string | string[]): void;
   /**
-   * Set a map of headers to be sent. Fails if headers have already been sent.
-   * @param map The map of header values to set
-   */
-  setHeaders(map: Record<string, string | string[]>): void;
-  /**
    * Remove a header from being sent.  Fails if headers have already been set.
    * @param key The header key to remove
    */

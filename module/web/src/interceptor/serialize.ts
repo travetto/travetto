@@ -19,9 +19,6 @@ export class SerializeInterceptor implements HttpInterceptor {
     try {
       const output = await next();
 
-      // Set implicit headers
-      res.setHeaders(SerializeUtil.convertHeaders(res[WebSymbols.Internal].headersAdded) ?? {});
-
       if (SerializeUtil.isRenderable(output)) {
         result = await SerializeUtil.serializeRenderable(req, res, output);
       } else if (output !== undefined && !res.headersSent) {
@@ -49,20 +46,11 @@ export class SerializeInterceptor implements HttpInterceptor {
       return;
     }
 
-    res.setHeaders(result?.headers ?? {});
-
-    // Set header if not defined
-    if (result?.defaultContentType && !res.getHeader('Content-Type')) {
-      res.setHeader('Content-Type', result.defaultContentType);
+    // Fill status code if not defined
+    if (result && !result.data && !result.statusCode) {
+      res.statusCode = ((req.method === 'POST' || req.method === 'PUT') ? 201 : 204);
     }
 
-    if (!result.data) {
-      res.statusCode ??= ((req.method === 'POST' || req.method === 'PUT') ? 201 : 204);
-      res.send('');
-    } else if (Buffer.isBuffer(result.data) || typeof result.data === 'string') {
-      res.send(result);
-    } else {
-      await res.sendStream(result.data);
-    }
+    await SerializeUtil.sendResult(res, result);
   }
 }

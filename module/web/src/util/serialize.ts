@@ -4,6 +4,7 @@ import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/run
 
 import { Renderable } from '../response/renderable';
 import { HttpRequest, HttpResponse } from '../types';
+import { WebSymbols } from '../symbols';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -33,19 +34,6 @@ const CATEGORY_STATUS: Record<ErrorCategory, number> = {
 export class SerializeUtil {
   static isRenderable = hasFunction<Renderable>('render');
   static isStream = hasFunction<Readable>('pipe');
-
-  /**
-   * Convert headers to standard map
-   */
-  static convertHeaders(headers?: Record<string, string | (() => string)>): Record<string, string | string> | undefined {
-    if (headers) {
-      const out: Record<string, string> = {};
-      for (const [k, v] of Object.entries(headers)) {
-        out[k] = typeof v === 'string' ? v : v();
-      }
-      return out;
-    }
-  }
 
   /**
    * Standard json
@@ -189,6 +177,34 @@ export class SerializeUtil {
           return this.serializeJSON(output);
         }
       }
+    }
+  }
+
+  static setHeaders(res: HttpResponse, map?: Record<string, string | string[] | (() => string | string[])>): void {
+    if (map) {
+      for (const [key, value] of Object.entries(map)) {
+        res.setHeader(key, typeof value === 'function' ? value() : value);
+      }
+    }
+  }
+
+  static async sendResult(res: HttpResponse, result: SerializedResult): Promise<void> {
+
+    // Set implicit headers
+    this.setHeaders(res, res[WebSymbols.Internal].headersAdded);
+    this.setHeaders(res, result?.headers);
+
+    // Set header if not defined
+    if (result?.defaultContentType && !res.getHeader('Content-Type')) {
+      res.setHeader('Content-Type', result.defaultContentType);
+    }
+
+    if (!result.data) {
+      res.send('');
+    } else if (Buffer.isBuffer(result.data) || typeof result.data === 'string') {
+      res.send(result);
+    } else {
+      await res.sendStream(result.data);
     }
   }
 }

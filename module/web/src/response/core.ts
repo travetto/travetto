@@ -35,15 +35,6 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   }
 
   /**
-   * Set a amp of headers
-   */
-  setHeaders(this: HttpResponse, map: Record<string, string | string[]>): void {
-    for (const [key, value] of Object.entries(map)) {
-      this.setHeader(key, value);
-    }
-  }
-
-  /**
    * Send the request to a new location, given a path
    */
   location(this: HttpResponse, path: string): void {
