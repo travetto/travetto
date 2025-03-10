@@ -1,10 +1,10 @@
-import { Renderable } from './renderable';
+import { HttpSerializable } from './serializable';
 import { HttpResponse } from '../types';
 
 /**
  * Simple redirect response
  */
-export class Redirect implements Renderable {
+export class Redirect implements HttpSerializable {
 
   #location: string;
   #status: number;
@@ -23,7 +23,7 @@ export class Redirect implements Renderable {
    * Render the response
    * @returns {void}
    */
-  render(res: HttpResponse): void {
+  serialize(res: HttpResponse): void {
     res.redirect(this.#status, this.#location);
   }
 }

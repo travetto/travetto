@@ -17,7 +17,7 @@ export class SerializeInterceptor implements HttpInterceptor {
       const output = await next();
 
       if (output !== undefined && !res.headersSent) {
-        if (SerializeUtil.isRenderable(output)) {
+        if (SerializeUtil.isSerializable(output)) {
           result = await SerializeUtil.fromRenderable(res, output);
         } else {
           result = SerializeUtil.serialize(output);

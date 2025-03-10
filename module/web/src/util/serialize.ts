@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 import { AppError, BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 import { DataUtil } from '@travetto/schema';
 
-import { Renderable } from '../response/renderable';
+import { HttpSerializable } from '../response/serializable';
 import { HttpResponse } from '../types';
 import { WebSymbols } from '../symbols';
 
@@ -34,7 +34,7 @@ const CATEGORY_STATUS: Record<ErrorCategory, number> = {
  * Utilities for serializing output
  */
 export class SerializeUtil {
-  static isRenderable = hasFunction<Renderable>('render');
+  static isSerializable = hasFunction<HttpSerializable>('serialize');
   static isStream = hasFunction<Readable>('pipe');
 
   /**
@@ -122,15 +122,9 @@ export class SerializeUtil {
   /**
    * Serialize renderable
    */
-  static async fromRenderable(res: HttpResponse, output: Renderable): Promise<SerializedResult | undefined> {
+  static async fromRenderable(res: HttpResponse, output: HttpSerializable): Promise<SerializedResult | undefined> {
     this.setHeaders(res, res[WebSymbols.Internal].headersAdded);
-    this.setHeaders(res, output.headers?.());
-
-    if (output.statusCode) {
-      res.status(output.statusCode());
-    }
-
-    const result = await output.render(res);
+    const result = await output.serialize(res);
     return result ? this.serialize(result) : undefined;
   }
 

@@ -5,7 +5,7 @@ import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';
 import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param';
 import { HttpRequest, HttpResponse } from '../../src/types';
 import { Produces, SetHeaders } from '../../src/decorator/common';
-import { Renderable } from '../../src/response/renderable';
+import { HttpSerializable } from '../../src/response/serializable';
 
 @Controller('/test')
 export class TestController {
@@ -61,12 +61,12 @@ export class TestController {
 
   @Get('/renderable')
   @Produces('text/plain')
-  getRenderable(): Renderable {
+  getRenderable(): HttpSerializable {
     return {
       /**
        * @returns {string}
        */
-      render(res) {
+      serialize(res) {
         return res.send('hello');
       }
     };

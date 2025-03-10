@@ -11,7 +11,7 @@ export * from './src/registry/controller';
 export * from './src/registry/visitor';
 export * from './src/registry/types';
 export * from './src/response/redirect';
-export * from './src/response/renderable';
+export * from './src/response/serializable';
 export * from './src/response/core';
 export * from './src/request/core';
 export * from './src/interceptor/body-parse';
