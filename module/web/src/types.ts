@@ -289,3 +289,15 @@ export interface HttpResponse<T = unknown> {
    */
   sendStream(stream: Readable): Promise<void>;
 }
+
+
+/**
+ * Simple subset of HttpResponse that represents a valid http response payload
+ */
+export interface HttpPayload {
+  headers?: Record<string, string>;
+  defaultContentType?: string;
+  statusCode?: number;
+  data: Readable | Buffer | string;
+  length?: number;
+}

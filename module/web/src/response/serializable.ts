@@ -1,12 +1,12 @@
-import { HttpResponse } from '../types';
+import { HttpResponse, HttpPayload } from '../types';
 
 /**
- * Renderable contract
+ * Custom serialization contract
  */
 export interface HttpSerializable {
   /**
-   * Serialize the output given a response.  If a value is returned, send it to the client
+   * Serialize the output given a response.  If a payload is returned, send it to the client
    * @param res
    */
-  serialize(res: HttpResponse): unknown;
+  serialize(res: HttpResponse): HttpPayload | undefined;
 }

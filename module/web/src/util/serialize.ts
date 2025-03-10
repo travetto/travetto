@@ -1,21 +1,12 @@
 import { Readable } from 'node:stream';
 
-import { AppError, BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
-import { DataUtil } from '@travetto/schema';
+import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
 import { HttpSerializable } from '../response/serializable';
-import { HttpResponse } from '../types';
+import { HttpResponse, HttpPayload } from '../types';
 import { WebSymbols } from '../symbols';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
-
-export type SerializedResult = {
-  headers?: Record<string, string>;
-  defaultContentType?: string;
-  statusCode?: number;
-  data: Readable | Buffer | string;
-  length?: number;
-};
 
 /**
  * Mapping from error category to standard http error codes
@@ -53,7 +44,7 @@ export class SerializeUtil {
   /**
    * Standard json
    */
-  static fromJSON(output: unknown): SerializedResult {
+  static fromJSON(output: unknown): HttpPayload {
     const val = hasToJSON(output) ? output.toJSON() : output;
     const data = JSON.stringify(val);
     return { defaultContentType: 'application/json', data, length: data.length };
@@ -62,9 +53,9 @@ export class SerializeUtil {
   /**
    * Serialize file/blob
    */
-  static fromBlob(output: Blob | File): SerializedResult {
+  static fromBlob(output: Blob | File): HttpPayload {
     const meta = BinaryUtil.getBlobMeta(output);
-    const out: SerializedResult = {
+    const out: HttpPayload = {
       defaultContentType: 'application/octet-stream',
       data: Readable.fromWeb(output.stream()),
       headers: {}
@@ -99,39 +90,21 @@ export class SerializeUtil {
   }
 
   /**
-   * Create error from an unknown source
-   */
-  static toError(error: unknown): ErrorResponse {
-    return error instanceof Error ? error :
-      !DataUtil.isPlainObject(error) ? new AppError(`${error}`) :
-        new AppError(`${error['message'] || 'Unexpected error'}`, { details: error });
-  }
-
-  /**
    * Serialize Error
    */
-  static fromError(error: ErrorResponse): SerializedResult {
+  static fromError(error: ErrorResponse): HttpPayload {
     const output = this.fromJSON(hasToJSON(error) ? error.toJSON() : { message: error.message });
     return {
       ...output,
-      headers: { ...output.headers, 'content-type': output.defaultContentType! },
+      headers: { ...output.headers, 'content-type': 'application/json' },
       statusCode: error.status ?? error.statusCode ?? CATEGORY_STATUS[error.category!] ?? 500,
     };
   }
 
   /**
-   * Serialize renderable
-   */
-  static async fromRenderable(res: HttpResponse, output: HttpSerializable): Promise<SerializedResult | undefined> {
-    this.setHeaders(res, res[WebSymbols.Internal].headersAdded);
-    const result = await output.serialize(res);
-    return result ? this.serialize(result) : undefined;
-  }
-
-  /**
    * Determine serialization type based on output
    */
-  static serialize(output: unknown): SerializedResult | undefined {
+  static serialize(output: unknown): HttpPayload {
     switch (typeof output) {
       case 'string': return { defaultContentType: 'text/plain', data: output, length: output.length };
       case 'number':
@@ -156,32 +129,26 @@ export class SerializeUtil {
   }
 
   /**
-   * Send result to response
+   * Send response
    */
-  static async sendResult(response: HttpResponse, result?: SerializedResult): Promise<void> {
-    if (!result) { // Nothing to do
-      return;
-    } else if (response.headersSent) { // Already sent, do nothing
-      return console.error('Failed to send, already sent data');
-    }
-
+  static async send(response: HttpResponse, basic: HttpPayload): Promise<void> {
     // Set implicit headers
     this.setHeaders(response, response[WebSymbols.Internal].headersAdded);
-    this.setHeaders(response, result?.headers);
+    this.setHeaders(response, basic?.headers);
 
     // Set header if not defined
-    if (result?.defaultContentType && !response.getHeader('content-type')) {
-      response.setHeader('content-type', result.defaultContentType);
+    if (basic?.defaultContentType && !response.getHeader('content-type')) {
+      response.setHeader('content-type', basic.defaultContentType);
     }
 
-    response.statusCode = result.statusCode ?? response.statusCode ?? 200;
+    response.statusCode = basic.statusCode ?? response.statusCode ?? 200;
 
-    if (!result.data) {
+    if (!basic.data) {
       response.send('');
-    } else if (Buffer.isBuffer(result.data) || typeof result.data === 'string') {
-      response.send(result);
+    } else if (Buffer.isBuffer(basic.data) || typeof basic.data === 'string') {
+      response.send(basic);
     } else {
-      await response.sendStream(result.data);
+      await response.sendStream(basic.data);
     }
   }
 }
