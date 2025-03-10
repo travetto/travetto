@@ -1,11 +1,8 @@
-import { AppError } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
-import { DataUtil } from '@travetto/schema';
 
 import { HttpInterceptor } from './types';
 import { FilterContext, FilterNext } from '../types';
 import { SerializedResult, SerializeUtil } from '../util/serialize';
-import { WebSymbols } from '../symbols';
 
 /**
  * Serialization interceptor
@@ -20,35 +17,25 @@ export class SerializeInterceptor implements HttpInterceptor {
       const output = await next();
 
       if (SerializeUtil.isRenderable(output)) {
-        result = await SerializeUtil.serializeRenderable(req, res, output);
+        result = await SerializeUtil.fromRenderable(res, output);
       } else if (output !== undefined && !res.headersSent) {
-        result = SerializeUtil.serializeStandard(output);
+        result = SerializeUtil.serialize(output);
+      }
+
+      // On empty response
+      if (result && !SerializeUtil.isStream(result.data) && result.data.length === 0) {
+        res.statusCode ??= ((req.method === 'POST' || req.method === 'PUT') ? 201 : 204);
       }
     } catch (err) {
-      const resolved = err instanceof Error ? err : (
-        DataUtil.isPlainObject(err) ?
-          new AppError(`${err['message'] || 'Unexpected error'}`, { details: err }) :
-          new AppError(`${err}`)
-      );
-
+      const resolved = SerializeUtil.toError(err);
       console.error(resolved.message, { error: resolved });
-      result = SerializeUtil.serializeError(resolved);
+      result = SerializeUtil.fromError(resolved);
     }
 
     if (!result) { // Nothing to do
       return;
     } else if (res.headersSent) { // Already sent, do nothing
-      if (Buffer.isBuffer(result)) {
-        console.error('Failed to send, already sent data', result.toString('utf8'));
-      } else {
-        console.error('Failed to send, already sent data');
-      }
-      return;
-    }
-
-    // Fill status code if not defined
-    if (result && !result.data && !result.statusCode) {
-      res.statusCode = ((req.method === 'POST' || req.method === 'PUT') ? 201 : 204);
+      return console.error('Failed to send, already sent data');
     }
 
     await SerializeUtil.sendResult(res, result);

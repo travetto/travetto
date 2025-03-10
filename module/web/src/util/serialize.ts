@@ -1,9 +1,10 @@
 import { Readable } from 'node:stream';
 
-import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
+import { AppError, BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
+import { DataUtil } from '@travetto/schema';
 
 import { Renderable } from '../response/renderable';
-import { HttpRequest, HttpResponse } from '../types';
+import { HttpResponse } from '../types';
 import { WebSymbols } from '../symbols';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
@@ -13,6 +14,7 @@ export type SerializedResult = {
   defaultContentType?: string;
   statusCode?: number;
   data: Readable | Buffer | string;
+  length?: number;
 };
 
 /**
@@ -36,52 +38,31 @@ export class SerializeUtil {
   static isStream = hasFunction<Readable>('pipe');
 
   /**
+   * Set headers on response given a map
+   * @param res
+   * @param map
+   */
+  static setHeaders(res: HttpResponse, map?: Record<string, string | string[] | (() => string | string[])>): void {
+    if (map) {
+      for (const [key, value] of Object.entries(map)) {
+        res.setHeader(key, typeof value === 'function' ? value() : value);
+      }
+    }
+  }
+
+  /**
    * Standard json
    */
-  static serializeJSON(output: unknown, forceHeader = false): SerializedResult {
+  static fromJSON(output: unknown): SerializedResult {
     const val = hasToJSON(output) ? output.toJSON() : output;
-    return {
-      ...forceHeader ? {
-        headers: { 'Content-Type': 'application/json' }
-      } : {
-        defaultContentType: 'application/json'
-      },
-      data: JSON.stringify(val)
-    };
-  }
-
-  /**
-   * Primitive json
-   */
-  static serializePrimitive(output: unknown): SerializedResult {
-    return { defaultContentType: 'application/json', data: JSON.stringify(output) };
-  }
-
-  /**
-   * Serialize text
-   */
-  static serializeText(output: string): SerializedResult {
-    return { defaultContentType: 'text/plain', data: output };
-  }
-
-  /**
-   * Serialize buffer
-   */
-  static serializeBuffer(output: Buffer): SerializedResult {
-    return { defaultContentType: 'application/octet-stream', data: output };
-  }
-
-  /**
-   * Serialize stream
-   */
-  static serializeStream(output: Readable): SerializedResult {
-    return { defaultContentType: 'application/octet-stream', data: output };
+    const data = JSON.stringify(val);
+    return { defaultContentType: 'application/json', data, length: data.length };
   }
 
   /**
    * Serialize file/blob
    */
-  static serializeBlob(output: Blob | File): SerializedResult {
+  static fromBlob(output: Blob | File): SerializedResult {
     const meta = BinaryUtil.getBlobMeta(output);
     const out: SerializedResult = {
       defaultContentType: 'application/octet-stream',
@@ -110,6 +91,7 @@ export class SerializeUtil {
       out.headers!['content-disposition'] = `attachment;filename="${output.name}"`;
     }
     if (output.size) {
+      out.length = output.size;
       out.headers!['content-length'] = `${output.size}`;
     }
 
@@ -117,94 +99,90 @@ export class SerializeUtil {
   }
 
   /**
-   * Send empty response
+   * Create error from an unknown source
    */
-  static serializeEmpty(): SerializedResult {
-    return { data: '' };
+  static toError(error: unknown): ErrorResponse {
+    return error instanceof Error ? error :
+      !DataUtil.isPlainObject(error) ? new AppError(`${error}`) :
+        new AppError(`${error['message'] || 'Unexpected error'}`, { details: error });
   }
 
   /**
    * Serialize Error
-   * @param error
    */
-  static serializeError(error: ErrorResponse): SerializedResult {
-    const output = this.serializeJSON(hasToJSON(error) ? error.toJSON() : { message: error.message }, true);
-    output.statusCode = error.status ?? error.statusCode ?? CATEGORY_STATUS[error.category!] ?? 500;
-    return output;
+  static fromError(error: ErrorResponse): SerializedResult {
+    const output = this.fromJSON(hasToJSON(error) ? error.toJSON() : { message: error.message });
+    return {
+      ...output,
+      headers: { ...output.headers, 'content-type': output.defaultContentType! },
+      statusCode: error.status ?? error.statusCode ?? CATEGORY_STATUS[error.category!] ?? 500,
+    };
   }
 
   /**
    * Serialize renderable
    */
-  static async serializeRenderable(req: HttpRequest, res: HttpResponse, output: Renderable): Promise<SerializedResult | undefined> {
-    if (output.headers) {
-      for (const [k, v] of Object.entries(output.headers())) {
-        res.setHeader(k, v);
-      }
-    }
+  static async fromRenderable(res: HttpResponse, output: Renderable): Promise<SerializedResult | undefined> {
+    this.setHeaders(res, res[WebSymbols.Internal].headersAdded);
+    this.setHeaders(res, output.headers?.());
+
     if (output.statusCode) {
       res.status(output.statusCode());
     }
+
     const result = await output.render(res);
-    if (result === undefined) { // If render didn't return a result, consider us done
-      return;
-    } else {
-      return this.serializeStandard(result);
-    }
+    return result ? this.serialize(result) : undefined;
   }
 
   /**
    * Determine serialization type based on output
    */
-  static serializeStandard(output: unknown): SerializedResult | undefined {
+  static serialize(output: unknown): SerializedResult | undefined {
     switch (typeof output) {
-      case 'string': return this.serializeText(output);
+      case 'string': return { defaultContentType: 'text/plain', data: output, length: output.length };
       case 'number':
       case 'boolean':
-      case 'bigint': return this.serializePrimitive(output);
+      case 'bigint': return this.fromJSON(output);
       default: {
         if (!output) {
-          return this.serializeEmpty();
+          return { data: '' };
         } else if (Buffer.isBuffer(output)) {
-          return this.serializeBuffer(output);
+          return { defaultContentType: 'application/octet-stream', data: output, length: output.length };
         } else if (this.isStream(output)) {
-          return this.serializeStream(output);
+          return { defaultContentType: 'application/octet-stream', data: output };
         } else if (output instanceof Error) {
-          return this.serializeError(output);
+          return this.fromError(output);
         } else if (output instanceof Blob) {
-          return this.serializeBlob(output);
+          return this.fromBlob(output);
         } else {
-          return this.serializeJSON(output);
+          return this.fromJSON(output);
         }
       }
     }
   }
 
-  static setHeaders(res: HttpResponse, map?: Record<string, string | string[] | (() => string | string[])>): void {
-    if (map) {
-      for (const [key, value] of Object.entries(map)) {
-        res.setHeader(key, typeof value === 'function' ? value() : value);
-      }
-    }
-  }
-
-  static async sendResult(res: HttpResponse, result: SerializedResult): Promise<void> {
+  /**
+   * Send result to response
+   */
+  static async sendResult(response: HttpResponse, result: SerializedResult): Promise<void> {
 
     // Set implicit headers
-    this.setHeaders(res, res[WebSymbols.Internal].headersAdded);
-    this.setHeaders(res, result?.headers);
+    this.setHeaders(response, response[WebSymbols.Internal].headersAdded);
+    this.setHeaders(response, result?.headers);
 
     // Set header if not defined
-    if (result?.defaultContentType && !res.getHeader('Content-Type')) {
-      res.setHeader('Content-Type', result.defaultContentType);
+    if (result?.defaultContentType && !response.getHeader('content-type')) {
+      response.setHeader('content-type', result.defaultContentType);
     }
 
+    response.statusCode = result.statusCode ?? response.statusCode ?? 200;
+
     if (!result.data) {
-      res.send('');
+      response.send('');
     } else if (Buffer.isBuffer(result.data) || typeof result.data === 'string') {
-      res.send(result);
+      response.send(result);
     } else {
-      await res.sendStream(result.data);
+      await response.sendStream(result.data);
     }
   }
 }
