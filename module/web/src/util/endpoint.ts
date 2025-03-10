@@ -60,7 +60,7 @@ export class EndpointUtil {
    * Get the interceptor config for a given request and interceptor instance
    */
   static getInterceptorConfig<T extends HttpInterceptor<U>, U extends ManagedInterceptorConfig>(req: HttpRequest, inst: T): U | undefined {
-    const cfg = req[WebSymbols.InterceptorConfigs]?.[inst.constructor.Ⲑid] ?? undefined;
+    const cfg = req[WebSymbols.Internal].interceptorConfigs?.[inst.constructor.Ⲑid] ?? undefined;
     return castTo(cfg);
   }
 
@@ -193,7 +193,7 @@ export class EndpointUtil {
   static async extractParameters(endpoint: EndpointConfig, req: HttpRequest, res: HttpResponse): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.handlerName;
-    const vals = req[WebSymbols.RequestParams];
+    const vals = req[WebSymbols.Internal].requestParams;
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
@@ -255,7 +255,7 @@ export class EndpointUtil {
     ];
 
     if (headers && Object.keys(headers).length > 0) {
-      filterChain.unshift([({ res }): void => { res[WebSymbols.HeadersAdded] = { ...headers }; }, undefined]);
+      filterChain.unshift([({ res }): void => { res[WebSymbols.Internal].headersAdded = { ...headers }; }, undefined]);
     }
 
     const chain = this.createFilterChain(filterChain);

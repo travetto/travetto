@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@travetto/di';
-import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, HttpInterceptor } from '@travetto/web';
+import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, HttpInterceptor, WebSymbols } from '@travetto/web';
 
 import { WebUploadConfig } from './config';
 import { WebUploadUtil } from './util';
-import { FileMap, WebUploadSymbol } from './types';
+import { FileMap } from './types';
 
 @Injectable()
 export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
@@ -44,7 +44,7 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
         uploads[item.field] = await WebUploadUtil.toFile(item, config.uploads?.[item.field] ?? config);
       }
 
-      req[WebUploadSymbol] = uploads;
+      req[WebSymbols.Internal].uploads = uploads;
 
       return await next();
     } finally {

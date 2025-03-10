@@ -121,7 +121,7 @@ export class WebTransformer {
     }
 
     // If we have a valid response type, declare it
-    const inner = SchemaTransformUtil.findInnerReturnMethod(state, node, 'render');
+    const inner = SchemaTransformUtil.findInnerReturnMethod(state, node, 'serialize');
     const returnType = SchemaTransformUtil.ensureType(state, state.resolveReturnType(inner ?? node), node);
     if (returnType.type) {
       newDecls.push(state.createDecorator(ENDPOINT_DEC_IMPORT, 'ResponseType', state.fromLiteral({

@@ -12,10 +12,10 @@ export class ExpressWebServerUtil {
    * Convert request, response object from provider to framework
    */
   static convert(req: express.Request, res: express.Response): [HttpRequest, HttpResponse] {
-    const fullReq: typeof req & { [WebSymbols.TravettoEntity]?: HttpRequest } = req;
-    const fullRes: typeof res & { [WebSymbols.TravettoEntity]?: HttpResponse } = res;
-    const finalReq = fullReq[WebSymbols.TravettoEntity] ??= this.getRequest(req);
-    const finalRes = fullRes[WebSymbols.TravettoEntity] ??= this.getResponse(res);
+    const fullReq: typeof req & { [WebSymbols.Internal]?: HttpRequest } = req;
+    const fullRes: typeof res & { [WebSymbols.Internal]?: HttpResponse } = res;
+    const finalReq = fullReq[WebSymbols.Internal] ??= this.getRequest(req);
+    const finalRes = fullRes[WebSymbols.Internal] ??= this.getResponse(res);
     return [finalReq, finalRes];
   }
 
@@ -24,8 +24,10 @@ export class ExpressWebServerUtil {
    */
   static getRequest(req: express.Request): HttpRequest {
     return HttpRequestCore.create({
-      [WebSymbols.ProviderEntity]: req,
-      [WebSymbols.NodeEntity]: req,
+      [WebSymbols.Internal]: {
+        providerEntity: req,
+        nodeEntity: req,
+      },
       protocol: castTo(req.protocol),
       method: castTo(req.method),
       url: req.originalUrl,
@@ -42,8 +44,10 @@ export class ExpressWebServerUtil {
    */
   static getResponse(res: express.Response): HttpResponse {
     return HttpResponseCore.create({
-      [WebSymbols.ProviderEntity]: res,
-      [WebSymbols.NodeEntity]: res,
+      [WebSymbols.Internal]: {
+        providerEntity: res,
+        nodeEntity: res,
+      },
       get headersSent(): boolean {
         return res.headersSent;
       },

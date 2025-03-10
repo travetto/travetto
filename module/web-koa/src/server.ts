@@ -1,6 +1,5 @@
 import https from 'node:https';
 import koa from 'koa';
-import kCompress from 'koa-compress';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
@@ -31,8 +30,6 @@ export class KoaWebServer implements WebServer<koa> {
 
   async init(): Promise<koa> {
     const app = new koa();
-    app.use(kCompress());
-
     app.keys = this.cookies.keys!;
 
     // Enable proxy for cookies

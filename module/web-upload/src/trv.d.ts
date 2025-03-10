@@ -1,7 +1,7 @@
-import { FileMap, WebUploadSymbol } from './types';
+import { FileMap } from './types';
 
 declare module '@travetto/web' {
-  interface HttpRequest {
-    [WebUploadSymbol]: FileMap
+  interface HttpRequestInternal<T = unknown> {
+    uploads?: FileMap
   }
 }

@@ -48,7 +48,7 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: req.body ?? req[WebSymbols.NodeEntity], filename: req.getFilename(), field: 'file' };
+      yield { stream: req.body ?? req[WebSymbols.Internal].nodeEntity, filename: req.getFilename(), field: 'file' };
     }
   }
 
