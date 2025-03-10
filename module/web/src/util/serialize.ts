@@ -164,7 +164,12 @@ export class SerializeUtil {
   /**
    * Send result to response
    */
-  static async sendResult(response: HttpResponse, result: SerializedResult): Promise<void> {
+  static async sendResult(response: HttpResponse, result?: SerializedResult): Promise<void> {
+    if (!result) { // Nothing to do
+      return;
+    } else if (response.headersSent) { // Already sent, do nothing
+      return console.error('Failed to send, already sent data');
+    }
 
     // Set implicit headers
     this.setHeaders(response, response[WebSymbols.Internal].headersAdded);

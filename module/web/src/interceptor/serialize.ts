@@ -16,26 +16,22 @@ export class SerializeInterceptor implements HttpInterceptor {
     try {
       const output = await next();
 
-      if (SerializeUtil.isRenderable(output)) {
-        result = await SerializeUtil.fromRenderable(res, output);
-      } else if (output !== undefined && !res.headersSent) {
-        result = SerializeUtil.serialize(output);
+      if (output !== undefined && !res.headersSent) {
+        if (SerializeUtil.isRenderable(output)) {
+          result = await SerializeUtil.fromRenderable(res, output);
+        } else {
+          result = SerializeUtil.serialize(output);
+        }
       }
 
       // On empty response
-      if (result && !SerializeUtil.isStream(result.data) && result.data.length === 0) {
+      if (!res.headersSent && result?.length === 0) {
         res.statusCode ??= ((req.method === 'POST' || req.method === 'PUT') ? 201 : 204);
       }
     } catch (err) {
       const resolved = SerializeUtil.toError(err);
       console.error(resolved.message, { error: resolved });
       result = SerializeUtil.fromError(resolved);
-    }
-
-    if (!result) { // Nothing to do
-      return;
-    } else if (res.headersSent) { // Already sent, do nothing
-      return console.error('Failed to send, already sent data');
     }
 
     await SerializeUtil.sendResult(res, result);
