@@ -136,4 +136,11 @@ export abstract class WebServerSuite extends BaseWebSuite {
     const { body: ret2 } = await this.request<{ ip: string | undefined }>('get', '/test/ip', { headers: { 'X-Forwarded-For': 'bob' } });
     assert(ret2.ip === 'bob');
   }
+
+  @Test()
+  async compressionReturned() {
+    const { body: ret, headers } = await this.request('get', '/test/json', { headers: { 'Accept-Encoding': 'gzip;q=1' } });
+    assert(headers['Content-Encoding'] === 'gzip');
+    assert(ret !== '{"json":true}');
+  }
 }
