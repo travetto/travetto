@@ -4,6 +4,8 @@ import { HttpPayload } from '../types';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
+const isStream = hasFunction<Readable>('pipe');
+
 /**
  * Mapping from error category to standard http error codes
  */
@@ -21,25 +23,26 @@ const CATEGORY_STATUS: Record<ErrorCategory, number> = {
  * Utilities for generating HttpPayloads from various values
  */
 export class HttpPayloadUtil {
-  static isStream = hasFunction<Readable>('pipe');
+  /**
+   * Standard stream
+   */
+  static fromStream(value: Readable, type?: string): HttpPayload {
+    return { defaultContentType: type, data: value };
+  }
 
   /**
-   * Standard array of bytes (stream, buffer, string)
+   * Standard array of bytes (buffer, string)
    */
-  static fromBytes(value: string | Buffer | Readable): HttpPayload {
-    return {
-      defaultContentType: typeof value === 'string' ? 'text/plain' : 'application/octet-stream',
-      data: value,
-      length: this.isStream(value) ? undefined : value.length
-    };
+  static fromBytes(value: Buffer | string, type?: string): HttpPayload {
+    value = typeof value === 'string' ? Buffer.from(value, 'utf8') : value;
+    return { defaultContentType: type, data: value, length: value.length };
   }
 
   /**
    * Standard json
    */
   static fromJSON(value: unknown): HttpPayload {
-    const data = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
-    return { defaultContentType: 'application/json', data, length: data.length };
+    return this.fromBytes(JSON.stringify(hasToJSON(value) ? value.toJSON() : value), 'application/json');
   }
 
   /**
@@ -47,7 +50,7 @@ export class HttpPayloadUtil {
    */
   static fromBlob(value: Blob | File): HttpPayload {
     const meta = BinaryUtil.getBlobMeta(value);
-    const out: HttpPayload = this.fromBytes(Readable.fromWeb(value.stream()));
+    const out = this.fromStream(Readable.fromWeb(value.stream()));
     const headers = out.headers ??= {};
     const setIf = (k: string, v?: string): unknown => v ? headers[k] = v : undefined;
 
@@ -65,10 +68,7 @@ export class HttpPayloadUtil {
       headers['content-disposition'] = `attachment;filename="${value.name}"`;
     }
 
-    if (value.size) {
-      out.length = value.size;
-      headers['content-length'] = `${out.length}`;
-    }
+    out.length = value.size;
 
     return out;
   }
@@ -90,9 +90,13 @@ export class HttpPayloadUtil {
    */
   static toPayload(value: unknown): HttpPayload {
     if (value === undefined || value === null) {
-      return { data: '' };
-    } else if (typeof value === 'string' || Buffer.isBuffer(value) || this.isStream(value)) {
+      return this.fromBytes('');
+    } else if (typeof value === 'string') {
+      return this.fromBytes(value, 'text/plain');
+    } else if (Buffer.isBuffer(value)) {
       return this.fromBytes(value);
+    } else if (isStream(value)) {
+      return this.fromStream(value);
     } else if (value instanceof Error) {
       return this.fromError(value);
     } else if (value instanceof Blob) {

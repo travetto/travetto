@@ -35,9 +35,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
       app.enable('trust proxy');
     }
 
-    this.raw = app;
-
-    return app;
+    return this.raw = app;
   }
 
   async unregisterEndpoints(key: string | symbol): Promise<void> {

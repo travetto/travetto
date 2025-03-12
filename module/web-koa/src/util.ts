@@ -73,9 +73,8 @@ export class KoaWebServerUtil {
       getHeader: ctx.response.get.bind(ctx.response),
       removeHeader: ctx.response.remove.bind(ctx.response),
       write: ctx.res.write.bind(ctx.res),
-      cookies: ctx.cookies,
       async sendStream(stream): Promise<void> {
-        ctx.status = 200;
+        ctx.status ??= 200;
         ctx.respond = false;
         await pipeline(stream, ctx.res);
       },

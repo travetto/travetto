@@ -295,9 +295,9 @@ export interface HttpResponse<T = unknown> {
  * Simple subset of HttpResponse that represents a valid http response payload
  */
 export interface HttpPayload {
-  headers?: Record<string, string>;
+  headers?: HttpHeaderMap;
   defaultContentType?: string;
   statusCode?: number;
-  data: Readable | Buffer | string;
+  data: Readable | Buffer;
   length?: number;
 }

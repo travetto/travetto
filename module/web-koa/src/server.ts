@@ -3,7 +3,7 @@ import koa from 'koa';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { WebConfig, WebServer, CookieConfig, WebServerHandle, EndpointConfig } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 
 import { KoaWebServerUtil } from './util';
@@ -23,23 +23,16 @@ export class KoaWebServer implements WebServer<koa> {
   updateGlobalOnChange = true;
 
   @Inject()
-  cookies: CookieConfig;
-
-  @Inject()
   config: WebConfig;
 
   async init(): Promise<koa> {
     const app = new koa();
-    app.keys = this.cookies.keys!;
 
-    // Enable proxy for cookies
     if (this.config.trustProxy) {
       app.proxy = true;
     }
 
-    this.raw = app;
-
-    return app;
+    return this.raw = app;
   }
 
   async unregisterEndpoints(key: string | symbol): Promise<void> {
