@@ -1,4 +1,5 @@
 import type lambda from 'aws-lambda';
+import zlib from 'node:zlib';
 
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
@@ -91,13 +92,26 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
       requestContext: { ...baseLambdaContext, path, httpMethod: method },
     }, { ...baseContext }));
 
+    let resBody = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
+    const resHeaders = valuesToShape.multi(castTo({
+      ...(res.headers ?? {}),
+      ...(res.multiValueHeaders ?? {})
+    }));
+
+    const first = resHeaders['content-encoding']?.[0];
+
+    if (/^(gzip|deflate|br)/.test(first)) {
+      switch (first) {
+        case 'gzip': resBody = zlib.gunzipSync(resBody); break;
+        case 'deflate': resBody = zlib.inflateSync(resBody); break;
+        case 'br': resBody = zlib.brotliDecompressSync(resBody); break;
+      }
+    }
+
     return {
       status: res.statusCode,
-      body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
-      headers: valuesToShape.multi(castTo({
-        ...(res.headers ?? {}),
-        ...(res.multiValueHeaders ?? {})
-      }))
+      body: resBody,
+      headers: resHeaders
     };
   }
 }
