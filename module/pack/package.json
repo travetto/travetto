@@ -27,11 +27,11 @@
   "dependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@travetto/runtime": "^6.0.0-rc.1",
     "@travetto/terminal": "^6.0.0-rc.1",
-    "rollup": "^4.34.9"
+    "rollup": "^4.35.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^6.0.0-rc.1"

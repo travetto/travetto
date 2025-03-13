@@ -37,8 +37,8 @@
     "@types/negotiator": "^0.6.3",
     "cookies": "^0.9.1",
     "inflation": "^2.1.0",
-    "raw-body": "^3.0.0",
-    "negotiator": "^1.0.0"
+    "negotiator": "^1.0.0",
+    "raw-body": "^3.0.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^6.0.0-rc.1",

@@ -26,7 +26,7 @@
   "dependencies": {
     "@travetto/runtime": "^6.0.0-rc.1",
     "@types/prismjs": "^1.26.5",
-    "prismjs": "^1.29.0"
+    "prismjs": "^1.30.0"
   },
   "peerDependencies": {
     "@travetto/cli": "^6.0.0-rc.1"
