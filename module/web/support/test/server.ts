@@ -146,7 +146,11 @@ export abstract class WebServerSuite extends BaseWebSuite {
     }
     for (const encoding of ['gzip', 'br', 'deflate']) {
       const { body: ret, headers } = await this.request('get', '/test/json/large/50000', { headers: { 'Accept-Encoding': `${encoding};q=1` } });
-      assert(headers['content-encoding'] === encoding);
+      if (Array.isArray(headers['content-encoding'])) {
+        assert(headers['content-encoding'][0] === encoding);
+      } else {
+        assert(headers['content-encoding'] === encoding);
+      }
       assert(ret && typeof ret === 'object');
       assert('json' in ret);
       assert(typeof ret.json === 'string');

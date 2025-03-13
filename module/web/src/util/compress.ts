@@ -39,12 +39,13 @@ export class HttpCompressionUtil {
       return { type: 'identity', stream: undefined };
     }
 
-    const method = new Negotiator(req)
+    const sent = req.headerFirst('accept-encoding');
+    const method = new Negotiator({ headers: { 'accept-encoding': sent ?? '*' } })
       // Bad typings, need to override
       .encoding(...castTo<[string[]]>([supportedEncodings, preferredEncodings]));
 
-    if (!method || !req.header('accept-encoding')?.includes(method)) {
-      const err = new AppError(`Please accept one of: ${supportedEncodings.join(', ')}.`);
+    if (sent && (!method || !sent.includes(method))) {
+      const err = new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${sent} is not supported`);
       Object.assign(err, { statusCode: 406 });
       throw err;
     }

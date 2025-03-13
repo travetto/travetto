@@ -86,7 +86,7 @@ export class SerializeInterceptor implements HttpInterceptor<SerializeConfig> {
 
   async intercept({ res, req }: FilterContext, next: FilterNext): Promise<void> {
     if (this.config.compress) {
-      res.setHeader('Vary', 'Accept-Encoding');
+      res.vary('Accept-Encoding');
     }
 
     try {

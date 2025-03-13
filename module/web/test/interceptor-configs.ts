@@ -1,6 +1,7 @@
 import assert from 'node:assert';
+import fs from 'node:fs';
 
-import { asFull, Class } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
@@ -17,6 +18,9 @@ import { WebApplication } from '../src/application/app';
 import { CorsInterceptor } from '../src/interceptor/cors';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache';
 import { EndpointConfig } from '../src/registry/types';
+import { HttpRequestCore } from '../src/request/core';
+import { HttpResponseCore } from '../src/response/core';
+import { WebSymbols } from '@travetto/web';
 
 @Injectable()
 @Config('web.custom')
@@ -107,8 +111,26 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const res = asFull<HttpResponse & { name: string }>({ name: undefined, status: () => 200, send: () => { } });
-    await endpoint.handlerFinalized!(asFull({}), res);
+    const res = HttpResponseCore.create<HttpResponse & { name?: string }>({
+      [WebSymbols.Internal]: {
+        nodeEntity: castTo(fs.createWriteStream('/dev/null')),
+        providerEntity: undefined!
+      },
+      end: () => { },
+      name: undefined,
+      status: () => 200,
+      send: () => { },
+      setHeader: (k, v) => { },
+      getHeader: (k) => undefined,
+      removeHeader: () => undefined,
+    });
+    await endpoint.handlerFinalized!(HttpRequestCore.create({
+      [WebSymbols.Internal]: {
+        nodeEntity: castTo(Buffer.from([])),
+        providerEntity: undefined!
+      },
+      headers: {}
+    }), res);
     return res.name;
   }
 

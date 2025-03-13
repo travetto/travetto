@@ -175,7 +175,7 @@ export interface HttpResponseInternal<T = unknown> {
   /**
    * The underlying request object
    */
-  providerEntity?: T;
+  providerEntity: T;
   /**
    * The raw http server response object
    */

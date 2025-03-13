@@ -11,7 +11,8 @@ import { BaseWebSuite } from '@travetto/web/support/test/base';
 
 import { Login, Authenticated, Logout } from '../../src/decorator';
 import { WebAuthConfig } from '../../src/config';
-import { CommonPrincipalCodecSymbol, JWTPrincipalCodec } from '../../__index__';
+import { CommonPrincipalCodecSymbol } from '../../src/types';
+import { JWTPrincipalCodec } from '../../src/codec';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 
