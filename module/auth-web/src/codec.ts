@@ -5,8 +5,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { FilterContext, WebCommonUtil } from '@travetto/web';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
-import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types';
-import { WebAuthConfig } from './config';
+import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
+import { WebAuthConfig } from './config.ts';
 
 /**
  * JWT Principal codec

@@ -2,7 +2,7 @@ import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { DynamoDBModelConfig, DynamoDBModelService } from '@travetto/model-dynamodb';
 
-import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model';
+import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model.ts';
 
 class Init {
   @InjectableFactory(TestModelSvcSymbol)

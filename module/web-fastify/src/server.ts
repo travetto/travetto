@@ -4,7 +4,7 @@ import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
 import { Inject, Injectable } from '@travetto/di';
 
-import { FastifyWebServerUtil } from './util';
+import { FastifyWebServerUtil } from './util.ts';
 
 /**
  * Fastify-based web server

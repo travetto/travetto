@@ -1,7 +1,7 @@
 import { asConstructable, Class, ClassInstance } from '@travetto/runtime';
 
-import { ControllerRegistry } from '../registry/controller';
-import { EndpointParamConfig } from '../registry/types';
+import { ControllerRegistry } from '../registry/controller.ts';
+import { EndpointParamConfig } from '../registry/types.ts';
 
 type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx: number) => void;
 

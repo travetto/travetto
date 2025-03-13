@@ -1,4 +1,4 @@
-import { DataUtil } from '../data';
+import { DataUtil } from '../data.ts';
 
 export class PointImpl {
   static validateSchema(input: unknown): 'type' | undefined {

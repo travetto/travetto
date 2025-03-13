@@ -6,7 +6,7 @@ import path from 'node:path';
 import { CliCommandInput } from '@travetto/cli';
 import { ExecUtil } from '@travetto/runtime';
 
-import { Workspace } from './workspace';
+import { Workspace } from './workspace.ts';
 
 /**
  * Input parameter with metadata

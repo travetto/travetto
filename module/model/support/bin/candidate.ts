@@ -1,9 +1,9 @@
 import { toConcrete, Class } from '@travetto/runtime';
 import { InjectableConfig, DependencyRegistry } from '@travetto/di';
 
-import { ModelRegistry } from '../../src/registry/model';
-import type { ModelStorageSupport } from '../../src/types/storage';
-import type { ModelType } from '../../src/types/model';
+import { ModelRegistry } from '../../src/registry/model.ts';
+import type { ModelStorageSupport } from '../../src/types/storage.ts';
+import type { ModelType } from '../../src/types/model.ts';
 
 /**
  * Utilities for finding candidates for model operations

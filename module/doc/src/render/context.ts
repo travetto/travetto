@@ -5,9 +5,9 @@ import { createElement, JSXElement, JSXRuntimeTag } from '@travetto/doc/jsx-runt
 import { PackageUtil } from '@travetto/manifest';
 import { castTo, RuntimeIndex } from '@travetto/runtime';
 
-import { JSXElementByFn, c } from '../jsx';
-import { DocResolveUtil, ResolvedCode, ResolvedRef, ResolvedSnippetLink } from '../util/resolve';
-import { DocRunUtil } from '../util/run';
+import { JSXElementByFn, c } from '../jsx.ts';
+import { DocResolveUtil, ResolvedCode, ResolvedRef, ResolvedSnippetLink } from '../util/resolve.ts';
+import { DocRunUtil } from '../util/run.ts';
 
 /**
  * Render Context

@@ -3,7 +3,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
 
-import { AuthContextInterceptor } from './context';
+import { AuthContextInterceptor } from './context.ts';
 
 @Config('web.auth.logout')
 export class WebAuthLogoutConfig extends ManagedInterceptorConfig { }

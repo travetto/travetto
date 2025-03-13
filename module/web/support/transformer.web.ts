@@ -5,7 +5,7 @@ import {
   OnProperty
 } from '@travetto/transformer';
 
-import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util';
+import { SchemaTransformUtil } from '@travetto/schema/support/transformer/util.ts';
 
 const PARAM_DEC_IMPORT = '@travetto/web/src/decorator/param.ts';
 const COMMON_DEC_IMPORT = '@travetto/web/src/decorator/common.ts';

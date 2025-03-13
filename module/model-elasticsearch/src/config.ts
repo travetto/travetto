@@ -2,7 +2,7 @@ import { TimeSpan } from '@travetto/runtime';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
-import { EsSchemaConfig } from './internal/types';
+import { EsSchemaConfig } from './internal/types.ts';
 
 /**
  * Elasticsearch model config

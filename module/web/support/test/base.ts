@@ -6,10 +6,10 @@ import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpMethodOrAll, HttpRequest, WebServerHandle } from '../../src/types';
-import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base';
-import { CoreWebServerSupport } from './server-support/core';
-import { NetUtil } from '../../src/util/net';
+import { HttpMethodOrAll, HttpRequest, WebServerHandle } from '../../src/types.ts';
+import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base.ts';
+import { CoreWebServerSupport } from './server-support/core.ts';
+import { NetUtil } from '../../src/util/net.ts';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 

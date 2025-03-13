@@ -3,7 +3,7 @@ import { KoaWebServer } from '@travetto/web-koa';
 import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
 
-import { ModelBlobWebUploadServerSuite } from './server';
+import { ModelBlobWebUploadServerSuite } from './server.ts';
 
 const KOA = Symbol.for('koa');
 

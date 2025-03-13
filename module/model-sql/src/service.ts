@@ -14,13 +14,13 @@ import {
   ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
 } from '@travetto/model-query';
 
-import { SQLModelConfig } from './config';
-import { Connected, ConnectedIterator, Transactional } from './connection/decorator';
-import { SQLModelUtil } from './util';
-import { SQLDialect } from './dialect/base';
-import { TableManager } from './table-manager';
-import { Connection } from './connection/base';
-import { InsertWrapper } from './internal/types';
+import { SQLModelConfig } from './config.ts';
+import { Connected, ConnectedIterator, Transactional } from './connection/decorator.ts';
+import { SQLModelUtil } from './util.ts';
+import { SQLDialect } from './dialect/base.ts';
+import { TableManager } from './table-manager.ts';
+import { Connection } from './connection/base.ts';
+import { InsertWrapper } from './internal/types.ts';
 
 /**
  * Core for SQL Model Source.  Should not have any direct queries,

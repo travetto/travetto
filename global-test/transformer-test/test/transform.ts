@@ -2,9 +2,9 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { Service } from '../src/tree';
-import { Service2 } from '../src/tree2';
-import { Service3 } from '../src/tree3';
+import { Service } from '../src/tree.ts';
+import { Service2 } from '../src/tree2.ts';
+import { Service3 } from '../src/tree3.ts';
 
 @Suite()
 export class TransformSuite {

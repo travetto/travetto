@@ -6,8 +6,8 @@ import { ModelExpirySupport } from '@travetto/model';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { SqliteDialect } from '@travetto/model-sqlite';
 
-import { CacheServiceSuite } from '@travetto/cache/support/test/service';
-import { WithSuiteContext } from '@travetto/context/support/test/context';
+import { CacheServiceSuite } from '@travetto/cache/support/test/service.ts';
+import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 
 class Config {
   @InjectableFactory({ primary: true })

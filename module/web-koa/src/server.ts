@@ -6,7 +6,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 
-import { KoaWebServerUtil } from './util';
+import { KoaWebServerUtil } from './util.ts';
 
 type Keyed = { key?: string | symbol };
 

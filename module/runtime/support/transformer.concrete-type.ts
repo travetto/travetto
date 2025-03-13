@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { TransformerState, OnInterface, OnCall, OnTypeAlias } from '@travetto/transformer';
 
-import { MetadataRegistrationUtil } from './transformer/metadata';
+import { MetadataRegistrationUtil } from './transformer/metadata.ts';
 
 const SRC = '@travetto/runtime/src/types.ts';
 

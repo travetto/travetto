@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { FilterContext, FilterNext } from '../types';
-import { ManagedInterceptorConfig, HttpInterceptor } from './types';
-import { WebContext } from '../context';
-import { SerializeInterceptor } from './serialize';
+import { FilterContext, FilterNext } from '../types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
+import { WebContext } from '../context.ts';
+import { SerializeInterceptor } from './serialize.ts';
 
 @Config('web.context')
 class AsyncContextConfig extends ManagedInterceptorConfig { }

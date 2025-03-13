@@ -5,14 +5,14 @@ import { Model } from '@travetto/model';
 import { LongText } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
 
-import { ModelQuerySuite } from '@travetto/model-query/support/test/query';
-import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud';
-import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet';
-import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism';
-import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest';
+import { ModelQuerySuite } from '@travetto/model-query/support/test/query.ts';
+import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud.ts';
+import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet.ts';
+import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism.ts';
+import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest.ts';
 
-import { MongoModelConfig } from '../src/config';
-import { MongoModelService } from '../src/service';
+import { MongoModelConfig } from '../src/config.ts';
+import { MongoModelService } from '../src/service.ts';
 
 @Model()
 class TextModel {

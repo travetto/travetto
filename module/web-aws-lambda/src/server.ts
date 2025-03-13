@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { WebServer, WebApplication } from '@travetto/web';
 
-import { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from './types';
+import { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from './types.ts';
 
 export const AwsLambdaSymbol = Symbol.for('@travetto/web-aws-lambda:entry');
 

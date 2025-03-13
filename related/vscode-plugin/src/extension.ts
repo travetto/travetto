@@ -3,8 +3,8 @@ import vscode from 'vscode';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { getManifestContext } from '@travetto/manifest';
 
-import { ActivationManager } from './core/activation';
-import { Workspace } from './core/workspace';
+import { ActivationManager } from './core/activation.ts';
+import { Workspace } from './core/workspace.ts';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   const [folder] = vscode.workspace.workspaceFolders ?? [];

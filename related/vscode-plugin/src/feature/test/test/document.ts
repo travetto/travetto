@@ -5,8 +5,8 @@ import { TypedObject } from '@travetto/runtime';
 
 import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig, TestWatchEvent } from '@travetto/test';
 
-import { Decorations } from './decoration';
-import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown } from './types';
+import { Decorations } from './decoration.ts';
+import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown } from './types.ts';
 
 export const testDiagnostics = vscode.languages.createDiagnosticCollection('Travetto');
 

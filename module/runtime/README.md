@@ -125,7 +125,7 @@ interface EnvData {
     /**
      * trvc log level
      */
-    TRV_BUILD: 'none' | 'info' | 'debug' | 'error' | 'warn',
+    TRV_BUILD: 'none' | 'info' | 'debug' | 'error' | 'warn';
     /**
      * Should break on first line of a method when using the @DebugBreak decorator
      * @default false

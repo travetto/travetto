@@ -2,9 +2,9 @@ import { AppError, toConcrete, ClassInstance } from '@travetto/runtime';
 import { ControllerRegistry, EndpointParamConfig, Param, WebSymbols } from '@travetto/web';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { WebUploadInterceptor } from './interceptor';
-import { WebUploadConfig } from './config';
-import { FileMap } from './types';
+import { WebUploadInterceptor } from './interceptor.ts';
+import { WebUploadConfig } from './config.ts';
+import { FileMap } from './types.ts';
 
 type UploadConfig = Partial<Pick<WebUploadConfig, 'types' | 'maxSize' | 'cleanupFiles'>>;
 

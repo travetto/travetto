@@ -1,11 +1,11 @@
 import { Readable } from 'node:stream';
 
-import { Controller } from '../../src/decorator/controller';
-import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';
-import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param';
-import { HttpRequest, HttpResponse } from '../../src/types';
-import { Produces, SetHeaders } from '../../src/decorator/common';
-import { HttpSerializable } from '../../src/response/serializable';
+import { Controller } from '../../src/decorator/controller.ts';
+import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint.ts';
+import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param.ts';
+import { HttpRequest, HttpResponse } from '../../src/types.ts';
+import { Produces, SetHeaders } from '../../src/decorator/common.ts';
+import { HttpSerializable } from '../../src/response/serializable.ts';
 
 @Controller('/test')
 export class TestController {

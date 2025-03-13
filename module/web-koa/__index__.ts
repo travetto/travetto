@@ -1,2 +1,2 @@
-export * from './src/server';
-export * from './src/util';
+export * from './src/server.ts';
+export * from './src/util.ts';

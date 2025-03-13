@@ -8,7 +8,7 @@ import {
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 
-import { RedisModelConfig } from './config';
+import { RedisModelConfig } from './config.ts';
 
 type RedisScan = { key: string } | { match: string };
 type RedisClient = ReturnType<typeof createClient>;

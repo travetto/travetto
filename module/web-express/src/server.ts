@@ -8,7 +8,7 @@ import {
 } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 
-import { ExpressWebServerUtil } from './util';
+import { ExpressWebServerUtil } from './util.ts';
 
 type Keyed = { key?: string | symbol };
 

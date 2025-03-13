@@ -6,8 +6,8 @@ import { ControllerRegistry } from '@travetto/web';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { ManifestModuleUtil } from '@travetto/manifest';
 
-import { clientFactory } from '../support/client/rpc';
-import { WebRpcClient, WebRpcConfig } from './config';
+import { clientFactory } from '../support/client/rpc.ts';
+import { WebRpcClient, WebRpcConfig } from './config.ts';
 
 @Injectable({ autoCreate: true })
 export class WebRpcClientGeneratorService {
@@ -57,7 +57,7 @@ export class WebRpcClientGeneratorService {
 
     const factoryOutputFile = path.resolve(config.output, 'factory.ts');
     const factorySourceContents = [
-      `import { ${clientFactory.name} } from './rpc';`,
+      `import { ${clientFactory.name} } from './rpc.ts';`,
       ...classes.map((n) => `import type { ${n.name} } from '${n.import}';`),
       '',
       `export const factory = ${clientFactory.name}<{`,

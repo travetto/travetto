@@ -7,19 +7,19 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { RootRegistry } from '@travetto/registry';
 
-import { ConfigureInterceptor } from '../src/decorator/common';
-import { Controller } from '../src/decorator/controller';
-import { Get } from '../src/decorator/endpoint';
-import { ManagedInterceptorConfig, HttpInterceptor } from '../src/interceptor/types';
-import { ControllerRegistry } from '../src/registry/controller';
-import { HttpResponse, FilterContext, WebServerHandle } from '../src/types';
-import { WebServer } from '../src/application/server';
-import { WebApplication } from '../src/application/app';
-import { CorsInterceptor } from '../src/interceptor/cors';
-import { GetCacheInterceptor } from '../src/interceptor/get-cache';
-import { EndpointConfig } from '../src/registry/types';
-import { HttpRequestCore } from '../src/request/core';
-import { HttpResponseCore } from '../src/response/core';
+import { ConfigureInterceptor } from '../src/decorator/common.ts';
+import { Controller } from '../src/decorator/controller.ts';
+import { Get } from '../src/decorator/endpoint.ts';
+import { ManagedInterceptorConfig, HttpInterceptor } from '../src/interceptor/types.ts';
+import { ControllerRegistry } from '../src/registry/controller.ts';
+import { HttpResponse, FilterContext, WebServerHandle } from '../src/types.ts';
+import { WebServer } from '../src/application/server.ts';
+import { WebApplication } from '../src/application/app.ts';
+import { CorsInterceptor } from '../src/interceptor/cors.ts';
+import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
+import { EndpointConfig } from '../src/registry/types.ts';
+import { HttpRequestCore } from '../src/request/core.ts';
+import { HttpResponseCore } from '../src/response/core.ts';
 import { WebSymbols } from '@travetto/web';
 
 @Injectable()

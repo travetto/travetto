@@ -4,7 +4,7 @@ import { Readable, Writable } from 'node:stream';
 
 import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
 
-import type { WebSymbols } from './symbols';
+import type { WebSymbols } from './symbols.ts';
 
 export type FilterReturn = void | unknown | Promise<void | unknown>;
 export type FilterNext = () => FilterReturn;

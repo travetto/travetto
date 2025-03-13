@@ -1,9 +1,9 @@
 import { DataUtil, SchemaRegistry, ValidationResultError, ValidationError } from '@travetto/schema';
 import { Class } from '@travetto/runtime';
 
-import { ModelQuery, Query, PageableModelQuery } from './model/query';
+import { ModelQuery, Query, PageableModelQuery } from './model/query.ts';
 
-import { TypeUtil } from './internal/types';
+import { TypeUtil } from './internal/types.ts';
 
 type SimpleType = keyof typeof TypeUtil.OPERATORS;
 

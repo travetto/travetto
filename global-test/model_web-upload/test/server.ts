@@ -9,7 +9,7 @@ import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, FileMap } from '@travetto/web-upload';
 import { Util, BlobMeta, BinaryUtil } from '@travetto/runtime';
 
-import { BaseWebSuite } from '@travetto/web/support/test/base';
+import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
 
 type FileUpload = { name: string, resource: string, type: string };
 

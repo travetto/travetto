@@ -3,12 +3,12 @@ import { AppError, hasFunction, TypedObject } from '@travetto/runtime';
 import { DataUtil, Ignore } from '@travetto/schema';
 import { Config } from '@travetto/config';
 
-import { HttpSerializable } from '../response/serializable';
-import { HttpInterceptor, ManagedInterceptorConfig } from './types';
-import { FilterContext, FilterNext, HttpPayload, HttpRequest, HttpResponse } from '../types';
-import { HttpPayloadUtil } from '../util/payload';
-import { WebSymbols } from '../symbols';
-import { HttpCompressionUtil, HttpCompressEncoding, HttpCompressOptions } from '../util/compress';
+import { HttpSerializable } from '../response/serializable.ts';
+import { HttpInterceptor, ManagedInterceptorConfig } from './types.ts';
+import { FilterContext, FilterNext, HttpPayload, HttpRequest, HttpResponse } from '../types.ts';
+import { HttpPayloadUtil } from '../util/payload.ts';
+import { WebSymbols } from '../symbols.ts';
+import { HttpCompressionUtil, HttpCompressEncoding, HttpCompressOptions } from '../util/compress.ts';
 
 const isSerializable = hasFunction<HttpSerializable>('serialize');
 

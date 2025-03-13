@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { PAGES } from '../pages';
+import { PAGES } from '../pages.ts';
 
 @Component({
   selector: 'app-module-chart',

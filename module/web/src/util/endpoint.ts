@@ -3,10 +3,10 @@ import { isPromise } from 'node:util/types';
 import { asConstructable, castTo, Class, Util } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpRequest, Filter, FilterContext, FilterNext, FilterReturn, HttpHandler, HttpResponse } from '../types';
-import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types';
-import { LightweightConfig, ManagedInterceptorConfig, HttpInterceptor, EndpointApplies } from '../interceptor/types';
-import { WebSymbols } from '../symbols';
+import { HttpRequest, Filter, FilterContext, FilterNext, FilterReturn, HttpHandler, HttpResponse } from '../types.ts';
+import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
+import { LightweightConfig, ManagedInterceptorConfig, HttpInterceptor, EndpointApplies } from '../interceptor/types.ts';
+import { WebSymbols } from '../symbols.ts';
 
 type EndpointRule = { sub: string | RegExp, base: string };
 

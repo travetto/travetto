@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises';
 
-import { ManifestModuleUtil } from './module';
-import { path } from './path';
+import { ManifestModuleUtil } from './module.ts';
+import { path } from './path.ts';
 
-import type { ManifestModule, ManifestModuleCore, ManifestModuleFile, ManifestRoot } from './types/manifest';
-import type { ManifestModuleFileType, ManifestModuleFolderType } from './types/common';
-import type { ManifestContext } from './types/context';
+import type { ManifestModule, ManifestModuleCore, ManifestModuleFile, ManifestRoot } from './types/manifest.ts';
+import type { ManifestModuleFileType, ManifestModuleFolderType } from './types/common.ts';
+import type { ManifestContext } from './types/context.ts';
 
 type DeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
 type DeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };

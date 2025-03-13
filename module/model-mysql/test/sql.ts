@@ -3,9 +3,9 @@ import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { SQLModelService, SQLModelConfig } from '@travetto/model-sql';
 
-import { BaseSQLTest } from '@travetto/model-sql/support/test/query';
+import { BaseSQLTest } from '@travetto/model-sql/support/test/query.ts';
 
-import { MySQLDialect } from '../src/dialect';
+import { MySQLDialect } from '../src/dialect.ts';
 
 class Config {
   @InjectableFactory({ primary: true })

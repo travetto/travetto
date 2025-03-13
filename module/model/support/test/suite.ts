@@ -3,9 +3,9 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry, TestFixtures } from '@travetto/test';
 
-import { ModelBlobUtil } from '../../src/util/blob';
-import { ModelStorageUtil } from '../../src/util/storage';
-import { ModelRegistry } from '../../src/registry/model';
+import { ModelBlobUtil } from '../../src/util/blob.ts';
+import { ModelStorageUtil } from '../../src/util/storage.ts';
+import { ModelRegistry } from '../../src/registry/model.ts';
 
 const Loaded = Symbol();
 

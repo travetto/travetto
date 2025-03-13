@@ -1,5 +1,5 @@
-import { HttpSerializable } from './serializable';
-import { HttpResponse } from '../types';
+import { HttpSerializable } from './serializable.ts';
+import { HttpResponse } from '../types.ts';
 
 /**
  * Simple redirect response

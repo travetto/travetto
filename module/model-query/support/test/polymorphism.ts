@@ -4,17 +4,17 @@ import { Suite, Test } from '@travetto/test';
 import { NotFoundError, ModelCrudSupport } from '@travetto/model';
 import { castTo } from '@travetto/runtime';
 
-import { BaseModelSuite } from '@travetto/model/support/test/base';
-import { Doctor, Engineer, Worker, Firefighter } from '@travetto/model/support/test/polymorphism';
+import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
+import { Doctor, Engineer, Worker, Firefighter } from '@travetto/model/support/test/polymorphism.ts';
 
-import { ModelQueryCrudSupport } from '../../src/types/crud';
-import { ModelQuerySupport } from '../../src/types/query';
-import { ModelQueryFacetSupport } from '../../src/types/facet';
-import { ModelQuerySuggestSupport } from '../../src/types/suggest';
+import { ModelQueryCrudSupport } from '../../src/types/crud.ts';
+import { ModelQuerySupport } from '../../src/types/query.ts';
+import { ModelQueryFacetSupport } from '../../src/types/facet.ts';
+import { ModelQuerySuggestSupport } from '../../src/types/suggest.ts';
 
-import { ModelQueryFacetUtil } from '../../src/util/facet';
-import { ModelQuerySuggestUtil } from '../../src/util/suggest';
-import { ModelQueryCrudUtil } from '../../src/util/crud';
+import { ModelQueryFacetUtil } from '../../src/util/facet.ts';
+import { ModelQuerySuggestUtil } from '../../src/util/suggest.ts';
+import { ModelQueryCrudUtil } from '../../src/util/crud.ts';
 
 @Suite()
 export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {

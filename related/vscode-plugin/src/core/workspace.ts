@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import timers from 'node:timers/promises';
 
 import { type ManifestContext, ManifestIndex, ManifestUtil, PackageUtil } from '@travetto/manifest';
-import type { CompilerStateType } from '@travetto/compiler/support/types';
+import type { CompilerStateType } from '@travetto/compiler/support/types.ts';
 
 /**
  * Standard set of workspace utilities

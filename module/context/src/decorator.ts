@@ -1,6 +1,6 @@
 import { AsyncMethodDescriptor } from '@travetto/runtime';
 
-import { AsyncContext } from './service';
+import { AsyncContext } from './service.ts';
 
 /**
  * Allows running a function while providing an async context

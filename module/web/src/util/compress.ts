@@ -6,7 +6,7 @@ import Negotiator from 'negotiator';
 
 import { AppError, castTo } from '@travetto/runtime';
 
-import { HttpRequest, HttpResponse } from '../types';
+import { HttpRequest, HttpResponse } from '../types.ts';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const ENCODING_METHODS = {

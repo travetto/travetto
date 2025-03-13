@@ -1,13 +1,13 @@
-export * from './src/model/query';
-export * from './src/model/where-clause';
-export * from './src/types/crud';
-export * from './src/types/query';
-export * from './src/types/facet';
-export * from './src/types/suggest';
+export * from './src/model/query.ts';
+export * from './src/model/where-clause.ts';
+export * from './src/types/crud.ts';
+export * from './src/types/query.ts';
+export * from './src/types/facet.ts';
+export * from './src/types/suggest.ts';
 
-export * from './src/util/query';
-export * from './src/util/suggest';
-export * from './src/util/facet';
-export * from './src/util/crud';
+export * from './src/util/query.ts';
+export * from './src/util/suggest.ts';
+export * from './src/util/facet.ts';
+export * from './src/util/crud.ts';
 
-export * from './src/verifier';
+export * from './src/verifier.ts';

@@ -2,11 +2,11 @@ import vscode from 'vscode';
 
 import type { TestWatchEvent } from '@travetto/test';
 
-import { Log } from '../../../core/log';
-import { Workspace } from '../../../core/workspace';
+import { Log } from '../../../core/log.ts';
+import { Workspace } from '../../../core/workspace.ts';
 
-import { DocumentResultsManager } from './document';
-import { StatusUnknown } from './types';
+import { DocumentResultsManager } from './document.ts';
+import { StatusUnknown } from './types.ts';
 
 /**
  * Manages results for the entire workspace, including the statusbar

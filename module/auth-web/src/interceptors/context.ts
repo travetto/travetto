@@ -3,9 +3,9 @@ import { HttpInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInte
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
 
-import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types';
+import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types.ts';
 
-import { WebAuthConfig } from '../config';
+import { WebAuthConfig } from '../config.ts';
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
 

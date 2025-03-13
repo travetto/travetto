@@ -5,7 +5,7 @@ import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
-import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server';
+import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
 
 const EXPRESS = Symbol.for('express');
 

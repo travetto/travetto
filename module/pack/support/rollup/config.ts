@@ -6,7 +6,7 @@ import type terser from '@rollup/plugin-terser';
 import { type ManifestModule, ManifestModuleUtil, type NodeModuleType } from '@travetto/manifest';
 import { EnvProp, Runtime, RuntimeIndex } from '@travetto/runtime';
 
-import { CoreRollupConfig } from '../../src/types';
+import { CoreRollupConfig } from '../../src/types.ts';
 
 function getFilesFromModule(m: ManifestModule): string[] {
   return [
@@ -55,7 +55,7 @@ export function getFiles(entry?: string): string[] {
     .map(x => RuntimeIndex.getManifestModule(x))
     .filter(m => m.prod)
     .flatMap(getFilesFromModule)
-    .filter(x => (!entry || !x.endsWith(entry)) && !x.includes('@travetto/pack/support'));
+    .filter(x => (!entry || !x.endsWith(entry)) && !x.includes('@travetto/pack/support/'));
 }
 
 export function getIgnoredModules(): ManifestModule[] {

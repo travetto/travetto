@@ -4,17 +4,17 @@ import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { asFull, castTo } from '@travetto/runtime';
 
-import { SchemaRegistry } from '../src/service/registry';
-import { ValidationResultError } from '../src/validate/error';
-import { ValidationError } from '../src/validate/types';
-import { SchemaValidator } from '../src/validate/validator';
+import { SchemaRegistry } from '../src/service/registry.ts';
+import { ValidationResultError } from '../src/validate/error.ts';
+import { ValidationError } from '../src/validate/types.ts';
+import { SchemaValidator } from '../src/validate/validator.ts';
 
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaaz,
   CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque, TemplateLit,
   RangeSchema
-} from './models/validation';
-import { Accessors } from './models/binding';
+} from './models/validation.ts';
+import { Accessors } from './models/binding.ts';
 
 function findError(errors: ValidationError[], path: string, message: string) {
   return errors.find(x => x.path === path && x.message.includes(message));

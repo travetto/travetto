@@ -1,7 +1,7 @@
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ConfigData } from '../parser/types';
-import { ConfigSource, ConfigSpec } from './types';
+import { ConfigData } from '../parser/types.ts';
+import { ConfigSource, ConfigSpec } from './types.ts';
 
 export const OverrideConfigSymbol = Symbol.for('@travetto/config:overrides');
 

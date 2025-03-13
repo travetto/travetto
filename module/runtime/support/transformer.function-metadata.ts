@@ -2,8 +2,8 @@ import ts from 'typescript';
 
 import { TransformerState, OnMethod, OnClass, AfterClass, CoreUtil, OnFunction } from '@travetto/transformer';
 
-import type { FunctionMetadataTag } from '../src/function';
-import { MetadataRegistrationUtil } from './transformer/metadata';
+import type { FunctionMetadataTag } from '../src/function.ts';
+import { MetadataRegistrationUtil } from './transformer/metadata.ts';
 
 const methods = Symbol.for('@travetto/runtime:methods');
 const cls = Symbol.for('@travetto/runtime:class');

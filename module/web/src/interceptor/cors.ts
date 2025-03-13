@@ -2,10 +2,10 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import { FilterContext, HttpRequest } from '../types';
+import { FilterContext, HttpRequest } from '../types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types';
-import { SerializeInterceptor } from './serialize';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
+import { SerializeInterceptor } from './serialize.ts';
 
 /**
  * Web cors support

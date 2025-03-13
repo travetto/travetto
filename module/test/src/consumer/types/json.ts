@@ -1,8 +1,8 @@
 import type { Writable } from 'node:stream';
 
-import type { TestEvent } from '../../model/event';
-import type { SuitesSummary } from '../types';
-import { TestConsumer } from '../registry';
+import type { TestEvent } from '../../model/event.ts';
+import type { SuitesSummary } from '../types.ts';
+import { TestConsumer } from '../registry.ts';
 
 /**
  * Returns the entire result set as a single JSON document

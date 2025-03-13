@@ -1,5 +1,5 @@
 import { castTo } from '@travetto/runtime';
-import { EmailOptions, SentEmail } from './types';
+import { EmailOptions, SentEmail } from './types.ts';
 
 /**
  * Default mail transport

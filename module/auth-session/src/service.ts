@@ -3,9 +3,9 @@ import { Runtime, Util } from '@travetto/runtime';
 import { ModelExpirySupport, NotFoundError, ModelStorageUtil } from '@travetto/model';
 import { AuthContext, AuthService } from '@travetto/auth';
 
-import { Session } from './session';
-import { SessionEntry, SessionModelSymbol } from './model';
-import { SessionContext } from './context';
+import { Session } from './session.ts';
+import { SessionEntry, SessionModelSymbol } from './model.ts';
+import { SessionContext } from './context.ts';
 
 /**
  * Service for supporting the session and managing the session state

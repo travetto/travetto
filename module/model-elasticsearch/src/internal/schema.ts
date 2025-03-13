@@ -4,7 +4,7 @@ import { Class, toConcrete } from '@travetto/runtime';
 import { ModelRegistry } from '@travetto/model';
 import { Point, DataUtil, SchemaRegistry } from '@travetto/schema';
 
-import { EsSchemaConfig } from './types';
+import { EsSchemaConfig } from './types.ts';
 
 const PointImpl = toConcrete<Point>();
 

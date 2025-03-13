@@ -74,7 +74,7 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
 }
 
 export function getBody(inputs: unknown[]): { body: FormData | string, headers: Record<string, string> } {
-  // If we do not have a blob, easy-peasy
+  // If we do not have a blob, simple output
   if (!inputs.some(isBlobLike)) {
     return {
       body: JSON.stringify(inputs),

@@ -3,14 +3,14 @@ import { InjectableFactory } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 
-import { ModelBasicSuite } from '@travetto/model/support/test/basic';
-import { ModelCrudSuite } from '@travetto/model/support/test/crud';
-import { ModelBulkSuite } from '@travetto/model/support/test/bulk';
-import { WithSuiteContext } from '@travetto/context/support/test/context';
-import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
-import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk.ts';
+import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
+import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
+import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 
-import { MySQLDialect } from '../src/dialect';
+import { MySQLDialect } from '../src/dialect.ts';
 
 class Config {
   @InjectableFactory({ primary: true })

@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { WebSslUtil } from '../src/util/ssl';
+import { WebSslUtil } from '../src/util/ssl.ts';
 
 @Suite()
 export class SSLTest {

@@ -8,7 +8,7 @@ import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, 
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 
-import { ApiSpecConfig } from './config';
+import { ApiSpecConfig } from './config.ts';
 
 const DEFINITION = '#/components/schemas';
 

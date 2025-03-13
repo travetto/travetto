@@ -2,18 +2,18 @@ import ts from 'typescript';
 
 import { path, ManifestIndex } from '@travetto/manifest';
 
-import { ManagedType, AnyType, Type, ForeignType } from './resolver/types';
-import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor';
-import { SimpleResolver } from './resolver/service';
-import { ImportManager } from './importer';
-import { Import } from './types/shared';
+import { ManagedType, AnyType, Type, ForeignType } from './resolver/types.ts';
+import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor.ts';
+import { SimpleResolver } from './resolver/service.ts';
+import { ImportManager } from './importer.ts';
+import { Import } from './types/shared.ts';
 
-import { DocUtil } from './util/doc';
-import { DecoratorUtil } from './util/decorator';
-import { DeclarationUtil } from './util/declaration';
-import { CoreUtil } from './util/core';
-import { LiteralUtil } from './util/literal';
-import { SystemUtil } from './util/system';
+import { DocUtil } from './util/doc.ts';
+import { DecoratorUtil } from './util/decorator.ts';
+import { DeclarationUtil } from './util/declaration.ts';
+import { CoreUtil } from './util/core.ts';
+import { LiteralUtil } from './util/literal.ts';
+import { SystemUtil } from './util/system.ts';
 
 function hasOriginal(n: ts.Node): n is ts.Node & { original: ts.Node } {
   return !!n && !n.parent && 'original' in n && !!n.original;

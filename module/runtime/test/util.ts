@@ -3,8 +3,8 @@ import assert from 'node:assert';
 import { Test, Suite } from '@travetto/test';
 import { AppError } from '@travetto/runtime';
 
-import { AsyncQueue } from '../src/queue';
-import { Util } from '../src/util';
+import { AsyncQueue } from '../src/queue.ts';
+import { Util } from '../src/util.ts';
 
 @Suite()
 export class UtilTest {
@@ -38,7 +38,7 @@ export class UtilTest {
   @Test()
   async verifySerialize() {
     const payload = {
-      err: new AppError('Uhoh'),
+      err: new AppError('Uh-oh'),
       count: 2000n
     };
 

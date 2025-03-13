@@ -7,12 +7,12 @@ import { Inject, Injectable } from '@travetto/di';
 import { castTo, Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
-import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { ModelSuite } from '@travetto/model/support/test/suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
-import { Cache, EvictCache } from '../../src/decorator';
-import { CacheService } from '../../src/service';
-import { CacheSymbols } from '../../src/symbols';
+import { Cache, EvictCache } from '../../src/decorator.ts';
+import { CacheService } from '../../src/service.ts';
+import { CacheSymbols } from '../../src/symbols.ts';
 
 @Schema()
 class User { }

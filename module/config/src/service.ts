@@ -4,11 +4,11 @@ import { AppError, toConcrete, castTo, Class, ClassInstance, Env, Runtime, Runti
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { ParserManager } from './parser/parser';
-import { ConfigData } from './parser/types';
-import { ConfigSource, ConfigSpec } from './source/types';
-import { FileConfigSource } from './source/file';
-import { OverrideConfigSource } from './source/override';
+import { ParserManager } from './parser/parser.ts';
+import { ConfigData } from './parser/types.ts';
+import { ConfigSource, ConfigSpec } from './source/types.ts';
+import { FileConfigSource } from './source/file.ts';
+import { OverrideConfigSource } from './source/override.ts';
 
 type ConfigSpecSimple = Omit<ConfigSpec, 'data'>;
 

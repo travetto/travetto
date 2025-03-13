@@ -4,7 +4,7 @@ import { spawn, ChildProcess } from 'node:child_process';
 import path from 'node:path';
 
 import { Env, ExecUtil, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { RunConfig } from './types';
+import { RunConfig } from './types.ts';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
 

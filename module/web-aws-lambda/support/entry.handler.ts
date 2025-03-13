@@ -1,6 +1,6 @@
 // @trv-no-transform
-import type { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from '../src/types';
-import type { AwsLambdaHandler } from '../src/server';
+import type { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from '../src/types.ts';
+import type { AwsLambdaHandler } from '../src/server.ts';
 
 type HandleFunction = (event: LambdaAPIGatewayProxyEvent, context: LambdaContext) => Promise<LambdaAPIGatewayProxyResult>;
 
@@ -12,7 +12,7 @@ async function buildApp(): Promise<{ handle: HandleFunction }> {
   await RootRegistry.init();
 
   const { DependencyRegistry } = await import('@travetto/di');
-  const { AwsLambdaWebApplication } = await import('../src/server');
+  const { AwsLambdaWebApplication } = await import('../src/server.ts');
   const app = await DependencyRegistry.getInstance(AwsLambdaWebApplication);
   await app.run();
   return app;

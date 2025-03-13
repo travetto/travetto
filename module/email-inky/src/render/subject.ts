@@ -1,7 +1,7 @@
 import { JSXElement } from '@travetto/email-inky/jsx-runtime';
 
-import { RenderProvider, RenderState } from '../types';
-import { RenderContext } from './context';
+import { RenderProvider, RenderState } from '../types.ts';
+import { RenderContext } from './context.ts';
 
 const empty = async (): Promise<string> => '';
 const visit = ({ recurse }: RenderState<JSXElement, RenderContext>): Promise<string> => recurse();

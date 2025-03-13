@@ -1,5 +1,5 @@
 import { type ManifestModuleRole } from '@travetto/manifest';
-import { type TimeSpan } from './time';
+import { type TimeSpan } from './time.ts';
 type Role = Exclude<ManifestModuleRole, 'std' | 'compile'>;
 
 declare module "@travetto/runtime" {
@@ -51,7 +51,7 @@ declare module "@travetto/runtime" {
     /**
      * trvc log level
      */
-    TRV_BUILD: 'none' | 'info' | 'debug' | 'error' | 'warn',
+    TRV_BUILD: 'none' | 'info' | 'debug' | 'error' | 'warn';
     /**
      * Should break on first line of a method when using the @DebugBreak decorator
      * @default false

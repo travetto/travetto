@@ -5,7 +5,7 @@ import { WebApplication, WebServer } from '@travetto/web';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { SessionModelSymbol } from '@travetto/auth-session';
 
-import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server';
+import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
 
 const FASTIFY = Symbol.for('fastify');
 

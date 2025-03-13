@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router, NavigationEnd, RouterLinkActive, RouterLink, RouterOutlet } from '@angular/router';
 
-import { PAGES } from './pages';
+import { PAGES } from './pages.ts';
 
 @Component({
   selector: 'app-documentation',

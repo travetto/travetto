@@ -5,10 +5,10 @@ import { Controller, Post } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { BaseWebSuite } from '@travetto/web/support/test/base';
+import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
 
-import { Upload } from '../../src/decorator';
-import { FileMap } from '../../src/types';
+import { Upload } from '../../src/decorator.ts';
+import { FileMap } from '../../src/types.ts';
 
 type FileUpload = { name: string, resource: string, type: string };
 

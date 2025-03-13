@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 
-import { Log } from '../core/log';
-import { ActivationTarget } from '../core/types';
+import { Log } from '../core/log.ts';
+import { ActivationTarget } from '../core/types.ts';
 
 /**
  * Base feature structure

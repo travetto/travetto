@@ -2,7 +2,7 @@ import { Util, Class, TimeUtil, Runtime } from '@travetto/runtime';
 import { ModelCrudSupport, ModelType, NotFoundError, OptionalId, ModelStorageUtil } from '@travetto/model';
 import { Principal, Authenticator, Authorizer, AuthenticationError } from '@travetto/auth';
 
-import { AuthModelUtil } from './util';
+import { AuthModelUtil } from './util.ts';
 
 /**
  * A set of registration data

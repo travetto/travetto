@@ -6,8 +6,8 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { Ignore } from '@travetto/schema';
 
-import type { WebRpcClient } from '../src/config';
-import { WebRpcClientGeneratorService } from '../src/service';
+import type { WebRpcClient } from '../src/config.ts';
+import { WebRpcClientGeneratorService } from '../src/service.ts';
 
 /**
  * Run client web operation

@@ -1,8 +1,8 @@
 import type { Class } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
-import type { HttpInterceptor } from '../interceptor/types';
-import type { Filter, HttpHandler, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointHandler, HttpResponse } from '../types';
+import type { HttpInterceptor } from '../interceptor/types.ts';
+import type { Filter, HttpHandler, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointHandler, HttpResponse } from '../types.ts';
 
 export type EndpointParamExtractor = (config: EndpointParamConfig, req: HttpRequest, res: HttpResponse) => unknown;
 

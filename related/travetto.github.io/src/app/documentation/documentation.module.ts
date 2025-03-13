@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { PAGES } from './pages';
+import { PAGES } from './pages.ts';
 
 export const ROUTES: Route[] = [
   {

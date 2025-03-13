@@ -9,9 +9,9 @@ import { asFull, castTo, Util } from '@travetto/runtime';
 import {
   WebServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
-} from '@travetto/web/support/test/server-support/base';
+} from '@travetto/web/support/test/server-support/base.ts';
 
-import { AwsLambdaWebApplication } from '../../src/server';
+import { AwsLambdaWebApplication } from '../../src/server.ts';
 
 const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {
   resource: '/{proxy+}',

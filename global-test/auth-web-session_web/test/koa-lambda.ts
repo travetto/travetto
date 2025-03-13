@@ -5,8 +5,8 @@ import { AwsLambdaWebApplication } from '@travetto/web-aws-lambda';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { SessionModelSymbol } from '@travetto/auth-session';
 
-import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server';
-import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server';
+import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
+import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server.ts';
 
 const KOA = Symbol.for('koa-lambda');
 

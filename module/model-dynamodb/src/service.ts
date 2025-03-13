@@ -12,7 +12,7 @@ import {
   ModelCrudUtil, ModelExpiryUtil, ModelIndexedUtil, ModelStorageUtil
 } from '@travetto/model';
 
-import { DynamoDBModelConfig } from './config';
+import { DynamoDBModelConfig } from './config.ts';
 
 const EXP_ATTR = 'expires_at__';
 

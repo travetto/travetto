@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 import { DependencyRegistry } from '@travetto/di';
 import { type HttpRequest, CookieConfig, WebConfig, WebSslConfig, WebApplication } from '@travetto/web';
 
-import { WebServerSupport, MakeRequestConfig, headerToShape } from './base';
+import { WebServerSupport, MakeRequestConfig, headerToShape } from './base.ts';
 
 /**
  * Support for invoking http requests against the server

@@ -4,7 +4,7 @@ import { Suite } from '@travetto/test';
 import { CacheSymbols } from '@travetto/cache';
 import { DynamoDBModelService, DynamoDBModelConfig } from '@travetto/model-dynamodb';
 
-import { CacheServiceSuite } from '@travetto/cache/support/test/service';
+import { CacheServiceSuite } from '@travetto/cache/support/test/service.ts';
 
 class Config {
   @InjectableFactory(CacheSymbols.Model)

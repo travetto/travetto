@@ -1,9 +1,9 @@
 import { AppError, asConstructable, castTo, Class } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ModelType } from '../types/model';
-import { ModelRegistry } from './model';
-import { DataHandler, IndexConfig, ModelOptions, PrePersistScope } from './types';
+import { ModelType } from '../types/model.ts';
+import { ModelRegistry } from './model.ts';
+import { DataHandler, IndexConfig, ModelOptions, PrePersistScope } from './types.ts';
 
 /**
  * Model decorator, extends `@Schema`

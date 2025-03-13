@@ -3,8 +3,8 @@ import { pipeline } from 'node:stream/promises';
 
 import { asFull } from '@travetto/runtime';
 
-import { HttpResponse } from '../types';
-import { WebSymbols } from '../symbols';
+import { HttpResponse } from '../types.ts';
+import { WebSymbols } from '../symbols.ts';
 
 /**
  * Base response object

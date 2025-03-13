@@ -2,8 +2,8 @@ import { Runtime } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 
-import { WebServerHandle } from '../src/types';
-import { NetUtil } from '../src/util/net';
+import { WebServerHandle } from '../src/types.ts';
+import { NetUtil } from '../src/util/net.ts';
 
 /**
  * Run a web server as an application
@@ -24,7 +24,7 @@ export class RunWebCommand implements CliCommandShape {
   }
 
   async main(): Promise<WebServerHandle | void> {
-    const { WebApplication } = await import('../src/application/app');
+    const { WebApplication } = await import('../src/application/app.ts');
     try {
       return await DependencyRegistry.runInstance(WebApplication);
     } catch (err) {

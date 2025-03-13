@@ -3,10 +3,10 @@ import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, Runtime, TimeUtil, Util } from '@travetto/runtime';
 
-import { CacheError } from './error';
-import { CacheUtil } from './util';
-import { CacheSymbols } from './symbols';
-import { CacheAware } from './types';
+import { CacheError } from './error.ts';
+import { CacheUtil } from './util.ts';
+import { CacheSymbols } from './symbols.ts';
+import { CacheAware } from './types.ts';
 
 const INFINITE_MAX_AGE = TimeUtil.asMillis(10, 'y');
 

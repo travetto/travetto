@@ -2,7 +2,7 @@ import { AsyncContextValue, AsyncContext } from '@travetto/context';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, castTo, Class, toConcrete } from '@travetto/runtime';
 
-import { FilterContext, FilterNext, HttpRequest, HttpResponse } from './types';
+import { FilterContext, FilterNext, HttpRequest, HttpResponse } from './types.ts';
 
 @Injectable()
 export class WebContext {

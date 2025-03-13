@@ -6,13 +6,13 @@ import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
 
-import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { BaseWebSuite } from '@travetto/web/support/test/base';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
 
-import { Login, Authenticated, Logout } from '../../src/decorator';
-import { WebAuthConfig } from '../../src/config';
-import { CommonPrincipalCodecSymbol } from '../../src/types';
-import { JWTPrincipalCodec } from '../../src/codec';
+import { Login, Authenticated, Logout } from '../../src/decorator.ts';
+import { WebAuthConfig } from '../../src/config.ts';
+import { CommonPrincipalCodecSymbol } from '../../src/types.ts';
+import { JWTPrincipalCodec } from '../../src/codec.ts';
 
 const TestAuthSymbol = Symbol.for('TEST_AUTH');
 

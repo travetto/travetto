@@ -5,7 +5,7 @@ import {
   BodyParseInterceptor, FilterContext, FilterNext, ControllerRegistry, HttpInterceptor, WebSymbols, EndpointConfig
 } from '@travetto/web';
 
-import { WebRpcConfig } from './config';
+import { WebRpcConfig } from './config.ts';
 
 /**
  * Exposes functionality for RPC behavior

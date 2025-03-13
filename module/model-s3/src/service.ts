@@ -15,7 +15,7 @@ import {
 import { Injectable } from '@travetto/di';
 import { Class, AppError, castTo, asFull, BlobMeta, ByteRange, BinaryInput, BinaryUtil, TimeSpan, TimeUtil } from '@travetto/runtime';
 
-import { S3ModelConfig } from './config';
+import { S3ModelConfig } from './config.ts';
 
 function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && typeof o === 'object' && '$metadata' in o;

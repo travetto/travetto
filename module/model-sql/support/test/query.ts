@@ -3,10 +3,10 @@ import assert from 'node:assert';
 import { Schema, FieldConfig } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
-import { BaseModelSuite } from '@travetto/model/support/test/base';
+import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import { VisitStack } from '../../src/types';
-import { SQLModelService } from '../../src/service';
+import { VisitStack } from '../../src/types.ts';
+import { SQLModelService } from '../../src/service.ts';
 
 @Schema()
 class User {

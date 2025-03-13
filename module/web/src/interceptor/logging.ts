@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types';
-import { FilterContext, FilterNext, HttpRequest, HttpResponse } from '../types';
-import { WebSymbols } from '../symbols';
-import { SerializeInterceptor } from './serialize';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
+import { FilterContext, FilterNext, HttpRequest, HttpResponse } from '../types.ts';
+import { WebSymbols } from '../symbols.ts';
+import { SerializeInterceptor } from './serialize.ts';
 
 /**
  * Web logging configuration

@@ -9,8 +9,8 @@ import { Controller, Get, Body, Post, Put, HttpRequest, FilterContext, HttpInter
 import { Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
-import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { BaseWebSuite } from '@travetto/web/support/test/base';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 

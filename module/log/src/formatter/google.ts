@@ -1,7 +1,7 @@
 import { Injectable } from '@travetto/di';
 
-import { LogFormatter, LogEvent } from '../types';
-import { LogFormatUtil } from './util';
+import { LogFormatter, LogEvent } from '../types.ts';
+import { LogFormatUtil } from './util.ts';
 
 /**
  * Google Logging Formatter

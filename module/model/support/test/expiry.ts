@@ -4,11 +4,11 @@ import timers from 'node:timers/promises';
 import { Suite, Test } from '@travetto/test';
 import { TimeSpan, TimeUnit, TimeUtil } from '@travetto/runtime';
 
-import { ExpiresAt, Model } from '../../src/registry/decorator';
-import { ModelExpirySupport } from '../../src/types/expiry';
-import { ModelExpiryUtil } from '../../src/util/expiry';
-import { NotFoundError } from '../../src/error/not-found';
-import { BaseModelSuite } from './base';
+import { ExpiresAt, Model } from '../../src/registry/decorator.ts';
+import { ModelExpirySupport } from '../../src/types/expiry.ts';
+import { ModelExpiryUtil } from '../../src/util/expiry.ts';
+import { NotFoundError } from '../../src/error/not-found.ts';
+import { BaseModelSuite } from './base.ts';
 
 @Model('expiry-user')
 export class ExpiryUser {

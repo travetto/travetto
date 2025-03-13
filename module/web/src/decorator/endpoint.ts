@@ -1,9 +1,9 @@
 import { asConstructable } from '@travetto/runtime';
 
-import { HttpMethodOrAll, EndpointHandler } from '../types';
+import { HttpMethodOrAll, EndpointHandler } from '../types.ts';
 
-import { ControllerRegistry } from '../registry/controller';
-import { EndpointConfig, EndpointIOType } from '../registry/types';
+import { ControllerRegistry } from '../registry/controller.ts';
+import { EndpointConfig, EndpointIOType } from '../registry/types.ts';
 
 type HttpEndpointDescriptor = TypedPropertyDescriptor<EndpointHandler>;
 type HttpEndpointDecorator = <T>(target: T, prop: symbol | string, descriptor: HttpEndpointDescriptor) => HttpEndpointDescriptor;

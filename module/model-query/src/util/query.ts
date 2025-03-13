@@ -2,8 +2,8 @@ import { Class, AppError, TimeUtil, castTo, hasFunction } from '@travetto/runtim
 import { ModelType, ModelRegistry, NotFoundError } from '@travetto/model';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { WhereClause, WhereClauseRaw } from '../model/where-clause';
-import { ModelQuerySupport } from '../types/query';
+import { WhereClause, WhereClauseRaw } from '../model/where-clause.ts';
+import { ModelQuerySupport } from '../types/query.ts';
 
 /**
  * Common model utils, that should be usable by end users

@@ -1,14 +1,14 @@
 import vscode from 'vscode';
 
-import { Activatible } from '../../../core/activation';
-import { ActionStorage } from '../../../core/storage';
+import { Activatible } from '../../../core/activation.ts';
+import { ActionStorage } from '../../../core/storage.ts';
 
-import { BaseFeature } from '../../base';
-import { EnvDict, TargetEvent } from '../../../core/types';
-import { RunUtil } from '../../../core/run';
+import { BaseFeature } from '../../base.ts';
+import { EnvDict, TargetEvent } from '../../../core/types.ts';
+import { RunUtil } from '../../../core/run.ts';
 
-import { RunChoice } from './types';
-import { CliRunUtil } from './util';
+import { RunChoice } from './types.ts';
+import { CliRunUtil } from './util.ts';
 
 type Recent = { mode: 'recent', count: number };
 type All = { mode: 'all' };

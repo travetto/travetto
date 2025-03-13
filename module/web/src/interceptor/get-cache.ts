@@ -1,11 +1,11 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { FilterContext, FilterNext } from '../types';
-import { EndpointConfig } from '../registry/types';
+import { FilterContext, FilterNext } from '../types.ts';
+import { EndpointConfig } from '../registry/types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types';
-import { SerializeInterceptor } from './serialize';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
+import { SerializeInterceptor } from './serialize.ts';
 
 @Config('web.getCache')
 export class GetCacheConfig extends ManagedInterceptorConfig { }

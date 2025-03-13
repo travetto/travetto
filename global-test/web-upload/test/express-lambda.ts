@@ -3,8 +3,8 @@ import { AwsLambdaExpressWebServer } from '@travetto/web-express-lambda';
 import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaWebApplication } from '@travetto/web-aws-lambda';
 
-import { WebUploadServerSuite } from '@travetto/web-upload/support/test/server';
-import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server';
+import { WebUploadServerSuite } from '@travetto/web-upload/support/test/server.ts';
+import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server.ts';
 
 const EXPRESS = Symbol.for('express-lambda');
 

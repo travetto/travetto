@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { DecoratorMeta, NodeTransformer, State, TransformPhase, TransformerType, Transformer, ModuleNameSymbol } from './types/visitor';
+import { DecoratorMeta, NodeTransformer, State, TransformPhase, TransformerType, Transformer, ModuleNameSymbol } from './types/visitor.ts';
 
 const HandlersProp = Symbol.for('@travetto/transformer:handlers');
 

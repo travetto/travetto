@@ -24,8 +24,8 @@ import {
 } from '@travetto/runtime';
 import { Injectable } from '@travetto/di';
 
-import { MongoUtil, PlainIdx, WithId } from './internal/util';
-import { MongoModelConfig } from './config';
+import { MongoUtil, PlainIdx, WithId } from './internal/util.ts';
+import { MongoModelConfig } from './config.ts';
 
 const ListIndexSymbol = Symbol.for('@travetto/mongo-model:list-index');
 

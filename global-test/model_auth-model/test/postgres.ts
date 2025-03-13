@@ -4,8 +4,8 @@ import { AsyncContext } from '@travetto/context';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { PostgreSQLDialect } from '@travetto/model-postgres';
 
-import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model';
-import { WithSuiteContext } from '@travetto/context/support/test/context';
+import { AuthModelServiceSuite, TestModelSvcSymbol } from '@travetto/auth-model/support/test/model.ts';
+import { WithSuiteContext } from '@travetto/context/support/test/context.ts';
 
 class Config {
   @InjectableFactory({ primary: true })

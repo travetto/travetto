@@ -16,11 +16,11 @@ import {
 } from '@travetto/model-query';
 
 
-import { ElasticsearchModelConfig } from './config';
-import { EsBulkError } from './internal/types';
-import { ElasticsearchQueryUtil } from './internal/query';
-import { ElasticsearchSchemaUtil } from './internal/schema';
-import { IndexManager } from './index-manager';
+import { ElasticsearchModelConfig } from './config.ts';
+import { EsBulkError } from './internal/types.ts';
+import { ElasticsearchQueryUtil } from './internal/query.ts';
+import { ElasticsearchSchemaUtil } from './internal/schema.ts';
+import { IndexManager } from './index-manager.ts';
 
 /**
  * Elasticsearch model source.

@@ -5,12 +5,12 @@ import { Inject } from '@travetto/di';
 import { HttpResponse } from '@travetto/web';
 import { asFull } from '@travetto/runtime';
 
-import { InjectableSuite } from '@travetto/di/support/test/suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
-import { AuthContextInterceptor } from '../src/interceptors/context';
-import { JWTPrincipalCodec } from '../src/codec';
-import { WebAuthConfig } from '../src/config';
-import { CommonPrincipalCodecSymbol } from '../src/types';
+import { AuthContextInterceptor } from '../src/interceptors/context.ts';
+import { JWTPrincipalCodec } from '../src/codec.ts';
+import { WebAuthConfig } from '../src/config.ts';
+import { CommonPrincipalCodecSymbol } from '../src/types.ts';
 
 @Suite()
 @InjectableSuite()

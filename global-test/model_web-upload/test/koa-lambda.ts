@@ -3,9 +3,9 @@ import { AwsLambdaKoaWebServer } from '@travetto/web-koa-lambda';
 import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaWebApplication } from '@travetto/web-aws-lambda';
 
-import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server';
+import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server.ts';
 
-import { ModelBlobWebUploadServerSuite } from './server';
+import { ModelBlobWebUploadServerSuite } from './server.ts';
 
 const KOA = Symbol.for('koa-lambda');
 

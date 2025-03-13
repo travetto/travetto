@@ -5,7 +5,7 @@ import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
 import { AuthenticationError, AuthContext } from '@travetto/auth';
 
-import { AuthContextInterceptor } from './context';
+import { AuthContextInterceptor } from './context.ts';
 
 function matchPermissionSet(rule: string[], perms: Set<string>): boolean {
   for (const el of rule) {

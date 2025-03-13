@@ -4,13 +4,13 @@ import { JSXElement } from '@travetto/doc/jsx-runtime';
 import { Runtime, RuntimeIndex } from '@travetto/runtime';
 import { PackageUtil } from '@travetto/manifest';
 
-import { highlight } from './code-highlight';
-import { RenderProvider, RenderState } from '../types';
-import { c, getComponentName } from '../jsx';
-import { MOD_MAPPING } from '../mapping/mod-mapping';
-import { LIB_MAPPING } from '../mapping/lib-mapping';
-import { RenderContext } from './context';
-import { DocResolveUtil } from '../util/resolve';
+import { highlight } from './code-highlight.ts';
+import { RenderProvider, RenderState } from '../types.ts';
+import { c, getComponentName } from '../jsx.ts';
+import { MOD_MAPPING } from '../mapping/mod-mapping.ts';
+import { LIB_MAPPING } from '../mapping/lib-mapping.ts';
+import { RenderContext } from './context.ts';
+import { DocResolveUtil } from '../util/resolve.ts';
 
 const ESCAPE_ENTITIES: Record<string, string> = { '<': '&lt;', '>': '&gt;', '&': '&amp;', '{': "{{'{'}}", '}': "{{'}'}}" };
 const ENTITY_RE = new RegExp(`[${Object.keys(ESCAPE_ENTITIES).join('')}]`, 'gm');

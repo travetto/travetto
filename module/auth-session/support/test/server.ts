@@ -7,8 +7,8 @@ import { AuthContext, AuthenticationError } from '@travetto/auth';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Util } from '@travetto/runtime';
 
-import { InjectableSuite } from '@travetto/di/support/test/suite';
-import { BaseWebSuite } from '@travetto/web/support/test/base';
+import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
+import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
 
 @Suite()
 @InjectableSuite()
@@ -40,16 +40,16 @@ export abstract class AuthSessionServerSuite extends BaseWebSuite {
     assert(this.sessionContext.get() === undefined);
     assert(await this.session.load() === undefined);
 
-    const sess = this.sessionContext.get(true);
-    assert(sess.id === this.auth.principal.sessionId);
-    sess.data = { name: 'bob' };
+    const session = this.sessionContext.get(true);
+    assert(session.id === this.auth.principal.sessionId);
+    session.data = { name: 'bob' };
     await this.session.persist();
 
     this.sessionContext.set(undefined); // Disconnect
 
     assert(await this.session.load() !== undefined);
-    const sess2 = this.sessionContext.get(true);
-    assert(sess2.data?.name === 'bob');
+    const session2 = this.sessionContext.get(true);
+    assert(session2.data?.name === 'bob');
 
     this.auth.principal = {
       id: 'orange',
@@ -60,8 +60,8 @@ export abstract class AuthSessionServerSuite extends BaseWebSuite {
     this.sessionContext.set(undefined); // Disconnect
 
     assert(await this.session.load() === undefined);
-    const sess3 = this.sessionContext.get(true);
-    assert.deepStrictEqual(sess3.data, {});
+    const session3 = this.sessionContext.get(true);
+    assert.deepStrictEqual(session3.data, {});
   }
 
   @WithAsyncContext()

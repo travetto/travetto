@@ -6,13 +6,13 @@ import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '
 import { castTo } from '@travetto/runtime';
 import { ContextParam } from '@travetto/context';
 
-import { QueryParam, HeaderParam, PathParam } from '../src/decorator/param';
-import { Post, Get } from '../src/decorator/endpoint';
-import { Controller } from '../src/decorator/controller';
-import { ControllerRegistry } from '../src/registry/controller';
-import { HttpMethodOrAll, HttpRequest, HttpResponse } from '../src/types';
-import { EndpointConfig } from '../src/registry/types';
-import { EndpointUtil } from '../src/util/endpoint';
+import { QueryParam, HeaderParam, PathParam } from '../src/decorator/param.ts';
+import { Post, Get } from '../src/decorator/endpoint.ts';
+import { Controller } from '../src/decorator/controller.ts';
+import { ControllerRegistry } from '../src/registry/controller.ts';
+import { HttpMethodOrAll, HttpRequest, HttpResponse } from '../src/types.ts';
+import { EndpointConfig } from '../src/registry/types.ts';
+import { EndpointUtil } from '../src/util/endpoint.ts';
 import { HttpRequestCore, HttpResponseCore } from '@travetto/web';
 
 class User {

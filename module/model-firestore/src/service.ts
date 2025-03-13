@@ -8,7 +8,7 @@ import {
   ModelCrudUtil, ModelIndexedUtil,
 } from '@travetto/model';
 
-import { FirestoreModelConfig } from './config';
+import { FirestoreModelConfig } from './config.ts';
 
 const clone = structuredClone;
 

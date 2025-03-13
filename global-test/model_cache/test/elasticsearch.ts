@@ -4,7 +4,7 @@ import { Suite } from '@travetto/test';
 import { CacheSymbols } from '@travetto/cache';
 import { ElasticsearchModelService, ElasticsearchModelConfig } from '@travetto/model-elasticsearch';
 
-import { CacheServiceSuite } from '@travetto/cache/support/test/service';
+import { CacheServiceSuite } from '@travetto/cache/support/test/service.ts';
 
 class Config {
   @InjectableFactory(CacheSymbols.Model)

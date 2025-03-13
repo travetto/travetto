@@ -1,6 +1,6 @@
 import { hasFunction } from '@travetto/runtime';
 
-import { ModelQueryFacetSupport } from '../types/facet';
+import { ModelQueryFacetSupport } from '../types/facet.ts';
 
 export class ModelQueryFacetUtil {
   /**

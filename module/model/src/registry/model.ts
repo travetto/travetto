@@ -3,10 +3,10 @@ import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, castTo, Class, describeFunction, asFull } from '@travetto/runtime';
 
-import { IndexConfig, IndexType, ModelOptions } from './types';
-import { NotFoundError } from '../error/not-found';
-import { ModelType } from '../types/model';
-import { IndexNotSupported } from '../error/invalid-index';
+import { IndexConfig, IndexType, ModelOptions } from './types.ts';
+import { NotFoundError } from '../error/not-found.ts';
+import { ModelType } from '../types/model.ts';
+import { IndexNotSupported } from '../error/invalid-index.ts';
 
 /**
  * Registry for all models, built on the Metadata registry

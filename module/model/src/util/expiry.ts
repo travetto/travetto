@@ -1,8 +1,8 @@
 import { ShutdownManager, Class, TimeSpan, TimeUtil, Util, castTo, hasFunction } from '@travetto/runtime';
 
-import { ModelRegistry } from '../registry/model';
-import { ModelExpirySupport } from '../types/expiry';
-import { ModelType } from '../types/model';
+import { ModelRegistry } from '../registry/model.ts';
+import { ModelExpirySupport } from '../types/expiry.ts';
+import { ModelType } from '../types/model.ts';
 
 /**
  * Utils for model expiry

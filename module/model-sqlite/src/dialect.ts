@@ -6,7 +6,7 @@ import { castTo } from '@travetto/runtime';
 
 import { SQLModelConfig, SQLDialect, VisitStack } from '@travetto/model-sql';
 
-import { SqliteConnection } from './connection';
+import { SqliteConnection } from './connection.ts';
 
 /**
  * Sqlite Dialect for the SQL Model Source

@@ -262,10 +262,10 @@ To enforce that these contracts are honored, the module provides shared test sui
 import { DependencyRegistry } from '@travetto/di';
 import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
 
-import { ModelBulkUtil } from '../../src/util/bulk';
-import { ModelCrudUtil } from '../../src/util/crud';
-import { ModelType } from '../../src/types/model';
-import { ModelSuite } from './suite';
+import { ModelBulkUtil } from '../../src/util/bulk.ts';
+import { ModelCrudUtil } from '../../src/util/crud.ts';
+import { ModelType } from '../../src/types/model.ts';
+import { ModelSuite } from './suite.ts';
 
 type ServiceClass = { serviceClass: { new(): unknown } };
 

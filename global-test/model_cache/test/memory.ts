@@ -3,7 +3,7 @@ import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { Suite } from '@travetto/test';
 import { CacheSymbols } from '@travetto/cache';
 
-import { CacheServiceSuite } from '@travetto/cache/support/test/service';
+import { CacheServiceSuite } from '@travetto/cache/support/test/service.ts';
 
 class Config {
   @InjectableFactory(CacheSymbols.Model)

@@ -3,10 +3,10 @@ import assert from 'node:assert';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { BinaryUtil, Util } from '@travetto/runtime';
 
-import { BaseModelSuite } from '@travetto/model/support/test/base';
+import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import { ModelBlobSupport } from '../../src/types/blob';
-import { ModelBlobUtil } from '../../src/util/blob';
+import { ModelBlobSupport } from '../../src/types/blob.ts';
+import { ModelBlobUtil } from '../../src/util/blob.ts';
 
 const meta = BinaryUtil.getBlobMeta;
 

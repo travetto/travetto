@@ -4,8 +4,8 @@ import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry, Validator } from '@travetto/schema';
 import { Controller, Redirect, Post, Get, HttpMethodOrAll, ControllerRegistry } from '@travetto/web';
 
-import { BaseWebSuite } from './base';
-import { PathParam, QueryParam } from '../../src/decorator/param';
+import { BaseWebSuite } from './base.ts';
+import { PathParam, QueryParam } from '../../src/decorator/param.ts';
 
 type Errors = { details: { errors: { path: string }[] }, message: string };
 

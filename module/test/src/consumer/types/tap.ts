@@ -3,10 +3,10 @@ import { stringify } from 'yaml';
 import { Terminal } from '@travetto/terminal';
 import { TimeUtil, Runtime, RuntimeIndex, hasToJSON } from '@travetto/runtime';
 
-import type { TestEvent } from '../../model/event';
-import type { SuitesSummary, TestConsumerShape } from '../types';
-import { TestConsumer } from '../registry';
-import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
+import type { TestEvent } from '../../model/event.ts';
+import type { SuitesSummary, TestConsumerShape } from '../types.ts';
+import { TestConsumer } from '../registry.ts';
+import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer.ts';
 
 /**
   * TAP Format consumer

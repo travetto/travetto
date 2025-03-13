@@ -1,6 +1,6 @@
-import type { HttpInterceptor } from '../interceptor/types';
-import type { WebServerHandle } from '../types';
-import type { EndpointConfig } from '../registry/types';
+import type { HttpInterceptor } from '../interceptor/types.ts';
+import type { WebServerHandle } from '../types.ts';
+import type { EndpointConfig } from '../registry/types.ts';
 
 /**
  * Defines the contract for any http server to support the framework.

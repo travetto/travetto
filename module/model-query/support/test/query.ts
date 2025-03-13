@@ -4,11 +4,11 @@ import { Suite, Test } from '@travetto/test';
 import { TimeUtil } from '@travetto/runtime';
 import { NotFoundError, ModelCrudSupport } from '@travetto/model';
 
-import { BaseModelSuite } from '@travetto/model/support/test/base';
+import { BaseModelSuite } from '@travetto/model/support/test/base.ts';
 
-import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './model';
+import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './model.ts';
 
-import { ModelQuerySupport } from '../../src/types/query';
+import { ModelQuerySupport } from '../../src/types/query.ts';
 
 @Suite()
 export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport & ModelCrudSupport> {

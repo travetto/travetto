@@ -1,8 +1,8 @@
 import { castTo, Runtime } from '@travetto/runtime';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { TestConsumerRegistry } from '../../src/consumer/registry';
-import type { RunState } from '../../src/execute/types';
+import { TestConsumerRegistry } from '../../src/consumer/registry.ts';
+import type { RunState } from '../../src/execute/types.ts';
 
 /**
  * Run tests given the input state

@@ -3,7 +3,7 @@ import { ExpressWebServer } from '@travetto/web-express';
 import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
 
-import { AuthWebServerSuite } from '@travetto/auth-web/support/test/server';
+import { AuthWebServerSuite } from '@travetto/auth-web/support/test/server.ts';
 
 const EXPRESS = Symbol.for('express');
 

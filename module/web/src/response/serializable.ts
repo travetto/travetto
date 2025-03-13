@@ -1,4 +1,4 @@
-import { HttpResponse, HttpPayload } from '../types';
+import { HttpResponse, HttpPayload } from '../types.ts';
 
 /**
  * Custom serialization contract

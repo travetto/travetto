@@ -3,16 +3,16 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
-import { WebServerHandle } from '../types';
-import { WebConfig } from './config';
-import { EndpointUtil } from '../util/endpoint';
-import { HttpInterceptor } from '../interceptor/types';
-import { ControllerRegistry } from '../registry/controller';
-import { WebSymbols } from '../symbols';
-import { WebServer } from './server';
-import { WebCommonUtil } from '../util/common';
-import { EndpointConfig } from '../registry/types';
-import { WebContext } from '../context';
+import { WebServerHandle } from '../types.ts';
+import { WebConfig } from './config.ts';
+import { EndpointUtil } from '../util/endpoint.ts';
+import { HttpInterceptor } from '../interceptor/types.ts';
+import { ControllerRegistry } from '../registry/controller.ts';
+import { WebSymbols } from '../symbols.ts';
+import { WebServer } from './server.ts';
+import { WebCommonUtil } from '../util/common.ts';
+import { EndpointConfig } from '../registry/types.ts';
+import { WebContext } from '../context.ts';
 
 /**
  * The web application

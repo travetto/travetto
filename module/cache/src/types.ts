@@ -1,6 +1,6 @@
 import { TypedFunction } from '@travetto/runtime';
 
-import { CacheSymbols } from './symbols';
+import { CacheSymbols } from './symbols.ts';
 
 /**
  * A minimal config for a cache operation

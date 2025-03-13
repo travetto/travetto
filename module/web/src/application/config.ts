@@ -3,7 +3,7 @@ import os from 'node:os';
 import { Config, EnvVar } from '@travetto/config';
 import { Required } from '@travetto/schema';
 
-import { WebSslConfig } from './ssl';
+import { WebSslConfig } from './ssl.ts';
 
 /**
  * Web configuration

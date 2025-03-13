@@ -1,8 +1,8 @@
 import { castTo, MethodDescriptor, TimeSpan, TimeUtil } from '@travetto/runtime';
 
-import { CacheService } from './service';
-import { CoreCacheConfig, CacheConfig, CacheAware } from './types';
-import { CacheSymbols } from './symbols';
+import { CacheService } from './service.ts';
+import { CoreCacheConfig, CacheConfig, CacheAware } from './types.ts';
+import { CacheSymbols } from './symbols.ts';
 
 /**
  * Indicates a method is intended to cache.  The return type must be properly serializable

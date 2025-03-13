@@ -4,7 +4,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Precision, Max, Min, Schema } from '@travetto/schema';
 
-import { SchemaFaker } from '../src/faker';
+import { SchemaFaker } from '../src/faker.ts';
 
 @Schema()
 class Tag {
@@ -71,7 +71,7 @@ class DataGenerationSuite {
     const user = SchemaFaker.generate(UserScore);
     assert(user.score >= -10);
     assert(user.score <= 100);
-    const scoreRepr = `${user.score}`;
-    assert(!scoreRepr.includes('.') || scoreRepr.split('.')[1].length < 3);
+    const scoreText = `${user.score}`;
+    assert(!scoreText.includes('.') || scoreText.split('.')[1].length < 3);
   }
 }

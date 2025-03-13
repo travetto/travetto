@@ -2,7 +2,7 @@ import { MailService, EmailOptions, MailTransport } from '@travetto/email';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { toConcrete } from '@travetto/runtime';
 
-import { EditorConfig } from './config';
+import { EditorConfig } from './config.ts';
 
 /**
  * Editor mail sender

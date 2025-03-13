@@ -4,8 +4,8 @@ import {
 } from '@travetto/runtime';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
-import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig, PostConstructHandler } from './types';
-import { InjectionError } from './error';
+import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig, PostConstructHandler } from './types.ts';
+import { InjectionError } from './error.ts';
 
 class AutoCreate { }
 type TargetId = string;
@@ -231,7 +231,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   override async init(): Promise<void> {
     await super.init();
     if (Runtime.dynamic) {
-      const { DependencyRegistration } = await import('../support/dynamic.injection');
+      const { DependencyRegistration } = await import('../support/dynamic.injection.ts');
       DependencyRegistration.init(this);
     }
 

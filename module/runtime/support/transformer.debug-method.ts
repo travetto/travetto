@@ -19,7 +19,7 @@ export class DebugEntryTransformer {
   @OnMethod('DebugBreak')
   static debugOnEntry(state: TransformerState & DebugState, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (!state[DebugSymbol]) {
-      const imp = state.importFile('@travetto/runtime/src/debug').ident;
+      const imp = state.importFile('@travetto/runtime/src/debug.ts').ident;
       state[DebugSymbol] = CoreUtil.createAccess(state.factory, imp, 'tryDebugger');
     }
 

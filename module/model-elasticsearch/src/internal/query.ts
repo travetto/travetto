@@ -5,7 +5,7 @@ import { WhereClause, SelectClause, SortClause, Query, ModelQueryUtil } from '@t
 import { IndexConfig, ModelType, ModelRegistry } from '@travetto/model';
 import { DataUtil, SchemaRegistry } from '@travetto/schema';
 
-import { EsSchemaConfig } from './types';
+import { EsSchemaConfig } from './types.ts';
 
 /**
  * Support tools for dealing with elasticsearch specific requirements

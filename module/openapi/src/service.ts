@@ -6,8 +6,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { ControllerRegistry, ControllerVisitUtil, WebConfig } from '@travetto/web';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config';
-import { OpenapiVisitor } from './spec-generate';
+import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config.ts';
+import { OpenapiVisitor } from './spec-generate.ts';
 
 /**
  * Open API generation service

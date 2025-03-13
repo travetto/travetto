@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Util } from '@travetto/runtime';
 
-import { PassportUtil } from '../src/util';
+import { PassportUtil } from '../src/util.ts';
 
 @Suite()
 class PassportUtilSuite {

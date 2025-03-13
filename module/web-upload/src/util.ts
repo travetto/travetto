@@ -10,7 +10,7 @@ import busboy from '@fastify/busboy';
 import { HttpRequest, MimeUtil, WebSymbols } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
-import { WebUploadConfig } from './config';
+import { WebUploadConfig } from './config.ts';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 

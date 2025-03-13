@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
-import { HttpPayload } from '../types';
+import { HttpPayload } from '../types.ts';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
