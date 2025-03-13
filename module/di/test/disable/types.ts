@@ -1,4 +1,4 @@
-import { Injectable, InjectableFactory } from '../../__index__';
+import { Injectable, InjectableFactory } from '../../src/decorator';
 
 @Injectable({ enabled: false })
 export class MyCustomClass {
