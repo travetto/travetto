@@ -17,7 +17,7 @@ function matchPermissionSet(rule: string[], perms: Set<string>): boolean {
 }
 
 @Config('web.auth.verify')
-export class AuthVerifyConfig extends ManagedInterceptorConfig {
+export class WebAuthVerifyConfig extends ManagedInterceptorConfig {
   /**
    * Default state to care about
    */
@@ -37,12 +37,12 @@ export class AuthVerifyConfig extends ManagedInterceptorConfig {
  * Enforces if the user should be authenticated
  */
 @Injectable()
-export class AuthVerifyInterceptor implements HttpInterceptor<AuthVerifyConfig> {
+export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfig> {
 
   dependsOn = [SerializeInterceptor, AuthContextInterceptor];
 
   @Inject()
-  config: AuthVerifyConfig;
+  config: WebAuthVerifyConfig;
 
   @Inject()
   authContext: AuthContext;
@@ -54,7 +54,7 @@ export class AuthVerifyInterceptor implements HttpInterceptor<AuthVerifyConfig> 
     return false;
   }
 
-  finalizeConfig(config: AuthVerifyConfig): AuthVerifyConfig {
+  finalizeConfig(config: WebAuthVerifyConfig): WebAuthVerifyConfig {
     config.matcher = Util.allowDeny<string[], [Set<string>]>(config.permissions ?? [],
       x => x.split('|'),
       matchPermissionSet,
@@ -62,7 +62,7 @@ export class AuthVerifyInterceptor implements HttpInterceptor<AuthVerifyConfig> 
     return config;
   }
 
-  async intercept({ req, config }: FilterContext<AuthVerifyConfig>): Promise<void> {
+  async intercept({ req, config }: FilterContext<WebAuthVerifyConfig>): Promise<void> {
     const principal = this.authContext.principal;
 
     switch (config?.state) {

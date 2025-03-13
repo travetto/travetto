@@ -359,7 +359,6 @@ npx trv run:web
       },
       AsyncContextConfig: {},
       AuthConfig: { maxAge: '1h', rollingRenew: true },
-      AuthVerifyConfig: { permissions: {} },
       BodyParseConfig: { limit: '1mb', parsingTypes: {} },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       ConsoleLogAppenderConfig: { logToLevel: true },
@@ -410,6 +409,7 @@ npx trv run:web
       },
       WebAuthLoginConfig: {},
       WebAuthLogoutConfig: {},
+      WebAuthVerifyConfig: { permissions: {} },
       WebConfig: {
         serve: true,
         port: 12555,
