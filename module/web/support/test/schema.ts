@@ -93,13 +93,13 @@ class SchemaAPI {
     return new Redirect('google.com');
   }
 
-  @Get('/customRender')
-  async customRender() {
+  @Get('/customSerialize')
+  async customSerialize() {
     return {
       /**
        * @returns {Promise<User>}
        */
-      render() {
+      serialize() {
 
       }
     };
@@ -108,8 +108,8 @@ class SchemaAPI {
   /**
    * @returns {Promise<User>}
    */
-  @Get('/customRender2')
-  async customRender2() {
+  @Get('/customSerialize2')
+  async customSerialize2() {
   }
 }
 
@@ -266,14 +266,14 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   }
 
   @Test()
-  async verifyCustomRenderable() {
-    const ep = getEndpoint('/customRender', 'get');
+  async verifyCustomSerializeable() {
+    const ep = getEndpoint('/customSerialize', 'get');
     assert(ep.responseType?.type === User);
   }
 
   @Test()
-  async verifyCustomRenderable2() {
-    const ep = getEndpoint('/customRender2', 'get');
+  async verifyCustomSerializeable2() {
+    const ep = getEndpoint('/customSerialize2', 'get');
     assert(ep.responseType?.type === User);
   }
 }

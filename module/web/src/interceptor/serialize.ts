@@ -8,14 +8,17 @@ import { HttpInterceptor, ManagedInterceptorConfig } from './types';
 import { FilterContext, FilterNext, HttpPayload, HttpRequest, HttpResponse } from '../types';
 import { HttpPayloadUtil } from '../util/payload';
 import { WebSymbols } from '../symbols';
-import { HttpCompressConfig, HttpCompressionUtil } from '../util/compress';
+import { HttpCompressionUtil, HttpCompressEncoding, HttpCompressOptions } from '../util/compress';
 
 const isSerializable = hasFunction<HttpSerializable>('serialize');
 
 @Config('web.serialize')
 class SerializeConfig extends ManagedInterceptorConfig {
-  compress: HttpCompressConfig;
-  compressionEnabled = false;
+  compress = true;
+  compressEncodings: HttpCompressEncoding[] = ['br', 'gzip', 'deflate', 'identity'];
+  compressEncodingsPreferred: HttpCompressEncoding[] = ['br', 'gzip'];
+  compressOptions: HttpCompressOptions = {};
+  errorStackTrace = true;
 }
 
 /**
@@ -56,53 +59,55 @@ export class SerializeInterceptor implements HttpInterceptor<SerializeConfig> {
       }
     }
 
-    // Stream it
-    if (this.config.compressionEnabled && HttpCompressionUtil.shouldCompress(this.config.compress, req, res, basic)) {
-      const outputStream = HttpCompressionUtil.getCompressor(this.config.compress, req.header('accept-encoding')?.toString());
-      if (outputStream) {
-        const original = basic.data;
-        basic.data = outputStream;
-        res.removeHeader('content-length');
-
-        if (Buffer.isBuffer(original)) {
-          outputStream.write(original);
-        } else {
-          original.pipe(outputStream);
-        }
-      }
-    }
-
     // Defer to preset status code if already done
-    res.statusCode ??= basic.statusCode;
+    res.statusCode = basic.statusCode;
 
-    if (Buffer.isBuffer(basic.data)) {
-      res.send(basic);
+    const compressor = this.config.compress ? HttpCompressionUtil.getCompressor(
+      req, res, this.config.compressOptions, this.config.compressEncodings, this.config.compressEncodingsPreferred
+    ) : undefined;
+
+    // If we are compressing
+    if (compressor?.stream) {
+      res.removeHeader('content-length');
+      res.setHeader('content-encoding', compressor.type);
+
+      if (Buffer.isBuffer(basic.data)) {
+        compressor.stream.end(basic.data);
+      } else {
+        basic.data.pipe(compressor.stream);
+      }
+      await res.sendStream(compressor.stream);
+    } else if (Buffer.isBuffer(basic.data)) {
+      res.end(basic.data);
     } else {
       await res.sendStream(basic.data);
     }
   }
 
   async intercept({ res, req }: FilterContext, next: FilterNext): Promise<void> {
-    let payload: HttpPayload | void;
+    if (this.config.compress) {
+      res.setHeader('Vary', 'Accept-Encoding');
+    }
 
     try {
       const output = await next();
-      payload = isSerializable(output) ? await output.serialize(res) : HttpPayloadUtil.toPayload(output);
+      const payload = isSerializable(output) ? await output.serialize(res) : HttpPayloadUtil.toPayload(output);
+
+      if (!payload) {
+        return; // Nothing to return
+      } else if (res.headersSent) {
+        return console.error('Failed to send, response already sent');
+      }
+      await this.sendPayload(req, res, payload);
     } catch (error) {
       const resolved = error instanceof Error ? error :
         !DataUtil.isPlainObject(error) ? new AppError(`${error}`) :
           new AppError(`${error['message'] || 'Unexpected error'}`, { details: error });
 
-      console.error(resolved.message, { error: resolved });
-      payload = HttpPayloadUtil.fromError(resolved);
+      if (this.config.errorStackTrace) {
+        console.error(resolved.message, { error: resolved });
+      }
+      await this.sendPayload(req, res, HttpPayloadUtil.fromError(resolved));
     }
-
-    if (!payload) {
-      return; // Nothing to return
-    } else if (res.headersSent) {
-      return console.error('Failed to send, response already sent');
-    }
-
-    await this.sendPayload(req, res, payload);
   }
 }

@@ -234,6 +234,10 @@ export interface HttpResponse<T = unknown> {
    */
   removeHeader(key: string): void;
   /**
+   * Add value to vary header, or create if not existing
+   */
+  vary(value: string): void;
+  /**
    * Listen for response events
    * @param ev Name of the event
    * @param cb The callback for the event

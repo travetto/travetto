@@ -45,6 +45,14 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   }
 
   /**
+   * Add value to vary header, or create if not existing
+   */
+  vary(this: HttpResponse, value: string): void {
+    const header = this.getHeader('vary');
+    this.setHeader('vary', header ? `${header}, ${value}` : value);
+  }
+
+  /**
    * Redirect application to a new path
    * @param code The HTTP code to send
    * @param path The new location for the request

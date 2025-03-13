@@ -5,7 +5,8 @@ import { BrotliOptions, constants, createBrotliCompress, createDeflate, createGz
 import Negotiator from 'negotiator';
 
 import { AppError, castTo } from '@travetto/runtime';
-import { HttpPayload, HttpRequest, HttpResponse } from '../types';
+
+import { HttpRequest, HttpResponse } from '../types';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const ENCODING_METHODS = {
@@ -15,40 +16,41 @@ const ENCODING_METHODS = {
   identity: (_?: {}): undefined => undefined
 };
 
-type HttpCompressType = keyof typeof ENCODING_METHODS;
-
-export class HttpCompressConfig {
-  preferredEncodings: HttpCompressType[] = ['br', 'gzip'];
-  supportedEncodings: HttpCompressType[] = ['br', 'gzip', 'deflate', 'identity'];
-  options: ZlibOptions | BrotliOptions = {
-    chunkSize: 2 ** 14,
-    params: {
-      [constants.BROTLI_PARAM_QUALITY]: 4
-    }
-  };
-};
+export type HttpCompressOptions = ZlibOptions & BrotliOptions;
+export type HttpCompressEncoding = keyof typeof ENCODING_METHODS;
 
 export class HttpCompressionUtil {
 
-  static shouldCompress(config: HttpCompressConfig, req: HttpRequest, res: HttpResponse, basic: HttpPayload): boolean {
-    return (basic.length === undefined || basic.length > config.options.chunkSize!) &&
-      req.method !== 'HEAD' &&
-      !res.getHeader('content-encoding') &&
-      !NO_TRANSFORM_REGEX.test(res.getHeader('cache-control')?.toString() ?? '');
-  }
+  static getCompressor(
+    req: HttpRequest, res: HttpResponse,
+    options: HttpCompressOptions,
+    supportedEncodings: HttpCompressEncoding[],
+    preferredEncodings = supportedEncodings
+  ): { type: HttpCompressEncoding, stream: Duplex | undefined } {
+    const length = +(res.getHeader('Content-Length')?.toString() ?? '-1');
+    const chunkSize = options?.chunkSize ?? constants.Z_DEFAULT_CHUNK;
 
-  static getCompressor(config: HttpCompressConfig, acceptEncoding = '*'): Duplex | undefined {
-    const method = new Negotiator({ headers: { 'Accept-Encoding': acceptEncoding } })
+    if (
+      (length >= 0 && length < chunkSize) ||
+      req.method === 'HEAD' ||
+      res.getHeader('content-encoding') ||
+      NO_TRANSFORM_REGEX.test(res.getHeader('cache-control')?.toString() ?? '')
+    ) {
+      return { type: 'identity', stream: undefined };
+    }
+
+    const method = new Negotiator(req)
       // Bad typings, need to override
-      .encoding(...castTo<[string[]]>([config.supportedEncodings, config.preferredEncodings]));
+      .encoding(...castTo<[string[]]>([supportedEncodings, preferredEncodings]));
 
-    if (!method) {
-      const err = new AppError(`Please accept one of: ${config.supportedEncodings.join(',')}.`);
+    if (!method || !req.header('accept-encoding')?.includes(method)) {
+      const err = new AppError(`Please accept one of: ${supportedEncodings.join(', ')}.`);
       Object.assign(err, { statusCode: 406 });
       throw err;
     }
 
-    const type = castTo<HttpCompressType>(method!);
-    return ENCODING_METHODS[type](config.options);
+    const type = castTo<HttpCompressEncoding>(method!);
+    const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...options?.params }, ...options } : { ...options };
+    return { type, stream: ENCODING_METHODS[type](opts) };
   }
 }

@@ -67,7 +67,7 @@ export class CoreWebServerSupport implements WebServerSupport {
       signal: ctrl.signal
     });
 
-    const out = { status: res.status, body: Buffer.from(await (await res.blob()).bytes()), headers: Object.fromEntries(res.headers.entries()) };
+    const out = { status: res.status, body: Buffer.from(await res.arrayBuffer()), headers: Object.fromEntries(res.headers.entries()) };
     ctrl.abort();
     return out;
   }

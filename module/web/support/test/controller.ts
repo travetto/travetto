@@ -21,6 +21,11 @@ export class TestController {
     return { json: true };
   }
 
+  @Get('/json/large/:size')
+  getJSONLarge(size = 20000) {
+    return { json: '0123456789'.repeat(size / 10) };
+  }
+
   @Post('/param/:param')
   withParam(@PathParam() param: string) {
     return { param };
@@ -67,7 +72,7 @@ export class TestController {
        * @returns {string}
        */
       serialize(res) {
-        return res.send('hello');
+        res.send('hello');
       }
     };
   }
