@@ -27,5 +27,6 @@ export * from './src/symbols';
 export * from './src/util/endpoint';
 export * from './src/util/mime';
 export * from './src/util/common';
+export * from './src/util/compress';
 export * from './src/util/net';
 export * from './src/util/payload';

@@ -359,6 +359,7 @@ npx trv run:web
       },
       AsyncContextConfig: {},
       AuthConfig: { maxAge: '1h', rollingRenew: true },
+      AuthVerifyConfig: { permissions: {} },
       BodyParseConfig: { limit: '1mb', parsingTypes: {} },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       ConsoleLogAppenderConfig: { logToLevel: true },
@@ -394,6 +395,13 @@ npx trv run:web
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
       },
+      SerializeConfig: {
+        compress: true,
+        compressionAvailable: { br: true, gzip: true, deflate: true, identity: true },
+        compressionPreferred: { br: true, gzip: true },
+        compressOptions: {},
+        errorStackTrace: true
+      },
       WebAuthConfig: {
         mode: 'cookie',
         header: 'Authorization',
@@ -402,7 +410,6 @@ npx trv run:web
       },
       WebAuthLoginConfig: {},
       WebAuthLogoutConfig: {},
-      WebAuthVerifyConfig: { permissions: {} },
       WebConfig: {
         serve: true,
         port: 12555,

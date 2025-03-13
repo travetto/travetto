@@ -387,6 +387,7 @@ First we must start the application:
       <span class="token punctuation">{{'}'}}</span>,
       AsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       AuthConfig: <span class="token punctuation">{{'{'}}</span> maxAge: <span class="token string">'1h'</span>, rollingRenew: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      AuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> permissions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       BodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
       ConsoleLogAppenderConfig: <span class="token punctuation">{{'{'}}</span> logToLevel: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
@@ -422,6 +423,13 @@ First we must start the application:
         connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
         options: <span class="token punctuation">{{'{'}}</span> waitQueueTimeoutMS: <span class="token number">86400000</span> <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
+      SerializeConfig: <span class="token punctuation">{{'{'}}</span>
+        compress: true,
+        compressionAvailable: <span class="token punctuation">{{'{'}}</span> br: true, gzip: true, deflate: true, identity: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+        compressionPreferred: <span class="token punctuation">{{'{'}}</span> br: true, gzip: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+        compressOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+        errorStackTrace: <span class="token boolean">true</span>
+      <span class="token punctuation">{{'}'}}</span>,
       WebAuthConfig: <span class="token punctuation">{{'{'}}</span>
         mode: <span class="token string">'cookie'</span>,
         header: <span class="token string">'Authorization'</span>,
@@ -430,7 +438,6 @@ First we must start the application:
       <span class="token punctuation">{{'}'}}</span>,
       WebAuthLoginConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       WebAuthLogoutConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      WebAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> permissions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">12555</span>,

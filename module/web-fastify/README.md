@@ -50,7 +50,6 @@ When working with an [fastify](https://www.fastify.io/) applications, the module
 **Code: Configured Middleware**
 ```typescript
 const app = fastify(fastConf);
-    app.register(compress);
     app.removeAllContentTypeParsers();
     app.addContentTypeParser(/^.*/, (_, body, done) => done(null, body));
 ```

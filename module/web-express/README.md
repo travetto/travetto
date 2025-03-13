@@ -49,5 +49,10 @@ When working with an [express](https://expressjs.com) applications, the module p
 ```typescript
 const app = express();
     app.disable('x-powered-by');
-    app.use(compression());
+
+    if (this.config.trustProxy) {
+      app.enable('trust proxy');
+    }
+
+    return this.raw = app;
 ```

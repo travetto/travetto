@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@travetto/di';
-import { AppError, hasFunction } from '@travetto/runtime';
-import { DataUtil } from '@travetto/schema';
+import { AppError, hasFunction, TypedObject } from '@travetto/runtime';
+import { DataUtil, Ignore } from '@travetto/schema';
 import { Config } from '@travetto/config';
 
 import { HttpSerializable } from '../response/serializable';
@@ -15,10 +15,21 @@ const isSerializable = hasFunction<HttpSerializable>('serialize');
 @Config('web.serialize')
 class SerializeConfig extends ManagedInterceptorConfig {
   compress = true;
-  compressEncodings: HttpCompressEncoding[] = ['br', 'gzip', 'deflate', 'identity'];
-  compressEncodingsPreferred: HttpCompressEncoding[] = ['br', 'gzip'];
+  compressionAvailable: Record<HttpCompressEncoding, boolean> = { br: true, gzip: true, deflate: true, identity: true };
+  compressionPreferred: Partial<Record<HttpCompressEncoding, boolean>> = { br: true, gzip: true };
   compressOptions: HttpCompressOptions = {};
   errorStackTrace = true;
+
+  @Ignore()
+  compressionEncodings: HttpCompressEncoding[];
+
+  @Ignore()
+  compressionEncodingsPreferred: HttpCompressEncoding[];
+
+  postConstruct(): void {
+    this.compressionEncodings = TypedObject.entries(this.compressionAvailable).filter(x => !!x[1]).map(x => x[0]);
+    this.compressionEncodingsPreferred = TypedObject.entries(this.compressionPreferred).filter(x => !!x[1]).map(x => x[0]);
+  }
 }
 
 /**
@@ -63,7 +74,9 @@ export class SerializeInterceptor implements HttpInterceptor<SerializeConfig> {
     res.statusCode = basic.statusCode;
 
     const compressor = this.config.compress ? HttpCompressionUtil.getCompressor(
-      req, res, this.config.compressOptions, this.config.compressEncodings, this.config.compressEncodingsPreferred
+      req, res, this.config.compressOptions,
+      this.config.compressionEncodings,
+      this.config.compressionEncodingsPreferred
     ) : undefined;
 
     // If we are compressing
