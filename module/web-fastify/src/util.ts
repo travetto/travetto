@@ -12,10 +12,10 @@ export class FastifyWebServerUtil {
    * Convert request, response object from provider to framework
    */
   static convert(req: FastifyRequest, res: FastifyReply): [HttpRequest, HttpResponse] {
-    const fullReq: typeof req & { [WebSymbols.TravettoEntity]?: HttpRequest } = req;
-    const fullRes: typeof res & { [WebSymbols.TravettoEntity]?: HttpResponse } = res;
-    const finalReq = fullReq[WebSymbols.TravettoEntity] ??= this.getRequest(req);
-    const finalRes = fullRes[WebSymbols.TravettoEntity] ??= this.getResponse(res);
+    const fullReq: typeof req & { [WebSymbols.Internal]?: HttpRequest } = req;
+    const fullRes: typeof res & { [WebSymbols.Internal]?: HttpResponse } = res;
+    const finalReq = fullReq[WebSymbols.Internal] ??= this.getRequest(req);
+    const finalRes = fullRes[WebSymbols.Internal] ??= this.getResponse(res);
     return [finalReq, finalRes];
   }
 
@@ -24,8 +24,10 @@ export class FastifyWebServerUtil {
    */
   static getRequest(req: FastifyRequest): HttpRequest {
     return HttpRequestCore.create({
-      [WebSymbols.ProviderEntity]: req,
-      [WebSymbols.NodeEntity]: req.raw,
+      [WebSymbols.Internal]: {
+        providerEntity: req,
+        nodeEntity: req.raw,
+      },
       protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
       method: castTo(req.raw.method),
       url: req.raw!.url,
@@ -42,8 +44,10 @@ export class FastifyWebServerUtil {
    */
   static getResponse(reply: FastifyReply): HttpResponse {
     return HttpResponseCore.create({
-      [WebSymbols.ProviderEntity]: reply,
-      [WebSymbols.NodeEntity]: reply.raw,
+      [WebSymbols.Internal]: {
+        providerEntity: reply,
+        nodeEntity: reply.raw
+      },
       get headersSent(): boolean {
         return reply.sent;
       },

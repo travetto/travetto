@@ -2,8 +2,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { AppError, Util } from '@travetto/runtime';
 
 import {
-  BodyParseInterceptor, LoggingInterceptor, FilterContext, FilterNext, ControllerRegistry,
-  HttpInterceptor, SerializeInterceptor, WebSymbols, SerializeUtil, EndpointConfig
+  BodyParseInterceptor, FilterContext, FilterNext, ControllerRegistry, HttpInterceptor, WebSymbols, EndpointConfig
 } from '@travetto/web';
 
 import { WebRpcConfig } from './config';
@@ -14,7 +13,7 @@ import { WebRpcConfig } from './config';
 @Injectable()
 export class WebRpcInterceptor implements HttpInterceptor<WebRpcConfig> {
 
-  runsBefore = [LoggingInterceptor, SerializeInterceptor];
+  runsBefore = [BodyParseInterceptor];
 
   @Inject()
   config: WebRpcConfig;
@@ -33,10 +32,10 @@ export class WebRpcInterceptor implements HttpInterceptor<WebRpcConfig> {
       return await next();
     }
 
-    const ep = ControllerRegistry.getEndpointByNames(target);
+    const endpoint = ControllerRegistry.getEndpointById(target);
 
-    if (!ep) {
-      return SerializeUtil.serializeError(req, res, new AppError('Unknown endpoint'));
+    if (!endpoint) {
+      throw new AppError('Unknown endpoint');
     }
 
     let params: unknown[];
@@ -52,18 +51,22 @@ export class WebRpcInterceptor implements HttpInterceptor<WebRpcConfig> {
       await this.body.intercept({ req, res, config: this.body.config }, () => { });
       params = req.body;
       if (Array.isArray(params)) {
-        req.body = ep.params.find((x, i) => x.location === 'body' ? params[i] : undefined) ?? params; // Re-assign body
+        req.body = endpoint.params.find((x, i) => x.location === 'body' ? params[i] : undefined) ?? params; // Re-assign body
       }
     }
 
     params ??= [];
 
     if (!Array.isArray(params)) {
-      return SerializeUtil.serializeError(req, res, new AppError('Invalid parameters, must be an array'));
+      throw new AppError('Invalid parameters, must be an array');
     }
 
-    req[WebSymbols.RequestLogging] = { controller: ep.class.name, endpoint: ep.handlerName };
-    req[WebSymbols.RequestParams] = ep.params.map((x, i) => (x.location === 'body' && isBinary) ? WebSymbols.MissingParam : params[i]);
-    return await ep.handlerFinalized!(req, res);
+    req[WebSymbols.Internal].requestLogging = false; // Disable logging on sub request
+    req[WebSymbols.Internal].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && isBinary) ? WebSymbols.MissingParam : params[i]);
+    try {
+      return await endpoint.handlerFinalized!(req, res);
+    } finally {
+      req[WebSymbols.Internal].requestLogging = { controller: endpoint.class.name, endpoint: endpoint.handlerName };
+    }
   }
 }

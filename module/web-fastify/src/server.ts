@@ -1,5 +1,4 @@
 import https from 'node:https';
-import compress from '@fastify/compress';
 import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
@@ -34,7 +33,6 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
     }
 
     const app = fastify(fastConf);
-    app.register(compress);
     app.removeAllContentTypeParsers();
     app.addContentTypeParser(/^.*/, (_, body, done) => done(null, body));
 

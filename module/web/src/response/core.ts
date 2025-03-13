@@ -14,7 +14,7 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   /**
    * Add base response as support for the provided
    */
-  static create<T extends HttpResponse>(res: Partial<T> & Record<string, unknown>): T {
+  static create<T extends HttpResponse>(res: Partial<T>): T {
     Object.setPrototypeOf(res, HttpResponseCore.prototype);
     return asFull<T>(res);
   }
@@ -45,13 +45,21 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   }
 
   /**
+   * Add value to vary header, or create if not existing
+   */
+  vary(this: HttpResponse, value: string): void {
+    const header = this.getHeader('vary');
+    this.setHeader('vary', header ? `${header}, ${value}` : value);
+  }
+
+  /**
    * Redirect application to a new path
    * @param code The HTTP code to send
    * @param path The new location for the request
    */
-  redirect(this: HttpResponse & HttpResponseCore, code: number, path: string): void;
-  redirect(this: HttpResponse & HttpResponseCore, path: string): void;
-  redirect(this: HttpResponse & HttpResponseCore, pathOrCode: number | string, path?: string): void {
+  redirect(this: HttpResponse, code: number, path: string): void;
+  redirect(this: HttpResponse, path: string): void;
+  redirect(this: HttpResponse, pathOrCode: number | string, path?: string): void {
     let code = 302;
     if (typeof pathOrCode === 'number') {
       code = pathOrCode;
@@ -68,7 +76,7 @@ export class HttpResponseCore implements Partial<HttpResponse> {
    * Send a stream to the response and wait for completion
    */
   async sendStream(this: HttpResponse, data: Readable): Promise<void> {
-    await pipeline(data, this[WebSymbols.NodeEntity], { end: false });
+    await pipeline(data, this[WebSymbols.Internal].nodeEntity, { end: false });
     this.end();
   }
 }

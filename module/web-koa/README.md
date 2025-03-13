@@ -50,5 +50,10 @@ When working with an [koa](https://koajs.com/) applications, the module provides
 **Code: Configured Middleware**
 ```typescript
 const app = new koa();
-    app.use(kCompress());
+
+    if (this.config.trustProxy) {
+      app.proxy = true;
+    }
+
+    return this.raw = app;
 ```

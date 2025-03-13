@@ -136,4 +136,30 @@ export abstract class WebServerSuite extends BaseWebSuite {
     const { body: ret2 } = await this.request<{ ip: string | undefined }>('get', '/test/ip', { headers: { 'X-Forwarded-For': 'bob' } });
     assert(ret2.ip === 'bob');
   }
+
+  @Test()
+  async compressionReturned() {
+    {
+      const { body: ret, headers } = await this.request('get', '/test/json', { headers: { 'Accept-Encoding': 'gzip;q=1' } });
+      assert(headers['content-encoding'] === undefined);
+      assert.deepStrictEqual(ret, { json: true });
+    }
+    for (const encoding of ['gzip', 'br', 'deflate']) {
+      const { body: ret, headers } = await this.request('get', '/test/json/large/20000', { headers: { 'Accept-Encoding': `${encoding};q=1` } });
+      if (Array.isArray(headers['content-encoding'])) {
+        assert(headers['content-encoding'][0] === encoding);
+      } else {
+        assert(headers['content-encoding'] === encoding);
+      }
+      assert(ret && typeof ret === 'object');
+      assert('json' in ret);
+      assert(typeof ret.json === 'string');
+      assert(ret.json.startsWith('0123456789'));
+    }
+
+    {
+      const { status } = await this.request('get', '/test/json/large/50000', { headers: { 'Accept-Encoding': 'orange' }, throwOnError: false });
+      assert(status === 406);
+    }
+  }
 }

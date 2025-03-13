@@ -5,7 +5,7 @@ import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';
 import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param';
 import { HttpRequest, HttpResponse } from '../../src/types';
 import { Produces, SetHeaders } from '../../src/decorator/common';
-import { Renderable } from '../../src/response/renderable';
+import { HttpSerializable } from '../../src/response/serializable';
 
 @Controller('/test')
 export class TestController {
@@ -19,6 +19,11 @@ export class TestController {
   @Get('/json')
   getJSON() {
     return { json: true };
+  }
+
+  @Get('/json/large/:size')
+  getJSONLarge(size = 20000) {
+    return { json: '0123456789'.repeat(size / 10) };
   }
 
   @Post('/param/:param')
@@ -61,13 +66,13 @@ export class TestController {
 
   @Get('/renderable')
   @Produces('text/plain')
-  getRenderable(): Renderable {
+  getRenderable(): HttpSerializable {
     return {
       /**
        * @returns {string}
        */
-      render(res) {
-        return res.send('hello');
+      serialize(res) {
+        res.send('hello');
       }
     };
   }

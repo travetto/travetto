@@ -13,6 +13,6 @@ export const text = <>
   <c.Section title='Default Middleware'>
     When working with an {d.library('Express')} applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
 
-    <c.Code title='Configured Middleware' src='src/server.ts' startRe={/const app\s*=/} endRe={/compress/} />
+    <c.Code title='Configured Middleware' src='src/server.ts' startRe={/const app\s*=/} endRe={/return/} />
   </c.Section>
 </>;

@@ -394,6 +394,13 @@ npx trv run:web
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
       },
+      SerializeConfig: {
+        compress: true,
+        compressionAvailable: { br: true, gzip: true, deflate: true, identity: true },
+        compressionPreferred: { br: true, gzip: true },
+        compressOptions: {},
+        errorStackTrace: true
+      },
       WebAuthConfig: {
         mode: 'cookie',
         header: 'Authorization',

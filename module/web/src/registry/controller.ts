@@ -35,7 +35,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     }
   }
 
-  getEndpointByNames(id: string): EndpointConfig | undefined {
+  getEndpointById(id: string): EndpointConfig | undefined {
     return this.#endpointsById.get(id);
   }
 
