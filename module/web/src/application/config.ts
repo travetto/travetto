@@ -57,6 +57,7 @@ export class WebConfig {
 
       this.bindAddress = useIPv4 ? '0.0.0.0' : '::';
     }
-    this.baseUrl ??= `http${this.ssl?.active ? 's' : ''}://${this.hostname}${[80, 443].includes(this.port) ? '' : `:${this.port}`}`;
+    const defaultPort = this.port === (this.ssl?.active ? 443 : 80);
+    this.baseUrl ??= `http${this.ssl?.active ? 's' : ''}://${this.hostname}${defaultPort ? '' : `:${this.port}`}`;
   }
 }

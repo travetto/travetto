@@ -49,7 +49,9 @@ export class HttpResponseCore implements Partial<HttpResponse> {
    */
   vary(this: HttpResponse, value: string): void {
     const header = this.getHeader('vary');
-    this.setHeader('vary', header ? `${header}, ${value}` : value);
+    if (!header?.includes(value)) {
+      this.setHeader('vary', header ? `${header}, ${value}` : value);
+    }
   }
 
   /**
@@ -60,14 +62,8 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   redirect(this: HttpResponse, code: number, path: string): void;
   redirect(this: HttpResponse, path: string): void;
   redirect(this: HttpResponse, pathOrCode: number | string, path?: string): void {
-    let code = 302;
-    if (typeof pathOrCode === 'number') {
-      code = pathOrCode;
-    } else {
-      path = pathOrCode;
-    }
-    this.status(code);
-    this.location(path!);
+    this.status(typeof pathOrCode === 'number' ? pathOrCode : 302);
+    this.location(path ?? pathOrCode.toString());
     this.setHeader('Content-Length', '0');
     this.send('');
   }

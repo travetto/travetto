@@ -1,5 +1,3 @@
-import { pipeline } from 'node:stream/promises';
-
 import type koa from 'koa';
 
 import { HttpRequest, HttpResponse, WebSymbols, HttpResponseCore, HttpRequestCore } from '@travetto/web';
@@ -59,13 +57,15 @@ export class KoaWebServerUtil {
       },
       send: b => ctx.body = b,
       on: ctx.res.on.bind(ctx.res),
-      end: (val?: unknown): void => {
+      end(this: HttpResponse, val?: unknown): void {
         if (val) {
           ctx.body = val;
         }
-        ctx.flushHeaders();
-        if (ctx.status < 200 || (ctx.status < 400 && ctx.status >= 300)) {
-          ctx.res.end(); // Only end on redirect
+        if (ctx.headerSent) {
+          ctx.res.end(); // End if headers already sent
+        } else {
+          ctx.body ??= '';
+          ctx.flushHeaders();
         }
       },
       getHeaderNames: () => Object.keys(ctx.response.headers),
@@ -73,11 +73,6 @@ export class KoaWebServerUtil {
       getHeader: ctx.response.get.bind(ctx.response),
       removeHeader: ctx.response.remove.bind(ctx.response),
       write: ctx.res.write.bind(ctx.res),
-      async sendStream(stream): Promise<void> {
-        ctx.status ??= 200;
-        ctx.respond = false;
-        await pipeline(stream, ctx.res);
-      },
     });
   }
 }
