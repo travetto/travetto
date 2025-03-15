@@ -68,7 +68,11 @@ export abstract class WebServerSuite extends BaseWebSuite {
 
   @Test()
   async testRegex() {
-    const { body: ret, headers } = await this.request('patch', '/test/regexp/super-poodle-party');
+    const { body: ret, headers } = await this.request('patch', '/test/regexp/super-poodle-party', {
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    });
     assert.deepStrictEqual(ret, { path: 'poodle' });
     assert(!('etag' in headers));
   }

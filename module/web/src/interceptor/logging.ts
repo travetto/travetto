@@ -11,7 +11,7 @@ import { SerializeInterceptor } from './serialize.ts';
  */
 @Config('web.log')
 export class WebLogConfig extends ManagedInterceptorConfig {
-  showStackTrace: boolean;
+  showStackTrace = true;
 }
 
 /**
