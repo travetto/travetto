@@ -1,17 +1,17 @@
-import type express from 'express';
+import { IncomingMessage, ServerResponse } from 'node:http';
 
 import { WebSymbols, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
- * Provide a mapping between express request/response and the framework analogs
+ * Provide a mapping between node request/response and the framework analogs
  */
-export class ExpressWebServerUtil {
+export class NodeWebServerUtil {
 
   /**
    * Convert request, response object from provider to framework
    */
-  static convert(req: express.Request, res: express.Response): [HttpRequest, HttpResponse] {
+  static convert(req: IncomingMessage, res: ServerResponse): [HttpRequest, HttpResponse] {
     const fullReq: typeof req & { [WebSymbols.Internal]?: HttpRequest } = req;
     const fullRes: typeof res & { [WebSymbols.Internal]?: HttpResponse } = res;
     const finalReq = fullReq[WebSymbols.Internal] ??= this.getRequest(req);
@@ -22,16 +22,19 @@ export class ExpressWebServerUtil {
   /**
    * Build a Travetto HttpRequest from an Express Request
    */
-  static getRequest(req: express.Request): HttpRequest {
+  static getRequest(req: IncomingMessage & { params?: Record<string, string> }): HttpRequest {
+
+    const url = new URL(req.url!);
+
     return HttpRequestCore.create({
       [WebSymbols.Internal]: {
         providerEntity: req,
         nodeEntity: req,
       },
-      protocol: castTo(req.protocol),
+      protocol: castTo(url.protocol),
       method: castTo(req.method),
-      url: req.originalUrl,
-      query: req.query,
+      url: req.url!,
+      query: Object.fromEntries(url.searchParams.entries()),
       params: req.params,
       headers: req.headers,
       pipe: req.pipe.bind(req),
@@ -42,7 +45,7 @@ export class ExpressWebServerUtil {
   /**
    * Build a Travetto HttpResponse from an Express Response
    */
-  static getResponse(res: express.Response): HttpResponse {
+  static getResponse(res: ServerResponse): HttpResponse {
     return HttpResponseCore.create({
       [WebSymbols.Internal]: {
         providerEntity: res,
@@ -53,7 +56,6 @@ export class ExpressWebServerUtil {
       },
       status(val?: number): number | undefined {
         if (val) {
-          res.status(val);
           res.statusCode = val;
         } else {
           return res.statusCode;
@@ -64,12 +66,13 @@ export class ExpressWebServerUtil {
         if (typeof contentType === 'string' && contentType.includes('json') && typeof data === 'string') {
           data = Buffer.from(data);
         }
-        res.send(data);
+        res.write(data);
+        res.end();
       },
       on: res.on.bind(res),
       end: (val?: unknown): void => {
         if (val) {
-          res.send(val);
+          res.write(val);
         }
         res.end();
       },

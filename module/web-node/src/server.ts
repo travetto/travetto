@@ -1,6 +1,6 @@
 import https from 'node:https';
-import express from 'express';
-import compression from 'compression';
+// eslint-disable-next-line @typescript-eslint/naming-convention
+import Router from 'router';
 
 import { Inject, Injectable } from '@travetto/di';
 import {
@@ -9,17 +9,22 @@ import {
 } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 
-import { ExpressWebServerUtil } from './util.ts';
+import { NodeWebServerUtil } from './util.ts';
+import { IncomingMessage, ServerResponse } from 'node:http';
 
 type Keyed = { key?: string | symbol };
+
+interface NodeWebApplication extends https.Server {
+  router: ReturnType<typeof Router>;
+};
 
 /**
  * An express http server
  */
 @Injectable()
-export class ExpressWebServer implements WebServer<express.Application> {
+export class NodeWebServer implements WebServer<NodeWebApplication> {
 
-  raw: express.Application;
+  raw: NodeWebApplication;
 
   listening: boolean;
 
@@ -28,16 +33,18 @@ export class ExpressWebServer implements WebServer<express.Application> {
   @Inject()
   config: WebConfig;
 
-  async init(): Promise<express.Application> {
-    const app = express();
-    app.disable('x-powered-by');
-    app.set('etag', true);
-    app.use(compression());
+  async init(): Promise<NodeWebApplication> {
+    let server: https.Server;
+    const router = Router();
+    const routed = (req: IncomingMessage, res: ServerResponse): void => { router(req, res, () => { }); };
 
-    if (this.config.trustProxy) {
-      app.enable('trust proxy');
+    if (this.config.ssl?.active) {
+      server = https.createServer((await this.config.ssl?.getKeys())!, routed);
+    } else {
+      server = https.createServer(routed);
     }
-
+    const app = castTo<NodeWebApplication>(server);
+    app.router = router;
     return this.raw = app;
   }
 
@@ -50,12 +57,12 @@ export class ExpressWebServer implements WebServer<express.Application> {
   }
 
   async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors: HttpInterceptor[]): Promise<void> {
-    const router: express.Router & Keyed = express.Router({ mergeParams: true });
+    const router = Router({});
 
     for (const endpoint of endpoints) {
       const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
       router[endpoint.method](endpointPath, async (req, res) => {
-        await endpoint.handlerFinalized!(...ExpressWebServerUtil.convert(req, res));
+        await endpoint.handlerFinalized!(...NodeWebServerUtil.convert(req, res));
       });
     }
 
@@ -66,11 +73,11 @@ export class ExpressWebServer implements WebServer<express.Application> {
         {
           method: 'options',
           path: '*all',
-          id: 'express-all',
+          id: 'node-all',
           filters: [],
           headers: {},
-          handlerName: 'express-all',
-          class: ExpressWebServer,
+          handlerName: 'node-all',
+          class: NodeWebServer,
           handler: () => '',
           params: [],
           interceptors: [
@@ -80,23 +87,21 @@ export class ExpressWebServer implements WebServer<express.Application> {
       );
 
       router.options('*all', (req, res) => {
-        optionHandler(...ExpressWebServerUtil.convert(req, res));
+        optionHandler(...NodeWebServerUtil.convert(req, res));
       });
     }
 
-    router.key = key;
-    this.raw.use(path, router);
+    castTo<{ key?: string | symbol }>(router).key = key;
+
+    this.raw.router.use(path, router);
   }
 
   async listen(): Promise<WebServerHandle> {
-    let raw: express.Application | https.Server = this.raw;
-    if (this.config.ssl?.active) {
-      raw = https.createServer((await this.config.ssl?.getKeys())!, this.raw);
-    }
     this.listening = true;
-
-    const { reject, resolve, promise } = Util.resolvablePromise<WebServerHandle>();
-    const handle = raw.listen(this.config.port, this.config.hostname, err => err ? reject(err) : resolve(handle));
-    return promise;
+    const { reject, resolve, promise } = Util.resolvablePromise();
+    this.raw.listen(this.config.port, this.config.hostname, undefined, () => resolve());
+    this.raw.on('error', reject);
+    await promise;
+    return this.raw;
   }
 }
