@@ -1,0 +1,41 @@
+{
+  "name": "@travetto/web-node",
+  "version": "6.0.0-rc.1",
+  "description": "Node provider for the travetto web module.",
+  "keywords": [
+    "web",
+    "node",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "git+https://github.com/travetto/travetto.git",
+    "directory": "module/web-node"
+  },
+  "dependencies": {
+    "@travetto/web": "^6.0.0-rc.1",
+    "@types/fresh": "^0.5.2",
+    "@types/inflation": "^2.0.4",
+    "@types/negotiator": "^0.6.3",
+    "fresh": "^0.5.2",
+    "inflation": "^2.1.0",
+    "negotiator": "^1.0.0"
+  },
+  "travetto": {
+    "displayName": "Node Web Server"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -188,6 +188,10 @@ export interface HttpResponseInternal<T = unknown> {
    * The pending body to respond with
    */
   body?: Readable | Buffer;
+  /**
+   * Functions to execute before sending
+   */
+  filters?: HttpHandler[];
 }
 
 /**

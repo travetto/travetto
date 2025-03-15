@@ -8,12 +8,12 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo, Class } from '@travetto/runtime';
 
-import { WebSymbols } from '../symbols.ts';
+import { WebSymbols } from '@travetto/web/src/symbols.ts';
 
-import { FilterContext, FilterNext } from '../types.ts';
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
+import { FilterContext, FilterNext } from '@travetto/web/src/types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor } from '@travetto/web/src/interceptor/types.ts';
 import { EtagInterceptor } from './etag.ts';
-import { LoggingInterceptor } from './logging.ts';
+import { LoggingInterceptor } from '@travetto/web/src/interceptor/logging.ts';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const ENCODING_METHODS = {

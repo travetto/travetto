@@ -4,12 +4,12 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { WebSymbols } from '../symbols';
+import { WebSymbols } from '@travetto/web/src/symbols.ts';
 
-import { FilterContext, FilterNext } from '../types.ts';
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
-import { LoggingInterceptor } from './logging.ts';
+import { FilterContext, FilterNext } from '@travetto/web/src/types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor } from '@travetto/web/src/interceptor/types.ts';
+import { SerializeInterceptor } from '@travetto/web/src/interceptor/serialize.ts';
+import { LoggingInterceptor } from '@travetto/web/src/interceptor/logging.ts';
 
 @Config('web.etag')
 class EtagConfig extends ManagedInterceptorConfig {
