@@ -9,9 +9,10 @@ import { WebSymbols } from '../symbols';
 import { FilterContext, FilterNext } from '../types.ts';
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
 import { SerializeInterceptor } from './serialize.ts';
+import { LoggingInterceptor } from './logging.ts';
 
 @Config('web.etag')
-class WebEtagConfig extends ManagedInterceptorConfig {
+class EtagConfig extends ManagedInterceptorConfig {
   weak?: boolean;
 }
 
@@ -22,9 +23,10 @@ class WebEtagConfig extends ManagedInterceptorConfig {
 export class EtagInterceptor implements HttpInterceptor {
 
   runsBefore = [SerializeInterceptor];
+  dependsOn = [LoggingInterceptor];
 
   @Inject()
-  config: WebEtagConfig;
+  config: EtagConfig;
 
   async intercept({ res, req }: FilterContext, next: FilterNext): Promise<unknown> {
     try {

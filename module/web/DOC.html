@@ -336,16 +336,15 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       AcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       AsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       BodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      CompressConfig: <span class="token punctuation">{{'{'}}</span>
+        preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
+        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span> <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
       CookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
       CorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      EtagConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      SerializeConfig: <span class="token punctuation">{{'{'}}</span>
-        compress: true,
-        compressionAvailable: <span class="token punctuation">{{'{'}}</span> br: true, gzip: true, deflate: true, identity: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-        compressionPreferred: <span class="token punctuation">{{'{'}}</span> br: true, gzip: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-        compressOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-        errorStackTrace: <span class="token boolean">true</span>
-      <span class="token punctuation">{{'}'}}</span>,
+      GlobalConfig: <span class="token punctuation">{{'{'}}</span> showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,
@@ -441,16 +440,15 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       AcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       AsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       BodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      CompressConfig: <span class="token punctuation">{{'{'}}</span>
+        preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
+        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span> <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
       CookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
       CorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      EtagConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      SerializeConfig: <span class="token punctuation">{{'{'}}</span>
-        compress: true,
-        compressionAvailable: <span class="token punctuation">{{'{'}}</span> br: true, gzip: true, deflate: true, identity: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-        compressionPreferred: <span class="token punctuation">{{'{'}}</span> br: true, gzip: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-        compressOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-        errorStackTrace: <span class="token boolean">true</span>
-      <span class="token punctuation">{{'}'}}</span>,
+      GlobalConfig: <span class="token punctuation">{{'{'}}</span> showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,
@@ -516,7 +514,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="serializeinterceptor">SerializeInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/serialize.ts#L39">SerializeInterceptor</a> is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/serialize.ts#L15">SerializeInterceptor</a> is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
 
 <h3 id="corsinterceptor">CorsInterceptor</h3>
 
@@ -557,11 +555,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="cookiesinterceptor">CookiesInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L50">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L49">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
   <figure class="code">
     <figcaption class="code">Cookies Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L18">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L17">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CookieConfig</span> <span class="token keyword">extends</span> <span class="token class-name">ManagedInterceptorConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -599,7 +597,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="logginginterceptor">LoggingInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L19">LoggingInterceptor</a> allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L20">LoggingInterceptor</a> allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
 
   <figure class="code">
     <figcaption class="code">Control Logging

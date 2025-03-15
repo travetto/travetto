@@ -6,13 +6,14 @@ import Negotiator from 'negotiator';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError, castTo } from '@travetto/runtime';
+import { AppError, castTo, Class } from '@travetto/runtime';
 
 import { WebSymbols } from '../symbols.ts';
 
 import { FilterContext, FilterNext } from '../types.ts';
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
 import { EtagInterceptor } from './etag.ts';
+import { LoggingInterceptor } from './logging.ts';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const ENCODING_METHODS = {
@@ -24,10 +25,10 @@ const ENCODING_METHODS = {
 type HttpCompressEncoding = keyof typeof ENCODING_METHODS | 'identity';
 
 @Config('web.compress')
-class WebCompressConfig extends ManagedInterceptorConfig {
+class CompressConfig extends ManagedInterceptorConfig {
   raw?: (ZlibOptions & BrotliOptions) | undefined;
-  preferredEncodings?: HttpCompressEncoding[];
-  supportedEncodings: HttpCompressEncoding[];
+  preferredEncodings?: HttpCompressEncoding[] = ['br', 'gzip', 'identity'];
+  supportedEncodings: HttpCompressEncoding[] = ['br', 'gzip', 'identity', 'deflate'];
 }
 
 /**
@@ -37,11 +38,12 @@ class WebCompressConfig extends ManagedInterceptorConfig {
 export class CompressionInterceptor implements HttpInterceptor {
 
   runsBefore = [EtagInterceptor];
+  dependsOn = [LoggingInterceptor];
 
   @Inject()
-  config: WebCompressConfig;
+  config: CompressConfig;
 
-  async intercept({ res, req, config }: FilterContext<WebCompressConfig>, next: FilterNext): Promise<unknown> {
+  async intercept({ res, req, config }: FilterContext<CompressConfig>, next: FilterNext): Promise<unknown> {
     try {
       res.vary('Accept-Encoding');
       return await next();
@@ -67,9 +69,10 @@ export class CompressionInterceptor implements HttpInterceptor {
         .encoding(...castTo<[string[]]>([supportedEncodings, preferredEncodings]));
 
       if (sent && (!method || !sent.includes(method))) {
-        const err = new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${sent} is not supported`);
-        Object.assign(err, { statusCode: 406 });
-        throw err;
+        throw Object.assign(
+          new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${sent} is not supported`),
+          { status: 406 }
+        );
       }
 
       const type = castTo<HttpCompressEncoding>(method!);

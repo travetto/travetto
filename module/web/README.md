@@ -302,16 +302,15 @@ Initialized {
       AcceptsConfig: { types: {} },
       AsyncContextConfig: {},
       BodyParseConfig: { limit: '1mb', parsingTypes: {} },
+      CompressConfig: {
+        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
+        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
+      },
       CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
       CorsConfig: {},
+      EtagConfig: {},
       GetCacheConfig: {},
-      SerializeConfig: {
-        compress: true,
-        compressionAvailable: { br: true, gzip: true, deflate: true, identity: true },
-        compressionPreferred: { br: true, gzip: true },
-        compressOptions: {},
-        errorStackTrace: true
-      },
+      GlobalConfig: { showStackTrace: true },
       WebConfig: {
         serve: true,
         port: 3000,
@@ -401,16 +400,15 @@ Initialized {
       AcceptsConfig: { types: {} },
       AsyncContextConfig: {},
       BodyParseConfig: { limit: '1mb', parsingTypes: {} },
+      CompressConfig: {
+        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
+        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
+      },
       CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
       CorsConfig: {},
+      EtagConfig: {},
       GetCacheConfig: {},
-      SerializeConfig: {
-        compress: true,
-        compressionAvailable: { br: true, gzip: true, deflate: true, identity: true },
-        compressionPreferred: { br: true, gzip: true },
-        compressOptions: {},
-        errorStackTrace: true
-      },
+      GlobalConfig: { showStackTrace: true },
       WebConfig: {
         serve: true,
         port: 3000,
@@ -468,7 +466,7 @@ export class BodyParseConfig extends ManagedInterceptorConfig {
 ```
 
 ### SerializeInterceptor
-[SerializeInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/serialize.ts#L39) is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+[SerializeInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/serialize.ts#L15) is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
 
 ### CorsInterceptor
 [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L45) allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, `web.cors.active: true`
@@ -504,7 +502,7 @@ export class CorsConfig extends ManagedInterceptorConfig {
 ```
 
 ### CookiesInterceptor
-[CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L50) is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+[CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L49) is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
 **Code: Cookies Config**
 ```typescript
@@ -541,7 +539,7 @@ export class CookieConfig extends ManagedInterceptorConfig {
 [GetCacheInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/get-cache.ts#L17) by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting `web.disableGetCache: true` in your config.
 
 ### LoggingInterceptor
-[LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L19) allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
+[LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L20) allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
 
 **Code: Control Logging**
 ```yaml

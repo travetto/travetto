@@ -143,12 +143,12 @@ export class HttpPayloadUtil {
 
     if (!statusCode) {
       if (length === 0) {  // On empty response
-        res.status((req.method === 'POST' || req.method === 'PUT') ? 201 : 204);
+        res.statusCode = (req.method === 'POST' || req.method === 'PUT') ? 201 : 204;
       } else {
-        res.status(200);
+        res.statusCode = 200;
       }
     } else {
-      res.status(statusCode);
+      res.statusCode = statusCode;
     }
   }
 }
