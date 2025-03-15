@@ -38,7 +38,7 @@ export class EtagInterceptor implements HttpInterceptor {
         (req.method === 'GET' || req.method === 'HEAD') &&
         (
           !res.statusCode ||
-          (res.statusCode < 300 || res.statusCode >= 200) ||
+          (res.statusCode < 300 && res.statusCode >= 200) ||
           res.statusCode === 304
         )
       ) {
