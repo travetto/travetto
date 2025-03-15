@@ -1,5 +1,6 @@
-import https from 'node:https';
-import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
+import { FastifyInstance, fastify } from 'fastify';
+import { fastifyCompress } from '@fastify/compress';
+import { fastifyEtag } from '@fastify/etag';
 
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
 import { Inject, Injectable } from '@travetto/di';
@@ -23,21 +24,18 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
    * Build the fastify server
    */
   async init(): Promise<FastifyInstance> {
-    const fastConf: Partial<FastifyHttpsOptions<https.Server>> = {};
-
-    if (this.config.ssl?.active) {
-      fastConf.https = (await this.config.ssl?.getKeys())!;
-    }
-    if (this.config.trustProxy) {
-      fastConf.trustProxy = true;
-    }
-
-    const app = fastify(fastConf);
+    const app = fastify({
+      trustProxy: this.config.trustProxy,
+      ...this.config.ssl?.active ? {
+        https: (await this.config.ssl?.getKeys()),
+      } : {}
+    });
+    app.register(fastifyCompress);
+    app.register(fastifyEtag);
     app.removeAllContentTypeParsers();
     app.addContentTypeParser(/^.*/, (_, body, done) => done(null, body));
 
-    this.raw = app;
-    return this.raw;
+    return this.raw = app;
   }
 
   async unregisterEndpoints(key: string | symbol): Promise<void> {

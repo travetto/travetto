@@ -1,5 +1,7 @@
 import https from 'node:https';
 import koa from 'koa';
+import kCompress from 'koa-compress';
+import kEtag from 'koa-etag';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
@@ -27,6 +29,8 @@ export class KoaWebServer implements WebServer<koa> {
 
   async init(): Promise<koa> {
     const app = new koa();
+    app.use(kCompress());
+    app.use(kEtag());
 
     if (this.config.trustProxy) {
       app.proxy = true;
