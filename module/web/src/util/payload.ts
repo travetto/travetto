@@ -1,10 +1,21 @@
 import { Readable } from 'node:stream';
+
 import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
-import { HttpPayload } from '../types.ts';
+
+import { HttpRequest, HttpResponse } from '../types';
+import { WebSymbols } from '../symbols';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
 const isStream = hasFunction<Readable>('pipe');
+
+interface HttpPayload {
+  headers?: Record<string, string>;
+  defaultContentType?: string;
+  statusCode?: number;
+  data: Readable | Buffer;
+  length?: number;
+};
 
 /**
  * Mapping from error category to standard http error codes
@@ -88,7 +99,7 @@ export class HttpPayloadUtil {
   /**
    * Determine payload based on output
    */
-  static toPayload(value: unknown): HttpPayload {
+  static from(value: unknown): HttpPayload {
     if (value === undefined || value === null) {
       return this.fromBytes('');
     } else if (typeof value === 'string') {
@@ -103,6 +114,41 @@ export class HttpPayloadUtil {
       return this.fromBlob(value);
     } else {
       return this.fromJSON(value);
+    }
+  }
+
+  /**
+   * Applies payload to the response
+   */
+  static applyPayload(payload: HttpPayload, req: HttpRequest, res: HttpResponse): void {
+    const { length, defaultContentType, headers, data, statusCode } = payload;
+
+    for (const map of [res[WebSymbols.Internal].headersAdded, headers]) {
+      for (const [key, value] of Object.entries(map ?? {})) {
+        res.setHeader(key, typeof value === 'function' ? value() : value);
+      }
+    }
+
+    // Set header if not defined
+    if (!res.getHeader('Content-type')) {
+      res.setHeader('Content-type', defaultContentType ?? 'application/octet-stream');
+    }
+
+    // Set length if provided
+    if (length !== undefined) {
+      res.setHeader('Content-Length', `${length} `);
+    }
+
+    res[WebSymbols.Internal].body = data;
+
+    if (!statusCode) {
+      if (length === 0) {  // On empty response
+        res.status((req.method === 'POST' || req.method === 'PUT') ? 201 : 204);
+      } else {
+        res.status(200);
+      }
+    } else {
+      res.status(statusCode);
     }
   }
 }

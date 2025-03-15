@@ -1,10 +1,6 @@
-import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
-
 import { asFull } from '@travetto/runtime';
 
 import { HttpResponse } from '../types.ts';
-import { WebSymbols } from '../symbols.ts';
 
 /**
  * Base response object
@@ -66,13 +62,5 @@ export class HttpResponseCore implements Partial<HttpResponse> {
     this.location(path ?? pathOrCode.toString());
     this.setHeader('Content-Length', '0');
     this.send('');
-  }
-
-  /**
-   * Send a stream to the response and wait for completion
-   */
-  async sendStream(this: HttpResponse, data: Readable): Promise<void> {
-    await pipeline(data, this[WebSymbols.Internal].nodeEntity, { end: false });
-    this.end();
   }
 }

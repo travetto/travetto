@@ -1,3 +1,4 @@
+import { pipeline } from 'node:stream/promises';
 import { isPromise } from 'node:util/types';
 
 import { asConstructable, castTo, Class, Util } from '@travetto/runtime';
@@ -217,6 +218,21 @@ export class EndpointUtil {
   }
 
   /**
+   * Finalize response
+   */
+  static async flushResponse(res: HttpResponse): Promise<void> {
+    const { body } = res[WebSymbols.Internal];
+    if (res.headersSent) {
+      if (Buffer.isBuffer(body) || body === undefined) {
+        res.end(body);
+      } else {
+        await pipeline(body, res[WebSymbols.Internal].nodeEntity, { end: false });
+        res.end();
+      }
+    }
+  }
+
+  /**
    * Create a full endpoint handler
    * @param interceptors Interceptors to apply
    * @param endpoint The endpoint to call
@@ -257,6 +273,11 @@ export class EndpointUtil {
     if (headers && Object.keys(headers).length > 0) {
       filterChain.unshift([({ res }): void => { res[WebSymbols.Internal].headersAdded = { ...headers }; }, undefined]);
     }
+
+    filterChain.unshift([async ({ res }, next) => {
+      await next();
+      await this.flushResponse(res);
+    }, undefined])
 
     const chain = this.createFilterChain(filterChain);
     return (req, res) => chain({ req, res, config: undefined! }, ident);
