@@ -5,6 +5,7 @@ import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
 import { FilterContext, FilterNext, HttpRequest, HttpResponse } from '../types.ts';
 import { WebSymbols } from '../symbols.ts';
 import { SerializeInterceptor } from './serialize.ts';
+import { GlobalInterceptor } from './global.ts';
 
 /**
  * Web logging configuration
@@ -41,6 +42,7 @@ export class LoggingInterceptor implements HttpInterceptor {
   }
 
   runsBefore = [SerializeInterceptor];
+  dependsOn = [GlobalInterceptor];
 
   @Inject()
   config: WebLogConfig;

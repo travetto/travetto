@@ -184,6 +184,10 @@ export interface HttpResponseInternal<T = unknown> {
    * The additional headers for this request, provided by controllers/endpoint config
    */
   headersAdded?: HttpHeaderMap;
+  /**
+   * The pending body to respond with
+   */
+  body?: Readable | Buffer;
 }
 
 /**
@@ -199,10 +203,6 @@ export interface HttpResponse<T = unknown> {
    * Outbound status code
    */
   statusCode: number;
-  /**
-   * The error that caused the current status
-   */
-  statusError?: Error;
   /**
    * Set the status code
    * @param code The code to set
@@ -287,21 +287,4 @@ export interface HttpResponse<T = unknown> {
      */
     set(name: string, value?: Any, options?: SetOption): void;
   };
-  /**
-   * Send readable stream to the response
-   * @param stream
-   */
-  sendStream(stream: Readable): Promise<void>;
-}
-
-
-/**
- * Simple subset of HttpResponse that represents a valid http response payload
- */
-export interface HttpPayload {
-  headers?: HttpHeaderMap;
-  defaultContentType?: string;
-  statusCode?: number;
-  data: Readable | Buffer;
-  length?: number;
 }

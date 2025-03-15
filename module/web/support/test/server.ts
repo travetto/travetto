@@ -68,21 +68,24 @@ export abstract class WebServerSuite extends BaseWebSuite {
 
   @Test()
   async testRegex() {
-    const { body: ret } = await this.request('patch', '/test/regexp/super-poodle-party');
+    const { body: ret, headers } = await this.request('patch', '/test/regexp/super-poodle-party');
     assert.deepStrictEqual(ret, { path: 'poodle' });
+    assert(!('etag' in headers));
   }
 
   @Test()
   async testBuffer() {
-    const { body: ret } = await this.request('get', '/test/buffer');
+    const { body: ret, headers } = await this.request('get', '/test/buffer');
     assert(ret === 'hello');
+    assert(('etag' in headers));
   }
 
   @Test()
   async testStream() {
     try {
-      const { body: ret } = await this.request('get', '/test/stream');
+      const { body: ret, headers } = await this.request('get', '/test/stream');
       assert(ret === 'hello');
+      assert(!('etag' in headers));
     } catch (err) {
       console.error(err);
       throw err;

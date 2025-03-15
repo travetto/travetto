@@ -361,14 +361,20 @@ npx trv run:web
       AuthConfig: { maxAge: '1h', rollingRenew: true },
       BodyParseConfig: { limit: '1mb', parsingTypes: {} },
       CommonLoggerConfig: { format: 'line', output: 'console' },
+      CompressConfig: {
+        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
+        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
+      },
       ConsoleLogAppenderConfig: { logToLevel: true },
       CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
       CorsConfig: {},
+      EtagConfig: {},
       FileLogAppenderConfig: {
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
       GetCacheConfig: {},
+      GlobalConfig: { showStackTrace: true },
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,
@@ -393,13 +399,6 @@ npx trv run:web
         port: 27017,
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
-      },
-      SerializeConfig: {
-        compress: true,
-        compressionAvailable: { br: true, gzip: true, deflate: true, identity: true },
-        compressionPreferred: { br: true, gzip: true },
-        compressOptions: {},
-        errorStackTrace: true
       },
       WebAuthConfig: {
         mode: 'cookie',

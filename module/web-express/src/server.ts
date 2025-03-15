@@ -30,6 +30,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
   async init(): Promise<express.Application> {
     const app = express();
     app.disable('x-powered-by');
+    app.set('etag', false);
 
     if (this.config.trustProxy) {
       app.enable('trust proxy');

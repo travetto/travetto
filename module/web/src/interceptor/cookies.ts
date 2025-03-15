@@ -7,7 +7,6 @@ import { castTo } from '@travetto/runtime';
 
 import { FilterContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
-
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
 import { SerializeInterceptor } from './serialize.ts';
 

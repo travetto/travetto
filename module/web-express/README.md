@@ -49,6 +49,7 @@ When working with an [express](https://expressjs.com) applications, the module p
 ```typescript
 const app = express();
     app.disable('x-powered-by');
+    app.set('etag', false);
 
     if (this.config.trustProxy) {
       app.enable('trust proxy');
