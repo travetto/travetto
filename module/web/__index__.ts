@@ -21,6 +21,7 @@ export * from './src/interceptor/compress.ts';
 export * from './src/interceptor/context.ts';
 export * from './src/interceptor/etag.ts';
 export * from './src/interceptor/get-cache.ts';
+export * from './src/interceptor/global.ts';
 export * from './src/interceptor/types.ts';
 export * from './src/interceptor/logging.ts';
 export * from './src/interceptor/serialize.ts';
