@@ -10,7 +10,9 @@ import { SerializeInterceptor } from './serialize.ts';
  * Web logging configuration
  */
 @Config('web.log')
-export class WebLogConfig extends ManagedInterceptorConfig { }
+export class WebLogConfig extends ManagedInterceptorConfig {
+  showStackTrace: boolean;
+}
 
 /**
  * Logging interceptor, to show activity for all requests
@@ -18,7 +20,12 @@ export class WebLogConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class LoggingInterceptor implements HttpInterceptor {
 
-  static logResult(req: HttpRequest, res: HttpResponse): void {
+  runsBefore = [SerializeInterceptor];
+
+  @Inject()
+  config: WebLogConfig;
+
+  logResult(req: HttpRequest, res: HttpResponse): void {
     const duration = Date.now() - req[WebSymbols.Internal].createdDate!;
 
     const reqLog = {
@@ -38,19 +45,21 @@ export class LoggingInterceptor implements HttpInterceptor {
     } else {
       console.error('Request', reqLog);
     }
+
+    if (this.config.showStackTrace) {
+      const result = res[WebSymbols.Internal].body;
+      if (result instanceof Error) {
+        console.error(result.message, { error: result });
+      }
+    }
   }
-
-  runsBefore = [SerializeInterceptor];
-
-  @Inject()
-  config: WebLogConfig;
 
   async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
     try {
       return await next();
     } finally {
       if (req[WebSymbols.Internal].requestLogging !== false) {
-        LoggingInterceptor.logResult(req, res);
+        this.logResult(req, res);
       }
     }
   }

@@ -192,6 +192,10 @@ export interface HttpResponseInternal<T = unknown> {
    * Functions to execute before sending
    */
   filters?: HttpHandler[];
+  /**
+   * Response error
+   */
+  responseError?: Error;
 }
 
 /**
