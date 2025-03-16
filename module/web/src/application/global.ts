@@ -3,6 +3,7 @@ import { Runtime } from '@travetto/runtime';
 import { Controller, Get, WebConfig } from '@travetto/web';
 
 @Controller('/', {
+  documented: false,
   conditional: async () => {
     const config = await DependencyRegistry.getInstance(WebConfig);
     return !!config.defaultMessage;

@@ -59,7 +59,12 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
       if (endpoint.path) {
         sub = `${path}/${endpoint.path}`;
       }
-      sub = sub.replace(/\/{1,3}/g, '/').replace(/\/{1,3}$/, '');
+      if (sub === '/*all') {
+        sub = '*';
+      } else {
+        sub = sub.replace(/\/{1,3}/g, '/').replace(/\/{1,3}$/, '');
+      }
+      console.error('Registering', sub, `${path}/${endpoint.path}`);
       this.raw[endpoint.method](sub, async (req, reply) => {
         await endpoint.handlerFinalized!(...FastifyWebServerUtil.convert(req, reply));
         return reply;

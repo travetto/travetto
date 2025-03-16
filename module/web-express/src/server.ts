@@ -48,7 +48,8 @@ export class ExpressWebServer implements WebServer<express.Application> {
   }
 
   async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void> {
-    const router: express.Router & Keyed = express.Router({ mergeParams: true });
+    const router = express.Router({ mergeParams: true });
+    castTo<Keyed>(router).key = key;
 
     for (const endpoint of endpoints) {
       if (endpoint.path === '/*all') {
@@ -63,7 +64,6 @@ export class ExpressWebServer implements WebServer<express.Application> {
       }
     }
 
-    router.key = key;
     this.raw.use(path, router);
   }
 

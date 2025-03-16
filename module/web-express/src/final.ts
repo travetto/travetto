@@ -20,11 +20,13 @@ export class FinalInterceptor implements HttpInterceptor {
       const { body, providerEntity } = ctx.res[WebInternal];
 
       const res = castTo<Response>(providerEntity);
-      if (isReadable(body)) {
-        await pipeline(body, res);
-      } else {
-        res.send(body);
-        res.end();
+      if ('send' in res) {
+        if (isReadable(body)) {
+          await pipeline(body, res);
+        } else {
+          res.send(body);
+          res.end();
+        }
       }
     }
   }
