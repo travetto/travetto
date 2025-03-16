@@ -32,7 +32,9 @@ export class ExpressWebServer implements WebServer<express.Application> {
     const app = express();
     app.disable('x-powered-by');
     app.set('etag', this.config.etag);
-    app.use(compression());
+    if (this.config.compress) {
+      app.use(compression());
+    }
 
     if (this.config.trustProxy) {
       app.enable('trust proxy');

@@ -53,6 +53,11 @@ export class WebConfig {
   etag: boolean = true;
 
   /**
+   * Should we attempt to compress the responses
+   */
+  compress: boolean = true;
+
+  /**
    * Redefine base url to be the full URL if not specified
    */
   postConstruct(): void {

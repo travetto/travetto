@@ -31,17 +31,19 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
         https: (await this.config.ssl?.getKeys()),
       } : {}
     });
-    const supported = [...['gzip', 'br', 'deflate', 'identity'] as const];
-    app.register(fastifyCompress, {
-      encodings: supported,
-      requestEncodings: supported.filter(x => x !== 'deflate'),
-      onUnsupportedEncoding(encoding, request, reply) {
-        reply.code(406);
-        return JSON.stringify(
-          new AppError(`Please accept one of: ${supported.join(', ')}. ${encoding} is not supported`).toJSON()
-        );
-      },
-    });
+    if (this.config.compress) {
+      const supported = [...['gzip', 'br', 'deflate', 'identity'] as const];
+      app.register(fastifyCompress, {
+        encodings: supported,
+        requestEncodings: supported.filter(x => x !== 'deflate'),
+        onUnsupportedEncoding(encoding, request, reply) {
+          reply.code(406);
+          return JSON.stringify(
+            new AppError(`Please accept one of: ${supported.join(', ')}. ${encoding} is not supported`).toJSON()
+          );
+        },
+      });
+    }
     if (this.config.etag) {
       app.register(fastifyEtag, { replyWith304: true });
     }

@@ -29,7 +29,9 @@ export class KoaWebServer implements WebServer<koa> {
 
   async init(): Promise<koa> {
     const app = new koa();
-    app.use(kCompress());
+    if (this.config.compress) {
+      app.use(kCompress());
+    }
     if (this.config.etag) {
       app.use(kEtag());
     }
