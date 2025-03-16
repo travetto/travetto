@@ -4,7 +4,6 @@ import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
 import { WebServerHandle } from '../types.ts';
-import { WebConfig } from './config.ts';
 import { EndpointUtil } from '../util/endpoint.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
@@ -17,9 +16,6 @@ import { WebServer } from './server.ts';
  */
 @Injectable()
 export class WebApplication<T = unknown> {
-
-  @Inject()
-  config: WebConfig;
 
   @Inject()
   server: WebServer<T>;
@@ -126,7 +122,6 @@ export class WebApplication<T = unknown> {
    * Run the application
    */
   async run(): Promise<WebServerHandle> {
-    console.info('Listening', { port: this.config.port });
     return await this.server.listen();
   }
 }

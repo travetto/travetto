@@ -70,11 +70,13 @@ export class KoaWebServer implements WebServer<koa> {
       raw = https.createServer((await this.config.ssl?.getKeys())!, this.raw.callback());
     }
     this.listening = true;
+    console.info('Listening', { port: this.config.port });
 
-    const { reject, resolve, promise } = Util.resolvablePromise<WebServerHandle>();
+    const { reject, resolve, promise } = Util.resolvablePromise();
     const handle = raw.listen(this.config.port, this.config.bindAddress)
       .on('error', reject)
-      .on('listening', () => resolve(handle));
-    return promise;
+      .on('listening', resolve);
+    await promise;
+    return handle;
   }
 }
