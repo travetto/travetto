@@ -61,11 +61,7 @@ export class FastifyWebServerUtil {
       },
       send: reply.send.bind(reply),
       on: reply.raw.on.bind(reply.raw),
-      end(this: HttpResponse, val?: unknown): void {
-        if (val) {
-          reply.send(val);
-        }
-      },
+      end: () => { },
       getHeaderNames: reply.raw.getHeaderNames.bind(reply.raw),
       setHeader: reply.raw.setHeader.bind(reply.raw),
       getHeader: castTo(reply.raw.getHeader.bind(reply.raw)), // NOTE: Forcing type, may be incorrect

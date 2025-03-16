@@ -196,6 +196,10 @@ export interface HttpResponseInternal<T = unknown> {
    * Response error
    */
   responseError?: Error;
+  /**
+   * cleanup action that must be awaited before the request is complete
+   */
+  cleanup?: Function;
 }
 
 /**
@@ -279,10 +283,9 @@ export interface HttpResponse<T = unknown> {
    */
   write(value: unknown): unknown;
   /**
-   * End the response, with a final optional value
-   * @param val
+   * End the response
    */
-  end(val?: unknown): unknown;
+  end(): void;
   /**
    * Cookie support for sending to the client
    */

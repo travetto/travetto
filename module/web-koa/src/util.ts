@@ -57,11 +57,7 @@ export class KoaWebServerUtil {
       },
       send: b => ctx.body = b,
       on: ctx.res.on.bind(ctx.res),
-      end(this: HttpResponse, val?: unknown): void {
-        if (val) {
-          ctx.body = val;
-        }
-      },
+      end: ctx.response.flushHeaders.bind(ctx.response),
       vary: ctx.response.vary.bind(ctx.response),
       getHeaderNames: () => Object.keys(ctx.response.headers),
       setHeader: ctx.response.set.bind(ctx.response),

@@ -52,6 +52,15 @@ export class ExpressWebServerUtil {
       [WebSymbols.Internal]: {
         providerEntity: res,
         nodeEntity: res,
+        cleanup: (_: HttpRequest, final: HttpResponse) => {
+          const { body } = final[WebSymbols.Internal];
+          if (isReadable(body)) {
+            return pipeline(body, res);
+          } else {
+            res.send(body);
+            res.end();
+          }
+        }
       },
       get headersSent(): boolean {
         return res.headersSent;
@@ -64,19 +73,11 @@ export class ExpressWebServerUtil {
           return res.statusCode;
         }
       },
-      send(this: HttpResponse, data): unknown {
-        if (isReadable(data)) {
-          return pipeline(data, res, { end: false });
-        }
-        res.send(data);
+      send(this: HttpResponse, data): void {
+        this[WebSymbols.Internal].body = castTo<Buffer>(data);
       },
       on: res.on.bind(res),
-      end(this: HttpResponse, val?: unknown): void {
-        if (val) {
-          res.send(val);
-        }
-        res.end();
-      },
+      end: res.end.bind(res),
       vary: res.vary.bind(res),
       getHeaderNames: res.getHeaderNames.bind(res),
       setHeader: res.setHeader.bind(res),
