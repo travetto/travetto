@@ -68,13 +68,9 @@ export abstract class WebServerSuite extends BaseWebSuite {
 
   @Test()
   async testRegex() {
-    const { body: ret, headers } = await this.request('patch', '/test/regexp/super-poodle-party', {
-      headers: {
-        'Cache-Control': 'no-cache'
-      }
-    });
+    const { body: ret, headers } = await this.request('patch', '/test/regexp/super-poodle-party');
     assert.deepStrictEqual(ret, { path: 'poodle' });
-    assert(!('etag' in headers));
+    assert(('etag' in headers));
   }
 
   @Test()
@@ -145,6 +141,13 @@ export abstract class WebServerSuite extends BaseWebSuite {
   }
 
   @Test()
+  async testErrorThrow() {
+    const { status } = await this.request<{ ip: string | undefined }>('post', '/test/ip', { throwOnError: false });
+    assert(status === 500);
+  }
+
+
+  @Test()
   async compressionReturned() {
     {
       const { body: ret, headers } = await this.request('get', '/test/json', { headers: { 'Accept-Encoding': 'gzip;q=1' } });
@@ -158,6 +161,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
       } else {
         assert(headers['content-encoding'] === encoding);
       }
+      console.error('Hi', headers);
       assert(ret && typeof ret === 'object');
       assert('json' in ret);
       assert(typeof ret.json === 'string');
@@ -165,7 +169,8 @@ export abstract class WebServerSuite extends BaseWebSuite {
     }
 
     {
-      const { status } = await this.request('get', '/test/json/large/50000', { headers: { 'Accept-Encoding': 'orange' }, throwOnError: false });
+      const { status, headers } = await this.request('get', '/test/json/large/50000', { headers: { 'Accept-Encoding': 'orange' }, throwOnError: false });
+      assert(!('content-encoding' in headers));
       assert(status === 406);
     }
   }

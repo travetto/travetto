@@ -1,5 +1,3 @@
-import { pipeline } from 'node:stream/promises';
-
 import { Injectable } from '@travetto/di';
 import { AppError, hasFunction } from '@travetto/runtime';
 
@@ -34,12 +32,7 @@ export class SerializeInterceptor implements HttpInterceptor {
     }
 
     const { body } = res[WebSymbols.Internal];
-    if (Buffer.isBuffer(body) || body === undefined) {
-      res.end(body);
-    } else {
-      await pipeline(body, res[WebSymbols.Internal].nodeEntity, { end: false });
-      res.end();
-    }
+    res.send(body);
   }
 
   async intercept({ res, req }: FilterContext, next: FilterNext): Promise<unknown> {

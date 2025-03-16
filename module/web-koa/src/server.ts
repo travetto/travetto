@@ -30,7 +30,9 @@ export class KoaWebServer implements WebServer<koa> {
   async init(): Promise<koa> {
     const app = new koa();
     app.use(kCompress());
-    app.use(kEtag());
+    if (this.config.etag) {
+      app.use(kEtag());
+    }
 
     if (this.config.trustProxy) {
       app.proxy = true;

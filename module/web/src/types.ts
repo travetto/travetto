@@ -272,7 +272,7 @@ export interface HttpResponse<T = unknown> {
    * Send a value to the client
    * @param value Value to send
    */
-  send(value: Any): unknown;
+  send(value: unknown): unknown;
   /**
    * Write content directly to the output stream
    * @param value The value to write
@@ -293,6 +293,6 @@ export interface HttpResponse<T = unknown> {
      * @param value The cookie value
      * @param options Cookie options to set
      */
-    set(name: string, value?: Any, options?: SetOption): void;
+    set(name: string, value?: string, options?: SetOption): void;
   };
 }

@@ -7,11 +7,11 @@ import Negotiator from 'negotiator';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
-
 import {
   FilterContext, HttpRequest, HttpResponse, ManagedInterceptorConfig,
   HttpInterceptor, LoggingInterceptor, WebSymbols
 } from '@travetto/web';
+
 import { EtagInterceptor } from './etag';
 
 

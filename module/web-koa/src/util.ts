@@ -1,7 +1,12 @@
+import { type Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+
 import type koa from 'koa';
 
 import { HttpRequest, HttpResponse, WebSymbols, HttpResponseCore, HttpRequestCore } from '@travetto/web';
-import { castTo } from '@travetto/runtime';
+import { castTo, hasFunction } from '@travetto/runtime';
+
+const isReadable = hasFunction<Readable>('pipe');
 
 /**
  * Provides translation between koa request/response objects and the framework
@@ -63,11 +68,15 @@ export class KoaWebServerUtil {
         }
         if (ctx.headerSent) {
           ctx.res.end(); // End if headers already sent
+        } else if (isReadable(ctx.body)) {
+          pipeline(ctx.body, ctx.res, { end: false }).then(ctx.res.end.bind(ctx.res));
+          return;
         } else {
           ctx.body ??= '';
           ctx.flushHeaders();
         }
       },
+      vary: ctx.response.vary.bind(ctx.response),
       getHeaderNames: () => Object.keys(ctx.response.headers),
       setHeader: ctx.response.set.bind(ctx.response),
       getHeader: ctx.response.get.bind(ctx.response),

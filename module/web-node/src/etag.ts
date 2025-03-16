@@ -3,12 +3,9 @@ import fresh from 'fresh';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-
-import { WebSymbols } from '@travetto/web/src/symbols.ts';
-
 import {
   FilterContext, HttpRequest, HttpResponse, ManagedInterceptorConfig,
-  HttpInterceptor, SerializeInterceptor, LoggingInterceptor
+  HttpInterceptor, SerializeInterceptor, LoggingInterceptor, WebSymbols
 } from '@travetto/web';
 
 @Config('web.etag')
@@ -32,7 +29,6 @@ export class EtagInterceptor implements HttpInterceptor {
     const output = res[WebSymbols.Internal].body;
     if (
       Buffer.isBuffer(output) &&
-      (req.method === 'GET' || req.method === 'HEAD') &&
       (
         !res.statusCode ||
         (res.statusCode < 300 && res.statusCode >= 200) ||
@@ -51,7 +47,11 @@ export class EtagInterceptor implements HttpInterceptor {
       res.setHeader('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
 
       const lastModified = res.getHeader('Last-Modified');
-      if (fresh(req.headers, { etag: tag, 'last-modified': lastModified })) {
+
+      if (
+        (req.method === 'GET' || req.method === 'HEAD') &&
+        fresh(req.headers, { etag: tag, 'last-modified': lastModified })
+      ) {
         res.statusCode = 304;
         res.end();
       }

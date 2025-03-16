@@ -31,7 +31,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
   async init(): Promise<express.Application> {
     const app = express();
     app.disable('x-powered-by');
-    app.set('etag', true);
+    app.set('etag', this.config.etag);
     app.use(compression());
 
     if (this.config.trustProxy) {

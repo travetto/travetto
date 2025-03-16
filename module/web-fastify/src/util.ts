@@ -60,16 +60,12 @@ export class FastifyWebServerUtil {
         }
       },
       send(data): void {
-        const type = (reply.getHeader('Content-Type') ?? '');
-        if (typeof type === 'string' && type.includes('json') && typeof data === 'string') {
-          data = Buffer.from(data);
-        }
-        reply.send(data);
+        reply.send(typeof data === 'string' ? Buffer.from(data, 'utf8') : data);
       },
       on: reply.raw.on.bind(reply.raw),
-      end: (val?: unknown): void => {
+      end(this: HttpResponse, val?: unknown): void {
         if (val) {
-          reply.send(val);
+          this.send(val);
         }
         reply.raw.end();
       },

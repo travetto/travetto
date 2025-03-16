@@ -48,6 +48,11 @@ export class WebConfig {
   ssl?: WebSslConfig;
 
   /**
+   * Should we generate etags
+   */
+  etag: boolean = true;
+
+  /**
    * Redefine base url to be the full URL if not specified
    */
   postConstruct(): void {

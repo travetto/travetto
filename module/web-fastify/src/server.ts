@@ -4,6 +4,7 @@ import { fastifyEtag } from '@fastify/etag';
 
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
 import { Inject, Injectable } from '@travetto/di';
+import { AppError } from '@travetto/runtime';
 
 import { FastifyWebServerUtil } from './util.ts';
 
@@ -30,8 +31,21 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
         https: (await this.config.ssl?.getKeys()),
       } : {}
     });
-    app.register(fastifyCompress);
-    app.register(fastifyEtag);
+    const supported = [...['gzip', 'br', 'deflate', 'identity'] as const];
+    app.register(fastifyCompress, {
+      encodings: supported,
+      requestEncodings: supported.filter(x => x !== 'deflate'),
+      removeContentLengthHeader: false,
+      onUnsupportedEncoding(encoding, request, reply) {
+        reply.code(406);
+        return JSON.stringify(
+          new AppError(`Please accept one of: ${supported.join(', ')}. ${encoding} is not supported`).toJSON()
+        );
+      },
+    });
+    if (this.config.etag) {
+      app.register(fastifyEtag, { replyWith304: true });
+    }
     app.removeAllContentTypeParsers();
     app.addContentTypeParser(/^.*/, (_, body, done) => done(null, body));
 

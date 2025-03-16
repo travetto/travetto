@@ -1,7 +1,12 @@
+import { type Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+
 import type express from 'express';
 
 import { WebSymbols, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
-import { castTo } from '@travetto/runtime';
+import { castTo, hasFunction } from '@travetto/runtime';
+
+const isReadable = hasFunction<Readable>('pipe');
 
 /**
  * Provide a mapping between express request/response and the framework analogs
@@ -59,7 +64,11 @@ export class ExpressWebServerUtil {
           return res.statusCode;
         }
       },
-      send(data): void {
+      send(this: HttpResponse, data): void {
+        if (isReadable(data)) {
+          pipeline(data, res, { end: false }).then(res.end.bind(res));
+          return;
+        }
         const contentType = res.getHeader('Content-Type');
         if (typeof contentType === 'string' && contentType.includes('json') && typeof data === 'string') {
           data = Buffer.from(data);
@@ -73,6 +82,7 @@ export class ExpressWebServerUtil {
         }
         res.end();
       },
+      vary: res.vary.bind(res),
       getHeaderNames: res.getHeaderNames.bind(res),
       setHeader: res.setHeader.bind(res),
       getHeader: castTo(res.getHeader.bind(res)), // NOTE: Forcing type, may be incorrect
