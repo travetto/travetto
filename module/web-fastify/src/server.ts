@@ -67,6 +67,7 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
       sub = sub.replace(/\/{1,3}/g, '/').replace(/\/{1,3}$/, '');
       this.raw[endpoint.method](sub, async (req, reply) => {
         await endpoint.handlerFinalized!(...FastifyWebServerUtil.convert(req, reply));
+        return reply;
       });
     }
   }
