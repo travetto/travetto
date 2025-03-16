@@ -1,7 +1,12 @@
+import { type Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+
 import type express from 'express';
 
 import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
-import { castTo } from '@travetto/runtime';
+import { castTo, hasFunction } from '@travetto/runtime';
+
+const isReadable = hasFunction<Readable>('pipe');
 
 /**
  * Provide a mapping between express request/response and the framework analogs
@@ -43,7 +48,7 @@ export class ExpressWebServerUtil {
    * Build a Travetto HttpResponse from an Express Response
    */
   static getResponse(res: express.Response): HttpResponse {
-    return HttpResponseCore.create({
+    const out = HttpResponseCore.create({
       [WebInternal]: {
         providerEntity: res,
         nodeEntity: res,
@@ -71,5 +76,17 @@ export class ExpressWebServerUtil {
       removeHeader: res.removeHeader.bind(res),
       write: res.write.bind(res),
     });
+
+    out[WebInternal].send = async (): Promise<void> => {
+      const { body } = out[WebInternal];
+      if (isReadable(body)) {
+        await pipeline(body, res);
+      } else {
+        res.send(body);
+        res.end();
+      }
+    };
+
+    return out;
   }
 }

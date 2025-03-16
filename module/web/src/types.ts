@@ -197,9 +197,9 @@ export interface HttpResponseInternal<T = unknown> {
    */
   responseError?: Error;
   /**
-   * cleanup action that must be awaited before the request is complete
+   * Send action that must be awaited before the request is complete
    */
-  cleanup?: Function;
+  send?: Function;
 }
 
 /**
