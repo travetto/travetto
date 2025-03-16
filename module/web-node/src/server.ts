@@ -3,10 +3,7 @@ import https from 'node:https';
 import Router from 'router';
 
 import { Inject, Injectable } from '@travetto/di';
-import {
-  HttpInterceptor, WebConfig, EndpointUtil, WebServer,
-  LoggingInterceptor, WebServerHandle, EndpointConfig
-} from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 
 import { NodeWebServerUtil } from './util.ts';
@@ -56,40 +53,22 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
     }
   }
 
-  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors: HttpInterceptor[]): Promise<void> {
+  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void> {
     const router = Router({});
+    castTo<{ key?: string | symbol }>(router).key = key;
 
     for (const endpoint of endpoints) {
-      const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[endpoint.method](endpointPath, async (req, res) => {
-        await endpoint.handlerFinalized!(...NodeWebServerUtil.convert(req, res));
-      });
-    }
-
-    // Register options handler for each controller, working with a bug in express
-    const optionHandler = EndpointUtil.createEndpointHandler(
-      interceptors,
-      {
-        method: 'options',
-        path: '*all',
-        id: 'node-all',
-        filters: [],
-        headers: {},
-        handlerName: 'node-all',
-        class: NodeWebServer,
-        handler: () => '',
-        params: [],
-        interceptors: [
-          [LoggingInterceptor, { disabled: true }]
-        ]
+      if (endpoint.path === '/*all') {
+        router[endpoint.method]('*all', async (req, res) => {
+          await endpoint.handlerFinalized!(...NodeWebServerUtil.convert(req, res));
+        });
+      } else {
+        const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
+        router[endpoint.method](endpointPath, async (req, res) => {
+          await endpoint.handlerFinalized!(...NodeWebServerUtil.convert(req, res));
+        });
       }
-    );
-
-    router.options('*all', (req, res) => {
-      optionHandler(...NodeWebServerUtil.convert(req, res));
-    });
-
-    castTo<{ key?: string | symbol }>(router).key = key;
+    }
 
     this.raw.router.use(path, router);
   }

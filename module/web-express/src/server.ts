@@ -4,10 +4,7 @@ import express from 'express';
 import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import {
-  HttpInterceptor, WebConfig, EndpointUtil, WebServer,
-  LoggingInterceptor, WebServerHandle, EndpointConfig
-} from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 
 import { ExpressWebServerUtil } from './util.ts';
@@ -50,38 +47,21 @@ export class ExpressWebServer implements WebServer<express.Application> {
     }
   }
 
-  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors: HttpInterceptor[]): Promise<void> {
+  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void> {
     const router: express.Router & Keyed = express.Router({ mergeParams: true });
 
     for (const endpoint of endpoints) {
-      const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[endpoint.method](endpointPath, async (req, res) => {
-        await endpoint.handlerFinalized!(...ExpressWebServerUtil.convert(req, res));
-      });
-    }
-
-    // Register options handler for each controller, working with a bug in express
-    const optionHandler = EndpointUtil.createEndpointHandler(
-      interceptors,
-      {
-        method: 'options',
-        path: '*all',
-        id: 'express-all',
-        filters: [],
-        headers: {},
-        handlerName: 'express-all',
-        class: ExpressWebServer,
-        handler: () => '',
-        params: [],
-        interceptors: [
-          [LoggingInterceptor, { disabled: true }]
-        ]
+      if (endpoint.path === '/*all') {
+        router[endpoint.method]('*all', async (req, res) => {
+          await endpoint.handlerFinalized!(...ExpressWebServerUtil.convert(req, res));
+        });
+      } else {
+        const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
+        router[endpoint.method](endpointPath, async (req, res) => {
+          await endpoint.handlerFinalized!(...ExpressWebServerUtil.convert(req, res));
+        });
       }
-    );
-
-    router.options('*all', async (req, res) => {
-      await optionHandler(...ExpressWebServerUtil.convert(req, res));
-    });
+    }
 
     router.key = key;
     this.raw.use(path, router);

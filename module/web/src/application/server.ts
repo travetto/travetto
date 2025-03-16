@@ -25,7 +25,7 @@ export interface WebServer<T = unknown> {
    * @param path The path to add the endpoints to
    * @param endpoints The list of endpoints to add
    */
-  registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors?: HttpInterceptor[]): Promise<void>;
+  registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void>;
 
   /**
    * The endpoints to unregister

@@ -104,7 +104,7 @@ export class WebApplication<T = unknown> {
       ep.handlerFinalized = EndpointUtil.createEndpointHandler(this.interceptors, ep, config);
     }
 
-    await this.server.registerEndpoints(config.class.Ⲑid, config.basePath, config.endpoints, this.interceptors);
+    await this.server.registerEndpoints(config.class.Ⲑid, config.basePath, config.endpoints);
 
     console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: config.endpoints.length });
   }
