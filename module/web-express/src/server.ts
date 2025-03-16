@@ -71,8 +71,9 @@ export class ExpressWebServer implements WebServer<express.Application> {
     this.listening = true;
     console.info('Listening', { port: this.config.port });
 
-    const { reject, resolve, promise } = Util.resolvablePromise<WebServerHandle>();
-    const handle = raw.listen(this.config.port, this.config.hostname, err => err ? reject(err) : resolve(handle));
-    return promise;
+    const { reject, resolve, promise } = Util.resolvablePromise();
+    const handle = raw.listen(this.config.port, this.config.hostname, err => err ? reject(err) : resolve());
+    await promise;
+    return handle;
   }
 }

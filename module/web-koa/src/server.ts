@@ -77,6 +77,7 @@ export class KoaWebServer implements WebServer<koa> {
       .on('error', reject)
       .on('listening', resolve);
     await promise;
+    handle.off('error', reject);
     return handle;
   }
 }

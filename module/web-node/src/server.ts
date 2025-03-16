@@ -58,16 +58,12 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
     castTo<{ key?: string | symbol }>(router).key = key;
 
     for (const endpoint of endpoints) {
-      if (endpoint.path === '/*all') {
-        router[endpoint.method]('*all', async (req, res) => {
-          await endpoint.handlerFinalized!(...NodeWebServerUtil.convert(req, res));
-        });
-      } else {
-        const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-        router[endpoint.method](endpointPath, async (req, res) => {
-          await endpoint.handlerFinalized!(...NodeWebServerUtil.convert(req, res));
-        });
-      }
+      const finalPath = endpoint.path === '/*all' ? '*all' :
+        endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
+
+      router[endpoint.method](finalPath, async (req, res) => {
+        await endpoint.handlerFinalized!(...NodeWebServerUtil.convert(req, res));
+      });
     }
 
     this.raw.router.use(path, router);
@@ -75,10 +71,13 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
 
   async listen(): Promise<WebServerHandle> {
     this.listening = true;
+    console.info('Listening', { port: this.config.port });
+
     const { reject, resolve, promise } = Util.resolvablePromise();
-    this.raw.listen(this.config.port, this.config.hostname, undefined, () => resolve());
+    this.raw.listen(this.config.port, this.config.hostname, undefined, resolve);
     this.raw.on('error', reject);
     await promise;
+    this.raw.off('error', reject);
     return this.raw;
   }
 }
