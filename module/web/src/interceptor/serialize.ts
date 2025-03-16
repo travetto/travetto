@@ -40,7 +40,8 @@ export class SerializeInterceptor implements HttpInterceptor {
       }
       await this.respond(req, res, value);
     } catch (error) {
-      await this.respond(req, res, error instanceof Error ? error : AppError.fromBasic(error), false);
+      const err = res[WebInternal].responseError = error instanceof Error ? error : AppError.fromBasic(error);
+      await this.respond(req, res, err, false);
     }
   }
 }

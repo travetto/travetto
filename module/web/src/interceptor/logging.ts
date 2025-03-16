@@ -45,11 +45,9 @@ export class LoggingInterceptor implements HttpInterceptor {
       console.error('Request', reqLog);
     }
 
-    if (this.config.showStackTrace) {
-      const result = res[WebInternal].body;
-      if (result instanceof Error) {
-        console.error(result.message, { error: result });
-      }
+    const err = res[WebInternal].responseError;
+    if (this.config.showStackTrace && err) {
+      console.error(err.message, { error: err });
     }
   }
 
