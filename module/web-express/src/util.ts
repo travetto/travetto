@@ -71,12 +71,11 @@ export class ExpressWebServerUtil {
         res.send(data);
       },
       on: res.on.bind(res),
-      end(this: HttpResponse, val?: unknown): unknown {
+      end(this: HttpResponse, val?: unknown): void {
         if (val) {
-          return Promise.resolve(this.send(val)).then(res.end.bind(res));
-        } else {
-          res.end();
+          this.send(val);
         }
+        res.end();
       },
       vary: res.vary.bind(res),
       getHeaderNames: res.getHeaderNames.bind(res),
