@@ -146,7 +146,6 @@ export abstract class WebServerSuite extends BaseWebSuite {
     assert(status === 500);
   }
 
-
   @Test()
   async compressionReturned() {
     {
