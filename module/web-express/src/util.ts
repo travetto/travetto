@@ -73,7 +73,7 @@ export class ExpressWebServerUtil {
       on: res.on.bind(res),
       end(this: HttpResponse, val?: unknown): void {
         if (val) {
-          this.send(val);
+          res.send(val);
         }
         res.end();
       },
