@@ -59,9 +59,7 @@ export class FastifyWebServerUtil {
           return reply.raw.statusCode;
         }
       },
-      send(data): void {
-        reply.send(typeof data === 'string' ? Buffer.from(data, 'utf8') : data);
-      },
+      send: reply.send.bind(reply),
       on: reply.raw.on.bind(reply.raw),
       end(this: HttpResponse, val?: unknown): void {
         if (val) {

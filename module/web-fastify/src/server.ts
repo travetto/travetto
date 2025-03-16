@@ -35,7 +35,6 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
     app.register(fastifyCompress, {
       encodings: supported,
       requestEncodings: supported.filter(x => x !== 'deflate'),
-      removeContentLengthHeader: false,
       onUnsupportedEncoding(encoding, request, reply) {
         reply.code(406);
         return JSON.stringify(

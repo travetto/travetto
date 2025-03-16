@@ -64,21 +64,16 @@ export class ExpressWebServerUtil {
           return res.statusCode;
         }
       },
-      send(this: HttpResponse, data): void {
+      send(this: HttpResponse, data): unknown {
         if (isReadable(data)) {
-          pipeline(data, res, { end: false }).then(res.end.bind(res));
-          return;
-        }
-        const contentType = res.getHeader('Content-Type');
-        if (typeof contentType === 'string' && contentType.includes('json') && typeof data === 'string') {
-          data = Buffer.from(data);
+          return pipeline(data, res, { end: false });
         }
         res.send(data);
       },
       on: res.on.bind(res),
-      end: (val?: unknown): void => {
+      end(this: HttpResponse, val?: unknown): void {
         if (val) {
-          res.send(val);
+          this.send(val);
         }
         res.end();
       },

@@ -30,9 +30,8 @@ export class SerializeInterceptor implements HttpInterceptor {
         await handler(req, res);
       }
     }
-
-    const { body } = res[WebSymbols.Internal];
-    res.send(body);
+    await res.send(res[WebSymbols.Internal].body);
+    res.end();
   }
 
   async intercept({ res, req }: FilterContext, next: FilterNext): Promise<unknown> {
