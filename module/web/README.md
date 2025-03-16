@@ -16,7 +16,7 @@ yarn add @travetto/web
 The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [HttpRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L30) and [HttpResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L174) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13) class.
 
 ## Controller
-To define an endpoint, you must first declare a [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9) which is only allowed on classes. Controllers can be configured with:
+To define an endpoint, you must first declare a [@Controller](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L10) which is only allowed on classes. Controllers can be configured with:
    *  `title` - The definition of the controller
    *  `description` - High level description fo the controller
 Additionally, the module is predicated upon [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), and so all standard injection techniques (constructor, fields) work for registering dependencies. 
@@ -267,7 +267,7 @@ Per the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#
 Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module supports typing requests and request bodies for run-time validation of requests.
 
 ## Running an App
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L21) that will follow default behaviors, and spin up the Web server.
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L18) that will follow default behaviors, and spin up the Web server.
 
 **Terminal: Standard application**
 ```bash
@@ -302,15 +302,9 @@ Initialized {
       AcceptsConfig: { types: {} },
       AsyncContextConfig: {},
       BodyParseConfig: { limit: '1mb', parsingTypes: {} },
-      CompressConfig: {
-        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
-        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
-      },
       CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
       CorsConfig: {},
-      EtagConfig: {},
       GetCacheConfig: {},
-      GlobalConfig: { showStackTrace: true },
       WebConfig: {
         serve: true,
         port: 3000,
@@ -318,9 +312,11 @@ Initialized {
         hostname: 'localhost',
         bindAddress: '0.0.0.0',
         baseUrl: 'http://localhost:3000',
-        defaultMessage: true
+        defaultMessage: true,
+        etag: true,
+        compress: true
       },
-      WebLogConfig: {},
+      WebLogConfig: { showStackTrace: true },
       WebSslConfig: { active: false }
     }
   }
@@ -400,15 +396,9 @@ Initialized {
       AcceptsConfig: { types: {} },
       AsyncContextConfig: {},
       BodyParseConfig: { limit: '1mb', parsingTypes: {} },
-      CompressConfig: {
-        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
-        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
-      },
       CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
       CorsConfig: {},
-      EtagConfig: {},
       GetCacheConfig: {},
-      GlobalConfig: { showStackTrace: true },
       WebConfig: {
         serve: true,
         port: 3000,
@@ -416,9 +406,11 @@ Initialized {
         hostname: 'localhost',
         bindAddress: '0.0.0.0',
         baseUrl: 'http://localhost:3000',
-        defaultMessage: true
+        defaultMessage: true,
+        etag: true,
+        compress: true
       },
-      WebLogConfig: {},
+      WebLogConfig: { showStackTrace: true },
       WebSslConfig: { active: true }
     }
   }
@@ -449,7 +441,7 @@ export class HelloWorldInterceptor implements HttpInterceptor {
 Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 
 ### BodyParseInterceptor
-[BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L39) handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
+[BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L38) handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
 **Code: Body Parse Config**
 ```typescript

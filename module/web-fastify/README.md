@@ -13,7 +13,7 @@ npm install @travetto/web-fastify
 yarn add @travetto/web-fastify
 ```
 
-The module is an [fastify](https://www.fastify.io/) provider for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.  This module provides an implementation of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L21) for automatic injection in the default Web server.
+The module is an [fastify](https://www.fastify.io/) provider for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.  This module provides an implementation of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L18) for automatic injection in the default Web server.
 
 ## Customizing Web App
 
@@ -49,7 +49,22 @@ When working with an [fastify](https://www.fastify.io/) applications, the module
 
 **Code: Configured Middleware**
 ```typescript
-const app = fastify(fastConf);
+const app = fastify({
+      trustProxy: this.config.trustProxy,
+      ...this.config.ssl?.active ? {
+        https: (await this.config.ssl?.getKeys()),
+      } : {}
+    });
+    if (this.config.compress) {
+      const supported = [...['gzip', 'br', 'deflate', 'identity'] as const];
+      app.register(fastifyCompress, {
+        encodings: supported,
+        requestEncodings: supported.filter(x => x !== 'deflate')
+      });
+    }
+    if (this.config.etag) {
+      app.register(fastifyEtag, { replyWith304: true });
+    }
     app.removeAllContentTypeParsers();
     app.addContentTypeParser(/^.*/, (_, body, done) => done(null, body));
 ```

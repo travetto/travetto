@@ -122,6 +122,10 @@ export class WebApplication<T = unknown> {
    * Run the application
    */
   async run(): Promise<WebServerHandle> {
-    return await this.server.listen();
+    const handle = await this.server.listen();
+    if (handle.port) {
+      console.log('Listening', { port: handle.port });
+    }
+    return handle;
   }
 }

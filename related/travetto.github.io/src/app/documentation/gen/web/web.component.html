@@ -18,7 +18,7 @@
 The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L30">HttpRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L174">HttpResponse</a> objects). This module is built upon the <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25">&#64;Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">&#64;Schema</a> class.
 <h2 id="controller">Controller</h2>
 
-To define an endpoint, you must first declare a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9">&#64;Controller</a> which is only allowed on classes. Controllers can be configured with:
+To define an endpoint, you must first declare a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L10">&#64;Controller</a> which is only allowed on classes. Controllers can be configured with:
 <ul> <li><code class="item input">title</code> - The definition of the controller</li>
 <li><code class="item input">description</code> - High level description fo the controller</li>
 </ul>
@@ -299,7 +299,7 @@ Additionally, the <a class="module-link" routerLink="/docs/schema" title="Data t
 
 <h2 id="running-an-app">Running an App</h2>
 
-By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">&#64;CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L21">WebApplication</a> that will follow default behaviors, and spin up the Web server.
+By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">&#64;CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L18">WebApplication</a> that will follow default behaviors, and spin up the Web server.
 
   <figure class="terminal">
     <figcaption class="terminal">Standard application
@@ -336,15 +336,9 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       AcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       AsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       BodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-      CompressConfig: <span class="token punctuation">{{'{'}}</span>
-        preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
-        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span> <span class="token punctuation">{{'}'}}</span>
-      <span class="token punctuation">{{'}'}}</span>,
       CookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
       CorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      EtagConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      GlobalConfig: <span class="token punctuation">{{'{'}}</span> showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,
@@ -352,9 +346,11 @@ Initialized <span class="token punctuation">{{'{'}}</span>
         hostname: <span class="token string">'localhost'</span>,
         bindAddress: <span class="token string">'0.0.0.0'</span>,
         baseUrl: <span class="token string">'http://localhost:3000'</span>,
-        defaultMessage: <span class="token boolean">true</span>
+        defaultMessage: true,
+        etag: true,
+        compress: <span class="token boolean">true</span>
       <span class="token punctuation">{{'}'}}</span>,
-      WebLogConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      WebLogConfig: <span class="token punctuation">{{'{'}}</span> showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -440,15 +436,9 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       AcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       AsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       BodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-      CompressConfig: <span class="token punctuation">{{'{'}}</span>
-        preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
-        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span> <span class="token punctuation">{{'}'}}</span>
-      <span class="token punctuation">{{'}'}}</span>,
       CookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
       CorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      EtagConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      GlobalConfig: <span class="token punctuation">{{'{'}}</span> showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,
@@ -456,9 +446,11 @@ Initialized <span class="token punctuation">{{'{'}}</span>
         hostname: <span class="token string">'localhost'</span>,
         bindAddress: <span class="token string">'0.0.0.0'</span>,
         baseUrl: <span class="token string">'http://localhost:3000'</span>,
-        defaultMessage: <span class="token boolean">true</span>
+        defaultMessage: true,
+        etag: true,
+        compress: <span class="token boolean">true</span>
       <span class="token punctuation">{{'}'}}</span>,
-      WebLogConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      WebLogConfig: <span class="token punctuation">{{'{'}}</span> showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -493,11 +485,11 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 <h3 id="bodyparseinterceptor">BodyParseInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L39">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L38">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
   <figure class="code">
     <figcaption class="code">Body Parse Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L24">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L23">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BodyParseConfig</span> <span class="token keyword">extends</span> <span class="token class-name">ManagedInterceptorConfig</span> <span class="token punctuation">{{'{'}}</span>

@@ -10,7 +10,7 @@ export type FilterContext<C = unknown> = { req: HttpRequest, res: HttpResponse, 
 export type Filter<C = unknown> = (context: FilterContext<C>, next: FilterNext) => FilterReturn;
 
 export type EndpointHandler = TypedFunction<Any, Any>;
-export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
+export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
 
 export type HttpHandler = (req: HttpRequest, res: HttpResponse) => FilterReturn;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;

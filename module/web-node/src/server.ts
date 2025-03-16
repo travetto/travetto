@@ -71,13 +71,15 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
 
   async listen(): Promise<WebServerHandle> {
     this.listening = true;
-    console.info('Listening', { port: this.config.port });
-
     const { reject, resolve, promise } = Util.resolvablePromise();
-    this.raw.listen(this.config.port, this.config.hostname, undefined, resolve);
-    this.raw.on('error', reject);
+    const server = this.raw.listen(this.config.port, this.config.hostname, undefined, resolve);
+    server.on('error', reject);
     await promise;
-    this.raw.off('error', reject);
-    return this.raw;
+    server.off('error', reject);
+    return {
+      port: this.config.port,
+      close: server.close.bind(server),
+      on: server.on.bind(server)
+    };
   }
 }

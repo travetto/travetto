@@ -75,10 +75,10 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
   }
 
   async listen(): Promise<WebServerHandle> {
-    console.info('Listening', { port: this.config.port });
     await this.raw.listen({ port: this.config.port, host: this.config.bindAddress });
     this.listening = true;
     return {
+      port: this.config.port,
       on: this.raw.server.on.bind(this.raw),
       close: this.raw.close.bind(this.raw)
     };

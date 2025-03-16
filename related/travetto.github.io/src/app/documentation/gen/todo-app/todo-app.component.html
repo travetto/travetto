@@ -392,20 +392,14 @@ First we must start the application:
       AuthConfig: <span class="token punctuation">{{'{'}}</span> maxAge: <span class="token string">'1h'</span>, rollingRenew: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       BodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
-      CompressConfig: <span class="token punctuation">{{'{'}}</span>
-        preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
-        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span> <span class="token punctuation">{{'}'}}</span>
-      <span class="token punctuation">{{'}'}}</span>,
       ConsoleLogAppenderConfig: <span class="token punctuation">{{'{'}}</span> logToLevel: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       CookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
       CorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      EtagConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       FileLogAppenderConfig: <span class="token punctuation">{{'{'}}</span>
         output: <span class="token string">'&lt;workspace-root>/.trv/tool/node_modules/&#64;travetto/todo-app/output.log'</span>,
         writeSync: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      GlobalConfig: <span class="token punctuation">{{'{'}}</span> showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       JSONLogFormatterConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       LineLogFormatterConfig: <span class="token punctuation">{{'{'}}</span>
         plain: false,
@@ -448,16 +442,18 @@ First we must start the application:
         bindAddress: <span class="token string">'0.0.0.0'</span>,
         baseUrl: <span class="token string">'http://localhost:12555'</span>,
         defaultMessage: true,
-        ssl: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
+        ssl: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
+        etag: true,
+        compress: <span class="token boolean">true</span>
       <span class="token punctuation">{{'}'}}</span>,
-      WebLogConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      WebLogConfig: <span class="token punctuation">{{'{'}}</span> showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       WebRpcConfig: <span class="token punctuation">{{'{'}}</span> clients: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       WebSessionConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/web:src/application/app.ts:195<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
+<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/web:src/application/app.ts:127<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://nodejs.org/api/globals.html#fetch">fetch</a> requests to interact with the new api. <br><br>

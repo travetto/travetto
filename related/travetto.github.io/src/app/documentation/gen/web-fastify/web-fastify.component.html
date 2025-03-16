@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/web-fastify</code></pre>
   </figure>
 
-The module is an <a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> provider for the <a class="module-link" routerLink="/docs/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a> module.  This module provides an implementation of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L21">WebApplication</a> for automatic injection in the default Web server.
+The module is an <a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> provider for the <a class="module-link" routerLink="/docs/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a> module.  This module provides an implementation of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L18">WebApplication</a> for automatic injection in the default Web server.
 <h2 id="customizing-web-app">Customizing Web App</h2>
 
   <figure class="code">
@@ -54,10 +54,25 @@ When working with an <a target="_blank" class="external-link" href="https://www.
 
   <figure class="code">
     <figcaption class="code">Configured Middleware
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-fastify/src/server.ts#L35">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-fastify/src/server.ts#L27">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token function">fastify</span><span class="token punctuation">(</span>fastConf<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token function">fastify</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+  trustProxy<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>trustProxy<span class="token punctuation">,</span>
+  <span class="token operator">...</span><span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>ssl<span class="token operator">?.</span>active <span class="token operator">?</span> <span class="token punctuation">{{'{'}}</span>
+    https<span class="token operator">:</span> <span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>ssl<span class="token operator">?.</span><span class="token function">getKeys</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{{'}'}}</span> <span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>compress<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> supported <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token punctuation">[</span><span class="token string">'gzip'</span><span class="token punctuation">,</span> <span class="token string">'br'</span><span class="token punctuation">,</span> <span class="token string">'deflate'</span><span class="token punctuation">,</span> <span class="token string">'identity'</span><span class="token punctuation">]</span> <span class="token keyword">as</span> <span class="token keyword">const</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  app<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span>fastifyCompress<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
+    encodings<span class="token operator">:</span> supported<span class="token punctuation">,</span>
+    requestEncodings<span class="token operator">:</span> supported<span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span>x <span class="token operator">=></span> x <span class="token operator">!==</span> <span class="token string">'deflate'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>etag<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  app<span class="token punctuation">.</span><span class="token function">register</span><span class="token punctuation">(</span>fastifyEtag<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> replyWith304<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
 app<span class="token punctuation">.</span><span class="token function">removeAllContentTypeParsers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 app<span class="token punctuation">.</span><span class="token function">addContentTypeParser</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^.*</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">,</span> <span class="token punctuation">(</span>_<span class="token punctuation">,</span> body<span class="token punctuation">,</span> done<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">done</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> body<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
   </figure>
