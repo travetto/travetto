@@ -5,7 +5,7 @@ import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
 import {
-  WebSymbols, HttpInterceptor, WebConfig, EndpointUtil, WebServer,
+  HttpInterceptor, WebConfig, EndpointUtil, WebServer,
   LoggingInterceptor, WebServerHandle, EndpointConfig
 } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
@@ -23,8 +23,6 @@ export class ExpressWebServer implements WebServer<express.Application> {
   raw: express.Application;
 
   listening: boolean;
-
-  updateGlobalOnChange = true;
 
   @Inject()
   config: WebConfig;
@@ -63,29 +61,27 @@ export class ExpressWebServer implements WebServer<express.Application> {
     }
 
     // Register options handler for each controller, working with a bug in express
-    if (key !== WebSymbols.GlobalEndpoint) {
-      const optionHandler = EndpointUtil.createEndpointHandler(
-        interceptors,
-        {
-          method: 'options',
-          path: '*all',
-          id: 'express-all',
-          filters: [],
-          headers: {},
-          handlerName: 'express-all',
-          class: ExpressWebServer,
-          handler: () => '',
-          params: [],
-          interceptors: [
-            [LoggingInterceptor, { disabled: true }]
-          ]
-        }
-      );
+    const optionHandler = EndpointUtil.createEndpointHandler(
+      interceptors,
+      {
+        method: 'options',
+        path: '*all',
+        id: 'express-all',
+        filters: [],
+        headers: {},
+        handlerName: 'express-all',
+        class: ExpressWebServer,
+        handler: () => '',
+        params: [],
+        interceptors: [
+          [LoggingInterceptor, { disabled: true }]
+        ]
+      }
+    );
 
-      router.options('*all', async (req, res) => {
-        await optionHandler(...ExpressWebServerUtil.convert(req, res));
-      });
-    }
+    router.options('*all', async (req, res) => {
+      await optionHandler(...ExpressWebServerUtil.convert(req, res));
+    });
 
     router.key = key;
     this.raw.use(path, router);

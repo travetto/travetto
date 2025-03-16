@@ -7,7 +7,7 @@ import { pipeline } from 'node:stream/promises';
 
 import busboy from '@fastify/busboy';
 
-import { HttpRequest, MimeUtil, WebSymbols } from '@travetto/web';
+import { HttpRequest, MimeUtil, WebInternal } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { WebUploadConfig } from './config.ts';
@@ -48,7 +48,7 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: req.body ?? req[WebSymbols.Internal].nodeEntity, filename: req.getFilename(), field: 'file' };
+      yield { stream: req.body ?? req[WebInternal].nodeEntity, filename: req.getFilename(), field: 'file' };
     }
   }
 

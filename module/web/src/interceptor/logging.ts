@@ -2,8 +2,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { FilterContext, FilterNext, HttpRequest, HttpResponse } from '../types.ts';
-import { WebSymbols } from '../symbols.ts';
+import { FilterContext, FilterNext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
 import { SerializeInterceptor } from './serialize.ts';
 
 /**
@@ -26,14 +25,14 @@ export class LoggingInterceptor implements HttpInterceptor {
   config: WebLogConfig;
 
   logResult(req: HttpRequest, res: HttpResponse): void {
-    const duration = Date.now() - req[WebSymbols.Internal].createdDate!;
+    const duration = Date.now() - req[WebInternal].createdDate!;
 
     const reqLog = {
       method: req.method,
       path: req.path,
       query: { ...req.query },
       params: req.params,
-      ...req[WebSymbols.Internal].requestLogging ?? {},
+      ...req[WebInternal].requestLogging ?? {},
       statusCode: res.statusCode,
       duration,
     };
@@ -47,7 +46,7 @@ export class LoggingInterceptor implements HttpInterceptor {
     }
 
     if (this.config.showStackTrace) {
-      const result = res[WebSymbols.Internal].body;
+      const result = res[WebInternal].body;
       if (result instanceof Error) {
         console.error(result.message, { error: result });
       }
@@ -58,7 +57,7 @@ export class LoggingInterceptor implements HttpInterceptor {
     try {
       return await next();
     } finally {
-      if (req[WebSymbols.Internal].requestLogging !== false) {
+      if (req[WebInternal].requestLogging !== false) {
         this.logResult(req, res);
       }
     }

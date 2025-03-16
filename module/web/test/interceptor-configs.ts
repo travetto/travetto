@@ -12,7 +12,7 @@ import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
 import { ManagedInterceptorConfig, HttpInterceptor } from '../src/interceptor/types.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpResponse, FilterContext, WebServerHandle } from '../src/types.ts';
+import { HttpResponse, FilterContext, WebServerHandle, WebInternal } from '../src/types.ts';
 import { WebServer } from '../src/application/server.ts';
 import { WebApplication } from '../src/application/app.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
@@ -20,7 +20,6 @@ import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
 import { HttpRequestCore } from '../src/request/core.ts';
 import { HttpResponseCore } from '../src/response/core.ts';
-import { WebSymbols } from '@travetto/web';
 
 @Injectable()
 @Config('web.custom')
@@ -112,7 +111,7 @@ class TestInterceptorConfigSuite {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
     const res = HttpResponseCore.create<HttpResponse & { name?: string }>({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         nodeEntity: castTo(fs.createWriteStream('/dev/null')),
         providerEntity: undefined!
       },
@@ -125,7 +124,7 @@ class TestInterceptorConfigSuite {
       removeHeader: () => undefined,
     });
     await endpoint.handlerFinalized!(HttpRequestCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         nodeEntity: castTo(Buffer.from([])),
         providerEntity: undefined!
       },

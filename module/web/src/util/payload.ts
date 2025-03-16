@@ -2,8 +2,7 @@ import { Readable } from 'node:stream';
 
 import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
-import { HttpRequest, HttpResponse } from '../types';
-import { WebSymbols } from '../symbols';
+import { HttpRequest, HttpResponse, WebInternal } from '../types';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -123,7 +122,7 @@ export class HttpPayloadUtil {
   static applyPayload(payload: HttpPayload, req: HttpRequest, res: HttpResponse): void {
     const { length, defaultContentType, headers, data, statusCode } = payload;
 
-    for (const map of [res[WebSymbols.Internal].headersAdded, headers]) {
+    for (const map of [res[WebInternal].headersAdded, headers]) {
       for (const [key, value] of Object.entries(map ?? {})) {
         res.setHeader(key, typeof value === 'function' ? value() : value);
       }
@@ -139,7 +138,7 @@ export class HttpPayloadUtil {
       res.setHeader('Content-Length', `${length} `);
     }
 
-    res[WebSymbols.Internal].body = data;
+    res[WebInternal].body = data;
 
     if (!statusCode) {
       if (length === 0) {  // On empty response

@@ -4,7 +4,7 @@ import Router from 'router';
 
 import { Inject, Injectable } from '@travetto/di';
 import {
-  WebSymbols, HttpInterceptor, WebConfig, EndpointUtil, WebServer,
+  HttpInterceptor, WebConfig, EndpointUtil, WebServer,
   LoggingInterceptor, WebServerHandle, EndpointConfig
 } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
@@ -67,29 +67,27 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
     }
 
     // Register options handler for each controller, working with a bug in express
-    if (key !== WebSymbols.GlobalEndpoint) {
-      const optionHandler = EndpointUtil.createEndpointHandler(
-        interceptors,
-        {
-          method: 'options',
-          path: '*all',
-          id: 'node-all',
-          filters: [],
-          headers: {},
-          handlerName: 'node-all',
-          class: NodeWebServer,
-          handler: () => '',
-          params: [],
-          interceptors: [
-            [LoggingInterceptor, { disabled: true }]
-          ]
-        }
-      );
+    const optionHandler = EndpointUtil.createEndpointHandler(
+      interceptors,
+      {
+        method: 'options',
+        path: '*all',
+        id: 'node-all',
+        filters: [],
+        headers: {},
+        handlerName: 'node-all',
+        class: NodeWebServer,
+        handler: () => '',
+        params: [],
+        interceptors: [
+          [LoggingInterceptor, { disabled: true }]
+        ]
+      }
+    );
 
-      router.options('*all', (req, res) => {
-        optionHandler(...NodeWebServerUtil.convert(req, res));
-      });
-    }
+    router.options('*all', (req, res) => {
+      optionHandler(...NodeWebServerUtil.convert(req, res));
+    });
 
     castTo<{ key?: string | symbol }>(router).key = key;
 

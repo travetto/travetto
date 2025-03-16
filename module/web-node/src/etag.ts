@@ -5,7 +5,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import {
   FilterContext, HttpRequest, HttpResponse, ManagedInterceptorConfig,
-  HttpInterceptor, SerializeInterceptor, LoggingInterceptor, WebSymbols
+  HttpInterceptor, SerializeInterceptor, LoggingInterceptor, WebInternal
 } from '@travetto/web';
 
 @Config('web.etag')
@@ -26,7 +26,7 @@ export class EtagInterceptor implements HttpInterceptor {
   config: EtagConfig;
 
   async etag(req: HttpRequest, res: HttpResponse): Promise<void> {
-    const output = res[WebSymbols.Internal].body;
+    const output = res[WebInternal].body;
     if (
       Buffer.isBuffer(output) &&
       (
@@ -59,6 +59,6 @@ export class EtagInterceptor implements HttpInterceptor {
   }
 
   async intercept({ res }: FilterContext): Promise<void> {
-    (res[WebSymbols.Internal].filters ??= []).push(this.etag.bind(this));
+    (res[WebInternal].filters ??= []).push(this.etag.bind(this));
   }
 }

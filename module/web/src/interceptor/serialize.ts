@@ -3,9 +3,8 @@ import { AppError, hasFunction } from '@travetto/runtime';
 
 import { HttpSerializable } from '../response/serializable.ts';
 import { HttpInterceptor } from './types.ts';
-import { FilterContext, FilterNext, HttpRequest, HttpResponse } from '../types.ts';
+import { FilterContext, FilterNext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
 import { HttpPayloadUtil } from '../util/payload.ts';
-import { WebSymbols } from '../symbols.ts';
 
 const isSerializable = hasFunction<HttpSerializable>('serialize');
 
@@ -26,11 +25,11 @@ export class SerializeInterceptor implements HttpInterceptor {
 
     if (applyFilters) {
       // Run any handlers if they exist
-      for (const handler of res[WebSymbols.Internal].filters ?? []) {
+      for (const handler of res[WebInternal].filters ?? []) {
         await handler(req, res);
       }
     }
-    await res.send(res[WebSymbols.Internal].body);
+    await res.send(res[WebInternal].body);
   }
 
   async intercept({ res, req }: FilterContext, next: FilterNext): Promise<unknown> {

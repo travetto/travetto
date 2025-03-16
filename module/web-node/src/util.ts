@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
 
-import { WebSymbols, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -12,10 +12,10 @@ export class NodeWebServerUtil {
    * Convert request, response object from provider to framework
    */
   static convert(req: IncomingMessage, res: ServerResponse): [HttpRequest, HttpResponse] {
-    const fullReq: typeof req & { [WebSymbols.Internal]?: HttpRequest } = req;
-    const fullRes: typeof res & { [WebSymbols.Internal]?: HttpResponse } = res;
-    const finalReq = fullReq[WebSymbols.Internal] ??= this.getRequest(req);
-    const finalRes = fullRes[WebSymbols.Internal] ??= this.getResponse(res);
+    const fullReq: typeof req & { [WebInternal]?: HttpRequest } = req;
+    const fullRes: typeof res & { [WebInternal]?: HttpResponse } = res;
+    const finalReq = fullReq[WebInternal] ??= this.getRequest(req);
+    const finalRes = fullRes[WebInternal] ??= this.getResponse(res);
     return [finalReq, finalRes];
   }
 
@@ -27,7 +27,7 @@ export class NodeWebServerUtil {
     const url = new URL(req.url!);
 
     return HttpRequestCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: req,
         nodeEntity: req,
       },
@@ -47,7 +47,7 @@ export class NodeWebServerUtil {
    */
   static getResponse(res: ServerResponse): HttpResponse {
     return HttpResponseCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: res,
         nodeEntity: res,
       },
@@ -61,21 +61,11 @@ export class NodeWebServerUtil {
           return res.statusCode;
         }
       },
-      send(data): void {
-        const contentType = res.getHeader('Content-Type');
-        if (typeof contentType === 'string' && contentType.includes('json') && typeof data === 'string') {
-          data = Buffer.from(data);
-        }
-        res.write(data);
-        res.end();
+      send(this: HttpResponse, data): void {
+        this[WebInternal].body = castTo<Buffer>(data);
       },
       on: res.on.bind(res),
-      end: (val?: unknown): void => {
-        if (val) {
-          res.write(val);
-        }
-        res.end();
-      },
+      end: res.end.bind(res),
       getHeaderNames: res.getHeaderNames.bind(res),
       setHeader: res.setHeader.bind(res),
       getHeader: castTo(res.getHeader.bind(res)), // NOTE: Forcing type, may be incorrect

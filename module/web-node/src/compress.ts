@@ -9,7 +9,7 @@ import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 import {
   FilterContext, HttpRequest, HttpResponse, ManagedInterceptorConfig,
-  HttpInterceptor, LoggingInterceptor, WebSymbols
+  HttpInterceptor, LoggingInterceptor, WebInternal
 } from '@travetto/web';
 
 import { EtagInterceptor } from './etag';
@@ -46,7 +46,7 @@ export class CompressionInterceptor implements HttpInterceptor {
   async compress(req: HttpRequest, res: HttpResponse): Promise<void> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
 
-    const data = res[WebSymbols.Internal].body;
+    const data = res[WebInternal].body;
     const length = +(res.getHeader('Content-Length')?.toString() ?? '-1');
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     if (
@@ -85,15 +85,15 @@ export class CompressionInterceptor implements HttpInterceptor {
       stream.end(data);
       const out = await buffer(stream);
       res.setHeader('Content-Length', `${out.length}`);
-      res[WebSymbols.Internal].body = out;
+      res[WebInternal].body = out;
     } else {
       data.pipe(stream);
-      res[WebSymbols.Internal].body = stream;
+      res[WebInternal].body = stream;
     }
   }
 
   async intercept({ res }: FilterContext<CompressConfig>): Promise<void> {
     res.vary('Accept-Encoding');
-    (res[WebSymbols.Internal].filters ??= []).push(this.compress.bind(this));
+    (res[WebInternal].filters ??= []).push(this.compress.bind(this));
   }
 }

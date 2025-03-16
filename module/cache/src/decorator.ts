@@ -1,8 +1,7 @@
 import { castTo, MethodDescriptor, TimeSpan, TimeUtil } from '@travetto/runtime';
 
 import { CacheService } from './service.ts';
-import { CoreCacheConfig, CacheConfig, CacheAware } from './types.ts';
-import { CacheSymbols } from './symbols.ts';
+import { CoreCacheConfig, CacheConfig, CacheAware, CacheConfigSymbol, EvictConfigSymbol } from './types.ts';
 
 /**
  * Indicates a method is intended to cache.  The return type must be properly serializable
@@ -24,7 +23,7 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
   }
   const dec = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
-    (target[CacheSymbols.CacheConfig] ??= {})[propertyKey] = config;
+    (target[CacheConfigSymbol] ??= {})[propertyKey] = config;
   };
   return castTo(dec);
 }
@@ -39,6 +38,6 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
 export function EvictCache<F extends string, U extends Record<F, CacheService>>(field: F, config: CoreCacheConfig = {}) {
   return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
-    (target[CacheSymbols.EvictConfig] ??= {})[propertyKey] = config;
+    (target[EvictConfigSymbol] ??= {})[propertyKey] = config;
   };
 }

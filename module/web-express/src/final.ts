@@ -5,7 +5,7 @@ import { pipeline } from 'node:stream/promises';
 
 import { Injectable } from '@travetto/di';
 import { castTo, hasFunction } from '@travetto/runtime';
-import { FilterContext, FilterNext, HttpInterceptor, LoggingInterceptor, WebSymbols } from '@travetto/web';
+import { FilterContext, FilterNext, HttpInterceptor, LoggingInterceptor, WebInternal } from '@travetto/web';
 
 const isReadable = hasFunction<Readable>('pipe');
 
@@ -17,7 +17,7 @@ export class FinalInterceptor implements HttpInterceptor {
     try {
       return await next();
     } finally {
-      const { body, providerEntity } = ctx.res[WebSymbols.Internal];
+      const { body, providerEntity } = ctx.res[WebInternal];
 
       const res = castTo<Response>(providerEntity);
       if (isReadable(body)) {

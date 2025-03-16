@@ -147,6 +147,10 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    * The request type
    */
   requestType?: EndpointIOType;
+  /**
+   * Is this endpoint considered global?
+   */
+  global?: boolean;
 }
 
 /**
@@ -169,6 +173,10 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
    * Context parameters to bind at create
    */
   contextParams: Record<string, Class>;
+  /**
+   * Should the controller only be used conditionally?
+   */
+  conditional?: () => (boolean | Promise<boolean>);
 }
 
 /**

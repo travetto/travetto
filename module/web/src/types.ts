@@ -4,8 +4,6 @@ import { Readable, Writable } from 'node:stream';
 
 import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
 
-import type { WebSymbols } from './symbols.ts';
-
 export type FilterReturn = void | unknown | Promise<void | unknown>;
 export type FilterNext = () => FilterReturn;
 export type FilterContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: Readonly<C> };
@@ -18,6 +16,8 @@ export type HttpHandler = (req: HttpRequest, res: HttpResponse) => FilterReturn;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 export type HttpContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
+
+export const WebInternal: unique symbol = Symbol.for('@travetto/web:internal');
 
 /**
  * Extension point for supporting new request headers
@@ -70,7 +70,7 @@ export interface HttpRequest<T = unknown> {
   /**
    * Internal state for the request
    */
-  [WebSymbols.Internal]: HttpRequestInternal<T>;
+  [WebInternal]: HttpRequestInternal<T>;
   /**
    * The http method
    */
@@ -210,7 +210,7 @@ export interface HttpResponse<T = unknown> {
   /**
    * Internal state for the response
    */
-  [WebSymbols.Internal]: HttpResponseInternal<T>;
+  [WebInternal]: HttpResponseInternal<T>;
   /**
    * Outbound status code
    */

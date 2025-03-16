@@ -1,6 +1,6 @@
 import type express from 'express';
 
-import { WebSymbols, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -12,10 +12,10 @@ export class ExpressWebServerUtil {
    * Convert request, response object from provider to framework
    */
   static convert(req: express.Request, res: express.Response): [HttpRequest, HttpResponse] {
-    const fullReq: typeof req & { [WebSymbols.Internal]?: HttpRequest } = req;
-    const fullRes: typeof res & { [WebSymbols.Internal]?: HttpResponse } = res;
-    const finalReq = fullReq[WebSymbols.Internal] ??= this.getRequest(req);
-    const finalRes = fullRes[WebSymbols.Internal] ??= this.getResponse(res);
+    const fullReq: typeof req & { [WebInternal]?: HttpRequest } = req;
+    const fullRes: typeof res & { [WebInternal]?: HttpResponse } = res;
+    const finalReq = fullReq[WebInternal] ??= this.getRequest(req);
+    const finalRes = fullRes[WebInternal] ??= this.getResponse(res);
     return [finalReq, finalRes];
   }
 
@@ -24,7 +24,7 @@ export class ExpressWebServerUtil {
    */
   static getRequest(req: express.Request): HttpRequest {
     return HttpRequestCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: req,
         nodeEntity: req,
       },
@@ -44,7 +44,7 @@ export class ExpressWebServerUtil {
    */
   static getResponse(res: express.Response): HttpResponse {
     return HttpResponseCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: res,
         nodeEntity: res,
       },
@@ -60,7 +60,7 @@ export class ExpressWebServerUtil {
         }
       },
       send(this: HttpResponse, data): void {
-        this[WebSymbols.Internal].body = castTo<Buffer>(data);
+        this[WebInternal].body = castTo<Buffer>(data);
       },
       on: res.on.bind(res),
       end: res.end.bind(res),

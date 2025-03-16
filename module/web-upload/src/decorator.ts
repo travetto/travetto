@@ -1,5 +1,5 @@
 import { AppError, toConcrete, ClassInstance } from '@travetto/runtime';
-import { ControllerRegistry, EndpointParamConfig, Param, WebSymbols } from '@travetto/web';
+import { ControllerRegistry, EndpointParamConfig, Param, WebInternal } from '@travetto/web';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { WebUploadInterceptor } from './interceptor.ts';
@@ -55,7 +55,7 @@ export function Upload(
     return Param('body', {
       ...finalConf,
       extract: (c, r) => {
-        const map = r[WebSymbols.Internal].uploads!;
+        const map = r[WebInternal].uploads!;
         return isMap ? map : map[c.name!];
       }
     })(inst, prop, idx);

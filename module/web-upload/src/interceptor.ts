@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, HttpInterceptor, WebSymbols } from '@travetto/web';
+import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, HttpInterceptor, WebInternal } from '@travetto/web';
 
 import { WebUploadConfig } from './config.ts';
 import { WebUploadUtil } from './util.ts';
@@ -44,7 +44,7 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
         uploads[item.field] = await WebUploadUtil.toFile(item, config.uploads?.[item.field] ?? config);
       }
 
-      req[WebSymbols.Internal].uploads = uploads;
+      req[WebInternal].uploads = uploads;
 
       return await next();
     } finally {

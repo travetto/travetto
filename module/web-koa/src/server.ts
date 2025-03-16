@@ -22,8 +22,6 @@ export class KoaWebServer implements WebServer<koa> {
 
   listening = false;
 
-  updateGlobalOnChange = true;
-
   @Inject()
   config: WebConfig;
 

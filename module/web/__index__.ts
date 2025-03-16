@@ -23,7 +23,6 @@ export * from './src/interceptor/types.ts';
 export * from './src/interceptor/logging.ts';
 export * from './src/interceptor/serialize.ts';
 export * from './src/types.ts';
-export * from './src/symbols.ts';
 export * from './src/util/endpoint.ts';
 export * from './src/util/mime.ts';
 export * from './src/util/common.ts';

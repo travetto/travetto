@@ -1,7 +1,7 @@
 import type { Handler, Response, Request } from 'express';
 
 import { asConstructable, castTo, Class } from '@travetto/runtime';
-import { ControllerRegistry, EndpointDecorator, EndpointHandler, Filter, WebSymbols } from '@travetto/web';
+import { ControllerRegistry, EndpointDecorator, EndpointHandler, Filter, WebInternal } from '@travetto/web';
 
 /**
  * Support the ability to inline arbitrary middleware
@@ -13,8 +13,8 @@ export function ExpressMiddleware(...middleware: [Handler, ...Handler[]]): Endpo
     for (const item of middleware) {
       const handler: Filter = (ctx, next) => {
         item(
-          castTo<Request>(ctx.req[WebSymbols.Internal].providerEntity),
-          castTo<Response>(ctx.res[WebSymbols.Internal].providerEntity),
+          castTo<Request>(ctx.req[WebInternal].providerEntity),
+          castTo<Response>(ctx.res[WebInternal].providerEntity),
           (err?: unknown) => {
             if (err) {
               throw err;

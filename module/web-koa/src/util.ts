@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpRequest, HttpResponse, WebSymbols, HttpResponseCore, HttpRequestCore } from '@travetto/web';
+import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -11,8 +11,8 @@ export class KoaWebServerUtil {
    * Convert context object from provider to framework
    */
   static convert(ctx: koa.Context): [HttpRequest, HttpResponse] {
-    const fullCtx: typeof ctx & { [WebSymbols.Internal]?: [HttpRequest, HttpResponse] } = ctx;
-    return fullCtx[WebSymbols.Internal] ??= [this.getRequest(ctx), this.getResponse(ctx)];
+    const fullCtx: typeof ctx & { [WebInternal]?: [HttpRequest, HttpResponse] } = ctx;
+    return fullCtx[WebInternal] ??= [this.getRequest(ctx), this.getResponse(ctx)];
   }
 
   /**
@@ -20,7 +20,7 @@ export class KoaWebServerUtil {
    */
   static getRequest(ctx: koa.Context): HttpRequest {
     return HttpRequestCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: ctx,
         nodeEntity: ctx.req,
       },
@@ -41,7 +41,7 @@ export class KoaWebServerUtil {
    */
   static getResponse(ctx: koa.Context): HttpResponse {
     return HttpResponseCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: ctx,
         nodeEntity: ctx.res,
       },

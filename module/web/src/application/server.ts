@@ -15,11 +15,6 @@ export interface WebServer<T = unknown> {
   listening: boolean;
 
   /**
-   * Should global be re-registered on any changes
-   */
-  updateGlobalOnChange?: boolean;
-
-  /**
    * Initialize the raw application
    */
   init(): Promise<T> | T;

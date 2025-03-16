@@ -5,8 +5,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
-import { WebSymbols } from '../symbols.ts';
-import { HttpRequest, FilterContext, FilterNext } from '../types.ts';
+import { HttpRequest, FilterContext, FilterNext, WebInternal } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
@@ -46,7 +45,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
   async read(req: HttpRequest, limit: string | number): Promise<{ text: string, raw: Buffer }> {
     const cfg = req.getContentType();
 
-    const text = await rawBody(inflation(req[WebSymbols.Internal].nodeEntity), {
+    const text = await rawBody(inflation(req[WebInternal].nodeEntity), {
       limit,
       encoding: cfg?.parameters.charset ?? 'utf8'
     });
@@ -88,7 +87,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     const parserType = this.detectParserType(req, config.parsingTypes);
 
     if (!parserType) {
-      req.body = req[WebSymbols.Internal].nodeEntity;
+      req.body = req[WebInternal].nodeEntity;
       return next();
     } else {
       let malformed: unknown;

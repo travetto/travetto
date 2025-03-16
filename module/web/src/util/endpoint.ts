@@ -3,10 +3,11 @@ import { isPromise } from 'node:util/types';
 import { asConstructable, castTo, Class, Util } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpRequest, Filter, FilterContext, FilterNext, FilterReturn, HttpHandler, HttpResponse } from '../types.ts';
+import { HttpRequest, Filter, FilterContext, FilterNext, FilterReturn, HttpHandler, HttpResponse, WebInternal } from '../types.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { LightweightConfig, ManagedInterceptorConfig, HttpInterceptor, EndpointApplies } from '../interceptor/types.ts';
-import { WebSymbols } from '../symbols.ts';
+
+const EndpointChecker: unique symbol = Symbol.for('@travetto/web:endpoint-checker');
 
 type EndpointRule = { sub: string | RegExp, base: string };
 
@@ -56,11 +57,13 @@ export class EndpointUtil {
     return 0;
   }
 
+  static MISSING_PARAM = Symbol.for('@travetto/web:missing-param');
+
   /**
    * Get the interceptor config for a given request and interceptor instance
    */
   static getInterceptorConfig<T extends HttpInterceptor<U>, U extends ManagedInterceptorConfig>(req: HttpRequest, inst: T): U | undefined {
-    const cfg = req[WebSymbols.Internal].interceptorConfigs?.[inst.constructor.Ⲑid] ?? undefined;
+    const cfg = req[WebInternal].interceptorConfigs?.[inst.constructor.Ⲑid] ?? undefined;
     return castTo(cfg);
   }
 
@@ -106,8 +109,8 @@ export class EndpointUtil {
 
     // Verify if endpoint applies matches, let it override interceptor-level applies
     if (hasPaths(config) && config.paths.length) {
-      const withChecker: typeof config & { [WebSymbols.EndpointChecker]?: EndpointApplies } = config;
-      const applies = withChecker[WebSymbols.EndpointChecker] ??= Util.allowDeny(config.paths, convertRule, compareRule);
+      const withChecker: typeof config & { [EndpointChecker]?: EndpointApplies } = config;
+      const applies = withChecker[EndpointChecker] ??= Util.allowDeny(config.paths, convertRule, compareRule);
       const result = applies(endpoint, controller);
       console.log('Verifying paths', interceptor.constructor.name, controller?.basePath, endpoint.path, config.paths, result);
       if (result === false) {
@@ -167,7 +170,7 @@ export class EndpointUtil {
    * Extract parameter from request
    */
   static extractParameter(param: EndpointParamConfig, req: HttpRequest, res: HttpResponse, field: FieldConfig, value?: unknown): unknown {
-    if (value !== undefined && value !== WebSymbols.MissingParam) {
+    if (value !== undefined && value !== this.MISSING_PARAM) {
       return value;
     } else if (param.extract) {
       return param.extract(param, req, res);
@@ -193,7 +196,7 @@ export class EndpointUtil {
   static async extractParameters(endpoint: EndpointConfig, req: HttpRequest, res: HttpResponse): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.handlerName;
-    const vals = req[WebSymbols.Internal].requestParams;
+    const vals = req[WebInternal].requestParams;
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
@@ -255,7 +258,7 @@ export class EndpointUtil {
     ];
 
     if (headers && Object.keys(headers).length > 0) {
-      filterChain.unshift([({ res }): void => { res[WebSymbols.Internal].headersAdded = { ...headers }; }, undefined]);
+      filterChain.unshift([({ res }): void => { res[WebInternal].headersAdded = { ...headers }; }, undefined]);
     }
 
     const chain = this.createFilterChain(filterChain);

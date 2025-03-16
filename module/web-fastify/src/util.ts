@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { WebSymbols, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -12,10 +12,10 @@ export class FastifyWebServerUtil {
    * Convert request, response object from provider to framework
    */
   static convert(req: FastifyRequest, res: FastifyReply): [HttpRequest, HttpResponse] {
-    const fullReq: typeof req & { [WebSymbols.Internal]?: HttpRequest } = req;
-    const fullRes: typeof res & { [WebSymbols.Internal]?: HttpResponse } = res;
-    const finalReq = fullReq[WebSymbols.Internal] ??= this.getRequest(req);
-    const finalRes = fullRes[WebSymbols.Internal] ??= this.getResponse(res);
+    const fullReq: typeof req & { [WebInternal]?: HttpRequest } = req;
+    const fullRes: typeof res & { [WebInternal]?: HttpResponse } = res;
+    const finalReq = fullReq[WebInternal] ??= this.getRequest(req);
+    const finalRes = fullRes[WebInternal] ??= this.getResponse(res);
     return [finalReq, finalRes];
   }
 
@@ -24,7 +24,7 @@ export class FastifyWebServerUtil {
    */
   static getRequest(req: FastifyRequest): HttpRequest {
     return HttpRequestCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: req,
         nodeEntity: req.raw,
       },
@@ -44,7 +44,7 @@ export class FastifyWebServerUtil {
    */
   static getResponse(reply: FastifyReply): HttpResponse {
     return HttpResponseCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: reply,
         nodeEntity: reply.raw
       },
