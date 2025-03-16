@@ -1,12 +1,7 @@
-import { type Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
-
 import type express from 'express';
 
 import { WebSymbols, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
-import { castTo, hasFunction } from '@travetto/runtime';
-
-const isReadable = hasFunction<Readable>('pipe');
+import { castTo } from '@travetto/runtime';
 
 /**
  * Provide a mapping between express request/response and the framework analogs
@@ -52,15 +47,6 @@ export class ExpressWebServerUtil {
       [WebSymbols.Internal]: {
         providerEntity: res,
         nodeEntity: res,
-        cleanup: (_: HttpRequest, final: HttpResponse) => {
-          const { body } = final[WebSymbols.Internal];
-          if (isReadable(body)) {
-            return pipeline(body, res);
-          } else {
-            res.send(body);
-            res.end();
-          }
-        }
       },
       get headersSent(): boolean {
         return res.headersSent;
@@ -83,7 +69,7 @@ export class ExpressWebServerUtil {
       setHeader: res.setHeader.bind(res),
       getHeader: castTo(res.getHeader.bind(res)), // NOTE: Forcing type, may be incorrect
       removeHeader: res.removeHeader.bind(res),
-      write: res.write.bind(res)
+      write: res.write.bind(res),
     });
   }
 }

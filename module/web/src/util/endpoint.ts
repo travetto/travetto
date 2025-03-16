@@ -258,11 +258,6 @@ export class EndpointUtil {
       filterChain.unshift([({ res }): void => { res[WebSymbols.Internal].headersAdded = { ...headers }; }, undefined]);
     }
 
-    filterChain.unshift([async (ctx, next): Promise<void> => {
-      await next();
-      await ctx.res[WebSymbols.Internal].cleanup?.(ctx.req, ctx.res);
-    }, undefined]);
-
     const chain = this.createFilterChain(filterChain);
     return (req, res) => chain({ req, res, config: undefined! }, ident);
   }
