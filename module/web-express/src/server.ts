@@ -52,16 +52,12 @@ export class ExpressWebServer implements WebServer<express.Application> {
     castTo<Keyed>(router).key = key;
 
     for (const endpoint of endpoints) {
-      if (endpoint.path === '/*all') {
-        router[endpoint.method]('*all', async (req, res) => {
-          await endpoint.handlerFinalized!(...ExpressWebServerUtil.convert(req, res));
-        });
-      } else {
-        const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-        router[endpoint.method](endpointPath, async (req, res) => {
-          await endpoint.handlerFinalized!(...ExpressWebServerUtil.convert(req, res));
-        });
-      }
+      const finalPath = endpoint.path === '/*all' ? '*all' :
+        endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
+
+      router[endpoint.method](finalPath, async (req, res) => {
+        await endpoint.handlerFinalized!(...ExpressWebServerUtil.convert(req, res));
+      });
     }
 
     this.raw.use(path, router);

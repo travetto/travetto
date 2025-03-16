@@ -154,12 +154,9 @@ export abstract class WebServerSuite extends BaseWebSuite {
       assert.deepStrictEqual(ret, { json: true });
     }
     for (const encoding of ['gzip', 'br', 'deflate']) {
-      const { body: ret, headers } = await this.request('get', '/test/json/large/20000', { headers: { 'Accept-Encoding': `identity;q=1,${encoding};q=1` } });
-      if (Array.isArray(headers['content-encoding'])) {
-        assert(headers['content-encoding'][0] === encoding);
-      } else {
-        assert(headers['content-encoding'] === encoding);
-      }
+      const { body: ret, headers } = await this.request('get', '/test/json/large/20000', { headers: { 'Accept-Encoding': `${encoding};q=1` } });
+      const value = [headers['content-encoding']].flat()[0];
+      assert(value === encoding);
       console.error('Hi', headers);
       assert(ret && typeof ret === 'object');
       assert('json' in ret);

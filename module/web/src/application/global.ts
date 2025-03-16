@@ -12,8 +12,7 @@ import { Controller, Get, WebConfig } from '@travetto/web';
 export class GlobalHandler {
 
   @Get()
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  handler() {
+  handler(): { module: string, version: string, env?: string } {
     return {
       module: Runtime.main.name,
       version: Runtime.main.version,
