@@ -56,6 +56,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
       const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
       router[endpoint.method](endpointPath, async (req, res) => {
         await endpoint.handlerFinalized!(...ExpressWebServerUtil.convert(req, res));
+        res.end();
       });
     }
 
@@ -79,8 +80,9 @@ export class ExpressWebServer implements WebServer<express.Application> {
         }
       );
 
-      router.options('*all', (req, res) => {
-        optionHandler(...ExpressWebServerUtil.convert(req, res));
+      router.options('*all', async (req, res) => {
+        await optionHandler(...ExpressWebServerUtil.convert(req, res));
+        res.end();
       });
     }
 
