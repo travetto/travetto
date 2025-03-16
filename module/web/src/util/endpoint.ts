@@ -7,7 +7,7 @@ import { HttpRequest, Filter, FilterContext, FilterNext, FilterReturn, HttpHandl
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { LightweightConfig, ManagedInterceptorConfig, HttpInterceptor, EndpointApplies } from '../interceptor/types.ts';
 
-const EndpointChecker: unique symbol = Symbol.for('@travetto/web:endpoint-checker');
+const CheckerSymbol: unique symbol = Symbol.for('@travetto/web:endpoint-checker');
 
 type EndpointRule = { sub: string | RegExp, base: string };
 
@@ -109,8 +109,8 @@ export class EndpointUtil {
 
     // Verify if endpoint applies matches, let it override interceptor-level applies
     if (hasPaths(config) && config.paths.length) {
-      const withChecker: typeof config & { [EndpointChecker]?: EndpointApplies } = config;
-      const applies = withChecker[EndpointChecker] ??= Util.allowDeny(config.paths, convertRule, compareRule);
+      const withChecker: typeof config & { [CheckerSymbol]?: EndpointApplies } = config;
+      const applies = withChecker[CheckerSymbol] ??= Util.allowDeny(config.paths, convertRule, compareRule);
       const result = applies(endpoint, controller);
       console.log('Verifying paths', interceptor.constructor.name, controller?.basePath, endpoint.path, config.paths, result);
       if (result === false) {
