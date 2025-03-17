@@ -265,5 +265,3 @@ export function withConfigFactoryDecorator(opts: RpcRequest) {
     }
   };
 }
-
-export function IGNORE<T>(): T { return null!; }
