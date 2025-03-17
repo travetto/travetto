@@ -37,14 +37,12 @@ export class WebRpController {
 
     let params: unknown[];
 
-    // Allow request to read inputs from header, if body isn't JSON
-    const isBinary = req.getContentType()?.full !== 'application/json';
-    if (isBinary) {
-      if (paramInput) {
-        params = Util.decodeSafeJSON(paramInput)!;
-      }
+    // Allow request to read inputs from header
+    if (paramInput) {
+      params = Util.decodeSafeJSON(paramInput)!;
     } else {
       params = req.body;
+      // Extract out body params if applicable
       if (Array.isArray(params)) {
         req.body = endpoint.params.find((x, i) => x.location === 'body' ? params[i] : undefined) ?? params; // Re-assign body
       }
@@ -56,7 +54,7 @@ export class WebRpController {
       throw new AppError('Invalid parameters, must be an array');
     }
 
-    req[WebInternal].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && isBinary) ? EndpointUtil.MISSING_PARAM : params[i]);
+    req[WebInternal].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MISSING_PARAM : params[i]);
     // Dispatch
     await endpoint.handlerFinalized!(req, res);
   }
