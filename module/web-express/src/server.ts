@@ -1,7 +1,6 @@
 import https from 'node:https';
 
 import express from 'express';
-import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
@@ -27,10 +26,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
   async init(): Promise<express.Application> {
     const app = express();
     app.disable('x-powered-by');
-    app.set('etag', this.config.etag);
-    if (this.config.compress) {
-      app.use(compression());
-    }
+    app.set('etag', false);
 
     if (this.config.trustProxy) {
       app.enable('trust proxy');
