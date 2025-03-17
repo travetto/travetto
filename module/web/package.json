@@ -29,11 +29,13 @@
     "@travetto/config": "^6.0.0-rc.1",
     "@travetto/context": "^6.0.0-rc.1",
     "@travetto/di": "^6.0.0-rc.1",
+    "@types/inflation": "^2.0.4",
     "@travetto/registry": "^6.0.0-rc.1",
     "@travetto/runtime": "^6.0.0-rc.1",
     "@travetto/schema": "^6.0.0-rc.1",
     "@types/cookies": "^0.9.0",
     "cookies": "^0.9.1",
+    "inflation": "^2.1.0",
     "raw-body": "^3.0.0"
   },
   "peerDependencies": {
