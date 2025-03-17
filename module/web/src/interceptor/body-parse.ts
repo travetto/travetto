@@ -79,7 +79,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     return endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method);
   }
 
-  async intercept({ req, res, config }: FilterContext<BodyParseConfig>, next: FilterNext): Promise<unknown> {
+  async intercept({ req, config }: FilterContext<BodyParseConfig>, next: FilterNext): Promise<unknown> {
     if (!METHODS_WITH_BODIES.has(req.method) || req.body) { // If body is already set
       return next();
     }

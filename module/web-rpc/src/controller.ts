@@ -2,8 +2,8 @@ import { Inject } from '@travetto/di';
 import { AppError, Util } from '@travetto/runtime';
 
 import {
-  ControllerRegistry, WebInternal, EndpointUtil, Controller, Post,
-  HeaderParam, WebContext, ConfigureInterceptor, LoggingInterceptor
+  ControllerRegistry, WebInternal, EndpointUtil, Controller, All,
+  HeaderParam, WebContext, ConfigureInterceptor, LoggingInterceptor,
 } from '@travetto/web';
 
 import { WebRpcConfig } from './config.ts';
@@ -21,7 +21,7 @@ export class WebRpController {
   @Inject()
   webCtx: WebContext;
 
-  @Post('/')
+  @All('/')
   async onRequest(
     @HeaderParam('X-TRV-RPC') target: string,
     @HeaderParam('X-TRV-INPUTS') paramInput?: string
@@ -29,7 +29,7 @@ export class WebRpController {
     const endpoint = ControllerRegistry.getEndpointById(target);
 
     if (!endpoint) {
-      throw new AppError('Unknown endpoint');
+      throw new AppError('Unknown endpoint', { category: 'notfound' });
     }
 
     const req = this.webCtx.request;
@@ -40,7 +40,7 @@ export class WebRpController {
     // Allow request to read inputs from header
     if (paramInput) {
       params = Util.decodeSafeJSON(paramInput)!;
-    } else {
+    } else if (req.getContentType()?.full.includes('json')) {
       params = req.body;
       // Extract out body params if applicable
       if (Array.isArray(params)) {
@@ -51,7 +51,7 @@ export class WebRpController {
     params ??= [];
 
     if (!Array.isArray(params)) {
-      throw new AppError('Invalid parameters, must be an array');
+      throw new AppError('Invalid parameters, must be an array', { category: 'data' });
     }
 
     req[WebInternal].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MISSING_PARAM : params[i]);
