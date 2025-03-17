@@ -147,10 +147,6 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    * The request type
    */
   requestType?: EndpointIOType;
-  /**
-   * Is this endpoint considered global?
-   */
-  global?: boolean;
 }
 
 /**
