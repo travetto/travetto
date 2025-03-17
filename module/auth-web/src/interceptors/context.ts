@@ -43,6 +43,11 @@ export class AuthContextInterceptor implements HttpInterceptor {
   }
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
+    // Skip if already authenticated
+    if (this.authContext.principal) {
+      return next();
+    }
+
     let decoded: Principal | undefined;
     let checked: Principal | undefined;
     let lastExpiresAt: Date | undefined;

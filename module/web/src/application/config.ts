@@ -48,6 +48,11 @@ export class WebConfig {
   ssl?: WebSslConfig;
 
   /**
+   * Global options handler
+   */
+  optionsGlobalHandle: boolean = true;
+
+  /**
    * Redefine base url to be the full URL if not specified
    */
   postConstruct(): void {

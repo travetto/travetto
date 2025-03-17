@@ -65,6 +65,10 @@ interface CoreConfig {
    * List of headers to add to the response
    */
   headers: HttpHeaderMap;
+  /**
+   * Should the resource only be used conditionally?
+   */
+  conditional?: () => (boolean | Promise<boolean>);
 }
 
 /**
@@ -169,10 +173,6 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
    * Context parameters to bind at create
    */
   contextParams: Record<string, Class>;
-  /**
-   * Should the controller only be used conditionally?
-   */
-  conditional?: () => (boolean | Promise<boolean>);
 }
 
 /**

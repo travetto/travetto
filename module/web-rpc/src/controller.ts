@@ -3,7 +3,7 @@ import { AppError, Util } from '@travetto/runtime';
 
 import {
   ControllerRegistry, WebInternal, EndpointUtil, Controller, All,
-  HeaderParam, WebContext, ConfigureInterceptor, LoggingInterceptor,
+  HeaderParam, WebContext, ConfigureInterceptor, LoggingInterceptor, Undocumented,
 } from '@travetto/web';
 
 import { WebRpcConfig } from './config.ts';
@@ -11,7 +11,8 @@ import { WebRpcConfig } from './config.ts';
 /**
  * Exposes functionality for RPC behavior
  */
-@Controller('/rpc', { documented: false })
+@Controller('/rpc')
+@Undocumented()
 @ConfigureInterceptor(LoggingInterceptor, { disabled: true })
 export class WebRpController {
 

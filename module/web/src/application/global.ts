@@ -1,22 +1,31 @@
 import { DependencyRegistry } from '@travetto/di';
 import { Runtime } from '@travetto/runtime';
-import { Controller, Get, WebConfig } from '@travetto/web';
+import { ConditionalRegister, ConfigureInterceptor, Controller, Get, LoggingInterceptor, Options, Undocumented, WebConfig } from '@travetto/web';
 
-@Controller('/', {
-  documented: false,
-  conditional: async () => {
-    const config = await DependencyRegistry.getInstance(WebConfig);
-    return !!config.defaultMessage;
-  }
-})
+@Undocumented()
+@Controller('/')
+@ConfigureInterceptor(LoggingInterceptor, { disabled: true })
 export class GlobalHandler {
 
-  @Get()
-  handler(): { module: string, version: string, env?: string } {
+  @Get('')
+  @ConditionalRegister(async () => {
+    const config = await DependencyRegistry.getInstance(WebConfig);
+    return config.defaultMessage;
+  })
+  message(): { module: string, version: string, env?: string } {
     return {
       module: Runtime.main.name,
       version: Runtime.main.version,
       env: Runtime.env
     };
+  }
+
+  @ConditionalRegister(async () => {
+    const config = await DependencyRegistry.getInstance(WebConfig);
+    return config.optionsGlobalHandle;
+  })
+  @Options('*all')
+  options(): string {
+    return '';
   }
 }

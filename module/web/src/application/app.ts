@@ -95,14 +95,23 @@ export class WebApplication<T = unknown> {
       config.instance = RetargettingProxy.unwrap(config.instance);
     }
 
-    for (const ep of EndpointUtil.orderEndpoints(config.endpoints)) {
+    // Filter out conditional endpoints
+    const endpoints = (await Promise.all(
+      config.endpoints.map(ep => Promise.resolve(ep.conditional?.() ?? true).then(v => v ? ep : undefined))
+    )).filter(x => !!x);
+
+    if (!endpoints.length) {
+      return;
+    }
+
+    for (const ep of EndpointUtil.orderEndpoints(endpoints)) {
       ep.instance = config.instance;
       ep.handlerFinalized = EndpointUtil.createEndpointHandler(this.interceptors, ep, config);
     }
 
-    await this.server.registerEndpoints(config.class.Ⲑid, config.basePath, config.endpoints);
+    await this.server.registerEndpoints(config.class.Ⲑid, config.basePath, endpoints);
 
-    console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: config.endpoints.length });
+    console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: endpoints.length });
   }
 
   /**
