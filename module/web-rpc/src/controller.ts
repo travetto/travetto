@@ -11,7 +11,7 @@ import { WebRpcConfig } from './config.ts';
 /**
  * Exposes functionality for RPC behavior
  */
-@Controller('/rpc')
+@Controller('/rpc', { documented: false })
 @ConfigureInterceptor(LoggingInterceptor, { disabled: true })
 export class WebRpController {
 
@@ -22,7 +22,10 @@ export class WebRpController {
   webCtx: WebContext;
 
   @Post('/')
-  async onRequest(@HeaderParam('X-TRV-RPC') target: string, @HeaderParam('X-TRV-INPUTS') paramInput?: string): Promise<void> {
+  async onRequest(
+    @HeaderParam('X-TRV-RPC') target: string,
+    @HeaderParam('X-TRV-INPUTS') paramInput?: string
+  ): Promise<void> {
     const endpoint = ControllerRegistry.getEndpointById(target);
 
     if (!endpoint) {

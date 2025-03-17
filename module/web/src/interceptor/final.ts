@@ -12,8 +12,10 @@ export class FinalSendInterceptor implements HttpInterceptor {
     try {
       return await next();
     } finally {
-      // Handle final ejection if specified
-      await ctx.res[WebInternal].send?.();
+      if (!ctx.res.headersSent) {
+        // Handle final ejection if specified
+        await ctx.res[WebInternal].send?.();
+      }
     }
   }
 }
