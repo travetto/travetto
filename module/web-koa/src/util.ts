@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore } from '@travetto/web';
+import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore, HttpResponsePayload } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -43,27 +43,26 @@ export class KoaWebServerUtil {
     return HttpResponseCore.create({
       [WebInternal]: {
         providerEntity: ctx,
-        nodeEntity: ctx.res,
+        nodeEntity: ctx.res
       },
       get headersSent(): boolean {
         return ctx.headerSent;
       },
-      status(value?: number): number | undefined {
-        if (value) {
-          ctx.status = value;
-        } else {
-          return ctx.status;
-        }
+      get statusCode(): number {
+        return ctx.status;
       },
-      send: b => ctx.body = b,
-      on: ctx.res.on.bind(ctx.res),
-      end: ctx.response.flushHeaders.bind(ctx.response),
+      set statusCode(code: number) {
+        ctx.status = code;
+      },
+      respond(this: HttpResponse, value?: HttpResponsePayload) {
+        ctx.body = value;
+        ctx.response.flushHeaders();
+      },
       vary: ctx.response.vary.bind(ctx.response),
       getHeaderNames: () => Object.keys(ctx.response.headers),
       setHeader: ctx.response.set.bind(ctx.response),
       getHeader: ctx.response.get.bind(ctx.response),
       removeHeader: ctx.response.remove.bind(ctx.response),
-      write: ctx.res.write.bind(ctx.res),
     });
   }
 }

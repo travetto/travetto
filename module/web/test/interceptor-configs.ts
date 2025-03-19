@@ -113,11 +113,10 @@ class TestInterceptorConfigSuite {
     const res = HttpResponseCore.create<HttpResponse & { name?: string }>({
       [WebInternal]: {
         nodeEntity: castTo(fs.createWriteStream('/dev/null')),
-        providerEntity: undefined!
+        providerEntity: undefined!,
       },
-      end: () => { },
       name: undefined,
-      status: () => 200,
+      statusCode: 200,
       send: () => { },
       setHeader: (k, v) => { },
       getHeader: (k) => undefined,

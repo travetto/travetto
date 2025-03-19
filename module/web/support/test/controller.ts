@@ -68,13 +68,10 @@ export class TestController {
 
   @Get('/renderable')
   @Produces('text/plain')
-  getRenderable(): HttpSerializable {
+  getRenderable(): HttpSerializable<string> {
     return {
-      /**
-       * @returns {string}
-       */
       serialize(res) {
-        res.send('hello');
+        return 'hello';
       }
     };
   }

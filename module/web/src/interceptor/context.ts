@@ -4,7 +4,7 @@ import { Config } from '@travetto/config';
 import { FilterContext, FilterNext } from '../types.ts';
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
 import { WebContext } from '../context.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { ApplicationLayerGroup } from './layers.ts';
 
 @Config('web.context')
 class AsyncContextConfig extends ManagedInterceptorConfig { }
@@ -15,7 +15,7 @@ class AsyncContextConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class AsyncContextInterceptor implements HttpInterceptor {
 
-  runsBefore = [SerializeInterceptor];
+  runsBefore = [ApplicationLayerGroup];
 
   @Inject()
   context: WebContext;

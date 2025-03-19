@@ -7,13 +7,13 @@ import Negotiator from 'negotiator';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
-import {
-  FilterContext, HttpRequest, HttpResponse, ManagedInterceptorConfig,
-  HttpInterceptor, LoggingInterceptor, WebInternal
-} from '@travetto/web';
 
+import { HttpInterceptor, ManagedInterceptorConfig } from './types';
+import { HttpRequest, HttpResponse, FilterContext, FilterNext, HttpResponsePayload } from '../types';
+import { LoggingInterceptor } from './logging';
+import { ApplicationLayerGroup } from './layers';
+import { HttpPayloadUtil } from '../util/payload';
 import { EtagInterceptor } from './etag';
-
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const ENCODING_METHODS = {
@@ -37,16 +37,21 @@ export class CompressConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class CompressionInterceptor implements HttpInterceptor {
 
-  runsBefore = [EtagInterceptor];
   dependsOn = [LoggingInterceptor];
+  runsBefore = [ApplicationLayerGroup, EtagInterceptor];
 
   @Inject()
   config: CompressConfig;
 
-  async compress(req: HttpRequest, res: HttpResponse): Promise<void> {
+  priority = 1000;
+
+  async compress(req: HttpRequest, res: HttpResponse, payload: unknown): Promise<HttpResponsePayload> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
 
-    const data = res[WebInternal].body;
+    const data = HttpPayloadUtil.ensureSerialized(req, res, payload);
+
+    res.vary('Accept-Encoding');
+
     const length = +(res.getHeader('Content-Length')?.toString() ?? '-1');
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     if (
@@ -56,7 +61,7 @@ export class CompressionInterceptor implements HttpInterceptor {
       res.getHeader('content-encoding') ||
       NO_TRANSFORM_REGEX.test(res.getHeader('cache-control')?.toString() ?? '')
     ) {
-      return;
+      return data;
     }
 
     const sent = req.headerFirst('accept-encoding');
@@ -73,7 +78,7 @@ export class CompressionInterceptor implements HttpInterceptor {
 
     const type = castTo<HttpCompressEncoding>(method!);
     if (type === 'identity') {
-      return;
+      return data;
     }
 
     const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
@@ -85,15 +90,15 @@ export class CompressionInterceptor implements HttpInterceptor {
       stream.end(data);
       const out = await buffer(stream);
       res.setHeader('Content-Length', `${out.length}`);
-      res[WebInternal].body = out;
+      return out;
     } else {
       data.pipe(stream);
-      res[WebInternal].body = stream;
+      return stream;
     }
   }
 
-  async intercept({ res }: FilterContext<CompressConfig>): Promise<void> {
-    res.vary('Accept-Encoding');
-    (res[WebInternal].filters ??= []).push(this.compress.bind(this));
+  async intercept({ req, res }: FilterContext<CompressConfig>, next: FilterNext): Promise<unknown> {
+    const result = await next();
+    return this.compress(req, res, result);
   }
 }

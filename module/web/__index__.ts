@@ -23,7 +23,7 @@ export * from './src/interceptor/etag.ts';
 export * from './src/interceptor/get-cache.ts';
 export * from './src/interceptor/types.ts';
 export * from './src/interceptor/logging.ts';
-export * from './src/interceptor/serialize.ts';
+export * from './src/interceptor/layers.ts';
 export * from './src/types.ts';
 export * from './src/util/endpoint.ts';
 export * from './src/util/mime.ts';

@@ -1,9 +1,11 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { AppError } from '@travetto/runtime';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
 import { FilterContext, FilterNext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { ResponseLayerGroup } from './layers.ts';
+import { FinalSendInterceptor } from './final.ts';
 
 /**
  * Web logging configuration
@@ -19,12 +21,13 @@ export class WebLogConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class LoggingInterceptor implements HttpInterceptor {
 
-  runsBefore = [SerializeInterceptor];
+  runsBefore = [ResponseLayerGroup];
+  dependsOn = [FinalSendInterceptor];
 
   @Inject()
   config: WebLogConfig;
 
-  logResult(req: HttpRequest, res: HttpResponse): void {
+  logResult(req: HttpRequest, res: HttpResponse, defaultCode: number): void {
     const duration = Date.now() - req[WebInternal].createdDate!;
 
     const reqLog = {
@@ -37,27 +40,34 @@ export class LoggingInterceptor implements HttpInterceptor {
       duration,
     };
 
-    if (res.statusCode < 400) {
+    const code = res.statusCode ?? defaultCode;
+
+    if (code < 400) {
       console.info('Request', reqLog);
-    } else if (res.statusCode < 500) {
+    } else if (code < 500) {
       console.warn('Request', reqLog);
     } else {
       console.error('Request', reqLog);
     }
-
-    const err = res[WebInternal].responseError;
-    if (this.config.showStackTrace && err) {
-      console.error(err.message, { error: err });
-    }
   }
 
   async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
-    try {
-      return await next();
-    } finally {
-      if (req[WebInternal].requestLogging !== false) {
-        this.logResult(req, res);
+    if (req[WebInternal].requestLogging === false) {
+      try {
+        const value = await next();
+        this.logResult(req, res, 200);
+        return value;
+      } catch (err) {
+        this.logResult(req, res, 500);
+        if (this.config.showStackTrace) {
+          const final = err instanceof Error ? err : AppError.fromBasic(err);
+          console.error(final.message, { error: final });
+        }
+        throw err;
       }
+    } else {
+      return next();
     }
   }
 }
+

@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpResponsePayload } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -51,22 +51,20 @@ export class FastifyWebServerUtil {
       get headersSent(): boolean {
         return reply.sent;
       },
-      status(val?: number): number | undefined {
-        if (val) {
-          reply.status(val);
-          reply.raw.statusCode = val;
-        } else {
-          return reply.raw.statusCode;
-        }
+      get statusCode(): number | undefined {
+        return reply.statusCode;
       },
-      send: reply.send.bind(reply),
-      on: reply.raw.on.bind(reply.raw),
-      end: () => { },
+      set statusCode(code: number) {
+        reply.status(code);
+        reply.raw.statusCode = code;
+      },
+      respond(this: HttpResponse, value?: HttpResponsePayload): void {
+        reply.send(value);
+      },
       getHeaderNames: reply.raw.getHeaderNames.bind(reply.raw),
       setHeader: reply.raw.setHeader.bind(reply.raw),
       getHeader: castTo(reply.raw.getHeader.bind(reply.raw)), // NOTE: Forcing type, may be incorrect
       removeHeader: reply.raw.removeHeader.bind(reply.raw),
-      write: reply.raw.write.bind(reply.raw)
     });
   }
 }

@@ -1,6 +1,7 @@
-import { SetOption, GetOption } from 'cookies';
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'node:http';
 import { Readable, Writable } from 'node:stream';
+
+import { SetOption, GetOption } from 'cookies';
 
 import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
 
@@ -16,6 +17,7 @@ export type HttpHandler = (req: HttpRequest, res: HttpResponse) => FilterReturn;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 export type HttpContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
+export type HttpResponsePayload = Buffer | Readable;
 
 export const WebInternal: unique symbol = Symbol.for('@travetto/web:internal');
 
@@ -184,22 +186,6 @@ export interface HttpResponseInternal<T = unknown> {
    * The additional headers for this request, provided by controllers/endpoint config
    */
   headersAdded?: HttpHeaderMap;
-  /**
-   * The pending body to respond with
-   */
-  body?: Readable | Buffer;
-  /**
-   * Functions to execute before sending
-   */
-  filters?: HttpHandler[];
-  /**
-   * Response error
-   */
-  responseError?: Error;
-  /**
-   * Send action that must be awaited before the request is complete
-   */
-  send?: Function;
 }
 
 /**
@@ -214,12 +200,7 @@ export interface HttpResponse<T = unknown> {
   /**
    * Outbound status code
    */
-  statusCode: number;
-  /**
-   * Set the status code
-   * @param code The code to set
-   */
-  status(code?: number): (number | undefined);
+  statusCode?: number;
   /**
    * Indicates if headers have already been sent
    */
@@ -250,42 +231,14 @@ export interface HttpResponse<T = unknown> {
    */
   vary(value: string): void;
   /**
-   * Listen for response events
-   * @param ev Name of the event
-   * @param cb The callback for the event
-   */
-  on(ev: 'close' | 'finish', cb: Function): unknown;
-  /**
-   * Redirect the request to a new location
-   * @param path The new location
-   */
-  redirect(path: string): unknown;
-  /**
-   * Redirect the request to a new location
-   * @param code The status code for redirect
-   * @param path The new location
-   */
-  redirect(code: number, path: string): unknown;
-  redirect(code: number | string, path?: string): unknown;
-  /**
    * Set the request's location
    * @param path The location to point to
    */
   location(path: string): unknown;
   /**
-   * Send a value to the client
-   * @param value Value to send
+   * Trigger response
    */
-  send(value: unknown): unknown;
-  /**
-   * Write content directly to the output stream
-   * @param value The value to write
-   */
-  write(value: unknown): unknown;
-  /**
-   * End the response
-   */
-  end(): void;
+  respond(value: Buffer | Readable): Promise<unknown> | unknown;
   /**
    * Cookie support for sending to the client
    */

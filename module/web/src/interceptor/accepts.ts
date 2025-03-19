@@ -7,7 +7,7 @@ import { FilterContext } from '../types.ts';
 import { MimeUtil } from '../util/mime.ts';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { RequestLayerGroup } from './layers.ts';
 
 @Config('web.accepts')
 class AcceptsConfig extends ManagedInterceptorConfig {
@@ -23,7 +23,7 @@ class AcceptsConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
 
-  dependsOn = [SerializeInterceptor];
+  dependsOn = [RequestLayerGroup];
 
   @Inject()
   config: AcceptsConfig;

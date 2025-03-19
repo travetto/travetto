@@ -3,10 +3,13 @@ import fresh from 'fresh';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import {
-  FilterContext, HttpRequest, HttpResponse, ManagedInterceptorConfig,
-  HttpInterceptor, SerializeInterceptor, LoggingInterceptor, WebInternal
-} from '@travetto/web';
+
+
+import { ApplicationLayerGroup } from './layers';
+import { HttpRequest, HttpResponse, FilterContext, HttpResponsePayload, FilterNext } from '../types';
+import { LoggingInterceptor } from './logging';
+import { ManagedInterceptorConfig, HttpInterceptor } from './types';
+import { HttpPayloadUtil } from '../util/payload';
 
 @Config('web.etag')
 export class EtagConfig extends ManagedInterceptorConfig {
@@ -19,14 +22,16 @@ export class EtagConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class EtagInterceptor implements HttpInterceptor {
 
-  runsBefore = [SerializeInterceptor];
+  runsBefore = [ApplicationLayerGroup];
   dependsOn = [LoggingInterceptor];
 
   @Inject()
   config: EtagConfig;
 
-  async etag(req: HttpRequest, res: HttpResponse): Promise<void> {
-    const output = res[WebInternal].body;
+  priority = 100;
+
+  addTag(req: HttpRequest, res: HttpResponse, value?: unknown): HttpResponsePayload {
+    const output = HttpPayloadUtil.ensureSerialized(req, res, value);
     if (
       Buffer.isBuffer(output) &&
       (
@@ -53,12 +58,14 @@ export class EtagInterceptor implements HttpInterceptor {
         fresh(req.headers, { etag: tag, 'last-modified': lastModified })
       ) {
         res.statusCode = 304;
-        res.end();
+        return Buffer.from([]);
       }
     }
+    return output;
   }
 
-  async intercept({ res }: FilterContext): Promise<void> {
-    (res[WebInternal].filters ??= []).push(this.etag.bind(this));
+  async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
+    const value = await next();
+    return this.addTag(req, res, value);
   }
 }

@@ -9,8 +9,8 @@ import { HttpRequest, FilterContext, FilterNext, WebInternal } from '../types.ts
 import { EndpointConfig } from '../registry/types.ts';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
 import { AcceptsInterceptor } from './accepts.ts';
+import { RequestLayerGroup } from './layers.ts';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
@@ -37,7 +37,7 @@ export class BodyParseConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
 
-  dependsOn = [SerializeInterceptor, AcceptsInterceptor];
+  dependsOn = [RequestLayerGroup, AcceptsInterceptor];
 
   @Inject()
   config: BodyParseConfig;

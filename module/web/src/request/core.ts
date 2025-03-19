@@ -17,7 +17,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Decorate a given request, extending from the request core
    */
-  static create<T extends HttpRequest>(req: Partial<T> & { connection?: unknown }): T {
+  static create<T extends HttpRequest>(req: Partial<T> & { connection?: unknown } & { [WebInternal]: HttpRequest[typeof WebInternal] }): T {
     if ('redirect' in req) {
       delete req.redirect;
     }
@@ -25,7 +25,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
     req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
     req.method = castTo(req.method?.toUpperCase());
     req.connection = {};
-    req[WebInternal]!.createdDate = Date.now();
+    req[WebInternal].createdDate = Date.now();
     return asFull<T>(req);
   }
 

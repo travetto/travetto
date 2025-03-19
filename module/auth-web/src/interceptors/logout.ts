@@ -1,4 +1,4 @@
-import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, SerializeInterceptor, FilterNext } from '@travetto/web';
+import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, FilterNext, ApplicationLayerGroup } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
@@ -22,7 +22,7 @@ export class AuthLogoutInterceptor implements HttpInterceptor<WebAuthLogoutConfi
   @Inject()
   authContext: AuthContext;
 
-  dependsOn = [SerializeInterceptor, AuthContextInterceptor];
+  dependsOn = [ApplicationLayerGroup, AuthContextInterceptor];
 
   /**
    * Ensures this is an opt-in interceptor

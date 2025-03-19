@@ -1,21 +1,27 @@
 import { Injectable } from '@travetto/di';
 
 import { HttpInterceptor } from './types';
-import { LoggingInterceptor } from './logging';
-import { FilterContext, FilterNext, WebInternal } from '../types';
+import { FilterContext, FilterNext } from '../types';
+import { HttpPayloadUtil } from '../util/payload';
+import { ResponseLayerGroup } from './layers';
 
 @Injectable()
 export class FinalSendInterceptor implements HttpInterceptor {
-  runsBefore = [LoggingInterceptor];
+  runsBefore = [ResponseLayerGroup];
 
-  async intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
+  async intercept(ctx: FilterContext, next: FilterNext): Promise<void> {
+    let value;
     try {
-      return await next();
-    } finally {
-      if (!ctx.res.headersSent) {
-        // Handle final ejection if specified
-        await ctx.res[WebInternal].send?.();
-      }
+      value = await next();
+    } catch (err) {
+      value = err;
+    }
+
+    if (!ctx.res.headersSent) {
+      const payload = HttpPayloadUtil.ensureSerialized(ctx.req, ctx.res, value);
+
+      // Handle final ejection if specified
+      await ctx.res.respond(payload);
     }
   }
 }

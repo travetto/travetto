@@ -3,7 +3,7 @@ import { pipeline } from 'node:stream/promises';
 
 import type express from 'express';
 
-import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpResponsePayload } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -48,45 +48,34 @@ export class ExpressWebServerUtil {
    * Build a Travetto HttpResponse from an Express Response
    */
   static getResponse(res: express.Response): HttpResponse {
-    const out = HttpResponseCore.create({
+    return HttpResponseCore.create({
       [WebInternal]: {
         providerEntity: res,
-        nodeEntity: res,
+        nodeEntity: res
       },
       get headersSent(): boolean {
         return res.headersSent;
       },
-      status(val?: number): number | undefined {
-        if (val) {
-          res.status(val);
-          res.statusCode = val;
+      get statusCode(): number | undefined {
+        return res.statusCode;
+      },
+      set statusCode(code: number) {
+        res.status(code);
+        res.statusCode = code;
+      },
+      respond(this: HttpResponse, value?: HttpResponsePayload): Promise<void> | void {
+        if (isReadable(value)) {
+          return pipeline(value, res);
         } else {
-          return res.statusCode;
+          res.send(value);
+          res.end();
         }
       },
-      send(this: HttpResponse, data): void {
-        this[WebInternal].body = castTo<Buffer>(data);
-      },
-      on: res.on.bind(res),
-      end: res.end.bind(res),
       vary: res.vary.bind(res),
       getHeaderNames: res.getHeaderNames.bind(res),
       setHeader: res.setHeader.bind(res),
       getHeader: castTo(res.getHeader.bind(res)), // NOTE: Forcing type, may be incorrect
       removeHeader: res.removeHeader.bind(res),
-      write: res.write.bind(res),
     });
-
-    out[WebInternal].send = async (): Promise<void> => {
-      const { body } = out[WebInternal];
-      if (isReadable(body)) {
-        await pipeline(body, res);
-      } else {
-        res.send(body);
-        res.end();
-      }
-    };
-
-    return out;
   }
 }

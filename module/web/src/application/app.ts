@@ -55,7 +55,7 @@ export class WebApplication<T = unknown> {
     const sorted = WebCommonUtil.ordered(ordered).map(x => x.target);
 
     console.debug('Sorting interceptors', { count: sorted.length, names: sorted.map(x => x.constructor.name) });
-    return sorted;
+    return sorted.filter(x => !x.placeholder); // Drop out the placeholders
   }
 
   /**
