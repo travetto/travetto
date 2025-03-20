@@ -4,8 +4,7 @@ import { AppError } from '@travetto/runtime';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
 import { FilterContext, FilterNext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
-import { ResponseLayerGroup } from './layers.ts';
-import { FinalSendInterceptor } from './final.ts';
+import { ResponseInterceptor } from './response.ts';
 
 /**
  * Web logging configuration
@@ -21,8 +20,7 @@ export class WebLogConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class LoggingInterceptor implements HttpInterceptor {
 
-  runsBefore = [ResponseLayerGroup];
-  dependsOn = [FinalSendInterceptor];
+  runsBefore = [ResponseInterceptor];
 
   @Inject()
   config: WebLogConfig;

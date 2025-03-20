@@ -1,4 +1,4 @@
-import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, ApplicationLayerGroup } from '@travetto/web';
+import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, ApplicationInterceptorGroup } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -27,7 +27,7 @@ export class AuthLoginInterceptor implements HttpInterceptor<WebAuthLoginConfig>
   @Inject()
   service: AuthService;
 
-  dependsOn = [ApplicationLayerGroup, AuthContextInterceptor];
+  dependsOn = [ApplicationInterceptorGroup, AuthContextInterceptor];
 
   /**
    * Ensures this is an opt-in interceptor

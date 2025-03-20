@@ -51,11 +51,27 @@ export class WebApplication<T = unknown> {
    */
   async getInterceptors(): Promise<HttpInterceptor[]> {
     const instances = await DependencyRegistry.getCandidateInstances(toConcrete<HttpInterceptor>());
-    const ordered = instances.map(x => ({ key: x.constructor, before: x.runsBefore, after: x.dependsOn, target: x }));
-    const sorted = WebCommonUtil.ordered(ordered).map(x => x.target);
+    const ordered = instances.map(x => {
+      const beforeGroups = x.runsBefore?.filter(z => 'group' in z) ?? [];
+      const dependGroups = x.dependsOn?.filter(z => 'group' in z) ?? [];
+      const after = x.dependsOn?.filter(z => !('group' in z)) ?? [];
+      const before = x.runsBefore?.filter(z => !('group' in z)) ?? [];
+
+      for (const { group: [start, end] } of dependGroups) {
+        after.push(start);
+        before.push(end);
+      }
+      for (const { group: [start] } of beforeGroups) {
+        before.push(start);
+      }
+      return ({ key: x.constructor, before, after, target: x });
+    });
+    const sorted = WebCommonUtil.ordered(ordered)
+      .map(x => x.target)
+      .filter(x => !x.placeholder);  // Drop out the placeholders
 
     console.debug('Sorting interceptors', { count: sorted.length, names: sorted.map(x => x.constructor.name) });
-    return sorted.filter(x => !x.placeholder); // Drop out the placeholders
+    return sorted;
   }
 
   /**

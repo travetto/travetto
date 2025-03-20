@@ -21,6 +21,10 @@ export abstract class ManagedInterceptorConfig {
   paths?: string[];
 }
 
+export interface HttpInterceptorGroup {
+  group: [Class<HttpInterceptor>, Class<HttpInterceptor>];
+}
+
 /**
  * Basic interceptor structure
  *
@@ -36,12 +40,12 @@ export interface HttpInterceptor<C = Any> {
   /**
    * This interceptor must run after these
    */
-  dependsOn?: Class<HttpInterceptor>[];
+  dependsOn?: (Class<HttpInterceptor> | HttpInterceptorGroup)[];
 
   /**
    * This interceptor must run before these
    */
-  runsBefore?: Class<HttpInterceptor>[];
+  runsBefore?: (Class<HttpInterceptor> | HttpInterceptorGroup)[];
 
   /**
    * Determines the current endpoint is applicable for the interceptor

@@ -8,7 +8,7 @@ import { castTo } from '@travetto/runtime';
 import { FilterContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { RequestLayerGroup } from './layers.ts';
+import { RequestInterceptorGroup } from './groups.ts';
 
 /**
  * Web cookie configuration
@@ -48,7 +48,7 @@ export class CookieConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
 
-  dependsOn = [RequestLayerGroup];
+  dependsOn = [RequestInterceptorGroup];
 
   @Inject()
   config: CookieConfig;
