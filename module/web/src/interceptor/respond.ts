@@ -6,7 +6,7 @@ import { HttpPayloadUtil } from '../util/payload';
 import { RequestInterceptorGroup } from './groups';
 
 @Injectable()
-export class ResponseInterceptor implements HttpInterceptor {
+export class RespondInterceptor implements HttpInterceptor {
   runsBefore = [RequestInterceptorGroup];
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<void> {

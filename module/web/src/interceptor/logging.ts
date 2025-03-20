@@ -1,10 +1,9 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError } from '@travetto/runtime';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
 import { FilterContext, FilterNext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
-import { ResponseInterceptor } from './response.ts';
+import { RespondInterceptor } from './respond.ts';
 
 /**
  * Web logging configuration
@@ -20,12 +19,16 @@ export class WebLogConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class LoggingInterceptor implements HttpInterceptor {
 
-  runsBefore = [ResponseInterceptor];
+  runsBefore = [RespondInterceptor];
 
   @Inject()
   config: WebLogConfig;
 
   logResult(req: HttpRequest, res: HttpResponse, defaultCode: number): void {
+    if (req[WebInternal].requestLogging === false) {
+      return;
+    }
+
     const duration = Date.now() - req[WebInternal].createdDate!;
 
     const reqLog = {
@@ -49,22 +52,15 @@ export class LoggingInterceptor implements HttpInterceptor {
     }
   }
 
-  async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
-    if (req[WebInternal].requestLogging === false) {
-      try {
-        const value = await next();
-        this.logResult(req, res, 200);
-        return value;
-      } catch (err) {
-        this.logResult(req, res, 500);
-        if (this.config.showStackTrace) {
-          const final = err instanceof Error ? err : AppError.fromBasic(err);
-          console.error(final.message, { error: final });
-        }
-        throw err;
+  async intercept({ req, res }: FilterContext, next: FilterNext): Promise<void> {
+    try {
+      await next();
+      this.logResult(req, res, 200);
+    } catch (err) {
+      this.logResult(req, res, 500);
+      if (this.config.showStackTrace && err instanceof Error) {
+        console.error(err.message, { error: err });
       }
-    } else {
-      return next();
     }
   }
 }
