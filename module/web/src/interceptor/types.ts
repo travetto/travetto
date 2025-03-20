@@ -1,4 +1,4 @@
-import type { Any, Class } from '@travetto/runtime';
+import { castTo, type Any, type Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import type { EndpointConfig } from '../registry/types.ts';
@@ -24,15 +24,16 @@ export abstract class ManagedInterceptorConfig {
 /**
  * Http Interceptor group, used for alignment in ordering
  */
-export class HttpInterceptorGroup<
-  S extends HttpInterceptor = HttpInterceptor,
-  E extends HttpInterceptor = HttpInterceptor
-> {
-  start: Class<S>;
-  end: Class<E>;
-  constructor(start: Class<S>, end: Class<E>) {
-    this.start = start;
-    this.end = end;
+export class HttpInterceptorGroup {
+  start: Class<HttpInterceptor>;
+  end: Class<HttpInterceptor>;
+
+  runsBefore: HttpInterceptorGroup[] = [];
+  dependsOn: HttpInterceptorGroup[] = [];
+
+  constructor(key: string) {
+    this.start = castTo({ name: `${key}Start` });
+    this.end = castTo({ name: `${key}End` });
   }
 }
 

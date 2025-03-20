@@ -6,7 +6,7 @@ class Appender {
 }
 
 @Injectable()
-export class LoggingInterceptor implements HttpInterceptor {
+export class CustomLoggingInterceptor implements HttpInterceptor {
 
   appender: Appender;
 

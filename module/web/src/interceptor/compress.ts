@@ -10,7 +10,6 @@ import { AppError, castTo } from '@travetto/runtime';
 
 import { HttpInterceptor, ManagedInterceptorConfig } from './types';
 import { HttpRequest, HttpResponse, FilterContext, FilterNext, HttpResponsePayload } from '../types';
-import { LoggingInterceptor } from './logging';
 import { InterceptorGroup } from './groups';
 import { HttpPayloadUtil } from '../util/payload';
 import { EtagInterceptor } from './etag';
@@ -37,8 +36,8 @@ export class CompressConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class CompressionInterceptor implements HttpInterceptor {
 
-  dependsOn = [LoggingInterceptor];
-  runsBefore = [InterceptorGroup.Application, EtagInterceptor];
+  dependsOn = [InterceptorGroup.Response];
+  runsBefore = [EtagInterceptor];
 
   @Inject()
   config: CompressConfig;

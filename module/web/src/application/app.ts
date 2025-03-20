@@ -51,23 +51,55 @@ export class WebApplication<T = unknown> {
    */
   async getInterceptors(): Promise<HttpInterceptor[]> {
     const instances = await DependencyRegistry.getCandidateInstances(toConcrete<HttpInterceptor>());
+    const groups = new Set<HttpInterceptorGroup>();
     const ordered = instances.map(x => {
       const after: Class<HttpInterceptor>[] = [];
       const before: Class<HttpInterceptor>[] = [];
 
       for (const item of x.runsBefore ?? []) {
-        before.push(item instanceof HttpInterceptorGroup ? item.start : item);
+        if (item instanceof HttpInterceptorGroup) {
+          groups.add(item);
+          before.push(item.start);
+        } else {
+          before.push(item);
+        }
       }
       for (const item of x.dependsOn ?? []) {
-        after.push(item instanceof HttpInterceptorGroup ? item.start : item);
-        (item instanceof HttpInterceptorGroup && before.push(item.end));
+        if (item instanceof HttpInterceptorGroup) {
+          groups.add(item);
+          before.push(item.end);
+          after.push(item.start);
+        } else {
+          after.push(item);
+        }
       }
 
-      return ({ key: x.constructor, before, after, target: x });
+      return ({ key: x.constructor, before, after, target: x, placeholder: false });
     });
+
+    // Load groups into the ordering
+    for (const group of groups) {
+      ordered.push(
+        {
+          key: group.start,
+          before: [group.end],
+          after: [...group.dependsOn?.map(x => x.end) ?? []],
+          placeholder: true,
+          target: undefined!
+        },
+        {
+          key: group.end,
+          before: [...group.runsBefore?.map(x => x.start) ?? []],
+          after: [group.start],
+          placeholder: true,
+          target: undefined!
+        }
+      );
+    }
+
     const sorted = WebCommonUtil.ordered(ordered)
-      .map(x => x.target)
-      .filter(x => !x.placeholder);  // Drop out the placeholders
+      .filter(x => !x.placeholder)  // Drop out the placeholders
+      .map(x => x.target);
 
     console.debug('Sorting interceptors', { count: sorted.length, names: sorted.map(x => x.constructor.name) });
     return sorted;

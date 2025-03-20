@@ -7,9 +7,9 @@ import { Config } from '@travetto/config';
 
 import { InterceptorGroup } from './groups';
 import { HttpRequest, HttpResponse, FilterContext, HttpResponsePayload, FilterNext } from '../types';
-import { LoggingInterceptor } from './logging';
 import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { HttpPayloadUtil } from '../util/payload';
+import { GetCacheInterceptor } from './get-cache';
 
 @Config('web.etag')
 export class EtagConfig extends ManagedInterceptorConfig {
@@ -22,8 +22,8 @@ export class EtagConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class EtagInterceptor implements HttpInterceptor {
 
-  runsBefore = [InterceptorGroup.Application];
-  dependsOn = [LoggingInterceptor];
+  dependsOn = [InterceptorGroup.Response];
+  runsBefore = [GetCacheInterceptor];
 
   @Inject()
   config: EtagConfig;

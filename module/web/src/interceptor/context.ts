@@ -15,7 +15,7 @@ class AsyncContextConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class AsyncContextInterceptor implements HttpInterceptor {
 
-  runsBefore = [InterceptorGroup.Application];
+  dependsOn = [InterceptorGroup.Request];
 
   @Inject()
   context: WebContext;

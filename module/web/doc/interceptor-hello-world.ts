@@ -1,4 +1,4 @@
-import { HttpInterceptor, InterceptorGroup FilterContext } from '@travetto/web';
+import { FilterContext, HttpInterceptor, InterceptorGroup } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
