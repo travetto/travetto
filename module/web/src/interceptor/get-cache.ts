@@ -5,7 +5,7 @@ import { FilterContext, FilterNext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { ResponseInterceptorGroup } from './groups.ts';
+import { InterceptorGroup } from './groups.ts';
 
 @Config('web.getCache')
 export class GetCacheConfig extends ManagedInterceptorConfig { }
@@ -16,7 +16,7 @@ export class GetCacheConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class GetCacheInterceptor implements HttpInterceptor {
 
-  dependsOn = [ResponseInterceptorGroup];
+  dependsOn = [InterceptorGroup.Response];
 
   @Inject()
   config: GetCacheConfig;

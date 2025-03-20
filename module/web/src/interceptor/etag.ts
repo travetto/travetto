@@ -5,7 +5,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 
-import { ApplicationInterceptorGroup } from './groups';
+import { InterceptorGroup } from './groups';
 import { HttpRequest, HttpResponse, FilterContext, HttpResponsePayload, FilterNext } from '../types';
 import { LoggingInterceptor } from './logging';
 import { ManagedInterceptorConfig, HttpInterceptor } from './types';
@@ -22,7 +22,7 @@ export class EtagConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class EtagInterceptor implements HttpInterceptor {
 
-  runsBefore = [ApplicationInterceptorGroup];
+  runsBefore = [InterceptorGroup.Application];
   dependsOn = [LoggingInterceptor];
 
   @Inject()

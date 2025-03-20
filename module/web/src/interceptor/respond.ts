@@ -3,11 +3,11 @@ import { Injectable } from '@travetto/di';
 import { HttpInterceptor } from './types';
 import { FilterContext, FilterNext } from '../types';
 import { HttpPayloadUtil } from '../util/payload';
-import { RequestInterceptorGroup } from './groups';
+import { InterceptorGroup } from './groups';
 
 @Injectable()
 export class RespondInterceptor implements HttpInterceptor {
-  runsBefore = [RequestInterceptorGroup];
+  runsBefore = [InterceptorGroup.Request];
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<void> {
     let value;

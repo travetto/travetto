@@ -5,7 +5,7 @@ import { Ignore } from '@travetto/schema';
 import { FilterContext, HttpRequest } from '../types.ts';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { ResponseInterceptorGroup } from './groups.ts';
+import { InterceptorGroup } from './groups.ts';
 
 /**
  * Web cors support
@@ -47,7 +47,7 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
   @Inject()
   config: CorsConfig;
 
-  dependsOn = [ResponseInterceptorGroup];
+  dependsOn = [InterceptorGroup.Response];
 
   finalizeConfig(config: CorsConfig): CorsConfig {
     config.resolved = {

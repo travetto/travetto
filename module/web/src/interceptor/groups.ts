@@ -1,55 +1,22 @@
-import { Injectable } from '@travetto/di';
+import { Class } from '@travetto/runtime';
 import { HttpInterceptor, HttpInterceptorGroup } from './types';
 
-@Injectable()
-class RequestGroupStart implements HttpInterceptor {
+class Basic {
   placeholder = true;
   intercept(): void { }
 }
 
-@Injectable()
-class RequestGroupEnd implements HttpInterceptor {
-  dependsOn = [ResponseGroupStart];
-  placeholder = true;
-  intercept(): void { }
-}
+class RequestGroupStart extends Basic { }
+class RequestGroupEnd extends Basic { dependsOn = [ResponseGroupStart]; }
+class ResponseGroupStart extends Basic { dependsOn = [RequestGroupEnd]; }
+class ResponseGroupEnd extends Basic { dependsOn = [ResponseGroupStart]; }
+class ApplicationGroupStart extends Basic { dependsOn = [ResponseGroupEnd]; }
+class ApplicationGroupEnd extends Basic { dependsOn = [ApplicationGroupStart]; }
 
-@Injectable()
-class ResponseGroupStart implements HttpInterceptor {
-  dependsOn = [RequestGroupEnd];
-  placeholder = true;
-  intercept(): void { }
-}
+const group = (start: Class<HttpInterceptor>, end: Class<HttpInterceptor>): HttpInterceptorGroup => ({ group: [start, end] });
 
-@Injectable()
-class ResponseGroupEnd implements HttpInterceptor {
-  dependsOn = [ResponseGroupStart];
-  placeholder = true;
-  intercept(): void { }
-}
-
-@Injectable()
-class ApplicationGroupStart implements HttpInterceptor {
-  dependsOn = [ResponseGroupEnd];
-  placeholder = true;
-  intercept(): void { }
-}
-
-@Injectable()
-class ApplicationGroupEnd implements HttpInterceptor {
-  dependsOn = [ApplicationGroupStart];
-  placeholder = true;
-  intercept(): void { }
-}
-
-export const RequestInterceptorGroup: HttpInterceptorGroup = {
-  group: [RequestGroupStart, RequestGroupEnd]
-};
-
-export const ResponseInterceptorGroup: HttpInterceptorGroup = {
-  group: [ResponseGroupStart, ResponseGroupEnd]
-};
-
-export const ApplicationInterceptorGroup: HttpInterceptorGroup = {
-  group: [ApplicationGroupStart, ApplicationGroupEnd]
+export const InterceptorGroup = {
+  Request: group(RequestGroupStart, RequestGroupEnd),
+  Response: group(ResponseGroupStart, ResponseGroupEnd),
+  Application: group(ApplicationGroupStart, ApplicationGroupEnd),
 };
