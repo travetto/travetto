@@ -21,12 +21,23 @@ export abstract class ManagedInterceptorConfig {
   paths?: string[];
 }
 
-export interface HttpInterceptorGroup {
-  group: [Class<HttpInterceptor>, Class<HttpInterceptor>];
+/**
+ * Http Interceptor group, used for alignment in ordering
+ */
+export class HttpInterceptorGroup<
+  S extends HttpInterceptor = HttpInterceptor,
+  E extends HttpInterceptor = HttpInterceptor
+> {
+  start: Class<S>;
+  end: Class<E>;
+  constructor(start: Class<S>, end: Class<E>) {
+    this.start = start;
+    this.end = end;
+  }
 }
 
 /**
- * Basic interceptor structure
+ * Basic http interceptor structure
  *
  * @concrete
  */

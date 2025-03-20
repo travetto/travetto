@@ -5,7 +5,7 @@ import { ConfigurationService } from '@travetto/config';
 
 import { WebServerHandle } from '../types.ts';
 import { EndpointUtil } from '../util/endpoint.ts';
-import { HttpInterceptor } from '../interceptor/types.ts';
+import { HttpInterceptor, HttpInterceptorGroup } from '../interceptor/types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
 import { WebCommonUtil } from '../util/common.ts';
 
@@ -52,18 +52,17 @@ export class WebApplication<T = unknown> {
   async getInterceptors(): Promise<HttpInterceptor[]> {
     const instances = await DependencyRegistry.getCandidateInstances(toConcrete<HttpInterceptor>());
     const ordered = instances.map(x => {
-      const beforeGroups = x.runsBefore?.filter(z => 'group' in z) ?? [];
-      const dependGroups = x.dependsOn?.filter(z => 'group' in z) ?? [];
-      const after = x.dependsOn?.filter(z => !('group' in z)) ?? [];
-      const before = x.runsBefore?.filter(z => !('group' in z)) ?? [];
+      const after: Class<HttpInterceptor>[] = [];
+      const before: Class<HttpInterceptor>[] = [];
 
-      for (const { group: [start, end] } of dependGroups) {
-        after.push(start);
-        before.push(end);
+      for (const item of x.runsBefore ?? []) {
+        before.push(item instanceof HttpInterceptorGroup ? item.start : item);
       }
-      for (const { group: [start] } of beforeGroups) {
-        before.push(start);
+      for (const item of x.dependsOn ?? []) {
+        after.push(item instanceof HttpInterceptorGroup ? item.start : item);
+        (item instanceof HttpInterceptorGroup && before.push(item.end));
       }
+
       return ({ key: x.constructor, before, after, target: x });
     });
     const sorted = WebCommonUtil.ordered(ordered)

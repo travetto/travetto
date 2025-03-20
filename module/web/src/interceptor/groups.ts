@@ -1,5 +1,4 @@
-import { Class } from '@travetto/runtime';
-import { HttpInterceptor, HttpInterceptorGroup } from './types';
+import { HttpInterceptorGroup } from './types';
 
 class Basic {
   placeholder = true;
@@ -13,10 +12,8 @@ class ResponseGroupEnd extends Basic { dependsOn = [ResponseGroupStart]; }
 class ApplicationGroupStart extends Basic { dependsOn = [ResponseGroupEnd]; }
 class ApplicationGroupEnd extends Basic { dependsOn = [ApplicationGroupStart]; }
 
-const group = (start: Class<HttpInterceptor>, end: Class<HttpInterceptor>): HttpInterceptorGroup => ({ group: [start, end] });
-
 export const InterceptorGroup = {
-  Request: group(RequestGroupStart, RequestGroupEnd),
-  Response: group(ResponseGroupStart, ResponseGroupEnd),
-  Application: group(ApplicationGroupStart, ApplicationGroupEnd),
+  Request: new HttpInterceptorGroup(RequestGroupStart, RequestGroupEnd),
+  Response: new HttpInterceptorGroup(ResponseGroupStart, ResponseGroupEnd),
+  Application: new HttpInterceptorGroup(ApplicationGroupStart, ApplicationGroupEnd),
 };
