@@ -1,5 +1,5 @@
 import { toConcrete } from '@travetto/runtime';
-import { HttpInterceptor, FilterContext, FilterReturn, FilterNext, WebContext, InterceptorGroup } from '@travetto/web';
+import { HttpInterceptor, HttpContext, WebFilterNext, WebContext, InterceptorGroup } from '@travetto/web';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
 
@@ -42,7 +42,7 @@ export class AuthContextInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<AuthToken>(), () => this.authContext.authToken);
   }
 
-  async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
+  async intercept(ctx: HttpContext, next: WebFilterNext): Promise<unknown> {
     // Skip if already authenticated
     if (this.authContext.principal) {
       return next();

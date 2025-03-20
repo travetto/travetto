@@ -3,7 +3,7 @@ import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInsta
 import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig } from './types.ts';
-import { Filter, EndpointHandler } from '../types.ts';
+import { WebFilter, EndpointHandler } from '../types.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
 import { WebContext } from '../context.ts';
 
@@ -88,7 +88,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param cls Controller class
    * @param fn The filter to call
    */
-  registerControllerFilter(target: Class, fn: Filter): void {
+  registerControllerFilter(target: Class, fn: WebFilter): void {
     const config = this.getOrCreatePending(target);
     config.filters!.push(fn);
   }
@@ -99,7 +99,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param handler Endpoint handler
    * @param fn The filter to call
    */
-  registerEndpointFilter(target: Class, handler: EndpointHandler, fn: Filter): void {
+  registerEndpointFilter(target: Class, handler: EndpointHandler, fn: WebFilter): void {
     const config = this.getOrCreateEndpointConfig(target, handler);
     config.filters!.unshift(fn);
   }
@@ -158,7 +158,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * Create a filter decorator
    * @param fn The filter to call
    */
-  createFilterDecorator(fn: Filter): EndpointDecorator {
+  createFilterDecorator(fn: WebFilter): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<EndpointHandler>): void => {
       if (prop) {
         this.registerEndpointFilter(asConstructable(target).constructor, descriptor!.value!, fn);

@@ -1,4 +1,4 @@
-import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, InterceptorGroup } from '@travetto/web';
+import { HttpInterceptor, ManagedInterceptorConfig, HttpContext, InterceptorGroup } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -36,8 +36,7 @@ export class AuthLoginInterceptor implements HttpInterceptor<WebAuthLoginConfig>
     return false;
   }
 
-  async intercept(ctx: FilterContext<WebAuthLoginConfig>): Promise<FilterReturn> {
+  async intercept(ctx: HttpContext<WebAuthLoginConfig>): Promise<void> {
     await this.service.authenticate(ctx.req.body, ctx, ctx.config.providers ?? []);
-    return;
   }
 }

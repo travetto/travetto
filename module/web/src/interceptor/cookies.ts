@@ -5,7 +5,7 @@ import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
 
-import { FilterContext } from '../types.ts';
+import { HttpContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
 import { InterceptorGroup } from './groups.ts';
@@ -62,7 +62,7 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
     return config;
   }
 
-  intercept({ req, res, config }: FilterContext<CookieConfig>): void {
+  intercept({ req, res, config }: HttpContext<CookieConfig>): void {
     const store = new cookies(castTo(req), castTo(res), config);
     req.cookies = { get: (key, opts?): string | undefined => store.get(key, { ...this.config, ...opts }) };
     res.cookies = { set: (key, value, opts?): void => { store.set(key, value, { ...this.config, ...opts }); } };

@@ -5,15 +5,15 @@ import { SetOption, GetOption } from 'cookies';
 
 import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
 
-export type FilterReturn = void | unknown | Promise<void | unknown>;
-export type FilterNext = () => FilterReturn;
-export type FilterContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: Readonly<C> };
-export type Filter<C = unknown> = (context: FilterContext<C>, next: FilterNext) => FilterReturn;
+type ReturnValue = void | unknown | Promise<void | unknown>;
+export type WebFilterNext = () => ReturnValue;
+export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: Readonly<C> };
+export type WebFilter<C = unknown> = (context: HttpContext<C>, next: WebFilterNext) => ReturnValue;
 
 export type EndpointHandler = TypedFunction<Any, Any>;
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
 
-export type HttpHandler = (req: HttpRequest, res: HttpResponse) => FilterReturn;
+export type HttpHandler = (req: HttpRequest, res: HttpResponse) => ReturnValue;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 export type HttpContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
@@ -38,10 +38,6 @@ export interface HttpRequestInternal<T = unknown> {
    * The parsed params for the target handler
    */
   requestParams?: unknown[];
-  /**
-   * Additional logging context
-   */
-  requestLogging?: false | Record<string, unknown>;
   /**
    * The original request of the underlying framework
    */

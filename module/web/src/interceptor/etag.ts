@@ -6,7 +6,7 @@ import { Config } from '@travetto/config';
 
 
 import { InterceptorGroup } from './groups';
-import { HttpRequest, HttpResponse, FilterContext, HttpResponsePayload, FilterNext } from '../types';
+import { HttpRequest, HttpResponse, HttpContext, HttpResponsePayload, WebFilterNext } from '../types';
 import { ManagedInterceptorConfig, HttpInterceptor } from './types';
 import { HttpPayloadUtil } from '../util/payload';
 import { GetCacheInterceptor } from './get-cache';
@@ -64,7 +64,7 @@ export class EtagInterceptor implements HttpInterceptor {
     return output;
   }
 
-  async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
+  async intercept({ req, res }: HttpContext, next: WebFilterNext): Promise<unknown> {
     const value = await next();
     return this.addTag(req, res, value);
   }

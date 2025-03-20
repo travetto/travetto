@@ -12,7 +12,7 @@ import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
 import { ManagedInterceptorConfig, HttpInterceptor } from '../src/interceptor/types.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpResponse, FilterContext, WebServerHandle, WebInternal } from '../src/types.ts';
+import { HttpResponse, HttpContext, WebServerHandle, WebInternal } from '../src/types.ts';
 import { WebServer } from '../src/application/server.ts';
 import { WebApplication } from '../src/application/app.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
@@ -54,7 +54,7 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
     return !/opt-in/.test(`${endpoint.path}`);
   }
 
-  intercept(ctx: FilterContext<CustomInterceptorConfig>) {
+  intercept(ctx: HttpContext<CustomInterceptorConfig>) {
     Object.assign(ctx.res, { name: ctx.config.name });
   }
 }

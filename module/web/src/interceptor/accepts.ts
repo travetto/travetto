@@ -3,7 +3,7 @@ import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 
-import { FilterContext } from '../types.ts';
+import { HttpContext } from '../types.ts';
 import { MimeUtil } from '../util/mime.ts';
 
 import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
@@ -38,7 +38,7 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
     return false;
   }
 
-  intercept({ req, config }: FilterContext<AcceptsConfig>): void {
+  intercept({ req, config }: HttpContext<AcceptsConfig>): void {
     const contentType = req.header('content-type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });

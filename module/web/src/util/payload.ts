@@ -132,8 +132,8 @@ export class HttpPayloadUtil {
     }
 
     // Set header if not defined
-    if (!res.getHeader('Content-type')) {
-      res.setHeader('Content-type', defaultContentType ?? 'application/octet-stream');
+    if (!res.getHeader('Content-Type')) {
+      res.setHeader('Content-Type', defaultContentType ?? 'application/octet-stream');
     }
 
     // Set length if provided
@@ -158,9 +158,6 @@ export class HttpPayloadUtil {
    * Ensure the value is ready for responding
    */
   static ensureSerialized(req: HttpRequest, res: HttpResponse, value: unknown): Buffer | Readable {
-    if (Buffer.isBuffer(value) || isStream(value)) {
-      return value;
-    }
     return this.applyPayload(req, res, this.from(value));
   }
 }
