@@ -4,10 +4,8 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-
-import { InterceptorGroup } from './groups';
 import { HttpRequest, HttpResponse, HttpContext, HttpResponsePayload, WebFilterNext } from '../types';
-import { ManagedInterceptorConfig, HttpInterceptor } from './types';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpPayloadUtil } from '../util/payload';
 import { GetCacheInterceptor } from './get-cache';
 
@@ -22,13 +20,11 @@ export class EtagConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class EtagInterceptor implements HttpInterceptor {
 
-  dependsOn = [InterceptorGroup.Response];
+  category: HttpInterceptorCategory = 'response';
   runsBefore = [GetCacheInterceptor];
 
   @Inject()
   config: EtagConfig;
-
-  priority = 100;
 
   addTag(req: HttpRequest, res: HttpResponse, value?: unknown): HttpResponsePayload {
     const output = HttpPayloadUtil.ensureSerialized(req, res, value);

@@ -5,7 +5,10 @@ import { AuthConfig, AuthContext } from '@travetto/auth';
 import { AuthContextInterceptor, WebAuthConfig } from '@travetto/auth-web';
 import { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
-import { Controller, Get, Body, Post, Put, HttpRequest, HttpContext, HttpInterceptor, EndpointConfig, ContextParam } from '@travetto/web';
+import {
+  Controller, Get, Body, Post, Put, HttpRequest, HttpContext, HttpInterceptor,
+  EndpointConfig, ContextParam, HttpInterceptorCategory
+} from '@travetto/web';
 import { Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
@@ -16,7 +19,9 @@ type Aged = { age: number, payload?: Record<string, unknown> };
 
 @Injectable()
 class AutoLogin implements HttpInterceptor {
+
   dependsOn = [AuthContextInterceptor];
+  category: HttpInterceptorCategory = 'application';
 
   @Inject()
   auth: AuthContext;

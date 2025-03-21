@@ -10,7 +10,7 @@ import { RootRegistry } from '@travetto/registry';
 import { ConfigureInterceptor } from '../src/decorator/common.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
-import { ManagedInterceptorConfig, HttpInterceptor } from '../src/interceptor/types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from '../src/interceptor/types.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { HttpResponse, HttpContext, WebServerHandle, WebInternal } from '../src/types.ts';
 import { WebServer } from '../src/application/server.ts';
@@ -46,6 +46,8 @@ class Server implements WebServer {
 
 @Injectable()
 class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
+
+  category: HttpInterceptorCategory = 'global';
 
   @Inject()
   config: CustomInterceptorConfig;
@@ -117,7 +119,7 @@ class TestInterceptorConfigSuite {
       },
       name: undefined,
       statusCode: 200,
-      send: () => { },
+      respond: () => { },
       setHeader: (k, v) => { },
       getHeader: (k) => undefined,
       removeHeader: () => undefined,

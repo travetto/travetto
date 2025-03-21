@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { AppError, Util } from '@travetto/runtime';
 
 import {
-  ControllerRegistry, WebInternal, EndpointUtil, HttpInterceptor, HttpContext, WebFilterNext, InterceptorGroup,
+  ControllerRegistry, WebInternal, EndpointUtil, HttpInterceptor, HttpContext, WebFilterNext, HttpInterceptorCategorySet,
 } from '@travetto/web';
 
 import { WebRpcConfig } from './config.ts';
@@ -13,8 +13,8 @@ import { WebRpcConfig } from './config.ts';
 @Injectable()
 export class WebRpcInterceptor implements HttpInterceptor {
 
-  dependsOn = [InterceptorGroup.Request];
-  runsBefore = [InterceptorGroup.Response];
+  dependsOn = [HttpInterceptorCategorySet.Request];
+  runsBefore = [HttpInterceptorCategorySet.Response];
 
   @Inject()
   config: WebRpcConfig;

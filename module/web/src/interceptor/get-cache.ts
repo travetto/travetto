@@ -4,8 +4,7 @@ import { Config } from '@travetto/config';
 import { HttpContext, WebFilterNext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { InterceptorGroup } from './groups.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 
 @Config('web.getCache')
 export class GetCacheConfig extends ManagedInterceptorConfig { }
@@ -16,7 +15,7 @@ export class GetCacheConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class GetCacheInterceptor implements HttpInterceptor {
 
-  dependsOn = [InterceptorGroup.Response];
+  category: HttpInterceptorCategory = 'response';
 
   @Inject()
   config: GetCacheConfig;

@@ -8,9 +8,8 @@ import { AppError } from '@travetto/runtime';
 import { HttpRequest, HttpContext, WebFilterNext, WebInternal } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { AcceptsInterceptor } from './accepts.ts';
-import { InterceptorGroup } from './groups.ts';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
@@ -37,7 +36,8 @@ export class BodyParseConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
 
-  dependsOn = [InterceptorGroup.Request, AcceptsInterceptor];
+  dependsOn = [AcceptsInterceptor];
+  category: HttpInterceptorCategory = 'request';
 
   @Inject()
   config: BodyParseConfig;

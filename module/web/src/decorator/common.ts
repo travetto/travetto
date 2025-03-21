@@ -4,6 +4,7 @@ import { HttpHeaderMap, EndpointHandler } from '../types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator } from '../registry/types.ts';
 import { AcceptsInterceptor } from '../interceptor/accepts.ts';
+import { HttpInterceptor } from '@travetto/web';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: TypedPropertyDescriptor<EndpointHandler>) {
@@ -80,3 +81,10 @@ export function Accepts(types: string[]): EndpointDecorator {
  */
 export const ConfigureInterceptor =
   ControllerRegistry.createInterceptorConfigDecorator.bind(ControllerRegistry);
+
+/**
+ * Registers an interceptor exclusion filter
+ */
+export function ExcludeInterceptors(interceptorExclude: (val: HttpInterceptor) => boolean): EndpointDecorator {
+  return register({ interceptorExclude });
+};

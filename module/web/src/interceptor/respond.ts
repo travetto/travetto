@@ -1,13 +1,13 @@
 import { Injectable } from '@travetto/di';
 
-import { HttpInterceptor } from './types';
+import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpContext, WebFilterNext } from '../types';
 import { HttpPayloadUtil } from '../util/payload';
-import { InterceptorGroup } from './groups';
 
 @Injectable()
 export class RespondInterceptor implements HttpInterceptor {
-  runsBefore = [InterceptorGroup.Request];
+
+  category: HttpInterceptorCategory = 'terminal';
 
   async intercept(ctx: HttpContext, next: WebFilterNext): Promise<void> {
     let value;

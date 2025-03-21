@@ -2,9 +2,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { HttpContext, WebFilterNext } from '../types.ts';
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { WebContext } from '../context.ts';
-import { InterceptorGroup } from './groups.ts';
 
 @Config('web.context')
 class AsyncContextConfig extends ManagedInterceptorConfig { }
@@ -15,8 +14,7 @@ class AsyncContextConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class AsyncContextInterceptor implements HttpInterceptor {
 
-  dependsOn = [InterceptorGroup.Response];
-  runsBefore = [InterceptorGroup.Application];
+  category: HttpInterceptorCategory = 'global';
 
   @Inject()
   context: WebContext;

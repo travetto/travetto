@@ -8,9 +8,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
-import { HttpInterceptor, ManagedInterceptorConfig } from './types';
+import { HttpInterceptor, HttpInterceptorCategory, ManagedInterceptorConfig } from './types';
 import { HttpRequest, HttpResponse, HttpContext, WebFilterNext, HttpResponsePayload } from '../types';
-import { InterceptorGroup } from './groups';
 import { HttpPayloadUtil } from '../util/payload';
 import { EtagInterceptor } from './etag';
 
@@ -36,13 +35,11 @@ export class CompressConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class CompressionInterceptor implements HttpInterceptor {
 
-  dependsOn = [InterceptorGroup.Response];
+  category: HttpInterceptorCategory = 'response';
   runsBefore = [EtagInterceptor];
 
   @Inject()
   config: CompressConfig;
-
-  priority = 1000;
 
   async compress(req: HttpRequest, res: HttpResponse, payload: unknown): Promise<HttpResponsePayload> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;

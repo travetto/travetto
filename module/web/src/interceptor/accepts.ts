@@ -6,8 +6,7 @@ import { Ignore } from '@travetto/schema';
 import { HttpContext } from '../types.ts';
 import { MimeUtil } from '../util/mime.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { InterceptorGroup } from './groups.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 
 @Config('web.accepts')
 class AcceptsConfig extends ManagedInterceptorConfig {
@@ -23,7 +22,7 @@ class AcceptsConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
 
-  dependsOn = [InterceptorGroup.Request];
+  category: HttpInterceptorCategory = 'request';
 
   @Inject()
   config: AcceptsConfig;

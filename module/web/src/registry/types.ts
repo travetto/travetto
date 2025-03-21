@@ -60,7 +60,7 @@ interface CoreConfig {
   /**
    * Set of interceptor configs
    */
-  interceptors?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
+  interceptorConfigs?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
   /**
    * List of headers to add to the response
    */
@@ -69,6 +69,10 @@ interface CoreConfig {
    * Should the resource only be used conditionally?
    */
   conditional?: () => (boolean | Promise<boolean>);
+  /**
+   * Control which interceptors are excluded
+   */
+  interceptorExclude?: (val: HttpInterceptor) => boolean;
 }
 
 /**
@@ -142,7 +146,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * Endpoint-based interceptor enable/disabling
    */
-  interceptors?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
+  interceptorConfigs?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
   /**
    * The response type
    */

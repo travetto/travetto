@@ -1,11 +1,11 @@
-import { Class, Runtime, toConcrete } from '@travetto/runtime';
+import { castTo, Class, Runtime, toConcrete, TypedObject } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
 import { WebServerHandle } from '../types.ts';
 import { EndpointUtil } from '../util/endpoint.ts';
-import { HttpInterceptor, HttpInterceptorGroup } from '../interceptor/types.ts';
+import { HttpInterceptor, HTTP_INTERCEPTOR_CATEGORIES } from '../interceptor/types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
 import { WebCommonUtil } from '../util/common.ts';
 
@@ -51,50 +51,30 @@ export class WebApplication<T = unknown> {
    */
   async getInterceptors(): Promise<HttpInterceptor[]> {
     const instances = await DependencyRegistry.getCandidateInstances(toConcrete<HttpInterceptor>());
-    const groups = new Set<HttpInterceptorGroup>();
+    const cats = HTTP_INTERCEPTOR_CATEGORIES.map(x => ({
+      key: x,
+      start: castTo<Class<HttpInterceptor>>({ name: `${x}Start` }),
+      end: castTo<Class<HttpInterceptor>>({ name: `${x}End` }),
+    }));
+
+    const categoryMapping = TypedObject.fromEntries(cats.map(x => [x.key, x]));
+
     const ordered = instances.map(x => {
-      const after: Class<HttpInterceptor>[] = [];
-      const before: Class<HttpInterceptor>[] = [];
-
-      for (const item of x.runsBefore ?? []) {
-        if (item instanceof HttpInterceptorGroup) {
-          groups.add(item);
-          before.push(item.start);
-        } else {
-          before.push(item);
-        }
-      }
-      for (const item of x.dependsOn ?? []) {
-        if (item instanceof HttpInterceptorGroup) {
-          groups.add(item);
-          before.push(item.end);
-          after.push(item.start);
-        } else {
-          after.push(item);
-        }
-      }
-
+      const group = categoryMapping[x.category];
+      const after = [...x.dependsOn ?? [], group.start];
+      const before = [...x.runsBefore ?? [], group.end];
       return ({ key: x.constructor, before, after, target: x, placeholder: false });
     });
 
-    // Load groups into the ordering
-    for (const group of groups) {
+    // Add category sets into the ordering
+    let i = 0;
+    for (const cat of cats) {
+      const prevEnd = cats[i - 1]?.end ? [cats[i - 1].end] : [];
       ordered.push(
-        {
-          key: group.start,
-          before: [group.end],
-          after: [...group.dependsOn?.map(x => x.end) ?? []],
-          placeholder: true,
-          target: undefined!
-        },
-        {
-          key: group.end,
-          before: [...group.runsBefore?.map(x => x.start) ?? []],
-          after: [group.start],
-          placeholder: true,
-          target: undefined!
-        }
+        { key: cat.start, before: [cat.end], after: prevEnd, placeholder: true, target: undefined! },
+        { key: cat.end, before: [], after: [cat.start], placeholder: true, target: undefined! }
       );
+      i += 1;
     }
 
     const sorted = WebCommonUtil.ordered(ordered)

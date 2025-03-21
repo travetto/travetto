@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { BodyParseInterceptor, HttpContext, WebFilterNext, HttpInterceptor, InterceptorGroup, WebInternal } from '@travetto/web';
+import { BodyParseInterceptor, HttpContext, WebFilterNext, HttpInterceptor, WebInternal, HttpInterceptorCategory } from '@travetto/web';
 
 import { WebUploadConfig } from './config.ts';
 import { WebUploadUtil } from './util.ts';
@@ -8,10 +8,11 @@ import { FileMap } from './types.ts';
 @Injectable()
 export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
 
+  category: HttpInterceptorCategory = 'request';
+  dependsOn = [BodyParseInterceptor];
+
   @Inject()
   config: WebUploadConfig;
-
-  dependsOn = [BodyParseInterceptor, InterceptorGroup.Request];
 
   /**
    * Produces final config object

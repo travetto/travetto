@@ -134,7 +134,7 @@ export class EndpointUtil {
     controller?: ControllerConfig
   ): (readonly [HttpInterceptor, LightweightConfig | undefined])[] {
     const resolvedConfigs =
-      [...controller?.interceptors ?? [], ...endpoint.interceptors ?? []]
+      [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []]
         .reduce((acc, [cls, cfg]) => {
           if (!acc.has(cls)) {
             acc.set(cls, []);
@@ -230,6 +230,11 @@ export class EndpointUtil {
     endpoint: EndpointConfig,
     controller?: ControllerConfig
   ): HttpHandler {
+
+    // Filter interceptors if needed
+    for (const filter of [controller?.interceptorExclude, endpoint.interceptorExclude]) {
+      interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
+    }
 
     const handlerBound: WebFilter = async ({ req, res }: HttpContext): Promise<unknown> => {
       const params = await this.extractParameters(endpoint, req, res);

@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { HttpContext, WebFilterNext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
 import { RespondInterceptor } from './respond.ts';
 
@@ -19,6 +19,7 @@ export class WebLogConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class LoggingInterceptor implements HttpInterceptor {
 
+  category: HttpInterceptorCategory = 'terminal';
   runsBefore = [RespondInterceptor];
 
   @Inject()

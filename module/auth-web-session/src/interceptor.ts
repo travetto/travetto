@@ -1,6 +1,6 @@
-import { Class, toConcrete } from '@travetto/runtime';
+import { toConcrete } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
-import { HttpInterceptor, HttpContext, WebFilterNext, ManagedInterceptorConfig, WebContext } from '@travetto/web';
+import { HttpInterceptor, HttpContext, WebFilterNext, ManagedInterceptorConfig, WebContext, HttpInterceptorCategory } from '@travetto/web';
 import { Session, SessionContext, SessionData, SessionService } from '@travetto/auth-session';
 import { Config } from '@travetto/config';
 import { AuthContextInterceptor } from '@travetto/auth-web';
@@ -14,8 +14,8 @@ class WebSessionConfig implements ManagedInterceptorConfig { }
 @Injectable()
 export class AuthSessionInterceptor implements HttpInterceptor {
 
-  dependsOn: Class<HttpInterceptor>[] = [AuthContextInterceptor];
-  runsBefore: Class<HttpInterceptor>[] = [];
+  category: HttpInterceptorCategory = 'application';
+  dependsOn = [AuthContextInterceptor];
 
   @Inject()
   service: SessionService;

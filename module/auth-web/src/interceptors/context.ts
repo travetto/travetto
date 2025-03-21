@@ -1,5 +1,5 @@
 import { toConcrete } from '@travetto/runtime';
-import { HttpInterceptor, HttpContext, WebFilterNext, WebContext, InterceptorGroup } from '@travetto/web';
+import { HttpInterceptor, HttpContext, WebFilterNext, WebContext, HttpInterceptorCategory } from '@travetto/web';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
 
@@ -19,7 +19,7 @@ const toDate = (v: string | Date | undefined): Date | undefined => (typeof v ===
 @Injectable()
 export class AuthContextInterceptor implements HttpInterceptor {
 
-  dependsOn = [InterceptorGroup.Application];
+  category: HttpInterceptorCategory = 'application';
 
   @Inject({ optional: true })
   codec: PrincipalCodec;

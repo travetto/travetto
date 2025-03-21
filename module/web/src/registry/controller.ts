@@ -44,7 +44,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       class: cls,
       filters: [],
       headers: {},
-      interceptors: [],
+      interceptorConfigs: [],
       basePath: '',
       externalName: cls.name.replace(/(Controller|Web|Service)$/, ''),
       endpoints: [],
@@ -63,7 +63,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       filters: [],
       headers: {},
       params: [],
-      interceptors: [],
+      interceptorConfigs: [],
       handlerName: handler.name,
       handler
     };
@@ -128,7 +128,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   registerEndpointInterceptorConfig<T extends HttpInterceptor>(target: Class, handler: EndpointHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const endpointConfig = this.getOrCreateEndpointConfig(target, handler);
-    (endpointConfig.interceptors ??= []).push([interceptorCls, { disabled: false, ...config }]);
+    (endpointConfig.interceptorConfigs ??= []).push([interceptorCls, { disabled: false, ...config }]);
   }
 
   /**
@@ -139,7 +139,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   registerControllerInterceptorConfig<T extends HttpInterceptor>(target: Class, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const controllerConfig = this.getOrCreatePending(target);
-    (controllerConfig.interceptors ??= []).push([interceptorCls, { disabled: false, ...config }]);
+    (controllerConfig.interceptorConfigs ??= []).push([interceptorCls, { disabled: false, ...config }]);
   }
 
   /**
@@ -196,7 +196,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     const headers = Object.fromEntries(Object.entries(src.headers ?? {}).map(([k, v]) => [k.toLowerCase(), v]));
     dest.headers = { ...(dest.headers ?? {}), ...headers };
     dest.filters = [...(dest.filters ?? []), ...(src.filters ?? [])];
-    dest.interceptors = [...(dest.interceptors ?? []), ...(src.interceptors ?? [])];
+    dest.interceptorConfigs = [...(dest.interceptorConfigs ?? []), ...(src.interceptorConfigs ?? [])];
+    dest.interceptorExclude = dest.interceptorExclude ?? src.interceptorExclude;
     dest.title = src.title || dest.title;
     dest.description = src.description || dest.description;
     dest.documented = src.documented ?? dest.documented;

@@ -7,8 +7,7 @@ import { castTo } from '@travetto/runtime';
 
 import { HttpContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { InterceptorGroup } from './groups.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 
 /**
  * Web cookie configuration
@@ -48,7 +47,7 @@ export class CookieConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
 
-  dependsOn = [InterceptorGroup.Request];
+  category: HttpInterceptorCategory = 'request';
 
   @Inject()
   config: CookieConfig;

@@ -1,4 +1,4 @@
-import { HttpContext, HttpInterceptor } from '@travetto/web';
+import { HttpContext, HttpInterceptor, HttpInterceptorCategory } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 class Appender {
@@ -7,6 +7,8 @@ class Appender {
 
 @Injectable()
 export class CustomLoggingInterceptor implements HttpInterceptor {
+
+  category: HttpInterceptorCategory = 'terminal';
 
   appender: Appender;
 
