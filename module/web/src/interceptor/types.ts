@@ -2,11 +2,11 @@ import { type Any, type Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import type { EndpointConfig } from '../registry/types.ts';
-import type { HttpFilter } from '../types.ts';
+import type { HttpContext, HttpFilter } from '../types.ts';
 
 export type EndpointApplies = (endpoint: EndpointConfig, config?: { basePath: string }) => boolean;
-
-export type LightweightConfig = ({ disabled?: boolean } & Record<string, unknown>);
+export type HttpInterceptorFilter<C extends Any = {}> = HttpFilter<{ config: C }>;
+export type HttpInterceptorContext<C extends Any = {}> = HttpContext<{ config: C }>;
 
 @Schema()
 export abstract class ManagedInterceptorConfig {
@@ -85,5 +85,5 @@ export interface HttpInterceptor<C = Any> {
    * @param context interceptor context
    * @param next
    */
-  intercept: HttpFilter<C>;
+  intercept: HttpInterceptorFilter<C>;
 }

@@ -4,7 +4,7 @@ import { Ignore } from '@travetto/schema';
 
 import { HttpContext, HttpRequest } from '../types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory, HttpInterceptorContext } from './types.ts';
 
 /**
  * Web cors support
@@ -58,7 +58,7 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     return config;
   }
 
-  intercept({ req, res, config: { resolved } }: HttpContext<CorsConfig>): void {
+  intercept({ req, res, config: { resolved } }: HttpInterceptorContext<CorsConfig>): void {
     const origin = req.header('origin');
     if (!resolved.origins.size || resolved.origins.has('*') || (origin && resolved.origins.has(origin))) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');

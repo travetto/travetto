@@ -1,5 +1,5 @@
 import { AppError, Util } from '@travetto/runtime';
-import { HttpInterceptor, ManagedInterceptorConfig, HttpContext, HttpInterceptorCategory } from '@travetto/web';
+import { HttpInterceptor, ManagedInterceptorConfig, HttpContext, HttpInterceptorCategory, HttpInterceptorContext } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -63,10 +63,10 @@ export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfi
     return config;
   }
 
-  async intercept({ req, config }: HttpContext<WebAuthVerifyConfig>): Promise<void> {
+  async intercept({ config }: HttpInterceptorContext<WebAuthVerifyConfig>): Promise<void> {
     const principal = this.authContext.principal;
 
-    switch (config?.state) {
+    switch (config.state) {
       case 'authenticated': {
         if (!principal) {
           throw new AuthenticationError('User is unauthenticated');

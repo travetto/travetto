@@ -2,7 +2,7 @@ import type { Class } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { HttpFilter, HttpHandler, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointHandler, HttpResponse } from '../types.ts';
+import type { HttpFilter, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointHandler, HttpResponse } from '../types.ts';
 
 export type EndpointParamExtractor = (config: EndpointParamConfig, req: HttpRequest, res: HttpResponse) => unknown;
 
@@ -138,7 +138,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The compiled and finalized handler
    */
-  handlerFinalized?: HttpHandler;
+  handlerFinalized?: HttpFilter;
   /**
    * List of params for the endpoint
    */

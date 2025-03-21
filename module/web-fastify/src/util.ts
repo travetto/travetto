@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpResponsePayload } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpResponsePayload, HttpContext } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -11,12 +11,12 @@ export class FastifyWebServerUtil {
   /**
    * Convert request, response object from provider to framework
    */
-  static convert(req: FastifyRequest, res: FastifyReply): [HttpRequest, HttpResponse] {
+  static getContext(req: FastifyRequest, res: FastifyReply): HttpContext {
     const fullReq: typeof req & { [WebInternal]?: HttpRequest } = req;
     const fullRes: typeof res & { [WebInternal]?: HttpResponse } = res;
     const finalReq = fullReq[WebInternal] ??= this.getRequest(req);
     const finalRes = fullRes[WebInternal] ??= this.getResponse(res);
-    return [finalReq, finalRes];
+    return { req: finalReq, res: finalRes };
   }
 
   /**

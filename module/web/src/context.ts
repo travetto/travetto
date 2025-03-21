@@ -21,6 +21,10 @@ export class WebContext {
     return this.#active.get()?.res!;
   }
 
+  get value(): HttpContext {
+    return this.#active.get()!;
+  }
+
   postConstruct(): void {
     this.registerType(toConcrete<HttpRequest>(), () => this.req);
     this.registerType(toConcrete<HttpResponse>(), () => this.res);

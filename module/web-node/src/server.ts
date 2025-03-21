@@ -61,8 +61,8 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
       const finalPath = endpoint.path === '/*all' ? '*all' :
         endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
 
-      router[endpoint.method](finalPath, async (req, res) => {
-        await endpoint.handlerFinalized!(...NodeWebServerUtil.convert(req, res));
+      router[endpoint.method](finalPath, async (req, res, next) => {
+        await endpoint.handlerFinalized!(NodeWebServerUtil.getContext(req, res), next);
       });
     }
 

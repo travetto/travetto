@@ -76,7 +76,7 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
 
       console.error('Registering', sub, `${path}/${endpoint.path}`, endpoint.class.name);
       this.raw[endpoint.method](sub, async (req, reply) => {
-        await endpoint.handlerFinalized!(...FastifyWebServerUtil.convert(req, reply));
+        await endpoint.handlerFinalized!(FastifyWebServerUtil.getContext(req, reply), () => { });
         return reply;
       });
     }

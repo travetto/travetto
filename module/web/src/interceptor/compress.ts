@@ -8,7 +8,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
-import { HttpInterceptor, HttpInterceptorCategory, ManagedInterceptorConfig } from './types';
+import { HttpInterceptor, HttpInterceptorCategory, HttpInterceptorContext, ManagedInterceptorConfig } from './types';
 import { HttpRequest, HttpResponse, HttpContext, HttpFilterNext, HttpResponsePayload } from '../types';
 import { HttpPayloadUtil } from '../util/payload';
 import { EtagInterceptor } from './etag';
@@ -93,7 +93,7 @@ export class CompressionInterceptor implements HttpInterceptor {
     }
   }
 
-  async intercept({ req, res }: HttpContext<CompressConfig>, next: HttpFilterNext): Promise<unknown> {
+  async intercept({ req, res }: HttpInterceptorContext<CompressConfig>, next: HttpFilterNext): Promise<unknown> {
     const result = await next();
     return this.compress(req, res, result);
   }

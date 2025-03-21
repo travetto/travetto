@@ -25,7 +25,9 @@ export class WebRpController {
       throw new AppError('Unknown endpoint', { category: 'notfound' });
     }
 
-    const { req, res } = this.ctx;
+    const bodyParamIdx = endpoint.params.findIndex((x) => x.location === 'body');
+
+    const { req } = this.ctx;
 
     let params: unknown[];
 
@@ -34,7 +36,9 @@ export class WebRpController {
       params = Util.decodeSafeJSON(paramInput)!;
     } else if (Array.isArray(body)) { // Params passed via body
       params = body;
-      req.body = endpoint.params.find((x, i) => x.location === 'body' ? params[i] : undefined) ?? params; // Re-assign body
+      if (bodyParamIdx >= 0) { // Re-assign body
+        req.body = params[bodyParamIdx];
+      }
     } else if (body) {
       throw new AppError('Invalid parameters, must be an array', { category: 'data' });
     } else {
@@ -44,6 +48,6 @@ export class WebRpController {
     req[WebInternal].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MISSING_PARAM : params[i]);
 
     // Dispatch
-    await endpoint.handlerFinalized!(req, res);
+    await endpoint.handlerFinalized!(this.ctx.value, () => { });
   }
 }

@@ -7,13 +7,12 @@ import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
 
 type ReturnValue = void | unknown | Promise<void | unknown>;
 export type HttpFilterNext = () => ReturnValue;
-export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: Readonly<C> };
-export type HttpFilter<C = unknown> = (context: HttpContext<C>, next: HttpFilterNext) => ReturnValue;
+export type HttpContext<C extends {} = {}> = { req: HttpRequest, res: HttpResponse } & C;
+export type HttpFilter<C extends {} = {}> = (context: HttpContext<C>, next: HttpFilterNext) => ReturnValue;
 
 export type EndpointHandler = TypedFunction<Any, Any>;
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
 
-export type HttpHandler = (req: HttpRequest, res: HttpResponse) => ReturnValue;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 export type HttpContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };

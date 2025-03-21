@@ -3,10 +3,9 @@ import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 
-import { HttpContext } from '../types.ts';
 import { MimeUtil } from '../util/mime.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory, HttpInterceptorContext } from './types.ts';
 
 @Config('web.accepts')
 class AcceptsConfig extends ManagedInterceptorConfig {
@@ -37,7 +36,7 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
     return false;
   }
 
-  intercept({ req, config }: HttpContext<AcceptsConfig>): void {
+  intercept({ req, config }: HttpInterceptorContext<AcceptsConfig>): void {
     const contentType = req.header('content-type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });

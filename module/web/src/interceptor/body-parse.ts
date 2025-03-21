@@ -8,7 +8,7 @@ import { AppError } from '@travetto/runtime';
 import { HttpRequest, HttpContext, HttpFilterNext, WebInternal } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory, HttpInterceptorContext } from './types.ts';
 import { AcceptsInterceptor } from './accepts.ts';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
@@ -79,7 +79,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     return endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method);
   }
 
-  async intercept({ req, config }: HttpContext<BodyParseConfig>, next: HttpFilterNext): Promise<unknown> {
+  async intercept({ req, config }: HttpInterceptorContext<BodyParseConfig>, next: HttpFilterNext): Promise<unknown> {
     if (!METHODS_WITH_BODIES.has(req.method) || req.body) { // If body is already set
       return next();
     }
