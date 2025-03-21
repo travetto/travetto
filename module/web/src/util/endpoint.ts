@@ -3,7 +3,7 @@ import { isPromise } from 'node:util/types';
 import { asConstructable, castTo, Class, Util } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpRequest, WebFilter, HttpContext, WebFilterNext, HttpHandler, HttpResponse, WebInternal } from '../types.ts';
+import { HttpRequest, HttpFilter, HttpContext, HttpFilterNext, HttpHandler, HttpResponse, WebInternal } from '../types.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { LightweightConfig, ManagedInterceptorConfig, HttpInterceptor, EndpointApplies } from '../interceptor/types.ts';
 
@@ -11,7 +11,7 @@ const CheckerSymbol: unique symbol = Symbol.for('@travetto/web:endpoint-checker'
 
 type EndpointRule = { sub: string | RegExp, base: string };
 
-const ident: WebFilterNext = ((x?: unknown) => x);
+const ident: HttpFilterNext = ((x?: unknown) => x);
 const hasDisabled = (o: unknown): o is { disabled: boolean } => !!o && typeof o === 'object' && 'disabled' in o;
 const hasPaths = (o: unknown): o is { paths: string[] } => !!o && typeof o === 'object' && 'paths' in o && Array.isArray(o['paths']);
 
@@ -71,9 +71,9 @@ export class EndpointUtil {
    * Create a full filter chain given the provided filters
    * @param filters Filters to chain
    */
-  static createFilterChain(filters: (readonly [WebFilter] | readonly [WebFilter, LightweightConfig | undefined])[]): WebFilter {
+  static createFilterChain(filters: (readonly [HttpFilter] | readonly [HttpFilter, LightweightConfig | undefined])[]): HttpFilter {
     const len = filters.length - 1;
-    return function filterChain(ctx: HttpContext, next: WebFilterNext, idx: number = 0): ReturnType<WebFilter> {
+    return function filterChain(ctx: HttpContext, next: HttpFilterNext, idx: number = 0): ReturnType<HttpFilter> {
       const [it, cfg] = filters[idx]!;
       const chainedNext = idx === len ? next : filterChain.bind(null, ctx, next, idx + 1);
       const out = it({ req: ctx.req, res: ctx.res, config: castTo(cfg) }, chainedNext);
@@ -236,12 +236,12 @@ export class EndpointUtil {
       interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
     }
 
-    const handlerBound: WebFilter = async ({ req, res }: HttpContext): Promise<unknown> => {
+    const handlerBound: HttpFilter = async ({ req, res }: HttpContext): Promise<unknown> => {
       const params = await this.extractParameters(endpoint, req, res);
       return endpoint.handler.apply(endpoint.instance, params);
     };
 
-    const filters: WebFilter[] = [
+    const filters: HttpFilter[] = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
       ...('filters' in endpoint ? endpoint.filters : []).map(fn => fn.bind(endpoint.instance)),
       ...(endpoint.params.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
@@ -256,7 +256,7 @@ export class EndpointUtil {
       this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
         .filter(([inst, cfg]) => this.verifyEndpointApplies(inst, cfg, endpoint, controller));
 
-    const filterChain: (readonly [WebFilter, LightweightConfig | undefined])[] = [
+    const filterChain: (readonly [HttpFilter, LightweightConfig | undefined])[] = [
       ...validInterceptors.map(([inst, cfg]) => [inst.intercept.bind(inst), cfg] as const),
       ...filters.map(fn => [fn, undefined] as const),
       [handlerBound, undefined] as const

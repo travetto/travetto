@@ -27,8 +27,8 @@ class WebSessionConfig implements ManagedInterceptorConfig { }
 @Injectable()
 export class AuthSessionInterceptor implements HttpInterceptor {
 
-  dependsOn: Class<HttpInterceptor>[] = [AuthContextInterceptor];
-  runsBefore: Class<HttpInterceptor>[] = [];
+  category: HttpInterceptorCategory = 'application';
+  dependsOn = [AuthContextInterceptor];
 
   @Inject()
   service: SessionService;
@@ -47,7 +47,7 @@ export class AuthSessionInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
 
-  async intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
+  async intercept(ctx: HttpContext, next: HttpFilterNext): Promise<unknown> {
     try {
       await this.service.load();
       return await next();

@@ -13,13 +13,13 @@ import { BodyParseInterceptor, BodyParseConfig } from './src/interceptor/body-pa
 import { CorsInterceptor, CorsConfig } from './src/interceptor/cors';
 import { GetCacheInterceptor } from './src/interceptor/get-cache';
 import { LoggingInterceptor } from './src/interceptor/logging';
-import { SerializeInterceptor } from './src/interceptor/serialize';
 import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies';
 import { WebConfig } from './src/application/config';
 import { HttpRequest, HttpResponse } from './src/types';
 import { AsyncContextInterceptor } from './src/interceptor/context';
 import { CacheControl } from './src/decorator/common';
 import { WebContext } from './src/context';
+import { RespondInterceptor } from './src/interceptor/respond';
 
 const HttpRequestContract = toConcrete<HttpRequest>();
 const HttpResponseContract = toConcrete<HttpResponse>();
@@ -177,8 +177,8 @@ export const text = <>
 
       <c.Code title='Body Parse Config' src={BodyParseConfig} />
     </c.SubSection>
-    <c.SubSection title={SerializeInterceptor.name}>
-      {SerializeInterceptor} is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+    <c.SubSection title={RespondInterceptor.name}>
+      {RespondInterceptor} is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
     </c.SubSection>
     <c.SubSection title={CorsInterceptor.name}>
       {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, {d.input('web.cors.active: true')}

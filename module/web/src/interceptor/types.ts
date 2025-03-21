@@ -2,7 +2,7 @@ import { type Any, type Class } from '@travetto/runtime';
 import { Schema } from '@travetto/schema';
 
 import type { EndpointConfig } from '../registry/types.ts';
-import type { WebFilter } from '../types.ts';
+import type { HttpFilter } from '../types.ts';
 
 export type EndpointApplies = (endpoint: EndpointConfig, config?: { basePath: string }) => boolean;
 
@@ -85,5 +85,5 @@ export interface HttpInterceptor<C = Any> {
    * @param context interceptor context
    * @param next
    */
-  intercept: WebFilter<C>;
+  intercept: HttpFilter<C>;
 }

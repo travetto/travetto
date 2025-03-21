@@ -2,7 +2,7 @@ import type { Class } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { WebFilter, HttpHandler, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointHandler, HttpResponse } from '../types.ts';
+import type { HttpFilter, HttpHandler, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointHandler, HttpResponse } from '../types.ts';
 
 export type EndpointParamExtractor = (config: EndpointParamConfig, req: HttpRequest, res: HttpResponse) => unknown;
 
@@ -56,7 +56,7 @@ interface CoreConfig {
   /**
    * List of filters to run on request
    */
-  filters: WebFilter[];
+  filters: HttpFilter[];
   /**
    * Set of interceptor configs
    */
@@ -94,7 +94,7 @@ export interface EndpointParamConfig {
   /**
    * Resolves the value by executing with req/res as input
    */
-  resolve?: WebFilter;
+  resolve?: HttpFilter;
   /**
    * Extract the value from request
    * @param config Param configuration

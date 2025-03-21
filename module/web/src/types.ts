@@ -6,9 +6,9 @@ import { SetOption, GetOption } from 'cookies';
 import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
 
 type ReturnValue = void | unknown | Promise<void | unknown>;
-export type WebFilterNext = () => ReturnValue;
+export type HttpFilterNext = () => ReturnValue;
 export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: Readonly<C> };
-export type WebFilter<C = unknown> = (context: HttpContext<C>, next: WebFilterNext) => ReturnValue;
+export type HttpFilter<C = unknown> = (context: HttpContext<C>, next: HttpFilterNext) => ReturnValue;
 
 export type EndpointHandler = TypedFunction<Any, Any>;
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };

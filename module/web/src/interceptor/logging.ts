@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
-import { HttpContext, WebFilterNext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
+import { HttpContext, HttpFilterNext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
 import { RespondInterceptor } from './respond.ts';
 
 /**
@@ -48,7 +48,7 @@ export class LoggingInterceptor implements HttpInterceptor {
     }
   }
 
-  async intercept({ req, res }: HttpContext, next: WebFilterNext): Promise<void> {
+  async intercept({ req, res }: HttpContext, next: HttpFilterNext): Promise<void> {
     try {
       await next();
       this.logResult(req, res, 200);

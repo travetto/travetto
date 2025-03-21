@@ -1,4 +1,4 @@
-import { HttpInterceptor, ManagedInterceptorConfig, HttpContext, WebFilterNext, HttpInterceptorCategory } from '@travetto/web';
+import { HttpInterceptor, ManagedInterceptorConfig, HttpContext, HttpFilterNext, HttpInterceptorCategory } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
@@ -32,7 +32,7 @@ export class AuthLogoutInterceptor implements HttpInterceptor<WebAuthLogoutConfi
     return false;
   }
 
-  async intercept(ctx: HttpContext<WebAuthLogoutConfig>, next: WebFilterNext): Promise<unknown> {
+  async intercept(ctx: HttpContext<WebAuthLogoutConfig>, next: HttpFilterNext): Promise<unknown> {
     try {
       if (!this.authContext.principal) {
         throw new AuthenticationError('Already logged out');

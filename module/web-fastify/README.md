@@ -55,16 +55,18 @@ const app = fastify({
         https: (await this.config.ssl?.getKeys()),
       } : {}
     });
-    if (this.config.compress) {
-      const supported = [...['gzip', 'br', 'deflate', 'identity'] as const];
-      app.register(fastifyCompress, {
-        encodings: supported,
-        requestEncodings: supported.filter(x => x !== 'deflate')
-      });
+
+    // Defer to fastify if disabled
+    if (this.compress.disabled) {
+      const preferred = this.compress.preferredEncodings ?? this.compress.supportedEncodings.filter(x => x !== 'deflate');
+      app.register(fastifyCompress, { encodings: this.compress.supportedEncodings, requestEncodings: preferred });
     }
-    if (this.config.etag) {
-      app.register(fastifyEtag, { replyWith304: true });
+
+    // Defer to fastify if disabled
+    if (this.etag.disabled) {
+      app.register(fastifyEtag, { weak: !!this.etag.weak, replyWith304: true });
     }
+
     app.removeAllContentTypeParsers();
     app.addContentTypeParser(/^.*/, (_, body, done) => done(null, body));
 ```
