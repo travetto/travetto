@@ -13,17 +13,17 @@ export class WebContext {
   @Inject()
   context: AsyncContext;
 
-  get request(): HttpRequest {
+  get req(): HttpRequest {
     return this.#active.get()?.req!;
   }
 
-  get response(): HttpResponse {
+  get res(): HttpResponse {
     return this.#active.get()?.res!;
   }
 
   postConstruct(): void {
-    this.registerType(toConcrete<HttpRequest>(), () => this.request);
-    this.registerType(toConcrete<HttpResponse>(), () => this.response);
+    this.registerType(toConcrete<HttpRequest>(), () => this.req);
+    this.registerType(toConcrete<HttpResponse>(), () => this.res);
   }
 
   withContext(ctx: HttpContext, next: WebFilterNext): Promise<unknown> {

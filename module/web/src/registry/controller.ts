@@ -36,7 +36,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   getEndpointById(id: string): EndpointConfig | undefined {
-    return this.#endpointsById.get(id);
+    return this.#endpointsById.get(id.replace(':', '#'));
   }
 
   createPending(cls: Class): ControllerConfig {
