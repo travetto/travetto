@@ -39,6 +39,9 @@ export class WebRpcInterceptor implements HttpInterceptor {
       throw new AppError('Unknown endpoint', { category: 'notfound' });
     }
 
+    // Overwrite config for logging
+    Object.assign(req, { url: `${req.url}/${target}`, method: req.method });
+
     let params: unknown[];
     const paramInput = req.headerFirst('X-TRV-INPUTS');
 
