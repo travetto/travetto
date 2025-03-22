@@ -11,5 +11,4 @@ export type WebRpcClient = {
 @Config('web.rpc')
 export class WebRpcConfig {
   clients: WebRpcClient[] = [];
-  disabled = true;
 }

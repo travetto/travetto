@@ -357,7 +357,6 @@ npx trv run:web
         skipEndpoints: false,
         exposeAllSchemas: false
       },
-      AsyncContextConfig: {},
       AuthConfig: { maxAge: '1h', rollingRenew: true },
       BodyParseConfig: { limit: '1mb', parsingTypes: {} },
       CommonLoggerConfig: { format: 'line', output: 'console' },
@@ -420,13 +419,13 @@ npx trv run:web
         optionsGlobalHandle: true
       },
       WebLogConfig: { showStackTrace: true },
-      WebRpcConfig: { disabled: true, clients: {} },
+      WebRpcConfig: { clients: {} },
       WebSessionConfig: {},
       WebSslConfig: { active: false }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web:src/application/app.ts:163] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web:src/application/app.ts:162] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

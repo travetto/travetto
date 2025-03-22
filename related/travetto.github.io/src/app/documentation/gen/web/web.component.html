@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/web</code></pre>
   </figure>
 
-The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32">HttpRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L172">HttpResponse</a> objects). This module is built upon the <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25">&#64;Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">&#64;Schema</a> class.
+The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L25">HttpRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L157">HttpResponse</a> objects). This module is built upon the <a class="module-link" routerLink="/docs/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L25">&#64;Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L13">&#64;Schema</a> class.
 <h2 id="controller">Controller</h2>
 
 To define an endpoint, you must first declare a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/controller.ts#L9">&#64;Controller</a> which is only allowed on classes. Controllers can be configured with:
@@ -42,13 +42,13 @@ Additionally, the module is predicated upon <a class="module-link" routerLink="/
 
 Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported. <br><br>
 The HTTP methods that are supported via:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L32">&#64;Get</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L39">&#64;Post</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L46">&#64;Put</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L59">&#64;Delete</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L53">&#64;Patch</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L65">&#64;Head</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L71">&#64;Options</a></li>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L31">&#64;Get</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L38">&#64;Post</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L45">&#64;Put</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L58">&#64;Delete</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L52">&#64;Patch</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L64">&#64;Head</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L70">&#64;Options</a></li>
 </ul>
 Each endpoint decorator handles the following config:
 <ul> <li><code class="item input">title</code> - The definition of the endpoint</li>
@@ -158,7 +158,7 @@ Each <a target="_blank" class="source-link" href="https://github.com/travetto/tr
 
 <h3 id="contextparam">ContextParam</h3>
 
-In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32">HttpRequest</a> or <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L172">HttpResponse</a>.  These are able to be injected using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">&#64;ContextParam</a> on a class-level field from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L8">WebContext</a>.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L25">HttpRequest</a> or <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L157">HttpResponse</a>.  These are able to be injected using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">&#64;ContextParam</a> on a class-level field from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L8">WebContext</a>.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
   <figure class="code">
     <figcaption class="code">Example ContextParam usage
@@ -299,7 +299,7 @@ Additionally, the <a class="module-link" routerLink="/docs/schema" title="Data t
 
 <h2 id="running-an-app">Running an App</h2>
 
-By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">&#64;CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L18">WebApplication</a> that will follow default behaviors, and spin up the Web server.
+By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84">&#64;CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L17">WebApplication</a> that will follow default behaviors, and spin up the Web server.
 
   <figure class="terminal">
     <figcaption class="terminal">Standard application
@@ -334,7 +334,6 @@ Initialized <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
       AcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-      AsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       BodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
@@ -438,7 +437,6 @@ Initialized <span class="token punctuation">{{'{'}}</span>
     <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
       AcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-      AsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       BodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
@@ -468,7 +466,7 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 
 <h2 id="interceptors">Interceptors</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L39">HttpInterceptor</a> s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every endpoint, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L21">HttpInterceptor</a> s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every endpoint, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
   <figure class="code">
     <figcaption class="code">A Trivial Interceptor
@@ -483,8 +481,9 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 
   category<span class="token operator">:</span> HttpInterceptorCategory <span class="token operator">=</span> <span class="token string">'application'</span><span class="token punctuation">;</span>
 
-  <span class="token function">intercept</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> HttpContext<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">filter</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> HttpContext<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Hello world!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> ctx<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
@@ -493,14 +492,18 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 <h3 id="bodyparseinterceptor">BodyParseInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L37">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L41">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
   <figure class="code">
     <figcaption class="code">Body Parse Config
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L22">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BodyParseConfig</span> <span class="token keyword">extends</span> <span class="token class-name">ManagedInterceptorConfig</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BodyParseConfig</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Should this be turned off by default?
+   */</span>
+  disabled<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Max body size limit
    */</span>
@@ -514,18 +517,22 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="respondinterceptor">RespondInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L8">RespondInterceptor</a> is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L9">RespondInterceptor</a> is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
 
 <h3 id="corsinterceptor">CorsInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L44">CorsInterceptor</a> allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, <code class="item input">web.cors.active: true</code>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L48">CorsInterceptor</a> allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, <code class="item input">web.cors.active: true</code>
 
   <figure class="code">
     <figcaption class="code">Cors Config
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L13">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CorsConfig</span> <span class="token keyword">extends</span> <span class="token class-name">ManagedInterceptorConfig</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CorsConfig</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Should this be turned off by default?
+   */</span>
+  disabled<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Allowed origins
    */</span>
@@ -555,14 +562,18 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="cookiesinterceptor">CookiesInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L48">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L52">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
   <figure class="code">
     <figcaption class="code">Cookies Config
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L16">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CookieConfig</span> <span class="token keyword">extends</span> <span class="token class-name">ManagedInterceptorConfig</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CookieConfig</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Should this be turned off by default?
+   */</span>
+  disabled<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Are they signed
    */</span>
@@ -593,11 +604,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="getcacheinterceptor">GetCacheInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/get-cache.ts#L16">GetCacheInterceptor</a> by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting <code class="item input">web.disableGetCache: true</code> in your config.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/get-cache.ts#L22">GetCacheInterceptor</a> by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting <code class="item input">web.disableGetCache: true</code> in your config.
 
 <h3 id="logginginterceptor">LoggingInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L20">LoggingInterceptor</a> allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L26">LoggingInterceptor</a> allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
 
   <figure class="code">
     <figcaption class="code">Control Logging
@@ -613,11 +624,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="asynccontextinterceptor">AsyncContextInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/context.ts#L15">AsyncContextInterceptor</a> is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/context.ts#L11">AsyncContextInterceptor</a> is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
 
 <h3 id="custom-interceptors">Custom Interceptors</h3>
 
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L39">HttpInterceptor</a> interface.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32">HttpRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L172">HttpResponse</a> objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/types.ts#L21">HttpInterceptor</a> interface.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L25">HttpRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L157">HttpResponse</a> objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
   <figure class="code">
     <figcaption class="code">Defining a new Interceptor
@@ -642,7 +653,8 @@ Additionally it is sometimes necessary to register custom interceptors.  Interce
     <span class="token keyword">this</span><span class="token punctuation">.</span>appender <span class="token operator">=</span> appender<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
-  <span class="token keyword">async</span> <span class="token function">intercept</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> req <span class="token punctuation">{{'}'}}</span><span class="token operator">:</span> HttpContext<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">filter</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> req<span class="token punctuation">,</span> next <span class="token punctuation">{{'}'}}</span><span class="token operator">:</span> HttpContext<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">await</span> <span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token comment">// Write request to database</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>appender<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>req<span class="token punctuation">.</span>method<span class="token punctuation">,</span> req<span class="token punctuation">.</span>path<span class="token punctuation">,</span> req<span class="token punctuation">.</span>query<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -656,7 +668,7 @@ A <code class="item input">next</code> parameter is also available to allow for 
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/interceptor-controlled.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> HttpInterceptor<span class="token punctuation">,</span> HttpContext<span class="token punctuation">,</span> HttpFilterNext<span class="token punctuation">,</span> HttpInterceptorCategory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> HttpInterceptor<span class="token punctuation">,</span> HttpContext<span class="token punctuation">,</span> HttpInterceptorCategory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -664,10 +676,10 @@ A <code class="item input">next</code> parameter is also available to allow for 
 
   category<span class="token operator">:</span> HttpInterceptorCategory <span class="token operator">=</span> <span class="token string">'terminal'</span><span class="token punctuation">;</span>
 
-  <span class="token keyword">async</span> <span class="token function">intercept</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> HttpContext<span class="token punctuation">,</span> next<span class="token operator">:</span> HttpFilterNext<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">filter</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> HttpContext<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> start <span class="token operator">=</span> Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">await</span> <span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span> <span class="token keyword">await</span> ctx<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span> <span class="token keyword">finally</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Request complete'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> time<span class="token operator">:</span> Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> start <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
@@ -692,20 +704,6 @@ All framework-provided interceptors, follow the same patterns for general config
     <span class="token key atrule">disabled</span><span class="token punctuation">:</span> <span class="token boolean important">true</span></code></pre>
   </figure>
 
-<h4 id="path-based-control-for-various-endpoints-within-the-application">Path-based control for various endpoints within the application</h4>
-
-  <figure class="code">
-    <figcaption class="code">Sample interceptor path managed configuration
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/endpoint-allow-deny.yml">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-yaml"><span class="token key atrule">web</span><span class="token punctuation">:</span>
-  <span class="token key atrule">cors</span><span class="token punctuation">:</span>
-    <span class="token key atrule">paths</span><span class="token punctuation">:</span>
-      <span class="token punctuation">-</span> <span class="token string">'!/public/user'</span>
-      <span class="token punctuation">-</span> <span class="token string">'/public/*'</span></code></pre>
-  </figure>
-
 <h4 id="endpoint-enabled-control-via-decorators">Endpoint-enabled control via decorators</h4>
 
   <figure class="code">
@@ -713,7 +711,7 @@ All framework-provided interceptors, follow the same patterns for general config
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/controller-endpoint-deny.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> ConfigureInterceptor<span class="token punctuation">,</span> CorsInterceptor <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> ConfigureInterceptor<span class="token punctuation">,</span> CorsInterceptor<span class="token punctuation">,</span> ExcludeInterceptors <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/allowDeny'</span><span class="token punctuation">)</span>
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">ConfigureInterceptor</span></span><span class="token punctuation">(</span>CorsInterceptor<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> disabled<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
@@ -721,7 +719,13 @@ All framework-provided interceptors, follow the same patterns for general config
 
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/override'</span><span class="token punctuation">)</span>
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">ConfigureInterceptor</span></span><span class="token punctuation">(</span>CorsInterceptor<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> disabled<span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
-  <span class="token function">cookies</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">QueryParam</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">withoutCors</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">QueryParam</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/raw'</span><span class="token punctuation">)</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">ExcludeInterceptors</span></span><span class="token punctuation">(</span>v <span class="token operator">=></span> v<span class="token punctuation">.</span>category <span class="token operator">===</span> <span class="token string">'response'</span><span class="token punctuation">)</span>
+  <span class="token function">withoutResponse</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">QueryParam</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> value<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
@@ -736,7 +740,7 @@ The resolution logic is as follows:
 
 <h2 id="cookie-support">Cookie Support</h2>
 
-<a target="_blank" class="external-link" href="https://expressjs.com">express</a>/<a target="_blank" class="external-link" href="https://koajs.com/">koa</a>/<a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using <a target="_blank" class="external-link" href="https://www.npmjs.com/package/cookies">cookies</a>.  This functionality is exposed onto the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L32">HttpRequest</a>/<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L172">HttpResponse</a> object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+<a target="_blank" class="external-link" href="https://expressjs.com">express</a>/<a target="_blank" class="external-link" href="https://koajs.com/">koa</a>/<a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using <a target="_blank" class="external-link" href="https://www.npmjs.com/package/cookies">cookies</a>.  This functionality is exposed onto the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L25">HttpRequest</a>/<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types.ts#L157">HttpResponse</a> object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
   <figure class="code">
     <figcaption class="code">Sample Cookie Usage

@@ -28,7 +28,7 @@ export class RunWebCommand implements CliCommandShape {
     try {
       return await DependencyRegistry.runInstance(WebApplication);
     } catch (err) {
-      if (NetUtil.isInuseError(err) && !Runtime.production && this.killConflict) {
+      if (NetUtil.isPortUsedError(err) && !Runtime.production && this.killConflict) {
         await NetUtil.freePort(err.port);
         return await DependencyRegistry.runInstance(WebApplication);
       }

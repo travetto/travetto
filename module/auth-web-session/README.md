@@ -19,7 +19,7 @@ This module's responsibility is, to expose [Auth Session](https://github.com/tra
 
 **Code: Anatomy of the Session Interceptor**
 ```typescript
-class WebSessionConfig implements ManagedInterceptorConfig { }
+class WebSessionConfig { }
 
 /**
  * Loads session, and provides ability to create session as needed, persists when complete.
@@ -47,10 +47,10 @@ export class AuthSessionInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
 
-  async intercept(ctx: HttpContext, next: HttpFilterNext): Promise<unknown> {
+  async filter(ctx: HttpContext): Promise<unknown> {
     try {
       await this.service.load();
-      return await next();
+      return await ctx.next();
     } finally {
       await this.service.persist();
     }
