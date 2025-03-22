@@ -10,7 +10,6 @@ export type HttpFilter<C = unknown> = (context: HttpContext<C>) => unknown;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 export type HttpContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
-export type HttpResponsePayload = Buffer | Readable;
 
 export const WebInternal: unique symbol = Symbol.for('@travetto/web:internal');
 

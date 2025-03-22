@@ -3,7 +3,7 @@ import { pipeline } from 'node:stream/promises';
 
 import type express from 'express';
 
-import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpResponsePayload, HttpContext } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpContext } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -62,7 +62,7 @@ export class ExpressWebServerUtil {
         res.status(code);
         res.statusCode = code;
       },
-      respond(this: HttpResponse, value?: HttpResponsePayload): Promise<void> | void {
+      respond(value): Promise<void> | void {
         if (isReadable(value)) {
           return pipeline(value, res);
         } else {

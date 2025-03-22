@@ -1,6 +1,7 @@
 declare module 'router' {
-  import { NextFunction, NextHandleFunction } from 'connect'
-  import { IncomingMessage, ServerResponse } from 'http'
+  import { NextFunction, NextHandleFunction } from 'connect';
+  import { IncomingMessage, ServerResponse } from 'http';
+  import { HttpMethodOrAll } from '@travetto/web';
 
   export type Path = string | RegExp | Array<string | RegExp>
 
@@ -10,7 +11,7 @@ declare module 'router' {
       prototype: Route
     }
 
-    type Method = 'all' | 'head' | 'get' | 'post' | 'delete' | 'put' | 'patch' | 'options'
+    type Method = HttpMethodOrAll
 
     export type Route = { readonly path: Path; } & Record<Method, (middleware: NextHandleFunction, ...middlewares: NextHandleFunction[]) => Route>
 

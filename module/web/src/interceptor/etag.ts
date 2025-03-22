@@ -4,10 +4,9 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { HttpRequest, HttpResponse, HttpContext, HttpResponsePayload } from '../types';
+import { HttpRequest, HttpResponse, HttpContext } from '../types';
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpPayloadUtil } from '../util/payload';
-import { GetCacheInterceptor } from './get-cache';
 import { CompressionInterceptor } from './compress';
 
 @Config('web.etag')
@@ -34,7 +33,7 @@ export class EtagInterceptor implements HttpInterceptor {
   @Inject()
   config: EtagConfig;
 
-  addTag(req: HttpRequest, res: HttpResponse, value?: unknown): HttpResponsePayload {
+  addTag(req: HttpRequest, res: HttpResponse, value?: unknown): unknown {
     const output = HttpPayloadUtil.ensureSerialized(req, res, value);
     if (
       Buffer.isBuffer(output) &&

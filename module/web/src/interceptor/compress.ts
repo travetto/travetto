@@ -9,7 +9,7 @@ import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
-import { HttpRequest, HttpResponse, HttpContext, HttpResponsePayload } from '../types';
+import { HttpRequest, HttpResponse, HttpContext } from '../types';
 import { HttpPayloadUtil } from '../util/payload';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
@@ -52,7 +52,7 @@ export class CompressionInterceptor implements HttpInterceptor {
   @Inject()
   config: CompressConfig;
 
-  async compress(req: HttpRequest, res: HttpResponse, payload: unknown): Promise<HttpResponsePayload> {
+  async compress(req: HttpRequest, res: HttpResponse, payload: unknown): Promise<unknown> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
 
     const data = HttpPayloadUtil.ensureSerialized(req, res, payload);

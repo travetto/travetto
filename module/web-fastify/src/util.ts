@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpResponsePayload, HttpContext } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpContext } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -60,7 +60,7 @@ export class FastifyWebServerUtil {
         reply.status(code);
         reply.raw.statusCode = code;
       },
-      respond(this: HttpResponse, value?: HttpResponsePayload): void {
+      respond(value): void {
         reply.send(value);
       },
       getHeaderNames: reply.raw.getHeaderNames.bind(reply.raw),

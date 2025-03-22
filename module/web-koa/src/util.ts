@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore, HttpResponsePayload, HttpContext } from '@travetto/web';
+import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore, HttpContext } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -58,7 +58,7 @@ export class KoaWebServerUtil {
       set statusCode(code: number) {
         ctx.status = code;
       },
-      respond(this: HttpResponse, value?: HttpResponsePayload) {
+      respond(value) {
         ctx.body = value;
         ctx.response.flushHeaders();
       },
