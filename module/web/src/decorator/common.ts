@@ -39,7 +39,7 @@ export function SetHeaders(headers: HttpHeaderMap): EndpointDecorator { return r
 export function Produces(mime: string): EndpointDecorator { return register({ headers: { 'content-type': mime } }); }
 
 /**
- * Specifies if routes should be conditional
+ * Specifies if endpoint should be conditional
  */
 export function ConditionalRegister(handler: () => (boolean | Promise<boolean>)): EndpointDecorator { return register({ conditional: handler }); }
 
