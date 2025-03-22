@@ -30,6 +30,7 @@ class AcceptsConfig {
 export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
 
   category: HttpInterceptorCategory = 'request';
+  applies = false; // opt-in interceptor
 
   @Inject()
   config: AcceptsConfig;
@@ -37,11 +38,6 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
   finalizeConfig(cfg: AcceptsConfig): AcceptsConfig {
     cfg.matcher = MimeUtil.matcher(cfg.types ?? []);
     return cfg;
-  }
-
-  // Opt-in
-  applies(): boolean {
-    return false;
   }
 
   filter({ req, config, next }: HttpChainedContext<AcceptsConfig>): unknown {

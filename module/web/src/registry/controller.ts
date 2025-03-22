@@ -58,6 +58,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     const fieldConf: EndpointConfig = {
       id: `${cls.name}#${endpoint.name}`,
       path: '/',
+      fullPath: '/',
       method: 'all',
       class: cls,
       filters: [],
@@ -255,6 +256,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     // Store for lookup
     for (const ep of final.endpoints) {
       this.#endpointsById.set(ep.id, ep);
+      // Store full path from base for use in other contexts
+      ep.fullPath = `${final.basePath}/${ep.path}`.replaceAll('//', '/');
     }
 
     if (this.has(final.basePath)) {

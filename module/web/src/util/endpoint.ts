@@ -46,25 +46,20 @@ export class EndpointUtil {
   /**
    * Verify endpoint applies based on the following scenarios
    * - If general is disabled or resolved is disabled
-   * - Path match on endpoints
    * - Interceptor level applies
    */
-  static verifyEndpointApplies(
-    interceptor: HttpInterceptor,
-    resolvedConfig: unknown,
-    endpoint: EndpointConfig,
-    controller?: ControllerConfig
-  ): boolean {
-    const config = interceptor.config;
+  static verifyEndpointApplies(interceptor: HttpInterceptor, resolvedConfig: unknown, endpoint: EndpointConfig): boolean {
+    const baseDisabled = hasDisabled(interceptor.config) ? interceptor.config.disabled : undefined;
+    const resolvedDisabled = hasDisabled(resolvedConfig) ? resolvedConfig.disabled : undefined;
 
-    if ((hasDisabled(config) && config.disabled) || (hasDisabled(resolvedConfig) && resolvedConfig?.disabled)) {
+    if (interceptor.applies === false || baseDisabled === true || resolvedDisabled === true) {
       return false;
-    } else if (hasDisabled(resolvedConfig) && resolvedConfig?.disabled === false) { // If explicitly not disabled
+    } else if (resolvedDisabled === false || interceptor.applies === true) { // If explicitly enabled
       return true;
     }
 
     // Fallback to interceptor level applies when paths haven't overridden
-    return interceptor.applies?.(endpoint, controller) ?? true;
+    return interceptor.applies?.(endpoint) ?? true;
   }
 
   /**
@@ -188,7 +183,7 @@ export class EndpointUtil {
 
     const validInterceptors =
       this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
-        .filter(([inst, cfg]) => this.verifyEndpointApplies(inst, cfg, endpoint, controller));
+        .filter(([inst, cfg]) => this.verifyEndpointApplies(inst, cfg, endpoint));
 
     const filterChain: [HttpChainedFilter, unknown][] = castTo([
       ...validInterceptors.map(([inst, cfg]) => [inst.filter.bind(inst), cfg]),

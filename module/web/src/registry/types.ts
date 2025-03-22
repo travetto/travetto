@@ -155,6 +155,10 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    * The request type
    */
   requestType?: EndpointIOType;
+  /**
+   * Full path including controller
+   */
+  fullPath: string;
 }
 
 /**

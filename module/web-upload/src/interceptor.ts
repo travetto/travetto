@@ -10,6 +10,7 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
 
   category: HttpInterceptorCategory = 'request';
   dependsOn = [BodyParseInterceptor];
+  applies = false; // opt-in interceptor
 
   @Inject()
   config: WebUploadConfig;
@@ -24,13 +25,6 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
       Object.assign(base.uploads[k] ??= {}, cfg);
     }
     return base;
-  }
-
-  /**
-   * Ensures this is an opt-in interceptor
-   */
-  applies(): boolean {
-    return false;
   }
 
   async filter({ req, config, next }: HttpChainedContext<WebUploadConfig>): Promise<unknown> {

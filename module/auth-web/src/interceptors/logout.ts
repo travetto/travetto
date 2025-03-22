@@ -18,19 +18,13 @@ export class AuthLogoutInterceptor implements HttpInterceptor<WebAuthLogoutConfi
 
   category: HttpInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
+  applies = false; // opt-in interceptor
 
   @Inject()
   config: WebAuthLogoutConfig;
 
   @Inject()
   authContext: AuthContext;
-
-  /**
-   * Ensures this is an opt-in interceptor
-   */
-  applies(): boolean {
-    return false;
-  }
 
   async filter({ next }: HttpChainedContext): Promise<unknown> {
     try {

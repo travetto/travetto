@@ -45,7 +45,7 @@ export interface HttpInterceptor<C = Any> {
    * @param endpoint The endpoint to check
    * @param controller The controller the endpoint belongs to
    */
-  applies?(endpoint: EndpointConfig, config?: { basePath: string }): boolean;
+  applies?: boolean | ((endpoint: EndpointConfig) => boolean);
 
   /**
    * Finalize config before use

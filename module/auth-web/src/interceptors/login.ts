@@ -23,19 +23,13 @@ export class AuthLoginInterceptor implements HttpInterceptor<WebAuthLoginConfig>
 
   category: HttpInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
+  applies = false; // opt-in interceptor
 
   @Inject()
   config: WebAuthLoginConfig;
 
   @Inject()
   service: AuthService;
-
-  /**
-   * Ensures this is an opt-in interceptor
-   */
-  applies(): boolean {
-    return false;
-  }
 
   async filter(ctx: HttpChainedContext<WebAuthLoginConfig>): Promise<unknown> {
     await this.service.authenticate(ctx.req.body, ctx, ctx.config.providers ?? []);

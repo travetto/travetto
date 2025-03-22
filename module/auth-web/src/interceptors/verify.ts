@@ -41,19 +41,13 @@ export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfi
 
   category: HttpInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
+  applies = false; // opt-in interceptor
 
   @Inject()
   config: WebAuthVerifyConfig;
 
   @Inject()
   authContext: AuthContext;
-
-  /**
-   * Ensures this is an opt-in interceptor
-   */
-  applies(): boolean {
-    return false;
-  }
 
   finalizeConfig(config: WebAuthVerifyConfig): WebAuthVerifyConfig {
     config.matcher = Util.allowDeny<string[], [Set<string>]>(config.permissions ?? [],
