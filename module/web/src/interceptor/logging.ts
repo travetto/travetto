@@ -3,7 +3,6 @@ import { Config } from '@travetto/config';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { HttpContext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
-import { RespondInterceptor } from './respond.ts';
 
 /**
  * Web logging configuration
@@ -27,7 +26,6 @@ export class WebLogConfig {
 export class LoggingInterceptor implements HttpInterceptor {
 
   category: HttpInterceptorCategory = 'terminal';
-  runsBefore = [RespondInterceptor];
 
   @Inject()
   config: WebLogConfig;

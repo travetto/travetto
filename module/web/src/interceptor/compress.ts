@@ -11,7 +11,6 @@ import { AppError, castTo } from '@travetto/runtime';
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpRequest, HttpResponse, HttpContext, HttpResponsePayload } from '../types';
 import { HttpPayloadUtil } from '../util/payload';
-import { EtagInterceptor } from './etag';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const ENCODING_METHODS = {
@@ -49,7 +48,6 @@ export class CompressConfig {
 export class CompressionInterceptor implements HttpInterceptor {
 
   category: HttpInterceptorCategory = 'response';
-  runsBefore = [EtagInterceptor];
 
   @Inject()
   config: CompressConfig;

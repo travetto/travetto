@@ -20,8 +20,8 @@ type Aged = { age: number, payload?: Record<string, unknown> };
 @Injectable()
 class AutoLogin implements HttpInterceptor {
 
-  dependsOn = [AuthContextInterceptor];
   category: HttpInterceptorCategory = 'application';
+  dependsOn = [AuthContextInterceptor];
 
   @Inject()
   auth: AuthContext;

@@ -1,10 +1,11 @@
 import { Injectable, Inject } from '@travetto/di';
+import { Config } from '@travetto/config';
 
 import { HttpContext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
-import { Config } from '@travetto/config';
+import { EtagInterceptor } from './etag.ts';
 
 @Config('web.getCache')
 export class GetCacheConfig {
@@ -21,6 +22,7 @@ export class GetCacheConfig {
 export class GetCacheInterceptor implements HttpInterceptor {
 
   category: HttpInterceptorCategory = 'response';
+  dependsOn = [EtagInterceptor];
 
   @Inject()
   config?: GetCacheConfig;

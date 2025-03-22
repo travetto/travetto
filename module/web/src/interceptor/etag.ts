@@ -8,6 +8,7 @@ import { HttpRequest, HttpResponse, HttpContext, HttpResponsePayload } from '../
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpPayloadUtil } from '../util/payload';
 import { GetCacheInterceptor } from './get-cache';
+import { CompressionInterceptor } from './compress';
 
 @Config('web.etag')
 export class EtagConfig {
@@ -28,7 +29,7 @@ export class EtagConfig {
 export class EtagInterceptor implements HttpInterceptor {
 
   category: HttpInterceptorCategory = 'response';
-  runsBefore = [GetCacheInterceptor];
+  dependsOn = [CompressionInterceptor];
 
   @Inject()
   config: EtagConfig;
