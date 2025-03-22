@@ -43,7 +43,6 @@ export interface HttpInterceptor<C = Any> {
   /**
    * Determines the current endpoint is applicable for the interceptor
    * @param endpoint The endpoint to check
-   * @param controller The controller the endpoint belongs to
    */
   applies?: boolean | ((endpoint: EndpointConfig) => boolean);
 
