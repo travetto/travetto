@@ -5,7 +5,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
-import { HttpRequest, HttpContext, WebInternal, NextFunction } from '../types.ts';
+import { HttpRequest, HttpContext, WebInternal, NextFilter } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
@@ -83,7 +83,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     return endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method);
   }
 
-  async filter({ req, config }: HttpContext<BodyParseConfig>, next: NextFunction): Promise<unknown> {
+  async filter({ req, config }: HttpContext<BodyParseConfig>, next: NextFilter): Promise<unknown> {
     if (!METHODS_WITH_BODIES.has(req.method) || req.body) { // If body is already set
       return next();
     }

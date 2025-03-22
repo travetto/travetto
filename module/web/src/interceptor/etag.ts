@@ -4,7 +4,7 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { HttpContext, NextFunction } from '../types';
+import { HttpContext, NextFilter } from '../types';
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpPayloadUtil } from '../util/payload';
 import { CompressionInterceptor } from './compress';
@@ -69,7 +69,7 @@ export class EtagInterceptor implements HttpInterceptor {
     return output;
   }
 
-  async filter(ctx: HttpContext, next: NextFunction): Promise<unknown> {
+  async filter(ctx: HttpContext, next: NextFilter): Promise<unknown> {
     return this.addTag(ctx, await next());
   }
 }

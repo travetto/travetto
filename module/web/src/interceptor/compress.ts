@@ -9,7 +9,7 @@ import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
-import { HttpRequest, HttpResponse, HttpContext, NextFunction } from '../types';
+import { HttpRequest, HttpResponse, HttpContext, NextFilter } from '../types';
 import { HttpPayloadUtil } from '../util/payload';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
@@ -106,7 +106,7 @@ export class CompressionInterceptor implements HttpInterceptor {
     }
   }
 
-  async filter(ctx: HttpContext, next: NextFunction): Promise<unknown> {
+  async filter(ctx: HttpContext, next: NextFilter): Promise<unknown> {
     return this.compress(ctx, await next());
   }
 }

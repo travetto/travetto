@@ -1,7 +1,7 @@
 import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpFilter, HttpContext, WebInternal, NextFunction } from '../types.ts';
+import { HttpFilter, HttpContext, WebInternal, NextFilter } from '../types.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
 
@@ -36,7 +36,7 @@ export class EndpointUtil {
    */
   static createFilterChain(filters: [HttpFilter, unknown][]): HttpFilter {
     const len = filters.length - 1;
-    return function filterChain(ctx: HttpContext, next: NextFunction, idx: number = 0): unknown {
+    return function filterChain(ctx: HttpContext, next: NextFilter, idx: number = 0): unknown {
       const [it, cfg] = filters[idx]!;
       const chainedNext = idx === len ? next : filterChain.bind(null, ctx, next, idx + 1);
       return it({ ...ctx, config: cfg }, chainedNext);
