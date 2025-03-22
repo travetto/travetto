@@ -168,6 +168,10 @@ export interface HttpResponseInternal<T = unknown> {
    * The additional headers for this request, provided by controllers/endpoint config
    */
   headersAdded?: HttpHeaderMap;
+  /**
+   * Disable operations
+   */
+  takeControlOfResponse?: Function;
 }
 
 /**
@@ -213,11 +217,6 @@ export interface HttpResponse<T = unknown> {
    */
   vary(value: string): void;
   /**
-   * Set the request's location
-   * @param path The location to point to
-   */
-  location(path: string): unknown;
-  /**
    * Trigger response
    */
   respond(value: Buffer | Readable): Promise<unknown> | unknown;
@@ -233,4 +232,12 @@ export interface HttpResponse<T = unknown> {
      */
     set(name: string, value?: string, options?: SetOption): void;
   };
+  /**
+   * Trigger redirect
+   */
+  redirect(url: string, statusCode?: number): void;
+  /**
+   * End response immediately
+   */
+  end(): void;
 }

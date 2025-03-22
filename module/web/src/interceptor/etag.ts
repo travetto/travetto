@@ -4,7 +4,7 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { HttpRequest, HttpResponse, HttpContext } from '../types';
+import { HttpContext } from '../types';
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpPayloadUtil } from '../util/payload';
 import { CompressionInterceptor } from './compress';
@@ -33,8 +33,10 @@ export class EtagInterceptor implements HttpInterceptor {
   @Inject()
   config: EtagConfig;
 
-  addTag(req: HttpRequest, res: HttpResponse, value?: unknown): unknown {
-    const output = HttpPayloadUtil.ensureSerialized(req, res, value);
+  addTag(ctx: HttpContext, value?: unknown): unknown {
+    const output = HttpPayloadUtil.ensureSerialized(ctx, value);
+    const { req, res } = ctx;
+
     if (
       Buffer.isBuffer(output) &&
       (
@@ -67,8 +69,7 @@ export class EtagInterceptor implements HttpInterceptor {
     return output;
   }
 
-  async filter({ req, res, next }: HttpContext): Promise<unknown> {
-    const value = await next();
-    return this.addTag(req, res, value);
+  async filter(ctx: HttpContext): Promise<unknown> {
+    return this.addTag(ctx, await ctx.next());
   }
 }

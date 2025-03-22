@@ -1,6 +1,6 @@
 import { asFull } from '@travetto/runtime';
 
-import { HttpResponse } from '../types.ts';
+import { HttpResponse, WebInternal } from '../types.ts';
 
 /**
  * Base response object
@@ -16,16 +16,6 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   }
 
   /**
-   * Send the request to a new location, given a path
-   */
-  location(this: HttpResponse, path: string): void {
-    if (!this.statusCode) {
-      this.statusCode = 302;
-    }
-    this.setHeader('Location', path);
-  }
-
-  /**
    * Add value to vary header, or create if not existing
    */
   vary(this: HttpResponse, value: string): void {
@@ -33,5 +23,23 @@ export class HttpResponseCore implements Partial<HttpResponse> {
     if (!header?.includes(value)) {
       this.setHeader('vary', header ? `${header}, ${value}` : value);
     }
+  }
+
+  /**
+   * Trigger redirect
+   */
+  redirect(this: HttpResponse, path: string, statusCode?: number): void {
+    this.statusCode = statusCode ?? this.statusCode ?? 302;
+    this.setHeader('Location', path);
+    this.setHeader('Content-Length', '0');
+    this.end();
+  }
+
+  /**
+   * End response immediately
+   */
+  end(this: HttpResponse): void {
+    this[WebInternal].takeControlOfResponse?.();
+    this[WebInternal].nodeEntity.flushHeaders();
   }
 }

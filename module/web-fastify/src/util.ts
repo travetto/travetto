@@ -12,13 +12,12 @@ export class FastifyWebServerUtil {
    * Convert request, response object from provider to framework
    */
   static getContext(req: FastifyRequest, res: FastifyReply): HttpContext {
-    const fullReq: typeof req & { [WebInternal]?: HttpRequest } = req;
-    const fullRes: typeof res & { [WebInternal]?: HttpResponse } = res;
-    return {
-      req: fullReq[WebInternal] ??= this.getRequest(req),
-      res: fullRes[WebInternal] ??= this.getResponse(res),
+    const fullReq: typeof req & { [WebInternal]?: HttpContext } = req;
+    return fullReq[WebInternal] ??= {
+      req: this.getRequest(req),
+      res: this.getResponse(res),
       next(): void { },
-      config: {}
+      config: {},
     };
   }
 
@@ -48,7 +47,10 @@ export class FastifyWebServerUtil {
     return HttpResponseCore.create({
       [WebInternal]: {
         providerEntity: reply,
-        nodeEntity: reply.raw
+        nodeEntity: reply.raw,
+        takeControlOfResponse: () => {
+          reply.hijack();
+        }
       },
       get headersSent(): boolean {
         return reply.sent;

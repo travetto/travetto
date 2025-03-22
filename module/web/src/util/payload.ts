@@ -3,7 +3,7 @@ import { ReadableStream } from 'node:stream/web';
 
 import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
-import { HttpRequest, HttpResponse, WebInternal } from '../types';
+import { HttpContext, WebInternal } from '../types';
 import { isArrayBuffer } from 'node:util/types';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
@@ -122,7 +122,7 @@ export class HttpPayloadUtil {
   /**
    * Applies payload to the response
    */
-  static applyPayload(req: HttpRequest, res: HttpResponse, payload: HttpPayload): HttpPayload['data'] {
+  static applyPayload({ req, res }: HttpContext, payload: HttpPayload): HttpPayload['data'] {
     const { length, defaultContentType, headers, data, statusCode } = payload;
 
     for (const map of [res[WebInternal].headersAdded, headers]) {
@@ -157,7 +157,7 @@ export class HttpPayloadUtil {
   /**
    * Ensure the value is ready for responding
    */
-  static ensureSerialized(req: HttpRequest, res: HttpResponse, value: unknown): Buffer | Readable {
-    return this.applyPayload(req, res, this.from(value));
+  static ensureSerialized(ctx: HttpContext, value: unknown): Buffer | Readable {
+    return this.applyPayload(ctx, this.from(value));
   }
 }

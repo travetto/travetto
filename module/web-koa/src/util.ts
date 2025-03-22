@@ -47,7 +47,10 @@ export class KoaWebServerUtil {
     return HttpResponseCore.create({
       [WebInternal]: {
         providerEntity: ctx,
-        nodeEntity: ctx.res
+        nodeEntity: ctx.res,
+        takeControlOfResponse: () => {
+          ctx.respond = false;
+        }
       },
       get headersSent(): boolean {
         return ctx.headerSent;

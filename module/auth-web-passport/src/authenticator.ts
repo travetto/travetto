@@ -1,7 +1,7 @@
 import passport from 'passport';
 
 import { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
-import { HttpContext, HttpRequest, HttpResponse } from '@travetto/web';
+import { HttpContext, HttpRequest, HttpResponse, WebInternal } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { PassportUtil } from './util.ts';
@@ -62,6 +62,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
       delete du.source;
 
       const p = this.#toPrincipal(user);
+      // @ts-expect-error
       p.issuer ??= this.#strategyName;
       return p;
     }
@@ -87,6 +88,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
       const filter = passport.authenticate(this.#strategyName,
         {
           session: this.session,
+          failWithError: true,
           ...requestOptions,
           state: PassportUtil.enhanceState(req, requestOptions.state)
         },

@@ -24,7 +24,6 @@ export class Redirect implements HttpSerializable<void> {
    * @returns {void}
    */
   serialize(res: HttpResponse): void {
-    res.statusCode = this.#status;
-    res.location(this.#location);
+    res.redirect(this.#location, this.#status);
   }
 }

@@ -52,10 +52,12 @@ export class CompressionInterceptor implements HttpInterceptor {
   @Inject()
   config: CompressConfig;
 
-  async compress(req: HttpRequest, res: HttpResponse, payload: unknown): Promise<unknown> {
+  async compress(ctx: HttpContext, payload: unknown): Promise<unknown> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
 
-    const data = HttpPayloadUtil.ensureSerialized(req, res, payload);
+    const data = HttpPayloadUtil.ensureSerialized(ctx, payload);
+
+    const { res, req } = ctx;
 
     res.vary('Accept-Encoding');
 
@@ -104,8 +106,7 @@ export class CompressionInterceptor implements HttpInterceptor {
     }
   }
 
-  async filter({ req, res, next }: HttpContext<CompressConfig>): Promise<unknown> {
-    const result = await next();
-    return this.compress(req, res, result);
+  async filter(ctx: HttpContext): Promise<unknown> {
+    return this.compress(ctx, await ctx.next());
   }
 }
