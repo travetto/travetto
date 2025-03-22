@@ -1,6 +1,8 @@
 import { TypedFunction } from '@travetto/runtime';
 
-import { CacheSymbols } from './symbols.ts';
+export const CacheConfigSymbol: unique symbol = Symbol.for('@travetto/cache:cache');
+export const EvictConfigSymbol: unique symbol = Symbol.for('@travetto/cache:evict');
+export const CacheModelSymbol: unique symbol = Symbol.for('@travetto/cache:model');
 
 /**
  * A minimal config for a cache operation
@@ -43,7 +45,7 @@ export interface CacheConfig extends CoreCacheConfig {
  * Describes a class as being cache aware or not
  */
 export interface CacheAware {
-  [CacheSymbols.CacheConfig]?: Record<string, CacheConfig>;
-  [CacheSymbols.EvictConfig]?: Record<string, CoreCacheConfig>;
+  [CacheConfigSymbol]?: Record<string, CacheConfig>;
+  [EvictConfigSymbol]?: Record<string, CoreCacheConfig>;
 }
 

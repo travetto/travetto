@@ -7,7 +7,7 @@ import { ExecUtil } from '@travetto/runtime';
 export class NetUtil {
 
   /** Is an error an address in use error */
-  static isInuseError(err: unknown): err is Error & { port: number } {
+  static isPortUsedError(err: unknown): err is Error & { port: number } {
     return !!err && err instanceof Error && err.message.includes('EADDRINUSE');
   }
 

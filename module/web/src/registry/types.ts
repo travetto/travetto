@@ -1,17 +1,18 @@
-import type { Class } from '@travetto/runtime';
+import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { Filter, HttpHandler, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointHandler, HttpResponse } from '../types.ts';
+import type { HttpContext, HttpFilter, HttpHeaderMap, HttpMethodOrAll } from '../types.ts';
 
-export type EndpointParamExtractor = (config: EndpointParamConfig, req: HttpRequest, res: HttpResponse) => unknown;
+export type EndpointFunction = TypedFunction<Any, Any>;
+export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
 
 /**
  * Endpoint decorator for composition of routing logic
  */
 export type EndpointDecorator = (
   (<T extends Class>(target: T) => void) &
-  (<U>(target: U, prop: string, descriptor?: TypedPropertyDescriptor<EndpointHandler>) => void)
+  (<U>(target: U, prop: string, descriptor?: EndpointFunctionDescriptor) => void)
 );
 
 /**
@@ -56,15 +57,23 @@ interface CoreConfig {
   /**
    * List of filters to run on request
    */
-  filters: Filter[];
+  filters: HttpFilter[];
   /**
    * Set of interceptor configs
    */
-  interceptors?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
+  interceptorConfigs?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
   /**
    * List of headers to add to the response
    */
   headers: HttpHeaderMap;
+  /**
+   * Should the resource only be used conditionally?
+   */
+  conditional?: () => (boolean | Promise<boolean>);
+  /**
+   * Control which interceptors are excluded
+   */
+  interceptorExclude?: (val: HttpInterceptor) => boolean;
 }
 
 /**
@@ -86,13 +95,12 @@ export interface EndpointParamConfig {
   /**
    * Resolves the value by executing with req/res as input
    */
-  resolve?: Filter;
+  resolve?: HttpFilter;
   /**
    * Extract the value from request
-   * @param config Param configuration
-   * @param req The request
+   * @param context The http context with the endpoint param config
    */
-  extract?: EndpointParamExtractor;
+  extract?: (ctx: HttpContext, config: EndpointParamConfig) => unknown;
   /**
    * Input prefix for parameter
    */
@@ -110,7 +118,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The name of the method
    */
-  handlerName: string;
+  name: string;
   /**
    * Instance the endpoint is for
    */
@@ -126,11 +134,11 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The function the endpoint will call
    */
-  handler: EndpointHandler;
+  endpoint: EndpointFunction;
   /**
    * The compiled and finalized handler
    */
-  handlerFinalized?: HttpHandler;
+  filter?: HttpFilter;
   /**
    * List of params for the endpoint
    */
@@ -138,7 +146,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * Endpoint-based interceptor enable/disabling
    */
-  interceptors?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
+  interceptorConfigs?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
   /**
    * The response type
    */

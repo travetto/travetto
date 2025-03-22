@@ -1,10 +1,6 @@
-import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
-
 import { asFull } from '@travetto/runtime';
 
-import { HttpResponse } from '../types.ts';
-import { WebSymbols } from '../symbols.ts';
+import { HttpResponse, WebInternal } from '../types.ts';
 
 /**
  * Base response object
@@ -20,31 +16,6 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   }
 
   /**
-   * Get the status code
-   */
-  // @ts-expect-error
-  get statusCode(this: HttpResponse): number {
-    return this.status()!;
-  }
-  /**
-   * Set the status code
-   */
-  // @ts-expect-error
-  set statusCode(this: HttpResponse, val: number) {
-    this.status(val);
-  }
-
-  /**
-   * Send the request to a new location, given a path
-   */
-  location(this: HttpResponse, path: string): void {
-    if (!this.statusCode) {
-      this.status(302);
-    }
-    this.setHeader('Location', path);
-  }
-
-  /**
    * Add value to vary header, or create if not existing
    */
   vary(this: HttpResponse, value: string): void {
@@ -55,24 +26,20 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   }
 
   /**
-   * Redirect application to a new path
-   * @param code The HTTP code to send
-   * @param path The new location for the request
+   * Trigger redirect
    */
-  redirect(this: HttpResponse, code: number, path: string): void;
-  redirect(this: HttpResponse, path: string): void;
-  redirect(this: HttpResponse, pathOrCode: number | string, path?: string): void {
-    this.status(typeof pathOrCode === 'number' ? pathOrCode : 302);
-    this.location(path ?? pathOrCode.toString());
+  redirect(this: HttpResponse, path: string, statusCode?: number): void {
+    this.statusCode = statusCode ?? this.statusCode ?? 302;
+    this.setHeader('Location', path);
     this.setHeader('Content-Length', '0');
-    this.send('');
+    this.end();
   }
 
   /**
-   * Send a stream to the response and wait for completion
+   * End response immediately
    */
-  async sendStream(this: HttpResponse, data: Readable): Promise<void> {
-    await pipeline(data, this[WebSymbols.Internal].nodeEntity, { end: false });
-    this.end();
+  end(this: HttpResponse): void {
+    this[WebInternal].takeControlOfResponse?.();
+    this[WebInternal].nodeEntity.flushHeaders();
   }
 }

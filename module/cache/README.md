@@ -40,9 +40,9 @@ Currently, the following are packages that provide [Expiry](https://github.com/t
 ## Decorators
 The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into [JSON](https://www.json.org).  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.
 
-Additionally, to use the decorators you will need to have a [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L33) object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.
+Additionally, to use the decorators you will need to have a [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L32) object accessible on the class instance. This can be dependency injected, or manually constructed. The decorators will detect the field at time of method execution, which decouples construction of your class from the cache construction.
 
-[@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L13) is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. [redis](https://redis.io), [memcached](https://memcached.org)), only asynchronous methods are supported.
+[@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L12) is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. [redis](https://redis.io), [memcached](https://memcached.org)), only asynchronous methods are supported.
 
 **Code: Using decorators to cache expensive async call**
 ```typescript
@@ -70,7 +70,7 @@ export class Worker {
 ```
 
 ### Cache
-The [@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L13) decorator supports configurations on:
+The [@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L12) decorator supports configurations on:
    *  `name` the field name of the current class which points to the desired cache source.
    *  `config` the additional/optional config options, on a per invocation basis
 
@@ -83,7 +83,7 @@ The [@Cache](https://github.com/travetto/travetto/tree/main/module/cache/src/dec
       *  `reinstate` the function to execute on return of a cached value.  This allows for any necessary operations to conform to expected output (e.g. re-establishing class instances, etc.).  This method should not be used often, as the return values of the methods should naturally serialize to/from `JSON` and the values should be usable either way.
 
 ### EvictCache
-Additionally, there is support for planned eviction via the [@EvictCache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L39) decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same `keySpace` and `key` to compute the expected key.
+Additionally, there is support for planned eviction via the [@EvictCache](https://github.com/travetto/travetto/tree/main/module/cache/src/decorator.ts#L38) decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same `keySpace` and `key` to compute the expected key.
 
 **Code: Using decorators to cache/evict user access**
 ```typescript
@@ -119,17 +119,17 @@ export class UserService {
 ```
 
 ## Extending the Cache Service
-By design, the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L33) relies solely on the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L33).  The [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L33) is expecting the model service to be registered using the @travetto/cache:model:
+By design, the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L32) relies solely on the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/types/expiry.ts#L10).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L32).  The [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L32) is expecting the model service to be registered using the @travetto/cache:model:
 
 **Code: Registering a Custom Model Source**
 ```typescript
 import { InjectableFactory } from '@travetto/di';
 import { ModelExpirySupport } from '@travetto/model';
 import { MemoryModelService } from '@travetto/model-memory';
-import { CacheSymbols } from '@travetto/cache';
+import { CacheModelSymbol } from '@travetto/cache';
 
 class Config {
-  @InjectableFactory(CacheSymbols.Model)
+  @InjectableFactory(CacheModelSymbol)
   static getModel(): ModelExpirySupport {
     return new CustomAwesomeModelService({});
   }

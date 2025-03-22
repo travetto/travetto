@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { BodyParseInterceptor, FilterContext, FilterNext, FilterReturn, HttpInterceptor, WebSymbols } from '@travetto/web';
+import { BodyParseInterceptor, HttpInterceptor, WebInternal, HttpInterceptorCategory, HttpChainedContext } from '@travetto/web';
 
 import { WebUploadConfig } from './config.ts';
 import { WebUploadUtil } from './util.ts';
@@ -8,10 +8,11 @@ import { FileMap } from './types.ts';
 @Injectable()
 export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
 
+  category: HttpInterceptorCategory = 'request';
+  dependsOn = [BodyParseInterceptor];
+
   @Inject()
   config: WebUploadConfig;
-
-  dependsOn = [BodyParseInterceptor];
 
   /**
    * Produces final config object
@@ -36,7 +37,7 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
     return false;
   }
 
-  async intercept({ req, config }: FilterContext<WebUploadConfig>, next: FilterNext): Promise<FilterReturn> {
+  async filter({ req, config, next }: HttpChainedContext<WebUploadConfig>): Promise<unknown> {
     const uploads: FileMap = {};
 
     try {
@@ -44,7 +45,7 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
         uploads[item.field] = await WebUploadUtil.toFile(item, config.uploads?.[item.field] ?? config);
       }
 
-      req[WebSymbols.Internal].uploads = uploads;
+      req[WebInternal].uploads = uploads;
 
       return await next();
     } finally {

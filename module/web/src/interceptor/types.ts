@@ -1,32 +1,29 @@
-import type { Any, Class } from '@travetto/runtime';
-import { Schema } from '@travetto/schema';
+import { type Any, type Class } from '@travetto/runtime';
 
 import type { EndpointConfig } from '../registry/types.ts';
-import type { Filter } from '../types.ts';
-
-export type EndpointApplies = (endpoint: EndpointConfig, config?: { basePath: string }) => boolean;
-
-export type LightweightConfig = ({ disabled?: boolean } & Record<string, unknown>);
-
-@Schema()
-export abstract class ManagedInterceptorConfig {
-  /**
-   * Interceptor mode, defaults to 'opt-out'
-   */
-  disabled?: boolean;
-
-  /**
-   * Path specific overrides
-   */
-  paths?: string[];
-}
+import type { HttpChainedFilter } from '../types.ts';
 
 /**
- * Basic interceptor structure
+ * High level categories with a defined ordering
+ */
+export const HTTP_INTERCEPTOR_CATEGORIES = ['global', 'terminal', 'request', 'response', 'application', 'unbound'] as const;
+
+/**
+ * High level categories with a defined ordering
+ */
+export type HttpInterceptorCategory = (typeof HTTP_INTERCEPTOR_CATEGORIES)[number];
+
+/**
+ * Basic http interceptor structure
  *
  * @concrete
  */
 export interface HttpInterceptor<C = Any> {
+
+  /**
+   * The category an interceptor belongs to
+   */
+  category: HttpInterceptorCategory;
 
   /**
    * Config for interceptor
@@ -48,7 +45,7 @@ export interface HttpInterceptor<C = Any> {
    * @param endpoint The endpoint to check
    * @param controller The controller the endpoint belongs to
    */
-  applies?: EndpointApplies;
+  applies?(endpoint: EndpointConfig, config?: { basePath: string }): boolean;
 
   /**
    * Resolve set of partial configs against core configuration
@@ -61,9 +58,7 @@ export interface HttpInterceptor<C = Any> {
   finalizeConfig?(config: C): C;
 
   /**
-   * Actually handle the request, response when applicable
-   * @param context interceptor context
-   * @param next
+   * Process the request
    */
-  intercept: Filter<C>;
+  filter: HttpChainedFilter<C>;
 }

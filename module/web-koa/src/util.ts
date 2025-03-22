@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpRequest, HttpResponse, WebSymbols, HttpResponseCore, HttpRequestCore } from '@travetto/web';
+import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore, HttpContext, HttpChainedContext } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -10,9 +10,14 @@ export class KoaWebServerUtil {
   /**
    * Convert context object from provider to framework
    */
-  static convert(ctx: koa.Context): [HttpRequest, HttpResponse] {
-    const fullCtx: typeof ctx & { [WebSymbols.Internal]?: [HttpRequest, HttpResponse] } = ctx;
-    return fullCtx[WebSymbols.Internal] ??= [this.getRequest(ctx), this.getResponse(ctx)];
+  static getContext(ctx: koa.Context, next: koa.Next): HttpChainedContext {
+    const fullCtx: typeof ctx & { [WebInternal]?: HttpChainedContext } = ctx;
+    return fullCtx[WebInternal] ??= {
+      req: this.getRequest(ctx),
+      res: this.getResponse(ctx),
+      next,
+      config: {}
+    };
   }
 
   /**
@@ -20,7 +25,7 @@ export class KoaWebServerUtil {
    */
   static getRequest(ctx: koa.Context): HttpRequest {
     return HttpRequestCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: ctx,
         nodeEntity: ctx.req,
       },
@@ -32,7 +37,6 @@ export class KoaWebServerUtil {
       headers: ctx.request.headers,
       cookies: ctx.cookies,
       pipe: ctx.req.pipe.bind(ctx.req),
-      on: ctx.req.on.bind(ctx.req)
     });
   }
 
@@ -41,38 +45,31 @@ export class KoaWebServerUtil {
    */
   static getResponse(ctx: koa.Context): HttpResponse {
     return HttpResponseCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: ctx,
         nodeEntity: ctx.res,
+        takeControlOfResponse: () => {
+          ctx.respond = false;
+        }
       },
       get headersSent(): boolean {
         return ctx.headerSent;
       },
-      status(value?: number): number | undefined {
-        if (value) {
-          ctx.status = value;
-        } else {
-          return ctx.status;
-        }
+      get statusCode(): number {
+        return ctx.status;
       },
-      send: b => ctx.body = b,
-      on: ctx.res.on.bind(ctx.res),
-      end(this: HttpResponse, val?: unknown): void {
-        if (val) {
-          ctx.body = val;
-        }
-        if (ctx.headerSent) {
-          ctx.res.end(); // End if headers already sent
-        } else {
-          ctx.body ??= '';
-          ctx.flushHeaders();
-        }
+      set statusCode(code: number) {
+        ctx.status = code;
       },
+      respond(value) {
+        ctx.body = value;
+        ctx.response.flushHeaders();
+      },
+      vary: ctx.response.vary.bind(ctx.response),
       getHeaderNames: () => Object.keys(ctx.response.headers),
       setHeader: ctx.response.set.bind(ctx.response),
       getHeader: ctx.response.get.bind(ctx.response),
       removeHeader: ctx.response.remove.bind(ctx.response),
-      write: ctx.res.write.bind(ctx.res),
     });
   }
 }

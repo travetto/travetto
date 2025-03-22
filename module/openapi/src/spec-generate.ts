@@ -311,7 +311,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       responses: {},
       summary: ep.title,
       description: ep.description || ep.title,
-      operationId: `${ep.class.name}_${ep.handlerName}`,
+      operationId: `${ep.class.name}_${ep.name}`,
       parameters: []
     };
 
@@ -319,7 +319,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;
 
-    const schema = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
+    const schema = SchemaRegistry.getMethodSchema(ep.class, ep.name);
     for (const field of schema) {
       const res = this.#processEndpointParam(ep, ep.params[field.index!], field);
       if (res) {

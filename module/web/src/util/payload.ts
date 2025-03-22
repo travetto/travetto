@@ -1,10 +1,23 @@
 import { Readable } from 'node:stream';
+import { ReadableStream } from 'node:stream/web';
+
 import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
-import { HttpPayload } from '../types.ts';
+
+import { HttpContext, WebInternal } from '../types';
+import { isArrayBuffer } from 'node:util/types';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
 const isStream = hasFunction<Readable>('pipe');
+const isReadableStream = hasFunction<ReadableStream>('pipeTo');
+
+interface HttpPayload {
+  headers?: Record<string, string>;
+  defaultContentType?: string;
+  statusCode?: number;
+  data: Buffer | Readable;
+  length?: number;
+};
 
 /**
  * Mapping from error category to standard http error codes
@@ -26,16 +39,16 @@ export class HttpPayloadUtil {
   /**
    * Standard stream
    */
-  static fromStream(value: Readable, type?: string): HttpPayload {
-    return { defaultContentType: type, data: value };
+  static fromStream(value: Readable | ReadableStream, type?: string): HttpPayload {
+    return { defaultContentType: type, data: isReadableStream(value) ? Readable.fromWeb(value) : value };
   }
 
   /**
    * Standard array of bytes (buffer, string)
    */
-  static fromBytes(value: Buffer | string, type?: string): HttpPayload {
+  static fromBytes(value: Buffer | string | ArrayBuffer, type?: string): HttpPayload {
     value = typeof value === 'string' ? Buffer.from(value, 'utf8') : value;
-    return { defaultContentType: type, data: value, length: value.length };
+    return { defaultContentType: type, data: Buffer.from(value), length: value.byteLength };
   }
 
   /**
@@ -88,14 +101,14 @@ export class HttpPayloadUtil {
   /**
    * Determine payload based on output
    */
-  static toPayload(value: unknown): HttpPayload {
+  static from(value: unknown): HttpPayload {
     if (value === undefined || value === null) {
       return this.fromBytes('');
     } else if (typeof value === 'string') {
       return this.fromBytes(value, 'text/plain');
-    } else if (Buffer.isBuffer(value)) {
+    } else if (Buffer.isBuffer(value) || isArrayBuffer(value)) {
       return this.fromBytes(value);
-    } else if (isStream(value)) {
+    } else if (isStream(value) || isReadableStream(value)) {
       return this.fromStream(value);
     } else if (value instanceof Error) {
       return this.fromError(value);
@@ -104,5 +117,47 @@ export class HttpPayloadUtil {
     } else {
       return this.fromJSON(value);
     }
+  }
+
+  /**
+   * Applies payload to the response
+   */
+  static applyPayload({ req, res }: HttpContext, payload: HttpPayload): HttpPayload['data'] {
+    const { length, defaultContentType, headers, data, statusCode } = payload;
+
+    for (const map of [res[WebInternal].headersAdded, headers]) {
+      for (const [key, value] of Object.entries(map ?? {})) {
+        res.setHeader(key, typeof value === 'function' ? value() : value);
+      }
+    }
+
+    // Set header if not defined
+    if (!res.getHeader('Content-Type')) {
+      res.setHeader('Content-Type', defaultContentType ?? 'application/octet-stream');
+    }
+
+    // Set length if provided
+    if (length !== undefined) {
+      res.setHeader('Content-Length', `${length} `);
+    }
+
+    if (statusCode) {
+      res.statusCode = statusCode;
+    } else if (!res.statusCode) { // Only set if status has yet to be written
+      if (length === 0) {  // On empty response
+        res.statusCode = (req.method === 'POST' || req.method === 'PUT') ? 201 : 204;
+      } else {
+        res.statusCode = 200;
+      }
+    }
+
+    return data;
+  }
+
+  /**
+   * Ensure the value is ready for responding
+   */
+  static ensureSerialized(ctx: HttpContext, value: unknown): Buffer | Readable {
+    return this.applyPayload(ctx, this.from(value));
   }
 }

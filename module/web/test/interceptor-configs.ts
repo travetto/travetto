@@ -10,23 +10,22 @@ import { RootRegistry } from '@travetto/registry';
 import { ConfigureInterceptor } from '../src/decorator/common.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
-import { ManagedInterceptorConfig, HttpInterceptor } from '../src/interceptor/types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../src/interceptor/types.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpResponse, FilterContext, WebServerHandle } from '../src/types.ts';
-import { WebServer } from '../src/application/server.ts';
+import { HttpResponse, WebInternal, HttpChainedContext } from '../src/types.ts';
+import { WebServer, WebServerHandle } from '../src/application/server.ts';
 import { WebApplication } from '../src/application/app.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
 import { HttpRequestCore } from '../src/request/core.ts';
 import { HttpResponseCore } from '../src/response/core.ts';
-import { WebSymbols } from '@travetto/web';
 
 @Injectable()
 @Config('web.custom')
-class CustomInterceptorConfig extends ManagedInterceptorConfig {
+class CustomInterceptorConfig {
+  disabled = false;
   name = 'bob';
-  paths = ['!test-interceptor:blackListed'];
 
   weird() { }
 }
@@ -48,6 +47,8 @@ class Server implements WebServer {
 @Injectable()
 class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
 
+  category: HttpInterceptorCategory = 'global';
+
   @Inject()
   config: CustomInterceptorConfig;
 
@@ -55,8 +56,9 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
     return !/opt-in/.test(`${endpoint.path}`);
   }
 
-  intercept(ctx: FilterContext<CustomInterceptorConfig>) {
-    Object.assign(ctx.res, { name: ctx.config.name });
+  filter({ res, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
+    Object.assign(res, { name: config.name });
+    return next();
   }
 }
 
@@ -112,25 +114,27 @@ class TestInterceptorConfigSuite {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
     const res = HttpResponseCore.create<HttpResponse & { name?: string }>({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         nodeEntity: castTo(fs.createWriteStream('/dev/null')),
-        providerEntity: undefined!
+        providerEntity: undefined!,
       },
-      end: () => { },
       name: undefined,
-      status: () => 200,
-      send: () => { },
+      statusCode: 200,
+      respond: () => { },
       setHeader: (k, v) => { },
       getHeader: (k) => undefined,
       removeHeader: () => undefined,
     });
-    await endpoint.handlerFinalized!(HttpRequestCore.create({
-      [WebSymbols.Internal]: {
-        nodeEntity: castTo(Buffer.from([])),
-        providerEntity: undefined!
-      },
-      headers: {}
-    }), res);
+    await endpoint.filter!({
+      req: HttpRequestCore.create({
+        [WebInternal]: {
+          nodeEntity: castTo(Buffer.from([])),
+          providerEntity: undefined!
+        },
+        headers: {}
+      }),
+      res,
+    });
     return res.name;
   }
 

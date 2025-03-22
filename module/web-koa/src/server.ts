@@ -20,8 +20,6 @@ export class KoaWebServer implements WebServer<koa> {
 
   listening = false;
 
-  updateGlobalOnChange = true;
-
   @Inject()
   config: WebConfig;
 
@@ -49,7 +47,9 @@ export class KoaWebServer implements WebServer<koa> {
     // Register all endpoints to extract the proper request/response for the framework
     for (const endpoint of endpoints) {
       const finalPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[endpoint.method](finalPath, ctx => endpoint.handlerFinalized!(...KoaWebServerUtil.convert(ctx)));
+      router[endpoint.method](finalPath, async (ctx, next) => {
+        await endpoint.filter!(KoaWebServerUtil.getContext(ctx, next));
+      });
     }
 
     // Register endpoints
@@ -64,11 +64,17 @@ export class KoaWebServer implements WebServer<koa> {
       raw = https.createServer((await this.config.ssl?.getKeys())!, this.raw.callback());
     }
     this.listening = true;
-
-    const { reject, resolve, promise } = Util.resolvablePromise<WebServerHandle>();
-    const handle = raw.listen(this.config.port, this.config.bindAddress)
+    const { reject, resolve, promise } = Util.resolvablePromise();
+    const server = raw.listen(this.config.port, this.config.bindAddress)
       .on('error', reject)
-      .on('listening', () => resolve(handle));
-    return promise;
+      .on('listening', resolve);
+    await promise;
+    server.off('error', reject);
+
+    return {
+      port: this.config.port,
+      close: server.close.bind(server),
+      on: server.on.bind(server)
+    };
   }
 }

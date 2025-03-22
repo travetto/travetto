@@ -1,12 +1,15 @@
-import { HttpInterceptor, FilterContext, FilterNext } from '@travetto/web';
+import { HttpInterceptor, HttpContext, HttpInterceptorCategory } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
-export class LoggingInterceptor implements HttpInterceptor {
-  async intercept(ctx: FilterContext, next: FilterNext) {
+export class SimpleLoggingInterceptor implements HttpInterceptor {
+
+  category: HttpInterceptorCategory = 'terminal';
+
+  async filter(ctx: HttpContext) {
     const start = Date.now();
     try {
-      await next();
+      return await ctx.next();
     } finally {
       console.log('Request complete', { time: Date.now() - start });
     }

@@ -12,7 +12,7 @@ import { ModelSuite } from '@travetto/model/support/test/suite.ts';
 
 import { Cache, EvictCache } from '../../src/decorator.ts';
 import { CacheService } from '../../src/service.ts';
-import { CacheSymbols } from '../../src/symbols.ts';
+import { CacheModelSymbol } from '../../src/types.ts';
 
 @Schema()
 class User { }
@@ -82,7 +82,7 @@ class SampleService {
 }
 
 @Suite()
-@ModelSuite(CacheSymbols.Model)
+@ModelSuite(CacheModelSymbol)
 @InjectableSuite()
 export abstract class CacheServiceSuite {
 

@@ -41,7 +41,6 @@ export class CodecTest {
             delete headers[key];
           }
         }),
-        config: {}
       },
       {
         id: 'true',
@@ -69,7 +68,6 @@ export class CodecTest {
           delete headers[key];
         }
       }),
-      config: {}
     }, undefined);
 
     assert(headers.Authorization === undefined);

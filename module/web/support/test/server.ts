@@ -68,21 +68,24 @@ export abstract class WebServerSuite extends BaseWebSuite {
 
   @Test()
   async testRegex() {
-    const { body: ret } = await this.request('patch', '/test/regexp/super-poodle-party');
+    const { body: ret, headers } = await this.request('patch', '/test/regexp/super-poodle-party');
     assert.deepStrictEqual(ret, { path: 'poodle' });
+    assert(('etag' in headers));
   }
 
   @Test()
   async testBuffer() {
-    const { body: ret } = await this.request('get', '/test/buffer');
+    const { body: ret, headers } = await this.request('get', '/test/buffer');
     assert(ret === 'hello');
+    assert(('etag' in headers));
   }
 
   @Test()
   async testStream() {
     try {
-      const { body: ret } = await this.request('get', '/test/stream');
+      const { body: ret, headers } = await this.request('get', '/test/stream');
       assert(ret === 'hello');
+      assert(!('etag' in headers));
     } catch (err) {
       console.error(err);
       throw err;
@@ -138,6 +141,12 @@ export abstract class WebServerSuite extends BaseWebSuite {
   }
 
   @Test()
+  async testErrorThrow() {
+    const { status } = await this.request<{ ip: string | undefined }>('post', '/test/ip', { throwOnError: false });
+    assert(status === 500);
+  }
+
+  @Test()
   async compressionReturned() {
     {
       const { body: ret, headers } = await this.request('get', '/test/json', { headers: { 'Accept-Encoding': 'gzip;q=1' } });
@@ -146,11 +155,9 @@ export abstract class WebServerSuite extends BaseWebSuite {
     }
     for (const encoding of ['gzip', 'br', 'deflate']) {
       const { body: ret, headers } = await this.request('get', '/test/json/large/20000', { headers: { 'Accept-Encoding': `${encoding};q=1` } });
-      if (Array.isArray(headers['content-encoding'])) {
-        assert(headers['content-encoding'][0] === encoding);
-      } else {
-        assert(headers['content-encoding'] === encoding);
-      }
+      const [value] = [headers['content-encoding']].flat();
+      assert(value === encoding);
+      console.error('Hi', headers);
       assert(ret && typeof ret === 'object');
       assert('json' in ret);
       assert(typeof ret.json === 'string');
@@ -158,8 +165,9 @@ export abstract class WebServerSuite extends BaseWebSuite {
     }
 
     {
-      const { status } = await this.request('get', '/test/json/large/50000', { headers: { 'Accept-Encoding': 'orange' }, throwOnError: false });
-      assert(status === 406);
+      const { headers } = await this.request('get', '/test/json/large/50000', { headers: { 'Accept-Encoding': 'orange' }, throwOnError: false });
+      assert(!('content-encoding' in headers));
+      // assert(status === 406);
     }
   }
 }

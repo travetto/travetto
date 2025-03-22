@@ -39,6 +39,15 @@ export class AppError<T = Record<string, unknown> | undefined> extends Error {
     }
   }
 
+  /** Convert from unknown type */
+  static fromBasic(e: unknown): AppError {
+    if (!!e && typeof e === 'object' && ('message' in e && typeof e.message === 'string')) {
+      return new AppError(e.message, { details: e });
+    } else {
+      return new AppError(`${e}`);
+    }
+  }
+
   type: string;
   category: ErrorCategory;
   at: string;

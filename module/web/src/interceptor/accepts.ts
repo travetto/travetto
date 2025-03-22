@@ -3,14 +3,20 @@ import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 
-import { FilterContext } from '../types.ts';
 import { MimeUtil } from '../util/mime.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpChainedContext } from '../types.ts';
 
 @Config('web.accepts')
-class AcceptsConfig extends ManagedInterceptorConfig {
+class AcceptsConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
+  /**
+   * The accepted types
+   */
   types: string[] = [];
 
   @Ignore()
@@ -23,7 +29,7 @@ class AcceptsConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
 
-  dependsOn = [SerializeInterceptor];
+  category: HttpInterceptorCategory = 'request';
 
   @Inject()
   config: AcceptsConfig;
@@ -38,10 +44,11 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
     return false;
   }
 
-  intercept({ req, config }: FilterContext<AcceptsConfig>): void {
+  filter({ req, config, next }: HttpChainedContext<AcceptsConfig>): unknown {
     const contentType = req.header('content-type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });
     }
+    return next();
   }
 }

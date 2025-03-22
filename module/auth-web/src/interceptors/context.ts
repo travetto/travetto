@@ -1,5 +1,5 @@
-import { toConcrete, Class } from '@travetto/runtime';
-import { HttpInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor, WebContext } from '@travetto/web';
+import { toConcrete } from '@travetto/runtime';
+import { HttpInterceptor, WebContext, HttpInterceptorCategory, HttpChainedContext } from '@travetto/web';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
 
@@ -19,7 +19,7 @@ const toDate = (v: string | Date | undefined): Date | undefined => (typeof v ===
 @Injectable()
 export class AuthContextInterceptor implements HttpInterceptor {
 
-  dependsOn: Class<HttpInterceptor>[] = [SerializeInterceptor, AsyncContextInterceptor];
+  category: HttpInterceptorCategory = 'application';
 
   @Inject({ optional: true })
   codec: PrincipalCodec;
@@ -42,7 +42,12 @@ export class AuthContextInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<AuthToken>(), () => this.authContext.authToken);
   }
 
-  async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
+  async filter(ctx: HttpChainedContext): Promise<unknown> {
+    // Skip if already authenticated
+    if (this.authContext.principal) {
+      return ctx.next();
+    }
+
     let decoded: Principal | undefined;
     let checked: Principal | undefined;
     let lastExpiresAt: Date | undefined;
@@ -59,7 +64,7 @@ export class AuthContextInterceptor implements HttpInterceptor {
       this.authContext.principal = checked;
       this.authContext.authToken = await this.codec.token?.(ctx);
 
-      return await next();
+      return await ctx.next();
     } finally {
       const result = this.authContext.principal;
       this.authService.manageExpiry(result);

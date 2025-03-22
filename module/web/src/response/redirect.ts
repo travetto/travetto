@@ -4,7 +4,7 @@ import { HttpResponse } from '../types.ts';
 /**
  * Simple redirect response
  */
-export class Redirect implements HttpSerializable {
+export class Redirect implements HttpSerializable<void> {
 
   #location: string;
   #status: number;
@@ -24,6 +24,6 @@ export class Redirect implements HttpSerializable {
    * @returns {void}
    */
   serialize(res: HttpResponse): void {
-    res.redirect(this.#status, this.#location);
+    res.redirect(this.#location, this.#status);
   }
 }

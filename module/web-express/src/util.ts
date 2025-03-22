@@ -1,7 +1,12 @@
+import { type Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+
 import type express from 'express';
 
-import { WebSymbols, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore } from '@travetto/web';
-import { castTo } from '@travetto/runtime';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpChainedContext } from '@travetto/web';
+import { castTo, hasFunction } from '@travetto/runtime';
+
+const isReadable = hasFunction<Readable>('pipe');
 
 /**
  * Provide a mapping between express request/response and the framework analogs
@@ -11,12 +16,14 @@ export class ExpressWebServerUtil {
   /**
    * Convert request, response object from provider to framework
    */
-  static convert(req: express.Request, res: express.Response): [HttpRequest, HttpResponse] {
-    const fullReq: typeof req & { [WebSymbols.Internal]?: HttpRequest } = req;
-    const fullRes: typeof res & { [WebSymbols.Internal]?: HttpResponse } = res;
-    const finalReq = fullReq[WebSymbols.Internal] ??= this.getRequest(req);
-    const finalRes = fullRes[WebSymbols.Internal] ??= this.getResponse(res);
-    return [finalReq, finalRes];
+  static getContext(req: express.Request, res: express.Response, next: express.NextFunction): HttpChainedContext {
+    const fullReq: typeof req & { [WebInternal]?: HttpChainedContext } = req;
+    return fullReq[WebInternal] ??= {
+      req: this.getRequest(req),
+      res: this.getResponse(res),
+      next,
+      config: {}
+    };
   }
 
   /**
@@ -24,7 +31,7 @@ export class ExpressWebServerUtil {
    */
   static getRequest(req: express.Request): HttpRequest {
     return HttpRequestCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: req,
         nodeEntity: req,
       },
@@ -35,7 +42,6 @@ export class ExpressWebServerUtil {
       params: req.params,
       headers: req.headers,
       pipe: req.pipe.bind(req),
-      on: req.on.bind(req)
     });
   }
 
@@ -44,40 +50,27 @@ export class ExpressWebServerUtil {
    */
   static getResponse(res: express.Response): HttpResponse {
     return HttpResponseCore.create({
-      [WebSymbols.Internal]: {
+      [WebInternal]: {
         providerEntity: res,
-        nodeEntity: res,
+        nodeEntity: res
       },
       get headersSent(): boolean {
         return res.headersSent;
       },
-      status(val?: number): number | undefined {
-        if (val) {
-          res.status(val);
-          res.statusCode = val;
+      respond(value): Promise<void> | void {
+        res.status(this.statusCode ?? 200);
+        if (isReadable(value)) {
+          return pipeline(value, res);
         } else {
-          return res.statusCode;
+          res.send(value);
+          res.end();
         }
       },
-      send(data): void {
-        const contentType = res.getHeader('Content-Type');
-        if (typeof contentType === 'string' && contentType.includes('json') && typeof data === 'string') {
-          data = Buffer.from(data);
-        }
-        res.send(data);
-      },
-      on: res.on.bind(res),
-      end: (val?: unknown): void => {
-        if (val) {
-          res.send(val);
-        }
-        res.end();
-      },
+      vary: res.vary.bind(res),
       getHeaderNames: res.getHeaderNames.bind(res),
       setHeader: res.setHeader.bind(res),
       getHeader: castTo(res.getHeader.bind(res)), // NOTE: Forcing type, may be incorrect
       removeHeader: res.removeHeader.bind(res),
-      write: res.write.bind(res)
     });
   }
 }

@@ -5,17 +5,19 @@ import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
 
-import { FilterContext } from '../types.ts';
+import { HttpChainedContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
-
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 
 /**
  * Web cookie configuration
  */
 @Config('web.cookie')
-export class CookieConfig extends ManagedInterceptorConfig {
+export class CookieConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
   /**
    * Are they signed
    */
@@ -49,7 +51,7 @@ export class CookieConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
 
-  dependsOn = [SerializeInterceptor];
+  category: HttpInterceptorCategory = 'request';
 
   @Inject()
   config: CookieConfig;
@@ -63,9 +65,10 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
     return config;
   }
 
-  intercept({ req, res, config }: FilterContext<CookieConfig>): void {
+  filter({ req, res, config, next }: HttpChainedContext<CookieConfig>): unknown {
     const store = new cookies(castTo(req), castTo(res), config);
     req.cookies = { get: (key, opts?): string | undefined => store.get(key, { ...this.config, ...opts }) };
     res.cookies = { set: (key, value, opts?): void => { store.set(key, value, { ...this.config, ...opts }); } };
+    return next();
   }
 }

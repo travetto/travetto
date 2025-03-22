@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { CacheSymbols } from '@travetto/cache';
+import { CacheModelSymbol } from '@travetto/cache';
 import { AsyncContext } from '@travetto/context';
 import { ModelExpirySupport } from '@travetto/model';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
@@ -14,11 +14,11 @@ class Config {
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
     return new SqliteDialect(ctx, config);
   }
-  @InjectableFactory(CacheSymbols.Model)
+  @InjectableFactory(CacheModelSymbol)
   static modelProviderExpiry(svc: SQLModelService): ModelExpirySupport {
     return svc;
   }
-  @InjectableFactory(CacheSymbols.Model)
+  @InjectableFactory(CacheModelSymbol)
   static modelProviderService(svc: SQLModelService) {
     return svc;
   }

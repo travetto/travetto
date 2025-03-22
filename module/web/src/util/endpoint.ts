@@ -1,39 +1,11 @@
-import { isPromise } from 'node:util/types';
-
-import { asConstructable, castTo, Class, Util } from '@travetto/runtime';
+import { Any, asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpRequest, Filter, FilterContext, FilterNext, FilterReturn, HttpHandler, HttpResponse } from '../types.ts';
+import { HttpFilter, HttpContext, WebInternal, HttpChainedFilter, HttpChainedContext } from '../types.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
-import { LightweightConfig, ManagedInterceptorConfig, HttpInterceptor, EndpointApplies } from '../interceptor/types.ts';
-import { WebSymbols } from '../symbols.ts';
+import { HttpInterceptor } from '../interceptor/types.ts';
 
-type EndpointRule = { sub: string | RegExp, base: string };
-
-const ident: FilterNext = ((x?: unknown) => x);
 const hasDisabled = (o: unknown): o is { disabled: boolean } => !!o && typeof o === 'object' && 'disabled' in o;
-const hasPaths = (o: unknown): o is { paths: string[] } => !!o && typeof o === 'object' && 'paths' in o && Array.isArray(o['paths']);
-
-function convertRule(rule: string): EndpointRule {
-  const [base, sub = '*'] = rule.split(':');
-  let final: string | RegExp = sub.replace(/^\/+/, '');
-  if (final.includes('*')) {
-    final = new RegExp(`^${final.replace(/[*]/g, '.*')}`);
-  }
-  return { base: base.replace(/^\/+/, ''), sub: final };
-}
-
-function compareRule({ sub, base }: EndpointRule, endpoint: EndpointConfig, controller?: Pick<ControllerConfig, 'basePath'>): boolean {
-  let match = false;
-  if (base === (controller?.basePath ?? '').replace(/^\/+/, '') || base === '*') {
-    if (!sub || sub === '*') {
-      match = true;
-    } else if (typeof endpoint.path === 'string') {
-      match = (typeof sub === 'string') ? endpoint.path.replace(/^\/+/, '') === sub : sub.test(endpoint.path);
-    }
-  }
-  return match;
-}
 
 /**
  * Endpoint specific utilities
@@ -56,31 +28,18 @@ export class EndpointUtil {
     return 0;
   }
 
-  /**
-   * Get the interceptor config for a given request and interceptor instance
-   */
-  static getInterceptorConfig<T extends HttpInterceptor<U>, U extends ManagedInterceptorConfig>(req: HttpRequest, inst: T): U | undefined {
-    const cfg = req[WebSymbols.Internal].interceptorConfigs?.[inst.constructor.Ⲑid] ?? undefined;
-    return castTo(cfg);
-  }
+  static MISSING_PARAM = Symbol.for('@travetto/web:missing-param');
 
   /**
    * Create a full filter chain given the provided filters
    * @param filters Filters to chain
    */
-  static createFilterChain(filters: (readonly [Filter] | readonly [Filter, LightweightConfig | undefined])[]): Filter {
+  static createFilterChain(filters: [HttpChainedFilter, unknown][]): HttpChainedFilter {
     const len = filters.length - 1;
-    return function filterChain(ctx: FilterContext, next: FilterNext, idx: number = 0): FilterReturn {
+    return function filterChain(ctx: HttpChainedContext, idx: number = 0): unknown {
       const [it, cfg] = filters[idx]!;
-      const chainedNext = idx === len ? next : filterChain.bind(null, ctx, next, idx + 1);
-      const out = it({ req: ctx.req, res: ctx.res, config: castTo(cfg) }, chainedNext);
-      if (it.length === 2) {
-        return out;
-      } else if (isPromise(out)) {
-        return out.then(chainedNext);
-      } else {
-        return chainedNext();
-      }
+      const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
+      return it({ req: ctx.req, res: ctx.res, next: chainedNext, config: cfg });
     };
   }
 
@@ -92,27 +51,16 @@ export class EndpointUtil {
    */
   static verifyEndpointApplies(
     interceptor: HttpInterceptor,
-    resolvedConfig: LightweightConfig | undefined,
+    resolvedConfig: unknown,
     endpoint: EndpointConfig,
     controller?: ControllerConfig
   ): boolean {
     const config = interceptor.config;
 
-    if ((hasDisabled(config) && config.disabled) || resolvedConfig?.disabled) {
+    if ((hasDisabled(config) && config.disabled) || (hasDisabled(resolvedConfig) && resolvedConfig?.disabled)) {
       return false;
-    } else if (resolvedConfig?.disabled === false) { // If explicitly not disabled
+    } else if (hasDisabled(resolvedConfig) && resolvedConfig?.disabled === false) { // If explicitly not disabled
       return true;
-    }
-
-    // Verify if endpoint applies matches, let it override interceptor-level applies
-    if (hasPaths(config) && config.paths.length) {
-      const withChecker: typeof config & { [WebSymbols.EndpointChecker]?: EndpointApplies } = config;
-      const applies = withChecker[WebSymbols.EndpointChecker] ??= Util.allowDeny(config.paths, convertRule, compareRule);
-      const result = applies(endpoint, controller);
-      console.log('Verifying paths', interceptor.constructor.name, controller?.basePath, endpoint.path, config.paths, result);
-      if (result === false) {
-        return result;
-      }
     }
 
     // Fallback to interceptor level applies when paths haven't overridden
@@ -126,27 +74,27 @@ export class EndpointUtil {
    * @param controller
    */
   static resolveInterceptorsWithConfig(
-    interceptors: HttpInterceptor<LightweightConfig>[],
+    interceptors: HttpInterceptor[],
     endpoint: EndpointConfig,
     controller?: ControllerConfig
-  ): (readonly [HttpInterceptor, LightweightConfig | undefined])[] {
+  ): [HttpInterceptor, unknown][] {
     const resolvedConfigs =
-      [...controller?.interceptors ?? [], ...endpoint.interceptors ?? []]
+      [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []]
         .reduce((acc, [cls, cfg]) => {
           if (!acc.has(cls)) {
             acc.set(cls, []);
           }
           acc.get(cls)!.push(cfg);
           return acc;
-        }, new Map<Class, LightweightConfig[]>());
+        }, new Map<Class, unknown[]>());
 
-    const resolvedConfig = new Map<Class, LightweightConfig>();
+    const resolvedConfig = new Map<Class, unknown>();
     for (const inst of interceptors) {
       const cls = asConstructable(inst).constructor;
       const values = resolvedConfigs.get(cls) ?? [];
       if (inst.config) {
         let resolved =
-          inst.resolveConfig?.(values) ??
+          inst.resolveConfig?.(castTo(values)) ??
           (values.length ? Object.assign({}, inst.config, ...values) : inst.config);
 
         if (inst.finalizeConfig) {
@@ -160,25 +108,25 @@ export class EndpointUtil {
     return interceptors.map(inst => [
       inst,
       resolvedConfig.get(asConstructable(inst).constructor)
-    ] as const);
+    ]);
   }
 
   /**
    * Extract parameter from request
    */
-  static extractParameter(param: EndpointParamConfig, req: HttpRequest, res: HttpResponse, field: FieldConfig, value?: unknown): unknown {
-    if (value !== undefined && value !== WebSymbols.MissingParam) {
+  static extractParameter(ctx: HttpContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
+    if (value !== undefined && value !== this.MISSING_PARAM) {
       return value;
     } else if (param.extract) {
-      return param.extract(param, req, res);
+      return param.extract(ctx, param);
     }
 
     switch (param.location) {
-      case 'path': return req.params[param.name!];
-      case 'header': return req.header(param.name!);
-      case 'body': return req.body;
+      case 'path': return ctx.req.params[param.name!];
+      case 'header': return ctx.req.header(param.name!);
+      case 'body': return ctx.req.body;
       case 'query': {
-        const q = req.getExpandedQuery();
+        const q = ctx.req.getExpandedQuery();
         return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[param.name!]);
       }
     }
@@ -190,14 +138,14 @@ export class EndpointUtil {
    * @param req The request
    * @param res The response
    */
-  static async extractParameters(endpoint: EndpointConfig, req: HttpRequest, res: HttpResponse): Promise<unknown[]> {
+  static async extractParameters(ctx: HttpContext, endpoint: EndpointConfig): Promise<unknown[]> {
     const cls = endpoint.class;
-    const method = endpoint.handlerName;
-    const vals = req[WebSymbols.Internal].requestParams;
+    const method = endpoint.name;
+    const vals = ctx.req[WebInternal].requestParams;
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
-      const extracted = endpoint.params.map((c, i) => this.extractParameter(c, req, res, fields[i], vals?.[i]));
+      const extracted = endpoint.params.map((c, i) => this.extractParameter(ctx, c, fields[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;
@@ -226,14 +174,19 @@ export class EndpointUtil {
     interceptors: HttpInterceptor[],
     endpoint: EndpointConfig,
     controller?: ControllerConfig
-  ): HttpHandler {
+  ): HttpChainedFilter {
 
-    const handlerBound: Filter = async ({ req, res }: FilterContext): Promise<unknown> => {
-      const params = await this.extractParameters(endpoint, req, res);
-      return endpoint.handler.apply(endpoint.instance, params);
+    // Filter interceptors if needed
+    for (const filter of [controller?.interceptorExclude, endpoint.interceptorExclude]) {
+      interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
+    }
+
+    const handlerBound: HttpFilter = async (ctx): Promise<unknown> => {
+      const params = await this.extractParameters(ctx, endpoint);
+      return endpoint.endpoint.apply(endpoint.instance, params);
     };
 
-    const filters: Filter[] = [
+    const filters: HttpFilter[] = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
       ...('filters' in endpoint ? endpoint.filters : []).map(fn => fn.bind(endpoint.instance)),
       ...(endpoint.params.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
@@ -248,18 +201,17 @@ export class EndpointUtil {
       this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
         .filter(([inst, cfg]) => this.verifyEndpointApplies(inst, cfg, endpoint, controller));
 
-    const filterChain: (readonly [Filter, LightweightConfig | undefined])[] = [
-      ...validInterceptors.map(([inst, cfg]) => [inst.intercept.bind(inst), cfg] as const),
-      ...filters.map(fn => [fn, undefined] as const),
-      [handlerBound, undefined] as const
-    ];
+    const filterChain: [HttpChainedFilter, unknown][] = castTo([
+      ...validInterceptors.map(([inst, cfg]) => [inst.filter.bind(inst), cfg]),
+      ...filters.map(fn => [fn, {}]),
+      [handlerBound, {}]
+    ]);
 
     if (headers && Object.keys(headers).length > 0) {
-      filterChain.unshift([({ res }): void => { res[WebSymbols.Internal].headersAdded = { ...headers }; }, undefined]);
+      filterChain.unshift([(c): unknown => (c.res[WebInternal].headersAdded = { ...headers }, c.next()), {}]);
     }
 
-    const chain = this.createFilterChain(filterChain);
-    return (req, res) => chain({ req, res, config: undefined! }, ident);
+    return this.createFilterChain(filterChain);
   }
 
   /**

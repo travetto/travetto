@@ -1,23 +1,22 @@
-import { SetOption, GetOption } from 'cookies';
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'node:http';
 import { Readable, Writable } from 'node:stream';
 
-import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
+import { SetOption, GetOption } from 'cookies';
 
-import type { WebSymbols } from './symbols.ts';
+import type { ByteRange, Any } from '@travetto/runtime';
 
-export type FilterReturn = void | unknown | Promise<void | unknown>;
-export type FilterNext = () => FilterReturn;
-export type FilterContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: Readonly<C> };
-export type Filter<C = unknown> = (context: FilterContext<C>, next: FilterNext) => FilterReturn;
-
-export type EndpointHandler = TypedFunction<Any, Any>;
-export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
-
-export type HttpHandler = (req: HttpRequest, res: HttpResponse) => FilterReturn;
+export type NextFilter = () => unknown;
+export type HttpContext<C = {}> = { req: HttpRequest, res: HttpResponse } & C;
+/** @param {HttpContext} context The context of to process  */
+export type HttpFilter<C = {}> = (context: HttpContext<C>) => Exclude<unknown, void>;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
-export type HttpContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
+export type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
+
+export type HttpChainedContext<C = unknown> = HttpContext<{ next: NextFilter, config: C }>;
+export type HttpChainedFilter<C = unknown> = HttpFilter<{ next: NextFilter, config: C }>;
+
+export const WebInternal: unique symbol = Symbol.for('@travetto/web:internal');
 
 /**
  * Extension point for supporting new request headers
@@ -37,10 +36,6 @@ export interface HttpRequestInternal<T = unknown> {
    */
   requestParams?: unknown[];
   /**
-   * Additional logging context
-   */
-  requestLogging?: false | Record<string, unknown>;
-  /**
    * The original request of the underlying framework
    */
   providerEntity: T;
@@ -59,7 +54,7 @@ export interface HttpRequestInternal<T = unknown> {
   /**
    * Expanded representation of query
    */
-  parsedType?: HttpContentType;
+  parsedType?: MimeType;
 }
 
 /**
@@ -70,7 +65,7 @@ export interface HttpRequest<T = unknown> {
   /**
    * Internal state for the request
    */
-  [WebSymbols.Internal]: HttpRequestInternal<T>;
+  [WebInternal]: HttpRequestInternal<T>;
   /**
    * The http method
    */
@@ -141,11 +136,7 @@ export interface HttpRequest<T = unknown> {
   /**
    * Get the structured content type of the request
    */
-  getContentType(): HttpContentType | undefined;
-  /**
-   * Listen for request events
-   */
-  on(ev: 'end' | 'close' | 'error', cb: Function): unknown;
+  getContentType(): MimeType | undefined;
   /**
    * Get the ip address for a request
    */
@@ -162,10 +153,6 @@ export interface HttpRequest<T = unknown> {
    * Get expanded query
    */
   getExpandedQuery(): Record<string, unknown>;
-  /**
-   * Readable stream for the request body
-   */
-  stream(): Readable;
 }
 
 /**
@@ -184,6 +171,10 @@ export interface HttpResponseInternal<T = unknown> {
    * The additional headers for this request, provided by controllers/endpoint config
    */
   headersAdded?: HttpHeaderMap;
+  /**
+   * Disable operations
+   */
+  takeControlOfResponse?: Function;
 }
 
 /**
@@ -194,20 +185,11 @@ export interface HttpResponse<T = unknown> {
   /**
    * Internal state for the response
    */
-  [WebSymbols.Internal]: HttpResponseInternal<T>;
+  [WebInternal]: HttpResponseInternal<T>;
   /**
    * Outbound status code
    */
-  statusCode: number;
-  /**
-   * The error that caused the current status
-   */
-  statusError?: Error;
-  /**
-   * Set the status code
-   * @param code The code to set
-   */
-  status(code?: number): (number | undefined);
+  statusCode?: number;
   /**
    * Indicates if headers have already been sent
    */
@@ -238,43 +220,9 @@ export interface HttpResponse<T = unknown> {
    */
   vary(value: string): void;
   /**
-   * Listen for response events
-   * @param ev Name of the event
-   * @param cb The callback for the event
+   * Trigger response
    */
-  on(ev: 'close' | 'finish', cb: Function): unknown;
-  /**
-   * Redirect the request to a new location
-   * @param path The new location
-   */
-  redirect(path: string): unknown;
-  /**
-   * Redirect the request to a new location
-   * @param code The status code for redirect
-   * @param path The new location
-   */
-  redirect(code: number, path: string): unknown;
-  redirect(code: number | string, path?: string): unknown;
-  /**
-   * Set the request's location
-   * @param path The location to point to
-   */
-  location(path: string): unknown;
-  /**
-   * Send a value to the client
-   * @param value Value to send
-   */
-  send(value: Any): unknown;
-  /**
-   * Write content directly to the output stream
-   * @param value The value to write
-   */
-  write(value: unknown): unknown;
-  /**
-   * End the response, with a final optional value
-   * @param val
-   */
-  end(val?: unknown): unknown;
+  respond(value: Buffer | Readable): Promise<unknown> | unknown;
   /**
    * Cookie support for sending to the client
    */
@@ -285,23 +233,14 @@ export interface HttpResponse<T = unknown> {
      * @param value The cookie value
      * @param options Cookie options to set
      */
-    set(name: string, value?: Any, options?: SetOption): void;
+    set(name: string, value?: string, options?: SetOption): void;
   };
   /**
-   * Send readable stream to the response
-   * @param stream
+   * Trigger redirect
    */
-  sendStream(stream: Readable): Promise<void>;
-}
-
-
-/**
- * Simple subset of HttpResponse that represents a valid http response payload
- */
-export interface HttpPayload {
-  headers?: HttpHeaderMap;
-  defaultContentType?: string;
-  statusCode?: number;
-  data: Readable | Buffer;
-  length?: number;
+  redirect(url: string, statusCode?: number): void;
+  /**
+   * End response immediately
+   */
+  end(): void;
 }

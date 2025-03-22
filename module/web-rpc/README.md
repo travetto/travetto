@@ -22,7 +22,7 @@ The library will create the RPC client in one of three flavors: fetch, fetch + n
 ```bash
 $ trv web:rpc --help
 
-Usage: web:rpc [options] <type:angular|config|node|web> [output:string]
+Usage: web:rpc [options] <type:config|node|web> [output:string]
 
 Options:
   -e, --env <string>     Application environment

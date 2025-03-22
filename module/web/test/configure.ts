@@ -45,10 +45,10 @@ export class ConfigureTest {
     assert(config.endpoints.length === 1);
 
     const ep = config.endpoints[0];
-    const params = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
+    const params = SchemaRegistry.getMethodSchema(ep.class, ep.name);
     assert(ep.method === 'get');
-    assert(ep.handlerName === 'getUser');
-    assert(ep.handler === TestController.prototype.getUser);
+    assert(ep.name === 'getUser');
+    assert(ep.endpoint === TestController.prototype.getUser);
     assert(ep.title === 'Get user by name');
 
     assert(ep.params.length === 1);

@@ -1,5 +1,5 @@
 import { AppError, Util } from '@travetto/runtime';
-import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, SerializeInterceptor } from '@travetto/web';
+import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -17,7 +17,7 @@ function matchPermissionSet(rule: string[], perms: Set<string>): boolean {
 }
 
 @Config('web.auth.verify')
-export class WebAuthVerifyConfig extends ManagedInterceptorConfig {
+export class WebAuthVerifyConfig {
   /**
    * Default state to care about
    */
@@ -39,7 +39,8 @@ export class WebAuthVerifyConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfig> {
 
-  dependsOn = [SerializeInterceptor, AuthContextInterceptor];
+  category: HttpInterceptorCategory = 'application';
+  dependsOn = [AuthContextInterceptor];
 
   @Inject()
   config: WebAuthVerifyConfig;
@@ -62,10 +63,10 @@ export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfi
     return config;
   }
 
-  async intercept({ req, config }: FilterContext<WebAuthVerifyConfig>): Promise<void> {
+  async filter({ config, next }: HttpChainedContext<WebAuthVerifyConfig>): Promise<unknown> {
     const principal = this.authContext.principal;
 
-    switch (config?.state) {
+    switch (config.state) {
       case 'authenticated': {
         if (!principal) {
           throw new AuthenticationError('User is unauthenticated');
@@ -81,5 +82,6 @@ export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfi
         break;
       }
     }
+    return next();
   }
 }

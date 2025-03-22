@@ -1,12 +1,10 @@
 import { IncomingHttpHeaders } from 'node:http';
-import { PassThrough, Readable } from 'node:stream';
 
 import { asFull, ByteRange, castTo } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpRequest, HttpContentType } from '../types.ts';
+import { HttpRequest, MimeType, WebInternal } from '../types.ts';
 import { MimeUtil } from '../util/mime.ts';
-import { WebSymbols } from '../symbols.ts';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
@@ -18,7 +16,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Decorate a given request, extending from the request core
    */
-  static create<T extends HttpRequest>(req: Partial<T> & { connection?: unknown }): T {
+  static create<T extends HttpRequest>(req: Partial<T> & { connection?: unknown } & { [WebInternal]: HttpRequest[typeof WebInternal] }): T {
     if ('redirect' in req) {
       delete req.redirect;
     }
@@ -26,7 +24,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
     req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
     req.method = castTo(req.method?.toUpperCase());
     req.connection = {};
-    req[WebSymbols.Internal]!.createdDate = Date.now();
+    req[WebInternal].createdDate = Date.now();
     return asFull<T>(req);
   }
 
@@ -64,15 +62,15 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Get the fully parsed content type
    */
-  getContentType(this: HttpRequest): HttpContentType | undefined {
-    return this[WebSymbols.Internal].parsedType ??= MimeUtil.parse(this.headerFirst('content-type'));
+  getContentType(this: HttpRequest): MimeType | undefined {
+    return this[WebInternal].parsedType ??= MimeUtil.parse(this.headerFirst('content-type'));
   }
 
   /**
    * Attempt to read the remote IP address of the connection
    */
   getIp(this: HttpRequest): string | undefined {
-    const raw = this[WebSymbols.Internal].nodeEntity;
+    const raw = this[WebInternal].nodeEntity;
     return this.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
   }
 
@@ -103,15 +101,6 @@ export class HttpRequestCore implements Partial<HttpRequest> {
    * Get the expanded query object
    */
   getExpandedQuery(this: HttpRequest): Record<string, unknown> {
-    return this[WebSymbols.Internal].queryExpanded ??= BindUtil.expandPaths(this.query);
-  }
-
-  /**
-   * Get request body as a stream
-   */
-  stream(this: HttpRequest): Readable {
-    const out = new PassThrough();
-    this.pipe(out);
-    return out;
+    return this[WebInternal].queryExpanded ??= BindUtil.expandPaths(this.query);
   }
 }

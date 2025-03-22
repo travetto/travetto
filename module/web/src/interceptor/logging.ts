@@ -1,16 +1,23 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { FilterContext, FilterNext, HttpRequest, HttpResponse } from '../types.ts';
-import { WebSymbols } from '../symbols.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpChainedContext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
 
 /**
  * Web logging configuration
  */
 @Config('web.log')
-export class WebLogConfig extends ManagedInterceptorConfig { }
+export class WebLogConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
+  /**
+   * Should errors be dumped as full stack traces
+   */
+  showStackTrace = true;
+}
 
 /**
  * Logging interceptor, to show activity for all requests
@@ -18,40 +25,44 @@ export class WebLogConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class LoggingInterceptor implements HttpInterceptor {
 
-  static logResult(req: HttpRequest, res: HttpResponse): void {
-    const duration = Date.now() - req[WebSymbols.Internal].createdDate!;
+  category: HttpInterceptorCategory = 'terminal';
+
+  @Inject()
+  config: WebLogConfig;
+
+  logResult(req: HttpRequest, res: HttpResponse, defaultCode: number): void {
+    const duration = Date.now() - req[WebInternal].createdDate!;
 
     const reqLog = {
       method: req.method,
       path: req.path,
       query: { ...req.query },
       params: req.params,
-      ...req[WebSymbols.Internal].requestLogging ?? {},
       statusCode: res.statusCode,
       duration,
     };
 
-    if (res.statusCode < 400) {
+    const code = res.statusCode ?? defaultCode;
+
+    if (code < 400) {
       console.info('Request', reqLog);
-    } else if (res.statusCode < 500) {
+    } else if (code < 500) {
       console.warn('Request', reqLog);
     } else {
       console.error('Request', reqLog);
     }
   }
 
-  runsBefore = [SerializeInterceptor];
-
-  @Inject()
-  config: WebLogConfig;
-
-  async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
+  async filter({ req, res, next }: HttpChainedContext): Promise<void> {
     try {
-      return await next();
-    } finally {
-      if (req[WebSymbols.Internal].requestLogging !== false) {
-        LoggingInterceptor.logResult(req, res);
+      await next();
+      this.logResult(req, res, 200);
+    } catch (err) {
+      this.logResult(req, res, 500);
+      if (this.config.showStackTrace && err instanceof Error) {
+        console.error(err.message, { error: err });
       }
     }
   }
 }
+

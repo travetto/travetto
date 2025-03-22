@@ -1,5 +1,7 @@
 import { Readable } from 'node:stream';
 
+import { AppError } from '@travetto/runtime';
+
 import { Controller } from '../../src/decorator/controller.ts';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint.ts';
 import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param.ts';
@@ -66,13 +68,10 @@ export class TestController {
 
   @Get('/renderable')
   @Produces('text/plain')
-  getRenderable(): HttpSerializable {
+  getRenderable(): HttpSerializable<string> {
     return {
-      /**
-       * @returns {string}
-       */
       serialize(res) {
-        res.send('hello');
+        return 'hello';
       }
     };
   }
@@ -103,5 +102,10 @@ export class TestController {
   @Get('/ip')
   getIp() {
     return { ip: this.req.getIp() };
+  }
+
+  @Post('/ip')
+  notFound() {
+    throw new AppError('Uh-oh', { category: 'general' });
   }
 }

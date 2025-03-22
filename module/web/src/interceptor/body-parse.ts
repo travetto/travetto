@@ -5,12 +5,10 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
-import { WebSymbols } from '../symbols.ts';
-import { HttpRequest, FilterContext, FilterNext } from '../types.ts';
+import { HttpRequest, WebInternal, HttpChainedContext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { AcceptsInterceptor } from './accepts.ts';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
@@ -21,7 +19,11 @@ type ParserType = 'json' | 'text' | 'form';
  * Web body parse configuration
  */
 @Config('web.bodyParse')
-export class BodyParseConfig extends ManagedInterceptorConfig {
+export class BodyParseConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
   /**
    * Max body size limit
    */
@@ -38,7 +40,8 @@ export class BodyParseConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
 
-  dependsOn = [SerializeInterceptor, AcceptsInterceptor];
+  dependsOn = [AcceptsInterceptor];
+  category: HttpInterceptorCategory = 'request';
 
   @Inject()
   config: BodyParseConfig;
@@ -46,7 +49,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
   async read(req: HttpRequest, limit: string | number): Promise<{ text: string, raw: Buffer }> {
     const cfg = req.getContentType();
 
-    const text = await rawBody(inflation(req[WebSymbols.Internal].nodeEntity), {
+    const text = await rawBody(inflation(req[WebInternal].nodeEntity), {
       limit,
       encoding: cfg?.parameters.charset ?? 'utf8'
     });
@@ -80,7 +83,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     return endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method);
   }
 
-  async intercept({ req, res, config }: FilterContext<BodyParseConfig>, next: FilterNext): Promise<unknown> {
+  async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<unknown> {
     if (!METHODS_WITH_BODIES.has(req.method) || req.body) { // If body is already set
       return next();
     }
@@ -88,7 +91,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     const parserType = this.detectParserType(req, config.parsingTypes);
 
     if (!parserType) {
-      req.body = req[WebSymbols.Internal].nodeEntity;
+      req.body = req[WebInternal].nodeEntity;
       return next();
     } else {
       let malformed: unknown;

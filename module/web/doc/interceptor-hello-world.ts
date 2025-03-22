@@ -1,12 +1,13 @@
-import { HttpInterceptor, SerializeInterceptor, FilterContext } from '@travetto/web';
+import { HttpContext, HttpInterceptor, HttpInterceptorCategory } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
 export class HelloWorldInterceptor implements HttpInterceptor {
 
-  dependsOn = [SerializeInterceptor];
+  category: HttpInterceptorCategory = 'application';
 
-  intercept(ctx: FilterContext) {
+  filter(ctx: HttpContext) {
     console.log('Hello world!');
+    return ctx.next();
   }
 }

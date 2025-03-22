@@ -2,16 +2,19 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import { FilterContext, HttpRequest } from '../types.ts';
+import { HttpChainedContext, HttpRequest } from '../types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 
 /**
  * Web cors support
  */
 @Config('web.cors')
-export class CorsConfig extends ManagedInterceptorConfig {
+export class CorsConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
   /**
    * Allowed origins
    */
@@ -44,10 +47,10 @@ export class CorsConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
 
+  category: HttpInterceptorCategory = 'response';
+
   @Inject()
   config: CorsConfig;
-
-  dependsOn = [SerializeInterceptor];
 
   finalizeConfig(config: CorsConfig): CorsConfig {
     config.resolved = {
@@ -59,7 +62,7 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     return config;
   }
 
-  intercept({ req, res, config: { resolved } }: FilterContext<CorsConfig>): void {
+  filter({ req, res, config: { resolved }, next }: HttpChainedContext<CorsConfig>): unknown {
     const origin = req.header('origin');
     if (!resolved.origins.size || resolved.origins.has('*') || (origin && resolved.origins.has(origin))) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');
@@ -67,5 +70,6 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
       res.setHeader('Access-Control-Allow-Methods', resolved.methods);
       res.setHeader('Access-Control-Allow-Headers', resolved.headers || req.header('access-control-request-headers')! || '*');
     }
+    return next();
   }
 }
