@@ -6,10 +6,12 @@ import { SetOption, GetOption } from 'cookies';
 import type { ByteRange, Any } from '@travetto/runtime';
 
 export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: C, next: () => unknown };
-export type HttpFilter<C = unknown> = (context: HttpContext<C>) => unknown;
+export type HttpFilter<C = unknown> =
+  /** @param {HttpContext} context The context of to process  */
+  (context: HttpContext<C>) => unknown;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
-export type HttpContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
+export type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
 export const WebInternal: unique symbol = Symbol.for('@travetto/web:internal');
 
@@ -49,7 +51,7 @@ export interface HttpRequestInternal<T = unknown> {
   /**
    * Expanded representation of query
    */
-  parsedType?: HttpContentType;
+  parsedType?: MimeType;
 }
 
 /**
@@ -131,7 +133,7 @@ export interface HttpRequest<T = unknown> {
   /**
    * Get the structured content type of the request
    */
-  getContentType(): HttpContentType | undefined;
+  getContentType(): MimeType | undefined;
   /**
    * Get the ip address for a request
    */

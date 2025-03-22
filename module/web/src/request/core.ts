@@ -3,7 +3,7 @@ import { IncomingHttpHeaders } from 'node:http';
 import { asFull, ByteRange, castTo } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpRequest, HttpContentType, WebInternal } from '../types.ts';
+import { HttpRequest, MimeType, WebInternal } from '../types.ts';
 import { MimeUtil } from '../util/mime.ts';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
@@ -62,7 +62,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Get the fully parsed content type
    */
-  getContentType(this: HttpRequest): HttpContentType | undefined {
+  getContentType(this: HttpRequest): MimeType | undefined {
     return this[WebInternal].parsedType ??= MimeUtil.parse(this.headerFirst('content-type'));
   }
 

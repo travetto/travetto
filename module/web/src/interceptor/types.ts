@@ -59,7 +59,6 @@ export interface HttpInterceptor<C = Any> {
 
   /**
    * Process the request
-   * @param context http context
    */
   filter: HttpFilter<C>;
 }
