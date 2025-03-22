@@ -8,6 +8,7 @@ import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param.t
 import { HttpRequest, HttpResponse } from '../../src/types.ts';
 import { Produces, SetHeaders } from '../../src/decorator/common.ts';
 import { HttpSerializable } from '../../src/response/serializable.ts';
+import { HttpPayloadUtil } from '@travetto/web';
 
 @Controller('/test')
 export class TestController {
@@ -68,10 +69,10 @@ export class TestController {
 
   @Get('/renderable')
   @Produces('text/plain')
-  getRenderable(): HttpSerializable<string> {
+  getRenderable(): HttpSerializable {
     return {
-      serialize(res) {
-        return 'hello';
+      serialize() {
+        return HttpPayloadUtil.from('hello');
       }
     };
   }
