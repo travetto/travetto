@@ -37,7 +37,7 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
     return false;
   }
 
-  async intercept({ req, config, next }: HttpContext<WebUploadConfig>): Promise<unknown> {
+  async filter({ req, config, next }: HttpContext<WebUploadConfig>): Promise<unknown> {
     const uploads: FileMap = {};
 
     try {

@@ -6,7 +6,7 @@ export class HelloWorldInterceptor implements HttpInterceptor {
 
   category: HttpInterceptorCategory = 'application';
 
-  intercept(ctx: HttpContext) {
+  filter(ctx: HttpContext) {
     console.log('Hello world!');
     return ctx.next();
   }

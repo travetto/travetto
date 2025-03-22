@@ -63,7 +63,7 @@ export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfi
     return config;
   }
 
-  async intercept({ config, next }: HttpContext<WebAuthVerifyConfig>): Promise<unknown> {
+  async filter({ config, next }: HttpContext<WebAuthVerifyConfig>): Promise<unknown> {
     const principal = this.authContext.principal;
 
     switch (config.state) {

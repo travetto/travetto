@@ -53,7 +53,7 @@ export class LoggingInterceptor implements HttpInterceptor {
     }
   }
 
-  async intercept({ req, res, next }: HttpContext): Promise<void> {
+  async filter({ req, res, next }: HttpContext): Promise<void> {
     try {
       await next();
       this.logResult(req, res, 200);

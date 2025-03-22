@@ -202,7 +202,7 @@ export class EndpointUtil {
         .filter(([inst, cfg]) => this.verifyEndpointApplies(inst, cfg, endpoint, controller));
 
     const filterChain: [HttpFilter, unknown][] = castTo([
-      ...validInterceptors.map(([inst, cfg]) => [inst.intercept.bind(inst), cfg]),
+      ...validInterceptors.map(([inst, cfg]) => [inst.filter.bind(inst), cfg]),
       ...filters.map(fn => [fn, {}]),
       [handlerBound, {}]
     ]);

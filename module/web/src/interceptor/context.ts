@@ -15,7 +15,7 @@ export class AsyncContextInterceptor implements HttpInterceptor {
   @Inject()
   context: WebContext;
 
-  intercept(ctx: HttpContext): Promise<unknown> {
+  filter(ctx: HttpContext): Promise<unknown> {
     return this.context.withContext(ctx);
   }
 }

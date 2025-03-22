@@ -30,7 +30,7 @@ class AutoLogin implements HttpInterceptor {
     return !endpoint.path.endsWith('/body');
   }
 
-  intercept(ctx: HttpContext) {
+  filter(ctx: HttpContext) {
     this.auth.principal ??= {
       id: Util.uuid(),
       sessionId: Util.uuid(),

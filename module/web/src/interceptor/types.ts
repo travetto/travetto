@@ -58,9 +58,8 @@ export interface HttpInterceptor<C = Any> {
   finalizeConfig?(config: C): C;
 
   /**
-   * Actually handle the request, response when applicable
-   * @param context interceptor context
-   * @param next
+   * Process the request
+   * @param context http context
    */
-  intercept: HttpFilter<C>;
+  filter: HttpFilter<C>;
 }

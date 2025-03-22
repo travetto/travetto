@@ -37,7 +37,7 @@ export class AuthLoginInterceptor implements HttpInterceptor<WebAuthLoginConfig>
     return false;
   }
 
-  async intercept(ctx: HttpContext<WebAuthLoginConfig>): Promise<unknown> {
+  async filter(ctx: HttpContext<WebAuthLoginConfig>): Promise<unknown> {
     await this.service.authenticate(ctx.req.body, ctx, ctx.config.providers ?? []);
     return ctx.next();
   }

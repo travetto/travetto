@@ -32,7 +32,7 @@ export class AuthLogoutInterceptor implements HttpInterceptor<WebAuthLogoutConfi
     return false;
   }
 
-  async intercept(ctx: HttpContext): Promise<unknown> {
+  async filter(ctx: HttpContext): Promise<unknown> {
     try {
       if (!this.authContext.principal) {
         throw new AuthenticationError('Already logged out');

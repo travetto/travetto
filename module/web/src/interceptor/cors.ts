@@ -62,7 +62,7 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     return config;
   }
 
-  intercept({ req, res, config: { resolved }, next }: HttpContext<CorsConfig>): unknown {
+  filter({ req, res, config: { resolved }, next }: HttpContext<CorsConfig>): unknown {
     const origin = req.header('origin');
     if (!resolved.origins.size || resolved.origins.has('*') || (origin && resolved.origins.has(origin))) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');

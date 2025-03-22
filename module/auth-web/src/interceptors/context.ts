@@ -42,7 +42,7 @@ export class AuthContextInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<AuthToken>(), () => this.authContext.authToken);
   }
 
-  async intercept(ctx: HttpContext): Promise<unknown> {
+  async filter(ctx: HttpContext): Promise<unknown> {
     // Skip if already authenticated
     if (this.authContext.principal) {
       return ctx.next();

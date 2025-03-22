@@ -11,7 +11,7 @@ export class RespondInterceptor implements HttpInterceptor {
   category: HttpInterceptorCategory = 'terminal';
   dependsOn = [LoggingInterceptor];
 
-  async intercept(ctx: HttpContext): Promise<void> {
+  async filter(ctx: HttpContext): Promise<void> {
     let value;
     try {
       value = await ctx.next();

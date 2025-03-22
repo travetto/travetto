@@ -104,7 +104,7 @@ export class CompressionInterceptor implements HttpInterceptor {
     }
   }
 
-  async intercept({ req, res, next }: HttpContext<CompressConfig>): Promise<unknown> {
+  async filter({ req, res, next }: HttpContext<CompressConfig>): Promise<unknown> {
     const result = await next();
     return this.compress(req, res, result);
   }

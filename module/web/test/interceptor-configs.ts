@@ -56,7 +56,7 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
     return !/opt-in/.test(`${endpoint.path}`);
   }
 
-  intercept(ctx: HttpContext<CustomInterceptorConfig>) {
+  filter(ctx: HttpContext<CustomInterceptorConfig>) {
     Object.assign(ctx.res, { name: ctx.config.name });
     return ctx.next();
   }

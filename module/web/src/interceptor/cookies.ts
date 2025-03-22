@@ -65,7 +65,7 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
     return config;
   }
 
-  intercept({ req, res, config, next }: HttpContext<CookieConfig>): unknown {
+  filter({ req, res, config, next }: HttpContext<CookieConfig>): unknown {
     const store = new cookies(castTo(req), castTo(res), config);
     req.cookies = { get: (key, opts?): string | undefined => store.get(key, { ...this.config, ...opts }) };
     res.cookies = { set: (key, value, opts?): void => { store.set(key, value, { ...this.config, ...opts }); } };

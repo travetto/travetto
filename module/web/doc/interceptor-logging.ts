@@ -16,7 +16,7 @@ export class CustomLoggingInterceptor implements HttpInterceptor {
     this.appender = appender;
   }
 
-  async intercept({ req, next }: HttpContext) {
+  async filter({ req, next }: HttpContext) {
     await next();
     // Write request to database
     this.appender.write(req.method, req.path, req.query);

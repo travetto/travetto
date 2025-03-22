@@ -31,7 +31,7 @@ export class GetCacheInterceptor implements HttpInterceptor {
     return endpoint.method === 'get';
   }
 
-  async intercept({ res, next }: HttpContext): Promise<unknown> {
+  async filter({ res, next }: HttpContext): Promise<unknown> {
     const result = await next();
     // Only apply on the way out, and on success
     if (res.getHeader('Expires') === undefined && res.getHeader('Cache-Control') === undefined) {

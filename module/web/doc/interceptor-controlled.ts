@@ -6,7 +6,7 @@ export class SimpleLoggingInterceptor implements HttpInterceptor {
 
   category: HttpInterceptorCategory = 'terminal';
 
-  async intercept(ctx: HttpContext) {
+  async filter(ctx: HttpContext) {
     const start = Date.now();
     try {
       return await ctx.next();

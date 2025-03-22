@@ -44,7 +44,7 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
     return false;
   }
 
-  intercept({ req, config, next }: HttpContext<AcceptsConfig>): unknown {
+  filter({ req, config, next }: HttpContext<AcceptsConfig>): unknown {
     const contentType = req.header('content-type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });

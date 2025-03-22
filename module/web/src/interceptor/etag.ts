@@ -68,7 +68,7 @@ export class EtagInterceptor implements HttpInterceptor {
     return output;
   }
 
-  async intercept({ req, res, next }: HttpContext): Promise<unknown> {
+  async filter({ req, res, next }: HttpContext): Promise<unknown> {
     const value = await next();
     return this.addTag(req, res, value);
   }
