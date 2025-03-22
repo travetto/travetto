@@ -1,12 +1,11 @@
-import { HttpResponse } from '../types.ts';
+import { HttpContext, HttpPayload } from '../types.ts';
 
 /**
  * Custom serialization contract
  */
-export interface HttpSerializable<T> {
+export interface HttpSerializable {
   /**
    * Serialize the output given a response.
-   * @param res
    */
-  serialize(res: HttpResponse): Promise<T> | T;
+  serialize(ctx: HttpContext): HttpPayload;
 }

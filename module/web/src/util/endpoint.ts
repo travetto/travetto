@@ -52,10 +52,10 @@ export class EndpointUtil {
     const baseDisabled = hasDisabled(interceptor.config) ? interceptor.config.disabled : undefined;
     const resolvedDisabled = hasDisabled(resolvedConfig) ? resolvedConfig.disabled : undefined;
 
-    if (interceptor.applies === false || baseDisabled === true || resolvedDisabled === true) {
-      return false;
-    } else if (resolvedDisabled === false || interceptor.applies === true) { // If explicitly enabled
+    if (resolvedDisabled === false || interceptor.applies === true) { // If explicitly enabled
       return true;
+    } else if (interceptor.applies === false || baseDisabled === true || resolvedDisabled === true) {
+      return false;
     }
 
     // Fallback to interceptor level applies when paths haven't overridden

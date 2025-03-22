@@ -175,6 +175,10 @@ export interface HttpResponseInternal<T = unknown> {
    * Disable operations
    */
   takeControlOfResponse?: Function;
+  /**
+   * The currently produced payload
+   */
+  payload?: [result: HttpPayload, source: unknown];
 }
 
 /**
@@ -235,12 +239,12 @@ export interface HttpResponse<T = unknown> {
      */
     set(name: string, value?: string, options?: SetOption): void;
   };
-  /**
-   * Trigger redirect
-   */
-  redirect(url: string, statusCode?: number): void;
-  /**
-   * End response immediately
-   */
-  end(): void;
 }
+
+export interface HttpPayload {
+  headers?: Record<string, string>;
+  defaultContentType?: string;
+  statusCode?: number;
+  data: Buffer | Readable;
+  length?: number;
+};

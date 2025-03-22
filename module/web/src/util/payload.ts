@@ -1,23 +1,17 @@
 import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
+import { isArrayBuffer } from 'node:util/types';
 
 import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
-import { HttpContext, WebInternal } from '../types';
-import { isArrayBuffer } from 'node:util/types';
+import { HttpSerializable } from '../response/serializable';
+import { HttpContext, HttpPayload, WebInternal } from '../types';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
 const isStream = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
-
-interface HttpPayload {
-  headers?: Record<string, string>;
-  defaultContentType?: string;
-  statusCode?: number;
-  data: Buffer | Readable;
-  length?: number;
-};
+const isSerializable = hasFunction<HttpSerializable>('serialize');
 
 /**
  * Mapping from error category to standard http error codes
@@ -143,7 +137,7 @@ export class HttpPayloadUtil {
 
     if (statusCode) {
       res.statusCode = statusCode;
-    } else if (!res.statusCode) { // Only set if status has yet to be written
+    } else {
       if (length === 0) {  // On empty response
         res.statusCode = (req.method === 'POST' || req.method === 'PUT') ? 201 : 204;
       } else {
@@ -158,6 +152,14 @@ export class HttpPayloadUtil {
    * Ensure the value is ready for responding
    */
   static ensureSerialized(ctx: HttpContext, value: unknown): Buffer | Readable {
-    return this.applyPayload(ctx, this.from(value));
+    const resolved = ctx.res[WebInternal].payload; // Track existing and skip out if already processed
+    if (resolved && value === resolved[1]) {
+      return resolved[0].data;
+    }
+
+    const payload = isSerializable(value) ? value.serialize(ctx) : this.from(value);
+    ctx.res[WebInternal].payload = [payload, value];
+
+    return this.applyPayload(ctx, payload);
   }
 }

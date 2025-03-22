@@ -26,9 +26,9 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   }
 
   /**
-   * Trigger redirect
+   * Trigger redirect, needed for express-like systems, e.g. passport
    */
-  redirect(this: HttpResponse, path: string, statusCode?: number): void {
+  redirect(this: HttpResponse & HttpResponseCore, path: string, statusCode?: number): void {
     this.statusCode = statusCode ?? this.statusCode ?? 302;
     this.setHeader('Location', path);
     this.setHeader('Content-Length', '0');
@@ -36,7 +36,7 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   }
 
   /**
-   * End response immediately
+   * End response immediately, needed for express-like systems, e.g. passport
    */
   end(this: HttpResponse): void {
     this[WebInternal].takeControlOfResponse?.();
