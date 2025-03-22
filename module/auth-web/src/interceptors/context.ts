@@ -1,5 +1,5 @@
 import { toConcrete } from '@travetto/runtime';
-import { HttpInterceptor, HttpContext, WebContext, HttpInterceptorCategory } from '@travetto/web';
+import { HttpInterceptor, HttpContext, WebContext, HttpInterceptorCategory, NextFunction } from '@travetto/web';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
 
@@ -42,10 +42,10 @@ export class AuthContextInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<AuthToken>(), () => this.authContext.authToken);
   }
 
-  async filter(ctx: HttpContext): Promise<unknown> {
+  async filter(ctx: HttpContext, next: NextFunction): Promise<unknown> {
     // Skip if already authenticated
     if (this.authContext.principal) {
-      return ctx.next();
+      return next();
     }
 
     let decoded: Principal | undefined;
@@ -64,7 +64,7 @@ export class AuthContextInterceptor implements HttpInterceptor {
       this.authContext.principal = checked;
       this.authContext.authToken = await this.codec.token?.(ctx);
 
-      return await ctx.next();
+      return await next();
     } finally {
       const result = this.authContext.principal;
       this.authService.manageExpiry(result);

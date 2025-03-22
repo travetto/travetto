@@ -141,14 +141,14 @@ export class HttpPayloadUtil {
       res.setHeader('Content-Length', `${length} `);
     }
 
-    if (!statusCode) {
+    if (statusCode) {
+      res.statusCode = statusCode;
+    } else if (!res.statusCode) { // Only set if status has yet to be written
       if (length === 0) {  // On empty response
         res.statusCode = (req.method === 'POST' || req.method === 'PUT') ? 201 : 204;
       } else {
         res.statusCode = 200;
       }
-    } else {
-      res.statusCode = statusCode;
     }
 
     return data;

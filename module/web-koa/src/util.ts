@@ -15,7 +15,6 @@ export class KoaWebServerUtil {
     return fullCtx[WebInternal] ??= {
       req: this.getRequest(ctx),
       res: this.getResponse(ctx),
-      next(): void { },
       config: {}
     };
   }

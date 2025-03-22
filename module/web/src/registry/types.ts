@@ -2,10 +2,9 @@ import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { HttpFilter, HttpHeaderMap, HttpMethodOrAll, HttpRequest, HttpResponse } from '../types.ts';
+import type { HttpContext, HttpFilter, HttpHeaderMap, HttpMethodOrAll } from '../types.ts';
 
 export type EndpointFunction = TypedFunction<Any, Any>;
-export type EndpointParamExtractor = (config: EndpointParamConfig, req: HttpRequest, res: HttpResponse) => unknown;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
 
 /**
@@ -99,10 +98,9 @@ export interface EndpointParamConfig {
   resolve?: HttpFilter;
   /**
    * Extract the value from request
-   * @param config Param configuration
-   * @param req The request
+   * @param context The http context with the endpoint param config
    */
-  extract?: EndpointParamExtractor;
+  extract?: (ctx: HttpContext<EndpointParamConfig>) => unknown;
   /**
    * Input prefix for parameter
    */

@@ -2,7 +2,7 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import { HttpContext, HttpRequest } from '../types.ts';
+import { HttpContext, HttpRequest, NextFunction } from '../types.ts';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 
@@ -62,7 +62,7 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     return config;
   }
 
-  filter({ req, res, config: { resolved }, next }: HttpContext<CorsConfig>): unknown {
+  filter({ req, res, config: { resolved } }: HttpContext<CorsConfig>, next: NextFunction): unknown {
     const origin = req.header('origin');
     if (!resolved.origins.size || resolved.origins.has('*') || (origin && resolved.origins.has(origin))) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');

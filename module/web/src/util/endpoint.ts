@@ -1,7 +1,7 @@
 import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpRequest, HttpFilter, HttpContext, HttpResponse, WebInternal } from '../types.ts';
+import { HttpFilter, HttpContext, WebInternal, NextFunction } from '../types.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
 
@@ -36,10 +36,10 @@ export class EndpointUtil {
    */
   static createFilterChain(filters: [HttpFilter, unknown][]): HttpFilter {
     const len = filters.length - 1;
-    return function filterChain(ctx: HttpContext, idx: number = 0): unknown {
+    return function filterChain(ctx: HttpContext, next: NextFunction, idx: number = 0): unknown {
       const [it, cfg] = filters[idx]!;
-      const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
-      return it({ ...ctx, config: cfg, next: chainedNext });
+      const chainedNext = idx === len ? next : filterChain.bind(null, ctx, next, idx + 1);
+      return it({ ...ctx, config: cfg }, chainedNext);
     };
   }
 
@@ -114,19 +114,21 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(param: EndpointParamConfig, req: HttpRequest, res: HttpResponse, field: FieldConfig, value?: unknown): unknown {
+  static extractParameter(ctx: HttpContext<EndpointParamConfig>, field: FieldConfig, value?: unknown): unknown {
+    const param = ctx.config;
+
     if (value !== undefined && value !== this.MISSING_PARAM) {
       return value;
     } else if (param.extract) {
-      return param.extract(param, req, res);
+      return param.extract(ctx);
     }
 
     switch (param.location) {
-      case 'path': return req.params[param.name!];
-      case 'header': return req.header(param.name!);
-      case 'body': return req.body;
+      case 'path': return ctx.req.params[param.name!];
+      case 'header': return ctx.req.header(param.name!);
+      case 'body': return ctx.req.body;
       case 'query': {
-        const q = req.getExpandedQuery();
+        const q = ctx.req.getExpandedQuery();
         return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[param.name!]);
       }
     }
@@ -138,14 +140,14 @@ export class EndpointUtil {
    * @param req The request
    * @param res The response
    */
-  static async extractParameters(endpoint: EndpointConfig, req: HttpRequest, res: HttpResponse): Promise<unknown[]> {
+  static async extractParameters(endpoint: EndpointConfig, ctx: HttpContext): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
-    const vals = req[WebInternal].requestParams;
+    const vals = ctx.req[WebInternal].requestParams;
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
-      const extracted = endpoint.params.map((c, i) => this.extractParameter(c, req, res, fields[i], vals?.[i]));
+      const extracted = endpoint.params.map((c, i) => this.extractParameter({ ...ctx, config: c }, fields[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;
@@ -181,8 +183,8 @@ export class EndpointUtil {
       interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
     }
 
-    const handlerBound: HttpFilter = async ({ req, res }: HttpContext): Promise<unknown> => {
-      const params = await this.extractParameters(endpoint, req, res);
+    const handlerBound: HttpFilter = async (ctx): Promise<unknown> => {
+      const params = await this.extractParameters(endpoint, ctx);
       return endpoint.endpoint.apply(endpoint.instance, params);
     };
 
@@ -208,7 +210,7 @@ export class EndpointUtil {
     ]);
 
     if (headers && Object.keys(headers).length > 0) {
-      filterChain.unshift([(c): unknown => (c.res[WebInternal].headersAdded = { ...headers }, c.next()), {}]);
+      filterChain.unshift([(c, next): unknown => (c.res[WebInternal].headersAdded = { ...headers }, next()), {}]);
     }
 
     return this.createFilterChain(filterChain);

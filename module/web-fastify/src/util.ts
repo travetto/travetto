@@ -16,7 +16,6 @@ export class FastifyWebServerUtil {
     return fullReq[WebInternal] ??= {
       req: this.getRequest(req),
       res: this.getResponse(res),
-      next(): void { },
       config: {},
     };
   }
@@ -55,15 +54,8 @@ export class FastifyWebServerUtil {
       get headersSent(): boolean {
         return reply.sent;
       },
-      get statusCode(): number | undefined {
-        return reply.statusCode;
-      },
-      set statusCode(code: number) {
-        reply.status(code);
-        reply.raw.statusCode = code;
-      },
       respond(value): void {
-        reply.send(value);
+        reply.status(this.statusCode ?? 200).send(value);
       },
       getHeaderNames: reply.raw.getHeaderNames.bind(reply.raw),
       setHeader: reply.raw.setHeader.bind(reply.raw),

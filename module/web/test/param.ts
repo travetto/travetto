@@ -4,16 +4,16 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
-import { ContextParam } from '@travetto/context';
 
-import { QueryParam, HeaderParam, PathParam } from '../src/decorator/param.ts';
+import { HttpRequestCore } from '../src/request/core.ts';
+import { HttpResponseCore } from '../src/response/core.ts';
+import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param.ts';
 import { Post, Get } from '../src/decorator/endpoint.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpMethodOrAll, HttpRequest, HttpResponse } from '../src/types.ts';
+import { HttpMethodOrAll, HttpRequest, HttpResponse, WebInternal } from '../src/types.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
 import { EndpointUtil } from '../src/util/endpoint.ts';
-import { HttpRequestCore, HttpResponseCore } from '@travetto/web';
 
 class User {
   name: string;
@@ -101,7 +101,23 @@ export class EndpointParameterTest {
   }
 
   static async extract(ep: EndpointConfig, req: Partial<HttpRequest>, res: Partial<HttpResponse> = {}): Promise<unknown[]> {
-    return await EndpointUtil.extractParameters(ep, HttpRequestCore.create(req), HttpResponseCore.create(res));
+    return await EndpointUtil.extractParameters(ep, {
+      req: HttpRequestCore.create({
+        ...req,
+        [WebInternal]: {
+          providerEntity: null!,
+          nodeEntity: null!,
+        }
+      }),
+      res: HttpResponseCore.create({
+        ...res,
+        [WebInternal]: {
+          providerEntity: null!,
+          nodeEntity: null!,
+        }
+      }),
+      config: {}
+    });
   }
 
   @BeforeAll()

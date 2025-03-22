@@ -5,10 +5,11 @@ import { SetOption, GetOption } from 'cookies';
 
 import type { ByteRange, Any } from '@travetto/runtime';
 
-export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: C, next: () => unknown };
+export type NextFunction = () => unknown;
+export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: C };
 export type HttpFilter<C = unknown> =
   /** @param {HttpContext} context The context of to process  */
-  (context: HttpContext<C>) => unknown;
+  (context: HttpContext<C>, next: NextFunction) => unknown;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 export type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };

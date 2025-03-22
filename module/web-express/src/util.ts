@@ -16,12 +16,12 @@ export class ExpressWebServerUtil {
   /**
    * Convert request, response object from provider to framework
    */
-  static getContext(req: express.Request, res: express.Response, next: express.NextFunction): HttpContext {
+  static getContext(req: express.Request, res: express.Response): HttpContext {
     const fullReq: typeof req & { [WebInternal]?: HttpContext } = req;
     return fullReq[WebInternal] ??= {
       req: this.getRequest(req),
       res: this.getResponse(res),
-      next, config: {}
+      config: {}
     };
   }
 
@@ -56,14 +56,8 @@ export class ExpressWebServerUtil {
       get headersSent(): boolean {
         return res.headersSent;
       },
-      get statusCode(): number | undefined {
-        return res.statusCode;
-      },
-      set statusCode(code: number) {
-        res.status(code);
-        res.statusCode = code;
-      },
       respond(value): Promise<void> | void {
+        res.status(this.statusCode ?? 200);
         if (isReadable(value)) {
           return pipeline(value, res);
         } else {

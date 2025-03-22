@@ -1,4 +1,4 @@
-import { HttpContext, HttpInterceptor, HttpInterceptorCategory } from '@travetto/web';
+import { HttpContext, HttpInterceptor, HttpInterceptorCategory, NextFunction } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 class Appender {
@@ -16,7 +16,7 @@ export class CustomLoggingInterceptor implements HttpInterceptor {
     this.appender = appender;
   }
 
-  async filter({ req, next }: HttpContext) {
+  async filter({ req }: HttpContext, next: NextFunction) {
     await next();
     // Write request to database
     this.appender.write(req.method, req.path, req.query);

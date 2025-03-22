@@ -16,12 +16,12 @@ export class NodeWebServerUtil {
   /**
    * Convert request, response object from provider to framework
    */
-  static getContext(req: IncomingMessage, res: ServerResponse, next: () => unknown): HttpContext {
+  static getContext(req: IncomingMessage, res: ServerResponse): HttpContext {
     const fullReq: typeof req & { [WebInternal]?: HttpContext } = req;
     return fullReq[WebInternal] ??= {
       req: this.getRequest(req),
       res: this.getResponse(res),
-      next, config: {}
+      config: {}
     };
   }
 
