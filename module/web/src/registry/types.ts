@@ -2,16 +2,17 @@ import type { Class } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { HttpFilter, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointHandler, HttpResponse } from '../types.ts';
+import type { HttpFilter, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointFunction, HttpResponse } from '../types.ts';
 
 export type EndpointParamExtractor = (config: EndpointParamConfig, req: HttpRequest, res: HttpResponse) => unknown;
+export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
 
 /**
  * Endpoint decorator for composition of routing logic
  */
 export type EndpointDecorator = (
   (<T extends Class>(target: T) => void) &
-  (<U>(target: U, prop: string, descriptor?: TypedPropertyDescriptor<EndpointHandler>) => void)
+  (<U>(target: U, prop: string, descriptor?: EndpointFunctionDescriptor) => void)
 );
 
 /**
@@ -134,7 +135,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The function the endpoint will call
    */
-  handler: EndpointHandler;
+  handler: EndpointFunction;
   /**
    * The compiled and finalized handler
    */

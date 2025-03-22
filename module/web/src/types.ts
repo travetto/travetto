@@ -8,7 +8,7 @@ import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
 export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: C, next: () => unknown };
 export type HttpFilter<C = unknown> = (context: HttpContext<C>) => unknown;
 
-export type EndpointHandler = TypedFunction<Any, Any>;
+export type EndpointFunction = TypedFunction<Any, Any>;
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
 
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
