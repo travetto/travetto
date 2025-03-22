@@ -4,13 +4,17 @@ import { Ignore } from '@travetto/schema';
 
 import { HttpContext, HttpRequest } from '../types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 
 /**
  * Web cors support
  */
 @Config('web.cors')
-export class CorsConfig extends ManagedInterceptorConfig {
+export class CorsConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
   /**
    * Allowed origins
    */

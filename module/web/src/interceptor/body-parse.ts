@@ -8,7 +8,7 @@ import { AppError } from '@travetto/runtime';
 import { HttpRequest, HttpContext, WebInternal } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { AcceptsInterceptor } from './accepts.ts';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
@@ -19,7 +19,11 @@ type ParserType = 'json' | 'text' | 'form';
  * Web body parse configuration
  */
 @Config('web.bodyParse')
-export class BodyParseConfig extends ManagedInterceptorConfig {
+export class BodyParseConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
   /**
    * Max body size limit
    */

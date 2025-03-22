@@ -37,7 +37,6 @@ export class KoaWebServerUtil {
       headers: ctx.request.headers,
       cookies: ctx.cookies,
       pipe: ctx.req.pipe.bind(ctx.req),
-      on: ctx.req.on.bind(ctx.req)
     });
   }
 

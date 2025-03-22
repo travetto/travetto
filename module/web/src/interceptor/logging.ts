@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { HttpContext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
 import { RespondInterceptor } from './respond.ts';
 
@@ -9,7 +9,14 @@ import { RespondInterceptor } from './respond.ts';
  * Web logging configuration
  */
 @Config('web.log')
-export class WebLogConfig extends ManagedInterceptorConfig {
+export class WebLogConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
+  /**
+   * Should errors be dumped as full stack traces
+   */
   showStackTrace = true;
 }
 

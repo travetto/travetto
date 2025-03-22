@@ -1,13 +1,18 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Config } from '@travetto/config';
 
 import { HttpContext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { Config } from '@travetto/config';
 
 @Config('web.getCache')
-export class GetCacheConfig extends ManagedInterceptorConfig { }
+export class GetCacheConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
+}
 
 /**
  * Determines if we should cache all get requests
@@ -18,7 +23,7 @@ export class GetCacheInterceptor implements HttpInterceptor {
   category: HttpInterceptorCategory = 'response';
 
   @Inject()
-  config: GetCacheConfig;
+  config?: GetCacheConfig;
 
   applies(endpoint: EndpointConfig): boolean {
     return endpoint.method === 'get';

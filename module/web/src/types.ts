@@ -139,10 +139,6 @@ export interface HttpRequest<T = unknown> {
    */
   getContentType(): HttpContentType | undefined;
   /**
-   * Listen for request events
-   */
-  on(ev: 'end' | 'close' | 'error', cb: Function): unknown;
-  /**
    * Get the ip address for a request
    */
   getIp(): string | undefined;
@@ -158,10 +154,6 @@ export interface HttpRequest<T = unknown> {
    * Get expanded query
    */
   getExpandedQuery(): Record<string, unknown>;
-  /**
-   * Readable stream for the request body
-   */
-  stream(): Readable;
 }
 
 /**

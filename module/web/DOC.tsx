@@ -218,9 +218,6 @@ export const text = <>
       <c.SubSubSection title='Enable/disable of individual interceptors via configuration'>
         <c.Code title='Sample interceptor disabling configuration' src='doc/disable.yml' />
       </c.SubSubSection>
-      <c.SubSubSection title='Path-based control for various endpoints within the application'>
-        <c.Code title='Sample interceptor path managed configuration' src='doc/endpoint-allow-deny.yml' />
-      </c.SubSubSection>
       <c.SubSubSection title='Endpoint-enabled control via decorators'>
         <c.Code title='Sample controller with endpoint-level allow/deny' src='doc/controller-endpoint-deny.ts' />
       </c.SubSubSection>

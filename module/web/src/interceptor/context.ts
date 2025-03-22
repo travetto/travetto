@@ -1,12 +1,8 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Config } from '@travetto/config';
 
 import { HttpContext } from '../types.ts';
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { WebContext } from '../context.ts';
-
-@Config('web.context')
-class AsyncContextConfig extends ManagedInterceptorConfig { }
 
 /**
  * Enables access to contextual data when running in a web application
@@ -18,9 +14,6 @@ export class AsyncContextInterceptor implements HttpInterceptor {
 
   @Inject()
   context: WebContext;
-
-  @Inject()
-  config: AsyncContextConfig;
 
   intercept(ctx: HttpContext): Promise<unknown> {
     return this.context.withContext(ctx);

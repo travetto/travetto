@@ -1,5 +1,4 @@
 import { Config } from '@travetto/config';
-import { ManagedInterceptorConfig } from '@travetto/web';
 
 export type WebRpcClient = {
   type: 'node' | 'web';
@@ -10,7 +9,7 @@ export type WebRpcClient = {
  * Web body parse configuration
  */
 @Config('web.rpc')
-export class WebRpcConfig extends ManagedInterceptorConfig {
+export class WebRpcConfig {
   clients: WebRpcClient[] = [];
   disabled = true;
 }

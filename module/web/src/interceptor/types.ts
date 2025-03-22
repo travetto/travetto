@@ -1,23 +1,7 @@
 import { type Any, type Class } from '@travetto/runtime';
-import { Schema } from '@travetto/schema';
 
 import type { EndpointConfig } from '../registry/types.ts';
 import type { HttpFilter } from '../types.ts';
-
-export type EndpointApplies = (endpoint: EndpointConfig, config?: { basePath: string }) => boolean;
-
-@Schema()
-export abstract class ManagedInterceptorConfig {
-  /**
-   * Interceptor mode, defaults to 'opt-out'
-   */
-  disabled?: boolean;
-
-  /**
-   * Path specific overrides
-   */
-  paths?: string[];
-}
 
 /**
  * High level categories with a defined ordering
@@ -61,7 +45,7 @@ export interface HttpInterceptor<C = Any> {
    * @param endpoint The endpoint to check
    * @param controller The controller the endpoint belongs to
    */
-  applies?: EndpointApplies;
+  applies?(endpoint: EndpointConfig, config?: { basePath: string }): boolean;
 
   /**
    * Is this a placeholder filter

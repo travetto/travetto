@@ -10,7 +10,7 @@ import { RootRegistry } from '@travetto/registry';
 import { ConfigureInterceptor } from '../src/decorator/common.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from '../src/interceptor/types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../src/interceptor/types.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { HttpResponse, HttpContext, WebServerHandle, WebInternal } from '../src/types.ts';
 import { WebServer } from '../src/application/server.ts';
@@ -23,9 +23,9 @@ import { HttpResponseCore } from '../src/response/core.ts';
 
 @Injectable()
 @Config('web.custom')
-class CustomInterceptorConfig extends ManagedInterceptorConfig {
+class CustomInterceptorConfig {
+  disabled = false;
   name = 'bob';
-  paths = ['!test-interceptor:blackListed'];
 
   weird() { }
 }

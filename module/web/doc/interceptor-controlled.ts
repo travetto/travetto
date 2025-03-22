@@ -9,7 +9,7 @@ export class SimpleLoggingInterceptor implements HttpInterceptor {
   async intercept(ctx: HttpContext) {
     const start = Date.now();
     try {
-      await ctx.next();
+      return await ctx.next();
     } finally {
       console.log('Request complete', { time: Date.now() - start });
     }

@@ -8,7 +8,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
-import { HttpInterceptor, HttpInterceptorCategory, ManagedInterceptorConfig } from './types';
+import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpRequest, HttpResponse, HttpContext, HttpResponsePayload } from '../types';
 import { HttpPayloadUtil } from '../util/payload';
 import { EtagInterceptor } from './etag';
@@ -23,9 +23,22 @@ const ENCODING_METHODS = {
 type HttpCompressEncoding = keyof typeof ENCODING_METHODS | 'identity';
 
 @Config('web.compress')
-export class CompressConfig extends ManagedInterceptorConfig {
+export class CompressConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
+  /**
+   * Raw encoding options
+   */
   raw?: (ZlibOptions & BrotliOptions) | undefined;
+  /**
+   * Preferred encodings
+   */
   preferredEncodings?: HttpCompressEncoding[] = ['br', 'gzip', 'identity'];
+  /**
+   * Supported encodings
+   */
   supportedEncodings: HttpCompressEncoding[] = ['br', 'gzip', 'identity', 'deflate'];
 }
 

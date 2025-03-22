@@ -175,7 +175,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   createInterceptorConfigDecorator<T extends HttpInterceptor>(
     cls: Class<T>,
-    cfg: Partial<Omit<RetainFields<T['config']>, 'paths'>>
+    cfg: Partial<RetainFields<T['config']>>
   ): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<EndpointHandler>): void => {
       if (prop && descriptor) {

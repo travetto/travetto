@@ -8,5 +8,6 @@ export class HelloWorldInterceptor implements HttpInterceptor {
 
   intercept(ctx: HttpContext) {
     console.log('Hello world!');
+    return ctx.next();
   }
 }

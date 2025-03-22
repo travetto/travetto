@@ -5,12 +5,19 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { HttpRequest, HttpResponse, HttpContext, HttpResponsePayload } from '../types';
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types';
+import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpPayloadUtil } from '../util/payload';
 import { GetCacheInterceptor } from './get-cache';
 
 @Config('web.etag')
-export class EtagConfig extends ManagedInterceptorConfig {
+export class EtagConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
+  /**
+   * Should we generate a weak etag
+   */
   weak?: boolean;
 }
 

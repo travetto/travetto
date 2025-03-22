@@ -1,5 +1,4 @@
 import { IncomingHttpHeaders } from 'node:http';
-import { PassThrough, Readable } from 'node:stream';
 
 import { asFull, ByteRange, castTo } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
@@ -103,14 +102,5 @@ export class HttpRequestCore implements Partial<HttpRequest> {
    */
   getExpandedQuery(this: HttpRequest): Record<string, unknown> {
     return this[WebInternal].queryExpanded ??= BindUtil.expandPaths(this.query);
-  }
-
-  /**
-   * Get request body as a stream
-   */
-  stream(this: HttpRequest): Readable {
-    const out = new PassThrough();
-    this.pipe(out);
-    return out;
   }
 }

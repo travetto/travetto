@@ -1,12 +1,12 @@
 import { toConcrete } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
-import { HttpInterceptor, HttpContext, HttpFilterNext, ManagedInterceptorConfig, WebContext, HttpInterceptorCategory } from '@travetto/web';
+import { HttpInterceptor, HttpContext, HttpFilterNext, WebContext, HttpInterceptorCategory } from '@travetto/web';
 import { Session, SessionContext, SessionData, SessionService } from '@travetto/auth-session';
 import { Config } from '@travetto/config';
 import { AuthContextInterceptor } from '@travetto/auth-web';
 
 @Config('web.session')
-class WebSessionConfig implements ManagedInterceptorConfig { }
+class WebSessionConfig { }
 
 /**
  * Loads session, and provides ability to create session as needed, persists when complete.

@@ -5,11 +5,18 @@ import { Ignore } from '@travetto/schema';
 
 import { MimeUtil } from '../util/mime.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { HttpContext } from '../types.ts';
 
 @Config('web.accepts')
-class AcceptsConfig extends ManagedInterceptorConfig {
+class AcceptsConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
+  /**
+   * The accepted types
+   */
   types: string[] = [];
 
   @Ignore()
@@ -37,7 +44,7 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
     return false;
   }
 
-  intercept({ req, config, next }: HttpContext<AcceptsConfig>): Promise<unknown> {
+  intercept({ req, config, next }: HttpContext<AcceptsConfig>): unknown {
     const contentType = req.header('content-type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });

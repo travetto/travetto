@@ -7,13 +7,17 @@ import { castTo } from '@travetto/runtime';
 
 import { HttpContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 
 /**
  * Web cookie configuration
  */
 @Config('web.cookie')
-export class CookieConfig extends ManagedInterceptorConfig {
+export class CookieConfig {
+  /**
+   * Should this be turned off by default?
+   */
+  disabled?: boolean;
   /**
    * Are they signed
    */

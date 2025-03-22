@@ -40,7 +40,6 @@ export class ExpressWebServerUtil {
       params: req.params,
       headers: req.headers,
       pipe: req.pipe.bind(req),
-      on: req.on.bind(req)
     });
   }
 

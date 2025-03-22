@@ -38,7 +38,6 @@ export class FastifyWebServerUtil {
       params: castTo(req.params),
       headers: req.headers,
       pipe: req.raw.pipe.bind(req.raw),
-      on: req.raw.on.bind(req.raw)
     });
   }
 

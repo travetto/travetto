@@ -1,4 +1,4 @@
-import { HttpInterceptor, ManagedInterceptorConfig, HttpInterceptorCategory, HttpContext } from '@travetto/web';
+import { HttpInterceptor, HttpInterceptorCategory, HttpContext } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -7,7 +7,7 @@ import { AuthService } from '@travetto/auth';
 import { AuthContextInterceptor } from './context.ts';
 
 @Config('web.auth.login')
-export class WebAuthLoginConfig extends ManagedInterceptorConfig {
+export class WebAuthLoginConfig {
   @Ignore()
   providers: symbol[];
 }

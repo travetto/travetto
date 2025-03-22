@@ -1,5 +1,5 @@
 import { AppError, Util } from '@travetto/runtime';
-import { HttpInterceptor, ManagedInterceptorConfig, HttpContext, HttpInterceptorCategory } from '@travetto/web';
+import { HttpInterceptor, HttpContext, HttpInterceptorCategory } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -17,7 +17,7 @@ function matchPermissionSet(rule: string[], perms: Set<string>): boolean {
 }
 
 @Config('web.auth.verify')
-export class WebAuthVerifyConfig extends ManagedInterceptorConfig {
+export class WebAuthVerifyConfig {
   /**
    * Default state to care about
    */

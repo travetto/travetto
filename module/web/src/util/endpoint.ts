@@ -1,39 +1,14 @@
-import { asConstructable, Class, Util } from '@travetto/runtime';
+import { asConstructable, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { HttpRequest, HttpFilter, HttpContext, HttpResponse, WebInternal } from '../types.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
-import { HttpInterceptor, EndpointApplies } from '../interceptor/types.ts';
+import { HttpInterceptor } from '../interceptor/types.ts';
 
-const CheckerSymbol: unique symbol = Symbol.for('@travetto/web:endpoint-checker');
-
-type EndpointRule = { sub: string | RegExp, base: string };
 type LightweightConfig<C extends {} = {}> = { disabled?: boolean } & C;
 type HttpFilterChainItem = readonly [HttpFilter, LightweightConfig | undefined];
 
 const hasDisabled = (o: unknown): o is { disabled: boolean } => !!o && typeof o === 'object' && 'disabled' in o;
-const hasPaths = (o: unknown): o is { paths: string[] } => !!o && typeof o === 'object' && 'paths' in o && Array.isArray(o['paths']);
-
-function convertRule(rule: string): EndpointRule {
-  const [base, sub = '*'] = rule.split(':');
-  let final: string | RegExp = sub.replace(/^\/+/, '');
-  if (final.includes('*')) {
-    final = new RegExp(`^${final.replace(/[*]/g, '.*')}`);
-  }
-  return { base: base.replace(/^\/+/, ''), sub: final };
-}
-
-function compareRule({ sub, base }: EndpointRule, endpoint: EndpointConfig, controller?: Pick<ControllerConfig, 'basePath'>): boolean {
-  let match = false;
-  if (base === (controller?.basePath ?? '').replace(/^\/+/, '') || base === '*') {
-    if (!sub || sub === '*') {
-      match = true;
-    } else if (typeof endpoint.path === 'string') {
-      match = (typeof sub === 'string') ? endpoint.path.replace(/^\/+/, '') === sub : sub.test(endpoint.path);
-    }
-  }
-  return match;
-}
 
 /**
  * Endpoint specific utilities
@@ -89,17 +64,6 @@ export class EndpointUtil {
       return false;
     } else if (resolvedConfig?.disabled === false) { // If explicitly not disabled
       return true;
-    }
-
-    // Verify if endpoint applies matches, let it override interceptor-level applies
-    if (hasPaths(config) && config.paths.length) {
-      const withChecker: typeof config & { [CheckerSymbol]?: EndpointApplies } = config;
-      const applies = withChecker[CheckerSymbol] ??= Util.allowDeny(config.paths, convertRule, compareRule);
-      const result = applies(endpoint, controller);
-      console.log('Verifying paths', interceptor.constructor.name, controller?.basePath, endpoint.path, config.paths, result);
-      if (result === false) {
-        return result;
-      }
     }
 
     // Fallback to interceptor level applies when paths haven't overridden
