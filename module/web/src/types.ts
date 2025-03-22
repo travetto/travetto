@@ -7,9 +7,6 @@ import type { ByteRange, Any } from '@travetto/runtime';
 
 export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: C, next: () => unknown };
 export type HttpFilter<C = unknown> = (context: HttpContext<C>) => unknown;
-
-export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
-
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 export type HttpContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };

@@ -6,8 +6,9 @@ import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpMethodOrAll, HttpRequest, WebServerHandle } from '../../src/types.ts';
+import { HttpMethodOrAll, HttpRequest } from '../../src/types.ts';
 import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base.ts';
+import { WebServerHandle } from '../../src/application/server.ts';
 import { CoreWebServerSupport } from './server-support/core.ts';
 import { NetUtil } from '../../src/util/net.ts';
 

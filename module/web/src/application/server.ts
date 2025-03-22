@@ -1,6 +1,6 @@
-import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { WebServerHandle } from '../types.ts';
 import type { EndpointConfig } from '../registry/types.ts';
+
+export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
 
 /**
  * Defines the contract for any http server to support the framework.
