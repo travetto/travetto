@@ -98,11 +98,12 @@ export class CompressionInterceptor implements HttpInterceptor {
     if (Buffer.isBuffer(data)) {
       stream.end(data);
       const out = await buffer(stream);
-      res.setHeader('Content-Length', `${out.length}`);
-      return out;
+      const newPayload = HttpPayloadUtil.fromBytes(out, res.getHeader('Content-Type')?.toString());
+      return HttpPayloadUtil.applyPayload(ctx, newPayload, out);
     } else {
       data.pipe(stream);
-      return stream;
+      const newPayload = HttpPayloadUtil.fromStream(stream, res.getHeader('Content-Type')?.toString());
+      return HttpPayloadUtil.applyPayload(ctx, newPayload, stream);
     }
   }
 

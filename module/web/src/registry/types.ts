@@ -61,7 +61,7 @@ interface CoreConfig {
   /**
    * Set of interceptor configs
    */
-  interceptorConfigs?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
+  interceptorConfigs?: [Class<HttpInterceptor>, Record<string, unknown>][];
   /**
    * List of headers to add to the response
    */
@@ -146,7 +146,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * Endpoint-based interceptor enable/disabling
    */
-  interceptorConfigs?: [Class<HttpInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
+  interceptorConfigs?: [Class<HttpInterceptor>, Record<string, unknown>][];
   /**
    * The response type
    */

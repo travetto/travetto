@@ -116,7 +116,7 @@ export class HttpPayloadUtil {
   /**
    * Applies payload to the response
    */
-  static applyPayload({ req, res }: HttpContext, payload: HttpPayload): HttpPayload['data'] {
+  static applyPayload({ req, res }: HttpContext, payload: HttpPayload, sourceValue?: unknown): HttpPayload['data'] {
     const { length, defaultContentType, headers, data, statusCode } = payload;
 
     for (const map of [res[WebInternal].headersAdded, headers]) {
@@ -145,6 +145,8 @@ export class HttpPayloadUtil {
       }
     }
 
+    res[WebInternal].payload = [payload, sourceValue];
+
     return data;
   }
 
@@ -158,8 +160,6 @@ export class HttpPayloadUtil {
     }
 
     const payload = isSerializable(value) ? value.serialize(ctx) : this.from(value);
-    ctx.res[WebInternal].payload = [payload, value];
-
-    return this.applyPayload(ctx, payload);
+    return this.applyPayload(ctx, payload, value);
   }
 }
