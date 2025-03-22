@@ -11,10 +11,6 @@ import { HttpChainedContext } from '../types.ts';
 @Config('web.accepts')
 class AcceptsConfig {
   /**
-   * Should this be turned off by default?
-   */
-  disabled?: boolean;
-  /**
    * The accepted types
    */
   types: string[] = [];
