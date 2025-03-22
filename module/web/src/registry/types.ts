@@ -1,9 +1,10 @@
-import type { Class } from '@travetto/runtime';
+import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { HttpFilter, HttpHeaderMap, HttpMethodOrAll, HttpRequest, EndpointFunction, HttpResponse } from '../types.ts';
+import type { HttpFilter, HttpHeaderMap, HttpMethodOrAll, HttpRequest, HttpResponse } from '../types.ts';
 
+export type EndpointFunction = TypedFunction<Any, Any>;
 export type EndpointParamExtractor = (config: EndpointParamConfig, req: HttpRequest, res: HttpResponse) => unknown;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
 

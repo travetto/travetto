@@ -3,12 +3,11 @@ import { Readable, Writable } from 'node:stream';
 
 import { SetOption, GetOption } from 'cookies';
 
-import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
+import type { ByteRange, Any } from '@travetto/runtime';
 
 export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: C, next: () => unknown };
 export type HttpFilter<C = unknown> = (context: HttpContext<C>) => unknown;
 
-export type EndpointFunction = TypedFunction<Any, Any>;
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
 
 export type HttpHeaderMap = Record<string, (string | (() => string))>;

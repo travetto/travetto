@@ -1,7 +1,7 @@
 import { Middleware, Context } from 'koa';
 
 import { asConstructable, castTo, Class } from '@travetto/runtime';
-import { ControllerRegistry, EndpointDecorator, EndpointFunction, EndpointFunctionDescriptor, HttpFilter, WebInternal } from '@travetto/web';
+import { ControllerRegistry, EndpointDecorator, EndpointFunctionDescriptor, HttpFilter, WebInternal } from '@travetto/web';
 
 /**
  * Support the ability to inline arbitrary middleware

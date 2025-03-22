@@ -2,8 +2,8 @@ import { DependencyRegistry } from '@travetto/di';
 import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInstance } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
-import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor } from './types.ts';
-import { HttpFilter, EndpointFunction } from '../types.ts';
+import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
+import { HttpFilter } from '../types.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
 import { WebContext } from '../context.ts';
 
