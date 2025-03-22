@@ -166,7 +166,7 @@ class TestInterceptorConfigSuite {
 
   @Test()
   async verifyBlacklist() {
-    assert(await this.name(TestController, '/blackListed') === undefined);
+    assert(await this.name(TestController, '/blackListed') === 'bob');
     assert(await this.name(AltTestController, '/blackListed') === 'greg');
   }
 }

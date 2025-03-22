@@ -52,14 +52,18 @@ export class EndpointUtil {
     const baseDisabled = hasDisabled(interceptor.config) ? interceptor.config.disabled : undefined;
     const resolvedDisabled = hasDisabled(resolvedConfig) ? resolvedConfig.disabled : undefined;
 
-    if (resolvedDisabled === false || interceptor.applies === true) { // If explicitly enabled
+    if (resolvedDisabled === false) { // If explicitly set disabled: false
       return true;
-    } else if (interceptor.applies === false || baseDisabled === true || resolvedDisabled === true) {
+    } else if (baseDisabled === true || resolvedDisabled === true) { // If either base or explicit has disabled set to true
       return false;
     }
 
-    // Fallback to interceptor level applies when paths haven't overridden
-    return interceptor.applies?.(endpoint) ?? true;
+    if (typeof interceptor.applies === 'boolean') {
+      return interceptor.applies;
+    } else {
+      // Fallback to interceptor level applies when paths haven't overridden
+      return interceptor.applies?.(endpoint) ?? true;
+    }
   }
 
   /**
@@ -85,7 +89,8 @@ export class EndpointUtil {
     const configs = new Map<Class, unknown>(interceptors.map(inst => {
       const cls = asConstructable(inst).constructor;
       const inputs = inputByClass.get(cls) ?? [];
-      const config = Object.assign({}, inst.config, ...inputs);
+      // Ensure disabled is not inherited from the config, unless explicitly set
+      const config = Object.assign({}, inst.config, { disabled: undefined }, ...inputs);
       return [cls, inst.finalizeConfig?.(config, castTo(inputs)) ?? config];
     }));
 
