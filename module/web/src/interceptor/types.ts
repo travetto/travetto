@@ -48,14 +48,9 @@ export interface HttpInterceptor<C = Any> {
   applies?(endpoint: EndpointConfig, config?: { basePath: string }): boolean;
 
   /**
-   * Resolve set of partial configs against core configuration
-   */
-  resolveConfig?(partials: Partial<C>[]): C;
-
-  /**
    * Finalize config before use
    */
-  finalizeConfig?(config: C): C;
+  finalizeConfig?(config: C, inputs: Partial<C>[]): C;
 
   /**
    * Process the request

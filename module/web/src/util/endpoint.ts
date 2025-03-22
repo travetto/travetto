@@ -1,4 +1,4 @@
-import { Any, asConstructable, castTo, Class } from '@travetto/runtime';
+import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { HttpFilter, HttpContext, WebInternal, HttpChainedFilter, HttpChainedContext } from '../types.ts';
@@ -78,36 +78,25 @@ export class EndpointUtil {
     endpoint: EndpointConfig,
     controller?: ControllerConfig
   ): [HttpInterceptor, unknown][] {
-    const resolvedConfigs =
-      [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []]
-        .reduce((acc, [cls, cfg]) => {
-          if (!acc.has(cls)) {
-            acc.set(cls, []);
-          }
-          acc.get(cls)!.push(cfg);
-          return acc;
-        }, new Map<Class, unknown[]>());
 
-    const resolvedConfig = new Map<Class, unknown>();
-    for (const inst of interceptors) {
-      const cls = asConstructable(inst).constructor;
-      const values = resolvedConfigs.get(cls) ?? [];
-      if (inst.config) {
-        let resolved =
-          inst.resolveConfig?.(castTo(values)) ??
-          (values.length ? Object.assign({}, inst.config, ...values) : inst.config);
-
-        if (inst.finalizeConfig) {
-          resolved = inst.finalizeConfig(resolved);
-        }
-        resolvedConfig.set(cls, resolved);
-      } else {
-        resolvedConfig.set(cls, {});
+    const inputByClass = new Map<Class, unknown[]>();
+    for (const [cls, cfg] of [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []]) {
+      if (!inputByClass.has(cls)) {
+        inputByClass.set(cls, []);
       }
+      inputByClass.get(cls)!.push(cfg);
     }
+
+    const configs = new Map<Class, unknown>(interceptors.map(inst => {
+      const cls = asConstructable(inst).constructor;
+      const inputs = inputByClass.get(cls) ?? [];
+      const config = Object.assign({}, inst.config, ...inputs);
+      return [cls, inst.finalizeConfig?.(config, castTo(inputs)) ?? config];
+    }));
+
     return interceptors.map(inst => [
       inst,
-      resolvedConfig.get(asConstructable(inst).constructor)
+      configs.get(asConstructable(inst).constructor)
     ]);
   }
 
@@ -123,7 +112,7 @@ export class EndpointUtil {
 
     switch (param.location) {
       case 'path': return ctx.req.params[param.name!];
-      case 'header': return ctx.req.header(param.name!);
+      case 'header': return field.array ? ctx.req.headerList(param.name!) : ctx.req.headerFirst(param.name!);
       case 'body': return ctx.req.body;
       case 'query': {
         const q = ctx.req.getExpandedQuery();

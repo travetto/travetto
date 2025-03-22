@@ -17,17 +17,13 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
   /**
    * Produces final config object
    */
-  resolveConfig(additional: Partial<WebUploadConfig>[]): WebUploadConfig {
-    const out: WebUploadConfig = { ...this.config };
-    for (const el of additional) {
-      const uploads = out.uploads ?? {};
-      for (const [k, cfg] of Object.entries(el.uploads ?? {})) {
-        Object.assign(uploads[k] ??= {}, cfg);
-      }
-      Object.assign(out, el);
-      out.uploads = uploads;
+  finalizeConfig(base: WebUploadConfig, inputs: Partial<WebUploadConfig>[]): WebUploadConfig {
+    base.uploads ??= {};
+    // Override the uploads object with all the data from the inputs
+    for (const [k, cfg] of inputs.flatMap(el => Object.entries(el.uploads ?? {}))) {
+      Object.assign(base.uploads[k] ??= {}, cfg);
     }
-    return out;
+    return base;
   }
 
   /**
