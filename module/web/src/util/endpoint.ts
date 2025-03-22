@@ -114,13 +114,11 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(ctx: HttpContext<EndpointParamConfig>, field: FieldConfig, value?: unknown): unknown {
-    const param = ctx.config;
-
+  static extractParameter(ctx: HttpContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MISSING_PARAM) {
       return value;
     } else if (param.extract) {
-      return param.extract(ctx);
+      return param.extract(ctx, param);
     }
 
     switch (param.location) {
@@ -140,14 +138,14 @@ export class EndpointUtil {
    * @param req The request
    * @param res The response
    */
-  static async extractParameters(endpoint: EndpointConfig, ctx: HttpContext): Promise<unknown[]> {
+  static async extractParameters(ctx: HttpContext, endpoint: EndpointConfig): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
     const vals = ctx.req[WebInternal].requestParams;
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
-      const extracted = endpoint.params.map((c, i) => this.extractParameter({ ...ctx, config: c }, fields[i], vals?.[i]));
+      const extracted = endpoint.params.map((c, i) => this.extractParameter(ctx, c, fields[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;
@@ -184,7 +182,7 @@ export class EndpointUtil {
     }
 
     const handlerBound: HttpFilter = async (ctx): Promise<unknown> => {
-      const params = await this.extractParameters(endpoint, ctx);
+      const params = await this.extractParameters(ctx, endpoint);
       return endpoint.endpoint.apply(endpoint.instance, params);
     };
 

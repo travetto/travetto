@@ -54,9 +54,9 @@ export function Upload(
 
     return Param('body', {
       ...finalConf,
-      extract: (ctx) => {
+      extract: (ctx, config) => {
         const map = ctx.req[WebInternal].uploads!;
-        return isMap ? map : map[ctx.config.name!];
+        return isMap ? map : map[config.name!];
       }
     })(inst, prop, idx);
   };

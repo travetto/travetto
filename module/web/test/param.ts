@@ -101,7 +101,7 @@ export class EndpointParameterTest {
   }
 
   static async extract(ep: EndpointConfig, req: Partial<HttpRequest>, res: Partial<HttpResponse> = {}): Promise<unknown[]> {
-    return await EndpointUtil.extractParameters(ep, {
+    return await EndpointUtil.extractParameters({
       req: HttpRequestCore.create({
         ...req,
         [WebInternal]: {
@@ -117,7 +117,7 @@ export class EndpointParameterTest {
         }
       }),
       config: {}
-    });
+    }, ep);
   }
 
   @BeforeAll()

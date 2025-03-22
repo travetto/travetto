@@ -100,7 +100,7 @@ export interface EndpointParamConfig {
    * Extract the value from request
    * @param context The http context with the endpoint param config
    */
-  extract?: (ctx: HttpContext<EndpointParamConfig>) => unknown;
+  extract?: (ctx: HttpContext, config: EndpointParamConfig) => unknown;
   /**
    * Input prefix for parameter
    */
