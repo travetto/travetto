@@ -52,7 +52,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
         endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
 
       router[endpoint.method](finalPath, async (req, res, next) => {
-        await endpoint.handlerFinalized!(ExpressWebServerUtil.getContext(req, res), next);
+        await endpoint.handlerFinalized!(ExpressWebServerUtil.getContext(req, res, next));
       });
     }
 

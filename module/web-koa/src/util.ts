@@ -12,7 +12,12 @@ export class KoaWebServerUtil {
    */
   static getContext(ctx: koa.Context): HttpContext {
     const fullCtx: typeof ctx & { [WebInternal]?: HttpContext } = ctx;
-    return fullCtx[WebInternal] ??= { req: this.getRequest(ctx), res: this.getResponse(ctx) };
+    return fullCtx[WebInternal] ??= {
+      req: this.getRequest(ctx),
+      res: this.getResponse(ctx),
+      next(): void { },
+      config: undefined!
+    };
   }
 
   /**

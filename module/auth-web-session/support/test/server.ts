@@ -37,6 +37,7 @@ class AutoLogin implements HttpInterceptor {
       issuedAt: new Date(),
       details: {}
     };
+    return ctx.next();
   }
 }
 

@@ -1,17 +1,15 @@
-import { isPromise } from 'node:util/types';
-
-import { Any, asConstructable, castTo, Class, Util } from '@travetto/runtime';
+import { asConstructable, Class, Util } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpRequest, HttpFilter, HttpContext, HttpFilterNext, HttpResponse, WebInternal } from '../types.ts';
+import { HttpRequest, HttpFilter, HttpContext, HttpResponse, WebInternal } from '../types.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
-import { ManagedInterceptorConfig, HttpInterceptor, EndpointApplies, HttpInterceptorFilter } from '../interceptor/types.ts';
+import { HttpInterceptor, EndpointApplies } from '../interceptor/types.ts';
 
 const CheckerSymbol: unique symbol = Symbol.for('@travetto/web:endpoint-checker');
 
 type EndpointRule = { sub: string | RegExp, base: string };
 type LightweightConfig<C extends {} = {}> = { disabled?: boolean } & C;
-type HttpFilterChainItem = (readonly [HttpInterceptorFilter] | readonly [HttpInterceptorFilter, LightweightConfig | undefined]);
+type HttpFilterChainItem = readonly [HttpFilter, LightweightConfig | undefined];
 
 const hasDisabled = (o: unknown): o is { disabled: boolean } => !!o && typeof o === 'object' && 'disabled' in o;
 const hasPaths = (o: unknown): o is { paths: string[] } => !!o && typeof o === 'object' && 'paths' in o && Array.isArray(o['paths']);
@@ -61,30 +59,15 @@ export class EndpointUtil {
   static MISSING_PARAM = Symbol.for('@travetto/web:missing-param');
 
   /**
-   * Get the interceptor config for a given request and interceptor instance
-   */
-  static getInterceptorConfig<T extends HttpInterceptor<U>, U extends ManagedInterceptorConfig>(req: HttpRequest, inst: T): U | undefined {
-    const cfg = req[WebInternal].interceptorConfigs?.[inst.constructor.Ⲑid] ?? undefined;
-    return castTo(cfg);
-  }
-
-  /**
    * Create a full filter chain given the provided filters
    * @param filters Filters to chain
    */
   static createFilterChain(filters: HttpFilterChainItem[]): HttpFilter {
     const len = filters.length - 1;
-    return function filterChain(ctx: HttpContext, next: HttpFilterNext, idx: number = 0): ReturnType<HttpFilter> {
+    return function filterChain(ctx: HttpContext, idx: number = 0): ReturnType<HttpFilter> {
       const [it, cfg] = filters[idx]!;
-      const chainedNext = idx === len ? next : filterChain.bind(null, ctx, next, idx + 1);
-      const out = it({ ...ctx, config: castTo(cfg) }, chainedNext);
-      if (it.length === 2) {
-        return out;
-      } else if (isPromise(out)) {
-        return out.then(chainedNext);
-      } else {
-        return chainedNext();
-      }
+      const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
+      return it({ ...ctx, config: cfg, next: chainedNext });
     };
   }
 
@@ -264,7 +247,10 @@ export class EndpointUtil {
     ];
 
     if (headers && Object.keys(headers).length > 0) {
-      filterChain.unshift([({ res }): void => { res[WebInternal].headersAdded = { ...headers }; }, undefined]);
+      filterChain.unshift([({ res, next }): unknown => {
+        res[WebInternal].headersAdded = { ...headers };
+        return next();
+      }, undefined]);
     }
 
     return this.createFilterChain(filterChain);

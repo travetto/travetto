@@ -48,7 +48,7 @@ export class KoaWebServer implements WebServer<koa> {
     for (const endpoint of endpoints) {
       const finalPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
       router[endpoint.method](finalPath, async (ctx) => {
-        await endpoint.handlerFinalized!(KoaWebServerUtil.getContext(ctx), () => { });
+        await endpoint.handlerFinalized!(KoaWebServerUtil.getContext(ctx));
       });
     }
 

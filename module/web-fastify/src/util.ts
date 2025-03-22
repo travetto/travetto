@@ -14,9 +14,12 @@ export class FastifyWebServerUtil {
   static getContext(req: FastifyRequest, res: FastifyReply): HttpContext {
     const fullReq: typeof req & { [WebInternal]?: HttpRequest } = req;
     const fullRes: typeof res & { [WebInternal]?: HttpResponse } = res;
-    const finalReq = fullReq[WebInternal] ??= this.getRequest(req);
-    const finalRes = fullRes[WebInternal] ??= this.getResponse(res);
-    return { req: finalReq, res: finalRes };
+    return {
+      req: fullReq[WebInternal] ??= this.getRequest(req),
+      res: fullRes[WebInternal] ??= this.getResponse(res),
+      next(): void { },
+      config: undefined!
+    };
   }
 
   /**

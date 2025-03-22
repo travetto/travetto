@@ -10,7 +10,7 @@ import { RootRegistry } from '@travetto/registry';
 import { ConfigureInterceptor } from '../src/decorator/common.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
-import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory, HttpInterceptorContext } from '../src/interceptor/types.ts';
+import { ManagedInterceptorConfig, HttpInterceptor, HttpInterceptorCategory } from '../src/interceptor/types.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { HttpResponse, HttpContext, WebServerHandle, WebInternal } from '../src/types.ts';
 import { WebServer } from '../src/application/server.ts';
@@ -56,8 +56,9 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
     return !/opt-in/.test(`${endpoint.path}`);
   }
 
-  intercept(ctx: HttpInterceptorContext<CustomInterceptorConfig>) {
+  intercept(ctx: HttpContext<CustomInterceptorConfig>) {
     Object.assign(ctx.res, { name: ctx.config.name });
+    return ctx.next();
   }
 }
 
@@ -132,8 +133,10 @@ class TestInterceptorConfigSuite {
         },
         headers: {}
       }),
-      res
-    }, () => { });
+      res,
+      next: async () => { },
+      config: undefined
+    });
     return res.name;
   }
 

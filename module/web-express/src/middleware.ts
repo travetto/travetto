@@ -11,18 +11,12 @@ export function ExpressMiddleware(...middleware: [Handler, ...Handler[]]): Endpo
 
     const cls = descriptor ? asConstructable(target).constructor : castTo<Class>(target);
     for (const item of middleware) {
-      const handler: HttpFilter = (ctx, next) => {
-        item(
+      const handler: HttpFilter = async (ctx) => {
+        await new Promise<void>((res, rej) => item(
           castTo<Request>(ctx.req[WebInternal].providerEntity),
           castTo<Response>(ctx.res[WebInternal].providerEntity),
-          (err?: unknown) => {
-            if (err) {
-              throw err;
-            } else {
-              next();
-            }
-          }
-        );
+          (err?: unknown) => err ? rej(err) : res()));
+        return ctx.next();
       };
       if (descriptor) {
         ControllerRegistry.registerEndpointFilter(cls, descriptor.value!, handler);

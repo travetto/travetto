@@ -16,12 +16,12 @@ export class ExpressWebServerUtil {
   /**
    * Convert request, response object from provider to framework
    */
-  static getContext(req: express.Request, res: express.Response): HttpContext {
+  static getContext(req: express.Request, res: express.Response, next: express.NextFunction): HttpContext {
     const fullReq: typeof req & { [WebInternal]?: HttpRequest } = req;
     const fullRes: typeof res & { [WebInternal]?: HttpResponse } = res;
     const finalReq = fullReq[WebInternal] ??= this.getRequest(req);
     const finalRes = fullRes[WebInternal] ??= this.getResponse(res);
-    return { req: finalReq, res: finalRes };
+    return { req: finalReq, res: finalRes, next, config: undefined };
   }
 
   /**

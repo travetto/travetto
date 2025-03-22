@@ -11,7 +11,12 @@ export function KoaMiddleware(...middleware: [Middleware, ...Middleware[]]): End
     const cls = descriptor ? asConstructable(target).constructor : castTo<Class>(target);
 
     for (const item of middleware) {
-      const handler: HttpFilter = (ctx, next) => item(castTo<Context>(ctx.req[WebInternal].providerEntity), async () => next());
+      const handler: HttpFilter = async ctx => {
+        await new Promise<void>((res, rej) =>
+          item(castTo<Context>(ctx.req[WebInternal].providerEntity), async () => res())
+        );
+        return ctx.next();
+      };
       if (descriptor) {
         ControllerRegistry.registerEndpointFilter(cls, descriptor.value!, handler);
       } else {

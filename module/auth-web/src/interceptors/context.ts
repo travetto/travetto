@@ -42,10 +42,10 @@ export class AuthContextInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<AuthToken>(), () => this.authContext.authToken);
   }
 
-  async intercept(ctx: HttpContext, next: HttpFilterNext): Promise<unknown> {
+  async intercept(ctx: HttpContext): Promise<unknown> {
     // Skip if already authenticated
     if (this.authContext.principal) {
-      return next();
+      return ctx.next();
     }
 
     let decoded: Principal | undefined;
@@ -64,7 +64,7 @@ export class AuthContextInterceptor implements HttpInterceptor {
       this.authContext.principal = checked;
       this.authContext.authToken = await this.codec.token?.(ctx);
 
-      return await next();
+      return await ctx.next();
     } finally {
       const result = this.authContext.principal;
       this.authService.manageExpiry(result);
