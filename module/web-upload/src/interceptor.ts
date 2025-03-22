@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { BodyParseInterceptor, HttpContext, HttpInterceptor, WebInternal, HttpInterceptorCategory, NextFilter } from '@travetto/web';
+import { BodyParseInterceptor, HttpInterceptor, WebInternal, HttpInterceptorCategory, HttpChainedContext } from '@travetto/web';
 
 import { WebUploadConfig } from './config.ts';
 import { WebUploadUtil } from './util.ts';
@@ -37,7 +37,7 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
     return false;
   }
 
-  async filter({ req, config }: HttpContext<WebUploadConfig>, next: NextFilter): Promise<unknown> {
+  async filter({ req, config, next }: HttpChainedContext<WebUploadConfig>): Promise<unknown> {
     const uploads: FileMap = {};
 
     try {

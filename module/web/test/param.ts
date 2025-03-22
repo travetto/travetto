@@ -116,7 +116,6 @@ export class EndpointParameterTest {
           nodeEntity: null!,
         }
       }),
-      config: {}
     }, ep);
   }
 

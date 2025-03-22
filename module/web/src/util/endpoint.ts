@@ -1,7 +1,7 @@
-import { asConstructable, castTo, Class } from '@travetto/runtime';
+import { Any, asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpFilter, HttpContext, WebInternal, NextFilter } from '../types.ts';
+import { HttpFilter, HttpContext, WebInternal, HttpChainedFilter, HttpChainedContext } from '../types.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
 
@@ -34,12 +34,12 @@ export class EndpointUtil {
    * Create a full filter chain given the provided filters
    * @param filters Filters to chain
    */
-  static createFilterChain(filters: [HttpFilter, unknown][]): HttpFilter {
+  static createFilterChain(filters: [HttpChainedFilter, unknown][]): HttpChainedFilter {
     const len = filters.length - 1;
-    return function filterChain(ctx: HttpContext, next: NextFilter, idx: number = 0): unknown {
+    return function filterChain(ctx: HttpChainedContext, idx: number = 0): unknown {
       const [it, cfg] = filters[idx]!;
-      const chainedNext = idx === len ? next : filterChain.bind(null, ctx, next, idx + 1);
-      return it({ ...ctx, config: cfg }, chainedNext);
+      const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
+      return it({ req: ctx.req, res: ctx.res, next: chainedNext, config: cfg });
     };
   }
 
@@ -174,7 +174,7 @@ export class EndpointUtil {
     interceptors: HttpInterceptor[],
     endpoint: EndpointConfig,
     controller?: ControllerConfig
-  ): HttpFilter {
+  ): HttpChainedFilter {
 
     // Filter interceptors if needed
     for (const filter of [controller?.interceptorExclude, endpoint.interceptorExclude]) {
@@ -201,14 +201,14 @@ export class EndpointUtil {
       this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
         .filter(([inst, cfg]) => this.verifyEndpointApplies(inst, cfg, endpoint, controller));
 
-    const filterChain: [HttpFilter, unknown][] = castTo([
+    const filterChain: [HttpChainedFilter, unknown][] = castTo([
       ...validInterceptors.map(([inst, cfg]) => [inst.filter.bind(inst), cfg]),
       ...filters.map(fn => [fn, {}]),
       [handlerBound, {}]
     ]);
 
     if (headers && Object.keys(headers).length > 0) {
-      filterChain.unshift([(c, next): unknown => (c.res[WebInternal].headersAdded = { ...headers }, next()), {}]);
+      filterChain.unshift([(c): unknown => (c.res[WebInternal].headersAdded = { ...headers }, c.next()), {}]);
     }
 
     return this.createFilterChain(filterChain);

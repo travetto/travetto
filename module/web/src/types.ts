@@ -6,13 +6,15 @@ import { SetOption, GetOption } from 'cookies';
 import type { ByteRange, Any } from '@travetto/runtime';
 
 export type NextFilter = () => unknown;
-export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: C };
-export type HttpFilter<C = unknown> =
-  /** @param {HttpContext} context The context of to process  */
-  (context: HttpContext<C>, next: NextFilter) => unknown;
+export type HttpContext<C = {}> = { req: HttpRequest, res: HttpResponse } & C;
+/** @param {HttpContext} context The context of to process  */
+export type HttpFilter<C = {}> = (context: HttpContext<C>) => Exclude<unknown, void>;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 export type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
+
+export type HttpChainedContext<C = unknown> = HttpContext<{ next: NextFilter, config: C }>;
+export type HttpChainedFilter<C = unknown> = HttpFilter<{ next: NextFilter, config: C }>;
 
 export const WebInternal: unique symbol = Symbol.for('@travetto/web:internal');
 

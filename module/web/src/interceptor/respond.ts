@@ -1,7 +1,7 @@
 import { Injectable } from '@travetto/di';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
-import { HttpContext, NextFilter } from '../types';
+import { HttpChainedContext } from '../types';
 import { HttpPayloadUtil } from '../util/payload';
 import { LoggingInterceptor } from './logging';
 
@@ -11,10 +11,10 @@ export class RespondInterceptor implements HttpInterceptor {
   category: HttpInterceptorCategory = 'terminal';
   dependsOn = [LoggingInterceptor];
 
-  async filter(ctx: HttpContext, next: NextFilter): Promise<void> {
+  async filter(ctx: HttpChainedContext): Promise<void> {
     let value;
     try {
-      value = await next();
+      value = await ctx.next();
     } catch (err) {
       value = err;
     }

@@ -3,7 +3,7 @@ import { pipeline } from 'node:stream/promises';
 
 import type express from 'express';
 
-import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpContext } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpChainedContext } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -16,11 +16,12 @@ export class ExpressWebServerUtil {
   /**
    * Convert request, response object from provider to framework
    */
-  static getContext(req: express.Request, res: express.Response): HttpContext {
-    const fullReq: typeof req & { [WebInternal]?: HttpContext } = req;
+  static getContext(req: express.Request, res: express.Response, next: express.NextFunction): HttpChainedContext {
+    const fullReq: typeof req & { [WebInternal]?: HttpChainedContext } = req;
     return fullReq[WebInternal] ??= {
       req: this.getRequest(req),
       res: this.getResponse(res),
+      next,
       config: {}
     };
   }

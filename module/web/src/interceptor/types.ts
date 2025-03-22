@@ -1,7 +1,7 @@
 import { type Any, type Class } from '@travetto/runtime';
 
 import type { EndpointConfig } from '../registry/types.ts';
-import type { HttpFilter } from '../types.ts';
+import type { HttpChainedFilter } from '../types.ts';
 
 /**
  * High level categories with a defined ordering
@@ -60,5 +60,5 @@ export interface HttpInterceptor<C = Any> {
   /**
    * Process the request
    */
-  filter: HttpFilter<C>;
+  filter: HttpChainedFilter<C>;
 }

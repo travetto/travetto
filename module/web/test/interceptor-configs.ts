@@ -12,7 +12,7 @@ import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
 import { HttpInterceptor, HttpInterceptorCategory } from '../src/interceptor/types.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpResponse, HttpContext, WebInternal } from '../src/types.ts';
+import { HttpResponse, WebInternal, HttpChainedContext } from '../src/types.ts';
 import { WebServer, WebServerHandle } from '../src/application/server.ts';
 import { WebApplication } from '../src/application/app.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
@@ -56,9 +56,9 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
     return !/opt-in/.test(`${endpoint.path}`);
   }
 
-  filter(ctx: HttpContext<CustomInterceptorConfig>) {
-    Object.assign(ctx.res, { name: ctx.config.name });
-    return ctx.next();
+  filter({ res, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
+    Object.assign(res, { name: config.name });
+    return next();
   }
 }
 
@@ -134,8 +134,6 @@ class TestInterceptorConfigSuite {
         headers: {}
       }),
       res,
-      next: async () => { },
-      config: undefined
     });
     return res.name;
   }

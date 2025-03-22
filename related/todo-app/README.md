@@ -451,11 +451,17 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/create-todo.ts <key> <port>
 
-{
-  text: 'New Todo - <key>',
-  created: '2029-03-14T04:00:01.510Z',
-  id: '<uniqueId>'
-}
+SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at parseJSONFromBytes (node:internal/deps/undici/undici:5738:19)
+    at successSteps (node:internal/deps/undici/undici:5719:27)
+    at fullyReadBody (node:internal/deps/undici/undici:4609:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async consumeBody (node:internal/deps/undici/undici:5728:7)
+    at async Module.main (./doc/create-todo.ts:2:15)
+    at async MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:26:13)
+    at async Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:58:20)
+    at async Function.run (<workspace-root>/module/cli/src/execute.ts:75:9)
 ```
 
 Now create `support/list-todo.ts` with the following contents:
@@ -472,11 +478,16 @@ export async function main(key: string, port: number) {
 ```bash
 $ trv main support/list-todo.ts <key> <port>
 
-[
-  {
-    id: '<uniqueId>',
-    text: 'New Todo - <key>',
-    created: '2029-03-14T04:00:01.814Z'
-  }
-]
+SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at parseJSONFromBytes (node:internal/deps/undici/undici:5738:19)
+    at successSteps (node:internal/deps/undici/undici:5719:27)
+    at consumeBody (node:internal/deps/undici/undici:5725:9)
+    at _Response.json (node:internal/deps/undici/undici:5665:18)
+    at <anonymous> (./doc/list-todo.ts:2:81)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Module.main (./doc/list-todo.ts:2:15)
+    at async MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:26:13)
+    at async Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:58:20)
+    at async Function.run (<workspace-root>/module/cli/src/execute.ts:75:9)
 ```

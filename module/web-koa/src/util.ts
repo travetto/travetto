@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore, HttpContext } from '@travetto/web';
+import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore, HttpContext, HttpChainedContext } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -10,11 +10,12 @@ export class KoaWebServerUtil {
   /**
    * Convert context object from provider to framework
    */
-  static getContext(ctx: koa.Context): HttpContext {
-    const fullCtx: typeof ctx & { [WebInternal]?: HttpContext } = ctx;
+  static getContext(ctx: koa.Context, next: koa.Next): HttpChainedContext {
+    const fullCtx: typeof ctx & { [WebInternal]?: HttpChainedContext } = ctx;
     return fullCtx[WebInternal] ??= {
       req: this.getRequest(ctx),
       res: this.getResponse(ctx),
+      next,
       config: {}
     };
   }

@@ -483,11 +483,17 @@ Create <code class="item path">support/create-todo.ts</code> with the following 
 </figcaption>
     <pre><code class="language-bash">$ trv main support/create-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
-<span class="token punctuation">{{'{'}}</span>
-  text: <span class="token string">'New Todo - &lt;key>'</span>,
-  created: <span class="token string">'2029-03-14T04:00:01.510Z'</span>,
-  id: <span class="token string">'&lt;uniqueId>'</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
+SyntaxError: Unexpected end of JSON input
+    at JSON.parse <span class="token punctuation">(</span><span class="token operator">&lt;</span>anonymous<span class="token operator">></span><span class="token punctuation">)</span>
+    at parseJSONFromBytes <span class="token punctuation">(</span>node:internal/deps/undici/undici:5738:19<span class="token punctuation">)</span>
+    at successSteps <span class="token punctuation">(</span>node:internal/deps/undici/undici:5719:27<span class="token punctuation">)</span>
+    at fullyReadBody <span class="token punctuation">(</span>node:internal/deps/undici/undici:4609:9<span class="token punctuation">)</span>
+    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:105:5<span class="token punctuation">)</span>
+    at async consumeBody <span class="token punctuation">(</span>node:internal/deps/undici/undici:5728:7<span class="token punctuation">)</span>
+    at async Module.main <span class="token punctuation">(</span>./doc/create-todo.ts:2:15<span class="token punctuation">)</span>
+    at async MainCommand.main <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/cli.main.ts:26:13<span class="token punctuation">)</span>
+    at async Function.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:58:20)</span>
+    at async Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:75:9<span class="token punctuation">)</span></code></pre>
   </figure>
 
 Now create <code class="item path">support/list-todo.ts</code> with the following contents:
@@ -509,11 +515,16 @@ Now create <code class="item path">support/list-todo.ts</code> with the followin
 </figcaption>
     <pre><code class="language-bash">$ trv main support/list-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span> <span class="token operator">&lt;</span>port<span class="token operator">></span>
 
-<span class="token punctuation">[</span>
-  <span class="token punctuation">{{'{'}}</span>
-    id: <span class="token string">'&lt;uniqueId>'</span>,
-    text: <span class="token string">'New Todo - &lt;key>'</span>,
-    created: <span class="token string">'2029-03-14T04:00:01.814Z'</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">]</span></code></pre>
+SyntaxError: Unexpected end of JSON input
+    at JSON.parse <span class="token punctuation">(</span><span class="token operator">&lt;</span>anonymous<span class="token operator">></span><span class="token punctuation">)</span>
+    at parseJSONFromBytes <span class="token punctuation">(</span>node:internal/deps/undici/undici:5738:19<span class="token punctuation">)</span>
+    at successSteps <span class="token punctuation">(</span>node:internal/deps/undici/undici:5719:27<span class="token punctuation">)</span>
+    at consumeBody <span class="token punctuation">(</span>node:internal/deps/undici/undici:5725:9<span class="token punctuation">)</span>
+    at _Response.json <span class="token punctuation">(</span>node:internal/deps/undici/undici:5665:18<span class="token punctuation">)</span>
+    at <span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span>./doc/list-todo.ts:2:81<span class="token punctuation">)</span>
+    at process.processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:105:5<span class="token punctuation">)</span>
+    at async Module.main <span class="token punctuation">(</span>./doc/list-todo.ts:2:15<span class="token punctuation">)</span>
+    at async MainCommand.main <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/cli.main.ts:26:13<span class="token punctuation">)</span>
+    at async Function.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:58:20)</span>
+    at async Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:75:9<span class="token punctuation">)</span></code></pre>
   </figure>

@@ -6,9 +6,8 @@ import { AuthContextInterceptor, WebAuthConfig } from '@travetto/auth-web';
 import { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
 import {
-  Controller, Get, Body, Post, Put, HttpRequest, HttpContext, HttpInterceptor,
-  EndpointConfig, ContextParam, HttpInterceptorCategory,
-  NextFilter
+  Controller, Get, Body, Post, Put, HttpRequest, HttpInterceptor,
+  EndpointConfig, ContextParam, HttpInterceptorCategory, HttpChainedContext
 } from '@travetto/web';
 import { Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
@@ -31,7 +30,7 @@ class AutoLogin implements HttpInterceptor {
     return !endpoint.path.endsWith('/body');
   }
 
-  filter(_: HttpContext, next: NextFilter) {
+  filter({ next }: HttpChainedContext) {
     this.auth.principal ??= {
       id: Util.uuid(),
       sessionId: Util.uuid(),

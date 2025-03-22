@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { HttpContext, NextFilter } from '../types.ts';
+import { HttpChainedContext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
@@ -31,7 +31,7 @@ export class GetCacheInterceptor implements HttpInterceptor {
     return endpoint.method === 'get';
   }
 
-  async filter({ res }: HttpContext, next: NextFilter): Promise<unknown> {
+  async filter({ res, next }: HttpChainedContext): Promise<unknown> {
     const result = await next();
     // Only apply on the way out, and on success
     if (res.getHeader('Expires') === undefined && res.getHeader('Cache-Control') === undefined) {
