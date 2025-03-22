@@ -16,7 +16,7 @@ export class KoaWebServerUtil {
       req: this.getRequest(ctx),
       res: this.getResponse(ctx),
       next(): void { },
-      config: undefined!
+      config: {}
     };
   }
 

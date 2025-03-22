@@ -1,12 +1,9 @@
-import { asConstructable, Class } from '@travetto/runtime';
+import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { HttpRequest, HttpFilter, HttpContext, HttpResponse, WebInternal } from '../types.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
-
-type LightweightConfig<C extends {} = {}> = { disabled?: boolean } & C;
-type HttpFilterChainItem = readonly [HttpFilter, LightweightConfig | undefined];
 
 const hasDisabled = (o: unknown): o is { disabled: boolean } => !!o && typeof o === 'object' && 'disabled' in o;
 
@@ -37,9 +34,9 @@ export class EndpointUtil {
    * Create a full filter chain given the provided filters
    * @param filters Filters to chain
    */
-  static createFilterChain(filters: HttpFilterChainItem[]): HttpFilter {
+  static createFilterChain(filters: [HttpFilter, unknown][]): HttpFilter {
     const len = filters.length - 1;
-    return function filterChain(ctx: HttpContext, idx: number = 0): ReturnType<HttpFilter> {
+    return function filterChain(ctx: HttpContext, idx: number = 0): unknown {
       const [it, cfg] = filters[idx]!;
       const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
       return it({ ...ctx, config: cfg, next: chainedNext });
@@ -54,15 +51,15 @@ export class EndpointUtil {
    */
   static verifyEndpointApplies(
     interceptor: HttpInterceptor,
-    resolvedConfig: LightweightConfig | undefined,
+    resolvedConfig: unknown,
     endpoint: EndpointConfig,
     controller?: ControllerConfig
   ): boolean {
     const config = interceptor.config;
 
-    if ((hasDisabled(config) && config.disabled) || resolvedConfig?.disabled) {
+    if ((hasDisabled(config) && config.disabled) || (hasDisabled(resolvedConfig) && resolvedConfig?.disabled)) {
       return false;
-    } else if (resolvedConfig?.disabled === false) { // If explicitly not disabled
+    } else if (hasDisabled(resolvedConfig) && resolvedConfig?.disabled === false) { // If explicitly not disabled
       return true;
     }
 
@@ -77,10 +74,10 @@ export class EndpointUtil {
    * @param controller
    */
   static resolveInterceptorsWithConfig(
-    interceptors: HttpInterceptor<LightweightConfig>[],
+    interceptors: HttpInterceptor[],
     endpoint: EndpointConfig,
     controller?: ControllerConfig
-  ): (readonly [HttpInterceptor, LightweightConfig | undefined])[] {
+  ): [HttpInterceptor, unknown][] {
     const resolvedConfigs =
       [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []]
         .reduce((acc, [cls, cfg]) => {
@@ -89,15 +86,15 @@ export class EndpointUtil {
           }
           acc.get(cls)!.push(cfg);
           return acc;
-        }, new Map<Class, LightweightConfig[]>());
+        }, new Map<Class, unknown[]>());
 
-    const resolvedConfig = new Map<Class, LightweightConfig>();
+    const resolvedConfig = new Map<Class, unknown>();
     for (const inst of interceptors) {
       const cls = asConstructable(inst).constructor;
       const values = resolvedConfigs.get(cls) ?? [];
       if (inst.config) {
         let resolved =
-          inst.resolveConfig?.(values) ??
+          inst.resolveConfig?.(castTo(values)) ??
           (values.length ? Object.assign({}, inst.config, ...values) : inst.config);
 
         if (inst.finalizeConfig) {
@@ -111,7 +108,7 @@ export class EndpointUtil {
     return interceptors.map(inst => [
       inst,
       resolvedConfig.get(asConstructable(inst).constructor)
-    ] as const);
+    ]);
   }
 
   /**
@@ -204,17 +201,14 @@ export class EndpointUtil {
       this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
         .filter(([inst, cfg]) => this.verifyEndpointApplies(inst, cfg, endpoint, controller));
 
-    const filterChain: HttpFilterChainItem[] = [
-      ...validInterceptors.map(([inst, cfg]) => [inst.intercept.bind(inst), cfg] as const),
-      ...filters.map(fn => [fn, undefined] as const),
-      [handlerBound, undefined] as const
-    ];
+    const filterChain: [HttpFilter, unknown][] = castTo([
+      ...validInterceptors.map(([inst, cfg]) => [inst.intercept.bind(inst), cfg]),
+      ...filters.map(fn => [fn, {}]),
+      [handlerBound, {}]
+    ]);
 
     if (headers && Object.keys(headers).length > 0) {
-      filterChain.unshift([({ res, next }): unknown => {
-        res[WebInternal].headersAdded = { ...headers };
-        return next();
-      }, undefined]);
+      filterChain.unshift([(c): unknown => (c.res[WebInternal].headersAdded = { ...headers }, c.next()), {}]);
     }
 
     return this.createFilterChain(filterChain);

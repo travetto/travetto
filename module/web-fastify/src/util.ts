@@ -18,7 +18,7 @@ export class FastifyWebServerUtil {
       req: fullReq[WebInternal] ??= this.getRequest(req),
       res: fullRes[WebInternal] ??= this.getResponse(res),
       next(): void { },
-      config: undefined!
+      config: {}
     };
   }
 

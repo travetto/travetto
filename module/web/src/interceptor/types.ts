@@ -48,11 +48,6 @@ export interface HttpInterceptor<C = Any> {
   applies?(endpoint: EndpointConfig, config?: { basePath: string }): boolean;
 
   /**
-   * Is this a placeholder filter
-   */
-  placeholder?: boolean;
-
-  /**
    * Resolve set of partial configs against core configuration
    */
   resolveConfig?(partials: Partial<C>[]): C;

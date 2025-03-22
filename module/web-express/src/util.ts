@@ -21,7 +21,7 @@ export class ExpressWebServerUtil {
     const fullRes: typeof res & { [WebInternal]?: HttpResponse } = res;
     const finalReq = fullReq[WebInternal] ??= this.getRequest(req);
     const finalRes = fullRes[WebInternal] ??= this.getResponse(res);
-    return { req: finalReq, res: finalRes, next, config: undefined };
+    return { req: finalReq, res: finalRes, next, config: {} };
   }
 
   /**
