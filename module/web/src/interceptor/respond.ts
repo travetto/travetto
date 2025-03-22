@@ -1,5 +1,4 @@
 import { Injectable } from '@travetto/di';
-import { Class } from '@travetto/runtime';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpContext } from '../types';
