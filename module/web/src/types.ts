@@ -5,8 +5,7 @@ import { SetOption, GetOption } from 'cookies';
 
 import type { ByteRange, Any, TypedFunction } from '@travetto/runtime';
 
-export type HttpFilterNext = () => unknown;
-export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: C, next: HttpFilterNext };
+export type HttpContext<C = unknown> = { req: HttpRequest, res: HttpResponse, config: C, next: () => unknown };
 export type HttpFilter<C = unknown> = (context: HttpContext<C>) => unknown;
 
 export type EndpointHandler = TypedFunction<Any, Any>;

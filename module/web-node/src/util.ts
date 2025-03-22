@@ -3,7 +3,7 @@ import { pipeline } from 'node:stream/promises';
 
 import { IncomingMessage, ServerResponse } from 'node:http';
 
-import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpResponsePayload, HttpContext, HttpFilterNext } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpResponsePayload, HttpContext } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -16,7 +16,7 @@ export class NodeWebServerUtil {
   /**
    * Convert request, response object from provider to framework
    */
-  static getContext(req: IncomingMessage, res: ServerResponse, next: HttpFilterNext): HttpContext {
+  static getContext(req: IncomingMessage, res: ServerResponse, next: () => unknown): HttpContext {
     const fullReq: typeof req & { [WebInternal]?: HttpRequest } = req;
     const fullRes: typeof res & { [WebInternal]?: HttpResponse } = res;
     const finalReq = fullReq[WebInternal] ??= this.getRequest(req);

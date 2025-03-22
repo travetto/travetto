@@ -1,5 +1,5 @@
 import { toConcrete } from '@travetto/runtime';
-import { HttpInterceptor, HttpContext, HttpFilterNext, WebContext, HttpInterceptorCategory } from '@travetto/web';
+import { HttpInterceptor, HttpContext, WebContext, HttpInterceptorCategory } from '@travetto/web';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
 

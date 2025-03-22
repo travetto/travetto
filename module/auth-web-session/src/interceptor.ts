@@ -1,6 +1,6 @@
 import { toConcrete } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
-import { HttpInterceptor, HttpContext, HttpFilterNext, WebContext, HttpInterceptorCategory } from '@travetto/web';
+import { HttpInterceptor, HttpContext, WebContext, HttpInterceptorCategory } from '@travetto/web';
 import { Session, SessionContext, SessionData, SessionService } from '@travetto/auth-session';
 import { Config } from '@travetto/config';
 import { AuthContextInterceptor } from '@travetto/auth-web';
