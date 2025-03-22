@@ -125,7 +125,7 @@ class TestInterceptorConfigSuite {
       getHeader: (k) => undefined,
       removeHeader: () => undefined,
     });
-    await endpoint.handlerFinalized!({
+    await endpoint.filter!({
       req: HttpRequestCore.create({
         [WebInternal]: {
           nodeEntity: castTo(Buffer.from([])),

@@ -120,7 +120,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The name of the method
    */
-  handlerName: string;
+  name: string;
   /**
    * Instance the endpoint is for
    */
@@ -136,11 +136,11 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The function the endpoint will call
    */
-  handler: EndpointFunction;
+  endpoint: EndpointFunction;
   /**
    * The compiled and finalized handler
    */
-  handlerFinalized?: HttpFilter;
+  filter?: HttpFilter;
   /**
    * List of params for the endpoint
    */

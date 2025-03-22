@@ -140,7 +140,7 @@ export class EndpointUtil {
    */
   static async extractParameters(endpoint: EndpointConfig, req: HttpRequest, res: HttpResponse): Promise<unknown[]> {
     const cls = endpoint.class;
-    const method = endpoint.handlerName;
+    const method = endpoint.name;
     const vals = req[WebInternal].requestParams;
 
     try {
@@ -183,7 +183,7 @@ export class EndpointUtil {
 
     const handlerBound: HttpFilter = async ({ req, res }: HttpContext): Promise<unknown> => {
       const params = await this.extractParameters(endpoint, req, res);
-      return endpoint.handler.apply(endpoint.instance, params);
+      return endpoint.endpoint.apply(endpoint.instance, params);
     };
 
     const filters: HttpFilter[] = [

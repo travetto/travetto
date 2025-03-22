@@ -132,7 +132,7 @@ export class WebApplication<T = unknown> {
 
     for (const ep of EndpointUtil.orderEndpoints(endpoints)) {
       ep.instance = config.instance;
-      ep.handlerFinalized = EndpointUtil.createEndpointHandler(this.interceptors, ep, config);
+      ep.filter = EndpointUtil.createEndpointHandler(this.interceptors, ep, config);
     }
 
     await this.server.registerEndpoints(config.class.Ⲑid, config.basePath, endpoints);

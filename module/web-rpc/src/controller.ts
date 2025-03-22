@@ -48,6 +48,6 @@ export class WebRpController {
     req[WebInternal].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MISSING_PARAM : params[i]);
 
     // Dispatch
-    await endpoint.handlerFinalized!({ req: this.ctx.req, res: this.ctx.res, next: async () => { }, config: undefined! });
+    await endpoint.filter!({ req: this.ctx.req, res: this.ctx.res, next: async () => { }, config: undefined! });
   }
 }
