@@ -4,7 +4,7 @@ import Router from 'router';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
-import { castTo, Util } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 
 import { NodeWebServerUtil } from './util.ts';
 import { IncomingMessage, ServerResponse } from 'node:http';

@@ -4,7 +4,7 @@ import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
-import { castTo, Util } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 
 import { KoaWebServerUtil } from './util.ts';
 
