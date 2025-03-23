@@ -1,5 +1,3 @@
-import { Util } from './util.ts';
-
 /**
  * An asynchronous queue
  */
@@ -7,7 +5,7 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
 
   #queue: X[] = [];
   #done = false;
-  #ready = Util.resolvablePromise();
+  #ready = Promise.withResolvers<void>();
 
   /**
    * Initial set of items
@@ -31,7 +29,7 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
   async next(): Promise<IteratorResult<X>> {
     while (!this.#done && !this.#queue.length) {
       await this.#ready.promise;
-      this.#ready = Util.resolvablePromise();
+      this.#ready = Promise.withResolvers<void>();
     }
     return { value: (this.#queue.length ? this.#queue.shift() : undefined)!, done: this.#done };
   }

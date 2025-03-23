@@ -4,7 +4,7 @@ import express from 'express';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
-import { castTo, Util } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 
 import { ExpressWebServerUtil } from './util.ts';
 
@@ -64,7 +64,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
     if (this.config.ssl?.active) {
       raw = https.createServer((await this.config.ssl?.getKeys())!, this.raw);
     }
-    const { reject, resolve, promise } = Util.resolvablePromise();
+    const { reject, resolve, promise } = Promise.withResolvers<void>();
     const server = raw.listen(this.config.port, this.config.hostname, err => err ? reject(err) : resolve());
     await promise;
     return {

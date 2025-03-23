@@ -53,17 +53,14 @@ export class EndpointUtil {
     controller?: ControllerConfig
   ): [HttpInterceptor, unknown][] {
 
-    const inputByClass = new Map<Class, unknown[]>();
-    for (const [cls, cfg] of [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []]) {
-      if (!inputByClass.has(cls)) {
-        inputByClass.set(cls, []);
-      }
-      inputByClass.get(cls)!.push(cfg);
-    }
+    const inputByClass = Map.groupBy(
+      [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []],
+      x => x[0]
+    );
 
     const configs = new Map<Class, unknown>(interceptors.map(inst => {
-      const cls = asConstructable(inst).constructor;
-      const inputs = inputByClass.get(cls) ?? [];
+      const cls = asConstructable<HttpInterceptor>(inst).constructor;
+      const [, inputs] = inputByClass.get(cls) ?? [];
       const config = Object.assign({}, inst.config, ...inputs);
       return [cls, inst.finalizeConfig?.(config, castTo(inputs)) ?? config];
     }));

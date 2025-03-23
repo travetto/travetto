@@ -71,7 +71,7 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
 
   async listen(): Promise<WebServerHandle> {
     this.listening = true;
-    const { reject, resolve, promise } = Util.resolvablePromise();
+    const { reject, resolve, promise } = Promise.withResolvers<void>();
     const server = this.raw.listen(this.config.port, this.config.hostname, undefined, resolve);
     server.on('error', reject);
     await promise;
