@@ -6,6 +6,7 @@ type KeyRec = { key: string, id: string };
 
 @Config('web.auth')
 export class WebAuthConfig {
+  applies: boolean = false;
   mode: 'cookie' | 'header' = 'cookie';
   header: string = 'Authorization';
   cookie: string = 'trv_auth';

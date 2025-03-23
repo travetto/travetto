@@ -6,7 +6,7 @@ import { SetOption, GetOption } from 'cookies';
 import type { ByteRange, Any } from '@travetto/runtime';
 
 export type HttpContext<C = {}> = { req: HttpRequest, res: HttpResponse } & C;
-export type HttpFilter<C extends HttpContext = HttpContext> = (context: C) => Exclude<unknown, void>;
+export type HttpFilter<C extends HttpContext = HttpContext> = (context: C) => unknown;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 export type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };

@@ -1,7 +1,7 @@
 import { Middleware, Context } from 'koa';
 
 import { asConstructable, castTo, Class } from '@travetto/runtime';
-import { ControllerRegistry, EndpointDecorator, EndpointFunctionDescriptor, HttpFilter, WebInternal } from '@travetto/web';
+import { ControllerRegistry, EndpointDecorator, EndpointFunctionDescriptor, HttpChainedFilter, WebInternal } from '@travetto/web';
 
 /**
  * Support the ability to inline arbitrary middleware
@@ -11,16 +11,16 @@ export function KoaMiddleware(...middleware: [Middleware, ...Middleware[]]): End
     const cls = descriptor ? asConstructable(target).constructor : castTo<Class>(target);
 
     for (const item of middleware) {
-      const handler: HttpFilter = async ctx => {
+      const filter: HttpChainedFilter = async ctx => {
         await new Promise<void>((res, rej) =>
           item(castTo<Context>(ctx.req[WebInternal].providerEntity), async () => res())
         );
         return ctx.next();
       };
       if (descriptor) {
-        ControllerRegistry.registerEndpointFilter(cls, descriptor.value!, handler);
+        ControllerRegistry.registerEndpointFilter(cls, descriptor.value!, filter);
       } else {
-        ControllerRegistry.registerControllerFilter(cls, handler);
+        ControllerRegistry.registerControllerFilter(cls, filter);
       }
     }
   };

@@ -149,16 +149,11 @@ export class EndpointUtil {
       return endpoint.endpoint.apply(endpoint.instance, params);
     };
 
-    const filters: HttpFilter[] = [
+    const filters = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
       ...('filters' in endpoint ? endpoint.filters : []).map(fn => fn.bind(endpoint.instance)),
       ...(endpoint.params.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
     ];
-
-    const headers = {
-      ...(controller?.headers ?? {}),
-      ...('headers' in endpoint ? endpoint.headers : {})
-    };
 
     const validInterceptors =
       this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
@@ -170,7 +165,12 @@ export class EndpointUtil {
       [handlerBound, {}]
     ]);
 
-    if (headers && Object.keys(headers).length > 0) {
+    const headers = {
+      ...(controller?.headers ?? {}),
+      ...('headers' in endpoint ? endpoint.headers : {})
+    };
+
+    if (Object.keys(headers).length > 0) {
       filterChain.unshift([(c): unknown => (c.res[WebInternal].headersAdded = { ...headers }, c.next()), {}]);
     }
 

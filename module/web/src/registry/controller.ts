@@ -3,7 +3,7 @@ import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInsta
 import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
-import { HttpFilter } from '../types.ts';
+import { HttpChainedFilter, HttpFilter } from '../types.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
 import { WebContext } from '../context.ts';
 
@@ -89,7 +89,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param cls Controller class
    * @param filter The filter to call
    */
-  registerControllerFilter(target: Class, filter: HttpFilter): void {
+  registerControllerFilter(target: Class, filter: HttpFilter | HttpChainedFilter): void {
     const config = this.getOrCreatePending(target);
     config.filters!.push(filter);
   }
@@ -100,7 +100,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param endpoint Endpoint function
    * @param filter The filter to call
    */
-  registerEndpointFilter(target: Class, endpoint: EndpointFunction, filter: HttpFilter): void {
+  registerEndpointFilter(target: Class, endpoint: EndpointFunction, filter: HttpFilter | HttpChainedFilter): void {
     const config = this.getOrCreateEndpointConfig(target, endpoint);
     config.filters!.unshift(filter);
   }

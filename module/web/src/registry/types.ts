@@ -2,9 +2,9 @@ import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { HttpContext, HttpFilter, HttpHeaderMap, HttpMethodOrAll } from '../types.ts';
+import type { HttpChainedFilter, HttpContext, HttpFilter, HttpHeaderMap, HttpMethodOrAll } from '../types.ts';
 
-export type EndpointFunction = TypedFunction<Any, Any>;
+export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
 
 /**
@@ -57,11 +57,11 @@ interface CoreConfig {
   /**
    * List of filters to run on request
    */
-  filters: HttpFilter[];
+  filters: (HttpFilter | HttpChainedFilter)[];
   /**
    * Set of interceptor configs
    */
-  interceptorConfigs?: [Class<HttpInterceptor>, Record<string, unknown>][];
+  interceptorConfigs?: [Class<HttpInterceptor>, unknown][];
   /**
    * List of headers to add to the response
    */
@@ -143,10 +143,6 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    * List of params for the endpoint
    */
   params: EndpointParamConfig[];
-  /**
-   * Endpoint-based interceptor enable/disabling
-   */
-  interceptorConfigs?: [Class<HttpInterceptor>, Record<string, unknown>][];
   /**
    * The response type
    */

@@ -1,7 +1,7 @@
-import { type Any, type Class } from '@travetto/runtime';
+import type { Any, Class } from '@travetto/runtime';
 
 import type { EndpointConfig } from '../registry/types.ts';
-import type { HttpChainedFilter } from '../types.ts';
+import type { HttpChainedContext } from '../types.ts';
 
 /**
  * High level categories with a defined ordering
@@ -18,7 +18,7 @@ export type HttpInterceptorCategory = (typeof HTTP_INTERCEPTOR_CATEGORIES)[numbe
  *
  * @concrete
  */
-export interface HttpInterceptor<C = Any> {
+export interface HttpInterceptor<C = unknown> {
 
   /**
    * The category an interceptor belongs to
@@ -55,5 +55,5 @@ export interface HttpInterceptor<C = Any> {
    * Process the request
    * @param {HttpChainedContext} context The context of to process
    */
-  filter: HttpChainedFilter<C>;
+  filter(context: HttpChainedContext<C>): unknown;
 }
