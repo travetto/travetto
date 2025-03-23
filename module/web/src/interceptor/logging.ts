@@ -31,7 +31,9 @@ export class LoggingInterceptor implements HttpInterceptor {
   @Inject()
   config: WebLogConfig;
 
-  logResult(req: HttpRequest, res: HttpResponse, defaultCode: number): void {
+  logResult(req: HttpRequest, res: HttpResponse, err?: unknown): void {
+
+    const defaultCode = !!err ? 500 : 200;
     const duration = Date.now() - req[WebInternal].createdDate!;
 
     const reqLog = {
@@ -52,21 +54,24 @@ export class LoggingInterceptor implements HttpInterceptor {
     } else {
       console.error('Request', reqLog);
     }
+
+    if (this.config.showStackTrace && err instanceof Error) {
+      console.error(err.message, { error: err });
+    }
   }
 
   applies(ep: EndpointConfig, config: WebLogConfig): boolean {
     return config.applies;
   }
 
-  async filter({ req, res, next }: HttpChainedContext): Promise<void> {
+  async filter({ req, res, next }: HttpChainedContext): Promise<unknown> {
+    let err;
     try {
-      await next();
-      this.logResult(req, res, 200);
-    } catch (err) {
-      this.logResult(req, res, 500);
-      if (this.config.showStackTrace && err instanceof Error) {
-        console.error(err.message, { error: err });
-      }
+      return await next();
+    } catch (e) {
+      err = e;
+    } finally {
+      this.logResult(req, res, err);
     }
   }
 }

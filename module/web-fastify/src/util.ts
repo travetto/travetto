@@ -12,8 +12,8 @@ export class FastifyWebServerUtil {
    * Convert request, response object from provider to framework
    */
   static getContext(req: FastifyRequest, res: FastifyReply): HttpChainedContext {
-    const fullReq: typeof req & { [WebInternal]?: HttpChainedContext } = req;
-    return fullReq[WebInternal] ??= {
+    const fullRes: typeof res & { [WebInternal]?: HttpChainedContext } = res;
+    return fullRes[WebInternal] ??= {
       req: this.getRequest(req),
       res: this.getResponse(res),
       next: (): void => { },
@@ -55,13 +55,12 @@ export class FastifyWebServerUtil {
       get headersSent(): boolean {
         return reply.sent;
       },
-      respond(value): void {
-        reply.status(this.statusCode ?? 200).send(value);
-      },
-      getHeaderNames: reply.raw.getHeaderNames.bind(reply.raw),
-      setHeader: reply.raw.setHeader.bind(reply.raw),
-      getHeader: castTo(reply.raw.getHeader.bind(reply.raw)), // NOTE: Forcing type, may be incorrect
-      removeHeader: reply.raw.removeHeader.bind(reply.raw),
+      respond(value): unknown {
+        return reply
+          .status(this.statusCode!)
+          .headers(this.getHeaders!())
+          .send(value);
+      }
     });
   }
 }

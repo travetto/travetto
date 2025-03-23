@@ -1,4 +1,5 @@
 import https from 'node:https';
+import { IncomingMessage, ServerResponse } from 'node:http';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import Router from 'router';
 
@@ -7,7 +8,6 @@ import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto
 import { castTo } from '@travetto/runtime';
 
 import { NodeWebServerUtil } from './util.ts';
-import { IncomingMessage, ServerResponse } from 'node:http';
 
 type Keyed = { key?: string | symbol };
 

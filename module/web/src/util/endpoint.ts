@@ -60,7 +60,7 @@ export class EndpointUtil {
 
     const configs = new Map<Class, unknown>(interceptors.map(inst => {
       const cls = asConstructable<HttpInterceptor>(inst).constructor;
-      const [, inputs] = inputByClass.get(cls) ?? [];
+      const inputs = (inputByClass.get(cls) ?? []).map(x => x[1]);
       const config = Object.assign({}, inst.config, ...inputs);
       return [cls, inst.finalizeConfig?.(config, castTo(inputs)) ?? config];
     }));

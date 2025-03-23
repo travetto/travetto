@@ -1,5 +1,5 @@
-import { type Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { Readable } from 'node:stream';
 
 import type express from 'express';
 
@@ -57,20 +57,15 @@ export class ExpressWebServerUtil {
       get headersSent(): boolean {
         return res.headersSent;
       },
-      respond(value): Promise<void> | void {
+      respond(value) {
         res.status(this.statusCode ?? 200);
+        res.setHeaders(new Map(Object.entries(this.getHeaders!())));
         if (isReadable(value)) {
           return pipeline(value, res);
         } else {
-          res.send(value);
-          res.end();
+          res.end(value);
         }
-      },
-      vary: res.vary.bind(res),
-      getHeaderNames: res.getHeaderNames.bind(res),
-      setHeader: res.setHeader.bind(res),
-      getHeader: castTo(res.getHeader.bind(res)), // NOTE: Forcing type, may be incorrect
-      removeHeader: res.removeHeader.bind(res),
+      }
     });
   }
 }

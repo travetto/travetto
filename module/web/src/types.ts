@@ -218,13 +218,17 @@ export interface HttpResponse<T = unknown> {
    */
   removeHeader(key: string): void;
   /**
+   * Get header map
+   */
+  getHeaders(): Readonly<Record<string, string | string[]>>;
+  /**
    * Add value to vary header, or create if not existing
    */
   vary(value: string): void;
   /**
-   * Trigger response
+   * Triggers response to provider entity
    */
-  respond(value: Buffer | Readable): Promise<unknown> | unknown;
+  respond(value: unknown): unknown;
   /**
    * Cookie support for sending to the client
    */

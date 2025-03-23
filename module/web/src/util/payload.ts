@@ -41,8 +41,8 @@ export class HttpPayloadUtil {
    * Standard array of bytes (buffer, string)
    */
   static fromBytes(value: Buffer | string | ArrayBuffer, type?: string): HttpPayload {
-    value = typeof value === 'string' ? Buffer.from(value, 'utf8') : value;
-    return { defaultContentType: type, data: Buffer.from(value), length: value.byteLength };
+    const narrowed = typeof value === 'string' ? Buffer.from(value, 'utf8') : (Buffer.isBuffer(value) ? value : Buffer.from(value));
+    return { defaultContentType: type, data: narrowed, length: narrowed.byteLength };
   }
 
   /**

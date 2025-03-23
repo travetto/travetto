@@ -1,7 +1,6 @@
-import { type Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
-
 import { IncomingMessage, ServerResponse } from 'node:http';
+import { pipeline } from 'node:stream/promises';
+import { Readable } from 'node:stream';
 
 import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpChainedContext, } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
@@ -60,23 +59,16 @@ export class NodeWebServerUtil {
       get headersSent(): boolean {
         return res.headersSent;
       },
-      get statusCode(): number | undefined {
-        return res.statusCode;
-      },
-      set statusCode(code: number) {
-        res.statusCode = code;
-      },
-      respond(value): Promise<void> | void {
+      respond(value) {
+        res.statusCode = this.statusCode ?? 200;
+        res.setHeaders(new Map(Object.entries(this.getHeaders!())));
         if (isReadable(value)) {
           return pipeline(value, res);
         } else {
           res.write(value);
           res.end();
         }
-      },
-      setHeader: res.setHeader.bind(res),
-      getHeader: castTo(res.getHeader.bind(res)), // NOTE: Forcing type, may be incorrect
-      removeHeader: res.removeHeader.bind(res),
+      }
     });
   }
 }

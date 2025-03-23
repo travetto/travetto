@@ -1,6 +1,7 @@
 import { asFull } from '@travetto/runtime';
 
 import { HttpResponse, WebInternal } from '../types.ts';
+import { HttpHeaders } from './headers.ts';
 
 /**
  * Base response object
@@ -12,6 +13,12 @@ export class HttpResponseCore implements Partial<HttpResponse> {
    */
   static create<T extends HttpResponse>(res: Partial<T>): T {
     Object.setPrototypeOf(res, HttpResponseCore.prototype);
+    const map = new HttpHeaders();
+    res.getHeader = map.getHeader.bind(map);
+    res.getHeaders = map.toObject.bind(map);
+    res.setHeader = map.setHeader.bind(map);
+    res.removeHeader = map.removeHeader.bind(map);
+    res.getHeaderNames = map.getHeaderNames.bind(map);
     return asFull<T>(res);
   }
 

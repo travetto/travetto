@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore, HttpContext, HttpChainedContext } from '@travetto/web';
+import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore, HttpChainedContext, HttpPayload } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -10,12 +10,12 @@ export class KoaWebServerUtil {
   /**
    * Convert context object from provider to framework
    */
-  static getContext(ctx: koa.Context, next: koa.Next): HttpChainedContext {
+  static getContext(ctx: koa.Context): HttpChainedContext {
     const fullCtx: typeof ctx & { [WebInternal]?: HttpChainedContext } = ctx;
     return fullCtx[WebInternal] ??= {
       req: this.getRequest(ctx),
       res: this.getResponse(ctx),
-      next,
+      next: (): void => { },
       config: {}
     };
   }
@@ -55,21 +55,11 @@ export class KoaWebServerUtil {
       get headersSent(): boolean {
         return ctx.headerSent;
       },
-      get statusCode(): number {
-        return ctx.status;
-      },
-      set statusCode(code: number) {
-        ctx.status = code;
-      },
-      respond(value) {
-        ctx.body = value;
-        ctx.response.flushHeaders();
-      },
-      vary: ctx.response.vary.bind(ctx.response),
-      getHeaderNames: () => Object.keys(ctx.response.headers),
-      setHeader: ctx.response.set.bind(ctx.response),
-      getHeader: ctx.response.get.bind(ctx.response),
-      removeHeader: ctx.response.remove.bind(ctx.response),
+      respond(value: HttpPayload): unknown {
+        ctx.response.status = value.statusCode!;
+        ctx.res.setHeaders(new Map(Object.entries(value.headers ?? {})));
+        return ctx.response.body = value;
+      }
     });
   }
 }

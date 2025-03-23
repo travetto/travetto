@@ -38,14 +38,16 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
     });
 
     // Defer to fastify if disabled
-    if (!this.compress.applies) {
+    if (this.compress.applies) {
       const preferred = this.compress.preferredEncodings ?? this.compress.supportedEncodings.filter(x => x !== 'deflate');
       app.register(fastifyCompress, { encodings: this.compress.supportedEncodings, requestEncodings: preferred });
+      this.compress.applies = false;
     }
 
     // Defer to fastify if disabled
-    if (!this.etag.applies) {
+    if (this.etag.applies) {
       app.register(fastifyEtag, { weak: !!this.etag.weak, replyWith304: true });
+      this.etag.applies = false;
     }
 
     app.removeAllContentTypeParsers();
@@ -74,11 +76,9 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
         sub = '*';
       }
 
-      console.error('Registering', sub, `${path}/${endpoint.path}`, endpoint.class.name);
-      this.raw[endpoint.method](sub, async (req, reply) => {
-        await endpoint.filter!(FastifyWebServerUtil.getContext(req, reply));
-        return reply;
-      });
+      this.raw[endpoint.method](sub, (req, reply) =>
+        endpoint.filter!(FastifyWebServerUtil.getContext(req, reply))
+      );
     }
   }
 

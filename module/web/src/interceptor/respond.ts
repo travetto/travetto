@@ -11,7 +11,7 @@ export class RespondInterceptor implements HttpInterceptor {
   category: HttpInterceptorCategory = 'terminal';
   dependsOn = [LoggingInterceptor];
 
-  async filter(ctx: HttpChainedContext): Promise<void> {
+  async filter(ctx: HttpChainedContext): Promise<unknown> {
     let value;
     try {
       value = await ctx.next();
@@ -21,9 +21,7 @@ export class RespondInterceptor implements HttpInterceptor {
 
     if (!ctx.res.headersSent) {
       const payload = HttpPayloadUtil.ensureSerialized(ctx, value);
-
-      // Handle final ejection if specified
-      await ctx.res.respond(payload);
+      return await ctx.res.respond(payload);
     }
   }
 }
