@@ -24,7 +24,7 @@ import { HttpResponseCore } from '../src/response/core.ts';
 @Injectable()
 @Config('web.custom')
 class CustomInterceptorConfig {
-  applies = true;
+  applies: boolean = true;
   name = 'bob';
 
   weird() { }
@@ -53,7 +53,7 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
   config: CustomInterceptorConfig;
 
   applies(endpoint: EndpointConfig, config: CustomInterceptorConfig) {
-    return config.applies || /opt-in/.test(`${endpoint.path}`);
+    return config.applies || /opt-in/.test(`${endpoint.fullPath}`);
   }
 
   filter({ res, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
@@ -63,6 +63,7 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
 }
 
 @Controller('/test-interceptor')
+@ConfigureInterceptor(CustomInterceptor, { applies: true })
 @ConfigureInterceptor(CorsInterceptor, { applies: false })
 @ConfigureInterceptor(GetCacheInterceptor, { applies: false })
 class TestController {
@@ -77,7 +78,7 @@ class TestController {
   async optIn() { }
 
   @Get('/override')
-  @ConfigureInterceptor(CustomInterceptor, { applies: true, name: 'jane' })
+  @ConfigureInterceptor(CustomInterceptor, { name: 'jane' })
   async override() { }
 
   @Get('/blackListed')
@@ -96,7 +97,7 @@ class AltTestController {
   async none() { }
 
   @Get('/opt-in/for-real')
-  @ConfigureInterceptor(CustomInterceptor, { applies: true, name: 'sarah' })
+  @ConfigureInterceptor(CustomInterceptor, { name: 'sarah' })
   async optIn() { }
 
   @Get('/override')
@@ -148,8 +149,8 @@ class TestInterceptorConfigSuite {
   async verifyBasic() {
     assert(await this.name(TestController, '/') === 'bob');
     assert(await this.name(AltTestController, '/') === undefined);
-    assert(await this.name(TestController, '/opt-in') === undefined);
-    assert(await this.name(AltTestController, '/opt-in') === undefined);
+    assert(await this.name(TestController, '/opt-in') === 'bob');
+    assert(await this.name(AltTestController, '/opt-in') === 'greg');
   }
 
   @Test()
