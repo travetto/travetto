@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@travetto/di';
-import { BodyParseInterceptor, HttpInterceptor, WebInternal, HttpInterceptorCategory, HttpChainedContext } from '@travetto/web';
+import { BodyParseInterceptor, HttpInterceptor, WebInternal, HttpInterceptorCategory, HttpChainedContext, EndpointConfig } from '@travetto/web';
 
 import { WebUploadConfig } from './config.ts';
 import { WebUploadUtil } from './util.ts';
@@ -10,7 +10,6 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
 
   category: HttpInterceptorCategory = 'request';
   dependsOn = [BodyParseInterceptor];
-  applies = false; // opt-in interceptor
 
   @Inject()
   config: WebUploadConfig;
@@ -25,6 +24,10 @@ export class WebUploadInterceptor implements HttpInterceptor<WebUploadConfig> {
       Object.assign(base.uploads[k] ??= {}, cfg);
     }
     return base;
+  }
+
+  applies(ep: EndpointConfig, config: WebUploadConfig): boolean {
+    return config.applies;
   }
 
   async filter({ req, config, next }: HttpChainedContext<WebUploadConfig>): Promise<unknown> {

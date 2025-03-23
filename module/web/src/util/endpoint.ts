@@ -64,8 +64,7 @@ export class EndpointUtil {
     const configs = new Map<Class, unknown>(interceptors.map(inst => {
       const cls = asConstructable(inst).constructor;
       const inputs = inputByClass.get(cls) ?? [];
-      // Ensure disabled is not inherited from the config, unless explicitly set
-      const config = Object.assign({}, inst.config, { disabled: undefined }, ...inputs);
+      const config = Object.assign({}, inst.config, ...inputs);
       return [cls, inst.finalizeConfig?.(config, castTo(inputs)) ?? config];
     }));
 
@@ -163,10 +162,7 @@ export class EndpointUtil {
 
     const validInterceptors =
       this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
-        .filter(([inst, cfg]) =>
-          typeof inst.applies === 'boolean' ? inst.applies :
-            inst.applies?.(endpoint, cfg) ?? true
-        );
+        .filter(([inst, cfg]) => inst.applies?.(endpoint, cfg) ?? true);
 
     const filterChain: [HttpChainedFilter, unknown][] = castTo([
       ...validInterceptors.map(([inst, cfg]) => [inst.filter.bind(inst), cfg]),

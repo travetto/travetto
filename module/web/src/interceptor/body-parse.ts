@@ -21,9 +21,9 @@ type ParserType = 'json' | 'text' | 'form';
 @Config('web.bodyParse')
 export class BodyParseConfig {
   /**
-   * Should this be turned off by default?
+   * Parse request body
    */
-  disabled?: boolean;
+  applies: boolean = true;
   /**
    * Max body size limit
    */
@@ -80,7 +80,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
   }
 
   applies(endpoint: EndpointConfig, config: BodyParseConfig): boolean {
-    return config.disabled !== true && (endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method));
+    return config.applies && (endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method));
   }
 
   async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<unknown> {

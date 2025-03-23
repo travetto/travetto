@@ -6,6 +6,8 @@ import { Ignore } from '@travetto/schema';
  */
 @Config('web.upload')
 export class WebUploadConfig {
+  applies = false;
+
   /**
    * Max file size in bytes
    */

@@ -73,7 +73,7 @@ export const DisableCacheControl = (): HeaderSet => CacheControl('0s');
  * @param types The list of mime types to allow/deny
  */
 export function Accepts(types: string[]): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AcceptsInterceptor, { types });
+  return ControllerRegistry.createInterceptorConfigDecorator(AcceptsInterceptor, { types, applies: false });
 }
 
 /**

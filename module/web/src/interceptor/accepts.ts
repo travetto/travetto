@@ -7,9 +7,14 @@ import { MimeUtil } from '../util/mime.ts';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { HttpChainedContext } from '../types.ts';
+import { EndpointConfig } from '../registry/types.ts';
 
 @Config('web.accepts')
 class AcceptsConfig {
+  /**
+   * Accepts certain request content types
+   */
+  applies = false;
   /**
    * The accepted types
    */
@@ -26,7 +31,6 @@ class AcceptsConfig {
 export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
 
   category: HttpInterceptorCategory = 'request';
-  applies = false; // opt-in interceptor
 
   @Inject()
   config: AcceptsConfig;
@@ -34,6 +38,10 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
   finalizeConfig(cfg: AcceptsConfig): AcceptsConfig {
     cfg.matcher = MimeUtil.matcher(cfg.types ?? []);
     return cfg;
+  }
+
+  applies(ep: EndpointConfig, config: AcceptsConfig): boolean {
+    return config.applies;
   }
 
   filter({ req, config, next }: HttpChainedContext<AcceptsConfig>): unknown {

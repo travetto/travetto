@@ -39,6 +39,7 @@ export function Upload(
     ControllerRegistry.registerEndpointInterceptorConfig(
       inst.constructor, inst[prop], WebUploadInterceptor,
       {
+        applies: false,
         maxSize: finalConf.maxSize,
         types: finalConf.types,
         cleanupFiles: finalConf.cleanupFiles,

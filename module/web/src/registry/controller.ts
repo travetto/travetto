@@ -129,7 +129,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   registerEndpointInterceptorConfig<T extends HttpInterceptor>(target: Class, endpoint: EndpointFunction, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const endpointConfig = this.getOrCreateEndpointConfig(target, endpoint);
-    (endpointConfig.interceptorConfigs ??= []).push([interceptorCls, { disabled: false, ...config }]);
+    (endpointConfig.interceptorConfigs ??= []).push([interceptorCls, { ...config }]);
   }
 
   /**
@@ -140,7 +140,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   registerControllerInterceptorConfig<T extends HttpInterceptor>(target: Class, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const controllerConfig = this.getOrCreatePending(target);
-    (controllerConfig.interceptorConfigs ??= []).push([interceptorCls, { disabled: false, ...config }]);
+    (controllerConfig.interceptorConfigs ??= []).push([interceptorCls, { ...config }]);
   }
 
   /**

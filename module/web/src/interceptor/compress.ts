@@ -25,9 +25,9 @@ type HttpCompressEncoding = keyof typeof ENCODING_METHODS | 'identity';
 @Config('web.compress')
 export class CompressConfig {
   /**
-   * Should this be turned off by default?
+   * Attempting to compressing responses
    */
-  disabled?: boolean;
+  applies: boolean = true;
   /**
    * Raw encoding options
    */
@@ -109,7 +109,7 @@ export class CompressionInterceptor implements HttpInterceptor {
   }
 
   applies(ep: EndpointConfig, config: CompressConfig): boolean {
-    return config.disabled !== true;
+    return config.applies;
   }
 
   async filter(ctx: HttpChainedContext): Promise<unknown> {

@@ -4,7 +4,7 @@ import { ConditionalRegister, ConfigureInterceptor, Controller, Get, LoggingInte
 
 @Undocumented()
 @Controller('/')
-@ConfigureInterceptor(LoggingInterceptor, { disabled: true })
+@ConfigureInterceptor(LoggingInterceptor, { applies: true })
 export class GlobalHandler {
 
   @Get('')

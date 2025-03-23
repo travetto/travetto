@@ -47,6 +47,7 @@ class TestAuthController {
   @Post('/login')
   @Login(TestAuthSymbol)
   async simpleLogin() {
+    console.log('hello');
   }
 
   @Get('/self')

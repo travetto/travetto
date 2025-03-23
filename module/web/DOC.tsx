@@ -181,7 +181,7 @@ export const text = <>
       {RespondInterceptor} is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
     </c.SubSection>
     <c.SubSection title={CorsInterceptor.name}>
-      {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, {d.input('web.cors.active: true')}
+      {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, the {d.input('web.cors')} config space.
 
       <c.Code title='Cors Config' src={CorsConfig} />
     </c.SubSection>
@@ -191,7 +191,7 @@ export const text = <>
       <c.Code title='Cookies Config' src={CookieConfig} />
     </c.SubSection>
     <c.SubSection title={GetCacheInterceptor.name}>
-      {GetCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting {d.input('web.disableGetCache: true')} in your config.
+      {GetCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting {d.input('web.getCache.applies: <boolean>')} in your config.  This interceptor applies by default.
     </c.SubSection>
     <c.SubSection title={LoggingInterceptor.name}>
       {LoggingInterceptor} allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
@@ -199,7 +199,7 @@ export const text = <>
       <c.Code title='Control Logging' src='doc/log.yml' />
     </c.SubSection>
     <c.SubSection title={AsyncContextInterceptor.name}>
-      {AsyncContextInterceptor} is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
+      {AsyncContextInterceptor} is responsible for sharing context across the various layers that may be touched by a request. This interceptor can be noisy, and so can easily be disabled as needed by setting {d.input('web.log.applies: false')} in your config.
     </c.SubSection>
 
     <c.SubSection title='Custom Interceptors'>

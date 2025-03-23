@@ -10,9 +10,9 @@ import { EtagInterceptor } from './etag.ts';
 @Config('web.getCache')
 export class GetCacheConfig {
   /**
-   * Should this be turned off by default?
+   * Generate GET cache headers
    */
-  disabled?: boolean;
+  applies = true;
 }
 
 /**
@@ -28,7 +28,7 @@ export class GetCacheInterceptor implements HttpInterceptor {
   config?: GetCacheConfig;
 
   applies(endpoint: EndpointConfig, config: GetCacheConfig): boolean {
-    return endpoint.method === 'get' && config.disabled !== true;
+    return endpoint.method === 'get' && config.applies;
   }
 
   async filter({ res, next }: HttpChainedContext): Promise<unknown> {

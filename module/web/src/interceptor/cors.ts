@@ -13,9 +13,9 @@ import { EndpointConfig } from '../registry/types.ts';
 @Config('web.cors')
 export class CorsConfig {
   /**
-   * Should this be turned off by default?
+   * Send CORS headers on responses
    */
-  disabled?: boolean;
+  applies = true;
   /**
    * Allowed origins
    */
@@ -64,7 +64,7 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
   }
 
   applies(ep: EndpointConfig, config: CorsConfig): boolean {
-    return config.disabled !== true;
+    return config.applies;
   }
 
   filter({ req, res, config: { resolved }, next }: HttpChainedContext<CorsConfig>): unknown {

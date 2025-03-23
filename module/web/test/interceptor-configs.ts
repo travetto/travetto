@@ -24,7 +24,7 @@ import { HttpResponseCore } from '../src/response/core.ts';
 @Injectable()
 @Config('web.custom')
 class CustomInterceptorConfig {
-  disabled = false;
+  applies = true;
   name = 'bob';
 
   weird() { }
@@ -52,8 +52,8 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
   @Inject()
   config: CustomInterceptorConfig;
 
-  applies(endpoint: EndpointConfig) {
-    return !/opt-in/.test(`${endpoint.path}`);
+  applies(endpoint: EndpointConfig, config: CustomInterceptorConfig) {
+    return config.applies && !/opt-in/.test(`${endpoint.path}`);
   }
 
   filter({ res, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
@@ -63,8 +63,8 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
 }
 
 @Controller('/test-interceptor')
-@ConfigureInterceptor(CorsInterceptor, { disabled: true })
-@ConfigureInterceptor(GetCacheInterceptor, { disabled: true })
+@ConfigureInterceptor(CorsInterceptor, { applies: true })
+@ConfigureInterceptor(GetCacheInterceptor, { applies: false })
 class TestController {
   @Get('/')
   async std() { }
@@ -85,9 +85,9 @@ class TestController {
 }
 
 @Controller('/alt-test-interceptor')
-@ConfigureInterceptor(CustomInterceptor, { disabled: true, name: 'greg' })
-@ConfigureInterceptor(CorsInterceptor, { disabled: true })
-@ConfigureInterceptor(GetCacheInterceptor, { disabled: true })
+@ConfigureInterceptor(CustomInterceptor, { applies: false, name: 'greg' })
+@ConfigureInterceptor(CorsInterceptor, { applies: true })
+@ConfigureInterceptor(GetCacheInterceptor, { applies: false })
 class AltTestController {
   @Get('/')
   async std() { }
@@ -96,7 +96,7 @@ class AltTestController {
   async none() { }
 
   @Get('/opt-in/for-real')
-  @ConfigureInterceptor(CustomInterceptor, { disabled: false, name: 'sarah' })
+  @ConfigureInterceptor(CustomInterceptor, { applies: true, name: 'sarah' })
   async optIn() { }
 
   @Get('/override')

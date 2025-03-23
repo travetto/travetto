@@ -13,9 +13,9 @@ import { EndpointConfig } from '../registry/types';
 @Config('web.etag')
 export class EtagConfig {
   /**
-   * Should this be turned off by default?
+   * Attempt ETag generation
    */
-  disabled?: boolean;
+  applies = true;
   /**
    * Should we generate a weak etag
    */
@@ -74,7 +74,7 @@ export class EtagInterceptor implements HttpInterceptor {
   }
 
   applies(ep: EndpointConfig, config: EtagConfig): boolean {
-    return config.disabled !== true;
+    return config.applies;
   }
 
   async filter(ctx: HttpChainedContext): Promise<unknown> {

@@ -1,5 +1,5 @@
 import { AppError, Util } from '@travetto/runtime';
-import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext } from '@travetto/web';
+import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext, EndpointConfig } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -18,6 +18,10 @@ function matchPermissionSet(rule: string[], perms: Set<string>): boolean {
 
 @Config('web.auth.verify')
 export class WebAuthVerifyConfig {
+  /**
+   * Verify user is in a specific auth state
+   */
+  applies = false;
   /**
    * Default state to care about
    */
@@ -41,7 +45,6 @@ export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfi
 
   category: HttpInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
-  applies = false; // opt-in interceptor
 
   @Inject()
   config: WebAuthVerifyConfig;
@@ -55,6 +58,10 @@ export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfi
       matchPermissionSet,
     );
     return config;
+  }
+
+  applies(ep: EndpointConfig, config: WebAuthVerifyConfig): boolean {
+    return config.applies;
   }
 
   async filter({ config, next }: HttpChainedContext<WebAuthVerifyConfig>): Promise<unknown> {

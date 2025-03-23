@@ -16,9 +16,9 @@ import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 @Config('web.cookie')
 export class CookieConfig {
   /**
-   * Should this be turned off by default?
+   * Support reading/sending cookies
    */
-  disabled?: boolean;
+  applies = true;
   /**
    * Are they signed
    */
@@ -60,14 +60,14 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
   @Inject()
   webConfig: WebConfig;
 
-  applies(ep: EndpointConfig, config: CookieConfig): boolean {
-    return config.disabled !== true;
-  }
-
   finalizeConfig(config: CookieConfig): CookieConfig {
     config.secure ??= this.webConfig.ssl?.active;
     config.domain ??= this.webConfig.hostname;
     return config;
+  }
+
+  applies(ep: EndpointConfig, config: CookieConfig): boolean {
+    return config.applies;
   }
 
   filter({ req, res, config, next }: HttpChainedContext<CookieConfig>): unknown {

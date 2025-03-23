@@ -11,9 +11,9 @@ import { EndpointConfig } from '../registry/types.ts';
 @Config('web.log')
 export class WebLogConfig {
   /**
-   * Should this be turned off by default?
+   * Enable logging of all requests
    */
-  disabled?: boolean;
+  applies = true;
   /**
    * Should errors be dumped as full stack traces
    */
@@ -55,7 +55,7 @@ export class LoggingInterceptor implements HttpInterceptor {
   }
 
   applies(ep: EndpointConfig, config: WebLogConfig): boolean {
-    return config.disabled !== true;
+    return config.applies;
   }
 
   async filter({ req, res, next }: HttpChainedContext): Promise<void> {

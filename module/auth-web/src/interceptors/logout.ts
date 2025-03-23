@@ -1,4 +1,4 @@
-import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext } from '@travetto/web';
+import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext, EndpointConfig } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
@@ -6,7 +6,12 @@ import { AuthContext, AuthenticationError } from '@travetto/auth';
 import { AuthContextInterceptor } from './context.ts';
 
 @Config('web.auth.logout')
-export class WebAuthLogoutConfig { }
+export class WebAuthLogoutConfig {
+  /**
+   * Execute logout on endpoint
+   */
+  applies = false;
+}
 
 /**
  * Logout interceptor
@@ -18,13 +23,16 @@ export class AuthLogoutInterceptor implements HttpInterceptor<WebAuthLogoutConfi
 
   category: HttpInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
-  applies = false; // opt-in interceptor
 
   @Inject()
   config: WebAuthLogoutConfig;
 
   @Inject()
   authContext: AuthContext;
+
+  applies(ep: EndpointConfig, config: WebAuthLogoutConfig): boolean {
+    return config.applies;
+  }
 
   async filter({ next }: HttpChainedContext): Promise<unknown> {
     try {

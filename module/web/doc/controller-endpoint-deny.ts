@@ -1,11 +1,11 @@
 import { Controller, Get, QueryParam, ConfigureInterceptor, CorsInterceptor, ExcludeInterceptors } from '@travetto/web';
 
 @Controller('/allowDeny')
-@ConfigureInterceptor(CorsInterceptor, { disabled: true })
+@ConfigureInterceptor(CorsInterceptor, { applies: true })
 export class AlowDenyController {
 
   @Get('/override')
-  @ConfigureInterceptor(CorsInterceptor, { disabled: false })
+  @ConfigureInterceptor(CorsInterceptor, { applies: false })
   withoutCors(@QueryParam() value: string) {
 
   }

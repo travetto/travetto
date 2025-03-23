@@ -7,7 +7,6 @@ import type { ByteRange, Any } from '@travetto/runtime';
 
 export type NextFilter = () => unknown;
 export type HttpContext<C = {}> = { req: HttpRequest, res: HttpResponse } & C;
-/** @param {HttpContext} context The context of to process  */
 export type HttpFilter<C = {}> = (context: HttpContext<C>) => Exclude<unknown, void>;
 export type HttpHeaderMap = Record<string, (string | (() => string))>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
