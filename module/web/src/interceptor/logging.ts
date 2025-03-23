@@ -3,6 +3,7 @@ import { Config } from '@travetto/config';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { HttpChainedContext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
+import { EndpointConfig } from '../registry/types.ts';
 
 /**
  * Web logging configuration
@@ -51,6 +52,10 @@ export class LoggingInterceptor implements HttpInterceptor {
     } else {
       console.error('Request', reqLog);
     }
+  }
+
+  applies(ep: EndpointConfig, config: WebLogConfig): boolean {
+    return config.disabled !== true;
   }
 
   async filter({ req, res, next }: HttpChainedContext): Promise<void> {

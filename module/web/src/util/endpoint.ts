@@ -5,8 +5,6 @@ import { HttpFilter, HttpContext, WebInternal, HttpChainedFilter, HttpChainedCon
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
 
-const hasDisabled = (o: unknown): o is { disabled: boolean } => !!o && typeof o === 'object' && 'disabled' in o;
-
 /**
  * Endpoint specific utilities
  */
@@ -41,29 +39,6 @@ export class EndpointUtil {
       const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
       return it({ req: ctx.req, res: ctx.res, next: chainedNext, config: cfg });
     };
-  }
-
-  /**
-   * Verify endpoint applies based on the following scenarios
-   * - If general is disabled or resolved is disabled
-   * - Interceptor level applies
-   */
-  static verifyEndpointApplies(interceptor: HttpInterceptor, resolvedConfig: unknown, endpoint: EndpointConfig): boolean {
-    const baseDisabled = hasDisabled(interceptor.config) ? interceptor.config.disabled : undefined;
-    const resolvedDisabled = hasDisabled(resolvedConfig) ? resolvedConfig.disabled : undefined;
-
-    if (resolvedDisabled === false) { // If explicitly set disabled: false
-      return true;
-    } else if (baseDisabled === true || resolvedDisabled === true) { // If either base or explicit has disabled set to true
-      return false;
-    }
-
-    if (typeof interceptor.applies === 'boolean') {
-      return interceptor.applies;
-    } else {
-      // Fallback to interceptor level applies when paths haven't overridden
-      return interceptor.applies?.(endpoint) ?? true;
-    }
   }
 
   /**
@@ -188,7 +163,10 @@ export class EndpointUtil {
 
     const validInterceptors =
       this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
-        .filter(([inst, cfg]) => this.verifyEndpointApplies(inst, cfg, endpoint));
+        .filter(([inst, cfg]) =>
+          typeof inst.applies === 'boolean' ? inst.applies :
+            inst.applies?.(endpoint, cfg) ?? true
+        );
 
     const filterChain: [HttpChainedFilter, unknown][] = castTo([
       ...validInterceptors.map(([inst, cfg]) => [inst.filter.bind(inst), cfg]),

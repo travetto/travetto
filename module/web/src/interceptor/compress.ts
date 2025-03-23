@@ -11,6 +11,7 @@ import { AppError, castTo } from '@travetto/runtime';
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpContext, HttpChainedContext } from '../types';
 import { HttpPayloadUtil } from '../util/payload';
+import { EndpointConfig } from '../registry/types.ts';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const ENCODING_METHODS = {
@@ -105,6 +106,10 @@ export class CompressionInterceptor implements HttpInterceptor {
       const newPayload = HttpPayloadUtil.fromStream(stream, res.getHeader('Content-Type')?.toString());
       return HttpPayloadUtil.applyPayload(ctx, newPayload, stream);
     }
+  }
+
+  applies(ep: EndpointConfig, config: CompressConfig): boolean {
+    return config.disabled !== true;
   }
 
   async filter(ctx: HttpChainedContext): Promise<unknown> {

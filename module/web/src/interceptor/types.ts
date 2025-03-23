@@ -44,7 +44,7 @@ export interface HttpInterceptor<C = Any> {
    * Determines the current endpoint is applicable for the interceptor
    * @param endpoint The endpoint to check
    */
-  applies?: boolean | ((endpoint: EndpointConfig) => boolean);
+  applies?: boolean | ((endpoint: EndpointConfig, config: C) => boolean);
 
   /**
    * Finalize config before use

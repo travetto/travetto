@@ -79,8 +79,8 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     }
   }
 
-  applies(endpoint: EndpointConfig): boolean {
-    return endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method);
+  applies(endpoint: EndpointConfig, config: BodyParseConfig): boolean {
+    return config.disabled !== true && (endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method));
   }
 
   async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<unknown> {

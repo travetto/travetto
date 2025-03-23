@@ -7,6 +7,7 @@ import { castTo } from '@travetto/runtime';
 
 import { HttpChainedContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
+import { EndpointConfig } from '../registry/types.ts';
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 
 /**
@@ -58,6 +59,10 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
 
   @Inject()
   webConfig: WebConfig;
+
+  applies(ep: EndpointConfig, config: CookieConfig): boolean {
+    return config.disabled !== true;
+  }
 
   finalizeConfig(config: CookieConfig): CookieConfig {
     config.secure ??= this.webConfig.ssl?.active;

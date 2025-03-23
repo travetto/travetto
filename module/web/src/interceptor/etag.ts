@@ -8,6 +8,7 @@ import { HttpChainedContext, HttpContext } from '../types';
 import { HttpInterceptor, HttpInterceptorCategory } from './types';
 import { HttpPayloadUtil } from '../util/payload';
 import { CompressionInterceptor } from './compress';
+import { EndpointConfig } from '../registry/types';
 
 @Config('web.etag')
 export class EtagConfig {
@@ -70,6 +71,10 @@ export class EtagInterceptor implements HttpInterceptor {
     }
 
     return output;
+  }
+
+  applies(ep: EndpointConfig, config: EtagConfig): boolean {
+    return config.disabled !== true;
   }
 
   async filter(ctx: HttpChainedContext): Promise<unknown> {

@@ -5,6 +5,7 @@ import { Ignore } from '@travetto/schema';
 import { HttpChainedContext, HttpRequest } from '../types.ts';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { EndpointConfig } from '../registry/types.ts';
 
 /**
  * Web cors support
@@ -60,6 +61,10 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
       credentials: !!config.credentials,
     };
     return config;
+  }
+
+  applies(ep: EndpointConfig, config: CorsConfig): boolean {
+    return config.disabled !== true;
   }
 
   filter({ req, res, config: { resolved }, next }: HttpChainedContext<CorsConfig>): unknown {

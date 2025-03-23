@@ -27,8 +27,8 @@ export class GetCacheInterceptor implements HttpInterceptor {
   @Inject()
   config?: GetCacheConfig;
 
-  applies(endpoint: EndpointConfig): boolean {
-    return endpoint.method === 'get';
+  applies(endpoint: EndpointConfig, config: GetCacheConfig): boolean {
+    return endpoint.method === 'get' && config.disabled !== true;
   }
 
   async filter({ res, next }: HttpChainedContext): Promise<unknown> {
