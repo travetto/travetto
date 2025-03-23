@@ -11,7 +11,7 @@ export class WebAuthLoginConfig {
   /**
    * Execute login on endpoint
    */
-  active = false;
+  applies = false;
   /**
    * The auth providers to iterate through when attempting to authenticate
    */
@@ -38,7 +38,7 @@ export class AuthLoginInterceptor implements HttpInterceptor<WebAuthLoginConfig>
   service: AuthService;
 
   applies(ep: EndpointConfig, config: WebAuthLoginConfig): boolean {
-    return config.active;
+    return config.applies;
   }
 
   async filter(ctx: HttpChainedContext<WebAuthLoginConfig>): Promise<unknown> {

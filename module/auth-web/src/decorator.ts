@@ -12,7 +12,8 @@ import { AuthLogoutInterceptor } from './interceptors/logout.ts';
  */
 export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(AuthLoginInterceptor, {
-    providers: [source, ...sources]
+    providers: [source, ...sources],
+    applies: true
   });
 }
 
