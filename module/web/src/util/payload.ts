@@ -126,13 +126,15 @@ export class HttpPayloadUtil {
     }
 
     // Set header if not defined
-    if (!res.getHeader('Content-Type')) {
+    if (!res.getHeader('Content-Type') && length !== 0) {
       res.setHeader('Content-Type', defaultContentType ?? 'application/octet-stream');
     }
 
     // Set length if provided
     if (length !== undefined) {
       res.setHeader('Content-Length', `${length} `);
+    } else if (length === 0) {
+      res.removeHeader('Content-Type');
     }
 
     if (statusCode) {
