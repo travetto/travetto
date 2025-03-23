@@ -53,7 +53,7 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
   config: CustomInterceptorConfig;
 
   applies(endpoint: EndpointConfig, config: CustomInterceptorConfig) {
-    return config.applies && !/opt-in/.test(`${endpoint.path}`);
+    return config.applies || /opt-in/.test(`${endpoint.path}`);
   }
 
   filter({ res, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
@@ -77,7 +77,7 @@ class TestController {
   async optIn() { }
 
   @Get('/override')
-  @ConfigureInterceptor(CustomInterceptor, { name: 'jane' })
+  @ConfigureInterceptor(CustomInterceptor, { applies: true, name: 'jane' })
   async override() { }
 
   @Get('/blackListed')
@@ -85,8 +85,8 @@ class TestController {
 }
 
 @Controller('/alt-test-interceptor')
-@ConfigureInterceptor(CustomInterceptor, { applies: true, name: 'greg' })
-@ConfigureInterceptor(CorsInterceptor, { applies: true })
+@ConfigureInterceptor(CustomInterceptor, { applies: false, name: 'greg' })
+@ConfigureInterceptor(CorsInterceptor, { applies: false })
 @ConfigureInterceptor(GetCacheInterceptor, { applies: false })
 class AltTestController {
   @Get('/')
@@ -100,11 +100,11 @@ class AltTestController {
   async optIn() { }
 
   @Get('/override')
-  @ConfigureInterceptor(CustomInterceptor, { name: 'Randy' })
+  @ConfigureInterceptor(CustomInterceptor, { applies: true, name: 'Randy' })
   async override() { }
 
   @Get('/blackListed')
-  @ConfigureInterceptor(CustomInterceptor, {})
+  @ConfigureInterceptor(CustomInterceptor, { applies: true })
   async blackListed() { }
 }
 
