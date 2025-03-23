@@ -25,8 +25,11 @@ export class HttpResponseCore implements Partial<HttpResponse> {
     }
   }
 
+  /** NOTE:  Internally used to create a constant pattern for working with express-like systems, e.g. passport */
+
   /**
-   * Trigger redirect, needed for express-like systems, e.g. passport
+   * Trigger redirect
+   * @private
    */
   redirect(this: HttpResponse & HttpResponseCore, path: string, statusCode?: number): void {
     this.statusCode = statusCode ?? this.statusCode ?? 302;
@@ -36,7 +39,8 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   }
 
   /**
-   * End response immediately, needed for express-like systems, e.g. passport
+   * End response immediately
+   * @private
    */
   end(this: HttpResponse): void {
     this[WebInternal].takeControlOfResponse?.();
