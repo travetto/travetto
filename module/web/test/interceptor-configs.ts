@@ -63,7 +63,7 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
 }
 
 @Controller('/test-interceptor')
-@ConfigureInterceptor(CorsInterceptor, { applies: true })
+@ConfigureInterceptor(CorsInterceptor, { applies: false })
 @ConfigureInterceptor(GetCacheInterceptor, { applies: false })
 class TestController {
   @Get('/')
@@ -85,7 +85,7 @@ class TestController {
 }
 
 @Controller('/alt-test-interceptor')
-@ConfigureInterceptor(CustomInterceptor, { applies: false, name: 'greg' })
+@ConfigureInterceptor(CustomInterceptor, { applies: true, name: 'greg' })
 @ConfigureInterceptor(CorsInterceptor, { applies: true })
 @ConfigureInterceptor(GetCacheInterceptor, { applies: false })
 class AltTestController {
