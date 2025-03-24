@@ -166,17 +166,17 @@ export interface HttpResponseInternal<T = unknown> {
    */
   nodeEntity: ServerResponse;
   /**
-   * The additional headers for this request, provided by controllers/endpoint config
-   */
-  headersAdded?: HttpHeaderMap;
-  /**
    * Disable operations
    */
   takeControlOfResponse?: Function;
   /**
-   * The currently produced payload
+   * The additional headers for this request, provided by controllers/endpoint config
    */
-  payload?: [result: HttpPayload, source: unknown];
+  headersAdded?: HttpHeaderMap;
+  /**
+   * Http Request method
+   */
+  requestMethod?: string;
 }
 
 /**
@@ -226,9 +226,13 @@ export interface HttpResponse<T = unknown> {
    */
   vary(value: string): void;
   /**
+   * Set response value
+   */
+  setResponse(value: unknown, replace?: boolean): HttpPayload;
+  /**
    * Triggers response to provider entity
    */
-  respond(value: unknown): unknown;
+  respond(value: HttpPayload): unknown;
   /**
    * Cookie support for sending to the client
    */
@@ -243,10 +247,18 @@ export interface HttpResponse<T = unknown> {
   };
 }
 
-export interface HttpPayload {
-  headers?: Record<string, string>;
+/**
+ * Http Payload as a simple object
+ */
+export class HttpPayload<V = unknown> {
+  headers: Record<string, string | string[]>;
   defaultContentType?: string;
   statusCode?: number;
-  data: Buffer | Readable;
+  source: V;
+  output: Buffer | Readable;
   length?: number;
+
+  constructor(o: HttpPayload<V>) {
+    Object.assign(this, o);
+  }
 };

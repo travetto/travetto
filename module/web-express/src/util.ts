@@ -52,18 +52,19 @@ export class ExpressWebServerUtil {
     return HttpResponseCore.create({
       [WebInternal]: {
         providerEntity: res,
-        nodeEntity: res
+        nodeEntity: res,
+        requestMethod: res.req.method
       },
       get headersSent(): boolean {
         return res.headersSent;
       },
       respond(value) {
-        res.status(this.statusCode ?? 200);
-        res.setHeaders(new Map(Object.entries(this.getHeaders!())));
-        if (isReadable(value)) {
-          return pipeline(value, res);
+        res.status(value.statusCode ?? 200);
+        res.setHeaders(new Map(Object.entries(value.headers)));
+        if (isReadable(value.output)) {
+          return pipeline(value.output, res);
         } else {
-          res.end(value);
+          res.end(value.output);
         }
       }
     });

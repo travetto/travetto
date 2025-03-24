@@ -4,11 +4,10 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { HttpChainedContext, HttpContext } from '../types';
-import { HttpInterceptor, HttpInterceptorCategory } from './types';
-import { HttpPayloadUtil } from '../util/payload';
-import { CompressionInterceptor } from './compress';
-import { EndpointConfig } from '../registry/types';
+import { HttpChainedContext, HttpContext, HttpPayload } from '../types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { CompressionInterceptor } from './compress.ts';
+import { EndpointConfig } from '../registry/types.ts';
 
 @Config('web.etag')
 export class EtagConfig {
@@ -35,8 +34,9 @@ export class EtagInterceptor implements HttpInterceptor {
   config: EtagConfig;
 
   addTag(ctx: HttpContext, value?: unknown): unknown {
-    const output = HttpPayloadUtil.ensureSerialized(ctx, value);
     const { req, res } = ctx;
+
+    const { output } = ctx.res.setResponse(value);
 
     if (
       Buffer.isBuffer(output) &&
@@ -63,10 +63,12 @@ export class EtagInterceptor implements HttpInterceptor {
         (req.method === 'GET' || req.method === 'HEAD') &&
         fresh(req.headers, { etag: tag, 'last-modified': lastModified })
       ) {
-        return HttpPayloadUtil.applyPayload(ctx, {
-          data: Buffer.from([]),
-          statusCode: 304
-        });
+        return ctx.res.setResponse(new HttpPayload({
+          output: Buffer.from([]),
+          statusCode: 304,
+          source: this,
+          headers: {}
+        }), true);
       }
     }
 

@@ -23,10 +23,11 @@ export class Redirect implements HttpSerializable {
    * Render the response
    */
   serialize(): HttpPayload {
-    return {
+    return new HttpPayload({
       statusCode: this.#status,
+      source: this,
       headers: { Location: this.#location },
-      data: Buffer.from([])
-    };
+      output: Buffer.from([])
+    });
   }
 }

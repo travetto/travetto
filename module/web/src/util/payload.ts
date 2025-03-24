@@ -4,8 +4,8 @@ import { isArrayBuffer } from 'node:util/types';
 
 import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
+import { HttpPayload } from '../types';
 import { HttpSerializable } from '../response/serializable';
-import { HttpContext, HttpPayload, WebInternal } from '../types';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -34,7 +34,8 @@ export class HttpPayloadUtil {
    * Standard stream
    */
   static fromStream(value: Readable | ReadableStream, type?: string): HttpPayload {
-    return { defaultContentType: type, data: isReadableStream(value) ? Readable.fromWeb(value) : value };
+    const output = isReadableStream(value) ? Readable.fromWeb(value) : value;
+    return new HttpPayload({ defaultContentType: type, output, source: value, headers: {} });
   }
 
   /**
@@ -42,7 +43,7 @@ export class HttpPayloadUtil {
    */
   static fromBytes(value: Buffer | string | ArrayBuffer, type?: string): HttpPayload {
     const narrowed = typeof value === 'string' ? Buffer.from(value, 'utf8') : (Buffer.isBuffer(value) ? value : Buffer.from(value));
-    return { defaultContentType: type, data: narrowed, length: narrowed.byteLength };
+    return new HttpPayload({ defaultContentType: type, output: narrowed, length: narrowed.byteLength, source: value, headers: {} });
   }
 
   /**
@@ -58,6 +59,8 @@ export class HttpPayloadUtil {
   static fromBlob(value: Blob | File): HttpPayload {
     const meta = BinaryUtil.getBlobMeta(value);
     const out = this.fromStream(Readable.fromWeb(value.stream()));
+    out.source = value;
+
     const headers = out.headers ??= {};
     const setIf = (k: string, v?: string): unknown => v ? headers[k] = v : undefined;
 
@@ -85,11 +88,12 @@ export class HttpPayloadUtil {
    */
   static fromError(error: ErrorResponse): HttpPayload {
     const output = this.fromJSON(hasToJSON(error) ? error : { message: error.message });
-    return {
+    return new HttpPayload({
       ...output,
+      source: error,
       headers: { ...output.headers, 'content-type': 'application/json' },
       statusCode: error.status ?? error.statusCode ?? CATEGORY_STATUS[error.category!] ?? 500,
-    };
+    });
   }
 
   /**
@@ -98,6 +102,8 @@ export class HttpPayloadUtil {
   static from(value: unknown): HttpPayload {
     if (value === undefined || value === null) {
       return this.fromBytes('');
+    } else if (value instanceof HttpPayload) {
+      return value;
     } else if (typeof value === 'string') {
       return this.fromBytes(value, 'text/plain');
     } else if (Buffer.isBuffer(value) || isArrayBuffer(value)) {
@@ -108,60 +114,10 @@ export class HttpPayloadUtil {
       return this.fromError(value);
     } else if (value instanceof Blob) {
       return this.fromBlob(value);
+    } else if (isSerializable(value)) {
+      return value.serialize();
     } else {
       return this.fromJSON(value);
     }
-  }
-
-  /**
-   * Applies payload to the response
-   */
-  static applyPayload({ req, res }: HttpContext, payload: HttpPayload, sourceValue?: unknown): HttpPayload['data'] {
-    const { length, defaultContentType, headers, data, statusCode } = payload;
-
-    for (const map of [res[WebInternal].headersAdded, headers]) {
-      for (const [key, value] of Object.entries(map ?? {})) {
-        res.setHeader(key, typeof value === 'function' ? value() : value);
-      }
-    }
-
-    // Set header if not defined
-    if (!res.getHeader('Content-Type') && length !== 0) {
-      res.setHeader('Content-Type', defaultContentType ?? 'application/octet-stream');
-    }
-
-    // Set length if provided
-    if (length !== undefined) {
-      res.setHeader('Content-Length', `${length} `);
-    } else if (length === 0) {
-      res.removeHeader('Content-Type');
-    }
-
-    if (statusCode) {
-      res.statusCode = statusCode;
-    } else {
-      if (length === 0) {  // On empty response
-        res.statusCode = (req.method === 'POST' || req.method === 'PUT') ? 201 : 204;
-      } else {
-        res.statusCode = 200;
-      }
-    }
-
-    res[WebInternal].payload = [payload, sourceValue];
-
-    return data;
-  }
-
-  /**
-   * Ensure the value is ready for responding
-   */
-  static ensureSerialized(ctx: HttpContext, value: unknown): Buffer | Readable {
-    const resolved = ctx.res[WebInternal].payload; // Track existing and skip out if already processed
-    if (resolved && value === resolved[1]) {
-      return resolved[0].data;
-    }
-
-    const payload = isSerializable(value) ? value.serialize(ctx) : this.from(value);
-    return this.applyPayload(ctx, payload, value);
   }
 }

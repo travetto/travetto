@@ -8,9 +8,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
-import { HttpInterceptor, HttpInterceptorCategory } from './types';
-import { HttpContext, HttpChainedContext } from '../types';
-import { HttpPayloadUtil } from '../util/payload';
+import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpContext, HttpChainedContext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
@@ -56,7 +55,7 @@ export class CompressionInterceptor implements HttpInterceptor {
   async compress(ctx: HttpContext, payload: unknown): Promise<unknown> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
 
-    const data = HttpPayloadUtil.ensureSerialized(ctx, payload);
+    const { output: data } = ctx.res.setResponse(payload);
 
     const { res, req } = ctx;
 
@@ -99,12 +98,12 @@ export class CompressionInterceptor implements HttpInterceptor {
     if (Buffer.isBuffer(data)) {
       stream.end(data);
       const out = await buffer(stream);
-      const newPayload = HttpPayloadUtil.fromBytes(out, res.getHeader('Content-Type')?.toString());
-      return HttpPayloadUtil.applyPayload(ctx, newPayload, out);
+      ctx.res.setResponse(out);
+      return out;
     } else {
       data.pipe(stream);
-      const newPayload = HttpPayloadUtil.fromStream(stream, res.getHeader('Content-Type')?.toString());
-      return HttpPayloadUtil.applyPayload(ctx, newPayload, stream);
+      ctx.res.setResponse(stream);
+      return stream;
     }
   }
 

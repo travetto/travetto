@@ -48,6 +48,7 @@ export class KoaWebServerUtil {
       [WebInternal]: {
         providerEntity: ctx,
         nodeEntity: ctx.res,
+        requestMethod: ctx.method,
         takeControlOfResponse: () => {
           ctx.respond = false;
         }
@@ -55,10 +56,10 @@ export class KoaWebServerUtil {
       get headersSent(): boolean {
         return ctx.headerSent;
       },
-      respond(value: HttpPayload): unknown {
-        ctx.response.status = value.statusCode!;
+      respond(value) {
+        ctx.response.status = value.statusCode ?? 200;
         ctx.res.setHeaders(new Map(Object.entries(value.headers ?? {})));
-        return ctx.response.body = value;
+        return ctx.response.body = value.output;
       }
     });
   }

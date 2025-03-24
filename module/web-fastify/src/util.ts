@@ -48,6 +48,7 @@ export class FastifyWebServerUtil {
       [WebInternal]: {
         providerEntity: reply,
         nodeEntity: reply.raw,
+        requestMethod: reply.request.method,
         takeControlOfResponse: () => {
           reply.hijack();
         }
@@ -57,9 +58,9 @@ export class FastifyWebServerUtil {
       },
       respond(value): unknown {
         return reply
-          .status(this.statusCode!)
-          .headers(this.getHeaders!())
-          .send(value);
+          .status(value.statusCode ?? 200)
+          .headers(value.headers)
+          .send(value.output);
       }
     });
   }
