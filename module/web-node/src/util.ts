@@ -28,18 +28,19 @@ export class NodeWebServerUtil {
   /**
    * Build a Travetto HttpRequest from an Express Request
    */
-  static getRequest(req: IncomingMessage & { params?: Record<string, string> }): HttpRequest {
+  static getRequest(req: IncomingMessage & { originalUrl?: string, secure?: boolean, params?: Record<string, string> }): HttpRequest {
 
-    const url = new URL(req.url!);
+    const url = new URL(`http${req.secure ? 's' : ''}://${req.headers.host}${req.originalUrl}`);
 
     return HttpRequestCore.create({
       [WebInternal]: {
         providerEntity: req,
         nodeEntity: req,
       },
-      protocol: castTo(url.protocol),
+      protocol: req.secure ? 'https' : 'http',
       method: castTo(req.method),
-      url: req.url!,
+      url: req.originalUrl,
+      path: url.pathname!,
       query: Object.fromEntries(url.searchParams.entries()),
       params: req.params,
       headers: req.headers,
@@ -60,14 +61,13 @@ export class NodeWebServerUtil {
       get headersSent(): boolean {
         return res.headersSent;
       },
-      respond(value) {
+      async respond(value) {
         res.statusCode = value.statusCode ?? 200;
         res.setHeaders(new Map(Object.entries(value.headers)));
         if (isReadable(value.output)) {
-          return pipeline(value.output, res);
+          await pipeline(value.output, res);
         } else {
-          res.write(value.output);
-          res.end();
+          res.end(value.output);
         }
       }
     });

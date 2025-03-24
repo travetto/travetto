@@ -18,7 +18,7 @@ declare module 'router' {
     export interface Options {
       caseSensitive?: boolean
       strict?: boolean
-      mergeParams?: <C extends {}, P extends {}>(currentParams: C, parentParams: P) => Record<string | number, any>
+      mergeParams?: boolean | (<C extends {}, P extends {}>(currentParams: C, parentParams: P) => Record<string | number, any>)
     }
 
     export interface Layer {

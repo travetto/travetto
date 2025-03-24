@@ -55,17 +55,16 @@ export class CompressionInterceptor implements HttpInterceptor {
   async compress(ctx: HttpContext, payload: unknown): Promise<unknown> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
 
-    const { output: data } = ctx.res.setResponse(payload);
+    const { output: data, length } = ctx.res.setResponse(payload);
 
     const { res, req } = ctx;
 
     res.vary('Accept-Encoding');
 
-    const length = +(res.getHeader('Content-Length')?.toString() ?? '-1');
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     if (
       !data ||
-      (length >= 0 && length < chunkSize) ||
+      (length !== undefined && length >= 0 && length < chunkSize) ||
       req.method === 'HEAD' ||
       res.getHeader('content-encoding') ||
       NO_TRANSFORM_REGEX.test(res.getHeader('cache-control')?.toString() ?? '')

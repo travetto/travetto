@@ -177,6 +177,10 @@ export interface HttpResponseInternal<T = unknown> {
    * Http Request method
    */
   requestMethod?: string;
+  /**
+   * The stored payload
+   */
+  payload: Readonly<HttpPayload>;
 }
 
 /**

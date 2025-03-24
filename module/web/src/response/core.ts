@@ -18,14 +18,15 @@ export class HttpResponseCore implements Partial<HttpResponse> {
     res: Omit<Partial<T>, typeof WebInternal> & { [WebInternal]: Partial<HttpResponse[typeof WebInternal]> },
   ): T {
     Object.setPrototypeOf(res, HttpResponseCore.prototype);
+    const final = castTo<T>(res);
     const core = castTo<HttpResponseCore>(res);
-    core._payload = HttpPayloadUtil.fromBytes('');
+    core._payload = final[WebInternal].payload = HttpPayloadUtil.fromBytes(Buffer.alloc(0));
     core._headerNames = {};
-    return castTo(res);
+    return final;
   }
 
-  _payload: HttpPayload;
   _headerNames: Record<string, string>;
+  _payload: HttpPayload;
 
   get statusCode(): number | undefined {
     return this._payload.statusCode;
@@ -74,11 +75,11 @@ export class HttpResponseCore implements Partial<HttpResponse> {
   setResponse(this: HttpResponse & HttpResponseCore, value: unknown, replace = false): HttpPayload {
     const payload = HttpPayloadUtil.from(value);
 
-    if (payload.source === this._payload.source || payload.output === value) {
+    if (payload.source === this._payload.source || this._payload.output === payload.output) {
       return this._payload;
     }
 
-    const p = this._payload = replace ?
+    const p = this._payload = this[WebInternal].payload = replace ?
       { ...payload } :
       { ...this._payload, ...payload, headers: { ...this._payload.headers, ...payload.headers } };
 
@@ -93,6 +94,8 @@ export class HttpResponseCore implements Partial<HttpResponse> {
       this.setHeader('Content-Length', `${p.length} `);
     } else if (p.length === 0) {
       this.removeHeader('Content-Type');
+    } else {
+      this.removeHeader('Content-Length');
     }
 
     if (!this.getHeader('Content-Type') && p.length) {

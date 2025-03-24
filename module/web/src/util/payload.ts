@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
 import { isArrayBuffer } from 'node:util/types';
 
-import { BinaryUtil, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
+import { BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
 import { HttpPayload } from '../types';
 import { HttpSerializable } from '../response/serializable';
@@ -33,33 +33,42 @@ export class HttpPayloadUtil {
   /**
    * Standard stream
    */
-  static fromStream(value: Readable | ReadableStream, type?: string): HttpPayload {
-    const output = isReadableStream(value) ? Readable.fromWeb(value) : value;
+  static fromStream<T extends Readable | ReadableStream>(value: T, type?: string): HttpPayload<T> {
+    const output: Readable = isReadableStream(value) ? Readable.fromWeb(value) : value;
     return new HttpPayload({ defaultContentType: type, output, source: value, headers: {} });
   }
 
   /**
-   * Standard array of bytes (buffer, string)
+   * Standard text
    */
-  static fromBytes(value: Buffer | string | ArrayBuffer, type?: string): HttpPayload {
-    const narrowed = typeof value === 'string' ? Buffer.from(value, 'utf8') : (Buffer.isBuffer(value) ? value : Buffer.from(value));
+  static fromText<T extends string>(value: T, type: string = 'text/plain', encoding: BufferEncoding = 'utf8'): HttpPayload<T> {
+    const output = Buffer.from(value, encoding);
+    return new HttpPayload({ defaultContentType: type, output, length: output.byteLength, source: value, headers: {} });
+  }
+
+  /**
+   * Standard array of bytes (buffer)
+   */
+  static fromBytes<T extends Buffer | ArrayBuffer>(value: T, type?: string): HttpPayload<T> {
+    const narrowed = Buffer.isBuffer(value) ? value : Buffer.from(value);
     return new HttpPayload({ defaultContentType: type, output: narrowed, length: narrowed.byteLength, source: value, headers: {} });
   }
 
   /**
    * Standard json
    */
-  static fromJSON(value: unknown): HttpPayload {
-    return this.fromBytes(JSON.stringify(hasToJSON(value) ? value.toJSON() : value), 'application/json');
+  static fromJSON<T extends unknown>(value: T): HttpPayload<T> {
+    const payload = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
+    const output = Buffer.from(payload, 'utf-8');
+    return new HttpPayload({ defaultContentType: 'application/json', headers: {}, output, source: value, length: output.byteLength });
   }
 
   /**
    * Serialize file/blob
    */
-  static fromBlob(value: Blob | File): HttpPayload {
+  static fromBlob<T extends Blob>(value: T): HttpPayload<T> {
     const meta = BinaryUtil.getBlobMeta(value);
-    const out = this.fromStream(Readable.fromWeb(value.stream()));
-    out.source = value;
+    const out = new HttpPayload<T>({ source: value, output: Readable.fromWeb(value.stream()), headers: {}, length: value.size });
 
     const headers = out.headers ??= {};
     const setIf = (k: string, v?: string): unknown => v ? headers[k] = v : undefined;
@@ -78,15 +87,13 @@ export class HttpPayloadUtil {
       headers['content-disposition'] = `attachment;filename="${value.name}"`;
     }
 
-    out.length = value.size;
-
     return out;
   }
 
   /**
    * From Error
    */
-  static fromError(error: ErrorResponse): HttpPayload {
+  static fromError<T extends ErrorResponse>(error: T): HttpPayload<T> {
     const output = this.fromJSON(hasToJSON(error) ? error : { message: error.message });
     return new HttpPayload({
       ...output,
@@ -99,13 +106,15 @@ export class HttpPayloadUtil {
   /**
    * Determine payload based on output
    */
-  static from(value: unknown): HttpPayload {
-    if (value === undefined || value === null) {
-      return this.fromBytes('');
+  static from<T>(value: T): HttpPayload<T> {
+    if (isSerializable(value)) {
+      return value.serialize();
+    } else if (value === undefined || value === null) {
+      return castTo(this.fromText(''));
     } else if (value instanceof HttpPayload) {
       return value;
     } else if (typeof value === 'string') {
-      return this.fromBytes(value, 'text/plain');
+      return this.fromText(value, 'text/plain');
     } else if (Buffer.isBuffer(value) || isArrayBuffer(value)) {
       return this.fromBytes(value);
     } else if (isStream(value) || isReadableStream(value)) {
@@ -114,8 +123,6 @@ export class HttpPayloadUtil {
       return this.fromError(value);
     } else if (value instanceof Blob) {
       return this.fromBlob(value);
-    } else if (isSerializable(value)) {
-      return value.serialize();
     } else {
       return this.fromJSON(value);
     }

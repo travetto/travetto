@@ -1,5 +1,5 @@
 import https from 'node:https';
-import { IncomingMessage, ServerResponse } from 'node:http';
+import http from 'node:http';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import Router from 'router';
 
@@ -25,20 +25,21 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
 
   listening: boolean;
 
-  updateGlobalOnChange = true;
-
   @Inject()
   config: WebConfig;
 
   async init(): Promise<NodeWebApplication> {
-    let server: https.Server;
-    const router = Router();
-    const routed = (req: IncomingMessage, res: ServerResponse): void => { router(req, res, () => { }); };
+    let server: https.Server | http.Server;
+    const router = new Router({ mergeParams: true });
+    const routed = (req: http.IncomingMessage, res: http.ServerResponse): void => {
+      Object.assign(req, { secure: this.config.ssl?.active });
+      router(req, res, () => { });
+    };
 
     if (this.config.ssl?.active) {
-      server = https.createServer((await this.config.ssl?.getKeys())!, routed);
+      server = https.createServer({ ...(await this.config.ssl?.getKeys())! }, routed);
     } else {
-      server = https.createServer(routed);
+      server = http.createServer({}, routed);
     }
     const app = castTo<NodeWebApplication>(server);
     app.router = router;
@@ -54,7 +55,7 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
   }
 
   async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void> {
-    const router = Router({});
+    const router = new Router({ mergeParams: true });
     castTo<{ key?: string | symbol }>(router).key = key;
 
     for (const endpoint of endpoints) {
@@ -62,7 +63,7 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
         endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
 
       router[endpoint.method](finalPath, async (req, res, next) => {
-        await endpoint.filter!(NodeWebServerUtil.getContext(req, res, next));
+        await endpoint.filter!(NodeWebServerUtil.getContext(req, res, () => { }));
       });
     }
 
@@ -70,10 +71,15 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
   }
 
   async listen(): Promise<WebServerHandle> {
-    this.listening = true;
     const { reject, resolve, promise } = Promise.withResolvers<void>();
-    const server = this.raw.listen(this.config.port, this.config.hostname, undefined, resolve);
-    server.on('error', reject);
+
+    this.listening = true;
+
+    const server = this.raw
+      .on('listening', resolve)
+      .on('error', reject)
+      .listen(this.config.port, this.config.hostname);
+
     await promise;
     server.off('error', reject);
     return {

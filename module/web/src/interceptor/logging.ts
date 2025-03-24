@@ -31,8 +31,10 @@ export class LoggingInterceptor implements HttpInterceptor {
   @Inject()
   config: WebLogConfig;
 
-  logResult(req: HttpRequest, res: HttpResponse, err?: unknown): void {
+  logResult(req: HttpRequest, res: HttpResponse): void {
 
+    const { source } = res[WebInternal].payload;
+    const err = source instanceof Error ? source : undefined;
     const defaultCode = !!err ? 500 : 200;
     const duration = Date.now() - req[WebInternal].createdDate!;
 
@@ -65,13 +67,10 @@ export class LoggingInterceptor implements HttpInterceptor {
   }
 
   async filter({ req, res, next }: HttpChainedContext): Promise<unknown> {
-    let err;
     try {
       return await next();
-    } catch (e) {
-      err = e;
     } finally {
-      this.logResult(req, res, err);
+      this.logResult(req, res);
     }
   }
 }
