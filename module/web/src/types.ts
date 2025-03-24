@@ -1,9 +1,11 @@
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'node:http';
-import { Readable, Writable } from 'node:stream';
+import { Writable } from 'node:stream';
 
 import { SetOption, GetOption } from 'cookies';
 
 import type { ByteRange, Any } from '@travetto/runtime';
+
+import { HttpPayload } from './response/payload';
 
 export type HttpContext<C = {}> = { req: HttpRequest, res: HttpResponse } & C;
 export type HttpFilter<C extends HttpContext = HttpContext> = (context: C) => unknown;
@@ -177,10 +179,6 @@ export interface HttpResponseInternal<T = unknown> {
    * Http Request method
    */
   requestMethod?: string;
-  /**
-   * The stored payload
-   */
-  payload: Readonly<HttpPayload>;
 }
 
 /**
@@ -226,13 +224,9 @@ export interface HttpResponse<T = unknown> {
    */
   getHeaders(): Readonly<Record<string, string | string[]>>;
   /**
-   * Add value to vary header, or create if not existing
+   * Make a response payload
    */
-  vary(value: string): void;
-  /**
-   * Set response value
-   */
-  setResponse(value: unknown, replace?: boolean): HttpPayload;
+  getPayload(value: unknown): HttpPayload;
   /**
    * Triggers response to provider entity
    */
@@ -250,19 +244,3 @@ export interface HttpResponse<T = unknown> {
     set(name: string, value?: string, options?: SetOption): void;
   };
 }
-
-/**
- * Http Payload as a simple object
- */
-export class HttpPayload<V = unknown> {
-  headers: Record<string, string | string[]>;
-  defaultContentType?: string;
-  statusCode?: number;
-  source: V;
-  output: Buffer | Readable;
-  length?: number;
-
-  constructor(o: HttpPayload<V>) {
-    Object.assign(this, o);
-  }
-};

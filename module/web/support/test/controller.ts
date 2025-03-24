@@ -7,8 +7,7 @@ import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint.ts';
 import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param.ts';
 import { HttpRequest, HttpResponse } from '../../src/types.ts';
 import { Produces, SetHeaders } from '../../src/decorator/common.ts';
-import { HttpSerializable } from '../../src/response/serializable.ts';
-import { HttpPayloadUtil } from '@travetto/web';
+import { HttpPayload, HttpSerializable } from '../../src/response/payload.ts';
 
 @Controller('/test')
 export class TestController {
@@ -72,7 +71,7 @@ export class TestController {
   getRenderable(): HttpSerializable<string> {
     return {
       serialize() {
-        return HttpPayloadUtil.from('hello');
+        return HttpPayload.from('hello');
       }
     };
   }

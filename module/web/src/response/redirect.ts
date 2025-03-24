@@ -1,5 +1,4 @@
-import { HttpSerializable } from './serializable.ts';
-import { HttpPayload } from '../types.ts';
+import { HttpSerializable, HttpPayload } from './payload.ts';
 
 /**
  * Simple redirect response
@@ -22,12 +21,10 @@ export class Redirect implements HttpSerializable<void> {
   /**
    * Render the response
    */
-  serialize(): HttpPayload {
-    return new HttpPayload({
+  serialize(): HttpPayload<void> {
+    return HttpPayload.fromEmpty().with({
       statusCode: this.#status,
-      source: this,
       headers: { Location: this.#location },
-      output: Buffer.from([])
     });
   }
 }

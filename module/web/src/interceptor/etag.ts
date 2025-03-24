@@ -4,7 +4,7 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { HttpChainedContext, HttpContext, HttpPayload } from '../types.ts';
+import { HttpChainedContext, HttpContext } from '../types.ts';
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { CompressionInterceptor } from './compress.ts';
 import { EndpointConfig } from '../registry/types.ts';
@@ -36,22 +36,22 @@ export class EtagInterceptor implements HttpInterceptor {
   addTag(ctx: HttpContext, value?: unknown): unknown {
     const { req, res } = ctx;
 
-    const { output } = ctx.res.setResponse(value);
+    const payload = res.getPayload(value);
 
     if (
-      Buffer.isBuffer(output) &&
+      Buffer.isBuffer(payload.output) &&
       (
-        !res.statusCode ||
-        (res.statusCode < 300 && res.statusCode >= 200) ||
-        res.statusCode === 304
+        !payload.statusCode ||
+        (payload.statusCode < 300 && payload.statusCode >= 200) ||
+        payload.statusCode === 304
       )
     ) {
 
-      const tag = output.length === 0 ?
+      const tag = payload.output.length === 0 ?
         '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
         crypto
           .createHash('sha1')
-          .update(output.toString('utf8'), 'utf8')
+          .update(payload.output.toString('utf8'), 'utf8')
           .digest('base64')
           .substring(0, 27);
 
@@ -63,16 +63,11 @@ export class EtagInterceptor implements HttpInterceptor {
         (req.method === 'GET' || req.method === 'HEAD') &&
         fresh(req.headers, { etag: tag, 'last-modified': lastModified })
       ) {
-        return ctx.res.setResponse(new HttpPayload({
-          output: Buffer.from([]),
-          statusCode: 304,
-          source: this,
-          headers: {}
-        }), true);
+        return res.getPayload(undefined).with({ statusCode: 304 });
       }
     }
 
-    return output;
+    return payload;
   }
 
   applies(ep: EndpointConfig, config: EtagConfig): boolean {

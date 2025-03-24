@@ -52,24 +52,23 @@ export class CompressionInterceptor implements HttpInterceptor {
   @Inject()
   config: CompressConfig;
 
-  async compress(ctx: HttpContext, payload: unknown): Promise<unknown> {
+  async compress(ctx: HttpContext, value: unknown): Promise<unknown> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
-
-    const { output: data, length } = ctx.res.setResponse(payload);
-
     const { res, req } = ctx;
 
-    res.vary('Accept-Encoding');
+    const payload = res.getPayload(value);
+
+    payload.vary('Accept-Encoding');
 
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     if (
-      !data ||
-      (length !== undefined && length >= 0 && length < chunkSize) ||
+      !payload.output ||
+      (payload.length !== undefined && payload.length >= 0 && payload.length < chunkSize) ||
       req.method === 'HEAD' ||
-      res.getHeader('content-encoding') ||
-      NO_TRANSFORM_REGEX.test(res.getHeader('cache-control')?.toString() ?? '')
+      payload.getHeader('content-encoding') ||
+      NO_TRANSFORM_REGEX.test(payload.getHeader('cache-control')?.toString() ?? '')
     ) {
-      return data;
+      return payload;
     }
 
     const sent = req.headerFirst('accept-encoding');
@@ -86,24 +85,24 @@ export class CompressionInterceptor implements HttpInterceptor {
 
     const type = castTo<HttpCompressEncoding>(method!);
     if (type === 'identity') {
-      return data;
+      return payload;
     }
 
     const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
     const stream = ENCODING_METHODS[type](opts);
     // If we are compressing
-    res.setHeader('Content-Encoding', type);
+    payload.setHeader('Content-Encoding', type);
 
-    if (Buffer.isBuffer(data)) {
-      stream.end(data);
+    if (Buffer.isBuffer(payload.output)) {
+      stream.end(payload.output);
       const out = await buffer(stream);
-      ctx.res.setResponse(out);
-      return out;
+      payload.output = out;
     } else {
-      data.pipe(stream);
-      ctx.res.setResponse(stream);
-      return stream;
+      payload.output.pipe(stream);
+      payload.output = stream;
     }
+
+    return payload;
   }
 
   applies(ep: EndpointConfig, config: CompressConfig): boolean {

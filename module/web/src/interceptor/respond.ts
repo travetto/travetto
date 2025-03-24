@@ -19,7 +19,7 @@ export class RespondInterceptor implements HttpInterceptor {
     }
 
     if (!ctx.res.headersSent) {
-      return await ctx.res.respond(ctx.res.setResponse(value));
+      return await ctx.res.respond(ctx.res.getPayload(value));
     }
   }
 }
