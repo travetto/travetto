@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 import { ReadableStream } from 'node:stream/web';
 import { isArrayBuffer } from 'node:util/types';
 
-import { BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
+import { Any, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
 import { HttpPayload } from '../types';
 import { HttpSerializable } from '../response/serializable';
@@ -107,9 +107,7 @@ export class HttpPayloadUtil {
    * Determine payload based on output
    */
   static from<T>(value: T): HttpPayload<T> {
-    if (isSerializable(value)) {
-      return value.serialize();
-    } else if (value === undefined || value === null) {
+    if (value === undefined || value === null) {
       return castTo(this.fromText(''));
     } else if (value instanceof HttpPayload) {
       return value;
@@ -123,6 +121,8 @@ export class HttpPayloadUtil {
       return this.fromError(value);
     } else if (value instanceof Blob) {
       return this.fromBlob(value);
+    } else if (isSerializable(value)) {
+      return castTo<HttpPayload<Any>>(value.serialize());
     } else {
       return this.fromJSON(value);
     }

@@ -4,7 +4,7 @@ import { HttpPayload } from '../types.ts';
 /**
  * Simple redirect response
  */
-export class Redirect implements HttpSerializable {
+export class Redirect implements HttpSerializable<void> {
 
   #location: string;
   #status: number;

@@ -7,5 +7,5 @@ export interface HttpSerializable<V = unknown> {
   /**
    * Serialize the output given a response.
    */
-  serialize(): HttpPayload<V>;
+  serialize(): HttpPayload;
 }
