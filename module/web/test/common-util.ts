@@ -1,18 +1,21 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
-import { castTo } from '@travetto/runtime';
 
 import { WebCommonUtil } from '../src/util/common.ts';
 import { HttpRequest } from '../src/types.ts';
 import { HttpPayload } from '../src/response/payload.ts';
+import { HttpRequestCore } from '../src/request/core.ts';
+import { castTo } from '@travetto/runtime';
 
 const mockRequest = (payload: HttpPayload): HttpRequest =>
-  castTo({
-    headerFirst(key: string) { return payload.getHeader(key); },
-    getHeader(key: string) { return payload.getHeader(key); },
-    cookies: { get(key: string) { return payload.getCookie(key); } }
-  });
+  HttpRequestCore.create(
+    {
+      getHeaderFirst: castTo((key: string) => payload.getHeader(key)),
+      getHeader: castTo((key: string) => payload.getHeader(key))
+    },
+    null!
+  );
 
 const KEY = 'test';
 const config = (mode: 'cookie' | 'header', signed = true) => ({ cookie: 'orange', header: 'dandy', mode, ...signed ? { signingKey: KEY } : {} });
@@ -60,11 +63,11 @@ export class WebCommonUtilTest {
 
   @Test()
   async writeValueCookieTest() {
-    const res = HttpPayload.fromEmpty();
-    WebCommonUtil.writeValue(config('cookie', false), res, 'blue');
+    const res = HttpPayload.fromEmpty()
+      .writeMetadata(config('cookie', false), 'blue');
     assert(res.getCookie('orange') === 'blue');
 
-    WebCommonUtil.writeValue(config('cookie'), res, undefined);
+    res.writeMetadata(config('cookie'), undefined);
     assert(res.hasCookie('orange'));
     assert(res.getCookie('orange') === undefined);
 
@@ -72,26 +75,26 @@ export class WebCommonUtilTest {
 
   @Test()
   async writeValueHeaderTest() {
-    const res = HttpPayload.fromEmpty();
-    WebCommonUtil.writeValue(config('header', false), res, 'blue');
+    const res = HttpPayload.fromEmpty()
+      .writeMetadata(config('header', false), 'blue');
     assert(res.getHeader('dandy') === 'blue');
 
-    const res2 = HttpPayload.fromEmpty();
-    WebCommonUtil.writeValue(config('header'), res2, undefined);
+    const res2 = HttpPayload.fromEmpty()
+      .writeMetadata(config('header'), undefined);
     assert(!res2.getHeader('dandy'));
 
-    WebCommonUtil.writeValue(config('header'), res, undefined);
+    res.writeMetadata(config('header'), undefined);
     assert(!res.getHeader('dandy'));
   }
 
   @Test()
   async readValueHeaderTest() {
     const req = mockRequest(HttpPayload.fromEmpty().with({ headers: { dandy: 'howdy' } }));
-    const value = await WebCommonUtil.readValue(config('header', false), req);
+    const value = await req.readMetadata(config('header', false));
     assert(value);
     assert(value === 'howdy');
 
-    const missing = await WebCommonUtil.readValue({ mode: 'header', header: 'zzzz', cookie: '' }, req);
+    const missing = await req.readMetadata({ mode: 'header', header: 'zzzz', cookie: '' });
     assert(missing === undefined);
   }
 
@@ -99,10 +102,10 @@ export class WebCommonUtilTest {
   async readWriteValueTest() {
     const cfg = config('header', false);
     const res = HttpPayload.fromEmpty();
-    await WebCommonUtil.writeValue(cfg, res, 'hello');
+    await res.writeMetadata(cfg, 'hello');
 
     const req = mockRequest(res);
-    const value = await WebCommonUtil.readValue(cfg, req);
+    const value = await req.readMetadata(cfg);
 
     assert(value === 'hello');
   }

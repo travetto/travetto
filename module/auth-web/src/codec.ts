@@ -2,7 +2,7 @@ import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt
 
 import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
-import { HttpPayload, HttpRequest, WebCommonUtil } from '@travetto/web';
+import { HttpPayload, HttpRequest } from '@travetto/web';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
@@ -47,7 +47,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   token(req: HttpRequest): AuthToken | undefined {
-    const value = WebCommonUtil.readValue(this.config, req, { signed: false });
+    const value = req.readMetadata(this.config, { signed: false });
     return value ? { type: 'jwt', value } : undefined;
   }
 
@@ -76,7 +76,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   async encode(payload: HttpPayload, data: Principal | undefined): Promise<HttpPayload> {
     const token = data ? await this.create(data) : undefined;
-    WebCommonUtil.writeValue(this.config, payload, token, { expires: data?.expiresAt, signed: false });
+    payload.writeMetadata(this.config, token, { expires: data?.expiresAt, signed: false });
     return payload;
   }
 }

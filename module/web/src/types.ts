@@ -11,6 +11,8 @@ export type HttpFilter<C extends HttpContext = HttpContext> = (context: C) => Pr
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 export type HttpHeaderMap = Record<string, string | (() => string)>;
 export type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
+export type HttpMetadataConfig = { mode?: 'header' | 'cookie', header: string, cookie: string, headerPrefix?: string };
+
 
 export type HttpChainedContext<C = unknown> = HttpContext<{ next: () => Promise<HttpPayload>, config: C }>;
 export type HttpChainedFilter<C = unknown> = HttpFilter<HttpChainedContext<C>>;
@@ -158,4 +160,9 @@ export interface HttpRequest<T = unknown> {
    * @param options The options for cookie retrieval
    */
   getCookie(name: string, options?: GetOption): string | undefined;
+
+  /**
+   * Read value from request
+   */
+  readMetadata(cfg: HttpMetadataConfig, opts?: GetOption): string | undefined;
 }

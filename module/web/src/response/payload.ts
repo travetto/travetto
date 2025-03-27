@@ -3,6 +3,7 @@ import { isArrayBuffer } from 'node:util/types';
 
 import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 import { SetOption } from 'cookies';
+import { HttpMetadataConfig } from '../types';
 
 type V = string | string[];
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
@@ -291,6 +292,27 @@ export class HttpPayload<S = unknown> {
 
   getCookies(): Record<string, ({ value: string | undefined, options: SetOption })> {
     return Object.freeze(this.#cookies!);
+  }
+
+
+  /**
+   * Write value to response
+   */
+  writeMetadata(cfg: HttpMetadataConfig, output: string | undefined, opts?: SetOption): this {
+    if (cfg.mode === 'cookie' || !cfg.mode) {
+      this.setCookie(cfg.cookie, output, {
+        ...opts,
+        maxAge: (output !== undefined) ? undefined : -1,
+      });
+    }
+    if (cfg.mode === 'header') {
+      if (output) {
+        this.setHeader(cfg.header, cfg.headerPrefix ? `${cfg.headerPrefix} ${output}` : output);
+      } else {
+        this.removeHeader(cfg.header);
+      }
+    }
+    return this;
   }
 }
 

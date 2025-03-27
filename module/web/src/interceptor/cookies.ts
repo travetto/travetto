@@ -9,7 +9,7 @@ import { HttpChainedContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
 import { EndpointConfig } from '../registry/types.ts';
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
-import { HttpPayload } from '@travetto/web';
+import { HttpPayload } from '../response/payload.ts';
 
 /**
  * Web cookie configuration

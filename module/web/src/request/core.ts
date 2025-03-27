@@ -3,9 +3,10 @@ import { IncomingHttpHeaders } from 'node:http';
 import { asFull, ByteRange, castTo } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpContact, HttpRequest, MimeType, WebInternal } from '../types.ts';
+import { HttpContact, HttpMetadataConfig, HttpRequest, MimeType, WebInternal } from '../types.ts';
 import { MimeUtil } from '../util/mime.ts';
 import { HttpPayload } from '../response/payload.ts';
+import { GetOption } from 'cookies';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
@@ -105,12 +106,19 @@ export class HttpRequestCore implements Partial<HttpRequest> {
     return this[WebInternal].queryExpanded ??= BindUtil.expandPaths(this.query);
   }
 
+
   /**
-   * End response immediately
-   * @private
+   * Read value from request
    */
-  endResponse(this: HttpRequest): void {
-    this[WebInternal].contact.takeControlOfResponse?.();
-    this[WebInternal].contact.nodeRes.flushHeaders();
+  readMetadata(this: HttpRequest, cfg: HttpMetadataConfig, opts?: GetOption): string | undefined {
+    let res = (cfg.mode === 'cookie' || !cfg.mode) ?
+      this.getCookie(cfg.cookie, opts) :
+      this.getHeaderFirst(cfg.header);
+
+    if (res && cfg.mode === 'header' && cfg.headerPrefix) {
+      res = res.split(cfg.headerPrefix)[1].trim();
+    }
+
+    return res;
   }
 }
