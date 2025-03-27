@@ -3,8 +3,9 @@ import { IncomingHttpHeaders } from 'node:http';
 import { asFull, ByteRange, castTo } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpRequest, MimeType, WebInternal } from '../types.ts';
+import { HttpContact, HttpRequest, MimeType, WebInternal } from '../types.ts';
 import { MimeUtil } from '../util/mime.ts';
+import { HttpPayload } from '../response/payload.ts';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
@@ -16,15 +17,15 @@ export class HttpRequestCore implements Partial<HttpRequest> {
   /**
    * Decorate a given request, extending from the request core
    */
-  static create<T extends HttpRequest>(req: Partial<T> & { connection?: unknown } & { [WebInternal]: HttpRequest[typeof WebInternal] }): T {
+  static create<T extends HttpRequest>(req: Partial<T>, contact: HttpContact): T {
     if ('redirect' in req) {
       delete req.redirect;
     }
     Object.setPrototypeOf(req, HttpRequestCore.prototype);
     req.path ??= (req.url ?? '').split(/[#?]/g)[0].replace(/^[^/]/, (a) => `/${a}`);
     req.method = castTo(req.method?.toUpperCase());
-    req.connection = {};
-    req[WebInternal].createdDate = Date.now();
+    castTo<{ connection: unknown }>(req).connection = {};
+    Object.assign((req[WebInternal] ??= asFull({}))!, { createdDate: Date.now(), contact });
     return asFull<T>(req);
   }
 
@@ -32,15 +33,15 @@ export class HttpRequestCore implements Partial<HttpRequest> {
    * Get the inbound request header as a string
    * @param key The header to get
    */
-  header<K extends keyof IncomingHttpHeaders>(this: HttpRequest, key: K): string | string[] | undefined {
+  getHeader<K extends keyof IncomingHttpHeaders>(this: HttpRequest, key: K): string | string[] | undefined {
     return this.headers[castTo<string>(key).toLowerCase()];
   }
   /**
    * Get the inbound request header as a string[]
    * @param key The header to get
    */
-  headerList<K extends keyof IncomingHttpHeaders>(this: HttpRequest, key: K): string[] | undefined {
-    const res = this.header(key);
+  getHeaderList<K extends keyof IncomingHttpHeaders>(this: HttpRequest, key: K): string[] | undefined {
+    const res = this.getHeader(key);
     if (res === undefined) {
       return res;
     }
@@ -55,30 +56,30 @@ export class HttpRequestCore implements Partial<HttpRequest> {
    * Get the inbound request header first value
    * @param key The header to get
    */
-  headerFirst<K extends keyof IncomingHttpHeaders>(this: HttpRequest, key: K): string | undefined {
-    return this.headerList(key)?.[0];
+  getHeaderFirst<K extends keyof IncomingHttpHeaders>(this: HttpRequest, key: K): string | undefined {
+    return this.getHeaderList(key)?.[0];
   }
 
   /**
    * Get the fully parsed content type
    */
   getContentType(this: HttpRequest): MimeType | undefined {
-    return this[WebInternal].parsedType ??= MimeUtil.parse(this.headerFirst('content-type'));
+    return this[WebInternal].parsedType ??= MimeUtil.parse(this.getHeaderFirst('content-type'));
   }
 
   /**
    * Attempt to read the remote IP address of the connection
    */
   getIp(this: HttpRequest): string | undefined {
-    const raw = this[WebInternal].nodeEntity;
-    return this.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
+    const raw = this[WebInternal].contact.nodeReq;
+    return this.getHeaderFirst('x-forwarded-for') || raw.socket.remoteAddress;
   }
 
   /**
    * Get requested byte range for a given request
    */
   getRange(this: HttpRequest, chunkSize: number = 100 * 1024): ByteRange | undefined {
-    const rangeHeader = this.headerFirst('range');
+    const rangeHeader = this.getHeaderFirst('range');
 
     if (rangeHeader) {
       const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
@@ -93,7 +94,7 @@ export class HttpRequestCore implements Partial<HttpRequest> {
    * Read the filename from the content disposition
    */
   getFilename(this: HttpRequest): string | undefined {
-    const [, match] = (this.header('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
+    const [, match] = (this.getHeader('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
     return match;
   }
 
@@ -102,5 +103,14 @@ export class HttpRequestCore implements Partial<HttpRequest> {
    */
   getExpandedQuery(this: HttpRequest): Record<string, unknown> {
     return this[WebInternal].queryExpanded ??= BindUtil.expandPaths(this.query);
+  }
+
+  /**
+   * End response immediately
+   * @private
+   */
+  endResponse(this: HttpRequest): void {
+    this[WebInternal].contact.takeControlOfResponse?.();
+    this[WebInternal].contact.nodeRes.flushHeaders();
   }
 }

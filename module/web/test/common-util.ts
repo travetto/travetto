@@ -4,31 +4,15 @@ import { Test, Suite } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
 
 import { WebCommonUtil } from '../src/util/common.ts';
-import { HttpResponse, HttpRequest } from '../src/types.ts';
+import { HttpRequest } from '../src/types.ts';
+import { HttpPayload } from '../src/response/payload.ts';
 
-type Meta = Record<'headerData' | 'cookieData', Record<string, string | undefined>>;
-type MockHttpResponse = HttpResponse & Meta;
-type MockHttpRequest = HttpRequest;
-
-const mockResponse = (data?: Partial<Meta>): MockHttpResponse => {
-  const meta = { headerData: {}, cookieData: {}, ...data };
-  return castTo({
-    headerData: meta.headerData,
-    cookieData: meta.cookieData,
-    setHeader(key: string, value: string) { meta.headerData[key] = value; },
-    removeHeader(key: string) { delete meta.headerData[key]; },
-    cookies: { set(key: string, value: string) { meta.cookieData[key] = value; } }
+const mockRequest = (payload: HttpPayload): HttpRequest =>
+  castTo({
+    headerFirst(key: string) { return payload.getHeader(key); },
+    getHeader(key: string) { return payload.getHeader(key); },
+    cookies: { get(key: string) { return payload.getCookie(key); } }
   });
-};
-
-const mockRequest = (data: Partial<Meta> = {}): MockHttpRequest => {
-  const meta = { headerData: {}, cookieData: {}, ...data };
-  return castTo({
-    headerFirst(key: string) { return meta.headerData[key]; },
-    getHeader(key: string) { return meta.headerData[key]; },
-    cookies: { get(key: string) { return meta.cookieData[key]; } }
-  });
-};
 
 const KEY = 'test';
 const config = (mode: 'cookie' | 'header', signed = true) => ({ cookie: 'orange', header: 'dandy', mode, ...signed ? { signingKey: KEY } : {} });
@@ -76,35 +60,33 @@ export class WebCommonUtilTest {
 
   @Test()
   async writeValueCookieTest() {
-    const res = mockResponse();
+    const res = HttpPayload.fromEmpty();
     WebCommonUtil.writeValue(config('cookie', false), res, 'blue');
-    assert(res.cookieData.orange);
-    assert(res.cookieData.orange === 'blue');
+    assert(res.getCookie('orange') === 'blue');
 
     WebCommonUtil.writeValue(config('cookie'), res, undefined);
-    assert('orange' in res.cookieData);
-    assert(res.cookieData.orange === undefined);
+    assert(res.hasCookie('orange'));
+    assert(res.getCookie('orange') === undefined);
 
   }
 
   @Test()
   async writeValueHeaderTest() {
-    const res = mockResponse();
+    const res = HttpPayload.fromEmpty();
     WebCommonUtil.writeValue(config('header', false), res, 'blue');
-    assert(res.headerData.dandy);
-    assert(res.headerData.dandy === 'blue');
+    assert(res.getHeader('dandy') === 'blue');
 
-    const res2 = mockResponse();
+    const res2 = HttpPayload.fromEmpty();
     WebCommonUtil.writeValue(config('header'), res2, undefined);
-    assert(!res2.headerData.dandy);
+    assert(!res2.getHeader('dandy'));
 
     WebCommonUtil.writeValue(config('header'), res, undefined);
-    assert(!res.headerData.dandy);
+    assert(!res.getHeader('dandy'));
   }
 
   @Test()
   async readValueHeaderTest() {
-    const req = mockRequest({ headerData: { dandy: 'howdy' } });
+    const req = mockRequest(HttpPayload.fromEmpty().with({ headers: { dandy: 'howdy' } }));
     const value = await WebCommonUtil.readValue(config('header', false), req);
     assert(value);
     assert(value === 'howdy');
@@ -116,7 +98,7 @@ export class WebCommonUtilTest {
   @Test()
   async readWriteValueTest() {
     const cfg = config('header', false);
-    const res = mockResponse();
+    const res = HttpPayload.fromEmpty();
     await WebCommonUtil.writeValue(cfg, res, 'hello');
 
     const req = mockRequest(res);

@@ -1,10 +1,9 @@
 import { toConcrete } from '@travetto/runtime';
-import { HttpInterceptor, WebContext, HttpInterceptorCategory, HttpChainedContext } from '@travetto/web';
+import { HttpInterceptor, WebContext, HttpInterceptorCategory, HttpChainedContext, HttpPayload } from '@travetto/web';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types.ts';
-
 import { WebAuthConfig } from '../config.ts';
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
@@ -42,38 +41,40 @@ export class AuthContextInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<AuthToken>(), () => this.authContext.authToken);
   }
 
-  async filter(ctx: HttpChainedContext): Promise<unknown> {
+  async filter(ctx: HttpChainedContext): Promise<HttpPayload> {
     // Skip if already authenticated
     if (this.authContext.principal) {
       return ctx.next();
     }
 
-    let decoded: Principal | undefined;
-    let checked: Principal | undefined;
-    let lastExpiresAt: Date | undefined;
-
     try {
-      decoded = await this.codec.decode(ctx);
+      let lastExpiresAt: Date | undefined;
+      const decoded = await this.codec.decode(ctx.req);
 
       if (decoded) {
         lastExpiresAt = decoded.expiresAt = toDate(decoded.expiresAt);
         decoded.issuedAt = toDate(decoded.issuedAt);
       }
 
-      checked = this.authService.enforceExpiry(decoded);
+      const checked = this.authService.enforceExpiry(decoded);
       this.authContext.principal = checked;
-      this.authContext.authToken = await this.codec.token?.(ctx);
+      this.authContext.authToken = await this.codec.token?.(ctx.req);
 
-      return await ctx.next();
-    } finally {
+      let value = await ctx.next();
+
       const result = this.authContext.principal;
       this.authService.manageExpiry(result);
 
       if ((!!decoded !== !!checked) || result !== checked || lastExpiresAt !== result?.expiresAt) { // If it changed
-        await this.codec.encode(ctx, result);
+        value = await this.codec.encode(value, result);
       }
 
+      return value;
+    } catch (err) {
+      return HttpPayload.fromBasicError(err);
+    } finally {
       this.authContext.clear();
     }
   }
+
 }

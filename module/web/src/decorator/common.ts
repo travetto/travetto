@@ -5,6 +5,7 @@ import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptsInterceptor } from '../interceptor/accepts.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
+import { ReturnValueInterceptor } from '../interceptor/returnValue.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: EndpointFunctionDescriptor) {
@@ -31,12 +32,14 @@ export function Undocumented(): EndpointDecorator { return register({ documented
  * Set response headers on success
  * @param headers The response headers to set
  */
-export function SetHeaders(headers: HttpHeaderMap): EndpointDecorator { return register({ headers }); }
+export function SetHeaders(headers: HttpHeaderMap): EndpointDecorator {
+  return ControllerRegistry.createInterceptorConfigDecorator(ReturnValueInterceptor, { headers });
+}
 
 /**
  * Specifies content type for response
  */
-export function Produces(mime: string): EndpointDecorator { return register({ headers: { 'content-type': mime } }); }
+export function Produces(mime: string): EndpointDecorator { return SetHeaders({ 'content-type': mime }); }
 
 /**
  * Specifies if endpoint should be conditional

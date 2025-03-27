@@ -1,9 +1,10 @@
-import { asConstructable, castTo, Class } from '@travetto/runtime';
+import { AppError, asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { HttpFilter, HttpContext, WebInternal, HttpChainedFilter, HttpChainedContext } from '../types.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { HttpInterceptor } from '../interceptor/types.ts';
+import { HttpPayload } from '../response/payload.ts';
 
 /**
  * Endpoint specific utilities
@@ -34,10 +35,10 @@ export class EndpointUtil {
    */
   static createFilterChain(filters: [HttpChainedFilter, unknown][]): HttpChainedFilter {
     const len = filters.length - 1;
-    return function filterChain(ctx: HttpChainedContext, idx: number = 0): unknown {
+    return function filterChain(ctx: HttpChainedContext, idx: number = 0): Promise<HttpPayload> {
       const [it, cfg] = filters[idx]!;
       const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
-      return it({ req: ctx.req, res: ctx.res, next: chainedNext, config: cfg });
+      return it({ req: ctx.req, next: chainedNext, config: cfg });
     };
   }
 
@@ -83,7 +84,7 @@ export class EndpointUtil {
 
     switch (param.location) {
       case 'path': return ctx.req.params[param.name!];
-      case 'header': return field.array ? ctx.req.headerList(param.name!) : ctx.req.headerFirst(param.name!);
+      case 'header': return field.array ? ctx.req.getHeaderList(param.name!) : ctx.req.getHeaderFirst(param.name!);
       case 'body': return ctx.req.body;
       case 'query': {
         const q = ctx.req.getExpandedQuery();
@@ -141,9 +142,15 @@ export class EndpointUtil {
       interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
     }
 
-    const handlerBound: HttpFilter = async (ctx): Promise<unknown> => {
+    const handlerBound: HttpFilter = async (ctx): Promise<HttpPayload> => {
       const params = await this.extractParameters(ctx, endpoint);
-      return endpoint.endpoint.apply(endpoint.instance, params);
+      let value;
+      try {
+        value = await endpoint.endpoint.apply(endpoint.instance, params);
+      } catch (err) {
+        value = err instanceof Error ? err : AppError.fromBasic(err);
+      }
+      return HttpPayload.from(value);
     };
 
     const filters = [
@@ -161,15 +168,6 @@ export class EndpointUtil {
       ...filters.map(fn => [fn, {}]),
       [handlerBound, {}]
     ]);
-
-    const headers = {
-      ...(controller?.headers ?? {}),
-      ...('headers' in endpoint ? endpoint.headers : {})
-    };
-
-    if (Object.keys(headers).length > 0) {
-      filterChain.unshift([(c): unknown => (c.res[WebInternal].headersAdded = { ...headers }, c.next()), {}]);
-    }
 
     return this.createFilterChain(filterChain);
   }

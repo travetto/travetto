@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { WebInternal, HttpRequest, HttpResponse, HttpRequestCore, HttpResponseCore, HttpChainedContext } from '@travetto/web';
+import { WebInternal, HttpRequest, HttpRequestCore, HttpChainedContext } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -11,12 +11,11 @@ export class FastifyWebServerUtil {
   /**
    * Convert request, response object from provider to framework
    */
-  static getContext(req: FastifyRequest, res: FastifyReply): HttpChainedContext {
-    const fullRes: typeof res & { [WebInternal]?: HttpChainedContext } = res;
-    return fullRes[WebInternal] ??= {
-      req: this.getRequest(req),
-      res: this.getResponse(res),
-      next: (): void => { },
+  static getContext(req: FastifyRequest, reply: FastifyReply): HttpChainedContext {
+    const fullReq: typeof req & { [WebInternal]?: HttpChainedContext } = req;
+    return fullReq[WebInternal] ??= {
+      req: this.getRequest(req, reply),
+      next: async () => null!,
       config: {}
     };
   }
@@ -24,12 +23,8 @@ export class FastifyWebServerUtil {
   /**
    * Build a Travetto HttpRequest from a Fastify Request
    */
-  static getRequest(req: FastifyRequest): HttpRequest {
+  static getRequest(req: FastifyRequest, reply: FastifyReply): HttpRequest {
     return HttpRequestCore.create({
-      [WebInternal]: {
-        providerEntity: req,
-        nodeEntity: req.raw,
-      },
       protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
       method: castTo(req.raw.method),
       url: req.raw!.url,
@@ -37,29 +32,14 @@ export class FastifyWebServerUtil {
       params: castTo(req.params),
       headers: req.headers,
       pipe: req.raw.pipe.bind(req.raw),
-    });
-  }
-
-  /**
-   * Build a Travetto HttpResponse from a Fastify Reply
-   */
-  static getResponse(reply: FastifyReply): HttpResponse {
-    return HttpResponseCore.create({
-      [WebInternal]: {
-        providerEntity: reply,
-        nodeEntity: reply.raw,
-        requestMethod: reply.request.method,
-        takeControlOfResponse: () => {
-          reply.hijack();
-        }
-      },
-      get headersSent(): boolean {
-        return reply.sent;
-      },
+    }, {
+      providerReq: req,
+      inputStream: req.raw,
+      providerRes: reply,
       respond(value): unknown {
         return reply
           .status(value.statusCode ?? 200)
-          .headers(value.headers)
+          .headers(value.getHeaders())
           .send(value.output);
       }
     });

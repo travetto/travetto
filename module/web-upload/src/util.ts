@@ -48,7 +48,7 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: req.body ?? req[WebInternal].nodeEntity, filename: req.getFilename(), field: 'file' };
+      yield { stream: req.body ?? req[WebInternal].contact.inputStream, filename: req.getFilename(), field: 'file' };
     }
   }
 

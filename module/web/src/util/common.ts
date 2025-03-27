@@ -1,5 +1,6 @@
 import type { GetOption, SetOption } from 'cookies';
-import type { HttpRequest, HttpResponse } from '../types.ts';
+import type { HttpRequest } from '../types.ts';
+import { HttpPayload } from '../response/payload.ts';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
@@ -58,18 +59,18 @@ export class WebCommonUtil {
   /**
    * Write value to response
    */
-  static writeValue(cfg: ValueConfig, res: HttpResponse, output: string | undefined, opts?: SetOption): void {
+  static writeValue(cfg: ValueConfig, payload: HttpPayload, output: string | undefined, opts?: SetOption): void {
     if (cfg.mode === 'cookie' || !cfg.mode) {
-      res.cookies.set(cfg.cookie, output, {
+      payload.setCookie(cfg.cookie, output, {
         ...opts,
         maxAge: (output !== undefined) ? undefined : -1,
       });
     }
     if (cfg.mode === 'header') {
       if (output) {
-        res.setHeader(cfg.header, cfg.headerPrefix ? `${cfg.headerPrefix} ${output}` : output);
+        payload.setHeader(cfg.header, cfg.headerPrefix ? `${cfg.headerPrefix} ${output}` : output);
       } else {
-        res.removeHeader(cfg.header);
+        payload.removeHeader(cfg.header);
       }
     }
   }
@@ -79,8 +80,8 @@ export class WebCommonUtil {
    */
   static readValue(cfg: ValueConfig, req: HttpRequest, opts?: GetOption): string | undefined {
     let res = (cfg.mode === 'cookie' || !cfg.mode) ?
-      req.cookies.get(cfg.cookie, opts) :
-      req.headerFirst(cfg.header);
+      req.getCookie(cfg.cookie, opts) :
+      req.getHeaderFirst(cfg.header);
 
     if (res && cfg.mode === 'header' && cfg.headerPrefix) {
       res = res.split(cfg.headerPrefix)[1].trim();

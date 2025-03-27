@@ -1,12 +1,13 @@
-import type { Any, Class } from '@travetto/runtime';
+import type { Class } from '@travetto/runtime';
 
 import type { EndpointConfig } from '../registry/types.ts';
 import type { HttpChainedContext } from '../types.ts';
+import { HttpPayload } from '../response/payload.ts';
 
 /**
  * High level categories with a defined ordering
  */
-export const HTTP_INTERCEPTOR_CATEGORIES = ['global', 'terminal', 'request', 'response', 'application', 'unbound'] as const;
+export const HTTP_INTERCEPTOR_CATEGORIES = ['global', 'terminal', 'request', 'response', 'application', 'value', 'unbound'] as const;
 
 /**
  * High level categories with a defined ordering
@@ -55,5 +56,5 @@ export interface HttpInterceptor<C = unknown> {
    * Process the request
    * @param {HttpChainedContext} context The context of to process
    */
-  filter(context: HttpChainedContext<C>): unknown;
+  filter(context: HttpChainedContext<C>): HttpPayload | Promise<HttpPayload>;
 }

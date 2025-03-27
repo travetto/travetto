@@ -43,7 +43,6 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     return {
       class: cls,
       filters: [],
-      headers: {},
       interceptorConfigs: [],
       basePath: '',
       externalName: cls.name.replace(/(Controller|Web|Service)$/, ''),
@@ -62,7 +61,6 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       method: 'all',
       class: cls,
       filters: [],
-      headers: {},
       params: [],
       interceptorConfigs: [],
       name: endpoint.name,
@@ -176,7 +174,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   createInterceptorConfigDecorator<T extends HttpInterceptor>(
     cls: Class<T>,
-    cfg: Partial<RetainFields<T['config']>>
+    cfg: Partial<RetainFields<T['config']>>,
   ): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: EndpointFunctionDescriptor): void => {
       if (prop && descriptor) {
@@ -193,9 +191,6 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param dest Target (controller, endpoint)
    */
   mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>): void {
-    // Coerce to lower case
-    const headers = Object.fromEntries(Object.entries(src.headers ?? {}).map(([k, v]) => [k.toLowerCase(), v]));
-    dest.headers = { ...(dest.headers ?? {}), ...headers };
     dest.filters = [...(dest.filters ?? []), ...(src.filters ?? [])];
     dest.interceptorConfigs = [...(dest.interceptorConfigs ?? []), ...(src.interceptorConfigs ?? [])];
     dest.interceptorExclude = dest.interceptorExclude ?? src.interceptorExclude;

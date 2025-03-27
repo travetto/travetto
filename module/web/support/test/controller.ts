@@ -5,7 +5,7 @@ import { AppError } from '@travetto/runtime';
 import { Controller } from '../../src/decorator/controller.ts';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint.ts';
 import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param.ts';
-import { HttpRequest, HttpResponse } from '../../src/types.ts';
+import { HttpRequest } from '../../src/types.ts';
 import { Produces, SetHeaders } from '../../src/decorator/common.ts';
 import { HttpPayload, HttpSerializable } from '../../src/response/payload.ts';
 
@@ -14,9 +14,6 @@ export class TestController {
 
   @ContextParam()
   req: HttpRequest;
-
-  @ContextParam()
-  res: HttpResponse;
 
   @Get('/json')
   getJSON() {
@@ -45,8 +42,10 @@ export class TestController {
 
   @Delete('/cookie')
   withCookie() {
-    this.res.cookies.set('flavor', 'oreo');
-    return { cookie: this.req.cookies.get('orange') };
+    return HttpPayload.from({ cookie: this.req.getCookie('orange') })
+      .with({
+        cookies: { flavor: { value: 'oreo', options: {} } }
+      });
   }
 
   @Patch('/regexp/super-:special-party')
@@ -86,7 +85,7 @@ export class TestController {
 
   @Get('/headerFirst')
   getHeaderFirst() {
-    return { header: this.req.headerFirst('age') };
+    return { header: this.req.getHeaderFirst('age') };
   }
 
   @Post('/rawBody')

@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpRequest, HttpResponse, WebInternal, HttpResponseCore, HttpRequestCore, HttpChainedContext, HttpPayload } from '@travetto/web';
+import { HttpRequest, WebInternal, HttpRequestCore, HttpChainedContext } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -14,8 +14,7 @@ export class KoaWebServerUtil {
     const fullCtx: typeof ctx & { [WebInternal]?: HttpChainedContext } = ctx;
     return fullCtx[WebInternal] ??= {
       req: this.getRequest(ctx),
-      res: this.getResponse(ctx),
-      next: (): void => { },
+      next: async () => null!,
       config: {}
     };
   }
@@ -25,40 +24,20 @@ export class KoaWebServerUtil {
    */
   static getRequest(ctx: koa.Context): HttpRequest {
     return HttpRequestCore.create({
-      [WebInternal]: {
-        providerEntity: ctx,
-        nodeEntity: ctx.req,
-      },
       protocol: castTo(ctx.protocol),
       method: castTo(ctx.request.method),
       query: ctx.request.query,
       url: ctx.originalUrl,
       params: ctx.params,
       headers: ctx.request.headers,
-      cookies: ctx.cookies,
       pipe: ctx.req.pipe.bind(ctx.req),
-    });
-  }
-
-  /**
-   * Build a Travetto HttpResponse from a koa context
-   */
-  static getResponse(ctx: koa.Context): HttpResponse {
-    return HttpResponseCore.create({
-      [WebInternal]: {
-        providerEntity: ctx,
-        nodeEntity: ctx.res,
-        requestMethod: ctx.method,
-        takeControlOfResponse: () => {
-          ctx.respond = false;
-        }
-      },
-      get headersSent(): boolean {
-        return ctx.headerSent;
-      },
+    }, {
+      providerReq: ctx,
+      providerRes: ctx,
+      inputStream: ctx.req,
       respond(value) {
         ctx.response.status = value.statusCode ?? 200;
-        ctx.res.setHeaders(new Map(Object.entries(value.headers ?? {})));
+        ctx.res.setHeaders(new Map(Object.entries(value.getHeaders())));
         return ctx.response.body = value.output;
       }
     });

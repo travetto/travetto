@@ -10,6 +10,7 @@ import { EndpointConfig } from '../registry/types.ts';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { AcceptsInterceptor } from './accepts.ts';
+import { HttpPayload } from '../response/payload.ts';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
@@ -49,7 +50,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
   async read(req: HttpRequest, limit: string | number): Promise<{ text: string, raw: Buffer }> {
     const cfg = req.getContentType();
 
-    const text = await rawBody(inflation(req[WebInternal].nodeEntity), {
+    const text = await rawBody(inflation(req[WebInternal].contact.inputStream), {
       limit,
       encoding: cfg?.parameters.charset ?? 'utf8'
     });
@@ -83,7 +84,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     return config.applies && (endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method));
   }
 
-  async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<unknown> {
+  async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<HttpPayload> {
     if (!METHODS_WITH_BODIES.has(req.method) || req.body) { // If body is already set
       return next();
     }
@@ -91,7 +92,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     const parserType = this.detectParserType(req, config.parsingTypes);
 
     if (!parserType) {
-      req.body = req[WebInternal].nodeEntity;
+      req.body = req[WebInternal].contact.inputStream;
       return next();
     } else {
       let malformed: unknown;

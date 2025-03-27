@@ -2,7 +2,7 @@ import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { HttpChainedFilter, HttpContext, HttpFilter, HttpHeaderMap, HttpMethodOrAll } from '../types.ts';
+import type { HttpChainedFilter, HttpContext, HttpFilter, HttpMethodOrAll } from '../types.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
@@ -62,10 +62,6 @@ interface CoreConfig {
    * Set of interceptor configs
    */
   interceptorConfigs?: [Class<HttpInterceptor>, unknown][];
-  /**
-   * List of headers to add to the response
-   */
-  headers: HttpHeaderMap;
   /**
    * Should the resource only be used conditionally?
    */

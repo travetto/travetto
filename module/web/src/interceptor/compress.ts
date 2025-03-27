@@ -11,6 +11,7 @@ import { AppError, castTo } from '@travetto/runtime';
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { HttpContext, HttpChainedContext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
+import { HttpPayload } from '../response/payload.ts';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const ENCODING_METHODS = {
@@ -52,11 +53,9 @@ export class CompressionInterceptor implements HttpInterceptor {
   @Inject()
   config: CompressConfig;
 
-  async compress(ctx: HttpContext, value: unknown): Promise<unknown> {
+  async compress(ctx: HttpContext, payload: HttpPayload): Promise<HttpPayload> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
-    const { res, req } = ctx;
-
-    const payload = res.getPayload(value);
+    const { req } = ctx;
 
     payload.vary('Accept-Encoding');
 
@@ -65,20 +64,20 @@ export class CompressionInterceptor implements HttpInterceptor {
       !payload.output ||
       (payload.length !== undefined && payload.length >= 0 && payload.length < chunkSize) ||
       req.method === 'HEAD' ||
-      payload.getHeader('content-encoding') ||
+      payload.hasHeader('content-encoding') ||
       NO_TRANSFORM_REGEX.test(payload.getHeader('cache-control')?.toString() ?? '')
     ) {
       return payload;
     }
 
-    const sent = req.headerFirst('accept-encoding');
-    const method = new Negotiator({ headers: { 'accept-encoding': sent ?? '*' } })
+    const accepts = req.getHeaderFirst('accept-encoding');
+    const method = new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
       // Bad typings, need to override
       .encoding(...castTo<[string[]]>([supportedEncodings, preferredEncodings]));
 
-    if (sent && (!method || !sent.includes(method))) {
+    if (accepts && (!method || !accepts.includes(method))) {
       throw Object.assign(
-        new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${sent} is not supported`),
+        new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`),
         { status: 406 }
       );
     }
@@ -109,7 +108,7 @@ export class CompressionInterceptor implements HttpInterceptor {
     return config.applies;
   }
 
-  async filter(ctx: HttpChainedContext): Promise<unknown> {
+  async filter(ctx: HttpChainedContext): Promise<HttpPayload> {
     return this.compress(ctx, await ctx.next());
   }
 }

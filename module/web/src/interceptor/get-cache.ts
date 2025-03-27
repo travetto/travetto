@@ -6,6 +6,7 @@ import { EndpointConfig } from '../registry/types.ts';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { EtagInterceptor } from './etag.ts';
+import { HttpPayload } from '../response/payload.ts';
 
 @Config('web.getCache')
 export class GetCacheConfig {
@@ -31,13 +32,13 @@ export class GetCacheInterceptor implements HttpInterceptor {
     return endpoint.method === 'get' && config.applies;
   }
 
-  async filter({ res, next }: HttpChainedContext): Promise<unknown> {
-    const result = await next();
+  async filter({ next }: HttpChainedContext): Promise<HttpPayload> {
+    const payload = await next();
     // Only apply on the way out, and on success
-    if (res.getHeader('Expires') === undefined && res.getHeader('Cache-Control') === undefined) {
-      res.setHeader('Expires', '-1');
-      res.setHeader('Cache-Control', 'max-age=0, no-cache');
+    if (!payload.hasHeader('Expires') && !payload.hasHeader('Cache-Control')) {
+      payload.setHeader('Expires', '-1');
+      payload.setHeader('Cache-Control', 'max-age=0, no-cache');
     }
-    return result;
+    return payload;
   }
 }

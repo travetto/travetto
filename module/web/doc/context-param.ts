@@ -1,4 +1,4 @@
-import { CacheControl, ContextParam, Controller, Get, HttpRequest, HttpResponse, Post } from '@travetto/web';
+import { CacheControl, ContextParam, Controller, Get, HttpRequest, SetHeaders } from '@travetto/web';
 
 @Controller('/context')
 class ContextController {
@@ -6,18 +6,13 @@ class ContextController {
   @ContextParam()
   req: HttpRequest;
 
-  @ContextParam()
-  res: HttpResponse;
-
   /**
    * Gets the ip of the user, ensure no caching
    */
   @CacheControl(0)
   @Get('/ip')
+  @SetHeaders({ 'Content-Type': 'application/json+ip' })
   async getIp() {
-    this.res.setHeader('Content-Type', 'application/json');
-    this.res.send(JSON.stringify({
-      ip: this.req.getIp()
-    }));
+    return { ip: this.req.getIp() };
   }
 }

@@ -2,7 +2,7 @@ import { AsyncContextValue, AsyncContext } from '@travetto/context';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, castTo, Class, toConcrete } from '@travetto/runtime';
 
-import { HttpContext, HttpRequest, HttpResponse } from './types.ts';
+import { HttpContext, HttpRequest } from './types.ts';
 
 @Injectable()
 export class WebContext {
@@ -17,16 +17,11 @@ export class WebContext {
     return this.#active.get()?.req!;
   }
 
-  get res(): HttpResponse {
-    return this.#active.get()?.res!;
-  }
-
   postConstruct(): void {
     this.registerType(toConcrete<HttpRequest>(), () => this.req);
-    this.registerType(toConcrete<HttpResponse>(), () => this.res);
   }
 
-  withContext(ctx: HttpContext, next: () => unknown): Promise<unknown> {
+  withContext<T>(ctx: HttpContext, next: () => T): Promise<Awaited<T>> {
     return this.context.run(() => {
       this.#active.set(ctx);
       return next();

@@ -8,6 +8,7 @@ import { MimeUtil } from '../util/mime.ts';
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { HttpChainedContext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
+import { HttpPayload } from '../response/payload.ts';
 
 @Config('web.accepts')
 class AcceptsConfig {
@@ -44,8 +45,8 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
     return config.applies;
   }
 
-  filter({ req, config, next }: HttpChainedContext<AcceptsConfig>): unknown {
-    const contentType = req.header('content-type');
+  filter({ req, config, next }: HttpChainedContext<AcceptsConfig>): Promise<HttpPayload> {
+    const contentType = req.getHeader('content-type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });
     }

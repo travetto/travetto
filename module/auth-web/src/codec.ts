@@ -2,7 +2,7 @@ import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt
 
 import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
-import { HttpContext, WebCommonUtil } from '@travetto/web';
+import { HttpPayload, HttpRequest, WebCommonUtil } from '@travetto/web';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
@@ -46,13 +46,13 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     }
   }
 
-  token(ctx: HttpContext): AuthToken | undefined {
-    const value = WebCommonUtil.readValue(this.config, ctx.req, { signed: false });
+  token(req: HttpRequest): AuthToken | undefined {
+    const value = WebCommonUtil.readValue(this.config, req, { signed: false });
     return value ? { type: 'jwt', value } : undefined;
   }
 
-  async decode(ctx: HttpContext): Promise<Principal | undefined> {
-    const token = this.token(ctx);
+  async decode(req: HttpRequest): Promise<Principal | undefined> {
+    const token = this.token(req);
     return token ? await this.verify(token.value) : undefined;
   }
 
@@ -74,8 +74,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     return jwt.toString();
   }
 
-  async encode(ctx: HttpContext, data: Principal | undefined): Promise<void> {
+  async encode(payload: HttpPayload, data: Principal | undefined): Promise<HttpPayload> {
     const token = data ? await this.create(data) : undefined;
-    WebCommonUtil.writeValue(this.config, ctx.res, token, { expires: data?.expiresAt, signed: false });
+    WebCommonUtil.writeValue(this.config, payload, token, { expires: data?.expiresAt, signed: false });
+    return payload;
   }
 }

@@ -2,13 +2,14 @@ import cookies from 'cookies';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { Secret } from '@travetto/schema';
+import { Ignore, Secret } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
 
 import { HttpChainedContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
 import { EndpointConfig } from '../registry/types.ts';
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpPayload } from '@travetto/web';
 
 /**
  * Web cookie configuration
@@ -39,7 +40,7 @@ export class CookieConfig {
   /**
    * Is the cookie only valid for https
    */
-  secure?: boolean;
+  secure?: boolean = false;
   /**
    * The domain of the cookie
    */
@@ -70,10 +71,16 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
     return config.applies;
   }
 
-  filter({ req, res, config, next }: HttpChainedContext<CookieConfig>): unknown {
-    const store = new cookies(castTo(req), castTo(res), config);
-    req.cookies = { get: (key, opts?): string | undefined => store.get(key, { ...this.config, ...opts }) };
-    res.cookies = { set: (key, value, opts?): void => { store.set(key, value, { ...this.config, ...opts }); } };
-    return next();
+  async filter({ req, config, next }: HttpChainedContext<CookieConfig>): Promise<HttpPayload> {
+    const reqStore = new cookies(castTo(req), castTo({}), this.config);
+    req.getCookie = (k, o): string | undefined => reqStore.get(k, { ...this.config, ...o });
+
+    const value = await next();
+
+    const resStore = new cookies(castTo({}), castTo(value), config);
+    for (const [k, { value: v, options: o }] of Object.entries(value.getCookies())) {
+      resStore.set(k, v, o);
+    }
+    return value;
   }
 }

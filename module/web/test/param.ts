@@ -6,12 +6,11 @@ import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '
 import { castTo } from '@travetto/runtime';
 
 import { HttpRequestCore } from '../src/request/core.ts';
-import { HttpResponseCore } from '../src/response/core.ts';
 import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param.ts';
 import { Post, Get } from '../src/decorator/endpoint.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpMethodOrAll, HttpRequest, HttpResponse, WebInternal } from '../src/types.ts';
+import { HttpMethodOrAll, HttpRequest } from '../src/types.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
 import { EndpointUtil } from '../src/util/endpoint.ts';
 
@@ -24,9 +23,6 @@ class ParamController {
 
   @ContextParam()
   req: HttpRequest;
-
-  @ContextParam()
-  res: HttpResponse;
 
   @Post('/:name')
   async endpoint(@PathParam() name: string, @QueryParam() age: number) { }
@@ -100,21 +96,15 @@ export class EndpointParameterTest {
     return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.method === method)!;
   }
 
-  static async extract(ep: EndpointConfig, req: Partial<HttpRequest>, res: Partial<HttpResponse> = {}): Promise<unknown[]> {
+  static async extract(ep: EndpointConfig, req: Partial<HttpRequest>): Promise<unknown[]> {
     return await EndpointUtil.extractParameters({
       req: HttpRequestCore.create({
         ...req,
-        [WebInternal]: {
-          providerEntity: null!,
-          nodeEntity: null!,
-        }
-      }),
-      res: HttpResponseCore.create({
-        ...res,
-        [WebInternal]: {
-          providerEntity: null!,
-          nodeEntity: null!,
-        }
+      }, {
+        providerReq: null!,
+        providerRes: null!,
+        inputStream: null!,
+        respond: () => { },
       }),
     }, ep);
   }
@@ -152,13 +142,13 @@ export class EndpointParameterTest {
 
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
-        header: castTo((key: string): string => key)
+        getHeader: castTo((key: string): string => key)
       })
     );
 
     await assert.rejects(() =>
       EndpointParameterTest.extract(ep, {
-        header: castTo(() => { })
+        getHeader: castTo(() => { })
       })
     );
 
@@ -193,8 +183,7 @@ export class EndpointParameterTest {
   async testReqRes() {
     const ep = EndpointParameterTest.getEndpoint('/req/res', 'post');
     const req = { path: '/path' };
-    const res = { statusCode: 200 };
-    const items = await EndpointParameterTest.extract(ep, req, res);
+    const items = await EndpointParameterTest.extract(ep, req);
 
     assert(items.length === 0);
   }

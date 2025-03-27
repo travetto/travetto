@@ -1,7 +1,7 @@
 import timers from 'node:timers/promises';
 import assert from 'node:assert';
 
-import { Controller, Get, Post, Redirect } from '@travetto/web';
+import { Controller, Get, HttpPayload, Post } from '@travetto/web';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
@@ -66,7 +66,7 @@ class TestAuthController {
   @Get('/logout')
   @Logout()
   async logout() {
-    return new Redirect('/auth/self', 301);
+    return HttpPayload.redirect('/auth/self', 301);
   }
 }
 

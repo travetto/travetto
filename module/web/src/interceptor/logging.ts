@@ -2,7 +2,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
-import { HttpChainedContext, HttpRequest, HttpResponse, WebInternal } from '../types.ts';
+import { HttpChainedContext, WebInternal } from '../types.ts';
+import { HttpPayload } from '../response/payload.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 /**
@@ -31,23 +32,29 @@ export class LoggingInterceptor implements HttpInterceptor {
   @Inject()
   config: WebLogConfig;
 
-  logResult(req: HttpRequest, res: HttpResponse): void {
+  applies(ep: EndpointConfig, config: WebLogConfig): boolean {
+    return config.applies;
+  }
 
-    const { source } = res[WebInternal].payload;
+  async filter({ req, next }: HttpChainedContext): Promise<HttpPayload> {
+    const createdDate = Date.now();
+    const payload = await next();
+
+    const { source } = payload;
     const err = source instanceof Error ? source : undefined;
     const defaultCode = !!err ? 500 : 200;
-    const duration = Date.now() - req[WebInternal].createdDate!;
+    const duration = Date.now() - createdDate;
 
     const reqLog = {
       method: req.method,
       path: req.path,
       query: { ...req.query },
       params: req.params,
-      statusCode: res.statusCode,
+      statusCode: payload.statusCode,
       duration,
     };
 
-    const code = res.statusCode ?? defaultCode;
+    const code = payload.statusCode ?? defaultCode;
 
     if (code < 400) {
       console.info('Request', reqLog);
@@ -60,18 +67,8 @@ export class LoggingInterceptor implements HttpInterceptor {
     if (this.config.showStackTrace && err instanceof Error) {
       console.error(err.message, { error: err });
     }
-  }
 
-  applies(ep: EndpointConfig, config: WebLogConfig): boolean {
-    return config.applies;
-  }
-
-  async filter({ req, res, next }: HttpChainedContext): Promise<unknown> {
-    try {
-      return await next();
-    } finally {
-      this.logResult(req, res);
-    }
+    return payload;
   }
 }
 

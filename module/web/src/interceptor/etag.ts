@@ -8,6 +8,7 @@ import { HttpChainedContext, HttpContext } from '../types.ts';
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { CompressionInterceptor } from './compress.ts';
 import { EndpointConfig } from '../registry/types.ts';
+import { HttpPayload } from '../response/payload.ts';
 
 @Config('web.etag')
 export class EtagConfig {
@@ -33,10 +34,8 @@ export class EtagInterceptor implements HttpInterceptor {
   @Inject()
   config: EtagConfig;
 
-  addTag(ctx: HttpContext, value?: unknown): unknown {
-    const { req, res } = ctx;
-
-    const payload = res.getPayload(value);
+  addTag(ctx: HttpContext, payload: HttpPayload): HttpPayload {
+    const { req } = ctx;
 
     if (
       Buffer.isBuffer(payload.output) &&
@@ -55,15 +54,15 @@ export class EtagInterceptor implements HttpInterceptor {
           .digest('base64')
           .substring(0, 27);
 
-      res.setHeader('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
+      payload.setHeader('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
 
-      const lastModified = res.getHeader('Last-Modified');
+      const lastModified = payload.getHeader('Last-Modified');
 
       if (
         (req.method === 'GET' || req.method === 'HEAD') &&
         fresh(req.headers, { etag: tag, 'last-modified': lastModified })
       ) {
-        return res.getPayload(undefined).with({ statusCode: 304 });
+        return HttpPayload.fromEmpty().with({ statusCode: 304 });
       }
     }
 
@@ -74,7 +73,7 @@ export class EtagInterceptor implements HttpInterceptor {
     return config.applies;
   }
 
-  async filter(ctx: HttpChainedContext): Promise<unknown> {
+  async filter(ctx: HttpChainedContext): Promise<HttpPayload> {
     return this.addTag(ctx, await ctx.next());
   }
 }

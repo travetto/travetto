@@ -1,7 +1,7 @@
 import assert from 'node:assert';
-import fs from 'node:fs';
+import { Readable } from 'node:stream';
 
-import { castTo, Class } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
@@ -12,14 +12,13 @@ import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
 import { HttpInterceptor, HttpInterceptorCategory } from '../src/interceptor/types.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpResponse, WebInternal, HttpChainedContext } from '../src/types.ts';
+import { HttpChainedContext, HttpRequest } from '../src/types.ts';
 import { WebServer, WebServerHandle } from '../src/application/server.ts';
 import { WebApplication } from '../src/application/app.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
 import { HttpRequestCore } from '../src/request/core.ts';
-import { HttpResponseCore } from '../src/response/core.ts';
 
 @Injectable()
 @Config('web.custom')
@@ -56,8 +55,8 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
     return config.applies || /opt-in/.test(`${endpoint.fullPath}`);
   }
 
-  filter({ res, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
-    Object.assign(res, { name: config.name });
+  filter({ req, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
+    Object.assign(req, { name: config.name });
     return next();
   }
 }
@@ -114,29 +113,16 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const res = HttpResponseCore.create<HttpResponse & { name?: string }>({
-      [WebInternal]: {
-        nodeEntity: castTo(fs.createWriteStream('/dev/null')),
-        providerEntity: undefined!,
-      },
-      name: undefined,
-      statusCode: 200,
+    const req: HttpRequest & { name?: string } = HttpRequestCore.create({
+      headers: {},
+    }, {
+      inputStream: Readable.from(Buffer.from([])),
+      providerReq: undefined!,
+      providerRes: undefined!,
       respond: () => { },
-      setHeader: (k, v) => { },
-      getHeader: (k) => undefined,
-      removeHeader: () => undefined,
     });
-    await endpoint.filter!({
-      req: HttpRequestCore.create({
-        [WebInternal]: {
-          nodeEntity: castTo(Buffer.from([])),
-          providerEntity: undefined!
-        },
-        headers: {}
-      }),
-      res,
-    });
-    return res.name;
+    await endpoint.filter!({ req });
+    return req.name;
   }
 
   @BeforeAll()

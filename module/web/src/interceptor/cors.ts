@@ -6,6 +6,7 @@ import { HttpChainedContext, HttpRequest } from '../types.ts';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { EndpointConfig } from '../registry/types.ts';
+import { HttpPayload } from '../response/payload.ts';
 
 /**
  * Web cors support
@@ -67,14 +68,20 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     return config.applies;
   }
 
-  filter({ req, res, config: { resolved }, next }: HttpChainedContext<CorsConfig>): unknown {
-    const origin = req.header('origin');
-    if (!resolved.origins.size || resolved.origins.has('*') || (origin && resolved.origins.has(origin))) {
-      res.setHeader('Access-Control-Allow-Origin', origin || '*');
-      res.setHeader('Access-Control-Allow-Credentials', `${resolved.credentials}`);
-      res.setHeader('Access-Control-Allow-Methods', resolved.methods);
-      res.setHeader('Access-Control-Allow-Headers', resolved.headers || req.header('access-control-request-headers')! || '*');
+  async filter({ req, config: { resolved }, next }: HttpChainedContext<CorsConfig>): Promise<HttpPayload> {
+    const origin = req.getHeader('origin');
+    let out;
+    try {
+      out = await next();
+    } catch (err) {
+      out = HttpPayload.fromBasicError(err);
     }
-    return next();
+
+    // Always apply
+    out.setHeader('Access-Control-Allow-Origin', origin || '*');
+    out.setHeader('Access-Control-Allow-Credentials', `${resolved.credentials}`);
+    out.setHeader('Access-Control-Allow-Methods', resolved.methods);
+    out.setHeader('Access-Control-Allow-Headers', resolved.headers || req.getHeader('access-control-request-headers')! || '*');
+    return out;
   }
 }

@@ -1,19 +1,18 @@
-import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'node:http';
-import { Writable } from 'node:stream';
+import type { IncomingHttpHeaders } from 'node:http';
+import { Readable, Writable } from 'node:stream';
 
-import { SetOption, GetOption } from 'cookies';
+import { GetOption } from 'cookies';
 
 import type { ByteRange, Any } from '@travetto/runtime';
-
 import { HttpPayload } from './response/payload';
 
-export type HttpContext<C = {}> = { req: HttpRequest, res: HttpResponse } & C;
-export type HttpFilter<C extends HttpContext = HttpContext> = (context: C) => unknown;
-export type HttpHeaderMap = Record<string, (string | (() => string))>;
+export type HttpContext<C = {}> = { req: HttpRequest } & C;
+export type HttpFilter<C extends HttpContext = HttpContext> = (context: C) => Promise<HttpPayload>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
+export type HttpHeaderMap = Record<string, string | (() => string)>;
 export type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
-export type HttpChainedContext<C = unknown> = HttpContext<{ next: () => unknown, config: C }>;
+export type HttpChainedContext<C = unknown> = HttpContext<{ next: () => Promise<HttpPayload>, config: C }>;
 export type HttpChainedFilter<C = unknown> = HttpFilter<HttpChainedContext<C>>;
 
 export const WebInternal: unique symbol = Symbol.for('@travetto/web:internal');
@@ -23,26 +22,33 @@ export const WebInternal: unique symbol = Symbol.for('@travetto/web:internal');
  */
 export interface RequestHeaders extends IncomingHttpHeaders { }
 
+export interface HttpContact<T = unknown, U = unknown> {
+  /**
+   * The original request of the underlying framework
+   */
+  providerReq: T;
+  /**
+   * The original response of the underlying framework
+   */
+  providerRes: U;
+  /**
+   * The raw http input stream
+   */
+  inputStream: Readable;
+  /**
+   * Triggers response to provider entity
+   */
+  respond(value: HttpPayload): unknown;
+}
+
 /**
  * Internal request information
  */
 export interface HttpRequestInternal<T = unknown> {
   /**
-   * The created timestamp of the request object
-   */
-  createdDate?: number;
-  /**
    * The parsed params for the target handler
    */
   requestParams?: unknown[];
-  /**
-   * The original request of the underlying framework
-   */
-  providerEntity: T;
-  /**
-   * The raw http Incoming Message object
-   */
-  nodeEntity: IncomingMessage;
   /**
    * Interceptor-related configs, providing request-awareness of endpoint-level configurations
    */
@@ -55,6 +61,10 @@ export interface HttpRequestInternal<T = unknown> {
    * Expanded representation of query
    */
   parsedType?: MimeType;
+  /**
+   * The communications channel
+   */
+  contact: HttpContact;
 }
 
 /**
@@ -95,17 +105,6 @@ export interface HttpRequest<T = unknown> {
    */
   headers: RequestHeaders;
   /**
-   * The cookie support
-   */
-  cookies: {
-    /**
-     * Get a cookie by name, with options
-     * @param name The name of the cookie to retrieve
-     * @param options The options for cookie retrieval
-     */
-    get(name: string, options?: GetOption): string | undefined;
-  };
-  /**
    * The http request body
    */
   body: Any;
@@ -122,17 +121,17 @@ export interface HttpRequest<T = unknown> {
    * Get a header as a string or array of strings depending on what was passed
    * @param key
    */
-  header<K extends keyof RequestHeaders>(key: K): RequestHeaders[K] | undefined;
+  getHeader<K extends keyof RequestHeaders>(key: K): RequestHeaders[K] | undefined;
   /**
    * Get a header as a list of values
    * @param key
    */
-  headerList<K extends keyof RequestHeaders>(key: K): string[] | undefined;
+  getHeaderList<K extends keyof RequestHeaders>(key: K): string[] | undefined;
   /**
    * Get a single header
    * @param key
    */
-  headerFirst<K extends keyof RequestHeaders>(key: K): string | undefined;
+  getHeaderFirst<K extends keyof RequestHeaders>(key: K): string | undefined;
   /**
    * Get the structured content type of the request
    */
@@ -153,94 +152,10 @@ export interface HttpRequest<T = unknown> {
    * Get expanded query
    */
   getExpandedQuery(): Record<string, unknown>;
-}
-
-/**
- * Internal response information
- */
-export interface HttpResponseInternal<T = unknown> {
   /**
-   * The underlying request object
+   * Get a cookie by name, with options
+   * @param name The name of the cookie to retrieve
+   * @param options The options for cookie retrieval
    */
-  providerEntity: T;
-  /**
-   * The raw http server response object
-   */
-  nodeEntity: ServerResponse;
-  /**
-   * Disable operations
-   */
-  takeControlOfResponse?: Function;
-  /**
-   * The additional headers for this request, provided by controllers/endpoint config
-   */
-  headersAdded?: HttpHeaderMap;
-  /**
-   * Http Request method
-   */
-  requestMethod?: string;
-}
-
-/**
- * Travetto response
- * @concrete
- */
-export interface HttpResponse<T = unknown> {
-  /**
-   * Internal state for the response
-   */
-  [WebInternal]: HttpResponseInternal<T>;
-  /**
-   * Outbound status code
-   */
-  statusCode?: number;
-  /**
-   * Indicates if headers have already been sent
-   */
-  readonly headersSent: boolean;
-  /**
-   * Get a registered response header by name
-   * @param key Header name
-   */
-  getHeader(key: string): string | string[] | undefined;
-  /**
-   * Get the headers that have been marked for sending
-   * @param key Header name
-   */
-  getHeaderNames(): string[];
-  /**
-   * Set a header to be sent.  Fails if headers have already been sent.
-   * @param key The header to set
-   * @param value The header value as a single or list of values
-   */
-  setHeader(key: string, value: string | string[]): void;
-  /**
-   * Remove a header from being sent.  Fails if headers have already been set.
-   * @param key The header key to remove
-   */
-  removeHeader(key: string): void;
-  /**
-   * Get header map
-   */
-  getHeaders(): Readonly<Record<string, string | string[]>>;
-  /**
-   * Make a response payload
-   */
-  getPayload(value: unknown): HttpPayload;
-  /**
-   * Triggers response to provider entity
-   */
-  respond(value: HttpPayload): unknown;
-  /**
-   * Cookie support for sending to the client
-   */
-  cookies: {
-    /**
-     * Set a cookie to send back to the client
-     * @param name Name of the cookie
-     * @param value The cookie value
-     * @param options Cookie options to set
-     */
-    set(name: string, value?: string, options?: SetOption): void;
-  };
+  getCookie(name: string, options?: GetOption): string | undefined;
 }
