@@ -39,7 +39,7 @@ export class FastifyWebServerUtil {
       respond(value): unknown {
         return reply
           .status(value.statusCode ?? 200)
-          .headers(value.getHeaders())
+          .headers(value.headers.toObject())
           .send(value.output);
       }
     });

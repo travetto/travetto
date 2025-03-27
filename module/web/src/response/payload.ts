@@ -1,15 +1,18 @@
 import { Readable } from 'node:stream';
 import { isArrayBuffer } from 'node:util/types';
 
-import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 import { SetOption } from 'cookies';
-import { HttpMetadataConfig } from '../types';
 
-type V = string | string[];
+import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
+import { HttpHeaderMap, HttpMetadataConfig } from '../types';
+import { HttpHeaders } from './headers';
+
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
 const isStream = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
+const isAsyncIterable = (v: unknown): v is AsyncIterable<unknown> =>
+  !!v && (typeof v === 'object' || typeof v === 'function') && Symbol.asyncIterator in v;
 
 const BINARY_TYPE = 'application/octet-stream';
 
@@ -34,7 +37,7 @@ type PayloadInput<S> = {
   emptyStatusCode?: number;
   contentType?: string;
   defaultContentType?: string;
-  headers?: Record<string, string | string[]>;
+  headers?: HttpHeaderMap | HttpHeaders;
   cookies?: Record<string, { value: string | undefined, options: SetOption }>;
 };
 
@@ -56,10 +59,18 @@ export class HttpPayload<S = unknown> {
   }
 
   /**
-    * Standard stream
-    */
+   * Standard stream
+   */
   static fromStream<T extends Readable | ReadableStream>(value: T, contentType?: string): HttpPayload<T> {
     const output: Readable = isReadableStream(value) ? Readable.fromWeb(value) : value;
+    return new HttpPayload({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
+  }
+
+  /**
+   * Standard iterable
+   */
+  static fromAsyncIterable<T extends AsyncIterable<unknown>>(value: T, contentType?: string): HttpPayload<T> {
+    const output: Readable = Readable.from(value);
     return new HttpPayload({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
@@ -108,12 +119,12 @@ export class HttpPayload<S = unknown> {
       contentType: meta?.contentType ?? BINARY_TYPE
     });
 
-    const setIf = (k: string, v?: string): unknown => v ? out.setHeader(k, v) : undefined;
+    const setIf = (k: string, v?: string): unknown => v ? out.headers.set(k, v) : undefined;
 
     if (meta?.range) {
       out.statusCode = 206;
-      out.setHeader('Accept-Ranges', 'bytes');
-      out.setHeader('Content-Range', `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`);
+      out.headers.set('Accept-Ranges', 'bytes');
+      out.headers.set('Content-Range', `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`);
     }
 
     setIf('content-encoding', meta?.contentEncoding);
@@ -121,17 +132,25 @@ export class HttpPayload<S = unknown> {
     setIf('content-language', meta?.contentLanguage);
 
     if (value instanceof File && value.name) {
-      out.setHeader('Content-Disposition', `attachment; filename="${value.name}"`);
+      out.headers.set('Content-Disposition', `attachment; filename="${value.name}"`);
     }
 
     return out;
   }
 
   /**
-   * From basic error
+   * From catch value
    */
-  static fromBasicError(err: unknown): HttpPayload<Error> {
-    return this.fromError(err instanceof Error ? err : AppError.fromBasic(err));
+  static fromCatch(err: unknown): HttpPayload<Error> {
+    if (err instanceof HttpPayload) {
+      return err;
+    } else if (err instanceof Error) {
+      return this.fromError(err);
+    } else if (!!err && typeof err === 'object' && ('message' in err && typeof err.message === 'string')) {
+      return this.fromError(new AppError(err.message, { details: err }));
+    } else {
+      return this.fromError(new AppError(`${err}`));
+    }
   }
 
   /**
@@ -165,13 +184,13 @@ export class HttpPayload<S = unknown> {
       return this.fromError(value);
     } else if (value instanceof Blob) {
       return this.fromBlob(value);
+    } else if (isAsyncIterable(value)) {
+      return this.fromAsyncIterable(value);
     } else {
       return this.fromJSON(value);
     }
   }
 
-  #headerNames: Record<string, string> = {};
-  #headers: Record<string, string | string[]> = {};
   #cookies: Record<string, { value: string | undefined, options: SetOption }> = {};
   #defaultContentType: string;
 
@@ -179,6 +198,7 @@ export class HttpPayload<S = unknown> {
   source?: S;
   output: Buffer | Readable;
   length?: number;
+  headers: HttpHeaders;
 
   constructor(o: PayloadInput<S>) {
     this.output = o.output;
@@ -187,77 +207,38 @@ export class HttpPayload<S = unknown> {
     this.#defaultContentType = o.defaultContentType ?? BINARY_TYPE;
     this.with(o);
     if (o.contentType && this.length !== 0) {
-      this.setHeader('Content-Type', o.contentType);
+      this.headers.set('Content-Type', o.contentType);
     }
   }
 
   with(o: Pick<PayloadInput<S>, 'headers' | 'cookies' | 'statusCode'>): this {
     this.statusCode ??= o.statusCode;
     this.#cookies = { ...o.cookies };
-    this.#headers = { ...o.headers };
-    this.#headerNames = Object.fromEntries(Object.keys(this.#headers).map(x => [x.toLowerCase(), x]));
+    this.headers = o.headers instanceof HttpHeaders ? o.headers : new HttpHeaders(o.headers ?? {});
     return this;
-  }
-
-  withHeaders(o: Record<string, string | (() => string)>): this {
-    for (const [k, v] of Object.entries(o)) {
-      this.setHeader(k, typeof v === 'function' ? v() : v);
-    }
-    return this;
-  }
-
-  getHeaderNames(): string[] {
-    return [...Object.keys(this.#headers ?? {})];
-  }
-
-  setHeader(key: string, value: (() => V) | V): void {
-    const lk = key.toLowerCase();
-    const fk = this.#headerNames[lk] ??= key;
-    this.#headers[fk] = typeof value === 'function' ? value() : value;
-  }
-
-  hasHeader(key: string): boolean {
-    return key.toLowerCase() in this.#headerNames;
-  }
-
-  getHeader(key: string): V | undefined {
-    return this.#headers![this.#headerNames[key.toLowerCase()]];
-  }
-
-  getHeaders(): Record<string, V> {
-    return Object.freeze(this.#headers!);
-  }
-
-  removeHeader(key: string): void {
-    const lk = key.toLowerCase();
-    if (lk in this.#headerNames) {
-      const fk = this.#headerNames[lk];
-      delete this.#headers![fk];
-      delete this.#headerNames[lk];
-    }
   }
 
   vary(value: string): void {
-    const header = this.getHeader('vary');
+    const header = this.headers.get('vary');
     if (!header?.includes(value)) {
-      this.setHeader('vary', header ? `${header}, ${value}` : value);
+      this.headers.set('vary', header ? `${header}, ${value}` : value);
     }
   }
 
   ensureContentLength(): this {
     if (this.length) {
-      this.setHeader('Content-Length', `${this.length} `);
+      this.headers.set('Content-Length', `${this.length} `);
     } else if (this.length === 0) {
-      this.removeHeader('Content-Type');
+      this.headers.delete('Content-Type');
     } else {
-      this.removeHeader('Content-Length');
+      this.headers.delete('Content-Length');
     }
     return this;
   }
 
   ensureContentType(): this {
-    if (!this.hasHeader('Content-Type') && this.length) {
-      this.setHeader('Content-Type', this.#defaultContentType);
+    if (!this.headers.has('Content-Type') && this.length) {
+      this.headers.set('Content-Type', this.#defaultContentType);
     }
     return this;
   }
@@ -307,21 +288,11 @@ export class HttpPayload<S = unknown> {
     }
     if (cfg.mode === 'header') {
       if (output) {
-        this.setHeader(cfg.header, cfg.headerPrefix ? `${cfg.headerPrefix} ${output}` : output);
+        this.headers.set(cfg.header, cfg.headerPrefix ? `${cfg.headerPrefix} ${output}` : output);
       } else {
-        this.removeHeader(cfg.header);
+        this.headers.delete(cfg.header);
       }
     }
     return this;
   }
-}
-
-/**
- * Custom serialization contract
- */
-export interface HttpSerializable<S = unknown> {
-  /**
-   * Serialize the output given a response.
-   */
-  serialize(): HttpPayload<S>;
 }

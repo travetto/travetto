@@ -1,5 +1,4 @@
 import { Injectable } from '@travetto/di';
-import { AppError } from '@travetto/runtime';
 
 import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { HttpChainedContext, WebInternal } from '../types.ts';
@@ -17,7 +16,7 @@ export class RespondInterceptor implements HttpInterceptor {
     try {
       value = await ctx.next();
     } catch (err) {
-      value = await HttpPayload.fromError(err instanceof Error ? err : AppError.fromBasic(err));
+      value = HttpPayload.fromCatch(err);
     }
     await ctx.req[WebInternal].contact.respond(value);
     return value;

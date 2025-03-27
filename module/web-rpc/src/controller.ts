@@ -17,7 +17,7 @@ export class WebRpController {
    */
   @All('/:target')
   @ExcludeInterceptors(val => !(val instanceof BodyParseInterceptor || val.category === 'global'))
-  async onRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string, @Body() body?: Any): Promise<void> {
+  async onRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string, @Body() body?: Any): Promise<unknown> {
 
     const endpoint = ControllerRegistry.getEndpointById(target);
 
@@ -48,6 +48,6 @@ export class WebRpController {
     req[WebInternal].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MISSING_PARAM : params[i]);
 
     // Dispatch
-    await endpoint.filter!({ req: this.ctx.req, res: this.ctx.res }, async () => { });
+    return await endpoint.filter!({ req: this.ctx.req });
   }
 }

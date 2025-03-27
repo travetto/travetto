@@ -43,7 +43,7 @@ export class ExpressWebServerUtil {
       providerRes: res,
       respond(value) {
         res.status(value.statusCode ?? 200);
-        res.setHeaders(new Map(Object.entries(value.getHeaders())));
+        res.setHeaders(new Map(Object.entries(value.headers.toObject())));
         if (isReadable(value.output)) {
           return pipeline(value.output, res);
         } else {

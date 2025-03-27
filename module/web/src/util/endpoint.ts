@@ -1,4 +1,4 @@
-import { AppError, asConstructable, castTo, Class } from '@travetto/runtime';
+import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { HttpFilter, HttpContext, WebInternal, HttpChainedFilter, HttpChainedContext } from '../types.ts';
@@ -144,13 +144,11 @@ export class EndpointUtil {
 
     const handlerBound: HttpFilter = async (ctx): Promise<HttpPayload> => {
       const params = await this.extractParameters(ctx, endpoint);
-      let value;
       try {
-        value = await endpoint.endpoint.apply(endpoint.instance, params);
+        return HttpPayload.from(await endpoint.endpoint.apply(endpoint.instance, params));
       } catch (err) {
-        value = err instanceof Error ? err : AppError.fromBasic(err);
+        throw HttpPayload.fromCatch(err);
       }
-      return HttpPayload.from(value);
     };
 
     const filters = [

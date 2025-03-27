@@ -7,7 +7,7 @@ import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint.ts';
 import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param.ts';
 import { HttpRequest } from '../../src/types.ts';
 import { Produces, SetHeaders } from '../../src/decorator/common.ts';
-import { HttpPayload, HttpSerializable } from '../../src/response/payload.ts';
+import { HttpPayload } from '../../src/response/payload.ts';
 
 @Controller('/test')
 export class TestController {
@@ -67,12 +67,8 @@ export class TestController {
 
   @Get('/renderable')
   @Produces('text/plain')
-  getRenderable(): HttpSerializable<string> {
-    return {
-      serialize() {
-        return HttpPayload.from('hello');
-      }
-    };
+  getRenderable(): HttpPayload<string> {
+    return HttpPayload.from('hello');
   }
 
   @Get('/fullUrl')

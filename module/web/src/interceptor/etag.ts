@@ -54,9 +54,9 @@ export class EtagInterceptor implements HttpInterceptor {
           .digest('base64')
           .substring(0, 27);
 
-      payload.setHeader('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
+      payload.headers.set('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
 
-      const lastModified = payload.getHeader('Last-Modified');
+      const lastModified = payload.headers.get('Last-Modified');
 
       if (
         (req.method === 'GET' || req.method === 'HEAD') &&

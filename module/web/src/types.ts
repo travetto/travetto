@@ -9,7 +9,7 @@ import { HttpPayload } from './response/payload';
 export type HttpContext<C = {}> = { req: HttpRequest } & C;
 export type HttpFilter<C extends HttpContext = HttpContext> = (context: C) => Promise<HttpPayload>;
 export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
-export type HttpHeaderMap = Record<string, string | (() => string)>;
+export type HttpHeaderMap = Record<string, string | string[] | (() => string)>;
 export type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 export type HttpMetadataConfig = { mode?: 'header' | 'cookie', header: string, cookie: string, headerPrefix?: string };
 

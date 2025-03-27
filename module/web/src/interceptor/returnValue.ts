@@ -33,8 +33,8 @@ export class ReturnValueInterceptor implements HttpInterceptor<ReturnValueConfig
     const method = ctx.req.method.toUpperCase();
 
     for (const [k, v] of Object.entries(ctx.config.headers)) {
-      if (!payload.hasHeader(k)) {
-        payload.setHeader(k, v);
+      if (!payload.headers.has(k)) {
+        payload.headers.set(k, v);
       }
     }
 

@@ -64,8 +64,8 @@ export class CompressionInterceptor implements HttpInterceptor {
       !payload.output ||
       (payload.length !== undefined && payload.length >= 0 && payload.length < chunkSize) ||
       req.method === 'HEAD' ||
-      payload.hasHeader('content-encoding') ||
-      NO_TRANSFORM_REGEX.test(payload.getHeader('cache-control')?.toString() ?? '')
+      payload.headers.has('content-encoding') ||
+      NO_TRANSFORM_REGEX.test(payload.headers.get('cache-control')?.toString() ?? '')
     ) {
       return payload;
     }
@@ -90,7 +90,7 @@ export class CompressionInterceptor implements HttpInterceptor {
     const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
     const stream = ENCODING_METHODS[type](opts);
     // If we are compressing
-    payload.setHeader('Content-Encoding', type);
+    payload.headers.set('Content-Encoding', type);
 
     if (Buffer.isBuffer(payload.output)) {
       stream.end(payload.output);

@@ -37,7 +37,7 @@ export class KoaWebServerUtil {
       inputStream: ctx.req,
       respond(value) {
         ctx.response.status = value.statusCode ?? 200;
-        ctx.res.setHeaders(new Map(Object.entries(value.getHeaders())));
+        ctx.res.setHeaders(new Map(Object.entries(value.headers.toObject())));
         return ctx.response.body = value.output;
       }
     });

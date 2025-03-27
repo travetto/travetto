@@ -1,7 +1,7 @@
 import passport from 'passport';
 
 import { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
-import { HttpContext, HttpRequest, HttpResponse } from '@travetto/web';
+import { HttpContext, HttpRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { PassportUtil } from './util.ts';

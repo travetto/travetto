@@ -70,8 +70,6 @@ export class AuthContextInterceptor implements HttpInterceptor {
       }
 
       return value;
-    } catch (err) {
-      return HttpPayload.fromBasicError(err);
     } finally {
       this.authContext.clear();
     }

@@ -16,7 +16,7 @@ export class CustomCodec implements PrincipalCodec {
   }
   encode(payload: HttpPayload, data: Principal | undefined): HttpPayload {
     if (data) {
-      payload.setHeader('USER_ID', data.id);
+      payload.headers.set('USER_ID', data.id);
     }
     return payload;
   }

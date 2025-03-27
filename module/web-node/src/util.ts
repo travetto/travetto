@@ -49,7 +49,7 @@ export class NodeWebServerUtil {
       inputStream: req,
       async respond(value) {
         res.statusCode = value.statusCode ?? 200;
-        res.setHeaders(new Map(Object.entries(value.getHeaders())));
+        res.setHeaders(new Map(Object.entries(value.headers.toObject())));
         if (isReadable(value.output)) {
           await pipeline(value.output, res);
         } else {

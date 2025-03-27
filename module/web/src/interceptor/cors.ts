@@ -68,20 +68,20 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     return config.applies;
   }
 
-  async filter({ req, config: { resolved }, next }: HttpChainedContext<CorsConfig>): Promise<HttpPayload> {
+  decorate(req: HttpRequest, resolved: CorsConfig['resolved'], out: HttpPayload,): HttpPayload {
     const origin = req.getHeader('origin');
-    let out;
-    try {
-      out = await next();
-    } catch (err) {
-      out = HttpPayload.fromBasicError(err);
-    }
-
-    // Always apply
-    out.setHeader('Access-Control-Allow-Origin', origin || '*');
-    out.setHeader('Access-Control-Allow-Credentials', `${resolved.credentials}`);
-    out.setHeader('Access-Control-Allow-Methods', resolved.methods);
-    out.setHeader('Access-Control-Allow-Headers', resolved.headers || req.getHeader('access-control-request-headers')! || '*');
+    out.headers.set('Access-Control-Allow-Origin', origin || '*');
+    out.headers.set('Access-Control-Allow-Credentials', `${resolved.credentials}`);
+    out.headers.set('Access-Control-Allow-Methods', resolved.methods);
+    out.headers.set('Access-Control-Allow-Headers', resolved.headers || req.getHeader('access-control-request-headers')! || '*');
     return out;
+  }
+
+  async filter({ req, config: { resolved }, next }: HttpChainedContext<CorsConfig>): Promise<HttpPayload> {
+    try {
+      return this.decorate(req, resolved, await next());
+    } catch (err) {
+      throw this.decorate(req, resolved, HttpPayload.fromCatch(err));
+    }
   }
 }
