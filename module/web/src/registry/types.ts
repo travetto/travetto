@@ -1,11 +1,13 @@
 import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
-import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { HttpChainedFilter, HttpContext, HttpFilter, HttpMethodOrAll } from '../types.ts';
+import type { HttpInterceptor } from '../types/interceptor.ts';
+import type { HttpChainedFilter, HttpContext, HttpFilter } from '../types.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
+
+export type HttpMethodOrAll = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head' | 'options' | 'all';
 
 /**
  * Endpoint decorator for composition of routing logic
@@ -134,7 +136,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The compiled and finalized handler
    */
-  filter?: HttpFilter;
+  filter?: HttpChainedFilter;
   /**
    * List of params for the endpoint
    */

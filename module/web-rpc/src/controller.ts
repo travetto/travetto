@@ -2,7 +2,7 @@ import { Inject } from '@travetto/di';
 import { Any, AppError, Util } from '@travetto/runtime';
 import {
   HeaderParam, Controller, All, Undocumented, ExcludeInterceptors, ControllerRegistry, WebContext,
-  Body, WebInternal, EndpointUtil, BodyParseInterceptor
+  Body, EndpointUtil, BodyParseInterceptor
 } from '@travetto/web';
 
 @Controller('/rpc')
@@ -45,9 +45,9 @@ export class WebRpController {
       params = [];
     }
 
-    req[WebInternal].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MISSING_PARAM : params[i]);
+    req.getInternal().requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MISSING_PARAM : params[i]);
 
     // Dispatch
-    return await endpoint.filter!({ req: this.ctx.req });
+    return await endpoint.filter!({ req: this.ctx.req, config: {}, next: async () => undefined! });
   }
 }

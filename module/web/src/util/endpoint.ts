@@ -1,10 +1,12 @@
 import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpFilter, HttpContext, WebInternal, HttpChainedFilter, HttpChainedContext } from '../types.ts';
+import { HttpFilter, HttpContext, HttpChainedFilter, HttpChainedContext } from '../types.ts';
+
+import { HttpResponse } from '../types/response.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
+
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
-import { HttpInterceptor } from '../interceptor/types.ts';
-import { HttpPayload } from '../response/payload.ts';
 
 /**
  * Endpoint specific utilities
@@ -35,7 +37,7 @@ export class EndpointUtil {
    */
   static createFilterChain(filters: [HttpChainedFilter, unknown][]): HttpChainedFilter {
     const len = filters.length - 1;
-    return function filterChain(ctx: HttpChainedContext, idx: number = 0): Promise<HttpPayload> {
+    return function filterChain(ctx: HttpChainedContext, idx: number = 0): Promise<HttpResponse> {
       const [it, cfg] = filters[idx]!;
       const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
       return it({ req: ctx.req, next: chainedNext, config: cfg });
@@ -84,7 +86,7 @@ export class EndpointUtil {
 
     switch (param.location) {
       case 'path': return ctx.req.params[param.name!];
-      case 'header': return field.array ? ctx.req.getHeaderList(param.name!) : ctx.req.getHeaderFirst(param.name!);
+      case 'header': return field.array ? ctx.req.headers.getList(param.name!) : ctx.req.headers.get(param.name!);
       case 'body': return ctx.req.body;
       case 'query': {
         const q = ctx.req.getExpandedQuery();
@@ -102,7 +104,7 @@ export class EndpointUtil {
   static async extractParameters(ctx: HttpContext, endpoint: EndpointConfig): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
-    const vals = ctx.req[WebInternal].requestParams;
+    const vals = ctx.req.getInternal().requestParams;
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
@@ -142,12 +144,12 @@ export class EndpointUtil {
       interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
     }
 
-    const handlerBound: HttpFilter = async (ctx): Promise<HttpPayload> => {
+    const handlerBound: HttpFilter = async (ctx): Promise<HttpResponse> => {
       const params = await this.extractParameters(ctx, endpoint);
       try {
-        return HttpPayload.from(await endpoint.endpoint.apply(endpoint.instance, params));
+        return HttpResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
       } catch (err) {
-        throw HttpPayload.fromCatch(err);
+        throw HttpResponse.fromCatch(err);
       }
     };
 

@@ -1,5 +1,5 @@
 import { AuthToken, Principal } from '@travetto/auth';
-import { HttpRequest, HttpPayload } from '@travetto/web';
+import { HttpRequest, HttpResponse } from '@travetto/web';
 
 export const CommonPrincipalCodecSymbol = Symbol.for('@travetto/auth-web:common-codec');
 
@@ -15,7 +15,7 @@ export interface PrincipalCodec {
   /**
    * Encode data
    */
-  encode(payload: HttpPayload, data: Principal | undefined): Promise<HttpPayload> | HttpPayload;
+  encode(payload: HttpResponse, data: Principal | undefined): Promise<HttpResponse> | HttpResponse;
   /**
    * Decode data
    */

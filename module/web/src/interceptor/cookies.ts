@@ -2,14 +2,14 @@ import cookies from 'cookies';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { Ignore, Secret } from '@travetto/schema';
+import { Secret } from '@travetto/schema';
 import { castTo } from '@travetto/runtime';
 
 import { HttpChainedContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
 import { EndpointConfig } from '../registry/types.ts';
-import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
-import { HttpPayload } from '../response/payload.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { HttpResponse } from '../types/response.ts';
 
 /**
  * Web cookie configuration
@@ -71,7 +71,7 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
     return config.applies;
   }
 
-  async filter({ req, config, next }: HttpChainedContext<CookieConfig>): Promise<HttpPayload> {
+  async filter({ req, config, next }: HttpChainedContext<CookieConfig>): Promise<HttpResponse> {
     const reqStore = new cookies(castTo(req), castTo({}), this.config);
     req.getCookie = (k, o): string | undefined => reqStore.get(k, { ...this.config, ...o });
 

@@ -2,7 +2,7 @@ import type { Class } from '@travetto/runtime';
 
 import type { EndpointConfig } from '../registry/types.ts';
 import type { HttpChainedContext } from '../types.ts';
-import { HttpPayload } from '../response/payload.ts';
+import { HttpResponse } from './response.ts';
 
 /**
  * High level categories with a defined ordering
@@ -56,5 +56,5 @@ export interface HttpInterceptor<C = unknown> {
    * Process the request
    * @param {HttpChainedContext} context The context of to process
    */
-  filter(context: HttpChainedContext<C>): HttpPayload | Promise<HttpPayload>;
+  filter(context: HttpChainedContext<C>): HttpResponse | Promise<HttpResponse>;
 }

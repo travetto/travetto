@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpRequest, WebInternal, HttpRequestCore, HttpChainedContext } from '@travetto/web';
+import { HttpRequest, HttpChainedContext } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -11,33 +11,28 @@ export class KoaWebServerUtil {
    * Convert context object from provider to framework
    */
   static getContext(ctx: koa.Context): HttpChainedContext {
-    const fullCtx: typeof ctx & { [WebInternal]?: HttpChainedContext } = ctx;
-    return fullCtx[WebInternal] ??= {
-      req: this.getRequest(ctx),
-      next: async () => null!,
-      config: {}
-    };
+    return { req: this.getRequest(ctx), next: async () => null!, config: {} };
   }
 
   /**
    * Build a Travetto HttpRequest from a koa context
    */
   static getRequest(ctx: koa.Context): HttpRequest {
-    return HttpRequestCore.create({
+    return new HttpRequest({
       protocol: castTo(ctx.protocol),
-      method: castTo(ctx.request.method),
+      method: ctx.request.method,
       query: ctx.request.query,
       url: ctx.originalUrl,
       params: ctx.params,
       headers: ctx.request.headers,
-      pipe: ctx.req.pipe.bind(ctx.req),
-    }, {
-      providerReq: ctx,
-      providerRes: ctx,
+      path: ctx.path,
+      body: ctx.body,
       inputStream: ctx.req,
-      respond(value) {
+      remoteIp: ctx.req.socket.remoteAddress,
+      port: ctx.req.socket.localPort,
+      respond(value): unknown {
         ctx.response.status = value.statusCode ?? 200;
-        ctx.res.setHeaders(new Map(Object.entries(value.headers.toObject())));
+        ctx.res.setHeaders(value.headers.toMap());
         return ctx.response.body = value.output;
       }
     });

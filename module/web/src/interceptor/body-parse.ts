@@ -5,12 +5,14 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
-import { HttpRequest, WebInternal, HttpChainedContext } from '../types.ts';
+import { HttpChainedContext } from '../types.ts';
+import { HttpResponse } from '../types/response.ts';
+import { HttpRequest } from '../types/request.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+
 import { EndpointConfig } from '../registry/types.ts';
 
-import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
 import { AcceptsInterceptor } from './accepts.ts';
-import { HttpPayload } from '../response/payload.ts';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
@@ -47,14 +49,14 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
   @Inject()
   config: BodyParseConfig;
 
-  async read(req: HttpRequest, limit: string | number): Promise<{ text: string, raw: Buffer }> {
+  async read(req: HttpRequest, limit: string | number): Promise<string> {
     const cfg = req.getContentType();
 
-    const text = await rawBody(inflation(req[WebInternal].contact.inputStream), {
+    const text = await rawBody(inflation(req.inputStream!), {
       limit,
       encoding: cfg?.parameters.charset ?? 'utf8'
     });
-    return { text, raw: Buffer.from(text) };
+    return text;
   }
 
   detectParserType(req: HttpRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
@@ -84,7 +86,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     return config.applies && (endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method));
   }
 
-  async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<HttpPayload> {
+  async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<HttpResponse> {
     if (!METHODS_WITH_BODIES.has(req.method) || req.body) { // If body is already set
       return next();
     }
@@ -92,13 +94,12 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     const parserType = this.detectParserType(req, config.parsingTypes);
 
     if (!parserType) {
-      req.body = req[WebInternal].contact.inputStream;
+      req.body = req.inputStream;
       return next();
     } else {
       let malformed: unknown;
       try {
-        const { text, raw } = await this.read(req, config.limit);
-        req.raw = raw;
+        const text = await this.read(req, config.limit);
         req.body = this.parse(text, parserType);
       } catch (err) {
         malformed = err;

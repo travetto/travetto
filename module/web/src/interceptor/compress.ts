@@ -8,10 +8,10 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
-import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 import { HttpContext, HttpChainedContext } from '../types.ts';
+import { HttpResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
-import { HttpPayload } from '../response/payload.ts';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const ENCODING_METHODS = {
@@ -53,7 +53,7 @@ export class CompressionInterceptor implements HttpInterceptor {
   @Inject()
   config: CompressConfig;
 
-  async compress(ctx: HttpContext, payload: HttpPayload): Promise<HttpPayload> {
+  async compress(ctx: HttpContext, payload: HttpResponse): Promise<HttpResponse> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
     const { req } = ctx;
 
@@ -70,7 +70,7 @@ export class CompressionInterceptor implements HttpInterceptor {
       return payload;
     }
 
-    const accepts = req.getHeaderFirst('accept-encoding');
+    const accepts = req.headers.getFirst('accept-encoding');
     const method = new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
       // Bad typings, need to override
       .encoding(...castTo<[string[]]>([supportedEncodings, preferredEncodings]));
@@ -108,7 +108,7 @@ export class CompressionInterceptor implements HttpInterceptor {
     return config.applies;
   }
 
-  async filter(ctx: HttpChainedContext): Promise<HttpPayload> {
+  async filter(ctx: HttpChainedContext): Promise<HttpResponse> {
     return this.compress(ctx, await ctx.next());
   }
 }

@@ -4,9 +4,9 @@ import { Config } from '@travetto/config';
 import { HttpChainedContext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
-import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 import { EtagInterceptor } from './etag.ts';
-import { HttpPayload } from '../response/payload.ts';
+import { HttpResponse } from '../types/response.ts';
 
 @Config('web.getCache')
 export class GetCacheConfig {
@@ -32,7 +32,7 @@ export class GetCacheInterceptor implements HttpInterceptor {
     return endpoint.method === 'get' && config.applies;
   }
 
-  async filter({ next }: HttpChainedContext): Promise<HttpPayload> {
+  async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
     const payload = await next();
     // Only apply on the way out, and on success
     if (!payload.headers.has('Expires') && !payload.headers.has('Cache-Control')) {

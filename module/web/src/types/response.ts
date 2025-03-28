@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Readable } from 'node:stream';
 import { isArrayBuffer } from 'node:util/types';
 
 import { SetOption } from 'cookies';
 
 import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
-import { HttpHeaderMap, HttpMetadataConfig } from '../types';
-import { HttpHeaders } from './headers';
+
+import { HttpMetadataConfig } from './common';
+import { HttpHeaders, HttpHeaderMap } from './headers';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -44,14 +46,14 @@ type PayloadInput<S> = {
 /**
  * Http Payload as a simple object
  */
-export class HttpPayload<S = unknown> {
+export class HttpResponse<S = unknown> {
 
   /**
     * Build the redirect
     * @param location Location to redirect to
     * @param status Status code
     */
-  static redirect(location: string, status = 302): HttpPayload {
+  static redirect(location: string, status = 302): HttpResponse {
     return this.fromEmpty().with({
       statusCode: status,
       headers: { Location: location },
@@ -61,78 +63,76 @@ export class HttpPayload<S = unknown> {
   /**
    * Standard stream
    */
-  static fromStream<T extends Readable | ReadableStream>(value: T, contentType?: string): HttpPayload<T> {
+  static fromStream<T extends Readable | ReadableStream>(value: T, contentType?: string): HttpResponse<T> {
     const output: Readable = isReadableStream(value) ? Readable.fromWeb(value) : value;
-    return new HttpPayload({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
+    return new HttpResponse({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
    * Standard iterable
    */
-  static fromAsyncIterable<T extends AsyncIterable<unknown>>(value: T, contentType?: string): HttpPayload<T> {
+  static fromAsyncIterable<T extends AsyncIterable<unknown>>(value: T, contentType?: string): HttpResponse<T> {
     const output: Readable = Readable.from(value);
-    return new HttpPayload({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
+    return new HttpResponse({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
    * Return an empty payload
    */
-  static fromEmpty(): HttpPayload<void> {
+  static fromEmpty(): HttpResponse<void> {
     return castTo(this.fromBytes(Buffer.alloc(0)));
   }
 
   /**
    * Standard text
    */
-  static fromText<T extends string>(value: T, encoding: BufferEncoding = 'utf8', contentType?: string): HttpPayload<T> {
+  static fromText<T extends string>(value: T, encoding: BufferEncoding = 'utf8', contentType?: string): HttpResponse<T> {
     const output = Buffer.from(value, encoding);
-    return new HttpPayload({ output, length: output.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
+    return new HttpResponse({ output, length: output.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
   }
 
   /**
    * Standard array of bytes (buffer)
    */
-  static fromBytes<T extends Buffer | ArrayBuffer>(value: T, contentType?: string): HttpPayload<T> {
+  static fromBytes<T extends Buffer | ArrayBuffer>(value: T, contentType?: string): HttpResponse<T> {
     const narrowed = Buffer.isBuffer(value) ? value : Buffer.from(value);
-    return new HttpPayload({ output: narrowed, length: narrowed.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
+    return new HttpResponse({ output: narrowed, length: narrowed.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
    * Standard json
    */
-  static fromJSON<T extends unknown>(value: T, contentType?: string): HttpPayload<T> {
+  static fromJSON<T extends unknown>(value: T, contentType?: string): HttpResponse<T> {
     const payload = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
     const output = Buffer.from(payload, 'utf-8');
-    return new HttpPayload({ output, source: value, length: output.byteLength, contentType, defaultContentType: 'application/json' });
+    return new HttpResponse({ output, source: value, length: output.byteLength, contentType, defaultContentType: 'application/json' });
   }
 
   /**
    * Serialize file/blob
    */
-  static fromBlob<T extends Blob>(value: T): HttpPayload<T> {
+  static fromBlob<T extends Blob>(value: T): HttpResponse<T> {
     const meta = BinaryUtil.getBlobMeta(value);
 
-    const out = new HttpPayload<T>({
+    const out = new HttpResponse<T>({
       source: value,
       output: Readable.fromWeb(value.stream()),
       length: value.size,
       contentType: meta?.contentType ?? BINARY_TYPE
     });
 
-    const setIf = (k: string, v?: string): unknown => v ? out.headers.set(k, v) : undefined;
-
     if (meta?.range) {
       out.statusCode = 206;
-      out.headers.set('Accept-Ranges', 'bytes');
-      out.headers.set('Content-Range', `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`);
+      out.headers.set('accept-ranges', 'bytes');
+      out.headers.set('Content-range', `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`);
     }
 
-    setIf('content-encoding', meta?.contentEncoding);
-    setIf('cache-control', meta?.cacheControl);
-    setIf('content-language', meta?.contentLanguage);
+    meta?.contentEncoding && out.headers.set('Content-encoding', meta.contentEncoding);
+    meta?.cacheControl && out.headers.set('cache-control', meta.cacheControl);
+    meta?.contentLanguage && out.headers.set('Content-Language', meta.contentLanguage);
 
     if (value instanceof File && value.name) {
-      out.headers.set('Content-Disposition', `attachment; filename="${value.name}"`);
+      out.headers.set('Content-disposition', `attachment; filename="${value.name}"`);
     }
 
     return out;
@@ -141,8 +141,8 @@ export class HttpPayload<S = unknown> {
   /**
    * From catch value
    */
-  static fromCatch(err: unknown): HttpPayload<Error> {
-    if (err instanceof HttpPayload) {
+  static fromCatch(err: unknown): HttpResponse<Error> {
+    if (err instanceof HttpResponse) {
       return err;
     } else if (err instanceof Error) {
       return this.fromError(err);
@@ -156,9 +156,9 @@ export class HttpPayload<S = unknown> {
   /**
    * From Error
    */
-  static fromError<T extends ErrorResponse>(error: T): HttpPayload<T> {
+  static fromError<T extends ErrorResponse>(error: T): HttpResponse<T> {
     const output = this.fromJSON(hasToJSON(error) ? error : { message: error.message });
-    return new HttpPayload({
+    return new HttpResponse({
       ...output,
       source: error,
       contentType: 'application/json',
@@ -169,10 +169,10 @@ export class HttpPayload<S = unknown> {
   /**
    * Determine payload based on output
    */
-  static from<T>(value: T): HttpPayload<T> {
+  static from<T>(value: T): HttpResponse<T> {
     if (value === undefined || value === null) {
       return castTo(this.fromEmpty());
-    } else if (value instanceof HttpPayload) {
+    } else if (value instanceof HttpResponse) {
       return value;
     } else if (typeof value === 'string') {
       return this.fromText(value);
@@ -219,10 +219,7 @@ export class HttpPayload<S = unknown> {
   }
 
   vary(value: string): void {
-    const header = this.headers.get('vary');
-    if (!header?.includes(value)) {
-      this.headers.set('vary', header ? `${header}, ${value}` : value);
-    }
+    this.headers.append('vary', value);
   }
 
   ensureContentLength(): this {

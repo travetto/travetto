@@ -1,5 +1,5 @@
 import type { HttpRequest } from '../../../src/types.ts';
-import type { WebServerHandle } from '../../../src/application/server.ts';
+import type { WebServerHandle } from '../../../src/types/server.ts';
 
 export type MakeRequestConfig<T> = {
   query?: Record<string, unknown>;

@@ -1,9 +1,10 @@
 import { Injectable } from '@travetto/di';
 
-import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
-import { HttpChainedContext, WebInternal } from '../types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { HttpResponse } from '../types/response.ts';
+
+import { HttpChainedContext } from '../types.ts';
 import { LoggingInterceptor } from './logging.ts';
-import { HttpPayload } from '../response/payload.ts';
 
 @Injectable()
 export class RespondInterceptor implements HttpInterceptor {
@@ -11,14 +12,14 @@ export class RespondInterceptor implements HttpInterceptor {
   category: HttpInterceptorCategory = 'terminal';
   dependsOn = [LoggingInterceptor];
 
-  async filter(ctx: HttpChainedContext): Promise<HttpPayload> {
+  async filter(ctx: HttpChainedContext): Promise<HttpResponse> {
     let value;
     try {
       value = await ctx.next();
     } catch (err) {
-      value = HttpPayload.fromCatch(err);
+      value = HttpResponse.fromCatch(err);
     }
-    await ctx.req[WebInternal].contact.respond(value);
+    await ctx.req.respond!(value);
     return value;
   }
 }

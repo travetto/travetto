@@ -10,15 +10,15 @@ import { RootRegistry } from '@travetto/registry';
 import { ConfigureInterceptor } from '../src/decorator/common.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
-import { HttpInterceptor, HttpInterceptorCategory } from '../src/interceptor/types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../src/types/interceptor.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpChainedContext, HttpRequest } from '../src/types.ts';
-import { WebServer, WebServerHandle } from '../src/application/server.ts';
+import { HttpChainedContext } from '../src/types.ts';
+import { WebServer, WebServerHandle } from '../src/types/server.ts';
 import { WebApplication } from '../src/application/app.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
-import { HttpRequestCore } from '../src/request/core.ts';
+import { HttpRequest } from '../src/types/request.ts';
 
 @Injectable()
 @Config('web.custom')
@@ -113,15 +113,19 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const req: HttpRequest & { name?: string } = HttpRequestCore.create({
-      headers: {},
-    }, {
+    const req: HttpRequest & { name?: string } = new HttpRequest({
       inputStream: Readable.from(Buffer.from([])),
-      providerReq: undefined!,
-      providerRes: undefined!,
       respond: () => { },
+      headers: {},
+      method: 'GET',
+      params: {},
+      query: {},
+      path: '',
+      port: 0,
+      protocol: 'http',
+      url: ''
     });
-    await endpoint.filter!({ req });
+    await endpoint.filter!({ req, config: {}, next: () => undefined! });
     return req.name;
   }
 

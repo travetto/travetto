@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { WebInternal, HttpRequest, HttpRequestCore, HttpChainedContext } from '@travetto/web';
+import { HttpRequest, HttpChainedContext } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -12,30 +12,25 @@ export class FastifyWebServerUtil {
    * Convert request, response object from provider to framework
    */
   static getContext(req: FastifyRequest, reply: FastifyReply): HttpChainedContext {
-    const fullReq: typeof req & { [WebInternal]?: HttpChainedContext } = req;
-    return fullReq[WebInternal] ??= {
-      req: this.getRequest(req, reply),
-      next: async () => null!,
-      config: {}
-    };
+    return { req: this.getRequest(req, reply), next: async () => null!, config: {} };
   }
 
   /**
    * Build a Travetto HttpRequest from a Fastify Request
    */
   static getRequest(req: FastifyRequest, reply: FastifyReply): HttpRequest {
-    return HttpRequestCore.create({
+    return new HttpRequest({
       protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
       method: castTo(req.raw.method),
-      url: req.raw!.url,
+      url: req.raw!.url!,
+      path: req.url,
       query: castTo(req.query),
       params: castTo(req.params),
-      headers: req.headers,
-      pipe: req.raw.pipe.bind(req.raw),
-    }, {
-      providerReq: req,
+      headers: castTo(req.headers),
       inputStream: req.raw,
-      providerRes: reply,
+      body: req.body,
+      port: req.raw.socket.localPort,
+      remoteIp: req.raw.socket.remoteAddress,
       respond(value): unknown {
         return reply
           .status(value.statusCode ?? 200)

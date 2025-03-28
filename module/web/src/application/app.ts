@@ -4,11 +4,11 @@ import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
 import { EndpointUtil } from '../util/endpoint.ts';
-import { HttpInterceptor, HTTP_INTERCEPTOR_CATEGORIES } from '../interceptor/types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
 import { WebCommonUtil } from '../util/common.ts';
 
-import { WebServer, WebServerHandle } from './server.ts';
+import { HttpInterceptor, HTTP_INTERCEPTOR_CATEGORIES } from '../types/interceptor.ts';
+import { WebServer, WebServerHandle } from '../types/server.ts';
 
 /**
  * The web application

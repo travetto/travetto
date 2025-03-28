@@ -1,9 +1,9 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
-import { HttpChainedContext, WebInternal } from '../types.ts';
-import { HttpPayload } from '../response/payload.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { HttpChainedContext } from '../types.ts';
+import { HttpResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 /**
@@ -36,7 +36,7 @@ export class LoggingInterceptor implements HttpInterceptor {
     return config.applies;
   }
 
-  async filter({ req, next }: HttpChainedContext): Promise<HttpPayload> {
+  async filter({ req, next }: HttpChainedContext): Promise<HttpResponse> {
     const createdDate = Date.now();
     const payload = await next();
 

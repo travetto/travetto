@@ -5,9 +5,10 @@ import { AppError } from '@travetto/runtime';
 import { Controller } from '../../src/decorator/controller.ts';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint.ts';
 import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param.ts';
-import { HttpRequest } from '../../src/types.ts';
 import { Produces, SetHeaders } from '../../src/decorator/common.ts';
-import { HttpPayload } from '../../src/response/payload.ts';
+
+import { HttpRequest } from '../../src/types/request.ts';
+import { HttpResponse } from '../../src/types/response.ts';
 
 @Controller('/test')
 export class TestController {
@@ -37,12 +38,12 @@ export class TestController {
 
   @Put('/body')
   withBody() {
-    return { body: this.req.body.age };
+    return { body: this.req.body?.age };
   }
 
   @Delete('/cookie')
   withCookie() {
-    return HttpPayload.from({ cookie: this.req.getCookie('orange') })
+    return HttpResponse.from({ cookie: this.req.getCookie!('orange') })
       .with({
         cookies: { flavor: { value: 'oreo', options: {} } }
       });
@@ -67,8 +68,8 @@ export class TestController {
 
   @Get('/renderable')
   @Produces('text/plain')
-  getRenderable(): HttpPayload<string> {
-    return HttpPayload.from('hello');
+  getRenderable(): HttpResponse<string> {
+    return HttpResponse.from('hello');
   }
 
   @Get('/fullUrl')
@@ -81,12 +82,12 @@ export class TestController {
 
   @Get('/headerFirst')
   getHeaderFirst() {
-    return { header: this.req.getHeaderFirst('age') };
+    return { header: this.req.headers.get('age') };
   }
 
   @Post('/rawBody')
   postRawBody() {
-    return { size: this.req.raw?.length };
+    return { size: Buffer.from(this.req.body).length };
   }
 
   @Get('/fun/*')

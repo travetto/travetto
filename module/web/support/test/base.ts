@@ -8,7 +8,7 @@ import { BindUtil } from '@travetto/schema';
 
 import { HttpMethodOrAll, HttpRequest } from '../../src/types.ts';
 import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base.ts';
-import { WebServerHandle } from '../../src/application/server.ts';
+import { WebServerHandle } from '../../src/types/server.ts';
 import { CoreWebServerSupport } from './server-support/core.ts';
 import { NetUtil } from '../../src/util/net.ts';
 

@@ -2,7 +2,8 @@ import { AsyncContextValue, AsyncContext } from '@travetto/context';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, castTo, Class, toConcrete } from '@travetto/runtime';
 
-import { HttpContext, HttpRequest } from './types.ts';
+import { HttpContext } from './types.ts';
+import { HttpRequest } from './types/request.ts';
 
 @Injectable()
 export class WebContext {
@@ -21,7 +22,7 @@ export class WebContext {
     this.registerType(toConcrete<HttpRequest>(), () => this.req);
   }
 
-  withContext<T>(ctx: HttpContext, next: () => T): Promise<Awaited<T>> {
+  withContext<T>(ctx: HttpContext, next: () => Promise<T>): Promise<T> {
     return this.context.run(() => {
       this.#active.set(ctx);
       return next();

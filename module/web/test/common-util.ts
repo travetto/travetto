@@ -4,11 +4,11 @@ import { Test, Suite } from '@travetto/test';
 
 import { WebCommonUtil } from '../src/util/common.ts';
 import { HttpRequest } from '../src/types.ts';
-import { HttpPayload } from '../src/response/payload.ts';
+import { HttpResponse } from '../src/types/response.ts';
 import { HttpRequestCore } from '../src/request/core.ts';
 import { castTo } from '@travetto/runtime';
 
-const mockRequest = (payload: HttpPayload): HttpRequest =>
+const mockRequest = (payload: HttpResponse): HttpRequest =>
   HttpRequestCore.create(
     {
       getHeaderFirst: castTo((key: string) => payload.getHeader(key)),
@@ -63,7 +63,7 @@ export class WebCommonUtilTest {
 
   @Test()
   async writeValueCookieTest() {
-    const res = HttpPayload.fromEmpty()
+    const res = HttpResponse.fromEmpty()
       .writeMetadata(config('cookie', false), 'blue');
     assert(res.getCookie('orange') === 'blue');
 
@@ -75,11 +75,11 @@ export class WebCommonUtilTest {
 
   @Test()
   async writeValueHeaderTest() {
-    const res = HttpPayload.fromEmpty()
+    const res = HttpResponse.fromEmpty()
       .writeMetadata(config('header', false), 'blue');
     assert(res.getHeader('dandy') === 'blue');
 
-    const res2 = HttpPayload.fromEmpty()
+    const res2 = HttpResponse.fromEmpty()
       .writeMetadata(config('header'), undefined);
     assert(!res2.getHeader('dandy'));
 
@@ -89,7 +89,7 @@ export class WebCommonUtilTest {
 
   @Test()
   async readValueHeaderTest() {
-    const req = mockRequest(HttpPayload.fromEmpty().with({ headers: { dandy: 'howdy' } }));
+    const req = mockRequest(HttpResponse.fromEmpty().with({ headers: { dandy: 'howdy' } }));
     const value = await req.readMetadata(config('header', false));
     assert(value);
     assert(value === 'howdy');
@@ -101,7 +101,7 @@ export class WebCommonUtilTest {
   @Test()
   async readWriteValueTest() {
     const cfg = config('header', false);
-    const res = HttpPayload.fromEmpty();
+    const res = HttpResponse.fromEmpty();
     await res.writeMetadata(cfg, 'hello');
 
     const req = mockRequest(res);

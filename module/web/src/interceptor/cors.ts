@@ -2,11 +2,12 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import { HttpChainedContext, HttpRequest } from '../types.ts';
+import { HttpChainedContext } from '../types.ts';
+import { HttpResponse } from '../types/response.ts';
+import { HttpRequest } from '../types/request.ts';
 
-import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 import { EndpointConfig } from '../registry/types.ts';
-import { HttpPayload } from '../response/payload.ts';
 
 /**
  * Web cors support
@@ -68,20 +69,20 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     return config.applies;
   }
 
-  decorate(req: HttpRequest, resolved: CorsConfig['resolved'], out: HttpPayload,): HttpPayload {
-    const origin = req.getHeader('origin');
+  decorate(req: HttpRequest, resolved: CorsConfig['resolved'], out: HttpResponse,): HttpResponse {
+    const origin = req.headers.get('Origin');
     out.headers.set('Access-Control-Allow-Origin', origin || '*');
     out.headers.set('Access-Control-Allow-Credentials', `${resolved.credentials}`);
     out.headers.set('Access-Control-Allow-Methods', resolved.methods);
-    out.headers.set('Access-Control-Allow-Headers', resolved.headers || req.getHeader('access-control-request-headers')! || '*');
+    out.headers.set('Access-Control-Allow-Headers', resolved.headers || req.headers.get('Access-Control-Request-Headers')! || '*');
     return out;
   }
 
-  async filter({ req, config: { resolved }, next }: HttpChainedContext<CorsConfig>): Promise<HttpPayload> {
+  async filter({ req, config: { resolved }, next }: HttpChainedContext<CorsConfig>): Promise<HttpResponse> {
     try {
       return this.decorate(req, resolved, await next());
     } catch (err) {
-      throw this.decorate(req, resolved, HttpPayload.fromCatch(err));
+      throw this.decorate(req, resolved, HttpResponse.fromCatch(err));
     }
   }
 }

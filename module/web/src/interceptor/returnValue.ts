@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@travetto/di';
 
-import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 import { HttpChainedContext } from '../types.ts';
-import { HttpPayload } from '../response/payload.ts';
+import { HttpResponse } from '../types/response.ts';
+import { HttpHeaderMap } from '../types/headers.ts';
 
 @Injectable()
 class ReturnValueConfig {
-  headers: Record<string, string | (() => string)> = {};
+  headers: HttpHeaderMap = {};
 }
 
 @Injectable()
@@ -28,15 +29,11 @@ export class ReturnValueInterceptor implements HttpInterceptor<ReturnValueConfig
     return base;
   }
 
-  async filter(ctx: HttpChainedContext<ReturnValueConfig>): Promise<HttpPayload> {
+  async filter(ctx: HttpChainedContext<ReturnValueConfig>): Promise<HttpResponse> {
     const payload = await ctx.next();
     const method = ctx.req.method.toUpperCase();
 
-    for (const [k, v] of Object.entries(ctx.config.headers)) {
-      if (!payload.headers.has(k)) {
-        payload.headers.set(k, v);
-      }
-    }
+    payload.headers.setAll(ctx.config.headers, true);
 
     return payload
       .ensureContentLength()

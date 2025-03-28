@@ -1,10 +1,10 @@
 import { asConstructable, castTo, Class, TimeSpan, TimeUtil } from '@travetto/runtime';
 
-import { HttpHeaderMap } from '../types.ts';
+import { HttpHeaderMap } from '../types/headers.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptsInterceptor } from '../interceptor/accepts.ts';
-import { HttpInterceptor } from '../interceptor/types.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
 import { ReturnValueInterceptor } from '../interceptor/returnValue.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {

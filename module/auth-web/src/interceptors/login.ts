@@ -1,4 +1,4 @@
-import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext, EndpointConfig, HttpPayload } from '@travetto/web';
+import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext, EndpointConfig, HttpResponse } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -41,7 +41,7 @@ export class AuthLoginInterceptor implements HttpInterceptor<WebAuthLoginConfig>
     return config.applies;
   }
 
-  async filter(ctx: HttpChainedContext<WebAuthLoginConfig>): Promise<HttpPayload> {
+  async filter(ctx: HttpChainedContext<WebAuthLoginConfig>): Promise<HttpResponse> {
     await this.service.authenticate(ctx.req.body, ctx, ctx.config.providers ?? []);
     return ctx.next();
   }

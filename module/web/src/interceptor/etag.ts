@@ -5,10 +5,10 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { HttpChainedContext, HttpContext } from '../types.ts';
-import { HttpInterceptor, HttpInterceptorCategory } from './types.ts';
+import { HttpResponse } from '../types/response.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 import { CompressionInterceptor } from './compress.ts';
 import { EndpointConfig } from '../registry/types.ts';
-import { HttpPayload } from '../response/payload.ts';
 
 @Config('web.etag')
 export class EtagConfig {
@@ -34,7 +34,7 @@ export class EtagInterceptor implements HttpInterceptor {
   @Inject()
   config: EtagConfig;
 
-  addTag(ctx: HttpContext, payload: HttpPayload): HttpPayload {
+  addTag(ctx: HttpContext, payload: HttpResponse): HttpResponse {
     const { req } = ctx;
 
     if (
@@ -60,9 +60,9 @@ export class EtagInterceptor implements HttpInterceptor {
 
       if (
         (req.method === 'GET' || req.method === 'HEAD') &&
-        fresh(req.headers, { etag: tag, 'last-modified': lastModified })
+        fresh(req.headers.toObject(), { etag: tag, 'last-modified': lastModified })
       ) {
-        return HttpPayload.fromEmpty().with({ statusCode: 304 });
+        return HttpResponse.fromEmpty().with({ statusCode: 304 });
       }
     }
 
@@ -73,7 +73,7 @@ export class EtagInterceptor implements HttpInterceptor {
     return config.applies;
   }
 
-  async filter(ctx: HttpChainedContext): Promise<HttpPayload> {
+  async filter(ctx: HttpChainedContext): Promise<HttpResponse> {
     return this.addTag(ctx, await ctx.next());
   }
 }

@@ -3,16 +3,15 @@ import assert from 'node:assert';
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
-import { castTo } from '@travetto/runtime';
 
-import { HttpRequestCore } from '../src/request/core.ts';
+import { HttpRequest } from '../src/types/request.ts';
 import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param.ts';
 import { Post, Get } from '../src/decorator/endpoint.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpMethodOrAll, HttpRequest } from '../src/types.ts';
-import { EndpointConfig } from '../src/registry/types.ts';
+import { EndpointConfig, HttpMethodOrAll } from '../src/registry/types.ts';
 import { EndpointUtil } from '../src/util/endpoint.ts';
+import { HttpHeaders } from '../src/types/headers.ts';
 
 class User {
   name: string;
@@ -98,14 +97,18 @@ export class EndpointParameterTest {
 
   static async extract(ep: EndpointConfig, req: Partial<HttpRequest>): Promise<unknown[]> {
     return await EndpointUtil.extractParameters({
-      req: HttpRequestCore.create({
-        ...req,
-      }, {
-        providerReq: null!,
-        providerRes: null!,
-        inputStream: null!,
+      req: new HttpRequest({
         respond: () => { },
-      }),
+        headers: {},
+        method: 'GET',
+        params: {},
+        query: {},
+        path: '',
+        port: 0,
+        protocol: 'http',
+        url: '',
+        ...req
+      })
     }, ep);
   }
 
@@ -142,13 +145,17 @@ export class EndpointParameterTest {
 
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
-        getHeader: castTo((key: string): string => key)
+        headers: Object.assign(new HttpHeaders({}), {
+          getHeader: (key: string) => key
+        })
       })
     );
 
     await assert.rejects(() =>
       EndpointParameterTest.extract(ep, {
-        getHeader: castTo(() => { })
+        headers: Object.assign(new HttpHeaders({}), {
+          getHeader: (key: string) => undefined
+        })
       })
     );
 

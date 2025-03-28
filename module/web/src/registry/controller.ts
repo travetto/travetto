@@ -4,7 +4,7 @@ import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
 import { HttpChainedFilter, HttpFilter } from '../types.ts';
-import { HttpInterceptor } from '../interceptor/types.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
 import { WebContext } from '../context.ts';
 
 type ValidFieldNames<T> = {
