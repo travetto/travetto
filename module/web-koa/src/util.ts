@@ -1,19 +1,12 @@
 import type koa from 'koa';
 
-import { HttpRequest, HttpChainedContext } from '@travetto/web';
+import { HttpRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
  * Provides translation between koa request/response objects and the framework
  */
 export class KoaWebServerUtil {
-  /**
-   * Convert context object from provider to framework
-   */
-  static getContext(ctx: koa.Context): HttpChainedContext {
-    return { req: this.getRequest(ctx), next: async () => null!, config: {} };
-  }
-
   /**
    * Build a Travetto HttpRequest from a koa context
    */

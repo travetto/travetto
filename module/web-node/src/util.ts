@@ -2,7 +2,7 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
 
-import { HttpRequest, HttpChainedContext, } from '@travetto/web';
+import { HttpRequest, } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -11,14 +11,6 @@ const isReadable = hasFunction<Readable>('pipe');
  * Provide a mapping between node request/response and the framework analogs
  */
 export class NodeWebServerUtil {
-
-  /**
-   * Convert request, response object from provider to framework
-   */
-  static getContext(req: IncomingMessage, res: ServerResponse): HttpChainedContext {
-    return { req: this.getRequest(req, res), next: async () => null!, config: {} };
-  }
-
   /**
    * Build a Travetto HttpRequest from an Express Request
    */

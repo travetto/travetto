@@ -125,7 +125,7 @@ class TestInterceptorConfigSuite {
       protocol: 'http',
       url: ''
     });
-    await endpoint.filter!({ req, config: {}, next: () => undefined! });
+    await endpoint.filter!({ req });
     return req.name;
   }
 

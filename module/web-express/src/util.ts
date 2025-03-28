@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 
 import type express from 'express';
 
-import { HttpRequest, HttpChainedContext } from '@travetto/web';
+import { HttpRequest } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -12,17 +12,6 @@ const isReadable = hasFunction<Readable>('pipe');
  * Provide a mapping between express request/response and the framework analogs
  */
 export class ExpressWebServerUtil {
-
-  /**
-   * Convert request, response object from provider to framework
-   */
-  static getContext(req: express.Request, res: express.Response): HttpChainedContext {
-    return {
-      req: this.getRequest(req, res),
-      next: async () => null!,
-      config: {}
-    };
-  }
 
   /**
    * Build a Travetto HttpRequest from an Express Request

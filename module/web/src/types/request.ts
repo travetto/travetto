@@ -54,7 +54,6 @@ export class HttpRequest {
   readonly remoteIp?: string;
   readonly inputStream: Readable;
   readonly respond: (value: HttpResponse) => void;
-  getCookie: (key: string, opts?: GetOption) => string | undefined;
 
   constructor(init: RequestInit) {
     Object.assign(this, init);
@@ -109,12 +108,8 @@ export class HttpRequest {
    * Read value from request
    */
   readMetadata(this: HttpRequest, cfg: HttpMetadataConfig, opts?: GetOption): string | undefined {
-    if (cfg.mode === 'cookie' && !this.getCookie) {
-      throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
-    }
-
     let res = (cfg.mode === 'cookie' || !cfg.mode) ?
-      this.getCookie!(cfg.cookie, opts) :
+      this.getCookie(cfg.cookie, opts) :
       this.headers.get(cfg.header);
 
     if (res && cfg.mode === 'header' && cfg.headerPrefix) {
@@ -126,5 +121,9 @@ export class HttpRequest {
 
   getInternal(): HttpRequestInternal {
     return this.#internal;
+  }
+
+  getCookie(key: string, opts?: GetOption): string | undefined {
+    throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
   }
 }

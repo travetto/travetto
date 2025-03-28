@@ -8,8 +8,8 @@ import { castTo } from '@travetto/runtime';
 import { HttpChainedContext } from '../types.ts';
 import { WebConfig } from '../application/config.ts';
 import { EndpointConfig } from '../registry/types.ts';
-import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 import { HttpResponse } from '../types/response.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 
 /**
  * Web cookie configuration
@@ -77,6 +77,7 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
 
     const value = await next();
 
+    // TODO: Fix cookie storage
     const resStore = new cookies(castTo({}), castTo(value), config);
     for (const [k, { value: v, options: o }] of Object.entries(value.getCookies())) {
       resStore.set(k, v, o);

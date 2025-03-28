@@ -136,7 +136,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The compiled and finalized handler
    */
-  filter?: HttpChainedFilter;
+  filter?: HttpFilter;
   /**
    * List of params for the endpoint
    */

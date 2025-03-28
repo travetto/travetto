@@ -63,7 +63,7 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
         endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
 
       router[endpoint.method](finalPath, async (req, res, next) => {
-        await endpoint.filter!(NodeWebServerUtil.getContext(req, res));
+        await endpoint.filter!({ req: NodeWebServerUtil.getRequest(req, res) });
         next();
       });
     }

@@ -1,19 +1,12 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { HttpRequest, HttpChainedContext } from '@travetto/web';
+import { HttpRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
  * Provide a mapping between fastify request/response and the framework analogs
  */
 export class FastifyWebServerUtil {
-
-  /**
-   * Convert request, response object from provider to framework
-   */
-  static getContext(req: FastifyRequest, reply: FastifyReply): HttpChainedContext {
-    return { req: this.getRequest(req, reply), next: async () => null!, config: {} };
-  }
 
   /**
    * Build a Travetto HttpRequest from a Fastify Request

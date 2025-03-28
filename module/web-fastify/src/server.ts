@@ -77,7 +77,7 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
       }
 
       this.raw[endpoint.method](sub, (req, reply) =>
-        endpoint.filter!(FastifyWebServerUtil.getContext(req, reply))
+        endpoint.filter!({ req: FastifyWebServerUtil.getRequest(req, reply) })
       );
     }
   }

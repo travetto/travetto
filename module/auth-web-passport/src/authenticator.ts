@@ -8,6 +8,7 @@ import { PassportUtil } from './util.ts';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
 
+// TODO: Fix express integration
 type Handler = (req: HttpRequest, res: HttpResponse, next: Function) => unknown;
 const authenticator: passport.Authenticator<Handler> = castTo(passport);
 
