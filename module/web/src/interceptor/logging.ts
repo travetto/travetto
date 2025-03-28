@@ -38,10 +38,9 @@ export class LoggingInterceptor implements HttpInterceptor {
 
   async filter({ req, next }: HttpChainedContext): Promise<HttpResponse> {
     const createdDate = Date.now();
-    const payload = await next();
+    const res = await next();
 
-    const { source } = payload;
-    const err = source instanceof Error ? source : undefined;
+    const err = res.source instanceof Error ? res.source : undefined;
     const defaultCode = !!err ? 500 : 200;
     const duration = Date.now() - createdDate;
 
@@ -50,11 +49,11 @@ export class LoggingInterceptor implements HttpInterceptor {
       path: req.path,
       query: { ...req.query },
       params: req.params,
-      statusCode: payload.statusCode,
+      statusCode: res.statusCode,
       duration,
     };
 
-    const code = payload.statusCode ?? defaultCode;
+    const code = res.statusCode ?? defaultCode;
 
     if (code < 400) {
       console.info('Request', reqLog);
@@ -68,7 +67,7 @@ export class LoggingInterceptor implements HttpInterceptor {
       console.error(err.message, { error: err });
     }
 
-    return payload;
+    return res;
   }
 }
 

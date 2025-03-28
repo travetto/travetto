@@ -69,13 +69,13 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     return config.applies;
   }
 
-  decorate(req: HttpRequest, resolved: CorsConfig['resolved'], out: HttpResponse,): HttpResponse {
+  decorate(req: HttpRequest, resolved: CorsConfig['resolved'], res: HttpResponse,): HttpResponse {
     const origin = req.headers.get('Origin');
-    out.headers.set('Access-Control-Allow-Origin', origin || '*');
-    out.headers.set('Access-Control-Allow-Credentials', `${resolved.credentials}`);
-    out.headers.set('Access-Control-Allow-Methods', resolved.methods);
-    out.headers.set('Access-Control-Allow-Headers', resolved.headers || req.headers.get('Access-Control-Request-Headers')! || '*');
-    return out;
+    res.headers.set('Access-Control-Allow-Origin', origin || '*');
+    res.headers.set('Access-Control-Allow-Credentials', `${resolved.credentials}`);
+    res.headers.set('Access-Control-Allow-Methods', resolved.methods);
+    res.headers.set('Access-Control-Allow-Headers', resolved.headers || req.headers.get('Access-Control-Request-Headers')! || '*');
+    return res;
   }
 
   async filter({ req, config: { resolved }, next }: HttpChainedContext<CorsConfig>): Promise<HttpResponse> {

@@ -33,12 +33,12 @@ export class GetCacheInterceptor implements HttpInterceptor {
   }
 
   async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
-    const payload = await next();
+    const res = await next();
     // Only apply on the way out, and on success
-    if (!payload.headers.has('Expires') && !payload.headers.has('Cache-Control')) {
-      payload.headers.set('Expires', '-1');
-      payload.headers.set('Cache-Control', 'max-age=0, no-cache');
+    if (!res.headers.has('Expires') && !res.headers.has('Cache-Control')) {
+      res.headers.set('Expires', '-1');
+      res.headers.set('Cache-Control', 'max-age=0, no-cache');
     }
-    return payload;
+    return res;
   }
 }

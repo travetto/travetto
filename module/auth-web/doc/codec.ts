@@ -14,10 +14,10 @@ export class CustomCodec implements PrincipalCodec {
     }
     return;
   }
-  encode(payload: HttpResponse, data: Principal | undefined): HttpResponse {
+  encode(res: HttpResponse, data: Principal | undefined): HttpResponse {
     if (data) {
-      payload.headers.set('USER_ID', data.id);
+      res.headers.set('USER_ID', data.id);
     }
-    return payload;
+    return res;
   }
 }

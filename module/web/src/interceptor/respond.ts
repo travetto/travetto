@@ -13,13 +13,13 @@ export class RespondInterceptor implements HttpInterceptor {
   dependsOn = [LoggingInterceptor];
 
   async filter(ctx: HttpChainedContext): Promise<HttpResponse> {
-    let value;
+    let res;
     try {
-      value = await ctx.next();
+      res = await ctx.next();
     } catch (err) {
-      value = HttpResponse.fromCatch(err);
+      res = HttpResponse.fromCatch(err);
     }
-    await ctx.req.respond!(value);
-    return value;
+    await ctx.req.respond(res);
+    return res;
   }
 }

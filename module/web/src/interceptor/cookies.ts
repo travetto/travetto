@@ -75,13 +75,13 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
     const reqStore = new cookies(castTo(req), castTo({}), this.config);
     req.getCookie = (k, o): string | undefined => reqStore.get(k, { ...this.config, ...o });
 
-    const value = await next();
+    const res = await next();
 
     // TODO: Fix cookie storage
-    const resStore = new cookies(castTo({}), castTo(value), config);
-    for (const [k, { value: v, options: o }] of Object.entries(value.getCookies())) {
+    const resStore = new cookies(castTo({}), castTo(res), config);
+    for (const [k, { value: v, options: o }] of Object.entries(res.getCookies())) {
       resStore.set(k, v, o);
     }
-    return value;
+    return res;
   }
 }

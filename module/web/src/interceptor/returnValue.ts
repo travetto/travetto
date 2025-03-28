@@ -30,12 +30,12 @@ export class ReturnValueInterceptor implements HttpInterceptor<ReturnValueConfig
   }
 
   async filter(ctx: HttpChainedContext<ReturnValueConfig>): Promise<HttpResponse> {
-    const payload = await ctx.next();
+    const res = await ctx.next();
     const method = ctx.req.method.toUpperCase();
 
-    payload.headers.setAll(ctx.config.headers, true);
+    res.headers.setAll(ctx.config.headers, true);
 
-    return payload
+    return res
       .ensureContentLength()
       .ensureContentType()
       .ensureStatusCode(method === 'POST' ? 201 : (method === 'PUT' ? 204 : 200));

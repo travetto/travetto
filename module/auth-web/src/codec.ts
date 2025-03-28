@@ -74,9 +74,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     return jwt.toString();
   }
 
-  async encode(payload: HttpResponse, data: Principal | undefined): Promise<HttpResponse> {
+  async encode(res: HttpResponse, data: Principal | undefined): Promise<HttpResponse> {
     const token = data ? await this.create(data) : undefined;
-    payload.writeMetadata(this.config, token, { expires: data?.expiresAt, signed: false });
-    return payload;
+    res.writeMetadata(this.config, token, { expires: data?.expiresAt, signed: false });
+    return res;
   }
 }

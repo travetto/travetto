@@ -3,19 +3,11 @@ import assert from 'node:assert';
 import { Test, Suite } from '@travetto/test';
 
 import { WebCommonUtil } from '../src/util/common.ts';
-import { HttpRequest } from '../src/types.ts';
+import { HttpRequest } from '../src/types/request.ts';
 import { HttpResponse } from '../src/types/response.ts';
-import { HttpRequestCore } from '../src/request/core.ts';
 import { castTo } from '@travetto/runtime';
 
-const mockRequest = (payload: HttpResponse): HttpRequest =>
-  HttpRequestCore.create(
-    {
-      getHeaderFirst: castTo((key: string) => payload.getHeader(key)),
-      getHeader: castTo((key: string) => payload.getHeader(key))
-    },
-    null!
-  );
+const mockRequest = (res: HttpResponse): HttpRequest => new HttpRequest(castTo({ headers: res.headers }));
 
 const KEY = 'test';
 const config = (mode: 'cookie' | 'header', signed = true) => ({ cookie: 'orange', header: 'dandy', mode, ...signed ? { signingKey: KEY } : {} });
@@ -77,14 +69,14 @@ export class WebCommonUtilTest {
   async writeValueHeaderTest() {
     const res = HttpResponse.fromEmpty()
       .writeMetadata(config('header', false), 'blue');
-    assert(res.getHeader('dandy') === 'blue');
+    assert(res.headers.get('dandy') === 'blue');
 
     const res2 = HttpResponse.fromEmpty()
       .writeMetadata(config('header'), undefined);
-    assert(!res2.getHeader('dandy'));
+    assert(!res2.headers.get('dandy'));
 
     res.writeMetadata(config('header'), undefined);
-    assert(!res.getHeader('dandy'));
+    assert(!res.headers.get('dandy'));
   }
 
   @Test()

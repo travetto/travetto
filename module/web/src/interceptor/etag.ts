@@ -34,29 +34,29 @@ export class EtagInterceptor implements HttpInterceptor {
   @Inject()
   config: EtagConfig;
 
-  addTag(ctx: HttpContext, payload: HttpResponse): HttpResponse {
+  addTag(ctx: HttpContext, res: HttpResponse): HttpResponse {
     const { req } = ctx;
 
     if (
-      Buffer.isBuffer(payload.output) &&
+      Buffer.isBuffer(res.output) &&
       (
-        !payload.statusCode ||
-        (payload.statusCode < 300 && payload.statusCode >= 200) ||
-        payload.statusCode === 304
+        !res.statusCode ||
+        (res.statusCode < 300 && res.statusCode >= 200) ||
+        res.statusCode === 304
       )
     ) {
 
-      const tag = payload.output.length === 0 ?
+      const tag = res.output.length === 0 ?
         '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
         crypto
           .createHash('sha1')
-          .update(payload.output.toString('utf8'), 'utf8')
+          .update(res.output.toString('utf8'), 'utf8')
           .digest('base64')
           .substring(0, 27);
 
-      payload.headers.set('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
+      res.headers.set('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
 
-      const lastModified = payload.headers.get('Last-Modified');
+      const lastModified = res.headers.get('Last-Modified');
 
       if (
         (req.method === 'GET' || req.method === 'HEAD') &&
@@ -66,7 +66,7 @@ export class EtagInterceptor implements HttpInterceptor {
       }
     }
 
-    return payload;
+    return res;
   }
 
   applies(ep: EndpointConfig, config: EtagConfig): boolean {
