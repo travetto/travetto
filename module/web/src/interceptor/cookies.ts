@@ -72,7 +72,7 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
   }
 
   async filter({ req, config, next }: HttpChainedContext<CookieConfig>): Promise<HttpResponse> {
-    const jar = new CookieJar(req.headers.get('cookie'), config);
+    const jar = new CookieJar(req.headers.get('Cookie'), config);
     req.getCookie = jar.get.bind(jar);
 
     const res = await next();

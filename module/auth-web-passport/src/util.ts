@@ -56,6 +56,6 @@ export class PassportUtil {
    * @param currentState The current state, if any
    */
   static enhanceState(req: HttpRequest, currentState?: string): string {
-    return this.addToState({ referrer: req.headers.get('referer') }, currentState);
+    return this.addToState({ referrer: req.headers.get('Referer') }, currentState);
   }
 }

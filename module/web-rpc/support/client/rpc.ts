@@ -205,7 +205,7 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
       }
     }
 
-    const contentType = resolved.headers.get('content-type')?.split(';')[0];
+    const contentType = resolved.headers.get('Content-Type')?.split(';')[0];
 
     if (resolved.ok) {
       const text = await resolved.text();

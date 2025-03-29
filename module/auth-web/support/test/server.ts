@@ -178,7 +178,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     const { status: lastStatus } = await this.request('get', '/test/auth/self', {
       throwOnError: false,
       headers: {
-        Authorization: headers.get('authorization')!
+        Authorization: headers.get('Authorization')!
       }
     });
     assert(lastStatus === 200);
@@ -206,7 +206,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     const { status: lastStatus } = await this.request('get', '/test/auth-all/self', {
       throwOnError: false,
       headers: {
-        Authorization: headers.get('authorization')!
+        Authorization: headers.get('Authorization')!
       }
     });
     assert(lastStatus === 200);

@@ -47,7 +47,7 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
   }
 
   filter({ req, config, next }: HttpChainedContext<AcceptsConfig>): Promise<HttpResponse> {
-    const contentType = req.headers.get('content-type');
+    const contentType = req.headers.get('Content-Type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });
     }

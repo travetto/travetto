@@ -70,14 +70,14 @@ export abstract class WebServerSuite extends BaseWebSuite {
   async testRegex() {
     const { body: ret, headers } = await this.request('patch', '/test/regexp/super-poodle-party');
     assert.deepStrictEqual(ret, { path: 'poodle' });
-    assert(headers.has('etag'));
+    assert(headers.has('ETag'));
   }
 
   @Test()
   async testBuffer() {
     const { body: ret, headers } = await this.request('get', '/test/buffer');
     assert(ret === 'hello');
-    assert(headers.has('etag'));
+    assert(headers.has('ETag'));
   }
 
   @Test()
@@ -85,7 +85,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
     try {
       const { body: ret, headers } = await this.request('get', '/test/stream');
       assert(ret === 'hello');
-      assert(!headers.has('etag'));
+      assert(!headers.has('ETag'));
     } catch (err) {
       console.error(err);
       throw err;
@@ -133,12 +133,12 @@ export abstract class WebServerSuite extends BaseWebSuite {
   async compressionReturned() {
     {
       const { body: ret, headers } = await this.request('get', '/test/json', { headers: { 'Accept-Encoding': 'gzip;q=1' } });
-      assert(!headers.has('content-encoding'));
+      assert(!headers.has('Content-Encoding'));
       assert.deepStrictEqual(ret, { json: true });
     }
     for (const encoding of ['gzip', 'br', 'deflate']) {
       const { body: ret, headers } = await this.request('get', '/test/json/large/20000', { headers: { 'Accept-Encoding': `${encoding};q=1` } });
-      const value = headers.get('content-encoding');
+      const value = headers.get('Content-Encoding');
       assert(value === encoding);
       console.error('Hi', headers);
       assert(ret && typeof ret === 'object');

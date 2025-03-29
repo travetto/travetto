@@ -92,17 +92,17 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     this.config({ maxAgeMs: 10000, mode: 'cookie' });
 
     let res = await this.request<Aged>('get', '/test/session');
-    let cookie = res.headers.get('set-cookie');
+    let cookie = res.headers.get('Set-Cookie');
     assert.deepStrictEqual(res.body, { age: 1 });
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
-    cookie = res.headers.get('set-cookie') ?? cookie;
+    cookie = res.headers.get('Set-Cookie') ?? cookie;
     assert.deepStrictEqual(res.body, { age: 2 });
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
-    cookie = res.headers.get('set-cookie') ?? cookie;
+    cookie = res.headers.get('Set-Cookie') ?? cookie;
     assert.deepStrictEqual(res.body, { age: 3 });
     res = await this.request('get', '/test/session');
     assert.deepStrictEqual(res.body, { age: 1 });
-    cookie = res.headers.get('set-cookie') ?? cookie;
+    cookie = res.headers.get('Set-Cookie') ?? cookie;
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert.deepStrictEqual(res.body, { age: 2 });
   }
@@ -115,7 +115,7 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
     assert(res.status === 201);
 
-    const cookie = res.headers.get('set-cookie');
+    const cookie = res.headers.get('Set-Cookie');
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
@@ -218,7 +218,7 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     assert(res.status === 201);
     const start = Date.now();
 
-    const cookie = res.headers.get('set-cookie');
+    const cookie = res.headers.get('Set-Cookie');
 
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert(res.body.payload === payload);

@@ -43,22 +43,22 @@ export class ConfigureTest {
   @Test()
   async verifyMaxAge() {
     const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[0]);
-    const cacher = headers.get('cache-control');
+    const cacher = headers.get('Cache-Control');
     assert(typeof cacher !== 'function');
     assert(cacher === 'max-age=1');
 
-    const expires = headers.get('expires');
+    const expires = headers.get('Expires');
     assert(expires === TimeUtil.fromNow('1s').toUTCString());
   }
 
   @Test()
   async verifyBadMaxAge() {
     const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[1]);
-    const cacher = headers.get('cache-control');
+    const cacher = headers.get('Cache-Control');
     assert(typeof cacher !== 'function');
     assert(cacher === 'max-age=0,no-cache');
 
-    const expires = headers.get('expires');
+    const expires = headers.get('Expires');
     assert(typeof expires === 'string');
     assert(expires === '-1');
   }
@@ -66,8 +66,8 @@ export class ConfigureTest {
   @Test()
   async setMultipleHeaderS() {
     const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[1]);
-    assert(headers.has('cache-control'));
-    assert(headers.has('expires'));
-    assert(headers.has('content-type'));
+    assert(headers.has('Cache-Control'));
+    assert(headers.has('Expires'));
+    assert(headers.has('Content-Type'));
   }
 }

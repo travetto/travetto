@@ -81,7 +81,7 @@ export class TestController {
 
   @Get('/headerFirst')
   getHeaderFirst() {
-    return { header: this.req.headers.get('age')?.split(',')?.[0] };
+    return { header: this.req.headers.get('Age')?.split(',')?.[0] };
   }
 
   @Get('/fun/*')

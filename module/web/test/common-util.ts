@@ -72,14 +72,14 @@ export class WebCommonUtilTest {
   async writeValueHeaderTest() {
     const res = HttpResponse.fromEmpty()
       .writeMetadata(config('header', false), 'blue');
-    assert(res.headers.get('dandy') === 'blue');
+    assert(res.headers.get('Dandy') === 'blue');
 
     const res2 = HttpResponse.fromEmpty()
       .writeMetadata(config('header'), undefined);
-    assert(!res2.headers.get('dandy'));
+    assert(!res2.headers.get('Dandy'));
 
     res.writeMetadata(config('header'), undefined);
-    assert(!res.headers.get('dandy'));
+    assert(!res.headers.get('Dandy'));
   }
 
   @Test()

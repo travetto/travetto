@@ -130,8 +130,8 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request('post', '/test/upload/cached', this.getMultipartRequest(uploads));
     assert(res.status === 200);
-    assert(res.headers.get('cache-control') === 'max-age=3600');
-    assert(res.headers.get('content-language') === 'en-GB');
+    assert(res.headers.get('Cache-Control') === 'max-age=3600');
+    assert(res.headers.get('Content-Language') === 'en-GB');
   }
 
   @Test()
