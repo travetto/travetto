@@ -1,6 +1,6 @@
 import type { HttpRequest } from '../../../src/types/request.ts';
 import type { WebServerHandle } from '../../../src/types/server.ts';
-import { HttpHeadersInit } from '../../../src/util/headers.ts';
+import { HttpHeaders, HttpHeadersInit } from '../../../src/types/headers.ts';
 
 export type MakeRequestConfig<T> = {
   query?: Record<string, unknown>;
@@ -11,7 +11,7 @@ export type MakeRequestConfig<T> = {
 export type MakeRequestResponse<T> = {
   status: number;
   body: T;
-  headers: Headers;
+  headers: HttpHeaders;
 };
 
 export interface WebServerSupport {

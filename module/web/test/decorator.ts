@@ -10,7 +10,7 @@ import { ControllerRegistry } from '../src/registry/controller.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Patch } from '../src/decorator/endpoint.ts';
 import { CacheControl, SetHeaders } from '../src/decorator/common.ts';
-import { HttpHeaderUtil } from '../src/util/headers.ts';
+import { HttpHeaders } from '../src/types/headers.ts';
 
 @Controller('/test')
 class TestController {
@@ -32,14 +32,12 @@ export class ConfigureTest {
     await RootRegistry.init();
   }
 
-  getHeaders(ep: EndpointConfig): Headers {
+  getHeaders(ep: EndpointConfig): HttpHeaders {
     const configs = (ep.interceptorConfigs ?? [])
       .filter((x): x is [Class, ReturnValueConfig] => x[0] === ReturnValueInterceptor)
       .map(x => x[1]);
 
-    const headers = new Headers();
-    HttpHeaderUtil.setFunctionalHeaders(headers, ...configs.map(x => x.headers));
-    return headers;
+    return new HttpHeaders().setFunctionalHeaders(...configs.map(x => x.headers));
   }
 
   @Test()

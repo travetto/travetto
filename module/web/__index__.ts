@@ -33,7 +33,7 @@ export * from './src/interceptor/respond.ts';
 export * from './src/interceptor/return-value.ts';
 
 export * from './src/util/endpoint.ts';
-export * from './src/util/headers.ts';
+export * from './src/types/headers.ts';
 export * from './src/util/mime.ts';
 export * from './src/util/cookie.ts';
 export * from './src/util/common.ts';

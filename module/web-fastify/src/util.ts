@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { HttpHeaderUtil, HttpRequest } from '@travetto/web';
+import { HttpHeaders, HttpRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -24,7 +24,7 @@ export class FastifyWebServerUtil {
       port: req.raw.socket.localPort,
       remoteIp: req.raw.socket.remoteAddress,
       respond(value): unknown {
-        HttpHeaderUtil.applyTo(value.headers, reply.header.bind(reply));
+        value.headers.applyTo(reply.header.bind(reply));
         return reply
           .status(value.statusCode ?? 200)
           .send(value.output);

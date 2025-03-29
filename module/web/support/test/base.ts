@@ -12,7 +12,7 @@ import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './serv
 import { WebServerHandle } from '../../src/types/server.ts';
 import { CoreWebServerSupport } from './server-support/core.ts';
 import { NetUtil } from '../../src/util/net.ts';
-import { HttpHeaderUtil } from '../../src/util/headers.ts';
+import { HttpHeaders } from '../../src/types/headers.ts';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
@@ -98,7 +98,7 @@ export abstract class BaseWebSuite {
 
     method = castTo<HttpRequest['method']>(method.toUpperCase());
 
-    const headers = HttpHeaderUtil.fromInput(cfg.headers);
+    const headers = new HttpHeaders(cfg.headers);
 
     let buffer: Buffer | undefined;
     const body = cfg.body;

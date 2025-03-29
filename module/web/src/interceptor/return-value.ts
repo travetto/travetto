@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 import { HttpChainedContext } from '../types.ts';
 import { HttpResponse } from '../types/response.ts';
-import { HttpHeaderUtil } from '../util/headers.ts';
+import { HttpHeaders } from '../types/headers.ts';
 
 @Injectable()
 export class ReturnValueConfig {
@@ -35,7 +35,7 @@ export class ReturnValueInterceptor implements HttpInterceptor<ReturnValueConfig
     const res = await ctx.next();
     const method = ctx.req.method.toUpperCase();
 
-    HttpHeaderUtil.setFunctionalHeaders(res.headers, ctx.config.headers);
+    res.headers.setFunctionalHeaders(ctx.config.headers);
 
     return res
       .ensureContentLength()

@@ -5,7 +5,7 @@ import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } f
 
 import { HttpMetadataConfig } from './common';
 import { Cookie } from './cookie';
-import { HttpHeadersInit, HttpHeaderUtil } from '../util/headers.ts';
+import { HttpHeadersInit, HttpHeaders } from './headers.ts';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -196,7 +196,7 @@ export class HttpResponse<S = unknown> {
   source?: S;
   output: Buffer | Readable;
   length?: number;
-  headers: Headers;
+  headers: HttpHeaders;
 
   constructor(o: PayloadInput<S>) {
     this.output = o.output;
@@ -212,7 +212,7 @@ export class HttpResponse<S = unknown> {
   with(o: Pick<PayloadInput<S>, 'headers' | 'cookies' | 'statusCode'>): this {
     this.statusCode ??= o.statusCode;
     this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
-    this.headers = HttpHeaderUtil.fromInput(o.headers);
+    this.headers = new HttpHeaders(o.headers);
     return this;
   }
 

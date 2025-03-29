@@ -6,7 +6,7 @@ import type {
 
 import {
   EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor,
-  ControllerRegistry, ReturnValueConfig, ReturnValueInterceptor, HttpHeaderUtil
+  ControllerRegistry, ReturnValueConfig, ReturnValueInterceptor, HttpHeaders
 } from '@travetto/web';
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
@@ -54,9 +54,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       (x): x is [Class, ReturnValueConfig] => x[0] instanceof ReturnValueInterceptor
     ).map(x => x[1].headers ?? {});
 
-    const headers = new Headers();
-    HttpHeaderUtil.setFunctionalHeaders(headers, ...configs);
-    return headers.get(header);
+    return new HttpHeaders().setFunctionalHeaders(...configs).get(header);
   }
 
   /**

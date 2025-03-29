@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 
 import type express from 'express';
 
-import { HttpHeaderUtil, HttpRequest } from '@travetto/web';
+import { HttpHeaders, HttpRequest } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -30,7 +30,7 @@ export class ExpressWebServerUtil {
       body: req.body,
       async respond(value): Promise<void> {
         res.status(value.statusCode ?? 200);
-        HttpHeaderUtil.applyTo(value.headers, res.setHeader.bind(res));
+        value.headers.applyTo(res.setHeader.bind(res));
         if (isReadable(value.output)) {
           await pipeline(value.output, res, { end: false });
           res.end();

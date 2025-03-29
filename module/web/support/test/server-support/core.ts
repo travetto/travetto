@@ -4,7 +4,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { type HttpRequest, CookieConfig, WebConfig, WebSslConfig, WebApplication } from '@travetto/web';
 
 import { WebServerSupport, MakeRequestConfig } from './base.ts';
-import { HttpHeaderUtil } from '../../../src/util/headers.ts';
+import { HttpHeaders } from '../../../src/types/headers.ts';
 
 /**
  * Support for invoking http requests against the server
@@ -63,12 +63,12 @@ export class CoreWebServerSupport implements WebServerSupport {
 
     const res = await fetch(`${this.url}${path}${q}`, {
       method,
-      headers: HttpHeaderUtil.fromInput(headers),
+      headers: new HttpHeaders(headers),
       body,
       signal: ctrl.signal
     });
 
-    const out = { status: res.status, body: Buffer.from(await res.arrayBuffer()), headers: new Headers(Object.fromEntries(res.headers.entries())) };
+    const out = { status: res.status, body: Buffer.from(await res.arrayBuffer()), headers: new HttpHeaders(res.headers) };
     ctrl.abort();
     return out;
   }

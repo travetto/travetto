@@ -7,7 +7,7 @@ import { HttpMetadataConfig } from './common.ts';
 import { MimeUtil } from '../util/mime.ts';
 import { HttpResponse } from './response.ts';
 import { CookieReadOptions } from './cookie.ts';
-import { HttpHeadersInit, HttpHeaderUtil } from '../util/headers.ts';
+import { HttpHeadersInit, HttpHeaders } from './headers.ts';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
@@ -41,7 +41,7 @@ export class HttpRequest {
   #queryExpanded?: Record<string, unknown>;
   #internal: HttpRequestInternal = {};
 
-  readonly headers: Headers;
+  readonly headers: HttpHeaders;
   readonly path: string;
   readonly port: number;
   readonly method: string;
@@ -54,7 +54,7 @@ export class HttpRequest {
 
   constructor(init: RequestInit) {
     Object.assign(this, init);
-    this.headers = HttpHeaderUtil.fromInput(init.headers);
+    this.headers = new HttpHeaders(init.headers);
   }
 
   /**
