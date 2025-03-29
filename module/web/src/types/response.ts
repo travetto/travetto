@@ -217,7 +217,7 @@ export class HttpResponse<S = unknown> {
   }
 
   vary(value: string): void {
-    this.headers.append('vary', value);
+    this.headers.append('Vary', value);
   }
 
   ensureContentLength(): this {

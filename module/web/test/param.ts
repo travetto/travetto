@@ -34,7 +34,7 @@ class ParamController {
 
   @Post('/req/res')
   async reqRes() {
-    return this.req.url;
+    return this.req.path;
   }
 
   @Post('/array')
@@ -106,7 +106,6 @@ export class EndpointParameterTest {
         path: '',
         port: 0,
         protocol: 'http',
-        url: '',
         ...req
       })
     }, ep);

@@ -15,13 +15,12 @@ export class FastifyWebServerUtil {
     return new HttpRequest({
       protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
       method: castTo(req.raw.method),
-      url: req.raw!.url!,
       path: req.url,
       query: castTo(req.query),
       params: castTo(req.params),
       headers: castTo(req.headers),
       inputStream: req.raw,
-      body: req.body,
+      body: req.body === req.raw ? undefined : req.body,
       port: req.raw.socket.localPort,
       remoteIp: req.raw.socket.remoteAddress,
       respond(value): unknown {

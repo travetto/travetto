@@ -101,7 +101,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
   @Test()
   async testFullUrl() {
     const { body: ret } = await this.request('get', '/test/fullUrl');
-    assert.deepStrictEqual(ret, { url: '/test/fullUrl', path: '/test/fullUrl' });
+    assert.deepStrictEqual(ret, { path: '/test/fullUrl' });
   }
 
   @Test()
@@ -112,17 +112,6 @@ export abstract class WebServerSuite extends BaseWebSuite {
       }
     });
     assert.deepStrictEqual(ret, { header: '1' });
-  }
-
-  @Test()
-  async testRawBody() {
-    const { body: ret } = await this.request('post', '/test/rawBody', {
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: `[${' '.repeat(18)}]`
-    });
-    assert.deepStrictEqual(ret, { size: 20 });
   }
 
   @Test()

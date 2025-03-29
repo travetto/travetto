@@ -75,7 +75,6 @@ export class TestController {
   @Get('/fullUrl')
   getFullUrl() {
     return {
-      url: this.req.url,
       path: this.req.path
     };
   }
@@ -85,14 +84,9 @@ export class TestController {
     return { header: this.req.headers.getFirst('age') };
   }
 
-  @Post('/rawBody')
-  postRawBody() {
-    return { size: Buffer.from(this.req.body).length };
-  }
-
   @Get('/fun/*')
   getFun() {
-    return { path: this.req.url.split('fun/')[1] };
+    return { path: this.req.path.split('fun/')[1] };
   }
 
   @Get('/ip')

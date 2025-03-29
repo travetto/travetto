@@ -17,7 +17,6 @@ type MimeType = { type: string, subtype: string, full: string, parameters: Recor
 type RequestInit = {
   headers: IncomingHttpHeaders | HttpHeaderMap | HttpHeaders;
   method: string;
-  url: string;
   protocol: 'http' | 'https';
   port?: number;
   query: Record<string, unknown>;
@@ -43,17 +42,16 @@ export class HttpRequest {
   #queryExpanded?: Record<string, unknown>;
   #internal: HttpRequestInternal = {};
 
-  readonly url: string;
   readonly headers: HttpHeaders;
   readonly path: string;
   readonly port: number;
   readonly method: string;
   readonly query: Record<string, unknown>;
   readonly params: Record<string, string>;
-  body?: Any;
   readonly remoteIp?: string;
   readonly inputStream: Readable;
   readonly respond: (value: HttpResponse) => void;
+  body?: Any;
 
   constructor(init: RequestInit) {
     Object.assign(this, init);

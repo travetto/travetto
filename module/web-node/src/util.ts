@@ -2,7 +2,7 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
 
-import { HttpRequest, } from '@travetto/web';
+import { HttpRequest } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -24,7 +24,6 @@ export class NodeWebServerUtil {
     return new HttpRequest({
       protocol: req.secure ? 'https' : 'http',
       method: castTo(req.method),
-      url: req.originalUrl!,
       path: url.pathname!,
       query: Object.fromEntries(url.searchParams.entries()),
       params: req.params,

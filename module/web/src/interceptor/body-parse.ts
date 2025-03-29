@@ -87,7 +87,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
   }
 
   async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<HttpResponse> {
-    if (!METHODS_WITH_BODIES.has(req.method) || req.body) { // If body is already set
+    if (!METHODS_WITH_BODIES.has(req.method) || req.body !== undefined) { // If body is already set
       return next();
     }
 

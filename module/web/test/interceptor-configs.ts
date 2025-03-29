@@ -123,7 +123,6 @@ class TestInterceptorConfigSuite {
       path: '',
       port: 0,
       protocol: 'http',
-      url: ''
     });
     await endpoint.filter!({ req });
     return req.name;

@@ -7,10 +7,6 @@ export class ConnectRequest {
     this.#req = req;
   }
 
-  get url(): string {
-    return this.#req.url;
-  }
-
   get path(): string {
     return this.#req.path;
   }

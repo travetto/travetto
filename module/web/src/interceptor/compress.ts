@@ -64,13 +64,13 @@ export class CompressionInterceptor implements HttpInterceptor {
       !res.output ||
       (res.length !== undefined && res.length >= 0 && res.length < chunkSize) ||
       req.method === 'HEAD' ||
-      res.headers.has('content-encoding') ||
-      NO_TRANSFORM_REGEX.test(res.headers.get('cache-control')?.toString() ?? '')
+      res.headers.has('Content-Encoding') ||
+      NO_TRANSFORM_REGEX.test(res.headers.get('Cache-Control')?.toString() ?? '')
     ) {
       return res;
     }
 
-    const accepts = req.headers.getFirst('accept-encoding');
+    const accepts = req.headers.getFirst('Accept-encoding');
     const method = new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
       // Bad typings, need to override
       .encoding(...castTo<[string[]]>([supportedEncodings, preferredEncodings]));
@@ -96,12 +96,14 @@ export class CompressionInterceptor implements HttpInterceptor {
       stream.end(res.output);
       const out = await buffer(stream);
       res.output = out;
+      res.length = out.length;
     } else {
       res.output.pipe(stream);
       res.output = stream;
+      res.length = undefined;
     }
 
-    return res;
+    return res.ensureContentLength();
   }
 
   applies(ep: EndpointConfig, config: CompressConfig): boolean {

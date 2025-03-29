@@ -20,7 +20,6 @@ export class ExpressWebServerUtil {
     return new HttpRequest({
       protocol: castTo(req.protocol),
       method: req.method,
-      url: req.originalUrl,
       path: req.originalUrl,
       query: req.query,
       params: req.params,
@@ -29,11 +28,12 @@ export class ExpressWebServerUtil {
       port: req.socket.localPort,
       inputStream: req,
       body: req.body,
-      respond(value): unknown {
+      async respond(value): Promise<void> {
         res.status(value.statusCode ?? 200);
         res.setHeaders(value.headers.toMap());
         if (isReadable(value.output)) {
-          return pipeline(value.output, res);
+          await pipeline(value.output, res, { end: false });
+          res.end();
         } else {
           res.end(value.output);
         }

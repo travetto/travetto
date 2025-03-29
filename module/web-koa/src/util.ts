@@ -15,7 +15,6 @@ export class KoaWebServerUtil {
       protocol: castTo(ctx.protocol),
       method: ctx.request.method,
       query: ctx.request.query,
-      url: ctx.originalUrl,
       params: ctx.params,
       headers: ctx.request.headers,
       path: ctx.path,

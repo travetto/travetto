@@ -19,12 +19,12 @@ export class UIController {
   @Get('js/*')
   @Produces('application/javascript')
   getJs(): Promise<Readable> {
-    return RuntimeResources.readStream(this.req.url);
+    return RuntimeResources.readStream(this.req.path);
   }
 
   @Get('css/*')
   @Produces('text/css')
   getCss(): Promise<Readable> {
-    return RuntimeResources.readStream(this.req.url);
+    return RuntimeResources.readStream(this.req.path);
   }
 }
