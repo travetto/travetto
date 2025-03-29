@@ -59,11 +59,9 @@ export class CookieJar {
     this.#grip = options?.grip;
     this.#secure = options?.secure ?? false;
     if (Array.isArray(input)) {
-      for (const c of input) {
-        this.#cookies[c.name] = c;
-      }
+      this.#import(input);
     } else {
-      this.#import(input?.split(/\s*,\s*/) ?? []);
+      this.#import(input?.split(/\s{0,4},\s{0,4}/) ?? []);
     }
   }
 
@@ -72,10 +70,12 @@ export class CookieJar {
     const key = pairText(c);
     const sc = this.#cookies[`${c.name}.sig`];
     if (!sc.value) { return; }
+
     const index = this.#grip.index(key, sc.value);
-    if (index >= 0) {
-      c.signed = true;
-    }
+    c.signed = index >= 0;
+    sc.signed = false;
+    sc.secure = c.secure;
+
     if (index > 1) {
       sc.value = this.#grip.sign(key);
       return sc;
@@ -91,10 +91,10 @@ export class CookieJar {
     return { ...c, name: `${c.name}.sig`, value: this.#grip.sign(pairText(c)) };
   }
 
-  #import(headers: string[]): void {
+  #import(inputs: (string | Cookie)[]): void {
     const toCheck = [];
-    for (const header of headers) {
-      const c = CookieJar.fromHeaderValue(header);
+    for (const input of inputs) {
+      const c = typeof input === 'string' ? CookieJar.fromHeaderValue(input) : input;
       this.#cookies[c.name] = c;
       if (this.#grip && !c.name.endsWith('.sig')) {
         toCheck.push(c);
@@ -103,7 +103,7 @@ export class CookieJar {
     for (const c of toCheck) {
       const sc = this.#checkSignature(c);
       if (sc) {
-        this.#modified[sc.name] = sc;
+        this.set(sc);
       }
     }
   }

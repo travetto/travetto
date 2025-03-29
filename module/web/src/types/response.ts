@@ -195,23 +195,26 @@ export class HttpResponse<S = unknown> {
   source?: S;
   output: Buffer | Readable;
   length?: number;
-  headers: HttpHeaders;
+  readonly headers: HttpHeaders;
 
   constructor(o: PayloadInput<S>) {
     this.output = o.output;
     this.length = o.length;
     this.source = o.source;
-    this.#defaultContentType = o.defaultContentType ?? BINARY_TYPE;
     this.with(o);
+  }
+
+  with(o: Pick<PayloadInput<S>, 'headers' | 'cookies' | 'statusCode' | 'contentType' | 'defaultContentType'>): this {
+    this.statusCode ??= o.statusCode;
+    this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
+    this.#defaultContentType = o.defaultContentType ?? BINARY_TYPE;
+
+    // @ts-expect-error
+    this.headers = new HttpHeaders(o.headers);
+
     if (o.contentType) {
       this.headers.set('Content-Type', o.contentType);
     }
-  }
-
-  with(o: Pick<PayloadInput<S>, 'headers' | 'cookies' | 'statusCode'>): this {
-    this.statusCode ??= o.statusCode;
-    this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
-    this.headers = new HttpHeaders(o.headers);
     return this;
   }
 
@@ -223,10 +226,11 @@ export class HttpResponse<S = unknown> {
    * Ensure content length matches the provided length of the source
    */
   ensureContentLength(): this {
-    if (this.length) {
-      this.headers.set('Content-Length', `${this.length} `);
-    } else if (this.length === 0) {
-      this.headers.delete('Content-Type');
+    if (this.length !== undefined) {
+      this.headers.set('Content-Length', `${this.length}`);
+      if (!this.length) {
+        this.headers.delete('Content-Type');
+      }
     } else {
       this.headers.delete('Content-Length');
     }
@@ -249,8 +253,8 @@ export class HttpResponse<S = unknown> {
   /**
    * Ensure status code is set
    */
-  ensureStatusCode(defaultStatusCode = 200): this {
-    this.statusCode ??= defaultStatusCode;
+  ensureStatusCode(emptyStatusCode = 200): this {
+    this.statusCode ??= (this.length === 0 ? emptyStatusCode : 200);
     return this;
   }
 
