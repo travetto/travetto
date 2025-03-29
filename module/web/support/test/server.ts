@@ -140,7 +140,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
       const { body: ret, headers } = await this.request('get', '/test/json/large/20000', { headers: { 'Accept-Encoding': `${encoding};q=1` } });
       const value = headers.get('Content-Encoding');
       assert(value === encoding);
-      console.error('Hi', headers);
+
       assert(ret && typeof ret === 'object');
       assert('json' in ret);
       assert(typeof ret.json === 'string');
