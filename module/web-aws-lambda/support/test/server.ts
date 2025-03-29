@@ -92,7 +92,7 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
       requestContext: { ...baseLambdaContext, path, httpMethod: method },
     }, { ...baseContext }));
 
-    let resBody = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
+    let resBody: Buffer = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
     const resHeaders = valuesToShape.multi(castTo({
       ...(res.headers ?? {}),
       ...(res.multiValueHeaders ?? {})

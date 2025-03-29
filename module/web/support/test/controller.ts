@@ -45,7 +45,7 @@ export class TestController {
   withCookie() {
     return HttpResponse.from({ cookie: this.req.getCookie!('orange') })
       .with({
-        cookies: { flavor: { value: 'oreo', options: {} } }
+        cookies: [{ name: 'flavor', value: 'oreo' }]
       });
   }
 

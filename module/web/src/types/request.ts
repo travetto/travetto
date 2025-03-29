@@ -41,7 +41,7 @@ export class HttpRequest {
 
   #parsedType?: MimeType;
   #queryExpanded?: Record<string, unknown>;
-  #internal: HttpRequestInternal;
+  #internal: HttpRequestInternal = {};
 
   readonly url: string;
   readonly headers: HttpHeaders;

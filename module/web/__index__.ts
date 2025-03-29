@@ -4,8 +4,8 @@ export * from './src/types/response.ts';
 export * from './src/types/headers.ts';
 export * from './src/types/common.ts';
 export * from './src/types/server.ts';
+export * from './src/types/cookie.ts';
 export * from './src/types/interceptor.ts';
-export * from './src/types/response.ts';
 
 export * from './src/context.ts';
 
@@ -35,5 +35,6 @@ export * from './src/interceptor/return-value.ts';
 
 export * from './src/util/endpoint.ts';
 export * from './src/util/mime.ts';
+export * from './src/util/cookie.ts';
 export * from './src/util/common.ts';
 export * from './src/util/net.ts';

@@ -38,7 +38,7 @@ type PayloadInput<S> = {
   contentType?: string;
   defaultContentType?: string;
   headers?: HttpHeaderMap | HttpHeaders;
-  cookies?: Record<string, Cookie>;
+  cookies?: Cookie[];
 };
 
 /**
@@ -211,7 +211,7 @@ export class HttpResponse<S = unknown> {
 
   with(o: Pick<PayloadInput<S>, 'headers' | 'cookies' | 'statusCode'>): this {
     this.statusCode ??= o.statusCode;
-    this.#cookies = { ...o.cookies };
+    this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
     this.headers = o.headers instanceof HttpHeaders ? o.headers : new HttpHeaders(o.headers ?? {});
     return this;
   }

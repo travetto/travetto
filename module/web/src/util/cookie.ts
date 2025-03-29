@@ -10,7 +10,7 @@ export class CookieJar {
 
   static fromHeaderValue(header: string): Cookie {
     const parts = header.split(/\s{0,4};\s{0,4}/g);
-    const [name, value] = parts[0].split(/\s{0,4}=\s{0,4}/g);
+    const [name, value] = parts[0].split(/\s{0,4}=\s{0,4}/);
     const c: Cookie = { name, value };
     for (const p of parts.slice(1)) {
       // eslint-disable-next-line prefer-const
@@ -52,8 +52,8 @@ export class CookieJar {
 
   #secure?: boolean;
   #grip?: keygrip;
-  #cookies: Record<string, Cookie>;
-  #modified: Record<string, Cookie>;
+  #cookies: Record<string, Cookie> = {};
+  #modified: Record<string, Cookie> = {};
 
   constructor(headers: string[], options: { grip?: keygrip, secure?: boolean }) {
     this.#grip = options?.grip;
