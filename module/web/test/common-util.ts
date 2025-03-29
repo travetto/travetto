@@ -6,6 +6,7 @@ import { WebCommonUtil } from '../src/util/common.ts';
 import { HttpRequest } from '../src/types/request.ts';
 import { HttpResponse } from '../src/types/response.ts';
 import { castTo } from '@travetto/runtime';
+import { CookieJar } from '@travetto/web';
 
 const mockRequest = (res: HttpResponse): HttpRequest => new HttpRequest(castTo({ headers: res.headers }));
 
@@ -57,12 +58,14 @@ export class WebCommonUtilTest {
   async writeValueCookieTest() {
     const res = HttpResponse.fromEmpty()
       .writeMetadata(config('cookie', false), 'blue');
-    assert(res.getCookie('orange') === 'blue');
+
+    const jar = new CookieJar(res.getCookies());
+    assert(jar.get('orange') === 'blue');
 
     res.writeMetadata(config('cookie'), undefined);
-    assert(res.hasCookie('orange'));
-    assert(res.getCookie('orange') === undefined);
 
+    const jar2 = new CookieJar(res.getCookies());
+    assert(jar2.get('orange') === undefined);
   }
 
   @Test()

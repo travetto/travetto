@@ -77,9 +77,7 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
 
     const res = await next();
     for (const c of res.getCookies()) { jar.set(c); }
-    for (const c of jar.export()) {
-      res.headers.append('Set-Cookie', c);
-    }
+    for (const c of jar.export()) { res.headers.addCookie(c); }
     return res;
   }
 }

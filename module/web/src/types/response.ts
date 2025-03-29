@@ -3,8 +3,8 @@ import { isArrayBuffer } from 'node:util/types';
 
 import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
-import { HttpMetadataConfig } from './common';
-import { Cookie } from './cookie';
+import { HttpMetadataConfig } from './common.ts';
+import { Cookie } from './cookie.ts';
 import { HttpHeadersInit, HttpHeaders } from './headers.ts';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
@@ -34,7 +34,6 @@ type PayloadInput<S> = {
   length?: number;
   statusCode?: number;
   source?: S;
-  emptyStatusCode?: number;
   contentType?: string;
   defaultContentType?: string;
   headers?: HttpHeadersInit;
@@ -126,7 +125,7 @@ export class HttpResponse<S = unknown> {
     }
 
     meta?.contentEncoding && out.headers.set('Content-encoding', meta.contentEncoding);
-    meta?.cacheControl && out.headers.set('cache-control', meta.cacheControl);
+    meta?.cacheControl && out.headers.set('Cache-Control', meta.cacheControl);
     meta?.contentLanguage && out.headers.set('Content-Language', meta.contentLanguage);
 
     if (value instanceof File && value.name) {
@@ -204,7 +203,7 @@ export class HttpResponse<S = unknown> {
     this.source = o.source;
     this.#defaultContentType = o.defaultContentType ?? BINARY_TYPE;
     this.with(o);
-    if (o.contentType && this.length !== 0) {
+    if (o.contentType) {
       this.headers.set('Content-Type', o.contentType);
     }
   }
@@ -220,6 +219,9 @@ export class HttpResponse<S = unknown> {
     this.headers.append('Vary', value);
   }
 
+  /**
+   * Ensure content length matches the provided length of the source
+   */
   ensureContentLength(): this {
     if (this.length) {
       this.headers.set('Content-Length', `${this.length} `);
@@ -231,36 +233,37 @@ export class HttpResponse<S = unknown> {
     return this;
   }
 
+  /**
+   * Ensure content type exists, if length is provided
+   * Fall back to the default type if not provided
+   */
   ensureContentType(): this {
     if (!this.headers.has('Content-Type') && this.length) {
       this.headers.set('Content-Type', this.#defaultContentType);
+    } else if (this.length === 0) {
+      this.headers.delete('Content-Type');
     }
     return this;
   }
 
-  ensureStatusCode(emptyStatusCode = 200): this {
-    if (!this.statusCode) {
-      if (this.length === 0) {  // On empty response
-        this.statusCode = emptyStatusCode;
-      } else {
-        this.statusCode = 200;
-      }
-    }
+  /**
+   * Ensure status code is set
+   */
+  ensureStatusCode(defaultStatusCode = 200): this {
+    this.statusCode ??= defaultStatusCode;
     return this;
   }
 
-  getCookie(key: string): string | undefined {
-    return this.#cookies[key].value;
-  }
-
-  hasCookie(key: string): boolean {
-    return key in this.#cookies;
-  }
-
+  /**
+   * Store a cookie by name, will be handled by the CookieJar at send time
+   */
   setCookie(cookie: Cookie): void {
     this.#cookies[cookie.name] = { ...cookie, maxAge: (cookie.value !== undefined) ? cookie.maxAge : -1 };
   }
 
+  /**
+   * Get all the registered cookies
+   */
   getCookies(): Cookie[] {
     return Object.values(this.#cookies);
   }

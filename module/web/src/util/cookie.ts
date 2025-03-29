@@ -55,10 +55,16 @@ export class CookieJar {
   #cookies: Record<string, Cookie> = {};
   #modified: Record<string, Cookie> = {};
 
-  constructor(header: string | null | undefined, options: { grip?: keygrip, secure?: boolean }) {
+  constructor(input?: string | null | undefined | Cookie[], options?: { grip?: keygrip, secure?: boolean }) {
     this.#grip = options?.grip;
     this.#secure = options?.secure ?? false;
-    this.#import(header?.split(/\s*,\s*/) ?? []);
+    if (Array.isArray(input)) {
+      for (const c of input) {
+        this.#cookies[c.name] = c;
+      }
+    } else {
+      this.#import(input?.split(/\s*,\s*/) ?? []);
+    }
   }
 
   #checkSignature(c: Cookie): Cookie | undefined {

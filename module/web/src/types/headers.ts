@@ -64,4 +64,8 @@ export class HttpHeaders extends Headers {
       set(k, k === 'set-cookie' ? this.getSetCookie() : v);
     }
   }
+
+  addCookie(value: string): void {
+    this.append('set-cookie', value);
+  }
 }

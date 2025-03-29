@@ -1,5 +1,5 @@
-import { HttpResponse } from './types/response';
-import { HttpRequest } from './types/request';
+import { HttpResponse } from './types/response.ts';
+import { HttpRequest } from './types/request.ts';
 
 export type HttpContext<C = {}> = { req: HttpRequest } & C;
 export type HttpFilter<C extends HttpContext = HttpContext> = (context: C) => Promise<HttpResponse>;

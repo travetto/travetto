@@ -6,12 +6,6 @@ import { HttpResponse } from '../types/response.ts';
 
 @Injectable()
 export class ReturnValueConfig {
-
-  static finalizeConfig(base: ReturnValueConfig, inputs: Partial<ReturnValueConfig>[]): ReturnValueConfig {
-    Object.assign(base.headers ??= {}, ...inputs.map(x => x.headers));
-    return base;
-  }
-
   headers?: Record<string, string | (() => string)>;
 }
 
@@ -27,7 +21,8 @@ export class ReturnValueInterceptor implements HttpInterceptor<ReturnValueConfig
    * Produces final config object
    */
   finalizeConfig(base: ReturnValueConfig, inputs: Partial<ReturnValueConfig>[]): ReturnValueConfig {
-    return ReturnValueConfig.finalizeConfig(base, inputs);
+    Object.assign(base.headers ??= {}, ...inputs.map(x => x.headers));
+    return base;
   }
 
   async filter(ctx: HttpChainedContext<ReturnValueConfig>): Promise<HttpResponse> {
