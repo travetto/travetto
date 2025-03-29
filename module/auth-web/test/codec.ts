@@ -38,7 +38,7 @@ export class CodecTest {
       }
     );
 
-    assert(res.headers.get('Authorization') !== undefined);
+    assert(res.headers.has('Authorization'));
   }
 
   @Test()
@@ -48,7 +48,7 @@ export class CodecTest {
 
     await this.interceptor.codec.encode(res, undefined);
 
-    assert(res.headers.get('Authorization') === undefined);
+    assert(!res.headers.has('Authorization'));
   }
 
   @Test()

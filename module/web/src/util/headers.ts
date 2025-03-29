@@ -28,7 +28,7 @@ export class HttpHeaderUtil {
     for (const [k, v] of Object.entries(o)) {
       if (v !== undefined && v !== null) {
         if (Array.isArray(v)) {
-          h.set(k, '');
+          h.delete(k);
           for (const sv of v) {
             h.append(k, typeof sv === 'string' ? sv : `${sv}`);
           }
@@ -57,5 +57,13 @@ export class HttpHeaderUtil {
 
   static toMulti(headers: Headers): Record<string, string[]> {
     return Object.fromEntries([...headers.keys()].map(k => [k, this.getList(headers, k)!]));
+  }
+
+  static setFunctionalHeaders(headers: Headers, ...configs: (Record<string, string | (() => string)> | undefined)[]): void {
+    for (const config of configs) {
+      for (const [k, v] of Object.entries(config ?? {})) {
+        headers.set(k, typeof v === 'function' ? v() : v);
+      }
+    }
   }
 }

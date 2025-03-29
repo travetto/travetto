@@ -10,6 +10,7 @@ import { ControllerRegistry } from '../src/registry/controller.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Patch } from '../src/decorator/endpoint.ts';
 import { CacheControl, SetHeaders } from '../src/decorator/common.ts';
+import { HttpHeaderUtil } from '../src/util/headers.ts';
 
 @Controller('/test')
 class TestController {
@@ -35,7 +36,10 @@ export class ConfigureTest {
     const configs = (ep.interceptorConfigs ?? [])
       .filter((x): x is [Class, ReturnValueConfig] => x[0] === ReturnValueInterceptor)
       .map(x => x[1]);
-    return ReturnValueConfig.setHeaders(new Headers(), new ReturnValueInterceptor().finalizeConfig({}, configs).headers ?? {});
+
+    const headers = new Headers();
+    HttpHeaderUtil.setFunctionalHeaders(headers, ...configs.map(x => x.headers));
+    return headers;
   }
 
   @Test()
@@ -64,8 +68,8 @@ export class ConfigureTest {
   @Test()
   async setMultipleHeaderS() {
     const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[1]);
-    assert(headers.get('cache-control'));
-    assert(headers.get('expires'));
-    assert(headers.get('content-type'));
+    assert(headers.has('cache-control'));
+    assert(headers.has('expires'));
+    assert(headers.has('content-type'));
   }
 }

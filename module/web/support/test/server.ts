@@ -60,8 +60,9 @@ export abstract class WebServerSuite extends BaseWebSuite {
         Cookie: 'orange=yummy'
       }
     });
-    const cookie = headers.getSetCookie()[0];
-    assert(/flavor.*oreo/.test(cookie ?? ''));
+    const [cookie] = headers.getSetCookie();
+    assert(cookie !== undefined);
+    assert(/flavor.*oreo/.test(cookie));
     assert.deepStrictEqual(ret, { cookie: 'yummy' });
   }
 

@@ -107,7 +107,7 @@ export class HttpRequest {
   readMetadata(this: HttpRequest, cfg: HttpMetadataConfig, opts?: CookieReadOptions): string | undefined {
     let res = (cfg.mode === 'cookie' || !cfg.mode) ?
       this.getCookie(cfg.cookie, opts) :
-      this.headers.get(cfg.header);
+      this.headers.get(cfg.header) ?? undefined;
 
     if (res && cfg.mode === 'header' && cfg.headerPrefix) {
       res = res.split(cfg.headerPrefix)[1].trim();

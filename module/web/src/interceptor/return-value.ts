@@ -3,16 +3,10 @@ import { Inject, Injectable } from '@travetto/di';
 import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 import { HttpChainedContext } from '../types.ts';
 import { HttpResponse } from '../types/response.ts';
+import { HttpHeaderUtil } from '../util/headers.ts';
 
 @Injectable()
 export class ReturnValueConfig {
-
-  static setHeaders(headers: Headers, config: ReturnValueConfig): typeof headers {
-    for (const [k, v] of Object.entries(config.headers ?? {})) {
-      headers.set(k, typeof v === 'function' ? v() : v);
-    }
-    return headers;
-  }
 
   static finalizeConfig(base: ReturnValueConfig, inputs: Partial<ReturnValueConfig>[]): ReturnValueConfig {
     Object.assign(base.headers ??= {}, ...inputs.map(x => x.headers));
@@ -41,7 +35,7 @@ export class ReturnValueInterceptor implements HttpInterceptor<ReturnValueConfig
     const res = await ctx.next();
     const method = ctx.req.method.toUpperCase();
 
-    ReturnValueConfig.setHeaders(res.headers, ctx.config.headers ?? {});
+    HttpHeaderUtil.setFunctionalHeaders(res.headers, ctx.config.headers);
 
     return res
       .ensureContentLength()
