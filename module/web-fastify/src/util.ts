@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { HttpHeaders, HttpRequest } from '@travetto/web';
+import { HttpRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**

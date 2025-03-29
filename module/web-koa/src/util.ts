@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpHeaders, HttpRequest } from '@travetto/web';
+import { HttpRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**

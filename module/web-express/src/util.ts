@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 
 import type express from 'express';
 
-import { HttpHeaders, HttpRequest } from '@travetto/web';
+import { HttpRequest } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
