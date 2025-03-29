@@ -92,17 +92,7 @@ export class EndpointParameterTest {
 
   static async extract(ep: EndpointConfig, req: Partial<HttpRequest>): Promise<unknown[]> {
     return await EndpointUtil.extractParameters({
-      req: new HttpRequest({
-        respond: () => { },
-        headers: {},
-        method: 'GET',
-        params: {},
-        query: {},
-        path: '',
-        port: 0,
-        protocol: 'http',
-        ...req
-      })
+      req: new HttpRequest({ ...req })
     }, ep);
   }
 

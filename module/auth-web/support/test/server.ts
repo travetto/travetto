@@ -1,7 +1,7 @@
 import timers from 'node:timers/promises';
 import assert from 'node:assert';
 
-import { Controller, Get, HttpResponse, Post } from '@travetto/web';
+import { Controller, Get, HttpHeaders, HttpResponse, Post } from '@travetto/web';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
@@ -90,15 +90,15 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   @Inject()
   config: WebAuthConfig;
 
-  getCookie(headers: Headers): string | undefined {
+  getCookie(headers: HttpHeaders): string | undefined {
     return headers.getSetCookie()[0];
   }
 
-  getCookieValue(headers: Headers): string | undefined {
+  getCookieValue(headers: HttpHeaders): string | undefined {
     return this.getCookie(headers)?.split(';')[0];
   }
 
-  getCookieExpires(headers: Headers): Date | undefined {
+  getCookieExpires(headers: HttpHeaders): Date | undefined {
     const v = this.getCookie(headers)?.match('expires=([^;]+)(;|$)')?.[1];
     return v ? new Date(v) : undefined;
   }

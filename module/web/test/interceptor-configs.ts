@@ -115,14 +115,6 @@ class TestInterceptorConfigSuite {
     const endpoint = inst.endpoints.find(x => x.path === path)!;
     const req: HttpRequest & { name?: string } = new HttpRequest({
       inputStream: Readable.from(Buffer.from([])),
-      respond: () => { },
-      headers: {},
-      method: 'GET',
-      params: {},
-      query: {},
-      path: '',
-      port: 0,
-      protocol: 'http',
     });
     await endpoint.filter!({ req });
     return req.name;

@@ -14,14 +14,14 @@ const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
 type RequestInit = {
-  headers: HttpHeadersInit;
-  method: string;
-  protocol: 'http' | 'https';
+  headers?: HttpHeadersInit;
+  method?: string;
+  protocol?: 'http' | 'https';
   port?: number;
-  query: Record<string, unknown>;
-  path: string;
+  query?: Record<string, unknown>;
+  path?: string;
   params?: Record<string, string>;
-  respond: (value: HttpResponse) => void;
+  respond?: (value: HttpResponse) => void;
   body?: unknown;
   inputStream?: Readable;
   remoteIp?: string;
@@ -44,16 +44,21 @@ export class HttpRequest {
   readonly headers: HttpHeaders;
   readonly path: string;
   readonly port: number;
+  readonly protocol: 'http' | 'https';
   readonly method: string;
   readonly query: Record<string, unknown>;
   readonly params: Record<string, string>;
   readonly remoteIp?: string;
   readonly inputStream: Readable;
-  readonly respond: (value: HttpResponse) => void;
   body?: Any;
 
   constructor(init: RequestInit) {
     Object.assign(this, init);
+    this.query ??= {};
+    this.params ??= {};
+    this.method ??= 'GET';
+    this.protocol ??= 'http';
+    this.path ??= '';
     this.headers = new HttpHeaders(init.headers);
   }
 
@@ -122,5 +127,9 @@ export class HttpRequest {
 
   getCookie(key: string, opts?: CookieReadOptions): string | undefined {
     throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
+  }
+
+  respond(value: HttpResponse): void {
+    // Do nothing by default
   }
 }
