@@ -1,6 +1,8 @@
+import { castTo } from '@travetto/runtime';
 import { IncomingHttpHeaders } from 'node:http';
 
-export type HttpHeaderMap = Record<string, string | string[] | (() => (string | string[]))>;
+type HeaderValue = string | string[] | readonly string[];
+export type HttpHeaderMap = Record<string, HeaderValue | (() => HeaderValue)>;
 
 /**
  * Http Payload as a simple object
@@ -10,11 +12,13 @@ export class HttpHeaders {
   #headerNames: Record<string, string> = {};
   #headers: Record<string, string> = {};
 
-  constructor(headers: IncomingHttpHeaders | HttpHeaderMap, readonly = false) {
-    this.setAll(headers);
-    if (readonly) {
-      Object.freeze(this.#headers);
-      Object.freeze(this.#headerNames);
+  constructor(headers?: IncomingHttpHeaders | HttpHeaderMap, readonly = false) {
+    if (headers) {
+      this.setAll(headers);
+      if (readonly) {
+        Object.freeze(this.#headers);
+        Object.freeze(this.#headerNames);
+      }
     }
   }
 
@@ -47,7 +51,7 @@ export class HttpHeaders {
   }
 
   toObject(): Record<string, string> {
-    return Object.freeze(this.#headers!);
+    return this.#headers;
   }
 
   toMap(): Map<string, string> {
@@ -61,7 +65,7 @@ export class HttpHeaders {
     if (Array.isArray(out)) {
       out = out.join(lk === 'set-cookie' ? '; ' : ', ');
     }
-    this.#headers[fk] = out;
+    this.#headers[fk] = castTo(out);
   }
 
   append(key: string, value: string): void {
@@ -80,7 +84,10 @@ export class HttpHeaders {
     }
   }
 
-  setAll(o: IncomingHttpHeaders | HttpHeaderMap, ifMissing = false): this {
+  setAll(o: IncomingHttpHeaders | HttpHeaderMap | HttpHeaders, ifMissing = false): this {
+    if (o instanceof HttpHeaders) {
+      o = o.toObject();
+    }
     for (const [k, v] of Object.entries(o)) {
       if (ifMissing && this.has(k)) {
         continue;

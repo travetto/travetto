@@ -6,8 +6,8 @@ import { HttpResponse } from '../types/response.ts';
 import { HttpHeaderMap } from '../types/headers.ts';
 
 @Injectable()
-class ReturnValueConfig {
-  headers: HttpHeaderMap = {};
+export class ReturnValueConfig {
+  headers?: HttpHeaderMap;
 }
 
 @Injectable()
@@ -22,10 +22,7 @@ export class ReturnValueInterceptor implements HttpInterceptor<ReturnValueConfig
    * Produces final config object
    */
   finalizeConfig(base: ReturnValueConfig, inputs: Partial<ReturnValueConfig>[]): ReturnValueConfig {
-    base.headers ??= {};
-    for (const v of inputs) {
-      Object.assign(base.headers, v.headers);
-    }
+    Object.assign(base.headers ??= {}, ...inputs.map(x => x.headers));
     return base;
   }
 
@@ -33,7 +30,7 @@ export class ReturnValueInterceptor implements HttpInterceptor<ReturnValueConfig
     const res = await ctx.next();
     const method = ctx.req.method.toUpperCase();
 
-    res.headers.setAll(ctx.config.headers, true);
+    res.headers.setAll(ctx.config.headers ?? {}, true);
 
     return res
       .ensureContentLength()
