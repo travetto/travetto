@@ -87,7 +87,7 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
   }
 
   async execute(method: HttpRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {
-    const httpHeaders = (headers instanceof HttpHeaders ? headers : HttpHeaders.fromIncomingHeaders(headers ?? {}));
+    const httpHeaders = HttpHeaders.fromInput(headers);
     const queryEntries = Object.entries(query ?? {});
 
     const res = (await this.#lambda.handle({
@@ -105,14 +105,7 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
 
     let resBody: Buffer = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
 
-    const resHeaders = new HttpHeaders();
-    for (const [k, v] of Object.entries(res.multiValueHeaders ?? {})) {
-      resHeaders.set(k, typeof v[0] === 'string' ? v[0] : `${v[0]}`);
-      for (const i of v.slice(1)) {
-        resHeaders.append(k, typeof i === 'string' ? i : `${i}`);
-      }
-    }
-
+    const resHeaders = HttpHeaders.fromInput({ ...res.headers ?? {}, ...res.multiValueHeaders ?? {} });
     const first = resHeaders.getFirst('content-encoding');
 
     if (/^(gzip|deflate|br)/.test(first ?? '')) {

@@ -91,7 +91,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   config: WebAuthConfig;
 
   getCookie(headers: HttpHeaders): string | undefined {
-    return headers.getFirst('set-cookie');
+    return headers.getSetCookie()[0];
   }
 
   getCookieValue(headers: HttpHeaders): string | undefined {
@@ -201,6 +201,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
       }
     });
     assert(authStatus === 201);
+
 
     const { status: lastStatus } = await this.request('get', '/test/auth-all/self', {
       throwOnError: false,

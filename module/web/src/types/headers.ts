@@ -1,21 +1,29 @@
-import { castTo } from '@travetto/runtime';
-import { IncomingHttpHeaders } from 'node:http';
-
 /**
  * Http Headers
  */
 export class HttpHeaders extends Headers {
 
-  static fromIncomingHeaders(o: IncomingHttpHeaders): HttpHeaders {
-    const v = new HttpHeaders(castTo(o));
-    const c = o['set-cookie'];
-    if (Array.isArray(c)) {
-      v.set('set-cookie', '');
-      for (const i of c) {
-        v.append('set-cookie', i);
+  static fromInput(o?: HttpHeaders | Headers | Record<string, undefined | number | boolean | string | (number | boolean | string)[]>): HttpHeaders {
+    if (o instanceof HttpHeaders) {
+      return o;
+    } else if (!o || o instanceof Headers) {
+      return new HttpHeaders(o);
+    }
+
+    const h = new HttpHeaders();
+    for (const [k, v] of Object.entries(o)) {
+      if (v !== undefined && v !== null) {
+        if (Array.isArray(v)) {
+          h.set(k, '');
+          for (const sv of v) {
+            h.append(k, typeof sv === 'string' ? sv : `${sv}`);
+          }
+        } else {
+          h.set(k, typeof v === 'string' ? v : `${v}`);
+        }
       }
     }
-    return v;
+    return h;
   }
 
   constructor(headers?: Record<string, string> | Headers) {

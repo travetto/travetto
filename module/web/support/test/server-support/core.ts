@@ -62,7 +62,7 @@ export class CoreWebServerSupport implements WebServerSupport {
 
     const res = await fetch(`${this.url}${path}${q}`, {
       method,
-      headers: headers instanceof Headers ? headers : HttpHeaders.fromIncomingHeaders(headers ?? {}),
+      headers: HttpHeaders.fromInput(headers),
       body,
       signal: ctrl.signal
     });

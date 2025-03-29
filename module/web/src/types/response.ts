@@ -213,7 +213,7 @@ export class HttpResponse<S = unknown> {
   with(o: Pick<PayloadInput<S>, 'headers' | 'cookies' | 'statusCode'>): this {
     this.statusCode ??= o.statusCode;
     this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
-    this.headers = o.headers instanceof HttpHeaders ? o.headers : HttpHeaders.fromIncomingHeaders(o.headers ?? {});
+    this.headers = HttpHeaders.fromInput(o.headers);
     return this;
   }
 

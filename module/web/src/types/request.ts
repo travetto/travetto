@@ -55,7 +55,7 @@ export class HttpRequest {
 
   constructor(init: RequestInit) {
     Object.assign(this, init);
-    this.headers = init.headers instanceof HttpHeaders ? init.headers : HttpHeaders.fromIncomingHeaders(init.headers);
+    this.headers = HttpHeaders.fromInput(init.headers);
   }
 
   /**
@@ -111,6 +111,7 @@ export class HttpRequest {
       this.headers.get(cfg.header);
 
     if (res && cfg.mode === 'header' && cfg.headerPrefix) {
+      console.log('Rs value', typeof res, res);
       res = res.split(cfg.headerPrefix)[1].trim();
     }
 

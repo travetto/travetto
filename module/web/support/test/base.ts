@@ -98,7 +98,7 @@ export abstract class BaseWebSuite {
 
     method = castTo<HttpRequest['method']>(method.toUpperCase());
 
-    const headers = cfg.headers instanceof HttpHeaders ? cfg.headers : HttpHeaders.fromIncomingHeaders(cfg.headers ?? {});
+    const headers = HttpHeaders.fromInput(cfg.headers);
 
     let buffer: Buffer | undefined;
     const body = cfg.body;
