@@ -1,11 +1,11 @@
 import { Controller, Get, QueryParam, HttpRequest, ContextParam, HttpResponse } from '@travetto/web';
-import { Cookie, CookieReadOptions } from '../src/types/cookie';
+import { CookieGetOptions, CookieSetOptions } from '../src/types/cookie';
 
 @Controller('/simple')
 export class SimpleEndpoints {
 
-  private getOptions: CookieReadOptions;
-  private setOptions: Omit<Cookie, 'name' | 'value'>;
+  private getOptions: CookieGetOptions;
+  private setOptions: CookieSetOptions;
 
   @ContextParam()
   req: HttpRequest;

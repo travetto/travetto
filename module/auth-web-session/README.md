@@ -47,7 +47,7 @@ export class AuthSessionInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
 
-  async filter({ next }: HttpChainedContext): Promise<unknown> {
+  async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
     try {
       await this.service.load();
       return await next();

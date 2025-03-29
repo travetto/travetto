@@ -348,7 +348,7 @@ npx trv run:web
       { priority: 999, source: 'memory://override' }
     ],
     active: {
-      AcceptsConfig: { types: {} },
+      AcceptsConfig: { applies: false, types: {} },
       ApiHostConfig: { openapi: '3.0.0' },
       ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
       ApiSpecConfig: {
@@ -358,21 +358,22 @@ npx trv run:web
         exposeAllSchemas: false
       },
       AuthConfig: { maxAge: '1h', rollingRenew: true },
-      BodyParseConfig: { limit: '1mb', parsingTypes: {} },
+      BodyParseConfig: { applies: true, limit: '1mb', parsingTypes: {} },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       CompressConfig: {
+        applies: true,
         preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
         supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
       },
       ConsoleLogAppenderConfig: { logToLevel: true },
-      CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-      CorsConfig: {},
-      EtagConfig: {},
+      CookieConfig: { applies: true, signed: true, httpOnly: true, sameSite: 'lax', secure: false },
+      CorsConfig: { applies: true },
+      EtagConfig: { applies: true },
       FileLogAppenderConfig: {
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
-      GetCacheConfig: {},
+      GetCacheConfig: { applies: true },
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,
@@ -399,14 +400,15 @@ npx trv run:web
         options: { waitQueueTimeoutMS: 86400000 }
       },
       WebAuthConfig: {
+        applies: false,
         mode: 'cookie',
         header: 'Authorization',
         cookie: 'trv_auth',
         headerPrefix: 'Token'
       },
-      WebAuthLoginConfig: {},
-      WebAuthLogoutConfig: {},
-      WebAuthVerifyConfig: { permissions: {} },
+      WebAuthLoginConfig: { applies: false },
+      WebAuthLogoutConfig: { applies: false },
+      WebAuthVerifyConfig: { applies: false, permissions: {} },
       WebConfig: {
         serve: true,
         port: 12555,
@@ -418,7 +420,7 @@ npx trv run:web
         ssl: { active: false },
         optionsGlobalHandle: true
       },
-      WebLogConfig: { showStackTrace: true },
+      WebLogConfig: { applies: true, showStackTrace: true },
       WebRpcConfig: { clients: {} },
       WebSessionConfig: {},
       WebSslConfig: { active: false }

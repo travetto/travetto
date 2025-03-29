@@ -169,6 +169,7 @@ module/web-fastify
 module/web-fastify-lambda
 module/web-koa
 module/web-koa-lambda
+module/web-node
 module/web-rpc
 module/web-upload
 module/worker
@@ -264,6 +265,7 @@ global-test/auth-web-session_web <workspace-root>/global-test/auth-web-session_w
        module/web-fastify-lambda <workspace-root>/module/web-fastify-lambda
                   module/web-koa <workspace-root>/module/web-koa
            module/web-koa-lambda <workspace-root>/module/web-koa-lambda
+                 module/web-node <workspace-root>/module/web-node
                   module/web-rpc <workspace-root>/module/web-rpc
                module/web-upload <workspace-root>/module/web-upload
                    module/worker <workspace-root>/module/worker

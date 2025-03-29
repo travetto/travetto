@@ -57,14 +57,16 @@ const app = fastify({
     });
 
     // Defer to fastify if disabled
-    if (this.compress.disabled) {
+    if (this.compress.applies) {
       const preferred = this.compress.preferredEncodings ?? this.compress.supportedEncodings.filter(x => x !== 'deflate');
       app.register(fastifyCompress, { encodings: this.compress.supportedEncodings, requestEncodings: preferred });
+      this.compress.applies = false;
     }
 
     // Defer to fastify if disabled
-    if (this.etag.disabled) {
+    if (this.etag.applies) {
       app.register(fastifyEtag, { weak: !!this.etag.weak, replyWith304: true });
+      this.etag.applies = false;
     }
 
     app.removeAllContentTypeParsers();

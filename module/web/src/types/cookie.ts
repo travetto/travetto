@@ -1,5 +1,3 @@
-export type CookieReadOptions = { signed?: boolean };
-
 export type Cookie = {
   name: string;
   value?: string;
@@ -15,5 +13,5 @@ export type Cookie = {
   partitioned?: boolean;
 };
 
-
+export type CookieGetOptions = { signed?: boolean };
 export type CookieSetOptions = Omit<Cookie, 'name' | 'value'>;
