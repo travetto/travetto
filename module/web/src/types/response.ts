@@ -51,7 +51,7 @@ export class HttpResponse<S = unknown> {
     * @param location Location to redirect to
     * @param status Status code
     */
-  static redirect(location: string, status = 302): HttpResponse {
+  static redirect(location: string, status = 302): HttpResponse<void> {
     return this.fromEmpty().with({
       statusCode: status,
       headers: { Location: location },

@@ -414,4 +414,13 @@ export class TransformerState implements State {
       throw new Error(`Unable to import non-external type: ${node.getText()} ${type.key}: ${src}`);
     }
   }
+
+  /**
+   * Get apparent type of requested field
+   */
+  getApparentTypeOfField(value: ts.Type, field: string): AnyType | undefined {
+    const checker = this.#resolver.getChecker();
+    const props = checker.getApparentType(value).getApparentProperties().find(x => x.escapedName === field);
+    return props ? this.resolveType(checker.getTypeOfSymbol(props)) : undefined;
+  }
 }

@@ -121,8 +121,18 @@ export class WebTransformer {
     }
 
     // If we have a valid response type, declare it
-    const inner = SchemaTransformUtil.findInnerReturnMethod(state, node, 'serialize');
-    const returnType = SchemaTransformUtil.ensureType(state, state.resolveReturnType(inner ?? node), node);
+    const nodeType = state.resolveReturnType(node);
+    let targetType = nodeType;
+    if (nodeType.key === 'literal' && nodeType.typeArguments?.length && nodeType.name === 'Promise') {
+      targetType = nodeType.typeArguments[0];
+    }
+
+    let inner: AnyType | undefined;
+    if (targetType.key === 'managed' && targetType.name === 'HttpResponse' && targetType.importName.startsWith('@travetto/web')) {
+      inner = state.getApparentTypeOfField(targetType.original!, 'source');
+    }
+
+    const returnType = SchemaTransformUtil.ensureType(state, inner ?? nodeType, node);
     if (returnType.type) {
       newDecls.push(state.createDecorator(ENDPOINT_DEC_IMPORT, 'ResponseType', state.fromLiteral({
         ...returnType,

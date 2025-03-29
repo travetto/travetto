@@ -82,7 +82,7 @@ export class TestController {
 
   @Get('/headerFirst')
   getHeaderFirst() {
-    return { header: this.req.headers.get('age') };
+    return { header: this.req.headers.getFirst('age') };
   }
 
   @Post('/rawBody')

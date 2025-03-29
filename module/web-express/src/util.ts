@@ -21,7 +21,7 @@ export class ExpressWebServerUtil {
       protocol: castTo(req.protocol),
       method: req.method,
       url: req.originalUrl,
-      path: req.url,
+      path: req.originalUrl,
       query: req.query,
       params: req.params,
       headers: req.headers,

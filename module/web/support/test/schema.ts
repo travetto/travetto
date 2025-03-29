@@ -93,18 +93,6 @@ class SchemaAPI {
     return HttpResponse.redirect('google.com');
   }
 
-  @Get('/customSerialize')
-  async customSerialize() {
-    return {
-      /**
-       * @returns {Promise<User>}
-       */
-      serialize() {
-
-      }
-    };
-  }
-
   /**
    * @returns {Promise<User>}
    */
@@ -263,12 +251,6 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyRenderable() {
     const ep = getEndpoint('/renderable/:age', 'get');
     assert(ep.responseType?.type === undefined);
-  }
-
-  @Test()
-  async verifyCustomSerializeable() {
-    const ep = getEndpoint('/customSerialize', 'get');
-    assert(ep.responseType?.type === User);
   }
 
   @Test()
