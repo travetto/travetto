@@ -61,7 +61,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
       }
     });
     console.log('Headers', { headers });
-    const cookie = Array.isArray(headers['set-cookie']) ? headers['set-cookie'][0] : headers['set-cookie'];
+    const cookie = headers.getFirst('set-cookie');
     assert(/flavor.*oreo/.test(cookie ?? ''));
     assert.deepStrictEqual(ret, { cookie: 'yummy' });
   }
@@ -70,14 +70,14 @@ export abstract class WebServerSuite extends BaseWebSuite {
   async testRegex() {
     const { body: ret, headers } = await this.request('patch', '/test/regexp/super-poodle-party');
     assert.deepStrictEqual(ret, { path: 'poodle' });
-    assert(('etag' in headers));
+    assert(headers.has('etag'));
   }
 
   @Test()
   async testBuffer() {
     const { body: ret, headers } = await this.request('get', '/test/buffer');
     assert(ret === 'hello');
-    assert(('etag' in headers));
+    assert(headers.has('etag'));
   }
 
   @Test()
@@ -85,7 +85,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
     try {
       const { body: ret, headers } = await this.request('get', '/test/stream');
       assert(ret === 'hello');
-      assert(!('etag' in headers));
+      assert(!headers.has('etag'));
     } catch (err) {
       console.error(err);
       throw err;
@@ -139,12 +139,12 @@ export abstract class WebServerSuite extends BaseWebSuite {
   async compressionReturned() {
     {
       const { body: ret, headers } = await this.request('get', '/test/json', { headers: { 'Accept-Encoding': 'gzip;q=1' } });
-      assert(headers['content-encoding'] === undefined);
+      assert(!headers.has('content-encoding'));
       assert.deepStrictEqual(ret, { json: true });
     }
     for (const encoding of ['gzip', 'br', 'deflate']) {
       const { body: ret, headers } = await this.request('get', '/test/json/large/20000', { headers: { 'Accept-Encoding': `${encoding};q=1` } });
-      const [value] = [headers['content-encoding']].flat();
+      const value = headers.get('content-encoding');
       assert(value === encoding);
       console.error('Hi', headers);
       assert(ret && typeof ret === 'object');

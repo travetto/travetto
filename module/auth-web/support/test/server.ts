@@ -1,7 +1,7 @@
 import timers from 'node:timers/promises';
 import assert from 'node:assert';
 
-import { Controller, Get, HttpResponse, Post } from '@travetto/web';
+import { Controller, Get, HttpHeaders, HttpResponse, Post } from '@travetto/web';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
@@ -90,19 +90,18 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   @Inject()
   config: WebAuthConfig;
 
-  getCookie(headers: Record<string, string | string[] | undefined>): string | undefined {
-    return this.getFirstHeader(headers, 'set-cookie');
+  getCookie(headers: HttpHeaders): string | undefined {
+    return headers.getFirst('set-cookie');
   }
 
-  getCookieValue(headers: Record<string, string | string[] | undefined>): string | undefined {
+  getCookieValue(headers: HttpHeaders): string | undefined {
     return this.getCookie(headers)?.split(';')[0];
   }
 
-  getCookieExpires(headers: Record<string, string | string[] | undefined>): Date | undefined {
-    const v = this.getCookie(headers)?.match('expires=([^;]+);')?.[1];
+  getCookieExpires(headers: HttpHeaders): Date | undefined {
+    const v = this.getCookie(headers)?.match('expires=([^;]+)(;|$)')?.[1];
     return v ? new Date(v) : undefined;
   }
-
 
   @Test()
   async testBadAuth() {
@@ -127,7 +126,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
         password: 'password'
       }
     });
-    assert(this.getCookie(headers));
+    assert(headers.getList('set-cookie')?.length);
     assert(status === 201);
   }
 
@@ -179,7 +178,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     const { status: lastStatus } = await this.request('get', '/test/auth/self', {
       throwOnError: false,
       headers: {
-        Authorization: headers.authorization
+        Authorization: headers.get('authorization')
       }
     });
     assert(lastStatus === 200);
@@ -206,7 +205,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     const { status: lastStatus } = await this.request('get', '/test/auth-all/self', {
       throwOnError: false,
       headers: {
-        Authorization: headers.authorization
+        Authorization: headers.get('authorization')
       }
     });
     assert(lastStatus === 200);

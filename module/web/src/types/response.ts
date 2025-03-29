@@ -258,10 +258,7 @@ export class HttpResponse<S = unknown> {
   }
 
   setCookie(cookie: Cookie): void {
-    this.#cookies[cookie.name] = {
-      maxAge: (cookie.value !== undefined) ? undefined : -1,
-      ...cookie,
-    };
+    this.#cookies[cookie.name] = { ...cookie, maxAge: (cookie.value !== undefined) ? cookie.maxAge : -1 };
   }
 
   getCookies(): Cookie[] {
@@ -277,7 +274,7 @@ export class HttpResponse<S = unknown> {
         name: cfg.cookie,
         value: output,
         ...opts,
-        maxAge: (output !== undefined) ? undefined : -1,
+        maxAge: (output !== undefined) ? opts?.maxAge : -1,
       });
     }
     if (cfg.mode === 'header') {

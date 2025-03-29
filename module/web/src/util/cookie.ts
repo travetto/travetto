@@ -47,7 +47,7 @@ export class CookieJar {
     if (c.httpOnly) { header.push('httponly'); }
     if (c.partitioned) { header.push('partitioned'); }
 
-    return header.join('; ');
+    return header.join(';');
   }
 
   #secure?: boolean;

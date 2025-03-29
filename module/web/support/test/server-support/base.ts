@@ -1,4 +1,5 @@
-import type { HttpRequest } from '../../../src/types.ts';
+import type { HttpRequest } from '../../../src/types/request.ts';
+import type { HttpHeaders } from '../../../src/types/headers.ts';
 import type { WebServerHandle } from '../../../src/types/server.ts';
 
 export type MakeRequestConfig<T> = {
@@ -10,7 +11,7 @@ export type MakeRequestConfig<T> = {
 export type MakeRequestResponse<T> = {
   status: number;
   body: T;
-  headers: Record<string, string | string[] | undefined>;
+  headers: HttpHeaders;
 };
 
 export interface WebServerSupport {

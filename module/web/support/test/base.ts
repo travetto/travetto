@@ -6,7 +6,8 @@ import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpMethodOrAll, HttpRequest } from '../../src/types.ts';
+import { HttpRequest } from '../../src/types/request.ts';
+import { HttpMethodOrAll } from '../../src/registry/types.ts';
 import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base.ts';
 import { WebServerHandle } from '../../src/types/server.ts';
 import { CoreWebServerSupport } from './server-support/core.ts';
@@ -40,17 +41,6 @@ export abstract class BaseWebSuite {
 
   get port(): number | undefined {
     return this.#support instanceof CoreWebServerSupport ? this.#support.port : undefined;
-  }
-
-  getFirstHeader(headers: Record<string, string | string[] | undefined>, key: string): string | undefined {
-    const v = headers[key];
-    if (v) {
-      if (typeof v === 'string') {
-        return v;
-      } else {
-        return v[0];
-      }
-    }
   }
 
   async getOutput<T>(t: Buffer): Promise<T | string> {
@@ -145,7 +135,7 @@ export abstract class BaseWebSuite {
     return {
       status: resp.status,
       body: castTo(out),
-      headers: Object.fromEntries(Object.entries(resp.headers).map(([k, v]) => [k.toLowerCase(), v]))
+      headers: resp.headers
     };
   }
 }

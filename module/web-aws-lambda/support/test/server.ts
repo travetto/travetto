@@ -3,7 +3,7 @@ import zlib from 'node:zlib';
 
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { HttpRequest, WebServerHandle, CookieConfig } from '@travetto/web';
+import { HttpRequest, WebServerHandle, CookieConfig, HttpHeaders } from '@travetto/web';
 import { asFull, castTo, Util } from '@travetto/runtime';
 
 import {
@@ -93,14 +93,14 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
     }, { ...baseContext }));
 
     let resBody: Buffer = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
-    const resHeaders = valuesToShape.multi(castTo({
+    const resHeaders = new HttpHeaders(valuesToShape.multi(castTo({
       ...(res.headers ?? {}),
       ...(res.multiValueHeaders ?? {})
-    }));
+    })));
 
-    const first = resHeaders['content-encoding']?.[0];
+    const first = resHeaders.getFirst('content-encoding');
 
-    if (/^(gzip|deflate|br)/.test(first)) {
+    if (/^(gzip|deflate|br)/.test(first ?? '')) {
       switch (first) {
         case 'gzip': resBody = zlib.gunzipSync(resBody); break;
         case 'deflate': resBody = zlib.inflateSync(resBody); break;
@@ -108,10 +108,6 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
       }
     }
 
-    return {
-      status: res.statusCode,
-      body: resBody,
-      headers: resHeaders
-    };
+    return { status: res.statusCode, body: resBody, headers: resHeaders };
   }
 }

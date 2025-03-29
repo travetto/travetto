@@ -48,7 +48,9 @@ export class HttpHeaders {
     }
 
     const lk = key.toLowerCase();
-    if (lk === 'cookie') {
+    if (lk === 'set-cookie') {
+      return [res];
+    } else if (lk === 'cookie') {
       return res.split(/\s{0,3};\s{0,3}/);
     } else {
       return res.split(/\s{0,3},\s{0,3}/);

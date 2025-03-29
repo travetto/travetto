@@ -1,7 +1,7 @@
 import timers from 'node:timers/promises';
 
 import { DependencyRegistry } from '@travetto/di';
-import { type HttpRequest, CookieConfig, WebConfig, WebSslConfig, WebApplication } from '@travetto/web';
+import { type HttpRequest, CookieConfig, WebConfig, WebSslConfig, WebApplication, HttpHeaders } from '@travetto/web';
 
 import { WebServerSupport, MakeRequestConfig, headerToShape } from './base.ts';
 
@@ -67,7 +67,7 @@ export class CoreWebServerSupport implements WebServerSupport {
       signal: ctrl.signal
     });
 
-    const out = { status: res.status, body: Buffer.from(await res.arrayBuffer()), headers: Object.fromEntries(res.headers.entries()) };
+    const out = { status: res.status, body: Buffer.from(await res.arrayBuffer()), headers: new HttpHeaders(Object.fromEntries(res.headers.entries())) };
     ctrl.abort();
     return out;
   }
