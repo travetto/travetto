@@ -4,9 +4,7 @@ import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResul
 import { HttpFilter, HttpContext, HttpChainedFilter, HttpChainedContext } from '../types.ts';
 import { HttpResponse } from '../types/response.ts';
 import { HttpInterceptor } from '../types/interceptor.ts';
-
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
-import { HttpHeaders } from '../types/headers.ts';
 
 /**
  * Endpoint specific utilities
@@ -84,13 +82,14 @@ export class EndpointUtil {
       return param.extract(ctx, param);
     }
 
+    const name = param.name!;
     switch (param.location) {
-      case 'path': return ctx.req.params[param.name!];
-      case 'header': return field.array ? ctx.req.headers.getList(param.name!) : ctx.req.headers.get(param.name!);
+      case 'path': return ctx.req.params[name];
+      case 'header': return field.array ? ctx.req.headers.getList(name) : ctx.req.headers.get(name);
       case 'body': return ctx.req.body;
       case 'query': {
         const q = ctx.req.getExpandedQuery();
-        return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[param.name!]);
+        return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[name]);
       }
     }
   }
