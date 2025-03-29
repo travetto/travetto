@@ -8,14 +8,14 @@ import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.t
 
 import { WebConfig } from '../application/config.ts';
 import { EndpointConfig } from '../registry/types.ts';
-import { Cookie } from '../types/cookie.ts';
+import { Cookie, CookieSetOptions } from '../types/cookie.ts';
 import { CookieJar } from '../util/cookie.ts';
 
 /**
  * Web cookie configuration
  */
 @Config('web.cookie')
-export class CookieConfig {
+export class CookieConfig implements CookieSetOptions {
   /**
    * Support reading/sending cookies
    */

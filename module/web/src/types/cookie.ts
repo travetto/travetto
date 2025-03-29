@@ -14,3 +14,6 @@ export type Cookie = {
   httpOnly?: boolean;
   partitioned?: boolean;
 };
+
+
+export type CookieSetOptions = Omit<Cookie, 'name' | 'value'>;
