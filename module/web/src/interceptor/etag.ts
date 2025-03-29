@@ -60,7 +60,11 @@ export class EtagInterceptor implements HttpInterceptor {
 
       if (
         (req.method === 'GET' || req.method === 'HEAD') &&
-        fresh(req.headers.toSingle(), { etag: tag, 'last-modified': lastModified! })
+        fresh({
+          'if-modified-since': req.headers.get('if-modified-since')!,
+          'if-none-match': req.headers.get('if-none-match')!,
+          'cache-control': req.headers.get('cache-control')!,
+        }, { etag: tag, 'last-modified': lastModified! })
       ) {
         return HttpResponse.fromEmpty().with({ statusCode: 304 });
       }

@@ -12,6 +12,7 @@ import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './serv
 import { WebServerHandle } from '../../src/types/server.ts';
 import { CoreWebServerSupport } from './server-support/core.ts';
 import { NetUtil } from '../../src/util/net.ts';
+import { HttpHeaders } from '@travetto/web';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
@@ -97,7 +98,7 @@ export abstract class BaseWebSuite {
 
     method = castTo<HttpRequest['method']>(method.toUpperCase());
 
-    cfg.headers ??= {};
+    const headers = cfg.headers instanceof HttpHeaders ? cfg.headers : HttpHeaders.fromIncomingHeaders(cfg.headers ?? {});
 
     let buffer: Buffer | undefined;
     const body = cfg.body;
@@ -110,12 +111,13 @@ export abstract class BaseWebSuite {
         buffer = await toBuffer(castTo(body.stream));
       } else {
         buffer = Buffer.from(JSON.stringify(body));
-        cfg.headers['Content-Type'] = cfg.headers['Content-Type'] ?? 'application/json';
+        headers.set('Content-Type', headers.get('Content-Type') ?? 'application/json');
       }
     }
 
     cfg.body = body;
     cfg.query = BindUtil.flattenPaths(cfg.query ?? {});
+    cfg.headers = headers;
 
     const resp = await this.#support.execute(method, path, { ...cfg, body: buffer });
     const out = await this.getOutput<T>(resp.body);

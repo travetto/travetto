@@ -54,6 +54,19 @@ const baseContext: lambda.Context = {
   succeed(...args: unknown[]) { }
 };
 
+function toSingle(headers: HttpHeaders): Record<string, string> {
+  const out = Object.fromEntries(headers.entries());
+  const cookies = headers.getSetCookie();
+  if (cookies.length) {
+    out['set-cookie'] = cookies.join('; ');
+  }
+  return out;
+}
+
+function toMulti(headers: HttpHeaders): Record<string, string[]> {
+  return Object.fromEntries([...headers.keys()].map(k => [k, headers.getList(k)!]));
+}
+
 /**
  * AWS Lambda support for invoking directly
  */
@@ -82,27 +95,21 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
       path,
       httpMethod: method,
       queryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : v?.toString()])),
-      headers: httpHeaders.toSingle(),
+      headers: toSingle(httpHeaders),
       isBase64Encoded: true,
       body: body ? body.toString('base64') : body ?? null,
       multiValueQueryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v : [v]])),
-      multiValueHeaders: httpHeaders.toMulti(),
+      multiValueHeaders: toMulti(httpHeaders),
       requestContext: { ...baseLambdaContext, path, httpMethod: method },
     }, { ...baseContext }));
 
     let resBody: Buffer = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
 
     const resHeaders = new HttpHeaders();
-    for (const [k, v] of Object.entries({
-      ...(res.headers ?? {}),
-      ...(res.multiValueHeaders ?? {})
-    })) {
-      if (!Array.isArray(v)) {
-        resHeaders.set(k, typeof v === 'string' ? v : `${v}`);
-      } else if (v && k.toLowerCase() === 'set-cookie') {
-        for (const i of v) {
-          resHeaders.append(k, typeof i === 'string' ? i : `${i}`);
-        }
+    for (const [k, v] of Object.entries(res.multiValueHeaders ?? {})) {
+      resHeaders.set(k, typeof v[0] === 'string' ? v[0] : `${v[0]}`);
+      for (const i of v.slice(1)) {
+        resHeaders.append(k, typeof i === 'string' ? i : `${i}`);
       }
     }
 

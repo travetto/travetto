@@ -38,26 +38,9 @@ export class HttpHeaders extends Headers {
     }
   }
 
-  applyTo(setHeader: (k: string, v: string | string[]) => void): void {
+  applyTo(set: (k: string, v: string | string[]) => void): void {
     for (const [k, v] of this.entries()) {
-      setHeader(k, v);
+      set(k, k === 'set-cookie' ? this.getSetCookie() : v);
     }
-    const cookies = this.getSetCookie();
-    if (cookies.length) {
-      setHeader('set-cookie', this.getSetCookie());
-    }
-  }
-
-  toMulti(): Record<string, string[]> {
-    return Object.fromEntries([...this.keys()].map(k => [k, this.getList(k) ?? []]));
-  }
-
-  toSingle(): Record<string, string> {
-    const out = Object.fromEntries(this.entries());
-    const cookies = this.getSetCookie();
-    if (cookies.length) {
-      out['set-cookie'] = cookies.join('; ');
-    }
-    return out;
   }
 }
