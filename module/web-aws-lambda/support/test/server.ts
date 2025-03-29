@@ -76,17 +76,23 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
   async execute(method: HttpRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {
     const httpHeaders = new HttpHeaders(headers);
     const queryEntries = Object.entries(query ?? {});
+    const singleHeaders: Record<string, string> = {};
+    const multiHeaders: Record<string, string[]> = {};
+    httpHeaders.forEach((v, k) => {
+      singleHeaders[k] = Array.isArray(v) ? v.join('; ') : v;
+      multiHeaders[k] = httpHeaders.getList(k) ?? [];
+    });
 
     const res = (await this.#lambda.handle({
       ...baseLambdaEvent,
       path,
       httpMethod: method,
       queryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : v?.toString()])),
-      headers: httpHeaders.toSingle(),
+      headers: singleHeaders,
       isBase64Encoded: true,
       body: body ? body.toString('base64') : body ?? null,
       multiValueQueryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v : [v]])),
-      multiValueHeaders: httpHeaders.toMulti(),
+      multiValueHeaders: multiHeaders,
       requestContext: { ...baseLambdaContext, path, httpMethod: method },
     }, { ...baseContext }));
 
@@ -94,7 +100,7 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
 
     const resHeaders = new HttpHeaders({ ...res.headers ?? {}, ...res.multiValueHeaders ?? {} });
 
-    switch (resHeaders.getFirst('Content-Encoding')) {
+    switch (resHeaders.getList('Content-Encoding')?.[0]) {
       case 'gzip': resBody = zlib.gunzipSync(resBody); break;
       case 'deflate': resBody = zlib.inflateSync(resBody); break;
       case 'br': resBody = zlib.brotliDecompressSync(resBody); break;

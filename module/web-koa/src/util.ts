@@ -24,7 +24,7 @@ export class KoaWebServerUtil {
       port: ctx.req.socket.localPort,
       respond(value): unknown {
         ctx.response.status = value.statusCode ?? 200;
-        value.headers.applyTo(ctx.res.setHeader.bind(ctx.res));
+        value.headers.forEach((v, k) => ctx.res.setHeader(k, v));
         return ctx.response.body = value.output;
       }
     });

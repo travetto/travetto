@@ -1,8 +1,8 @@
 type Prim = number | boolean | string;
-export type HttpHeadersInit = Headers | Record<string, undefined | null | Prim | Prim[]>;
+export type HttpHeadersInit = Headers | Record<string, undefined | null | Prim | Prim[]> | string[][];
 
 /**
- * Tools for handling header objects
+ * Simple Headers wrapper with additional logic for common patterns
  */
 export class HttpHeaders extends Headers {
 
@@ -25,47 +25,23 @@ export class HttpHeaders extends Headers {
     }
   }
 
-  setFunctionalHeaders(...configs: (Record<string, string | (() => string)> | undefined)[]): this {
-    for (const config of configs) {
-      for (const [k, v] of Object.entries(config ?? {})) {
-        this.set(k, typeof v === 'function' ? v() : v);
-      }
-    }
-    return this;
-  }
-
+  /**
+   * Get a header value as a list, breaking on commas except for cookies
+   */
   getList(key: string): string[] | undefined {
     const v = this.get(key);
     if (!v) {
       return;
+    } else if (v.toLowerCase() === 'set-cookie') {
+      return this.getSetCookie();
     }
     return v.split(key === 'cookie' ? /\s{0,3};\s{0,3}/ : /\s{0,3},\s{0,3}/);
   }
 
-  getFirst(key: string): string | undefined {
-    return this.getList(key)?.[0];
-  }
-
-  toSingle(): Record<string, string> {
-    const out = Object.fromEntries(this.entries());
-    const cookies = this.getSetCookie();
-    if (cookies.length) {
-      out['set-cookie'] = cookies.join('; ');
-    }
-    return out;
-  }
-
-  toMulti(): Record<string, string[]> {
-    return Object.fromEntries([...this.keys()].map(k => [k, this.getList(k)!]));
-  }
-
-  applyTo(set: (k: string, v: string | string[]) => void): void {
+  // @ts-expect-error
+  override forEach(set: (v: string | string[], k: string) => void): void {
     for (const [k, v] of this.entries()) {
-      set(k, k === 'set-cookie' ? this.getSetCookie() : v);
+      set(k === 'set-cookie' ? this.getSetCookie() : v, k);
     }
-  }
-
-  addCookie(value: string): void {
-    this.append('set-cookie', value);
   }
 }

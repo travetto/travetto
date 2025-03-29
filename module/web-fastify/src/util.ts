@@ -24,7 +24,7 @@ export class FastifyWebServerUtil {
       port: req.raw.socket.localPort,
       remoteIp: req.raw.socket.remoteAddress,
       respond(value): unknown {
-        value.headers.applyTo(reply.header.bind(reply));
+        value.headers.forEach((v, k) => reply.header(k, v));
         return reply
           .status(value.statusCode ?? 200)
           .send(value.output);

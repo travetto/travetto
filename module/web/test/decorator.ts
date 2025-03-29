@@ -2,10 +2,9 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { Class, TimeUtil } from '@travetto/runtime';
+import { TimeUtil } from '@travetto/runtime';
 
 import { EndpointConfig } from '../src/registry/types.ts';
-import { ReturnValueConfig, ReturnValueInterceptor } from '../src/interceptor/return-value.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Patch } from '../src/decorator/endpoint.ts';
@@ -33,11 +32,7 @@ export class ConfigureTest {
   }
 
   getHeaders(ep: EndpointConfig): HttpHeaders {
-    const configs = (ep.interceptorConfigs ?? [])
-      .filter((x): x is [Class, ReturnValueConfig] => x[0] === ReturnValueInterceptor)
-      .map(x => x[1]);
-
-    return new HttpHeaders().setFunctionalHeaders(...configs.map(x => x.headers));
+    return ControllerRegistry.resolveAddedHeaders(ep);
   }
 
   @Test()

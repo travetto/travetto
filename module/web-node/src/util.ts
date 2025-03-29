@@ -33,7 +33,7 @@ export class NodeWebServerUtil {
       port: req.socket.localPort,
       async respond(value): Promise<void> {
         res.statusCode = value.statusCode ?? 200;
-        value.headers.applyTo(res.setHeader.bind(res));
+        value.headers.forEach((v, k) => res.setHeader(k, v));
         if (isReadable(value.output)) {
           await pipeline(value.output, res);
         } else {

@@ -1,12 +1,12 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
+import { castTo } from '@travetto/runtime';
 
+import { CookieJar } from '../src/util/cookie.ts';
 import { WebCommonUtil } from '../src/util/common.ts';
 import { HttpRequest } from '../src/types/request.ts';
 import { HttpResponse } from '../src/types/response.ts';
-import { castTo } from '@travetto/runtime';
-import { CookieJar } from '@travetto/web';
 
 const mockRequest = (res: HttpResponse): HttpRequest => new HttpRequest(castTo({ headers: res.headers }));
 

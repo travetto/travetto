@@ -29,7 +29,9 @@ export class ReturnValueInterceptor implements HttpInterceptor<ReturnValueConfig
     const res = await ctx.next();
     const method = ctx.req.method.toUpperCase();
 
-    res.headers.setFunctionalHeaders(ctx.config.headers);
+    for (const [k, v] of Object.entries(ctx.config.headers ?? {})) {
+      res.headers.set(k, typeof v === 'function' ? v() : v);
+    }
 
     return res
       .ensureContentLength()

@@ -30,7 +30,7 @@ export class ExpressWebServerUtil {
       body: req.body,
       async respond(value): Promise<void> {
         res.status(value.statusCode ?? 200);
-        value.headers.applyTo(res.setHeader.bind(res));
+        value.headers.forEach((v, k) => res.setHeader(k, v));
         if (isReadable(value.output)) {
           await pipeline(value.output, res, { end: false });
           res.end();

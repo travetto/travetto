@@ -5,8 +5,7 @@ import type {
 } from 'openapi3-ts/oas31';
 
 import {
-  EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor,
-  ControllerRegistry, ReturnValueConfig, ReturnValueInterceptor, HttpHeaders
+  EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, ControllerRegistry
 } from '@travetto/web';
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
@@ -48,13 +47,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Build response object
    */
   #getHeaderValue(ep: EndpointConfig, header: string): string | undefined | null {
-    const classConfig = ControllerRegistry.get(ep.class);
-
-    const configs = [...classConfig.interceptorConfigs ?? [], ...ep.interceptorConfigs ?? []].filter(
-      (x): x is [Class, ReturnValueConfig] => x[0] instanceof ReturnValueInterceptor
-    ).map(x => x[1].headers ?? {});
-
-    return new HttpHeaders().setFunctionalHeaders(...configs).get(header);
+    return ControllerRegistry.resolveAddedHeaders(ep).get(header);
   }
 
   /**
