@@ -7,9 +7,10 @@ export type HttpHeadersInit = Headers | Record<string, undefined | null | Prim |
 export class HttpHeaders extends Headers {
 
   constructor(o?: HttpHeadersInit) {
-    super(o instanceof Headers ? o : undefined);
+    const passed = (Array.isArray(o) || (o instanceof Headers));
+    super(passed ? o : undefined);
 
-    if (o && !(o instanceof Headers)) {
+    if (o && !passed) {
       for (const [k, v] of Object.entries(o)) {
         if (v !== undefined && v !== null) {
           if (Array.isArray(v)) {
