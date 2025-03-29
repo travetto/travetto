@@ -1,3 +1,4 @@
+import { IncomingHttpHeaders } from 'node:http';
 import { Readable } from 'node:stream';
 
 import { Any, AppError, ByteRange } from '@travetto/runtime';
@@ -5,10 +6,9 @@ import { BindUtil } from '@travetto/schema';
 
 import { HttpMetadataConfig } from './common.ts';
 import { MimeUtil } from '../util/mime.ts';
-import { GetOption } from 'cookies';
 import { HttpHeaderMap, HttpHeaders } from './headers.ts';
 import { HttpResponse } from './response.ts';
-import { IncomingHttpHeaders } from 'node:http';
+import { CookieReadOptions } from './cookie.ts';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
@@ -27,7 +27,7 @@ type RequestInit = {
   body?: unknown;
   inputStream?: Readable;
   remoteIp?: string;
-  getCookie?: (key: string, opts: GetOption) => string | undefined;
+  getCookie?: (key: string, opts: CookieReadOptions) => string | undefined;
 };
 
 export interface HttpRequestInternal {
@@ -107,7 +107,7 @@ export class HttpRequest {
   /**
    * Read value from request
    */
-  readMetadata(this: HttpRequest, cfg: HttpMetadataConfig, opts?: GetOption): string | undefined {
+  readMetadata(this: HttpRequest, cfg: HttpMetadataConfig, opts?: CookieReadOptions): string | undefined {
     let res = (cfg.mode === 'cookie' || !cfg.mode) ?
       this.getCookie(cfg.cookie, opts) :
       this.headers.get(cfg.header);
@@ -123,7 +123,7 @@ export class HttpRequest {
     return this.#internal;
   }
 
-  getCookie(key: string, opts?: GetOption): string | undefined {
+  getCookie(key: string, opts?: CookieReadOptions): string | undefined {
     throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
   }
 }

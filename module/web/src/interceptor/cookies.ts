@@ -1,15 +1,15 @@
-import cookies from 'cookies';
-
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
-import { castTo } from '@travetto/runtime';
 
 import { HttpChainedContext } from '../types.ts';
-import { WebConfig } from '../application/config.ts';
-import { EndpointConfig } from '../registry/types.ts';
 import { HttpResponse } from '../types/response.ts';
 import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+
+import { WebConfig } from '../application/config.ts';
+import { EndpointConfig } from '../registry/types.ts';
+import { Cookie } from '../types/cookie.ts';
+import { CookieJar } from '../util/cookie.ts';
 
 /**
  * Web cookie configuration
@@ -31,7 +31,7 @@ export class CookieConfig {
   /**
    * Enforce same site policy
    */
-  sameSite: cookies.SetOption['sameSite'] | 'lax' = 'lax';
+  sameSite: Cookie['sameSite'] = 'lax';
   /**
    * The signing keys
    */
@@ -72,16 +72,12 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
   }
 
   async filter({ req, config, next }: HttpChainedContext<CookieConfig>): Promise<HttpResponse> {
-    const reqStore = new cookies(castTo(req), castTo({}), this.config);
-    req.getCookie = (k, o): string | undefined => reqStore.get(k, { ...this.config, ...o });
+    const jar = new CookieJar(req.headers.getList('cookie') ?? [], config);
+    req.getCookie = jar.get.bind(jar);
 
     const res = await next();
-
-    // TODO: Fix cookie storage
-    const resStore = new cookies(castTo({}), castTo(res), config);
-    for (const [k, { value: v, options: o }] of Object.entries(res.getCookies())) {
-      resStore.set(k, v, o);
-    }
+    for (const c of res.getCookies()) { jar.set(c); }
+    res.headers.set('Set-Cookie', jar.export());
     return res;
   }
 }

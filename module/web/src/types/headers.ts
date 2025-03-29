@@ -43,10 +43,15 @@ export class HttpHeaders {
       return;
     }
     const res = this.get(key)!;
-    if (key.toLowerCase() === 'set-cookie') {
-      return res.split(/\s{1,3};\s{1,3}/);
+    if (Array.isArray(res)) {
+      return res;
+    }
+
+    const lk = key.toLowerCase();
+    if (lk === 'cookie') {
+      return res.split(/\s{0,3};\s{0,3}/);
     } else {
-      return res.split(/\s{1,3},\s{1,3}/);
+      return res.split(/\s{0,3},\s{0,3}/);
     }
   }
 
@@ -63,9 +68,17 @@ export class HttpHeaders {
     const fk = this.#headerNames[lk] ??= key;
     let out = typeof value === 'function' ? value() : value;
     if (Array.isArray(out)) {
-      out = out.join(lk === 'set-cookie' ? '; ' : ', ');
+      if (!out.length) {
+        out = undefined!;
+      } else if (lk !== 'set-cookie') {
+        out = out.join(', ');
+      }
     }
-    this.#headers[fk] = castTo(out);
+    if (out) {
+      this.#headers[fk] = castTo(out);
+    } else {
+      this.delete(fk);
+    }
   }
 
   append(key: string, value: string): void {

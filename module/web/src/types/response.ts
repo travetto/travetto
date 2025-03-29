@@ -1,13 +1,11 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import { Readable } from 'node:stream';
 import { isArrayBuffer } from 'node:util/types';
-
-import { SetOption } from 'cookies';
 
 import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
 import { HttpMetadataConfig } from './common';
 import { HttpHeaders, HttpHeaderMap } from './headers';
+import { Cookie } from './cookie';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -40,7 +38,7 @@ type PayloadInput<S> = {
   contentType?: string;
   defaultContentType?: string;
   headers?: HttpHeaderMap | HttpHeaders;
-  cookies?: Record<string, { value: string | undefined, options: SetOption }>;
+  cookies?: Record<string, Cookie>;
 };
 
 /**
@@ -191,7 +189,7 @@ export class HttpResponse<S = unknown> {
     }
   }
 
-  #cookies: Record<string, { value: string | undefined, options: SetOption }> = {};
+  #cookies: Record<string, Cookie> = {};
   #defaultContentType: string;
 
   statusCode?: number;
@@ -259,26 +257,25 @@ export class HttpResponse<S = unknown> {
     return key in this.#cookies;
   }
 
-  setCookie(key: string, value: string | undefined, opts?: SetOption): void {
-    this.#cookies[key] = {
-      value, options: {
-        ...opts,
-        maxAge: (value !== undefined) ? undefined : -1,
-      }
+  setCookie(cookie: Cookie): void {
+    this.#cookies[cookie.name] = {
+      maxAge: (cookie.value !== undefined) ? undefined : -1,
+      ...cookie,
     };
   }
 
-  getCookies(): Record<string, ({ value: string | undefined, options: SetOption })> {
-    return Object.freeze(this.#cookies!);
+  getCookies(): Cookie[] {
+    return Object.values(this.#cookies);
   }
-
 
   /**
    * Write value to response
    */
-  writeMetadata(cfg: HttpMetadataConfig, output: string | undefined, opts?: SetOption): this {
+  writeMetadata(cfg: HttpMetadataConfig, output: string | undefined, opts?: Omit<Cookie, 'name' | 'value'>): this {
     if (cfg.mode === 'cookie' || !cfg.mode) {
-      this.setCookie(cfg.cookie, output, {
+      this.setCookie({
+        name: cfg.cookie,
+        value: output,
         ...opts,
         maxAge: (output !== undefined) ? undefined : -1,
       });
