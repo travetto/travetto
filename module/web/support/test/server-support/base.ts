@@ -1,19 +1,17 @@
-import { IncomingHttpHeaders } from 'node:http';
-
 import type { HttpRequest } from '../../../src/types/request.ts';
-import type { HttpHeaders } from '../../../src/types/headers.ts';
 import type { WebServerHandle } from '../../../src/types/server.ts';
+import { HttpHeadersInit } from '../../../src/util/headers.ts';
 
 export type MakeRequestConfig<T> = {
   query?: Record<string, unknown>;
   body?: T;
-  headers?: IncomingHttpHeaders | HttpHeaders;
+  headers?: HttpHeadersInit;
 };
 
 export type MakeRequestResponse<T> = {
   status: number;
   body: T;
-  headers: HttpHeaders;
+  headers: Headers;
 };
 
 export interface WebServerSupport {

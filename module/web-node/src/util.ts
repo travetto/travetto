@@ -2,7 +2,7 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
 
-import { HttpRequest } from '@travetto/web';
+import { HttpHeaderUtil, HttpRequest } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -33,7 +33,7 @@ export class NodeWebServerUtil {
       port: req.socket.localPort,
       async respond(value): Promise<void> {
         res.statusCode = value.statusCode ?? 200;
-        value.headers.applyTo(res.setHeader.bind(res));
+        HttpHeaderUtil.applyTo(value.headers, res.setHeader.bind(res));
         if (isReadable(value.output)) {
           await pipeline(value.output, res);
         } else {

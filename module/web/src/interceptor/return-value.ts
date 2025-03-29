@@ -3,12 +3,11 @@ import { Inject, Injectable } from '@travetto/di';
 import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 import { HttpChainedContext } from '../types.ts';
 import { HttpResponse } from '../types/response.ts';
-import { HttpHeaders } from '../types/headers.ts';
 
 @Injectable()
 export class ReturnValueConfig {
 
-  static setHeaders(headers: HttpHeaders, config: ReturnValueConfig): typeof headers {
+  static setHeaders(headers: Headers, config: ReturnValueConfig): typeof headers {
     for (const [k, v] of Object.entries(config.headers ?? {})) {
       headers.set(k, typeof v === 'function' ? v() : v);
     }

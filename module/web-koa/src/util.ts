@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpRequest } from '@travetto/web';
+import { HttpHeaderUtil, HttpRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -24,7 +24,7 @@ export class KoaWebServerUtil {
       port: ctx.req.socket.localPort,
       respond(value): unknown {
         ctx.response.status = value.statusCode ?? 200;
-        value.headers.applyTo(ctx.res.setHeader.bind(ctx.res));
+        HttpHeaderUtil.applyTo(value.headers, ctx.res.setHeader.bind(ctx.res));
         return ctx.response.body = value.output;
       }
     });

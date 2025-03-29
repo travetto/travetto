@@ -127,8 +127,7 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
-    const cookie = res.headers.get('set-cookie');
-    assert(cookie === undefined);
+    assert(res.headers.getSetCookie().length === 0);
   }
 
   @Test()
@@ -177,8 +176,7 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     const res = await this.request<{ body: number }>('put', '/test/session/body', { body: payload });
-    const sessionId = res.headers.get(key);
-    assert(sessionId === undefined);
+    assert(!res.headers.has(key));
   }
 
   @Test()
@@ -250,16 +248,16 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.status === 200);
     assert(res.body.payload === payload);
-    assert(res.headers.get(key) === undefined);
+    assert(!res.headers.has(key));
     await timers.setTimeout(350);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     assert(res.body.payload === payload);
-    assert(res.headers.get(key) === undefined);
+    assert(!res.headers.has(key));
     await timers.setTimeout(350);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
-    assert(res.headers.get(key) !== undefined);
+    assert(res.headers.has(key));
     assert(res.body.payload === payload);
     assert(res.body.age === 3);
   }

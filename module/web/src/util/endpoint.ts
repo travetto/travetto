@@ -2,11 +2,11 @@ import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { HttpFilter, HttpContext, HttpChainedFilter, HttpChainedContext } from '../types.ts';
-
 import { HttpResponse } from '../types/response.ts';
 import { HttpInterceptor } from '../types/interceptor.ts';
 
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
+import { HttpHeaderUtil } from './headers.ts';
 
 /**
  * Endpoint specific utilities
@@ -86,7 +86,7 @@ export class EndpointUtil {
 
     switch (param.location) {
       case 'path': return ctx.req.params[param.name!];
-      case 'header': return field.array ? ctx.req.headers.getList(param.name!) : ctx.req.headers.get(param.name!);
+      case 'header': return field.array ? HttpHeaderUtil.getList(ctx.req.headers, param.name!) : ctx.req.headers.get(param.name!);
       case 'body': return ctx.req.body;
       case 'query': {
         const q = ctx.req.getExpandedQuery();

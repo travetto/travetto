@@ -5,17 +5,16 @@ import { BindUtil } from '@travetto/schema';
 
 import { HttpMetadataConfig } from './common.ts';
 import { MimeUtil } from '../util/mime.ts';
-import { HttpHeaders } from './headers.ts';
 import { HttpResponse } from './response.ts';
 import { CookieReadOptions } from './cookie.ts';
-import { IncomingHttpHeaders } from 'node:http';
+import { HttpHeadersInit, HttpHeaderUtil } from '../util/headers.ts';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
 type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
 type RequestInit = {
-  headers: HttpHeaders | IncomingHttpHeaders;
+  headers: HttpHeadersInit;
   method: string;
   protocol: 'http' | 'https';
   port?: number;
@@ -42,7 +41,7 @@ export class HttpRequest {
   #queryExpanded?: Record<string, unknown>;
   #internal: HttpRequestInternal = {};
 
-  readonly headers: HttpHeaders;
+  readonly headers: Headers;
   readonly path: string;
   readonly port: number;
   readonly method: string;
@@ -55,7 +54,7 @@ export class HttpRequest {
 
   constructor(init: RequestInit) {
     Object.assign(this, init);
-    this.headers = HttpHeaders.fromInput(init.headers);
+    this.headers = HttpHeaderUtil.fromInput(init.headers);
   }
 
   /**
@@ -111,7 +110,6 @@ export class HttpRequest {
       this.headers.get(cfg.header);
 
     if (res && cfg.mode === 'header' && cfg.headerPrefix) {
-      console.log('Rs value', typeof res, res);
       res = res.split(cfg.headerPrefix)[1].trim();
     }
 

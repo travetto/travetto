@@ -5,7 +5,6 @@ import { RootRegistry } from '@travetto/registry';
 import { Class, TimeUtil } from '@travetto/runtime';
 
 import { EndpointConfig } from '../src/registry/types.ts';
-import { HttpHeaders } from '../src/types/headers.ts';
 import { ReturnValueConfig, ReturnValueInterceptor } from '../src/interceptor/return-value.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { Controller } from '../src/decorator/controller.ts';
@@ -32,11 +31,11 @@ export class ConfigureTest {
     await RootRegistry.init();
   }
 
-  getHeaders(ep: EndpointConfig): HttpHeaders {
+  getHeaders(ep: EndpointConfig): Headers {
     const configs = (ep.interceptorConfigs ?? [])
       .filter((x): x is [Class, ReturnValueConfig] => x[0] === ReturnValueInterceptor)
       .map(x => x[1]);
-    return new HttpHeaders().setAll(new ReturnValueInterceptor().finalizeConfig({}, configs).headers ?? {});
+    return ReturnValueConfig.setHeaders(new Headers(), new ReturnValueInterceptor().finalizeConfig({}, configs).headers ?? {});
   }
 
   @Test()
@@ -65,7 +64,6 @@ export class ConfigureTest {
   @Test()
   async setMultipleHeaderS() {
     const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[1]);
-    console.log(headers.toObject());
     assert(headers.get('cache-control'));
     assert(headers.get('expires'));
     assert(headers.get('content-type'));

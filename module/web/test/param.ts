@@ -11,7 +11,6 @@ import { Controller } from '../src/decorator/controller.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { EndpointConfig, HttpMethodOrAll } from '../src/registry/types.ts';
 import { EndpointUtil } from '../src/util/endpoint.ts';
-import { HttpHeaders } from '../src/types/headers.ts';
 
 class User {
   name: string;
@@ -139,7 +138,7 @@ export class EndpointParameterTest {
 
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
-        headers: new class extends HttpHeaders {
+        headers: new class extends Headers {
           get = (key: string) => key;
         }()
       })
@@ -147,7 +146,7 @@ export class EndpointParameterTest {
 
     await assert.rejects(() =>
       EndpointParameterTest.extract(ep, {
-        headers: new class extends HttpHeaders {
+        headers: new class extends Headers {
           get = (key: string) => undefined!;
         }()
       })
