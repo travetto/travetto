@@ -34,9 +34,16 @@ export class ConnectResponse {
   get statusCode(): number | undefined {
     return this.#res.statusCode;
   }
+
+  set statusCode(val: number) {
+    this.#res.statusCode = val;
+  }
+
   writeHead(statusCode: unknown, statusMessage?: unknown, headers?: unknown): this {
     this.#res.statusCode = castTo(statusCode);
-    this.#res.headers.setAll(castTo(headers));
+    for (const [k, v] of Object.entries(headers ?? {})) {
+      this.#res.headers.set(k, v);
+    }
     this.#sent = true;
     return this;
   }
@@ -51,7 +58,7 @@ export class ConnectResponse {
     throw new Error('Method not implemented.');
   }
   getHeaderNames(): string[] {
-    return this.#res.headers.getNames();
+    throw new Error('Method not implemented.');
   }
   hasHeader(name: string): boolean {
     return this.#res.headers.has(name);

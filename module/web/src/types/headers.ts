@@ -1,37 +1,25 @@
 import { castTo } from '@travetto/runtime';
 import { IncomingHttpHeaders } from 'node:http';
 
-type HeaderValue = string | string[] | readonly string[];
-export type HttpHeaderMap = Record<string, HeaderValue | (() => HeaderValue)>;
-
 /**
- * Http Payload as a simple object
+ * Http Headers
  */
-export class HttpHeaders {
+export class HttpHeaders extends Headers {
 
-  #headerNames: Record<string, string> = {};
-  #headers: Record<string, string> = {};
-
-  constructor(headers?: IncomingHttpHeaders | HttpHeaderMap, readonly = false) {
-    if (headers) {
-      this.setAll(headers);
-      if (readonly) {
-        Object.freeze(this.#headers);
-        Object.freeze(this.#headerNames);
+  static fromIncomingHeaders(o: IncomingHttpHeaders): HttpHeaders {
+    const v = new HttpHeaders(castTo(o));
+    const c = o['set-cookie'];
+    if (Array.isArray(c)) {
+      v.set('set-cookie', '');
+      for (const i of c) {
+        v.append('set-cookie', i);
       }
     }
+    return v;
   }
 
-  getNames(): string[] {
-    return [...Object.keys(this.#headers ?? {})];
-  }
-
-  has(key: string): boolean {
-    return key.toLowerCase() in this.#headerNames;
-  }
-
-  get(key: string): string | undefined {
-    return this.#headers![this.#headerNames[key.toLowerCase()]];
+  constructor(headers?: Record<string, string> | Headers) {
+    super(headers instanceof Headers ? headers : headers);
   }
 
   getFirst(key: string): string | undefined {
@@ -42,75 +30,34 @@ export class HttpHeaders {
     if (!this.has(key)) {
       return;
     }
-    const res = this.get(key)!;
-    if (Array.isArray(res)) {
-      return res;
-    }
-
     const lk = key.toLowerCase();
     if (lk === 'set-cookie') {
-      return [res];
-    } else if (lk === 'cookie') {
-      return res.split(/\s{0,3};\s{0,3}/);
+      return this.getSetCookie();
     } else {
-      return res.split(/\s{0,3},\s{0,3}/);
+      return this.get(lk)?.split(lk === 'cookie' ? /\s{0,3};\s{0,3}/ : /\s{0,3},\s{0,3}/);
     }
   }
 
-  toObject(): Record<string, string> {
-    return this.#headers;
-  }
-
-  toMap(): Map<string, string> {
-    return new Map(Object.entries(this.#headers));
-  }
-
-  set(key: string, value: HttpHeaderMap[string]): void {
-    const lk = key.toLowerCase();
-    const fk = this.#headerNames[lk] ??= key;
-    let out = typeof value === 'function' ? value() : value;
-    if (Array.isArray(out)) {
-      if (!out.length) {
-        out = undefined!;
-      } else if (lk !== 'set-cookie') {
-        out = out.join(', ');
-      }
+  applyTo(setHeader: (k: string, v: string | string[]) => void): void {
+    for (const [k, v] of this.entries()) {
+      setHeader(k, v);
     }
-    if (out) {
-      this.#headers[fk] = castTo(out);
-    } else {
-      this.delete(fk);
+    const cookies = this.getSetCookie();
+    if (cookies.length) {
+      setHeader('set-cookie', this.getSetCookie());
     }
   }
 
-  append(key: string, value: string): void {
-    const header = this.getList(key) ?? [];
-    if (!header.includes(value)) {
-      this.set(key, [...header, value]);
-    }
+  toMulti(): Record<string, string[]> {
+    return Object.fromEntries([...this.keys()].map(k => [k, this.getList(k) ?? []]));
   }
 
-  delete(key: string): void {
-    const lk = key.toLowerCase();
-    if (lk in this.#headerNames) {
-      const fk = this.#headerNames[lk];
-      delete this.#headers![fk];
-      delete this.#headerNames[lk];
+  toSingle(): Record<string, string> {
+    const out = Object.fromEntries(this.entries());
+    const cookies = this.getSetCookie();
+    if (cookies.length) {
+      out['set-cookie'] = cookies.join('; ');
     }
-  }
-
-  setAll(o: IncomingHttpHeaders | HttpHeaderMap | HttpHeaders, ifMissing = false): this {
-    if (o instanceof HttpHeaders) {
-      o = o.toObject();
-    }
-    for (const [k, v] of Object.entries(o)) {
-      if (ifMissing && this.has(k)) {
-        continue;
-      }
-      if (v) {
-        this.set(k, v);
-      }
-    }
-    return this;
+    return out;
   }
 }

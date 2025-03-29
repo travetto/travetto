@@ -1,4 +1,3 @@
-import { IncomingHttpHeaders } from 'node:http';
 import { Readable } from 'node:stream';
 
 import { Any, AppError, ByteRange } from '@travetto/runtime';
@@ -6,16 +5,17 @@ import { BindUtil } from '@travetto/schema';
 
 import { HttpMetadataConfig } from './common.ts';
 import { MimeUtil } from '../util/mime.ts';
-import { HttpHeaderMap, HttpHeaders } from './headers.ts';
+import { HttpHeaders } from './headers.ts';
 import { HttpResponse } from './response.ts';
 import { CookieReadOptions } from './cookie.ts';
+import { IncomingHttpHeaders } from 'node:http';
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
 type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
 type RequestInit = {
-  headers: IncomingHttpHeaders | HttpHeaderMap | HttpHeaders;
+  headers: HttpHeaders | IncomingHttpHeaders;
   method: string;
   protocol: 'http' | 'https';
   port?: number;
@@ -55,14 +55,14 @@ export class HttpRequest {
 
   constructor(init: RequestInit) {
     Object.assign(this, init);
-    this.headers = init.headers instanceof HttpHeaders ? init.headers : new HttpHeaders(init.headers);
+    this.headers = init.headers instanceof HttpHeaders ? init.headers : HttpHeaders.fromIncomingHeaders(init.headers);
   }
 
   /**
    * Get the fully parsed content type
    */
   getContentType(this: HttpRequest): MimeType | undefined {
-    return this.#parsedType ??= MimeUtil.parse(this.headers.get('Content-Type'));
+    return this.#parsedType ??= MimeUtil.parse(this.headers.get('Content-Type')!);
   }
 
   /**
@@ -114,7 +114,7 @@ export class HttpRequest {
       res = res.split(cfg.headerPrefix)[1].trim();
     }
 
-    return res;
+    return res!;
   }
 
   getInternal(): HttpRequestInternal {

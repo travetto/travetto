@@ -14,19 +14,19 @@ export class FastifyWebServerUtil {
   static getRequest(req: FastifyRequest, reply: FastifyReply): HttpRequest {
     return new HttpRequest({
       protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
-      method: castTo(req.raw.method),
+      method: req.raw.method!,
       path: req.url,
       query: castTo(req.query),
       params: castTo(req.params),
-      headers: castTo(req.headers),
+      headers: req.headers,
       inputStream: req.raw,
       body: req.body === req.raw ? undefined : req.body,
       port: req.raw.socket.localPort,
       remoteIp: req.raw.socket.remoteAddress,
       respond(value): unknown {
+        value.headers.applyTo(reply.header.bind(reply));
         return reply
           .status(value.statusCode ?? 200)
-          .headers(value.headers.toObject())
           .send(value.output);
       }
     });

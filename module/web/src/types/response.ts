@@ -1,10 +1,11 @@
 import { Readable } from 'node:stream';
 import { isArrayBuffer } from 'node:util/types';
+import type { IncomingHttpHeaders } from 'node:http';
 
 import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
 import { HttpMetadataConfig } from './common';
-import { HttpHeaders, HttpHeaderMap } from './headers';
+import { HttpHeaders } from './headers';
 import { Cookie } from './cookie';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
@@ -37,7 +38,7 @@ type PayloadInput<S> = {
   emptyStatusCode?: number;
   contentType?: string;
   defaultContentType?: string;
-  headers?: HttpHeaderMap | HttpHeaders;
+  headers?: IncomingHttpHeaders | HttpHeaders;
   cookies?: Cookie[];
 };
 
@@ -212,7 +213,7 @@ export class HttpResponse<S = unknown> {
   with(o: Pick<PayloadInput<S>, 'headers' | 'cookies' | 'statusCode'>): this {
     this.statusCode ??= o.statusCode;
     this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
-    this.headers = o.headers instanceof HttpHeaders ? o.headers : new HttpHeaders(o.headers ?? {});
+    this.headers = o.headers instanceof HttpHeaders ? o.headers : HttpHeaders.fromIncomingHeaders(o.headers ?? {});
     return this;
   }
 

@@ -108,7 +108,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
   async testHeaderFirst() {
     const { body: ret } = await this.request('get', '/test/headerFirst', {
       headers: {
-        age: ['1', '2', '3']
+        age: '1, 2, 3'
       }
     });
     assert.deepStrictEqual(ret, { header: '1' });

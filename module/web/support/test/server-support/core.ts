@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 import { DependencyRegistry } from '@travetto/di';
 import { type HttpRequest, CookieConfig, WebConfig, WebSslConfig, WebApplication, HttpHeaders } from '@travetto/web';
 
-import { WebServerSupport, MakeRequestConfig, headerToShape } from './base.ts';
+import { WebServerSupport, MakeRequestConfig } from './base.ts';
 
 /**
  * Support for invoking http requests against the server
@@ -62,7 +62,7 @@ export class CoreWebServerSupport implements WebServerSupport {
 
     const res = await fetch(`${this.url}${path}${q}`, {
       method,
-      headers: headerToShape.single(headers),
+      headers: headers instanceof Headers ? headers : HttpHeaders.fromIncomingHeaders(headers ?? {}),
       body,
       signal: ctrl.signal
     });

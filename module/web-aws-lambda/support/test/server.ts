@@ -4,12 +4,9 @@ import zlib from 'node:zlib';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { HttpRequest, WebServerHandle, CookieConfig, HttpHeaders } from '@travetto/web';
-import { asFull, castTo, Util } from '@travetto/runtime';
+import { asFull, Util } from '@travetto/runtime';
 
-import {
-  WebServerSupport, MakeRequestConfig, MakeRequestResponse,
-  headerToShape as valuesToShape
-} from '@travetto/web/support/test/server-support/base.ts';
+import { WebServerSupport, MakeRequestConfig, MakeRequestResponse, } from '@travetto/web/support/test/server-support/base.ts';
 
 import { AwsLambdaWebApplication } from '../../src/server.ts';
 
@@ -77,26 +74,37 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
   }
 
   async execute(method: HttpRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {
-    const multiValueHeaders = valuesToShape.multi(headers);
+    const httpHeaders = (headers instanceof HttpHeaders ? headers : HttpHeaders.fromIncomingHeaders(headers ?? {}));
+    const queryEntries = Object.entries(query ?? {});
 
     const res = (await this.#lambda.handle({
       ...baseLambdaEvent,
       path,
       httpMethod: method,
-      queryStringParameters: castTo(query ?? {}),
-      headers: valuesToShape.single(headers ?? {}),
+      queryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : v?.toString()])),
+      headers: httpHeaders.toSingle(),
       isBase64Encoded: true,
       body: body ? body.toString('base64') : body ?? null,
-      multiValueQueryStringParameters: valuesToShape.multi(castTo(query ?? {})),
-      multiValueHeaders,
+      multiValueQueryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v : [v]])),
+      multiValueHeaders: httpHeaders.toMulti(),
       requestContext: { ...baseLambdaContext, path, httpMethod: method },
     }, { ...baseContext }));
 
     let resBody: Buffer = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
-    const resHeaders = new HttpHeaders(valuesToShape.multi(castTo({
+
+    const resHeaders = new HttpHeaders();
+    for (const [k, v] of Object.entries({
       ...(res.headers ?? {}),
       ...(res.multiValueHeaders ?? {})
-    })));
+    })) {
+      if (!Array.isArray(v)) {
+        resHeaders.set(k, typeof v === 'string' ? v : `${v}`);
+      } else if (v && k.toLowerCase() === 'set-cookie') {
+        for (const i of v) {
+          resHeaders.append(k, typeof i === 'string' ? i : `${i}`);
+        }
+      }
+    }
 
     const first = resHeaders.getFirst('content-encoding');
 

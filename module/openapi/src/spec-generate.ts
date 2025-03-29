@@ -47,15 +47,14 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Build response object
    */
-  #getHeaderValue(ep: EndpointConfig, header: string): string | undefined {
+  #getHeaderValue(ep: EndpointConfig, header: string): string | undefined | null {
     const classConfig = ControllerRegistry.get(ep.class);
 
     const configs = [...classConfig.interceptorConfigs ?? [], ...ep.interceptorConfigs ?? []].filter(
       (x): x is [Class, ReturnValueConfig] => x[0] instanceof ReturnValueInterceptor
     ).map(x => x[1].headers ?? {});
 
-    const flat = Object.assign({}, ...configs);
-    return new HttpHeaders(flat).get(header);
+    return ReturnValueConfig.setHeaders(new HttpHeaders(), Object.assign({}, ...configs)).get(header);
   }
 
   /**
@@ -248,7 +247,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Standard payload structure
    */
-  #getEndpointBody(body?: EndpointIOType, mime?: string): RequestBodyObject {
+  #getEndpointBody(body?: EndpointIOType, mime?: string | null): RequestBodyObject {
     if (!body) {
       return { content: {}, description: '' };
     } else if (body.type === Readable || body.type === Buffer) {

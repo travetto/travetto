@@ -36,7 +36,7 @@ export class ConfigureTest {
     const configs = (ep.interceptorConfigs ?? [])
       .filter((x): x is [Class, ReturnValueConfig] => x[0] === ReturnValueInterceptor)
       .map(x => x[1]);
-    return new HttpHeaders(new ReturnValueInterceptor().finalizeConfig({}, configs).headers ?? {});
+    return new HttpHeaders().setAll(new ReturnValueInterceptor().finalizeConfig({}, configs).headers ?? {});
   }
 
   @Test()

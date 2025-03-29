@@ -140,9 +140,7 @@ export class EndpointParameterTest {
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
         headers: new class extends HttpHeaders {
-          get(key: string) {
-            return key;
-          }
+          get = (key: string) => key;
         }()
       })
     );
@@ -150,9 +148,7 @@ export class EndpointParameterTest {
     await assert.rejects(() =>
       EndpointParameterTest.extract(ep, {
         headers: new class extends HttpHeaders {
-          get(key: string) {
-            return undefined;
-          }
+          get = (key: string) => undefined!;
         }()
       })
     );

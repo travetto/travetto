@@ -1,11 +1,10 @@
 import { asConstructable, castTo, Class, TimeSpan, TimeUtil } from '@travetto/runtime';
 
-import { HttpHeaderMap } from '../types/headers.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptsInterceptor } from '../interceptor/accepts.ts';
 import { HttpInterceptor } from '../types/interceptor.ts';
-import { ReturnValueInterceptor } from '../interceptor/return-value.ts';
+import { ReturnValueConfig, ReturnValueInterceptor } from '../interceptor/return-value.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: EndpointFunctionDescriptor) {
@@ -32,7 +31,7 @@ export function Undocumented(): EndpointDecorator { return register({ documented
  * Set response headers on success
  * @param headers The response headers to set
  */
-export function SetHeaders(headers: HttpHeaderMap): EndpointDecorator {
+export function SetHeaders(headers: ReturnValueConfig['headers']): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(ReturnValueInterceptor, { headers });
 }
 

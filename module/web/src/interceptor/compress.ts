@@ -70,7 +70,7 @@ export class CompressionInterceptor implements HttpInterceptor {
       return res;
     }
 
-    const accepts = req.headers.getFirst('Accept-encoding');
+    const accepts = req.headers.getFirst('Accept-Encoding');
     const method = new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
       // Bad typings, need to override
       .encoding(...castTo<[string[]]>([supportedEncodings, preferredEncodings]));

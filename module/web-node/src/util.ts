@@ -33,11 +33,12 @@ export class NodeWebServerUtil {
       port: req.socket.localPort,
       async respond(value): Promise<void> {
         res.statusCode = value.statusCode ?? 200;
-        res.setHeaders(value.headers.toMap());
+        value.headers.applyTo(res.setHeader.bind(res));
         if (isReadable(value.output)) {
           await pipeline(value.output, res);
         } else {
-          res.end(value.output);
+          res.write(value.output);
+          res.end();
         }
       }
     });
