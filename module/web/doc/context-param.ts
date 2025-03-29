@@ -1,4 +1,4 @@
-import { CacheControl, ContextParam, Controller, Get, HttpRequest, SetHeaders } from '@travetto/web';
+import { CacheControl, ContextParam, Controller, Get, HttpRequest, HttpResponse } from '@travetto/web';
 
 @Controller('/context')
 class ContextController {
@@ -11,8 +11,11 @@ class ContextController {
    */
   @CacheControl(0)
   @Get('/ip')
-  @SetHeaders({ 'Content-Type': 'application/json+ip' })
   async getIp() {
-    return { ip: this.req.getIp() };
+    return HttpResponse.from({ ip: this.req.getIp() }).with({
+      headers: {
+        'Content-Type': 'application/json+ip'
+      }
+    });
   }
 }
