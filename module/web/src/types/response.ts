@@ -154,13 +154,12 @@ export class HttpResponse<S = unknown> {
    * From Error
    */
   static fromError<T extends ErrorResponse>(error: T): HttpResponse<T> {
-    const output = this.fromJSON(hasToJSON(error) ? error : { message: error.message });
-    return new HttpResponse({
-      ...output,
-      source: error,
+    const output = this.fromJSON(hasToJSON(error) ? error : { message: error.message }).with({
       contentType: 'application/json',
       statusCode: error.status ?? error.statusCode ?? CATEGORY_STATUS[error.category!] ?? 500,
     });
+    output.source = error;
+    return castTo(output);
   }
 
   /**

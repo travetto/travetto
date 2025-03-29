@@ -1,5 +1,7 @@
+import { castTo } from '@travetto/runtime';
+
 type Prim = number | boolean | string;
-export type HttpHeadersInit = Headers | Record<string, undefined | null | Prim | Prim[]> | string[][];
+export type HttpHeadersInit = Headers | Record<string, undefined | null | Prim | Prim[]> | [string, Prim | Prim[]][];
 
 /**
  * Simple Headers wrapper with additional logic for common patterns
@@ -7,20 +9,13 @@ export type HttpHeadersInit = Headers | Record<string, undefined | null | Prim |
 export class HttpHeaders extends Headers {
 
   constructor(o?: HttpHeadersInit) {
-    const passed = (Array.isArray(o) || (o instanceof Headers));
+    const passed = (o instanceof Headers);
     super(passed ? o : undefined);
 
     if (o && !passed) {
-      for (const [k, v] of Object.entries(o)) {
+      for (const [k, v] of (Array.isArray(o) ? o : Object.entries(o))) {
         if (v !== undefined && v !== null) {
-          if (Array.isArray(v)) {
-            this.delete(k);
-            for (const sv of v) {
-              this.append(k, typeof sv === 'string' ? sv : `${sv}`);
-            }
-          } else {
-            this.set(k, typeof v === 'string' ? v : `${v}`);
-          }
+          this.append(k, castTo(v));
         }
       }
     }

@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
-import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInstance, TypedObject, Any } from '@travetto/runtime';
+import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInstance } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
@@ -278,11 +278,11 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     const keyValuePairs = [...classConfig.interceptorConfigs ?? [], ...ep.interceptorConfigs ?? []]
       .filter((x): x is [Class, unknown] => x[0].name.startsWith('ReturnValue'))
       .map(x => (typeof x[1] === 'object' && x[1] && 'headers' in x[1]) ? x[1].headers ?? {} : {})
-      .flatMap((c): [string, string | (() => string)][] | undefined => c ? Object.entries(c) : undefined)
+      .flatMap((c): [string, unknown][] | undefined => c ? Object.entries(c) : undefined)
       .filter((x): x is Exclude<typeof x, undefined> => !!x)
       .map(x => [x[0], typeof x[1] !== 'function' ? x[1] : x[1]()]);
 
-    return new HttpHeaders(keyValuePairs);
+    return new HttpHeaders(castTo(keyValuePairs));
   }
 }
 
