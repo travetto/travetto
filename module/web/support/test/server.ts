@@ -115,12 +115,6 @@ export abstract class WebServerSuite extends BaseWebSuite {
   }
 
   @Test()
-  async testWildcard() {
-    const { body: ret } = await this.request<{ path: string }>('get', '/test/fun/1/2/3/4');
-    assert(ret.path === '1/2/3/4');
-  }
-
-  @Test()
   async testGetIp() {
     const { body: ret } = await this.request<{ ip: string | undefined }>('get', '/test/ip');
     assert(ret.ip === '127.0.0.1' || ret.ip === '::1');
@@ -158,5 +152,11 @@ export abstract class WebServerSuite extends BaseWebSuite {
       assert(!('content-encoding' in headers));
       // assert(status === 406);
     }
+  }
+
+  @Test()
+  async testWildcard() {
+    const { body: ret } = await this.request<{ path: string }>('get', '/test/fun/1/2/3/4');
+    assert(ret.path === '1/2/3/4');
   }
 }
