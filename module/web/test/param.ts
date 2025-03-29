@@ -73,11 +73,6 @@ class ParamController {
   @Post('/alias3')
   async alias3(@QueryParam() nm: string | number = 'green') { }
 
-  /**
-  */
-  // @Post('/wrapper')
-  // async wrapper(@Body() wrapper: Wrapper<Complex>) { }
-
   @Get('/list/todo')
   async listTodo(limit: number, offset: number, categories?: string[]): Promise<unknown[]> {
     return [];
@@ -144,20 +139,23 @@ export class EndpointParameterTest {
 
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
-        headers: Object.assign(new HttpHeaders({}), {
-          getHeader: (key: string) => key
-        })
+        headers: new class extends HttpHeaders {
+          get(key: string) {
+            return key;
+          }
+        }()
       })
     );
 
     await assert.rejects(() =>
       EndpointParameterTest.extract(ep, {
-        headers: Object.assign(new HttpHeaders({}), {
-          getHeader: (key: string) => undefined
-        })
+        headers: new class extends HttpHeaders {
+          get(key: string) {
+            return undefined;
+          }
+        }()
       })
     );
-
   }
 
   @Test()

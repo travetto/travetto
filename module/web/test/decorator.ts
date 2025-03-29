@@ -2,8 +2,11 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { TimeUtil } from '@travetto/runtime';
+import { Class, TimeUtil } from '@travetto/runtime';
 
+import { EndpointConfig } from '../src/registry/types.ts';
+import { HttpHeaders } from '../src/types/headers.ts';
+import { ReturnValueConfig, ReturnValueInterceptor } from '../src/interceptor/return-value.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Patch } from '../src/decorator/endpoint.ts';
@@ -29,33 +32,42 @@ export class ConfigureTest {
     await RootRegistry.init();
   }
 
+  getHeaders(ep: EndpointConfig): HttpHeaders {
+    const configs = (ep.interceptorConfigs ?? [])
+      .filter((x): x is [Class, ReturnValueConfig] => x[0] === ReturnValueInterceptor)
+      .map(x => x[1]);
+    return new HttpHeaders(new ReturnValueInterceptor().finalizeConfig({}, configs).headers ?? {});
+  }
+
   @Test()
   async verifyMaxAge() {
-    const cacher = ControllerRegistry.get(TestController).endpoints[0].headers['cache-control'];
+    const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[0]);
+    const cacher = headers.get('cache-control');
     assert(typeof cacher !== 'function');
     assert(cacher === 'max-age=1');
 
-    const expires = ControllerRegistry.get(TestController).endpoints[0].headers['expires'];
-    assert(typeof expires === 'function');
-    assert(expires() === TimeUtil.fromNow('1s').toUTCString());
+    const expires = headers.get('expires');
+    assert(expires === TimeUtil.fromNow('1s').toUTCString());
   }
 
   @Test()
   async verifyBadMaxAge() {
-    const cacher = ControllerRegistry.get(TestController).endpoints[1].headers['cache-control'];
+    const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[1]);
+    const cacher = headers.get('cache-control');
     assert(typeof cacher !== 'function');
     assert(cacher === 'max-age=0,no-cache');
 
-    const expires = ControllerRegistry.get(TestController).endpoints[1].headers['expires'];
+    const expires = headers.get('expires');
     assert(typeof expires === 'string');
     assert(expires === '-1');
   }
 
   @Test()
   async setMultipleHeaderS() {
-    const { headers } = ControllerRegistry.get(TestController).endpoints[1];
-    assert(headers['cache-control']);
-    assert(headers['expires']);
-    assert(headers['content-type']);
+    const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[1]);
+    console.log(headers.toObject());
+    assert(headers.get('cache-control'));
+    assert(headers.get('expires'));
+    assert(headers.get('content-type'));
   }
 }
