@@ -55,9 +55,10 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
     return config.applies || /opt-in/.test(`${endpoint.fullPath}`);
   }
 
-  filter({ req, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
-    Object.assign(req, { name: config.name });
-    return next();
+  async filter({ req, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
+    const out = await next();
+    out.headers.set('Name', config.name);
+    return out;
   }
 }
 
@@ -113,11 +114,8 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const req: HttpRequest & { name?: string } = new HttpRequest({
-      inputStream: Readable.from(Buffer.from([])),
-    });
-    await endpoint.filter!({ req });
-    return req.name;
+    const res = await endpoint.filter!({ req: new HttpRequest({}) });
+    return res.headers.get('Name') ?? undefined;
   }
 
   @BeforeAll()
