@@ -29,7 +29,9 @@ export class AwsLambdaExpressWebServer extends ExpressWebServer implements AwsLa
 
   override async init(): Promise<this['raw']> {
     const ret = await super.init();
-    this.#handler = castTo(configure({ app: ret, ...this.awsConfig.toJSON() }));
+    this.#handler = castTo(configure({
+      app: (req, res) => ret(Object.assign(req, { body: undefined }), res), ...this.awsConfig.toJSON()
+    }));
     return ret;
   }
 
