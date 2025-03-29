@@ -6,8 +6,7 @@ import type {
 
 import {
   EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor,
-  ControllerRegistry, ReturnValueConfig, ReturnValueInterceptor,
-  HttpHeaderUtil
+  ControllerRegistry, ReturnValueConfig, ReturnValueInterceptor, HttpHeaderUtil
 } from '@travetto/web';
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
