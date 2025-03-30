@@ -4,9 +4,7 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import {
-  EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, ControllerRegistry
-} from '@travetto/web';
+import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, ControllerRegistry, HttpHeaders } from '@travetto/web';
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 
@@ -26,6 +24,11 @@ type GeneratedSpec = {
   };
 };
 
+function getResponseHeader(ep: EndpointConfig, header: string): string | undefined {
+  const config = ControllerRegistry.get(ep.class);
+  return new HttpHeaders({ ...config.responseHeaders, ...ep.responseHeaders }).get(header) ?? undefined;
+}
+
 /**
  * Spec generation utilities
  */
@@ -41,13 +44,6 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
   constructor(config: Partial<ApiSpecConfig> = {}) {
     this.#config = config;
-  }
-
-  /**
-   * Build response object
-   */
-  #getHeaderValue(ep: EndpointConfig, header: string): string | undefined | null {
-    return ControllerRegistry.resolveAddedHeaders(ep).get(header);
   }
 
   /**
@@ -276,8 +272,9 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const complex = field.type && SchemaRegistry.has(field.type);
     if (param.location) {
       if (param.location === 'body') {
+        const acceptsMime = getResponseHeader(ep, 'accepts');
         return {
-          requestBody: field.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(field, this.#getHeaderValue(ep, 'accepts'))
+          requestBody: field.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(field, acceptsMime)
         };
       } else if (complex && (param.location === 'query' || param.location === 'header')) {
         return { parameters: this.#schemaToDotParams(param.location, field, param.prefix ? `${param.prefix}.` : '') };
@@ -313,7 +310,8 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       parameters: []
     };
 
-    const pConf = this.#getEndpointBody(ep.responseType, this.#getHeaderValue(ep, 'content-type'));
+    const contentTypeMime = getResponseHeader(ep, 'content-type');
+    const pConf = this.#getEndpointBody(ep.responseType, contentTypeMime);
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;
 

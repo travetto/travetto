@@ -4,7 +4,6 @@ import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptsInterceptor } from '../interceptor/accepts.ts';
 import { HttpInterceptor } from '../types/interceptor.ts';
-import { ReturnValueConfig, ReturnValueInterceptor } from '../interceptor/return-value.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: EndpointFunctionDescriptor) {
@@ -31,14 +30,14 @@ export function Undocumented(): EndpointDecorator { return register({ documented
  * Set response headers on success
  * @param headers The response headers to set
  */
-export function SetHeaders(headers: ReturnValueConfig['headers']): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(ReturnValueInterceptor, { headers });
+export function SetHeaders(headers: EndpointConfig['responseHeaders']): EndpointDecorator {
+  return register({ responseHeaders: headers });
 }
 
 /**
  * Specifies content type for response
  */
-export function Produces(mime: string): EndpointDecorator { return SetHeaders({ 'content-type': mime }); }
+export function Produces(mime: string): EndpointDecorator { return SetHeaders({ 'Content-Type': mime }); }
 
 /**
  * Specifies if endpoint should be conditional
@@ -59,10 +58,8 @@ type CacheControlFlag =
  */
 export function CacheControl(value: number | TimeSpan, flags: CacheControlFlag[] = []): HeaderSet {
   const delta = TimeUtil.asSeconds(value);
-  return SetHeaders({
-    Expires: delta === 0 ? '-1' : ((): string => TimeUtil.fromNow(delta, 's').toUTCString()),
-    'Cache-Control': delta === 0 ? 'max-age=0,no-cache' : [...flags, `max-age=${delta}`].join(',')
-  });
+  const output = delta === 0 ? 'max-age=0,no-cache' : [...flags, `max-age=${delta}`].join(',');
+  return SetHeaders({ 'Cache-Control': output });
 }
 
 /**
@@ -74,8 +71,12 @@ export const DisableCacheControl = (): HeaderSet => CacheControl('0s');
  * Define an endpoint to support specific input types
  * @param types The list of mime types to allow/deny
  */
-export function Accepts(types: string[]): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AcceptsInterceptor, { types, applies: false });
+export function Accepts(types: [string, ...string[]]): EndpointDecorator {
+  return ControllerRegistry.createInterceptorConfigDecorator(
+    AcceptsInterceptor,
+    { types, applies: true },
+    { responseHeaders: { accepts: types[0] } }
+  );
 }
 
 /**

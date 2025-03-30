@@ -30,7 +30,6 @@ export * from './src/interceptor/etag.ts';
 export * from './src/interceptor/get-cache.ts';
 export * from './src/interceptor/logging.ts';
 export * from './src/interceptor/respond.ts';
-export * from './src/interceptor/return-value.ts';
 
 export * from './src/util/endpoint.ts';
 export * from './src/types/headers.ts';

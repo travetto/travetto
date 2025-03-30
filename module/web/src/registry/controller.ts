@@ -4,7 +4,6 @@ import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
 import { HttpChainedFilter, HttpFilter } from '../types.ts';
-import { HttpHeaders } from '../types/headers.ts';
 import { HttpInterceptor } from '../types/interceptor.ts';
 import { WebContext } from '../context.ts';
 
@@ -176,12 +175,16 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   createInterceptorConfigDecorator<T extends HttpInterceptor>(
     cls: Class<T>,
     cfg: Partial<RetainFields<T['config']>>,
+    extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: EndpointFunctionDescriptor): void => {
+      const outCls: Class = descriptor ? asConstructable(target).constructor : castTo(target);
       if (prop && descriptor) {
-        this.registerEndpointInterceptorConfig(asConstructable(target).constructor, descriptor!.value!, cls, castTo(cfg));
+        this.registerEndpointInterceptorConfig(outCls, descriptor!.value!, cls, castTo(cfg));
+        extra && this.registerPendingEndpoint(outCls, descriptor, extra);
       } else {
-        this.registerControllerInterceptorConfig(castTo(target), cls, castTo(cfg));
+        this.registerControllerInterceptorConfig(outCls, cls, castTo(cfg));
+        extra && this.registerPending(outCls, extra);
       }
     };
   }
@@ -198,6 +201,11 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     dest.title = src.title || dest.title;
     dest.description = src.description || dest.description;
     dest.documented = src.documented ?? dest.documented;
+    dest.responseHeaders ??= {};
+    // Merge in, lower case
+    for (const [k, v] of Object.entries(src.responseHeaders ?? {})) {
+      dest.responseHeaders[k.toLowerCase()] = v;
+    }
   }
 
   /**
@@ -269,20 +277,6 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       this.#endpointsById.delete(k.id);
     }
     super.onUninstallFinalize(cls);
-  }
-
-  resolveAddedHeaders(ep: EndpointConfig): HttpHeaders {
-    const classConfig = this.get(ep.class)!;
-
-    // TODO: Cleanup ReturnValue pattern
-    const keyValuePairs = [...classConfig.interceptorConfigs ?? [], ...ep.interceptorConfigs ?? []]
-      .filter((x): x is [Class, unknown] => x[0].name.startsWith('ReturnValue'))
-      .map(x => (typeof x[1] === 'object' && x[1] && 'headers' in x[1]) ? x[1].headers ?? {} : {})
-      .flatMap((c): [string, unknown][] | undefined => c ? Object.entries(c) : undefined)
-      .filter((x): x is Exclude<typeof x, undefined> => !!x)
-      .map(x => [x[0], typeof x[1] !== 'function' ? x[1] : x[1]()]);
-
-    return new HttpHeaders(castTo(keyValuePairs));
   }
 }
 

@@ -1,7 +1,8 @@
-import { castTo } from '@travetto/runtime';
+import { Any, castTo } from '@travetto/runtime';
 
 type Prim = number | boolean | string;
-export type HttpHeadersInit = Headers | Record<string, undefined | null | Prim | Prim[]> | [string, Prim | Prim[]][];
+type HeaderValue = Prim | Prim[] | readonly Prim[];
+export type HttpHeadersInit = Headers | Record<string, undefined | null | HeaderValue> | [string, HeaderValue][];
 
 /**
  * Simple Headers wrapper with additional logic for common patterns
@@ -22,6 +23,17 @@ export class HttpHeaders extends Headers {
   }
 
   /**
+   * Set all headers, if not already there
+   */
+  backfill(value: Exclude<HttpHeadersInit, Headers | unknown[]>): void {
+    for (const [k, v] of Object.entries(value)) {
+      if (!this.has(k) && v !== null && v !== undefined) {
+        this.set(k, castTo(v));
+      }
+    }
+  }
+
+  /**
    * Get a header value as a list, breaking on commas except for cookies
    */
   getList(key: string): string[] | undefined {
@@ -35,9 +47,11 @@ export class HttpHeaders extends Headers {
   }
 
   // @ts-expect-error
-  override forEach(set: (v: string | string[], k: string) => void): void {
+  forEach(set: (v: string | string[], k: string, headers: HttpHeaders) => void): void;
+  forEach(set: (v: Any, k: string, headers: HttpHeaders) => void): void;
+  forEach(set: (v: string | string[], k: string, headers: HttpHeaders) => void): void {
     for (const [k, v] of this.entries()) {
-      set(k === 'set-cookie' ? this.getSetCookie() : v, k);
+      set(k === 'set-cookie' ? this.getSetCookie() : v, k, this);
     }
-  }
+  };
 }

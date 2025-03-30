@@ -2,9 +2,8 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { TimeUtil } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 
-import { EndpointConfig } from '../src/registry/types.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Patch } from '../src/decorator/endpoint.ts';
@@ -31,44 +30,35 @@ export class ConfigureTest {
     await RootRegistry.init();
   }
 
-  getHeaders(ep: EndpointConfig): HttpHeaders {
-    return ControllerRegistry.resolveAddedHeaders(ep);
+  getHeaders(cls: Class, idx: number) {
+    const config = ControllerRegistry.get(cls);
+    return new HttpHeaders({ ...config.responseHeaders, ...config.endpoints[idx].responseHeaders });
   }
 
   @Test()
   async verifyMaxAge() {
-    const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[0]);
+    const headers = this.getHeaders(TestController, 0);
     assert(headers.has('Cache-Control'));
-    assert(headers.has('Expires'));
 
     const cacher = headers.get('Cache-Control');
     assert(typeof cacher !== 'function');
     assert(cacher === 'max-age=1');
-
-    const expires = headers.get('Expires');
-    assert(expires === TimeUtil.fromNow('1s').toUTCString());
   }
 
   @Test()
   async verifyBadMaxAge() {
-    const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[1]);
+    const headers = this.getHeaders(TestController, 1);
     assert(headers.has('Cache-Control'));
-    assert(headers.has('Expires'));
 
     const cacher = headers.get('Cache-Control');
     assert(typeof cacher !== 'function');
     assert(cacher === 'max-age=0,no-cache');
-
-    const expires = headers.get('Expires');
-    assert(typeof expires === 'string');
-    assert(expires === '-1');
   }
 
   @Test()
   async setMultipleHeaderS() {
-    const headers = this.getHeaders(ControllerRegistry.get(TestController).endpoints[1]);
+    const headers = this.getHeaders(TestController, 1);
     assert(headers.has('Cache-Control'));
-    assert(headers.has('Expires'));
     assert(headers.has('Content-Type'));
   }
 }

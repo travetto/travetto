@@ -3,7 +3,6 @@ import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../types/interceptor.ts';
 import type { HttpChainedFilter, HttpContext, HttpFilter } from '../types.ts';
-import { HttpHeaders } from '@travetto/web';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
@@ -73,6 +72,10 @@ interface CoreConfig {
    * Control which interceptors are excluded
    */
   interceptorExclude?: (val: HttpInterceptor) => boolean;
+  /**
+   * Response headers
+   */
+  responseHeaders?: Record<string, string>;
 }
 
 /**

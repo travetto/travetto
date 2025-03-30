@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { Any, AppError, ByteRange } from '@travetto/runtime';
+import { Any, AppError, ByteRange, castTo } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
 import { HttpMetadataConfig } from './common.ts';
@@ -45,7 +45,7 @@ export class HttpRequest {
   readonly path: string;
   readonly port: number;
   readonly protocol: 'http' | 'https';
-  readonly method: string;
+  readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS' | 'HEAD' | 'TRACE';
   readonly query: Record<string, unknown>;
   readonly params: Record<string, string>;
   readonly remoteIp?: string;
@@ -56,7 +56,7 @@ export class HttpRequest {
     Object.assign(this, init);
     this.query ??= {};
     this.params ??= {};
-    this.method ??= 'GET';
+    this.method = castTo((this.method || 'GET').toUpperCase());
     this.protocol ??= 'http';
     this.path ??= '';
     this.headers = new HttpHeaders(init.headers);
