@@ -59,7 +59,6 @@ export function Upload(
         }
 
         const isMap = field.type === FileMapContract;
-
         const map = ctx.req.getInternal().uploads!;
         return isMap ? map : map[config.name!];
       }
