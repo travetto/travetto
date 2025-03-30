@@ -25,8 +25,9 @@ export class HttpHeaders extends Headers {
   /**
    * Set all headers, if not already there
    */
-  backfill(value: Exclude<HttpHeadersInit, Headers | unknown[]>): void {
-    for (const [k, v] of Object.entries(value)) {
+  backfill(value: HttpHeadersInit): void {
+    const entries = Array.isArray(value) ? value : value instanceof Headers ? value.entries() : Object.entries(value);
+    for (const [k, v] of entries) {
       if (!this.has(k) && v !== null && v !== undefined) {
         this.set(k, castTo(v));
       }

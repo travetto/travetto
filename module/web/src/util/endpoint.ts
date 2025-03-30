@@ -148,7 +148,7 @@ export class EndpointUtil {
       try {
         const res = HttpResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
         return res
-          .backfillHeaders(endpoint.responseHeaders ?? {})
+          .backfillHeaders(endpoint.responseHeaderMap)
           .ensureContentLength()
           .ensureContentType()
           .ensureStatusCode(ctx.req.method === 'POST' ? 201 : (ctx.req.method === 'PUT' ? 204 : 200));

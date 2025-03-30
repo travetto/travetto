@@ -296,7 +296,7 @@ export class HttpResponse<S = unknown> {
   /**
    * Set all values into the map
    */
-  backfillHeaders(value: Exclude<HttpHeadersInit, Headers | unknown[]>): this {
+  backfillHeaders(value: HttpHeadersInit): this {
     this.headers.backfill(value);
     return this;
   }
