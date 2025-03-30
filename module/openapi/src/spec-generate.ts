@@ -4,11 +4,13 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, HttpHeaders } from '@travetto/web';
+import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, HTTP_METHODS } from '@travetto/web';
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 
 import { ApiSpecConfig } from './config.ts';
+
+const ALL_METHODS = Object.values(HTTP_METHODS).filter(x => x.standard);
 
 const DEFINITION = '#/components/schemas';
 
@@ -326,10 +328,11 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     const key = `${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/');
 
-    const toAdd = ep.method === 'all' ?
-      ['get', 'post', 'put', 'delete', 'patch'].reduce((acc, v) =>
-        ({ ...acc, [v]: { ...op, operationId: `${op.operationId}_${v}` } }), {}) :
-      { [ep.method]: op };
+    const toAdd = ep.method === 'ALL' ?
+      ALL_METHODS.reduce((acc, v) =>
+        ({ ...acc, [v.lower]: { ...op, operationId: `${op.operationId}_${v}` } }), {}
+      ) :
+      { [HTTP_METHODS[ep.method].lower]: op };
 
     this.#paths[key] = {
       ...(this.#paths[key] ?? {}),

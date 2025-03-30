@@ -6,7 +6,8 @@ import { Ignore } from '@travetto/schema';
 import { MimeUtil } from '../util/mime.ts';
 
 import { HttpChainedContext } from '../types.ts';
-import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
+import { HttpInterceptorCategory } from '../types/core.ts';
 import { HttpResponse } from '../types/response.ts';
 
 import { EndpointConfig } from '../registry/types.ts';

@@ -19,7 +19,7 @@ export class ExpressWebServerUtil {
   static getRequest(req: express.Request, res: express.Response): HttpRequest {
     return new HttpRequest({
       protocol: castTo(req.protocol),
-      method: req.method,
+      method: castTo(req.method.toUpperCase()),
       path: req.originalUrl,
       query: req.query,
       params: req.params,

@@ -66,7 +66,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUploadAll() {
     const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<{ hash: string }>('post', '/test/upload/all', this.getMultipartRequest([sent]));
+    const res = await this.request<{ hash: string }>('POST', '/test/upload/all', this.getMultipartRequest([sent]));
 
     const file = await this.fixture.readStream('/logo.png');
     assert(res.body.hash === await BinaryUtil.hashInput(file));
@@ -75,7 +75,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUploadDirect() {
     const [sent] = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<{ hash: string }>('post', '/test/upload', {
+    const res = await this.request<{ hash: string }>('POST', '/test/upload', {
       headers: {
         'Content-Type': sent.type,
         'Content-Length': `${sent.size}`
@@ -90,7 +90,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<{ hash: string }>('post', '/test/upload', this.getMultipartRequest(uploads));
+    const res = await this.request<{ hash: string }>('POST', '/test/upload', this.getMultipartRequest(uploads));
 
     const file = await this.fixture.readStream('/logo.png');
     assert(res.body.hash === await BinaryUtil.hashInput(file));
@@ -102,7 +102,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file1', resource: 'logo.png', type: 'image/png' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named', this.getMultipartRequest(uploads));
+    const res = await this.request<{ hash1: string, hash2: string }>('POST', '/test/upload/all-named', this.getMultipartRequest(uploads));
     const file = await this.fixture.readStream('/logo.png');
     const hash = await BinaryUtil.hashInput(file);
 
@@ -117,7 +117,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
 
-    const resBad = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named-custom', {
+    const resBad = await this.request<{ hash1: string, hash2: string }>('POST', '/test/upload/all-named-custom', {
       ...this.getMultipartRequest(uploadBad),
       throwOnError: false
     });
@@ -127,7 +127,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file1', resource: 'logo.gif', type: 'image/gif' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named-custom', {
+    const res = await this.request<{ hash1: string, hash2: string }>('POST', '/test/upload/all-named-custom', {
       ...this.getMultipartRequest(uploads),
       throwOnError: false
     });
@@ -150,7 +150,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
 
-    const resBad = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named-size', {
+    const resBad = await this.request<{ hash1: string, hash2: string }>('POST', '/test/upload/all-named-size', {
       ...this.getMultipartRequest(uploadBad),
       throwOnError: false
     });
@@ -160,7 +160,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file1', resource: 'asset.yml', type: 'text/plain' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const res = await this.request<{ hash1: string, hash2: string }>('post', '/test/upload/all-named-size', {
+    const res = await this.request<{ hash1: string, hash2: string }>('POST', '/test/upload/all-named-size', {
       ...this.getMultipartRequest(uploads),
       throwOnError: false
     });

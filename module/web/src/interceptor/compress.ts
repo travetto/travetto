@@ -8,7 +8,8 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
-import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
+import { HttpInterceptorCategory } from '../types/core.ts';
 import { HttpContext, HttpChainedContext } from '../types.ts';
 import { HttpResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';

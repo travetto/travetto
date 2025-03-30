@@ -3,16 +3,7 @@ import type { Class } from '@travetto/runtime';
 import type { EndpointConfig } from '../registry/types.ts';
 import type { HttpChainedContext } from '../types.ts';
 import { HttpResponse } from './response.ts';
-
-/**
- * High level categories with a defined ordering
- */
-export const HTTP_INTERCEPTOR_CATEGORIES = ['global', 'terminal', 'request', 'response', 'application', 'value', 'unbound'] as const;
-
-/**
- * High level categories with a defined ordering
- */
-export type HttpInterceptorCategory = (typeof HTTP_INTERCEPTOR_CATEGORIES)[number];
+import { HttpInterceptorCategory } from './core.ts';
 
 /**
  * Basic http interceptor structure

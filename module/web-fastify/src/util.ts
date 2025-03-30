@@ -14,7 +14,7 @@ export class FastifyWebServerUtil {
   static getRequest(req: FastifyRequest, reply: FastifyReply): HttpRequest {
     return new HttpRequest({
       protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
-      method: req.raw.method!,
+      method: castTo(req.raw.method?.toUpperCase()),
       path: req.url,
       query: castTo(req.query),
       params: castTo(req.params),

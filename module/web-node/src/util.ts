@@ -24,7 +24,7 @@ export class NodeWebServerUtil {
 
     return new HttpRequest({
       protocol: req.secure ? 'https' : 'http',
-      method: castTo(req.method),
+      method: castTo(req.method?.toUpperCase()),
       path: url.pathname!,
       query: Object.fromEntries(url.searchParams.entries()),
       params,

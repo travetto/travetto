@@ -3,7 +3,7 @@ import https from 'node:https';
 import express from 'express';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig, HTTP_METHODS } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { ExpressWebServerUtil } from './util.ts';
@@ -51,7 +51,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
       const finalPath = endpoint.path === '/*all' ? '*all' :
         endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
 
-      router[endpoint.method](finalPath, async (req, res, next) => {
+      router[HTTP_METHODS[endpoint.method].lower](finalPath, async (req, res, next) => {
         await endpoint.filter!({ req: ExpressWebServerUtil.getRequest(req, res) });
         next();
       });

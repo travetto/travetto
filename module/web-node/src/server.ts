@@ -4,7 +4,7 @@ import http from 'node:http';
 import type Router from 'find-my-way';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig, HTTP_METHODS } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { NodeWebServerUtil } from './util.ts';
@@ -60,9 +60,9 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
     // castTo<{ key?: string | symbol }>(router).key = key;
 
     for (const endpoint of endpoints) {
-      const fullPath = endpoint.fullPath.replaceAll('//', '/').replace(/[^/]*[*][^/]*/g, '*').replace(/(.)[/]$/, (_, a) => a);
+      const fullPath = endpoint.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
 
-      this.raw.router[endpoint.method](fullPath, async (req, res, params) => {
+      this.raw.router[HTTP_METHODS[endpoint.method].lower](fullPath, async (req, res, params) => {
         await endpoint.filter!({ req: NodeWebServerUtil.getRequest(castTo(req), castTo(res), castTo(params)) });
       });
     }

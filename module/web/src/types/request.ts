@@ -1,22 +1,17 @@
 import { Readable } from 'node:stream';
 
-import { Any, AppError, ByteRange, castTo } from '@travetto/runtime';
+import { Any, AppError } from '@travetto/runtime';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpMetadataConfig } from './common.ts';
-import { MimeUtil } from '../util/mime.ts';
 import { HttpResponse } from './response.ts';
 import { CookieGetOptions } from './cookie.ts';
 import { HttpHeadersInit, HttpHeaders } from './headers.ts';
-
-const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
-
-type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
+import { HttpMetadataConfig, HttpMethod, HttpProtocol } from './core.ts';
 
 type RequestInit = {
   headers?: HttpHeadersInit;
-  method?: string;
-  protocol?: 'http' | 'https';
+  method?: HttpMethod;
+  protocol?: HttpProtocol;
   port?: number;
   query?: Record<string, unknown>;
   path?: string;
@@ -37,36 +32,23 @@ export interface HttpRequestInternal {
  */
 export class HttpRequest {
 
-  #parsedType?: MimeType;
   #queryExpanded?: Record<string, unknown>;
   #internal: HttpRequestInternal = {};
 
   readonly headers: HttpHeaders;
-  readonly path: string;
-  readonly port: number;
-  readonly protocol: 'http' | 'https';
-  readonly method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'OPTIONS' | 'HEAD' | 'TRACE';
-  readonly query: Record<string, unknown>;
-  readonly params: Record<string, string>;
+  readonly path: string = '';
+  readonly port: number = 0;
+  readonly protocol: HttpProtocol = 'http';
+  readonly method: HttpMethod = 'GET';
+  readonly query: Record<string, unknown> = {};
+  readonly params: Record<string, string> = {};
   readonly remoteIp?: string;
   readonly inputStream: Readable;
   body?: Any;
 
   constructor(init: RequestInit) {
     Object.assign(this, init);
-    this.query ??= {};
-    this.params ??= {};
-    this.method = castTo((this.method || 'GET').toUpperCase());
-    this.protocol ??= 'http';
-    this.path ??= '';
     this.headers = new HttpHeaders(init.headers);
-  }
-
-  /**
-   * Get the fully parsed content type
-   */
-  getContentType(this: HttpRequest): MimeType | undefined {
-    return this.#parsedType ??= MimeUtil.parse(this.headers.get('Content-Type')!);
   }
 
   /**
@@ -74,29 +56,6 @@ export class HttpRequest {
    */
   getIp(): string | undefined {
     return this.headers.get('X-Forwarded-For') || this.remoteIp;
-  }
-
-  /**
-   * Get requested byte range for a given request
-   */
-  getRange(this: HttpRequest, chunkSize: number = 100 * 1024): ByteRange | undefined {
-    const rangeHeader = this.headers.get('Range');
-
-    if (rangeHeader) {
-      const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
-        .map(x => x ? parseInt(x, 10) : undefined);
-      if (start !== undefined) {
-        return { start, end: end ?? (start + chunkSize) };
-      }
-    }
-  }
-
-  /**
-   * Read the filename from the content disposition
-   */
-  getFilename(this: HttpRequest): string | undefined {
-    const [, match] = (this.headers.get('Content-Disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
-    return match;
   }
 
   /**

@@ -6,10 +6,9 @@ import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpRequest } from '../../src/types/request.ts';
-import { HttpMethodOrAll } from '../../src/registry/types.ts';
 import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base.ts';
 import { WebServerHandle } from '../../src/types/server.ts';
+import { HttpMethod } from '../../src/types/core.ts';
 import { CoreWebServerSupport } from './server-support/core.ts';
 import { NetUtil } from '../../src/util/net.ts';
 import { HttpHeaders } from '../../src/types/headers.ts';
@@ -91,12 +90,10 @@ export abstract class BaseWebSuite {
   }
 
   async request<T>(
-    method: HttpRequest['method'] | Exclude<HttpMethodOrAll, 'all'>,
+    method: HttpMethod,
     path: string,
     cfg: FullHttpRequest = {}
   ): Promise<MakeRequestResponse<T>> {
-
-    method = castTo<HttpRequest['method']>(method.toUpperCase());
 
     const headers = new HttpHeaders(cfg.headers);
 

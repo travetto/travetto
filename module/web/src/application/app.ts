@@ -7,7 +7,8 @@ import { EndpointUtil } from '../util/endpoint.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
 import { WebCommonUtil } from '../util/common.ts';
 
-import { HttpInterceptor, HTTP_INTERCEPTOR_CATEGORIES } from '../types/interceptor.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
+import { HTTP_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
 import { WebServer, WebServerHandle } from '../types/server.ts';
 
 /**

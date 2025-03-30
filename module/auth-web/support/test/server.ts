@@ -105,7 +105,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
 
   @Test()
   async testBadAuth() {
-    const { status } = await this.request('post', '/test/auth/login', {
+    const { status } = await this.request('POST', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'Todd',
@@ -119,7 +119,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testGoodAuth() {
     this.config.mode = 'cookie';
 
-    const { headers, status } = await this.request('post', '/test/auth/login', {
+    const { headers, status } = await this.request('POST', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'super-user',
@@ -134,7 +134,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testBlockedAuthenticated() {
     this.config.mode = 'header';
 
-    const { status } = await this.request('get', '/test/auth/self', {
+    const { status } = await this.request('GET', '/test/auth/self', {
       throwOnError: false
     });
     assert(status === 401);
@@ -144,7 +144,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testGoodAuthenticatedCookie() {
     this.config.mode = 'cookie';
 
-    const { headers, status } = await this.request('post', '/test/auth/login', {
+    const { headers, status } = await this.request('POST', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'super-user',
@@ -155,7 +155,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     const cookie = this.getCookieValue(headers);
     assert(cookie);
 
-    const { status: lastStatus } = await this.request('get', '/test/auth/self', {
+    const { status: lastStatus } = await this.request('GET', '/test/auth/self', {
       throwOnError: false,
       headers: { cookie }
     });
@@ -166,7 +166,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testGoodAuthenticatedHeader() {
     this.config.mode = 'header';
 
-    const { headers, status } = await this.request('post', '/test/auth/login', {
+    const { headers, status } = await this.request('POST', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'super-user',
@@ -175,7 +175,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     });
     assert(status === 201);
 
-    const { status: lastStatus } = await this.request('get', '/test/auth/self', {
+    const { status: lastStatus } = await this.request('GET', '/test/auth/self', {
       throwOnError: false,
       headers: {
         Authorization: headers.get('Authorization')!
@@ -188,12 +188,12 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testAllAuthenticated() {
     this.config.mode = 'header';
 
-    const { status } = await this.request('get', '/test/auth-all/self', {
+    const { status } = await this.request('GET', '/test/auth-all/self', {
       throwOnError: false
     });
     assert(status === 401);
 
-    const { headers, status: authStatus } = await this.request('post', '/test/auth/login', {
+    const { headers, status: authStatus } = await this.request('POST', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'super-user',
@@ -203,7 +203,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     assert(authStatus === 201);
 
 
-    const { status: lastStatus } = await this.request('get', '/test/auth-all/self', {
+    const { status: lastStatus } = await this.request('GET', '/test/auth-all/self', {
       throwOnError: false,
       headers: {
         Authorization: headers.get('Authorization')!
@@ -217,7 +217,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testTokenRetrieval() {
     this.config.mode = 'cookie';
 
-    const { headers, status } = await this.request('post', '/test/auth/login', {
+    const { headers, status } = await this.request('POST', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'super-user',
@@ -228,7 +228,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     const cookie = this.getCookieValue(headers);
     assert(cookie);
 
-    const { body, status: lastStatus } = await this.request('get', '/test/auth/token', {
+    const { body, status: lastStatus } = await this.request('GET', '/test/auth/token', {
       throwOnError: false,
       headers: { cookie }
     });
@@ -243,7 +243,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testCookieRollingRenewAuthenticated() {
     this.config.mode = 'cookie';
 
-    const { headers, status } = await this.request('post', '/test/auth/login', {
+    const { headers, status } = await this.request('POST', '/test/auth/login', {
       throwOnError: false,
       body: {
         username: 'super-user',
@@ -259,7 +259,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     const expires = this.getCookieExpires(headers);
     assert(expires);
 
-    const { headers: selfHeaders, status: lastStatus } = await this.request('get', '/test/auth/self', {
+    const { headers: selfHeaders, status: lastStatus } = await this.request('GET', '/test/auth/self', {
       throwOnError: false,
       headers: { cookie }
     });
@@ -270,7 +270,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     assert(used < 1000);
     await timers.setTimeout((2000 - used) / 2);
 
-    const { headers: selfHeadersRenew, status: lastStatus2 } = await this.request('get', '/test/auth/self', {
+    const { headers: selfHeadersRenew, status: lastStatus2 } = await this.request('GET', '/test/auth/self', {
       throwOnError: false,
       headers: { cookie }
     });

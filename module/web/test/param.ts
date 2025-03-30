@@ -10,8 +10,9 @@ import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorat
 import { Post, Get } from '../src/decorator/endpoint.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { EndpointConfig, HttpMethodOrAll } from '../src/registry/types.ts';
+import { EndpointConfig } from '../src/registry/types.ts';
 import { EndpointUtil } from '../src/util/endpoint.ts';
+import { HttpMethodWithAll } from '../src/types/core.ts';
 
 class User {
   name: string;
@@ -86,7 +87,7 @@ class ParamController {
 
 @Suite()
 export class EndpointParameterTest {
-  static getEndpoint(path: string, method: HttpMethodOrAll) {
+  static getEndpoint(path: string, method: HttpMethodWithAll) {
     return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.method === method)!;
   }
 
@@ -103,7 +104,7 @@ export class EndpointParameterTest {
 
   @Test()
   async simpleParameters() {
-    const ep = EndpointParameterTest.getEndpoint('/:name', 'post');
+    const ep = EndpointParameterTest.getEndpoint('/:name', 'POST');
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
         params: { name: 'bob' },
@@ -125,7 +126,7 @@ export class EndpointParameterTest {
 
   @Test()
   async testHeaders() {
-    const ep = EndpointParameterTest.getEndpoint('/login', 'post');
+    const ep = EndpointParameterTest.getEndpoint('/login', 'POST');
 
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
@@ -142,7 +143,7 @@ export class EndpointParameterTest {
 
   @Test()
   async testOptional() {
-    const ep = EndpointParameterTest.getEndpoint('/user/:id', 'post');
+    const ep = EndpointParameterTest.getEndpoint('/user/:id', 'POST');
 
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
@@ -167,7 +168,7 @@ export class EndpointParameterTest {
 
   @Test()
   async testReqRes() {
-    const ep = EndpointParameterTest.getEndpoint('/req/res', 'post');
+    const ep = EndpointParameterTest.getEndpoint('/req/res', 'POST');
     const req = { path: '/path' };
     const items = await EndpointParameterTest.extract(ep, req);
 
@@ -176,18 +177,18 @@ export class EndpointParameterTest {
 
   @Test()
   async testAliasing() {
-    const ep = EndpointParameterTest.getEndpoint('/alias', 'post');
+    const ep = EndpointParameterTest.getEndpoint('/alias', 'POST');
     const params = SchemaRegistry.getMethodSchema(ep.class, ep.name);
     assert(params[0].description === 'User name');
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep, { query: { nm: 'blue' } }), ['green']);
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep, { query: { name: 'blue' } }), ['blue']);
 
-    const ep2 = EndpointParameterTest.getEndpoint('/alias2', 'post');
+    const ep2 = EndpointParameterTest.getEndpoint('/alias2', 'POST');
     const params2 = SchemaRegistry.getMethodSchema(ep2.class, ep2.name);
     assert(params2[0].description === 'User\'s name');
     assert(ep2.params[0].name === 'nm');
 
-    const ep3 = EndpointParameterTest.getEndpoint('/alias3', 'post');
+    const ep3 = EndpointParameterTest.getEndpoint('/alias3', 'POST');
     const params3 = SchemaRegistry.getMethodSchema(ep3.class, ep3.name);
     assert(params3[0].description === 'User\'s name');
     assert(ep3.params[0].name === 'nm');
@@ -195,8 +196,8 @@ export class EndpointParameterTest {
 
   @Test()
   async testArray() {
-    const ep = EndpointParameterTest.getEndpoint('/array', 'post');
-    const ep2 = EndpointParameterTest.getEndpoint('/array2', 'post');
+    const ep = EndpointParameterTest.getEndpoint('/array', 'POST');
+    const ep2 = EndpointParameterTest.getEndpoint('/array2', 'POST');
 
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep2, { query: { values: 'no' } }), [[false]]);
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep2, { query: { values: ['no', 'yes'] } }), [[false, true]]);
@@ -207,7 +208,7 @@ export class EndpointParameterTest {
 
   @Test()
   async realWorld() {
-    const ep = EndpointParameterTest.getEndpoint('/job/output/:jobId', 'get');
+    const ep = EndpointParameterTest.getEndpoint('/job/output/:jobId', 'GET');
     await assert.doesNotReject(() => EndpointParameterTest.extract(ep, { params: { jobId: '5' }, query: {} }));
     await assert.rejects(() => EndpointParameterTest.extract(ep, { params: {}, query: {} }), ValidationResultError);
     await assert.rejects(() => EndpointParameterTest.extract(ep, { params: { jobId: '5' }, query: { time: 'blue' } }), ValidationResultError);
@@ -215,7 +216,7 @@ export class EndpointParameterTest {
 
   @Test()
   async realWorldMin() {
-    const ep = EndpointParameterTest.getEndpoint('/job/output-min/:jobId', 'get');
+    const ep = EndpointParameterTest.getEndpoint('/job/output-min/:jobId', 'GET');
     await assert.doesNotReject(() => EndpointParameterTest.extract(ep, { params: { jobId: '5' }, query: { age: '20' } }));
     await assert.rejects(() => EndpointParameterTest.extract(ep, { params: {}, query: {} }), ValidationResultError);
     await assert.rejects(() => EndpointParameterTest.extract(ep, { params: { jobId: '5' }, query: { age: 'blue' } }), ValidationResultError);
@@ -224,7 +225,7 @@ export class EndpointParameterTest {
 
   @Test()
   async realWorldQueryArrayOptional() {
-    const ep = EndpointParameterTest.getEndpoint('/array/names', 'get');
+    const ep = EndpointParameterTest.getEndpoint('/array/names', 'GET');
     await assert.doesNotReject(() => EndpointParameterTest.extract(ep, { query: {} }));
 
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep, { query: { values: 'no' } }), [['no']]);
@@ -234,7 +235,7 @@ export class EndpointParameterTest {
 
   @Test()
   async realWorldListTodo() {
-    const ep = EndpointParameterTest.getEndpoint('/list/todo', 'get');
+    const ep = EndpointParameterTest.getEndpoint('/list/todo', 'GET');
     await assert.rejects(() => EndpointParameterTest.extract(ep, { query: {} }));
 
     assert.deepStrictEqual(
@@ -265,7 +266,7 @@ export class EndpointParameterTest {
   async realWorldUserInterface() {
     await RootRegistry.init();
 
-    const ep = EndpointParameterTest.getEndpoint('/interface-prefix', 'get');
+    const ep = EndpointParameterTest.getEndpoint('/interface-prefix', 'GET');
     await assert.rejects(() => EndpointParameterTest.extract(ep, { query: {} }));
 
     const extracted = await EndpointParameterTest.extract(

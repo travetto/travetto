@@ -13,7 +13,7 @@ export class KoaWebServerUtil {
   static getRequest(ctx: koa.Context): HttpRequest {
     return new HttpRequest({
       protocol: castTo(ctx.protocol),
-      method: ctx.request.method,
+      method: castTo(ctx.request.method.toUpperCase()),
       query: ctx.request.query,
       params: ctx.params,
       headers: ctx.request.headers,

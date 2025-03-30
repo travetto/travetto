@@ -1,10 +1,15 @@
 import { DependencyRegistry } from '@travetto/di';
 import { Runtime } from '@travetto/runtime';
-import { ConditionalRegister, ConfigureInterceptor, Controller, Get, LoggingInterceptor, Options, Undocumented, WebConfig } from '@travetto/web';
+
+import { Controller } from '../decorator/controller.ts';
+import { ConditionalRegister, ConfigureInterceptor, Undocumented } from '../decorator/common.ts';
+import { Get, Options } from '../decorator/endpoint.ts';
+import { WebConfig } from './config.ts';
+import { LoggingInterceptor, } from '../interceptor/logging.ts';
 
 @Undocumented()
 @Controller('/')
-@ConfigureInterceptor(LoggingInterceptor, { applies: true })
+@ConfigureInterceptor(LoggingInterceptor, { applies: false })
 export class GlobalHandler {
 
   @Get('')

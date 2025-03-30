@@ -34,7 +34,7 @@ export class WebUploadUtil {
    * Get all the uploads, separating multipart from direct
    */
   static async* getUploads(req: HttpRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
-    if (MULTIPART.has(req.getContentType()?.full!)) {
+    if (MULTIPART.has(req.headers.getContentType()?.full!)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;
       const itr = new AsyncQueue<UploadItem>();
@@ -58,7 +58,7 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: req.body ?? req.inputStream, filename: req.getFilename(), field: 'file' };
+      yield { stream: req.body ?? req.inputStream, filename: req.headers.getFilename(), field: 'file' };
     }
   }
 

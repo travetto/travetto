@@ -4,7 +4,8 @@ import { Secret } from '@travetto/schema';
 
 import { HttpChainedContext } from '../types.ts';
 import { HttpResponse } from '../types/response.ts';
-import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
+import { HttpInterceptorCategory } from '../types/core.ts';
 
 import { WebConfig } from '../application/config.ts';
 import { EndpointConfig } from '../registry/types.ts';

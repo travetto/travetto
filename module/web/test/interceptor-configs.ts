@@ -1,5 +1,4 @@
 import assert from 'node:assert';
-import { Readable } from 'node:stream';
 
 import { Class } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
@@ -10,7 +9,8 @@ import { RootRegistry } from '@travetto/registry';
 import { ConfigureInterceptor } from '../src/decorator/common.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
-import { HttpInterceptor, HttpInterceptorCategory } from '../src/types/interceptor.ts';
+import { HttpInterceptor } from '../src/types/interceptor.ts';
+import { HttpInterceptorCategory } from '../src/types/core.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { HttpChainedContext } from '../src/types.ts';
 import { WebServer, WebServerHandle } from '../src/types/server.ts';

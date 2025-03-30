@@ -1,13 +1,19 @@
-import { Any, castTo } from '@travetto/runtime';
+import { Any, ByteRange, castTo } from '@travetto/runtime';
+import { MimeUtil } from '../util/mime.ts';
 
 type Prim = number | boolean | string;
 type HeaderValue = Prim | Prim[] | readonly Prim[];
 export type HttpHeadersInit = Headers | Record<string, undefined | null | HeaderValue> | [string, HeaderValue][];
+type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
+
+const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
 /**
  * Simple Headers wrapper with additional logic for common patterns
  */
 export class HttpHeaders extends Headers {
+
+  #parsedType?: MimeType;
 
   constructor(o?: HttpHeadersInit) {
     const passed = (o instanceof Headers);
@@ -18,18 +24,6 @@ export class HttpHeaders extends Headers {
         if (v !== undefined && v !== null) {
           this.append(k, castTo(v));
         }
-      }
-    }
-  }
-
-  /**
-   * Set all headers, if not already there
-   */
-  backfill(value: HttpHeadersInit): void {
-    const entries = Array.isArray(value) ? value : value instanceof Headers ? value.entries() : Object.entries(value);
-    for (const [k, v] of entries) {
-      if (!this.has(k) && v !== null && v !== undefined) {
-        this.set(k, castTo(v));
       }
     }
   }
@@ -55,4 +49,35 @@ export class HttpHeaders extends Headers {
       set(k === 'set-cookie' ? this.getSetCookie() : v, k, this);
     }
   };
+
+
+  /**
+   * Get the fully parsed content type
+   */
+  getContentType(): MimeType | undefined {
+    return this.#parsedType ??= MimeUtil.parse(this.get('Content-Type')!);
+  }
+
+  /**
+   * Read the filename from the content disposition
+   */
+  getFilename(): string | undefined {
+    const [, match] = (this.get('Content-Disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
+    return match;
+  }
+
+  /**
+   * Get requested byte range for a given request
+   */
+  getRange(chunkSize: number = 100 * 1024): ByteRange | undefined {
+    const rangeHeader = this.get('Range');
+
+    if (rangeHeader) {
+      const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
+        .map(x => x ? parseInt(x, 10) : undefined);
+      if (start !== undefined) {
+        return { start, end: end ?? (start + chunkSize) };
+      }
+    }
+  }
 }

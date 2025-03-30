@@ -5,8 +5,9 @@ import { MetadataRegistry } from '@travetto/registry';
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
 import { HttpChainedFilter, HttpFilter } from '../types.ts';
 import { HttpInterceptor } from '../types/interceptor.ts';
-import { WebContext } from '../context.ts';
 import { HttpHeaders } from '../types/headers.ts';
+
+import { WebContext } from '../context.ts';
 
 type ValidFieldNames<T> = {
   [K in keyof T]:
@@ -59,7 +60,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       id: `${cls.name}#${endpoint.name}`,
       path: '/',
       fullPath: '/',
-      method: 'all',
+      method: 'GET',
       class: cls,
       filters: [],
       params: [],
@@ -259,7 +260,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     for (const ep of final.endpoints) {
       this.#endpointsById.set(ep.id, ep);
       // Store full path from base for use in other contexts
-      ep.fullPath = `${final.basePath}/${ep.path}`.replaceAll('//', '/');
+      ep.fullPath = `${final.basePath}/${ep.path}`.replaceAll('//', '/').replace(/(.)[/]$/, (_, a) => a);
       ep.responseHeaderMap = new HttpHeaders({ ...final.responseHeaders ?? {}, ...ep.responseHeaders ?? {} });
     }
 

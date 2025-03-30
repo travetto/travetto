@@ -17,8 +17,11 @@ export class CustomLoggingInterceptor implements HttpInterceptor {
   }
 
   async filter({ req, next }: HttpChainedContext) {
-    await next();
-    // Write request to database
-    this.appender.write(req.method, req.path, req.query);
+    try {
+      return await next();
+    } finally {
+      // Write request to database
+      this.appender.write(req.method, req.path, req.query);
+    }
   }
 }

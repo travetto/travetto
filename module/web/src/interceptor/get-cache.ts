@@ -29,7 +29,7 @@ export class GetCacheInterceptor implements HttpInterceptor {
   config?: GetCacheConfig;
 
   applies(endpoint: EndpointConfig, config: GetCacheConfig): boolean {
-    return endpoint.method === 'get' && config.applies;
+    return endpoint.method === 'GET' && config.applies;
   }
 
   async filter({ next }: HttpChainedContext): Promise<HttpResponse> {

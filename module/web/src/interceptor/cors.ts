@@ -3,11 +3,16 @@ import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
 import { HttpChainedContext } from '../types.ts';
+import { HTTP_METHODS, HttpInterceptorCategory } from '../types/core.ts';
 import { HttpResponse } from '../types/response.ts';
 import { HttpRequest } from '../types/request.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
 
-import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
 import { EndpointConfig } from '../registry/types.ts';
+
+const STANDARD_METHODS = Object.values(HTTP_METHODS)
+  .filter(x => x.standard && x.method !== 'OPTIONS')
+  .map(x => x.method);
 
 /**
  * Web cors support
@@ -58,7 +63,7 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
   finalizeConfig(config: CorsConfig): CorsConfig {
     config.resolved = {
       origins: new Set(config.origins ?? []),
-      methods: (config.methods ?? ['PUT', 'POST', 'GET', 'DELETE', 'PATCH', 'HEAD', 'TRACE']).join(',').toUpperCase(),
+      methods: (config.methods ?? STANDARD_METHODS).join(',').toUpperCase(),
       headers: (config.headers ?? []).join(','),
       credentials: !!config.credentials,
     };
@@ -71,11 +76,12 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
 
   decorate(req: HttpRequest, resolved: CorsConfig['resolved'], res: HttpResponse,): HttpResponse {
     const origin = req.headers.get('Origin');
-    res.headers.set('Access-Control-Allow-Origin', origin || '*');
-    res.headers.set('Access-Control-Allow-Credentials', `${resolved.credentials}`);
-    res.headers.set('Access-Control-Allow-Methods', resolved.methods);
-    res.headers.set('Access-Control-Allow-Headers', resolved.headers || req.headers.get('Access-Control-Request-Headers')! || '*');
-    return res;
+    return res.backfillHeaders({
+      'Access-Control-Allow-Origin': origin || '*',
+      'Access-Control-Allow-Credentials': `${resolved.credentials}`,
+      'Access-Control-Allow-Methods': resolved.methods,
+      'Access-Control-Allow-Headers': resolved.headers || req.headers.get('Access-Control-Request-Headers')! || '*',
+    });
   }
 
   async filter({ req, config: { resolved }, next }: HttpChainedContext<CorsConfig>): Promise<HttpResponse> {

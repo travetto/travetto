@@ -3,7 +3,7 @@ import { isArrayBuffer } from 'node:util/types';
 
 import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
-import { HttpMetadataConfig } from './common.ts';
+import { HttpMetadataConfig } from './core.ts';
 import { Cookie } from './cookie.ts';
 import { HttpHeadersInit, HttpHeaders } from './headers.ts';
 
@@ -297,7 +297,12 @@ export class HttpResponse<S = unknown> {
    * Set all values into the map
    */
   backfillHeaders(value: HttpHeadersInit): this {
-    this.headers.backfill(value);
+    const entries = Array.isArray(value) ? value : value instanceof Headers ? value.entries() : Object.entries(value);
+    for (const [k, v] of entries) {
+      if (!this.headers.has(k) && v !== null && v !== undefined) {
+        this.headers.set(k, castTo(v));
+      }
+    }
     return this;
   }
 }

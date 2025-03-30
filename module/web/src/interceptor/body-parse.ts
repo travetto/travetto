@@ -8,13 +8,12 @@ import { AppError } from '@travetto/runtime';
 import { HttpChainedContext } from '../types.ts';
 import { HttpResponse } from '../types/response.ts';
 import { HttpRequest } from '../types/request.ts';
-import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { HttpInterceptorCategory, HTTP_METHODS } from '../types/core.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
 
 import { AcceptsInterceptor } from './accepts.ts';
-
-const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
 type ParserType = 'json' | 'text' | 'form';
 
@@ -50,7 +49,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
   config: BodyParseConfig;
 
   async read(req: HttpRequest, limit: string | number): Promise<string> {
-    const cfg = req.getContentType();
+    const cfg = req.headers.getContentType();
 
     const text = await rawBody(inflation(req.inputStream!), {
       limit,
@@ -60,7 +59,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
   }
 
   detectParserType(req: HttpRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
-    const { full = '' } = req.getContentType() ?? {};
+    const { full = '' } = req.headers.getContentType() ?? {};
     if (!full) {
       return;
     } else if (full in parsingTypes) {
@@ -83,11 +82,11 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
   }
 
   applies(endpoint: EndpointConfig, config: BodyParseConfig): boolean {
-    return config.applies && (endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method));
+    return config.applies && HTTP_METHODS[endpoint.method].body;
   }
 
   async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<HttpResponse> {
-    if (!METHODS_WITH_BODIES.has(req.method) || req.body !== undefined) { // If body is already set
+    if (!HTTP_METHODS[req.method].body || req.body !== undefined) { // If body is already set
       return next();
     }
 

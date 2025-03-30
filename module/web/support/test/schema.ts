@@ -2,10 +2,9 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry, Validator } from '@travetto/schema';
-import { Controller, Post, Get, HttpMethodOrAll, ControllerRegistry, HttpResponse } from '@travetto/web';
+import { Controller, Post, Get, ControllerRegistry, HttpResponse, HttpMethodWithAll, PathParam, QueryParam } from '@travetto/web';
 
 import { BaseWebSuite } from './base.ts';
-import { PathParam, QueryParam } from '../../src/decorator/param.ts';
 
 type Errors = { details: { errors: { path: string }[] }, message: string };
 
@@ -106,7 +105,7 @@ class SchemaAPI {
   }
 }
 
-function getEndpoint(path: string, method: HttpMethodOrAll) {
+function getEndpoint(path: string, method: HttpMethodWithAll) {
   return ControllerRegistry.get(SchemaAPI)
     .endpoints.find(x => x.path === path && x.method === method)!;
 }
@@ -118,17 +117,17 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyBody() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<UserShape>('post', '/test/schema/user', { body: user });
+    const res1 = await this.request<UserShape>('POST', '/test/schema/user', { body: user });
 
     assert(res1.body.name === user.name);
 
-    const res2 = await this.request<Errors>('post', '/test/schema/user', { body: { id: 'orange' }, throwOnError: false });
+    const res2 = await this.request<Errors>('POST', '/test/schema/user', { body: { id: 'orange' }, throwOnError: false });
 
     assert(res2.status === 400);
     assert(/Validation errors have occurred/.test(res2.body.message));
     assert(res2.body.details.errors[0].path === 'id');
 
-    const res3 = await this.request<Errors>('post', '/test/schema/user', { body: { id: 0, name: 'bob', age: 'a' }, throwOnError: false });
+    const res3 = await this.request<Errors>('POST', '/test/schema/user', { body: { id: 0, name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res3.status === 400);
     assert(/Validation errors have occurred/.test(res3.body.message));
@@ -139,17 +138,17 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyQuery() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<UserShape>('get', '/test/schema/user', { query: user });
+    const res1 = await this.request<UserShape>('GET', '/test/schema/user', { query: user });
 
     assert(res1.body.name === user.name);
 
-    const res2 = await this.request<Errors>('get', '/test/schema/user', { query: { id: 'orange' }, throwOnError: false });
+    const res2 = await this.request<Errors>('GET', '/test/schema/user', { query: { id: 'orange' }, throwOnError: false });
 
     assert(res2.status === 400);
     assert(/Validation errors have occurred/.test(res2.body.message));
     assert(res2.body.details.errors[0].path === 'id');
 
-    const res3 = await this.request<Errors>('get', '/test/schema/user', { query: { id: '0', name: 'bob', age: 'a' }, throwOnError: false });
+    const res3 = await this.request<Errors>('GET', '/test/schema/user', { query: { id: '0', name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res3.status === 400);
     assert(/Validation errors have occurred/.test(res3.body.message));
@@ -160,18 +159,18 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyInterface() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<UserShape>('get', '/test/schema/interface', { query: user });
+    const res1 = await this.request<UserShape>('GET', '/test/schema/interface', { query: user });
 
     assert(res1.body.name === user.name);
     assert(res1.body.age === 20);
 
-    const res2 = await this.request<Errors>('get', '/test/schema/interface', { query: { id: 'orange' }, throwOnError: false });
+    const res2 = await this.request<Errors>('GET', '/test/schema/interface', { query: { id: 'orange' }, throwOnError: false });
 
     assert(res2.status === 400);
     assert(/Validation errors have occurred/.test(res2.body.message));
     assert(res2.body.details.errors[0].path === 'id');
 
-    const res3 = await this.request<Errors>('get', '/test/schema/interface', { query: { id: '0', name: 'bob', age: 'a' }, throwOnError: false });
+    const res3 = await this.request<Errors>('GET', '/test/schema/interface', { query: { id: '0', name: 'bob', age: 'a' }, throwOnError: false });
 
     assert(res3.status === 400);
     assert(/Validation errors have occurred/.test(res3.body.message));
@@ -182,7 +181,7 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyPrefix() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<Errors>('get', '/test/schema/interface-prefix', {
+    const res1 = await this.request<Errors>('GET', '/test/schema/interface-prefix', {
       query: user,
       throwOnError: false
     });
@@ -192,7 +191,7 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
     console.error(res1.body);
     assert(res1.body.details.errors[0].path.startsWith('user2'));
 
-    const res2 = await this.request<Errors>('get', '/test/schema/interface-prefix', {
+    const res2 = await this.request<Errors>('GET', '/test/schema/interface-prefix', {
       query: { user3: user },
       throwOnError: false
     });
@@ -202,7 +201,7 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
     assert(res2.body.details.errors[0].path);
     assert(!res2.body.details.errors[0].path.startsWith('user'));
 
-    const res3 = await this.request<User>('get', '/test/schema/interface-prefix', {
+    const res3 = await this.request<User>('GET', '/test/schema/interface-prefix', {
       query: { ...user, user2: user },
     });
 
@@ -210,7 +209,7 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
     assert(res3.body.name === user.name);
     assert(res3.body.age === 20);
 
-    const res4 = await this.request<Errors>('get', '/test/schema/interface-prefix', {
+    const res4 = await this.request<Errors>('GET', '/test/schema/interface-prefix', {
       query: { ...user, user2: { ...user, age: '300' } },
       throwOnError: false
     });
@@ -223,50 +222,50 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
 
   @Test()
   async verifyVoid() {
-    const ep = getEndpoint('/void', 'get');
+    const ep = getEndpoint('/void', 'GET');
     assert(ep.responseType === undefined);
   }
 
   @Test()
   async verifyVoidAll() {
-    const ep = getEndpoint('/voidAll', 'get');
+    const ep = getEndpoint('/voidAll', 'GET');
     assert(ep.responseType === undefined);
   }
 
   @Test()
   async verifyList() {
-    const ep = getEndpoint('/users', 'get');
+    const ep = getEndpoint('/users', 'GET');
     assert(ep.responseType?.type === User);
   }
 
   @Test()
   async verifyShapeAll() {
-    const ep = getEndpoint('/allShapes', 'get');
+    const ep = getEndpoint('/allShapes', 'GET');
     console.log(`${ep.responseType}`);
   }
 
   @Test()
   async verifyShapeClass() {
-    const ep = getEndpoint('/classShape/:shape', 'get');
+    const ep = getEndpoint('/classShape/:shape', 'GET');
     assert(ep.responseType);
     assert(SchemaRegistry.has(ep.responseType!.type));
   }
 
   @Test()
   async verifyRenderable() {
-    const ep = getEndpoint('/renderable/:age', 'get');
+    const ep = getEndpoint('/renderable/:age', 'GET');
     assert(ep.responseType?.type === undefined);
   }
 
   @Test()
   async verifyCustomSerializeable() {
-    const ep = getEndpoint('/customSerialize', 'get');
+    const ep = getEndpoint('/customSerialize', 'GET');
     assert(ep.responseType?.type === User);
   }
 
   @Test()
   async verifyCustomSerializeable2() {
-    const ep = getEndpoint('/customSerialize2', 'get');
+    const ep = getEndpoint('/customSerialize2', 'GET');
     assert(ep.responseType?.type === User);
   }
 }

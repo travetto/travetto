@@ -3,7 +3,7 @@ import koa from 'koa';
 import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig, HTTP_METHODS } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { KoaWebServerUtil } from './util.ts';
@@ -47,7 +47,7 @@ export class KoaWebServer implements WebServer<koa> {
     // Register all endpoints to extract the proper request/response for the framework
     for (const endpoint of endpoints) {
       const finalPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[endpoint.method](finalPath, ctx => endpoint.filter!({
+      router[HTTP_METHODS[endpoint.method].lower](finalPath, ctx => endpoint.filter!({
         req: KoaWebServerUtil.getRequest(ctx)
       }));
     }

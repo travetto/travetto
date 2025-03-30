@@ -2,7 +2,7 @@ import { FastifyInstance, fastify } from 'fastify';
 import { fastifyCompress } from '@fastify/compress';
 import { fastifyEtag } from '@fastify/etag';
 
-import { WebConfig, WebServer, WebServerHandle, EndpointConfig, EtagConfig, CompressConfig } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig, EtagConfig, CompressConfig, HTTP_METHODS } from '@travetto/web';
 import { Inject, Injectable } from '@travetto/di';
 
 import { FastifyWebServerUtil } from './util.ts';
@@ -76,7 +76,7 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
         sub = '*';
       }
 
-      this.raw[endpoint.method](sub, (req, reply) =>
+      this.raw[HTTP_METHODS[endpoint.method].lower](sub, (req, reply) =>
         endpoint.filter!({ req: FastifyWebServerUtil.getRequest(req, reply) })
       );
     }

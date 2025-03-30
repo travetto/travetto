@@ -8,7 +8,6 @@ import { ControllerRegistry } from '../src/registry/controller.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Patch } from '../src/decorator/endpoint.ts';
 import { CacheControl, SetHeaders } from '../src/decorator/common.ts';
-import { HttpHeaders } from '../src/types/headers.ts';
 
 @Controller('/test')
 class TestController {

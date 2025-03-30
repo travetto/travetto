@@ -1,10 +1,9 @@
 import timers from 'node:timers/promises';
 
 import { DependencyRegistry } from '@travetto/di';
-import { type HttpRequest, CookieConfig, WebConfig, WebSslConfig, WebApplication } from '@travetto/web';
+import { type HttpRequest, CookieConfig, WebConfig, HttpHeaders, WebSslConfig, WebApplication } from '@travetto/web';
 
 import { WebServerSupport, MakeRequestConfig } from './base.ts';
-import { HttpHeaders } from '../../../src/types/headers.ts';
 
 /**
  * Support for invoking http requests against the server
