@@ -116,6 +116,7 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     assert(res.status === 201);
 
     const cookie = res.headers.get('Set-Cookie');
+    assert(cookie);
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert(res.body.payload === payload);
     assert(res.body.age === 1);

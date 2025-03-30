@@ -15,18 +15,19 @@ export class NodeWebServerUtil {
    * Build a Travetto HttpRequest from an Express Request
    */
   static getRequest(
-    req: IncomingMessage & { originalUrl?: string, secure?: boolean, params?: Record<string, string> },
-    res: ServerResponse
+    req: IncomingMessage & { originalUrl?: string, secure?: boolean },
+    res: ServerResponse,
+    params?: Record<string, string>
   ): HttpRequest {
 
-    const url = new URL(`http${req.secure ? 's' : ''}://${req.headers.host}${req.originalUrl}`);
+    const url = new URL(`http${req.secure ? 's' : ''}://${req.headers.host}${req.url}`);
 
     return new HttpRequest({
       protocol: req.secure ? 'https' : 'http',
       method: castTo(req.method),
       path: url.pathname!,
       query: Object.fromEntries(url.searchParams.entries()),
-      params: req.params,
+      params,
       headers: req.headers,
       inputStream: req,
       remoteIp: req.socket.remoteAddress,

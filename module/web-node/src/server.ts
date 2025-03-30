@@ -1,7 +1,7 @@
 import https from 'node:https';
 import http from 'node:http';
 // eslint-disable-next-line @typescript-eslint/naming-convention
-import Router from 'router';
+import Router from 'find-my-way';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
@@ -30,10 +30,10 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
 
   async init(): Promise<NodeWebApplication> {
     let server: https.Server | http.Server;
-    const router = new Router({ mergeParams: true });
+    const router = Router({ querystringParser: (await import('qs')).parse });
     const routed = (req: http.IncomingMessage, res: http.ServerResponse): void => {
       Object.assign(req, { secure: this.config.ssl?.active });
-      router(req, res, () => { });
+      router.lookup(req, res, () => { });
     };
 
     if (this.config.ssl?.active) {
@@ -47,28 +47,23 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
   }
 
   async unregisterEndpoints(key: string | symbol): Promise<void> {
-    const layers = this.raw.router.stack;
-    const pos = layers.findIndex(x => castTo<Keyed>(x.handle).key === key);
-    if (pos >= 0) {
-      layers.splice(pos, 1);
-    }
+    // const layers = this.raw.router.stack;
+    // const pos = layers.findIndex(x => castTo<Keyed>(x.handle).key === key);
+    // if (pos >= 0) {
+    //   layers.splice(pos, 1);
+    // }
   }
 
   async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void> {
-    const router = new Router({ mergeParams: true });
-    castTo<{ key?: string | symbol }>(router).key = key;
+    // castTo<{ key?: string | symbol }>(router).key = key;
 
     for (const endpoint of endpoints) {
-      const finalPath = endpoint.path === '/*all' ? '*all' :
-        endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
+      const fullPath = endpoint.fullPath.replaceAll('//', '/').replace(/[^/]*[*][^/]*/g, '*').replace(/(.)[/]$/, (_, a) => a);
 
-      router[endpoint.method](finalPath, async (req, res, next) => {
-        await endpoint.filter!({ req: NodeWebServerUtil.getRequest(req, res) });
-        next();
+      this.raw.router[endpoint.method](fullPath, async (req, res, params) => {
+        await endpoint.filter!({ req: NodeWebServerUtil.getRequest(castTo(req), castTo(res), castTo(params)) });
       });
     }
-
-    this.raw.router.use(path, router);
   }
 
   async listen(): Promise<WebServerHandle> {
