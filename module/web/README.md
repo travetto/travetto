@@ -37,13 +37,13 @@ class SimpleController {
 Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported. 
 
 The HTTP methods that are supported via:
-   *  [@Get](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L31)
-   *  [@Post](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L38)
-   *  [@Put](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L45)
-   *  [@Delete](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L58)
-   *  [@Patch](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L52)
-   *  [@Head](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L64)
-   *  [@Options](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L70)
+   *  [@Get](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L29)
+   *  [@Post](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L36)
+   *  [@Put](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L43)
+   *  [@Delete](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L56)
+   *  [@Patch](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L50)
+   *  [@Head](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L62)
+   *  [@Options](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L68)
 Each endpoint decorator handles the following config:
    *  `title` - The definition of the endpoint
    *  `description` - High level description fo the endpoint
@@ -169,7 +169,7 @@ class ContextController {
 }
 ```
 
-**Note**: When referencing the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) values, the contract for idempotency needs to be carefully inspected to ensure idempotency, if expected. You can see in the example above that the [CacheControl](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L60) decorator is used to ensure that the response is not cached.
+**Note**: When referencing the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) values, the contract for idempotency needs to be carefully inspected to ensure idempotency, if expected. You can see in the example above that the [CacheControl](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L59) decorator is used to ensure that the response is not cached.
 
 ### Body and QuerySchema
 The module provides high level access for [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") support, via decorators, for validating and typing request bodies. 

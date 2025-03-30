@@ -42,13 +42,13 @@ Additionally, the module is predicated upon <a class="module-link" routerLink="/
 
 Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported. <br><br>
 The HTTP methods that are supported via:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L31">&#64;Get</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L38">&#64;Post</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L45">&#64;Put</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L58">&#64;Delete</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L52">&#64;Patch</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L64">&#64;Head</a></li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L70">&#64;Options</a></li>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L29">&#64;Get</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L36">&#64;Post</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L43">&#64;Put</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L56">&#64;Delete</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L50">&#64;Patch</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L62">&#64;Head</a></li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L68">&#64;Options</a></li>
 </ul>
 Each endpoint decorator handles the following config:
 <ul> <li><code class="item input">title</code> - The definition of the endpoint</li>
@@ -188,7 +188,7 @@ In addition to endpoint parameters (i.e. user-provided inputs), there may also b
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<p class="note"><strong>Note</strong> When referencing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">&#64;ContextParam</a> values, the contract for idempotency needs to be carefully inspected to ensure idempotency, if expected. You can see in the example above that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L60">CacheControl</a> decorator is used to ensure that the response is not cached.</p>
+<p class="note"><strong>Note</strong> When referencing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">&#64;ContextParam</a> values, the contract for idempotency needs to be carefully inspected to ensure idempotency, if expected. You can see in the example above that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L59">CacheControl</a> decorator is used to ensure that the response is not cached.</p>
 
 <h3 id="body-and-queryschema">Body and QuerySchema</h3>
 
