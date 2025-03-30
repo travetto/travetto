@@ -7,7 +7,7 @@ import { SessionModelSymbol } from '@travetto/auth-session';
 
 import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
 
-const KOA = Symbol.for('koa');
+const ServerSymbol = Symbol.for('koa');
 
 class Config {
   @InjectableFactory()
@@ -15,7 +15,7 @@ class Config {
     return new KoaWebServer();
   }
 
-  @InjectableFactory(KOA)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: KoaWebServer): WebApplication {
     return new class extends WebApplication {
       server = dep;
@@ -30,5 +30,5 @@ class Config {
 
 @Suite()
 export class KoaWebSessionTest extends AuthWebSessionServerSuite {
-  qualifier = KOA;
+  qualifier = ServerSymbol;
 }

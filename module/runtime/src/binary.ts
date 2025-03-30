@@ -11,7 +11,7 @@ import { BinaryInput, BlobMeta } from './types.ts';
 import { AppError } from './error.ts';
 import { Util } from './util.ts';
 
-const BlobMetaSymbol = Symbol.for('@travetto/runtime:blob-meta');
+const BlobMetaSymbol = Symbol();
 
 /**
  * Common functions for dealing with binary data/streams

@@ -43,9 +43,9 @@ class CustomService {
   }
 }
 
-const CUSTOM2 = Symbol.for('di-custom2');
+const Custom2Symbol = Symbol.for('di-custom2');
 
-@Injectable({ target: CustomService, qualifier: CUSTOM2 })
+@Injectable({ target: CustomService, qualifier: Custom2Symbol })
 class CustomService2 extends CustomService {
   override async coolOperation() {
     await super.coolOperation();
@@ -54,7 +54,7 @@ class CustomService2 extends CustomService {
 }
 
 class Consumer {
-  @Inject(CUSTOM2) // Pull in specific service
+  @Inject(Custom2Symbol) // Pull in specific service
   service: CustomService;
 }
 ```

@@ -66,27 +66,27 @@ export class ServiceInherit extends Service {
   }
 }
 
-export const SERVICE_INHERIT_2 = Symbol.for('SVC_I_2');
-export const SERVICE_INHERIT_3 = Symbol.for('SVC_I_3');
+export const ServiceInheritSymbol2 = Symbol.for('SVC_I_2');
+export const ServiceInheritSymbol3 = Symbol.for('SVC_I_3');
 
-@Injectable(SERVICE_INHERIT_2)
+@Injectable(ServiceInheritSymbol2)
 export class ServiceInherit2 extends ServiceInherit {
   age = 31;
 }
 
-export const CUSTOM_SERVICE_INHERIT = Symbol.for('Custom');
-export const CUSTOM_DATABASE = Symbol.for('CUSTOM DB');
-export const CUSTOM_EMPTY = Symbol.for('Custom EMPTY');
-export const CUSTOM_INTERFACE = Symbol.for('CustomInterface');
+export const CustomServiceInheritSymbol = Symbol.for('Custom');
+export const CustomDatabaseSymbol = Symbol.for('CUSTOM DB');
+export const CustomEmptySymbol = Symbol.for('Custom EMPTY');
+export const CustomInterfaceSymbol = Symbol.for('CustomInterface');
 
 class TestConfig {
-  @InjectableFactory(CUSTOM_EMPTY)
+  @InjectableFactory(CustomEmptySymbol)
   static getNewDb() {
     const out = new DbConfig();
     return out;
   }
 
-  @InjectableFactory(CUSTOM_EMPTY)
+  @InjectableFactory(CustomEmptySymbol)
   static getNewEmpty() {
     const out = new Empty();
     out.age = 20;
@@ -94,16 +94,16 @@ class TestConfig {
     return out;
   }
 
-  @InjectableFactory(CUSTOM_SERVICE_INHERIT)
-  static getObject(@Inject(SERVICE_INHERIT_2) svc: ServiceInherit) {
+  @InjectableFactory(CustomServiceInheritSymbol)
+  static getObject(@Inject(ServiceInheritSymbol2) svc: ServiceInherit) {
     console.log('Did I find service 2', { svc, db: svc?.db });
     const out: ServiceInherit = new ServiceInherit2(svc?.db ?? new Database());
     out.age = 11;
     return out;
   }
 
-  @InjectableFactory(CUSTOM_DATABASE)
-  static getCustomDB(@Inject(CUSTOM_EMPTY) empty: Empty) {
+  @InjectableFactory(CustomDatabaseSymbol)
+  static getCustomDB(@Inject(CustomEmptySymbol) empty: Empty) {
     console.log('Custom EMPTY 2', { empty });
     const config = new DbConfig();
     config.temp = 'any';
@@ -114,7 +114,7 @@ class TestConfig {
     return ret;
   }
 
-  @InjectableFactory(CUSTOM_INTERFACE)
+  @InjectableFactory(CustomInterfaceSymbol)
   static getIntType() {
     return new InterfaceType();
   }
@@ -135,7 +135,7 @@ export class UsableSubSubAClass extends UsableSubSubClass { }
 @Injectable()
 export class UsableSubSubBClass extends UsableSubSubClass { }
 
-export const LOOSE_SYM = Symbol.for('loose');
+export const LooseSymbol = Symbol.for('loose');
 
 @Injectable()
 export class LooseResolutionClass {
@@ -143,7 +143,7 @@ export class LooseResolutionClass {
 }
 
 class Config {
-  @InjectableFactory(LOOSE_SYM)
+  @InjectableFactory(LooseSymbol)
   static getLoose(): LooseResolutionClass {
     return new class extends LooseResolutionClass {
       name = 'george';

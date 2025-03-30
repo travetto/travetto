@@ -11,7 +11,7 @@ export type FunctionMetadata = FunctionMetadataTag & {
   abstract?: boolean;
 };
 
-const MetadataSymbol = Symbol.for('@travetto/runtime:function-metadata');
+const MetadataSymbol = Symbol();
 
 const pending = new Set<Function>([]);
 

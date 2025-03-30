@@ -5,14 +5,12 @@ import { TransformerState, OnMethod, OnClass, AfterClass, CoreUtil, OnFunction }
 import type { FunctionMetadataTag } from '../src/function.ts';
 import { MetadataRegistrationUtil } from './transformer/metadata.ts';
 
-const methods = Symbol.for('@travetto/runtime:methods');
-const cls = Symbol.for('@travetto/runtime:class');
-const fn = Symbol.for('@travetto/runtime:function');
+const MethodsSymbol = Symbol();
+const ClassSymbol = Symbol();
 
 interface MetadataInfo {
-  [methods]?: Record<string, FunctionMetadataTag>;
-  [cls]?: FunctionMetadataTag;
-  [fn]?: number;
+  [MethodsSymbol]?: Record<string, FunctionMetadataTag>;
+  [ClassSymbol]?: FunctionMetadataTag;
 }
 
 /**
@@ -29,8 +27,8 @@ export class RegisterTransformer {
       return node; // Exclude self
     }
 
-    state[cls] = MetadataRegistrationUtil.tag(state, node);
-    state[methods] = {};
+    state[ClassSymbol] = MetadataRegistrationUtil.tag(state, node);
+    state[MethodsSymbol] = {};
     return node;
   }
 
@@ -39,8 +37,8 @@ export class RegisterTransformer {
    */
   @OnMethod()
   static collectMethodMetadata(state: TransformerState & MetadataInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (state[cls] && ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
-      state[methods]![node.name.escapedText.toString()] = MetadataRegistrationUtil.tag(state, node);
+    if (state[ClassSymbol] && ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
+      state[MethodsSymbol]![node.name.escapedText.toString()] = MetadataRegistrationUtil.tag(state, node);
     }
     return node;
   }
@@ -50,12 +48,12 @@ export class RegisterTransformer {
    */
   @AfterClass()
   static registerClassMetadata(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (!state[cls]) {
+    if (!state[ClassSymbol]) {
       return node;
     }
 
-    const { [methods]: m, [cls]: c } = state;
-    delete state[cls];
+    const { [MethodsSymbol]: m, [ClassSymbol]: c } = state;
+    delete state[ClassSymbol];
     return MetadataRegistrationUtil.registerClass(state, node, c!, m);
   }
 

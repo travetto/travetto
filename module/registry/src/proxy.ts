@@ -1,6 +1,6 @@
 import { Any, castKey, castTo, classConstruct } from '@travetto/runtime';
 
-const ProxyTargetSymbol = Symbol.for('@travetto/runtime:proxy-target');
+const ProxyTargetSymbol = Symbol();
 
 const AsyncGeneratorFunction = Object.getPrototypeOf(async function* () { });
 const GeneratorFunction = Object.getPrototypeOf(function* () { });

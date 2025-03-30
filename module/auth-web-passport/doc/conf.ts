@@ -9,10 +9,10 @@ export class FbUser {
   permissions: string[];
 }
 
-export const FB_AUTH = Symbol.for('auth_facebook');
+export const FbAuthSymbol = Symbol.for('auth_facebook');
 
 export class AppConfig {
-  @InjectableFactory(FB_AUTH)
+  @InjectableFactory(FbAuthSymbol)
   static facebookPassport(): Authenticator {
     return new PassportAuthenticator('facebook',
       new FacebookStrategy(

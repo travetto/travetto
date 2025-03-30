@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import { path } from './path.ts';
 import { ManifestFileUtil } from './file.ts';
 
-import { PackagePath, type Package, type PackageWorkspaceEntry } from './types/package.ts';
+import { PackagePathSymbol, type Package, type PackageWorkspaceEntry } from './types/package.ts';
 import type { ManifestContext } from './types/context.ts';
 import type { NodePackageManager } from './types/common.ts';
 
@@ -82,7 +82,7 @@ export class PackageUtil {
 
     res.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for npx execution
 
-    res[PackagePath] = modulePath;
+    res[PackagePathSymbol] = modulePath;
     return res;
   }
 
@@ -90,7 +90,7 @@ export class PackageUtil {
    * Get the package path
    */
   static getPackagePath(pkg: Package): string {
-    return pkg[PackagePath]!;
+    return pkg[PackagePathSymbol]!;
   }
 
   /**

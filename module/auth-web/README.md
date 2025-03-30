@@ -96,10 +96,10 @@ import { InjectableFactory } from '@travetto/di';
 
 import { SimpleAuthenticator } from './source.ts';
 
-export const FB_AUTH = Symbol.for('auth-facebook');
+export const FbAuthSymbol = Symbol.for('auth-facebook');
 
 export class AppConfig {
-  @InjectableFactory(FB_AUTH)
+  @InjectableFactory(FbAuthSymbol)
   static facebookIdentity() {
     return new SimpleAuthenticator();
   }
@@ -245,7 +245,7 @@ import { Controller, Get, ContextParam, HttpResponse } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import { Principal } from '@travetto/auth';
 
-import { FB_AUTH } from './facebook.ts';
+import { FbAuthSymbol } from './facebook.ts';
 
 @Controller('/auth')
 export class SampleAuth {
@@ -254,7 +254,7 @@ export class SampleAuth {
   user: Principal;
 
   @Get('/simple')
-  @Login(FB_AUTH)
+  @Login(FbAuthSymbol)
   async simpleLogin() {
     return HttpResponse.redirect('/auth/self', 301);
   }

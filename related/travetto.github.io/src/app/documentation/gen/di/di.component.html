@@ -51,9 +51,9 @@ When declaring a dependency, you can also provide a token to allow for multiple 
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 
-<span class="token keyword">const</span> <span class="token constant">CUSTOM2</span> <span class="token operator">=</span> Symbol<span class="token punctuation">.</span><span class="token function">for</span><span class="token punctuation">(</span><span class="token string">'di-custom2'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> Custom2Symbol <span class="token operator">=</span> Symbol<span class="token punctuation">.</span><span class="token function">for</span><span class="token punctuation">(</span><span class="token string">'di-custom2'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
-<span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> target<span class="token operator">:</span> CustomService<span class="token punctuation">,</span> qualifier<span class="token operator">:</span> <span class="token constant">CUSTOM2</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> target<span class="token operator">:</span> CustomService<span class="token punctuation">,</span> qualifier<span class="token operator">:</span> Custom2Symbol <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">CustomService2</span> <span class="token keyword">extends</span> <span class="token class-name">CustomService</span> <span class="token punctuation">{{'{'}}</span>
   override <span class="token keyword">async</span> <span class="token function">coolOperation</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">await</span> <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">coolOperation</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -62,7 +62,7 @@ When declaring a dependency, you can also provide a token to allow for multiple 
 <span class="token punctuation">{{'}'}}</span>
 
 <span class="token keyword">class</span> <span class="token class-name">Consumer</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token constant">CUSTOM2</span><span class="token punctuation">)</span> <span class="token comment">// Pull in specific service</span>
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Inject</span></span><span class="token punctuation">(</span>Custom2Symbol<span class="token punctuation">)</span> <span class="token comment">// Pull in specific service</span>
   service<span class="token operator">:</span> CustomService<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

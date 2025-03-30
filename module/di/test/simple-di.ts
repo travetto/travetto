@@ -6,12 +6,12 @@ import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '../src/registry.ts';
 
 import {
-  ServiceInherit, SERVICE_INHERIT_2, CUSTOM_SERVICE_INHERIT,
-  CUSTOM_DATABASE, Database, CUSTOM_EMPTY, BasePattern,
-  SpecificPattern, InterfaceType, BaseTypeTarget, CUSTOM_INTERFACE, UsableMainClass, UsableSubClass,
+  ServiceInherit, ServiceInheritSymbol2, CustomServiceInheritSymbol,
+  CustomDatabaseSymbol, Database, CustomEmptySymbol, BasePattern,
+  SpecificPattern, InterfaceType, BaseTypeTarget, CustomInterfaceSymbol, UsableMainClass, UsableSubClass,
   UsableSubSubClass,
   LooseResolutionClass,
-  LOOSE_SYM,
+  LooseSymbol,
   SetterInject
 } from './deps.ts';
 
@@ -36,7 +36,7 @@ class DiTest {
     assert.ok(inst.db);
     assert(inst.age === 30);
 
-    inst = await DependencyRegistry.getInstance(ServiceInherit, SERVICE_INHERIT_2);
+    inst = await DependencyRegistry.getInstance(ServiceInherit, ServiceInheritSymbol2);
     inst.doWork();
     assert.ok(inst.db);
     assert(inst.age === 31);
@@ -92,7 +92,7 @@ class DiTest2 {
   @Test('factory')
   async factory() {
     assert(true);
-    const inst = await DependencyRegistry.getInstance(ServiceInherit, CUSTOM_SERVICE_INHERIT);
+    const inst = await DependencyRegistry.getInstance(ServiceInherit, CustomServiceInheritSymbol);
 
     assert(inst);
 
@@ -110,7 +110,7 @@ class DiTest2 {
   async factory2() {
     assert(true);
 
-    const inst = await DependencyRegistry.getInstance(Database, CUSTOM_DATABASE);
+    const inst = await DependencyRegistry.getInstance(Database, CustomDatabaseSymbol);
 
     assert(inst);
 
@@ -140,7 +140,7 @@ class DiTest2 {
   async factory4() {
     assert(true);
 
-    const inst = await DependencyRegistry.getInstance(DbConfig, CUSTOM_EMPTY);
+    const inst = await DependencyRegistry.getInstance(DbConfig, CustomEmptySymbol);
 
     assert(inst);
 
@@ -175,7 +175,7 @@ class DiTest2 {
     const specInst = await DependencyRegistry.getInstance(BaseTypeTarget);
     assert(specInst instanceof InterfaceType);
 
-    const customInst = await DependencyRegistry.getInstance(BaseTypeTarget, CUSTOM_INTERFACE);
+    const customInst = await DependencyRegistry.getInstance(BaseTypeTarget, CustomInterfaceSymbol);
     assert(customInst instanceof InterfaceType);
   }
 
@@ -203,7 +203,7 @@ class DiTest2 {
 
     const inst = await DependencyRegistry.getInstance(LooseResolutionClass);
 
-    const spec = await DependencyRegistry.getInstance(LooseResolutionClass, LOOSE_SYM);
+    const spec = await DependencyRegistry.getInstance(LooseResolutionClass, LooseSymbol);
 
     assert(spec.name !== inst.name);
 

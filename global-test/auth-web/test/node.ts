@@ -5,7 +5,7 @@ import { WebApplication, WebServer } from '@travetto/web';
 
 import { AuthWebServerSuite } from '@travetto/auth-web/support/test/server.ts';
 
-const NODE = Symbol.for('node');
+const ServerSymbol = Symbol.for('node');
 
 class Config {
   @InjectableFactory()
@@ -13,7 +13,7 @@ class Config {
     return new NodeWebServer();
   }
 
-  @InjectableFactory(NODE)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: NodeWebServer): WebApplication {
     return new class extends WebApplication {
       server = dep;
@@ -23,5 +23,5 @@ class Config {
 
 @Suite()
 export class NodeAuthWebTest extends AuthWebServerSuite {
-  qualifier = NODE;
+  qualifier = ServerSymbol;
 }

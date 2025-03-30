@@ -2,9 +2,9 @@ import ts from 'typescript';
 
 import { DecoratorMeta, NodeTransformer, State, TransformPhase, TransformerType, Transformer, ModuleNameSymbol } from './types/visitor.ts';
 
-const HandlersProp = Symbol.for('@travetto/transformer:handlers');
+const HandlersSymbol = Symbol();
 
-type TransformerWithHandlers = Transformer & { [HandlersProp]?: NodeTransformer[] };
+type TransformerWithHandlers = Transformer & { [HandlersSymbol]?: NodeTransformer[] };
 
 function isTransformer(x: unknown): x is Transformer {
   return x !== null && x !== undefined && typeof x === 'function';
@@ -14,13 +14,13 @@ function isTransformer(x: unknown): x is Transformer {
  * Get all transformers
  * @param obj Object to search for transformers
  */
-export function getAllTransformers(obj: Record<string, { [HandlersProp]?: NodeTransformer[] }>, module: string): NodeTransformer[] {
+export function getAllTransformers(obj: Record<string, { [HandlersSymbol]?: NodeTransformer[] }>, module: string): NodeTransformer[] {
   return Object.values(obj)
     .flatMap(x => {
       if (isTransformer(x)) {
         x[ModuleNameSymbol] = module;
       }
-      return (x[HandlersProp] ?? []);
+      return (x[HandlersSymbol] ?? []);
     })
     .map(handler => ({
       ...handler,
@@ -31,7 +31,7 @@ export function getAllTransformers(obj: Record<string, { [HandlersProp]?: NodeTr
 
 // Store handlers in class
 function storeHandler(cls: TransformerWithHandlers, fn: Function, phase: TransformPhase, type: TransformerType, target?: string[]): void {
-  (cls[HandlersProp] ??= []).push({ key: fn.name, [phase]: fn.bind(cls), type, target });
+  (cls[HandlersSymbol] ??= []).push({ key: fn.name, [phase]: fn.bind(cls), type, target });
 }
 
 /**

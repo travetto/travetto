@@ -1,7 +1,7 @@
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { Inject } from '@travetto/di';
 
-const NAME = Symbol.for('My Custom name symbol');
+const NameSymbol = Symbol();
 
 export class ContextAwareService {
 
@@ -10,18 +10,18 @@ export class ContextAwareService {
 
   @WithAsyncContext()
   async complexOperator(name: string) {
-    this.context.set(NAME, name);
+    this.context.set(NameSymbol, name);
     await this.additionalOp('extra');
     await this.finalOp();
   }
 
   async additionalOp(additional: string) {
-    const name = this.context.get(NAME);
-    this.context.set(NAME, `${name} ${additional}`);
+    const name = this.context.get(NameSymbol);
+    this.context.set(NameSymbol, `${name} ${additional}`);
   }
 
   async finalOp() {
-    const name = this.context.get(NAME);
+    const name = this.context.get(NameSymbol);
     // Use name
     return name;
   }

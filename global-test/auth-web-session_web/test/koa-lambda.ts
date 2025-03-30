@@ -8,7 +8,7 @@ import { SessionModelSymbol } from '@travetto/auth-session';
 import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
 import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server.ts';
 
-const KOA = Symbol.for('koa-lambda');
+const ServerSymbol = Symbol.for('koa-lambda');
 
 class Config {
   @InjectableFactory()
@@ -16,7 +16,7 @@ class Config {
     return new AwsLambdaKoaWebServer();
   }
 
-  @InjectableFactory(KOA)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: AwsLambdaKoaWebServer): AwsLambdaWebApplication {
     return new AwsLambdaWebApplication(dep);
   }
@@ -29,6 +29,6 @@ class Config {
 
 @Suite()
 export class KoaLambdaWebSessionTest extends AuthWebSessionServerSuite {
-  qualifier = KOA;
+  qualifier = ServerSymbol;
   type = AwsLambdaWebServerSupport;
 }

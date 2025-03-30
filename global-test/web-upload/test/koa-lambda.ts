@@ -6,7 +6,7 @@ import { AwsLambdaWebApplication } from '@travetto/web-aws-lambda';
 import { WebUploadServerSuite } from '@travetto/web-upload/support/test/server.ts';
 import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server.ts';
 
-const KOA = Symbol.for('koa-lambda');
+const ServerSymbol = Symbol.for('koa-lambda');
 
 class Config {
   @InjectableFactory()
@@ -14,7 +14,7 @@ class Config {
     return new AwsLambdaKoaWebServer();
   }
 
-  @InjectableFactory(KOA)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: AwsLambdaKoaWebServer): AwsLambdaWebApplication {
     return new AwsLambdaWebApplication(dep);
   }
@@ -22,6 +22,6 @@ class Config {
 
 @Suite()
 export class KoaLambdaWebUploadTest extends WebUploadServerSuite {
-  qualifier = KOA;
+  qualifier = ServerSymbol;
   type = AwsLambdaWebServerSupport;
 }

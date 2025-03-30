@@ -48,8 +48,8 @@ const METHODS: Record<string, Function[]> = {
 
 const OP_TOKEN_TO_NAME = new Map<number, keyof typeof OPTOKEN_ASSERT>();
 
-const AssertSymbol = Symbol.for('@travetto/test:assert');
-const IsTestSymbol = Symbol.for('@travetto/test:valid');
+const AssertSymbol = Symbol();
+const IsTestSymbol = Symbol();
 
 /**
  * Assert transformation state

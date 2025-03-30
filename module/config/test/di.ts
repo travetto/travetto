@@ -4,16 +4,16 @@ import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
-import { CUSTOM_EMPTY, DbConfig, Empty } from './di-config.ts';
+import { CustomEmptySymbol, DbConfig, Empty } from './di-config.ts';
 
 class TestConfig {
-  @InjectableFactory(CUSTOM_EMPTY)
+  @InjectableFactory(CustomEmptySymbol)
   static getNewDb() {
     const out = new DbConfig();
     return out;
   }
 
-  @InjectableFactory(CUSTOM_EMPTY)
+  @InjectableFactory(CustomEmptySymbol)
   static getNewEmpty() {
     const out = new Empty();
     out.age = 20;
@@ -28,7 +28,7 @@ export class DiConfigSuite {
   @Test('factory with autowire after')
   async simpleConfig() {
     await RootRegistry.init();
-    const inst = await DependencyRegistry.getInstance(DbConfig, CUSTOM_EMPTY);
+    const inst = await DependencyRegistry.getInstance(DbConfig, CustomEmptySymbol);
 
     assert(inst);
 

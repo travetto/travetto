@@ -2,7 +2,7 @@ import { Config } from '@travetto/config';
 import { Schema } from '@travetto/schema';
 import { Injectable, Inject } from '@travetto/di';
 
-export const CUSTOM_EMPTY = Symbol.for('CUSTOM_EMPTY');
+export const CustomEmptySymbol = Symbol.for('CUSTOM_EMPTY');
 
 @Injectable()
 export class Empty {

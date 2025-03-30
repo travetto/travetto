@@ -14,7 +14,7 @@ export type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: 
 
 export type ResolutionType = 'strict' | 'loose' | 'any';
 
-const PrimaryCandidateSymbol = Symbol.for('@travetto/di:primary');
+const PrimaryCandidateSymbol = Symbol();
 
 const hasPostConstruct = hasFunction<{ postConstruct: () => Promise<unknown> }>('postConstruct');
 const hasPreDestroy = hasFunction<{ preDestroy: () => Promise<unknown> }>('preDestroy');

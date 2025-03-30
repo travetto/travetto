@@ -7,7 +7,7 @@ import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test
 
 import { ModelBlobWebUploadServerSuite } from './server.ts';
 
-const EXPRESS = Symbol.for('express-lambda');
+const ServerSymbol = Symbol.for('express-lambda');
 
 class Config {
   @InjectableFactory()
@@ -15,7 +15,7 @@ class Config {
     return new AwsLambdaExpressWebServer();
   }
 
-  @InjectableFactory(EXPRESS)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: AwsLambdaExpressWebServer): AwsLambdaWebApplication {
     return new AwsLambdaWebApplication(dep);
   }
@@ -23,6 +23,6 @@ class Config {
 
 @Suite()
 export class ExpressLambdaWebUploadTest extends ModelBlobWebUploadServerSuite {
-  qualifier = EXPRESS;
+  qualifier = ServerSymbol;
   type = AwsLambdaWebServerSupport;
 }

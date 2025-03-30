@@ -6,7 +6,7 @@ import { castTo } from './types.ts';
 
 const MINUTE = (1000 * 60);
 
-const RESULT = Symbol.for('@travetto/runtime:exec-result');
+const ResultSymbol = Symbol();
 
 interface ExecutionBaseResult {
   /**
@@ -95,8 +95,8 @@ export class ExecUtil {
   static getResult(proc: ChildProcess, options: { catch?: boolean, binary?: false }): Promise<ExecutionResult<string>>;
   static getResult(proc: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
   static getResult<T extends string | Buffer>(proc: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
-    const _proc: ChildProcess & { [RESULT]?: Promise<ExecutionResult> } = proc;
-    const res = _proc[RESULT] ??= new Promise<ExecutionResult>(resolve => {
+    const _proc: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = proc;
+    const res = _proc[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let done = false;
@@ -123,8 +123,8 @@ export class ExecUtil {
         );
       };
 
-      proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
-      proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
+      proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
+      proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.isBuffer(d) ? d : Buffer.from(d)));
 
       proc.on('error', (err: Error) =>
         finish({ code: 1, message: err.message, valid: false }));

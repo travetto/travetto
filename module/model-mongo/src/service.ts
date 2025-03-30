@@ -27,7 +27,7 @@ import { Injectable } from '@travetto/di';
 import { MongoUtil, PlainIdx, WithId } from './internal/util.ts';
 import { MongoModelConfig } from './config.ts';
 
-const ListIndexSymbol = Symbol.for('@travetto/mongo-model:list-index');
+const ListIndexSymbol = Symbol();
 
 type BlobRaw = GridFSFile & { metadata?: BlobMeta };
 

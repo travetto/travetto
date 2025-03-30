@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { TransformerState, OnMethod, CoreUtil } from '@travetto/transformer';
 
-const DebugSymbol = Symbol.for('@travetto/runtime:debug');
+const DebugSymbol = Symbol();
 
 /**
  * Debug transformation state

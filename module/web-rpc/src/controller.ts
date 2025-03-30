@@ -45,7 +45,7 @@ export class WebRpController {
       params = [];
     }
 
-    req.getInternal().requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MISSING_PARAM : params[i]);
+    req.getInternal().requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]);
 
     // Dispatch
     return await endpoint.filter!({ req: this.ctx.req });

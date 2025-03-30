@@ -16,7 +16,7 @@ const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-
 
 type UploadItem = { stream: Readable, filename?: string, field: string };
 type FileType = { ext: string, mime: string };
-const RawFileSymbol = Symbol.for('@travetto/web-upload:raw-file');
+const RawFileSymbol = Symbol();
 
 /**
  * Web upload utilities

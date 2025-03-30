@@ -8,7 +8,7 @@ import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
 import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server.ts';
 
-const FASTIFY = Symbol.for('fastify-lambda');
+const ServerSymbol = Symbol.for('fastify-lambda');
 
 class Config {
   @InjectableFactory()
@@ -16,7 +16,7 @@ class Config {
     return new AwsLambdaFastifyWebServer();
   }
 
-  @InjectableFactory(FASTIFY)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: AwsLambdaFastifyWebServer): AwsLambdaWebApplication {
     return new AwsLambdaWebApplication(dep);
   }
@@ -29,6 +29,6 @@ class Config {
 
 @Suite()
 export class FastifyLambdaWebSessionTest extends AuthWebSessionServerSuite {
-  qualifier = FASTIFY;
+  qualifier = ServerSymbol;
   type = AwsLambdaWebServerSupport;
 }

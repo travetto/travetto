@@ -5,7 +5,7 @@ import { WebApplication, WebServer } from '@travetto/web';
 
 import { WebUploadServerSuite } from '@travetto/web-upload/support/test/server.ts';
 
-const EXPRESS = Symbol.for('express');
+const ServerSymbol = Symbol.for('express');
 
 class Config {
   @InjectableFactory()
@@ -13,7 +13,7 @@ class Config {
     return new ExpressWebServer();
   }
 
-  @InjectableFactory(EXPRESS)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: ExpressWebServer): WebApplication {
     return new class extends WebApplication {
       server = dep;
@@ -23,5 +23,5 @@ class Config {
 
 @Suite()
 export class ExpressWebUploadTest extends WebUploadServerSuite {
-  qualifier = EXPRESS;
+  qualifier = ServerSymbol;
 }

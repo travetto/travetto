@@ -5,7 +5,7 @@ import { WebApplication, WebServer } from '@travetto/web';
 
 import { WebUploadServerSuite } from '@travetto/web-upload/support/test/server.ts';
 
-const FASTIFY = Symbol.for('fastify');
+const ServerSymbol = Symbol.for('fastify');
 
 class Config {
   @InjectableFactory()
@@ -13,7 +13,7 @@ class Config {
     return new FastifyWebServer();
   }
 
-  @InjectableFactory(FASTIFY)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: FastifyWebServer): WebApplication {
     return new class extends WebApplication {
       server = dep;
@@ -23,5 +23,5 @@ class Config {
 
 @Suite()
 export class FastifyWebUploadTest extends WebUploadServerSuite {
-  qualifier = FASTIFY;
+  qualifier = ServerSymbol;
 }

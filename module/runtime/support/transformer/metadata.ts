@@ -3,10 +3,10 @@ import * as ts from 'typescript';
 import { FunctionMetadataTag } from '@travetto/runtime';
 import { CoreUtil, Import, SystemUtil, TransformerState } from '@travetto/transformer';
 
-const registerImport = Symbol.for('@travetto/runtime:registerImport');
+const RegisterImportSymbol = Symbol();
 
 interface MetadataInfo {
-  [registerImport]?: Import;
+  [RegisterImportSymbol]?: Import;
 }
 
 /**
@@ -46,11 +46,11 @@ export class MetadataRegistrationUtil {
     src?: ts.FunctionDeclaration | ts.FunctionExpression | ts.InterfaceDeclaration | ts.TypeAliasDeclaration
   ): void {
     // If we have a class like function
-    state[registerImport] ??= state.importFile(this.REGISTER_IMPORT);
+    state[RegisterImportSymbol] ??= state.importFile(this.REGISTER_IMPORT);
 
     const tag = this.tag(state, src ?? node);
     const meta = state.factory.createCallExpression(
-      state.createAccess(state[registerImport].ident, this.REGISTER_FN),
+      state.createAccess(state[RegisterImportSymbol].ident, this.REGISTER_FN),
       [],
       [
         state.createIdentifier(node.name!.text),
@@ -69,12 +69,12 @@ export class MetadataRegistrationUtil {
     cls: FunctionMetadataTag, methods?: Record<string, FunctionMetadataTag>
   ): ts.ClassDeclaration {
 
-    state[registerImport] ??= state.importFile(this.REGISTER_IMPORT);
+    state[RegisterImportSymbol] ??= state.importFile(this.REGISTER_IMPORT);
 
     const name = node.name?.escapedText.toString() ?? '';
 
     const meta = state.factory.createCallExpression(
-      state.createAccess(state[registerImport].ident, this.REGISTER_FN),
+      state.createAccess(state[RegisterImportSymbol].ident, this.REGISTER_FN),
       [],
       [
         state.createIdentifier(name),

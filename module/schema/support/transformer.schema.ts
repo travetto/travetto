@@ -6,12 +6,12 @@ import {
 
 import { SchemaTransformUtil } from './transformer/util.ts';
 
-const inSchema = Symbol.for('@travetto/schema:schema');
-const accessors = Symbol.for('@travetto/schema:accessors');
+const InSchemaSymbol = Symbol();
+const AccessorsSymbol = Symbol();
 
 interface AutoState {
-  [inSchema]?: boolean;
-  [accessors]?: Set<string>;
+  [InSchemaSymbol]?: boolean;
+  [AccessorsSymbol]?: Set<string>;
 }
 
 /**
@@ -24,8 +24,8 @@ export class SchemaTransformer {
    */
   @OnClass('Schema')
   static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta): ts.ClassDeclaration {
-    state[inSchema] = true;
-    state[accessors] = new Set();
+    state[InSchemaSymbol] = true;
+    state[AccessorsSymbol] = new Set();
     return node;
   }
 
@@ -48,8 +48,8 @@ export class SchemaTransformer {
       })));
     }
 
-    delete state[inSchema];
-    delete state[accessors];
+    delete state[InSchemaSymbol];
+    delete state[AccessorsSymbol];
 
     return state.factory.updateClassDeclaration(
       node,
@@ -67,7 +67,7 @@ export class SchemaTransformer {
   @OnProperty()
   static processSchemaField(state: TransformerState & AutoState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
     const ignore = state.findDecorator(this, node, 'Ignore');
-    return state[inSchema] && !ignore && DeclarationUtil.isPublic(node) ?
+    return state[InSchemaSymbol] && !ignore && DeclarationUtil.isPublic(node) ?
       SchemaTransformUtil.computeField(state, node) : node;
   }
 
@@ -77,8 +77,8 @@ export class SchemaTransformer {
   @OnGetter()
   static processSchemaGetter(state: TransformerState & AutoState, node: ts.GetAccessorDeclaration): ts.GetAccessorDeclaration {
     const ignore = state.findDecorator(this, node, 'Ignore');
-    if (state[inSchema] && !ignore && DeclarationUtil.isPublic(node) && !state[accessors]?.has(node.name.getText())) {
-      state[accessors]?.add(node.name.getText());
+    if (state[InSchemaSymbol] && !ignore && DeclarationUtil.isPublic(node) && !state[AccessorsSymbol]?.has(node.name.getText())) {
+      state[AccessorsSymbol]?.add(node.name.getText());
       return SchemaTransformUtil.computeField(state, node);
     }
     return node;
@@ -90,8 +90,8 @@ export class SchemaTransformer {
   @OnSetter()
   static processSchemaSetter(state: TransformerState & AutoState, node: ts.SetAccessorDeclaration): ts.SetAccessorDeclaration {
     const ignore = state.findDecorator(this, node, 'Ignore');
-    if (state[inSchema] && !ignore && DeclarationUtil.isPublic(node) && !state[accessors]?.has(node.name.getText())) {
-      state[accessors]?.add(node.name.getText());
+    if (state[InSchemaSymbol] && !ignore && DeclarationUtil.isPublic(node) && !state[AccessorsSymbol]?.has(node.name.getText())) {
+      state[AccessorsSymbol]?.add(node.name.getText());
       return SchemaTransformUtil.computeField(state, node);
     }
     return node;

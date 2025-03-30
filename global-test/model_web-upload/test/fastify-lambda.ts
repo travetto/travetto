@@ -7,7 +7,7 @@ import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test
 
 import { ModelBlobWebUploadServerSuite } from './server.ts';
 
-const FASTIFY = Symbol.for('fastify-lambda');
+const ServerSymbol = Symbol.for('fastify-lambda');
 
 class Config {
   @InjectableFactory()
@@ -15,7 +15,7 @@ class Config {
     return new AwsLambdaFastifyWebServer();
   }
 
-  @InjectableFactory(FASTIFY)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: AwsLambdaFastifyWebServer): AwsLambdaWebApplication {
     return new AwsLambdaWebApplication(dep);
   }
@@ -23,6 +23,6 @@ class Config {
 
 @Suite()
 export class FastifyLambdaWebUploadTest extends ModelBlobWebUploadServerSuite {
-  qualifier = FASTIFY;
+  qualifier = ServerSymbol;
   type = AwsLambdaWebServerSupport;
 }

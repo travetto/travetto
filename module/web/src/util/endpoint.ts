@@ -27,7 +27,7 @@ export class EndpointUtil {
     return 0;
   }
 
-  static MISSING_PARAM = Symbol.for('@travetto/web:missing-param');
+  static MissingParamSymbol = Symbol();
 
   /**
    * Create a full filter chain given the provided filters
@@ -76,7 +76,7 @@ export class EndpointUtil {
    * Extract parameter from request
    */
   static extractParameter(ctx: HttpContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
-    if (value !== undefined && value !== this.MISSING_PARAM) {
+    if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
       return param.extract(ctx, param);

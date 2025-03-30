@@ -7,7 +7,7 @@ import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
 import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
 
-const NODE = Symbol.for('node');
+const ServerSymbol = Symbol.for('node');
 
 class Config {
   @InjectableFactory()
@@ -15,7 +15,7 @@ class Config {
     return new NodeWebServer();
   }
 
-  @InjectableFactory(NODE)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: NodeWebServer): WebApplication {
     return new class extends WebApplication {
       server = dep;
@@ -30,5 +30,5 @@ class Config {
 
 @Suite()
 export class NodeWebSessionTest extends AuthWebSessionServerSuite {
-  qualifier = NODE;
+  qualifier = ServerSymbol;
 }
