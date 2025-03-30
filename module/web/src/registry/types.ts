@@ -3,6 +3,7 @@ import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../types/interceptor.ts';
 import type { HttpChainedFilter, HttpContext, HttpFilter } from '../types.ts';
+import { HttpHeaders } from '../types/headers.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
@@ -157,6 +158,10 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    * Full path including controller
    */
   fullPath: string;
+  /**
+   * Response header map
+   */
+  responseHeaderMap: HttpHeaders;
 }
 
 /**

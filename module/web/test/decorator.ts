@@ -31,8 +31,7 @@ export class ConfigureTest {
   }
 
   getHeaders(cls: Class, idx: number) {
-    const config = ControllerRegistry.get(cls);
-    return new HttpHeaders({ ...config.responseHeaders, ...config.endpoints[idx].responseHeaders });
+    return ControllerRegistry.get(cls).endpoints[idx].responseHeaderMap;
   }
 
   @Test()

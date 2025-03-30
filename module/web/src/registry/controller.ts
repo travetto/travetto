@@ -6,6 +6,7 @@ import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfi
 import { HttpChainedFilter, HttpFilter } from '../types.ts';
 import { HttpInterceptor } from '../types/interceptor.ts';
 import { WebContext } from '../context.ts';
+import { HttpHeaders } from '../types/headers.ts';
 
 type ValidFieldNames<T> = {
   [K in keyof T]:
@@ -47,7 +48,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       basePath: '',
       externalName: cls.name.replace(/(Controller|Web|Service)$/, ''),
       endpoints: [],
-      contextParams: {}
+      contextParams: {},
     };
   }
 
@@ -64,7 +65,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       params: [],
       interceptorConfigs: [],
       name: endpoint.name,
-      endpoint
+      endpoint,
+      responseHeaderMap: new HttpHeaders()
     };
 
     controllerConf.endpoints!.push(fieldConf);
@@ -201,11 +203,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     dest.title = src.title || dest.title;
     dest.description = src.description || dest.description;
     dest.documented = src.documented ?? dest.documented;
-    dest.responseHeaders ??= {};
-    // Merge in, lower case
-    for (const [k, v] of Object.entries(src.responseHeaders ?? {})) {
-      dest.responseHeaders[k.toLowerCase()] = v;
-    }
+    dest.responseHeaders = { ...src.responseHeaders, ...dest.responseHeaders };
   }
 
   /**
@@ -262,6 +260,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       this.#endpointsById.set(ep.id, ep);
       // Store full path from base for use in other contexts
       ep.fullPath = `${final.basePath}/${ep.path}`.replaceAll('//', '/');
+      ep.responseHeaderMap = new HttpHeaders({ ...final.responseHeaders ?? {}, ...ep.responseHeaders ?? {} });
     }
 
     if (this.has(final.basePath)) {

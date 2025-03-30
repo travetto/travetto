@@ -4,7 +4,7 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, ControllerRegistry, HttpHeaders } from '@travetto/web';
+import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, HttpHeaders } from '@travetto/web';
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 
@@ -23,11 +23,6 @@ type GeneratedSpec = {
     schemas: SchemasObject;
   };
 };
-
-function getResponseHeader(ep: EndpointConfig, header: string): string | undefined {
-  const config = ControllerRegistry.get(ep.class);
-  return new HttpHeaders({ ...config.responseHeaders, ...ep.responseHeaders }).get(header) ?? undefined;
-}
 
 /**
  * Spec generation utilities
@@ -272,7 +267,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const complex = field.type && SchemaRegistry.has(field.type);
     if (param.location) {
       if (param.location === 'body') {
-        const acceptsMime = getResponseHeader(ep, 'accepts');
+        const acceptsMime = ep.responseHeaderMap.get('accepts');
         return {
           requestBody: field.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(field, acceptsMime)
         };
@@ -310,7 +305,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       parameters: []
     };
 
-    const contentTypeMime = getResponseHeader(ep, 'content-type');
+    const contentTypeMime = ep.responseHeaderMap.get('content-type');
     const pConf = this.#getEndpointBody(ep.responseType, contentTypeMime);
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;

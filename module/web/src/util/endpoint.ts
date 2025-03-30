@@ -143,14 +143,12 @@ export class EndpointUtil {
       interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
     }
 
-    const resolvedHeaders = { ...controller?.responseHeaders, ...endpoint.responseHeaders };
-
     const handlerBound: HttpFilter = async (ctx): Promise<HttpResponse> => {
       const params = await this.extractParameters(ctx, endpoint);
       try {
         const res = HttpResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
         return res
-          .backfillHeaders(resolvedHeaders)
+          .backfillHeaders(endpoint.responseHeaders ?? {})
           .ensureContentLength()
           .ensureContentType()
           .ensureStatusCode(ctx.req.method === 'POST' ? 201 : (ctx.req.method === 'PUT' ? 204 : 200));
@@ -161,7 +159,7 @@ export class EndpointUtil {
 
     const filters = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
-      ...('filters' in endpoint ? endpoint.filters : []).map(fn => fn.bind(endpoint.instance)),
+      ...(endpoint.filters ?? []).map(fn => fn.bind(endpoint.instance)),
       ...(endpoint.params.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
     ];
 
