@@ -1,7 +1,7 @@
 import https from 'node:https';
 import http from 'node:http';
 // eslint-disable-next-line @typescript-eslint/naming-convention
-import Router from 'find-my-way';
+import type Router from 'find-my-way';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
@@ -30,6 +30,8 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
 
   async init(): Promise<NodeWebApplication> {
     let server: https.Server | http.Server;
+    // eslint-disable-next-line no-shadow
+    const Router = (await import('find-my-way')).default;
     const router = Router({ querystringParser: (await import('qs')).parse });
     const routed = (req: http.IncomingMessage, res: http.ServerResponse): void => {
       Object.assign(req, { secure: this.config.ssl?.active });

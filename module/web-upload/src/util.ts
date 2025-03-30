@@ -40,7 +40,17 @@ export class WebUploadUtil {
       const itr = new AsyncQueue<UploadItem>();
 
       // Upload
-      req.inputStream.pipe(busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
+      req.inputStream.pipe(busboy({
+        headers: {
+          'content-type': req.headers.get('Content-Type')!,
+          'content-disposition': req.headers.get('Content-Disposition')!,
+          'content-length': req.headers.get('Content-Length')!,
+          'content-range': req.headers.get('Content-Range')!,
+          'content-encoding': req.headers.get('Content-Encoding')!,
+          'content-transfer-encoding': req.headers.get('Content-Transfer-Encoding')!,
+        },
+        limits: { fileSize: largestMax }
+      })
         .on('file', (field, stream, filename) => itr.add({ stream, filename, field }))
         .on('limit', field => itr.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
         .on('finish', () => itr.close())
