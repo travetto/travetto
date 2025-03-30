@@ -43,10 +43,10 @@ export class HttpRequest {
   readonly query: Record<string, unknown> = {};
   readonly params: Record<string, string> = {};
   readonly remoteIp?: string;
-  readonly inputStream: Readable;
+  readonly inputStream?: Readable;
   body?: Any;
 
-  constructor(init: RequestInit) {
+  constructor(init: RequestInit = {}) {
     Object.assign(this, init);
     this.headers = new HttpHeaders(init.headers);
   }
