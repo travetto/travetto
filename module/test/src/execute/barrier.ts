@@ -12,7 +12,7 @@ export class Barrier {
    * Track timeout
    */
   static timeout(duration: number | TimeSpan, op: string = 'Operation'): { promise: Promise<void>, resolve: () => unknown } {
-    const resolver = Util.resolvablePromise();
+    const resolver = Promise.withResolvers<void>();
     const durationMs = TimeUtil.asMillis(duration);
     let timeout: NodeJS.Timeout;
     if (!durationMs) {
@@ -30,7 +30,7 @@ export class Barrier {
    * Track uncaught error
    */
   static uncaughtErrorPromise(): { promise: Promise<void>, resolve: () => unknown } {
-    const uncaught = Util.resolvablePromise<void>();
+    const uncaught = Promise.withResolvers<void>();
     const onError = (err: Error): void => { Util.queueMacroTask().then(() => uncaught.reject(err)); };
     UNCAUGHT_ERR_EVENTS.map(k => process.on(k, onError));
     uncaught.promise.finally(() => { UNCAUGHT_ERR_EVENTS.map(k => process.off(k, onError)); });

@@ -29,7 +29,8 @@ export class AwsLambdaKoaWebServer extends KoaWebServer implements AwsLambdaWebS
 
   override async init(): Promise<this['raw']> {
     const ret = await super.init();
-    this.#handler = castTo(configure({ app: ret.callback(), ...this.awsConfig.toJSON() }));
+    const fn = ret.callback();
+    this.#handler = castTo(configure({ app: (req, res) => fn(Object.assign(req, { body: undefined }), res), ...this.awsConfig.toJSON() }));
     return ret;
   }
 

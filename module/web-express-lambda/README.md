@@ -13,4 +13,4 @@ npm install @travetto/web-express-lambda
 yarn add @travetto/web-express-lambda
 ```
 
-The [express](https://expressjs.com) module supports AWS lambda integration when installed.  This produces an instance of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L21) that is able to integrate with AWS appropriately.
+The [express](https://expressjs.com) module supports AWS lambda integration when installed.  This produces an instance of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L17) that is able to integrate with AWS appropriately.

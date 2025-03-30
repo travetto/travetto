@@ -13,4 +13,4 @@ npm install @travetto/web-fastify-lambda
 yarn add @travetto/web-fastify-lambda
 ```
 
-This module provides support for [Fastify Web Server](https://github.com/travetto/travetto/tree/main/module/web-fastify#readme "Fastify provider for the travetto web module.") + [Web AWS Lambda](https://github.com/travetto/travetto/tree/main/module/web-aws-lambda#readme "Web APIs entry point support for AWS Lambdas.").  This produces an instance of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L21) that is able to integrate with AWS appropriately.
+This module provides support for [Fastify Web Server](https://github.com/travetto/travetto/tree/main/module/web-fastify#readme "Fastify provider for the travetto web module.") + [Web AWS Lambda](https://github.com/travetto/travetto/tree/main/module/web-aws-lambda#readme "Web APIs entry point support for AWS Lambdas.").  This produces an instance of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L17) that is able to integrate with AWS appropriately.

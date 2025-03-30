@@ -3,14 +3,23 @@ import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 import { Ignore } from '@travetto/schema';
 
-import { FilterContext } from '../types.ts';
 import { MimeUtil } from '../util/mime.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { HttpChainedContext } from '../types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { HttpResponse } from '../types/response.ts';
+
+import { EndpointConfig } from '../registry/types.ts';
 
 @Config('web.accepts')
-class AcceptsConfig extends ManagedInterceptorConfig {
+class AcceptsConfig {
+  /**
+   * Accepts certain request content types
+   */
+  applies = false;
+  /**
+   * The accepted types
+   */
   types: string[] = [];
 
   @Ignore()
@@ -23,7 +32,7 @@ class AcceptsConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
 
-  dependsOn = [SerializeInterceptor];
+  category: HttpInterceptorCategory = 'request';
 
   @Inject()
   config: AcceptsConfig;
@@ -33,15 +42,15 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
     return cfg;
   }
 
-  // Opt-in
-  applies(): boolean {
-    return false;
+  applies(ep: EndpointConfig, config: AcceptsConfig): boolean {
+    return config.applies;
   }
 
-  intercept({ req, config }: FilterContext<AcceptsConfig>): void {
-    const contentType = req.header('content-type');
+  filter({ req, config, next }: HttpChainedContext<AcceptsConfig>): Promise<HttpResponse> {
+    const contentType = req.headers.get('Content-Type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });
     }
+    return next();
   }
 }

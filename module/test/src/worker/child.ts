@@ -14,7 +14,7 @@ import { TestRun } from '../model/test.ts';
  */
 export class TestChildWorker extends IpcChannel<TestRun> {
 
-  #done = Util.resolvablePromise();
+  #done = Promise.withResolvers<void>();
 
   async #exec(op: () => Promise<unknown>, type: string): Promise<void> {
     try {

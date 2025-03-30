@@ -12,7 +12,8 @@ import { AuthLogoutInterceptor } from './interceptors/logout.ts';
  */
 export function Login(source: symbol, ...sources: symbol[]): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(AuthLoginInterceptor, {
-    providers: [source, ...sources]
+    providers: [source, ...sources],
+    applies: true
   });
 }
 
@@ -25,6 +26,7 @@ export function Authenticated(permissions: string[] = []): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
     state: 'authenticated',
     permissions,
+    applies: true
   });
 }
 
@@ -34,7 +36,8 @@ export function Authenticated(permissions: string[] = []): EndpointDecorator {
  */
 export function Unauthenticated(): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
-    state: 'unauthenticated'
+    state: 'unauthenticated',
+    applies: true
   });
 }
 
@@ -43,5 +46,5 @@ export function Unauthenticated(): EndpointDecorator {
  * @augments `@travetto/auth:Logout`
  */
 export function Logout(): EndpointDecorator {
-  return ControllerRegistry.createInterceptorConfigDecorator(AuthLogoutInterceptor, {});
+  return ControllerRegistry.createInterceptorConfigDecorator(AuthLogoutInterceptor, { applies: true });
 }

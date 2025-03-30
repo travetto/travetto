@@ -3,17 +3,15 @@ import assert from 'node:assert';
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
-import { castTo } from '@travetto/runtime';
-import { ContextParam } from '@travetto/context';
 
-import { QueryParam, HeaderParam, PathParam } from '../src/decorator/param.ts';
+import { HttpRequest } from '../src/types/request.ts';
+import { HttpHeaders } from '../src/types/headers.ts';
+import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param.ts';
 import { Post, Get } from '../src/decorator/endpoint.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpMethodOrAll, HttpRequest, HttpResponse } from '../src/types.ts';
-import { EndpointConfig } from '../src/registry/types.ts';
+import { EndpointConfig, HttpMethodOrAll } from '../src/registry/types.ts';
 import { EndpointUtil } from '../src/util/endpoint.ts';
-import { HttpRequestCore, HttpResponseCore } from '@travetto/web';
 
 class User {
   name: string;
@@ -24,9 +22,6 @@ class ParamController {
 
   @ContextParam()
   req: HttpRequest;
-
-  @ContextParam()
-  res: HttpResponse;
 
   @Post('/:name')
   async endpoint(@PathParam() name: string, @QueryParam() age: number) { }
@@ -39,7 +34,7 @@ class ParamController {
 
   @Post('/req/res')
   async reqRes() {
-    return this.req.url;
+    return this.req.path;
   }
 
   @Post('/array')
@@ -78,11 +73,6 @@ class ParamController {
   @Post('/alias3')
   async alias3(@QueryParam() nm: string | number = 'green') { }
 
-  /**
-  */
-  // @Post('/wrapper')
-  // async wrapper(@Body() wrapper: Wrapper<Complex>) { }
-
   @Get('/list/todo')
   async listTodo(limit: number, offset: number, categories?: string[]): Promise<unknown[]> {
     return [];
@@ -100,8 +90,10 @@ export class EndpointParameterTest {
     return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.method === method)!;
   }
 
-  static async extract(ep: EndpointConfig, req: Partial<HttpRequest>, res: Partial<HttpResponse> = {}): Promise<unknown[]> {
-    return await EndpointUtil.extractParameters(ep, HttpRequestCore.create(req), HttpResponseCore.create(res));
+  static async extract(ep: EndpointConfig, req: Partial<HttpRequest>): Promise<unknown[]> {
+    return await EndpointUtil.extractParameters({
+      req: new HttpRequest({ ...req })
+    }, ep);
   }
 
   @BeforeAll()
@@ -137,16 +129,15 @@ export class EndpointParameterTest {
 
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
-        header: castTo((key: string): string => key)
+        headers: new HttpHeaders({
+          'api-key': 'api-key'
+        })
       })
     );
 
     await assert.rejects(() =>
-      EndpointParameterTest.extract(ep, {
-        header: castTo(() => { })
-      })
+      EndpointParameterTest.extract(ep, {})
     );
-
   }
 
   @Test()
@@ -178,8 +169,7 @@ export class EndpointParameterTest {
   async testReqRes() {
     const ep = EndpointParameterTest.getEndpoint('/req/res', 'post');
     const req = { path: '/path' };
-    const res = { statusCode: 200 };
-    const items = await EndpointParameterTest.extract(ep, req, res);
+    const items = await EndpointParameterTest.extract(ep, req);
 
     assert(items.length === 0);
   }
@@ -187,18 +177,18 @@ export class EndpointParameterTest {
   @Test()
   async testAliasing() {
     const ep = EndpointParameterTest.getEndpoint('/alias', 'post');
-    const params = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
+    const params = SchemaRegistry.getMethodSchema(ep.class, ep.name);
     assert(params[0].description === 'User name');
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep, { query: { nm: 'blue' } }), ['green']);
     assert.deepStrictEqual(await EndpointParameterTest.extract(ep, { query: { name: 'blue' } }), ['blue']);
 
     const ep2 = EndpointParameterTest.getEndpoint('/alias2', 'post');
-    const params2 = SchemaRegistry.getMethodSchema(ep2.class, ep2.handlerName);
+    const params2 = SchemaRegistry.getMethodSchema(ep2.class, ep2.name);
     assert(params2[0].description === 'User\'s name');
     assert(ep2.params[0].name === 'nm');
 
     const ep3 = EndpointParameterTest.getEndpoint('/alias3', 'post');
-    const params3 = SchemaRegistry.getMethodSchema(ep3.class, ep3.handlerName);
+    const params3 = SchemaRegistry.getMethodSchema(ep3.class, ep3.name);
     assert(params3[0].description === 'User\'s name');
     assert(ep3.params[0].name === 'nm');
   }

@@ -9,7 +9,7 @@ import { ManifestModuleUtil } from '@travetto/manifest';
 import { clientFactory } from '../support/client/rpc.ts';
 import { WebRpcClient, WebRpcConfig } from './config.ts';
 
-@Injectable({ autoCreate: true })
+@Injectable({ autoCreate: !Runtime.production })
 export class WebRpcClientGeneratorService {
 
   @Inject()

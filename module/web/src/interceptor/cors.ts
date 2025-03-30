@@ -2,16 +2,22 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import { FilterContext, HttpRequest } from '../types.ts';
+import { HttpChainedContext } from '../types.ts';
+import { HttpResponse } from '../types/response.ts';
+import { HttpRequest } from '../types/request.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { EndpointConfig } from '../registry/types.ts';
 
 /**
  * Web cors support
  */
 @Config('web.cors')
-export class CorsConfig extends ManagedInterceptorConfig {
+export class CorsConfig {
+  /**
+   * Send CORS headers on responses
+   */
+  applies = true;
   /**
    * Allowed origins
    */
@@ -44,10 +50,10 @@ export class CorsConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
 
+  category: HttpInterceptorCategory = 'response';
+
   @Inject()
   config: CorsConfig;
-
-  dependsOn = [SerializeInterceptor];
 
   finalizeConfig(config: CorsConfig): CorsConfig {
     config.resolved = {
@@ -59,13 +65,24 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     return config;
   }
 
-  intercept({ req, res, config: { resolved } }: FilterContext<CorsConfig>): void {
-    const origin = req.header('origin');
-    if (!resolved.origins.size || resolved.origins.has('*') || (origin && resolved.origins.has(origin))) {
-      res.setHeader('Access-Control-Allow-Origin', origin || '*');
-      res.setHeader('Access-Control-Allow-Credentials', `${resolved.credentials}`);
-      res.setHeader('Access-Control-Allow-Methods', resolved.methods);
-      res.setHeader('Access-Control-Allow-Headers', resolved.headers || req.header('access-control-request-headers')! || '*');
+  applies(ep: EndpointConfig, config: CorsConfig): boolean {
+    return config.applies;
+  }
+
+  decorate(req: HttpRequest, resolved: CorsConfig['resolved'], res: HttpResponse,): HttpResponse {
+    const origin = req.headers.get('Origin');
+    res.headers.set('Access-Control-Allow-Origin', origin || '*');
+    res.headers.set('Access-Control-Allow-Credentials', `${resolved.credentials}`);
+    res.headers.set('Access-Control-Allow-Methods', resolved.methods);
+    res.headers.set('Access-Control-Allow-Headers', resolved.headers || req.headers.get('Access-Control-Request-Headers')! || '*');
+    return res;
+  }
+
+  async filter({ req, config: { resolved }, next }: HttpChainedContext<CorsConfig>): Promise<HttpResponse> {
+    try {
+      return this.decorate(req, resolved, await next());
+    } catch (err) {
+      throw this.decorate(req, resolved, HttpResponse.fromCatch(err));
     }
   }
 }

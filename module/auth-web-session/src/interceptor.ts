@@ -1,12 +1,12 @@
-import { Class, toConcrete } from '@travetto/runtime';
+import { toConcrete } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
-import { HttpInterceptor, FilterContext, FilterNext, ManagedInterceptorConfig, WebContext } from '@travetto/web';
+import { HttpInterceptor, WebContext, HttpInterceptorCategory, HttpChainedContext, HttpResponse } from '@travetto/web';
 import { Session, SessionContext, SessionData, SessionService } from '@travetto/auth-session';
 import { Config } from '@travetto/config';
 import { AuthContextInterceptor } from '@travetto/auth-web';
 
 @Config('web.session')
-class WebSessionConfig implements ManagedInterceptorConfig { }
+class WebSessionConfig { }
 
 /**
  * Loads session, and provides ability to create session as needed, persists when complete.
@@ -14,8 +14,8 @@ class WebSessionConfig implements ManagedInterceptorConfig { }
 @Injectable()
 export class AuthSessionInterceptor implements HttpInterceptor {
 
-  dependsOn: Class<HttpInterceptor>[] = [AuthContextInterceptor];
-  runsBefore: Class<HttpInterceptor>[] = [];
+  category: HttpInterceptorCategory = 'application';
+  dependsOn = [AuthContextInterceptor];
 
   @Inject()
   service: SessionService;
@@ -34,7 +34,7 @@ export class AuthSessionInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
 
-  async intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
+  async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
     try {
       await this.service.load();
       return await next();

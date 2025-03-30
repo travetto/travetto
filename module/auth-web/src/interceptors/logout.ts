@@ -1,4 +1,4 @@
-import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, SerializeInterceptor, FilterNext } from '@travetto/web';
+import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext, EndpointConfig, HttpResponse } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
@@ -6,7 +6,12 @@ import { AuthContext, AuthenticationError } from '@travetto/auth';
 import { AuthContextInterceptor } from './context.ts';
 
 @Config('web.auth.logout')
-export class WebAuthLogoutConfig extends ManagedInterceptorConfig { }
+export class WebAuthLogoutConfig {
+  /**
+   * Execute logout on endpoint
+   */
+  applies = false;
+}
 
 /**
  * Logout interceptor
@@ -16,22 +21,20 @@ export class WebAuthLogoutConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class AuthLogoutInterceptor implements HttpInterceptor<WebAuthLogoutConfig> {
 
+  category: HttpInterceptorCategory = 'application';
+  dependsOn = [AuthContextInterceptor];
+
   @Inject()
   config: WebAuthLogoutConfig;
 
   @Inject()
   authContext: AuthContext;
 
-  dependsOn = [SerializeInterceptor, AuthContextInterceptor];
-
-  /**
-   * Ensures this is an opt-in interceptor
-   */
-  applies(): boolean {
-    return false;
+  applies(ep: EndpointConfig, config: WebAuthLogoutConfig): boolean {
+    return config.applies;
   }
 
-  async intercept(ctx: FilterContext<WebAuthLogoutConfig>, next: FilterNext): Promise<FilterReturn> {
+  async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
     try {
       if (!this.authContext.principal) {
         throw new AuthenticationError('Already logged out');

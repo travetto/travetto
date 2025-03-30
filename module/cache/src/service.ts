@@ -5,8 +5,7 @@ import { AppError, Runtime, TimeUtil, Util } from '@travetto/runtime';
 
 import { CacheError } from './error.ts';
 import { CacheUtil } from './util.ts';
-import { CacheSymbols } from './symbols.ts';
-import { CacheAware } from './types.ts';
+import { CacheAware, CacheConfigSymbol, CacheModelSymbol, EvictConfigSymbol } from './types.ts';
 
 const INFINITE_MAX_AGE = TimeUtil.asMillis(10, 'y');
 
@@ -34,7 +33,7 @@ export class CacheService {
 
   #modelService: ModelExpirySupport;
 
-  constructor(@Inject(CacheSymbols.Model, { resolution: 'loose' }) modelService: ModelExpirySupport) {
+  constructor(@Inject(CacheModelSymbol, { resolution: 'loose' }) modelService: ModelExpirySupport) {
     this.#modelService = modelService;
   }
 
@@ -159,7 +158,7 @@ export class CacheService {
    * @param params input parameters
    */
   async cache(target: CacheAware, method: string, fn: Function, params: unknown[]): Promise<unknown | undefined> {
-    const config = target[CacheSymbols.CacheConfig]![method];
+    const config = target[CacheConfigSymbol]![method];
 
     const id = CacheUtil.generateKey(config, params);
 
@@ -186,7 +185,7 @@ export class CacheService {
    * @param params Input params to the function
    */
   async evict(target: CacheAware, method: string, fn: Function, params: unknown[]): Promise<unknown> {
-    const config = target[CacheSymbols.EvictConfig]![method];
+    const config = target[EvictConfigSymbol]![method];
     const id = CacheUtil.generateKey(config, params);
     const val = await fn.apply(target, params);
     try {

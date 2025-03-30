@@ -1,12 +1,10 @@
 import https from 'node:https';
+
 import express from 'express';
 
 import { Inject, Injectable } from '@travetto/di';
-import {
-  WebSymbols, HttpInterceptor, WebConfig, EndpointUtil, WebServer,
-  LoggingInterceptor, WebServerHandle, EndpointConfig
-} from '@travetto/web';
-import { castTo, Util } from '@travetto/runtime';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
+import { castTo } from '@travetto/runtime';
 
 import { ExpressWebServerUtil } from './util.ts';
 
@@ -22,14 +20,13 @@ export class ExpressWebServer implements WebServer<express.Application> {
 
   listening: boolean;
 
-  updateGlobalOnChange = true;
-
   @Inject()
   config: WebConfig;
 
   async init(): Promise<express.Application> {
     const app = express();
     app.disable('x-powered-by');
+    app.set('etag', false);
 
     if (this.config.trustProxy) {
       app.enable('trust proxy');
@@ -46,42 +43,20 @@ export class ExpressWebServer implements WebServer<express.Application> {
     }
   }
 
-  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors: HttpInterceptor[]): Promise<void> {
-    const router: express.Router & Keyed = express.Router({ mergeParams: true });
+  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void> {
+    const router = express.Router({ mergeParams: true });
+    castTo<Keyed>(router).key = key;
 
     for (const endpoint of endpoints) {
-      const endpointPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[endpoint.method](endpointPath, async (req, res) => {
-        await endpoint.handlerFinalized!(...ExpressWebServerUtil.convert(req, res));
+      const finalPath = endpoint.path === '/*all' ? '*all' :
+        endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
+
+      router[endpoint.method](finalPath, async (req, res, next) => {
+        await endpoint.filter!({ req: ExpressWebServerUtil.getRequest(req, res) });
+        next();
       });
     }
 
-    // Register options handler for each controller, working with a bug in express
-    if (key !== WebSymbols.GlobalEndpoint) {
-      const optionHandler = EndpointUtil.createEndpointHandler(
-        interceptors,
-        {
-          method: 'options',
-          path: '*all',
-          id: 'express-all',
-          filters: [],
-          headers: {},
-          handlerName: 'express-all',
-          class: ExpressWebServer,
-          handler: () => '',
-          params: [],
-          interceptors: [
-            [LoggingInterceptor, { disabled: true }]
-          ]
-        }
-      );
-
-      router.options('*all', (req, res) => {
-        optionHandler(...ExpressWebServerUtil.convert(req, res));
-      });
-    }
-
-    router.key = key;
     this.raw.use(path, router);
   }
 
@@ -90,10 +65,13 @@ export class ExpressWebServer implements WebServer<express.Application> {
     if (this.config.ssl?.active) {
       raw = https.createServer((await this.config.ssl?.getKeys())!, this.raw);
     }
-    this.listening = true;
-
-    const { reject, resolve, promise } = Util.resolvablePromise<WebServerHandle>();
-    const handle = raw.listen(this.config.port, this.config.hostname, err => err ? reject(err) : resolve(handle));
-    return promise;
+    const { reject, resolve, promise } = Promise.withResolvers<void>();
+    const server = raw.listen(this.config.port, this.config.hostname, err => err ? reject(err) : resolve());
+    await promise;
+    return {
+      port: this.config.port,
+      close: server.close.bind(server),
+      on: server.on.bind(server)
+    };
   }
 }

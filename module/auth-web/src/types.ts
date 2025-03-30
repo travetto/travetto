@@ -1,5 +1,5 @@
 import { AuthToken, Principal } from '@travetto/auth';
-import { FilterContext } from '@travetto/web';
+import { HttpRequest, HttpResponse } from '@travetto/web';
 
 export const CommonPrincipalCodecSymbol = Symbol.for('@travetto/auth-web:common-codec');
 
@@ -11,13 +11,13 @@ export interface PrincipalCodec {
   /**
    * Extract token for re-use elsewhere
    */
-  token?(ctx: FilterContext): Promise<AuthToken | undefined> | AuthToken | undefined;
+  token?(req: HttpRequest): Promise<AuthToken | undefined> | AuthToken | undefined;
   /**
    * Encode data
    */
-  encode(ctx: FilterContext, data: Principal | undefined): Promise<void> | void;
+  encode(payload: HttpResponse, data: Principal | undefined): Promise<HttpResponse> | HttpResponse;
   /**
    * Decode data
    */
-  decode(ctx: FilterContext): Promise<Principal | undefined> | Principal | undefined;
+  decode(req: HttpRequest): Promise<Principal | undefined> | Principal | undefined;
 }

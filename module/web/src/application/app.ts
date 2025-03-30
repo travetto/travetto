@@ -1,27 +1,20 @@
-import { Class, AppError, Runtime, toConcrete } from '@travetto/runtime';
+import { castTo, Class, Runtime, toConcrete, TypedObject } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
-import { WebServerHandle } from '../types.ts';
-import { WebConfig } from './config.ts';
 import { EndpointUtil } from '../util/endpoint.ts';
-import { HttpInterceptor } from '../interceptor/types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
-import { WebSymbols } from '../symbols.ts';
-import { WebServer } from './server.ts';
 import { WebCommonUtil } from '../util/common.ts';
-import { EndpointConfig } from '../registry/types.ts';
-import { WebContext } from '../context.ts';
+
+import { HttpInterceptor, HTTP_INTERCEPTOR_CATEGORIES } from '../types/interceptor.ts';
+import { WebServer, WebServerHandle } from '../types/server.ts';
 
 /**
  * The web application
  */
 @Injectable()
 export class WebApplication<T = unknown> {
-
-  @Inject()
-  config: WebConfig;
 
   @Inject()
   server: WebServer<T>;
@@ -31,23 +24,11 @@ export class WebApplication<T = unknown> {
    */
   interceptors: HttpInterceptor[] = [];
 
-  /**
-   * Provide the base information for the app
-   */
-  info: Record<string, unknown>;
-
   constructor() {
     this.onControllerChange = this.onControllerChange.bind(this);
-    this.globalHandler = this.globalHandler.bind(this);
   }
 
   async postConstruct(): Promise<void> {
-    this.info = {
-      module: Runtime.main.name,
-      version: Runtime.main.version,
-      env: Runtime.env
-    };
-
     // Log on startup, before DI finishes
     const cfg = await DependencyRegistry.getInstance(ConfigurationService);
     await cfg.initBanner();
@@ -60,25 +41,8 @@ export class WebApplication<T = unknown> {
     await Promise.all(ControllerRegistry.getClasses()
       .map(c => this.registerController(c)));
 
-    this.registerGlobal();
-
     // Listen for updates
     ControllerRegistry.on(this.onControllerChange);
-  }
-
-  /**
-   * Handle the global request
-   */
-  async globalHandler(): Promise<string | Record<string, unknown>> {
-    const { request: req } = await DependencyRegistry.getInstance(WebContext);
-
-    if (req.method === 'OPTIONS') {
-      return '';
-    } else if (req.path === '/' && this.config.defaultMessage) {
-      return this.info;
-    } else {
-      throw new AppError('Resource not found', { category: 'notfound', details: { path: req.path } });
-    }
   }
 
   /**
@@ -86,8 +50,35 @@ export class WebApplication<T = unknown> {
    */
   async getInterceptors(): Promise<HttpInterceptor[]> {
     const instances = await DependencyRegistry.getCandidateInstances(toConcrete<HttpInterceptor>());
-    const ordered = instances.map(x => ({ key: x.constructor, before: x.runsBefore, after: x.dependsOn, target: x }));
-    const sorted = WebCommonUtil.ordered(ordered).map(x => x.target);
+    const cats = HTTP_INTERCEPTOR_CATEGORIES.map(x => ({
+      key: x,
+      start: castTo<Class<HttpInterceptor>>({ name: `${x}Start` }),
+      end: castTo<Class<HttpInterceptor>>({ name: `${x}End` }),
+    }));
+
+    const categoryMapping = TypedObject.fromEntries(cats.map(x => [x.key, x]));
+
+    const ordered = instances.map(x => {
+      const group = categoryMapping[x.category];
+      const after = [...x.dependsOn ?? [], group.start];
+      const before = [...x.runsBefore ?? [], group.end];
+      return ({ key: x.constructor, before, after, target: x, placeholder: false });
+    });
+
+    // Add category sets into the ordering
+    let i = 0;
+    for (const cat of cats) {
+      const prevEnd = cats[i - 1]?.end ? [cats[i - 1].end] : [];
+      ordered.push(
+        { key: cat.start, before: [cat.end], after: prevEnd, placeholder: true, target: undefined! },
+        { key: cat.end, before: [], after: [cat.start], placeholder: true, target: undefined! }
+      );
+      i += 1;
+    }
+
+    const sorted = WebCommonUtil.ordered(ordered)
+      .filter(x => !x.placeholder)  // Drop out the placeholders
+      .map(x => x.target);
 
     console.debug('Sorting interceptors', { count: sorted.length, names: sorted.map(x => x.constructor.name) });
     return sorted;
@@ -118,25 +109,35 @@ export class WebApplication<T = unknown> {
     }
 
     const config = ControllerRegistry.get(c);
+
+    // Skip registering conditional controllers
+    if (config.conditional && !await config.conditional()) {
+      return;
+    }
+
     config.instance = await DependencyRegistry.getInstance(config.class);
 
     if (Runtime.dynamic) {
       config.instance = RetargettingProxy.unwrap(config.instance);
     }
 
-    for (const ep of EndpointUtil.orderEndpoints(config.endpoints)) {
+    // Filter out conditional endpoints
+    const endpoints = (await Promise.all(
+      config.endpoints.map(ep => Promise.resolve(ep.conditional?.() ?? true).then(v => v ? ep : undefined))
+    )).filter(x => !!x);
+
+    if (!endpoints.length) {
+      return;
+    }
+
+    for (const ep of EndpointUtil.orderEndpoints(endpoints)) {
       ep.instance = config.instance;
-      ep.handlerFinalized = EndpointUtil.createEndpointHandler(this.interceptors, ep, config);
+      ep.filter = castTo(EndpointUtil.createEndpointHandler(this.interceptors, ep, config));
     }
 
-    await this.server.registerEndpoints(config.class.Ⲑid, config.basePath, config.endpoints, this.interceptors);
+    await this.server.registerEndpoints(config.class.Ⲑid, config.basePath, endpoints);
 
-    if (this.server.listening && this.server.updateGlobalOnChange) {
-      await this.unregisterGlobal();
-      await this.registerGlobal();
-    }
-
-    console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: config.endpoints.length });
+    console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: endpoints.length });
   }
 
   /**
@@ -153,46 +154,13 @@ export class WebApplication<T = unknown> {
   }
 
   /**
-   * Register the global listener as a hardcoded path
-   */
-  async registerGlobal(): Promise<void> {
-    if (this.server.listening && !Runtime.dynamic) {
-      console.warn('Reloading only supported in dynamic mode');
-      return;
-    }
-
-    const endpoint: EndpointConfig = {
-      id: 'global-all',
-      filters: [],
-      headers: {},
-      class: WebApplication,
-      handlerName: this.globalHandler.name,
-      params: [],
-      instance: {},
-      handler: this.globalHandler,
-      method: 'all', path: '*',
-    };
-    endpoint.handlerFinalized = EndpointUtil.createEndpointHandler(this.interceptors, endpoint);
-    await this.server.registerEndpoints(WebSymbols.GlobalEndpoint, '/', [endpoint]);
-  }
-
-  /**
-   * Remove the global listener
-   */
-  async unregisterGlobal(): Promise<void> {
-    if (!Runtime.dynamic) {
-      console.warn('Unloading only supported in dynamic mode');
-      return;
-    }
-
-    await this.server.unregisterEndpoints(WebSymbols.GlobalEndpoint);
-  }
-
-  /**
    * Run the application
    */
   async run(): Promise<WebServerHandle> {
-    console.info('Listening', { port: this.config.port });
-    return await this.server.listen();
+    const handle = await this.server.listen();
+    if (handle.port) {
+      console.log('Listening', { port: handle.port });
+    }
+    return handle;
   }
 }

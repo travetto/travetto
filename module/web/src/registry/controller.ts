@@ -2,10 +2,11 @@ import { DependencyRegistry } from '@travetto/di';
 import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInstance } from '@travetto/runtime';
 import { MetadataRegistry } from '@travetto/registry';
 
-import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig } from './types.ts';
-import { Filter, EndpointHandler } from '../types.ts';
-import { HttpInterceptor } from '../interceptor/types.ts';
+import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
+import { HttpChainedFilter, HttpFilter } from '../types.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
 import { WebContext } from '../context.ts';
+import { HttpHeaders } from '../types/headers.ts';
 
 type ValidFieldNames<T> = {
   [K in keyof T]:
@@ -36,36 +37,36 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   getEndpointById(id: string): EndpointConfig | undefined {
-    return this.#endpointsById.get(id);
+    return this.#endpointsById.get(id.replace(':', '#'));
   }
 
   createPending(cls: Class): ControllerConfig {
     return {
       class: cls,
       filters: [],
-      headers: {},
-      interceptors: [],
+      interceptorConfigs: [],
       basePath: '',
       externalName: cls.name.replace(/(Controller|Web|Service)$/, ''),
       endpoints: [],
-      contextParams: {}
+      contextParams: {},
     };
   }
 
-  createPendingField(cls: Class, handler: EndpointHandler): EndpointConfig {
+  createPendingField(cls: Class, endpoint: EndpointFunction): EndpointConfig {
     const controllerConf = this.getOrCreatePending(cls);
 
     const fieldConf: EndpointConfig = {
-      id: `${cls.name}#${handler.name}`,
+      id: `${cls.name}#${endpoint.name}`,
       path: '/',
+      fullPath: '/',
       method: 'all',
       class: cls,
       filters: [],
-      headers: {},
       params: [],
-      interceptors: [],
-      handlerName: handler.name,
-      handler
+      interceptorConfigs: [],
+      name: endpoint.name,
+      endpoint,
+      responseHeaderMap: new HttpHeaders()
     };
 
     controllerConf.endpoints!.push(fieldConf);
@@ -76,43 +77,43 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   /**
    * Register the endpoint config
    * @param cls Controller class
-   * @param handler Endpoint handler
+   * @param endpoint Endpoint target function
    */
-  getOrCreateEndpointConfig<T>(cls: Class<T>, handler: EndpointHandler): EndpointConfig {
-    const fieldConf = this.getOrCreatePendingField(cls, handler);
+  getOrCreateEndpointConfig<T>(cls: Class<T>, endpoint: EndpointFunction): EndpointConfig {
+    const fieldConf = this.getOrCreatePendingField(cls, endpoint);
     return asFull(fieldConf);
   }
 
   /**
    * Register the controller filter
    * @param cls Controller class
-   * @param fn The filter to call
+   * @param filter The filter to call
    */
-  registerControllerFilter(target: Class, fn: Filter): void {
+  registerControllerFilter(target: Class, filter: HttpFilter | HttpChainedFilter): void {
     const config = this.getOrCreatePending(target);
-    config.filters!.push(fn);
+    config.filters!.push(filter);
   }
 
   /**
    * Register the controller filter
    * @param cls Controller class
-   * @param handler Endpoint handler
-   * @param fn The filter to call
+   * @param endpoint Endpoint function
+   * @param filter The filter to call
    */
-  registerEndpointFilter(target: Class, handler: EndpointHandler, fn: Filter): void {
-    const config = this.getOrCreateEndpointConfig(target, handler);
-    config.filters!.unshift(fn);
+  registerEndpointFilter(target: Class, endpoint: EndpointFunction, filter: HttpFilter | HttpChainedFilter): void {
+    const config = this.getOrCreateEndpointConfig(target, endpoint);
+    config.filters!.unshift(filter);
   }
 
   /**
    * Register the endpoint parameter
    * @param cls Controller class
-   * @param handler Endpoint handler
+   * @param endpoint Endpoint function
    * @param param The param config
    * @param index The parameter index
    */
-  registerEndpointParameter(target: Class, handler: EndpointHandler, param: EndpointParamConfig, index: number): void {
-    const config = this.getOrCreateEndpointConfig(target, handler);
+  registerEndpointParameter(target: Class, endpoint: EndpointFunction, param: EndpointParamConfig, index: number): void {
+    const config = this.getOrCreateEndpointConfig(target, endpoint);
     if (index >= config.params.length) {
       config.params.length = index + 1;
     }
@@ -122,13 +123,13 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   /**
    * Register the endpoint interceptor config
    * @param cls Controller class
-   * @param handler Endpoint handler
+   * @param endpoint Endpoint function
    * @param param The param config
    * @param index The parameter index
    */
-  registerEndpointInterceptorConfig<T extends HttpInterceptor>(target: Class, handler: EndpointHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
-    const endpointConfig = this.getOrCreateEndpointConfig(target, handler);
-    (endpointConfig.interceptors ??= []).push([interceptorCls, { disabled: false, ...config }]);
+  registerEndpointInterceptorConfig<T extends HttpInterceptor>(target: Class, endpoint: EndpointFunction, interceptorCls: Class<T>, config: Partial<T['config']>): void {
+    const endpointConfig = this.getOrCreateEndpointConfig(target, endpoint);
+    (endpointConfig.interceptorConfigs ??= []).push([interceptorCls, { ...config }]);
   }
 
   /**
@@ -139,7 +140,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   registerControllerInterceptorConfig<T extends HttpInterceptor>(target: Class, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const controllerConfig = this.getOrCreatePending(target);
-    (controllerConfig.interceptors ??= []).push([interceptorCls, { disabled: false, ...config }]);
+    (controllerConfig.interceptorConfigs ??= []).push([interceptorCls, { ...config }]);
   }
 
   /**
@@ -156,14 +157,14 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
 
   /**
    * Create a filter decorator
-   * @param fn The filter to call
+   * @param filter The filter to call
    */
-  createFilterDecorator(fn: Filter): EndpointDecorator {
-    return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<EndpointHandler>): void => {
+  createFilterDecorator(filter: HttpFilter): EndpointDecorator {
+    return (target: unknown, prop?: symbol | string, descriptor?: EndpointFunctionDescriptor): void => {
       if (prop) {
-        this.registerEndpointFilter(asConstructable(target).constructor, descriptor!.value!, fn);
+        this.registerEndpointFilter(asConstructable(target).constructor, descriptor!.value!, filter);
       } else {
-        this.registerControllerFilter(castTo(target), fn);
+        this.registerControllerFilter(castTo(target), filter);
       }
     };
   }
@@ -175,13 +176,17 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   createInterceptorConfigDecorator<T extends HttpInterceptor>(
     cls: Class<T>,
-    cfg: Partial<Omit<RetainFields<T['config']>, 'paths'>>
+    cfg: Partial<RetainFields<T['config']>>,
+    extra?: Partial<EndpointConfig & ControllerConfig>
   ): EndpointDecorator {
-    return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<EndpointHandler>): void => {
+    return (target: unknown, prop?: symbol | string, descriptor?: EndpointFunctionDescriptor): void => {
+      const outCls: Class = descriptor ? asConstructable(target).constructor : castTo(target);
       if (prop && descriptor) {
-        this.registerEndpointInterceptorConfig(asConstructable(target).constructor, descriptor!.value!, cls, castTo(cfg));
+        this.registerEndpointInterceptorConfig(outCls, descriptor!.value!, cls, castTo(cfg));
+        extra && this.registerPendingEndpoint(outCls, descriptor, extra);
       } else {
-        this.registerControllerInterceptorConfig(castTo(target), cls, castTo(cfg));
+        this.registerControllerInterceptorConfig(outCls, cls, castTo(cfg));
+        extra && this.registerPending(outCls, extra);
       }
     };
   }
@@ -192,14 +197,13 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param dest Target (controller, endpoint)
    */
   mergeDescribable(src: Partial<ControllerConfig | EndpointConfig>, dest: Partial<ControllerConfig | EndpointConfig>): void {
-    // Coerce to lower case
-    const headers = Object.fromEntries(Object.entries(src.headers ?? {}).map(([k, v]) => [k.toLowerCase(), v]));
-    dest.headers = { ...(dest.headers ?? {}), ...headers };
     dest.filters = [...(dest.filters ?? []), ...(src.filters ?? [])];
-    dest.interceptors = [...(dest.interceptors ?? []), ...(src.interceptors ?? [])];
+    dest.interceptorConfigs = [...(dest.interceptorConfigs ?? []), ...(src.interceptorConfigs ?? [])];
+    dest.interceptorExclude = dest.interceptorExclude ?? src.interceptorExclude;
     dest.title = src.title || dest.title;
     dest.description = src.description || dest.description;
     dest.documented = src.documented ?? dest.documented;
+    dest.responseHeaders = { ...src.responseHeaders, ...dest.responseHeaders };
   }
 
   /**
@@ -208,7 +212,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param descriptor Prop descriptor
    * @param config The endpoint config
    */
-  registerPendingEndpoint(target: Class, descriptor: TypedPropertyDescriptor<EndpointHandler>, config: Partial<EndpointConfig>): typeof descriptor {
+  registerPendingEndpoint(target: Class, descriptor: EndpointFunctionDescriptor, config: Partial<EndpointConfig>): typeof descriptor {
     const srcConf = this.getOrCreateEndpointConfig(target, descriptor.value!);
     srcConf.method = config.method ?? srcConf.method;
     srcConf.path = config.path || srcConf.path;
@@ -254,6 +258,9 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     // Store for lookup
     for (const ep of final.endpoints) {
       this.#endpointsById.set(ep.id, ep);
+      // Store full path from base for use in other contexts
+      ep.fullPath = `${final.basePath}/${ep.path}`.replaceAll('//', '/');
+      ep.responseHeaderMap = new HttpHeaders({ ...final.responseHeaders ?? {}, ...ep.responseHeaders ?? {} });
     }
 
     if (this.has(final.basePath)) {

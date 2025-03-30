@@ -29,7 +29,7 @@ While the expiry is not necessarily a hard requirement, the implementation witho
 
 **Code: Sample usage of Session Service**
 ```typescript
-class WebSessionConfig implements ManagedInterceptorConfig { }
+class WebSessionConfig { }
 
 /**
  * Loads session, and provides ability to create session as needed, persists when complete.
@@ -37,8 +37,8 @@ class WebSessionConfig implements ManagedInterceptorConfig { }
 @Injectable()
 export class AuthSessionInterceptor implements HttpInterceptor {
 
-  dependsOn: Class<HttpInterceptor>[] = [AuthContextInterceptor];
-  runsBefore: Class<HttpInterceptor>[] = [];
+  category: HttpInterceptorCategory = 'application';
+  dependsOn = [AuthContextInterceptor];
 
   @Inject()
   service: SessionService;
@@ -57,7 +57,7 @@ export class AuthSessionInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
 
-  async intercept(ctx: FilterContext, next: FilterNext): Promise<unknown> {
+  async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
     try {
       await this.service.load();
       return await next();

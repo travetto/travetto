@@ -1,5 +1,0 @@
-web:
-  cors:
-    paths: 
-      - '!/public/user'
-      - '/public/*'      

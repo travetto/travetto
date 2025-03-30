@@ -3,32 +3,12 @@ import assert from 'node:assert';
 import { Test, Suite } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
 
+import { CookieJar } from '../src/util/cookie.ts';
 import { WebCommonUtil } from '../src/util/common.ts';
-import { HttpResponse, HttpRequest } from '../src/types.ts';
+import { HttpRequest } from '../src/types/request.ts';
+import { HttpResponse } from '../src/types/response.ts';
 
-type Meta = Record<'headerData' | 'cookieData', Record<string, string | undefined>>;
-type MockHttpResponse = HttpResponse & Meta;
-type MockHttpRequest = HttpRequest;
-
-const mockResponse = (data?: Partial<Meta>): MockHttpResponse => {
-  const meta = { headerData: {}, cookieData: {}, ...data };
-  return castTo({
-    headerData: meta.headerData,
-    cookieData: meta.cookieData,
-    setHeader(key: string, value: string) { meta.headerData[key] = value; },
-    removeHeader(key: string) { delete meta.headerData[key]; },
-    cookies: { set(key: string, value: string) { meta.cookieData[key] = value; } }
-  });
-};
-
-const mockRequest = (data: Partial<Meta> = {}): MockHttpRequest => {
-  const meta = { headerData: {}, cookieData: {}, ...data };
-  return castTo({
-    headerFirst(key: string) { return meta.headerData[key]; },
-    getHeader(key: string) { return meta.headerData[key]; },
-    cookies: { get(key: string) { return meta.cookieData[key]; } }
-  });
-};
+const mockRequest = (res: HttpResponse): HttpRequest => new HttpRequest(castTo({ headers: res.headers }));
 
 const KEY = 'test';
 const config = (mode: 'cookie' | 'header', signed = true) => ({ cookie: 'orange', header: 'dandy', mode, ...signed ? { signingKey: KEY } : {} });
@@ -76,51 +56,51 @@ export class WebCommonUtilTest {
 
   @Test()
   async writeValueCookieTest() {
-    const res = mockResponse();
-    WebCommonUtil.writeValue(config('cookie', false), res, 'blue');
-    assert(res.cookieData.orange);
-    assert(res.cookieData.orange === 'blue');
+    const res = HttpResponse.fromEmpty()
+      .writeMetadata(config('cookie', false), 'blue');
 
-    WebCommonUtil.writeValue(config('cookie'), res, undefined);
-    assert('orange' in res.cookieData);
-    assert(res.cookieData.orange === undefined);
+    const jar = new CookieJar(res.getCookies());
+    assert(jar.get('orange') === 'blue');
 
+    res.writeMetadata(config('cookie'), undefined);
+
+    const jar2 = new CookieJar(res.getCookies());
+    assert(jar2.get('orange') === undefined);
   }
 
   @Test()
   async writeValueHeaderTest() {
-    const res = mockResponse();
-    WebCommonUtil.writeValue(config('header', false), res, 'blue');
-    assert(res.headerData.dandy);
-    assert(res.headerData.dandy === 'blue');
+    const res = HttpResponse.fromEmpty()
+      .writeMetadata(config('header', false), 'blue');
+    assert(res.headers.get('Dandy') === 'blue');
 
-    const res2 = mockResponse();
-    WebCommonUtil.writeValue(config('header'), res2, undefined);
-    assert(!res2.headerData.dandy);
+    const res2 = HttpResponse.fromEmpty()
+      .writeMetadata(config('header'), undefined);
+    assert(!res2.headers.get('Dandy'));
 
-    WebCommonUtil.writeValue(config('header'), res, undefined);
-    assert(!res.headerData.dandy);
+    res.writeMetadata(config('header'), undefined);
+    assert(!res.headers.get('Dandy'));
   }
 
   @Test()
   async readValueHeaderTest() {
-    const req = mockRequest({ headerData: { dandy: 'howdy' } });
-    const value = await WebCommonUtil.readValue(config('header', false), req);
+    const req = mockRequest(HttpResponse.fromEmpty().with({ headers: { dandy: 'howdy' } }));
+    const value = await req.readMetadata(config('header', false));
     assert(value);
     assert(value === 'howdy');
 
-    const missing = await WebCommonUtil.readValue({ mode: 'header', header: 'zzzz', cookie: '' }, req);
+    const missing = await req.readMetadata({ mode: 'header', header: 'zzzz', cookie: '' });
     assert(missing === undefined);
   }
 
   @Test()
   async readWriteValueTest() {
     const cfg = config('header', false);
-    const res = mockResponse();
-    await WebCommonUtil.writeValue(cfg, res, 'hello');
+    const res = HttpResponse.fromEmpty();
+    await res.writeMetadata(cfg, 'hello');
 
     const req = mockRequest(res);
-    const value = await WebCommonUtil.readValue(cfg, req);
+    const value = await req.readMetadata(cfg);
 
     assert(value === 'hello');
   }

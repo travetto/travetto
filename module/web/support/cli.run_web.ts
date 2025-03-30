@@ -2,7 +2,7 @@ import { Runtime } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 
-import { WebServerHandle } from '../src/types.ts';
+import { WebServerHandle } from '../src/types/server.ts';
 import { NetUtil } from '../src/util/net.ts';
 
 /**
@@ -28,7 +28,7 @@ export class RunWebCommand implements CliCommandShape {
     try {
       return await DependencyRegistry.runInstance(WebApplication);
     } catch (err) {
-      if (NetUtil.isInuseError(err) && !Runtime.production && this.killConflict) {
+      if (NetUtil.isPortUsedError(err) && !Runtime.production && this.killConflict) {
         await NetUtil.freePort(err.port);
         return await DependencyRegistry.runInstance(WebApplication);
       }

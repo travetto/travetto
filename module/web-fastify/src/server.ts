@@ -1,7 +1,8 @@
-import https from 'node:https';
-import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
+import { FastifyInstance, fastify } from 'fastify';
+import { fastifyCompress } from '@fastify/compress';
+import { fastifyEtag } from '@fastify/etag';
 
-import { WebConfig, WebServer, WebServerHandle, EndpointConfig } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig, EtagConfig, CompressConfig } from '@travetto/web';
 import { Inject, Injectable } from '@travetto/di';
 
 import { FastifyWebServerUtil } from './util.ts';
@@ -19,25 +20,40 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
   @Inject()
   config: WebConfig;
 
+  @Inject()
+  etag: EtagConfig;
+
+  @Inject()
+  compress: CompressConfig;
+
   /**
    * Build the fastify server
    */
   async init(): Promise<FastifyInstance> {
-    const fastConf: Partial<FastifyHttpsOptions<https.Server>> = {};
+    const app = fastify({
+      trustProxy: this.config.trustProxy,
+      ...this.config.ssl?.active ? {
+        https: (await this.config.ssl?.getKeys()),
+      } : {}
+    });
 
-    if (this.config.ssl?.active) {
-      fastConf.https = (await this.config.ssl?.getKeys())!;
-    }
-    if (this.config.trustProxy) {
-      fastConf.trustProxy = true;
+    // Defer to fastify if disabled
+    if (this.compress.applies) {
+      const preferred = this.compress.preferredEncodings ?? this.compress.supportedEncodings.filter(x => x !== 'deflate');
+      app.register(fastifyCompress, { encodings: this.compress.supportedEncodings, requestEncodings: preferred });
+      this.compress.applies = false;
     }
 
-    const app = fastify(fastConf);
+    // Defer to fastify if disabled
+    if (this.etag.applies) {
+      app.register(fastifyEtag, { weak: !!this.etag.weak, replyWith304: true });
+      this.etag.applies = false;
+    }
+
     app.removeAllContentTypeParsers();
     app.addContentTypeParser(/^.*/, (_, body, done) => done(null, body));
 
-    this.raw = app;
-    return this.raw;
+    return this.raw = app;
   }
 
   async unregisterEndpoints(key: string | symbol): Promise<void> {
@@ -53,10 +69,16 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
       if (endpoint.path) {
         sub = `${path}/${endpoint.path}`;
       }
-      sub = sub.replace(/\/{1,3}/g, '/').replace(/\/{1,3}$/, '');
-      this.raw[endpoint.method](sub, async (req, reply) => {
-        await endpoint.handlerFinalized!(...FastifyWebServerUtil.convert(req, reply));
-      });
+
+      sub = sub.replace(/[/]{1,3}/g, '/').replace(/[/]{1,3}$/, '').replace(/^$/, '/');
+
+      if (sub === '/*all') {
+        sub = '*';
+      }
+
+      this.raw[endpoint.method](sub, (req, reply) =>
+        endpoint.filter!({ req: FastifyWebServerUtil.getRequest(req, reply) })
+      );
     }
   }
 
@@ -64,6 +86,7 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
     await this.raw.listen({ port: this.config.port, host: this.config.bindAddress });
     this.listening = true;
     return {
+      port: this.config.port,
       on: this.raw.server.on.bind(this.raw),
       close: this.raw.close.bind(this.raw)
     };

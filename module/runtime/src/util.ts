@@ -4,12 +4,6 @@ import timers from 'node:timers/promises';
 import { castTo, hasToJSON } from './types.ts';
 import { AppError } from './error.ts';
 
-type PromiseWithResolvers<T> = {
-  resolve: (v: T) => void;
-  reject: (err?: unknown) => void;
-  promise: Promise<T>;
-};
-
 type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
 
 /**
@@ -55,15 +49,6 @@ export class Util {
       bytes[8] = (bytes[8] & 0x3f) | 0x80;
     }
     return bytes.toString('hex').substring(0, len);
-  }
-
-  /**
-   * Produce a promise that is externally resolvable
-   */
-  static resolvablePromise<T = void>(): PromiseWithResolvers<T> {
-    let ops: Pick<PromiseWithResolvers<T>, 'reject' | 'resolve'>;
-    const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
-    return { ...ops!, promise: prom };
   }
 
   /**

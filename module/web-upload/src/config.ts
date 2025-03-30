@@ -1,12 +1,13 @@
 import { Config } from '@travetto/config';
-import { ManagedInterceptorConfig } from '@travetto/web';
 import { Ignore } from '@travetto/schema';
 
 /**
  * Config for uploading within @travetto/web
  */
 @Config('web.upload')
-export class WebUploadConfig extends ManagedInterceptorConfig {
+export class WebUploadConfig {
+  applies = false;
+
   /**
    * Max file size in bytes
    */

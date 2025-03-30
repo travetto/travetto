@@ -1,4 +1,4 @@
-import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, SerializeInterceptor } from '@travetto/web';
+import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext, EndpointConfig, HttpResponse } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -7,7 +7,14 @@ import { AuthService } from '@travetto/auth';
 import { AuthContextInterceptor } from './context.ts';
 
 @Config('web.auth.login')
-export class WebAuthLoginConfig extends ManagedInterceptorConfig {
+export class WebAuthLoginConfig {
+  /**
+   * Execute login on endpoint
+   */
+  applies = false;
+  /**
+   * The auth providers to iterate through when attempting to authenticate
+   */
   @Ignore()
   providers: symbol[];
 }
@@ -21,23 +28,21 @@ export class WebAuthLoginConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AuthLoginInterceptor implements HttpInterceptor<WebAuthLoginConfig> {
 
+  category: HttpInterceptorCategory = 'application';
+  dependsOn = [AuthContextInterceptor];
+
   @Inject()
   config: WebAuthLoginConfig;
 
   @Inject()
   service: AuthService;
 
-  dependsOn = [SerializeInterceptor, AuthContextInterceptor];
-
-  /**
-   * Ensures this is an opt-in interceptor
-   */
-  applies(): boolean {
-    return false;
+  applies(ep: EndpointConfig, config: WebAuthLoginConfig): boolean {
+    return config.applies;
   }
 
-  async intercept(ctx: FilterContext<WebAuthLoginConfig>): Promise<FilterReturn> {
+  async filter(ctx: HttpChainedContext<WebAuthLoginConfig>): Promise<HttpResponse> {
     await this.service.authenticate(ctx.req.body, ctx, ctx.config.providers ?? []);
-    return;
+    return ctx.next();
   }
 }

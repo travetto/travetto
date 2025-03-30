@@ -348,7 +348,7 @@ npx trv run:web
       { priority: 999, source: 'memory://override' }
     ],
     active: {
-      AcceptsConfig: { types: {} },
+      AcceptsConfig: { applies: false, types: {} },
       ApiHostConfig: { openapi: '3.0.0' },
       ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
       ApiSpecConfig: {
@@ -357,18 +357,23 @@ npx trv run:web
         skipEndpoints: false,
         exposeAllSchemas: false
       },
-      AsyncContextConfig: {},
       AuthConfig: { maxAge: '1h', rollingRenew: true },
-      BodyParseConfig: { limit: '1mb', parsingTypes: {} },
+      BodyParseConfig: { applies: true, limit: '1mb', parsingTypes: {} },
       CommonLoggerConfig: { format: 'line', output: 'console' },
+      CompressConfig: {
+        applies: true,
+        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
+        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
+      },
       ConsoleLogAppenderConfig: { logToLevel: true },
-      CookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-      CorsConfig: {},
+      CookieConfig: { applies: true, signed: true, httpOnly: true, sameSite: 'lax', secure: false },
+      CorsConfig: { applies: true },
+      EtagConfig: { applies: true },
       FileLogAppenderConfig: {
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
-      GetCacheConfig: {},
+      GetCacheConfig: { applies: true },
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,
@@ -394,22 +399,16 @@ npx trv run:web
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
       },
-      SerializeConfig: {
-        compress: true,
-        compressionAvailable: { br: true, gzip: true, deflate: true, identity: true },
-        compressionPreferred: { br: true, gzip: true },
-        compressOptions: {},
-        errorStackTrace: true
-      },
       WebAuthConfig: {
+        applies: false,
         mode: 'cookie',
         header: 'Authorization',
         cookie: 'trv_auth',
         headerPrefix: 'Token'
       },
-      WebAuthLoginConfig: {},
-      WebAuthLogoutConfig: {},
-      WebAuthVerifyConfig: { permissions: {} },
+      WebAuthLoginConfig: { applies: false },
+      WebAuthLogoutConfig: { applies: false },
+      WebAuthVerifyConfig: { applies: false, permissions: {} },
       WebConfig: {
         serve: true,
         port: 12555,
@@ -418,16 +417,17 @@ npx trv run:web
         bindAddress: '0.0.0.0',
         baseUrl: 'http://localhost:12555',
         defaultMessage: true,
-        ssl: { active: false }
+        ssl: { active: false },
+        optionsGlobalHandle: true
       },
-      WebLogConfig: {},
+      WebLogConfig: { applies: true, showStackTrace: true },
       WebRpcConfig: { clients: {} },
       WebSessionConfig: {},
       WebSslConfig: { active: false }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web:src/application/app.ts:195] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web:src/application/app.ts:162] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

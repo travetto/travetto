@@ -1,14 +1,20 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { FilterContext, FilterNext } from '../types.ts';
+import { HttpChainedContext } from '../types.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { EtagInterceptor } from './etag.ts';
+import { HttpResponse } from '../types/response.ts';
 
 @Config('web.getCache')
-export class GetCacheConfig extends ManagedInterceptorConfig { }
+export class GetCacheConfig {
+  /**
+   * Generate GET cache headers
+   */
+  applies = true;
+}
 
 /**
  * Determines if we should cache all get requests
@@ -16,22 +22,23 @@ export class GetCacheConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class GetCacheInterceptor implements HttpInterceptor {
 
-  dependsOn = [SerializeInterceptor];
+  category: HttpInterceptorCategory = 'response';
+  dependsOn = [EtagInterceptor];
 
   @Inject()
-  config: GetCacheConfig;
+  config?: GetCacheConfig;
 
-  applies(endpoint: EndpointConfig): boolean {
-    return endpoint.method === 'get';
+  applies(endpoint: EndpointConfig, config: GetCacheConfig): boolean {
+    return endpoint.method === 'get' && config.applies;
   }
 
-  async intercept({ res }: FilterContext, next: FilterNext): Promise<unknown> {
-    const result = await next();
+  async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
+    const res = await next();
     // Only apply on the way out, and on success
-    if (res.getHeader('Expires') === undefined && res.getHeader('Cache-Control') === undefined) {
-      res.setHeader('Expires', '-1');
-      res.setHeader('Cache-Control', 'max-age=0, no-cache');
+    if (!res.headers.has('Expires') && !res.headers.has('Cache-Control')) {
+      res.headers.set('Expires', '-1');
+      res.headers.set('Cache-Control', 'max-age=0, no-cache');
     }
-    return result;
+    return res;
   }
 }

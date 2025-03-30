@@ -66,7 +66,7 @@ class TestUploadController {
   @Get('*')
   async get() {
     const range = this.req.getRange();
-    return await this.service.getBlob(this.req.url.replace(/^\/test\/upload\//, ''), range);
+    return await this.service.getBlob(this.req.path.replace(/^\/test\/upload\//, ''), range);
   }
 }
 
@@ -130,8 +130,8 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request('post', '/test/upload/cached', this.getMultipartRequest(uploads));
     assert(res.status === 200);
-    assert(this.getFirstHeader(res.headers, 'cache-control') === 'max-age=3600');
-    assert(this.getFirstHeader(res.headers, 'content-language') === 'en-GB');
+    assert(res.headers.get('Cache-Control') === 'max-age=3600');
+    assert(res.headers.get('Content-Language') === 'en-GB');
   }
 
   @Test()

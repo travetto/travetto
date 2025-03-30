@@ -4,7 +4,6 @@ import { Field, Schema } from '@travetto/schema';
 import { CliCommand } from '@travetto/cli';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';
 
-import { HttpInterceptor } from './src/interceptor/types';
 import { WebApplication } from './src/application/app';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
@@ -13,21 +12,21 @@ import { BodyParseInterceptor, BodyParseConfig } from './src/interceptor/body-pa
 import { CorsInterceptor, CorsConfig } from './src/interceptor/cors';
 import { GetCacheInterceptor } from './src/interceptor/get-cache';
 import { LoggingInterceptor } from './src/interceptor/logging';
-import { SerializeInterceptor } from './src/interceptor/serialize';
 import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies';
 import { WebConfig } from './src/application/config';
-import { HttpRequest, HttpResponse } from './src/types';
+import { HttpRequest } from './src/types/request';
+import { HttpResponse } from './src/types/response';
+import { HttpInterceptor } from './src/types/interceptor';
 import { AsyncContextInterceptor } from './src/interceptor/context';
 import { CacheControl } from './src/decorator/common';
 import { WebContext } from './src/context';
+import { RespondInterceptor } from './src/interceptor/respond';
 
-const HttpRequestContract = toConcrete<HttpRequest>();
-const HttpResponseContract = toConcrete<HttpResponse>();
 const HttpInterceptorContract = toConcrete<HttpInterceptor>();
 
 export const text = <>
   <c.StdHeader />
-  The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles {d.library('Express')} in the {HttpRequestContract} and {HttpResponseContract} objects). This module is built upon the {d.mod('Schema')} structure, and all controller method parameters follow the same rules/abilities as any {Field} in a standard {Schema} class.
+  The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. This module is built upon the {d.mod('Schema')} structure, and all controller method parameters follow the same rules/abilities as any {Field} in a standard {Schema} class.
 
   <c.Section title='Controller'>
     To define an endpoint, you must first declare a {Controller} which is only allowed on classes. Controllers can be configured with:
@@ -99,7 +98,7 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='ContextParam'>
-      In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire {HttpRequestContract} or {HttpResponseContract}.  These are able to be injected using the {ContextParam} on a class-level field from the {WebContext}.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+      In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire {HttpRequest}.  These are able to be injected using the {ContextParam} on a class-level field from the {WebContext}.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
       <c.Code title='Example ContextParam usage' src='doc/context-param.ts'></c.Code>
 
@@ -177,11 +176,11 @@ export const text = <>
 
       <c.Code title='Body Parse Config' src={BodyParseConfig} />
     </c.SubSection>
-    <c.SubSection title={SerializeInterceptor.name}>
-      {SerializeInterceptor} is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+    <c.SubSection title={RespondInterceptor.name}>
+      {RespondInterceptor} is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
     </c.SubSection>
     <c.SubSection title={CorsInterceptor.name}>
-      {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, {d.input('web.cors.active: true')}
+      {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, the {d.input('web.cors')} config space.
 
       <c.Code title='Cors Config' src={CorsConfig} />
     </c.SubSection>
@@ -191,7 +190,7 @@ export const text = <>
       <c.Code title='Cookies Config' src={CookieConfig} />
     </c.SubSection>
     <c.SubSection title={GetCacheInterceptor.name}>
-      {GetCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting {d.input('web.disableGetCache: true')} in your config.
+      {GetCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting {d.input('web.getCache.applies: <boolean>')} in your config.  This interceptor applies by default.
     </c.SubSection>
     <c.SubSection title={LoggingInterceptor.name}>
       {LoggingInterceptor} allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
@@ -199,11 +198,11 @@ export const text = <>
       <c.Code title='Control Logging' src='doc/log.yml' />
     </c.SubSection>
     <c.SubSection title={AsyncContextInterceptor.name}>
-      {AsyncContextInterceptor} is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
+      {AsyncContextInterceptor} is responsible for sharing context across the various layers that may be touched by a request. This interceptor can be noisy, and so can easily be disabled as needed by setting {d.input('web.log.applies: false')} in your config.
     </c.SubSection>
 
     <c.SubSection title='Custom Interceptors'>
-      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {HttpInterceptorContract} interface.  The interceptors are tied to the defined {HttpRequestContract} and {HttpResponseContract} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {HttpInterceptorContract} interface.  The interceptors are tied to the defined {HttpRequest} object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
       <c.Code title='Defining a new Interceptor' src='doc/interceptor-logging.ts' />
 
@@ -217,9 +216,6 @@ export const text = <>
       All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:
       <c.SubSubSection title='Enable/disable of individual interceptors via configuration'>
         <c.Code title='Sample interceptor disabling configuration' src='doc/disable.yml' />
-      </c.SubSubSection>
-      <c.SubSubSection title='Path-based control for various endpoints within the application'>
-        <c.Code title='Sample interceptor path managed configuration' src='doc/endpoint-allow-deny.yml' />
       </c.SubSubSection>
       <c.SubSubSection title='Endpoint-enabled control via decorators'>
         <c.Code title='Sample controller with endpoint-level allow/deny' src='doc/controller-endpoint-deny.ts' />
@@ -235,7 +231,7 @@ export const text = <>
     </c.SubSection>
   </c.Section>
   <c.Section title='Cookie Support'>
-    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {HttpRequestContract}/{HttpResponseContract} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {HttpRequest} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
     <c.Code title='Sample Cookie Usage' src='doc/cookie-endpoints.ts' />
   </c.Section>

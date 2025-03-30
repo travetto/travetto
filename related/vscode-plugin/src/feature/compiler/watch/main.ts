@@ -13,6 +13,12 @@ import { Activatible } from '../../../core/activation.ts';
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
 
+const resolvablePromise = <T = void>(): PromiseWithResolvers<T> => {
+  let ops: Pick<PromiseWithResolvers<T>, 'reject' | 'resolve'>;
+  const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
+  return { ...ops!, promise: prom };
+};
+
 const SCOPE_MAX = 15;
 const SUB_LOG_RE = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(.\d{3})?\s+(info|error|debug|warn)/;
 
@@ -32,7 +38,7 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#progress[type]?.cleanup();
 
     const ctrl = new AbortController();
-    const complete = Util.resolvablePromise();
+    const complete = resolvablePromise<void>();
     const kill = (): void => ctrl.abort();
     signal.addEventListener('abort', kill);
 

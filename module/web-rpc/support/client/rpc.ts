@@ -18,6 +18,7 @@ export type RpcRequest = {
   core?: Partial<RequestInit> & {
     timeout?: number;
     retriesOnConnectFailure?: number;
+    path?: string;
   };
   url: URL | string;
   consumeJSON?: <T>(text?: unknown) => (T | Promise<T>);
@@ -65,10 +66,10 @@ function buildRequest<T extends RequestInit>(base: T, controller: string, endpoi
   return {
     ...base,
     method: 'POST',
+    path: `${controller}:${endpoint}`,
     headers: {
       ...base.headers,
       'Content-Type': 'application/json',
-      'X-TRV-RPC': `${controller}#${endpoint}`
     }
   };
 }
@@ -177,7 +178,11 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
     let resolved: Response | undefined;
     for (let i = 0; i <= (core.retriesOnConnectFailure ?? 0); i += 1) {
       try {
-        resolved = await fetch(req.url, core);
+        const url = typeof req.url === 'string' ? new URL(req.url) : req.url;
+        if (req.core?.path) {
+          url.pathname = `${url.pathname}/${req.core.path}`.replaceAll('//', '/');
+        }
+        resolved = await fetch(url, core);
         break;
       } catch (err) {
         if (i < (core.retriesOnConnectFailure ?? 0)) {
@@ -200,7 +205,7 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
       }
     }
 
-    const contentType = resolved.headers.get('content-type')?.split(';')[0];
+    const contentType = resolved.headers.get('Content-Type')?.split(';')[0];
 
     if (resolved.ok) {
       const text = await resolved.text();
@@ -265,5 +270,3 @@ export function withConfigFactoryDecorator(opts: RpcRequest) {
     }
   };
 }
-
-export function IGNORE<T>(): T { return null!; }

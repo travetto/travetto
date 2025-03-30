@@ -1,24 +1,18 @@
 import passport from 'passport';
 
 import { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
-import { FilterContext, HttpRequest, HttpResponse } from '@travetto/web';
-import { castTo } from '@travetto/runtime';
+import { HttpContext, HttpRequest } from '@travetto/web';
 
 import { PassportUtil } from './util.ts';
+import { ConnectRequest, ConnectResponse } from './connect.ts';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
-
-type Handler = (req: HttpRequest, res: HttpResponse, next: Function) => unknown;
-const authenticator: passport.Authenticator<Handler> = castTo(passport);
 
 /**
  * Authenticator via passport
  */
-export class PassportAuthenticator<U extends object> implements Authenticator<U, FilterContext> {
+export class PassportAuthenticator<U extends object> implements Authenticator<U, HttpContext> {
 
-  #passportInit = authenticator.initialize();
-
-  #init?: Promise<void>;
   #strategyName: string;
   #strategy: passport.Strategy;
   #toPrincipal: (user: U) => SimplePrincipal;
@@ -62,6 +56,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
       delete du.source;
 
       const p = this.#toPrincipal(user);
+      // @ts-expect-error
       p.issuer ??= this.#strategyName;
       return p;
     }
@@ -70,7 +65,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
   /**
    * Extract the passport auth context
    */
-  getState(context?: FilterContext | undefined): AuthenticatorState | undefined {
+  getState(context?: HttpContext | undefined): AuthenticatorState | undefined {
     return PassportUtil.readState<AuthenticatorState>(context!.req);
   }
 
@@ -78,21 +73,29 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
    * Authenticate a request given passport config
    * @param ctx The travetto filter context
    */
-  async authenticate(input: U, { req, res }: FilterContext): Promise<Principal | undefined> {
+  async authenticate(input: U, { req }: HttpContext): Promise<Principal | undefined> {
     const requestOptions = this.#passportOptions(req);
 
-    await (this.#init ??= new Promise<void>(resolve => this.#passportInit(req, res, resolve)));
+    const connectReq = new ConnectRequest(req);
+    const connectRes = new ConnectResponse();
 
-    return new Promise<Principal | undefined>((resolve, reject) => {
+    const principal = await new Promise<Principal | undefined>((resolve, reject) => {
       const filter = passport.authenticate(this.#strategyName,
         {
           session: this.session,
+          failWithError: true,
           ...requestOptions,
           state: PassportUtil.enhanceState(req, requestOptions.state)
         },
         (err: Error, u: U) => this.#authHandler(err, u).then(resolve, reject));
 
-      filter(req, res);
+      filter(connectReq, connectRes);
     });
+
+    if (!principal) {
+      connectRes.throwIfSent();
+    }
+
+    return principal;
   }
 }

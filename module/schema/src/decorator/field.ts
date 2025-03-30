@@ -40,16 +40,14 @@ export function Field(type: ClassList, ...config: Partial<FieldConfig>[]) {
 export function Alias(...aliases: string[]): PropType<unknown> { return prop({ aliases }); }
 /**
  * Mark a field as writeonly
- * @param active This determines if this field is readonly or not.
  * @augments `@travetto/schema:Field`
  */
-export function Writeonly(active = true): PropType<unknown> { return prop({ access: 'writeonly' }); }
+export function Writeonly(): PropType<unknown> { return prop({ access: 'writeonly' }); }
 /**
  * Mark a field as readonly
- * @param active This determines if this field is readonly or not.
  * @augments `@travetto/schema:Field`
  */
-export function Readonly(active = true): PropType<unknown> { return prop({ access: 'readonly' }); }
+export function Readonly(): PropType<unknown> { return prop({ access: 'readonly' }); }
 /**
  * Mark a field as sensitive
  * @param active This determines if this field is sensitive or not.

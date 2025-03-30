@@ -13,7 +13,7 @@ npm install @travetto/web-express
 yarn add @travetto/web-express
 ```
 
-The module is an [express](https://expressjs.com) provider for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.  This module provides an implementation of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L21) for automatic injection in the default Web server.
+The module is an [express](https://expressjs.com) provider for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.  This module provides an implementation of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L17) for automatic injection in the default Web server.
 
 ## Customizing Web App
 
@@ -49,6 +49,7 @@ When working with an [express](https://expressjs.com) applications, the module p
 ```typescript
 const app = express();
     app.disable('x-powered-by');
+    app.set('etag', false);
 
     if (this.config.trustProxy) {
       app.enable('trust proxy');

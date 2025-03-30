@@ -2,31 +2,27 @@ import { AsyncContextValue, AsyncContext } from '@travetto/context';
 import { Inject, Injectable } from '@travetto/di';
 import { AppError, castTo, Class, toConcrete } from '@travetto/runtime';
 
-import { FilterContext, FilterNext, HttpRequest, HttpResponse } from './types.ts';
+import { HttpContext } from './types.ts';
+import { HttpRequest } from './types/request.ts';
 
 @Injectable()
 export class WebContext {
 
-  #active = new AsyncContextValue<FilterContext>(this);
+  #active = new AsyncContextValue<HttpContext>(this);
   #byType = new Map<string, () => unknown>();
 
   @Inject()
   context: AsyncContext;
 
-  get request(): HttpRequest {
+  get req(): HttpRequest {
     return this.#active.get()?.req!;
   }
 
-  get response(): HttpResponse {
-    return this.#active.get()?.res!;
-  }
-
   postConstruct(): void {
-    this.registerType(toConcrete<HttpRequest>(), () => this.request);
-    this.registerType(toConcrete<HttpResponse>(), () => this.response);
+    this.registerType(toConcrete<HttpRequest>(), () => this.req);
   }
 
-  withContext(ctx: FilterContext, next: FilterNext): Promise<unknown> {
+  withContext<T>(ctx: HttpContext, next: () => Promise<T>): Promise<T> {
     return this.context.run(() => {
       this.#active.set(ctx);
       return next();

@@ -31,7 +31,7 @@ export class ControllerVisitUtil {
         continue;
       }
 
-      const params = SchemaRegistry.getMethodSchema(cls, endpoint.handlerName);
+      const params = SchemaRegistry.getMethodSchema(cls, endpoint.name);
       await visitor.onEndpointStart?.(endpoint, controller, params);
       await this.#onSchemaEvent(visitor, endpoint.responseType?.type);
       await this.#onSchemaEvent(visitor, endpoint.requestType?.type);

@@ -132,9 +132,9 @@ HELLO
 
 The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) supports the following data types for flags:
    *  Boolean values
-   *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L166), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L172), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L160), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L101) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L111) decorators help provide additional validation.
-   *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L101), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L111), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L93) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L72) provide additional constraints
-   *  Date values. The [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L101) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L111) decorators help provide additional validation.
+   *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L164), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L170), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L158), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L109) decorators help provide additional validation.
+   *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L109), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L91) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L70) provide additional constraints
+   *  Date values. The [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L109) decorators help provide additional validation.
    *  String lists. Same as String, but allowing multiple values.
    *  Numeric lists. Same as Number, but allowing multiple values.
 
@@ -464,7 +464,7 @@ import { Runtime } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 
-import { WebServerHandle } from '../src/types.ts';
+import { WebServerHandle } from '../src/types/server.ts';
 import { NetUtil } from '../src/util/net.ts';
 
 /**
@@ -490,7 +490,7 @@ export class RunWebCommand implements CliCommandShape {
     try {
       return await DependencyRegistry.runInstance(WebApplication);
     } catch (err) {
-      if (NetUtil.isInuseError(err) && !Runtime.production && this.killConflict) {
+      if (NetUtil.isPortUsedError(err) && !Runtime.production && this.killConflict) {
         await NetUtil.freePort(err.port);
         return await DependencyRegistry.runInstance(WebApplication);
       }

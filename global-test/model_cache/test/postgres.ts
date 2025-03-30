@@ -1,7 +1,7 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { CacheSymbols } from '@travetto/cache';
 import { AsyncContext } from '@travetto/context';
+import { CacheModelSymbol } from '@travetto/cache';
 import { ModelExpirySupport } from '@travetto/model';
 import { SQLModelService, SQLModelConfig } from '@travetto/model-sql';
 import { PostgreSQLDialect } from '@travetto/model-postgres';
@@ -14,11 +14,11 @@ class Config {
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
     return new PostgreSQLDialect(ctx, config);
   }
-  @InjectableFactory(CacheSymbols.Model)
+  @InjectableFactory(CacheModelSymbol)
   static modelProviderExpiry(svc: SQLModelService): ModelExpirySupport {
     return svc;
   }
-  @InjectableFactory(CacheSymbols.Model)
+  @InjectableFactory(CacheModelSymbol)
   static modelProviderService(svc: SQLModelService) {
     return svc;
   }

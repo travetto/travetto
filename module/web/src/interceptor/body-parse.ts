@@ -5,12 +5,13 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
-import { WebSymbols } from '../symbols.ts';
-import { HttpRequest, FilterContext, FilterNext } from '../types.ts';
+import { HttpChainedContext } from '../types.ts';
+import { HttpResponse } from '../types/response.ts';
+import { HttpRequest } from '../types/request.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+
 import { EndpointConfig } from '../registry/types.ts';
 
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
 import { AcceptsInterceptor } from './accepts.ts';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
@@ -21,7 +22,11 @@ type ParserType = 'json' | 'text' | 'form';
  * Web body parse configuration
  */
 @Config('web.bodyParse')
-export class BodyParseConfig extends ManagedInterceptorConfig {
+export class BodyParseConfig {
+  /**
+   * Parse request body
+   */
+  applies: boolean = true;
   /**
    * Max body size limit
    */
@@ -38,19 +43,20 @@ export class BodyParseConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
 
-  dependsOn = [SerializeInterceptor, AcceptsInterceptor];
+  dependsOn = [AcceptsInterceptor];
+  category: HttpInterceptorCategory = 'request';
 
   @Inject()
   config: BodyParseConfig;
 
-  async read(req: HttpRequest, limit: string | number): Promise<{ text: string, raw: Buffer }> {
+  async read(req: HttpRequest, limit: string | number): Promise<string> {
     const cfg = req.getContentType();
 
-    const text = await rawBody(inflation(req[WebSymbols.Internal].nodeEntity), {
+    const text = await rawBody(inflation(req.inputStream!), {
       limit,
       encoding: cfg?.parameters.charset ?? 'utf8'
     });
-    return { text, raw: Buffer.from(text) };
+    return text;
   }
 
   detectParserType(req: HttpRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
@@ -76,25 +82,24 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     }
   }
 
-  applies(endpoint: EndpointConfig): boolean {
-    return endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method);
+  applies(endpoint: EndpointConfig, config: BodyParseConfig): boolean {
+    return config.applies && (endpoint.method === 'all' || METHODS_WITH_BODIES.has(endpoint.method));
   }
 
-  async intercept({ req, res, config }: FilterContext<BodyParseConfig>, next: FilterNext): Promise<unknown> {
-    if (!METHODS_WITH_BODIES.has(req.method) || req.body) { // If body is already set
+  async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<HttpResponse> {
+    if (!METHODS_WITH_BODIES.has(req.method) || req.body !== undefined) { // If body is already set
       return next();
     }
 
     const parserType = this.detectParserType(req, config.parsingTypes);
 
     if (!parserType) {
-      req.body = req[WebSymbols.Internal].nodeEntity;
+      req.body = req.inputStream;
       return next();
     } else {
       let malformed: unknown;
       try {
-        const { text, raw } = await this.read(req, config.limit);
-        req.raw = raw;
+        const text = await this.read(req, config.limit);
         req.body = this.parse(text, parserType);
       } catch (err) {
         malformed = err;

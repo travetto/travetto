@@ -1,6 +1,6 @@
-import type { HttpInterceptor } from '../interceptor/types.ts';
-import type { WebServerHandle } from '../types.ts';
 import type { EndpointConfig } from '../registry/types.ts';
+
+export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
 
 /**
  * Defines the contract for any http server to support the framework.
@@ -15,11 +15,6 @@ export interface WebServer<T = unknown> {
   listening: boolean;
 
   /**
-   * Should global be re-registered on any changes
-   */
-  updateGlobalOnChange?: boolean;
-
-  /**
    * Initialize the raw application
    */
   init(): Promise<T> | T;
@@ -30,7 +25,7 @@ export interface WebServer<T = unknown> {
    * @param path The path to add the endpoints to
    * @param endpoints The list of endpoints to add
    */
-  registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors?: HttpInterceptor[]): Promise<void>;
+  registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void>;
 
   /**
    * The endpoints to unregister

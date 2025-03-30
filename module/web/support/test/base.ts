@@ -6,10 +6,13 @@ import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { HttpMethodOrAll, HttpRequest, WebServerHandle } from '../../src/types.ts';
+import { HttpRequest } from '../../src/types/request.ts';
+import { HttpMethodOrAll } from '../../src/registry/types.ts';
 import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base.ts';
+import { WebServerHandle } from '../../src/types/server.ts';
 import { CoreWebServerSupport } from './server-support/core.ts';
 import { NetUtil } from '../../src/util/net.ts';
+import { HttpHeaders } from '../../src/types/headers.ts';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
@@ -39,17 +42,6 @@ export abstract class BaseWebSuite {
 
   get port(): number | undefined {
     return this.#support instanceof CoreWebServerSupport ? this.#support.port : undefined;
-  }
-
-  getFirstHeader(headers: Record<string, string | string[] | undefined>, key: string): string | undefined {
-    const v = headers[key];
-    if (v) {
-      if (typeof v === 'string') {
-        return v;
-      } else {
-        return v[0];
-      }
-    }
   }
 
   async getOutput<T>(t: Buffer): Promise<T | string> {
@@ -106,7 +98,7 @@ export abstract class BaseWebSuite {
 
     method = castTo<HttpRequest['method']>(method.toUpperCase());
 
-    cfg.headers ??= {};
+    const headers = new HttpHeaders(cfg.headers);
 
     let buffer: Buffer | undefined;
     const body = cfg.body;
@@ -119,12 +111,13 @@ export abstract class BaseWebSuite {
         buffer = await toBuffer(castTo(body.stream));
       } else {
         buffer = Buffer.from(JSON.stringify(body));
-        cfg.headers['Content-Type'] = cfg.headers['Content-Type'] ?? 'application/json';
+        headers.set('Content-Type', headers.get('Content-Type') ?? 'application/json');
       }
     }
 
     cfg.body = body;
     cfg.query = BindUtil.flattenPaths(cfg.query ?? {});
+    cfg.headers = headers;
 
     const resp = await this.#support.execute(method, path, { ...cfg, body: buffer });
     const out = await this.getOutput<T>(resp.body);
@@ -144,7 +137,7 @@ export abstract class BaseWebSuite {
     return {
       status: resp.status,
       body: castTo(out),
-      headers: Object.fromEntries(Object.entries(resp.headers).map(([k, v]) => [k.toLowerCase(), v]))
+      headers: resp.headers
     };
   }
 }

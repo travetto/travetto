@@ -6,11 +6,8 @@ import { ControllerRegistry } from '../registry/controller.ts';
  * @augments `@travetto/di:Injectable`
  * @augments `@travetto/web:Controller`
  */
-export function Controller(path = '') {
+export function Controller(path: string) {
   return function <T>(target: Class<T>): void {
-    ControllerRegistry.registerPending(target, {
-      basePath: path,
-      class: target,
-    });
+    ControllerRegistry.registerPending(target, { basePath: path, class: target, });
   };
 }

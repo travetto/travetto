@@ -1,7 +1,7 @@
 import assert from 'node:assert';
-import fs from 'node:fs';
+import { Readable } from 'node:stream';
 
-import { castTo, Class } from '@travetto/runtime';
+import { Class } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
@@ -10,23 +10,21 @@ import { RootRegistry } from '@travetto/registry';
 import { ConfigureInterceptor } from '../src/decorator/common.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
-import { ManagedInterceptorConfig, HttpInterceptor } from '../src/interceptor/types.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../src/types/interceptor.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpResponse, FilterContext, WebServerHandle } from '../src/types.ts';
-import { WebServer } from '../src/application/server.ts';
+import { HttpChainedContext } from '../src/types.ts';
+import { WebServer, WebServerHandle } from '../src/types/server.ts';
 import { WebApplication } from '../src/application/app.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
-import { HttpRequestCore } from '../src/request/core.ts';
-import { HttpResponseCore } from '../src/response/core.ts';
-import { WebSymbols } from '@travetto/web';
+import { HttpRequest } from '../src/types/request.ts';
 
 @Injectable()
 @Config('web.custom')
-class CustomInterceptorConfig extends ManagedInterceptorConfig {
+class CustomInterceptorConfig {
+  applies: boolean = true;
   name = 'bob';
-  paths = ['!test-interceptor:blackListed'];
 
   weird() { }
 }
@@ -48,21 +46,26 @@ class Server implements WebServer {
 @Injectable()
 class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
 
+  category: HttpInterceptorCategory = 'global';
+
   @Inject()
   config: CustomInterceptorConfig;
 
-  applies(endpoint: EndpointConfig) {
-    return !/opt-in/.test(`${endpoint.path}`);
+  applies(endpoint: EndpointConfig, config: CustomInterceptorConfig) {
+    return config.applies || /opt-in/.test(`${endpoint.fullPath}`);
   }
 
-  intercept(ctx: FilterContext<CustomInterceptorConfig>) {
-    Object.assign(ctx.res, { name: ctx.config.name });
+  async filter({ req, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
+    const out = await next();
+    out.headers.set('Name', config.name);
+    return out;
   }
 }
 
 @Controller('/test-interceptor')
-@ConfigureInterceptor(CorsInterceptor, { disabled: true })
-@ConfigureInterceptor(GetCacheInterceptor, { disabled: true })
+@ConfigureInterceptor(CustomInterceptor, { applies: true })
+@ConfigureInterceptor(CorsInterceptor, { applies: false })
+@ConfigureInterceptor(GetCacheInterceptor, { applies: false })
 class TestController {
   @Get('/')
   async std() { }
@@ -83,9 +86,9 @@ class TestController {
 }
 
 @Controller('/alt-test-interceptor')
-@ConfigureInterceptor(CustomInterceptor, { disabled: true, name: 'greg' })
-@ConfigureInterceptor(CorsInterceptor, { disabled: true })
-@ConfigureInterceptor(GetCacheInterceptor, { disabled: true })
+@ConfigureInterceptor(CustomInterceptor, { applies: false, name: 'greg' })
+@ConfigureInterceptor(CorsInterceptor, { applies: false })
+@ConfigureInterceptor(GetCacheInterceptor, { applies: false })
 class AltTestController {
   @Get('/')
   async std() { }
@@ -94,15 +97,15 @@ class AltTestController {
   async none() { }
 
   @Get('/opt-in/for-real')
-  @ConfigureInterceptor(CustomInterceptor, { disabled: false, name: 'sarah' })
+  @ConfigureInterceptor(CustomInterceptor, { name: 'sarah' })
   async optIn() { }
 
   @Get('/override')
-  @ConfigureInterceptor(CustomInterceptor, { name: 'Randy' })
+  @ConfigureInterceptor(CustomInterceptor, { applies: true, name: 'Randy' })
   async override() { }
 
   @Get('/blackListed')
-  @ConfigureInterceptor(CustomInterceptor, {})
+  @ConfigureInterceptor(CustomInterceptor, { applies: true })
   async blackListed() { }
 }
 
@@ -111,27 +114,8 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const res = HttpResponseCore.create<HttpResponse & { name?: string }>({
-      [WebSymbols.Internal]: {
-        nodeEntity: castTo(fs.createWriteStream('/dev/null')),
-        providerEntity: undefined!
-      },
-      end: () => { },
-      name: undefined,
-      status: () => 200,
-      send: () => { },
-      setHeader: (k, v) => { },
-      getHeader: (k) => undefined,
-      removeHeader: () => undefined,
-    });
-    await endpoint.handlerFinalized!(HttpRequestCore.create({
-      [WebSymbols.Internal]: {
-        nodeEntity: castTo(Buffer.from([])),
-        providerEntity: undefined!
-      },
-      headers: {}
-    }), res);
-    return res.name;
+    const res = await endpoint.filter!({ req: new HttpRequest({}) });
+    return res.headers.get('Name') ?? undefined;
   }
 
   @BeforeAll()
@@ -144,8 +128,8 @@ class TestInterceptorConfigSuite {
   async verifyBasic() {
     assert(await this.name(TestController, '/') === 'bob');
     assert(await this.name(AltTestController, '/') === undefined);
-    assert(await this.name(TestController, '/opt-in') === undefined);
-    assert(await this.name(AltTestController, '/opt-in') === undefined);
+    assert(await this.name(TestController, '/opt-in') === 'bob');
+    assert(await this.name(AltTestController, '/opt-in') === 'greg');
   }
 
   @Test()
@@ -162,7 +146,7 @@ class TestInterceptorConfigSuite {
 
   @Test()
   async verifyBlacklist() {
-    assert(await this.name(TestController, '/blackListed') === undefined);
+    assert(await this.name(TestController, '/blackListed') === 'bob');
     assert(await this.name(AltTestController, '/blackListed') === 'greg');
   }
 }

@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry, Validator } from '@travetto/schema';
-import { Controller, Redirect, Post, Get, HttpMethodOrAll, ControllerRegistry } from '@travetto/web';
+import { Controller, Post, Get, HttpMethodOrAll, ControllerRegistry, HttpResponse } from '@travetto/web';
 
 import { BaseWebSuite } from './base.ts';
 import { PathParam, QueryParam } from '../../src/decorator/param.ts';
@@ -90,19 +90,12 @@ class SchemaAPI {
 
   @Get('/renderable/:age')
   async renderable(age: number) {
-    return new Redirect('google.com');
+    return HttpResponse.redirect('google.com');
   }
 
   @Get('/customSerialize')
   async customSerialize() {
-    return {
-      /**
-       * @returns {Promise<User>}
-       */
-      serialize() {
-
-      }
-    };
+    return HttpResponse.from(new User());
   }
 
   /**

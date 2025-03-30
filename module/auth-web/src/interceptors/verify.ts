@@ -1,5 +1,5 @@
 import { AppError, Util } from '@travetto/runtime';
-import { HttpInterceptor, ManagedInterceptorConfig, FilterContext, SerializeInterceptor } from '@travetto/web';
+import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext, EndpointConfig, HttpResponse } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -17,7 +17,11 @@ function matchPermissionSet(rule: string[], perms: Set<string>): boolean {
 }
 
 @Config('web.auth.verify')
-export class WebAuthVerifyConfig extends ManagedInterceptorConfig {
+export class WebAuthVerifyConfig {
+  /**
+   * Verify user is in a specific auth state
+   */
+  applies = false;
   /**
    * Default state to care about
    */
@@ -39,20 +43,14 @@ export class WebAuthVerifyConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfig> {
 
-  dependsOn = [SerializeInterceptor, AuthContextInterceptor];
+  category: HttpInterceptorCategory = 'application';
+  dependsOn = [AuthContextInterceptor];
 
   @Inject()
   config: WebAuthVerifyConfig;
 
   @Inject()
   authContext: AuthContext;
-
-  /**
-   * Ensures this is an opt-in interceptor
-   */
-  applies(): boolean {
-    return false;
-  }
 
   finalizeConfig(config: WebAuthVerifyConfig): WebAuthVerifyConfig {
     config.matcher = Util.allowDeny<string[], [Set<string>]>(config.permissions ?? [],
@@ -62,10 +60,14 @@ export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfi
     return config;
   }
 
-  async intercept({ req, config }: FilterContext<WebAuthVerifyConfig>): Promise<void> {
+  applies(ep: EndpointConfig, config: WebAuthVerifyConfig): boolean {
+    return config.applies;
+  }
+
+  async filter({ config, next }: HttpChainedContext<WebAuthVerifyConfig>): Promise<HttpResponse> {
     const principal = this.authContext.principal;
 
-    switch (config?.state) {
+    switch (config.state) {
       case 'authenticated': {
         if (!principal) {
           throw new AuthenticationError('User is unauthenticated');
@@ -81,5 +83,6 @@ export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfi
         break;
       }
     }
+    return next();
   }
 }

@@ -1,21 +1,25 @@
-import cookies from 'cookies';
-
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
-import { castTo } from '@travetto/runtime';
 
-import { FilterContext } from '../types.ts';
+import { HttpChainedContext } from '../types.ts';
+import { HttpResponse } from '../types/response.ts';
+import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+
 import { WebConfig } from '../application/config.ts';
-
-import { ManagedInterceptorConfig, HttpInterceptor } from './types.ts';
-import { SerializeInterceptor } from './serialize.ts';
+import { EndpointConfig } from '../registry/types.ts';
+import { Cookie, CookieSetOptions } from '../types/cookie.ts';
+import { CookieJar } from '../util/cookie.ts';
 
 /**
  * Web cookie configuration
  */
 @Config('web.cookie')
-export class CookieConfig extends ManagedInterceptorConfig {
+export class CookieConfig implements CookieSetOptions {
+  /**
+   * Support reading/sending cookies
+   */
+  applies = true;
   /**
    * Are they signed
    */
@@ -27,7 +31,7 @@ export class CookieConfig extends ManagedInterceptorConfig {
   /**
    * Enforce same site policy
    */
-  sameSite: cookies.SetOption['sameSite'] | 'lax' = 'lax';
+  sameSite: Cookie['sameSite'] = 'lax';
   /**
    * The signing keys
    */
@@ -36,7 +40,7 @@ export class CookieConfig extends ManagedInterceptorConfig {
   /**
    * Is the cookie only valid for https
    */
-  secure?: boolean;
+  secure?: boolean = false;
   /**
    * The domain of the cookie
    */
@@ -49,7 +53,7 @@ export class CookieConfig extends ManagedInterceptorConfig {
 @Injectable()
 export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
 
-  dependsOn = [SerializeInterceptor];
+  category: HttpInterceptorCategory = 'request';
 
   @Inject()
   config: CookieConfig;
@@ -63,9 +67,17 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
     return config;
   }
 
-  intercept({ req, res, config }: FilterContext<CookieConfig>): void {
-    const store = new cookies(castTo(req), castTo(res), config);
-    req.cookies = { get: (key, opts?): string | undefined => store.get(key, { ...this.config, ...opts }) };
-    res.cookies = { set: (key, value, opts?): void => { store.set(key, value, { ...this.config, ...opts }); } };
+  applies(ep: EndpointConfig, config: CookieConfig): boolean {
+    return config.applies;
+  }
+
+  async filter({ req, config, next }: HttpChainedContext<CookieConfig>): Promise<HttpResponse> {
+    const jar = new CookieJar(req.headers.get('Cookie'), config);
+    req.getCookie = jar.get.bind(jar);
+
+    const res = await next();
+    for (const c of res.getCookies()) { jar.set(c); }
+    for (const c of jar.export()) { res.headers.append('Set-Cookie', c); }
+    return res;
   }
 }

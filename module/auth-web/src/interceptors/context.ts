@@ -1,10 +1,9 @@
-import { toConcrete, Class } from '@travetto/runtime';
-import { HttpInterceptor, FilterContext, FilterReturn, FilterNext, SerializeInterceptor, AsyncContextInterceptor, WebContext } from '@travetto/web';
+import { toConcrete } from '@travetto/runtime';
+import { HttpInterceptor, WebContext, HttpInterceptorCategory, HttpChainedContext, HttpResponse } from '@travetto/web';
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { AuthContext, AuthService, AuthToken, Principal } from '@travetto/auth';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from '../types.ts';
-
 import { WebAuthConfig } from '../config.ts';
 
 const toDate = (v: string | Date | undefined): Date | undefined => (typeof v === 'string') ? new Date(v) : v;
@@ -19,7 +18,7 @@ const toDate = (v: string | Date | undefined): Date | undefined => (typeof v ===
 @Injectable()
 export class AuthContextInterceptor implements HttpInterceptor {
 
-  dependsOn: Class<HttpInterceptor>[] = [SerializeInterceptor, AsyncContextInterceptor];
+  category: HttpInterceptorCategory = 'application';
 
   @Inject({ optional: true })
   codec: PrincipalCodec;
@@ -42,33 +41,38 @@ export class AuthContextInterceptor implements HttpInterceptor {
     this.webContext.registerType(toConcrete<AuthToken>(), () => this.authContext.authToken);
   }
 
-  async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
-    let decoded: Principal | undefined;
-    let checked: Principal | undefined;
-    let lastExpiresAt: Date | undefined;
+  async filter(ctx: HttpChainedContext): Promise<HttpResponse> {
+    // Skip if already authenticated
+    if (this.authContext.principal) {
+      return ctx.next();
+    }
 
     try {
-      decoded = await this.codec.decode(ctx);
+      let lastExpiresAt: Date | undefined;
+      const decoded = await this.codec.decode(ctx.req);
 
       if (decoded) {
         lastExpiresAt = decoded.expiresAt = toDate(decoded.expiresAt);
         decoded.issuedAt = toDate(decoded.issuedAt);
       }
 
-      checked = this.authService.enforceExpiry(decoded);
+      const checked = this.authService.enforceExpiry(decoded);
       this.authContext.principal = checked;
-      this.authContext.authToken = await this.codec.token?.(ctx);
+      this.authContext.authToken = await this.codec.token?.(ctx.req);
 
-      return await next();
-    } finally {
+      let value = await ctx.next();
+
       const result = this.authContext.principal;
       this.authService.manageExpiry(result);
 
       if ((!!decoded !== !!checked) || result !== checked || lastExpiresAt !== result?.expiresAt) { // If it changed
-        await this.codec.encode(ctx, result);
+        value = await this.codec.encode(value, result);
       }
 
+      return value;
+    } finally {
       this.authContext.clear();
     }
   }
+
 }

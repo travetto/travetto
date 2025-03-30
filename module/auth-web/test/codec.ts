@@ -3,7 +3,6 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { HttpResponse } from '@travetto/web';
-import { asFull } from '@travetto/runtime';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
@@ -27,22 +26,10 @@ export class CodecTest {
 
   @Test()
   async testHeader() {
-    const headers: Record<string, string> = {};
+    const res = HttpResponse.fromEmpty();
     this.interceptor.config.mode = 'header';
 
-    await this.interceptor.codec.encode(
-      {
-        req: asFull({}),
-        res: asFull<HttpResponse>({
-          setHeader(key: string, value: string) {
-            headers[key] = value;
-          },
-          removeHeader(key: string) {
-            delete headers[key];
-          }
-        }),
-        config: {}
-      },
+    await this.interceptor.codec.encode(res,
       {
         id: 'true',
         details: {
@@ -51,28 +38,17 @@ export class CodecTest {
       }
     );
 
-    assert(headers.Authorization !== undefined);
+    assert(res.headers.has('Authorization'));
   }
 
   @Test()
   async testHeaderMissing() {
-    const headers: Record<string, string> = {};
+    const res = HttpResponse.fromEmpty();
     this.interceptor.config.mode = 'header';
 
-    await this.interceptor.codec.encode({
-      req: asFull({}),
-      res: asFull<HttpResponse>({
-        setHeader(key: string, value: string) {
-          headers[key] = value;
-        },
-        removeHeader(key: string) {
-          delete headers[key];
-        }
-      }),
-      config: {}
-    }, undefined);
+    await this.interceptor.codec.encode(res, undefined);
 
-    assert(headers.Authorization === undefined);
+    assert(!res.headers.has('Authorization'));
   }
 
   @Test()

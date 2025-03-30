@@ -1,20 +1,20 @@
 import { Readable } from 'node:stream';
 
+import { AppError } from '@travetto/runtime';
+
 import { Controller } from '../../src/decorator/controller.ts';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint.ts';
 import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param.ts';
-import { HttpRequest, HttpResponse } from '../../src/types.ts';
 import { Produces, SetHeaders } from '../../src/decorator/common.ts';
-import { HttpSerializable } from '../../src/response/serializable.ts';
+
+import { HttpRequest } from '../../src/types/request.ts';
+import { HttpResponse } from '../../src/types/response.ts';
 
 @Controller('/test')
 export class TestController {
 
   @ContextParam()
   req: HttpRequest;
-
-  @ContextParam()
-  res: HttpResponse;
 
   @Get('/json')
   getJSON() {
@@ -38,13 +38,15 @@ export class TestController {
 
   @Put('/body')
   withBody() {
-    return { body: this.req.body.age };
+    return { body: this.req.body?.age };
   }
 
   @Delete('/cookie')
   withCookie() {
-    this.res.cookies.set('flavor', 'oreo');
-    return { cookie: this.req.cookies.get('orange') };
+    return HttpResponse.from({ cookie: this.req.getCookie!('orange') })
+      .with({
+        cookies: [{ name: 'flavor', value: 'oreo' }]
+      });
   }
 
   @Patch('/regexp/super-:special-party')
@@ -66,42 +68,34 @@ export class TestController {
 
   @Get('/renderable')
   @Produces('text/plain')
-  getRenderable(): HttpSerializable {
-    return {
-      /**
-       * @returns {string}
-       */
-      serialize(res) {
-        res.send('hello');
-      }
-    };
+  getRenderable(): HttpResponse<string> {
+    return HttpResponse.from('hello');
   }
 
   @Get('/fullUrl')
   getFullUrl() {
     return {
-      url: this.req.url,
       path: this.req.path
     };
   }
 
   @Get('/headerFirst')
   getHeaderFirst() {
-    return { header: this.req.headerFirst('age') };
-  }
-
-  @Post('/rawBody')
-  postRawBody() {
-    return { size: this.req.raw?.length };
+    return { header: this.req.headers.get('Age')?.split(',')?.[0] };
   }
 
   @Get('/fun/*')
   getFun() {
-    return { path: this.req.url.split('fun/')[1] };
+    return { path: this.req.path.split('fun/')[1] };
   }
 
   @Get('/ip')
   getIp() {
     return { ip: this.req.getIp() };
+  }
+
+  @Post('/ip')
+  notFound() {
+    throw new AppError('Uh-oh', { category: 'general' });
   }
 }

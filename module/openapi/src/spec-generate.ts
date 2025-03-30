@@ -4,7 +4,7 @@ import type {
   RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts/oas31';
 
-import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/web';
+import { EndpointConfig, ControllerConfig, EndpointParamConfig, EndpointIOType, ControllerVisitor, HttpHeaders } from '@travetto/web';
 import { Class, describeFunction } from '@travetto/runtime';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 
@@ -39,17 +39,6 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
   constructor(config: Partial<ApiSpecConfig> = {}) {
     this.#config = config;
-  }
-
-  /**
-   * Build response object
-   */
-  #getHeaderValue(ep: EndpointConfig, header: string): string | undefined {
-    let cType = ep.headers?.[header];
-    if (cType && typeof cType !== 'string') {
-      cType = cType();
-    }
-    return cType;
   }
 
   /**
@@ -242,7 +231,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   /**
    * Standard payload structure
    */
-  #getEndpointBody(body?: EndpointIOType, mime?: string): RequestBodyObject {
+  #getEndpointBody(body?: EndpointIOType, mime?: string | null): RequestBodyObject {
     if (!body) {
       return { content: {}, description: '' };
     } else if (body.type === Readable || body.type === Buffer) {
@@ -278,8 +267,9 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const complex = field.type && SchemaRegistry.has(field.type);
     if (param.location) {
       if (param.location === 'body') {
+        const acceptsMime = ep.responseHeaderMap.get('accepts');
         return {
-          requestBody: field.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(field, this.#getHeaderValue(ep, 'accepts'))
+          requestBody: field.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(field, acceptsMime)
         };
       } else if (complex && (param.location === 'query' || param.location === 'header')) {
         return { parameters: this.#schemaToDotParams(param.location, field, param.prefix ? `${param.prefix}.` : '') };
@@ -311,15 +301,16 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       responses: {},
       summary: ep.title,
       description: ep.description || ep.title,
-      operationId: `${ep.class.name}_${ep.handlerName}`,
+      operationId: `${ep.class.name}_${ep.name}`,
       parameters: []
     };
 
-    const pConf = this.#getEndpointBody(ep.responseType, this.#getHeaderValue(ep, 'content-type'));
+    const contentTypeMime = ep.responseHeaderMap.get('content-type');
+    const pConf = this.#getEndpointBody(ep.responseType, contentTypeMime);
     const code = Object.keys(pConf.content).length ? 200 : 201;
     op.responses![code] = pConf;
 
-    const schema = SchemaRegistry.getMethodSchema(ep.class, ep.handlerName);
+    const schema = SchemaRegistry.getMethodSchema(ep.class, ep.name);
     for (const field of schema) {
       const res = this.#processEndpointParam(ep, ep.params[field.index!], field);
       if (res) {

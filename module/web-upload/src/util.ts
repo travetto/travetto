@@ -7,7 +7,7 @@ import { pipeline } from 'node:stream/promises';
 
 import busboy from '@fastify/busboy';
 
-import { HttpRequest, MimeUtil, WebSymbols } from '@travetto/web';
+import { HttpRequest, MimeUtil } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { WebUploadConfig } from './config.ts';
@@ -40,7 +40,7 @@ export class WebUploadUtil {
       const itr = new AsyncQueue<UploadItem>();
 
       // Upload
-      req.pipe(busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
+      req.inputStream.pipe(busboy({ headers: castTo(req.headers), limits: { fileSize: largestMax } })
         .on('file', (field, stream, filename) => itr.add({ stream, filename, field }))
         .on('limit', field => itr.throw(new AppError(`File size exceeded for ${field}`, { category: 'data' })))
         .on('finish', () => itr.close())
@@ -48,7 +48,7 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: req.body ?? req[WebSymbols.Internal].nodeEntity, filename: req.getFilename(), field: 'file' };
+      yield { stream: req.body ?? req.inputStream, filename: req.getFilename(), field: 'file' };
     }
   }
 
