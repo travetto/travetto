@@ -1,17 +1,17 @@
 type MethodConfig = { body: boolean, standard: boolean, emptyStatusCode: number };
-function VERB<M extends string, L extends string, C extends Partial<MethodConfig>>(method: M, lower: L, cfg: C): { method: M, lower: L } & C & MethodConfig {
-  return { body: false, emptyStatusCode: 204, standard: true, method, lower, ...cfg };
+function verb<M, L, C extends Partial<MethodConfig>>(method: M, lower: L, cfg: C): { method: M, lower: L } & C & MethodConfig {
+  return { body: false, emptyStatusCode: 204, standard: true, ...cfg, method, lower, };
 }
 
 export const HTTP_METHODS = {
-  PUT: VERB('PUT', 'put', { body: true }),
-  POST: VERB('POST', 'post', { body: true, emptyStatusCode: 201 }),
-  PATCH: VERB('PATCH', 'patch', { body: true }),
-  GET: VERB('GET', 'get', {}),
-  DELETE: VERB('DELETE', 'delete', {}),
-  HEAD: VERB('HEAD', 'head', {}),
-  OPTIONS: VERB('OPTIONS', 'options', {}),
-  ALL: VERB('ALL', 'all', { standard: false }),
+  PUT: verb('PUT', 'put', { body: true }),
+  POST: verb('POST', 'post', { body: true, emptyStatusCode: 201 }),
+  PATCH: verb('PATCH', 'patch', { body: true }),
+  GET: verb('GET', 'get', {}),
+  DELETE: verb('DELETE', 'delete', {}),
+  HEAD: verb('HEAD', 'head', {}),
+  OPTIONS: verb('OPTIONS', 'options', {}),
+  ALL: verb('ALL', 'all', { standard: false, body: true }),
 } as const;
 type HttpMethodsType = typeof HTTP_METHODS;
 

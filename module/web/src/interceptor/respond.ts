@@ -1,6 +1,7 @@
 import { Injectable } from '@travetto/di';
 
-import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
+import { HttpInterceptorCategory } from '../types/core.ts';
 import { HttpResponse } from '../types/response.ts';
 
 import { HttpChainedContext } from '../types.ts';
