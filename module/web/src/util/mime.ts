@@ -10,7 +10,7 @@ export class MimeUtil {
   static #convert(rule: string): RegExp {
     const core = (rule.endsWith('/*') || !rule.includes('/')) ?
       `${rule.replace(/[/].{0,20}$/, '')}\/.*` : rule;
-    return new RegExp(`^${core}(;|$)`);
+    return new RegExp(`^${core}[ ]{0,10}(;|$)`);
   }
 
   static parse(mimeType?: string): MimeType | undefined {
