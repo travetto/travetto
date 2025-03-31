@@ -1,8 +1,7 @@
 import type { Class } from '@travetto/runtime';
 
 import type { EndpointConfig } from '../registry/types.ts';
-import type { HttpChainedContext } from '../types.ts';
-import { HttpResponse } from './response.ts';
+import type { HttpChainedFilter } from '../types.ts';
 import { HttpInterceptorCategory } from './core.ts';
 
 /**
@@ -47,5 +46,5 @@ export interface HttpInterceptor<C = unknown> {
    * Process the request
    * @param {HttpChainedContext} context The context of to process
    */
-  filter(context: HttpChainedContext<C>): HttpResponse | Promise<HttpResponse>;
+  filter: HttpChainedFilter<C>;
 }

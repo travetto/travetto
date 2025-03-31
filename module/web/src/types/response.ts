@@ -252,7 +252,7 @@ export class HttpResponse<S = unknown> {
   /**
    * Ensure status code is set
    */
-  ensureStatusCode(emptyStatusCode = 200): this {
+  ensureStatusCode(emptyStatusCode = 204): this {
     this.statusCode ??= (this.length === 0 ? emptyStatusCode : 200);
     return this;
   }

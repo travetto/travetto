@@ -1,10 +1,9 @@
 import { Any, ByteRange, castTo } from '@travetto/runtime';
-import { MimeUtil } from '../util/mime.ts';
+import { MimeType, MimeUtil } from '../util/mime.ts';
 
 type Prim = number | boolean | string;
 type HeaderValue = Prim | Prim[] | readonly Prim[];
 export type HttpHeadersInit = Headers | Record<string, undefined | null | HeaderValue> | [string, HeaderValue][];
-type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 

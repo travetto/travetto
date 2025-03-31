@@ -1,17 +1,22 @@
+type MethodConfig = { body: boolean, standard: boolean, emptyStatusCode: number };
+function VERB<M extends string, L extends string, C extends Partial<MethodConfig>>(method: M, lower: L, cfg: C): { method: M, lower: L } & C & MethodConfig {
+  return { body: false, emptyStatusCode: 204, standard: true, method, lower, ...cfg };
+}
+
 export const HTTP_METHODS = {
-  PUT: { method: 'PUT', body: true, lower: 'put', standard: true },
-  POST: { method: 'POST', body: true, lower: 'post', standard: true },
-  GET: { method: 'GET', body: false, lower: 'get', standard: true },
-  DELETE: { method: 'DELETE', body: false, lower: 'delete', standard: true },
-  PATCH: { method: 'PATCH', body: true, lower: 'patch', standard: true },
-  HEAD: { method: 'HEAD', body: false, lower: 'head', standard: true },
-  OPTIONS: { method: 'OPTIONS', body: false, lower: 'options', standard: true },
-  ALL: { method: 'ALL', body: true, lower: 'all', standard: false },
+  PUT: VERB('PUT', 'put', { body: true }),
+  POST: VERB('POST', 'post', { body: true, emptyStatusCode: 201 }),
+  PATCH: VERB('PATCH', 'patch', { body: true }),
+  GET: VERB('GET', 'get', {}),
+  DELETE: VERB('DELETE', 'delete', {}),
+  HEAD: VERB('HEAD', 'head', {}),
+  OPTIONS: VERB('OPTIONS', 'options', {}),
+  ALL: VERB('ALL', 'all', { standard: false }),
 } as const;
 type HttpMethodsType = typeof HTTP_METHODS;
 
 export type HttpMethodWithAll = keyof HttpMethodsType;
-export type HttpMethod = { [K in keyof HttpMethodsType]: HttpMethodsType[K]['standard'] extends true ? K : never }[HttpMethodWithAll];
+export type HttpMethod = { [K in keyof HttpMethodsType]: HttpMethodsType[K]['standard'] extends false ? never : K }[HttpMethodWithAll];
 export type HttpProtocol = 'http' | 'https';
 export type HttpMetadataConfig = { mode: 'cookie' | 'header', headerPrefix?: string, header: string, cookie: string };
 

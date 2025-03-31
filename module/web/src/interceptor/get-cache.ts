@@ -2,11 +2,12 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { HttpChainedContext } from '../types.ts';
-import { EndpointConfig } from '../registry/types.ts';
-
-import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
-import { EtagInterceptor } from './etag.ts';
+import { HttpInterceptor } from '../types/interceptor.ts';
+import { HttpInterceptorCategory } from '../types/core.ts';
 import { HttpResponse } from '../types/response.ts';
+
+import { EndpointConfig } from '../registry/types.ts';
+import { EtagInterceptor } from './etag.ts';
 
 @Config('web.getCache')
 export class GetCacheConfig {
@@ -35,10 +36,6 @@ export class GetCacheInterceptor implements HttpInterceptor {
   async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
     const res = await next();
     // Only apply on the way out, and on success
-    if (!res.headers.has('Expires') && !res.headers.has('Cache-Control')) {
-      res.headers.set('Expires', '-1');
-      res.headers.set('Cache-Control', 'max-age=0, no-cache');
-    }
-    return res;
+    return res.backfillHeaders({ 'Cache-Control': 'max-age=0, no-cache' });
   }
 }

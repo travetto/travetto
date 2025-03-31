@@ -1,9 +1,10 @@
 import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpFilter, HttpContext, HttpChainedFilter, HttpChainedContext } from '../types.ts';
+import { HttpContext, HttpChainedFilter, HttpChainedContext } from '../types.ts';
 import { HttpResponse } from '../types/response.ts';
 import { HttpInterceptor } from '../types/interceptor.ts';
+import { HTTP_METHODS } from '../types/core.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 
 /**
@@ -33,12 +34,12 @@ export class EndpointUtil {
    * Create a full filter chain given the provided filters
    * @param filters Filters to chain
    */
-  static createFilterChain(filters: [HttpChainedFilter, unknown][]): HttpChainedFilter {
+  static createFilterChain(filters: { filter: HttpChainedFilter, config?: unknown }[]): HttpChainedFilter {
     const len = filters.length - 1;
     return function filterChain(ctx: HttpChainedContext, idx: number = 0): Promise<HttpResponse> {
-      const [it, cfg] = filters[idx]!;
+      const { filter, config } = filters[idx]!;
       const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
-      return it({ req: ctx.req, next: chainedNext, config: cfg });
+      return filter({ req: ctx.req, next: chainedNext, config });
     };
   }
 
@@ -127,6 +128,23 @@ export class EndpointUtil {
   }
 
   /**
+   * Endpoint invocation code
+   */
+  static async invokeEndpoint(endpoint: EndpointConfig, ctx: HttpContext): Promise<HttpResponse> {
+    const params = await this.extractParameters(ctx, endpoint);
+    try {
+      const res = HttpResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
+      return res
+        .backfillHeaders(endpoint.responseHeaderMap)
+        .ensureContentLength()
+        .ensureContentType()
+        .ensureStatusCode(HTTP_METHODS[ctx.req.method].emptyStatusCode);
+    } catch (err) {
+      throw HttpResponse.fromCatch(err);
+    }
+  }
+
+  /**
    * Create a full endpoint handler
    * @param interceptors Interceptors to apply
    * @param endpoint The endpoint to call
@@ -143,37 +161,23 @@ export class EndpointUtil {
       interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
     }
 
-    const handlerBound: HttpFilter = async (ctx): Promise<HttpResponse> => {
-      const params = await this.extractParameters(ctx, endpoint);
-      try {
-        const res = HttpResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
-        return res
-          .backfillHeaders(endpoint.responseHeaderMap)
-          .ensureContentLength()
-          .ensureContentType()
-          .ensureStatusCode(ctx.req.method === 'POST' ? 201 : (ctx.req.method === 'PUT' ? 204 : 200));
-      } catch (err) {
-        throw HttpResponse.fromCatch(err);
-      }
-    };
+    const interceptorFilters =
+      this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
+        .filter(([inst, cfg]) => inst.applies?.(endpoint, cfg) ?? true)
+        .map(([inst, config]) => ({ filter: inst.filter.bind(inst), config }));
 
-    const filters = [
+    const endpointFilters = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
       ...(endpoint.filters ?? []).map(fn => fn.bind(endpoint.instance)),
       ...(endpoint.params.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
-    ];
+    ]
+      .map(fn => ({ filter: fn }));
 
-    const validInterceptors =
-      this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
-        .filter(([inst, cfg]) => inst.applies?.(endpoint, cfg) ?? true);
-
-    const filterChain: [HttpChainedFilter, unknown][] = castTo([
-      ...validInterceptors.map(([inst, cfg]) => [inst.filter.bind(inst), cfg]),
-      ...filters.map(fn => [fn, {}]),
-      [handlerBound, {}]
+    return this.createFilterChain([
+      ...interceptorFilters,
+      ...endpointFilters,
+      { filter: this.invokeEndpoint.bind(this, endpoint) }
     ]);
-
-    return this.createFilterChain(filterChain);
   }
 
   /**

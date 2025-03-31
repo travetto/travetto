@@ -1,5 +1,6 @@
 import { Util } from '@travetto/runtime';
-import { MimeType } from '../types.ts';
+
+export type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
 /**
  * Utils for checking mime patterns
