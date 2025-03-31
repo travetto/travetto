@@ -13,7 +13,7 @@ import { HttpResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 @Config('web.accepts')
-class AcceptsConfig {
+export class AcceptsConfig {
   /**
    * Accepts certain request content types
    */
