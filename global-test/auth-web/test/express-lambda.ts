@@ -6,7 +6,7 @@ import { AwsLambdaWebApplication } from '@travetto/web-aws-lambda';
 import { AuthWebServerSuite } from '@travetto/auth-web/support/test/server.ts';
 import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server.ts';
 
-const EXPRESS = Symbol.for('express-lambda');
+const ServerSymbol = Symbol.for('express-lambda');
 
 class Config {
   @InjectableFactory()
@@ -14,7 +14,7 @@ class Config {
     return new AwsLambdaExpressWebServer();
   }
 
-  @InjectableFactory(EXPRESS)
+  @InjectableFactory(ServerSymbol)
   static getApp(dep: AwsLambdaExpressWebServer): AwsLambdaWebApplication {
     return new AwsLambdaWebApplication(dep);
   }
@@ -22,6 +22,6 @@ class Config {
 
 @Suite()
 export class ExpressLambdaAuthWebTest extends AuthWebServerSuite {
-  qualifier = EXPRESS;
+  qualifier = ServerSymbol;
   type = AwsLambdaWebServerSupport;
 }
