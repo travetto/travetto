@@ -2,11 +2,11 @@ import { asConstructable } from '@travetto/runtime';
 
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, EndpointFunctionDescriptor, EndpointIOType } from '../registry/types.ts';
-import { HttpMethodWithAll } from '../types/core.ts';
+import { HttpMethod } from '../types/core.ts';
 
 type EndpointFunctionDecorator = <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
 
-function Endpoint(method: HttpMethodWithAll, path: string = '/', extra: Partial<EndpointConfig> = {}): EndpointFunctionDecorator {
+function Endpoint(method: HttpMethod, path: string = '/', extra: Partial<EndpointConfig> = {}): EndpointFunctionDecorator {
   return function <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
     const ret = ControllerRegistry.registerPendingEndpoint(
       asConstructable(target).constructor, descriptor, { method, path, ...extra }
@@ -15,13 +15,6 @@ function Endpoint(method: HttpMethodWithAll, path: string = '/', extra: Partial<
   };
 }
 
-/**
- * Registers for ALL HTTP verbs
- * @param path The endpoint path for the request
- * @augments `@travetto/web:HttpRequestBody`
- * @augments `@travetto/web:Endpoint`
- */
-export function All(path?: string): EndpointFunctionDecorator { return Endpoint('ALL', path); }
 /**
  * Registers GET requests
  * @param path The endpoint path for the request

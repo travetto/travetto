@@ -33,7 +33,11 @@ export class GetCacheInterceptor implements HttpInterceptor {
     return endpoint.method === 'GET' && config.applies;
   }
 
-  async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
+  async filter({ req, next }: HttpChainedContext): Promise<HttpResponse> {
+    if (req.method !== 'GET') {
+      return next();
+    }
+
     const res = await next();
     // Only apply on the way out, and on success
     return res.backfillHeaders({ 'Cache-Control': 'max-age=0, no-cache' });

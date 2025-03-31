@@ -3,7 +3,7 @@ import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { HttpInterceptor } from '../types/interceptor.ts';
 import type { HttpChainedFilter, HttpContext, HttpFilter } from '../types.ts';
-import { HttpMethodWithAll } from '../types/core.ts';
+import { HttpMethod } from '../types/core.ts';
 import { HttpHeaders } from '../types/headers.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
@@ -128,7 +128,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The HTTP method the endpoint is for
    */
-  method: HttpMethodWithAll;
+  method: HttpMethod;
   /**
    * The path of the endpoint
    */

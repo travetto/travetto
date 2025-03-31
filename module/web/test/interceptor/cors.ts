@@ -16,7 +16,7 @@ class CorsInterceptorSuite {
   async basicTest() {
 
     const interceptor = new CorsInterceptor();
-    interceptor.config = CorsConfig.from({ applies: true });
+    interceptor.config = CorsConfig.from({});
     interceptor.finalizeConfig(interceptor.config);
 
     const res = await interceptor.filter({
@@ -31,7 +31,7 @@ class CorsInterceptorSuite {
     assert(res.headers.has('Access-Control-Allow-Methods'));
     assert.deepStrictEqual(
       res.headers.getList('Access-Control-Allow-Methods'),
-      Object.values(HTTP_METHODS).filter(x => x.standard).map(x => x.method)
+      Object.keys(HTTP_METHODS)
     );
 
     assert(res.headers.has('Access-Control-Allow-Headers'));
@@ -59,7 +59,6 @@ class CorsInterceptorSuite {
 
     const interceptor = new CorsInterceptor();
     interceptor.config = CorsConfig.from({
-      applies: true,
       methods: ['GET', 'PATCH'],
       origins: ['google.com', 'boogle.com'],
       headers: ['Content-Type', 'Accept'],
@@ -98,7 +97,6 @@ class CorsInterceptorSuite {
 
     const interceptor = new CorsInterceptor();
     interceptor.config = CorsConfig.from({
-      applies: true,
       methods: ['GET', 'PATCH'],
       origins: ['google.com', 'boogle.com'],
       headers: ['Content-Type', 'Accept'],

@@ -10,8 +10,6 @@ import { HttpInterceptor } from '../types/interceptor.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
 
-const STANDARD_METHODS = Object.values(HTTP_METHODS).filter(x => x.standard).map(x => x.method);
-
 /**
  * Web cors support
  */
@@ -61,7 +59,7 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
   finalizeConfig(config: CorsConfig): CorsConfig {
     config.resolved = {
       origins: new Set(config.origins ?? []),
-      methods: (config.methods ?? STANDARD_METHODS).join(',').toUpperCase(),
+      methods: (config.methods ?? Object.keys(HTTP_METHODS)).join(',').toUpperCase(),
       headers: (config.headers ?? []).join(','),
       credentials: !!config.credentials,
     };

@@ -1,11 +1,12 @@
 import { Inject } from '@travetto/di';
 import { Any, AppError, Util } from '@travetto/runtime';
 import {
-  HeaderParam, Controller, All, Undocumented, ExcludeInterceptors, ControllerRegistry, WebContext,
-  Body, EndpointUtil, BodyParseInterceptor
+  HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistry, WebContext,
+  Body, EndpointUtil, BodyParseInterceptor, Post
 } from '@travetto/web';
 
 @Controller('/rpc')
+@ExcludeInterceptors(val => !(val instanceof BodyParseInterceptor || val.category === 'global'))
 @Undocumented()
 export class WebRpController {
 
@@ -15,8 +16,7 @@ export class WebRpController {
   /**
    * RPC main entrypoint
    */
-  @All('/:target')
-  @ExcludeInterceptors(val => !(val instanceof BodyParseInterceptor || val.category === 'global'))
+  @Post('/:target')
   async onRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string, @Body() body?: Any): Promise<unknown> {
 
     const endpoint = ControllerRegistry.getEndpointById(target);
