@@ -99,30 +99,37 @@ export class CompilerWatcher {
         if (ev.action === 'delete') {
           this.#state.removeSource(ev.entry.sourceFile);
         }
-        for (const m of [mod, ...this.#state.manifestIndex.getDependentModules(mod.name, 'parents')]) {
-          if (!eventsByMod.has(m.name)) {
-            eventsByMod.set(m.name, []);
+        const moduleSet = new Set(this.#state.manifestIndex.getDependentModules(mod.name, 'parents').map(x => x.name));
+        moduleSet.add(this.#state.manifest.workspace.name);
+        for (const m of moduleSet) {
+          if (!eventsByMod.has(m)) {
+            eventsByMod.set(m, []);
           }
-          eventsByMod.get(m.name)!.push(ev);
+          eventsByMod.get(m)!.push(ev);
         }
       }
 
       for (const [mod, events] of eventsByMod.entries()) {
         const modRoot = this.#state.manifestIndex.getManifestModule(mod)!.sourceFolder;
         const context = ManifestUtil.getModuleContext(this.#state.manifest, modRoot);
-        const newManifest = ManifestUtil.readManifestSync(ManifestUtil.getManifestLocation(context));
-        log.debug('Updating manifest', { module: mod });
-        for (const { action, file } of events) {
-          const resolvedRoot = modRoot || this.#root;
-          const moduleFile = file.includes(resolvedRoot) ? file.split(`${resolvedRoot}/`)[1] : file;
-          const folderKey = ManifestModuleUtil.getFolderKey(moduleFile);
-          const fileType = ManifestModuleUtil.getFileType(moduleFile);
+        const location = ManifestUtil.getManifestLocation(context, mod);
+        const newManifest = ManifestUtil.readManifestSync(location);
 
-          const modFiles = newManifest.modules[mod].files[folderKey] ??= [];
-          const idx = modFiles.findIndex(x => x[0] === moduleFile);
+        log.debug('Updating manifest', { module: mod, events: events.length });
+        for (const { action, file, entry } of events) {
+          const moduleName = entry.module.name;
+          const moduleRoot = entry.module.sourceFolder || this.#root;
+          const relativeFile = file.includes(moduleRoot) ? file.split(`${moduleRoot}/`)[1] : file;
+          const folderKey = ManifestModuleUtil.getFolderKey(relativeFile);
+          const fileType = ManifestModuleUtil.getFileType(relativeFile);
+
+          const manifestModuleFiles = newManifest.modules[moduleName].files[folderKey] ??= [];
+          const idx = manifestModuleFiles.findIndex(x => x[0] === relativeFile);
+          const wrappedIdx = idx < 0 ? manifestModuleFiles.length : idx;
+
           switch (action) {
-            case 'create': modFiles[idx < 0 ? modFiles.length : idx] = [moduleFile, fileType, Date.now()]; break;
-            case 'delete': modFiles.splice(idx, 1); break;
+            case 'create': manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now()]; break;
+            case 'delete': idx >= 0 && manifestModuleFiles.splice(idx, 1); break;
           }
         }
         await ManifestUtil.writeManifest(newManifest);
