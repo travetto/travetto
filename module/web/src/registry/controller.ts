@@ -260,7 +260,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     for (const ep of final.endpoints) {
       this.#endpointsById.set(ep.id, ep);
       // Store full path from base for use in other contexts
-      ep.fullPath = `${final.basePath}/${ep.path}`.replaceAll('//', '/').replace(/(.)[/]$/, (_, a) => a);
+      ep.fullPath = `/${final.basePath}/${ep.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
       ep.responseHeaderMap = new HttpHeaders({ ...final.responseHeaders ?? {}, ...ep.responseHeaders ?? {} });
     }
 
