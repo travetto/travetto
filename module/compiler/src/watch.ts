@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { watch } from 'node:fs';
 
-import { ManifestFileUtil, ManifestModuleUtil, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { ManifestFileUtil, ManifestModuleUtil, ManifestRoot, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { CompilerReset, type CompilerWatchEvent, type CompileStateEntry } from './types.ts';
 import { CompilerState } from './state.ts';
@@ -63,6 +63,8 @@ export class CompilerWatcher {
       const modRoot = mod.sourceFolder || this.#root;
       const moduleFile = file.includes(`${modRoot}/`) ? file.split(`${modRoot}/`)[1] : file;
       entry = this.#state.registerInput(mod, moduleFile);
+    } else if (action === 'delete' && entry) {
+      this.#state.removeSource(entry.sourceFile); // Ensure we remove it
     }
     return { entry, file: entry?.sourceFile ?? file, action };
   }
@@ -85,61 +87,62 @@ export class CompilerWatcher {
     return true;
   }
 
-  async #reconcileAddRemove(compilerEvents: CompilerWatchEvent[]): Promise<void> {
-    const nonUpdates = compilerEvents.filter(x => x.entry.outputFile && x.action !== 'update');
-    if (!nonUpdates.length) {
+  #getManifestUpdateEventsByParents(events: CompilerWatchEvent[]): Map<string, CompilerWatchEvent[]> {
+    const eventsByMod = new Map<string, CompilerWatchEvent[]>();
+    for (const ev of events) {
+      if (ev.action === 'update') {
+        continue;
+      }
+
+      const mod = ev.entry.module;
+      const moduleSet = new Set(this.#state.manifestIndex.getDependentModules(mod.name, 'parents').map(x => x.name));
+      moduleSet.add(this.#state.manifest.workspace.name);
+      for (const m of moduleSet) {
+        if (!eventsByMod.has(m)) {
+          eventsByMod.set(m, []);
+        }
+        eventsByMod.get(m)!.push(ev);
+      }
+    }
+    return eventsByMod;
+  }
+
+  #updateManifestForEvent({ action, file, entry }: CompilerWatchEvent, manifest: ManifestRoot): void {
+    if (action === 'update') {
       return;
     }
 
-    try {
-      const eventsByMod = new Map<string, CompilerWatchEvent[]>();
+    const moduleName = entry.module.name;
+    const moduleRoot = entry.module.sourceFolder || this.#root;
+    const relativeFile = file.includes(moduleRoot) ? file.split(`${moduleRoot}/`)[1] : file;
+    const folderKey = ManifestModuleUtil.getFolderKey(relativeFile);
+    const fileType = ManifestModuleUtil.getFileType(relativeFile);
 
-      for (const ev of nonUpdates) {
-        const mod = ev.entry.module;
-        if (ev.action === 'delete') {
-          this.#state.removeSource(ev.entry.sourceFile);
-        }
-        const moduleSet = new Set(this.#state.manifestIndex.getDependentModules(mod.name, 'parents').map(x => x.name));
-        moduleSet.add(this.#state.manifest.workspace.name);
-        for (const m of moduleSet) {
-          if (!eventsByMod.has(m)) {
-            eventsByMod.set(m, []);
-          }
-          eventsByMod.get(m)!.push(ev);
-        }
-      }
+    const manifestModuleFiles = manifest.modules[moduleName].files[folderKey] ??= [];
+    const idx = manifestModuleFiles.findIndex(x => x[0] === relativeFile);
+    const wrappedIdx = idx < 0 ? manifestModuleFiles.length : idx;
 
-      for (const [mod, events] of eventsByMod.entries()) {
-        const modRoot = this.#state.manifestIndex.getManifestModule(mod)!.sourceFolder;
-        const context = ManifestUtil.getModuleContext(this.#state.manifest, modRoot);
-        const location = ManifestUtil.getManifestLocation(context, mod);
-        const newManifest = ManifestUtil.readManifestSync(location);
-
-        log.debug('Updating manifest', { module: mod, events: events.length });
-        for (const { action, file, entry } of events) {
-          const moduleName = entry.module.name;
-          const moduleRoot = entry.module.sourceFolder || this.#root;
-          const relativeFile = file.includes(moduleRoot) ? file.split(`${moduleRoot}/`)[1] : file;
-          const folderKey = ManifestModuleUtil.getFolderKey(relativeFile);
-          const fileType = ManifestModuleUtil.getFileType(relativeFile);
-
-          const manifestModuleFiles = newManifest.modules[moduleName].files[folderKey] ??= [];
-          const idx = manifestModuleFiles.findIndex(x => x[0] === relativeFile);
-          const wrappedIdx = idx < 0 ? manifestModuleFiles.length : idx;
-
-          switch (action) {
-            case 'create': manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now()]; break;
-            case 'delete': idx >= 0 && manifestModuleFiles.splice(idx, 1); break;
-          }
-        }
-        await ManifestUtil.writeManifest(newManifest);
-      }
-
-      this.#state.manifestIndex.init(ManifestUtil.getManifestLocation(this.#state.manifest));
-    } catch (mErr) {
-      log.info('Restarting due to manifest rebuild failure', mErr);
-      throw new CompilerReset(`Manifest rebuild failure: ${mErr}`);
+    switch (action) {
+      case 'create': manifestModuleFiles[wrappedIdx] = [relativeFile, fileType, Date.now()]; break;
+      case 'delete': idx >= 0 && manifestModuleFiles.splice(idx, 1); break;
     }
+  }
+
+  async #reconcileManifestUpdates(compilerEvents: CompilerWatchEvent[]): Promise<void> {
+    for (const [mod, events] of this.#getManifestUpdateEventsByParents(compilerEvents).entries()) {
+      const moduleRoot = this.#state.manifestIndex.getManifestModule(mod)!.sourceFolder;
+      const moduleContext = ManifestUtil.getModuleContext(this.#state.manifest, moduleRoot);
+      const manifestLocation = ManifestUtil.getManifestLocation(moduleContext, mod);
+      const moduleManifest = ManifestUtil.readManifestSync(manifestLocation);
+
+      log.debug('Updating manifest', { module: mod, events: events.length });
+      for (const ev of events) {
+        this.#updateManifestForEvent(ev, moduleManifest);
+      }
+      await ManifestUtil.writeManifest(moduleManifest);
+    }
+
+    this.#state.manifestIndex.init(ManifestUtil.getManifestLocation(this.#state.manifest));
   }
 
   async #listenWorkspace(): Promise<void> {
@@ -168,7 +171,12 @@ export class CompilerWatcher {
           .map(x => this.#toCandidateEvent(x.type, path.toPosix(x.path)))
           .filter(x => this.#isValidEvent(x));
 
-        await this.#reconcileAddRemove(items);
+        try {
+          await this.#reconcileManifestUpdates(items);
+        } catch (mErr) {
+          log.info('Restarting due to manifest rebuild failure', mErr);
+          throw new CompilerReset(`Manifest rebuild failure: ${mErr}`);
+        }
 
         for (const item of items) {
           this.#q.add(item);
