@@ -1,0 +1,485 @@
+{
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "openapi": "3.0.0",
+  "info": {
+    "title": "@travetto-test/openapi",
+    "version": "0.0.0"
+  },
+  "tags": [
+    {
+      "name": "Relationship",
+      "description": "Relationships for the win"
+    },
+    {
+      "name": "User",
+      "description": "User oriented operations."
+    }
+  ],
+  "paths": {
+    "/relationship": {
+      "get": {
+        "tags": [
+          "Relationship"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "description": "User instance for framework"
+          }
+        },
+        "summary": "Get all users.",
+        "description": "Get all users.",
+        "operationId": "RelationshipController_getAll",
+        "parameters": [
+          {
+            "name": "age",
+            "schema": {
+              "type": "number"
+            },
+            "required": false,
+            "in": "query"
+          },
+          {
+            "name": "deceased",
+            "description": "DOB is fixed",
+            "schema": {
+              "type": "boolean"
+            },
+            "required": false,
+            "in": "query"
+          },
+          {
+            "name": "page.start",
+            "schema": {
+              "type": "number"
+            },
+            "required": false,
+            "in": "query"
+          },
+          {
+            "name": "page.size",
+            "schema": {
+              "type": "number"
+            },
+            "required": false,
+            "in": "query"
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Relationship"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "User instance for framework"
+          }
+        },
+        "operationId": "RelationshipController_createUser",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "description": "User instance for framework"
+        }
+      }
+    },
+    "/relationship/{id}": {
+      "delete": {
+        "tags": [
+          "Relationship"
+        ],
+        "responses": {
+          "201": {
+            "content": {},
+            "description": ""
+          }
+        },
+        "summary": "Delete user by id",
+        "description": "Delete user by id",
+        "operationId": "RelationshipController_removeUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Relationship"
+        ],
+        "responses": {
+          "201": {
+            "content": {},
+            "description": ""
+          }
+        },
+        "summary": "Update user by id",
+        "description": "Update user by id",
+        "operationId": "RelationshipController_updateUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "description": "User instance for framework"
+        }
+      }
+    },
+    "/relationship/{name}": {
+      "get": {
+        "tags": [
+          "Relationship"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "User instance for framework"
+          }
+        },
+        "summary": "Get user by name.",
+        "description": "Get user by name.",
+        "operationId": "RelationshipController_getByName",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "description": "User name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "description": "User instance for framework"
+          }
+        },
+        "summary": "Get all users",
+        "description": "Get all users",
+        "operationId": "UserController_getAll",
+        "parameters": [
+          {
+            "name": "age",
+            "schema": {
+              "type": "number"
+            },
+            "required": false,
+            "in": "query"
+          },
+          {
+            "name": "deceased",
+            "description": "DOB is fixed",
+            "schema": {
+              "type": "boolean"
+            },
+            "required": false,
+            "in": "query"
+          },
+          {
+            "name": "page.start",
+            "schema": {
+              "type": "number"
+            },
+            "required": false,
+            "in": "query"
+          },
+          {
+            "name": "page.size",
+            "schema": {
+              "type": "number"
+            },
+            "required": false,
+            "in": "query"
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "User instance for framework"
+          }
+        },
+        "operationId": "UserController_createUser",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "description": "User instance for framework"
+        }
+      }
+    },
+    "/user/{id}": {
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "201": {
+            "content": {},
+            "description": ""
+          }
+        },
+        "summary": "Delete user by id",
+        "description": "Delete user by id",
+        "operationId": "UserController_removeUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "201": {
+            "content": {},
+            "description": ""
+          }
+        },
+        "summary": "Update user by id",
+        "description": "Update user by id",
+        "operationId": "UserController_updateUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "User id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "description": "User instance for framework"
+        }
+      }
+    },
+    "/user/{name}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "User instance for framework"
+          }
+        },
+        "summary": "Get user by full name",
+        "description": "Get user by full name",
+        "operationId": "UserController_getByName",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "description": "User name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/user/age/{age}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "description": "User instance for framework"
+          }
+        },
+        "summary": "Get user by age",
+        "description": "Get user by age",
+        "operationId": "UserController_getByAge",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "age",
+            "description": "User age",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Paging": {
+        "properties": {
+          "start": {
+            "type": "number"
+          },
+          "size": {
+            "type": "number"
+          }
+        }
+      },
+      "User": {
+        "title": "User instance for framework",
+        "description": "User instance for framework",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "User's first and last name",
+            "pattern": "\\w{4,20}"
+          },
+          "age": {
+            "type": "number",
+            "description": "User's age in years"
+          },
+          "dob": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "height": {
+            "type": "number"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "weight": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "age",
+          "dob",
+          "height",
+          "aliases",
+          "weight"
+        ]
+      }
+    }
+  }
+}
