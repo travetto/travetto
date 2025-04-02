@@ -56,27 +56,17 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
     return this.raw = app;
   }
 
-  async unregisterEndpoints(key: string | symbol): Promise<void> {
-    console.debug('Fastify does not allow for endpoint reloading');
-  }
-
-  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void> {
+  async registerEndpoints(endpoints: EndpointConfig[]): Promise<void> {
     if (this.listening) { // Does not support live reload
       return;
     }
     for (const endpoint of endpoints) {
-      let sub = path;
-      if (endpoint.path) {
-        sub = `${path}/${endpoint.path}`;
+      let path = endpoint.fullPath;
+      if (path === '/*all') {
+        path = '*';
       }
 
-      sub = sub.replace(/[/]{1,3}/g, '/').replace(/[/]{1,3}$/, '').replace(/^$/, '/');
-
-      if (sub === '/*all') {
-        sub = '*';
-      }
-
-      this.raw[HTTP_METHODS[endpoint.method].lower](sub, (req, reply) =>
+      this.raw[HTTP_METHODS[endpoint.method].lower](path, (req, reply) =>
         endpoint.filter!({ req: FastifyWebServerUtil.getRequest(req, reply) })
       );
     }

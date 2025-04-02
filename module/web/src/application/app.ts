@@ -9,13 +9,15 @@ import { WebCommonUtil } from '../util/common.ts';
 
 import { HttpInterceptor } from '../types/interceptor.ts';
 import { HTTP_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
-import { WebServer, WebServerHandle } from '../types/server.ts';
+import { WebEndpointCleanup, WebServer, WebServerHandle } from '../types/server.ts';
 
 /**
  * The web application
  */
 @Injectable()
 export class WebApplication<T = unknown> {
+
+  #routeCleanup = new Map<string, WebEndpointCleanup>();
 
   @Inject()
   server: WebServer<T>;
@@ -136,7 +138,10 @@ export class WebApplication<T = unknown> {
       ep.filter = castTo(EndpointUtil.createEndpointHandler(this.interceptors, ep, config));
     }
 
-    await this.server.registerEndpoints(config.class.Ⲑid, config.basePath, endpoints);
+    const result = await this.server.registerEndpoints(endpoints, config);
+    if (result) {
+      this.#routeCleanup.set(c.Ⲑid, result);
+    }
 
     console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: endpoints.length });
   }
@@ -149,9 +154,16 @@ export class WebApplication<T = unknown> {
     if (!Runtime.dynamic) {
       console.warn('Unloading only supported in dynamic mode');
       return;
+    } else {
+      const cleanup = this.#routeCleanup.get(c.Ⲑid);
+      if (!cleanup) {
+        console.warn('Unloading routes not supported for the route');
+        return;
+      } else {
+        await cleanup();
+        this.#routeCleanup.delete(c.Ⲑid);
+      }
     }
-
-    await this.server.unregisterEndpoints(c.Ⲑid);
   }
 
   /**

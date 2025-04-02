@@ -1,6 +1,8 @@
-import type { EndpointConfig } from '../registry/types.ts';
+import type { ControllerConfig, EndpointConfig } from '../registry/types.ts';
 
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
+
+export type WebEndpointCleanup = (() => Promise<void>);
 
 /**
  * Defines the contract for any http server to support the framework.
@@ -21,17 +23,9 @@ export interface WebServer<T = unknown> {
 
   /**
    * Register new endpoints
-   * @param key The identifier for the set of endpoints
-   * @param path The path to add the endpoints to
    * @param endpoints The list of endpoints to add
    */
-  registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void>;
-
-  /**
-   * The endpoints to unregister
-   * @param key The key to unregister by
-   */
-  unregisterEndpoints(key: string | symbol): Promise<void>;
+  registerEndpoints(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<void | undefined | WebEndpointCleanup>;
 
   /**
    * Start the listening process

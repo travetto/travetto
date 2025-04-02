@@ -3,7 +3,7 @@ import https from 'node:https';
 import express from 'express';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, EndpointConfig, HTTP_METHODS } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, EndpointConfig, HTTP_METHODS, ControllerConfig } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { ExpressWebServerUtil } from './util.ts';
@@ -35,15 +35,8 @@ export class ExpressWebServer implements WebServer<express.Application> {
     return this.raw = app;
   }
 
-  async unregisterEndpoints(key: string | symbol): Promise<void> {
-    const layers = this.raw.router.stack;
-    const pos = layers.findIndex(x => castTo<Keyed>(x.handle).key === key);
-    if (pos >= 0) {
-      layers.splice(pos, 1);
-    }
-  }
-
-  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[]): Promise<void> {
+  async registerEndpoints(endpoints: EndpointConfig[], controller: ControllerConfig) {
+    const key = controller.class.Ⲑid;
     const router = express.Router({ mergeParams: true });
     castTo<Keyed>(router).key = key;
 
@@ -57,7 +50,15 @@ export class ExpressWebServer implements WebServer<express.Application> {
       });
     }
 
-    this.raw.use(path, router);
+    this.raw.use(controller.basePath, router);
+
+    return async (): Promise<void> => {
+      const layers = this.raw.router.stack;
+      const pos = layers.findIndex(x => castTo<Keyed>(x.handle).key === key);
+      if (pos >= 0) {
+        layers.splice(pos, 1);
+      }
+    };
   }
 
   async listen(): Promise<WebServerHandle> {
