@@ -47,7 +47,7 @@ export class CompressConfig {
  * Enables compression support
  */
 @Injectable()
-export class CompressionInterceptor implements HttpInterceptor {
+export class CompressInterceptor implements HttpInterceptor {
 
   category: HttpInterceptorCategory = 'response';
 

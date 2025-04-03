@@ -1,3 +1,8 @@
+import { HttpMetadataConfig } from '../types/core';
+import { Cookie, CookieGetOptions } from '../types/cookie';
+import { HttpRequest } from '../types/request';
+import { HttpResponse } from '../types/response';
+
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
 
@@ -49,5 +54,40 @@ export class WebCommonUtil {
 
     const inputMap = new Map(items.map(x => [x.key, x]));
     return keys.map(k => inputMap.get(k)!);
+  }
+
+  /**
+   * Write value to response
+   */
+  static writeMetadata(res: HttpResponse, cfg: HttpMetadataConfig, value: string | undefined, opts?: Omit<Cookie, 'name' | 'value'>): HttpResponse {
+    if (cfg.mode === 'cookie' || !cfg.mode) {
+      res.setCookie({
+        ...opts,
+        name: cfg.cookie, value, maxAge: (value !== undefined) ? opts?.maxAge : -1,
+      });
+    }
+    if (cfg.mode === 'header') {
+      if (value) {
+        res.headers.set(cfg.header, `${cfg.headerPrefix || ''} ${value}`.trim());
+      } else {
+        res.headers.delete(cfg.header);
+      }
+    }
+    return res;
+  }
+
+  /**
+   * Read value from request
+   */
+  static readMetadata(req: HttpRequest, cfg: HttpMetadataConfig, opts?: CookieGetOptions): string | undefined {
+    let value = (cfg.mode === 'cookie' || !cfg.mode) ?
+      req.getCookie(cfg.cookie, opts) :
+      req.headers.get(cfg.header) ?? undefined;
+
+    if (value && cfg.mode === 'header' && cfg.headerPrefix) {
+      value = value.split(cfg.headerPrefix)[1].trim();
+    }
+
+    return value;
   }
 }

@@ -6,7 +6,7 @@ import { BindUtil } from '@travetto/schema';
 import { HttpResponse } from './response.ts';
 import { CookieGetOptions } from './cookie.ts';
 import { HttpHeadersInit, HttpHeaders } from './headers.ts';
-import { HttpMetadataConfig, HttpMethod, HttpProtocol } from './core.ts';
+import { HttpMethod, HttpProtocol } from './core.ts';
 
 type RequestInit = {
   headers?: HttpHeadersInit;
@@ -63,21 +63,6 @@ export class HttpRequest {
    */
   getExpandedQuery(this: HttpRequest): Record<string, unknown> {
     return this.#queryExpanded ??= BindUtil.expandPaths(this.query);
-  }
-
-  /**
-   * Read value from request
-   */
-  readMetadata(this: HttpRequest, cfg: HttpMetadataConfig, opts?: CookieGetOptions): string | undefined {
-    let res = (cfg.mode === 'cookie' || !cfg.mode) ?
-      this.getCookie(cfg.cookie, opts) :
-      this.headers.get(cfg.header) ?? undefined;
-
-    if (res && cfg.mode === 'header' && cfg.headerPrefix) {
-      res = res.split(cfg.headerPrefix)[1].trim();
-    }
-
-    return res!;
   }
 
   getInternal(): HttpRequestInternal {

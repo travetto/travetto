@@ -8,7 +8,7 @@ import { HttpChainedContext, HttpContext } from '../types.ts';
 import { HttpResponse } from '../types/response.ts';
 import { HttpInterceptor } from '../types/interceptor.ts';
 import { HttpInterceptorCategory } from '../types/core.ts';
-import { CompressionInterceptor } from './compress.ts';
+import { CompressInterceptor } from './compress.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 @Config('web.etag')
@@ -30,7 +30,7 @@ export class EtagConfig {
 export class EtagInterceptor implements HttpInterceptor {
 
   category: HttpInterceptorCategory = 'response';
-  dependsOn = [CompressionInterceptor];
+  dependsOn = [CompressInterceptor];
 
   @Inject()
   config: EtagConfig;
