@@ -20,7 +20,6 @@ const WRITE_ONLY = Symbol();
 export class WebApplication<T = unknown> {
 
   #routeCleanup = new Map<string, WebEndpointCleanup | typeof WRITE_ONLY>();
-  #listening = false;
 
   @Inject()
   server: WebServer<T>;
@@ -109,10 +108,7 @@ export class WebApplication<T = unknown> {
    * @param c The class to register
    */
   async registerController(c: Class): Promise<void> {
-    if (this.#listening && !Runtime.dynamic) {
-      console.warn('Reloading only supported in dynamic mode');
-      return;
-    } else if (this.#routeCleanup.get(c.Ⲑid) === null) {
+    if (this.#routeCleanup.get(c.Ⲑid) === null) {
       console.warn('Reloading routes not supported for ', this.server.constructor.Ⲑid);
     }
 
@@ -156,10 +152,7 @@ export class WebApplication<T = unknown> {
   async unregisterController(c: Class): Promise<void> {
     const cleanup = this.#routeCleanup.get(c.Ⲑid)!;
 
-    if (!Runtime.dynamic) {
-      console.warn('Unloading only supported in dynamic mode');
-      return;
-    } else if (cleanup === WRITE_ONLY) {
+    if (cleanup === WRITE_ONLY) {
       console.warn('Unloading routes not supported for ', this.server.constructor.Ⲑid);
       return;
     } else {
@@ -176,7 +169,6 @@ export class WebApplication<T = unknown> {
     if (handle.port) {
       console.log('Listening', { port: handle.port });
     }
-    this.#listening = true;
     return handle;
   }
 }
