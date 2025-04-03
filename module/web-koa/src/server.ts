@@ -18,8 +18,6 @@ export class KoaWebServer implements WebServer<koa> {
 
   raw: koa;
 
-  listening = false;
-
   @Inject()
   config: WebConfig;
 
@@ -63,7 +61,6 @@ export class KoaWebServer implements WebServer<koa> {
     if (this.config.ssl?.active) {
       raw = https.createServer((await this.config.ssl?.getKeys())!, this.raw.callback());
     }
-    this.listening = true;
     const { reject, resolve, promise } = Promise.withResolvers<void>();
     const server = raw.listen(this.config.port, this.config.bindAddress)
       .on('error', reject)

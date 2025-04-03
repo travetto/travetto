@@ -11,13 +11,16 @@ import { HttpInterceptor } from '../types/interceptor.ts';
 import { HTTP_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
 import { WebEndpointCleanup, WebServer, WebServerHandle } from '../types/server.ts';
 
+const WRITE_ONLY = Symbol();
+
 /**
  * The web application
  */
 @Injectable()
 export class WebApplication<T = unknown> {
 
-  #routeCleanup = new Map<string, WebEndpointCleanup>();
+  #routeCleanup = new Map<string, WebEndpointCleanup | typeof WRITE_ONLY>();
+  #listening = false;
 
   @Inject()
   server: WebServer<T>;
@@ -106,9 +109,11 @@ export class WebApplication<T = unknown> {
    * @param c The class to register
    */
   async registerController(c: Class): Promise<void> {
-    if (this.server.listening && !Runtime.dynamic) {
+    if (this.#listening && !Runtime.dynamic) {
       console.warn('Reloading only supported in dynamic mode');
       return;
+    } else if (this.#routeCleanup.get(c.Ⲑid) === null) {
+      console.warn('Reloading routes not supported for ', this.server.constructor.Ⲑid);
     }
 
     const config = ControllerRegistry.get(c);
@@ -139,9 +144,7 @@ export class WebApplication<T = unknown> {
     }
 
     const result = await this.server.registerEndpoints(endpoints, config);
-    if (result) {
-      this.#routeCleanup.set(c.Ⲑid, result);
-    }
+    this.#routeCleanup.set(c.Ⲑid, result ?? WRITE_ONLY);
 
     console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: endpoints.length });
   }
@@ -151,18 +154,17 @@ export class WebApplication<T = unknown> {
    * @param c The class to unregister
    */
   async unregisterController(c: Class): Promise<void> {
+    const cleanup = this.#routeCleanup.get(c.Ⲑid)!;
+
     if (!Runtime.dynamic) {
       console.warn('Unloading only supported in dynamic mode');
       return;
+    } else if (cleanup === WRITE_ONLY) {
+      console.warn('Unloading routes not supported for ', this.server.constructor.Ⲑid);
+      return;
     } else {
-      const cleanup = this.#routeCleanup.get(c.Ⲑid);
-      if (!cleanup) {
-        console.warn('Unloading routes not supported for the route');
-        return;
-      } else {
-        await cleanup();
-        this.#routeCleanup.delete(c.Ⲑid);
-      }
+      await cleanup();
+      this.#routeCleanup.delete(c.Ⲑid);
     }
   }
 
@@ -174,6 +176,7 @@ export class WebApplication<T = unknown> {
     if (handle.port) {
       console.log('Listening', { port: handle.port });
     }
+    this.#listening = true;
     return handle;
   }
 }

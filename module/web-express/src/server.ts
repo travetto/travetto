@@ -18,8 +18,6 @@ export class ExpressWebServer implements WebServer<express.Application> {
 
   raw: express.Application;
 
-  listening: boolean;
-
   @Inject()
   config: WebConfig;
 

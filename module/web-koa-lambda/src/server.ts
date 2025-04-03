@@ -35,7 +35,6 @@ export class AwsLambdaKoaWebServer extends KoaWebServer implements AwsLambdaWebS
   }
 
   override async listen(): Promise<WebServerHandle> {
-    this.listening = true;
     return asFull<WebServerHandle>({});
   }
 }

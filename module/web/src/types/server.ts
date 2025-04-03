@@ -12,11 +12,6 @@ export type WebEndpointCleanup = (() => Promise<void>);
 export interface WebServer<T = unknown> {
 
   /**
-   * Is the server listening
-   */
-  listening: boolean;
-
-  /**
    * Initialize the raw application
    */
   init(): Promise<T> | T;

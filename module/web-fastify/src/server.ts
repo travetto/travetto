@@ -13,8 +13,6 @@ import { FastifyWebServerUtil } from './util.ts';
 @Injectable()
 export class FastifyWebServer implements WebServer<FastifyInstance> {
 
-  listening = false;
-
   raw: FastifyInstance;
 
   @Inject()
@@ -57,9 +55,6 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
   }
 
   async registerEndpoints(endpoints: EndpointConfig[]): Promise<void> {
-    if (this.listening) { // Does not support live reload
-      return;
-    }
     for (const endpoint of endpoints) {
       let path = endpoint.fullPath;
       if (path === '/*all') {
@@ -74,7 +69,7 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
 
   async listen(): Promise<WebServerHandle> {
     await this.raw.listen({ port: this.config.port, host: this.config.bindAddress });
-    this.listening = true;
+
     return {
       port: this.config.port,
       on: this.raw.server.on.bind(this.raw),

@@ -31,10 +31,8 @@ class CustomInterceptorConfig {
 
 @Injectable()
 class Server implements WebServer {
-  listening: boolean;
   async init(): Promise<void> { }
-  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors?: HttpInterceptor<unknown>[] | undefined): Promise<void> { }
-  async unregisterEndpoints(key: string | symbol): Promise<void> { }
+  async registerEndpoints(endpoints: EndpointConfig[]): Promise<void> { }
   listen(): WebServerHandle | Promise<WebServerHandle> {
     return {
       close(cb?: Function) { },

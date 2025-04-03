@@ -26,7 +26,6 @@ export class AwsLambdaFastifyWebServer extends FastifyWebServer implements AwsLa
   }
 
   override async listen(): Promise<WebServerHandle> {
-    this.listening = true;
     return {
       close: this.raw.close.bind(this.raw),
       on: this.raw.server.on.bind(this.raw.server)

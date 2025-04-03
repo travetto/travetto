@@ -36,7 +36,6 @@ export class AwsLambdaExpressWebServer extends ExpressWebServer implements AwsLa
   }
 
   override async listen(): Promise<WebServerHandle> {
-    this.listening = true;
     return asFull({});
   }
 }

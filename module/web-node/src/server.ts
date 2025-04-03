@@ -21,8 +21,6 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
 
   raw: NodeWebApplication;
 
-  listening: boolean;
-
   @Inject()
   config: WebConfig;
 
@@ -67,8 +65,6 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
 
   async listen(): Promise<WebServerHandle> {
     const { reject, resolve, promise } = Promise.withResolvers<void>();
-
-    this.listening = true;
 
     const server = this.raw
       .on('listening', resolve)
