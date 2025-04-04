@@ -1,3 +1,4 @@
+import { IncomingMessage } from 'node:http';
 import { configure } from '@codegenie/serverless-express';
 
 import { Inject, Injectable } from '@travetto/di';
@@ -30,7 +31,11 @@ export class AwsLambdaExpressWebServer extends ExpressWebServer implements AwsLa
   override async init(): Promise<this['raw']> {
     const ret = await super.init();
     this.#handler = castTo(configure({
-      app: (req, res) => ret(Object.assign(req, { body: undefined }), res), ...this.awsConfig.toJSON()
+      app: (req: IncomingMessage & { body?: unknown }, res) => {
+        delete req.body;
+        return ret(req, res);
+      },
+      ...this.awsConfig.toJSON()
     }));
     return ret;
   }

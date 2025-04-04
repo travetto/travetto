@@ -21,6 +21,7 @@ export class ExpressWebServerUtil {
       protocol: castTo(req.protocol),
       method: castTo(req.method.toUpperCase()),
       path: req.url,
+      params: req.params,
       query: req.query,
       headers: req.headers,
       remoteIp: req.socket.remoteAddress,

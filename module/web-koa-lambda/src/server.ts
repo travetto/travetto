@@ -1,3 +1,5 @@
+import { IncomingMessage } from 'node:http';
+
 import { configure } from '@codegenie/serverless-express';
 
 import { Inject, Injectable } from '@travetto/di';
@@ -30,7 +32,13 @@ export class AwsLambdaKoaWebServer extends KoaWebServer implements AwsLambdaWebS
   override async init(): Promise<this['raw']> {
     const ret = await super.init();
     const fn = ret.callback();
-    this.#handler = castTo(configure({ app: (req, res) => fn(Object.assign(req, { body: undefined }), res), ...this.awsConfig.toJSON() }));
+    this.#handler = castTo(configure({
+      app: (req: IncomingMessage & { body?: unknown }, res) => {
+        delete req.body;
+        return fn(req, res);
+      },
+      ...this.awsConfig.toJSON()
+    }));
     return ret;
   }
 
