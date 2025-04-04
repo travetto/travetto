@@ -3,8 +3,10 @@ import { RouterLink, RouterModule } from '@angular/router';
 
 @Component({
   imports: [RouterLink, RouterModule],
-  selector: 'app-web-fastify-lambda',
-  templateUrl: './web-fastify-lambda.component.html',
-  styleUrls: []
+  selector: 'web-node',
+  templateUrl: './web-node.component.html',
+  styles: ['']
 })
-export class WebFastifyLambdaComponent { }
+export class WebNodeComponent {
+
+}

@@ -3,7 +3,7 @@ import { FastifyWebServer } from '@travetto/web-fastify';
 import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
 
-import { ModelBlobWebUploadServerSuite } from './server.ts';
+import { ModelBlobWebUploadServerSuite } from '../../../../global-test/model_web-upload/test/server.ts';
 
 const ServerSymbol = Symbol.for('fastify');
 

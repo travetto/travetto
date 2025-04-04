@@ -112,32 +112,12 @@ export const PAGES = [
     loadComponent: (): Promise<Type<unknown>> => import('./gen/web/web.component').then(m => m.WebComponent),
     subs: [
       {
-        path: 'web-express', title: 'Express',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-express/web-express.component').then(m => m.WebExpressComponent)
-      },
-      {
-        path: 'web-koa', title: 'Koa',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-koa/web-koa.component').then(m => m.WebKoaComponent)
-      },
-      {
-        path: 'web-fastify', title: 'Fastify',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-fastify/web-fastify.component').then(m => m.WebFastifyComponent)
+        path: 'web-node', title: 'Noe',
+        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-node/web-node.component').then(m => m.WebNodeComponent)
       },
       {
         path: 'web-aws-lambda', title: 'AWS Lambda',
         loadComponent: (): Promise<Type<unknown>> => import('./gen/web-aws-lambda/web-aws-lambda.component').then(m => m.WebAwsLambdaComponent)
-      },
-      {
-        path: 'web-express-lambda', title: 'Express Lambda',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-express-lambda/web-express-lambda.component').then(m => m.WebExpressLambdaComponent)
-      },
-      {
-        path: 'web-koa-lambda', title: 'Koa Lambda',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-koa-lambda/web-koa-lambda.component').then(m => m.WebKoaLambdaComponent)
-      },
-      {
-        path: 'web-fastify-lambda', title: 'Fastify Lambda',
-        loadComponent: (): Promise<Type<unknown>> => import('./gen/web-fastify-lambda/web-fastify-lambda.component').then(m => m.WebFastifyLambdaComponent)
       },
       {
         path: 'web-upload', title: 'Upload',

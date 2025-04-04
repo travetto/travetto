@@ -1,28 +1,28 @@
 import { Suite } from '@travetto/test';
-import { AwsLambdaExpressWebServer } from '@travetto/web-express-lambda';
+import { AwsLambdaKoaWebServer } from '@travetto/web-koa-lambda';
 import { InjectableFactory } from '@travetto/di';
 import { AwsLambdaWebApplication } from '@travetto/web-aws-lambda';
 
 import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server.ts';
 
-import { ModelBlobWebUploadServerSuite } from './server.ts';
+import { ModelBlobWebUploadServerSuite } from '../../../../global-test/model_web-upload/test/server.ts';
 
-const ServerSymbol = Symbol.for('express-lambda');
+const ServerSymbol = Symbol.for('koa-lambda');
 
 class Config {
   @InjectableFactory()
-  static getServer(): AwsLambdaExpressWebServer {
-    return new AwsLambdaExpressWebServer();
+  static getServer(): AwsLambdaKoaWebServer {
+    return new AwsLambdaKoaWebServer();
   }
 
   @InjectableFactory(ServerSymbol)
-  static getApp(dep: AwsLambdaExpressWebServer): AwsLambdaWebApplication {
+  static getApp(dep: AwsLambdaKoaWebServer): AwsLambdaWebApplication {
     return new AwsLambdaWebApplication(dep);
   }
 }
 
 @Suite()
-export class ExpressLambdaWebUploadTest extends ModelBlobWebUploadServerSuite {
+export class KoaLambdaWebUploadTest extends ModelBlobWebUploadServerSuite {
   qualifier = ServerSymbol;
   type = AwsLambdaWebServerSupport;
 }

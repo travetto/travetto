@@ -1,20 +1,20 @@
 import { Suite } from '@travetto/test';
-import { ExpressWebServer } from '@travetto/web-express';
+import { KoaWebServer } from '@travetto/web-koa';
 import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
 
-import { ModelBlobWebUploadServerSuite } from './server.ts';
+import { ModelBlobWebUploadServerSuite } from '../../../../global-test/model_web-upload/test/server.ts';
 
-const ServerSymbol = Symbol.for('express');
+const ServerSymbol = Symbol.for('koa');
 
 class Config {
   @InjectableFactory()
   static getServer(): WebServer {
-    return new ExpressWebServer();
+    return new KoaWebServer();
   }
 
   @InjectableFactory(ServerSymbol)
-  static getApp(dep: ExpressWebServer): WebApplication {
+  static getApp(dep: KoaWebServer): WebApplication {
     return new class extends WebApplication {
       server = dep;
     }();
@@ -22,6 +22,6 @@ class Config {
 }
 
 @Suite()
-export class ExpressWebUploadTest extends ModelBlobWebUploadServerSuite {
+export class KoaWebUploadTest extends ModelBlobWebUploadServerSuite {
   qualifier = ServerSymbol;
 }
