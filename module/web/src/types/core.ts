@@ -26,3 +26,5 @@ export const HTTP_INTERCEPTOR_CATEGORIES = ['global', 'terminal', 'request', 're
  * High level categories with a defined ordering
  */
 export type HttpInterceptorCategory = (typeof HTTP_INTERCEPTOR_CATEGORIES)[number];
+
+export const HttpInternalSymbol = Symbol.for('@travetto/web:http-internal');

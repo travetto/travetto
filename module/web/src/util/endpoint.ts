@@ -4,7 +4,7 @@ import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResul
 import { HttpContext, HttpChainedFilter, HttpChainedContext } from '../types.ts';
 import { HttpResponse } from '../types/response.ts';
 import { HttpInterceptor } from '../types/interceptor.ts';
-import { HTTP_METHODS } from '../types/core.ts';
+import { HttpInternalSymbol, HTTP_METHODS } from '../types/core.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 
 /**
@@ -89,7 +89,7 @@ export class EndpointUtil {
       case 'header': return field.array ? ctx.req.headers.getList(name) : ctx.req.headers.get(name);
       case 'body': return ctx.req.body;
       case 'query': {
-        const q = ctx.req.getExpandedQuery();
+        const q = ctx.req[HttpInternalSymbol].expandedQuery ??= BindUtil.expandPaths(ctx.req.query);
         return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[name]);
       }
     }
@@ -104,7 +104,7 @@ export class EndpointUtil {
   static async extractParameters(ctx: HttpContext, endpoint: EndpointConfig): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
-    const vals = ctx.req.getInternal().requestParams;
+    const vals = ctx.req[HttpInternalSymbol].requestParams;
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);

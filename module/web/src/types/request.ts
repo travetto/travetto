@@ -1,12 +1,11 @@
 import { Readable } from 'node:stream';
 
 import { Any, AppError } from '@travetto/runtime';
-import { BindUtil } from '@travetto/schema';
 
 import { HttpResponse } from './response.ts';
 import { CookieGetOptions } from './cookie.ts';
 import { HttpHeadersInit, HttpHeaders } from './headers.ts';
-import { HttpMethod, HttpProtocol } from './core.ts';
+import { HttpInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
 
 type RequestInit = {
   headers?: HttpHeadersInit;
@@ -25,6 +24,7 @@ type RequestInit = {
 
 export interface HttpRequestInternal {
   requestParams?: unknown[];
+  expandedQuery?: Record<string, unknown>;
 }
 
 /**
@@ -32,8 +32,7 @@ export interface HttpRequestInternal {
  */
 export class HttpRequest {
 
-  #queryExpanded?: Record<string, unknown>;
-  #internal: HttpRequestInternal = {};
+  [HttpInternalSymbol]: HttpRequestInternal = {};
 
   readonly headers: HttpHeaders;
   readonly path: string = '';
@@ -56,17 +55,6 @@ export class HttpRequest {
    */
   getIp(): string | undefined {
     return this.headers.get('X-Forwarded-For') || this.remoteIp;
-  }
-
-  /**
-   * Get the expanded query object
-   */
-  getExpandedQuery(): Record<string, unknown> {
-    return this.#queryExpanded ??= BindUtil.expandPaths(this.query);
-  }
-
-  getInternal(): HttpRequestInternal {
-    return this.#internal;
   }
 
   getCookie(key: string, opts?: CookieGetOptions): string | undefined {
