@@ -32,7 +32,7 @@ class CustomInterceptorConfig {
 @Injectable()
 class Server implements WebServer {
   async init(): Promise<void> { }
-  async registerEndpoints(endpoints: EndpointConfig[]): Promise<void> { }
+  registerRouter(): void { }
   listen(): WebServerHandle | Promise<WebServerHandle> {
     return {
       close(cb?: Function) { },

@@ -45,9 +45,9 @@ export class WebApplication<T = unknown> {
 
     this.interceptors = await this.getInterceptors();
 
-    // Register all active
-    await Promise.all(ControllerRegistry.getClasses()
-      .map(c => this.registerController(c)));
+    // eslint-disable-next-line no-shadow
+    const Router = (await import('find-my-way')).default;
+    this.router = Router();
 
     this.server.registerRouter(req => {
       const found = this.router.find(req.method, req.url);
@@ -56,6 +56,11 @@ export class WebApplication<T = unknown> {
       }
       return { endpoint: castTo(found.handler), params: found?.params };
     });
+
+
+    // Register all active
+    await Promise.all(ControllerRegistry.getClasses()
+      .map(c => this.registerController(c)));
 
     // Listen for updates
     ControllerRegistry.on(this.onControllerChange);
@@ -153,7 +158,7 @@ export class WebApplication<T = unknown> {
     const toClean: [HttpMethod, string][] = [];
     for (const endpoint of endpoints) {
       const fullPath = endpoint.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
-      this.router[HTTP_METHODS[endpoint.method].lower](fullPath, castTo(endpoint.filter!));
+      this.router[HTTP_METHODS[endpoint.method].lower](fullPath, castTo(endpoint));
       toClean.push([endpoint.method, fullPath]);
     }
 

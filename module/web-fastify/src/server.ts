@@ -28,9 +28,6 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
       } : {}
     });
 
-    app.removeAllContentTypeParsers();
-    app.addContentTypeParser(/^.*/, (_, body, done) => done(null, body));
-
     return this.raw = app;
   }
 

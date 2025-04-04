@@ -1,4 +1,4 @@
-import { EndpointConfig } from '@travetto/web';
+import { EndpointConfig } from '../registry/types.ts';
 import { HttpMethod } from './core.ts';
 
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
