@@ -2,12 +2,7 @@
   "name": "@travetto-test/web-upload",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/web-express": "^6.0.0-rc.1",
-    "@travetto/web-express-lambda": "^6.0.0-rc.1",
-    "@travetto/web-fastify": "^6.0.0-rc.1",
-    "@travetto/web-fastify-lambda": "^6.0.0-rc.1",
-    "@travetto/web-koa": "^6.0.0-rc.1",
-    "@travetto/web-koa-lambda": "^6.0.0-rc.1",
+    "@travetto/web-aws-lambda": "^6.0.0-rc.1",
     "@travetto/web-node": "^6.0.0-rc.1",
     "@travetto/web-upload": "^6.0.0-rc.1"
   },
