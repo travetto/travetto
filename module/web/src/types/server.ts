@@ -1,10 +1,9 @@
 import { EndpointConfig } from '../registry/types.ts';
-import { HttpMethod } from './core.ts';
 
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
 export type WebEndpointCleanup = (() => Promise<void>);
 
-export type WebRouterRequest = { url: string, method: HttpMethod, headers: Record<string, unknown> };
+export type WebRouterRequest = { url?: string, method?: string, headers?: Record<string, unknown> };
 export type WebRouter = (req: WebRouterRequest) => { endpoint: EndpointConfig, params: Record<string, unknown> };
 
 /**

@@ -2,7 +2,6 @@ import { FastifyInstance, fastify } from 'fastify';
 
 import { WebConfig, WebServer, WebServerHandle, WebRouter } from '@travetto/web';
 import { Inject, Injectable } from '@travetto/di';
-import { castTo } from '@travetto/runtime';
 
 import { FastifyWebServerUtil } from './util.ts';
 
@@ -33,7 +32,7 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
 
   registerRouter(router: WebRouter): void {
     this.raw.addHook('onRequest', (req, reply) => {
-      const { endpoint, params } = router({ method: castTo((req.method).toUpperCase()), url: req.url, headers: req.headers });
+      const { endpoint, params } = router(req);
       req.params = params;
       return endpoint.filter!({ req: FastifyWebServerUtil.getRequest(req, reply) });
     });

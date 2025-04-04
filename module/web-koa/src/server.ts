@@ -1,13 +1,9 @@
-import https from 'node:https';
 import koa from 'koa';
 
 import { Injectable, Inject } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, WebRouter } from '@travetto/web';
-import { castTo } from '@travetto/runtime';
+import { WebConfig, WebServer, WebServerHandle, WebRouter, NetUtil } from '@travetto/web';
 
 import { KoaWebServerUtil } from './util.ts';
-
-type Keyed = { key?: string | symbol };
 
 /**
  * Koa-based Web server
@@ -32,28 +28,13 @@ export class KoaWebServer implements WebServer<koa> {
 
   registerRouter(router: WebRouter): void {
     this.raw.use(async (ctx) => {
-      const { endpoint, params } = router({ method: castTo((ctx.method).toUpperCase()), url: ctx.url, headers: ctx.headers });
+      const { endpoint, params } = router(ctx);
       ctx.params = params;
       return endpoint.filter!({ req: KoaWebServerUtil.getRequest(ctx) });
     });
   }
 
   async listen(): Promise<WebServerHandle> {
-    let raw: https.Server | koa = this.raw;
-    if (this.config.ssl?.active) {
-      raw = https.createServer((await this.config.ssl?.getKeys())!, this.raw.callback());
-    }
-    const { reject, resolve, promise } = Promise.withResolvers<void>();
-    const server = raw.listen(this.config.port, this.config.bindAddress)
-      .on('error', reject)
-      .on('listening', resolve);
-    await promise;
-    server.off('error', reject);
-
-    return {
-      port: this.config.port,
-      close: server.close.bind(server),
-      on: server.on.bind(server)
-    };
+    return NetUtil.createHttpServer(this.config, this.raw.callback());
   }
 }

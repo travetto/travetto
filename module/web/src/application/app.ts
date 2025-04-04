@@ -52,7 +52,7 @@ export class WebApplication<T = unknown> {
     this.router = Router();
 
     this.server.registerRouter(req => {
-      const found = this.router.find(req.method, req.url);
+      const found = this.router.find(castTo((req.method ?? 'get').toUpperCase()), req.url ?? '/');
       if (!found) {
         throw new AppError('Unknown route');
       }
