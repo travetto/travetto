@@ -32,6 +32,11 @@ export class NodeWebServer implements WebServer<NodeWebApplication> {
   }
 
   async listen(): Promise<WebServerHandle> {
-    return NetUtil.createHttpServer(this.config, this.raw.handler!);
+    return NetUtil.createHttpServer({
+      bindAddress: this.config.bindAddress,
+      port: this.config.port,
+      handler: this.raw.handler,
+      sslKeys: await (this.config.ssl?.active ? this.config.ssl.getKeys() : undefined),
+    });
   }
 }

@@ -35,6 +35,11 @@ export class KoaWebServer implements WebServer<koa> {
   }
 
   async listen(): Promise<WebServerHandle> {
-    return NetUtil.createHttpServer(this.config, this.raw.callback());
+    return NetUtil.createHttpServer({
+      bindAddress: this.config.bindAddress,
+      port: this.config.port,
+      handler: this.raw.callback(),
+      sslKeys: await (this.config.ssl?.active ? this.config.ssl.getKeys() : undefined),
+    });
   }
 }

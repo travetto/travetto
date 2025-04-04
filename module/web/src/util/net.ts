@@ -5,8 +5,7 @@ import { spawn } from 'node:child_process';
 
 import { ExecUtil } from '@travetto/runtime';
 
-import { WebConfig } from '../application/config';
-import { WebServerHandle } from '../types/server';
+import { WebSslKeyPair, WebServerHandle } from '../types/server';
 
 /** Net utilities */
 export class NetUtil {
@@ -52,10 +51,15 @@ export class NetUtil {
   /**
    * Create an HTTP Server
    */
-  static async createHttpServer(config: WebConfig, handler: (req: IncomingMessage, res: ServerResponse) => void): Promise<WebServerHandle> {
-    const core = config.ssl?.active ?
-      https.createServer((await config.ssl?.getKeys())!, handler) :
-      http.createServer(handler);
+  static async createHttpServer(config: {
+    sslKeys?: WebSslKeyPair;
+    bindAddress?: string;
+    port?: number;
+    handler?: (req: IncomingMessage, res: ServerResponse) => void;
+  }): Promise<WebServerHandle> {
+    const core = config.sslKeys ?
+      https.createServer(config.sslKeys, config.handler) :
+      http.createServer(config.handler);
 
     const { reject, resolve, promise } = Promise.withResolvers<void>();
     const server = core.listen(config.port, config.bindAddress)

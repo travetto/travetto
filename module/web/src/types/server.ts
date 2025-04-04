@@ -6,6 +6,11 @@ export type WebEndpointCleanup = (() => Promise<void>);
 export type WebRouterRequest = { url?: string, method?: string, headers?: Record<string, unknown> };
 export type WebRouter = (req: WebRouterRequest) => { endpoint: EndpointConfig, params: Record<string, unknown> };
 
+export type WebSslKeyPair = {
+  cert: string;
+  key: string;
+};
+
 /**
  * Defines the contract for any http server to support the framework.
  *

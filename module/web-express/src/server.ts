@@ -39,6 +39,11 @@ export class ExpressWebServer implements WebServer<express.Application> {
   }
 
   async listen(): Promise<WebServerHandle> {
-    return NetUtil.createHttpServer(this.config, this.raw);
+    return NetUtil.createHttpServer({
+      bindAddress: this.config.bindAddress,
+      port: this.config.port,
+      handler: this.raw,
+      sslKeys: await (this.config.ssl?.active ? this.config.ssl.getKeys() : undefined),
+    });
   }
 }
