@@ -6,13 +6,15 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
-import { EndpointUtil } from '../util/endpoint.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
-import { WebCommonUtil } from '../util/common.ts';
+import { EndpointConfig } from '../registry/types.ts';
 
 import { HttpInterceptor } from '../types/interceptor.ts';
 import { HTTP_INTERCEPTOR_CATEGORIES, HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { WebEndpointCleanup, WebServer, WebServerHandle } from '../types/server.ts';
+
+import { WebCommonUtil } from '../util/common.ts';
+import { EndpointUtil } from '../util/endpoint.ts';
 
 /**
  * The web application
@@ -54,7 +56,8 @@ export class WebApplication<T = unknown> {
       if (!found) {
         throw new AppError('Unknown route');
       }
-      return { endpoint: castTo(found.handler), params: found?.params };
+      const handler = castTo<{ endpoint: EndpointConfig }>(found.handler);
+      return { endpoint: handler.endpoint, params: found?.params };
     });
 
 
@@ -158,7 +161,9 @@ export class WebApplication<T = unknown> {
     const toClean: [HttpMethod, string][] = [];
     for (const endpoint of endpoints) {
       const fullPath = endpoint.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
-      this.router[HTTP_METHODS[endpoint.method].lower](fullPath, castTo(endpoint));
+      const handler = (): void => { };
+      Object.defineProperty(handler, 'endpoint', { value: endpoint });
+      this.router[HTTP_METHODS[endpoint.method].lower](fullPath, handler);
       toClean.push([endpoint.method, fullPath]);
     }
 
