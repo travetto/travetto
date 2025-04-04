@@ -34,7 +34,8 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
   registerRouter(router: WebRouter): void {
     this.raw.addHook('onRequest', (req, reply) => {
       const { endpoint, params } = router({ method: castTo((req.method).toUpperCase()), url: req.url, headers: req.headers });
-      return endpoint.filter!({ req: FastifyWebServerUtil.getRequest(req, reply, params) });
+      req.params = params;
+      return endpoint.filter!({ req: FastifyWebServerUtil.getRequest(req, reply) });
     });
   }
 

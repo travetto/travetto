@@ -34,7 +34,8 @@ export class ExpressWebServer implements WebServer<express.Application> {
   registerRouter(router: WebRouter): void {
     this.raw.use(async (req, res, next) => {
       const { endpoint, params } = router({ method: castTo((req.method).toUpperCase()), url: req.url, headers: req.headers });
-      await endpoint.filter!({ req: ExpressWebServerUtil.getRequest(req, res, params) });
+      req.params = castTo(params);
+      await endpoint.filter!({ req: ExpressWebServerUtil.getRequest(req, res) });
       next();
     });
   }

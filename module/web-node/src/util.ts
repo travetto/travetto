@@ -17,7 +17,7 @@ export class NodeWebServerUtil {
   static getRequest(
     req: IncomingMessage & { originalUrl?: string, secure?: boolean },
     res: ServerResponse,
-    params: Record<string, unknown>
+    routeParams: Record<string, unknown>
   ): HttpRequest {
 
     const url = new URL(`http${req.secure ? 's' : ''}://${req.headers.host}${req.originalUrl ?? req.url}`);
@@ -27,7 +27,7 @@ export class NodeWebServerUtil {
       method: castTo(req.method?.toUpperCase()),
       path: url.pathname!,
       query: Object.fromEntries(url.searchParams.entries()),
-      params,
+      params: routeParams,
       headers: req.headers,
       inputStream: req,
       remoteIp: req.socket.remoteAddress,

@@ -33,7 +33,8 @@ export class KoaWebServer implements WebServer<koa> {
   registerRouter(router: WebRouter): void {
     this.raw.use(async (ctx) => {
       const { endpoint, params } = router({ method: castTo((ctx.method).toUpperCase()), url: ctx.url, headers: ctx.headers });
-      return endpoint.filter!({ req: KoaWebServerUtil.getRequest(ctx, params) });
+      ctx.params = params;
+      return endpoint.filter!({ req: KoaWebServerUtil.getRequest(ctx) });
     });
   }
 
