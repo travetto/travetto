@@ -1,9 +1,8 @@
 import https from 'node:https';
 import koa from 'koa';
-import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, EndpointConfig, HTTP_METHODS, ControllerConfig } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, WebRouter } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { KoaWebServerUtil } from './util.ts';
@@ -31,29 +30,11 @@ export class KoaWebServer implements WebServer<koa> {
     return this.raw = app;
   }
 
-  async registerEndpoints(endpoints: EndpointConfig[], controller: ControllerConfig) {
-    const router = new kRouter<unknown, koa.Context>(controller.basePath !== '/' ? { prefix: controller.basePath } : {});
-
-    // Register all endpoints to extract the proper request/response for the framework
-    for (const endpoint of endpoints) {
-      const finalPath = endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-      router[HTTP_METHODS[endpoint.method].lower](finalPath, ctx => endpoint.filter!({
-        req: KoaWebServerUtil.getRequest(ctx)
-      }));
-    }
-
-    // Register endpoints
-    const key = controller.class.Ⲑid;
-    const middleware = router.routes();
-    castTo<Keyed>(middleware).key = key;
-    this.raw.use(middleware);
-
-    return async (): Promise<void> => {
-      const pos = this.raw.middleware.findIndex(x => castTo<Keyed>(x).key === key);
-      if (pos >= 0) {
-        this.raw.middleware.splice(pos, 1);
-      }
-    };
+  registerRouter(router: WebRouter): void {
+    this.raw.use(async (ctx) => {
+      const { endpoint, params } = router({ method: castTo((ctx.method).toUpperCase()), url: ctx.url, headers: ctx.headers });
+      return endpoint.filter!({ req: KoaWebServerUtil.getRequest(ctx, params) });
+    });
   }
 
   async listen(): Promise<WebServerHandle> {

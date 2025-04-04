@@ -1,9 +1,8 @@
 import { FastifyInstance, fastify } from 'fastify';
-import { fastifyCompress } from '@fastify/compress';
-import { fastifyEtag } from '@fastify/etag';
 
-import { WebConfig, WebServer, WebServerHandle, EndpointConfig, EtagConfig, CompressConfig, HTTP_METHODS } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, WebRouter } from '@travetto/web';
 import { Inject, Injectable } from '@travetto/di';
+import { castTo } from '@travetto/runtime';
 
 import { FastifyWebServerUtil } from './util.ts';
 
@@ -18,12 +17,6 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
   @Inject()
   config: WebConfig;
 
-  @Inject()
-  etag: EtagConfig;
-
-  @Inject()
-  compress: CompressConfig;
-
   /**
    * Build the fastify server
    */
@@ -35,36 +28,17 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
       } : {}
     });
 
-    // Defer to fastify if disabled
-    if (this.compress.applies) {
-      const preferred = this.compress.preferredEncodings ?? this.compress.supportedEncodings.filter(x => x !== 'deflate');
-      app.register(fastifyCompress, { encodings: this.compress.supportedEncodings, requestEncodings: preferred });
-      this.compress.applies = false;
-    }
-
-    // Defer to fastify if disabled
-    if (this.etag.applies) {
-      app.register(fastifyEtag, { weak: !!this.etag.weak, replyWith304: true });
-      this.etag.applies = false;
-    }
-
     app.removeAllContentTypeParsers();
     app.addContentTypeParser(/^.*/, (_, body, done) => done(null, body));
 
     return this.raw = app;
   }
 
-  async registerEndpoints(endpoints: EndpointConfig[]): Promise<void> {
-    for (const endpoint of endpoints) {
-      let path = endpoint.fullPath;
-      if (path === '/*all') {
-        path = '*';
-      }
-
-      this.raw[HTTP_METHODS[endpoint.method].lower](path, (req, reply) =>
-        endpoint.filter!({ req: FastifyWebServerUtil.getRequest(req, reply) })
-      );
-    }
+  registerRouter(router: WebRouter): void {
+    this.raw.addHook('onRequest', (req, reply) => {
+      const { endpoint, params } = router({ method: castTo((req.method).toUpperCase()), url: req.url, headers: req.headers });
+      return endpoint.filter!({ req: FastifyWebServerUtil.getRequest(req, reply, params) });
+    });
   }
 
   async listen(): Promise<WebServerHandle> {

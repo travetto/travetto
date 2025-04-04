@@ -3,12 +3,10 @@ import https from 'node:https';
 import express from 'express';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, EndpointConfig, HTTP_METHODS, ControllerConfig } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, WebRouter } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { ExpressWebServerUtil } from './util.ts';
-
-type Keyed = { key?: string | symbol };
 
 /**
  * An express http server
@@ -33,30 +31,12 @@ export class ExpressWebServer implements WebServer<express.Application> {
     return this.raw = app;
   }
 
-  async registerEndpoints(endpoints: EndpointConfig[], controller: ControllerConfig) {
-    const key = controller.class.Ⲑid;
-    const router = express.Router({ mergeParams: true });
-    castTo<Keyed>(router).key = key;
-
-    for (const endpoint of endpoints) {
-      const finalPath = endpoint.path === '/*all' ? '*all' :
-        endpoint.path.replace(/[*][^/]*/g, p => p.length > 1 ? p : '*wildcard');
-
-      router[HTTP_METHODS[endpoint.method].lower](finalPath, async (req, res, next) => {
-        await endpoint.filter!({ req: ExpressWebServerUtil.getRequest(req, res) });
-        next();
-      });
-    }
-
-    this.raw.use(controller.basePath, router);
-
-    return async (): Promise<void> => {
-      const layers = this.raw.router.stack;
-      const pos = layers.findIndex(x => castTo<Keyed>(x.handle).key === key);
-      if (pos >= 0) {
-        layers.splice(pos, 1);
-      }
-    };
+  registerRouter(router: WebRouter): void {
+    this.raw.use(async (req, res, next) => {
+      const { endpoint, params } = router({ method: castTo((req.method).toUpperCase()), url: req.url, headers: req.headers });
+      await endpoint.filter!({ req: ExpressWebServerUtil.getRequest(req, res, params) });
+      next();
+    });
   }
 
   async listen(): Promise<WebServerHandle> {

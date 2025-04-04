@@ -26,9 +26,7 @@
   "dependencies": {
     "@travetto/web": "^6.0.0-rc.1",
     "@types/koa": "^2.15.0",
-    "@types/koa-router": "^7.4.8",
-    "koa": "^2.16.0",
-    "koa-router": "^13.0.1"
+    "koa": "^2.16.0"
   },
   "travetto": {
     "displayName": "Koa Web Server"

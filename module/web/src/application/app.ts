@@ -1,4 +1,7 @@
-import { castTo, Class, Runtime, toConcrete, TypedObject } from '@travetto/runtime';
+// eslint-disable-next-line @typescript-eslint/naming-convention
+import type Router from 'find-my-way';
+
+import { AppError, castTo, Class, Runtime, toConcrete, TypedObject } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
@@ -8,10 +11,8 @@ import { ControllerRegistry } from '../registry/controller.ts';
 import { WebCommonUtil } from '../util/common.ts';
 
 import { HttpInterceptor } from '../types/interceptor.ts';
-import { HTTP_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
+import { HTTP_INTERCEPTOR_CATEGORIES, HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { WebEndpointCleanup, WebServer, WebServerHandle } from '../types/server.ts';
-
-const WRITE_ONLY = Symbol();
 
 /**
  * The web application
@@ -19,10 +20,12 @@ const WRITE_ONLY = Symbol();
 @Injectable()
 export class WebApplication<T = unknown> {
 
-  #routeCleanup = new Map<string, WebEndpointCleanup | typeof WRITE_ONLY>();
+  #routeCleanup = new Map<string, WebEndpointCleanup>();
 
   @Inject()
   server: WebServer<T>;
+
+  router: ReturnType<typeof Router>;
 
   /**
    * List of provided interceptors
@@ -45,6 +48,14 @@ export class WebApplication<T = unknown> {
     // Register all active
     await Promise.all(ControllerRegistry.getClasses()
       .map(c => this.registerController(c)));
+
+    this.server.registerRouter(req => {
+      const found = this.router.find(req.method, req.url);
+      if (!found) {
+        throw new AppError('Unknown route');
+      }
+      return { endpoint: castTo(found.handler), params: found?.params };
+    });
 
     // Listen for updates
     ControllerRegistry.on(this.onControllerChange);
@@ -139,8 +150,18 @@ export class WebApplication<T = unknown> {
       ep.filter = castTo(EndpointUtil.createEndpointHandler(this.interceptors, ep, config));
     }
 
-    const result = await this.server.registerEndpoints(endpoints, config);
-    this.#routeCleanup.set(c.Ⲑid, result ?? WRITE_ONLY);
+    const toClean: [HttpMethod, string][] = [];
+    for (const endpoint of endpoints) {
+      const fullPath = endpoint.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
+      this.router[HTTP_METHODS[endpoint.method].lower](fullPath, castTo(endpoint.filter!));
+      toClean.push([endpoint.method, fullPath]);
+    }
+
+    this.#routeCleanup.set(c.Ⲑid, async () => {
+      for (const [method, path] of toClean) {
+        this.router.off(method, path);
+      }
+    });
 
     console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: endpoints.length });
   }
@@ -150,15 +171,8 @@ export class WebApplication<T = unknown> {
    * @param c The class to unregister
    */
   async unregisterController(c: Class): Promise<void> {
-    const cleanup = this.#routeCleanup.get(c.Ⲑid)!;
-
-    if (cleanup === WRITE_ONLY) {
-      console.warn('Unloading routes not supported for ', this.server.constructor.Ⲑid);
-      return;
-    } else {
-      await cleanup();
-      this.#routeCleanup.delete(c.Ⲑid);
-    }
+    this.#routeCleanup.get(c.Ⲑid)?.();
+    this.#routeCleanup.delete(c.Ⲑid);
   }
 
   /**

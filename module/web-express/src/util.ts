@@ -16,13 +16,13 @@ export class ExpressWebServerUtil {
   /**
    * Build a Travetto HttpRequest from an Express Request
    */
-  static getRequest(req: express.Request, res: express.Response): HttpRequest {
+  static getRequest(req: express.Request, res: express.Response, params: Record<string, unknown>): HttpRequest {
     return new HttpRequest({
       protocol: castTo(req.protocol),
       method: castTo(req.method.toUpperCase()),
       path: req.originalUrl,
       query: req.query,
-      params: req.params,
+      params,
       headers: req.headers,
       remoteIp: req.socket.remoteAddress,
       port: req.socket.localPort,

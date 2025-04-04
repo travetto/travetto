@@ -15,7 +15,7 @@ type RequestInit = {
   port?: number;
   query?: Record<string, unknown>;
   path?: string;
-  params?: Record<string, string>;
+  params?: Record<string, unknown>;
   respond?: (value: HttpResponse) => void;
   body?: unknown;
   inputStream?: Readable;
@@ -61,7 +61,7 @@ export class HttpRequest {
   /**
    * Get the expanded query object
    */
-  getExpandedQuery(this: HttpRequest): Record<string, unknown> {
+  getExpandedQuery(): Record<string, unknown> {
     return this.#queryExpanded ??= BindUtil.expandPaths(this.query);
   }
 

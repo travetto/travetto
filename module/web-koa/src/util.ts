@@ -10,12 +10,12 @@ export class KoaWebServerUtil {
   /**
    * Build a Travetto HttpRequest from a koa context
    */
-  static getRequest(ctx: koa.Context): HttpRequest {
+  static getRequest(ctx: koa.Context, params: Record<string, unknown>): HttpRequest {
     return new HttpRequest({
       protocol: castTo(ctx.protocol),
       method: castTo(ctx.request.method.toUpperCase()),
       query: ctx.request.query,
-      params: ctx.params,
+      params,
       headers: ctx.request.headers,
       path: ctx.path,
       body: ctx.body,

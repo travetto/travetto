@@ -25,8 +25,8 @@
   },
   "dependencies": {
     "@travetto/web": "^6.0.0-rc.1",
-    "@types/express": "^5.0.0",
-    "express": "^5.0.1"
+    "@types/express": "^5.0.1",
+    "express": "^5.1.0"
   },
   "travetto": {
     "displayName": "Express Web Server"
