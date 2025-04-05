@@ -1,8 +1,8 @@
-import { HttpMetadataConfig } from '../types/core';
 import { Cookie, CookieGetOptions } from '../types/cookie';
 import { WebRequest } from '../types/request';
 import { WebResponse } from '../types/response';
 
+type WebMetadataConfig = { mode: 'cookie' | 'header', header: string, cookie: string, headerPrefix?: string };
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
 
@@ -59,7 +59,7 @@ export class WebCommonUtil {
   /**
    * Write value to response
    */
-  static writeMetadata(res: WebResponse, cfg: HttpMetadataConfig, value: string | undefined, opts?: Omit<Cookie, 'name' | 'value'>): WebResponse {
+  static writeMetadata(res: WebResponse, cfg: WebMetadataConfig, value: string | undefined, opts?: Omit<Cookie, 'name' | 'value'>): WebResponse {
     if (cfg.mode === 'cookie' || !cfg.mode) {
       res.setCookie({
         ...opts,
@@ -79,7 +79,7 @@ export class WebCommonUtil {
   /**
    * Read value from request
    */
-  static readMetadata(req: WebRequest, cfg: HttpMetadataConfig, opts?: CookieGetOptions): string | undefined {
+  static readMetadata(req: WebRequest, cfg: WebMetadataConfig, opts?: CookieGetOptions): string | undefined {
     let value = (cfg.mode === 'cookie' || !cfg.mode) ?
       req.getCookie(cfg.cookie, opts) :
       req.headers.get(cfg.header) ?? undefined;
