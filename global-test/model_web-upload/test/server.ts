@@ -7,7 +7,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, FileMap } from '@travetto/web-upload';
-import { Util, BlobMeta, BinaryUtil, castTo } from '@travetto/runtime';
+import { Util, BlobMeta, BinaryUtil, castTo, AppError } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
 
@@ -80,7 +80,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     await Promise.all(files.map(async ({ name, type, resource }) => {
       const file = await this.fixture.readFile(resource);
       if (type) {
-        Object.assign(file, { type });
+        Object.defineProperty(file, 'type', { value: type });
       }
       data.append(name, file);
     }));
@@ -279,7 +279,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     assert(itemRanged2.source?.length === 3);
     assert(itemRanged2.source === 'xyz');
 
-    const itemRanged3 = await this.request(
+    const itemRanged3 = await this.request<AppError>(
       {
         method: 'GET',
         path: `/test/upload/${loc}`,
@@ -291,8 +291,6 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     );
 
     assert(itemRanged3.statusCode === 400);
-    assert(DataUtil.isPlainObject(itemRanged3.source));
-    assert('message' in itemRanged3.source);
     assert(typeof itemRanged3.source?.message === 'string');
     assert(itemRanged3.source?.message.includes('out of range'));
   }
