@@ -1,7 +1,7 @@
 import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
+import { castTo, Class, classConstruct } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
@@ -53,34 +53,24 @@ export abstract class BaseWebSuite {
 
     const req = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
 
-    const body = req.body;
-    if (body) {
-      if (body instanceof Buffer) {
-        // Do nothing
-      } else if (typeof body === 'string') {
-        req.body = Buffer.from(body);
-      } else if ('stream' in body) {
-        req.body = await toBuffer(castTo(body.stream));
-      } else {
-        req.body = Buffer.from(JSON.stringify(body));
-        req.headers.set('Content-Type', req.headers.get('Content-Type') ?? 'application/json');
-      }
-    }
-
+    const sample = WebResponse.from(req.body);
+    sample.headers.forEach(([v, k]) => req.headers.set(k, v));
+    req.body = sample.body;
     Object.assign(req, { query: BindUtil.flattenPaths(req.query ?? {}) });
 
     const res = await this.#support.execute(req);
     const buffer = Buffer.isBuffer(res.body) ? res.body : await toBuffer(res.body);
-    const out = await this.getOutput<T>(buffer);
+    const result = await this.getOutput(buffer);
 
     if (res.statusCode && res.statusCode >= 400) {
       if (throwOnError) {
-        const err = new AppError(res.body.toString('utf8'));
+        const err = WebResponse.fromCatch(result).source!;
         Object.assign(err, { status: res.statusCode });
         throw err;
       }
     }
-    res.source = castTo(out);
+
+    res.source = castTo(result);
     return castTo(res);
   }
 }
