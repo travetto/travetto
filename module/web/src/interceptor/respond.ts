@@ -20,7 +20,6 @@ export class RespondInterceptor implements WebInterceptor {
     } catch (err) {
       res = WebResponse.fromCatch(err);
     }
-    await ctx.req.respond(res);
     return res;
   }
 }

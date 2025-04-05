@@ -6,6 +6,7 @@ import { WebApplication, WebServer } from '@travetto/web';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
 import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
+import { NodeWebServerSupport } from '@travetto/web-node/support/test/server-support.ts';
 
 const ServerSymbol = Symbol.for('node');
 
@@ -31,4 +32,5 @@ class Config {
 @Suite()
 export class NodeWebSessionTest extends AuthWebSessionServerSuite {
   qualifier = ServerSymbol;
+  type = NodeWebServerSupport;
 }

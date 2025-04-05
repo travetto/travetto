@@ -8,7 +8,7 @@ import { Config } from '@travetto/config';
 import { WebServer, WebRouter, WebServerHandle, WebRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
-export const WebAwsLambdaSymbol = Symbol.for('@travetto/web-aws-lambda:entry');
+export const AwsLambdaWebSymbol = Symbol.for('@travetto/web-aws-lambda:entry');
 
 /**
  * Main contract for lambda based applications
@@ -36,7 +36,7 @@ export class AwsLambdaConfig {
   }
 }
 
-@Injectable(WebAwsLambdaSymbol)
+@Injectable(AwsLambdaWebSymbol)
 export class AwsLambdaWebServer implements WebServer, AwsLambdaHandler {
 
   #router: WebRouter;

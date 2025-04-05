@@ -13,7 +13,7 @@ async function buildApp(): Promise<WebApplication<AwsLambdaWebServer>> {
   const { DependencyRegistry } = await import('@travetto/di');
 
   const web = await import('@travetto/web');
-  const { WebAwsLambdaSymbol: AwsLambdaSymbol } = await import('../src/server.ts');
+  const { AwsLambdaWebSymbol: AwsLambdaSymbol } = await import('../src/server.ts');
 
   const app = await DependencyRegistry.getInstance(web.WebApplication<AwsLambdaWebServer>, AwsLambdaSymbol);
   await app.run();

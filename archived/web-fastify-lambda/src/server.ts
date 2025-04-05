@@ -2,13 +2,13 @@ import alf from '@fastify/aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebServerHandle } from '@travetto/web';
-import { AwsLambdaWebServer, WebAwsLambdaSymbol, AwsLambdaConfig } from '@travetto/web-aws-lambda';
+import { AwsLambdaWebServer, AwsLambdaWebSymbol, AwsLambdaConfig } from '@travetto/web-aws-lambda';
 import { FastifyWebServer } from '@travetto/web-fastify';
 
 /**
  * Aws Lambda Web Server
  */
-@Injectable(WebAwsLambdaSymbol)
+@Injectable(AwsLambdaWebSymbol)
 export class AwsLambdaFastifyWebServer extends FastifyWebServer implements AwsLambdaWebServer {
 
   @Inject()

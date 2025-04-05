@@ -77,14 +77,15 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(req: WebRequest, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
+  static extractParameter(ctx: WebContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
-      return param.extract(req, param);
+      return param.extract(ctx, param);
     }
 
     const name = param.name!;
+    const { req } = ctx;
     switch (param.location) {
       case 'path': return req.params[name];
       case 'header': return field.array ? req.headers.getList(name) : req.headers.get(name);
@@ -102,14 +103,14 @@ export class EndpointUtil {
    * @param req The request
    * @param res The response
    */
-  static async extractParameters(req: WebRequest, endpoint: EndpointConfig): Promise<unknown[]> {
+  static async extractParameters(ctx: WebContext, endpoint: EndpointConfig): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
-    const vals = req[WebInternalSymbol].requestParams;
+    const vals = ctx.req[WebInternalSymbol]?.requestParams ?? [];
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
-      const extracted = endpoint.params.map((c, i) => this.extractParameter(req, c, fields[i], vals?.[i]));
+      const extracted = endpoint.params.map((c, i) => this.extractParameter(ctx, c, fields[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;
@@ -132,7 +133,7 @@ export class EndpointUtil {
    * Endpoint invocation code
    */
   static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebContext): Promise<WebResponse> {
-    const params = await this.extractParameters(ctx.req, endpoint);
+    const params = await this.extractParameters(ctx, endpoint);
     try {
       const res = WebResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
       return res
