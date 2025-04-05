@@ -1,22 +1,22 @@
 import { Inject } from '@travetto/di';
 import { Any, AppError, Util } from '@travetto/runtime';
 import {
-  HeaderParam, Controller, All, Undocumented, ExcludeInterceptors, ControllerRegistry, WebContext,
-  Body, EndpointUtil, BodyParseInterceptor
+  HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistry,
+  WebAsyncContext, Body, EndpointUtil, BodyParseInterceptor, Post, WebInternalSymbol
 } from '@travetto/web';
 
 @Controller('/rpc')
+@ExcludeInterceptors(val => !(val instanceof BodyParseInterceptor || val.category === 'global'))
 @Undocumented()
 export class WebRpController {
 
   @Inject()
-  ctx: WebContext;
+  ctx: WebAsyncContext;
 
   /**
    * RPC main entrypoint
    */
-  @All('/:target')
-  @ExcludeInterceptors(val => !(val instanceof BodyParseInterceptor || val.category === 'global'))
+  @Post('/:target')
   async onRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string, @Body() body?: Any): Promise<unknown> {
 
     const endpoint = ControllerRegistry.getEndpointById(target);
@@ -45,7 +45,7 @@ export class WebRpController {
       params = [];
     }
 
-    req.getInternal().requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]);
+    req[WebInternalSymbol].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]);
 
     // Dispatch
     return await endpoint.filter!({ req: this.ctx.req });

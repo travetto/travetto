@@ -8,10 +8,10 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
-import { HttpInterceptor } from '../types/interceptor.ts';
-import { HttpInterceptorCategory } from '../types/core.ts';
-import { HttpContext, HttpChainedContext } from '../types.ts';
-import { HttpResponse } from '../types/response.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
+import { WebChainedContext } from '../types.ts';
+import { WebResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
@@ -21,7 +21,7 @@ const ENCODING_METHODS = {
   br: createBrotliCompress,
 };
 
-type HttpCompressEncoding = keyof typeof ENCODING_METHODS | 'identity';
+type WebCompressEncoding = keyof typeof ENCODING_METHODS | 'identity';
 
 @Config('web.compress')
 export class CompressConfig {
@@ -36,25 +36,25 @@ export class CompressConfig {
   /**
    * Preferred encodings
    */
-  preferredEncodings?: HttpCompressEncoding[] = ['br', 'gzip', 'identity'];
+  preferredEncodings?: WebCompressEncoding[] = ['br', 'gzip', 'identity'];
   /**
    * Supported encodings
    */
-  supportedEncodings: HttpCompressEncoding[] = ['br', 'gzip', 'identity', 'deflate'];
+  supportedEncodings: WebCompressEncoding[] = ['br', 'gzip', 'identity', 'deflate'];
 }
 
 /**
  * Enables compression support
  */
 @Injectable()
-export class CompressionInterceptor implements HttpInterceptor {
+export class CompressInterceptor implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'response';
+  category: WebInterceptorCategory = 'response';
 
   @Inject()
   config: CompressConfig;
 
-  async compress(ctx: HttpContext, res: HttpResponse): Promise<HttpResponse> {
+  async compress(ctx: WebChainedContext, res: WebResponse): Promise<WebResponse> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
     const { req } = ctx;
 
@@ -62,7 +62,7 @@ export class CompressionInterceptor implements HttpInterceptor {
 
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     if (
-      !res.output ||
+      !res.body ||
       (res.length !== undefined && res.length >= 0 && res.length < chunkSize) ||
       req.method === 'HEAD' ||
       res.headers.has('Content-Encoding') ||
@@ -83,7 +83,7 @@ export class CompressionInterceptor implements HttpInterceptor {
       );
     }
 
-    const type = castTo<HttpCompressEncoding>(method!);
+    const type = castTo<WebCompressEncoding>(method!);
     if (type === 'identity') {
       return res;
     }
@@ -93,14 +93,14 @@ export class CompressionInterceptor implements HttpInterceptor {
     // If we are compressing
     res.headers.set('Content-Encoding', type);
 
-    if (Buffer.isBuffer(res.output)) {
-      stream.end(res.output);
+    if (Buffer.isBuffer(res.body)) {
+      stream.end(res.body);
       const out = await buffer(stream);
-      res.output = out;
+      res.body = out;
       res.length = out.length;
     } else {
-      res.output.pipe(stream);
-      res.output = stream;
+      res.body.pipe(stream);
+      res.body = stream;
       res.length = undefined;
     }
 
@@ -111,7 +111,7 @@ export class CompressionInterceptor implements HttpInterceptor {
     return config.applies;
   }
 
-  async filter(ctx: HttpChainedContext): Promise<HttpResponse> {
+  async filter(ctx: WebChainedContext): Promise<WebResponse> {
     return this.compress(ctx, await ctx.next());
   }
 }

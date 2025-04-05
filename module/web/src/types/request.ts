@@ -1,41 +1,38 @@
 import { Readable } from 'node:stream';
 
 import { Any, AppError } from '@travetto/runtime';
-import { BindUtil } from '@travetto/schema';
 
-import { HttpResponse } from './response.ts';
 import { CookieGetOptions } from './cookie.ts';
-import { HttpHeadersInit, HttpHeaders } from './headers.ts';
-import { HttpMetadataConfig, HttpMethod, HttpProtocol } from './core.ts';
+import { WebHeadersInit, WebHeaders } from './headers.ts';
+import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
 
-type RequestInit = {
-  headers?: HttpHeadersInit;
+export type WebRequestInit = {
+  headers?: WebHeadersInit;
   method?: HttpMethod;
   protocol?: HttpProtocol;
   port?: number;
   query?: Record<string, unknown>;
   path?: string;
-  params?: Record<string, string>;
-  respond?: (value: HttpResponse) => void;
+  params?: Record<string, unknown>;
   body?: unknown;
   inputStream?: Readable;
   remoteIp?: string;
   getCookie?: (key: string, opts: CookieGetOptions) => string | undefined;
 };
 
-export interface HttpRequestInternal {
+export interface WebRequestInternal {
   requestParams?: unknown[];
+  expandedQuery?: Record<string, unknown>;
 }
 
 /**
- * Base Http Request object
+ * Web Request object
  */
-export class HttpRequest {
+export class WebRequest {
 
-  #queryExpanded?: Record<string, unknown>;
-  #internal: HttpRequestInternal = {};
+  [WebInternalSymbol]: WebRequestInternal = {};
 
-  readonly headers: HttpHeaders;
+  readonly headers: WebHeaders;
   readonly path: string = '';
   readonly port: number = 0;
   readonly protocol: HttpProtocol = 'http';
@@ -43,12 +40,12 @@ export class HttpRequest {
   readonly query: Record<string, unknown> = {};
   readonly params: Record<string, string> = {};
   readonly remoteIp?: string;
-  readonly inputStream: Readable;
+  readonly inputStream?: Readable;
   body?: Any;
 
-  constructor(init: RequestInit) {
+  constructor(init: WebRequestInit = {}) {
     Object.assign(this, init);
-    this.headers = new HttpHeaders(init.headers);
+    this.headers = new WebHeaders(init.headers);
   }
 
   /**
@@ -58,37 +55,7 @@ export class HttpRequest {
     return this.headers.get('X-Forwarded-For') || this.remoteIp;
   }
 
-  /**
-   * Get the expanded query object
-   */
-  getExpandedQuery(this: HttpRequest): Record<string, unknown> {
-    return this.#queryExpanded ??= BindUtil.expandPaths(this.query);
-  }
-
-  /**
-   * Read value from request
-   */
-  readMetadata(this: HttpRequest, cfg: HttpMetadataConfig, opts?: CookieGetOptions): string | undefined {
-    let res = (cfg.mode === 'cookie' || !cfg.mode) ?
-      this.getCookie(cfg.cookie, opts) :
-      this.headers.get(cfg.header) ?? undefined;
-
-    if (res && cfg.mode === 'header' && cfg.headerPrefix) {
-      res = res.split(cfg.headerPrefix)[1].trim();
-    }
-
-    return res!;
-  }
-
-  getInternal(): HttpRequestInternal {
-    return this.#internal;
-  }
-
   getCookie(key: string, opts?: CookieGetOptions): string | undefined {
     throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
-  }
-
-  respond(value: HttpResponse): void {
-    // Do nothing by default
   }
 }

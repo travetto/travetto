@@ -6,6 +6,7 @@ import { ElasticsearchModelService, ElasticsearchModelConfig } from '@travetto/m
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
+import { NodeWebServerSupport } from '@travetto/web-node/support/test/server-support.ts';
 
 class Config {
   @InjectableFactory(SessionModelSymbol)
@@ -19,4 +20,5 @@ class Config {
 export class ElasticsearchAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = ElasticsearchModelService;
   configClass = ElasticsearchModelConfig;
+  type = NodeWebServerSupport;
 }

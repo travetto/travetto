@@ -38,7 +38,6 @@ export class UserController {
   }
 
   @Post('/')
-
   async createUser(@Body() user: User): Promise<User> {
     return undefined!;
   }

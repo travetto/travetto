@@ -8,6 +8,7 @@ import { PostgreSQLDialect } from '@travetto/model-postgres';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
+import { NodeWebServerSupport } from '@travetto/web-node/support/test/server-support.ts';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -25,4 +26,5 @@ class Config {
 export class PostgreSQLAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
+  type = NodeWebServerSupport;
 }

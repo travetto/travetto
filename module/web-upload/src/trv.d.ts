@@ -1,7 +1,7 @@
 import { FileMap } from './types.ts';
 
 declare module '@travetto/web' {
-  interface HttpRequestInternal {
+  interface WebRequestInternal {
     uploads?: FileMap
   }
 }

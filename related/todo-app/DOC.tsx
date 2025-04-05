@@ -72,7 +72,7 @@ $ cd todo-project
 $ git init .
 
 $ npm init -f
-$ npm i @travetto/{log,web-express,model-mongo,cli}
+$ npm i @travetto/{log,web-node,model-mongo,cli}
 $ npm i -D @travetto/{eslint,compiler,test}
 
 $ npx trv lint:register

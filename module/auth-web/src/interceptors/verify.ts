@@ -1,5 +1,5 @@
 import { AppError, Util } from '@travetto/runtime';
-import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext, EndpointConfig, HttpResponse } from '@travetto/web';
+import { WebInterceptor, WebInterceptorCategory, WebChainedContext, EndpointConfig, WebResponse } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -41,9 +41,9 @@ export class WebAuthVerifyConfig {
  * Enforces if the user should be authenticated
  */
 @Injectable()
-export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfig> {
+export class AuthVerifyInterceptor implements WebInterceptor<WebAuthVerifyConfig> {
 
-  category: HttpInterceptorCategory = 'application';
+  category: WebInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
 
   @Inject()
@@ -64,7 +64,7 @@ export class AuthVerifyInterceptor implements HttpInterceptor<WebAuthVerifyConfi
     return config.applies;
   }
 
-  async filter({ config, next }: HttpChainedContext<WebAuthVerifyConfig>): Promise<HttpResponse> {
+  async filter({ config, next }: WebChainedContext<WebAuthVerifyConfig>): Promise<WebResponse> {
     const principal = this.authContext.principal;
 
     switch (config.state) {

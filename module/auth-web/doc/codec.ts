@@ -1,11 +1,11 @@
 import { Principal } from '@travetto/auth';
 import { PrincipalCodec } from '@travetto/auth-web';
 import { Injectable } from '@travetto/di';
-import { HttpResponse, HttpRequest } from '@travetto/web';
+import { WebResponse, WebRequest } from '@travetto/web';
 
 @Injectable()
 export class CustomCodec implements PrincipalCodec {
-  decode(req: HttpRequest): Promise<Principal | undefined> | Principal | undefined {
+  decode(req: WebRequest): Promise<Principal | undefined> | Principal | undefined {
     const userId = req.headers.get('USER_ID');
     if (userId) {
       let p: Principal | undefined;
@@ -14,7 +14,7 @@ export class CustomCodec implements PrincipalCodec {
     }
     return;
   }
-  encode(res: HttpResponse, data: Principal | undefined): HttpResponse {
+  encode(res: WebResponse, data: Principal | undefined): WebResponse {
     if (data) {
       res.headers.set('USER_ID', data.id);
     }

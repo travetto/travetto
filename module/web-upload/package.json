@@ -29,7 +29,7 @@
     "@travetto/config": "^6.0.0-rc.1",
     "@travetto/web": "^6.0.0-rc.1",
     "file-type": "^20.4.1",
-    "mime": "^4.0.6"
+    "mime": "^4.0.7"
   },
   "peerDependencies": {
     "@travetto/test": "^6.0.0-rc.1"

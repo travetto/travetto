@@ -7,14 +7,14 @@ import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint.ts';
 import { ContextParam, PathParam, QueryParam } from '../../src/decorator/param.ts';
 import { Produces, SetHeaders } from '../../src/decorator/common.ts';
 
-import { HttpRequest } from '../../src/types/request.ts';
-import { HttpResponse } from '../../src/types/response.ts';
+import { WebRequest } from '../../src/types/request.ts';
+import { WebResponse } from '../../src/types/response.ts';
 
 @Controller('/test')
 export class TestController {
 
   @ContextParam()
-  req: HttpRequest;
+  req: WebRequest;
 
   @Get('/json')
   getJSON() {
@@ -43,7 +43,7 @@ export class TestController {
 
   @Delete('/cookie')
   withCookie() {
-    return HttpResponse.from({ cookie: this.req.getCookie!('orange') })
+    return WebResponse.from({ cookie: this.req.getCookie!('orange') })
       .with({
         cookies: [{ name: 'flavor', value: 'oreo' }]
       });
@@ -68,8 +68,8 @@ export class TestController {
 
   @Get('/renderable')
   @Produces('text/plain')
-  getRenderable(): HttpResponse<string> {
-    return HttpResponse.from('hello');
+  getRenderable(): WebResponse<string> {
+    return WebResponse.from('hello');
   }
 
   @Get('/fullUrl')

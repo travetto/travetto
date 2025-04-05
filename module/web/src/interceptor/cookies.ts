@@ -2,10 +2,10 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 
-import { HttpChainedContext } from '../types.ts';
-import { HttpResponse } from '../types/response.ts';
-import { HttpInterceptor } from '../types/interceptor.ts';
-import { HttpInterceptorCategory } from '../types/core.ts';
+import { WebChainedContext } from '../types.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
 
 import { WebConfig } from '../application/config.ts';
 import { EndpointConfig } from '../registry/types.ts';
@@ -52,9 +52,9 @@ export class CookieConfig implements CookieSetOptions {
  * Loads cookies from the request, verifies, exposes, and then signs and sets
  */
 @Injectable()
-export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
+export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
 
-  category: HttpInterceptorCategory = 'request';
+  category: WebInterceptorCategory = 'request';
 
   @Inject()
   config: CookieConfig;
@@ -72,7 +72,7 @@ export class CookiesInterceptor implements HttpInterceptor<CookieConfig> {
     return config.applies;
   }
 
-  async filter({ req, config, next }: HttpChainedContext<CookieConfig>): Promise<HttpResponse> {
+  async filter({ req, config, next }: WebChainedContext<CookieConfig>): Promise<WebResponse> {
     const jar = new CookieJar(req.headers.get('Cookie'), config);
     req.getCookie = jar.get.bind(jar);
 

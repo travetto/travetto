@@ -18,11 +18,11 @@ export class OpenApiSuite {
       [...Object.keys(spec.paths ?? {})].sort(),
       [
         '/relationship/{name}',
-        '/relationship/',
+        '/relationship',
         '/relationship/{id}',
         '/user/{name}',
         '/user/age/{age}',
-        '/user/',
+        '/user',
         '/user/{id}'
       ].sort()
     );

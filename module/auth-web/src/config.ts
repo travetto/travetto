@@ -1,12 +1,11 @@
 import { Config } from '@travetto/config';
 import { Runtime, AppError, BinaryUtil } from '@travetto/runtime';
 import { Ignore, Secret } from '@travetto/schema';
-import { HttpMetadataConfig } from '@travetto/web';
 
 type KeyRec = { key: string, id: string };
 
 @Config('web.auth')
-export class WebAuthConfig implements HttpMetadataConfig {
+export class WebAuthConfig {
   applies: boolean = false;
   mode: 'cookie' | 'header' = 'cookie';
   header: string = 'Authorization';

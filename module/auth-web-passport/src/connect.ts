@@ -1,9 +1,9 @@
 import { castTo } from '@travetto/runtime';
-import { HttpRequest, HttpResponse } from '@travetto/web';
+import { WebRequest, WebResponse } from '@travetto/web';
 
 export class ConnectRequest {
-  #req: HttpRequest;
-  constructor(req: HttpRequest) {
+  #req: WebRequest;
+  constructor(req: WebRequest) {
     this.#req = req;
   }
 
@@ -21,10 +21,10 @@ export class ConnectRequest {
 }
 
 export class ConnectResponse {
-  #res: HttpResponse;
+  #res: WebResponse;
   #sent = false;
-  constructor(res?: HttpResponse) {
-    this.#res = res ?? HttpResponse.fromEmpty();
+  constructor(res?: WebResponse) {
+    this.#res = res ?? WebResponse.fromEmpty();
   }
 
   get headersSent(): boolean {

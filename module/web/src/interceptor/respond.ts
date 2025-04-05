@@ -1,25 +1,25 @@
 import { Injectable } from '@travetto/di';
 
-import { HttpInterceptor, HttpInterceptorCategory } from '../types/interceptor.ts';
-import { HttpResponse } from '../types/response.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
+import { WebResponse } from '../types/response.ts';
 
-import { HttpChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types.ts';
 import { LoggingInterceptor } from './logging.ts';
 
 @Injectable()
-export class RespondInterceptor implements HttpInterceptor {
+export class RespondInterceptor implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'terminal';
+  category: WebInterceptorCategory = 'terminal';
   dependsOn = [LoggingInterceptor];
 
-  async filter(ctx: HttpChainedContext): Promise<HttpResponse> {
+  async filter(ctx: WebChainedContext): Promise<WebResponse> {
     let res;
     try {
       res = await ctx.next();
     } catch (err) {
-      res = HttpResponse.fromCatch(err);
+      res = WebResponse.fromCatch(err);
     }
-    await ctx.req.respond(res);
     return res;
   }
 }

@@ -62,7 +62,7 @@ export class VisitorFactory<S extends State = State> {
         this.#transformers.set(trn.type, {});
       }
       const set = this.#transformers.get(trn.type)!;
-      const targets = trn.target && trn.target.length ? trn.target : ['ALL'];
+      const targets = trn.target && trn.target.length ? trn.target : ['__all__'];
 
       for (const target of targets) {
         for (const phase of ['before', 'after'] as const) {
@@ -140,7 +140,7 @@ export class VisitorFactory<S extends State = State> {
       return;
     }
 
-    for (const all of set[phase]!.get('ALL') ?? []) {
+    for (const all of set[phase]!.get('__all__') ?? []) {
       node = all[phase]!<T>(state, node) ?? node;
     }
     return node;

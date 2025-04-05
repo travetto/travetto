@@ -1,10 +1,9 @@
 // @trv-no-transform
-import type { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from '../src/types.ts';
-import type { AwsLambdaHandler } from '../src/server.ts';
+import type lambda from 'aws-lambda';
+import type { WebApplication } from '@travetto/web';
+import type { AwsLambdaWebServer } from '../src/server.ts';
 
-type HandleFunction = (event: LambdaAPIGatewayProxyEvent, context: LambdaContext) => Promise<LambdaAPIGatewayProxyResult>;
-
-async function buildApp(): Promise<{ handle: HandleFunction }> {
+async function buildApp(): Promise<WebApplication<AwsLambdaWebServer>> {
   const { Runtime, ConsoleManager } = await import('@travetto/runtime');
   ConsoleManager.debug(Runtime.debug);
 
@@ -12,14 +11,14 @@ async function buildApp(): Promise<{ handle: HandleFunction }> {
   await RootRegistry.init();
 
   const { DependencyRegistry } = await import('@travetto/di');
-  const { AwsLambdaWebApplication } = await import('../src/server.ts');
-  const app = await DependencyRegistry.getInstance(AwsLambdaWebApplication);
+
+  const web = await import('@travetto/web');
+  const app = await DependencyRegistry.getInstance(web.WebApplication<AwsLambdaWebServer>);
   await app.run();
   return app;
 }
 
-let inst: AwsLambdaHandler;
-export async function handler(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): Promise<LambdaAPIGatewayProxyResult> {
-  context.callbackWaitsForEmptyEventLoop = false;
-  return (inst ??= await buildApp()).handle(event, context);
+let inst: WebApplication<AwsLambdaWebServer>;
+export async function handler(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
+  return ((inst ??= await buildApp()).server as AwsLambdaWebServer).handle(event, context);
 }

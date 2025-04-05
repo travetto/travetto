@@ -24,8 +24,7 @@
     "directory": "module/web-node"
   },
   "dependencies": {
-    "@travetto/web": "^6.0.0-rc.1",
-    "find-my-way": "^9.3.0"
+    "@travetto/web": "^6.0.0-rc.1"
   },
   "travetto": {
     "displayName": "Node Web Server"

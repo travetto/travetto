@@ -1,4 +1,4 @@
-import { HttpChainedContext, HttpInterceptor, HttpInterceptorCategory } from '@travetto/web';
+import { WebChainedContext, WebInterceptor, WebInterceptorCategory } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 class Appender {
@@ -6,9 +6,9 @@ class Appender {
 }
 
 @Injectable()
-export class CustomLoggingInterceptor implements HttpInterceptor {
+export class CustomLoggingInterceptor implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'terminal';
+  category: WebInterceptorCategory = 'terminal';
 
   appender: Appender;
 
@@ -16,7 +16,7 @@ export class CustomLoggingInterceptor implements HttpInterceptor {
     this.appender = appender;
   }
 
-  async filter({ req, next }: HttpChainedContext) {
+  async filter({ req, next }: WebChainedContext) {
     try {
       return await next();
     } finally {

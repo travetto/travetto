@@ -26,12 +26,8 @@ export const FEATURES: Feature[] = [
     title: 'Web Framework',
     package: '@travetto/web',
     choices: [
-      { title: 'Express.js', package: '@travetto/web-express' },
-      { title: 'Express.js Lambda', package: '@travetto/web-express-lambda' },
-      { title: 'KOA', package: '@travetto/web-koa' },
-      { title: 'KOA Lambda', package: '@travetto/web-koa-lambda' },
-      { title: 'Fastify', package: '@travetto/web-fastify' },
-      { title: 'Fastify Lambda', package: '@travetto/web-fastify-lambda' },
+      { title: 'Node', package: '@travetto/web-node' },
+      { title: 'AWS Lambda', package: '@travetto/web-aws-lambda' },
     ],
     addons: [
       { title: 'OpenAPI', package: '@travetto/openapi' },

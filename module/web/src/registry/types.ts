@@ -1,10 +1,10 @@
 import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
-import type { HttpInterceptor } from '../types/interceptor.ts';
-import type { HttpChainedFilter, HttpContext, HttpFilter } from '../types.ts';
-import { HttpMethodWithAll } from '../types/core.ts';
-import { HttpHeaders } from '../types/headers.ts';
+import type { WebInterceptor } from '../types/interceptor.ts';
+import type { WebChainedFilter, WebContext, WebFilter } from '../types.ts';
+import { HttpMethod } from '../types/core.ts';
+import { WebHeaders } from '../types/headers.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
@@ -59,11 +59,11 @@ interface CoreConfig {
   /**
    * List of filters to run on request
    */
-  filters: (HttpFilter | HttpChainedFilter)[];
+  filters: (WebFilter | WebChainedFilter)[];
   /**
    * Set of interceptor configs
    */
-  interceptorConfigs?: [Class<HttpInterceptor>, unknown][];
+  interceptorConfigs?: [Class<WebInterceptor>, unknown][];
   /**
    * Should the resource only be used conditionally?
    */
@@ -71,7 +71,7 @@ interface CoreConfig {
   /**
    * Control which interceptors are excluded
    */
-  interceptorExclude?: (val: HttpInterceptor) => boolean;
+  interceptorExclude?: (val: WebInterceptor) => boolean;
   /**
    * Response headers
    */
@@ -97,12 +97,12 @@ export interface EndpointParamConfig {
   /**
    * Resolves the value by executing with req/res as input
    */
-  resolve?: HttpFilter;
+  resolve?: WebFilter;
   /**
    * Extract the value from request
    * @param context The http context with the endpoint param config
    */
-  extract?: (ctx: HttpContext, config: EndpointParamConfig) => unknown;
+  extract?: (ctx: WebContext, config: EndpointParamConfig) => unknown;
   /**
    * Input prefix for parameter
    */
@@ -128,7 +128,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The HTTP method the endpoint is for
    */
-  method: HttpMethodWithAll;
+  method: HttpMethod;
   /**
    * The path of the endpoint
    */
@@ -140,7 +140,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * The compiled and finalized handler
    */
-  filter?: HttpFilter;
+  filter?: WebFilter;
   /**
    * List of params for the endpoint
    */
@@ -160,7 +160,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * Response header map
    */
-  responseHeaderMap: HttpHeaders;
+  responseHeaderMap: WebHeaders;
 }
 
 /**

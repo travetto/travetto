@@ -1,4 +1,4 @@
-import { Controller, Get, ContextParam, HttpResponse } from '@travetto/web';
+import { Controller, Get, ContextParam, WebResponse } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import { Principal } from '@travetto/auth';
 
@@ -13,7 +13,7 @@ export class SampleAuth {
   @Get('/simple')
   @Login(FbAuthSymbol)
   async simpleLogin() {
-    return HttpResponse.redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self', 301);
   }
 
   @Get('/self')
@@ -25,6 +25,6 @@ export class SampleAuth {
   @Get('/logout')
   @Logout()
   async logout() {
-    return HttpResponse.redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self', 301);
   }
 }

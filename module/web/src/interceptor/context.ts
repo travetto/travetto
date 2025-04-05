@@ -1,23 +1,23 @@
 import { Injectable, Inject } from '@travetto/di';
 
-import { HttpChainedContext } from '../types.ts';
-import { HttpResponse } from '../types/response.ts';
-import { HttpInterceptor } from '../types/interceptor.ts';
-import { HttpInterceptorCategory } from '../types/core.ts';
-import { WebContext } from '../context.ts';
+import { WebChainedContext } from '../types.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
+import { WebAsyncContext } from '../context.ts';
 
 /**
  * Enables access to contextual data when running in a web application
  */
 @Injectable()
-export class AsyncContextInterceptor implements HttpInterceptor {
+export class AsyncContextInterceptor implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'global';
+  category: WebInterceptorCategory = 'global';
 
   @Inject()
-  context: WebContext;
+  context: WebAsyncContext;
 
-  filter(ctx: HttpChainedContext): Promise<HttpResponse> {
-    return this.context.withContext(ctx, ctx.next);
+  filter(ctx: WebChainedContext): Promise<WebResponse> {
+    return this.context.withContext(ctx.req, ctx.next);
   }
 }
