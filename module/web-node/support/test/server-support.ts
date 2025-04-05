@@ -56,7 +56,7 @@ export class NodeWebServerSupport implements WebServerSupport {
     return handle;
   }
 
-  async execute(req: WebRequest): Promise<WebResponse<Buffer>> {
+  async execute(req: WebRequest): Promise<WebResponse> {
     const { path, ...request } = NodeWebUtil.toFetchRequest(req);
     const res = await fetch(`${this.url}${path}`, request);
     return NodeWebUtil.toWebResponse(res);

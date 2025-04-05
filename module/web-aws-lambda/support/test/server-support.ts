@@ -29,7 +29,7 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
     return await this.#lambda.run();
   }
 
-  async execute(req: WebRequest): Promise<WebResponse<Buffer>> {
+  async execute(req: WebRequest): Promise<WebResponse> {
     const res = (await castTo<AwsLambdaWebServer>(this.#lambda.server).handle(
       AwsLambdaWebUtil.toLambdaEvent(req), asFull<lambda.Context>({}))
     );

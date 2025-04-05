@@ -42,7 +42,7 @@ export class NodeWebUtil {
   /**
    * Create a WebResponse given a fetch Response
    */
-  static async toWebResponse(res: Response): Promise<WebResponse<Buffer>> {
+  static async toWebResponse(res: Response): Promise<WebResponse> {
     const out = Buffer.from(await res.arrayBuffer());
     return WebResponse.from(out).with({ statusCode: res.status, headers: res.headers });
   }

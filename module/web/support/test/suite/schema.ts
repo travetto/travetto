@@ -23,7 +23,7 @@ class SimpleUser {
 
 @Validator(user => {
   if (user && user.age === 300) {
-    return { kind: 'value', message: 'Age cannot be 300', path: 'age' }
+    return { kind: 'value', message: 'Age cannot be 300', path: 'age' };
   }
 })
 @Schema()

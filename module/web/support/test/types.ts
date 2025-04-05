@@ -4,5 +4,5 @@ import type { WebServerHandle } from '../../src/types/server.ts';
 
 export interface WebServerSupport {
   init(qualifier?: symbol): Promise<WebServerHandle>;
-  execute(req: WebRequest): Promise<WebResponse<Buffer>>;
+  execute(req: WebRequest): Promise<WebResponse>;
 }

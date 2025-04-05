@@ -28,13 +28,10 @@ const baseLambdaContext = asFull<APIGatewayProxyEvent['requestContext']>({
   stage: '',
 });
 
-
 export class AwsLambdaWebUtil {
+
   /**
    * Create a request from an api gateway event
-   * @param event 
-   * @param params 
-   * @returns 
    */
   static toWebRequest(event: APIGatewayProxyEvent, params: Record<string, unknown>): WebRequest {
     // Build request
@@ -54,8 +51,6 @@ export class AwsLambdaWebUtil {
 
   /**
    * Create an api gateway event given a web request
-   * @param req 
-   * @returns 
    */
   static toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
     const queryEntries = Object.entries(req.query ?? {});
@@ -79,11 +74,11 @@ export class AwsLambdaWebUtil {
       multiValueQueryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v : [v]])),
       multiValueHeaders: multiHeaders,
       requestContext: { ...baseLambdaContext, path: req.path, httpMethod: req.method },
-    }
+    };
   }
 
   /**
-   * Create an API Gateway result from a web response   
+   * Create an API Gateway result from a web response
    */
   static async toLambdaResult(res: WebResponse, base64Encoded: boolean = false): Promise<APIGatewayProxyResult> {
     let output = res.body;
@@ -116,7 +111,7 @@ export class AwsLambdaWebUtil {
   /**
    * Create a web response from an API Gateway result
    */
-  static toWebResponse(res: APIGatewayProxyResult): WebResponse<Buffer> {
+  static toWebResponse(res: APIGatewayProxyResult): WebResponse {
     let resBody: Buffer = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
 
     const resHeaders = new WebHeaders({ ...res.headers ?? {}, ...res.multiValueHeaders ?? {} });

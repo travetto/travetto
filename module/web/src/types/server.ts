@@ -3,7 +3,7 @@ import { EndpointConfig } from '../registry/types.ts';
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void, port?: number };
 export type WebEndpointCleanup = (() => Promise<void>);
 
-export type WebRouterRequest = { url?: string, method?: string, headers?: Record<string, unknown> };
+export type WebRouterRequest = { path?: string, method?: string };
 export type WebRouter = (req: WebRouterRequest) => { endpoint: EndpointConfig, params: Record<string, unknown> };
 
 export type WebSslKeyPair = {

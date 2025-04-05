@@ -43,11 +43,7 @@ export class AwsLambdaWebServer implements WebServer {
     context.callbackWaitsForEmptyEventLoop = false;
 
     // Route
-    const { endpoint, params } = this.#router({
-      url: event.path,
-      headers: { ...event.headers, ...event.multiValueHeaders },
-      method: event.httpMethod
-    });
+    const { endpoint, params } = this.#router({ path: event.path, method: event.httpMethod });
 
     // Build request
     const req = AwsLambdaWebUtil.toWebRequest(event, params);

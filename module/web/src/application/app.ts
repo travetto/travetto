@@ -11,7 +11,7 @@ import { EndpointConfig } from '../registry/types.ts';
 
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WEB_INTERCEPTOR_CATEGORIES, HTTP_METHODS, HttpMethod } from '../types/core.ts';
-import { WebEndpointCleanup, WebServer, WebServerHandle } from '../types/server.ts';
+import { WebEndpointCleanup, WebRouterRequest, WebServer, WebServerHandle } from '../types/server.ts';
 
 import { WebCommonUtil } from '../util/common.ts';
 import { EndpointUtil } from '../util/endpoint.ts';
@@ -34,6 +34,15 @@ export class WebApplication<T = unknown> {
    */
   interceptors: WebInterceptor[] = [];
 
+  resolveRoute(req: WebRouterRequest): { endpoint: EndpointConfig, params: Record<string, unknown> } {
+    const found = this.router.find(castTo((req.method ?? 'get').toUpperCase()), req.path ?? '/');
+    if (!found) {
+      throw new AppError('Unknown route');
+    }
+    const handler = castTo<{ endpoint: EndpointConfig }>(found.handler);
+    return { endpoint: handler.endpoint, params: found?.params };
+  }
+
   async postConstruct(): Promise<void> {
     // Log on startup, before DI finishes
     const cfg = await DependencyRegistry.getInstance(ConfigurationService);
@@ -46,16 +55,7 @@ export class WebApplication<T = unknown> {
     // eslint-disable-next-line no-shadow
     const Router = (await import('find-my-way')).default;
     this.router = Router();
-
-    this.server.registerRouter(req => {
-      const found = this.router.find(castTo((req.method ?? 'get').toUpperCase()), req.url ?? '/');
-      if (!found) {
-        throw new AppError('Unknown route');
-      }
-      const handler = castTo<{ endpoint: EndpointConfig }>(found.handler);
-      return { endpoint: handler.endpoint, params: found?.params };
-    });
-
+    this.server.registerRouter(req => this.resolveRoute(req));
 
     // Register all active
     await Promise.all(ControllerRegistry.getClasses()

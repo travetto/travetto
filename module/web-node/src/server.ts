@@ -26,8 +26,7 @@ export class NodeWebServer implements WebServer {
 
   registerRouter(router: WebRouter): void {
     this.handler = async (req, res): Promise<void> => {
-      const { endpoint, params } = router(req);
-
+      const { endpoint, params } = router({ method: req.method, path: req.url, headers: req.headers });
       const webReq = NodeWebUtil.toWebRequest(req, params);
       const webRes = await endpoint.filter!({ req: webReq });
 
