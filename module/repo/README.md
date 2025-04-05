@@ -163,12 +163,6 @@ module/test
 module/transformer
 module/web
 module/web-aws-lambda
-module/web-express
-module/web-express-lambda
-module/web-fastify
-module/web-fastify-lambda
-module/web-koa
-module/web-koa-lambda
 module/web-node
 module/web-rpc
 module/web-upload
@@ -259,12 +253,6 @@ global-test/auth-web-session_web <workspace-root>/global-test/auth-web-session_w
               module/transformer <workspace-root>/module/transformer
                       module/web <workspace-root>/module/web
            module/web-aws-lambda <workspace-root>/module/web-aws-lambda
-              module/web-express <workspace-root>/module/web-express
-       module/web-express-lambda <workspace-root>/module/web-express-lambda
-              module/web-fastify <workspace-root>/module/web-fastify
-       module/web-fastify-lambda <workspace-root>/module/web-fastify-lambda
-                  module/web-koa <workspace-root>/module/web-koa
-           module/web-koa-lambda <workspace-root>/module/web-koa-lambda
                  module/web-node <workspace-root>/module/web-node
                   module/web-rpc <workspace-root>/module/web-rpc
                module/web-upload <workspace-root>/module/web-upload

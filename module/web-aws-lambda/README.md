@@ -13,7 +13,7 @@ npm install @travetto/web-aws-lambda
 yarn add @travetto/web-aws-lambda
 ```
 
-The module provides support basic support with AWS lambdas. When using one of the specific web modules (e.g. [Express Web Server](https://github.com/travetto/travetto/tree/main/module/web-express#readme "Express provider for the travetto web module.")), you can install the appropriate lambda-related dependencies installed (e.g. [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md)) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers.
+The module provides support basic support with AWS lambdas. When using one of the specific web modules (e.g. [Node Web Server](https://github.com/travetto/travetto/tree/main/module/web-node#readme "Node provider for the travetto web module.")), you can install the appropriate lambda-related dependencies installed (e.g. [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md)) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers.
 
 ## CLI - Packaging Lambdas
 

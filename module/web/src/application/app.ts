@@ -20,12 +20,12 @@ import { EndpointUtil } from '../util/endpoint.ts';
  * The web application
  */
 @Injectable()
-export class WebApplication<T extends WebServer = WebServer> {
+export class WebApplication<T = unknown> {
 
   #routeCleanup = new Map<string, WebEndpointCleanup>();
 
   @Inject()
-  server: T;
+  server: WebServer<T>;
 
   router: ReturnType<typeof Router>;
 
