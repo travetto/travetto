@@ -5,7 +5,7 @@ import { AppError, castTo, Class, toConcrete } from '@travetto/runtime';
 import { WebRequest } from './types/request.ts';
 
 @Injectable()
-export class WebContext {
+export class WebAsyncContext {
 
   #active = new AsyncContextValue<WebRequest>(this);
   #byType = new Map<string, () => unknown>();

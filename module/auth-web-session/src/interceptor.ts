@@ -1,6 +1,6 @@
 import { toConcrete } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
-import { WebInterceptor, WebContext, WebInterceptorCategory, WebChainedContext, WebResponse } from '@travetto/web';
+import { WebInterceptor, WebAsyncContext, WebInterceptorCategory, WebChainedContext, WebResponse } from '@travetto/web';
 import { Session, SessionContext, SessionData, SessionService } from '@travetto/auth-session';
 import { Config } from '@travetto/config';
 import { AuthContextInterceptor } from '@travetto/auth-web';
@@ -27,11 +27,11 @@ export class AuthSessionInterceptor implements WebInterceptor {
   config: WebSessionConfig;
 
   @Inject()
-  webContext: WebContext;
+  webAsyncContext: WebAsyncContext;
 
   postConstruct(): void {
-    this.webContext.registerType(toConcrete<Session>(), () => this.context.get(true));
-    this.webContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
+    this.webAsyncContext.registerType(toConcrete<Session>(), () => this.context.get(true));
+    this.webAsyncContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
 
   async filter({ next }: WebChainedContext): Promise<WebResponse> {

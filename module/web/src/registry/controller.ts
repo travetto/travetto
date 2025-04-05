@@ -7,7 +7,7 @@ import { WebChainedFilter, WebFilter } from '../types.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebpHeaders } from '../types/headers.ts';
 
-import { WebContext } from '../context.ts';
+import { WebAsyncContext } from '../context.ts';
 
 type ValidFieldNames<T> = {
   [K in keyof T]:
@@ -30,7 +30,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   async #bindContextParams<T>(inst: ClassInstance<T>): Promise<void> {
-    const ctx = await DependencyRegistry.getInstance(WebContext);
+    const ctx = await DependencyRegistry.getInstance(WebAsyncContext);
     const map = this.get(inst.constructor).contextParams;
     for (const [field, type] of Object.entries(map)) {
       Object.defineProperty(inst, field, { get: ctx.getByType(type) });

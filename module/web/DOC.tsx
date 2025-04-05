@@ -19,7 +19,7 @@ import { WebResponse } from './src/types/response';
 import { WebInterceptor } from './src/types/interceptor';
 import { AsyncContextInterceptor } from './src/interceptor/context';
 import { CacheControl } from './src/decorator/common';
-import { WebContext } from './src/context';
+import { WebAsyncContext } from './src/context';
 import { RespondInterceptor } from './src/interceptor/respond';
 
 const WebInterceptorContract = toConcrete<WebInterceptor>();
@@ -98,7 +98,7 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='ContextParam'>
-      In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire {WebRequest}.  These are able to be injected using the {ContextParam} on a class-level field from the {WebContext}.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+      In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire {WebRequest}.  These are able to be injected using the {ContextParam} on a class-level field from the {WebAsyncContext}.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
       <c.Code title='Example ContextParam usage' src='doc/context-param.ts'></c.Code>
 

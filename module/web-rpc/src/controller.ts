@@ -1,9 +1,8 @@
 import { Inject } from '@travetto/di';
 import { Any, AppError, Util } from '@travetto/runtime';
 import {
-  HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistry, WebContext,
-  Body, EndpointUtil, BodyParseInterceptor, Post,
-  WebInternalSymbol
+  HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistry,
+  WebAsyncContext, Body, EndpointUtil, BodyParseInterceptor, Post, WebInternalSymbol
 } from '@travetto/web';
 
 @Controller('/rpc')
@@ -12,7 +11,7 @@ import {
 export class WebRpController {
 
   @Inject()
-  ctx: WebContext;
+  ctx: WebAsyncContext;
 
   /**
    * RPC main entrypoint

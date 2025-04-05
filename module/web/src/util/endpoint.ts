@@ -1,7 +1,7 @@
 import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { WebFilterContext, WebChainedFilter, WebChainedContext } from '../types.ts';
+import { WebContext, WebChainedFilter, WebChainedContext } from '../types.ts';
 import { WebRequest } from '../types/request.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
@@ -131,7 +131,7 @@ export class EndpointUtil {
   /**
    * Endpoint invocation code
    */
-  static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebFilterContext): Promise<WebResponse> {
+  static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebContext): Promise<WebResponse> {
     const params = await this.extractParameters(ctx.req, endpoint);
     try {
       const res = WebResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
