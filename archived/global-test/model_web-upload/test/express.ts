@@ -3,7 +3,7 @@ import { ExpressWebServer } from '@travetto/web-express';
 import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
 
-import { ModelBlobWebUploadServerSuite } from '../../../../global-test/model_web-upload/test/server.ts';
+import { ModelBlobWebUploadServerSuite } from './server.ts';
 
 const ServerSymbol = Symbol.for('express');
 

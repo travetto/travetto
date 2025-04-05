@@ -5,7 +5,7 @@ import { AwsLambdaWebApplication } from '@travetto/web-aws-lambda';
 
 import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server.ts';
 
-import { ModelBlobWebUploadServerSuite } from '../../../../global-test/model_web-upload/test/server.ts';
+import { ModelBlobWebUploadServerSuite } from './server.ts';
 
 const ServerSymbol = Symbol.for('express-lambda');
 
