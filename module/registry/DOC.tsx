@@ -1,8 +1,9 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { MetadataRegistry } from './src/service/metadata';
-import { RootRegistry } from './src/service/root';
-import { DynamicFileLoader } from './src/internal/file-loader';
+
+import { MetadataRegistry } from './src/service/metadata.ts';
+import { RootRegistry } from './src/service/root.ts';
+import { DynamicFileLoader } from './src/internal/file-loader.ts';
 
 export const text = <>
   <c.StdHeader />

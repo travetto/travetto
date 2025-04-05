@@ -1,10 +1,10 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { ModelQueryTypes } from '@travetto/model-query/support/doc.support';
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
+import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
-import { ElasticsearchModelConfig } from './src/config';
-import { ElasticsearchModelService } from './src/service';
+import { ElasticsearchModelConfig } from './src/config.ts';
+import { ElasticsearchModelService } from './src/service.ts';
 
 export const text = <>
   <c.StdHeader />

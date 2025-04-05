@@ -1,6 +1,6 @@
-import { Cookie, CookieGetOptions } from '../types/cookie';
-import { WebRequest } from '../types/request';
-import { WebResponse } from '../types/response';
+import { Cookie, CookieGetOptions } from '../types/cookie.ts';
+import { WebRequest } from '../types/request.ts';
+import { WebResponse } from '../types/response.ts';
 
 type WebMetadataConfig = { mode: 'cookie' | 'header', header: string, cookie: string, headerPrefix?: string };
 type List<T> = T[] | readonly T[];

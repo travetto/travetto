@@ -2,7 +2,13 @@
 import { d, c, DocJSXElementByFn, DocJSXElement, DocFileUtil } from '@travetto/doc';
 import { Config } from '@travetto/config';
 import { Runtime, toConcrete } from '@travetto/runtime';
-import { ModelBasicSupport, ModelBlobSupport, ModelBulkSupport, ModelCrudSupport, ModelExpirySupport, ModelIndexedSupport } from '../__index__';
+
+import { ModelBasicSupport } from '../src/types/basic.ts';
+import { ModelBlobSupport } from '../src/types/blob.ts';
+import { ModelBulkSupport } from '../src/types/bulk.ts';
+import { ModelCrudSupport } from '../src/types/crud.ts';
+import { ModelExpirySupport } from '../src/types/expiry.ts';
+import { ModelIndexedSupport } from '../src/types/indexed.ts';
 
 const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> =>
   d.codeLink(title, Runtime.getSourceFile(target), new RegExp(`\\binterface\\s+${target.name}`));

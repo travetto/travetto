@@ -1,7 +1,11 @@
 /** @jsxImportSource @travetto/doc */
 import { d, DocJSXElementByFn, DocJSXElement, DocFileUtil } from '@travetto/doc';
 import { Runtime, toConcrete } from '@travetto/runtime';
-import { ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport, ModelQuerySupport } from '../__index__';
+
+import { ModelQueryCrudSupport } from '../src/types/crud.ts';
+import { ModelQuerySupport } from '../src/types/query.ts';
+import { ModelQueryFacetSupport, } from '../src/types/facet.ts';
+import { ModelQuerySuggestSupport } from '../src/types/suggest.ts';
 
 const toLink = (title: string, target: Function): DocJSXElementByFn<'CodeLink'> =>
   d.codeLink(title, Runtime.getSourceFile(target), new RegExp(`\\binterface\\s+${target.name}`));

@@ -3,7 +3,7 @@ import { d, c } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import { ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport, ModelQuerySupport } from '@travetto/model-query';
 
-import { Links } from './support/doc.support';
+import { Links } from './support/doc.support.ts';
 
 export const text = <>
   <c.StdHeader />

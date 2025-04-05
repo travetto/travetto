@@ -10,7 +10,7 @@ import { WebServerHandle } from '../../src/types/server.ts';
 import { WebRequest, WebRequestInit } from '../../src/types/request.ts';
 import { WebResponse } from '../../src/types/response.ts';
 
-import { WebServerSupport } from './server-support/base.ts';
+import { WebServerSupport } from './types.ts';
 
 function asBuffer(v: Buffer | Readable): Promise<Buffer> {
   return !Buffer.isBuffer(v) ? toBuffer(v) : Promise.resolve(v);

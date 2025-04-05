@@ -4,7 +4,7 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { WebServer, WebRouter, WebServerHandle } from '@travetto/web';
 
-import { AwsLambdaWebUtil } from './util';
+import { AwsLambdaWebUtil } from './util.ts';
 
 @Config('web.aws')
 export class AwsLambdaConfig {

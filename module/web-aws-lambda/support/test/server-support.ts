@@ -5,7 +5,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { WebRequest, WebServerHandle, CookieConfig, WebApplication, WebResponse } from '@travetto/web';
 import { asFull, castTo } from '@travetto/runtime';
 
-import { WebServerSupport } from '@travetto/web/support/test/server-support/base.ts';
+import { WebServerSupport } from '@travetto/web/support/test/types.ts';
 
 import { AwsLambdaWebServer } from '../../src/server.ts';
 import { AwsLambdaWebUtil } from '../../src/util.ts';

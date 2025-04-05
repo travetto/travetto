@@ -1,7 +1,7 @@
 import { PackageUtil } from '@travetto/manifest';
 import { Runtime } from '@travetto/runtime';
 
-import { WebSslKeyPair } from '../types/server';
+import { WebSslKeyPair } from '../types/server.ts';
 
 /**
  * Utils for generating key pairs

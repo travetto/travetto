@@ -3,8 +3,8 @@ import { d, c } from '@travetto/doc';
 
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
-import { DynamoDBModelService } from './src/service';
-import { DynamoDBModelConfig } from './src/config';
+import { DynamoDBModelService } from './src/service.ts';
+import { DynamoDBModelConfig } from './src/config.ts';
 
 export const text = <>
   <c.StdHeader />

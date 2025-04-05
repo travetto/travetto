@@ -3,7 +3,7 @@ import timers from 'node:timers/promises';
 import { DependencyRegistry } from '@travetto/di';
 import { type WebRequest, CookieConfig, WebConfig, WebSslConfig, WebApplication, NetUtil, WebResponse } from '@travetto/web';
 
-import { WebServerSupport } from '@travetto/web/support/test/server-support/base.ts';
+import { WebServerSupport } from '@travetto/web/support/test/types.ts';
 
 import { NodeWebUtil } from '../../src/util';
 

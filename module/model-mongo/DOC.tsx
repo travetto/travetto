@@ -2,11 +2,11 @@
 import { d, c } from '@travetto/doc';
 import { RuntimeResources } from '@travetto/runtime';
 
-import { ModelQueryTypes } from '@travetto/model-query/support/doc.support';
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
+import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
-import { MongoModelConfig } from './src/config';
-import { MongoModelService } from './src/service';
+import { MongoModelConfig } from './src/config.ts';
+import { MongoModelService } from './src/service.ts';
 
 export const text = <>
   <c.StdHeader />

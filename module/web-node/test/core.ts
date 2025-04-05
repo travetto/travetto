@@ -1,6 +1,6 @@
 import { Suite } from '@travetto/test';
 import { WebServerSuite } from '@travetto/web/support/test/server.ts';
-import { NodeWebServerSupport } from '../support/test/server-support';
+import { NodeWebServerSupport } from '../support/test/server-support.ts';
 
 @Suite()
 export class NodeWebCoreTest extends WebServerSuite {

@@ -2,12 +2,12 @@
 import { d, c } from '@travetto/doc';
 import { ConsoleEvent, ConsoleManager, toConcrete } from '@travetto/runtime';
 
-import { CommonLogger, CommonLoggerConfig } from './src/common';
-import { FileLogAppender } from './src/appender/file';
-import { ConsoleLogAppender } from './src/appender/console';
-import { JsonLogFormatter } from './src/formatter/json';
-import { LineLogFormatter } from './src/formatter/line';
-import { LogAppender, LogDecorator, LogEvent, LogFormatter, Logger } from './src/types';
+import { CommonLogger, CommonLoggerConfig } from './src/common.ts';
+import { FileLogAppender } from './src/appender/file.ts';
+import { ConsoleLogAppender } from './src/appender/console.ts';
+import { JsonLogFormatter } from './src/formatter/json.ts';
+import { LineLogFormatter } from './src/formatter/line.ts';
+import { LogAppender, LogDecorator, LogEvent, LogFormatter, Logger } from './src/types.ts';
 
 const LoggerContract = toConcrete<Logger>();
 const LogDecoratorContract = toConcrete<LogDecorator>();
