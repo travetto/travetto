@@ -18,6 +18,6 @@ export class AsyncContextInterceptor implements WebInterceptor {
   context: WebContext;
 
   filter(ctx: WebChainedContext): Promise<WebResponse> {
-    return this.context.withContext(ctx, ctx.next);
+    return this.context.withContext(ctx.req, ctx.next);
   }
 }

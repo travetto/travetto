@@ -4,7 +4,7 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { WebChainedContext, FilterContext } from '../types.ts';
+import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
@@ -35,7 +35,7 @@ export class EtagInterceptor implements WebInterceptor {
   @Inject()
   config: EtagConfig;
 
-  addTag(ctx: FilterContext, res: WebResponse): WebResponse {
+  addTag(ctx: WebChainedContext, res: WebResponse): WebResponse {
     const { req } = ctx;
 
     if (

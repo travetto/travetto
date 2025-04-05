@@ -10,7 +10,7 @@ import { AppError, castTo } from '@travetto/runtime';
 
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
-import { FilterContext, WebChainedContext } from '../types.ts';
+import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
@@ -21,7 +21,7 @@ const ENCODING_METHODS = {
   br: createBrotliCompress,
 };
 
-type HttpCompressEncoding = keyof typeof ENCODING_METHODS | 'identity';
+type WebCompressEncoding = keyof typeof ENCODING_METHODS | 'identity';
 
 @Config('web.compress')
 export class CompressConfig {
@@ -36,11 +36,11 @@ export class CompressConfig {
   /**
    * Preferred encodings
    */
-  preferredEncodings?: HttpCompressEncoding[] = ['br', 'gzip', 'identity'];
+  preferredEncodings?: WebCompressEncoding[] = ['br', 'gzip', 'identity'];
   /**
    * Supported encodings
    */
-  supportedEncodings: HttpCompressEncoding[] = ['br', 'gzip', 'identity', 'deflate'];
+  supportedEncodings: WebCompressEncoding[] = ['br', 'gzip', 'identity', 'deflate'];
 }
 
 /**
@@ -54,7 +54,7 @@ export class CompressInterceptor implements WebInterceptor {
   @Inject()
   config: CompressConfig;
 
-  async compress(ctx: FilterContext, res: WebResponse): Promise<WebResponse> {
+  async compress(ctx: WebChainedContext, res: WebResponse): Promise<WebResponse> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
     const { req } = ctx;
 
@@ -83,7 +83,7 @@ export class CompressInterceptor implements WebInterceptor {
       );
     }
 
-    const type = castTo<HttpCompressEncoding>(method!);
+    const type = castTo<WebCompressEncoding>(method!);
     if (type === 'identity') {
       return res;
     }

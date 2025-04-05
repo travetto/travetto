@@ -1,7 +1,7 @@
 import passport from 'passport';
 
 import { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
-import { FilterContext, WebRequest } from '@travetto/web';
+import { WebFilterContext, WebRequest } from '@travetto/web';
 
 import { PassportUtil } from './util.ts';
 import { ConnectRequest, ConnectResponse } from './connect.ts';
@@ -11,7 +11,7 @@ type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
 /**
  * Authenticator via passport
  */
-export class PassportAuthenticator<U extends object> implements Authenticator<U, FilterContext> {
+export class PassportAuthenticator<U extends object> implements Authenticator<U, WebFilterContext> {
 
   #strategyName: string;
   #strategy: passport.Strategy;
@@ -65,7 +65,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
   /**
    * Extract the passport auth context
    */
-  getState(context?: FilterContext | undefined): AuthenticatorState | undefined {
+  getState(context?: WebFilterContext | undefined): AuthenticatorState | undefined {
     return PassportUtil.readState<AuthenticatorState>(context!.req);
   }
 
@@ -73,7 +73,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
    * Authenticate a request given passport config
    * @param ctx The travetto filter context
    */
-  async authenticate(input: U, { req }: FilterContext): Promise<Principal | undefined> {
+  async authenticate(input: U, { req }: WebFilterContext): Promise<Principal | undefined> {
     const requestOptions = this.#passportOptions(req);
 
     const connectReq = new ConnectRequest(req);
