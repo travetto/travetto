@@ -1,21 +1,21 @@
 import { Suite } from '@travetto/test';
-import { NodeWebServer } from '@travetto/web-node';
+import { AwsLambdaWebServer } from '@travetto/web-aws-lambda';
 import { InjectableFactory } from '@travetto/di';
 import { WebApplication, WebServer } from '@travetto/web';
 
 import { WebUploadServerSuite } from '@travetto/web-upload/support/test/server.ts';
-import { NodeWebServerSupport } from '@travetto/web-node/support/test/server-support.ts';
+import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server-support.ts';
 
 const ServerSymbol = Symbol.for('node');
 
 class Config {
   @InjectableFactory()
   static getServer(): WebServer {
-    return new NodeWebServer();
+    return new AwsLambdaWebServer();
   }
 
   @InjectableFactory(ServerSymbol)
-  static getApp(dep: NodeWebServer): WebApplication {
+  static getApp(dep: AwsLambdaWebServer): WebApplication {
     return new class extends WebApplication {
       server = dep;
     }();
@@ -23,7 +23,7 @@ class Config {
 }
 
 @Suite()
-export class NodeWebUploadTest extends WebUploadServerSuite {
+export class AwsLambdaWebUploadTest extends WebUploadServerSuite {
   qualifier = ServerSymbol;
-  type = NodeWebServerSupport;
+  type = AwsLambdaWebServerSupport;
 }
