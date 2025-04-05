@@ -22,5 +22,5 @@ async function buildApp(): Promise<WebApplication<AwsLambdaWebServer>> {
 
 let inst: WebApplication<AwsLambdaWebServer>;
 export async function handler(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
-  return (inst ??= await buildApp()).server.handle(event, context);
+  return ((inst ??= await buildApp()).server as AwsLambdaWebServer).handle(event, context);
 }

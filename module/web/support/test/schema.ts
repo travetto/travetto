@@ -2,11 +2,11 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry, Validator } from '@travetto/schema';
-import { Controller, Post, Get, ControllerRegistry, WebResponse, HttpMethodWithAll, PathParam, QueryParam } from '@travetto/web';
+import { Controller, Post, Get, ControllerRegistry, WebResponse, PathParam, QueryParam, HttpMethod } from '@travetto/web';
 
 import { BaseWebSuite } from './base.ts';
 
-type Errors = { details: { errors: { path: string }[] }, message: string };
+type Errors = { details: { errors: { path: string }[] }, message?: string };
 
 interface UserShape {
   id: number | undefined;
@@ -25,7 +25,7 @@ class SimpleUser {
 
 @Validator(user => {
   if (user && user.age === 300) {
-    return { kind: 'value', message: 'Age cannot be 300', path: 'age' };
+    return { kind: 'value', message: 'Age cannot be 300', path: 'age' }
   }
 })
 @Schema()
@@ -105,7 +105,7 @@ class SchemaAPI {
   }
 }
 
-function getEndpoint(path: string, method: HttpMethodWithAll) {
+function getEndpoint(path: string, method: HttpMethod) {
   return ControllerRegistry.get(SchemaAPI)
     .endpoints.find(x => x.path === path && x.method === method)!;
 }
@@ -117,107 +117,99 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyBody() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<UserShape>('POST', '/test/schema/user', { body: user });
+    const res1 = await this.request<UserShape>({ method: 'POST', path: '/test/schema/user', body: user });
 
-    assert(res1.body.name === user.name);
+    assert(res1.source?.name === user.name);
 
-    const res2 = await this.request<Errors>('POST', '/test/schema/user', { body: { id: 'orange' }, throwOnError: false });
+    const res2 = await this.request<Errors>({ method: 'POST', path: '/test/schema/user', body: { id: 'orange' } }, false);
 
-    assert(res2.status === 400);
-    assert(/Validation errors have occurred/.test(res2.body.message));
-    assert(res2.body.details.errors[0].path === 'id');
+    assert(res2.statusCode === 400);
+    assert(/Validation errors have occurred/.test(res2.source?.message ?? ''));
+    assert(res2.source?.details.errors[0].path === 'id');
 
-    const res3 = await this.request<Errors>('POST', '/test/schema/user', { body: { id: 0, name: 'bob', age: 'a' }, throwOnError: false });
+    const res3 = await this.request<Errors>({ method: 'POST', path: '/test/schema/user', body: { id: 0, name: 'bob', age: 'a' } }, false);
 
-    assert(res3.status === 400);
-    assert(/Validation errors have occurred/.test(res3.body.message));
-    assert(res3.body.details.errors[0].path === 'age');
+    assert(res3.statusCode === 400);
+    assert(/Validation errors have occurred/.test(res3.source?.message ?? ''));
+    assert(res3.source?.details.errors[0].path === 'age');
   }
 
   @Test()
   async verifyQuery() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<UserShape>('GET', '/test/schema/user', { query: user });
+    const res1 = await this.request<UserShape>({ method: 'GET', path: '/test/schema/user', query: user });
 
-    assert(res1.body.name === user.name);
+    assert(res1.source?.name === user.name);
 
-    const res2 = await this.request<Errors>('GET', '/test/schema/user', { query: { id: 'orange' }, throwOnError: false });
+    const res2 = await this.request<Errors>({ method: 'GET', path: '/test/schema/user', query: { id: 'orange' } }, false);
 
-    assert(res2.status === 400);
-    assert(/Validation errors have occurred/.test(res2.body.message));
-    assert(res2.body.details.errors[0].path === 'id');
+    assert(res2.statusCode === 400);
+    assert(/Validation errors have occurred/.test(res2.source?.message ?? ''));
+    assert(res2.source?.details.errors[0].path === 'id');
 
-    const res3 = await this.request<Errors>('GET', '/test/schema/user', { query: { id: '0', name: 'bob', age: 'a' }, throwOnError: false });
+    const res3 = await this.request<Errors>({ method: 'GET', path: '/test/schema/user', query: { id: '0', name: 'bob', age: 'a' } }, false);
 
-    assert(res3.status === 400);
-    assert(/Validation errors have occurred/.test(res3.body.message));
-    assert(res3.body.details.errors[0].path === 'age');
+    assert(res3.statusCode === 400);
+    assert(/Validation errors have occurred/.test(res3.source?.message ?? ''));
+    assert(res3.source?.details.errors[0].path === 'age');
   }
 
   @Test()
   async verifyInterface() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<UserShape>('GET', '/test/schema/interface', { query: user });
+    const res1 = await this.request<UserShape>({ method: 'GET', path: '/test/schema/interface', query: user });
 
-    assert(res1.body.name === user.name);
-    assert(res1.body.age === 20);
+    assert(res1.source?.name === user.name);
+    assert(res1.source?.age === 20);
 
-    const res2 = await this.request<Errors>('GET', '/test/schema/interface', { query: { id: 'orange' }, throwOnError: false });
+    const res2 = await this.request<Errors>({ method: 'GET', path: '/test/schema/interface', query: { id: 'orange' } }, false);
 
-    assert(res2.status === 400);
-    assert(/Validation errors have occurred/.test(res2.body.message));
-    assert(res2.body.details.errors[0].path === 'id');
+    assert(res2.statusCode === 400);
+    assert(/Validation errors have occurred/.test(res2.source?.message ?? ''));
+    assert(res2.source?.details.errors[0].path === 'id');
 
-    const res3 = await this.request<Errors>('GET', '/test/schema/interface', { query: { id: '0', name: 'bob', age: 'a' }, throwOnError: false });
+    const res3 = await this.request<Errors>({ method: 'GET', path: '/test/schema/interface', query: { id: '0', name: 'bob', age: 'a' } }, false);
 
-    assert(res3.status === 400);
-    assert(/Validation errors have occurred/.test(res3.body.message));
-    assert(res3.body.details.errors[0].path === 'age');
+    assert(res3.statusCode === 400);
+    assert(/Validation errors have occurred/.test(res3.source?.message ?? ''));
+    assert(res3.source?.details.errors[0].path === 'age');
   }
 
   @Test()
   async verifyPrefix() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<Errors>('GET', '/test/schema/interface-prefix', {
-      query: user,
-      throwOnError: false
-    });
+    const res1 = await this.request<Errors>({ method: 'GET', path: '/test/schema/interface-prefix', query: user, }, false);
 
-    assert(res1.status === 400);
-    assert(/Validation errors have occurred/.test(res1.body.message));
-    console.error(res1.body);
-    assert(res1.body.details.errors[0].path.startsWith('user2'));
+    assert(res1.statusCode === 400);
+    assert(/Validation errors have occurred/.test(res1.source?.message ?? ''));
+    console.error(res1.source);
+    assert(res1.source?.details.errors[0].path.startsWith('user2'));
 
-    const res2 = await this.request<Errors>('GET', '/test/schema/interface-prefix', {
-      query: { user3: user },
-      throwOnError: false
-    });
+    const res2 = await this.request<Errors>({ method: 'GET', path: '/test/schema/interface-prefix', query: { user3: user } }, false);
 
-    assert(res2.status === 400);
-    assert(/Validation errors have occurred/.test(res2.body.message));
-    assert(res2.body.details.errors[0].path);
-    assert(!res2.body.details.errors[0].path.startsWith('user'));
+    assert(res2.statusCode === 400);
+    assert(/Validation errors have occurred/.test(res2.source?.message ?? ''));
+    assert(res2.source?.details.errors[0].path);
+    assert(!res2.source?.details.errors[0].path.startsWith('user'));
 
-    const res3 = await this.request<User>('GET', '/test/schema/interface-prefix', {
-      query: { ...user, user2: user },
-    });
+    const res3 = await this.request<User>({ method: 'GET', path: '/test/schema/interface-prefix', query: { ...user, user2: user } });
 
-    assert(res3.status === 200);
-    assert(res3.body.name === user.name);
-    assert(res3.body.age === 20);
+    assert(res3.statusCode === 200);
+    assert(res3.source?.name === user.name);
+    assert(res3.source?.age === 20);
 
-    const res4 = await this.request<Errors>('GET', '/test/schema/interface-prefix', {
+    const res4 = await this.request<Errors>({
+      method: 'GET', path: '/test/schema/interface-prefix',
       query: { ...user, user2: { ...user, age: '300' } },
-      throwOnError: false
-    });
+    }, false);
 
-    assert(res4.status === 400);
-    assert(/Validation errors have occurred/.test(res4.body.message));
-    assert(res4.body.details.errors[0].path);
-    assert(!res4.body.details.errors[0].path.startsWith('user2.age'));
+    assert(res4.statusCode === 400);
+    assert(/Validation errors have occurred/.test(res4.source?.message ?? ''));
+    assert(res4.source?.details.errors[0].path);
+    assert(!res4.source?.details.errors[0].path.startsWith('user2.age'));
   }
 
   @Test()

@@ -17,26 +17,28 @@ export abstract class WebServerSuite extends BaseWebSuite {
 
   @Test()
   async getJSON() {
-    const { body: ret } = await this.request('GET', '/test/json');
+    const { source: ret } = await this.request({ method: 'GET', path: '/test/json' });
     assert.deepStrictEqual(ret, { json: true });
   }
 
   @Test()
   async getParam() {
-    const { body: ret } = await this.request('POST', '/test/param/bob');
+    const { source: ret } = await this.request({ method: 'POST', path: '/test/param/bob' });
     assert.deepStrictEqual(ret, { param: 'bob' });
   }
 
   @Test()
   async putQuery() {
-    const { body: ret } = await this.request('PUT', '/test/query', {
+    const { source: ret } = await this.request({
+      method: 'PUT', path: '/test/query',
       query: {
         age: '20'
       }
     });
     assert.deepStrictEqual(ret, { query: 20 });
 
-    await assert.rejects(() => this.request('PUT', '/test/query', {
+    await assert.rejects(() => this.request({
+      method: 'PUT', path: '/test/query',
       query: {
         age: 'blue'
       }
@@ -45,17 +47,19 @@ export abstract class WebServerSuite extends BaseWebSuite {
 
   @Test()
   async postBody() {
-    const { body: ret } = await this.request('PUT', '/test/body', {
+    const { source: ret } = await this.request({
+      method: 'PUT', path: '/test/body',
       body: {
         age: 20
       }
     });
-    assert.deepStrictEqual(ret, { body: 20 });
+    assert.deepStrictEqual(ret, { source: 20 });
   }
 
   @Test()
   async testCookie() {
-    const { body: ret, headers } = await this.request('DELETE', '/test/cookie', {
+    const { source: ret, headers } = await this.request({
+      method: 'DELETE', path: '/test/cookie',
       headers: {
         Cookie: 'orange=yummy'
       }
@@ -68,14 +72,14 @@ export abstract class WebServerSuite extends BaseWebSuite {
 
   @Test()
   async testRegex() {
-    const { body: ret, headers } = await this.request('PATCH', '/test/regexp/super-poodle-party');
+    const { source: ret, headers } = await this.request({ method: 'PATCH', path: '/test/regexp/super-poodle-party' });
     assert.deepStrictEqual(ret, { path: 'poodle' });
     assert(headers.has('ETag'));
   }
 
   @Test()
   async testBuffer() {
-    const { body: ret, headers } = await this.request('GET', '/test/buffer');
+    const { source: ret, headers } = await this.request({ method: 'GET', path: '/test/buffer' });
     assert(ret === 'hello');
     assert(headers.has('ETag'));
   }
@@ -83,7 +87,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
   @Test()
   async testStream() {
     try {
-      const { body: ret, headers } = await this.request('GET', '/test/stream');
+      const { source: ret, headers } = await this.request({ method: 'GET', path: '/test/stream' });
       assert(ret === 'hello');
       assert(!headers.has('ETag'));
     } catch (err) {
@@ -94,19 +98,20 @@ export abstract class WebServerSuite extends BaseWebSuite {
 
   @Test()
   async testRenderable() {
-    const { body: ret } = await this.request('GET', '/test/renderable');
+    const { source: ret } = await this.request({ method: 'GET', path: '/test/renderable' });
     assert(ret === 'hello');
   }
 
   @Test()
   async testFullUrl() {
-    const { body: ret } = await this.request('GET', '/test/fullUrl');
+    const { source: ret } = await this.request({ method: 'GET', path: '/test/fullUrl' });
     assert.deepStrictEqual(ret, { path: '/test/fullUrl' });
   }
 
   @Test()
   async testHeaderFirst() {
-    const { body: ret } = await this.request('GET', '/test/headerFirst', {
+    const { source: ret } = await this.request({
+      method: 'GET', path: '/test/headerFirst',
       headers: {
         age: ['1', '2', '3']
       }
@@ -116,28 +121,28 @@ export abstract class WebServerSuite extends BaseWebSuite {
 
   @Test()
   async testGetIp() {
-    const { body: ret } = await this.request<{ ip: string | undefined }>('GET', '/test/ip');
-    assert(ret.ip === '127.0.0.1' || ret.ip === '::1');
+    const { source: ret } = await this.request<{ ip: string | undefined }>({ method: 'GET', path: '/test/ip' });
+    assert(ret?.ip === '127.0.0.1' || ret?.ip === '::1');
 
-    const { body: ret2 } = await this.request<{ ip: string | undefined }>('GET', '/test/ip', { headers: { 'X-Forwarded-For': 'bob' } });
-    assert(ret2.ip === 'bob');
+    const { source: ret2 } = await this.request<{ ip: string | undefined }>({ method: 'GET', path: '/test/ip', headers: { 'X-Forwarded-For': 'bob' } });
+    assert(ret2?.ip === 'bob');
   }
 
   @Test()
   async testErrorThrow() {
-    const { status } = await this.request<{ ip: string | undefined }>('POST', '/test/ip', { throwOnError: false });
-    assert(status === 500);
+    const { statusCode } = await this.request<{ ip: string | undefined }>({ method: 'POST', path: '/test/ip' }, false);
+    assert(statusCode === 500);
   }
 
   @Test()
   async compressionReturned() {
     {
-      const { body: ret, headers } = await this.request('GET', '/test/json', { headers: { 'Accept-Encoding': 'gzip;q=1' } });
+      const { source: ret, headers } = await this.request({ method: 'GET', path: '/test/json', headers: { 'Accept-Encoding': 'gzip;q=1' } });
       assert(!headers.has('Content-Encoding'));
       assert.deepStrictEqual(ret, { json: true });
     }
     for (const encoding of ['gzip', 'br', 'deflate']) {
-      const { body: ret, headers } = await this.request('GET', '/test/json/large/20000', { headers: { 'Accept-Encoding': `${encoding};q=1` } });
+      const { source: ret, headers } = await this.request({ method: 'GET', path: '/test/json/large/20000', headers: { 'Accept-Encoding': `${encoding};q=1` } });
       const value = headers.get('Content-Encoding');
       assert(value === encoding);
 
@@ -148,7 +153,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
     }
 
     {
-      const { headers } = await this.request('GET', '/test/json/large/50000', { headers: { 'Accept-Encoding': 'orange' }, throwOnError: false });
+      const { headers } = await this.request({ method: 'GET', path: '/test/json/large/50000', headers: { 'Accept-Encoding': 'orange' } }, false);
       assert(!('content-encoding' in headers));
       // assert(status === 406);
     }
@@ -156,7 +161,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
 
   @Test()
   async testWildcard() {
-    const { body: ret } = await this.request<{ path: string }>('GET', '/test/fun/1/2/3/4');
-    assert(ret.path === '1/2/3/4');
+    const { source: ret } = await this.request<{ path: string }>({ method: 'GET', path: '/test/fun/1/2/3/4' });
+    assert(ret?.path === '1/2/3/4');
   }
 }

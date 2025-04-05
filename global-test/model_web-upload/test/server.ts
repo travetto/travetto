@@ -96,16 +96,18 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUploadAll() {
     const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<BlobMeta>('POST', '/test/upload/all', this.getMultipartRequest([sent]));
+    const res = await this.request<BlobMeta>({ ...this.getMultipartRequest([sent]), method: 'POST', path: '/test/upload/all', });
 
     const { hash } = await this.getFileMeta('/logo.png');
-    assert(res.body.hash === hash);
+    assert(res.source?.hash === hash);
   }
 
   @Test()
   async testUploadDirect() {
     const [sent] = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<{ location: string, meta: BlobMeta }>('POST', '/test/upload', {
+    const res = await this.request<{ location: string, meta: BlobMeta }>({
+      method: 'POST',
+      path: '/test/upload',
       headers: {
         'Content-Type': sent.type,
         'Content-Length': `${sent.size}`
@@ -114,22 +116,26 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     });
 
     const { hash } = await this.getFileMeta('/logo.png');
-    assert(res.body.meta.hash === hash);
+    assert(res.source?.meta.hash === hash);
   }
 
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<{ location: string, meta: BlobMeta }>('POST', '/test/upload', this.getMultipartRequest(uploads));
+    const res = await this.request<{ location: string, meta: BlobMeta }>(
+      { ...this.getMultipartRequest(uploads), method: 'POST', path: '/test/upload', }
+    );
     const { hash } = await this.getFileMeta('/logo.png');
-    assert(res.body.meta.hash === hash);
+    assert(res.source?.meta.hash === hash);
   }
 
   @Test()
   async testCached() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request('POST', '/test/upload/cached', this.getMultipartRequest(uploads));
-    assert(res.status === 200);
+    const res = await this.request(
+      { ...this.getMultipartRequest(uploads), method: 'POST', path: '/test/upload/cached', }
+    );
+    assert(res.statusCode === 200);
     assert(res.headers.get('Cache-Control') === 'max-age=3600');
     assert(res.headers.get('Content-Language') === 'en-GB');
   }
@@ -140,10 +146,12 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file1', resource: 'logo.png', type: 'image/png' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const res = await this.request<{ hash1: string, hash2: string }>('POST', '/test/upload/all-named', this.getMultipartRequest(uploads));
+    const res = await this.request<{ hash1: string, hash2: string }>(
+      { ... this.getMultipartRequest(uploads), method: 'POST', path: '/test/upload/all-named' }
+    );
     const { hash } = await this.getFileMeta('/logo.png');
-    assert(res.body.hash1 === hash);
-    assert(res.body.hash2 === hash);
+    assert(res.source?.hash1 === hash);
+    assert(res.source?.hash2 === hash);
   }
 
   @Test()
@@ -153,27 +161,34 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
 
-    const resBad = await this.request<{ hash1: string, hash2: string }>('POST', '/test/upload/all-named-custom', {
-      ...this.getMultipartRequest(uploadBad),
-      throwOnError: false
-    });
-    assert(resBad.status === 400);
+    const resBad = await this.request<{ hash1: string, hash2: string }>(
+      {
+        ...this.getMultipartRequest(uploadBad),
+        method: 'POST',
+        path: '/test/upload/all-named-custom',
+      },
+      false
+    );
+    assert(resBad.statusCode === 400);
 
     const uploads = await this.getUploads(
       { name: 'file1', resource: 'logo.gif', type: 'image/gif' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const res = await this.request<{ hash1: string, hash2: string }>('POST', '/test/upload/all-named-custom', {
-      ...this.getMultipartRequest(uploads),
-      throwOnError: false
-    });
-    assert(res.status === 200);
+    const res = await this.request<{ hash1: string, hash2: string }>(
+      {
+        ...this.getMultipartRequest(uploads),
+        method: 'POST', path: '/test/upload/all-named-custom',
+      },
+      false
+    );
+    assert(res.statusCode === 200);
 
     const blob = await this.getFileMeta('/logo.gif');
-    assert(res.body.hash1 === blob?.hash);
+    assert(res.source?.hash1 === blob?.hash);
 
     const blob2 = await this.getFileMeta('/logo.png');
-    assert(res.body.hash2 === blob2?.hash);
+    assert(res.source?.hash2 === blob2?.hash);
   }
 
   @Test()
@@ -183,80 +198,103 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
 
-    const resBad = await this.request<{ hash1: string, hash2: string }>('POST', '/test/upload/all-named-size', {
-      ...this.getMultipartRequest(uploadBad),
-      throwOnError: false
-    });
-    assert(resBad.status === 400);
+    const resBad = await this.request<{ hash1: string, hash2: string }>(
+      {
+        ...this.getMultipartRequest(uploadBad),
+        method: 'POST',
+        path: '/test/upload/all-named-size',
+      },
+      false
+    );
+    assert(resBad.statusCode === 400);
 
     const uploads = await this.getUploads(
       { name: 'file1', resource: 'asset.yml', type: 'text/plain' },
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
-    const res = await this.request<{ hash1: string, hash2: string }>('POST', '/test/upload/all-named-size', {
-      ...this.getMultipartRequest(uploads),
-      throwOnError: false
-    });
-    assert(res.status === 200);
+    const res = await this.request<{ hash1: string, hash2: string }>(
+      {
+        ...this.getMultipartRequest(uploads),
+        method: 'POST',
+        path: '/test/upload/all-named-size',
+      },
+      false
+    );
+    assert(res.statusCode === 200);
 
     const blob = await this.getFileMeta('/asset.yml');
-    assert(res.body.hash1 === blob?.hash);
+    assert(res.source?.hash1 === blob?.hash);
 
     const blob2 = await this.getFileMeta('/logo.png');
-    assert(res.body.hash2 === blob2?.hash);
+    assert(res.source?.hash2 === blob2?.hash);
   }
 
   @Test()
   async testRangedDownload() {
     const [sent] = await this.getUploads({ name: 'file', resource: 'alpha.txt', type: 'text/plain' });
-    const res = await this.request<{ location: string }>('POST', '/test/upload', {
-      headers: {
-        'Content-Type': sent.type,
-        'Content-Length': `${sent.size}`,
+    const res = await this.request<{ location: string }>(
+      {
+        method: 'POST',
+        path: '/test/upload',
+        headers: {
+          'Content-Type': sent.type,
+          'Content-Length': `${sent.size}`,
+        },
+        body: sent.buffer,
       },
-      body: sent.buffer,
-      throwOnError: false
-    });
+      false
+    );
 
-    assert(res.status === 200);
+    assert(res.statusCode === 200);
 
-    const loc = res.body.location;
+    const loc = res.source?.location;
 
-    const item = await this.request('GET', `/test/upload/${loc}`);
-    assert(typeof item.body === 'string');
-    assert(item.body.length === 26);
+    const item = await this.request({ method: 'GET', path: `/test/upload/${loc}` });
+    assert(typeof item.source === 'string');
+    assert(item.source?.length === 26);
 
-    const itemRanged = await this.request('GET', `/test/upload/${loc}`, {
-      headers: {
-        Range: 'bytes=0-9'
+    const itemRanged = await this.request(
+      {
+        method: 'GET', path: `/test/upload/${loc}`,
+        headers: {
+          Range: 'bytes=0-9'
+        }
       }
-    });
+    );
 
-    assert(typeof itemRanged.body === 'string');
-    assert(itemRanged.body === 'abcdefghij');
-    assert(itemRanged.body.length === 10);
+    assert(typeof itemRanged.source === 'string');
+    assert(itemRanged.source === 'abcdefghij');
+    assert(itemRanged.source?.length === 10);
 
-    const itemRanged2 = await this.request('GET', `/test/upload/${loc}`, {
-      headers: {
-        Range: 'bytes=23-25'
+    const itemRanged2 = await this.request(
+      {
+        method: 'GET',
+        path: `/test/upload/${loc}`,
+        headers: {
+          Range: 'bytes=23-25'
+        }
       }
-    });
+    );
 
-    assert(typeof itemRanged2.body === 'string');
-    assert(itemRanged2.body.length === 3);
-    assert(itemRanged2.body === 'xyz');
+    assert(typeof itemRanged2.source === 'string');
+    assert(itemRanged2.source?.length === 3);
+    assert(itemRanged2.source === 'xyz');
 
-    const itemRanged3 = await this.request('GET', `/test/upload/${loc}`, {
-      headers: {
-        Range: 'bytes=30-20'
+    const itemRanged3 = await this.request(
+      {
+        method: 'GET',
+        path: `/test/upload/${loc}`,
+        headers: {
+          Range: 'bytes=30-20'
+        },
       },
-      throwOnError: false
-    });
+      false
+    );
 
-    assert(itemRanged3.status === 400);
-    assert(DataUtil.isPlainObject(itemRanged3.body));
-    assert('message' in itemRanged3.body);
-    assert(typeof itemRanged3.body.message === 'string');
-    assert(itemRanged3.body.message.includes('out of range'));
+    assert(itemRanged3.statusCode === 400);
+    assert(DataUtil.isPlainObject(itemRanged3.source));
+    assert('message' in itemRanged3.source);
+    assert(typeof itemRanged3.source?.message === 'string');
+    assert(itemRanged3.source?.message.includes('out of range'));
   }
 }

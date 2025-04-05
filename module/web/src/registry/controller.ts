@@ -5,7 +5,7 @@ import { MetadataRegistry } from '@travetto/registry';
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
 import { WebChainedFilter, WebFilter } from '../types.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
-import { WebpHeaders } from '../types/headers.ts';
+import { WebHeaders } from '../types/headers.ts';
 
 import { WebAsyncContext } from '../context.ts';
 
@@ -67,7 +67,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       interceptorConfigs: [],
       name: endpoint.name,
       endpoint,
-      responseHeaderMap: new WebpHeaders()
+      responseHeaderMap: new WebHeaders()
     };
 
     controllerConf.endpoints!.push(fieldConf);
@@ -261,7 +261,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       this.#endpointsById.set(ep.id, ep);
       // Store full path from base for use in other contexts
       ep.fullPath = `/${final.basePath}/${ep.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
-      ep.responseHeaderMap = new WebpHeaders({ ...final.responseHeaders ?? {}, ...ep.responseHeaders ?? {} });
+      ep.responseHeaderMap = new WebHeaders({ ...final.responseHeaders ?? {}, ...ep.responseHeaders ?? {} });
     }
 
     if (this.has(final.basePath)) {

@@ -3,10 +3,10 @@ import { Readable } from 'node:stream';
 import { Any, AppError } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
-import { WebHeadersInit, WebpHeaders } from './headers.ts';
+import { WebHeadersInit, WebHeaders } from './headers.ts';
 import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
 
-type RequestInit = {
+export type WebRequestInit = {
   headers?: WebHeadersInit;
   method?: HttpMethod;
   protocol?: HttpProtocol;
@@ -32,7 +32,7 @@ export class WebRequest {
 
   [WebInternalSymbol]: WebRequestInternal = {};
 
-  readonly headers: WebpHeaders;
+  readonly headers: WebHeaders;
   readonly path: string = '';
   readonly port: number = 0;
   readonly protocol: HttpProtocol = 'http';
@@ -43,9 +43,9 @@ export class WebRequest {
   readonly inputStream?: Readable;
   body?: Any;
 
-  constructor(init: RequestInit = {}) {
+  constructor(init: WebRequestInit = {}) {
     Object.assign(this, init);
-    this.headers = new WebpHeaders(init.headers);
+    this.headers = new WebHeaders(init.headers);
   }
 
   /**

@@ -91,20 +91,20 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
   async cookiePersistence() {
     this.config({ maxAgeMs: 10000, mode: 'cookie' });
 
-    let res = await this.request<Aged>('GET', '/test/session');
+    let res = await this.request<Aged>({ method: 'GET', path: '/test/session' });
     let cookie = res.headers.get('Set-Cookie');
-    assert.deepStrictEqual(res.body, { age: 1 });
-    res = await this.request('GET', '/test/session', { headers: { Cookie: cookie } });
+    assert.deepStrictEqual(res.source, { age: 1 });
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { Cookie: cookie } });
     cookie = res.headers.get('Set-Cookie') ?? cookie;
-    assert.deepStrictEqual(res.body, { age: 2 });
-    res = await this.request('GET', '/test/session', { headers: { Cookie: cookie } });
+    assert.deepStrictEqual(res.source, { age: 2 });
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { Cookie: cookie } });
     cookie = res.headers.get('Set-Cookie') ?? cookie;
-    assert.deepStrictEqual(res.body, { age: 3 });
-    res = await this.request('GET', '/test/session');
-    assert.deepStrictEqual(res.body, { age: 1 });
+    assert.deepStrictEqual(res.source, { age: 3 });
+    res = await this.request({ method: 'GET', path: '/test/session' });
+    assert.deepStrictEqual(res.source, { age: 1 });
     cookie = res.headers.get('Set-Cookie') ?? cookie;
-    res = await this.request('GET', '/test/session', { headers: { Cookie: cookie } });
-    assert.deepStrictEqual(res.body, { age: 2 });
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { Cookie: cookie } });
+    assert.deepStrictEqual(res.source, { age: 2 });
   }
 
   @Test()
@@ -112,14 +112,14 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     this.config({ maxAgeMs: 3000, mode: 'cookie' });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request<Aged>('POST', '/test/session/complex', { body: payload });
-    assert(res.status === 201);
+    let res = await this.request<Aged>({ method: 'POST', path: '/test/session/complex', body: payload });
+    assert(res.statusCode === 201);
 
     const cookie = res.headers.get('Set-Cookie');
     assert(cookie);
-    res = await this.request('GET', '/test/session', { headers: { Cookie: cookie } });
-    assert(res.body.payload === payload);
-    assert(res.body.age === 1);
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { Cookie: cookie } });
+    assert(res.source?.payload === payload);
+    assert(res.source?.age === 1);
   }
 
   @Test()
@@ -127,7 +127,7 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     this.config({ maxAgeMs: 3000, mode: 'cookie' });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    const res = await this.request<{ body: number }>('PUT', '/test/session/body', { body: payload });
+    const res = await this.request<{ body: number }>({ method: 'PUT', path: '/test/session/body', body: payload });
     assert(res.headers.getSetCookie().length === 0);
   }
 
@@ -136,25 +136,25 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     const key = this.config({ mode: 'header', rollingRenew: true, maxAgeMs: 3000 });
 
 
-    let res = await this.request('GET', '/test/session');
+    let res = await this.request({ method: 'GET', path: '/test/session' });
     let header = res.headers.get(key);
-    assert.deepStrictEqual(res.body, { age: 1 });
+    assert.deepStrictEqual(res.source, { age: 1 });
 
-    res = await this.request('GET', '/test/session', { headers: { [key]: header } });
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
     header = res.headers.get(key) ?? header;
-    assert.deepStrictEqual(res.body, { age: 2 });
+    assert.deepStrictEqual(res.source, { age: 2 });
 
-    res = await this.request('GET', '/test/session', { headers: { [key]: header } });
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
     header = res.headers.get(key) ?? header;
-    assert.deepStrictEqual(res.body, { age: 3 });
+    assert.deepStrictEqual(res.source, { age: 3 });
 
-    res = await this.request('GET', '/test/session');
+    res = await this.request({ method: 'GET', path: '/test/session' });
     header = res.headers.get(key) ?? header;
-    assert.deepStrictEqual(res.body, { age: 1 });
+    assert.deepStrictEqual(res.source, { age: 1 });
 
-    res = await this.request('GET', '/test/session', { headers: { [key]: header } });
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
     header = res.headers.get(key) ?? header;
-    assert.deepStrictEqual(res.body, { age: 2 });
+    assert.deepStrictEqual(res.source, { age: 2 });
   }
 
   @Test()
@@ -162,13 +162,13 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     const key = this.config({ mode: 'header', maxAgeMs: 3000 });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request<Aged>('POST', '/test/session/complex', { body: payload });
-    assert(res.status === 201);
+    let res = await this.request<Aged>({ method: 'POST', path: '/test/session/complex', body: payload });
+    assert(res.statusCode === 201);
 
     const header = res.headers.get(key);
-    res = await this.request('GET', '/test/session', { headers: { [key]: header } });
-    assert(res.body.payload === payload);
-    assert(res.body.age === 1);
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
+    assert(res.source?.payload === payload);
+    assert(res.source?.age === 1);
   }
 
   @Test()
@@ -176,7 +176,7 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     const key = this.config({ mode: 'header', maxAgeMs: 100 });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    const res = await this.request<{ body: number }>('PUT', '/test/session/body', { body: payload });
+    const res = await this.request<{ body: number }>({ method: 'PUT', path: '/test/session/body', body: payload });
     assert(!res.headers.has(key));
   }
 
@@ -184,30 +184,30 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
   async testExpiryHeader() {
     const key = this.config({ mode: 'header', maxAgeMs: 1000 });
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request<Aged>('POST', '/test/session/complex', { body: payload });
-    assert(res.status === 201);
+    let res = await this.request<Aged>({ method: 'POST', path: '/test/session/complex', body: payload });
+    assert(res.statusCode === 201);
 
     const start = Date.now();
     let header = res.headers.get(key);
     assert(header);
 
-    res = await this.request('GET', '/test/session', { headers: { [key]: header } });
-    assert(res.status === 200);
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
+    assert(res.statusCode === 200);
     header = res.headers.get(key) ?? header;
 
-    assert(res.body.payload === payload);
-    assert(res.body.age === 1);
+    assert(res.source?.payload === payload);
+    assert(res.source?.age === 1);
 
     await timers.setTimeout(1000 - (Date.now() - start));
 
-    res = await this.request('GET', '/test/session', { headers: { [key]: header }, throwOnError: false });
-    assert(res.status === 403);
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } }, false);
+    assert(res.statusCode === 403);
 
 
-    res = await this.request('GET', '/test/session', {});
-    assert(res.status === 200);
-    assert(res.body.payload === undefined);
-    assert(res.body.age === 1);
+    res = await this.request({ method: 'GET', path: '/test/session' });
+    assert(res.statusCode === 200);
+    assert(res.source?.payload === undefined);
+    assert(res.source?.age === 1);
   }
 
   @Test()
@@ -215,25 +215,25 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     this.config({ mode: 'cookie', maxAgeMs: 1000 });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request<Aged>('POST', '/test/session/complex', { body: payload });
-    assert(res.status === 201);
+    let res = await this.request<Aged>({ method: 'POST', path: '/test/session/complex', body: payload });
+    assert(res.statusCode === 201);
     const start = Date.now();
 
     const cookie = res.headers.get('Set-Cookie');
 
-    res = await this.request('GET', '/test/session', { headers: { Cookie: cookie } });
-    assert(res.body.payload === payload);
-    assert(res.body.age === 1);
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { Cookie: cookie } });
+    assert(res.source?.payload === payload);
+    assert(res.source?.age === 1);
 
     await timers.setTimeout(1000 - (Date.now() - start));
 
-    res = await this.request('GET', '/test/session', { headers: { Cookie: cookie }, throwOnError: false });
-    assert(res.status === 403);
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { Cookie: cookie } }, false);
+    assert(res.statusCode === 403);
 
-    res = await this.request('GET', '/test/session', { headers: {} });
-    assert(res.status === 200);
-    assert(res.body.payload === undefined);
-    assert(res.body.age === 1);
+    res = await this.request({ method: 'GET', path: '/test/session', headers: {} });
+    assert(res.statusCode === 200);
+    assert(res.source?.payload === undefined);
+    assert(res.source?.age === 1);
   }
 
   @Test()
@@ -241,25 +241,25 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     const key = this.config({ mode: 'header', maxAgeMs: 2000 });
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
-    let res = await this.request<Aged>('POST', '/test/session/complex', { body: payload });
-    assert(res.status === 201);
+    let res = await this.request<Aged>({ method: 'POST', path: '/test/session/complex', body: payload });
+    assert(res.statusCode === 201);
     const header = res.headers.get(key);
     await timers.setTimeout(350);
 
-    res = await this.request('GET', '/test/session', { headers: { [key]: header } });
-    assert(res.status === 200);
-    assert(res.body.payload === payload);
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
+    assert(res.statusCode === 200);
+    assert(res.source?.payload === payload);
     assert(!res.headers.has(key));
     await timers.setTimeout(350);
 
-    res = await this.request('GET', '/test/session', { headers: { [key]: header } });
-    assert(res.body.payload === payload);
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
+    assert(res.source?.payload === payload);
     assert(!res.headers.has(key));
     await timers.setTimeout(350);
 
-    res = await this.request('GET', '/test/session', { headers: { [key]: header } });
+    res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
     assert(res.headers.has(key));
-    assert(res.body.payload === payload);
-    assert(res.body.age === 3);
+    assert(res.source?.payload === payload);
+    assert(res.source?.age === 3);
   }
 }

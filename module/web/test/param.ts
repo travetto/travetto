@@ -5,7 +5,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
 
 import { WebRequest } from '../src/types/request.ts';
-import { WebpHeaders } from '../src/types/headers.ts';
+import { WebHeaders } from '../src/types/headers.ts';
 import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param.ts';
 import { Post, Get } from '../src/decorator/endpoint.ts';
 import { Controller } from '../src/decorator/controller.ts';
@@ -130,7 +130,7 @@ export class EndpointParameterTest {
 
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
-        headers: new WebpHeaders({
+        headers: new WebHeaders({
           'api-key': 'api-key'
         })
       })

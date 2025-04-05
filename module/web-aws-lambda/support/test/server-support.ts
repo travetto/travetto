@@ -3,10 +3,10 @@ import zlib from 'node:zlib';
 
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { WebRequest, WebServerHandle, CookieConfig, WebpHeaders, WebApplication } from '@travetto/web';
-import { asFull, Util } from '@travetto/runtime';
+import { WebRequest, WebServerHandle, CookieConfig, WebHeaders, WebApplication, WebResponse } from '@travetto/web';
+import { asFull, castTo, Util } from '@travetto/runtime';
 
-import { WebServerSupport, MakeRequestConfig, MakeRequestResponse, } from '@travetto/web/support/test/server-support/base.ts';
+import { WebServerSupport } from '@travetto/web/support/test/server-support/base.ts';
 import { AwsLambdaWebServer } from '../../__index__';
 
 const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {
@@ -72,32 +72,31 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
     return await this.#lambda.run();
   }
 
-  async execute(method: WebRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {
-    const httpHeaders = new WebpHeaders(headers);
-    const queryEntries = Object.entries(query ?? {});
+  async execute(req: WebRequest): Promise<WebResponse<Buffer>> {
+    const queryEntries = Object.entries(req.query ?? {});
     const singleHeaders: Record<string, string> = {};
     const multiHeaders: Record<string, string[]> = {};
-    httpHeaders.forEach((v, k) => {
+    req.headers.forEach((v, k) => {
       singleHeaders[k] = Array.isArray(v) ? v.join('; ') : v;
-      multiHeaders[k] = httpHeaders.getList(k) ?? [];
+      multiHeaders[k] = req.headers.getList(k) ?? [];
     });
 
-    const res = (await this.#lambda.server.handle({
+    const res = (await castTo<AwsLambdaWebServer>(this.#lambda.server).handle({
       ...baseLambdaEvent,
-      path,
-      httpMethod: method,
+      path: req.path,
+      httpMethod: req.method,
       queryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : v?.toString()])),
       headers: singleHeaders,
       isBase64Encoded: true,
-      body: body ? body.toString('base64') : body ?? null,
+      body: req.body ? req.body.toString('base64') : req.body ?? null,
       multiValueQueryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v : [v]])),
       multiValueHeaders: multiHeaders,
-      requestContext: { ...baseLambdaContext, path, httpMethod: method },
+      requestContext: { ...baseLambdaContext, path: req.path, httpMethod: req.method },
     }, { ...baseContext }));
 
     let resBody: Buffer = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
 
-    const resHeaders = new WebpHeaders({ ...res.headers ?? {}, ...res.multiValueHeaders ?? {} });
+    const resHeaders = new WebHeaders({ ...res.headers ?? {}, ...res.multiValueHeaders ?? {} });
 
     switch (resHeaders.getList('Content-Encoding')?.[0]) {
       case 'gzip': resBody = zlib.gunzipSync(resBody); break;
@@ -105,6 +104,6 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
       case 'br': resBody = zlib.brotliDecompressSync(resBody); break;
     }
 
-    return { status: res.statusCode, body: resBody, headers: resHeaders };
+    return WebResponse.from(resBody).with({ statusCode: res.statusCode, headers: resHeaders });
   }
 }

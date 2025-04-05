@@ -10,19 +10,6 @@ import { castTo } from '@travetto/runtime';
 
 export const AwsLambdaWebSymbol = Symbol.for('@travetto/web-aws-lambda:entry');
 
-/**
- * Main contract for lambda based applications
- * @concrete
- */
-export interface AwsLambdaHandler {
-  /**
-   * Handles lambda proxy event
-   */
-  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult>;
-}
-
-export type AwsLambdaHandle = AwsLambdaHandler['handle'];
-
 @Config('web.aws')
 export class AwsLambdaConfig {
   binaryMimeTypes?: string[];
@@ -37,7 +24,7 @@ export class AwsLambdaConfig {
 }
 
 @Injectable(AwsLambdaWebSymbol)
-export class AwsLambdaWebServer implements WebServer, AwsLambdaHandler {
+export class AwsLambdaWebServer implements WebServer {
 
   #router: WebRouter;
 

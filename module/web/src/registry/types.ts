@@ -4,7 +4,7 @@ import type { FieldConfig, ClassConfig } from '@travetto/schema';
 import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebChainedFilter, WebContext, WebFilter } from '../types.ts';
 import { HttpMethod } from '../types/core.ts';
-import { WebpHeaders } from '../types/headers.ts';
+import { WebHeaders } from '../types/headers.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
@@ -160,7 +160,7 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
   /**
    * Response header map
    */
-  responseHeaderMap: WebpHeaders;
+  responseHeaderMap: WebHeaders;
 }
 
 /**

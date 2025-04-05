@@ -4,7 +4,7 @@ import { isArrayBuffer } from 'node:util/types';
 import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
-import { WebHeadersInit, WebpHeaders } from './headers.ts';
+import { WebHeadersInit, WebHeaders } from './headers.ts';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -193,7 +193,7 @@ export class WebResponse<S = unknown> {
   source?: S;
   output: Buffer | Readable;
   length?: number;
-  readonly headers: WebpHeaders;
+  readonly headers: WebHeaders;
 
   constructor(o: ResponseInput<S>) {
     this.output = o.output;
@@ -208,7 +208,7 @@ export class WebResponse<S = unknown> {
     this.#defaultContentType = o.defaultContentType ?? BINARY_TYPE;
 
     // @ts-expect-error
-    this.headers = new WebpHeaders(o.headers);
+    this.headers = new WebHeaders(o.headers);
 
     if (o.contentType) {
       this.headers.set('Content-Type', o.contentType);

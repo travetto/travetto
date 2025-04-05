@@ -10,7 +10,7 @@ const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 /**
  * Simple Headers wrapper with additional logic for common patterns
  */
-export class WebpHeaders extends Headers {
+export class WebHeaders extends Headers {
 
   #parsedType?: MimeType;
 
@@ -41,9 +41,9 @@ export class WebpHeaders extends Headers {
   }
 
   // @ts-expect-error
-  forEach(set: (v: string | string[], k: string, headers: WebpHeaders) => void): void;
-  forEach(set: (v: Any, k: string, headers: WebpHeaders) => void): void;
-  forEach(set: (v: string | string[], k: string, headers: WebpHeaders) => void): void {
+  forEach(set: (v: string | string[], k: string, headers: WebHeaders) => void): void;
+  forEach(set: (v: Any, k: string, headers: WebHeaders) => void): void;
+  forEach(set: (v: string | string[], k: string, headers: WebHeaders) => void): void {
     for (const [k, v] of this.entries()) {
       set(k === 'set-cookie' ? this.getSetCookie() : v, k, this);
     }

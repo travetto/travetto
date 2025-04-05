@@ -1,4 +1,3 @@
-import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { RootRegistry } from '@travetto/registry';
@@ -6,14 +5,13 @@ import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base.ts';
 import { WebServerHandle } from '../../src/types/server.ts';
-import { HttpMethod } from '../../src/types/core.ts';
-import { WebpHeaders } from '../../src/types/headers.ts';
+import { WebRequest, WebRequestInit } from '../../src/types/request.ts';
+import { WebResponse } from '../../src/types/response.ts';
+
+import { WebServerSupport } from './server-support/base.ts';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
-
-type FullHttpRequest = MakeRequestConfig<Buffer | string | { stream: Readable } | Record<string, unknown>> & { throwOnError?: boolean };
 
 /**
  * Base Web Suite
@@ -53,7 +51,7 @@ export abstract class BaseWebSuite {
     }
   }
 
-  getMultipartRequest(chunks: Multipart[]): FullHttpRequest {
+  getMultipartRequest(chunks: Multipart[]): WebRequest {
     const boundary = `-------------------------multipart-${Util.uuid()}`;
 
     const nl = '\r\n';
@@ -80,55 +78,41 @@ export abstract class BaseWebSuite {
       'Content-Length': `${body.length}`
     };
 
-    return { body, headers };
+    return new WebRequest({ body, headers });
   }
 
-  async request<T>(
-    method: HttpMethod,
-    path: string,
-    cfg: FullHttpRequest = {}
-  ): Promise<MakeRequestResponse<T>> {
+  async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
 
-    const headers = new WebpHeaders(cfg.headers);
+    const req = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
 
-    let buffer: Buffer | undefined;
-    const body = cfg.body;
+    const body = req.body;
     if (body) {
       if (body instanceof Buffer) {
-        buffer = body;
+        // Do nothing
       } else if (typeof body === 'string') {
-        buffer = Buffer.from(body);
+        req.body = Buffer.from(body);
       } else if ('stream' in body) {
-        buffer = await toBuffer(castTo(body.stream));
+        req.body = await toBuffer(castTo(body.stream));
       } else {
-        buffer = Buffer.from(JSON.stringify(body));
-        headers.set('Content-Type', headers.get('Content-Type') ?? 'application/json');
+        req.body = Buffer.from(JSON.stringify(body));
+        req.headers.set('Content-Type', req.headers.get('Content-Type') ?? 'application/json');
       }
     }
 
-    cfg.body = body;
-    cfg.query = BindUtil.flattenPaths(cfg.query ?? {});
-    cfg.headers = headers;
+    Object.assign(req, { query: BindUtil.flattenPaths(req.query ?? {}) });
 
-    const resp = await this.#support.execute(method, path, { ...cfg, body: buffer });
-    const out = await this.getOutput<T>(resp.body);
+    const res = await this.#support.execute(req);
+    const buffer = Buffer.isBuffer(res.output) ? res.output : await toBuffer(res.output);
+    const out = await this.getOutput<T>(buffer);
 
-    if (resp.status >= 400) {
-      if (cfg.throwOnError ?? true) {
+    if (res.statusCode && res.statusCode >= 400) {
+      if (throwOnError) {
         const err = new AppError('Error');
-        if (Buffer.isBuffer(resp.body)) {
-          err.message = resp.body.toString('utf8');
-        } else {
-          Object.assign(err, resp.body);
-        }
-        Object.assign(err, { status: resp.status });
+        Object.assign(err, { status: res.statusCode, message: res.output.toString('utf8') });
         throw err;
       }
     }
-    return {
-      status: resp.status,
-      body: castTo(out),
-      headers: resp.headers
-    };
+    res.source = castTo(out);
+    return castTo(res);
   }
 }
