@@ -33,10 +33,10 @@ export class NodeWebServer implements WebServer {
 
       res.statusCode = webRes.statusCode ?? 200;
       webRes.headers.forEach((v, k) => res.setHeader(k, v));
-      if (isReadable(webRes.output)) {
-        await pipeline(webRes.output, res);
+      if (isReadable(webRes.body)) {
+        await pipeline(webRes.body, res);
       } else {
-        res.write(webRes.output);
+        res.write(webRes.body);
         res.end();
       }
     };

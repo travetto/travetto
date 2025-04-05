@@ -86,7 +86,7 @@ export class AwsLambdaWebUtil {
    * Create an API Gateway result from a web response   
    */
   static async toLambdaResult(res: WebResponse, base64Encoded: boolean = false): Promise<APIGatewayProxyResult> {
-    let output = res.output;
+    let output = res.body;
 
     if (!Buffer.isBuffer(output)) {
       output = await buffer(output);

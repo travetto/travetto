@@ -56,4 +56,12 @@ export class FileLoader {
     const file = await this.resolve(relativePath);
     return createReadStream(file, { encoding: binary ? undefined : 'utf8' });
   }
+
+  /**
+   * Read a file as a File object
+   * @param relativePath The path to read
+   */
+  async readFile(relativePath: string): Promise<File> {
+    return new File([await this.read(relativePath, true)], path.basename(relativePath))
+  }
 }

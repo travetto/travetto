@@ -1,8 +1,7 @@
 import { buffer as toBuffer } from 'node:stream/consumers';
-import assert, { AssertionError } from 'node:assert';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime';
+import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
@@ -11,8 +10,6 @@ import { WebRequest, WebRequestInit } from '../../src/types/request.ts';
 import { WebResponse } from '../../src/types/response.ts';
 
 import { WebServerSupport } from './server-support/base.ts';
-
-type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
 /**
  * Base Web Suite
@@ -52,36 +49,6 @@ export abstract class BaseWebSuite {
     }
   }
 
-  getMultipartRequest(chunks: Multipart[]): WebRequest {
-    const boundary = `-------------------------multipart-${Util.uuid()}`;
-
-    const nl = '\r\n';
-
-    const header = (flag: boolean, key: string, ...values: (string | number | undefined)[]) =>
-      flag ? `${key}: ${values.map(v => `${v}`).join(';')}${nl}` : Buffer.alloc(0);
-
-    const lines = [
-      ...chunks.flatMap(chunk => [
-        '--', boundary, nl,
-        header(true, 'Content-Disposition', 'form-data', `name="${chunk.name}"`, `filename="${chunk.filename ?? chunk.name}"`),
-        header(!!chunk.size, 'Content-Length', chunk.size),
-        header(!!chunk.type, 'Content-Type', chunk.type),
-        nl,
-        chunk.buffer, nl
-      ]),
-      '--', boundary, '--', nl
-    ];
-
-    const body = Buffer.concat(lines.map(l => Buffer.isBuffer(l) ? l : Buffer.from(l)));
-
-    const headers = {
-      'Content-Type': `multipart/form-data; boundary=${boundary}`,
-      'Content-Length': `${body.length}`
-    };
-
-    return new WebRequest({ body, headers });
-  }
-
   async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
 
     const req = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
@@ -103,12 +70,12 @@ export abstract class BaseWebSuite {
     Object.assign(req, { query: BindUtil.flattenPaths(req.query ?? {}) });
 
     const res = await this.#support.execute(req);
-    const buffer = Buffer.isBuffer(res.output) ? res.output : await toBuffer(res.output);
+    const buffer = Buffer.isBuffer(res.body) ? res.body : await toBuffer(res.body);
     const out = await this.getOutput<T>(buffer);
 
     if (res.statusCode && res.statusCode >= 400) {
       if (throwOnError) {
-        const err = new AppError(res.output.toString('utf8'));
+        const err = new AppError(res.body.toString('utf8'));
         Object.assign(err, { status: res.statusCode });
         throw err;
       }

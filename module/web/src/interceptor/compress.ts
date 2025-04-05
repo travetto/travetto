@@ -62,7 +62,7 @@ export class CompressInterceptor implements WebInterceptor {
 
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     if (
-      !res.output ||
+      !res.body ||
       (res.length !== undefined && res.length >= 0 && res.length < chunkSize) ||
       req.method === 'HEAD' ||
       res.headers.has('Content-Encoding') ||
@@ -93,14 +93,14 @@ export class CompressInterceptor implements WebInterceptor {
     // If we are compressing
     res.headers.set('Content-Encoding', type);
 
-    if (Buffer.isBuffer(res.output)) {
-      stream.end(res.output);
+    if (Buffer.isBuffer(res.body)) {
+      stream.end(res.body);
       const out = await buffer(stream);
-      res.output = out;
+      res.body = out;
       res.length = out.length;
     } else {
-      res.output.pipe(stream);
-      res.output = stream;
+      res.body.pipe(stream);
+      res.body = stream;
       res.length = undefined;
     }
 

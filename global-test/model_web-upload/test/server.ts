@@ -1,19 +1,20 @@
 import assert from 'node:assert';
 
 import { DataUtil } from '@travetto/schema';
-import { Controller, Get, Post, WebRequest, ContextParam } from '@travetto/web';
+import { Controller, Get, Post, WebRequest, ContextParam, WebResponse } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
 import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, FileMap } from '@travetto/web-upload';
-import { Util, BlobMeta, BinaryUtil } from '@travetto/runtime';
+import { Util, BlobMeta, BinaryUtil, castTo } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
 
 type FileUpload = { name: string, resource: string, type: string };
 
 const meta = BinaryUtil.getBlobMeta;
+const multipart = (data: FormData) => new WebRequest(WebResponse.from(data));
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -75,11 +76,14 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
   fixture: TestFixtures;
 
-  async getUploads(...files: FileUpload[]) {
-    return Promise.all(files.map(async ({ name, type, resource: filename }) => {
-      const buffer = await this.fixture.read(filename, true);
-      return { name, type, filename, buffer, size: buffer.length };
+  async getUploads(...files: FileUpload[]): Promise<FormData> {
+    const data = new FormData();
+    await Promise.all(files.map(async ({ name, type, resource: filename }) => {
+      const file = await this.fixture.readFile(filename);
+      Object.assign(file, { type });
+      data.append(name, file);
     }));
+    return data;
   }
 
   async getFileMeta(pth: string) {
@@ -95,8 +99,8 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
   @Test()
   async testUploadAll() {
-    const [sent] = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<BlobMeta>({ ...this.getMultipartRequest([sent]), method: 'POST', path: '/test/upload/all', });
+    const uploads = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
+    const res = await this.request<BlobMeta>({ ...multipart(uploads), method: 'POST', path: '/test/upload/all', });
 
     const { hash } = await this.getFileMeta('/logo.png');
     assert(res.source?.hash === hash);
@@ -104,15 +108,12 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
   @Test()
   async testUploadDirect() {
-    const [sent] = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
+    const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
+    const sent = castTo<Blob>(uploads.get('file')?.slice());
     const res = await this.request<{ location: string, meta: BlobMeta }>({
       method: 'POST',
       path: '/test/upload',
-      headers: {
-        'Content-Type': sent.type,
-        'Content-Length': `${sent.size}`
-      },
-      body: sent.buffer
+      ...WebResponse.from(sent)
     });
 
     const { hash } = await this.getFileMeta('/logo.png');
@@ -123,7 +124,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<{ location: string, meta: BlobMeta }>(
-      { ...this.getMultipartRequest(uploads), method: 'POST', path: '/test/upload', }
+      { ...multipart(uploads), method: 'POST', path: '/test/upload', }
     );
     const { hash } = await this.getFileMeta('/logo.png');
     assert(res.source?.meta.hash === hash);
@@ -133,7 +134,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async testCached() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request(
-      { ...this.getMultipartRequest(uploads), method: 'POST', path: '/test/upload/cached', }
+      { ...multipart(uploads), method: 'POST', path: '/test/upload/cached', }
     );
     assert(res.statusCode === 200);
     assert(res.headers.get('Cache-Control') === 'max-age=3600');
@@ -147,7 +148,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>(
-      { ... this.getMultipartRequest(uploads), method: 'POST', path: '/test/upload/all-named' }
+      { ...multipart(uploads), method: 'POST', path: '/test/upload/all-named' }
     );
     const { hash } = await this.getFileMeta('/logo.png');
     assert(res.source?.hash1 === hash);
@@ -163,7 +164,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
     const resBad = await this.request<{ hash1: string, hash2: string }>(
       {
-        ...this.getMultipartRequest(uploadBad),
+        ...multipart(uploadBad),
         method: 'POST',
         path: '/test/upload/all-named-custom',
       },
@@ -177,7 +178,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     );
     const res = await this.request<{ hash1: string, hash2: string }>(
       {
-        ...this.getMultipartRequest(uploads),
+        ...multipart(uploads),
         method: 'POST', path: '/test/upload/all-named-custom',
       },
       false
@@ -200,7 +201,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
     const resBad = await this.request<{ hash1: string, hash2: string }>(
       {
-        ...this.getMultipartRequest(uploadBad),
+        ...multipart(uploadBad),
         method: 'POST',
         path: '/test/upload/all-named-size',
       },
@@ -214,7 +215,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     );
     const res = await this.request<{ hash1: string, hash2: string }>(
       {
-        ...this.getMultipartRequest(uploads),
+        ...multipart(uploads),
         method: 'POST',
         path: '/test/upload/all-named-size',
       },
@@ -231,16 +232,13 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
   @Test()
   async testRangedDownload() {
-    const [sent] = await this.getUploads({ name: 'file', resource: 'alpha.txt', type: 'text/plain' });
+    const uploads = await this.getUploads({ name: 'file', resource: 'alpha.txt', type: 'text/plain' });
+    const sent = castTo<Blob>(uploads.get('file')?.slice());
     const res = await this.request<{ location: string }>(
       {
         method: 'POST',
         path: '/test/upload',
-        headers: {
-          'Content-Type': sent.type,
-          'Content-Length': `${sent.size}`,
-        },
-        body: sent.buffer,
+        ...WebResponse.from(sent)
       },
       false
     );

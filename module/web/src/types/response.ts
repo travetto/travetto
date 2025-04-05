@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { isArrayBuffer } from 'node:util/types';
 
-import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
+import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON, Util } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
@@ -28,8 +28,8 @@ const CATEGORY_STATUS: Record<ErrorCategory, number> = {
   unavailable: 503,
 };
 
-type ResponseInput<S> = {
-  output: Buffer | Readable;
+export type WebResponseInput<S> = {
+  body: Buffer | Readable;
   length?: number;
   statusCode?: number;
   source?: S;
@@ -61,7 +61,7 @@ export class WebResponse<S = unknown> {
    */
   static fromStream<T extends Readable | ReadableStream>(value: T, contentType?: string): WebResponse<T> {
     const output: Readable = isReadableStream(value) ? Readable.fromWeb(value) : value;
-    return new WebResponse({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
+    return new WebResponse({ body: output, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
@@ -69,7 +69,7 @@ export class WebResponse<S = unknown> {
    */
   static fromAsyncIterable<T extends AsyncIterable<unknown>>(value: T, contentType?: string): WebResponse<T> {
     const output: Readable = Readable.from(value);
-    return new WebResponse({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
+    return new WebResponse({ body: output, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
@@ -84,7 +84,7 @@ export class WebResponse<S = unknown> {
    */
   static fromText<T extends string>(value: T, encoding: BufferEncoding = 'utf8', contentType?: string): WebResponse<T> {
     const output = Buffer.from(value, encoding);
-    return new WebResponse({ output, length: output.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
+    return new WebResponse({ body: output, length: output.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
   }
 
   /**
@@ -92,7 +92,7 @@ export class WebResponse<S = unknown> {
    */
   static fromBytes<T extends Buffer | ArrayBuffer>(value: T, contentType?: string): WebResponse<T> {
     const narrowed = Buffer.isBuffer(value) ? value : Buffer.from(value);
-    return new WebResponse({ output: narrowed, length: narrowed.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
+    return new WebResponse({ body: narrowed, length: narrowed.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
@@ -101,7 +101,7 @@ export class WebResponse<S = unknown> {
   static fromJSON<T extends unknown>(value: T, contentType?: string): WebResponse<T> {
     const payload = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
     const output = Buffer.from(payload, 'utf-8');
-    return new WebResponse({ output, source: value, length: output.byteLength, contentType, defaultContentType: 'application/json' });
+    return new WebResponse({ body: output, source: value, length: output.byteLength, contentType, defaultContentType: 'application/json' });
   }
 
   /**
@@ -112,7 +112,7 @@ export class WebResponse<S = unknown> {
 
     const out = new WebResponse<T>({
       source: value,
-      output: Readable.fromWeb(value.stream()),
+      body: Readable.fromWeb(value.stream()),
       length: value.size,
       contentType: meta?.contentType ?? BINARY_TYPE
     });
@@ -162,6 +162,45 @@ export class WebResponse<S = unknown> {
   }
 
   /**
+   * Get response from form data
+   */
+  static fromFormData<T extends FormData>(form: T): WebResponse<T> {
+    const boundary = `-------------------------multipart-${Util.uuid()}`;
+    const nl = '\r\n';
+
+    const source = (async function* (): AsyncIterable<Buffer | string> {
+      for (const [k, v] of form.entries()) {
+        const data = v.slice();
+        const filename = data instanceof File ? data.name : undefined;
+        const size = data instanceof Blob ? data.size : data.length;
+        const type = data instanceof Blob ? data.type : undefined;
+        yield `--${boundary}${nl}`;
+        yield `Content-Disposition: form-data; name="${k}"; filename="${filename ?? k}"`;
+        yield `Content-Length: ${size}`;
+        if (type) {
+          yield `Content-Type: ${type}`;
+        }
+        yield nl;
+        if (data instanceof Blob) {
+          for await (const chunk of data.stream()) {
+            yield chunk;
+          }
+        } else {
+          yield data;
+        }
+        yield nl;
+      }
+      yield `--${boundary}--${nl}`;
+    });
+
+    return new WebResponse({
+      body: Readable.from(source()),
+      contentType: `multipart/form-data; boundary=${boundary}`,
+      source: form
+    });
+  }
+
+  /**
    * Determine payload based on output
    */
   static from<T>(value: T): WebResponse<T> {
@@ -181,6 +220,8 @@ export class WebResponse<S = unknown> {
       return this.fromBlob(value);
     } else if (isAsyncIterable(value)) {
       return this.fromAsyncIterable(value);
+    } else if (value instanceof FormData) {
+      return this.fromFormData(value);
     } else {
       return this.fromJSON(value);
     }
@@ -191,18 +232,18 @@ export class WebResponse<S = unknown> {
 
   statusCode?: number;
   source?: S;
-  output: Buffer | Readable;
+  body: Buffer | Readable;
   length?: number;
   readonly headers: WebHeaders;
 
-  constructor(o: ResponseInput<S>) {
-    this.output = o.output;
+  constructor(o: WebResponseInput<S>) {
+    this.body = o.body;
     this.length = o.length;
     this.source = o.source;
     this.with(o);
   }
 
-  with(o: Pick<ResponseInput<S>, 'headers' | 'cookies' | 'statusCode' | 'contentType' | 'defaultContentType'>): this {
+  with(o: Pick<WebResponseInput<S>, 'headers' | 'cookies' | 'statusCode' | 'contentType' | 'defaultContentType'>): this {
     this.statusCode ??= o.statusCode;
     this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
     this.#defaultContentType = o.defaultContentType ?? BINARY_TYPE;
