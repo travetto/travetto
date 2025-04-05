@@ -33,10 +33,10 @@
     "@travetto/runtime": "^6.0.0-rc.1",
     "@travetto/worker": "^6.0.0-rc.1",
     "@types/inline-css": "^3.0.3",
-    "html-entities": "^2.5.2",
+    "html-entities": "^2.6.0",
     "inline-css": "^4.0.3",
     "purgecss": "^7.0.2",
-    "sass": "^1.85.1"
+    "sass": "^1.86.3"
   },
   "peerDependencies": {
     "@travetto/cli": "^6.0.0-rc.1"

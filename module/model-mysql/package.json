@@ -33,7 +33,7 @@
     "@travetto/model": "^6.0.0-rc.1",
     "@travetto/model-query": "^6.0.0-rc.1",
     "@travetto/model-sql": "^6.0.0-rc.1",
-    "mysql2": "^3.13.0"
+    "mysql2": "^3.14.0"
   },
   "travetto": {
     "displayName": "MySQL Model Service"
