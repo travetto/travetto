@@ -1,7 +1,7 @@
 import type { IncomingMessage } from 'node:http';
 
 import { castTo } from '@travetto/runtime';
-import { WebHeaders, WebRequest, WebResponse } from '@travetto/web';
+import { WebRequest, WebResponse } from '@travetto/web';
 
 export class NodeWebUtil {
   /**
@@ -43,7 +43,7 @@ export class NodeWebUtil {
    * Create a WebResponse given a fetch Response
    */
   static async toWebResponse(res: Response): Promise<WebResponse<Buffer>> {
-    const out = { status: res.status, body: Buffer.from(await res.arrayBuffer()), headers: new WebHeaders(res.headers) };
-    return WebResponse.from(out.body).with({ statusCode: out.status, headers: out.headers });
+    const out = Buffer.from(await res.arrayBuffer());
+    return WebResponse.from(out).with({ statusCode: res.status, headers: res.headers });
   }
 }

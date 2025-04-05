@@ -59,8 +59,7 @@ export abstract class BaseWebSuite {
     Object.assign(req, { query: BindUtil.flattenPaths(req.query ?? {}) });
 
     const res = await this.#support.execute(req);
-    const buffer = Buffer.isBuffer(res.body) ? res.body : await toBuffer(res.body);
-    const result = await this.getOutput(buffer);
+    const result = res.source ?? await (Buffer.isBuffer(res.body) ? Promise.resolve(res.body) : toBuffer(res.body)).then(v => this.getOutput(v));
 
     if (res.statusCode && res.statusCode >= 400) {
       if (throwOnError) {
