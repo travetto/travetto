@@ -6,14 +6,14 @@ import { WebServerHandle } from '@travetto/web';
 import { ExpressWebServer } from '@travetto/web-express';
 import { castTo, asFull } from '@travetto/runtime';
 import {
-  AwsLambdaHandle, AwsLambdaWebServer, AwsLambdaSymbol,
+  AwsLambdaHandle, AwsLambdaWebServer, WebAwsLambdaSymbol,
   AwsLambdaConfig, LambdaContext, LambdaAPIGatewayProxyEvent
 } from '@travetto/web-aws-lambda';
 
 /**
  * Aws Lambda Web Server
  */
-@Injectable(AwsLambdaSymbol)
+@Injectable(WebAwsLambdaSymbol)
 export class AwsLambdaExpressWebServer extends ExpressWebServer implements AwsLambdaWebServer {
 
   #handler: AwsLambdaHandle;

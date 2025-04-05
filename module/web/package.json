@@ -37,6 +37,7 @@
     "@types/inflation": "^2.0.4",
     "@types/negotiator": "^0.6.3",
     "fresh": "^0.5.2",
+    "find-my-way": "^9.3.0",
     "keygrip": "^1.1.0",
     "inflation": "^2.1.0",
     "negotiator": "^1.0.0",

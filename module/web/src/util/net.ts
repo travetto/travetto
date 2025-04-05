@@ -1,11 +1,7 @@
-import http, { IncomingMessage, ServerResponse } from 'node:http';
-import https from 'node:https';
 import net from 'node:net';
 import { spawn } from 'node:child_process';
 
 import { ExecUtil } from '@travetto/runtime';
-
-import { WebSslKeyPair, WebServerHandle } from '../types/server';
 
 /** Net utilities */
 export class NetUtil {
@@ -46,32 +42,5 @@ export class NetUtil {
         server.close(() => { resolve(port); });
       });
     });
-  }
-
-  /**
-   * Create an HTTP Server
-   */
-  static async createHttpServer(config: {
-    sslKeys?: WebSslKeyPair;
-    bindAddress?: string;
-    port?: number;
-    handler?: (req: IncomingMessage, res: ServerResponse) => void;
-  }): Promise<WebServerHandle> {
-    const core = config.sslKeys ?
-      https.createServer(config.sslKeys, config.handler) :
-      http.createServer(config.handler);
-
-    const { reject, resolve, promise } = Promise.withResolvers<void>();
-    const server = core.listen(config.port, config.bindAddress)
-      .on('error', reject)
-      .on('listening', resolve);
-    await promise;
-    server.off('error', reject);
-
-    return {
-      port: config.port,
-      close: server.close.bind(server),
-      on: server.on.bind(server)
-    };
   }
 }

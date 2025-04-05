@@ -2,7 +2,6 @@ import { Readable } from 'node:stream';
 
 import { Any, AppError } from '@travetto/runtime';
 
-import { HttpResponse } from './response.ts';
 import { CookieGetOptions } from './cookie.ts';
 import { HttpHeadersInit, HttpHeaders } from './headers.ts';
 import { HttpInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
@@ -15,7 +14,6 @@ type RequestInit = {
   query?: Record<string, unknown>;
   path?: string;
   params?: Record<string, unknown>;
-  respond?: (value: HttpResponse) => void;
   body?: unknown;
   inputStream?: Readable;
   remoteIp?: string;
@@ -59,9 +57,5 @@ export class HttpRequest {
 
   getCookie(key: string, opts?: CookieGetOptions): string | undefined {
     throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
-  }
-
-  respond(value: HttpResponse): void {
-    // Do nothing by default
   }
 }
