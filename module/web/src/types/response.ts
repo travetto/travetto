@@ -60,16 +60,16 @@ export class WebResponse<S = unknown> {
    * Standard stream
    */
   static fromStream<T extends Readable | ReadableStream>(value: T, contentType?: string): WebResponse<T> {
-    const output: Readable = isReadableStream(value) ? Readable.fromWeb(value) : value;
-    return new WebResponse({ body: output, source: value, contentType, defaultContentType: BINARY_TYPE });
+    const body: Readable = isReadableStream(value) ? Readable.fromWeb(value) : value;
+    return new WebResponse({ body, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
    * Standard iterable
    */
   static fromAsyncIterable<T extends AsyncIterable<unknown>>(value: T, contentType?: string): WebResponse<T> {
-    const output: Readable = Readable.from(value);
-    return new WebResponse({ body: output, source: value, contentType, defaultContentType: BINARY_TYPE });
+    const body: Readable = Readable.from(value);
+    return new WebResponse({ body, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
@@ -83,16 +83,16 @@ export class WebResponse<S = unknown> {
    * Standard text
    */
   static fromText<T extends string>(value: T, encoding: BufferEncoding = 'utf8', contentType?: string): WebResponse<T> {
-    const output = Buffer.from(value, encoding);
-    return new WebResponse({ body: output, length: output.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
+    const body = Buffer.from(value, encoding);
+    return new WebResponse({ body, length: body.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
   }
 
   /**
    * Standard array of bytes (buffer)
    */
   static fromBytes<T extends Buffer | ArrayBuffer>(value: T, contentType?: string): WebResponse<T> {
-    const narrowed = Buffer.isBuffer(value) ? value : Buffer.from(value);
-    return new WebResponse({ body: narrowed, length: narrowed.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
+    const body = Buffer.isBuffer(value) ? value : Buffer.from(value);
+    return new WebResponse({ body, length: body.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
@@ -100,8 +100,8 @@ export class WebResponse<S = unknown> {
    */
   static fromJSON<T extends unknown>(value: T, contentType?: string): WebResponse<T> {
     const payload = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
-    const output = Buffer.from(payload, 'utf-8');
-    return new WebResponse({ body: output, source: value, length: output.byteLength, contentType, defaultContentType: 'application/json' });
+    const body = Buffer.from(payload, 'utf-8');
+    return new WebResponse({ body, source: value, length: body.byteLength, contentType, defaultContentType: 'application/json' });
   }
 
   /**
@@ -153,12 +153,12 @@ export class WebResponse<S = unknown> {
    * From Error
    */
   static fromError<T extends ErrorResponse>(error: T): WebResponse<T> {
-    const output = this.fromJSON(hasToJSON(error) ? error : { message: error.message }).with({
+    const response = this.fromJSON(hasToJSON(error) ? error : { message: error.message }).with({
       contentType: 'application/json',
       statusCode: error.status ?? error.statusCode ?? CATEGORY_STATUS[error.category!] ?? 500,
     });
-    output.source = error;
-    return castTo(output);
+    response.source = error;
+    return castTo(response);
   }
 
   /**
@@ -201,7 +201,7 @@ export class WebResponse<S = unknown> {
   }
 
   /**
-   * Determine payload based on output
+   * Build WebResponse based on return value
    */
   static from<T>(value: T): WebResponse<T> {
     if (value === undefined || value === null) {
