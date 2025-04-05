@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { DataUtil } from '@travetto/schema';
-import { Controller, Get, Post, HttpRequest, ContextParam } from '@travetto/web';
+import { Controller, Get, Post, WebRequest, ContextParam } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
@@ -22,7 +22,7 @@ class TestUploadController {
   service: MemoryModelService;
 
   @ContextParam()
-  req: HttpRequest;
+  req: WebRequest;
 
   @Post('/all')
   async uploadAll(@Upload() uploads: FileMap) {

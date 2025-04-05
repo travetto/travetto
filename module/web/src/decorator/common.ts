@@ -3,7 +3,7 @@ import { asConstructable, castTo, Class, TimeSpan, TimeUtil } from '@travetto/ru
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptsInterceptor } from '../interceptor/accepts.ts';
-import { HttpInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: EndpointFunctionDescriptor) {
@@ -88,6 +88,6 @@ export const ConfigureInterceptor =
 /**
  * Registers an interceptor exclusion filter
  */
-export function ExcludeInterceptors(interceptorExclude: (val: HttpInterceptor) => boolean): EndpointDecorator {
+export function ExcludeInterceptors(interceptorExclude: (val: WebInterceptor) => boolean): EndpointDecorator {
   return register({ interceptorExclude });
 };

@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { AsyncContextInterceptor, HttpRequest, HttpResponse, WebContext } from '@travetto/web';
+import { AsyncContextInterceptor, WebRequest, WebResponse, WebContext } from '@travetto/web';
 import { DependencyRegistry } from '@travetto/di';
 
 @Suite()
@@ -17,13 +17,13 @@ class AsyncContextInterceptorSuite {
   async basicTest() {
     const interceptor = await DependencyRegistry.getInstance(AsyncContextInterceptor);
 
-    const req = new HttpRequest({ method: 'GET' });
+    const req = new WebRequest({ method: 'GET' });
     const res = await interceptor.filter({
       req,
       next: async () => {
         const ctx = await DependencyRegistry.getInstance(WebContext);
         req.headers.set('Modified', '1');
-        return HttpResponse.from(ctx.req === req); // We have the same instance
+        return WebResponse.from(ctx.req === req); // We have the same instance
       },
       config: {}
     });

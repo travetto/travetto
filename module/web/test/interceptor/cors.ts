@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { CorsConfig, CorsInterceptor, HTTP_METHODS, HttpRequest, HttpResponse } from '@travetto/web';
+import { CorsConfig, CorsInterceptor, HTTP_METHODS, WebRequest, WebResponse } from '@travetto/web';
 import { RootRegistry } from '@travetto/registry';
 
 @Suite()
@@ -20,8 +20,8 @@ class CorsInterceptorSuite {
     interceptor.finalizeConfig(interceptor.config);
 
     const res = await interceptor.filter({
-      req: new HttpRequest(),
-      next: async () => HttpResponse.fromEmpty(),
+      req: new WebRequest(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     });
 
@@ -41,12 +41,12 @@ class CorsInterceptorSuite {
     assert(res.headers.get('Access-Control-Allow-Credentials') === 'false');
 
     const res2 = await interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           'Access-Control-Request-Headers': ['ETag', 'BTag']
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     });
 
@@ -67,12 +67,12 @@ class CorsInterceptorSuite {
     interceptor.finalizeConfig(interceptor.config);
 
     const res = await interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           Origin: 'google.com'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     });
 
@@ -105,12 +105,12 @@ class CorsInterceptorSuite {
     interceptor.finalizeConfig(interceptor.config);
 
     const res = await interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           Origin: 'google2.com'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     });
 

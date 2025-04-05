@@ -3,7 +3,7 @@ import zlib from 'node:zlib';
 
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { HttpRequest, WebServerHandle, CookieConfig, HttpHeaders, WebApplication } from '@travetto/web';
+import { WebRequest, WebServerHandle, CookieConfig, WebpHeaders, WebApplication } from '@travetto/web';
 import { asFull, Util } from '@travetto/runtime';
 
 import { WebServerSupport, MakeRequestConfig, MakeRequestResponse, } from '@travetto/web/support/test/server-support/base.ts';
@@ -72,8 +72,8 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
     return await this.#lambda.run();
   }
 
-  async execute(method: HttpRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {
-    const httpHeaders = new HttpHeaders(headers);
+  async execute(method: WebRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}): Promise<MakeRequestResponse<Buffer>> {
+    const httpHeaders = new WebpHeaders(headers);
     const queryEntries = Object.entries(query ?? {});
     const singleHeaders: Record<string, string> = {};
     const multiHeaders: Record<string, string[]> = {};
@@ -97,7 +97,7 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
 
     let resBody: Buffer = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
 
-    const resHeaders = new HttpHeaders({ ...res.headers ?? {}, ...res.multiValueHeaders ?? {} });
+    const resHeaders = new WebpHeaders({ ...res.headers ?? {}, ...res.multiValueHeaders ?? {} });
 
     switch (resHeaders.getList('Content-Encoding')?.[0]) {
       case 'gzip': resBody = zlib.gunzipSync(resBody); break;

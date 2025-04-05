@@ -3,9 +3,9 @@ import { type Primitive, type Class, asFull, castTo, asConstructable, ClassInsta
 import { MetadataRegistry } from '@travetto/registry';
 
 import { EndpointConfig, ControllerConfig, EndpointDecorator, EndpointParamConfig, EndpointFunctionDescriptor, EndpointFunction } from './types.ts';
-import { HttpChainedFilter, HttpFilter } from '../types.ts';
-import { HttpInterceptor } from '../types/interceptor.ts';
-import { HttpHeaders } from '../types/headers.ts';
+import { WebChainedFilter, WebFilter } from '../types.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebpHeaders } from '../types/headers.ts';
 
 import { WebContext } from '../context.ts';
 
@@ -67,7 +67,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       interceptorConfigs: [],
       name: endpoint.name,
       endpoint,
-      responseHeaderMap: new HttpHeaders()
+      responseHeaderMap: new WebpHeaders()
     };
 
     controllerConf.endpoints!.push(fieldConf);
@@ -90,7 +90,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param cls Controller class
    * @param filter The filter to call
    */
-  registerControllerFilter(target: Class, filter: HttpFilter | HttpChainedFilter): void {
+  registerControllerFilter(target: Class, filter: WebFilter | WebChainedFilter): void {
     const config = this.getOrCreatePending(target);
     config.filters!.push(filter);
   }
@@ -101,7 +101,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param endpoint Endpoint function
    * @param filter The filter to call
    */
-  registerEndpointFilter(target: Class, endpoint: EndpointFunction, filter: HttpFilter | HttpChainedFilter): void {
+  registerEndpointFilter(target: Class, endpoint: EndpointFunction, filter: WebFilter | WebChainedFilter): void {
     const config = this.getOrCreateEndpointConfig(target, endpoint);
     config.filters!.unshift(filter);
   }
@@ -128,7 +128,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param param The param config
    * @param index The parameter index
    */
-  registerEndpointInterceptorConfig<T extends HttpInterceptor>(target: Class, endpoint: EndpointFunction, interceptorCls: Class<T>, config: Partial<T['config']>): void {
+  registerEndpointInterceptorConfig<T extends WebInterceptor>(target: Class, endpoint: EndpointFunction, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const endpointConfig = this.getOrCreateEndpointConfig(target, endpoint);
     (endpointConfig.interceptorConfigs ??= []).push([interceptorCls, { ...config }]);
   }
@@ -139,7 +139,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param param The param config
    * @param index The parameter index
    */
-  registerControllerInterceptorConfig<T extends HttpInterceptor>(target: Class, interceptorCls: Class<T>, config: Partial<T['config']>): void {
+  registerControllerInterceptorConfig<T extends WebInterceptor>(target: Class, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const controllerConfig = this.getOrCreatePending(target);
     (controllerConfig.interceptorConfigs ??= []).push([interceptorCls, { ...config }]);
   }
@@ -160,7 +160,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * Create a filter decorator
    * @param filter The filter to call
    */
-  createFilterDecorator(filter: HttpFilter): EndpointDecorator {
+  createFilterDecorator(filter: WebFilter): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: EndpointFunctionDescriptor): void => {
       if (prop) {
         this.registerEndpointFilter(asConstructable(target).constructor, descriptor!.value!, filter);
@@ -175,7 +175,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param cls The interceptor to register data for
    * @param cfg The partial config override
    */
-  createInterceptorConfigDecorator<T extends HttpInterceptor>(
+  createInterceptorConfigDecorator<T extends WebInterceptor>(
     cls: Class<T>,
     cfg: Partial<RetainFields<T['config']>>,
     extra?: Partial<EndpointConfig & ControllerConfig>
@@ -261,7 +261,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       this.#endpointsById.set(ep.id, ep);
       // Store full path from base for use in other contexts
       ep.fullPath = `/${final.basePath}/${ep.path}`.replace(/[/]{1,4}/g, '/').replace(/(.)[/]$/, (_, a) => a);
-      ep.responseHeaderMap = new HttpHeaders({ ...final.responseHeaders ?? {}, ...ep.responseHeaders ?? {} });
+      ep.responseHeaderMap = new WebpHeaders({ ...final.responseHeaders ?? {}, ...ep.responseHeaders ?? {} });
     }
 
     if (this.has(final.basePath)) {

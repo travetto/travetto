@@ -14,15 +14,15 @@ import { GetCacheInterceptor } from './src/interceptor/get-cache';
 import { LoggingInterceptor } from './src/interceptor/logging';
 import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies';
 import { WebConfig } from './src/application/config';
-import { HttpRequest } from './src/types/request';
-import { HttpResponse } from './src/types/response';
-import { HttpInterceptor } from './src/types/interceptor';
+import { WebRequest } from './src/types/request';
+import { WebResponse } from './src/types/response';
+import { WebInterceptor } from './src/types/interceptor';
 import { AsyncContextInterceptor } from './src/interceptor/context';
 import { CacheControl } from './src/decorator/common';
 import { WebContext } from './src/context';
 import { RespondInterceptor } from './src/interceptor/respond';
 
-const HttpInterceptorContract = toConcrete<HttpInterceptor>();
+const WebInterceptorContract = toConcrete<WebInterceptor>();
 
 export const text = <>
   <c.StdHeader />
@@ -98,7 +98,7 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='ContextParam'>
-      In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire {HttpRequest}.  These are able to be injected using the {ContextParam} on a class-level field from the {WebContext}.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+      In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire {WebRequest}.  These are able to be injected using the {ContextParam} on a class-level field from the {WebContext}.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
       <c.Code title='Example ContextParam usage' src='doc/context-param.ts'></c.Code>
 
@@ -163,7 +163,7 @@ export const text = <>
 
   <c.Section title='Interceptors'>
 
-    {HttpInterceptorContract}s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every endpoint, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+    {WebInterceptorContract}s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every endpoint, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
     <c.Code title='A Trivial Interceptor' src='doc/interceptor-hello-world.ts' />
 
@@ -202,7 +202,7 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='Custom Interceptors'>
-      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {HttpInterceptorContract} interface.  The interceptors are tied to the defined {HttpRequest} object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {WebInterceptorContract} interface.  The interceptors are tied to the defined {WebRequest} object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
       <c.Code title='Defining a new Interceptor' src='doc/interceptor-logging.ts' />
 
@@ -231,7 +231,7 @@ export const text = <>
     </c.SubSection>
   </c.Section>
   <c.Section title='Cookie Support'>
-    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {HttpRequest} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+    {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {WebRequest} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
     <c.Code title='Sample Cookie Usage' src='doc/cookie-endpoints.ts' />
   </c.Section>

@@ -3,11 +3,11 @@ import { Readable } from 'node:stream';
 import { Any, AppError } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
-import { HttpHeadersInit, HttpHeaders } from './headers.ts';
-import { HttpInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
+import { WebHeadersInit, WebpHeaders } from './headers.ts';
+import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
 
 type RequestInit = {
-  headers?: HttpHeadersInit;
+  headers?: WebHeadersInit;
   method?: HttpMethod;
   protocol?: HttpProtocol;
   port?: number;
@@ -20,19 +20,19 @@ type RequestInit = {
   getCookie?: (key: string, opts: CookieGetOptions) => string | undefined;
 };
 
-export interface HttpRequestInternal {
+export interface WebRequestInternal {
   requestParams?: unknown[];
   expandedQuery?: Record<string, unknown>;
 }
 
 /**
- * Base Http Request object
+ * Web Request object
  */
-export class HttpRequest {
+export class WebRequest {
 
-  [HttpInternalSymbol]: HttpRequestInternal = {};
+  [WebInternalSymbol]: WebRequestInternal = {};
 
-  readonly headers: HttpHeaders;
+  readonly headers: WebpHeaders;
   readonly path: string = '';
   readonly port: number = 0;
   readonly protocol: HttpProtocol = 'http';
@@ -45,7 +45,7 @@ export class HttpRequest {
 
   constructor(init: RequestInit = {}) {
     Object.assign(this, init);
-    this.headers = new HttpHeaders(init.headers);
+    this.headers = new WebpHeaders(init.headers);
   }
 
   /**

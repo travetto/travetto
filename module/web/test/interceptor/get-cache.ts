@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { GetCacheConfig, GetCacheInterceptor, HttpRequest, HttpResponse } from '@travetto/web';
+import { GetCacheConfig, GetCacheInterceptor, WebRequest, WebResponse } from '@travetto/web';
 
 @Suite()
 class GetCacheInterceptorSuite {
@@ -18,8 +18,8 @@ class GetCacheInterceptorSuite {
     interceptor.config = GetCacheConfig.from({});
 
     const res = await interceptor.filter({
-      req: new HttpRequest({ method: 'GET' }),
-      next: async () => HttpResponse.fromEmpty(),
+      req: new WebRequest({ method: 'GET' }),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     });
 
@@ -27,8 +27,8 @@ class GetCacheInterceptorSuite {
     assert(/no-cache/.test(res.headers.get('Cache-Control')!));
 
     const res2 = await interceptor.filter({
-      req: new HttpRequest({ method: 'PATCH' }),
-      next: async () => HttpResponse.fromEmpty(),
+      req: new WebRequest({ method: 'PATCH' }),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     });
 
@@ -41,8 +41,8 @@ class GetCacheInterceptorSuite {
     interceptor.config = GetCacheConfig.from({});
 
     const res = await interceptor.filter({
-      req: new HttpRequest({ method: 'GET' }),
-      next: async () => HttpResponse.fromEmpty().with({
+      req: new WebRequest({ method: 'GET' }),
+      next: async () => WebResponse.fromEmpty().with({
         headers: { 'cache-control': 'max-age=3000' }
       }),
       config: interceptor.config

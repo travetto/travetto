@@ -8,10 +8,10 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
-import { HttpInterceptor } from '../types/interceptor.ts';
-import { HttpInterceptorCategory } from '../types/core.ts';
-import { HttpContext, HttpChainedContext } from '../types.ts';
-import { HttpResponse } from '../types/response.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
+import { FilterContext, WebChainedContext } from '../types.ts';
+import { WebResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
@@ -47,14 +47,14 @@ export class CompressConfig {
  * Enables compression support
  */
 @Injectable()
-export class CompressInterceptor implements HttpInterceptor {
+export class CompressInterceptor implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'response';
+  category: WebInterceptorCategory = 'response';
 
   @Inject()
   config: CompressConfig;
 
-  async compress(ctx: HttpContext, res: HttpResponse): Promise<HttpResponse> {
+  async compress(ctx: FilterContext, res: WebResponse): Promise<WebResponse> {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
     const { req } = ctx;
 
@@ -111,7 +111,7 @@ export class CompressInterceptor implements HttpInterceptor {
     return config.applies;
   }
 
-  async filter(ctx: HttpChainedContext): Promise<HttpResponse> {
+  async filter(ctx: WebChainedContext): Promise<WebResponse> {
     return this.compress(ctx, await ctx.next());
   }
 }

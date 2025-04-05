@@ -3,7 +3,7 @@ import { Readable } from 'node:stream';
 
 import type express from 'express';
 
-import { HttpRequest } from '@travetto/web';
+import { WebRequest } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -16,8 +16,8 @@ export class ExpressWebServerUtil {
   /**
    * Build a Travetto HttpRequest from an Express Request
    */
-  static getRequest(req: express.Request, res: express.Response): HttpRequest {
-    return new HttpRequest({
+  static getRequest(req: express.Request, res: express.Response): WebRequest {
+    return new WebRequest({
       protocol: castTo(req.protocol),
       method: castTo(req.method.toUpperCase()),
       path: req.url,

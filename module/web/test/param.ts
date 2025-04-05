@@ -4,8 +4,8 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
 
-import { HttpRequest } from '../src/types/request.ts';
-import { HttpHeaders } from '../src/types/headers.ts';
+import { WebRequest } from '../src/types/request.ts';
+import { WebpHeaders } from '../src/types/headers.ts';
 import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param.ts';
 import { Post, Get } from '../src/decorator/endpoint.ts';
 import { Controller } from '../src/decorator/controller.ts';
@@ -22,7 +22,7 @@ class User {
 class ParamController {
 
   @ContextParam()
-  req: HttpRequest;
+  req: WebRequest;
 
   @Post('/:name')
   async endpoint(@PathParam() name: string, @QueryParam() age: number) { }
@@ -91,9 +91,9 @@ export class EndpointParameterTest {
     return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.method === method)!;
   }
 
-  static async extract(ep: EndpointConfig, req: Partial<HttpRequest>): Promise<unknown[]> {
+  static async extract(ep: EndpointConfig, req: Partial<WebRequest>): Promise<unknown[]> {
     return await EndpointUtil.extractParameters({
-      req: new HttpRequest({ ...req })
+      req: new WebRequest({ ...req })
     }, ep);
   }
 
@@ -130,7 +130,7 @@ export class EndpointParameterTest {
 
     await assert.doesNotReject(() =>
       EndpointParameterTest.extract(ep, {
-        headers: new HttpHeaders({
+        headers: new WebpHeaders({
           'api-key': 'api-key'
         })
       })

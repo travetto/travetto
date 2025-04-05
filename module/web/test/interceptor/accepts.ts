@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
-import { AcceptsConfig, AcceptsInterceptor, HttpRequest, HttpResponse } from '@travetto/web';
+import { AcceptsConfig, AcceptsInterceptor, WebRequest, WebResponse } from '@travetto/web';
 import { RootRegistry } from '@travetto/registry';
 
 @Suite()
@@ -22,42 +22,42 @@ class AcceptsInterceptorSuite {
     interceptor.finalizeConfig(interceptor.config);
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           'Content-Type': 'application/json'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     }));
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           'Content-Type': 'text/plain'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     }));
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           'Content-Type': 'text/plain; charset=utf-8'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     }));
 
     await assert.rejects(() => interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           'Content-Type': 'text/sql'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     }), /Content type.*violated/i);
   }
@@ -72,52 +72,52 @@ class AcceptsInterceptorSuite {
     interceptor.finalizeConfig(interceptor.config);
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           'Content-Type': 'text/json'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     }));
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           'Content-Type': 'text/plain'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     }));
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           'Content-Type': 'text/plain; charset=utf-8'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     }));
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           'Content-Type': 'text/sql'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     }));
 
     await assert.rejects(() => interceptor.filter({
-      req: new HttpRequest({
+      req: new WebRequest({
         headers: {
           'Content-Type': 'json/text'
         }
       }),
-      next: async () => HttpResponse.fromEmpty(),
+      next: async () => WebResponse.fromEmpty(),
       config: interceptor.config
     }), /Content type.*violated/i);
 

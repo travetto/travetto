@@ -2,11 +2,11 @@ import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
-import { HttpChainedContext } from '../types.ts';
-import { HTTP_METHODS, HttpInterceptorCategory } from '../types/core.ts';
-import { HttpResponse } from '../types/response.ts';
-import { HttpRequest } from '../types/request.ts';
-import { HttpInterceptor } from '../types/interceptor.ts';
+import { WebChainedContext } from '../types.ts';
+import { HTTP_METHODS, WebInterceptorCategory } from '../types/core.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebRequest } from '../types/request.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
 
@@ -26,7 +26,7 @@ export class CorsConfig {
   /**
    * Allowed http methods
    */
-  methods?: HttpRequest['method'][];
+  methods?: WebRequest['method'][];
   /**
    * Allowed http headers
    */
@@ -49,9 +49,9 @@ export class CorsConfig {
  * Interceptor that will provide cors support across all requests
  */
 @Injectable()
-export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
+export class CorsInterceptor implements WebInterceptor<CorsConfig> {
 
-  category: HttpInterceptorCategory = 'response';
+  category: WebInterceptorCategory = 'response';
 
   @Inject()
   config: CorsConfig;
@@ -70,7 +70,7 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     return config.applies;
   }
 
-  decorate(req: HttpRequest, resolved: CorsConfig['resolved'], res: HttpResponse,): HttpResponse {
+  decorate(req: WebRequest, resolved: CorsConfig['resolved'], res: WebResponse,): WebResponse {
     const origin = req.headers.get('Origin');
     if (resolved.origins.size === 0 || resolved.origins.has(origin!)) {
       return res.backfillHeaders({
@@ -84,11 +84,11 @@ export class CorsInterceptor implements HttpInterceptor<CorsConfig> {
     }
   }
 
-  async filter({ req, config: { resolved }, next }: HttpChainedContext<CorsConfig>): Promise<HttpResponse> {
+  async filter({ req, config: { resolved }, next }: WebChainedContext<CorsConfig>): Promise<WebResponse> {
     try {
       return this.decorate(req, resolved, await next());
     } catch (err) {
-      throw this.decorate(req, resolved, HttpResponse.fromCatch(err));
+      throw this.decorate(req, resolved, WebResponse.fromCatch(err));
     }
   }
 }

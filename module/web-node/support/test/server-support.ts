@@ -1,7 +1,7 @@
 import timers from 'node:timers/promises';
 
 import { DependencyRegistry } from '@travetto/di';
-import { type HttpRequest, CookieConfig, WebConfig, HttpHeaders, WebSslConfig, WebApplication, NetUtil } from '@travetto/web';
+import { type WebRequest, CookieConfig, WebConfig, WebpHeaders, WebSslConfig, WebApplication, NetUtil } from '@travetto/web';
 
 import { WebServerSupport, MakeRequestConfig } from '@travetto/web/support/test/server-support/base.ts';
 
@@ -54,7 +54,7 @@ export class NodeWebServerSupport implements WebServerSupport {
     return handle;
   }
 
-  async execute(method: HttpRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}) {
+  async execute(method: WebRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}) {
 
     let q = '';
     if (query && Object.keys(query).length) {
@@ -66,12 +66,12 @@ export class NodeWebServerSupport implements WebServerSupport {
 
     const res = await fetch(`${this.url}${path}${q}`, {
       method,
-      headers: new HttpHeaders(headers),
+      headers: new WebpHeaders(headers),
       body,
       signal: ctrl.signal
     });
 
-    const out = { status: res.status, body: Buffer.from(await res.arrayBuffer()), headers: new HttpHeaders(res.headers) };
+    const out = { status: res.status, body: Buffer.from(await res.arrayBuffer()), headers: new WebpHeaders(res.headers) };
     ctrl.abort();
     return out;
   }

@@ -6,8 +6,8 @@ import { AuthContextInterceptor, WebAuthConfig } from '@travetto/auth-web';
 import { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
 import {
-  Controller, Get, Body, Post, Put, HttpRequest, HttpInterceptor,
-  EndpointConfig, ContextParam, HttpInterceptorCategory, HttpChainedContext
+  Controller, Get, Body, Post, Put, WebRequest, WebInterceptor,
+  EndpointConfig, ContextParam, WebInterceptorCategory, WebChainedContext
 } from '@travetto/web';
 import { Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
@@ -18,9 +18,9 @@ import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
 type Aged = { age: number, payload?: Record<string, unknown> };
 
 @Injectable()
-class AutoLogin implements HttpInterceptor {
+class AutoLogin implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'application';
+  category: WebInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
 
   @Inject()
@@ -30,7 +30,7 @@ class AutoLogin implements HttpInterceptor {
     return !endpoint.path.endsWith('/body');
   }
 
-  filter({ next }: HttpChainedContext) {
+  filter({ next }: WebChainedContext) {
     this.auth.principal ??= {
       id: Util.uuid(),
       sessionId: Util.uuid(),
@@ -49,7 +49,7 @@ class TestController {
   session: SessionService;
 
   @ContextParam()
-  req: HttpRequest;
+  req: WebRequest;
 
   @ContextParam()
   data: SessionData;

@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { HttpRequest } from '@travetto/web';
+import { WebRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -11,8 +11,8 @@ export class FastifyWebServerUtil {
   /**
    * Build a Travetto HttpRequest from a Fastify Request
    */
-  static getRequest(req: FastifyRequest, reply: FastifyReply): HttpRequest {
-    return new HttpRequest({
+  static getRequest(req: FastifyRequest, reply: FastifyReply): WebRequest {
+    return new WebRequest({
       protocol: (req.raw.socket && 'encrypted' in req.raw.socket) ? 'https' : 'http',
       method: castTo(req.raw.method?.toUpperCase()),
       path: req.url,

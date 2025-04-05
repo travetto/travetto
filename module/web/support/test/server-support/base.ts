@@ -1,20 +1,20 @@
-import type { HttpRequest } from '../../../src/types/request.ts';
+import type { WebRequest } from '../../../src/types/request.ts';
 import type { WebServerHandle } from '../../../src/types/server.ts';
-import { HttpHeaders, HttpHeadersInit } from '../../../src/types/headers.ts';
+import { WebpHeaders, WebHeadersInit } from '../../../src/types/headers.ts';
 
 export type MakeRequestConfig<T> = {
   query?: Record<string, unknown>;
   body?: T;
-  headers?: HttpHeadersInit;
+  headers?: WebHeadersInit;
 };
 
 export type MakeRequestResponse<T> = {
   status: number;
   body: T;
-  headers: HttpHeaders;
+  headers: WebpHeaders;
 };
 
 export interface WebServerSupport {
   init(qualifier?: symbol): Promise<WebServerHandle>;
-  execute(method: HttpRequest['method'], path: string, cfg?: MakeRequestConfig<Buffer>): Promise<MakeRequestResponse<Buffer>>;
+  execute(method: WebRequest['method'], path: string, cfg?: MakeRequestConfig<Buffer>): Promise<MakeRequestResponse<Buffer>>;
 }

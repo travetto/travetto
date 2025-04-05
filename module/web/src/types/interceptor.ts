@@ -1,21 +1,21 @@
 import type { Class } from '@travetto/runtime';
 
 import type { EndpointConfig } from '../registry/types.ts';
-import type { HttpChainedContext } from '../types.ts';
-import { HttpResponse } from './response.ts';
-import { HttpInterceptorCategory } from './core.ts';
+import type { WebChainedContext } from '../types.ts';
+import { WebResponse } from './response.ts';
+import { WebInterceptorCategory } from './core.ts';
 
 /**
- * Basic http interceptor structure
+ * Web interceptor structure
  *
  * @concrete
  */
-export interface HttpInterceptor<C = unknown> {
+export interface WebInterceptor<C = unknown> {
 
   /**
    * The category an interceptor belongs to
    */
-  category: HttpInterceptorCategory;
+  category: WebInterceptorCategory;
 
   /**
    * Config for interceptor
@@ -25,12 +25,12 @@ export interface HttpInterceptor<C = unknown> {
   /**
    * This interceptor must run after these
    */
-  dependsOn?: Class<HttpInterceptor>[];
+  dependsOn?: Class<WebInterceptor>[];
 
   /**
    * This interceptor must run before these
    */
-  runsBefore?: Class<HttpInterceptor>[];
+  runsBefore?: Class<WebInterceptor>[];
 
   /**
    * Determines the current endpoint is applicable for the interceptor
@@ -45,7 +45,7 @@ export interface HttpInterceptor<C = unknown> {
 
   /**
    * Process the request
-   * @param {HttpChainedContext} context The context of to process
+   * @param {WebChainedContext} context The context of to process
    */
-  filter(context: HttpChainedContext<C>): Promise<HttpResponse>;
+  filter(context: WebChainedContext<C>): Promise<WebResponse>;
 }

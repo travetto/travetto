@@ -1,7 +1,7 @@
 import timers from 'node:timers/promises';
 import assert from 'node:assert';
 
-import { Controller, Get, HttpHeaders, HttpResponse, Post } from '@travetto/web';
+import { Controller, Get, WebpHeaders, WebResponse, Post } from '@travetto/web';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
@@ -66,7 +66,7 @@ class TestAuthController {
   @Get('/logout')
   @Logout()
   async logout() {
-    return HttpResponse.redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self', 301);
   }
 }
 
@@ -90,15 +90,15 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   @Inject()
   config: WebAuthConfig;
 
-  getCookie(headers: HttpHeaders): string | undefined {
+  getCookie(headers: WebpHeaders): string | undefined {
     return headers.getSetCookie()[0];
   }
 
-  getCookieValue(headers: HttpHeaders): string | undefined {
+  getCookieValue(headers: WebpHeaders): string | undefined {
     return this.getCookie(headers)?.split(';')[0];
   }
 
-  getCookieExpires(headers: HttpHeaders): Date | undefined {
+  getCookieExpires(headers: WebpHeaders): Date | undefined {
     const v = this.getCookie(headers)?.match('expires=([^;]+)(;|$)')?.[1];
     return v ? new Date(v) : undefined;
   }

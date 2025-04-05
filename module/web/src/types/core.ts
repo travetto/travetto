@@ -15,16 +15,15 @@ export const HTTP_METHODS = {
 
 export type HttpMethod = keyof typeof HTTP_METHODS;
 export type HttpProtocol = 'http' | 'https';
-export type HttpMetadataConfig = { mode: 'cookie' | 'header', headerPrefix?: string, header: string, cookie: string };
 
 /**
  * High level categories with a defined ordering
  */
-export const HTTP_INTERCEPTOR_CATEGORIES = ['global', 'terminal', 'request', 'response', 'application', 'value', 'unbound'] as const;
+export const WEB_INTERCEPTOR_CATEGORIES = ['global', 'terminal', 'request', 'response', 'application', 'value', 'unbound'] as const;
 
 /**
  * High level categories with a defined ordering
  */
-export type HttpInterceptorCategory = (typeof HTTP_INTERCEPTOR_CATEGORIES)[number];
+export type WebInterceptorCategory = (typeof WEB_INTERCEPTOR_CATEGORIES)[number];
 
-export const HttpInternalSymbol = Symbol.for('@travetto/web:http-internal');
+export const WebInternalSymbol = Symbol.for('@travetto/web:internal');

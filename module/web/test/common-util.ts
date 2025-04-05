@@ -4,8 +4,8 @@ import { Test, Suite } from '@travetto/test';
 
 import { CookieJar } from '../src/util/cookie.ts';
 import { WebCommonUtil } from '../src/util/common.ts';
-import { HttpRequest } from '../src/types/request.ts';
-import { HttpResponse } from '../src/types/response.ts';
+import { WebRequest } from '../src/types/request.ts';
+import { WebResponse } from '../src/types/response.ts';
 
 const KEY = 'test';
 const config = (mode: 'cookie' | 'header', signed = true) => ({ cookie: 'orange', header: 'dandy', mode, ...signed ? { signingKey: KEY } : {} });
@@ -53,7 +53,7 @@ export class WebCommonUtilTest {
 
   @Test()
   async writeValueCookieTest() {
-    const res = WebCommonUtil.writeMetadata(HttpResponse.fromEmpty(), config('cookie', false), 'blue');
+    const res = WebCommonUtil.writeMetadata(WebResponse.fromEmpty(), config('cookie', false), 'blue');
 
     const jar = new CookieJar(res.getCookies());
     assert(jar.get('orange') === 'blue');
@@ -67,11 +67,11 @@ export class WebCommonUtilTest {
   @Test()
   async writeValueHeaderTest() {
     const res = WebCommonUtil
-      .writeMetadata(HttpResponse.fromEmpty(), config('header', false), 'blue');
+      .writeMetadata(WebResponse.fromEmpty(), config('header', false), 'blue');
     assert(res.headers.get('Dandy') === 'blue');
 
     const res2 = WebCommonUtil
-      .writeMetadata(HttpResponse.fromEmpty(), config('header'), undefined);
+      .writeMetadata(WebResponse.fromEmpty(), config('header'), undefined);
     assert(!res2.headers.get('Dandy'));
 
     WebCommonUtil.writeMetadata(res, config('header'), undefined);
@@ -80,7 +80,7 @@ export class WebCommonUtilTest {
 
   @Test()
   async readValueHeaderTest() {
-    const req = new HttpRequest({ headers: { dandy: 'howdy' } });
+    const req = new WebRequest({ headers: { dandy: 'howdy' } });
     const value = WebCommonUtil.readMetadata(req, config('header', false));
     assert(value);
     assert(value === 'howdy');
@@ -92,9 +92,9 @@ export class WebCommonUtilTest {
   @Test()
   async readWriteValueTest() {
     const cfg = config('header', false);
-    const res = WebCommonUtil.writeMetadata(HttpResponse.fromEmpty(), cfg, 'hello');
+    const res = WebCommonUtil.writeMetadata(WebResponse.fromEmpty(), cfg, 'hello');
 
-    const req = new HttpRequest({ headers: res.headers });
+    const req = new WebRequest({ headers: res.headers });
     const value = WebCommonUtil.readMetadata(req, cfg);
 
     assert(value === 'hello');

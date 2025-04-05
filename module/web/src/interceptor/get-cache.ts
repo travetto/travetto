@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { HttpChainedContext } from '../types.ts';
-import { HttpInterceptor } from '../types/interceptor.ts';
-import { HttpInterceptorCategory } from '../types/core.ts';
-import { HttpResponse } from '../types/response.ts';
+import { WebChainedContext } from '../types.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
+import { WebResponse } from '../types/response.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
 import { EtagInterceptor } from './etag.ts';
@@ -21,9 +21,9 @@ export class GetCacheConfig {
  * Determines if we should cache all get requests
  */
 @Injectable()
-export class GetCacheInterceptor implements HttpInterceptor {
+export class GetCacheInterceptor implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'response';
+  category: WebInterceptorCategory = 'response';
   dependsOn = [EtagInterceptor];
 
   @Inject()
@@ -33,7 +33,7 @@ export class GetCacheInterceptor implements HttpInterceptor {
     return endpoint.method === 'GET' && config.applies;
   }
 
-  async filter({ req, next }: HttpChainedContext): Promise<HttpResponse> {
+  async filter({ req, next }: WebChainedContext): Promise<WebResponse> {
     if (req.method !== 'GET') {
       return next();
     }

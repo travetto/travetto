@@ -1,12 +1,12 @@
-import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext } from '@travetto/web';
+import { WebInterceptor, WebInterceptorCategory, WebChainedContext } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
-export class SimpleLoggingInterceptor implements HttpInterceptor {
+export class SimpleLoggingInterceptor implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'terminal';
+  category: WebInterceptorCategory = 'terminal';
 
-  async filter(ctx: HttpChainedContext) {
+  async filter(ctx: WebChainedContext) {
     const start = Date.now();
     try {
       return await ctx.next();

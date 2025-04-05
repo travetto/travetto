@@ -5,7 +5,7 @@ import { Readable } from 'node:stream';
 
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { WebServer, WebRouter, WebServerHandle, HttpRequest } from '@travetto/web';
+import { WebServer, WebRouter, WebServerHandle, WebRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 export const WebAwsLambdaSymbol = Symbol.for('@travetto/web-aws-lambda:entry');
@@ -68,7 +68,7 @@ export class AwsLambdaWebServer implements WebServer, AwsLambdaHandler {
 
     // Build request
     const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
-    const req = new HttpRequest({
+    const req = new WebRequest({
       protocol: castTo(event.requestContext.protocol ?? 'http'),
       method: castTo(event.httpMethod.toUpperCase()),
       path: event.path,

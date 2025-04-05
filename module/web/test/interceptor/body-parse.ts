@@ -3,7 +3,7 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { BodyParseConfig, BodyParseInterceptor, HttpRequest, HttpResponse } from '@travetto/web';
+import { BodyParseConfig, BodyParseInterceptor, WebRequest, WebResponse } from '@travetto/web';
 
 @Suite()
 class BodyParseInterceptorSuite {
@@ -20,7 +20,7 @@ class BodyParseInterceptorSuite {
       applies: true
     });
 
-    const req = new HttpRequest({
+    const req = new WebRequest({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -30,7 +30,7 @@ class BodyParseInterceptorSuite {
 
     const res = await interceptor.filter({
       req,
-      next: async () => HttpResponse.from(req.body),
+      next: async () => WebResponse.from(req.body),
       config
     });
 
@@ -44,7 +44,7 @@ class BodyParseInterceptorSuite {
       applies: true
     });
 
-    const req = new HttpRequest({
+    const req = new WebRequest({
       method: 'POST',
       headers: {
         'Content-Type': 'text/plain'
@@ -54,7 +54,7 @@ class BodyParseInterceptorSuite {
 
     const res = await interceptor.filter({
       req,
-      next: async () => HttpResponse.from(req.body),
+      next: async () => WebResponse.from(req.body),
       config
     });
 
@@ -69,7 +69,7 @@ class BodyParseInterceptorSuite {
     });
 
     const stream = Readable.from(Buffer.alloc(1000));
-    const req = new HttpRequest({
+    const req = new WebRequest({
       method: 'POST',
       headers: {
         'Content-Type': 'image/jpeg'
@@ -79,7 +79,7 @@ class BodyParseInterceptorSuite {
 
     const res = await interceptor.filter({
       req,
-      next: async () => HttpResponse.from(req.body),
+      next: async () => WebResponse.from(req.body),
       config
     });
 

@@ -1,6 +1,6 @@
 import type koa from 'koa';
 
-import { HttpRequest } from '@travetto/web';
+import { WebRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 /**
@@ -10,8 +10,8 @@ export class KoaWebServerUtil {
   /**
    * Build a Travetto HttpRequest from a koa context
    */
-  static getRequest(ctx: koa.Context): HttpRequest {
-    return new HttpRequest({
+  static getRequest(ctx: koa.Context): WebRequest {
+    return new WebRequest({
       protocol: castTo(ctx.protocol),
       method: castTo(ctx.request.method.toUpperCase()),
       query: ctx.request.query,

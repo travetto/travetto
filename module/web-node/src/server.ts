@@ -4,7 +4,7 @@ import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, WebRouter, HttpRequest } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, WebRouter, WebRequest } from '@travetto/web';
 import { castTo, hasFunction } from '@travetto/runtime';
 
 const isReadable = hasFunction<Readable>('pipe');
@@ -29,7 +29,7 @@ export class NodeWebServer implements WebServer {
       const secure = 'encrypted' in req.socket && !!req.socket.encrypted;
       const url = new URL(`http${secure ? 's' : ''}://${req.headers.host}${req.url}`);
 
-      const httpReq = new HttpRequest({
+      const httpReq = new WebRequest({
         protocol: secure ? 'https' : 'http',
         method: castTo(req.method?.toUpperCase()),
         path: url.pathname!,

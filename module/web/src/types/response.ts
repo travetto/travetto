@@ -4,7 +4,7 @@ import { isArrayBuffer } from 'node:util/types';
 import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
-import { HttpHeadersInit, HttpHeaders } from './headers.ts';
+import { WebHeadersInit, WebpHeaders } from './headers.ts';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -28,28 +28,28 @@ const CATEGORY_STATUS: Record<ErrorCategory, number> = {
   unavailable: 503,
 };
 
-type PayloadInput<S> = {
+type ResponseInput<S> = {
   output: Buffer | Readable;
   length?: number;
   statusCode?: number;
   source?: S;
   contentType?: string;
   defaultContentType?: string;
-  headers?: HttpHeadersInit;
+  headers?: WebHeadersInit;
   cookies?: Cookie[];
 };
 
 /**
- * Http Payload as a simple object
+ * Web Response as a simple object
  */
-export class HttpResponse<S = unknown> {
+export class WebResponse<S = unknown> {
 
   /**
     * Build the redirect
     * @param location Location to redirect to
     * @param status Status code
     */
-  static redirect(location: string, status = 302): HttpResponse<void> {
+  static redirect(location: string, status = 302): WebResponse<void> {
     return this.fromEmpty().with({
       statusCode: status,
       headers: { Location: location },
@@ -59,58 +59,58 @@ export class HttpResponse<S = unknown> {
   /**
    * Standard stream
    */
-  static fromStream<T extends Readable | ReadableStream>(value: T, contentType?: string): HttpResponse<T> {
+  static fromStream<T extends Readable | ReadableStream>(value: T, contentType?: string): WebResponse<T> {
     const output: Readable = isReadableStream(value) ? Readable.fromWeb(value) : value;
-    return new HttpResponse({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
+    return new WebResponse({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
    * Standard iterable
    */
-  static fromAsyncIterable<T extends AsyncIterable<unknown>>(value: T, contentType?: string): HttpResponse<T> {
+  static fromAsyncIterable<T extends AsyncIterable<unknown>>(value: T, contentType?: string): WebResponse<T> {
     const output: Readable = Readable.from(value);
-    return new HttpResponse({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
+    return new WebResponse({ output, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
    * Return an empty payload
    */
-  static fromEmpty(): HttpResponse<void> {
+  static fromEmpty(): WebResponse<void> {
     return castTo(this.fromBytes(Buffer.alloc(0)));
   }
 
   /**
    * Standard text
    */
-  static fromText<T extends string>(value: T, encoding: BufferEncoding = 'utf8', contentType?: string): HttpResponse<T> {
+  static fromText<T extends string>(value: T, encoding: BufferEncoding = 'utf8', contentType?: string): WebResponse<T> {
     const output = Buffer.from(value, encoding);
-    return new HttpResponse({ output, length: output.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
+    return new WebResponse({ output, length: output.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
   }
 
   /**
    * Standard array of bytes (buffer)
    */
-  static fromBytes<T extends Buffer | ArrayBuffer>(value: T, contentType?: string): HttpResponse<T> {
+  static fromBytes<T extends Buffer | ArrayBuffer>(value: T, contentType?: string): WebResponse<T> {
     const narrowed = Buffer.isBuffer(value) ? value : Buffer.from(value);
-    return new HttpResponse({ output: narrowed, length: narrowed.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
+    return new WebResponse({ output: narrowed, length: narrowed.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /**
    * Standard json
    */
-  static fromJSON<T extends unknown>(value: T, contentType?: string): HttpResponse<T> {
+  static fromJSON<T extends unknown>(value: T, contentType?: string): WebResponse<T> {
     const payload = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
     const output = Buffer.from(payload, 'utf-8');
-    return new HttpResponse({ output, source: value, length: output.byteLength, contentType, defaultContentType: 'application/json' });
+    return new WebResponse({ output, source: value, length: output.byteLength, contentType, defaultContentType: 'application/json' });
   }
 
   /**
    * Serialize file/blob
    */
-  static fromBlob<T extends Blob>(value: T): HttpResponse<T> {
+  static fromBlob<T extends Blob>(value: T): WebResponse<T> {
     const meta = BinaryUtil.getBlobMeta(value);
 
-    const out = new HttpResponse<T>({
+    const out = new WebResponse<T>({
       source: value,
       output: Readable.fromWeb(value.stream()),
       length: value.size,
@@ -137,8 +137,8 @@ export class HttpResponse<S = unknown> {
   /**
    * From catch value
    */
-  static fromCatch(err: unknown): HttpResponse<Error> {
-    if (err instanceof HttpResponse) {
+  static fromCatch(err: unknown): WebResponse<Error> {
+    if (err instanceof WebResponse) {
       return err;
     } else if (err instanceof Error) {
       return this.fromError(err);
@@ -152,7 +152,7 @@ export class HttpResponse<S = unknown> {
   /**
    * From Error
    */
-  static fromError<T extends ErrorResponse>(error: T): HttpResponse<T> {
+  static fromError<T extends ErrorResponse>(error: T): WebResponse<T> {
     const output = this.fromJSON(hasToJSON(error) ? error : { message: error.message }).with({
       contentType: 'application/json',
       statusCode: error.status ?? error.statusCode ?? CATEGORY_STATUS[error.category!] ?? 500,
@@ -164,10 +164,10 @@ export class HttpResponse<S = unknown> {
   /**
    * Determine payload based on output
    */
-  static from<T>(value: T): HttpResponse<T> {
+  static from<T>(value: T): WebResponse<T> {
     if (value === undefined || value === null) {
       return castTo(this.fromEmpty());
-    } else if (value instanceof HttpResponse) {
+    } else if (value instanceof WebResponse) {
       return value;
     } else if (typeof value === 'string') {
       return this.fromText(value);
@@ -193,22 +193,22 @@ export class HttpResponse<S = unknown> {
   source?: S;
   output: Buffer | Readable;
   length?: number;
-  readonly headers: HttpHeaders;
+  readonly headers: WebpHeaders;
 
-  constructor(o: PayloadInput<S>) {
+  constructor(o: ResponseInput<S>) {
     this.output = o.output;
     this.length = o.length;
     this.source = o.source;
     this.with(o);
   }
 
-  with(o: Pick<PayloadInput<S>, 'headers' | 'cookies' | 'statusCode' | 'contentType' | 'defaultContentType'>): this {
+  with(o: Pick<ResponseInput<S>, 'headers' | 'cookies' | 'statusCode' | 'contentType' | 'defaultContentType'>): this {
     this.statusCode ??= o.statusCode;
     this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
     this.#defaultContentType = o.defaultContentType ?? BINARY_TYPE;
 
     // @ts-expect-error
-    this.headers = new HttpHeaders(o.headers);
+    this.headers = new WebpHeaders(o.headers);
 
     if (o.contentType) {
       this.headers.set('Content-Type', o.contentType);
@@ -273,7 +273,7 @@ export class HttpResponse<S = unknown> {
   /**
    * Set all values into the map
    */
-  backfillHeaders(value: HttpHeadersInit): this {
+  backfillHeaders(value: WebHeadersInit): this {
     const entries = Array.isArray(value) ? value : value instanceof Headers ? value.entries() : Object.entries(value);
     for (const [k, v] of entries) {
       if (!this.headers.has(k) && v !== null && v !== undefined) {

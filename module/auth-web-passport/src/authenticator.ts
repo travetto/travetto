@@ -1,7 +1,7 @@
 import passport from 'passport';
 
 import { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
-import { HttpContext, HttpRequest } from '@travetto/web';
+import { FilterContext, WebRequest } from '@travetto/web';
 
 import { PassportUtil } from './util.ts';
 import { ConnectRequest, ConnectResponse } from './connect.ts';
@@ -11,12 +11,12 @@ type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
 /**
  * Authenticator via passport
  */
-export class PassportAuthenticator<U extends object> implements Authenticator<U, HttpContext> {
+export class PassportAuthenticator<U extends object> implements Authenticator<U, FilterContext> {
 
   #strategyName: string;
   #strategy: passport.Strategy;
   #toPrincipal: (user: U) => SimplePrincipal;
-  #passportOptions: (req: HttpRequest) => passport.AuthenticateOptions;
+  #passportOptions: (req: WebRequest) => passport.AuthenticateOptions;
   session = false;
 
   /**
@@ -31,7 +31,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
     strategyName: string,
     strategy: passport.Strategy,
     toPrincipal: (user: U) => SimplePrincipal,
-    opts: passport.AuthenticateOptions | ((req: HttpRequest) => passport.AuthenticateOptions) = {},
+    opts: passport.AuthenticateOptions | ((req: WebRequest) => passport.AuthenticateOptions) = {},
   ) {
     this.#strategyName = strategyName;
     this.#strategy = strategy;
@@ -65,7 +65,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
   /**
    * Extract the passport auth context
    */
-  getState(context?: HttpContext | undefined): AuthenticatorState | undefined {
+  getState(context?: FilterContext | undefined): AuthenticatorState | undefined {
     return PassportUtil.readState<AuthenticatorState>(context!.req);
   }
 
@@ -73,7 +73,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
    * Authenticate a request given passport config
    * @param ctx The travetto filter context
    */
-  async authenticate(input: U, { req }: HttpContext): Promise<Principal | undefined> {
+  async authenticate(input: U, { req }: FilterContext): Promise<Principal | undefined> {
     const requestOptions = this.#passportOptions(req);
 
     const connectReq = new ConnectRequest(req);

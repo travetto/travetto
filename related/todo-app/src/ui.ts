@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { Controller, Get, Produces, HttpRequest, Undocumented, ContextParam } from '@travetto/web';
+import { Controller, Get, Produces, WebRequest, Undocumented, ContextParam } from '@travetto/web';
 import { RuntimeResources } from '@travetto/runtime';
 
 @Controller('/ui')
@@ -8,7 +8,7 @@ import { RuntimeResources } from '@travetto/runtime';
 export class UIController {
 
   @ContextParam()
-  req: HttpRequest;
+  req: WebRequest;
 
   @Get('/')
   @Produces('text/html')

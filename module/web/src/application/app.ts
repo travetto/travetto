@@ -9,8 +9,8 @@ import { ConfigurationService } from '@travetto/config';
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
-import { HttpInterceptor } from '../types/interceptor.ts';
-import { HTTP_INTERCEPTOR_CATEGORIES, HTTP_METHODS, HttpMethod } from '../types/core.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WEB_INTERCEPTOR_CATEGORIES, HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { WebEndpointCleanup, WebServer, WebServerHandle } from '../types/server.ts';
 
 import { WebCommonUtil } from '../util/common.ts';
@@ -32,7 +32,7 @@ export class WebApplication<T extends WebServer = WebServer> {
   /**
    * List of provided interceptors
    */
-  interceptors: HttpInterceptor[] = [];
+  interceptors: WebInterceptor[] = [];
 
   constructor() {
     this.onControllerChange = this.onControllerChange.bind(this);
@@ -72,12 +72,12 @@ export class WebApplication<T extends WebServer = WebServer> {
   /**
    * Get the list of installed interceptors
    */
-  async getInterceptors(): Promise<HttpInterceptor[]> {
-    const instances = await DependencyRegistry.getCandidateInstances(toConcrete<HttpInterceptor>());
-    const cats = HTTP_INTERCEPTOR_CATEGORIES.map(x => ({
+  async getInterceptors(): Promise<WebInterceptor[]> {
+    const instances = await DependencyRegistry.getCandidateInstances(toConcrete<WebInterceptor>());
+    const cats = WEB_INTERCEPTOR_CATEGORIES.map(x => ({
       key: x,
-      start: castTo<Class<HttpInterceptor>>({ name: `${x}Start` }),
-      end: castTo<Class<HttpInterceptor>>({ name: `${x}End` }),
+      start: castTo<Class<WebInterceptor>>({ name: `${x}Start` }),
+      end: castTo<Class<WebInterceptor>>({ name: `${x}End` }),
     }));
 
     const categoryMapping = TypedObject.fromEntries(cats.map(x => [x.key, x]));

@@ -9,7 +9,7 @@ import { BindUtil } from '@travetto/schema';
 import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base.ts';
 import { WebServerHandle } from '../../src/types/server.ts';
 import { HttpMethod } from '../../src/types/core.ts';
-import { HttpHeaders } from '../../src/types/headers.ts';
+import { WebpHeaders } from '../../src/types/headers.ts';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
@@ -89,7 +89,7 @@ export abstract class BaseWebSuite {
     cfg: FullHttpRequest = {}
   ): Promise<MakeRequestResponse<T>> {
 
-    const headers = new HttpHeaders(cfg.headers);
+    const headers = new WebpHeaders(cfg.headers);
 
     let buffer: Buffer | undefined;
     const body = cfg.body;

@@ -3,18 +3,18 @@ import { MimeType, MimeUtil } from '../util/mime.ts';
 
 type Prim = number | boolean | string;
 type HeaderValue = Prim | Prim[] | readonly Prim[];
-export type HttpHeadersInit = Headers | Record<string, undefined | null | HeaderValue> | [string, HeaderValue][];
+export type WebHeadersInit = Headers | Record<string, undefined | null | HeaderValue> | [string, HeaderValue][];
 
 const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
 /**
  * Simple Headers wrapper with additional logic for common patterns
  */
-export class HttpHeaders extends Headers {
+export class WebpHeaders extends Headers {
 
   #parsedType?: MimeType;
 
-  constructor(o?: HttpHeadersInit) {
+  constructor(o?: WebHeadersInit) {
     const passed = (o instanceof Headers);
     super(passed ? o : undefined);
 
@@ -41,9 +41,9 @@ export class HttpHeaders extends Headers {
   }
 
   // @ts-expect-error
-  forEach(set: (v: string | string[], k: string, headers: HttpHeaders) => void): void;
-  forEach(set: (v: Any, k: string, headers: HttpHeaders) => void): void;
-  forEach(set: (v: string | string[], k: string, headers: HttpHeaders) => void): void {
+  forEach(set: (v: string | string[], k: string, headers: WebpHeaders) => void): void;
+  forEach(set: (v: Any, k: string, headers: WebpHeaders) => void): void;
+  forEach(set: (v: string | string[], k: string, headers: WebpHeaders) => void): void {
     for (const [k, v] of this.entries()) {
       set(k === 'set-cookie' ? this.getSetCookie() : v, k, this);
     }

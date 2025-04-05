@@ -1,4 +1,4 @@
-import { HttpInterceptor, HttpInterceptorCategory, HttpChainedContext, EndpointConfig, HttpResponse } from '@travetto/web';
+import { WebInterceptor, WebInterceptorCategory, WebChainedContext, EndpointConfig, WebResponse } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AuthContext, AuthenticationError } from '@travetto/auth';
@@ -19,9 +19,9 @@ export class WebAuthLogoutConfig {
  * Throws an error if the user is not logged in at time of logout
  */
 @Injectable()
-export class AuthLogoutInterceptor implements HttpInterceptor<WebAuthLogoutConfig> {
+export class AuthLogoutInterceptor implements WebInterceptor<WebAuthLogoutConfig> {
 
-  category: HttpInterceptorCategory = 'application';
+  category: WebInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
 
   @Inject()
@@ -34,7 +34,7 @@ export class AuthLogoutInterceptor implements HttpInterceptor<WebAuthLogoutConfi
     return config.applies;
   }
 
-  async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
+  async filter({ next }: WebChainedContext): Promise<WebResponse> {
     try {
       if (!this.authContext.principal) {
         throw new AuthenticationError('Already logged out');
