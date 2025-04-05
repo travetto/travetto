@@ -175,10 +175,10 @@ export class WebResponse<S = unknown> {
         const size = data instanceof Blob ? data.size : data.length;
         const type = data instanceof Blob ? data.type : undefined;
         yield `--${boundary}${nl}`;
-        yield `Content-Disposition: form-data; name="${k}"; filename="${filename ?? k}"`;
-        yield `Content-Length: ${size}`;
+        yield `Content-Disposition: form-data; name="${k}"; filename="${filename ?? k}"${nl}`;
+        yield `Content-Length: ${size}${nl}`;
         if (type) {
-          yield `Content-Type: ${type}`;
+          yield `Content-Type: ${type}${nl}`;
         }
         yield nl;
         if (data instanceof Blob) {
@@ -193,8 +193,15 @@ export class WebResponse<S = unknown> {
       yield `--${boundary}--${nl}`;
     });
 
+    const tap = async function* () {
+      for await (const item of source()) {
+        console.error(item);
+        yield item;
+      }
+    }
+
     return new WebResponse({
-      body: Readable.from(source()),
+      body: Readable.from(tap()),
       contentType: `multipart/form-data; boundary=${boundary}`,
       source: form
     });

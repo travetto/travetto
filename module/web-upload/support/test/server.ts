@@ -55,7 +55,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     await Promise.all(files.map(async ({ name, type, resource }) => {
       const file = await this.fixture.readFile(resource);
       if (type) {
-        Object.assign(file, { type });
+        Object.defineProperty(file, 'type', { get: () => type });
       }
       data.append(name, file);
     }));
