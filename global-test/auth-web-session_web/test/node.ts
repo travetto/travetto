@@ -2,7 +2,7 @@ import { Suite } from '@travetto/test';
 import { NodeWebServer } from '@travetto/web-node';
 import { SessionModelSymbol } from '@travetto/auth-session';
 import { InjectableFactory } from '@travetto/di';
-import { WebApplication, WebServer } from '@travetto/web';
+import { WebApplication } from '@travetto/web';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
 import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
@@ -11,11 +11,6 @@ import { NodeWebServerSupport } from '@travetto/web-node/support/test/server-sup
 const ServerSymbol = Symbol.for('node');
 
 class Config {
-  @InjectableFactory()
-  static getServer(): WebServer {
-    return new NodeWebServer();
-  }
-
   @InjectableFactory(ServerSymbol)
   static getApp(dep: NodeWebServer): WebApplication {
     return new class extends WebApplication {

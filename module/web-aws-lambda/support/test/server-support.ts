@@ -7,7 +7,7 @@ import { WebRequest, WebServerHandle, CookieConfig, WebHeaders, WebApplication, 
 import { asFull, castTo, Util } from '@travetto/runtime';
 
 import { WebServerSupport } from '@travetto/web/support/test/server-support/base.ts';
-import { AwsLambdaWebServer } from '../../__index__';
+import { AwsLambdaWebServer } from '../../src/server.ts';
 
 const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {
   resource: '/{proxy+}',

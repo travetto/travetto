@@ -1,7 +1,7 @@
 import { Suite } from '@travetto/test';
 import { AwsLambdaWebServer } from '@travetto/web-aws-lambda';
 import { InjectableFactory } from '@travetto/di';
-import { WebApplication, WebServer } from '@travetto/web';
+import { WebApplication } from '@travetto/web';
 
 import { AuthWebServerSuite } from '@travetto/auth-web/support/test/server.ts';
 import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server-support';
@@ -9,11 +9,6 @@ import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test
 const ServerSymbol = Symbol.for('aws-lambda');
 
 class Config {
-  @InjectableFactory()
-  static getServer(): WebServer {
-    return new AwsLambdaWebServer();
-  }
-
   @InjectableFactory(ServerSymbol)
   static getApp(dep: AwsLambdaWebServer): WebApplication {
     return new class extends WebApplication {

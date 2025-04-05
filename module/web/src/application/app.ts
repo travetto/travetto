@@ -34,10 +34,6 @@ export class WebApplication<T = unknown> {
    */
   interceptors: WebInterceptor[] = [];
 
-  constructor() {
-    this.onControllerChange = this.onControllerChange.bind(this);
-  }
-
   async postConstruct(): Promise<void> {
     // Log on startup, before DI finishes
     const cfg = await DependencyRegistry.getInstance(ConfigurationService);
@@ -66,7 +62,7 @@ export class WebApplication<T = unknown> {
       .map(c => this.registerController(c)));
 
     // Listen for updates
-    ControllerRegistry.on(this.onControllerChange);
+    ControllerRegistry.on(v => this.onControllerChange(v));
   }
 
   /**

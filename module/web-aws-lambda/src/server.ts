@@ -8,8 +8,6 @@ import { Config } from '@travetto/config';
 import { WebServer, WebRouter, WebServerHandle, WebRequest } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
-export const AwsLambdaWebSymbol = Symbol.for('@travetto/web-aws-lambda:entry');
-
 @Config('web.aws')
 export class AwsLambdaConfig {
   binaryMimeTypes?: string[];
@@ -23,7 +21,7 @@ export class AwsLambdaConfig {
   }
 }
 
-@Injectable(AwsLambdaWebSymbol)
+@Injectable()
 export class AwsLambdaWebServer implements WebServer {
 
   #router: WebRouter;

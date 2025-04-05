@@ -1,9 +1,9 @@
 import timers from 'node:timers/promises';
 
 import { DependencyRegistry } from '@travetto/di';
-import { type WebRequest, CookieConfig, WebConfig, WebHeaders, WebSslConfig, WebApplication, NetUtil } from '@travetto/web';
+import { type WebRequest, CookieConfig, WebConfig, WebHeaders, WebSslConfig, WebApplication, NetUtil, WebResponse } from '@travetto/web';
 
-import { WebServerSupport, MakeRequestConfig } from '@travetto/web/support/test/server-support/base.ts';
+import { WebServerSupport } from '@travetto/web/support/test/server-support/base.ts';
 
 /**
  * Support for invoking http requests against the server
@@ -54,7 +54,9 @@ export class NodeWebServerSupport implements WebServerSupport {
     return handle;
   }
 
-  async execute(method: WebRequest['method'], path: string, { query, headers, body }: MakeRequestConfig<Buffer> = {}) {
+  async execute(req: WebRequest): Promise<WebResponse<Buffer>> {
+
+    const { query, method, body, headers, path } = req;
 
     let q = '';
     if (query && Object.keys(query).length) {
@@ -64,16 +66,11 @@ export class NodeWebServerSupport implements WebServerSupport {
 
     const ctrl = new AbortController();
 
-    const res = await fetch(`${this.url}${path}${q}`, {
-      method,
-      headers: new WebHeaders(headers),
-      body,
-      signal: ctrl.signal
-    });
+    const res = await fetch(`${this.url}${path}${q}`, { method, headers, body, signal: ctrl.signal });
 
     const out = { status: res.status, body: Buffer.from(await res.arrayBuffer()), headers: new WebHeaders(res.headers) };
     ctrl.abort();
-    return out;
+    return WebResponse.from(out.body).with({ statusCode: out.status, headers: out.headers });
   }
 
   get url() {

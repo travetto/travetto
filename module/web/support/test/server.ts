@@ -53,7 +53,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
         age: 20
       }
     });
-    assert.deepStrictEqual(ret, { source: 20 });
+    assert.deepStrictEqual(ret, { body: 20 });
   }
 
   @Test()
