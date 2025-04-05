@@ -66,7 +66,6 @@ export class AwsLambdaWebServer implements WebServer, AwsLambdaHandler {
       method: event.httpMethod
     });
 
-
     // Build request
     const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
     const req = new HttpRequest({

@@ -9,8 +9,6 @@ import { BindUtil } from '@travetto/schema';
 import { MakeRequestConfig, MakeRequestResponse, WebServerSupport } from './server-support/base.ts';
 import { WebServerHandle } from '../../src/types/server.ts';
 import { HttpMethod } from '../../src/types/core.ts';
-import { CoreWebServerSupport } from './server-support/core.ts';
-import { NetUtil } from '../../src/util/net.ts';
 import { HttpHeaders } from '../../src/types/headers.ts';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
@@ -30,17 +28,13 @@ export abstract class BaseWebSuite {
 
   @BeforeAll()
   async initServer(): Promise<void> {
-    if (!this.type || this.type === CoreWebServerSupport) {
-      this.#support = new CoreWebServerSupport(await NetUtil.getFreePort());
-    } else {
-      this.#support = classConstruct(this.type);
-    }
+    this.#support = classConstruct(this.type);
     await RootRegistry.init();
     this.#handle = await this.#support.init(this.qualifier);
   }
 
   get port(): number | undefined {
-    return this.#support instanceof CoreWebServerSupport ? this.#support.port : undefined;
+    return 'port' in this.#support && typeof this.#support['port'] === 'number' ? this.#support.port : undefined;
   }
 
   async getOutput<T>(t: Buffer): Promise<T | string> {

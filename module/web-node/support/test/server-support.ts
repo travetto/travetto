@@ -1,19 +1,19 @@
 import timers from 'node:timers/promises';
 
 import { DependencyRegistry } from '@travetto/di';
-import { type HttpRequest, CookieConfig, WebConfig, HttpHeaders, WebSslConfig, WebApplication } from '@travetto/web';
+import { type HttpRequest, CookieConfig, WebConfig, HttpHeaders, WebSslConfig, WebApplication, NetUtil } from '@travetto/web';
 
-import { WebServerSupport, MakeRequestConfig } from './base.ts';
+import { WebServerSupport, MakeRequestConfig } from '@travetto/web/support/test/server-support/base.ts';
 
 /**
  * Support for invoking http requests against the server
  */
-export class CoreWebServerSupport implements WebServerSupport {
+export class NodeWebServerSupport implements WebServerSupport {
 
   #app: WebApplication;
   #port: number;
 
-  constructor(port: number) {
+  constructor(port: number = -1) {
     this.#port = port;
   }
 
@@ -22,6 +22,10 @@ export class CoreWebServerSupport implements WebServerSupport {
   }
 
   async init(qualifier?: symbol) {
+    if (this.#port < 0) {
+      this.#port = await NetUtil.getFreePort();
+    }
+
     Object.assign(
       await DependencyRegistry.getInstance(CookieConfig),
       { active: true, secure: false, signed: false }

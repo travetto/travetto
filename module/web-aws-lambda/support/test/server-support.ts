@@ -3,12 +3,11 @@ import zlib from 'node:zlib';
 
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { HttpRequest, WebServerHandle, CookieConfig, HttpHeaders } from '@travetto/web';
+import { HttpRequest, WebServerHandle, CookieConfig, HttpHeaders, WebApplication } from '@travetto/web';
 import { asFull, Util } from '@travetto/runtime';
 
 import { WebServerSupport, MakeRequestConfig, MakeRequestResponse, } from '@travetto/web/support/test/server-support/base.ts';
-
-import { AwsLambdaWebApplication } from '../../src/server.ts';
+import { AwsLambdaWebServer } from '../../__index__';
 
 const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {
   resource: '/{proxy+}',
@@ -59,7 +58,7 @@ const baseContext: lambda.Context = {
  */
 export class AwsLambdaWebServerSupport implements WebServerSupport {
 
-  #lambda: AwsLambdaWebApplication;
+  #lambda: WebApplication<AwsLambdaWebServer>;
 
   async init(qualifier?: symbol): Promise<WebServerHandle> {
     await RootRegistry.init();
@@ -69,7 +68,7 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
       { active: true, secure: false, signed: false }
     );
 
-    this.#lambda = await DependencyRegistry.getInstance(AwsLambdaWebApplication, qualifier);
+    this.#lambda = await DependencyRegistry.getInstance<WebApplication<AwsLambdaWebServer>>(WebApplication, qualifier);
     return await this.#lambda.run();
   }
 
@@ -83,7 +82,7 @@ export class AwsLambdaWebServerSupport implements WebServerSupport {
       multiHeaders[k] = httpHeaders.getList(k) ?? [];
     });
 
-    const res = (await this.#lambda.handle({
+    const res = (await this.#lambda.server.handle({
       ...baseLambdaEvent,
       path,
       httpMethod: method,
