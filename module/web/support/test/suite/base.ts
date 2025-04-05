@@ -6,11 +6,11 @@ import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
-import { WebServerHandle } from '../../src/types/server.ts';
-import { WebRequest, WebRequestInit } from '../../src/types/request.ts';
-import { WebResponse } from '../../src/types/response.ts';
+import { WebServerHandle } from '../../../src/types/server.ts';
+import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
+import { WebResponse } from '../../../src/types/response.ts';
 
-import { WebServerSupport } from './types.ts';
+import { WebServerSupport } from '../types.ts';
 
 function asBuffer(v: Buffer | Readable): Promise<Buffer> {
   return !Buffer.isBuffer(v) ? toBuffer(v) : Promise.resolve(v);

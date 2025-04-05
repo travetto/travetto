@@ -1,5 +1,5 @@
 import { Suite } from '@travetto/test';
-import { SchemaWebServerSuite } from '@travetto/web/support/test/schema-suite.ts';
+import { SchemaWebServerSuite } from '@travetto/web/support/test/suite/schema.ts';
 import { NodeWebServerSupport } from '../support/test/server-support.ts';
 
 @Suite()
