@@ -125,6 +125,7 @@ export class WebApplication<T = unknown> {
   async registerController(c: Class): Promise<void> {
     if (this.#routeCleanup.get(c.Ⲑid) === null) {
       console.warn('Reloading routes not supported for ', this.server.constructor.Ⲑid);
+      return;
     }
 
     const config = ControllerRegistry.get(c);
