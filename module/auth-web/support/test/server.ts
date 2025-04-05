@@ -186,7 +186,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testAllAuthenticated() {
     this.config.mode = 'header';
 
-    const { statusCode } = await this.request({ method: 'GET', path: '/test/auth-all/self' });
+    const { statusCode } = await this.request({ method: 'GET', path: '/test/auth-all/self' }, false);
     assert(statusCode === 401);
 
     const { headers, statusCode: authStatus } = await this.request({
