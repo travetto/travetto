@@ -7,7 +7,7 @@ import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
-import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
+import { BaseWebSuite } from '@travetto/web/support/test/base-suite.ts';
 
 import { Login, Authenticated, Logout } from '../../src/decorator.ts';
 import { WebAuthConfig } from '../../src/config.ts';

@@ -4,7 +4,7 @@ import { InjectableFactory } from '@travetto/di';
 import { WebApplication } from '@travetto/web';
 
 import { AuthWebServerSuite } from '@travetto/auth-web/support/test/server.ts';
-import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server-support';
+import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server-support.ts';
 
 const ServerSymbol = Symbol.for('aws-lambda');
 

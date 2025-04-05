@@ -5,7 +5,7 @@ import { Controller, Post, WebRequest, WebResponse } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
+import { BaseWebSuite } from '@travetto/web/support/test/base-suite.ts';
 
 import { Upload } from '../../src/decorator.ts';
 import { FileMap } from '../../src/types.ts';

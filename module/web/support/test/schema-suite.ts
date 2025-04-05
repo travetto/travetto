@@ -4,7 +4,7 @@ import { Suite, Test } from '@travetto/test';
 import { Schema, SchemaRegistry, ValidationResultError, Validator } from '@travetto/schema';
 import { Controller, Post, Get, ControllerRegistry, WebResponse, PathParam, QueryParam, HttpMethod } from '@travetto/web';
 
-import { BaseWebSuite } from './base.ts';
+import { BaseWebSuite } from './base-suite.ts';
 
 interface UserShape {
   id: number | undefined;

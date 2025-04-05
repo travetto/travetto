@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c, mod } from '@travetto/doc';
 
-import { Links } from '@travetto/model/support/doc.support';
+import { Links } from '@travetto/model/support/doc.support.ts';
 
 import { Cache, EvictCache } from './src/decorator.ts';
 import { CacheService } from './src/service.ts';

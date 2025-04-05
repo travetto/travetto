@@ -2,12 +2,12 @@ import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 
-import { BaseWebSuite } from './base.ts';
+import { BaseWebSuite } from './base-suite.ts';
 import { TestController } from './controller.ts';
 import { ControllerRegistry } from '../../src/registry/controller.ts';
 
 @Suite()
-export abstract class WebServerSuite extends BaseWebSuite {
+export abstract class StandardWebServerSuite extends BaseWebSuite {
 
   @BeforeAll()
   async init() {

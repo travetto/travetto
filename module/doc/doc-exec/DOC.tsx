@@ -1,1 +1,1 @@
-export * from '@travetto/doc/doc/sample';
+export * from '@travetto/doc/doc/sample.ts';
