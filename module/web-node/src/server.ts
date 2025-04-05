@@ -4,8 +4,10 @@ import { pipeline } from 'node:stream/promises';
 import { Readable } from 'node:stream';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, WebRouter, WebRequest } from '@travetto/web';
-import { castTo, hasFunction } from '@travetto/runtime';
+import { WebConfig, WebServer, WebServerHandle, WebRouter } from '@travetto/web';
+import { hasFunction } from '@travetto/runtime';
+
+import { NodeWebUtil } from './util.ts';
 
 const isReadable = hasFunction<Readable>('pipe');
 
@@ -26,29 +28,15 @@ export class NodeWebServer implements WebServer {
     this.handler = async (req, res): Promise<void> => {
       const { endpoint, params } = router(req);
 
-      const secure = 'encrypted' in req.socket && !!req.socket.encrypted;
-      const url = new URL(`http${secure ? 's' : ''}://${req.headers.host}${req.url}`);
+      const webReq = NodeWebUtil.toWebRequest(req, params);
+      const webRes = await endpoint.filter!({ req: webReq });
 
-      const httpReq = new WebRequest({
-        protocol: secure ? 'https' : 'http',
-        method: castTo(req.method?.toUpperCase()),
-        path: url.pathname!,
-        query: Object.fromEntries(url.searchParams.entries()),
-        params,
-        headers: req.headers,
-        inputStream: req,
-        remoteIp: req.socket.remoteAddress,
-        port: req.socket.localPort
-      });
-
-      const value = await endpoint.filter!({ req: httpReq });
-
-      res.statusCode = value.statusCode ?? 200;
-      value.headers.forEach((v, k) => res.setHeader(k, v));
-      if (isReadable(value.output)) {
-        await pipeline(value.output, res);
+      res.statusCode = webRes.statusCode ?? 200;
+      webRes.headers.forEach((v, k) => res.setHeader(k, v));
+      if (isReadable(webRes.output)) {
+        await pipeline(webRes.output, res);
       } else {
-        res.write(value.output);
+        res.write(webRes.output);
         res.end();
       }
     };

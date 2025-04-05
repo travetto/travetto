@@ -1,9 +1,11 @@
 import timers from 'node:timers/promises';
 
 import { DependencyRegistry } from '@travetto/di';
-import { type WebRequest, CookieConfig, WebConfig, WebHeaders, WebSslConfig, WebApplication, NetUtil, WebResponse } from '@travetto/web';
+import { type WebRequest, CookieConfig, WebConfig, WebSslConfig, WebApplication, NetUtil, WebResponse } from '@travetto/web';
 
 import { WebServerSupport } from '@travetto/web/support/test/server-support/base.ts';
+
+import { NodeWebUtil } from '../../src/util';
 
 /**
  * Support for invoking http requests against the server
@@ -55,22 +57,9 @@ export class NodeWebServerSupport implements WebServerSupport {
   }
 
   async execute(req: WebRequest): Promise<WebResponse<Buffer>> {
-
-    const { query, method, body, headers, path } = req;
-
-    let q = '';
-    if (query && Object.keys(query).length) {
-      const pairs = Object.entries(query).map<[string, string]>(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`]);
-      q = `?${new URLSearchParams(pairs).toString()}`;
-    }
-
-    const ctrl = new AbortController();
-
-    const res = await fetch(`${this.url}${path}${q}`, { method, headers, body, signal: ctrl.signal });
-
-    const out = { status: res.status, body: Buffer.from(await res.arrayBuffer()), headers: new WebHeaders(res.headers) };
-    ctrl.abort();
-    return WebResponse.from(out.body).with({ statusCode: out.status, headers: out.headers });
+    const { path, ...request } = NodeWebUtil.toFetchRequest(req);
+    const res = await fetch(`${this.url}${path}`, request);
+    return NodeWebUtil.toWebResponse(res);
   }
 
   get url() {

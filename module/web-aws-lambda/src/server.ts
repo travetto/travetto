@@ -1,12 +1,10 @@
 import type lambda from 'aws-lambda';
 
-import { buffer } from 'node:stream/consumers';
-import { Readable } from 'node:stream';
-
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { WebServer, WebRouter, WebServerHandle, WebRequest } from '@travetto/web';
-import { castTo } from '@travetto/runtime';
+import { WebServer, WebRouter, WebServerHandle } from '@travetto/web';
+
+import { AwsLambdaWebUtil } from './util';
 
 @Config('web.aws')
 export class AwsLambdaConfig {
@@ -52,45 +50,11 @@ export class AwsLambdaWebServer implements WebServer {
     });
 
     // Build request
-    const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
-    const req = new WebRequest({
-      protocol: castTo(event.requestContext.protocol ?? 'http'),
-      method: castTo(event.httpMethod.toUpperCase()),
-      path: event.path,
-      query: castTo(event.queryStringParameters!),
-      params,
-      remoteIp: event.requestContext.identity.sourceIp,
-      headers: { ...event.headers, ...event.multiValueHeaders },
-      inputStream: body ? Readable.from(body) : undefined
-    });
+    const req = AwsLambdaWebUtil.toWebRequest(event, params);
 
     // Render
     const res = await endpoint.filter!({ req });
 
-    let output = res.output;
-
-    if (!Buffer.isBuffer(output)) {
-      output = await buffer(output);
-    }
-
-    const isBase64Encoded = !!output.length && event.isBase64Encoded;
-    const headers: Record<string, string> = {};
-    const multiValueHeaders: Record<string, string[]> = {};
-
-    res.headers.forEach((v, k) => {
-      if (Array.isArray(v)) {
-        multiValueHeaders[k] = v;
-      } else {
-        headers[k] = v;
-      }
-    });
-
-    return {
-      statusCode: res.statusCode ?? 200,
-      isBase64Encoded,
-      body: output.toString(isBase64Encoded ? 'base64' : 'utf8'),
-      headers,
-      multiValueHeaders,
-    };
+    return AwsLambdaWebUtil.toLambdaResult(res, event.isBase64Encoded);
   }
 }

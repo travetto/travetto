@@ -11,7 +11,6 @@ import { WebRequest, WebRequestInit } from '../../src/types/request.ts';
 import { WebResponse } from '../../src/types/response.ts';
 
 import { WebServerSupport } from './server-support/base.ts';
-import { AssertCapture } from '@travetto/test/src/assert/capture.ts';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
