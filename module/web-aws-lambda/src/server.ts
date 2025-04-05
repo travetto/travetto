@@ -59,6 +59,7 @@ export class AwsLambdaWebServer implements WebServer {
       path: event.path,
       query: castTo(event.queryStringParameters!),
       params,
+      remoteIp: event.requestContext.identity.sourceIp,
       headers: { ...event.headers, ...event.multiValueHeaders },
       inputStream: body ? Readable.from(body) : undefined
     });
