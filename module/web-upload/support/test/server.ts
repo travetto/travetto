@@ -10,8 +10,6 @@ import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
 import { Upload } from '../../src/decorator.ts';
 import { FileMap } from '../../src/types.ts';
 
-type FileUpload = { name: string, resource: string, type: string };
-
 const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
 
 const multipart = (data: FormData) => new WebRequest(WebResponse.from(data));
@@ -52,11 +50,13 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
 
   fixture: TestFixtures;
 
-  async getUploads(...files: FileUpload[]): Promise<FormData> {
+  async getUploads(...files: { name: string, resource: string, type?: string }[]): Promise<FormData> {
     const data = new FormData();
-    await Promise.all(files.map(async ({ name, type, resource: filename }) => {
-      const file = await this.fixture.readFile(filename);
-      Object.assign(file, { type });
+    await Promise.all(files.map(async ({ name, type, resource }) => {
+      const file = await this.fixture.readFile(resource);
+      if (type) {
+        Object.assign(file, { type });
+      }
       data.append(name, file);
     }));
     return data;

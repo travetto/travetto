@@ -11,9 +11,8 @@ import { Util, BlobMeta, BinaryUtil, castTo } from '@travetto/runtime';
 
 import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
 
-type FileUpload = { name: string, resource: string, type: string };
+const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
 
-const meta = BinaryUtil.getBlobMeta;
 const multipart = (data: FormData) => new WebRequest(WebResponse.from(data));
 
 @Controller('/test/upload')
@@ -28,7 +27,7 @@ class TestUploadController {
   @Post('/all')
   async uploadAll(@Upload() uploads: FileMap) {
     for (const [, file] of Object.entries(uploads)) {
-      return meta(file);
+      return { hash: bHash(file) };
     }
   }
 
@@ -51,17 +50,17 @@ class TestUploadController {
 
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: meta(file1)?.hash, hash2: meta(file2)?.hash };
+    return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 
   @Post('/all-named-custom')
   async uploadVariousLimits(@Upload({ name: 'file1', types: ['!image/png'] }) file1: Blob, @Upload('file2') file2: Blob) {
-    return { hash1: meta(file1)?.hash, hash2: meta(file2)?.hash };
+    return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 
   @Post('/all-named-size')
   async uploadVariousSizeLimits(@Upload({ name: 'file1', maxSize: 100 }) file1: File, @Upload({ name: 'file2', maxSize: 8000 }) file2: File) {
-    return { hash1: meta(file1)?.hash, hash2: meta(file2)?.hash };
+    return { hash1: bHash(file1), hash2: bHash(file2) };
   }
 
   @Get('*')
@@ -76,11 +75,13 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
   fixture: TestFixtures;
 
-  async getUploads(...files: FileUpload[]): Promise<FormData> {
+  async getUploads(...files: { name: string, resource: string, type?: string }[]): Promise<FormData> {
     const data = new FormData();
-    await Promise.all(files.map(async ({ name, type, resource: filename }) => {
-      const file = await this.fixture.readFile(filename);
-      Object.assign(file, { type });
+    await Promise.all(files.map(async ({ name, type, resource }) => {
+      const file = await this.fixture.readFile(resource);
+      if (type) {
+        Object.assign(file, { type });
+      }
       data.append(name, file);
     }));
     return data;
