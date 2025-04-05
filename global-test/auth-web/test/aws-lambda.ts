@@ -6,7 +6,7 @@ import { WebApplication, WebServer } from '@travetto/web';
 import { AuthWebServerSuite } from '@travetto/auth-web/support/test/server.ts';
 import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server-support';
 
-const ServerSymbol = Symbol.for('node');
+const ServerSymbol = Symbol.for('aws-lambda');
 
 class Config {
   @InjectableFactory()

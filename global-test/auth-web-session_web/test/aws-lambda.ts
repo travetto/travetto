@@ -8,7 +8,7 @@ import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
 import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test/server-support.ts';
 
-const ServerSymbol = Symbol.for('node');
+const ServerSymbol = Symbol.for('aws-lambda');
 
 class Config {
   @InjectableFactory()

@@ -7,7 +7,7 @@ import { AwsLambdaWebServerSupport } from '@travetto/web-aws-lambda/support/test
 
 import { ModelBlobWebUploadServerSuite } from './server.ts';
 
-const ServerSymbol = Symbol.for('node');
+const ServerSymbol = Symbol.for('aws-lambda');
 
 class Config {
   @InjectableFactory()
