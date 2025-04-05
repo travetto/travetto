@@ -111,7 +111,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
         username: 'Todd',
         password: 'Rod'
       }
-    }, false);
+    }, true);
     assert(statusCode === 401);
   }
 

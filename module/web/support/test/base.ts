@@ -1,4 +1,5 @@
 import { buffer as toBuffer } from 'node:stream/consumers';
+import assert, { AssertionError } from 'node:assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { AppError, castTo, Class, classConstruct, Util } from '@travetto/runtime';
@@ -10,6 +11,7 @@ import { WebRequest, WebRequestInit } from '../../src/types/request.ts';
 import { WebResponse } from '../../src/types/response.ts';
 
 import { WebServerSupport } from './server-support/base.ts';
+import { AssertCapture } from '@travetto/test/src/assert/capture.ts';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
 
@@ -107,8 +109,8 @@ export abstract class BaseWebSuite {
 
     if (res.statusCode && res.statusCode >= 400) {
       if (throwOnError) {
-        const err = new AppError('Error');
-        Object.assign(err, { status: res.statusCode, message: res.output.toString('utf8') });
+        const err = new AppError(res.output.toString('utf8'));
+        Object.assign(err, { status: res.statusCode });
         throw err;
       }
     }
