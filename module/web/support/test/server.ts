@@ -42,7 +42,7 @@ export abstract class WebServerSuite extends BaseWebSuite {
       query: {
         age: 'blue'
       }
-    }), /Number/i);
+    }), /Validation errors have occurred/i);
   }
 
   @Test()

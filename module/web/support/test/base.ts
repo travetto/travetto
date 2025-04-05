@@ -1,7 +1,8 @@
 import { buffer as toBuffer } from 'node:stream/consumers';
+import { Readable } from 'node:stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { castTo, Class, classConstruct } from '@travetto/runtime';
+import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 
@@ -10,6 +11,10 @@ import { WebRequest, WebRequestInit } from '../../src/types/request.ts';
 import { WebResponse } from '../../src/types/response.ts';
 
 import { WebServerSupport } from './server-support/base.ts';
+
+function asBuffer(v: Buffer | Readable): Promise<Buffer> {
+  return !Buffer.isBuffer(v) ? toBuffer(v) : Promise.resolve(v);
+}
 
 /**
  * Base Web Suite
@@ -53,19 +58,23 @@ export abstract class BaseWebSuite {
 
     const req = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
 
-    const sample = WebResponse.from(req.body);
-    sample.headers.forEach(([v, k]) => req.headers.set(k, v));
-    req.body = sample.body;
+    if (req.body) {
+      const sample = WebResponse.from(req.body).ensureContentLength().ensureContentType();
+      sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
+      req.body = await asBuffer(sample.body);
+    }
+
     Object.assign(req, { query: BindUtil.flattenPaths(req.query ?? {}) });
 
     const res = await this.#support.execute(req);
-    const result = res.source ?? await (Buffer.isBuffer(res.body) ? Promise.resolve(res.body) : toBuffer(res.body)).then(v => this.getOutput(v));
+    let result = await asBuffer(res.body).then(v => this.getOutput(v));
 
     if (res.statusCode && res.statusCode >= 400) {
+      const err = WebResponse.fromCatch(AppError.fromJSON(result) ?? result).source!;
       if (throwOnError) {
-        const err = WebResponse.fromCatch(result).source!;
-        Object.assign(err, { status: res.statusCode });
         throw err;
+      } else {
+        result = err;
       }
     }
 
