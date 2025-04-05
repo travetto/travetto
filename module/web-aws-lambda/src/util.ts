@@ -1,11 +1,10 @@
 import { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
-import zlib from 'node:zlib';
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { asFull, castTo, Util } from '@travetto/runtime';
-import { WebHeaders, WebRequest, WebResponse } from '@travetto/web';
+import { WebRequest, WebResponse } from '@travetto/web';
 
 const baseLambdaContext = asFull<APIGatewayProxyEvent['requestContext']>({
   accountId: Util.uuid(),
@@ -112,16 +111,10 @@ export class AwsLambdaWebUtil {
    * Create a web response from an API Gateway result
    */
   static toWebResponse(res: APIGatewayProxyResult): WebResponse {
-    let resBody: Buffer = Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8');
-
-    const resHeaders = new WebHeaders({ ...res.headers ?? {}, ...res.multiValueHeaders ?? {} });
-
-    switch (resHeaders.getList('Content-Encoding')?.[0]) {
-      case 'gzip': resBody = zlib.gunzipSync(resBody); break;
-      case 'deflate': resBody = zlib.inflateSync(resBody); break;
-      case 'br': resBody = zlib.brotliDecompressSync(resBody); break;
-    }
-
-    return WebResponse.from(resBody).with({ statusCode: res.statusCode, headers: resHeaders });
+    return new WebResponse({
+      body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
+      headers: { ...res.headers ?? {}, ...res.multiValueHeaders ?? {} },
+      statusCode: res.statusCode
+    });
   }
 }

@@ -1,3 +1,4 @@
+import zlib from 'node:zlib';
 import { buffer as toBuffer } from 'node:stream/consumers';
 import { Readable } from 'node:stream';
 
@@ -67,7 +68,19 @@ export abstract class BaseWebSuite {
     Object.assign(req, { query: BindUtil.flattenPaths(req.query ?? {}) });
 
     const res = await this.#support.execute(req);
-    let result = await asBuffer(res.body).then(v => this.getOutput(v));
+    let bufferResult = await asBuffer(res.body);
+
+    if (bufferResult.length) {
+      try {
+        switch (res.headers.getList('Content-Encoding')?.[0]) {
+          case 'gzip': bufferResult = zlib.gunzipSync(bufferResult); break;
+          case 'deflate': bufferResult = zlib.inflateSync(bufferResult); break;
+          case 'br': bufferResult = zlib.brotliDecompressSync(bufferResult); break;
+        }
+      } catch { /* Preemptively attempt to decompress */ }
+    }
+
+    let result = await this.getOutput(bufferResult);
 
     if (res.statusCode && res.statusCode >= 400) {
       const err = WebResponse.fromCatch(AppError.fromJSON(result) ?? result).source!;

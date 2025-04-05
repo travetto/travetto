@@ -146,7 +146,8 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
       const value = headers.get('Content-Encoding');
       assert(value === encoding);
 
-      assert(ret && typeof ret === 'object');
+      assert(ret);
+      assert(typeof ret === 'object');
       assert('json' in ret);
       assert(typeof ret.json === 'string');
       assert(ret.json.startsWith('0123456789'));

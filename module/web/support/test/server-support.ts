@@ -1,7 +1,6 @@
 import { Readable } from 'node:stream';
 
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { castTo } from '@travetto/runtime';
 
 import { WebServerSupport } from './types.ts';
 import { WebApplication } from '../../src/application/app.ts';
@@ -33,15 +32,14 @@ export class BasicWebServerSupport implements WebServerSupport {
     return this.#app.run();
   }
 
-  async execute(req: WebRequest): Promise<WebResponse> {
+  execute(req: WebRequest): Promise<WebResponse> {
     const { endpoint, params } = this.#app.resolveRoute(req);
-    Object.assign(req, { params });
+    Object.assign(req, { params, remoteIp: '::1' });
 
     if (req.body && Buffer.isBuffer(req.body)) {
       Object.assign(req, { inputStream: Readable.from(req.body), body: undefined });
     }
 
-    const res = await endpoint.filter!({ req });
-    return castTo(res);
+    return endpoint.filter!({ req });
   }
 }
