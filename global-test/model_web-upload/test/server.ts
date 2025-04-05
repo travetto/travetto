@@ -9,7 +9,7 @@ import { MemoryModelService } from '@travetto/model-memory';
 import { Upload, FileMap } from '@travetto/web-upload';
 import { Util, BlobMeta, BinaryUtil, castTo, AppError } from '@travetto/runtime';
 
-import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
+import { BaseWebSuite } from '@travetto/web/support/test/base-suite.ts';
 
 const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
 
