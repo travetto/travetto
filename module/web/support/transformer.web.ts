@@ -128,7 +128,7 @@ export class WebTransformer {
     }
 
     let inner: AnyType | undefined;
-    if (targetType.key === 'managed' && targetType.name === 'HttpResponse' && targetType.importName.startsWith('@travetto/web')) {
+    if (targetType.key === 'managed' && targetType.name === 'WebResponse' && targetType.importName.startsWith('@travetto/web')) {
       inner = state.getApparentTypeOfField(targetType.original!, 'source');
     }
 

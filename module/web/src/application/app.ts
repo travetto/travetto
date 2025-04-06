@@ -1,15 +1,20 @@
-import { castTo, Class, Runtime, toConcrete, TypedObject } from '@travetto/runtime';
+// eslint-disable-next-line @typescript-eslint/naming-convention
+import type Router from 'find-my-way';
+
+import { AppError, castTo, Class, Runtime, toConcrete, TypedObject } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
-import { EndpointUtil } from '../util/endpoint.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
-import { WebCommonUtil } from '../util/common.ts';
+import { EndpointConfig } from '../registry/types.ts';
 
-import { HttpInterceptor } from '../types/interceptor.ts';
-import { HTTP_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
-import { WebServer, WebServerHandle } from '../types/server.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WEB_INTERCEPTOR_CATEGORIES, HTTP_METHODS, HttpMethod } from '../types/core.ts';
+import { WebEndpointCleanup, WebRouterRequest, WebServer, WebServerHandle } from '../types/server.ts';
+
+import { WebCommonUtil } from '../util/common.ts';
+import { EndpointUtil } from '../util/endpoint.ts';
 
 /**
  * The web application
@@ -17,16 +22,25 @@ import { WebServer, WebServerHandle } from '../types/server.ts';
 @Injectable()
 export class WebApplication<T = unknown> {
 
+  #routeCleanup = new Map<string, WebEndpointCleanup>();
+
   @Inject()
   server: WebServer<T>;
+
+  router: ReturnType<typeof Router>;
 
   /**
    * List of provided interceptors
    */
-  interceptors: HttpInterceptor[] = [];
+  interceptors: WebInterceptor[] = [];
 
-  constructor() {
-    this.onControllerChange = this.onControllerChange.bind(this);
+  resolveRoute(req: WebRouterRequest): { endpoint: EndpointConfig, params: Record<string, unknown> } {
+    const found = this.router.find(castTo((req.method ?? 'get').toUpperCase()), req.path ?? '/');
+    if (!found) {
+      throw new AppError('Unknown route');
+    }
+    const handler = castTo<{ endpoint: EndpointConfig }>(found.handler);
+    return { endpoint: handler.endpoint, params: found?.params };
   }
 
   async postConstruct(): Promise<void> {
@@ -38,23 +52,28 @@ export class WebApplication<T = unknown> {
 
     this.interceptors = await this.getInterceptors();
 
+    // eslint-disable-next-line no-shadow
+    const Router = (await import('find-my-way')).default;
+    this.router = Router();
+    this.server.registerRouter(req => this.resolveRoute(req));
+
     // Register all active
     await Promise.all(ControllerRegistry.getClasses()
       .map(c => this.registerController(c)));
 
     // Listen for updates
-    ControllerRegistry.on(this.onControllerChange);
+    ControllerRegistry.on(v => this.onControllerChange(v));
   }
 
   /**
    * Get the list of installed interceptors
    */
-  async getInterceptors(): Promise<HttpInterceptor[]> {
-    const instances = await DependencyRegistry.getCandidateInstances(toConcrete<HttpInterceptor>());
-    const cats = HTTP_INTERCEPTOR_CATEGORIES.map(x => ({
+  async getInterceptors(): Promise<WebInterceptor[]> {
+    const instances = await DependencyRegistry.getCandidateInstances(toConcrete<WebInterceptor>());
+    const cats = WEB_INTERCEPTOR_CATEGORIES.map(x => ({
       key: x,
-      start: castTo<Class<HttpInterceptor>>({ name: `${x}Start` }),
-      end: castTo<Class<HttpInterceptor>>({ name: `${x}End` }),
+      start: castTo<Class<WebInterceptor>>({ name: `${x}Start` }),
+      end: castTo<Class<WebInterceptor>>({ name: `${x}End` }),
     }));
 
     const categoryMapping = TypedObject.fromEntries(cats.map(x => [x.key, x]));
@@ -104,8 +123,8 @@ export class WebApplication<T = unknown> {
    * @param c The class to register
    */
   async registerController(c: Class): Promise<void> {
-    if (this.server.listening && !Runtime.dynamic) {
-      console.warn('Reloading only supported in dynamic mode');
+    if (this.#routeCleanup.get(c.Ⲑid) === null) {
+      console.warn('Reloading routes not supported for ', this.server.constructor.Ⲑid);
       return;
     }
 
@@ -136,7 +155,20 @@ export class WebApplication<T = unknown> {
       ep.filter = castTo(EndpointUtil.createEndpointHandler(this.interceptors, ep, config));
     }
 
-    await this.server.registerEndpoints(config.class.Ⲑid, config.basePath, endpoints);
+    const toClean: [HttpMethod, string][] = [];
+    for (const endpoint of endpoints) {
+      const fullPath = endpoint.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
+      const handler = (): void => { };
+      Object.defineProperty(handler, 'endpoint', { value: endpoint });
+      this.router[HTTP_METHODS[endpoint.method].lower](fullPath, handler);
+      toClean.push([endpoint.method, fullPath]);
+    }
+
+    this.#routeCleanup.set(c.Ⲑid, async () => {
+      for (const [method, path] of toClean) {
+        this.router.off(method, path);
+      }
+    });
 
     console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: endpoints.length });
   }
@@ -146,12 +178,8 @@ export class WebApplication<T = unknown> {
    * @param c The class to unregister
    */
   async unregisterController(c: Class): Promise<void> {
-    if (!Runtime.dynamic) {
-      console.warn('Unloading only supported in dynamic mode');
-      return;
-    }
-
-    await this.server.unregisterEndpoints(c.Ⲑid);
+    this.#routeCleanup.get(c.Ⲑid)?.();
+    this.#routeCleanup.delete(c.Ⲑid);
   }
 
   /**

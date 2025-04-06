@@ -4,11 +4,11 @@ import fresh from 'fresh';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { HttpChainedContext, HttpContext } from '../types.ts';
-import { HttpResponse } from '../types/response.ts';
-import { HttpInterceptor } from '../types/interceptor.ts';
-import { HttpInterceptorCategory } from '../types/core.ts';
-import { CompressionInterceptor } from './compress.ts';
+import { WebChainedContext } from '../types.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
+import { CompressInterceptor } from './compress.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 @Config('web.etag')
@@ -27,19 +27,19 @@ export class EtagConfig {
  * Enables etag support
  */
 @Injectable()
-export class EtagInterceptor implements HttpInterceptor {
+export class EtagInterceptor implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'response';
-  dependsOn = [CompressionInterceptor];
+  category: WebInterceptorCategory = 'response';
+  dependsOn = [CompressInterceptor];
 
   @Inject()
   config: EtagConfig;
 
-  addTag(ctx: HttpContext, res: HttpResponse): HttpResponse {
+  addTag(ctx: WebChainedContext, res: WebResponse): WebResponse {
     const { req } = ctx;
 
     if (
-      Buffer.isBuffer(res.output) &&
+      Buffer.isBuffer(res.body) &&
       (
         !res.statusCode ||
         (res.statusCode < 300 && res.statusCode >= 200) ||
@@ -47,11 +47,11 @@ export class EtagInterceptor implements HttpInterceptor {
       )
     ) {
 
-      const tag = res.output.length === 0 ?
+      const tag = res.body.length === 0 ?
         '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
         crypto
           .createHash('sha1')
-          .update(res.output.toString('utf8'), 'utf8')
+          .update(res.body.toString('utf8'), 'utf8')
           .digest('base64')
           .substring(0, 27);
 
@@ -67,7 +67,7 @@ export class EtagInterceptor implements HttpInterceptor {
           'cache-control': req.headers.get('Cache-Control')!,
         }, { etag: tag, 'last-modified': lastModified! })
       ) {
-        return HttpResponse.fromEmpty().with({ statusCode: 304 });
+        return WebResponse.fromEmpty().with({ statusCode: 304 });
       }
     }
 
@@ -78,7 +78,7 @@ export class EtagInterceptor implements HttpInterceptor {
     return config.applies;
   }
 
-  async filter(ctx: HttpChainedContext): Promise<HttpResponse> {
+  async filter(ctx: WebChainedContext): Promise<WebResponse> {
     return this.addTag(ctx, await ctx.next());
   }
 }

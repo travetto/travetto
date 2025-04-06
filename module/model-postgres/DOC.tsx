@@ -2,8 +2,8 @@
 import { d, c } from '@travetto/doc';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 
-import { ModelQueryTypes } from '@travetto/model-query/support/doc.support';
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
+import { ModelQueryTypes } from '@travetto/model-query/support/doc.support.ts';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support.ts';
 
 export const text = <>
   <c.StdHeader />

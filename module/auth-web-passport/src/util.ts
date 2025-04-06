@@ -1,4 +1,4 @@
-import { HttpRequest } from '@travetto/web';
+import { WebRequest } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 
 /**
@@ -10,7 +10,7 @@ export class PassportUtil {
    * Read passport state string as bas64 encoded JSON value
    * @param src The input src for a state read (string, or a request obj)
    */
-  static readState<T = Record<string, unknown>>(src?: string | HttpRequest): T | undefined {
+  static readState<T = Record<string, unknown>>(src?: string | WebRequest): T | undefined {
     const state = (typeof src === 'string' ? src : (typeof src?.query.state === 'string' ? src?.query.state : ''));
     if (state) {
       try {
@@ -37,7 +37,7 @@ export class PassportUtil {
    * @param key Optional location to nest new state data
    * @returns
    */
-  static addToState(state: string | Record<string, unknown>, current?: string | HttpRequest, key?: string): string {
+  static addToState(state: string | Record<string, unknown>, current?: string | WebRequest, key?: string): string {
     const pre = this.readState(current) ?? {};
     const toAdd = typeof state === 'string' ? JSON.parse(state) : state;
     const base: Record<string, unknown> = key ? castTo(pre[key] ??= {}) : pre;
@@ -55,7 +55,7 @@ export class PassportUtil {
    * @param req The travetto request,
    * @param currentState The current state, if any
    */
-  static enhanceState(req: HttpRequest, currentState?: string): string {
+  static enhanceState(req: WebRequest, currentState?: string): string {
     return this.addToState({ referrer: req.headers.get('Referer') }, currentState);
   }
 }

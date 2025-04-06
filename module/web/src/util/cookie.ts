@@ -1,7 +1,7 @@
 import keygrip from 'keygrip';
 import { AppError, castKey, castTo } from '@travetto/runtime';
 
-import { Cookie, CookieGetOptions } from '../types/cookie';
+import { Cookie, CookieGetOptions } from '../types/cookie.ts';
 
 const pairText = (c: Cookie): string => `${c.name}=${c.value}`;
 const pair = (k: string, v: unknown): string => `${k}=${v}`;

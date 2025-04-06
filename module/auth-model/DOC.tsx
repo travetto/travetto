@@ -3,7 +3,7 @@ import { d, c, mod } from '@travetto/doc';
 import { toConcrete } from '@travetto/runtime';
 import { AuthModelUtil, RegisteredPrincipal } from '@travetto/auth-model';
 
-import { Links } from '@travetto/model/support/doc.support';
+import { Links } from '@travetto/model/support/doc.support.ts';
 
 const RegisteredPrincipalContract = toConcrete<RegisteredPrincipal>();
 

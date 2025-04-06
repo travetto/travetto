@@ -9,16 +9,16 @@ import { RootRegistry } from '@travetto/registry';
 import { ConfigureInterceptor } from '../src/decorator/common.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
-import { HttpInterceptor } from '../src/types/interceptor.ts';
-import { HttpInterceptorCategory } from '../src/types/core.ts';
+import { WebInterceptor } from '../src/types/interceptor.ts';
+import { WebInterceptorCategory } from '../src/types/core.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { HttpChainedContext } from '../src/types.ts';
+import { WebChainedContext } from '../src/types.ts';
 import { WebServer, WebServerHandle } from '../src/types/server.ts';
 import { WebApplication } from '../src/application/app.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
-import { HttpRequest } from '../src/types/request.ts';
+import { WebRequest } from '../src/types/request.ts';
 
 @Injectable()
 @Config('web.custom')
@@ -31,10 +31,8 @@ class CustomInterceptorConfig {
 
 @Injectable()
 class Server implements WebServer {
-  listening: boolean;
   async init(): Promise<void> { }
-  async registerEndpoints(key: string | symbol, path: string, endpoints: EndpointConfig[], interceptors?: HttpInterceptor<unknown>[] | undefined): Promise<void> { }
-  async unregisterEndpoints(key: string | symbol): Promise<void> { }
+  registerRouter(): void { }
   listen(): WebServerHandle | Promise<WebServerHandle> {
     return {
       close(cb?: Function) { },
@@ -44,9 +42,9 @@ class Server implements WebServer {
 }
 
 @Injectable()
-class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
+class CustomInterceptor implements WebInterceptor<CustomInterceptorConfig> {
 
-  category: HttpInterceptorCategory = 'global';
+  category: WebInterceptorCategory = 'global';
 
   @Inject()
   config: CustomInterceptorConfig;
@@ -55,7 +53,7 @@ class CustomInterceptor implements HttpInterceptor<CustomInterceptorConfig> {
     return config.applies || /opt-in/.test(`${endpoint.fullPath}`);
   }
 
-  async filter({ req, config, next }: HttpChainedContext<CustomInterceptorConfig>) {
+  async filter({ req, config, next }: WebChainedContext<CustomInterceptorConfig>) {
     const out = await next();
     out.headers.set('Name', config.name);
     return out;
@@ -114,7 +112,7 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const res = await endpoint.filter!({ req: new HttpRequest({}) });
+    const res = await endpoint.filter!({ req: new WebRequest({}) });
     return res.headers.get('Name') ?? undefined;
   }
 

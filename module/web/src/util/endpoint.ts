@@ -1,9 +1,11 @@
 import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { HttpFilter, HttpContext, HttpChainedFilter, HttpChainedContext } from '../types.ts';
-import { HttpResponse } from '../types/response.ts';
-import { HttpInterceptor } from '../types/interceptor.ts';
+import { WebContext, WebChainedFilter, WebChainedContext } from '../types.ts';
+import { WebRequest } from '../types/request.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInternalSymbol, HTTP_METHODS } from '../types/core.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 
 /**
@@ -33,12 +35,12 @@ export class EndpointUtil {
    * Create a full filter chain given the provided filters
    * @param filters Filters to chain
    */
-  static createFilterChain(filters: [HttpChainedFilter, unknown][]): HttpChainedFilter {
+  static createFilterChain(filters: { filter: WebChainedFilter, config?: unknown }[]): WebChainedFilter {
     const len = filters.length - 1;
-    return function filterChain(ctx: HttpChainedContext, idx: number = 0): Promise<HttpResponse> {
-      const [it, cfg] = filters[idx]!;
+    return function filterChain(ctx: WebChainedContext, idx: number = 0): Promise<WebResponse> {
+      const { filter, config } = filters[idx]!;
       const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
-      return it({ req: ctx.req, next: chainedNext, config: cfg });
+      return filter({ req: ctx.req, next: chainedNext, config });
     };
   }
 
@@ -49,10 +51,10 @@ export class EndpointUtil {
    * @param controller
    */
   static resolveInterceptorsWithConfig(
-    interceptors: HttpInterceptor[],
+    interceptors: WebInterceptor[],
     endpoint: EndpointConfig,
     controller?: ControllerConfig
-  ): [HttpInterceptor, unknown][] {
+  ): [WebInterceptor, unknown][] {
 
     const inputByClass = Map.groupBy(
       [...controller?.interceptorConfigs ?? [], ...endpoint.interceptorConfigs ?? []],
@@ -60,7 +62,7 @@ export class EndpointUtil {
     );
 
     const configs = new Map<Class, unknown>(interceptors.map(inst => {
-      const cls = asConstructable<HttpInterceptor>(inst).constructor;
+      const cls = asConstructable<WebInterceptor>(inst).constructor;
       const inputs = (inputByClass.get(cls) ?? []).map(x => x[1]);
       const config = Object.assign({}, inst.config, ...inputs);
       return [cls, inst.finalizeConfig?.(config, castTo(inputs)) ?? config];
@@ -75,7 +77,7 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(ctx: HttpContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
+  static extractParameter(ctx: WebContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
@@ -83,12 +85,13 @@ export class EndpointUtil {
     }
 
     const name = param.name!;
+    const { req } = ctx;
     switch (param.location) {
-      case 'path': return ctx.req.params[name];
-      case 'header': return field.array ? ctx.req.headers.getList(name) : ctx.req.headers.get(name);
-      case 'body': return ctx.req.body;
+      case 'path': return req.params[name];
+      case 'header': return field.array ? req.headers.getList(name) : req.headers.get(name);
+      case 'body': return req.body;
       case 'query': {
-        const q = ctx.req.getExpandedQuery();
+        const q = req[WebInternalSymbol].expandedQuery ??= BindUtil.expandPaths(req.query);
         return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[name]);
       }
     }
@@ -100,10 +103,10 @@ export class EndpointUtil {
    * @param req The request
    * @param res The response
    */
-  static async extractParameters(ctx: HttpContext, endpoint: EndpointConfig): Promise<unknown[]> {
+  static async extractParameters(ctx: WebContext, endpoint: EndpointConfig): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
-    const vals = ctx.req.getInternal().requestParams;
+    const vals = ctx.req[WebInternalSymbol]?.requestParams ?? [];
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
@@ -127,53 +130,56 @@ export class EndpointUtil {
   }
 
   /**
+   * Endpoint invocation code
+   */
+  static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebContext): Promise<WebResponse> {
+    const params = await this.extractParameters(ctx, endpoint);
+    try {
+      const res = WebResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
+      return res
+        .backfillHeaders(endpoint.responseHeaderMap)
+        .ensureContentLength()
+        .ensureContentType()
+        .ensureStatusCode(HTTP_METHODS[ctx.req.method].emptyStatusCode);
+    } catch (err) {
+      throw WebResponse.fromCatch(err);
+    }
+  }
+
+  /**
    * Create a full endpoint handler
    * @param interceptors Interceptors to apply
    * @param endpoint The endpoint to call
    * @param controller The controller to tie to
    */
   static createEndpointHandler(
-    interceptors: HttpInterceptor[],
+    interceptors: WebInterceptor[],
     endpoint: EndpointConfig,
     controller?: ControllerConfig
-  ): HttpChainedFilter {
+  ): WebChainedFilter {
 
     // Filter interceptors if needed
     for (const filter of [controller?.interceptorExclude, endpoint.interceptorExclude]) {
       interceptors = filter ? interceptors.filter(x => !filter(x)) : interceptors;
     }
 
-    const handlerBound: HttpFilter = async (ctx): Promise<HttpResponse> => {
-      const params = await this.extractParameters(ctx, endpoint);
-      try {
-        const res = HttpResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
-        return res
-          .backfillHeaders(endpoint.responseHeaderMap)
-          .ensureContentLength()
-          .ensureContentType()
-          .ensureStatusCode(ctx.req.method === 'POST' ? 201 : (ctx.req.method === 'PUT' ? 204 : 200));
-      } catch (err) {
-        throw HttpResponse.fromCatch(err);
-      }
-    };
+    const interceptorFilters =
+      this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
+        .filter(([inst, cfg]) => inst.applies?.(endpoint, cfg) ?? true)
+        .map(([inst, config]) => ({ filter: inst.filter.bind(inst), config }));
 
-    const filters = [
+    const endpointFilters = [
       ...(controller?.filters ?? []).map(fn => fn.bind(controller?.instance)),
       ...(endpoint.filters ?? []).map(fn => fn.bind(endpoint.instance)),
       ...(endpoint.params.filter(cfg => cfg.resolve).map(fn => fn.resolve!))
-    ];
+    ]
+      .map(fn => ({ filter: fn }));
 
-    const validInterceptors =
-      this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
-        .filter(([inst, cfg]) => inst.applies?.(endpoint, cfg) ?? true);
-
-    const filterChain: [HttpChainedFilter, unknown][] = castTo([
-      ...validInterceptors.map(([inst, cfg]) => [inst.filter.bind(inst), cfg]),
-      ...filters.map(fn => [fn, {}]),
-      [handlerBound, {}]
+    return this.createFilterChain([
+      ...interceptorFilters,
+      ...endpointFilters,
+      { filter: this.invokeEndpoint.bind(this, endpoint) }
     ]);
-
-    return this.createFilterChain(filterChain);
   }
 
   /**

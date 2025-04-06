@@ -25,9 +25,9 @@ class WebSessionConfig { }
  * Loads session, and provides ability to create session as needed, persists when complete.
  */
 @Injectable()
-export class AuthSessionInterceptor implements HttpInterceptor {
+export class AuthSessionInterceptor implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'application';
+  category: WebInterceptorCategory = 'application';
   dependsOn = [AuthContextInterceptor];
 
   @Inject()
@@ -40,14 +40,14 @@ export class AuthSessionInterceptor implements HttpInterceptor {
   config: WebSessionConfig;
 
   @Inject()
-  webContext: WebContext;
+  webAsyncContext: WebAsyncContext;
 
   postConstruct(): void {
-    this.webContext.registerType(toConcrete<Session>(), () => this.context.get(true));
-    this.webContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
+    this.webAsyncContext.registerType(toConcrete<Session>(), () => this.context.get(true));
+    this.webAsyncContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
 
-  async filter({ next }: HttpChainedContext): Promise<HttpResponse> {
+  async filter({ next }: WebChainedContext): Promise<WebResponse> {
     try {
       await this.service.load();
       return await next();

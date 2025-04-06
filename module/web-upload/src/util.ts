@@ -7,7 +7,7 @@ import { pipeline } from 'node:stream/promises';
 
 import busboy from '@fastify/busboy';
 
-import { HttpRequest, MimeUtil } from '@travetto/web';
+import { WebRequest, MimeUtil } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { WebUploadConfig } from './config.ts';
@@ -33,7 +33,11 @@ export class WebUploadUtil {
   /**
    * Get all the uploads, separating multipart from direct
    */
-  static async* getUploads(req: HttpRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
+  static async* getUploads(req: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
+    if (!req.inputStream) {
+      throw new AppError('No input stream provided for upload', { category: 'data' });
+    }
+
     if (MULTIPART.has(req.headers.getContentType()?.full!)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;

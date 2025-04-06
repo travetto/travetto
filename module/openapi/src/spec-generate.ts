@@ -10,8 +10,6 @@ import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@t
 
 import { ApiSpecConfig } from './config.ts';
 
-const ALL_METHODS = Object.values(HTTP_METHODS).filter(x => x.standard);
-
 const DEFINITION = '#/components/schemas';
 
 function isFieldConfig(val: object): val is FieldConfig {
@@ -324,19 +322,11 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       }
     }
 
-    const epPath = (!ep.path ? '/' : ep.path).replace(/:([A-Za-z0-9_]+)\b/g, (__, param) => `{${param}}`);
-
-    const key = `${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/');
-
-    const toAdd = ep.method === 'ALL' ?
-      ALL_METHODS.reduce((acc, v) =>
-        ({ ...acc, [v.lower]: { ...op, operationId: `${op.operationId}_${v}` } }), {}
-      ) :
-      { [HTTP_METHODS[ep.method].lower]: op };
+    const key = ep.fullPath.replace(/:([A-Za-z0-9_]+)\b/g, (__, param) => `{${param}}`);
 
     this.#paths[key] = {
       ...(this.#paths[key] ?? {}),
-      ...toAdd
+      [HTTP_METHODS[ep.method].lower]: op
     };
   }
 

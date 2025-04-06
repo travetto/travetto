@@ -1,7 +1,8 @@
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import { Writable } from 'node:stream';
-import { DefaultContextExtends, HttpError } from 'koa';
+import { HttpError } from 'http-errors';
+import keygrip from 'keygrip';
 
 import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
@@ -22,8 +23,8 @@ class Source {
   }
 
   @InjectableFactory()
-  static extends(): DefaultContextExtends {
-    return { follow: 2 };
+  static extends(): keygrip {
+    return castTo({});
   }
 
   @InjectableFactory()
@@ -65,7 +66,7 @@ class Child {
   stream2: Writable;
 
   @Inject()
-  ctx: DefaultContextExtends;
+  ctx: keygrip;
 }
 
 @Suite()

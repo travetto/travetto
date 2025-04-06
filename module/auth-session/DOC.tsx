@@ -4,7 +4,7 @@ import { AuthContext, Principal } from '@travetto/auth';
 import { Runtime, toConcrete } from '@travetto/runtime';
 import { ModelExpirySupport } from '@travetto/model';
 
-import { SessionService } from './src/service';
+import { SessionService } from './src/service.ts';
 
 const PrincipalContract = toConcrete<Principal>();
 const ModelExpirySupportContract = toConcrete<ModelExpirySupport>();

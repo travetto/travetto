@@ -1,4 +1,4 @@
-import { Controller, Get, Redirect, Post, HttpRequest, ContextParam } from '@travetto/web';
+import { Controller, Get, Redirect, Post, WebRequest, ContextParam } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import { Principal } from '@travetto/auth';
 
@@ -8,7 +8,7 @@ import { FbAuthSymbol } from './conf.ts';
 export class SampleAuth {
 
   @ContextParam()
-  req: HttpRequest;
+  req: WebRequest;
 
   @ContextParam()
   user: Principal;

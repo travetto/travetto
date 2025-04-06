@@ -21,6 +21,7 @@ export * from './src/registry/controller.ts';
 export * from './src/registry/visitor.ts';
 export * from './src/registry/types.ts';
 
+export * from './src/interceptor/accepts.ts';
 export * from './src/interceptor/body-parse.ts';
 export * from './src/interceptor/cors.ts';
 export * from './src/interceptor/cookies.ts';

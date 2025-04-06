@@ -5,15 +5,15 @@ import { Ignore } from '@travetto/schema';
 
 import { MimeUtil } from '../util/mime.ts';
 
-import { HttpChainedContext } from '../types.ts';
-import { HttpInterceptor } from '../types/interceptor.ts';
-import { HttpInterceptorCategory } from '../types/core.ts';
-import { HttpResponse } from '../types/response.ts';
+import { WebChainedContext } from '../types.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
+import { WebResponse } from '../types/response.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
 
 @Config('web.accepts')
-class AcceptsConfig {
+export class AcceptsConfig {
   /**
    * Accepts certain request content types
    */
@@ -31,9 +31,9 @@ class AcceptsConfig {
  * Enables access to contextual data when running in a web application
  */
 @Injectable()
-export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
+export class AcceptsInterceptor implements WebInterceptor<AcceptsConfig> {
 
-  category: HttpInterceptorCategory = 'request';
+  category: WebInterceptorCategory = 'request';
 
   @Inject()
   config: AcceptsConfig;
@@ -47,7 +47,7 @@ export class AcceptsInterceptor implements HttpInterceptor<AcceptsConfig> {
     return config.applies;
   }
 
-  filter({ req, config, next }: HttpChainedContext<AcceptsConfig>): Promise<HttpResponse> {
+  filter({ req, config, next }: WebChainedContext<AcceptsConfig>): Promise<WebResponse> {
     const contentType = req.headers.get('Content-Type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });

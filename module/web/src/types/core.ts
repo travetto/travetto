@@ -1,26 +1,29 @@
+type MethodConfig = { body: boolean, emptyStatusCode: number };
+function verb<M extends string, L extends string, C extends Partial<MethodConfig>>(method: M, lower: L, cfg: C): { method: M, lower: L } & C & MethodConfig {
+  return { body: false, emptyStatusCode: 204, ...cfg, method, lower, };
+}
+
 export const HTTP_METHODS = {
-  PUT: { method: 'PUT', body: true, lower: 'put', standard: true },
-  POST: { method: 'POST', body: true, lower: 'post', standard: true },
-  GET: { method: 'GET', body: false, lower: 'get', standard: true },
-  DELETE: { method: 'DELETE', body: false, lower: 'delete', standard: true },
-  PATCH: { method: 'PATCH', body: true, lower: 'patch', standard: true },
-  HEAD: { method: 'HEAD', body: false, lower: 'head', standard: true },
-  OPTIONS: { method: 'OPTIONS', body: false, lower: 'options', standard: true },
-  ALL: { method: 'ALL', body: true, lower: 'all', standard: false },
+  PUT: verb('PUT', 'put', { body: true }),
+  POST: verb('POST', 'post', { body: true, emptyStatusCode: 201 }),
+  PATCH: verb('PATCH', 'patch', { body: true }),
+  GET: verb('GET', 'get', {}),
+  DELETE: verb('DELETE', 'delete', {}),
+  HEAD: verb('HEAD', 'head', {}),
+  OPTIONS: verb('OPTIONS', 'options', {}),
 } as const;
-type HttpMethodsType = typeof HTTP_METHODS;
 
-export type HttpMethodWithAll = keyof HttpMethodsType;
-export type HttpMethod = { [K in keyof HttpMethodsType]: HttpMethodsType[K]['standard'] extends true ? K : never }[HttpMethodWithAll];
+export type HttpMethod = keyof typeof HTTP_METHODS;
 export type HttpProtocol = 'http' | 'https';
-export type HttpMetadataConfig = { mode: 'cookie' | 'header', headerPrefix?: string, header: string, cookie: string };
 
 /**
  * High level categories with a defined ordering
  */
-export const HTTP_INTERCEPTOR_CATEGORIES = ['global', 'terminal', 'request', 'response', 'application', 'value', 'unbound'] as const;
+export const WEB_INTERCEPTOR_CATEGORIES = ['global', 'terminal', 'request', 'response', 'application', 'value', 'unbound'] as const;
 
 /**
  * High level categories with a defined ordering
  */
-export type HttpInterceptorCategory = (typeof HTTP_INTERCEPTOR_CATEGORIES)[number];
+export type WebInterceptorCategory = (typeof WEB_INTERCEPTOR_CATEGORIES)[number];
+
+export const WebInternalSymbol = Symbol.for('@travetto/web:internal');

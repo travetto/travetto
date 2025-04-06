@@ -1,29 +1,33 @@
-import { IncomingMessage, ServerResponse } from 'node:http';
-import { pipeline } from 'node:stream/promises';
-import { Readable } from 'node:stream';
+import type { IncomingMessage } from 'node:http';
 
-import { HttpRequest } from '@travetto/web';
-import { castTo, hasFunction } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
+import { WebRequest, WebResponse } from '@travetto/web';
 
-const isReadable = hasFunction<Readable>('pipe');
-
-/**
- * Provide a mapping between node request/response and the framework analogs
- */
-export class NodeWebServerUtil {
+export class NodeWebUtil {
   /**
-   * Build a Travetto HttpRequest from an Express Request
+   * Create a fetch request given a web request
    */
-  static getRequest(
-    req: IncomingMessage & { originalUrl?: string, secure?: boolean },
-    res: ServerResponse,
-    params?: Record<string, string>
-  ): HttpRequest {
+  static toFetchRequest(req: WebRequest): RequestInit & { path: string } {
+    const { query, method, body, headers, path } = req;
 
-    const url = new URL(`http${req.secure ? 's' : ''}://${req.headers.host}${req.url}`);
+    let q = '';
+    if (query && Object.keys(query).length) {
+      const pairs = Object.entries(query).map<[string, string]>(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`]);
+      q = `?${new URLSearchParams(pairs).toString()}`;
+    }
 
-    return new HttpRequest({
-      protocol: req.secure ? 'https' : 'http',
+    return { path: `${path}${q}`, method, headers, body, };
+  }
+
+  /**
+   * Create a web request given a node IncomingMessage
+   */
+  static toWebRequest(req: IncomingMessage, params: Record<string, unknown>): WebRequest {
+    const secure = 'encrypted' in req.socket && !!req.socket.encrypted;
+    const url = new URL(`http${secure ? 's' : ''}://${req.headers.host}${req.url}`);
+
+    return new WebRequest({
+      protocol: secure ? 'https' : 'http',
       method: castTo(req.method?.toUpperCase()),
       path: url.pathname!,
       query: Object.fromEntries(url.searchParams.entries()),
@@ -31,17 +35,15 @@ export class NodeWebServerUtil {
       headers: req.headers,
       inputStream: req,
       remoteIp: req.socket.remoteAddress,
-      port: req.socket.localPort,
-      async respond(value): Promise<void> {
-        res.statusCode = value.statusCode ?? 200;
-        value.headers.forEach((v, k) => res.setHeader(k, v));
-        if (isReadable(value.output)) {
-          await pipeline(value.output, res);
-        } else {
-          res.write(value.output);
-          res.end();
-        }
-      }
+      port: req.socket.localPort
     });
+  }
+
+  /**
+   * Create a WebResponse given a fetch Response
+   */
+  static async toWebResponse(res: Response): Promise<WebResponse> {
+    const out = Buffer.from(await res.arrayBuffer());
+    return WebResponse.from(out).with({ statusCode: res.status, headers: res.headers });
   }
 }

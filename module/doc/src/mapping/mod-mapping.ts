@@ -199,29 +199,9 @@ export const MOD_MAPPING = {
     name: '@travetto/web-aws-lambda', folder: '@travetto/web-aws-lambda', displayName: 'Web AWS Lambda',
     description: 'Web APIs entry point support for AWS Lambdas.'
   },
-  WebExpress: {
-    name: '@travetto/web-express', folder: '@travetto/web-express', displayName: 'Express Web Server',
-    description: 'Express provider for the travetto web module.'
-  },
-  WebExpressLambda: {
-    name: '@travetto/web-express-lambda', folder: '@travetto/web-express-lambda', displayName: 'Express Web AWS Lambda Server',
-    description: 'Express AWS Lambda provider for the travetto web module.'
-  },
-  WebFastify: {
-    name: '@travetto/web-fastify', folder: '@travetto/web-fastify', displayName: 'Fastify Web Server',
-    description: 'Fastify provider for the travetto web module.'
-  },
-  WebFastifyLambda: {
-    name: '@travetto/web-fastify-lambda', folder: '@travetto/web-fastify-lambda', displayName: 'Fastify Web AWS Lambda Server',
-    description: 'Fastify AWS Lambda provider for the travetto web module.'
-  },
-  WebKoa: {
-    name: '@travetto/web-koa', folder: '@travetto/web-koa', displayName: 'Koa Web Server',
-    description: 'Koa provider for the travetto web module.'
-  },
-  WebKoaLambda: {
-    name: '@travetto/web-koa-lambda', folder: '@travetto/web-koa-lambda', displayName: 'Koa Web AWS Lambda Source',
-    description: 'Koa provider for the travetto web module.'
+  WebNode: {
+    name: '@travetto/web-node', folder: '@travetto/web-node', displayName: 'Node Web Server',
+    description: 'Node provider for the travetto web module.'
   },
   WebRpc: {
     name: '@travetto/web-rpc', folder: '@travetto/web-rpc', displayName: 'Web RPC Support',

@@ -1,5 +1,6 @@
 import { Util } from '@travetto/runtime';
-import { MimeType } from '../types.ts';
+
+export type MimeType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 
 /**
  * Utils for checking mime patterns
@@ -9,7 +10,7 @@ export class MimeUtil {
   static #convert(rule: string): RegExp {
     const core = (rule.endsWith('/*') || !rule.includes('/')) ?
       `${rule.replace(/[/].{0,20}$/, '')}\/.*` : rule;
-    return new RegExp(`^${core}$`);
+    return new RegExp(`^${core}[ ]{0,10}(;|$)`);
   }
 
   static parse(mimeType?: string): MimeType | undefined {

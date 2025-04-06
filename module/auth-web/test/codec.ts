@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { HttpResponse } from '@travetto/web';
+import { WebResponse } from '@travetto/web';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
@@ -26,7 +26,7 @@ export class CodecTest {
 
   @Test()
   async testHeader() {
-    const res = HttpResponse.fromEmpty();
+    const res = WebResponse.fromEmpty();
     this.interceptor.config.mode = 'header';
 
     await this.interceptor.codec.encode(res,
@@ -43,7 +43,7 @@ export class CodecTest {
 
   @Test()
   async testHeaderMissing() {
-    const res = HttpResponse.fromEmpty();
+    const res = WebResponse.fromEmpty();
     this.interceptor.config.mode = 'header';
 
     await this.interceptor.codec.encode(res, undefined);

@@ -5,11 +5,11 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError } from '@travetto/runtime';
 
-import { HttpChainedContext } from '../types.ts';
-import { HttpResponse } from '../types/response.ts';
-import { HttpRequest } from '../types/request.ts';
-import { HttpInterceptorCategory, HTTP_METHODS } from '../types/core.ts';
-import { HttpInterceptor } from '../types/interceptor.ts';
+import { WebChainedContext } from '../types.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebRequest } from '../types/request.ts';
+import { WebInterceptorCategory, HTTP_METHODS } from '../types/core.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
 
@@ -40,15 +40,15 @@ export class BodyParseConfig {
  * Parses the body input content
  */
 @Injectable()
-export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
+export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
   dependsOn = [AcceptsInterceptor];
-  category: HttpInterceptorCategory = 'request';
+  category: WebInterceptorCategory = 'request';
 
   @Inject()
   config: BodyParseConfig;
 
-  async read(req: HttpRequest, limit: string | number): Promise<string> {
+  async read(req: WebRequest, limit: string | number): Promise<string> {
     const cfg = req.headers.getContentType();
 
     const text = await rawBody(inflation(req.inputStream!), {
@@ -58,7 +58,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     return text;
   }
 
-  detectParserType(req: HttpRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
+  detectParserType(req: WebRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
     const { full = '' } = req.headers.getContentType() ?? {};
     if (!full) {
       return;
@@ -85,7 +85,7 @@ export class BodyParseInterceptor implements HttpInterceptor<BodyParseConfig> {
     return config.applies && HTTP_METHODS[endpoint.method].body;
   }
 
-  async filter({ req, config, next }: HttpChainedContext<BodyParseConfig>): Promise<HttpResponse> {
+  async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
     if (!HTTP_METHODS[req.method].body || req.body !== undefined) { // If body is already set
       return next();
     }

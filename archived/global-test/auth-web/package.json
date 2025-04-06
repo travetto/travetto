@@ -1,0 +1,11 @@
+{
+  "name": "@travetto-test/auth-web",
+  "version": "0.0.0",
+  "dependencies": {
+    "@travetto/auth-web": "^6.0.0-rc.3",
+    "@travetto/web-aws-lambda": "^6.0.0-rc.1",
+    "@travetto/web-node": "^6.0.0-rc.1"
+  },
+  "travetto": {},
+  "private": true
+}

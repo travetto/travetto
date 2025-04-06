@@ -6,8 +6,8 @@ import {
   ModelExpirySupport, ModelIndexedSupport, ModelType
 } from '@travetto/model';
 
-import { Model } from './src/registry/decorator';
-import { Links } from './support/doc.support';
+import { Model } from './src/registry/decorator.ts';
+import { Links } from './support/doc.support.ts';
 
 const ModelTypeContract = toConcrete<ModelType>();
 

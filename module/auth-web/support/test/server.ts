@@ -1,13 +1,13 @@
 import timers from 'node:timers/promises';
 import assert from 'node:assert';
 
-import { Controller, Get, HttpHeaders, HttpResponse, Post } from '@travetto/web';
+import { Controller, Get, WebHeaders, WebResponse, Post } from '@travetto/web';
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AuthenticationError, Authenticator, AuthContext, AuthConfig } from '@travetto/auth';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
-import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
+import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
 import { Login, Authenticated, Logout } from '../../src/decorator.ts';
 import { WebAuthConfig } from '../../src/config.ts';
@@ -66,7 +66,7 @@ class TestAuthController {
   @Get('/logout')
   @Logout()
   async logout() {
-    return HttpResponse.redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self', 301);
   }
 }
 
@@ -90,75 +90,73 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   @Inject()
   config: WebAuthConfig;
 
-  getCookie(headers: HttpHeaders): string | undefined {
+  getCookie(headers: WebHeaders): string | undefined {
     return headers.getSetCookie()[0];
   }
 
-  getCookieValue(headers: HttpHeaders): string | undefined {
+  getCookieValue(headers: WebHeaders): string | undefined {
     return this.getCookie(headers)?.split(';')[0];
   }
 
-  getCookieExpires(headers: HttpHeaders): Date | undefined {
+  getCookieExpires(headers: WebHeaders): Date | undefined {
     const v = this.getCookie(headers)?.match('expires=([^;]+)(;|$)')?.[1];
     return v ? new Date(v) : undefined;
   }
 
   @Test()
   async testBadAuth() {
-    const { status } = await this.request('POST', '/test/auth/login', {
-      throwOnError: false,
+    const { statusCode } = await this.request({
+      method: 'POST', path: '/test/auth/login',
       body: {
         username: 'Todd',
         password: 'Rod'
       }
-    });
-    assert(status === 401);
+    }, false);
+    assert(statusCode === 401);
   }
 
   @Test()
   async testGoodAuth() {
     this.config.mode = 'cookie';
 
-    const { headers, status } = await this.request('POST', '/test/auth/login', {
-      throwOnError: false,
+    const { headers, statusCode } = await this.request({
+      method: 'POST', path: '/test/auth/login',
       body: {
         username: 'super-user',
         password: 'password'
       }
-    });
+    }, false);
     assert(headers.getSetCookie().length);
-    assert(status === 201);
+    assert(statusCode === 201);
   }
 
   @Test()
   async testBlockedAuthenticated() {
     this.config.mode = 'header';
 
-    const { status } = await this.request('GET', '/test/auth/self', {
-      throwOnError: false
-    });
-    assert(status === 401);
+    const { statusCode } = await this.request({ method: 'GET', path: '/test/auth/self' }, false);
+    assert(statusCode === 401);
   }
 
   @Test()
   async testGoodAuthenticatedCookie() {
     this.config.mode = 'cookie';
 
-    const { headers, status } = await this.request('POST', '/test/auth/login', {
-      throwOnError: false,
+    const { headers, statusCode } = await this.request({
+      method: 'POST', path: '/test/auth/login',
       body: {
         username: 'super-user',
         password: 'password'
       }
-    });
-    assert(status === 201);
+    }, false);
+    assert(statusCode === 201);
     const cookie = this.getCookieValue(headers);
     assert(cookie);
 
-    const { status: lastStatus } = await this.request('GET', '/test/auth/self', {
-      throwOnError: false,
+    const { statusCode: lastStatus } = await this.request({
+      method: 'GET', path: '/test/auth/self',
       headers: { cookie }
-    });
+    }, false);
     assert(lastStatus === 200);
   }
 
@@ -166,21 +164,21 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testGoodAuthenticatedHeader() {
     this.config.mode = 'header';
 
-    const { headers, status } = await this.request('POST', '/test/auth/login', {
-      throwOnError: false,
+    const { headers, statusCode } = await this.request({
+      method: 'POST', path: '/test/auth/login',
       body: {
         username: 'super-user',
         password: 'password'
       }
-    });
-    assert(status === 201);
+    }, false);
+    assert(statusCode === 201);
 
-    const { status: lastStatus } = await this.request('GET', '/test/auth/self', {
-      throwOnError: false,
+    const { statusCode: lastStatus } = await this.request({
+      method: 'GET', path: '/test/auth/self',
       headers: {
         Authorization: headers.get('Authorization')!
       }
-    });
+    }, false);
     assert(lastStatus === 200);
   }
 
@@ -188,27 +186,25 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testAllAuthenticated() {
     this.config.mode = 'header';
 
-    const { status } = await this.request('GET', '/test/auth-all/self', {
-      throwOnError: false
-    });
-    assert(status === 401);
+    const { statusCode } = await this.request({ method: 'GET', path: '/test/auth-all/self' }, false);
+    assert(statusCode === 401);
 
-    const { headers, status: authStatus } = await this.request('POST', '/test/auth/login', {
-      throwOnError: false,
+    const { headers, statusCode: authStatus } = await this.request({
+      method: 'POST', path: '/test/auth/login',
       body: {
         username: 'super-user',
         password: 'password'
       }
-    });
+    }, false);
     assert(authStatus === 201);
 
 
-    const { status: lastStatus } = await this.request('GET', '/test/auth-all/self', {
-      throwOnError: false,
+    const { statusCode: lastStatus } = await this.request({
+      method: 'GET', path: '/test/auth-all/self',
       headers: {
         Authorization: headers.get('Authorization')!
       }
-    });
+    }, false);
     assert(lastStatus === 200);
   }
 
@@ -217,21 +213,21 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testTokenRetrieval() {
     this.config.mode = 'cookie';
 
-    const { headers, status } = await this.request('POST', '/test/auth/login', {
-      throwOnError: false,
+    const { headers, statusCode } = await this.request({
+      method: 'POST', path: '/test/auth/login',
       body: {
         username: 'super-user',
         password: 'password'
       }
-    });
-    assert(status === 201);
+    }, false);
+    assert(statusCode === 201);
     const cookie = this.getCookieValue(headers);
     assert(cookie);
 
-    const { body, status: lastStatus } = await this.request('GET', '/test/auth/token', {
-      throwOnError: false,
+    const { source: body, statusCode: lastStatus } = await this.request({
+      method: 'GET', path: '/test/auth/token',
       headers: { cookie }
-    });
+    }, false);
     assert(lastStatus === 200);
     assert(typeof body === 'string');
 
@@ -243,14 +239,14 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
   async testCookieRollingRenewAuthenticated() {
     this.config.mode = 'cookie';
 
-    const { headers, status } = await this.request('POST', '/test/auth/login', {
-      throwOnError: false,
+    const { headers, statusCode } = await this.request({
+      method: 'POST', path: '/test/auth/login',
       body: {
         username: 'super-user',
         password: 'password'
       }
-    });
-    assert(status === 201);
+    }, false);
+    assert(statusCode === 201);
 
     const start = Date.now();
     const cookie = this.getCookieValue(headers);
@@ -259,10 +255,10 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     const expires = this.getCookieExpires(headers);
     assert(expires);
 
-    const { headers: selfHeaders, status: lastStatus } = await this.request('GET', '/test/auth/self', {
-      throwOnError: false,
+    const { headers: selfHeaders, statusCode: lastStatus } = await this.request({
+      method: 'GET', path: '/test/auth/self',
       headers: { cookie }
-    });
+    }, false);
     assert(this.getCookie(selfHeaders) === undefined);
     assert(lastStatus === 200);
 
@@ -270,10 +266,10 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     assert(used < 1000);
     await timers.setTimeout((2000 - used) / 2);
 
-    const { headers: selfHeadersRenew, status: lastStatus2 } = await this.request('GET', '/test/auth/self', {
-      throwOnError: false,
+    const { headers: selfHeadersRenew, statusCode: lastStatus2 } = await this.request({
+      method: 'GET', path: '/test/auth/self',
       headers: { cookie }
-    });
+    }, false);
     assert(lastStatus2 === 200);
     assert(this.getCookie(selfHeadersRenew));
 

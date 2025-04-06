@@ -1,0 +1,13 @@
+{
+  "name": "@travetto-test/auth-web-session_web",
+  "version": "0.0.0",
+  "dependencies": {
+    "@travetto/auth-session": "^6.0.0-rc.1",
+    "@travetto/auth-web-session": "^6.0.0-rc.3",
+    "@travetto/model-memory": "^6.0.0-rc.1",
+    "@travetto/web-aws-lambda": "^6.0.0-rc.1",
+    "@travetto/web-node": "^6.0.0-rc.1"
+  },
+  "travetto": {},
+  "private": true
+}

@@ -1,12 +1,12 @@
-import { HttpChainedContext, HttpInterceptor, HttpInterceptorCategory } from '@travetto/web';
+import { WebChainedContext, WebInterceptor, WebInterceptorCategory } from '@travetto/web';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
-export class HelloWorldInterceptor implements HttpInterceptor {
+export class HelloWorldInterceptor implements WebInterceptor {
 
-  category: HttpInterceptorCategory = 'application';
+  category: WebInterceptorCategory = 'application';
 
-  filter(ctx: HttpChainedContext) {
+  filter(ctx: WebChainedContext) {
     console.log('Hello world!');
     return ctx.next();
   }
