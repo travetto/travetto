@@ -193,15 +193,8 @@ export class WebResponse<S = unknown> {
       yield `--${boundary}--${nl}`;
     });
 
-    const tap = async function* () {
-      for await (const item of source()) {
-        console.error(item);
-        yield item;
-      }
-    }
-
     return new WebResponse({
-      body: Readable.from(tap()),
+      body: Readable.from(source()),
       contentType: `multipart/form-data; boundary=${boundary}`,
       source: form
     });

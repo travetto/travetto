@@ -2,7 +2,8 @@ import { AppError, Runtime, RuntimeResources } from '@travetto/runtime';
 import { Config, EnvVar } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 
-import { WebSslKeyPair, WebSslUtil } from '../util/ssl.ts';
+import { WebSslUtil } from '../util/ssl.ts';
+import { WebSslKeyPair } from '../types/application.ts';
 
 @Config('web.ssl')
 export class WebSslConfig {

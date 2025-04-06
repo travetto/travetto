@@ -10,7 +10,7 @@ class Config {
       async run(): Promise<WebApplicationHandle> {
         await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
         console.log('Listening', { port: config.port });
-        return { on() { }, close() { } };
+        return { on(): void { }, close(): void { } };
       }
     } satisfies WebApplication;
   }
