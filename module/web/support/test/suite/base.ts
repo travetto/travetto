@@ -69,7 +69,7 @@ export abstract class BaseWebSuite {
 
   async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
 
-    const router = await DependencyRegistry.getInstance(this.dispatcherType);
+    const dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
 
     const webReq = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
 
@@ -81,7 +81,7 @@ export abstract class BaseWebSuite {
 
     Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
 
-    const webRes = await router.dispatch({ req: webReq });
+    const webRes = await dispatcher.dispatch({ req: webReq });
     let bufferResult = await asBuffer(webRes.body);
 
     if (bufferResult.length) {
