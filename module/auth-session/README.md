@@ -50,11 +50,11 @@ export class AuthSessionInterceptor implements WebInterceptor {
   config: WebSessionConfig;
 
   @Inject()
-  webContext: WebContext;
+  webAsyncContext: WebAsyncContext;
 
   postConstruct(): void {
-    this.webContext.registerType(toConcrete<Session>(), () => this.context.get(true));
-    this.webContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
+    this.webAsyncContext.registerType(toConcrete<Session>(), () => this.context.get(true));
+    this.webAsyncContext.registerType(toConcrete<SessionData>(), () => this.context.get(true).data);
   }
 
   async filter({ next }: WebChainedContext): Promise<WebResponse> {

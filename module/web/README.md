@@ -142,7 +142,7 @@ export class Simple {
 ```
 
 ### ContextParam
-In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L23).  These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) on a class-level field from the [WebContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L9).  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L23).  These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) on a class-level field from the [WebAsyncContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L8).  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
 **Code: Example ContextParam usage**
 ```typescript
@@ -271,15 +271,65 @@ By default, the framework provides a default [@CliCommand](https://github.com/tr
 ```bash
 $ trv run:web
 
-TypeError: this.server.registerRouter is not a function
-    at WebApplication.postConstruct (./src/application/app.ts:54:17)
-    at async $DependencyRegistry.construct (<workspace-root>/module/di/src/registry.ts:174:7)
-    at async $DependencyRegistry.createInstance (<workspace-root>/module/di/src/registry.ts:203:24)
-    at async $DependencyRegistry.getInstance (<workspace-root>/module/di/src/registry.ts:288:7)
-    at async $DependencyRegistry.runInstance (<workspace-root>/module/di/src/registry.ts:585:18)
-    at async RunWebCommand.main (./support/cli.run_web.ts:29:14)
-    at async Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:58:20)
-    at async Function.run (<workspace-root>/module/cli/src/execute.ts:75:9)
+Initialized {
+  manifest: {
+    main: {
+      name: '@travetto-doc/web',
+      folder: './doc-exec'
+    },
+    workspace: {
+      name: '@travetto-doc/web',
+      path: './doc-exec',
+      mono: false,
+      manager: 'npm',
+      type: 'commonjs',
+      defaultEnv: 'local'
+    }
+  },
+  runtime: {
+    env: 'local',
+    debug: false,
+    production: false,
+    dynamic: false,
+    resourcePaths: [ './doc-exec/resources' ],
+    profiles: []
+  },
+  config: {
+    sources: [ { priority: 999, source: 'memory://override' } ],
+    active: {
+      AcceptsConfig: { applies: false, types: {} },
+      BodyParseConfig: { applies: true, limit: '1mb', parsingTypes: {} },
+      CompressConfig: {
+        applies: true,
+        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
+        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
+      },
+      CookieConfig: {
+        applies: true,
+        signed: true,
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false
+      },
+      CorsConfig: { applies: true },
+      EtagConfig: { applies: true },
+      GetCacheConfig: { applies: true },
+      WebConfig: {
+        serve: true,
+        port: 3000,
+        trustProxy: false,
+        hostname: 'localhost',
+        bindAddress: '0.0.0.0',
+        baseUrl: 'http://localhost:3000',
+        defaultMessage: true,
+        optionsGlobalHandle: true
+      },
+      WebLogConfig: { applies: true, showStackTrace: true },
+      WebSslConfig: { active: false }
+    }
+  }
+}
+Listening { port: 3000 }
 ```
 
 ### Creating a Custom CLI Entry Point
@@ -321,14 +371,69 @@ And using the pattern established in the [Command Line Interface](https://github
 ```bash
 $ trv run:web:custom
 
-TypeError: this.server.registerRouter is not a function
-    at WebApplication.postConstruct (./src/application/app.ts:54:17)
-    at async $DependencyRegistry.construct (<workspace-root>/module/di/src/registry.ts:174:7)
-    at async $DependencyRegistry.createInstance (<workspace-root>/module/di/src/registry.ts:203:24)
-    at async $DependencyRegistry.getInstance (<workspace-root>/module/di/src/registry.ts:288:7)
-    at async $DependencyRegistry.runInstance (<workspace-root>/module/di/src/registry.ts:585:18)
-    at async Function.#runCommand (<workspace-root>/module/cli/src/execute.ts:58:20)
-    at async Function.run (<workspace-root>/module/cli/src/execute.ts:75:9)
+CUSTOM STARTUP
+Initialized {
+  manifest: {
+    main: {
+      name: '@travetto-doc/web',
+      folder: './doc-exec'
+    },
+    workspace: {
+      name: '@travetto-doc/web',
+      path: './doc-exec',
+      mono: false,
+      manager: 'npm',
+      type: 'commonjs',
+      defaultEnv: 'local'
+    }
+  },
+  runtime: {
+    env: 'prod',
+    debug: false,
+    production: true,
+    dynamic: false,
+    resourcePaths: [ './doc-exec/resources' ],
+    profiles: []
+  },
+  config: {
+    sources: [
+      { priority: 10, source: 'direct' },
+      { priority: 999, source: 'memory://override' }
+    ],
+    active: {
+      AcceptsConfig: { applies: false, types: {} },
+      BodyParseConfig: { applies: true, limit: '1mb', parsingTypes: {} },
+      CompressConfig: {
+        applies: true,
+        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
+        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
+      },
+      CookieConfig: {
+        applies: true,
+        signed: true,
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false
+      },
+      CorsConfig: { applies: true },
+      EtagConfig: { applies: true },
+      GetCacheConfig: { applies: true },
+      WebConfig: {
+        serve: true,
+        port: 3000,
+        trustProxy: false,
+        hostname: 'localhost',
+        bindAddress: '0.0.0.0',
+        baseUrl: 'http://localhost:3000',
+        defaultMessage: true,
+        optionsGlobalHandle: true
+      },
+      WebLogConfig: { applies: true, showStackTrace: true },
+      WebSslConfig: { active: true }
+    }
+  }
+}
+Listening { port: 3000 }
 ```
 
 ## Interceptors
@@ -578,7 +683,7 @@ The resolution logic is as follows:
 **Code: Sample Cookie Usage**
 ```typescript
 import { Controller, Get, QueryParam, WebRequest, ContextParam, WebResponse } from '@travetto/web';
-import { CookieGetOptions, CookieSetOptions } from '../src/types/cookie';
+import { CookieGetOptions, CookieSetOptions } from '../src/types/cookie.ts';
 
 @Controller('/simple')
 export class SimpleEndpoints {

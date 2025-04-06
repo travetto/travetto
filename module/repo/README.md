@@ -104,8 +104,6 @@ Options:
 ```bash
 $ trv repo:list
 
-global-test/auth-web
-global-test/auth-web-session_web
 global-test/model_auth-model
 global-test/model_auth-session
 global-test/model_cache
@@ -113,7 +111,6 @@ global-test/model_web-upload
 global-test/openapi
 global-test/pack_app
 global-test/transformer-test
-global-test/web-upload
 module/auth
 module/auth-model
 module/auth-session
@@ -193,68 +190,65 @@ The standard format includes prefixed output to help identify which module produ
 ```bash
 $ trv repo:exec -w 1 pwd
 
-global-test/auth-web <workspace-root>/global-test/auth-web
-global-test/auth-web-session_web <workspace-root>/global-test/auth-web-session_web
-    global-test/model_auth-model <workspace-root>/global-test/model_auth-model
-  global-test/model_auth-session <workspace-root>/global-test/model_auth-session
-         global-test/model_cache <workspace-root>/global-test/model_cache
-    global-test/model_web-upload <workspace-root>/global-test/model_web-upload
-             global-test/openapi <workspace-root>/global-test/openapi
-            global-test/pack_app <workspace-root>/global-test/pack_app
-    global-test/transformer-test <workspace-root>/global-test/transformer-test
-          global-test/web-upload <workspace-root>/global-test/web-upload
-                     module/auth <workspace-root>/module/auth
-               module/auth-model <workspace-root>/module/auth-model
-             module/auth-session <workspace-root>/module/auth-session
-                 module/auth-web <workspace-root>/module/auth-web
-        module/auth-web-passport <workspace-root>/module/auth-web-passport
-         module/auth-web-session <workspace-root>/module/auth-web-session
-                    module/cache <workspace-root>/module/cache
-                      module/cli <workspace-root>/module/cli
-                 module/compiler <workspace-root>/module/compiler
-                   module/config <workspace-root>/module/config
-                  module/context <workspace-root>/module/context
-                       module/di <workspace-root>/module/di
-                      module/doc <workspace-root>/module/doc
-                    module/email <workspace-root>/module/email
-           module/email-compiler <workspace-root>/module/email-compiler
-               module/email-inky <workspace-root>/module/email-inky
-         module/email-nodemailer <workspace-root>/module/email-nodemailer
-                   module/eslint <workspace-root>/module/eslint
-                    module/image <workspace-root>/module/image
-                      module/log <workspace-root>/module/log
-                 module/manifest <workspace-root>/module/manifest
-                    module/model <workspace-root>/module/model
-           module/model-dynamodb <workspace-root>/module/model-dynamodb
-      module/model-elasticsearch <workspace-root>/module/model-elasticsearch
-               module/model-file <workspace-root>/module/model-file
-          module/model-firestore <workspace-root>/module/model-firestore
-             module/model-memory <workspace-root>/module/model-memory
-              module/model-mongo <workspace-root>/module/model-mongo
-              module/model-mysql <workspace-root>/module/model-mysql
-           module/model-postgres <workspace-root>/module/model-postgres
-              module/model-query <workspace-root>/module/model-query
-     module/model-query-language <workspace-root>/module/model-query-language
-              module/model-redis <workspace-root>/module/model-redis
-                 module/model-s3 <workspace-root>/module/model-s3
-                module/model-sql <workspace-root>/module/model-sql
-             module/model-sqlite <workspace-root>/module/model-sqlite
-                  module/openapi <workspace-root>/module/openapi
-                     module/pack <workspace-root>/module/pack
-                 module/registry <workspace-root>/module/registry
-                     module/repo .
-                  module/runtime <workspace-root>/module/runtime
-                 module/scaffold <workspace-root>/module/scaffold
-                   module/schema <workspace-root>/module/schema
-             module/schema-faker <workspace-root>/module/schema-faker
-                 module/terminal <workspace-root>/module/terminal
-                     module/test <workspace-root>/module/test
-                related/todo-app <workspace-root>/related/todo-app
-              module/transformer <workspace-root>/module/transformer
-                      module/web <workspace-root>/module/web
-           module/web-aws-lambda <workspace-root>/module/web-aws-lambda
-                 module/web-node <workspace-root>/module/web-node
-                  module/web-rpc <workspace-root>/module/web-rpc
-               module/web-upload <workspace-root>/module/web-upload
-                   module/worker <workspace-root>/module/worker
+global-test/model_auth-model <workspace-root>/global-test/model_auth-model
+global-test/model_auth-session <workspace-root>/global-test/model_auth-session
+       global-test/model_cache <workspace-root>/global-test/model_cache
+  global-test/model_web-upload <workspace-root>/global-test/model_web-upload
+           global-test/openapi <workspace-root>/global-test/openapi
+          global-test/pack_app <workspace-root>/global-test/pack_app
+  global-test/transformer-test <workspace-root>/global-test/transformer-test
+                   module/auth <workspace-root>/module/auth
+             module/auth-model <workspace-root>/module/auth-model
+           module/auth-session <workspace-root>/module/auth-session
+               module/auth-web <workspace-root>/module/auth-web
+      module/auth-web-passport <workspace-root>/module/auth-web-passport
+       module/auth-web-session <workspace-root>/module/auth-web-session
+                  module/cache <workspace-root>/module/cache
+                    module/cli <workspace-root>/module/cli
+               module/compiler <workspace-root>/module/compiler
+                 module/config <workspace-root>/module/config
+                module/context <workspace-root>/module/context
+                     module/di <workspace-root>/module/di
+                    module/doc <workspace-root>/module/doc
+                  module/email <workspace-root>/module/email
+         module/email-compiler <workspace-root>/module/email-compiler
+             module/email-inky <workspace-root>/module/email-inky
+       module/email-nodemailer <workspace-root>/module/email-nodemailer
+                 module/eslint <workspace-root>/module/eslint
+                  module/image <workspace-root>/module/image
+                    module/log <workspace-root>/module/log
+               module/manifest <workspace-root>/module/manifest
+                  module/model <workspace-root>/module/model
+         module/model-dynamodb <workspace-root>/module/model-dynamodb
+    module/model-elasticsearch <workspace-root>/module/model-elasticsearch
+             module/model-file <workspace-root>/module/model-file
+        module/model-firestore <workspace-root>/module/model-firestore
+           module/model-memory <workspace-root>/module/model-memory
+            module/model-mongo <workspace-root>/module/model-mongo
+            module/model-mysql <workspace-root>/module/model-mysql
+         module/model-postgres <workspace-root>/module/model-postgres
+            module/model-query <workspace-root>/module/model-query
+   module/model-query-language <workspace-root>/module/model-query-language
+            module/model-redis <workspace-root>/module/model-redis
+               module/model-s3 <workspace-root>/module/model-s3
+              module/model-sql <workspace-root>/module/model-sql
+           module/model-sqlite <workspace-root>/module/model-sqlite
+                module/openapi <workspace-root>/module/openapi
+                   module/pack <workspace-root>/module/pack
+               module/registry <workspace-root>/module/registry
+                   module/repo .
+                module/runtime <workspace-root>/module/runtime
+               module/scaffold <workspace-root>/module/scaffold
+                 module/schema <workspace-root>/module/schema
+           module/schema-faker <workspace-root>/module/schema-faker
+               module/terminal <workspace-root>/module/terminal
+                   module/test <workspace-root>/module/test
+              related/todo-app <workspace-root>/related/todo-app
+            module/transformer <workspace-root>/module/transformer
+                    module/web <workspace-root>/module/web
+         module/web-aws-lambda <workspace-root>/module/web-aws-lambda
+               module/web-node <workspace-root>/module/web-node
+                module/web-rpc <workspace-root>/module/web-rpc
+             module/web-upload <workspace-root>/module/web-upload
+                 module/worker <workspace-root>/module/worker
 ```

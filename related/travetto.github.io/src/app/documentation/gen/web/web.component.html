@@ -158,7 +158,7 @@ Each <a target="_blank" class="source-link" href="https://github.com/travetto/tr
 
 <h3 id="contextparam">ContextParam</h3>
 
-In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L23">WebRequest</a>.  These are able to be injected using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">&#64;ContextParam</a> on a class-level field from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L9">WebContext</a>.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L23">WebRequest</a>.  These are able to be injected using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">&#64;ContextParam</a> on a class-level field from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L8">WebAsyncContext</a>.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
   <figure class="code">
     <figcaption class="code">Example ContextParam usage
@@ -305,15 +305,65 @@ By default, the framework provides a default <a target="_blank" class="source-li
 </figcaption>
     <pre><code class="language-bash">$ trv run:web
 
-TypeError: this.server.registerRouter is not a <span class="token keyword">function</span>
-    at WebApplication.postConstruct <span class="token punctuation">(</span>./src/application/app.ts:54:17<span class="token punctuation">)</span>
-    at async <span class="token variable">$DependencyRegistry</span>.construct <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/di/src/registry.ts:174:7<span class="token punctuation">)</span>
-    at async <span class="token variable">$DependencyRegistry</span>.createInstance <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/di/src/registry.ts:203:24<span class="token punctuation">)</span>
-    at async <span class="token variable">$DependencyRegistry</span>.getInstance <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/di/src/registry.ts:288:7<span class="token punctuation">)</span>
-    at async <span class="token variable">$DependencyRegistry</span>.runInstance <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/di/src/registry.ts:585:18<span class="token punctuation">)</span>
-    at async RunWebCommand.main <span class="token punctuation">(</span>./support/cli.run_web.ts:29:14<span class="token punctuation">)</span>
-    at async Function.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:58:20)</span>
-    at async Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:75:9<span class="token punctuation">)</span></code></pre>
+Initialized <span class="token punctuation">{{'{'}}</span>
+  manifest: <span class="token punctuation">{{'{'}}</span>
+    main: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'&#64;travetto-doc/web'</span>,
+      folder: <span class="token string">'./doc-exec'</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    workspace: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'&#64;travetto-doc/web'</span>,
+      path: <span class="token string">'./doc-exec'</span>,
+      mono: false,
+      manager: <span class="token string">'npm'</span>,
+      type: <span class="token string">'commonjs'</span>,
+      defaultEnv: <span class="token string">'local'</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  runtime: <span class="token punctuation">{{'{'}}</span>
+    env: <span class="token string">'local'</span>,
+    debug: false,
+    production: false,
+    dynamic: false,
+    resourcePaths: <span class="token punctuation">[</span> <span class="token string">'./doc-exec/resources'</span> <span class="token punctuation">]</span>,
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  config: <span class="token punctuation">{{'{'}}</span>
+    sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
+    active: <span class="token punctuation">{{'{'}}</span>
+      AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      BodyParseConfig: <span class="token punctuation">{{'{'}}</span> applies: true, limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      CompressConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
+        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span> <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      CookieConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        signed: true,
+        httpOnly: true,
+        sameSite: <span class="token string">'lax'</span>,
+        secure: <span class="token boolean">false</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      CorsConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      GetCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      WebConfig: <span class="token punctuation">{{'{'}}</span>
+        serve: true,
+        port: <span class="token number">3000</span>,
+        trustProxy: false,
+        hostname: <span class="token string">'localhost'</span>,
+        bindAddress: <span class="token string">'0.0.0.0'</span>,
+        baseUrl: <span class="token string">'http://localhost:3000'</span>,
+        defaultMessage: true,
+        optionsGlobalHandle: <span class="token boolean">true</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 <h3 id="creating-a-custom-cli-entry-point">Creating a Custom CLI Entry Point</h3>
@@ -361,14 +411,69 @@ And using the pattern established in the <a class="module-link" routerLink="/doc
 </figcaption>
     <pre><code class="language-bash">$ trv run:web:custom
 
-TypeError: this.server.registerRouter is not a <span class="token keyword">function</span>
-    at WebApplication.postConstruct <span class="token punctuation">(</span>./src/application/app.ts:54:17<span class="token punctuation">)</span>
-    at async <span class="token variable">$DependencyRegistry</span>.construct <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/di/src/registry.ts:174:7<span class="token punctuation">)</span>
-    at async <span class="token variable">$DependencyRegistry</span>.createInstance <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/di/src/registry.ts:203:24<span class="token punctuation">)</span>
-    at async <span class="token variable">$DependencyRegistry</span>.getInstance <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/di/src/registry.ts:288:7<span class="token punctuation">)</span>
-    at async <span class="token variable">$DependencyRegistry</span>.runInstance <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/di/src/registry.ts:585:18<span class="token punctuation">)</span>
-    at async Function.<span class="token comment">#runCommand (&lt;workspace-root>/module/cli/src/execute.ts:58:20)</span>
-    at async Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:75:9<span class="token punctuation">)</span></code></pre>
+CUSTOM STARTUP
+Initialized <span class="token punctuation">{{'{'}}</span>
+  manifest: <span class="token punctuation">{{'{'}}</span>
+    main: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'&#64;travetto-doc/web'</span>,
+      folder: <span class="token string">'./doc-exec'</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    workspace: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'&#64;travetto-doc/web'</span>,
+      path: <span class="token string">'./doc-exec'</span>,
+      mono: false,
+      manager: <span class="token string">'npm'</span>,
+      type: <span class="token string">'commonjs'</span>,
+      defaultEnv: <span class="token string">'local'</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  runtime: <span class="token punctuation">{{'{'}}</span>
+    env: <span class="token string">'prod'</span>,
+    debug: false,
+    production: true,
+    dynamic: false,
+    resourcePaths: <span class="token punctuation">[</span> <span class="token string">'./doc-exec/resources'</span> <span class="token punctuation">]</span>,
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  config: <span class="token punctuation">{{'{'}}</span>
+    sources: <span class="token punctuation">[</span>
+      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">10</span>, source: <span class="token string">'direct'</span> <span class="token punctuation">{{'}'}}</span>,
+      <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">]</span>,
+    active: <span class="token punctuation">{{'{'}}</span>
+      AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      BodyParseConfig: <span class="token punctuation">{{'{'}}</span> applies: true, limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      CompressConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
+        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span> <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      CookieConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        signed: true,
+        httpOnly: true,
+        sameSite: <span class="token string">'lax'</span>,
+        secure: <span class="token boolean">false</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      CorsConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      GetCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      WebConfig: <span class="token punctuation">{{'{'}}</span>
+        serve: true,
+        port: <span class="token number">3000</span>,
+        trustProxy: false,
+        hostname: <span class="token string">'localhost'</span>,
+        bindAddress: <span class="token string">'0.0.0.0'</span>,
+        baseUrl: <span class="token string">'http://localhost:3000'</span>,
+        defaultMessage: true,
+        optionsGlobalHandle: <span class="token boolean">true</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 <h2 id="interceptors">Interceptors</h2>
@@ -658,7 +763,7 @@ The resolution logic is as follows:
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> WebRequest<span class="token punctuation">,</span> ContextParam<span class="token punctuation">,</span> WebResponse <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CookieGetOptions<span class="token punctuation">,</span> CookieSetOptions <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/types/cookie'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CookieGetOptions<span class="token punctuation">,</span> CookieSetOptions <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/types/cookie.ts'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SimpleEndpoints</span> <span class="token punctuation">{{'{'}}</span>
