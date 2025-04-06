@@ -1,8 +1,8 @@
 import type lambda from 'aws-lambda';
 
-import { Injectable } from '@travetto/di';
-import { Config } from '@travetto/config';
-import { WebServer, WebRouter, WebServerHandle } from '@travetto/web';
+import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
+import { Config, ConfigurationService } from '@travetto/config';
+import { WebApplication, WebRouter, WebServerHandle } from '@travetto/web';
 
 import { AwsLambdaWebUtil } from './util.ts';
 
@@ -20,19 +20,14 @@ export class AwsLambdaConfig {
 }
 
 @Injectable()
-export class AwsLambdaWebServer implements WebServer {
+export class AwsLambdaWebApplication implements WebApplication {
 
-  #router: WebRouter;
+  @Inject()
+  router: WebRouter;
 
-  init(): unknown {
-    return;
-  }
+  async run(): Promise<WebServerHandle> {
+    await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
 
-  registerRouter(router: WebRouter): void {
-    this.#router = router;
-  }
-
-  listen(): WebServerHandle {
     return {
       close(): void { },
       on(): void { }
@@ -41,16 +36,8 @@ export class AwsLambdaWebServer implements WebServer {
 
   async handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
     context.callbackWaitsForEmptyEventLoop = false;
-
-    // Route
-    const { endpoint, params } = this.#router({ path: event.path, method: event.httpMethod });
-
-    // Build request
-    const req = AwsLambdaWebUtil.toWebRequest(event, params);
-
-    // Render
-    const res = await endpoint.filter!({ req });
-
+    const req = AwsLambdaWebUtil.toWebRequest(event);
+    const res = await this.router.execute(req);
     return AwsLambdaWebUtil.toLambdaResult(res, event.isBase64Encoded);
   }
 }

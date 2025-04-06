@@ -1,7 +1,7 @@
 // @trv-no-transform
 import type lambda from 'aws-lambda';
 import type { WebApplication } from '@travetto/web';
-import type { AwsLambdaWebServer } from '../src/server.ts';
+import type { AwsLambdaWebServer } from '../src/application.ts';
 
 async function buildApp(): Promise<WebApplication<AwsLambdaWebServer>> {
   const { Runtime, ConsoleManager } = await import('@travetto/runtime');

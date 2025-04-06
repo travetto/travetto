@@ -3,15 +3,16 @@ import { buffer as toBuffer } from 'node:stream/consumers';
 import { Readable } from 'node:stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
+import { AppError, castTo, Class } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
+import { DependencyRegistry } from '@travetto/di';
 
-import { WebServerHandle } from '../../../src/types/server.ts';
+import { WebApplication, WebServerHandle } from '../../../src/types/application.ts';
 import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
-
-import { WebServerSupport } from '../types.ts';
+import { WebRouter } from '../../../src/application/router.ts';
+import { CookieConfig } from '@travetto/web';
 
 function asBuffer(v: Buffer | Readable): Promise<Buffer> {
   return !Buffer.isBuffer(v) ? toBuffer(v) : Promise.resolve(v);
@@ -23,20 +24,27 @@ function asBuffer(v: Buffer | Readable): Promise<Buffer> {
 export abstract class BaseWebSuite {
 
   #handle?: WebServerHandle;
-  #support: WebServerSupport;
+  #app?: WebApplication;
+  #router: WebRouter;
 
-  type: Class<WebServerSupport>;
-  qualifier?: symbol;
+  appType?: Class<WebApplication>;
+  routerType: Class<WebRouter>;
 
   @BeforeAll()
   async initServer(): Promise<void> {
-    this.#support = classConstruct(this.type);
     await RootRegistry.init();
-    this.#handle = await this.#support.init(this.qualifier);
-  }
+    this.#router = await DependencyRegistry.getInstance(this.routerType);
+    if (this.appType) {
+      this.#app = await DependencyRegistry.getInstance(this.appType);
+      this.#handle = await this.#app.run();
+    }
 
-  get port(): number | undefined {
-    return 'port' in this.#support && typeof this.#support['port'] === 'number' ? this.#support.port : undefined;
+    // Deactivate secure cookies
+    Object.assign(
+      await DependencyRegistry.getInstance(CookieConfig),
+      { active: true, secure: false, signed: false }
+    );
+
   }
 
   async getOutput<T>(t: Buffer): Promise<T | string> {
@@ -67,7 +75,7 @@ export abstract class BaseWebSuite {
 
     Object.assign(req, { query: BindUtil.flattenPaths(req.query ?? {}) });
 
-    const res = await this.#support.execute(req);
+    const res = await this.#router.execute(req);
     let bufferResult = await asBuffer(res.body);
 
     if (bufferResult.length) {

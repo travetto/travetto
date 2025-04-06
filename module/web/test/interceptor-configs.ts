@@ -13,7 +13,7 @@ import { WebInterceptor } from '../src/types/interceptor.ts';
 import { WebInterceptorCategory } from '../src/types/core.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { WebChainedContext } from '../src/types.ts';
-import { WebServer, WebServerHandle } from '../src/types/server.ts';
+import { WebApplication, WebServerHandle } from '../src/types/application.ts';
 import { WebApplication } from '../src/application/app.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
@@ -30,7 +30,7 @@ class CustomInterceptorConfig {
 }
 
 @Injectable()
-class Server implements WebServer {
+class Server implements WebApplication {
   async init(): Promise<void> { }
   registerRouter(): void { }
   listen(): WebServerHandle | Promise<WebServerHandle> {

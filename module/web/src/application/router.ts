@@ -2,40 +2,38 @@
 import type Router from 'find-my-way';
 
 import { AppError, castTo, Class, Runtime, toConcrete, TypedObject } from '@travetto/runtime';
-import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
+import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
-import { ConfigurationService } from '@travetto/config';
 
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WEB_INTERCEPTOR_CATEGORIES, HTTP_METHODS, HttpMethod } from '../types/core.ts';
-import { WebEndpointCleanup, WebRouterRequest, WebServer, WebServerHandle } from '../types/server.ts';
+import { WebRequest } from '../types/request.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebRouter } from '../types/application.ts';
 
 import { WebCommonUtil } from '../util/common.ts';
 import { EndpointUtil } from '../util/endpoint.ts';
 
 /**
- * The web application
+ * The web router
  */
-@Injectable()
-export class WebApplication<T = unknown> {
+@Injectable({ primary: true })
+export class CoreWebRouter implements WebRouter {
 
-  #routeCleanup = new Map<string, WebEndpointCleanup>();
+  #routeCleanup = new Map<string, Function>();
 
-  @Inject()
-  server: WebServer<T>;
-
-  router: ReturnType<typeof Router>;
+  raw: ReturnType<typeof Router>;
 
   /**
    * List of provided interceptors
    */
   interceptors: WebInterceptor[] = [];
 
-  resolveRoute(req: WebRouterRequest): { endpoint: EndpointConfig, params: Record<string, unknown> } {
-    const found = this.router.find(castTo((req.method ?? 'get').toUpperCase()), req.path ?? '/');
+  resolveRoute(req: WebRequest): { endpoint: EndpointConfig, params: Record<string, unknown> } {
+    const found = this.raw.find(castTo((req.method ?? 'get').toUpperCase()), req.path ?? '/');
     if (!found) {
       throw new AppError('Unknown route');
     }
@@ -44,18 +42,11 @@ export class WebApplication<T = unknown> {
   }
 
   async postConstruct(): Promise<void> {
-    // Log on startup, before DI finishes
-    const cfg = await DependencyRegistry.getInstance(ConfigurationService);
-    await cfg.initBanner();
-
-    await this.server.init();
-
     this.interceptors = await this.getInterceptors();
 
     // eslint-disable-next-line no-shadow
     const Router = (await import('find-my-way')).default;
-    this.router = Router();
-    this.server.registerRouter(req => this.resolveRoute(req));
+    this.raw = Router();
 
     // Register all active
     await Promise.all(ControllerRegistry.getClasses()
@@ -123,11 +114,6 @@ export class WebApplication<T = unknown> {
    * @param c The class to register
    */
   async registerController(c: Class): Promise<void> {
-    if (this.#routeCleanup.get(c.Ⲑid) === null) {
-      console.warn('Reloading routes not supported for ', this.server.constructor.Ⲑid);
-      return;
-    }
-
     const config = ControllerRegistry.get(c);
 
     // Skip registering conditional controllers
@@ -160,13 +146,13 @@ export class WebApplication<T = unknown> {
       const fullPath = endpoint.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
       const handler = (): void => { };
       Object.defineProperty(handler, 'endpoint', { value: endpoint });
-      this.router[HTTP_METHODS[endpoint.method].lower](fullPath, handler);
+      this.raw[HTTP_METHODS[endpoint.method].lower](fullPath, handler);
       toClean.push([endpoint.method, fullPath]);
     }
 
     this.#routeCleanup.set(c.Ⲑid, async () => {
       for (const [method, path] of toClean) {
-        this.router.off(method, path);
+        this.raw.off(method, path);
       }
     });
 
@@ -183,13 +169,11 @@ export class WebApplication<T = unknown> {
   }
 
   /**
-   * Run the application
+   * Route and run the request
    */
-  async run(): Promise<WebServerHandle> {
-    const handle = await this.server.listen();
-    if (handle.port) {
-      console.log('Listening', { port: handle.port });
-    }
-    return handle;
+  async execute(req: WebRequest): Promise<WebResponse> {
+    const { params, endpoint } = this.resolveRoute(req);
+    Object.assign(req, { params });
+    return endpoint.filter!({ req });
   }
 }

@@ -1,5 +1,6 @@
 import net from 'node:net';
 import { spawn } from 'node:child_process';
+import timers from 'node:timers/promises';
 
 import { ExecUtil } from '@travetto/runtime';
 
@@ -42,5 +43,21 @@ export class NetUtil {
         server.close(() => { resolve(port); });
       });
     });
+  }
+
+  /** Wait until URL responds with a proper connection */
+  static async waitUntilReady(url: string, maxWait = 5000): Promise<void> {
+    const start = Date.now();
+
+    while ((Date.now() - start) < maxWait) {
+      try {
+        const ctrl = new AbortController();
+        await fetch(url, { signal: ctrl.signal });
+        ctrl.abort();
+        break; // We good
+      } catch {
+        await timers.setTimeout(100);
+      }
+    }
   }
 }

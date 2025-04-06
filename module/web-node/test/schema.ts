@@ -1,8 +1,11 @@
 import { Suite } from '@travetto/test';
 import { SchemaWebServerSuite } from '@travetto/web/support/test/suite/schema.ts';
-import { NodeWebServerSupport } from '../support/test/server-support.ts';
+
+import { NodeWebApplication } from '../src/application.ts';
+import { NodeWeFetchRouter } from '../support/test/fetch-router.ts';
 
 @Suite()
 export class NodeSchemaTest extends SchemaWebServerSuite {
-  type = NodeWebServerSupport;
+  appType = NodeWebApplication;
+  routerType = NodeWeFetchRouter;
 }
