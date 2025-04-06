@@ -8,11 +8,11 @@ import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 
-import { WebApplication, WebServerHandle } from '../../../src/types/application.ts';
+import { WebApplication, WebRouter, WebServerHandle } from '../../../src/types/application.ts';
 import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
-import { WebRouter } from '../../../src/application/router.ts';
-import { CookieConfig } from '@travetto/web';
+import { CookieConfig } from '../../../src/interceptor/cookies.ts';
+import { WebConfig } from '../../../src/application/config.ts';
 
 function asBuffer(v: Buffer | Readable): Promise<Buffer> {
   return !Buffer.isBuffer(v) ? toBuffer(v) : Promise.resolve(v);
@@ -25,7 +25,6 @@ export abstract class BaseWebSuite {
 
   #handle?: WebServerHandle;
   #app?: WebApplication;
-  #router: WebRouter;
 
   appType?: Class<WebApplication>;
   routerType: Class<WebRouter>;
@@ -33,11 +32,6 @@ export abstract class BaseWebSuite {
   @BeforeAll()
   async initServer(): Promise<void> {
     await RootRegistry.init();
-    this.#router = await DependencyRegistry.getInstance(this.routerType);
-    if (this.appType) {
-      this.#app = await DependencyRegistry.getInstance(this.appType);
-      this.#handle = await this.#app.run();
-    }
 
     // Deactivate secure cookies
     Object.assign(
@@ -45,6 +39,16 @@ export abstract class BaseWebSuite {
       { active: true, secure: false, signed: false }
     );
 
+    // Deactivate ssl/port
+    Object.assign(
+      await DependencyRegistry.getInstance(WebConfig),
+      { port: -1, ssl: { active: false } }
+    );
+
+    if (this.appType) {
+      this.#app = await DependencyRegistry.getInstance(this.appType);
+      this.#handle = await this.#app.run();
+    }
   }
 
   async getOutput<T>(t: Buffer): Promise<T | string> {
@@ -65,6 +69,8 @@ export abstract class BaseWebSuite {
 
   async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
 
+    const router = await DependencyRegistry.getInstance(this.routerType);
+
     const req = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
 
     if (req.body) {
@@ -75,7 +81,7 @@ export abstract class BaseWebSuite {
 
     Object.assign(req, { query: BindUtil.flattenPaths(req.query ?? {}) });
 
-    const res = await this.#router.execute(req);
+    const res = await router.execute(req);
     let bufferResult = await asBuffer(res.body);
 
     if (bufferResult.length) {

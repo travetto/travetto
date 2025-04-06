@@ -40,8 +40,8 @@ export class NodeWebApplication implements WebApplication {
 
   async run(): Promise<WebServerHandle> {
     const core = this.config.ssl?.active ?
-      https.createServer(this.config.ssl.keys, this.handler) :
-      http.createServer(this.handler);
+      https.createServer(this.config.ssl.keys, (req, res) => this.handler(req, res)) :
+      http.createServer((req, res) => this.handler(req, res));
 
     const { reject, resolve, promise } = Promise.withResolvers<void>();
 
