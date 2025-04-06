@@ -1,23 +1,10 @@
 import type lambda from 'aws-lambda';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { Config, ConfigurationService } from '@travetto/config';
+import { ConfigurationService } from '@travetto/config';
 import { WebApplication, WebRouter, WebServerHandle } from '@travetto/web';
 
 import { AwsLambdaWebUtil } from './util.ts';
-
-@Config('web.aws')
-export class AwsLambdaConfig {
-  binaryMimeTypes?: string[];
-
-  toJSON(): Record<string, unknown> {
-    const out: Record<string, unknown> = {};
-    if (this.binaryMimeTypes) {
-      out.binarySettings = { contentTypes: this.binaryMimeTypes };
-    }
-    return out;
-  }
-}
 
 @Injectable()
 export class AwsLambdaWebApplication implements WebApplication {
