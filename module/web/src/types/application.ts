@@ -1,5 +1,4 @@
-import { WebRequest } from './request';
-import { WebResponse } from './response';
+import { WebFilter } from '../types';
 
 export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
 export type WebSslKeyPair = { cert: string, key: string };
@@ -19,5 +18,5 @@ export interface WebApplication {
  * @concrete
  */
 export interface WebRouter {
-  execute(req: WebRequest): Promise<WebResponse>;
+  execute: WebFilter;
 }

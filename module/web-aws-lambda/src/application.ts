@@ -20,7 +20,7 @@ export class AwsLambdaWebApplication implements WebApplication {
   async handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
     context.callbackWaitsForEmptyEventLoop = false;
     const req = AwsLambdaWebUtil.toWebRequest(event);
-    const res = await this.router.execute(req);
+    const res = await this.router.execute({ req });
     return AwsLambdaWebUtil.toLambdaResult(res, event.isBase64Encoded);
   }
 }

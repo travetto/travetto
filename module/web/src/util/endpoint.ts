@@ -1,7 +1,7 @@
 import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { WebContext, WebChainedFilter, WebChainedContext } from '../types.ts';
+import { WebFilterContext, WebChainedFilter, WebChainedContext } from '../types.ts';
 import { WebRequest } from '../types/request.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
@@ -77,7 +77,7 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(ctx: WebContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
+  static extractParameter(ctx: WebFilterContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
@@ -103,7 +103,7 @@ export class EndpointUtil {
    * @param req The request
    * @param res The response
    */
-  static async extractParameters(ctx: WebContext, endpoint: EndpointConfig): Promise<unknown[]> {
+  static async extractParameters(ctx: WebFilterContext, endpoint: EndpointConfig): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
     const vals = ctx.req[WebInternalSymbol]?.requestParams ?? [];
@@ -132,7 +132,7 @@ export class EndpointUtil {
   /**
    * Endpoint invocation code
    */
-  static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebContext): Promise<WebResponse> {
+  static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebFilterContext): Promise<WebResponse> {
     const params = await this.extractParameters(ctx, endpoint);
     try {
       const res = WebResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));

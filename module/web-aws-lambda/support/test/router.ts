@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebRequest, WebResponse, WebRouter } from '@travetto/web';
+import { WebFilterContext, WebRequest, WebResponse, WebRouter } from '@travetto/web';
 import { asFull, castTo, Util } from '@travetto/runtime';
 
 import { AwsLambdaWebApplication } from '../../src/application.ts';
@@ -66,7 +66,7 @@ export class LocalAwsLambdaWebRouter implements WebRouter {
   @Inject()
   app: AwsLambdaWebApplication;
 
-  async execute(req: WebRequest): Promise<WebResponse> {
+  async execute({ req }: WebFilterContext): Promise<WebResponse> {
     const res = await this.app.handle(toLambdaEvent(req), asFull<Context>({}));
 
     return new WebResponse({

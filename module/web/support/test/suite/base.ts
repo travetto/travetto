@@ -71,22 +71,22 @@ export abstract class BaseWebSuite {
 
     const router = await DependencyRegistry.getInstance(this.routerType);
 
-    const req = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
+    const webReq = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
 
-    if (req.body) {
-      const sample = WebResponse.from(req.body).ensureContentLength().ensureContentType();
-      sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      req.body = await asBuffer(sample.body);
+    if (webReq.body) {
+      const sample = WebResponse.from(webReq.body).ensureContentLength().ensureContentType();
+      sample.headers.forEach((v, k) => webReq.headers.set(k, Array.isArray(v) ? v.join(',') : v));
+      webReq.body = await asBuffer(sample.body);
     }
 
-    Object.assign(req, { query: BindUtil.flattenPaths(req.query ?? {}) });
+    Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
 
-    const res = await router.execute(req);
-    let bufferResult = await asBuffer(res.body);
+    const webRes = await router.execute({ req: webReq });
+    let bufferResult = await asBuffer(webRes.body);
 
     if (bufferResult.length) {
       try {
-        switch (res.headers.getList('Content-Encoding')?.[0]) {
+        switch (webRes.headers.getList('Content-Encoding')?.[0]) {
           case 'gzip': bufferResult = zlib.gunzipSync(bufferResult); break;
           case 'deflate': bufferResult = zlib.inflateSync(bufferResult); break;
           case 'br': bufferResult = zlib.brotliDecompressSync(bufferResult); break;
@@ -96,7 +96,7 @@ export abstract class BaseWebSuite {
 
     let result = await this.getOutput(bufferResult);
 
-    if (res.statusCode && res.statusCode >= 400) {
+    if (webRes.statusCode && webRes.statusCode >= 400) {
       const err = WebResponse.fromCatch(AppError.fromJSON(result) ?? result).source!;
       if (throwOnError) {
         throw err;
@@ -105,7 +105,7 @@ export abstract class BaseWebSuite {
       }
     }
 
-    res.source = castTo(result);
-    return castTo(res);
+    webRes.source = castTo(result);
+    return castTo(webRes);
   }
 }

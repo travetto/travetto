@@ -16,6 +16,7 @@ import { WebRouter } from '../types/application.ts';
 
 import { WebCommonUtil } from '../util/common.ts';
 import { EndpointUtil } from '../util/endpoint.ts';
+import { WebFilterContext } from '../types.ts';
 
 /**
  * The web router
@@ -171,7 +172,7 @@ export class CoreWebRouter implements WebRouter {
   /**
    * Route and run the request
    */
-  async execute(req: WebRequest): Promise<WebResponse> {
+  async execute({ req }: WebFilterContext): Promise<WebResponse> {
     const { params, endpoint } = this.resolveRoute(req);
     Object.assign(req, { params });
     return endpoint.filter!({ req });
