@@ -1,16 +1,16 @@
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebFilterContext, WebResponse, WebRouter } from '@travetto/web';
+import { WebConfig, WebFilterContext, WebResponse, WebDispatcher } from '@travetto/web';
 
 /**
  * Support for invoking http requests against the server
  */
 @Injectable()
-export class NodeWeFetchRouter implements WebRouter {
+export class FetchWebDispatcher implements WebDispatcher {
 
   @Inject()
   config: WebConfig;
 
-  async execute({ req }: WebFilterContext): Promise<WebResponse> {
+  async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
     const { query, method, body, headers, path } = req;
 
     let q = '';

@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/naming-convention
-import type Router from 'find-my-way';
+import router from 'find-my-way';
 
 import { AppError, castTo, Class, Runtime, toConcrete, TypedObject } from '@travetto/runtime';
 import { DependencyRegistry, Injectable } from '@travetto/di';
@@ -12,7 +11,7 @@ import { WebInterceptor } from '../types/interceptor.ts';
 import { WEB_INTERCEPTOR_CATEGORIES, HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { WebRequest } from '../types/request.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebRouter } from '../types/application.ts';
+import { WebDispatcher } from '../types/application.ts';
 
 import { WebCommonUtil } from '../util/common.ts';
 import { EndpointUtil } from '../util/endpoint.ts';
@@ -21,33 +20,19 @@ import { WebFilterContext } from '../types.ts';
 /**
  * The web router
  */
-@Injectable({ primary: true })
-export class CoreWebRouter implements WebRouter {
+@Injectable()
+export class WebRouter implements WebDispatcher {
 
   #routeCleanup = new Map<string, Function>();
-
-  raw: ReturnType<typeof Router>;
+  raw = router();
 
   /**
    * List of provided interceptors
    */
   interceptors: WebInterceptor[] = [];
 
-  resolveRoute(req: WebRequest): { endpoint: EndpointConfig, params: Record<string, unknown> } {
-    const found = this.raw.find(castTo((req.method ?? 'get').toUpperCase()), req.path ?? '/');
-    if (!found) {
-      throw new AppError('Unknown route');
-    }
-    const handler = castTo<{ endpoint: EndpointConfig }>(found.handler);
-    return { endpoint: handler.endpoint, params: found?.params };
-  }
-
   async postConstruct(): Promise<void> {
     this.interceptors = await this.getInterceptors();
-
-    // eslint-disable-next-line no-shadow
-    const Router = (await import('find-my-way')).default;
-    this.raw = Router();
 
     // Register all active
     await Promise.all(ControllerRegistry.getClasses()
@@ -55,6 +40,19 @@ export class CoreWebRouter implements WebRouter {
 
     // Listen for updates
     ControllerRegistry.on(v => this.onControllerChange(v));
+  }
+
+  /**
+   * Resolve an endpoint given a web request
+   * @throws Throws a not found error if the route doesn't exist
+   */
+  resolveRoute(req: WebRequest): { endpoint: EndpointConfig, params: Record<string, unknown> } {
+    const found = this.raw.find(castTo((req.method ?? 'get').toUpperCase()), req.path ?? '/');
+    if (!found) {
+      throw new AppError(`Unknown route ${req.method} ${req.path}`, { category: 'notfound' });
+    }
+    const handler = castTo<{ endpoint: EndpointConfig }>(found.handler);
+    return { endpoint: handler.endpoint, params: found?.params };
   }
 
   /**
@@ -172,7 +170,7 @@ export class CoreWebRouter implements WebRouter {
   /**
    * Route and run the request
    */
-  async execute({ req }: WebFilterContext): Promise<WebResponse> {
+  async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
     const { params, endpoint } = this.resolveRoute(req);
     Object.assign(req, { params });
     return endpoint.filter!({ req });

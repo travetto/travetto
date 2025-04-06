@@ -2,10 +2,10 @@ import { Suite } from '@travetto/test';
 import { NodeWebApplication } from '@travetto/web-node';
 
 import { ModelBlobWebUploadServerSuite } from './server.ts';
-import { NodeWeFetchRouter } from '@travetto/web-node/support/test/fetch-router.ts';
+import { FetchWebDispatcher } from '@travetto/web-node/support/test/dispatcher.ts';
 
 @Suite()
 export class NodeWebUploadTest extends ModelBlobWebUploadServerSuite {
-  routerType = NodeWeFetchRouter;
+  dispatcherType = FetchWebDispatcher;
   appType = NodeWebApplication;
 }

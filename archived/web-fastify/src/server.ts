@@ -1,6 +1,6 @@
 import { FastifyInstance, fastify } from 'fastify';
 
-import { WebConfig, WebServer, WebServerHandle, WebRouter } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, WebDispatcher } from '@travetto/web';
 import { Inject, Injectable } from '@travetto/di';
 
 import { FastifyWebServerUtil } from './util.ts';
@@ -30,7 +30,7 @@ export class FastifyWebServer implements WebServer<FastifyInstance> {
     return this.raw = app;
   }
 
-  registerRouter(router: WebRouter): void {
+  registerRouter(router: WebDispatcher): void {
     this.raw.addHook('onRequest', (req, reply) => {
       const { endpoint, params } = router(req);
       req.params = params;

@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, WebRouter, NetUtil } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, WebDispatcher, NetUtil } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { ExpressWebServerUtil } from './util.ts';
@@ -29,7 +29,7 @@ export class ExpressWebServer implements WebServer<express.Application> {
     return this.raw = app;
   }
 
-  registerRouter(router: WebRouter): void {
+  registerRouter(router: WebDispatcher): void {
     this.raw.use(async (req, res, next) => {
       const { endpoint, params } = router(req);
       req.params = castTo(params);

@@ -2,7 +2,7 @@ import http, { IncomingMessage, ServerResponse } from 'node:http';
 import https from 'node:https';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebApplication, WebApplicationHandle, WebRouter, NetUtil } from '@travetto/web';
+import { WebConfig, WebApplication, WebApplicationHandle, WebDispatcher, NetUtil } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
 
 import { NodeWebUtil } from './util.ts';
@@ -17,17 +17,17 @@ export class NodeWebApplication implements WebApplication {
   config: WebConfig;
 
   @Inject()
-  router: WebRouter;
+  router: WebDispatcher;
 
   async handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const webReq = NodeWebUtil.toWebRequest(req);
-    const webRes = await this.router.execute({ req: webReq });
+    const webRes = await this.router.dispatch({ req: webReq });
     await NodeWebUtil.respondToServerResponse(webRes, res);
   }
 
   async run(): Promise<WebApplicationHandle> {
     const core = this.config.ssl?.active ?
-      https.createServer(this.config.ssl.keys) :
+      https.createServer(this.config.ssl.keys!) :
       http.createServer();
 
     const { reject, resolve, promise } = Promise.withResolvers<void>();

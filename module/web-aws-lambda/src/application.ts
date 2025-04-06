@@ -2,7 +2,7 @@ import type lambda from 'aws-lambda';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { ConfigurationService } from '@travetto/config';
-import { WebApplication, WebRouter, WebApplicationHandle } from '@travetto/web';
+import { WebApplication, WebDispatcher, WebApplicationHandle } from '@travetto/web';
 
 import { AwsLambdaWebUtil } from './util.ts';
 
@@ -10,7 +10,7 @@ import { AwsLambdaWebUtil } from './util.ts';
 export class AwsLambdaWebApplication implements WebApplication {
 
   @Inject()
-  router: WebRouter;
+  router: WebDispatcher;
 
   async run(): Promise<WebApplicationHandle> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
@@ -20,7 +20,7 @@ export class AwsLambdaWebApplication implements WebApplication {
   async handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
     context.callbackWaitsForEmptyEventLoop = false;
     const req = AwsLambdaWebUtil.toWebRequest(event);
-    const res = await this.router.execute({ req });
+    const res = await this.router.dispatch({ req });
     return AwsLambdaWebUtil.toLambdaResult(res, event.isBase64Encoded);
   }
 }

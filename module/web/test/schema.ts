@@ -1,8 +1,8 @@
 import { Suite } from '@travetto/test';
 import { SchemaWebServerSuite } from '../support/test/suite/schema';
-import { BasicWebRouter } from '../support/test/test-router.ts';
+import { BasicWebDispatcher } from '../support/test/dispatcher.ts';
 
 @Suite()
 export class BasicSchemaTest extends SchemaWebServerSuite {
-  routerType = BasicWebRouter;
+  dispatcherType = BasicWebDispatcher;
 }

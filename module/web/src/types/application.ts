@@ -13,10 +13,10 @@ export interface WebApplication {
 }
 
 /**
- * Defines the shape for a web router
+ * Defines the shape for a web dispatcher
  *
  * @concrete
  */
-export interface WebRouter {
-  execute: WebFilter;
+export interface WebDispatcher {
+  dispatch: WebFilter;
 }

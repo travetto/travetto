@@ -1,7 +1,7 @@
 import koa from 'koa';
 
 import { Injectable, Inject } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle, WebRouter, NetUtil } from '@travetto/web';
+import { WebConfig, WebServer, WebServerHandle, WebDispatcher, NetUtil } from '@travetto/web';
 
 import { KoaWebServerUtil } from './util.ts';
 
@@ -26,7 +26,7 @@ export class KoaWebServer implements WebServer<koa> {
     return this.raw = app;
   }
 
-  registerRouter(router: WebRouter): void {
+  registerRouter(router: WebDispatcher): void {
     this.raw.use(async (ctx) => {
       const { endpoint, params } = router(ctx);
       ctx.params = params;

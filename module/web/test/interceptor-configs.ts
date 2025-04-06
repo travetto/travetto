@@ -13,7 +13,7 @@ import { WebInterceptor } from '../src/types/interceptor.ts';
 import { WebInterceptorCategory } from '../src/types/core.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { WebChainedContext } from '../src/types.ts';
-import { WebRouter } from '../src/types/application.ts';
+import { WebDispatcher } from '../src/types/application.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
@@ -106,7 +106,7 @@ class TestInterceptorConfigSuite {
   @BeforeAll()
   async init() {
     await RootRegistry.init();
-    await DependencyRegistry.getInstance(toConcrete<WebRouter>());
+    await DependencyRegistry.getInstance(toConcrete<WebDispatcher>());
   }
 
   @Test()

@@ -7,7 +7,7 @@ import { NodeWebApplication } from '@travetto/web-node';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
-import { NodeWeFetchRouter } from '@travetto/web-node/support/test/fetch-router.ts';
+import { FetchWebDispatcher } from '@travetto/web-node/support/test/dispatcher.ts';
 
 class Config {
   @InjectableFactory(SessionModelSymbol)
@@ -21,6 +21,6 @@ class Config {
 export class RedisAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = RedisModelService;
   configClass = RedisModelConfig;
-  routerType = NodeWeFetchRouter;
+  dispatcherType = FetchWebDispatcher;
   appType = NodeWebApplication;
 }

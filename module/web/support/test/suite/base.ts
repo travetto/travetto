@@ -8,7 +8,7 @@ import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 
-import { WebApplication, WebRouter, WebApplicationHandle } from '../../../src/types/application.ts';
+import { WebApplication, WebDispatcher, WebApplicationHandle } from '../../../src/types/application.ts';
 import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
 import { CookieConfig } from '../../../src/interceptor/cookies.ts';
@@ -27,7 +27,7 @@ export abstract class BaseWebSuite {
   #app?: WebApplication;
 
   appType?: Class<WebApplication>;
-  routerType: Class<WebRouter>;
+  dispatcherType: Class<WebDispatcher>;
 
   @BeforeAll()
   async initServer(): Promise<void> {
@@ -69,7 +69,7 @@ export abstract class BaseWebSuite {
 
   async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
 
-    const router = await DependencyRegistry.getInstance(this.routerType);
+    const router = await DependencyRegistry.getInstance(this.dispatcherType);
 
     const webReq = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
 
@@ -81,7 +81,7 @@ export abstract class BaseWebSuite {
 
     Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
 
-    const webRes = await router.execute({ req: webReq });
+    const webRes = await router.dispatch({ req: webReq });
     let bufferResult = await asBuffer(webRes.body);
 
     if (bufferResult.length) {
