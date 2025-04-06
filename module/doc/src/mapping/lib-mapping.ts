@@ -98,6 +98,7 @@ export const LIB_MAPPING = {
   SQLite: { title: 'SQLite', href: 'https://www.sqlite.org/' },
 
   // Web
+  Connect: { title: 'connect', href: 'https://github.com/senchalabs/connect' },
   Express: { title: 'express', href: 'https://expressjs.com' },
   Passport: { title: 'passport', href: 'http://passportjs.org' },
   Busboy: { title: '@fastify/busboy', href: 'https://github.com/fastify/busboy' },
