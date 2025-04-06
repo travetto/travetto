@@ -4,7 +4,7 @@ import { Field, Schema } from '@travetto/schema';
 import { CliCommand } from '@travetto/cli';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';
 
-import { WebApplication } from './src/application/app.ts';
+import { WebApplication } from './src/types/application.ts';
 import { Controller } from './src/decorator/controller.ts';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint.ts';
 import { PathParam, QueryParam, Body, Param, HeaderParam, ContextParam } from './src/decorator/param.ts';
@@ -23,6 +23,7 @@ import { WebAsyncContext } from './src/context.ts';
 import { RespondInterceptor } from './src/interceptor/respond.ts';
 
 const WebInterceptorContract = toConcrete<WebInterceptor>();
+const WebApplicationContract = toConcrete<WebApplication>();
 
 export const text = <>
   <c.StdHeader />
@@ -143,7 +144,7 @@ export const text = <>
 
   <c.Section title='Running an App'>
 
-    By default, the framework provides a default {CliCommand} for {WebApplication} that will follow default behaviors, and spin up the Web server.
+    By default, the framework provides a default {CliCommand} for {WebApplicationContract} that will follow default behaviors, and spin up the Web server.
 
     <c.Execution title='Standard application' cmd='trv' args={['run:web']} config={{
       cwd: './doc-exec'

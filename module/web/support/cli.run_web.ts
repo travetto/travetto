@@ -2,7 +2,7 @@ import { Runtime, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 
-import type { WebApplication, WebServerHandle } from '../src/types/application.ts';
+import type { WebApplication, WebApplicationHandle } from '../src/types/application.ts';
 import { NetUtil } from '../src/util/net.ts';
 
 /**
@@ -23,7 +23,7 @@ export class RunWebCommand implements CliCommandShape {
     }
   }
 
-  async main(): Promise<WebServerHandle | void> {
+  async main(): Promise<WebApplicationHandle | void> {
     try {
       return await DependencyRegistry.runInstance(toConcrete<WebApplication>());
     } catch (err) {

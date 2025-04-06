@@ -13,4 +13,4 @@ npm install @travetto/web-node
 yarn add @travetto/web-node
 ```
 
-The module is an [Node](https://nodejs.org) provider for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.  This module provides an implementation of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L23) for automatic injection in the default Web server.
+The module is an [Node](https://nodejs.org) provider for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.  This module provides an implementation of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/types/application.ts#L11) for automatic injection in the default Web server.

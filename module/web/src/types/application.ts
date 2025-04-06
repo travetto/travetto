@@ -1,6 +1,6 @@
 import { WebFilter } from '../types';
 
-export type WebServerHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
+export type WebApplicationHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
 export type WebSslKeyPair = { cert: string, key: string };
 
 /**
@@ -9,7 +9,7 @@ export type WebSslKeyPair = { cert: string, key: string };
  * @concrete
  */
 export interface WebApplication {
-  run(): WebServerHandle | Promise<WebServerHandle>;
+  run(): WebApplicationHandle | Promise<WebApplicationHandle>;
 }
 
 /**

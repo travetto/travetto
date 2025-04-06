@@ -2,7 +2,7 @@ import type lambda from 'aws-lambda';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { ConfigurationService } from '@travetto/config';
-import { WebApplication, WebRouter, WebServerHandle } from '@travetto/web';
+import { WebApplication, WebRouter, WebApplicationHandle } from '@travetto/web';
 
 import { AwsLambdaWebUtil } from './util.ts';
 
@@ -12,7 +12,7 @@ export class AwsLambdaWebApplication implements WebApplication {
   @Inject()
   router: WebRouter;
 
-  async run(): Promise<WebServerHandle> {
+  async run(): Promise<WebApplicationHandle> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
     return { close(): void { }, on(): void { } };
   }

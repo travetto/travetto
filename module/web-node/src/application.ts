@@ -2,7 +2,7 @@ import http, { IncomingMessage, ServerResponse } from 'node:http';
 import https from 'node:https';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebApplication, WebServerHandle, WebRouter, NetUtil } from '@travetto/web';
+import { WebConfig, WebApplication, WebApplicationHandle, WebRouter, NetUtil } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
 
 import { NodeWebUtil } from './util.ts';
@@ -25,7 +25,7 @@ export class NodeWebApplication implements WebApplication {
     await NodeWebUtil.respondToServerResponse(webRes, res);
   }
 
-  async run(): Promise<WebServerHandle> {
+  async run(): Promise<WebApplicationHandle> {
     const core = this.config.ssl?.active ?
       https.createServer(this.config.ssl.keys) :
       http.createServer();
@@ -44,6 +44,8 @@ export class NodeWebApplication implements WebApplication {
       .on('request', this.handler.bind(this));
     await promise;
     server.off('error', reject);
+
+    console.log('Listening', { port: this.config.port });
 
     return {
       close: server.close.bind(server),

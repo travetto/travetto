@@ -1,4 +1,4 @@
-import { Env } from '@travetto/runtime';
+import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -21,6 +21,6 @@ export class SampleApp {
     ssl.active = true;
 
     // Configure server before running
-    return DependencyRegistry.runInstance(WebApplication);
+    return DependencyRegistry.runInstance(toConcrete<WebApplication>());
   }
 }

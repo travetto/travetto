@@ -380,7 +380,7 @@ First we must start the application:
     <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
       AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-      ApiHostConfig: <span class="token punctuation">{{'{'}}</span> openapi: <span class="token string">'3.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
+      ApiHostConfig: <span class="token punctuation">{{'{'}}</span> servers: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token punctuation">{{'{'}}</span> url: <span class="token string">'http://localhost:12555'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>, openapi: <span class="token string">'3.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
       ApiInfoConfig: <span class="token punctuation">{{'{'}}</span> description: <span class="token string">''</span>, title: <span class="token string">'&#64;travetto/todo-app'</span>, version: <span class="token string">'0.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
       ApiSpecConfig: <span class="token punctuation">{{'{'}}</span>
         output: <span class="token string">'./openapi.yml'</span>,
@@ -458,7 +458,7 @@ First we must start the application:
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
-<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/web:src/application/app.ts:191<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
+<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>&#64;travetto/web-node:src/application.ts:48<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
 next, let's execute <a target="_blank" class="external-link" href="https://nodejs.org/api/globals.html#fetch">fetch</a> requests to interact with the new api. <br><br>

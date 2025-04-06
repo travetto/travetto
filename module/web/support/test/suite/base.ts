@@ -8,7 +8,7 @@ import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 
-import { WebApplication, WebRouter, WebServerHandle } from '../../../src/types/application.ts';
+import { WebApplication, WebRouter, WebApplicationHandle } from '../../../src/types/application.ts';
 import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
 import { CookieConfig } from '../../../src/interceptor/cookies.ts';
@@ -23,7 +23,7 @@ function asBuffer(v: Buffer | Readable): Promise<Buffer> {
  */
 export abstract class BaseWebSuite {
 
-  #handle?: WebServerHandle;
+  #handle?: WebApplicationHandle;
   #app?: WebApplication;
 
   appType?: Class<WebApplication>;

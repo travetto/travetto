@@ -265,7 +265,7 @@ Per the [Runtime](https://github.com/travetto/travetto/tree/main/module/runtime#
 Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module supports typing requests and request bodies for run-time validation of requests.
 
 ## Running an App
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/application/app.ts#L23) that will follow default behaviors, and spin up the Web server.
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L84) for [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/types/application.ts#L11) that will follow default behaviors, and spin up the Web server.
 
 **Terminal: Standard application**
 ```bash
@@ -337,7 +337,7 @@ To customize a Web server, you may need to construct an entry point using the [@
 
 **Code: Application entry point for Web Applications**
 ```typescript
-import { Env } from '@travetto/runtime';
+import { Env, toConcrete } from '@travetto/runtime';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -360,7 +360,7 @@ export class SampleApp {
     ssl.active = true;
 
     // Configure server before running
-    return DependencyRegistry.runInstance(WebApplication);
+    return DependencyRegistry.runInstance(toConcrete<WebApplication>());
   }
 }
 ```
