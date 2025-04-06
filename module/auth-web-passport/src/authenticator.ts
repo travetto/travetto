@@ -12,11 +12,11 @@ type PassportUser = Express.User & { _raw?: unknown, _json?: unknown, source?: u
 /**
  * Authenticator via passport
  */
-export class PassportAuthenticator<U extends object> implements Authenticator<U, WebFilterContext> {
+export class PassportAuthenticator<V extends PassportUser = PassportUser> implements Authenticator<object, WebFilterContext> {
 
   #strategyName: string;
   #strategy: passport.Strategy;
-  #toPrincipal: (user: PassportUser, issuer?: string) => SimplePrincipal;
+  #toPrincipal: (user: V, issuer?: string) => SimplePrincipal;
   #passportOptions: (ctx: WebFilterContext) => passport.AuthenticateOptions;
   session = false;
 
@@ -31,7 +31,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
   constructor(
     strategyName: string,
     strategy: passport.Strategy,
-    toPrincipal: (user: PassportUser) => SimplePrincipal,
+    toPrincipal: (user: V) => SimplePrincipal,
     opts: passport.AuthenticateOptions | ((ctx: WebFilterContext) => passport.AuthenticateOptions) = {},
   ) {
     this.#strategyName = strategyName;
@@ -52,7 +52,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
    * Authenticate a request given passport config
    * @param ctx The travetto filter context
    */
-  async authenticate(input: U, ctx: WebFilterContext): Promise<Principal | undefined> {
+  async authenticate(input: object, ctx: WebFilterContext): Promise<Principal | undefined> {
     const requestOptions = this.#passportOptions(ctx);
     const options = {
       session: this.session,
@@ -61,7 +61,7 @@ export class PassportAuthenticator<U extends object> implements Authenticator<U,
       state: PassportUtil.enhanceState(ctx, requestOptions.state)
     };
 
-    const user = await WebConnectUtil.invoke<PassportUser>(ctx, (req, res, next) =>
+    const user = await WebConnectUtil.invoke<V>(ctx, (req, res, next) =>
       passport.authenticate(this.#strategyName, options, next)(req, res)
     );
 
