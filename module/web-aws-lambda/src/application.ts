@@ -27,11 +27,7 @@ export class AwsLambdaWebApplication implements WebApplication {
 
   async run(): Promise<WebServerHandle> {
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
-
-    return {
-      close(): void { },
-      on(): void { }
-    };
+    return { close(): void { }, on(): void { } };
   }
 
   async handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
