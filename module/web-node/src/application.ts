@@ -1,16 +1,11 @@
 import http, { IncomingMessage, ServerResponse } from 'node:http';
 import https from 'node:https';
-import { pipeline } from 'node:stream/promises';
-import { Readable } from 'node:stream';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebApplication, WebServerHandle, WebRouter, NetUtil } from '@travetto/web';
-import { hasFunction } from '@travetto/runtime';
 import { ConfigurationService } from '@travetto/config';
 
 import { NodeWebUtil } from './util.ts';
-
-const isReadable = hasFunction<Readable>('pipe');
 
 /**
  * An express http server
@@ -27,21 +22,13 @@ export class NodeWebApplication implements WebApplication {
   async handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const webReq = NodeWebUtil.toWebRequest(req);
     const webRes = await this.router.execute(webReq);
-
-    res.statusCode = webRes.statusCode ?? 200;
-    webRes.headers.forEach((v, k) => res.setHeader(k, v));
-    if (isReadable(webRes.body)) {
-      await pipeline(webRes.body, res);
-    } else {
-      res.write(webRes.body);
-      res.end();
-    }
+    await NodeWebUtil.respondToServerResponse(webRes, res);
   }
 
   async run(): Promise<WebServerHandle> {
     const core = this.config.ssl?.active ?
-      https.createServer(this.config.ssl.keys, (req, res) => this.handler(req, res)) :
-      http.createServer((req, res) => this.handler(req, res));
+      https.createServer(this.config.ssl.keys) :
+      http.createServer();
 
     const { reject, resolve, promise } = Promise.withResolvers<void>();
 
@@ -53,7 +40,8 @@ export class NodeWebApplication implements WebApplication {
 
     const server = core.listen(this.config.port, this.config.bindAddress)
       .on('error', reject)
-      .on('listening', resolve);
+      .on('listening', resolve)
+      .on('request', this.handler.bind(this));
     await promise;
     server.off('error', reject);
 

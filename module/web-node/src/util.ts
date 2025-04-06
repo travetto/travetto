@@ -1,7 +1,11 @@
-import type { IncomingMessage } from 'node:http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import { pipeline } from 'node:stream/promises';
+import { Readable } from 'node:stream';
 
-import { castTo } from '@travetto/runtime';
-import { WebRequest } from '@travetto/web';
+import { castTo, hasFunction } from '@travetto/runtime';
+import { WebRequest, WebResponse } from '@travetto/web';
+
+const isReadable = hasFunction<Readable>('pipe');
 
 export class NodeWebUtil {
   /**
@@ -22,5 +26,19 @@ export class NodeWebUtil {
       remoteIp: req.socket.remoteAddress,
       port: req.socket.localPort
     });
+  }
+
+  /**
+   * Send WebResponse to ServerResponse
+   */
+  static async respondToServerResponse(webRes: WebResponse, res: ServerResponse): Promise<void> {
+    res.statusCode = webRes.statusCode ?? 200;
+    webRes.headers.forEach((v, k) => res.setHeader(k, v));
+    if (isReadable(webRes.body)) {
+      await pipeline(webRes.body, res);
+    } else {
+      res.write(webRes.body);
+      res.end();
+    }
   }
 }
