@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Class } from '@travetto/runtime';
+import { Class, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
@@ -13,8 +13,7 @@ import { WebInterceptor } from '../src/types/interceptor.ts';
 import { WebInterceptorCategory } from '../src/types/core.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { WebChainedContext } from '../src/types.ts';
-import { WebApplication, WebServerHandle } from '../src/types/application.ts';
-import { WebApplication } from '../src/application/app.ts';
+import { WebRouter } from '../src/types/application.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
@@ -27,18 +26,6 @@ class CustomInterceptorConfig {
   name = 'bob';
 
   weird() { }
-}
-
-@Injectable()
-class Server implements WebApplication {
-  async init(): Promise<void> { }
-  registerRouter(): void { }
-  listen(): WebServerHandle | Promise<WebServerHandle> {
-    return {
-      close(cb?: Function) { },
-      on(type: 'close', cb: Function) { }
-    };
-  }
 }
 
 @Injectable()
@@ -119,7 +106,7 @@ class TestInterceptorConfigSuite {
   @BeforeAll()
   async init() {
     await RootRegistry.init();
-    await DependencyRegistry.getInstance(WebApplication);
+    await DependencyRegistry.getInstance(toConcrete<WebRouter>());
   }
 
   @Test()
