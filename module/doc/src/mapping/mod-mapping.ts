@@ -199,6 +199,10 @@ export const MOD_MAPPING = {
     name: '@travetto/web-aws-lambda', folder: '@travetto/web-aws-lambda', displayName: 'Web AWS Lambda',
     description: 'Web APIs entry point support for AWS Lambdas.'
   },
+  WebConnect: {
+    name: '@travetto/web-connect', folder: '@travetto/web-connect', displayName: 'Web Connect Support',
+    description: 'Web integration for Connect-Like Resources'
+  },
   WebNode: {
     name: '@travetto/web-node', folder: '@travetto/web-node', displayName: 'Node Web Server',
     description: 'Node provider for the travetto web module.'

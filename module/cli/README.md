@@ -464,7 +464,7 @@ import { Runtime, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 
-import type { WebApplication, WebServerHandle } from '../src/types/application.ts';
+import type { WebApplication, WebApplicationHandle } from '../src/types/application.ts';
 import { NetUtil } from '../src/util/net.ts';
 
 /**
@@ -485,7 +485,7 @@ export class RunWebCommand implements CliCommandShape {
     }
   }
 
-  async main(): Promise<WebServerHandle | void> {
+  async main(): Promise<WebApplicationHandle | void> {
     try {
       return await DependencyRegistry.runInstance(toConcrete<WebApplication>());
     } catch (err) {
@@ -564,14 +564,14 @@ $ trv service status
 
 Service          Version    Status
 -------------------------------------------------
-dynamodb           2.5.3    Running 93af422e793a
-elasticsearch     8.17.0    Running ed76ee063d13
-firestore         latest    Running feec2e5e95b4
-mongodb              8.0    Running 5513eba6734e
-mysql                9.1    Running 307bc66d442a
-postgresql          17.2    Running e78291e71040
-redis                7.4    Running 77ba279b4e30
-s3                3.12.0    Running fdacfc55b9e3
+dynamodb           2.5.3    Not running
+elasticsearch     8.17.0    Not running
+firestore         latest    Not running
+mongodb              8.0    Not running
+mysql                9.1    Not running
+postgresql          17.2    Not running
+redis                7.4    Not running
+s3                3.12.0    Not running
 ```
 
 ### Defining new Services

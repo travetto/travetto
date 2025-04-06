@@ -160,6 +160,7 @@ module/test
 module/transformer
 module/web
 module/web-aws-lambda
+module/web-connect
 module/web-node
 module/web-rpc
 module/web-upload
@@ -247,6 +248,7 @@ global-test/model_auth-session <workspace-root>/global-test/model_auth-session
             module/transformer <workspace-root>/module/transformer
                     module/web <workspace-root>/module/web
          module/web-aws-lambda <workspace-root>/module/web-aws-lambda
+            module/web-connect <workspace-root>/module/web-connect
                module/web-node <workspace-root>/module/web-node
                 module/web-rpc <workspace-root>/module/web-rpc
              module/web-upload <workspace-root>/module/web-upload

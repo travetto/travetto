@@ -2,9 +2,9 @@ import passport from 'passport';
 
 import { Authenticator, AuthenticatorState, Principal } from '@travetto/auth';
 import { WebFilterContext, WebRequest } from '@travetto/web';
+import { ConnectRequest, ConnectResponse } from '@travetto/web-connect';
 
 import { PassportUtil } from './util.ts';
-import { ConnectRequest, ConnectResponse } from './connect.ts';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
 
