@@ -13,7 +13,7 @@ import { Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
-import { BaseWebSuite } from '@travetto/web/support/test/base.ts';
+import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 
