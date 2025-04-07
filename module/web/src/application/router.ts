@@ -127,7 +127,7 @@ export class WebRouter implements WebDispatcher {
     const toClean = EndpointUtil.orderEndpoints(endpoints)
       .map(ep => {
         ep.instance = config.instance;
-        ep.filter = castTo(EndpointUtil.createEndpointHandler(this.interceptors, ep, config));
+        ep.filter = EndpointUtil.createEndpointHandler(this.interceptors, ep, config);
         return this.source.register(ep);
       })
       .filter(x => !!x);
