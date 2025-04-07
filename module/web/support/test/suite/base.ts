@@ -12,7 +12,7 @@ import { WebApplication, WebDispatcher, WebApplicationHandle } from '../../../sr
 import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
 import { CookieConfig } from '../../../src/interceptor/cookies.ts';
-import { WebConfig } from '../../../src/application/config.ts';
+import { WebConfig } from '../../../src/config/web.ts';
 
 function asBuffer(v: Buffer | Readable): Promise<Buffer> {
   return !Buffer.isBuffer(v) ? toBuffer(v) : Promise.resolve(v);

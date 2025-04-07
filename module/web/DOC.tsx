@@ -13,7 +13,7 @@ import { CorsInterceptor, CorsConfig } from './src/interceptor/cors.ts';
 import { GetCacheInterceptor } from './src/interceptor/get-cache.ts';
 import { LoggingInterceptor } from './src/interceptor/logging.ts';
 import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies.ts';
-import { WebConfig } from './src/application/config.ts';
+import { WebConfig } from './src/config/web.ts';
 import { WebRequest } from './src/types/request.ts';
 import { WebResponse } from './src/types/response.ts';
 import { WebInterceptor } from './src/types/interceptor.ts';

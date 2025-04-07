@@ -4,7 +4,7 @@ import { Injectable } from '@travetto/di';
 
 import { WebFilterContext } from '../../src/types.ts';
 import { WebResponse } from '../../src/types/response.ts';
-import { StandardWebRouter } from '../../src/application/router.ts';
+import { StandardWebRouter } from '../../src/router/standard.ts';
 import { WebDispatcher } from '../../src/types/application.ts';
 
 /**

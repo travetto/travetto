@@ -7,7 +7,7 @@ import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 
-import { WebConfig } from '../application/config.ts';
+import { WebConfig } from '../config/web.ts';
 import { EndpointConfig } from '../registry/types.ts';
 import { Cookie, CookieSetOptions } from '../types/cookie.ts';
 import { CookieJar } from '../util/cookie.ts';
