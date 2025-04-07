@@ -26,17 +26,17 @@ export const Markdown: RenderProvider<RenderContext> = {
   ul: async ({ recurse }) => `\n${await recurse()}`,
   ol: async ({ recurse }) => `\n${await recurse()}`,
   li: async ({ recurse, stack }) => {
-    const parent = stack.reverse().find(x => x.type === 'ol' || x.type === 'ul');
+    const parent = stack.toReversed().find(x => x.type === 'ol' || x.type === 'ul');
     const depth = stack.filter(x => x.type === 'ol' || x.type === 'ul').length;
     return `${'   '.repeat(depth)}${(parent && parent.type === 'ol') ? '1.' : '* '} ${await recurse()}\n`;
   },
-  table: async ({ recurse }) => recurse(),
-  tbody: async ({ recurse }) => recurse(),
+  table: async ({ recurse }) => `${await recurse()}`,
+  tbody: async ({ recurse }) => `${await recurse()}`,
   td: async ({ recurse }) => `|${await recurse()}`,
   tr: async ({ recurse }) => `${await recurse()}|\n`,
   thead: async ({ recurse }) => {
     const row = await recurse();
-    return `${row}${row.replace(/[^|\n]/g, '-')}`;
+    return `${row}${row?.replace(/[^|\n]/g, '-')}`;
   },
   h2: async ({ recurse }) => `\n## ${await recurse()}\n\n`,
   h3: async ({ recurse }) => `\n### ${await recurse()}\n\n`,
