@@ -18,6 +18,7 @@ import { CorsInterceptor } from '../src/interceptor/cors.ts';
 import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
 import { WebRequest } from '../src/types/request.ts';
+import { StandardWebRouter } from '@travetto/web';
 
 @Injectable()
 @Config('web.custom')
@@ -106,7 +107,7 @@ class TestInterceptorConfigSuite {
   @BeforeAll()
   async init() {
     await RootRegistry.init();
-    await DependencyRegistry.getInstance(toConcrete<WebDispatcher>());
+    await DependencyRegistry.getInstance(toConcrete<StandardWebRouter>());
   }
 
   @Test()
