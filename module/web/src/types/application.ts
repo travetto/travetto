@@ -1,5 +1,5 @@
 import { WebFilter } from '../types.ts';
-import { EndpointConfig } from '../registry/types.ts';
+import { ControllerConfig, EndpointConfig } from '../registry/types.ts';
 
 export type WebApplicationHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
 export type WebSslKeyPair = { cert: string, key: string };
@@ -26,13 +26,11 @@ export interface WebDispatcher {
 }
 
 /**
- * Defines the shape for web router internals
- *
- * @concrete
+ * Web router pattern
  */
-export interface WebRouterSupport extends WebDispatcher {
+export interface WebRouter extends WebDispatcher {
   /**
-   * Register a new endpoint with cleanup
+   * Register a controller with the prepared endpoints
    */
-  register(endpoint: EndpointConfig): (() => void) | undefined;
+  register(endpoints: EndpointConfig[], controller: ControllerConfig): Promise<() => void>;
 }

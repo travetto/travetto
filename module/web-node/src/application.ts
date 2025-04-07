@@ -2,7 +2,7 @@ import http, { IncomingMessage, ServerResponse } from 'node:http';
 import https from 'node:https';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, WebRouter } from '@travetto/web';
+import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, StandardWebRouter } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
 
 import { NodeWebUtil } from './util.ts';
@@ -17,7 +17,7 @@ export class NodeWebApplication implements WebApplication {
   config: WebConfig;
 
   @Inject()
-  router: WebRouter;
+  router: StandardWebRouter;
 
   async handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const webReq = NodeWebUtil.toWebRequest(req);

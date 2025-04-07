@@ -12,22 +12,6 @@ import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../regist
  */
 export class EndpointUtil {
 
-  static #compareEndpoints(a: number[], b: number[]): number {
-    const al = a.length;
-    const bl = b.length;
-    if (al !== bl) {
-      return bl - al;
-    }
-    let i = 0;
-    while (i < al) {
-      if (a[i] !== b[i]) {
-        return b[i] - a[i];
-      }
-      i += 1;
-    }
-    return 0;
-  }
-
   static MissingParamSymbol = Symbol();
 
   /**
@@ -181,18 +165,5 @@ export class EndpointUtil {
     ]);
 
     return castTo(result);
-  }
-
-  /**
-   * Order endpoints by a set of rules, to ensure consistent registration and that precedence is honored
-   */
-  static orderEndpoints(endpoints: EndpointConfig[]): EndpointConfig[] {
-    return endpoints
-      .map(ep => {
-        const parts = ep.path.replace(/^[/]|[/]$/g, '').split('/');
-        return [ep, parts.map(x => /[*]/.test(x) ? 1 : /:/.test(x) ? 2 : 3)] as const;
-      })
-      .toSorted((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
-      .map(([ep, _]) => ep);
   }
 }

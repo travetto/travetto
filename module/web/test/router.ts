@@ -6,7 +6,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Post, Get } from '../src/decorator/endpoint.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
-import { EndpointUtil } from '../src/util/endpoint.ts';
+import { WebRouterUtil } from '../src/util/router.ts';
 
 @Controller('/')
 class EndpointController {
@@ -63,7 +63,7 @@ class EndpointController {
 }
 
 @Suite()
-export class EndpointTest {
+export class RouterUtilTest {
 
   @BeforeAll()
   async init() {
@@ -73,7 +73,7 @@ export class EndpointTest {
   @Test()
   async testOrder() {
     const controller = ControllerRegistry.get(EndpointController);
-    const endpoints = EndpointUtil.orderEndpoints(controller.endpoints);
+    const endpoints = WebRouterUtil.orderEndpoints(controller.endpoints);
 
     assert.deepStrictEqual(endpoints.map(x => x.path), [
       '/a/b/c',
