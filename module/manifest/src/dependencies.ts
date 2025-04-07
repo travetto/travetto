@@ -146,7 +146,7 @@ export class PackageModuleVisitor {
       dep.state.roleSet = new Set(['std']);
     }
 
-    return [...mods].sort((a, b) => a.name.localeCompare(b.name));
+    return [...mods].toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
   /**

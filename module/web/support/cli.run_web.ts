@@ -1,8 +1,8 @@
-import { Runtime } from '@travetto/runtime';
+import { Runtime, toConcrete } from '@travetto/runtime';
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 
-import { WebServerHandle } from '../src/types/server.ts';
+import type { WebApplication, WebApplicationHandle } from '../src/types/application.ts';
 import { NetUtil } from '../src/util/net.ts';
 
 /**
@@ -23,14 +23,13 @@ export class RunWebCommand implements CliCommandShape {
     }
   }
 
-  async main(): Promise<WebServerHandle | void> {
-    const { WebApplication } = await import('../src/application/app.ts');
+  async main(): Promise<WebApplicationHandle | void> {
     try {
-      return await DependencyRegistry.runInstance(WebApplication);
+      return await DependencyRegistry.runInstance(toConcrete<WebApplication>());
     } catch (err) {
       if (NetUtil.isPortUsedError(err) && !Runtime.production && this.killConflict) {
         await NetUtil.freePort(err.port);
-        return await DependencyRegistry.runInstance(WebApplication);
+        return await DependencyRegistry.runInstance(toConcrete<WebApplication>());
       }
       throw err;
     }

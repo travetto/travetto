@@ -65,7 +65,7 @@ export class AppConfig {
 }
 ```
 
-As you can see, [PassportAuthenticator](https://github.com/travetto/travetto/tree/main/module/auth-web-passport/src/authenticator.ts#L14) will take care of the majority of the work, and all that is required is:
+As you can see, [PassportAuthenticator](https://github.com/travetto/travetto/tree/main/module/auth-web-passport/src/authenticator.ts#L15) will take care of the majority of the work, and all that is required is:
    *  Provide the name of the strategy (should be unique)
    *  Provide the strategy instance.
    *  The conversion functions which defines the mapping between external and local identities.
@@ -75,7 +75,7 @@ After that, the provider is no different than any other, and can be used accordi
 
 **Code: Sample endpoints using Facebook/passport provider**
 ```typescript
-import { Controller, Get, Redirect, Post, WebRequest, ContextParam } from '@travetto/web';
+import { Controller, Get, Post, WebRequest, ContextParam, WebResponse } from '@travetto/web';
 import { Login, Authenticated, Logout } from '@travetto/auth-web';
 import { Principal } from '@travetto/auth';
 
@@ -110,7 +110,7 @@ export class SampleAuth {
   @Get('/facebook/callback')
   @Login(FbAuthSymbol)
   async fbLoginComplete() {
-    return new Redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self', 301);
   }
 
   @Post('/logout')

@@ -2,7 +2,7 @@ import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { WebInterceptor } from '../types/interceptor.ts';
-import type { WebChainedFilter, WebContext, WebFilter } from '../types.ts';
+import type { WebChainedFilter, WebFilterContext, WebFilter } from '../types.ts';
 import { HttpMethod } from '../types/core.ts';
 import { WebHeaders } from '../types/headers.ts';
 
@@ -102,7 +102,7 @@ export interface EndpointParamConfig {
    * Extract the value from request
    * @param context The http context with the endpoint param config
    */
-  extract?: (ctx: WebContext, config: EndpointParamConfig) => unknown;
+  extract?: (ctx: WebFilterContext, config: EndpointParamConfig) => unknown;
   /**
    * Input prefix for parameter
    */

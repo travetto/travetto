@@ -3,36 +3,15 @@ import { buffer } from 'node:stream/consumers';
 
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { asFull, castTo, Util } from '@travetto/runtime';
+import { castTo } from '@travetto/runtime';
 import { WebRequest, WebResponse } from '@travetto/web';
-
-const baseLambdaContext = asFull<APIGatewayProxyEvent['requestContext']>({
-  accountId: Util.uuid(),
-  resourceId: Util.uuid(),
-  requestId: Util.uuid(),
-  apiId: Util.uuid(),
-  requestTimeEpoch: 1428582896000,
-  resourcePath: '/{proxy+}',
-  protocol: 'HTTP/1.1',
-  authorizer: {},
-  identity: {
-    accessKey: '', apiKeyId: '', accountId: '', caller: '', clientCert: {
-      clientCertPem: '', issuerDN: '', serialNumber: '', subjectDN: '',
-      validity: { notAfter: '', notBefore: '' }
-    }, apiKey: '',
-    cognitoAuthenticationProvider: '', cognitoAuthenticationType: '', cognitoIdentityId: '',
-    cognitoIdentityPoolId: '', principalOrgId: '', sourceIp: '127.0.0.1', user: '',
-    userAgent: '', userArn: ''
-  },
-  stage: '',
-});
 
 export class AwsLambdaWebUtil {
 
   /**
    * Create a request from an api gateway event
    */
-  static toWebRequest(event: APIGatewayProxyEvent, params: Record<string, unknown>): WebRequest {
+  static toWebRequest(event: APIGatewayProxyEvent, params?: Record<string, unknown>): WebRequest {
     // Build request
     const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
     const req = new WebRequest({
@@ -46,34 +25,6 @@ export class AwsLambdaWebUtil {
       inputStream: body ? Readable.from(body) : undefined
     });
     return req;
-  }
-
-  /**
-   * Create an api gateway event given a web request
-   */
-  static toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
-    const queryEntries = Object.entries(req.query ?? {});
-    const singleHeaders: Record<string, string> = {};
-    const multiHeaders: Record<string, string[]> = {};
-    req.headers.forEach((v, k) => {
-      singleHeaders[k] = Array.isArray(v) ? v.join('; ') : v;
-      multiHeaders[k] = req.headers.getList(k) ?? [];
-    });
-
-    return {
-      resource: '/{proxy+}',
-      pathParameters: {},
-      stageVariables: {},
-      path: req.path,
-      httpMethod: req.method,
-      queryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : v?.toString()])),
-      headers: singleHeaders,
-      isBase64Encoded: true,
-      body: req.body ? req.body.toString('base64') : req.body ?? null,
-      multiValueQueryStringParameters: Object.fromEntries(queryEntries.map(([k, v]) => [k, Array.isArray(v) ? v : [v]])),
-      multiValueHeaders: multiHeaders,
-      requestContext: { ...baseLambdaContext, path: req.path, httpMethod: req.method },
-    };
   }
 
   /**
@@ -105,16 +56,5 @@ export class AwsLambdaWebUtil {
       headers,
       multiValueHeaders,
     };
-  }
-
-  /**
-   * Create a web response from an API Gateway result
-   */
-  static toWebResponse(res: APIGatewayProxyResult): WebResponse {
-    return new WebResponse({
-      body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
-      headers: { ...res.headers ?? {}, ...res.multiValueHeaders ?? {} },
-      statusCode: res.statusCode
-    });
   }
 }

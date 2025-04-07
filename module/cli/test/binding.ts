@@ -96,7 +96,7 @@ export class SchemaBindingSuite {
     assert(color.envVars?.includes('COLOREO'));
     assert(color.flagNames?.includes('-l'));
     assert(color.flagNames?.includes('--color'));
-    assert.deepStrictEqual(color.choices?.sort(), ['blue', 'green']);
+    assert.deepStrictEqual(color.choices?.toSorted(), ['blue', 'green']);
 
     const age = schema.flags.find(x => x.name === 'age')!;
     assert(age.description === 'My age');

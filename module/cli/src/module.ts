@@ -35,7 +35,7 @@ export class CliModuleUtil {
     }
 
     return [...out.values()]
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
   /**

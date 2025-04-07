@@ -342,7 +342,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
           yield this.get(cls, id);
         }
       } else {
-        for (const id of [...index.entries()].sort((a, b) => +a[1] - +b[1]).map(([a, b]) => a)) {
+        for (const id of [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a, b]) => a)) {
           yield this.get(cls, id);
         }
       }

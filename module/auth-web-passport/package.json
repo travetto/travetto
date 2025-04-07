@@ -30,6 +30,7 @@
     "@travetto/auth-web": "^6.0.0-rc.3",
     "@travetto/config": "^6.0.0-rc.1",
     "@travetto/web": "^6.0.0-rc.1",
+    "@travetto/web-connect": "^6.0.0-rc.1",
     "@types/passport": "^1.0.17",
     "passport": "^0.7.0"
   },

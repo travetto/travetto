@@ -71,7 +71,7 @@ export class ActionStorage<T> {
    */
   getRecent(size = 5): TimeEntry<T>[] {
     return Object.values(this.#storage)
-      .sort((a, b) => b.time - a.time)
+      .toSorted((a, b) => b.time - a.time)
       .slice(0, size);
   }
 

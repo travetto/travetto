@@ -32,7 +32,7 @@ export class ModelCandidateUtil {
    * Get model names
    */
   static async getModelNames(): Promise<string[]> {
-    return (await this.#getModels()).map(x => ModelRegistry.getStore(x)).sort();
+    return (await this.#getModels()).map(x => ModelRegistry.getStore(x)).toSorted();
   }
 
   /**
@@ -49,7 +49,7 @@ export class ModelCandidateUtil {
   static async getProviderNames(op?: keyof ModelStorageSupport): Promise<string[]> {
     return (await this.getProviders(op))
       .map(x => x.class.name.replace(/ModelService/, ''))
-      .sort();
+      .toSorted();
   }
 
   /**

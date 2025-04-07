@@ -62,6 +62,6 @@ export class FileLoader {
    * @param relativePath The path to read
    */
   async readFile(relativePath: string): Promise<File> {
-    return new File([await this.read(relativePath, true)], path.basename(relativePath))
+    return new File([await this.read(relativePath, true)], path.basename(relativePath));
   }
 }

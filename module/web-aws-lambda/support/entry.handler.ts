@@ -1,9 +1,8 @@
 // @trv-no-transform
 import type lambda from 'aws-lambda';
-import type { WebApplication } from '@travetto/web';
-import type { AwsLambdaWebServer } from '../src/server.ts';
+import type { AwsLambdaWebApplication } from '../src/application.ts';
 
-async function buildApp(): Promise<WebApplication<AwsLambdaWebServer>> {
+async function buildApp(): Promise<AwsLambdaWebApplication> {
   const { Runtime, ConsoleManager } = await import('@travetto/runtime');
   ConsoleManager.debug(Runtime.debug);
 
@@ -12,13 +11,13 @@ async function buildApp(): Promise<WebApplication<AwsLambdaWebServer>> {
 
   const { DependencyRegistry } = await import('@travetto/di');
 
-  const web = await import('@travetto/web');
-  const app = await DependencyRegistry.getInstance(web.WebApplication<AwsLambdaWebServer>);
+  const web = await import('../src/application.ts');
+  const app = await DependencyRegistry.getInstance(web.AwsLambdaWebApplication);
   await app.run();
   return app;
 }
 
-let inst: WebApplication<AwsLambdaWebServer>;
+let inst: AwsLambdaWebApplication;
 export async function handler(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
-  return ((inst ??= await buildApp()).server as AwsLambdaWebServer).handle(event, context);
+  return (inst ??= await buildApp()).handle(event, context);
 }

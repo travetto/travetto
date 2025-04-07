@@ -1,15 +1,17 @@
 '@Application';
-import { InjectableFactory } from '@travetto/di';
-import { WebConfig, WebServer, WebServerHandle } from '@travetto/web';
-import { asFull } from '@travetto/runtime';
+import { DependencyRegistry, InjectableFactory } from '@travetto/di';
+import { WebConfig, WebApplication, WebApplicationHandle } from '@travetto/web';
+import { ConfigurationService } from '@travetto/config';
 
 class Config {
   @InjectableFactory()
-  static target(config: WebConfig): WebServer<unknown> {
-    return asFull<WebServer>({
-      init: () => { },
-      listen: () => asFull<WebServerHandle>({ port: config.port }),
-      registerRouter: async () => { }
-    });
+  static target(config: WebConfig): WebApplication {
+    return {
+      async run(): Promise<WebApplicationHandle> {
+        await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
+        console.log('Listening', { port: config.port });
+        return { on(): void { }, close(): void { } };
+      }
+    } satisfies WebApplication;
   }
 }

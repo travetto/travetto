@@ -3,15 +3,17 @@ import { buffer as toBuffer } from 'node:stream/consumers';
 import { Readable } from 'node:stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, castTo, Class, classConstruct } from '@travetto/runtime';
+import { AppError, castTo, Class } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
+import { DependencyRegistry } from '@travetto/di';
 
-import { WebServerHandle } from '../../../src/types/server.ts';
+import { WebApplication, WebApplicationHandle } from '../../../src/types/application.ts';
+import { WebDispatcher } from '../../../src/types.ts';
 import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
-
-import { WebServerSupport } from '../types.ts';
+import { CookieConfig } from '../../../src/interceptor/cookies.ts';
+import { WebConfig } from '../../../src/config/web.ts';
 
 function asBuffer(v: Buffer | Readable): Promise<Buffer> {
   return !Buffer.isBuffer(v) ? toBuffer(v) : Promise.resolve(v);
@@ -22,28 +24,31 @@ function asBuffer(v: Buffer | Readable): Promise<Buffer> {
  */
 export abstract class BaseWebSuite {
 
-  #handle?: WebServerHandle;
-  #support: WebServerSupport;
+  #handle?: WebApplicationHandle;
+  #app?: WebApplication;
 
-  type: Class<WebServerSupport>;
-  qualifier?: symbol;
+  appType?: Class<WebApplication>;
+  dispatcherType: Class<WebDispatcher>;
 
   @BeforeAll()
   async initServer(): Promise<void> {
-    this.#support = classConstruct(this.type);
     await RootRegistry.init();
-    this.#handle = await this.#support.init(this.qualifier);
-  }
 
-  get port(): number | undefined {
-    return 'port' in this.#support && typeof this.#support['port'] === 'number' ? this.#support.port : undefined;
-  }
+    // Deactivate secure cookies
+    Object.assign(
+      await DependencyRegistry.getInstance(CookieConfig),
+      { active: true, secure: false, signed: false }
+    );
 
-  async getOutput<T>(t: Buffer): Promise<T | string> {
-    try {
-      return JSON.parse(t.toString('utf8'));
-    } catch {
-      return t.toString('utf8');
+    // Deactivate ssl/port
+    Object.assign(
+      await DependencyRegistry.getInstance(WebConfig),
+      { port: -1, ssl: { active: false } }
+    );
+
+    if (this.appType) {
+      this.#app = await DependencyRegistry.getInstance(this.appType);
+      this.#handle = await this.#app.run();
     }
   }
 
@@ -57,22 +62,24 @@ export abstract class BaseWebSuite {
 
   async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
 
-    const req = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
+    const dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
 
-    if (req.body) {
-      const sample = WebResponse.from(req.body).ensureContentLength().ensureContentType();
-      sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      req.body = await asBuffer(sample.body);
+    const webReq = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
+
+    if (webReq.body) {
+      const sample = WebResponse.from(webReq.body).ensureContentLength().ensureContentType();
+      sample.headers.forEach((v, k) => webReq.headers.set(k, Array.isArray(v) ? v.join(',') : v));
+      webReq.body = await asBuffer(sample.body);
     }
 
-    Object.assign(req, { query: BindUtil.flattenPaths(req.query ?? {}) });
+    Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
 
-    const res = await this.#support.execute(req);
-    let bufferResult = await asBuffer(res.body);
+    const webRes = await dispatcher.dispatch({ req: webReq });
+    let bufferResult = await asBuffer(webRes.body);
 
     if (bufferResult.length) {
       try {
-        switch (res.headers.getList('Content-Encoding')?.[0]) {
+        switch (webRes.headers.getList('Content-Encoding')?.[0]) {
           case 'gzip': bufferResult = zlib.gunzipSync(bufferResult); break;
           case 'deflate': bufferResult = zlib.inflateSync(bufferResult); break;
           case 'br': bufferResult = zlib.brotliDecompressSync(bufferResult); break;
@@ -80,9 +87,10 @@ export abstract class BaseWebSuite {
       } catch { /* Preemptively attempt to decompress */ }
     }
 
-    let result = await this.getOutput(bufferResult);
+    let result: unknown = bufferResult.toString('utf8');
+    try { result = JSON.parse(castTo(result)); } catch { }
 
-    if (res.statusCode && res.statusCode >= 400) {
+    if (webRes.statusCode && webRes.statusCode >= 400) {
       const err = WebResponse.fromCatch(AppError.fromJSON(result) ?? result).source!;
       if (throwOnError) {
         throw err;
@@ -91,7 +99,7 @@ export abstract class BaseWebSuite {
       }
     }
 
-    res.source = castTo(result);
-    return castTo(res);
+    webRes.source = castTo(result);
+    return castTo(webRes);
   }
 }

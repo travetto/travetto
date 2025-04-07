@@ -19,7 +19,7 @@ export class FileConfigSource implements ConfigSource {
 
   constructor(parser: ParserManager) {
     this.#parser = parser;
-    this.#searchPaths = RuntimeResources.searchPaths.slice().reverse();
+    this.#searchPaths = RuntimeResources.searchPaths.toReversed();
     this.#profiles = ([
       ['application', 100],
       [Runtime.env!, 200],

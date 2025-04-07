@@ -53,7 +53,7 @@ export class CompilerWatcher {
         ignores.add(item);
       }
     }
-    return [...ignores].sort().map(x => x.endsWith('/') ? x : `${x}/`);
+    return [...ignores].toSorted().map(x => x.endsWith('/') ? x : `${x}/`);
   }
 
   #toCandidateEvent(action: CompilerWatchEvent['action'], file: string): CompilerWatchEventCandidate {

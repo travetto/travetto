@@ -1,4 +1,4 @@
-import { WebRequest } from '@travetto/web';
+import { WebFilterContext, WebRequest } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 
 /**
@@ -55,7 +55,7 @@ export class PassportUtil {
    * @param req The travetto request,
    * @param currentState The current state, if any
    */
-  static enhanceState(req: WebRequest, currentState?: string): string {
-    return this.addToState({ referrer: req.headers.get('Referer') }, currentState);
+  static enhanceState(ctx: WebFilterContext, currentState?: string): string {
+    return this.addToState({ referrer: ctx.req.headers.get('Referer') }, currentState);
   }
 }

@@ -5,10 +5,11 @@ import { AsyncContext } from '@travetto/context';
 import { ModelExpirySupport } from '@travetto/model';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 import { SqliteDialect } from '@travetto/model-sqlite';
+import { NodeWebApplication } from '@travetto/web-node';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
-import { NodeWebServerSupport } from '@travetto/web-node/support/test/server-support.ts';
+import { FetchWebDispatcher } from '@travetto/web-node/support/test/dispatcher.ts';
 
 class Config {
   @InjectableFactory({ primary: true })
@@ -26,5 +27,6 @@ class Config {
 export class SqliteAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
-  type = NodeWebServerSupport;
+  dispatcherType = FetchWebDispatcher;
+  appType = NodeWebApplication;
 }

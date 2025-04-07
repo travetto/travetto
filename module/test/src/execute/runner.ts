@@ -31,7 +31,7 @@ export class Runner {
     const consumer = new RunnableTestConsumer(target);
     const tests = await RunnerUtil.getTestDigest(globs, this.#state.tags);
     const testRuns = RunnerUtil.getTestRuns(tests)
-      .sort((a, b) => a.runId!.localeCompare(b.runId!));
+      .toSorted((a, b) => a.runId!.localeCompare(b.runId!));
 
     await consumer.onStart({ testCount: tests.length });
     await WorkPool.run(

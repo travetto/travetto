@@ -67,7 +67,7 @@ export class ConfigurationService {
     const specs = possible
       .flat()
       .filter(x => !!x)
-      .sort((a, b) => a.priority - b.priority);
+      .toSorted((a, b) => a.priority - b.priority);
 
     for (const spec of specs) {
       DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(spec.data), 'coerce');
@@ -97,7 +97,7 @@ export class ConfigurationService {
     const configs = await Promise.all(
       configTargets
         .filter(el => el.qualifier === DependencyRegistry.get(el.class).qualifier) // Is primary?
-        .sort((a, b) => a.class.name.localeCompare(b.class.name))
+        .toSorted((a, b) => a.class.name.localeCompare(b.class.name))
         .map(async el => {
           const inst = await DependencyRegistry.getInstance<ClassInstance>(el.class, el.qualifier);
           return [el, inst] as const;

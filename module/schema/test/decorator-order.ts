@@ -36,14 +36,14 @@ export class DecoratorOrderSuite {
   async testSpecifiers() {
     await SchemaRegistry.init();
     const schema = SchemaRegistry.getViewSchema(MyClass);
-    assert.deepStrictEqual(schema.schema.text.specifiers?.sort(), ['text', 'long', 'weird'].sort());
+    assert.deepStrictEqual(schema.schema.text.specifiers?.toSorted(), ['text', 'long', 'weird'].toSorted());
   }
 
   @Test()
   async testSpecifiersRaw() {
     await SchemaRegistry.init();
     const schema = SchemaRegistry.getViewSchema(MyClass);
-    assert.deepStrictEqual(schema.schema.text2.specifiers?.sort(), ['text', 'weirder'].sort());
+    assert.deepStrictEqual(schema.schema.text2.specifiers?.toSorted(), ['text', 'weirder'].toSorted());
     assert(schema.schema.text2.name === 'text2');
     assert(schema.schema.text2.required?.active === true);
   }

@@ -4,7 +4,7 @@ import { Runtime } from '@travetto/runtime';
 import { Controller } from '../decorator/controller.ts';
 import { ConditionalRegister, ConfigureInterceptor, Undocumented } from '../decorator/common.ts';
 import { Get, Options } from '../decorator/endpoint.ts';
-import { WebConfig } from './config.ts';
+import { WebConfig } from '../config/web.ts';
 import { LoggingInterceptor, } from '../interceptor/logging.ts';
 
 @Undocumented()

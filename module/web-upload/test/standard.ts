@@ -1,11 +1,8 @@
 import { Suite } from '@travetto/test';
-import { WebInternalSymbol } from '@travetto/web';
-import { BasicWebServerSupport } from '@travetto/web/support/test/server-support.ts';
-
+import { BasicWebDispatcher } from '@travetto/web/support/test/dispatcher.ts';
 import { WebUploadServerSuite } from '../support/test/server.ts';
 
 @Suite()
 export class StandardAuthWebTest extends WebUploadServerSuite {
-  type = BasicWebServerSupport;
-  qualifier = WebInternalSymbol;
+  dispatcherType = BasicWebDispatcher;
 }

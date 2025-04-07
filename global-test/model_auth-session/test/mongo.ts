@@ -3,10 +3,11 @@ import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { SessionModelSymbol } from '@travetto/auth-session';
 import { MongoModelService, MongoModelConfig } from '@travetto/model-mongo';
+import { NodeWebApplication } from '@travetto/web-node';
 
 import { AuthSessionServerSuite } from '@travetto/auth-session/support/test/server.ts';
 import { ModelSuite } from '@travetto/model/support/test/suite.ts';
-import { NodeWebServerSupport } from '@travetto/web-node/support/test/server-support.ts';
+import { FetchWebDispatcher } from '@travetto/web-node/support/test/dispatcher.ts';
 
 class Config {
   @InjectableFactory(SessionModelSymbol)
@@ -20,5 +21,6 @@ class Config {
 export class MongoAuthSessionServerSuite extends AuthSessionServerSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
-  type = NodeWebServerSupport;
+  dispatcherType = FetchWebDispatcher;
+  appType = NodeWebApplication;
 }

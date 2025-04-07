@@ -63,7 +63,7 @@ class EndpointController {
 }
 
 @Suite()
-export class EndpointTest {
+export class RouterUtilTest {
 
   @BeforeAll()
   async init() {

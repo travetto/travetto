@@ -1,12 +1,15 @@
-import { asConstructable, castTo, Class } from '@travetto/runtime';
+import { asConstructable, castTo, Class, Runtime, TypedObject } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { WebContext, WebChainedFilter, WebChainedContext } from '../types.ts';
-import { WebRequest } from '../types/request.ts';
+import { WebFilterContext, WebChainedFilter, WebChainedContext, WebFilter } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
-import { WebInternalSymbol, HTTP_METHODS } from '../types/core.ts';
+import { WebInternalSymbol, HTTP_METHODS, WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
+import { WebCommonUtil } from './common.ts';
+import { ControllerRegistry } from '@travetto/web';
+import { DependencyRegistry } from '@travetto/di';
+import { RetargettingProxy } from '@travetto/registry';
 
 /**
  * Endpoint specific utilities
@@ -77,7 +80,7 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(ctx: WebContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
+  static extractParameter(ctx: WebFilterContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
@@ -103,7 +106,7 @@ export class EndpointUtil {
    * @param req The request
    * @param res The response
    */
-  static async extractParameters(ctx: WebContext, endpoint: EndpointConfig): Promise<unknown[]> {
+  static async extractParameters(ctx: WebFilterContext, endpoint: EndpointConfig): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
     const vals = ctx.req[WebInternalSymbol]?.requestParams ?? [];
@@ -132,7 +135,7 @@ export class EndpointUtil {
   /**
    * Endpoint invocation code
    */
-  static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebContext): Promise<WebResponse> {
+  static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebFilterContext): Promise<WebResponse> {
     const params = await this.extractParameters(ctx, endpoint);
     try {
       const res = WebResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
@@ -156,7 +159,7 @@ export class EndpointUtil {
     interceptors: WebInterceptor[],
     endpoint: EndpointConfig,
     controller?: ControllerConfig
-  ): WebChainedFilter {
+  ): WebFilter {
 
     // Filter interceptors if needed
     for (const filter of [controller?.interceptorExclude, endpoint.interceptorExclude]) {
@@ -175,11 +178,47 @@ export class EndpointUtil {
     ]
       .map(fn => ({ filter: fn }));
 
-    return this.createFilterChain([
+    const result = this.createFilterChain([
       ...interceptorFilters,
       ...endpointFilters,
       { filter: this.invokeEndpoint.bind(this, endpoint) }
     ]);
+
+    return castTo(result);
+  }
+
+
+  /**
+   * Get bound endpoints, honoring the conditional status
+   */
+  static async getBoundEndpoints(c: Class): Promise<EndpointConfig[]> {
+    const config = ControllerRegistry.get(c);
+
+    // Skip registering conditional controllers
+    if (config.conditional && !await config.conditional()) {
+      return [];
+    }
+
+    config.instance = await DependencyRegistry.getInstance(config.class);
+
+    if (Runtime.dynamic) {
+      config.instance = RetargettingProxy.unwrap(config.instance);
+    }
+
+    // Filter out conditional endpoints
+    const endpoints = (await Promise.all(
+      config.endpoints.map(ep => Promise.resolve(ep.conditional?.() ?? true).then(v => v ? ep : undefined))
+    )).filter(x => !!x);
+
+    if (!endpoints.length) {
+      return [];
+    }
+
+    for (const ep of endpoints) {
+      ep.instance = config.instance;
+    }
+
+    return endpoints;
   }
 
   /**
@@ -191,7 +230,43 @@ export class EndpointUtil {
         const parts = ep.path.replace(/^[/]|[/]$/g, '').split('/');
         return [ep, parts.map(x => /[*]/.test(x) ? 1 : /:/.test(x) ? 2 : 3)] as const;
       })
-      .sort((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
+      .toSorted((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
       .map(([ep, _]) => ep);
+  }
+
+
+  /**
+   * Order interceptors
+   */
+  static orderInterceptors(instances: WebInterceptor[]): WebInterceptor[] {
+    const cats = WEB_INTERCEPTOR_CATEGORIES.map(x => ({
+      key: x,
+      start: castTo<Class<WebInterceptor>>({ name: `${x}Start` }),
+      end: castTo<Class<WebInterceptor>>({ name: `${x}End` }),
+    }));
+
+    const categoryMapping = TypedObject.fromEntries(cats.map(x => [x.key, x]));
+
+    const ordered = instances.map(x => {
+      const group = categoryMapping[x.category];
+      const after = [...x.dependsOn ?? [], group.start];
+      const before = [...x.runsBefore ?? [], group.end];
+      return ({ key: x.constructor, before, after, target: x, placeholder: false });
+    });
+
+    // Add category sets into the ordering
+    let i = 0;
+    for (const cat of cats) {
+      const prevEnd = cats[i - 1]?.end ? [cats[i - 1].end] : [];
+      ordered.push(
+        { key: cat.start, before: [cat.end], after: prevEnd, placeholder: true, target: undefined! },
+        { key: cat.end, before: [], after: [cat.start], placeholder: true, target: undefined! }
+      );
+      i += 1;
+    }
+
+    return WebCommonUtil.ordered(ordered)
+      .filter(x => !x.placeholder)  // Drop out the placeholders
+      .map(x => x.target);
   }
 }
