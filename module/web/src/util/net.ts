@@ -52,11 +52,12 @@ export class NetUtil {
     port: number;
     bindAddress?: string;
     sslKeys?: WebSslKeyPair;
+    handler?: (req: http.IncomingMessage, res: http.ServerResponse) => void
   }): Promise<http.Server> {
     const { reject, resolve, promise } = Promise.withResolvers<void>();
     const core = config.sslKeys ?
-      https.createServer(config.sslKeys!) :
-      http.createServer();
+      https.createServer(config.sslKeys!, config.handler) :
+      http.createServer(config.handler);
 
     const server = core.listen(config.port, config.bindAddress)
       .on('error', reject)

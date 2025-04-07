@@ -31,14 +31,15 @@ export class NodeWebApplication implements WebApplication {
 
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
 
-    const res = await NetUtil.startHttpServer({
+    const server = await NetUtil.startHttpServer({
       port: this.config.port,
       bindAddress: this.config.bindAddress,
-      sslKeys: this.config.ssl?.active ? this.config.ssl.keys : undefined
+      sslKeys: this.config.ssl?.active ? this.config.ssl.keys : undefined,
+      handler: (req, res) => this.handler(req, res)
     });
 
     console.log('Listening', { port: this.config.port });
 
-    return res;
+    return server;
   }
 }
