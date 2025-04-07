@@ -205,7 +205,7 @@ export class BasicCommand {
   reverse?: boolean;
 
   main(@Min(1) @Max(10) volumes: number[]) {
-    console.log(volumes.sort((a, b) => (a - b) * (this.reverse ? -1 : 1)).join(' '));
+    console.log(volumes.toSorted((a, b) => (a - b) * (this.reverse ? -1 : 1)).join(' '));
   }
 }
 ```
@@ -564,14 +564,14 @@ $ trv service status
 
 Service          Version    Status
 -------------------------------------------------
-dynamodb           2.5.3    Not running
-elasticsearch     8.17.0    Not running
-firestore         latest    Not running
-mongodb              8.0    Not running
-mysql                9.1    Not running
-postgresql          17.2    Not running
-redis                7.4    Not running
-s3                3.12.0    Not running
+dynamodb           2.5.3    Running 93af422e793a
+elasticsearch     8.17.0    Running ed76ee063d13
+firestore         latest    Running feec2e5e95b4
+mongodb              8.0    Running 5513eba6734e
+mysql                9.1    Running 307bc66d442a
+postgresql          17.2    Running e78291e71040
+redis                7.4    Running 77ba279b4e30
+s3                3.12.0    Running fdacfc55b9e3
 ```
 
 ### Defining new Services

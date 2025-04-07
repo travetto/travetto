@@ -13,20 +13,4 @@ npm install @travetto/web-connect
 yarn add @travetto/web-connect
 ```
 
-The module provides support basic support with AWS lambdas.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers.
-
-## CLI - Packaging Lambdas
-
-**Terminal: Invoking a Package Build**
-```bash
-$ trv pack:lambda -h
-
-Unknown command: pack:lambda 
-
-Commands:
-  doc         Command line support for generating module docs.
-  run:web     Run a web server as an application
-  service     Allows for running services
-  test        Launch test framework and execute tests
-  test:watch  Invoke the test watcher
-```
+This module provides basic integration for calling [connect](https://github.com/senchalabs/connect) related middleware.

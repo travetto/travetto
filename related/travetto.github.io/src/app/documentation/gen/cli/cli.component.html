@@ -238,7 +238,7 @@ Additionally, if you provide a field as an array, it will collect all valid valu
   reverse<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
 
   <span class="token function">main</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Min</span></span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Max</span></span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span> volumes<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>volumes<span class="token punctuation">.</span><span class="token function">sort</span><span class="token punctuation">(</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span>a <span class="token operator">-</span> b<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>reverse <span class="token operator">?</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">' '</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>volumes<span class="token punctuation">.</span><span class="token function">toSorted</span><span class="token punctuation">(</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span>a <span class="token operator">-</span> b<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>reverse <span class="token operator">?</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">' '</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
@@ -658,14 +658,14 @@ A sample of all services available to the entire framework:
 
 Service          Version    Status
 -------------------------------------------------
-dynamodb           <span class="token number">2.5</span>.3    Not running
-elasticsearch     <span class="token number">8.17</span>.0    Not running
-firestore         latest    Not running
-mongodb              <span class="token number">8.0</span>    Not running
-mysql                <span class="token number">9.1</span>    Not running
-postgresql          <span class="token number">17.2</span>    Not running
-redis                <span class="token number">7.4</span>    Not running
-s3                <span class="token number">3.12</span>.0    Not running</code></pre>
+dynamodb           <span class="token number">2.5</span>.3    Running 93af422e793a
+elasticsearch     <span class="token number">8.17</span>.0    Running ed76ee063d13
+firestore         latest    Running feec2e5e95b4
+mongodb              <span class="token number">8.0</span>    Running 5513eba6734e
+mysql                <span class="token number">9.1</span>    Running 307bc66d442a
+postgresql          <span class="token number">17.2</span>    Running e78291e71040
+redis                <span class="token number">7.4</span>    Running 77ba279b4e30
+s3                <span class="token number">3.12</span>.0    Running fdacfc55b9e3</code></pre>
   </figure>
 
 <h3 id="defining-new-services">Defining new Services</h3>
