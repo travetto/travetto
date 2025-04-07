@@ -51,14 +51,6 @@ export abstract class BaseWebSuite {
     }
   }
 
-  async getOutput<T>(t: Buffer): Promise<T | string> {
-    try {
-      return JSON.parse(t.toString('utf8'));
-    } catch {
-      return t.toString('utf8');
-    }
-  }
-
   @AfterAll()
   async destroySever(): Promise<void> {
     if (this.#handle) {
@@ -94,7 +86,8 @@ export abstract class BaseWebSuite {
       } catch { /* Preemptively attempt to decompress */ }
     }
 
-    let result = await this.getOutput(bufferResult);
+    let result: unknown = bufferResult.toString('utf8');
+    try { result = JSON.parse(castTo(result)); } catch { }
 
     if (webRes.statusCode && webRes.statusCode >= 400) {
       const err = WebResponse.fromCatch(AppError.fromJSON(result) ?? result).source!;

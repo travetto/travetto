@@ -23,5 +23,4 @@ export class ElasticsearchAuthSessionServerSuite extends AuthSessionServerSuite 
   configClass = ElasticsearchModelConfig;
   dispatcherType = FetchWebDispatcher;
   appType = NodeWebApplication;
-
 }
