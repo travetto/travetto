@@ -37,5 +37,4 @@ export * from './src/util/endpoint.ts';
 export * from './src/util/mime.ts';
 export * from './src/util/cookie.ts';
 export * from './src/util/common.ts';
-export * from './src/util/router.ts';
 export * from './src/util/net.ts';

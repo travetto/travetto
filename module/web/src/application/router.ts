@@ -6,17 +6,15 @@ import { Injectable } from '@travetto/di';
 import { EndpointConfig } from '../registry/types.ts';
 
 import { WebResponse } from '../types/response.ts';
-import { WebRouter } from '../types/application.ts';
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { WebFilterContext } from '../types.ts';
-
-import { WebRouterUtil } from '../util/router.ts';
+import { BaseWebRouter } from './base-router.ts';
 
 /**
  * The web router
  */
 @Injectable()
-export class StandardWebRouter implements WebRouter {
+export class StandardWebRouter extends BaseWebRouter {
 
   #cache = new Map<Function, EndpointConfig>();
   raw = router();
@@ -34,10 +32,6 @@ export class StandardWebRouter implements WebRouter {
         this.raw.off(ep.method, ep.fullPath);
       }
     };
-  }
-
-  async postConstruct(): Promise<void> {
-    await WebRouterUtil.initializeRouter(this);
   }
 
   /**
