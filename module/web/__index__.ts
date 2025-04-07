@@ -3,6 +3,7 @@ export * from './src/types/request.ts';
 export * from './src/types/response.ts';
 export * from './src/types/core.ts';
 export * from './src/types/application.ts';
+export * from './src/types/router.ts';
 export * from './src/types/cookie.ts';
 export * from './src/types/interceptor.ts';
 export * from './src/types/headers.ts';

@@ -8,7 +8,8 @@ import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 
-import { WebApplication, WebDispatcher, WebApplicationHandle } from '../../../src/types/application.ts';
+import { WebApplication, WebApplicationHandle } from '../../../src/types/application.ts';
+import { WebDispatcher } from '../../../src/types.ts';
 import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
 import { CookieConfig } from '../../../src/interceptor/cookies.ts';

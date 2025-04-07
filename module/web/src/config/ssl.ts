@@ -3,7 +3,7 @@ import { Config, EnvVar } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 
 import { WebSslUtil } from '../util/ssl.ts';
-import { WebSslKeyPair } from '../types/application.ts';
+import { WebSslKeyPair } from '../types/core.ts';
 
 @Config('web.ssl')
 export class WebSslConfig {

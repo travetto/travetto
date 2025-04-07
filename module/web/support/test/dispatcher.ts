@@ -2,10 +2,9 @@ import { Readable } from 'node:stream';
 
 import { Injectable } from '@travetto/di';
 
-import { WebFilterContext } from '../../src/types.ts';
+import { WebDispatcher, WebFilterContext } from '../../src/types.ts';
 import { WebResponse } from '../../src/types/response.ts';
 import { StandardWebRouter } from '../../src/router/standard.ts';
-import { WebDispatcher } from '../../src/types/application.ts';
 
 /**
  * Support for invoking http requests directly
