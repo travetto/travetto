@@ -1,5 +1,4 @@
-import http, { IncomingMessage, ServerResponse } from 'node:http';
-import https from 'node:https';
+import { IncomingMessage, ServerResponse } from 'node:http';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, StandardWebRouter } from '@travetto/web';
@@ -26,30 +25,20 @@ export class NodeWebApplication implements WebApplication {
   }
 
   async run(): Promise<WebApplicationHandle> {
-    const core = this.config.ssl?.active ?
-      https.createServer(this.config.ssl.keys!) :
-      http.createServer();
-
-    const { reject, resolve, promise } = Promise.withResolvers<void>();
-
     if (this.config.port < 0) {
       this.config.port = await NetUtil.getFreePort();
     }
 
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
 
-    const server = core.listen(this.config.port, this.config.bindAddress)
-      .on('error', reject)
-      .on('listening', resolve)
-      .on('request', this.handler.bind(this));
-    await promise;
-    server.off('error', reject);
+    const res = await NetUtil.startHttpServer({
+      port: this.config.port,
+      bindAddress: this.config.bindAddress,
+      sslKeys: this.config.ssl?.active ? this.config.ssl.keys : undefined
+    });
 
     console.log('Listening', { port: this.config.port });
 
-    return {
-      close: server.close.bind(server),
-      on: server.on.bind(server)
-    };
+    return res;
   }
 }
