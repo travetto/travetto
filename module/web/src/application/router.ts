@@ -1,17 +1,13 @@
-import router from 'find-my-way';
-
 import { AppError, castTo, Class, Runtime, toConcrete, TypedObject } from '@travetto/runtime';
-import { DependencyRegistry, Injectable } from '@travetto/di';
+import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 
 import { ControllerRegistry } from '../registry/controller.ts';
-import { EndpointConfig } from '../registry/types.ts';
 
 import { WebInterceptor } from '../types/interceptor.ts';
-import { WEB_INTERCEPTOR_CATEGORIES, HTTP_METHODS, HttpMethod } from '../types/core.ts';
-import { WebRequest } from '../types/request.ts';
+import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebDispatcher } from '../types/application.ts';
+import { WebDispatcher, WebRouterSupport } from '../types/application.ts';
 
 import { WebCommonUtil } from '../util/common.ts';
 import { EndpointUtil } from '../util/endpoint.ts';
@@ -23,8 +19,10 @@ import { WebFilterContext } from '../types.ts';
 @Injectable()
 export class WebRouter implements WebDispatcher {
 
-  #routeCleanup = new Map<string, Function>();
-  raw = router();
+  #cleanup = new Map<string, Function | undefined>();
+
+  @Inject()
+  source: WebRouterSupport;
 
   /**
    * List of provided interceptors
@@ -40,19 +38,6 @@ export class WebRouter implements WebDispatcher {
 
     // Listen for updates
     ControllerRegistry.on(v => this.onControllerChange(v));
-  }
-
-  /**
-   * Resolve an endpoint given a web request
-   * @throws Throws a not found error if the route doesn't exist
-   */
-  resolveRoute(req: WebRequest): { endpoint: EndpointConfig, params: Record<string, unknown> } {
-    const found = this.raw.find(castTo((req.method ?? 'get').toUpperCase()), req.path ?? '/');
-    if (!found) {
-      throw new AppError(`Unknown route ${req.method} ${req.path}`, { category: 'notfound' });
-    }
-    const handler = castTo<{ endpoint: EndpointConfig }>(found.handler);
-    return { endpoint: handler.endpoint, params: found?.params };
   }
 
   /**
@@ -115,6 +100,10 @@ export class WebRouter implements WebDispatcher {
   async registerController(c: Class): Promise<void> {
     const config = ControllerRegistry.get(c);
 
+    if (this.#cleanup.has(c.Ⲑid)) {
+      throw new AppError(`Routes already exists for ${c.Ⲑid}, cannot re-register`, { category: 'general' });
+    }
+
     // Skip registering conditional controllers
     if (config.conditional && !await config.conditional()) {
       return;
@@ -135,25 +124,19 @@ export class WebRouter implements WebDispatcher {
       return;
     }
 
-    for (const ep of EndpointUtil.orderEndpoints(endpoints)) {
-      ep.instance = config.instance;
-      ep.filter = castTo(EndpointUtil.createEndpointHandler(this.interceptors, ep, config));
-    }
+    const toClean = EndpointUtil.orderEndpoints(endpoints)
+      .map(ep => {
+        ep.instance = config.instance;
+        ep.filter = castTo(EndpointUtil.createEndpointHandler(this.interceptors, ep, config));
+        return this.source.register(ep);
+      })
+      .filter(x => !!x);
 
-    const toClean: [HttpMethod, string][] = [];
-    for (const endpoint of endpoints) {
-      const fullPath = endpoint.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
-      const handler = (): void => { };
-      Object.defineProperty(handler, 'endpoint', { value: endpoint });
-      this.raw[HTTP_METHODS[endpoint.method].lower](fullPath, handler);
-      toClean.push([endpoint.method, fullPath]);
+    if (toClean.length) {
+      this.#cleanup.set(c.Ⲑid, () => toClean.forEach(x => x()));
+    } else {
+      this.#cleanup.set(c.Ⲑid, undefined);
     }
-
-    this.#routeCleanup.set(c.Ⲑid, async () => {
-      for (const [method, path] of toClean) {
-        this.raw.off(method, path);
-      }
-    });
 
     console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: endpoints.length });
   }
@@ -163,16 +146,17 @@ export class WebRouter implements WebDispatcher {
    * @param c The class to unregister
    */
   async unregisterController(c: Class): Promise<void> {
-    this.#routeCleanup.get(c.Ⲑid)?.();
-    this.#routeCleanup.delete(c.Ⲑid);
+    const cleanup = this.#cleanup.get(c.Ⲑid);
+    if (cleanup) {
+      cleanup();
+      this.#cleanup.delete(c.Ⲑid);
+    }
   }
 
   /**
    * Route and run the request
    */
-  async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const { params, endpoint } = this.resolveRoute(req);
-    Object.assign(req, { params });
-    return endpoint.filter!({ req });
+  async dispatch(ctx: WebFilterContext): Promise<WebResponse> {
+    return this.source.dispatch(ctx);
   }
 }

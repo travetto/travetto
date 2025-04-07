@@ -47,7 +47,7 @@ class $ActivationManager {
   }
 
   async activate(ctx: vscode.ExtensionContext): Promise<void> {
-    for (const { instance } of [...this.#registry.values()].sort((a, b) => a.priority - b.priority)) {
+    for (const { instance } of [...this.#registry.values()].toSorted((a, b) => a.priority - b.priority)) {
       this.#log.info('Activating', instance?.module, instance?.command);
       await instance?.activate?.(ctx);
     }

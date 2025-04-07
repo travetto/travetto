@@ -127,7 +127,7 @@ export class QueryVerifier {
       }
       return;
     } else {
-      const keys = Object.keys(value).sort();
+      const keys = Object.keys(value).toSorted();
 
       if (keys.length !== 1 && !(
         keys.length >= 2 &&

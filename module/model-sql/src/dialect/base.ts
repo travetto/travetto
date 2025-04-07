@@ -577,7 +577,7 @@ export abstract class SQLDialect implements DialectState {
   getFromSQL<T>(cls: Class<T>): string {
     const stack = SQLModelUtil.classToStack(cls);
     const aliases = this.getAliasCache(stack, this.namespace);
-    const tables = [...aliases.keys()].sort((a, b) => a.length - b.length); // Shortest first
+    const tables = [...aliases.keys()].toSorted((a, b) => a.length - b.length); // Shortest first
     return `FROM ${tables.map((table, i) => {
       const { alias, path } = aliases.get(table)!;
       let from = `${this.ident(table)} ${alias}`;
@@ -754,7 +754,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     const config = stack[stack.length - 1];
     const columns = SQLModelUtil.getFieldsByLocation(stack).local
       .filter(x => !SchemaRegistry.has(x.type))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .toSorted((a, b) => a.name.localeCompare(b.name));
     const columnNames = columns.map(c => c.name);
 
     const hasParent = stack.length > 1;

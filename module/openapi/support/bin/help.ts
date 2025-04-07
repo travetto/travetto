@@ -22,7 +22,7 @@ export class OpenApiClientHelp {
         .map(x => x.replace(/^\s+-\s+/, '').trim());
 
       await fs.mkdir(path.dirname(formatCache), { recursive: true });
-      await fs.writeFile(formatCache, JSON.stringify([...lines.sort(),]));
+      await fs.writeFile(formatCache, JSON.stringify([...lines.toSorted(),]));
     }
     const list: string[] = JSON.parse(await fs.readFile(formatCache, 'utf8'));
     return list;

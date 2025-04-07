@@ -1,4 +1,5 @@
-import { WebFilter } from '../types';
+import { WebFilter } from '../types.ts';
+import { EndpointConfig } from '../registry/types.ts';
 
 export type WebApplicationHandle = { close(): (unknown | Promise<unknown>), on(type: 'close', callback: () => void): unknown | void };
 export type WebSslKeyPair = { cert: string, key: string };
@@ -18,5 +19,20 @@ export interface WebApplication {
  * @concrete
  */
 export interface WebDispatcher {
+  /**
+   * Dispatch a request, and return a promise when completed
+   */
   dispatch: WebFilter;
+}
+
+/**
+ * Defines the shape for web router internals
+ *
+ * @concrete
+ */
+export interface WebRouterSupport extends WebDispatcher {
+  /**
+   * Register a new endpoint with cleanup
+   */
+  register(endpoint: EndpointConfig): (() => void) | undefined;
 }

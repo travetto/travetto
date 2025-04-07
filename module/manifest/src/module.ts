@@ -223,8 +223,8 @@ export class ManifestModuleUtil {
 
     return {
       ...rest,
-      roles: [...state.roleSet].sort(),
-      parents: [...state.parentSet].sort(),
+      roles: [...state.roleSet].toSorted(),
+      parents: [...state.parentSet].toSorted(),
       files
     };
   }

@@ -21,7 +21,7 @@ export class CliServiceCommand implements CliCommandShape {
     ))
       .filter(x => !!x)
       .filter(x => services?.length ? services.includes(x.name) : true)
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
   async validate(action: ServiceAction, services: string[]): Promise<CliValidationError | undefined> {

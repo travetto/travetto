@@ -1,8 +1,7 @@
 import { asConstructable, castTo, Class } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { WebFilterContext, WebChainedFilter, WebChainedContext } from '../types.ts';
-import { WebRequest } from '../types/request.ts';
+import { WebFilterContext, WebChainedFilter, WebChainedContext, WebFilter } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebInternalSymbol, HTTP_METHODS } from '../types/core.ts';
@@ -156,7 +155,7 @@ export class EndpointUtil {
     interceptors: WebInterceptor[],
     endpoint: EndpointConfig,
     controller?: ControllerConfig
-  ): WebChainedFilter {
+  ): WebFilter {
 
     // Filter interceptors if needed
     for (const filter of [controller?.interceptorExclude, endpoint.interceptorExclude]) {
@@ -175,11 +174,13 @@ export class EndpointUtil {
     ]
       .map(fn => ({ filter: fn }));
 
-    return this.createFilterChain([
+    const result = this.createFilterChain([
       ...interceptorFilters,
       ...endpointFilters,
       { filter: this.invokeEndpoint.bind(this, endpoint) }
     ]);
+
+    return castTo(result);
   }
 
   /**
@@ -191,7 +192,7 @@ export class EndpointUtil {
         const parts = ep.path.replace(/^[/]|[/]$/g, '').split('/');
         return [ep, parts.map(x => /[*]/.test(x) ? 1 : /:/.test(x) ? 2 : 3)] as const;
       })
-      .sort((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
+      .toSorted((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
       .map(([ep, _]) => ep);
   }
 }

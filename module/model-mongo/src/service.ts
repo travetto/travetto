@@ -437,7 +437,7 @@ export class MongoModelService implements
     );
 
     const sort = castTo<{ [ListIndexSymbol]: PlainIdx }>(idxCfg)[ListIndexSymbol] ??= MongoUtil.getPlainIndex(idxCfg);
-    const cursor = store.find(where, { timeout: true }).batchSize(100).sort(castTo(sort));
+    const cursor = store.find(where, { timeout: true }).batchSize(100).toSorted(castTo(sort));
 
     for await (const el of cursor) {
       yield await this.postLoad(cls, el);
@@ -545,10 +545,12 @@ export class MongoModelService implements
 
     const result = await col.aggregate<{ _id: ObjectId, count: number }>(aggregations).toArray();
 
-    return result.map(val => ({
-      key: MongoUtil.idToString(val._id),
-      count: val.count
-    })).sort((a, b) => b.count - a.count);
+    return result
+      .map(val => ({
+        key: MongoUtil.idToString(val._id),
+        count: val.count
+      }))
+      .toSorted((a, b) => b.count - a.count);
   }
 
   // Suggest

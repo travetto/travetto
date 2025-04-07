@@ -218,7 +218,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param method
    */
   getMethodSchema<T>(cls: Class<T>, method: string): FieldConfig[] {
-    return (this.get(cls)?.methods?.[method] ?? {}).fields?.filter(x => !!x).sort((a, b) => a.index! - b.index!) ?? [];
+    return (this.get(cls)?.methods?.[method] ?? {}).fields?.filter(x => !!x).toSorted((a, b) => a.index! - b.index!) ?? [];
   }
 
   /**
@@ -274,7 +274,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       config.specifiers = [...params[idx]?.specifiers ?? [], ...config.specifiers];
     }
     if (config.enum?.values) {
-      config.enum.values = config.enum.values.slice().sort();
+      config.enum.values = config.enum.values.toSorted();
     }
 
     params[idx] = {
@@ -313,7 +313,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       config.specifiers = [...totalViewConf.schema[prop].specifiers ?? [], ...config.specifiers];
     }
     if (config.enum?.values) {
-      config.enum.values = config.enum.values.slice().sort();
+      config.enum.values = config.enum.values.toSorted();
     }
 
     Object.assign(totalViewConf.schema[prop], config);

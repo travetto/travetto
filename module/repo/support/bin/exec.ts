@@ -11,7 +11,7 @@ const COLORS = ([...[
   '#afffd7', '#afffff', '#d787ff', '#d7afaf', '#d7afd7', '#d7afff', '#d7d7af', '#d7d7d7', '#d7d7ff', '#d7ff87', '#d7ffaf', '#d7ffd7', '#d7ffff', '#ff8787', '#ff87af',
   '#ff87d7', '#ff87ff', '#ffaf87', '#ffafaf', '#ffafd7', '#ffafff', '#ffd787', '#ffd7af', '#ffd7d7', '#ffd7ff', '#ffff87', '#ffffaf', '#ffffd7', '#ffffff', '#bcbcbc',
   '#c6c6c6', '#d0d0d0', '#dadada', '#e4e4e4', '#eeeeee'
-] as const]).sort((a, b) => Math.random() < .5 ? -1 : 1).map(x => StyleUtil.getStyle(x));
+] as const]).toSorted((a, b) => Math.random() < .5 ? -1 : 1).map(x => StyleUtil.getStyle(x));
 
 type ModuleRunConfig<T = ExecutionResult<string>> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;

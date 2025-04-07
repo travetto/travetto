@@ -106,7 +106,7 @@ export class VisitorFactory<S extends State = State> {
         const changed = state.added.size;
         let statements: ts.NodeArray<ts.Statement> | ts.Statement[] = ret.statements;
         while (state.added.size) {
-          for (const [idx, all] of [...state.added].sort(([idxA], [idxB]) => idxB - idxA)) {
+          for (const [idx, all] of [...state.added].toSorted(([idxA], [idxB]) => idxB - idxA)) {
             statements = [
               ...statements.slice(0, Math.max(idx, 0)),
               ...all.map(v => this.visit(state, context, v)),

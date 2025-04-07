@@ -97,7 +97,7 @@ export class HelpUtil {
    */
   static async renderAllHelp(title?: string): Promise<string> {
     const rows: string[] = [];
-    const keys = [...CliCommandRegistry.getCommandMapping().keys()].sort((a, b) => a.localeCompare(b));
+    const keys = [...CliCommandRegistry.getCommandMapping().keys()].toSorted((a, b) => a.localeCompare(b));
     const maxWidth = keys.reduce((a, b) => Math.max(a, util.stripVTControlCharacters(b).length), 0);
 
     for (const cmd of keys) {

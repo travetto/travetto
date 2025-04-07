@@ -328,7 +328,7 @@ export class SQLModelUtil {
 
     await Promise.all(all);
 
-    const ret = [...Object.values(ins)].sort((a, b) => a.stack.length - b.stack.length);
+    const ret = [...Object.values(ins)].toSorted((a, b) => a.stack.length - b.stack.length);
     return ret;
   }
 }

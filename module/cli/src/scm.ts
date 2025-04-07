@@ -59,7 +59,7 @@ export class CliScmUtil {
         out.add(entry.sourceFile);
       }
     }
-    return [...out].sort((a, b) => a.localeCompare(b));
+    return [...out].toSorted((a, b) => a.localeCompare(b));
   }
 
   /**
@@ -77,7 +77,7 @@ export class CliScmUtil {
       .filter(x => !!x);
 
     return [...new Set(mods)]
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .toSorted((a, b) => a.name.localeCompare(b.name));
   }
 
   /**

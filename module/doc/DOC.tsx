@@ -17,7 +17,7 @@ function NodeList({ src }: { src: string }): DocJSXElement {
       return { name, desc };
     });
 
-  const children = features.sort((a, b) => a.name.localeCompare(b.name))
+  const children = features.toSorted((a, b) => a.name.localeCompare(b.name))
     .map(f => <li>{d.method(f.name)} - {f.desc}</li>);
 
   return <ul>{...children}</ul>;

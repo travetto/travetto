@@ -15,7 +15,7 @@ export class OpenApiSuite {
     const spec = await svc.getSpec();
 
     assert.deepStrictEqual(
-      [...Object.keys(spec.paths ?? {})].sort(),
+      [...Object.keys(spec.paths ?? {})].toSorted(),
       [
         '/relationship/{name}',
         '/relationship',
@@ -24,7 +24,7 @@ export class OpenApiSuite {
         '/user/age/{age}',
         '/user',
         '/user/{id}'
-      ].sort()
+      ].toSorted()
     );
 
     assert(spec.components?.schemas?.Paging);

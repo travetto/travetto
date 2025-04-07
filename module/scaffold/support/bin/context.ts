@@ -122,8 +122,8 @@ export class Context {
       name: this.name,
       modules,
       moduleNames,
-      dependencies: [...new Set(this.#dependencies)].sort((a, b) => a.localeCompare(b)),
-      devDependencies: [...new Set(this.#devDependencies)].sort((a, b) => a.localeCompare(b)),
+      dependencies: [...new Set(this.#dependencies)].toSorted((a, b) => a.localeCompare(b)),
+      devDependencies: [...new Set(this.#devDependencies)].toSorted((a, b) => a.localeCompare(b)),
     }, ...this.#featureContexts);
 
     return context;
