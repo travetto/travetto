@@ -1,11 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { pipeline } from 'node:stream/promises';
-import { Readable } from 'node:stream';
 
-import { castTo, hasFunction } from '@travetto/runtime';
+import { BinaryUtil, castTo } from '@travetto/runtime';
 import { WebRequest, WebResponse } from '@travetto/web';
-
-const isReadable = hasFunction<Readable>('pipe');
 
 export class NodeWebUtil {
   /**
@@ -22,7 +19,7 @@ export class NodeWebUtil {
       query: Object.fromEntries(url.searchParams.entries()),
       params,
       headers: req.headers,
-      inputStream: req,
+      body: req,
       remoteIp: req.socket.remoteAddress,
       port: req.socket.localPort
     });
@@ -34,7 +31,7 @@ export class NodeWebUtil {
   static async respondToServerResponse(webRes: WebResponse, res: ServerResponse): Promise<void> {
     res.statusCode = webRes.statusCode ?? 200;
     webRes.headers.forEach((v, k) => res.setHeader(k, v));
-    if (isReadable(webRes.body)) {
+    if (BinaryUtil.isReadable(webRes.body)) {
       await pipeline(webRes.body, res);
     } else {
       res.write(webRes.body);

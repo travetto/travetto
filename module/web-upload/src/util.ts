@@ -7,7 +7,7 @@ import { pipeline } from 'node:stream/promises';
 
 import busboy from '@fastify/busboy';
 
-import { WebRequest, MimeUtil } from '@travetto/web';
+import { WebRequest, MimeUtil, WebInternalSymbol } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { WebUploadConfig } from './config.ts';
@@ -34,9 +34,13 @@ export class WebUploadUtil {
    * Get all the uploads, separating multipart from direct
    */
   static async* getUploads(req: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
-    if (!req.inputStream) {
+    const bodyStream = req[WebInternalSymbol].bodyHandled ? undefined : req.getBodyAsStream();
+
+    if (!bodyStream) {
       throw new AppError('No input stream provided for upload', { category: 'data' });
     }
+
+    req[WebInternalSymbol].bodyHandled = true;
 
     if (MULTIPART.has(req.headers.getContentType()?.full!)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
@@ -44,7 +48,7 @@ export class WebUploadUtil {
       const itr = new AsyncQueue<UploadItem>();
 
       // Upload
-      req.inputStream.pipe(busboy({
+      bodyStream.pipe(busboy({
         headers: {
           'content-type': req.headers.get('Content-Type')!,
           'content-disposition': req.headers.get('Content-Disposition')!,
@@ -62,7 +66,7 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: req.body ?? req.inputStream, filename: req.headers.getFilename(), field: 'file' };
+      yield { stream: bodyStream, filename: req.headers.getFilename(), field: 'file' };
     }
   }
 

@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream';
 import zlib from 'node:zlib';
 
 import { Injectable, Inject } from '@travetto/di';
@@ -6,12 +7,11 @@ import { AppError, castTo } from '@travetto/runtime';
 
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebInterceptorCategory } from '../types/core.ts';
+import { WebInterceptorCategory, WebInternalSymbol } from '../types/core.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
+import { WebHeaders } from '../types/headers.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
-import { Readable } from 'node:stream';
-import { WebHeaders } from '@travetto/web';
 
 const DECOMPRESSORS = {
   gzip: zlib.createGunzip,
@@ -70,8 +70,11 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
   }
 
   async filter({ req, config, next }: WebChainedContext<DecompressConfig>): Promise<WebResponse> {
-    if (req.inputStream) {
-      req.replaceInputStream(DecompressInterceptor.decompress(req.headers, req.inputStream, config));
+    if (!req[WebInternalSymbol].bodyHandled) {
+      const stream = req.getBodyAsStream();
+      if (stream) {
+        req.body = DecompressInterceptor.decompress(req.headers, stream, config);
+      }
     }
     return next();
   }

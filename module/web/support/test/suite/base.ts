@@ -15,10 +15,6 @@ import { CookieConfig } from '../../../src/interceptor/cookies.ts';
 import { WebConfig } from '../../../src/config/web.ts';
 import { DecompressInterceptor } from '../../../src/interceptor/decompress.ts';
 
-function asBuffer(v: Buffer | Readable): Promise<Buffer> {
-  return !Buffer.isBuffer(v) ? toBuffer(v) : Promise.resolve(v);
-}
-
 /**
  * Base Web Suite
  */
@@ -65,13 +61,13 @@ export abstract class BaseWebSuite {
     if (webReq.body) {
       const sample = WebResponse.from(webReq.body).ensureContentLength().ensureContentType();
       sample.headers.forEach((v, k) => webReq.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      webReq.body = await asBuffer(sample.body);
+      webReq.body = await sample.getBodyAsBuffer();
     }
 
     Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
 
     const webRes = await dispatcher.dispatch({ req: webReq });
-    let bufferResult = await asBuffer(webRes.body);
+    let bufferResult = await webRes.getBodyAsBuffer();
 
     if (bufferResult.length) {
       try {

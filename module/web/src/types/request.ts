@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { Any, AppError } from '@travetto/runtime';
+import { Any, AppError, BinaryUtil, castTo } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
@@ -15,7 +15,6 @@ export type WebRequestInit = {
   path?: string;
   params?: Record<string, unknown>;
   body?: unknown;
-  inputStream?: Readable;
   remoteIp?: string;
   getCookie?: (key: string, opts: CookieGetOptions) => string | undefined;
 };
@@ -23,6 +22,7 @@ export type WebRequestInit = {
 export interface WebRequestInternal {
   requestParams?: unknown[];
   expandedQuery?: Record<string, unknown>;
+  bodyHandled?: boolean;
 }
 
 /**
@@ -40,7 +40,6 @@ export class WebRequest {
   readonly query: Record<string, unknown> = {};
   readonly params: Record<string, string> = {};
   readonly remoteIp?: string;
-  readonly inputStream?: Readable;
   body?: Any;
 
   constructor(init: WebRequestInit = {}) {
@@ -59,8 +58,28 @@ export class WebRequest {
     throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
   }
 
-  replaceInputStream(stream: Readable): void {
-    // @ts-expect-error
-    this.inputStream = stream;
+  /**
+   * Get body as input stream, if possible
+   */
+  getBodyAsStream(): Readable | undefined {
+    const cfg = this.headers.getContentType();
+    const encoding = cfg?.parameters.charset ?? 'utf8';
+    let body = this.body;
+
+    if (body === undefined) {
+      return body;
+    }
+
+    if (typeof body === 'string') {
+      body = Buffer.from(body, castTo(encoding));
+    }
+
+    if (Buffer.isBuffer(body)) {
+      body = Readable.from(body);
+    }
+
+    if (BinaryUtil.isReadable(body)) {
+      return body;
+    }
   }
 }

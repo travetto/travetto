@@ -1,3 +1,5 @@
+import { Readable } from 'node:stream';
+
 import rawBody from 'raw-body';
 
 import { Injectable, Inject } from '@travetto/di';
@@ -7,7 +9,7 @@ import { AppError } from '@travetto/runtime';
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
-import { WebInterceptorCategory, HTTP_METHODS } from '../types/core.ts';
+import { WebInterceptorCategory, HTTP_METHODS, WebInternalSymbol } from '../types/core.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
@@ -48,14 +50,10 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   @Inject()
   config: BodyParseConfig;
 
-  async read(req: WebRequest, limit: string | number): Promise<string> {
+  read(req: WebRequest, body: Readable, limit: string | number): Promise<string> {
     const cfg = req.headers.getContentType();
-
-    const text = await rawBody(req.inputStream!, {
-      limit,
-      encoding: cfg?.parameters.charset ?? 'utf8'
-    });
-    return text;
+    const encoding = cfg?.parameters.charset ?? 'utf8';
+    return rawBody(body, { limit, encoding });
   }
 
   detectParserType(req: WebRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
@@ -86,30 +84,39 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   }
 
   async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
-    if (!HTTP_METHODS[req.method].body || req.body !== undefined || !req.inputStream) { // If body is already set, or no body
+    if (
+      !HTTP_METHODS[req.method].body
+      || !req.body
+      || req[WebInternalSymbol].bodyHandled
+    ) { // If body is already set, or no body
+      return next();
+    }
+
+    const stream = req.getBodyAsStream();
+    if (!stream) {
       return next();
     }
 
     const parserType = this.detectParserType(req, config.parsingTypes);
-
     if (!parserType) {
-      req.body = req.inputStream;
+      return next();
+    }
+
+    req[WebInternalSymbol].bodyHandled = true;
+
+    let malformed: unknown;
+    try {
+      const text = await this.read(req, stream, config.limit);
+      req.body = this.parse(text, parserType);
+    } catch (err) {
+      malformed = err;
+    }
+
+    if (!malformed) {
       return next();
     } else {
-      let malformed: unknown;
-      try {
-        const text = await this.read(req, config.limit);
-        req.body = this.parse(text, parserType);
-      } catch (err) {
-        malformed = err;
-      }
-
-      if (!malformed) {
-        return next();
-      } else {
-        console.error('Malformed input', malformed);
-        throw new AppError('Malformed input', { category: 'data' });
-      }
+      console.error('Malformed input', malformed);
+      throw new AppError('Malformed input', { category: 'data' });
     }
   }
 }

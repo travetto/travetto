@@ -16,7 +16,7 @@ export class BasicWebDispatcher extends StandardWebRouter implements WebDispatch
     Object.assign(req, { remoteIp: '::1' });
 
     if (req.body && Buffer.isBuffer(req.body)) {
-      Object.assign(req, { inputStream: Readable.from(req.body), body: undefined });
+      req.body = Readable.from(req.body);
     }
 
     return await super.dispatch({ req });
