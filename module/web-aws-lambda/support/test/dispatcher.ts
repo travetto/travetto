@@ -4,7 +4,7 @@ import { Inject, Injectable } from '@travetto/di';
 import { WebFilterContext, WebRequest, WebResponse, WebDispatcher } from '@travetto/web';
 import { asFull, castTo, Util } from '@travetto/runtime';
 
-import { AwsLambdaWebApplication } from '../../src/application.ts';
+import { AwsLambdaWebHandler } from '../../src/handler.ts';
 
 /**
  * Create an api gateway event given a web request
@@ -64,7 +64,7 @@ function toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
 export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
 
   @Inject()
-  app: AwsLambdaWebApplication;
+  app: AwsLambdaWebHandler;
 
   async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
     const res = await this.app.handle(toLambdaEvent(req), asFull<Context>({}));

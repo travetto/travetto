@@ -52,7 +52,7 @@ export class NetUtil {
     port: number;
     bindAddress?: string;
     sslKeys?: WebSslKeyPair;
-    handler?: (req: http.IncomingMessage, res: http.ServerResponse) => void
+    handler?: (req: http.IncomingMessage, res: http.ServerResponse) => void;
   }): Promise<http.Server> {
     const { reject, resolve, promise } = Promise.withResolvers<void>();
     const core = config.sslKeys ?
