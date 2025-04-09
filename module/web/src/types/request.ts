@@ -58,4 +58,9 @@ export class WebRequest {
   getCookie(key: string, opts?: CookieGetOptions): string | undefined {
     throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
   }
+
+  replaceInputStream(stream: Readable): void {
+    // @ts-expect-error
+    this.inputStream = stream;
+  }
 }

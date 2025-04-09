@@ -24,8 +24,7 @@ function asBuffer(v: Buffer | Readable): Promise<Buffer> {
  */
 export abstract class BaseWebSuite {
 
-  #handle?: WebApplicationHandle;
-  #app?: WebApplication;
+  #appHandle?: WebApplicationHandle;
 
   appType?: Class<WebApplication>;
   dispatcherType: Class<WebDispatcher>;
@@ -37,7 +36,7 @@ export abstract class BaseWebSuite {
     // Deactivate secure cookies
     Object.assign(
       await DependencyRegistry.getInstance(CookieConfig),
-      { active: true, secure: false, signed: false }
+      { active: true, secure: false }
     );
 
     // Deactivate ssl/port
@@ -47,17 +46,14 @@ export abstract class BaseWebSuite {
     );
 
     if (this.appType) {
-      this.#app = await DependencyRegistry.getInstance(this.appType);
-      this.#handle = await this.#app.run();
+      this.#appHandle = await DependencyRegistry.getInstance(this.appType).then(v => v.run());
     }
   }
 
   @AfterAll()
   async destroySever(): Promise<void> {
-    if (this.#handle) {
-      await this.#handle.close?.();
-      this.#handle = undefined;
-    }
+    await this.#appHandle?.close?.();
+    this.#appHandle = undefined;
   }
 
   async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {

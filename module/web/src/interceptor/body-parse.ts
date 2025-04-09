@@ -1,4 +1,3 @@
-import inflation from 'inflation';
 import rawBody from 'raw-body';
 
 import { Injectable, Inject } from '@travetto/di';
@@ -14,6 +13,7 @@ import { WebInterceptor } from '../types/interceptor.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 import { AcceptsInterceptor } from './accepts.ts';
+import { DecompressInterceptor } from './decompress.ts';
 
 type ParserType = 'json' | 'text' | 'form';
 
@@ -42,7 +42,7 @@ export class BodyParseConfig {
 @Injectable()
 export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
-  dependsOn = [AcceptsInterceptor];
+  dependsOn = [AcceptsInterceptor, DecompressInterceptor];
   category: WebInterceptorCategory = 'request';
 
   @Inject()
@@ -51,7 +51,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   async read(req: WebRequest, limit: string | number): Promise<string> {
     const cfg = req.headers.getContentType();
 
-    const text = await rawBody(inflation(req.inputStream!), {
+    const text = await rawBody(req.inputStream!, {
       limit,
       encoding: cfg?.parameters.charset ?? 'utf8'
     });
