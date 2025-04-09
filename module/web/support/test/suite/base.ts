@@ -1,4 +1,3 @@
-import zlib from 'node:zlib';
 import { buffer as toBuffer } from 'node:stream/consumers';
 import { Readable } from 'node:stream';
 
@@ -14,6 +13,7 @@ import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
 import { CookieConfig } from '../../../src/interceptor/cookies.ts';
 import { WebConfig } from '../../../src/config/web.ts';
+import { DecompressInterceptor } from '../../../src/interceptor/decompress.ts';
 
 function asBuffer(v: Buffer | Readable): Promise<Buffer> {
   return !Buffer.isBuffer(v) ? toBuffer(v) : Promise.resolve(v);
@@ -75,12 +75,12 @@ export abstract class BaseWebSuite {
 
     if (bufferResult.length) {
       try {
-        switch (webRes.headers.getList('Content-Encoding')?.[0]) {
-          case 'gzip': bufferResult = zlib.gunzipSync(bufferResult); break;
-          case 'deflate': bufferResult = zlib.inflateSync(bufferResult); break;
-          case 'br': bufferResult = zlib.brotliDecompressSync(bufferResult); break;
-        }
-      } catch { /* Preemptively attempt to decompress */ }
+        bufferResult = await toBuffer(DecompressInterceptor.decompress(
+          webRes.headers,
+          Readable.from(bufferResult),
+          { applies: true, supportedEncodings: ['br', 'deflate', 'gzip', 'identity'] }
+        ));
+      } catch { }
     }
 
     let result: unknown = bufferResult.toString('utf8');

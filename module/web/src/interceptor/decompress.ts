@@ -10,11 +10,14 @@ import { WebInterceptorCategory } from '../types/core.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
+import { Readable } from 'node:stream';
+import { WebHeaders } from '@travetto/web';
 
 const DECOMPRESSORS = {
   gzip: zlib.createGunzip,
   deflate: zlib.createInflate,
   br: zlib.createBrotliDecompress,
+  identity: (): Readable => null!
 };
 
 type WebDecompressEncoding = keyof typeof DECOMPRESSORS;
@@ -31,7 +34,7 @@ export class DecompressConfig {
   /**
    * Supported encodings
    */
-  supportedEncodings: WebDecompressEncoding[] = ['br', 'gzip', 'deflate'];
+  supportedEncodings: WebDecompressEncoding[] = ['br', 'gzip', 'deflate', 'identity'];
 }
 
 /**
@@ -39,6 +42,22 @@ export class DecompressConfig {
  */
 @Injectable()
 export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
+
+
+  static decompress(headers: WebHeaders, stream: Readable, config: DecompressConfig): Readable {
+    const encoding: WebDecompressEncoding | 'identity' = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
+
+    if (!config.supportedEncodings.includes(encoding)) {
+      throw WebResponse.fromError(new AppError(`Unsupported Content-Encoding: ${encoding}`))
+        .with({ statusCode: 415 });
+    }
+
+    if (encoding === 'identity') {
+      return stream;
+    } else {
+      return stream.pipe(DECOMPRESSORS[encoding]());
+    }
+  }
 
   dependsOn = [];
   category: WebInterceptorCategory = 'request';
@@ -51,16 +70,9 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
   }
 
   async filter({ req, config, next }: WebChainedContext<DecompressConfig>): Promise<WebResponse> {
-    const encoding: WebDecompressEncoding | 'identity' = castTo(req.headers.getList('Content-Encoding')?.[0]) ?? 'identity';
-
-    if (!req.inputStream || encoding === 'identity') {
-      return next();
-    } else if (!config.supportedEncodings.includes(encoding)) {
-      return WebResponse.fromError(new AppError(`Unsupported Content-Encoding: ${encoding}`))
-        .with({ statusCode: 415 });
+    if (req.inputStream) {
+      req.replaceInputStream(DecompressInterceptor.decompress(req.headers, req.inputStream, config));
     }
-
-    req.replaceInputStream(req.inputStream.pipe(DECOMPRESSORS[encoding]()));
     return next();
   }
 }
