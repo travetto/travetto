@@ -17,7 +17,7 @@ const DECOMPRESSORS = {
   br: zlib.createBrotliDecompress,
 };
 
-type WebDecompressEncoding = keyof typeof DECOMPRESSORS | 'identity';
+type WebDecompressEncoding = keyof typeof DECOMPRESSORS;
 
 /**
  * Web body parse configuration
@@ -31,7 +31,7 @@ export class DecompressConfig {
   /**
    * Supported encodings
    */
-  supportedEncodings: WebDecompressEncoding[] = ['br', 'gzip', 'identity', 'deflate'];
+  supportedEncodings: WebDecompressEncoding[] = ['br', 'gzip', 'deflate'];
 }
 
 /**
@@ -51,7 +51,7 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
   }
 
   async filter({ req, config, next }: WebChainedContext<DecompressConfig>): Promise<WebResponse> {
-    const encoding: WebDecompressEncoding = castTo(req.headers.getList('Content-Encoding')?.[0]) ?? 'identity';
+    const encoding: WebDecompressEncoding | 'identity' = castTo(req.headers.getList('Content-Encoding')?.[0]) ?? 'identity';
 
     if (!req.inputStream || encoding === 'identity') {
       return next();
