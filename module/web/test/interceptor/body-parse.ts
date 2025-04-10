@@ -49,7 +49,7 @@ class BodyParseInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain'
       },
-      body: WebRequest.markUnprocessed(Readable.from(Buffer.from('{ "hello": "world" }', 'utf8'))),
+      body: WebRequest.markUnprocessed(Readable.from(Buffer.from('{ "hello": "world" }', 'utf8')))
     });
 
     const res = await interceptor.filter({
