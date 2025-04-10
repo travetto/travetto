@@ -368,6 +368,10 @@ npx trv run:web
       ConsoleLogAppenderConfig: { logToLevel: true },
       CookieConfig: { applies: true, signed: true, httpOnly: true, sameSite: 'lax', secure: false },
       CorsConfig: { applies: true },
+      DecompressConfig: {
+        applies: true,
+        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'deflate', '3': 'identity' }
+      },
       EtagConfig: { applies: true },
       FileLogAppenderConfig: {
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
@@ -427,7 +431,7 @@ npx trv run:web
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/application.ts:48] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/application.ts:41] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

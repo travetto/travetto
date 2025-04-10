@@ -132,7 +132,7 @@ export class ConnectResponse implements Pick<ServerResponse,
 
   throwIfSent(): void {
     if (!this.#headersSent) {
-      this.#res.body = Buffer.concat(this.#written);
+      this.#res.payload = Buffer.concat(this.#written);
       throw this.#res;
     }
   }

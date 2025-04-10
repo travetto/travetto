@@ -7,7 +7,7 @@ import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toBuffer } from 'node:stream/consumers';
 
-import { BinaryInput, BlobMeta } from './types.ts';
+import { BinaryInput, BlobMeta, hasFunction } from './types.ts';
 import { AppError } from './error.ts';
 import { Util } from './util.ts';
 
@@ -17,6 +17,11 @@ const BlobMetaSymbol = Symbol();
  * Common functions for dealing with binary data/streams
  */
 export class BinaryUtil {
+
+  /**
+   * Determine if a value is readable
+   */
+  static isReadable = hasFunction<Readable>('pipe');
 
   /**
    * Generate a proper sha512 hash from a src value

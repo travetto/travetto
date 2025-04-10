@@ -1,3 +1,4 @@
+import { buffer } from 'node:stream/consumers';
 import { Readable } from 'node:stream';
 import { isArrayBuffer } from 'node:util/types';
 
@@ -8,7 +9,6 @@ import { WebHeadersInit, WebHeaders } from './headers.ts';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
-const isStream = hasFunction<Readable>('pipe');
 const isReadableStream = hasFunction<ReadableStream>('pipeTo');
 const isAsyncIterable = (v: unknown): v is AsyncIterable<unknown> =>
   !!v && (typeof v === 'object' || typeof v === 'function') && Symbol.asyncIterator in v;
@@ -56,57 +56,43 @@ export class WebResponse<S = unknown> {
     });
   }
 
-  /**
-   * Standard stream
-   */
+  /** Standard stream */
   static fromStream<T extends Readable | ReadableStream>(value: T, contentType?: string): WebResponse<T> {
     const body: Readable = isReadableStream(value) ? Readable.fromWeb(value) : value;
     return new WebResponse({ body, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
-  /**
-   * Standard iterable
-   */
+  /** Standard iterable */
   static fromAsyncIterable<T extends AsyncIterable<unknown>>(value: T, contentType?: string): WebResponse<T> {
     const body: Readable = Readable.from(value);
     return new WebResponse({ body, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
-  /**
-   * Return an empty payload
-   */
+  /** Return an empty body */
   static fromEmpty(): WebResponse<void> {
     return castTo(this.fromBytes(Buffer.alloc(0)));
   }
 
-  /**
-   * Standard text
-   */
+  /** Standard text */
   static fromText<T extends string>(value: T, encoding: BufferEncoding = 'utf8', contentType?: string): WebResponse<T> {
     const body = Buffer.from(value, encoding);
     return new WebResponse({ body, length: body.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
   }
 
-  /**
-   * Standard array of bytes (buffer)
-   */
+  /** Standard array of bytes (buffer) */
   static fromBytes<T extends Buffer | ArrayBuffer>(value: T, contentType?: string): WebResponse<T> {
     const body = Buffer.isBuffer(value) ? value : Buffer.from(value);
     return new WebResponse({ body, length: body.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
-  /**
-   * Standard json
-   */
+  /** Standard json */
   static fromJSON<T extends unknown>(value: T, contentType?: string): WebResponse<T> {
-    const payload = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
-    const body = Buffer.from(payload, 'utf-8');
+    const text = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
+    const body = Buffer.from(text, 'utf-8');
     return new WebResponse({ body, source: value, length: body.byteLength, contentType, defaultContentType: 'application/json' });
   }
 
-  /**
-   * Serialize file/blob
-   */
+  /** Serialize file/blob */
   static fromBlob<T extends Blob>(value: T): WebResponse<T> {
     const meta = BinaryUtil.getBlobMeta(value);
 
@@ -134,9 +120,7 @@ export class WebResponse<S = unknown> {
     return out;
   }
 
-  /**
-   * From catch value
-   */
+  /** From catch value */
   static fromCatch(err: unknown): WebResponse<Error> {
     if (err instanceof WebResponse) {
       return err;
@@ -149,9 +133,7 @@ export class WebResponse<S = unknown> {
     }
   }
 
-  /**
-   * From Error
-   */
+  /** From Error */
   static fromError<T extends ErrorResponse>(error: T): WebResponse<T> {
     const response = this.fromJSON(hasToJSON(error) ? error : { message: error.message }).with({
       contentType: 'application/json',
@@ -161,9 +143,7 @@ export class WebResponse<S = unknown> {
     return castTo(response);
   }
 
-  /**
-   * Get response from form data
-   */
+  /** Get response from form data */
   static fromFormData<T extends FormData>(form: T): WebResponse<T> {
     const boundary = `-------------------------multipart-${Util.uuid()}`;
     const nl = '\r\n';
@@ -212,7 +192,7 @@ export class WebResponse<S = unknown> {
       return this.fromText(value);
     } else if (Buffer.isBuffer(value) || isArrayBuffer(value)) {
       return this.fromBytes(value);
-    } else if (isStream(value) || isReadableStream(value)) {
+    } else if (BinaryUtil.isReadable(value) || isReadableStream(value)) {
       return this.fromStream(value);
     } else if (value instanceof Error) {
       return this.fromError(value);
@@ -322,5 +302,12 @@ export class WebResponse<S = unknown> {
       }
     }
     return this;
+  }
+
+  /**
+   * Get the body as a bufffer
+   */
+  async getBodyAsBuffer(): Promise<Buffer> {
+    return !this.body ? Buffer.alloc(0) : (Buffer.isBuffer(this.body) ? this.body : buffer(this.body));
   }
 }

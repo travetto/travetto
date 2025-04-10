@@ -15,13 +15,13 @@ import { WebResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
-const ENCODING_METHODS = {
+const COMPRESSORS = {
   gzip: createGzip,
   deflate: createDeflate,
   br: createBrotliCompress,
 };
 
-type WebCompressEncoding = keyof typeof ENCODING_METHODS | 'identity';
+type WebCompressEncoding = keyof typeof COMPRESSORS | 'identity';
 
 @Config('web.compress')
 export class CompressConfig {
@@ -89,7 +89,7 @@ export class CompressInterceptor implements WebInterceptor {
     }
 
     const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
-    const stream = ENCODING_METHODS[type](opts);
+    const stream = COMPRESSORS[type](opts);
     // If we are compressing
     res.headers.set('Content-Encoding', type);
 

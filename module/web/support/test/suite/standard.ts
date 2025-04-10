@@ -121,7 +121,7 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
 
   @Test()
   async testGetIp() {
-    const { source: ret } = await this.request<{ ip: string | undefined }>({ method: 'GET', path: '/test/ip' });
+    const { source: ret } = await this.request<{ ip: string | undefined }>({ method: 'GET', path: '/test/ip', remoteIp: '::1' });
     assert(ret?.ip === '127.0.0.1' || ret?.ip === '::1');
 
     const { source: ret2 } = await this.request<{ ip: string | undefined }>({ method: 'GET', path: '/test/ip', headers: { 'X-Forwarded-For': 'bob' } });

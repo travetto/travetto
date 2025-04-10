@@ -20,10 +20,11 @@ export abstract class BaseWebRouter implements WebRouter {
   #interceptors: WebInterceptor[];
 
   async #register(c: Class): Promise<void> {
+    const config = ControllerRegistry.get(c);
+
     let endpoints = await EndpointUtil.getBoundEndpoints(c);
     endpoints = EndpointUtil.orderEndpoints(endpoints);
 
-    const config = ControllerRegistry.get(c);
     for (const ep of endpoints) {
       ep.filter = EndpointUtil.createEndpointHandler(this.#interceptors, ep, config);
     }

@@ -1,3 +1,5 @@
+import { buffer } from 'node:stream/consumers';
+
 import { Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebFilterContext, WebResponse, WebDispatcher } from '@travetto/web';
 
@@ -11,7 +13,7 @@ export class FetchWebDispatcher implements WebDispatcher {
   config: WebConfig;
 
   async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const { query, method, body, headers, path } = req;
+    const { query, method, headers, path } = req;
 
     let q = '';
     if (query && Object.keys(query).length) {
@@ -20,6 +22,8 @@ export class FetchWebDispatcher implements WebDispatcher {
     }
 
     const finalPath = `${path}${q}`;
+    const stream = req.getUnprocessedStream();
+    const body = stream ? await buffer(stream) : req.body;
 
     const res = await fetch(`http://localhost:${this.config.port}${finalPath}`, { method, body, headers });
 

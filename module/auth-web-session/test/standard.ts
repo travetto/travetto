@@ -2,8 +2,7 @@ import { Suite } from '@travetto/test';
 import { InjectableFactory } from '@travetto/di';
 import { SessionModelSymbol } from '@travetto/auth-session';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
-
-import { BasicWebDispatcher } from '@travetto/web/support/test/dispatcher.ts';
+import { StandardWebRouter } from '@travetto/web';
 
 import { AuthWebSessionServerSuite } from '../support/test/server.ts';
 
@@ -16,5 +15,5 @@ class Config {
 
 @Suite()
 export class StandardAuthWebSessionTest extends AuthWebSessionServerSuite {
-  dispatcherType = BasicWebDispatcher;
+  dispatcherType = StandardWebRouter;
 }

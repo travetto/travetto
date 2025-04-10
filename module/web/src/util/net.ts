@@ -1,8 +1,10 @@
 import net from 'node:net';
+import http from 'node:http';
+import https from 'node:https';
 import { spawn } from 'node:child_process';
-import timers from 'node:timers/promises';
 
 import { ExecUtil } from '@travetto/runtime';
+import { WebSslKeyPair } from '@travetto/web';
 
 /** Net utilities */
 export class NetUtil {
@@ -45,19 +47,25 @@ export class NetUtil {
     });
   }
 
-  /** Wait until URL responds with a proper connection */
-  static async waitUntilReady(url: string, maxWait = 5000): Promise<void> {
-    const start = Date.now();
+  /** Start an http server */
+  static async startHttpServer(config: {
+    port: number;
+    bindAddress?: string;
+    sslKeys?: WebSslKeyPair;
+    handler?: (req: http.IncomingMessage, res: http.ServerResponse) => void;
+  }): Promise<http.Server> {
+    const { reject, resolve, promise } = Promise.withResolvers<void>();
+    const core = config.sslKeys ?
+      https.createServer(config.sslKeys!, config.handler) :
+      http.createServer(config.handler);
 
-    while ((Date.now() - start) < maxWait) {
-      try {
-        const ctrl = new AbortController();
-        await fetch(url, { signal: ctrl.signal });
-        ctrl.abort();
-        break; // We good
-      } catch {
-        await timers.setTimeout(100);
-      }
-    }
+    const server = core.listen(config.port, config.bindAddress)
+      .on('error', reject)
+      .on('listening', resolve);
+
+    await promise;
+    server.off('error', reject);
+
+    return server;
   }
 }

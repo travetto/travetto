@@ -1,6 +1,3 @@
-import { Readable } from 'node:stream';
-import { buffer } from 'node:stream/consumers';
-
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { castTo } from '@travetto/runtime';
@@ -22,7 +19,7 @@ export class AwsLambdaWebUtil {
       params,
       remoteIp: event.requestContext.identity.sourceIp,
       headers: { ...event.headers, ...event.multiValueHeaders },
-      inputStream: body ? Readable.from(body) : undefined
+      body: WebRequest.markUnprocessed(body)
     });
     return req;
   }
@@ -31,12 +28,7 @@ export class AwsLambdaWebUtil {
    * Create an API Gateway result from a web response
    */
   static async toLambdaResult(res: WebResponse, base64Encoded: boolean = false): Promise<APIGatewayProxyResult> {
-    let output = res.body;
-
-    if (!Buffer.isBuffer(output)) {
-      output = await buffer(output);
-    }
-
+    const output = await res.getBodyAsBuffer();
     const isBase64Encoded = !!output.length && base64Encoded;
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};

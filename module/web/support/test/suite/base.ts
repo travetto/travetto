@@ -1,4 +1,3 @@
-import zlib from 'node:zlib';
 import { buffer as toBuffer } from 'node:stream/consumers';
 import { Readable } from 'node:stream';
 
@@ -14,18 +13,14 @@ import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
 import { CookieConfig } from '../../../src/interceptor/cookies.ts';
 import { WebConfig } from '../../../src/config/web.ts';
-
-function asBuffer(v: Buffer | Readable): Promise<Buffer> {
-  return !Buffer.isBuffer(v) ? toBuffer(v) : Promise.resolve(v);
-}
+import { DecompressInterceptor } from '../../../src/interceptor/decompress.ts';
 
 /**
  * Base Web Suite
  */
 export abstract class BaseWebSuite {
 
-  #handle?: WebApplicationHandle;
-  #app?: WebApplication;
+  #appHandle?: WebApplicationHandle;
 
   appType?: Class<WebApplication>;
   dispatcherType: Class<WebDispatcher>;
@@ -37,7 +32,7 @@ export abstract class BaseWebSuite {
     // Deactivate secure cookies
     Object.assign(
       await DependencyRegistry.getInstance(CookieConfig),
-      { active: true, secure: false, signed: false }
+      { active: true, secure: false }
     );
 
     // Deactivate ssl/port
@@ -47,17 +42,14 @@ export abstract class BaseWebSuite {
     );
 
     if (this.appType) {
-      this.#app = await DependencyRegistry.getInstance(this.appType);
-      this.#handle = await this.#app.run();
+      this.#appHandle = await DependencyRegistry.getInstance(this.appType).then(v => v.run());
     }
   }
 
   @AfterAll()
   async destroySever(): Promise<void> {
-    if (this.#handle) {
-      await this.#handle.close?.();
-      this.#handle = undefined;
-    }
+    await this.#appHandle?.close?.();
+    this.#appHandle = undefined;
   }
 
   async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
@@ -69,22 +61,22 @@ export abstract class BaseWebSuite {
     if (webReq.body) {
       const sample = WebResponse.from(webReq.body).ensureContentLength().ensureContentType();
       sample.headers.forEach((v, k) => webReq.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      webReq.body = await asBuffer(sample.body);
+      webReq.body = WebRequest.markUnprocessed(await sample.getBodyAsBuffer());
     }
 
     Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
 
     const webRes = await dispatcher.dispatch({ req: webReq });
-    let bufferResult = await asBuffer(webRes.body);
+    let bufferResult = await webRes.getBodyAsBuffer();
 
     if (bufferResult.length) {
       try {
-        switch (webRes.headers.getList('Content-Encoding')?.[0]) {
-          case 'gzip': bufferResult = zlib.gunzipSync(bufferResult); break;
-          case 'deflate': bufferResult = zlib.inflateSync(bufferResult); break;
-          case 'br': bufferResult = zlib.brotliDecompressSync(bufferResult); break;
-        }
-      } catch { /* Preemptively attempt to decompress */ }
+        bufferResult = await toBuffer(DecompressInterceptor.decompress(
+          webRes.headers,
+          Readable.from(bufferResult),
+          { applies: true, supportedEncodings: ['br', 'deflate', 'gzip', 'identity'] }
+        ));
+      } catch { }
     }
 
     let result: unknown = bufferResult.toString('utf8');

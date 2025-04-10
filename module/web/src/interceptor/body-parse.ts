@@ -1,4 +1,5 @@
-import inflation from 'inflation';
+import { Readable } from 'node:stream';
+
 import rawBody from 'raw-body';
 
 import { Injectable, Inject } from '@travetto/di';
@@ -14,6 +15,7 @@ import { WebInterceptor } from '../types/interceptor.ts';
 import { EndpointConfig } from '../registry/types.ts';
 
 import { AcceptsInterceptor } from './accepts.ts';
+import { DecompressInterceptor } from './decompress.ts';
 
 type ParserType = 'json' | 'text' | 'form';
 
@@ -42,20 +44,16 @@ export class BodyParseConfig {
 @Injectable()
 export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
-  dependsOn = [AcceptsInterceptor];
+  dependsOn = [AcceptsInterceptor, DecompressInterceptor];
   category: WebInterceptorCategory = 'request';
 
   @Inject()
   config: BodyParseConfig;
 
-  async read(req: WebRequest, limit: string | number): Promise<string> {
+  async read(req: WebRequest, body: Readable, limit: string | number): Promise<string> {
     const cfg = req.headers.getContentType();
-
-    const text = await rawBody(inflation(req.inputStream!), {
-      limit,
-      encoding: cfg?.parameters.charset ?? 'utf8'
-    });
-    return text;
+    const encoding = cfg?.parameters.charset ?? 'utf8';
+    return rawBody(body, { limit, encoding });
   }
 
   detectParserType(req: WebRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
@@ -86,30 +84,23 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   }
 
   async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
-    if (!HTTP_METHODS[req.method].body || req.body !== undefined) { // If body is already set
+    const stream = req.getUnprocessedStream();
+    if (!HTTP_METHODS[req.method].body || !stream) { // If body is already set, or no body
       return next();
     }
 
     const parserType = this.detectParserType(req, config.parsingTypes);
-
     if (!parserType) {
-      req.body = req.inputStream;
       return next();
-    } else {
-      let malformed: unknown;
-      try {
-        const text = await this.read(req, config.limit);
-        req.body = this.parse(text, parserType);
-      } catch (err) {
-        malformed = err;
-      }
+    }
 
-      if (!malformed) {
-        return next();
-      } else {
-        console.error('Malformed input', malformed);
-        throw new AppError('Malformed input', { category: 'data' });
-      }
+    try {
+      const text = await this.read(req, stream, config.limit);
+      req.body = this.parse(text, parserType);
+      return next();
+    } catch (err) {
+      console.error('Malformed input', err);
+      throw new AppError('Malformed input', { category: 'data' });
     }
   }
 }

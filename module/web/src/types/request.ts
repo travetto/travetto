@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { Any, AppError } from '@travetto/runtime';
+import { Any, AppError, BinaryUtil } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
@@ -14,8 +14,7 @@ export type WebRequestInit = {
   query?: Record<string, unknown>;
   path?: string;
   params?: Record<string, unknown>;
-  body?: unknown;
-  inputStream?: Readable;
+  body?: Any;
   remoteIp?: string;
   getCookie?: (key: string, opts: CookieGetOptions) => string | undefined;
 };
@@ -30,6 +29,13 @@ export interface WebRequestInternal {
  */
 export class WebRequest {
 
+  static markUnprocessed<T extends Readable | Buffer | undefined>(val: T): T {
+    if (val) {
+      Object.defineProperty(val, WebInternalSymbol, { value: val });
+    }
+    return val;
+  }
+
   [WebInternalSymbol]: WebRequestInternal = {};
 
   readonly headers: WebHeaders;
@@ -40,7 +46,6 @@ export class WebRequest {
   readonly query: Record<string, unknown> = {};
   readonly params: Record<string, string> = {};
   readonly remoteIp?: string;
-  readonly inputStream?: Readable;
   body?: Any;
 
   constructor(init: WebRequestInit = {}) {
@@ -57,5 +62,15 @@ export class WebRequest {
 
   getCookie(key: string, opts?: CookieGetOptions): string | undefined {
     throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
+  }
+
+  /**
+   * Get unprocessed body as readable stream
+   */
+  getUnprocessedStream(): Readable | undefined {
+    const p = this.body;
+    if (typeof p === 'object' && p && p[WebInternalSymbol] === p) {
+      return BinaryUtil.isReadable(p) ? p : Buffer.isBuffer(p) ? Readable.from(p) : undefined;
+    }
   }
 }

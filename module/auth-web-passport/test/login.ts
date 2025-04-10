@@ -1,13 +1,13 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+import { StandardWebRouter } from '@travetto/web';
 
 import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
-import { BasicWebDispatcher } from '@travetto/web/support/test/dispatcher.ts';
 
 @Suite()
 class PassportLoginSuite extends BaseWebSuite {
-  dispatcherType = BasicWebDispatcher;
+  dispatcherType = StandardWebRouter;
 
   @Test()
   async simpleTest() {
