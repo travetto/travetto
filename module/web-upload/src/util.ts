@@ -40,7 +40,7 @@ export class WebUploadUtil {
 
     req.body = req.payload;
 
-    const bodyStream = req.getPayloadAsStream();
+    const payloadStream = req.getPayloadAsStream();
 
     if (MULTIPART.has(req.headers.getContentType()?.full!)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
@@ -48,7 +48,7 @@ export class WebUploadUtil {
       const itr = new AsyncQueue<UploadItem>();
 
       // Upload
-      bodyStream.pipe(busboy({
+      payloadStream.pipe(busboy({
         headers: {
           'content-type': req.headers.get('Content-Type')!,
           'content-disposition': req.headers.get('Content-Disposition')!,
@@ -66,7 +66,7 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: bodyStream, filename: req.headers.getFilename(), field: 'file' };
+      yield { stream: payloadStream, filename: req.headers.getFilename(), field: 'file' };
     }
   }
 
