@@ -68,7 +68,7 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
 
   async filter({ req, config, next }: WebChainedContext<DecompressConfig>): Promise<WebResponse> {
     if (req.body === undefined) {
-      const stream = req.getUnprocessedBodyAsStream();
+      const stream = req.getUnprocessedStream();
       if (stream) {
         req.body = WebRequest.markUnprocessed(DecompressInterceptor.decompress(req.headers, stream, config));
       }

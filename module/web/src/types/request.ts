@@ -65,9 +65,9 @@ export class WebRequest {
   }
 
   /**
-   * Get payload as readable stream
+   * Get unprocessed body as readable stream
    */
-  getUnprocessedBodyAsStream(): Readable | undefined {
+  getUnprocessedStream(): Readable | undefined {
     const p = this.body;
     if (typeof p === 'object' && p && p[WebInternalSymbol] === p) {
       return BinaryUtil.isReadable(p) ? p : Buffer.isBuffer(p) ? Readable.from(p) : undefined;

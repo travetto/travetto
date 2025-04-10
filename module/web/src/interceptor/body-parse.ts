@@ -84,7 +84,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   }
 
   async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
-    const stream = req.getUnprocessedBodyAsStream();
+    const stream = req.getUnprocessedStream();
     if (!HTTP_METHODS[req.method].body || !stream) { // If body is already set, or no body
       return next();
     }
