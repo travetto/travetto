@@ -10,7 +10,7 @@ export class AwsLambdaWebUtil {
    */
   static toWebRequest(event: APIGatewayProxyEvent, params?: Record<string, unknown>): WebRequest {
     // Build request
-    const payload = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
+    const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
     const req = new WebRequest({
       protocol: castTo(event.requestContext.protocol ?? 'http'),
       method: castTo(event.httpMethod.toUpperCase()),
@@ -19,7 +19,7 @@ export class AwsLambdaWebUtil {
       params,
       remoteIp: event.requestContext.identity.sourceIp,
       headers: { ...event.headers, ...event.multiValueHeaders },
-      payload
+      body: WebRequest.markUnprocessed(body)
     });
     return req;
   }
@@ -28,7 +28,7 @@ export class AwsLambdaWebUtil {
    * Create an API Gateway result from a web response
    */
   static async toLambdaResult(res: WebResponse, base64Encoded: boolean = false): Promise<APIGatewayProxyResult> {
-    const output = await res.getPayloadAsBuffer();
+    const output = await res.getBodyAsBuffer();
     const isBase64Encoded = !!output.length && base64Encoded;
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};

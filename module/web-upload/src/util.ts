@@ -34,13 +34,14 @@ export class WebUploadUtil {
    * Get all the uploads, separating multipart from direct
    */
   static async* getUploads(req: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
-    if (req.body !== undefined || !req.payload) {
+    const bodyStream = req.getUnprocessedBodyAsStream();
+
+    if (!bodyStream) {
       throw new AppError('No input stream provided for upload', { category: 'data' });
     }
 
-    req.body = req.payload;
+    req.body = undefined;
 
-    const payloadStream = req.getPayloadAsStream();
 
     if (MULTIPART.has(req.headers.getContentType()?.full!)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
@@ -48,7 +49,7 @@ export class WebUploadUtil {
       const itr = new AsyncQueue<UploadItem>();
 
       // Upload
-      payloadStream.pipe(busboy({
+      bodyStream.pipe(busboy({
         headers: {
           'content-type': req.headers.get('Content-Type')!,
           'content-disposition': req.headers.get('Content-Disposition')!,
@@ -66,7 +67,7 @@ export class WebUploadUtil {
 
       yield* itr;
     } else {
-      yield { stream: payloadStream, filename: req.headers.getFilename(), field: 'file' };
+      yield { stream: bodyStream, filename: req.headers.getFilename(), field: 'file' };
     }
   }
 

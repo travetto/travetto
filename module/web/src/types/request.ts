@@ -14,7 +14,6 @@ export type WebRequestInit = {
   query?: Record<string, unknown>;
   path?: string;
   params?: Record<string, unknown>;
-  payload?: Buffer | Readable;
   body?: Any;
   remoteIp?: string;
   getCookie?: (key: string, opts: CookieGetOptions) => string | undefined;
@@ -30,6 +29,13 @@ export interface WebRequestInternal {
  */
 export class WebRequest {
 
+  static markUnprocessed<T extends Readable | Buffer | undefined>(val: T): T {
+    if (val) {
+      Object.defineProperty(val, WebInternalSymbol, { value: val });
+    }
+    return val;
+  }
+
   [WebInternalSymbol]: WebRequestInternal = {};
 
   readonly headers: WebHeaders;
@@ -41,7 +47,6 @@ export class WebRequest {
   readonly params: Record<string, string> = {};
   readonly remoteIp?: string;
   body?: Any;
-  payload?: Readable | Buffer;
 
   constructor(init: WebRequestInit = {}) {
     Object.assign(this, init);
@@ -62,8 +67,10 @@ export class WebRequest {
   /**
    * Get payload as readable stream
    */
-  getPayloadAsStream(): Readable {
-    const p = this.payload;
-    return !p ? Readable.from(Buffer.alloc(0)) : Buffer.isBuffer(p) ? Readable.from(p) : p;
+  getUnprocessedBodyAsStream(): Readable | undefined {
+    const p = this.body;
+    if (typeof p === 'object' && p && p[WebInternalSymbol] === p) {
+      return !p ? Readable.from(Buffer.alloc(0)) : Buffer.isBuffer(p) ? Readable.from(p) : p;
+    }
   }
 }

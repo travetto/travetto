@@ -19,9 +19,9 @@ export class NodeWebUtil {
       query: Object.fromEntries(url.searchParams.entries()),
       params,
       headers: req.headers,
-      body: req,
+      body: WebRequest.markUnprocessed(req),
       remoteIp: req.socket.remoteAddress,
-      port: req.socket.localPort
+      port: req.socket.localPort,
     });
   }
 
@@ -31,10 +31,10 @@ export class NodeWebUtil {
   static async respondToServerResponse(webRes: WebResponse, res: ServerResponse): Promise<void> {
     res.statusCode = webRes.statusCode ?? 200;
     webRes.headers.forEach((v, k) => res.setHeader(k, v));
-    if (BinaryUtil.isReadable(webRes.payload)) {
-      await pipeline(webRes.payload, res);
+    if (BinaryUtil.isReadable(webRes.body)) {
+      await pipeline(webRes.body, res);
     } else {
-      res.write(webRes.payload);
+      res.write(webRes.body);
       res.end();
     }
   }

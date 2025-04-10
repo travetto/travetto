@@ -50,7 +50,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   @Inject()
   config: BodyParseConfig;
 
-  read(req: WebRequest, body: Readable, limit: string | number): Promise<string> {
+  async read(req: WebRequest, body: Readable, limit: string | number): Promise<string> {
     const cfg = req.headers.getContentType();
     const encoding = cfg?.parameters.charset ?? 'utf8';
     return rawBody(body, { limit, encoding });
@@ -86,11 +86,16 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
     if (
       !HTTP_METHODS[req.method].body
-      || !req.payload
       || req.body !== undefined
     ) { // If body is already set, or no body
       return next();
     }
+
+    const stream = req.getUnprocessedBodyAsStream();
+    if (!stream) {
+      return next();
+    }
+
 
     const parserType = this.detectParserType(req, config.parsingTypes);
     if (!parserType) {
@@ -99,7 +104,6 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
     let malformed: unknown;
     try {
-      const stream = req.getPayloadAsStream();
       const text = await this.read(req, stream, config.limit);
       req.body = this.parse(text, parserType);
     } catch (err) {

@@ -7,9 +7,10 @@ import { AppError, castTo } from '@travetto/runtime';
 
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebInterceptorCategory, WebInternalSymbol } from '../types/core.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebHeaders } from '../types/headers.ts';
+import { WebRequest } from '../types/request.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
 
@@ -52,11 +53,7 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
         .with({ statusCode: 415 });
     }
 
-    if (encoding === 'identity') {
-      return stream;
-    } else {
-      return stream.pipe(DECOMPRESSORS[encoding]());
-    }
+    return encoding === 'identity' ? stream : stream.pipe(DECOMPRESSORS[encoding]());
   }
 
   dependsOn = [];
@@ -70,8 +67,11 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
   }
 
   async filter({ req, config, next }: WebChainedContext<DecompressConfig>): Promise<WebResponse> {
-    if (req.payload && req.body === undefined) {
-      req.payload = DecompressInterceptor.decompress(req.headers, req.getPayloadAsStream(), config);
+    if (req.body === undefined) {
+      const stream = req.getUnprocessedBodyAsStream();
+      if (stream) {
+        req.body = WebRequest.markUnprocessed(DecompressInterceptor.decompress(req.headers, stream, config));
+      }
     }
     return next();
   }
