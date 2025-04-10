@@ -61,13 +61,14 @@ export abstract class BaseWebSuite {
     if (webReq.body) {
       const sample = WebResponse.from(webReq.body).ensureContentLength().ensureContentType();
       sample.headers.forEach((v, k) => webReq.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      webReq.body = await sample.getBodyAsBuffer();
+      webReq.payload = await sample.getPayloadAsBuffer();
+      webReq.body = undefined;
     }
 
     Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
 
     const webRes = await dispatcher.dispatch({ req: webReq });
-    let bufferResult = await webRes.getBodyAsBuffer();
+    let bufferResult = await webRes.getPayloadAsBuffer();
 
     if (bufferResult.length) {
       try {

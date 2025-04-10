@@ -9,7 +9,7 @@ import { AppError } from '@travetto/runtime';
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
-import { WebInterceptorCategory, HTTP_METHODS, WebInternalSymbol } from '../types/core.ts';
+import { WebInterceptorCategory, HTTP_METHODS } from '../types/core.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
@@ -86,14 +86,9 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
     if (
       !HTTP_METHODS[req.method].body
-      || !req.body
-      || req[WebInternalSymbol].bodyHandled
+      || !req.payload
+      || req.body !== undefined
     ) { // If body is already set, or no body
-      return next();
-    }
-
-    const stream = req.getBodyAsStream();
-    if (!stream) {
       return next();
     }
 
@@ -102,10 +97,9 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
       return next();
     }
 
-    req[WebInternalSymbol].bodyHandled = true;
-
     let malformed: unknown;
     try {
+      const stream = req.getPayloadAsStream();
       const text = await this.read(req, stream, config.limit);
       req.body = this.parse(text, parserType);
     } catch (err) {

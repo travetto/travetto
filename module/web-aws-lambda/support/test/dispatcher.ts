@@ -70,7 +70,7 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
     const res = await this.app.handle(toLambdaEvent(req), asFull<Context>({}));
 
     return new WebResponse({
-      body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
+      payload: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
       headers: { ...res.headers ?? {}, ...res.multiValueHeaders ?? {} },
       statusCode: res.statusCode
     });

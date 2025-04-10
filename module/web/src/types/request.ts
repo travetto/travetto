@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { Any, AppError, BinaryUtil, castTo } from '@travetto/runtime';
+import { Any, AppError } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
@@ -14,7 +14,8 @@ export type WebRequestInit = {
   query?: Record<string, unknown>;
   path?: string;
   params?: Record<string, unknown>;
-  body?: unknown;
+  payload?: Buffer | Readable;
+  body?: Any;
   remoteIp?: string;
   getCookie?: (key: string, opts: CookieGetOptions) => string | undefined;
 };
@@ -22,7 +23,6 @@ export type WebRequestInit = {
 export interface WebRequestInternal {
   requestParams?: unknown[];
   expandedQuery?: Record<string, unknown>;
-  bodyHandled?: boolean;
 }
 
 /**
@@ -41,6 +41,7 @@ export class WebRequest {
   readonly params: Record<string, string> = {};
   readonly remoteIp?: string;
   body?: Any;
+  payload?: Readable | Buffer;
 
   constructor(init: WebRequestInit = {}) {
     Object.assign(this, init);
@@ -59,27 +60,10 @@ export class WebRequest {
   }
 
   /**
-   * Get body as input stream, if possible
+   * Get payload as readable stream
    */
-  getBodyAsStream(): Readable | undefined {
-    const cfg = this.headers.getContentType();
-    const encoding = cfg?.parameters.charset ?? 'utf8';
-    let body = this.body;
-
-    if (body === undefined) {
-      return body;
-    }
-
-    if (typeof body === 'string') {
-      body = Buffer.from(body, castTo(encoding));
-    }
-
-    if (Buffer.isBuffer(body)) {
-      body = Readable.from(body);
-    }
-
-    if (BinaryUtil.isReadable(body)) {
-      return body;
-    }
+  getPayloadAsStream(): Readable {
+    const p = this.payload;
+    return !p ? Readable.from(Buffer.alloc(0)) : Buffer.isBuffer(p) ? Readable.from(p) : p;
   }
 }

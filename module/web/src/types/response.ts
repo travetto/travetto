@@ -29,7 +29,7 @@ const CATEGORY_STATUS: Record<ErrorCategory, number> = {
 };
 
 export type WebResponseInput<S> = {
-  body: Buffer | Readable;
+  payload: Buffer | Readable;
   length?: number;
   statusCode?: number;
   source?: S;
@@ -58,14 +58,14 @@ export class WebResponse<S = unknown> {
 
   /** Standard stream */
   static fromStream<T extends Readable | ReadableStream>(value: T, contentType?: string): WebResponse<T> {
-    const body: Readable = isReadableStream(value) ? Readable.fromWeb(value) : value;
-    return new WebResponse({ body, source: value, contentType, defaultContentType: BINARY_TYPE });
+    const payload: Readable = isReadableStream(value) ? Readable.fromWeb(value) : value;
+    return new WebResponse({ payload, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /** Standard iterable */
   static fromAsyncIterable<T extends AsyncIterable<unknown>>(value: T, contentType?: string): WebResponse<T> {
-    const body: Readable = Readable.from(value);
-    return new WebResponse({ body, source: value, contentType, defaultContentType: BINARY_TYPE });
+    const payload: Readable = Readable.from(value);
+    return new WebResponse({ payload, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /** Return an empty payload */
@@ -75,21 +75,21 @@ export class WebResponse<S = unknown> {
 
   /** Standard text */
   static fromText<T extends string>(value: T, encoding: BufferEncoding = 'utf8', contentType?: string): WebResponse<T> {
-    const body = Buffer.from(value, encoding);
-    return new WebResponse({ body, length: body.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
+    const payload = Buffer.from(value, encoding);
+    return new WebResponse({ payload, length: payload.byteLength, source: value, contentType, defaultContentType: 'text/plain' });
   }
 
   /** Standard array of bytes (buffer) */
   static fromBytes<T extends Buffer | ArrayBuffer>(value: T, contentType?: string): WebResponse<T> {
-    const body = Buffer.isBuffer(value) ? value : Buffer.from(value);
-    return new WebResponse({ body, length: body.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
+    const payload = Buffer.isBuffer(value) ? value : Buffer.from(value);
+    return new WebResponse({ payload, length: payload.byteLength, source: value, contentType, defaultContentType: BINARY_TYPE });
   }
 
   /** Standard json */
   static fromJSON<T extends unknown>(value: T, contentType?: string): WebResponse<T> {
-    const payload = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
-    const body = Buffer.from(payload, 'utf-8');
-    return new WebResponse({ body, source: value, length: body.byteLength, contentType, defaultContentType: 'application/json' });
+    const text = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
+    const payload = Buffer.from(text, 'utf-8');
+    return new WebResponse({ payload, source: value, length: payload.byteLength, contentType, defaultContentType: 'application/json' });
   }
 
   /** Serialize file/blob */
@@ -98,7 +98,7 @@ export class WebResponse<S = unknown> {
 
     const out = new WebResponse<T>({
       source: value,
-      body: Readable.fromWeb(value.stream()),
+      payload: Readable.fromWeb(value.stream()),
       length: value.size,
       contentType: meta?.contentType ?? BINARY_TYPE
     });
@@ -174,7 +174,7 @@ export class WebResponse<S = unknown> {
     });
 
     return new WebResponse({
-      body: Readable.from(source()),
+      payload: Readable.from(source()),
       contentType: `multipart/form-data; boundary=${boundary}`,
       source: form
     });
@@ -212,12 +212,12 @@ export class WebResponse<S = unknown> {
 
   statusCode?: number;
   source?: S;
-  body: Buffer | Readable;
+  payload: Buffer | Readable;
   length?: number;
   readonly headers: WebHeaders;
 
   constructor(o: WebResponseInput<S>) {
-    this.body = o.body;
+    this.payload = o.payload;
     this.length = o.length;
     this.source = o.source;
     this.with(o);
@@ -305,9 +305,9 @@ export class WebResponse<S = unknown> {
   }
 
   /**
-   * Get the body as a bufffer
+   * Get the payload as a bufffer
    */
-  async getBodyAsBuffer(): Promise<Buffer> {
-    return !this.body ? Buffer.alloc(0) : (Buffer.isBuffer(this.body) ? this.body : buffer(this.body));
+  async getPayloadAsBuffer(): Promise<Buffer> {
+    return !this.payload ? Buffer.alloc(0) : (Buffer.isBuffer(this.payload) ? this.payload : buffer(this.payload));
   }
 }
