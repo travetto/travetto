@@ -94,18 +94,12 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
       return next();
     }
 
-    let malformed: unknown;
     try {
       const text = await this.read(req, stream, config.limit);
       req.body = this.parse(text, parserType);
-    } catch (err) {
-      malformed = err;
-    }
-
-    if (!malformed) {
       return next();
-    } else {
-      console.error('Malformed input', malformed);
+    } catch (err) {
+      console.error('Malformed input', err);
       throw new AppError('Malformed input', { category: 'data' });
     }
   }
