@@ -39,7 +39,7 @@ export class EtagInterceptor implements WebInterceptor {
     const { req } = ctx;
 
     if (
-      Buffer.isBuffer(res.payload) &&
+      Buffer.isBuffer(res.body) &&
       (
         !res.statusCode ||
         (res.statusCode < 300 && res.statusCode >= 200) ||
@@ -47,11 +47,11 @@ export class EtagInterceptor implements WebInterceptor {
       )
     ) {
 
-      const tag = res.payload.length === 0 ?
+      const tag = res.body.length === 0 ?
         '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
         crypto
           .createHash('sha1')
-          .update(res.payload.toString('utf8'), 'utf8')
+          .update(res.body.toString('utf8'), 'utf8')
           .digest('base64')
           .substring(0, 27);
 
