@@ -57,7 +57,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   }
 
   detectParserType(req: WebRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
-    const { full = '' } = req.headers.getContentType() ?? {};
+    const { full = '', type } = req.headers.getContentType() ?? {};
     if (!full) {
       return;
     } else if (full in parsingTypes) {
@@ -66,7 +66,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
       return 'json';
     } else if (full === 'application/x-www-form-urlencoded') {
       return 'form';
-    } else if (/^text\//.test(full)) {
+    } else if (type === 'text') {
       return 'text';
     }
   }
@@ -85,7 +85,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
   async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
     const stream = req.getUnprocessedStream();
-    if (!HTTP_METHODS[req.method].body || !stream) { // If body is already set, or no body
+    if (!stream) { // No body to process
       return next();
     }
 
