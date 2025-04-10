@@ -21,7 +21,7 @@ export class NodeWebUtil {
       headers: req.headers,
       body: WebRequest.markUnprocessed(req),
       remoteIp: req.socket.remoteAddress,
-      port: req.socket.localPort,
+      port: req.socket.localPort
     });
   }
 
