@@ -58,7 +58,7 @@ export class WebBodyUtil {
   }
 
   /** Get Blob Headers */
-  static getBlobHeaders(value: Blob): [string, string][] {
+  static getBlobHeaders(value: Blob): Record<string, string> {
     const meta = BinaryUtil.getBlobMeta(value);
 
     const toAdd: [string, string | undefined][] = [
@@ -79,7 +79,7 @@ export class WebBodyUtil {
       toAdd.push(['Content-disposition', `attachment; filename="${value.name}"`]);
     }
 
-    return toAdd.filter((x): x is [string, string] => !!x[1]);
+    return Object.fromEntries(toAdd.filter((x): x is [string, string] => !!x[1]));
   }
 
   /**

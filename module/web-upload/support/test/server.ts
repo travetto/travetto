@@ -12,7 +12,7 @@ import { FileMap } from '../../src/types.ts';
 
 const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
 
-const multipart = (data: FormData) => new WebRequest(WebResponse.from(data));
+const multipart = (data: FormData) => new WebRequest({ body: data });
 
 @Controller('/test/upload')
 class TestUploadController {

@@ -17,6 +17,7 @@ const isAsyncIterable = (v: unknown): v is AsyncIterable<unknown> =>
   !!v && (typeof v === 'object' || typeof v === 'function') && Symbol.asyncIterator in v;
 
 
+export type NodeBinary = Readable | Buffer;
 const BlobMetaSymbol = Symbol();
 
 /**
@@ -153,7 +154,7 @@ export class BinaryUtil {
   /**
    * Get value as node-specific binary value, buffer or readable stream
    */
-  static toNodeBinaryValue(src: unknown): Buffer | Readable {
+  static toNodeBinaryValue(src: unknown): NodeBinary {
     if (Buffer.isBuffer(src) || this.isReadable(src)) {
       return src;
     } else if (src === undefined || src === null) {
@@ -177,7 +178,19 @@ export class BinaryUtil {
     }
   }
 
-  static async toBuffer(src: Buffer | Readable): Promise<Buffer> {
+  static async toBuffer(src: NodeBinary): Promise<Buffer> {
     return Buffer.isBuffer(src) ? src : toBuffer(src);
+  }
+
+  static toReadable(src: NodeBinary | unknown): Readable {
+    if (Buffer.isBuffer(src)) {
+      return Readable.from(src);
+    } else if (this.isReadable(src)) {
+      return src;
+    } else if (typeof src === 'object' && src) {
+      throw new AppError(`Unknown type ${src.constructor.name}`);
+    } else {
+      throw new AppError('Unknown type');
+    }
   }
 }

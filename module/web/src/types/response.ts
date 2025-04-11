@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { Any, BinaryUtil, castTo, Util } from '@travetto/runtime';
+import { Any, BinaryUtil, castTo, NodeBinary, Util } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
@@ -12,8 +12,6 @@ export type WebResponseInput<B> = {
   headers?: WebHeadersInit;
   cookies?: Cookie[];
 };
-
-type BinaryBody = Readable | Buffer;
 
 /**
  * Web Response as a simple object
@@ -96,24 +94,28 @@ export class WebResponse<B = unknown> {
   /**
    * Get a binary version
    */
-  toBinary(): WebResponse<BinaryBody> {
+  toBinary(): WebResponse<NodeBinary> {
+    if (Buffer.isBuffer(this.body) || BinaryUtil.isReadable(this.body)) {
+      return castTo(this);
+    }
+
     const out: Omit<WebResponseInput<Any>, 'headers'> & { headers: WebHeaders } = {
-      headers: this.headers, body: this.body,
+      headers: new WebHeaders(this.headers), body: this.body,
       cookies: this.getCookies(), statusCode: this.statusCode
     };
 
     if (this.body instanceof FormData) {
       const [boundary, body] = WebBodyUtil.buildMultiPartBody(this.body);
-      out.headers = new WebHeaders([...out.headers.entries(), ['Content-Type', `multipart/form-data; boundary=${boundary}`]]);
+      out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
       out.body = body;
     } else {
       out.body = BinaryUtil.toNodeBinaryValue(this.body);
-      if (out.body === this.body) { // unchanged
-        return castTo(this);
-      } else if (this.body instanceof Blob) {
+      if (this.body instanceof Blob) {
         const meta = BinaryUtil.getBlobMeta(this.body);
         out.statusCode = meta?.range ? 206 : out.statusCode;
-        out.headers = new WebHeaders([...out.headers.entries(), ...WebBodyUtil.getBlobHeaders(this.body)]);
+        for (const [k, v] of Object.entries(WebBodyUtil.getBlobHeaders(this.body))) {
+          out.headers.set(k, v);
+        }
       }
     }
     return new WebResponse(out);

@@ -26,7 +26,7 @@ class TestUploadController {
   @Post('/all')
   async uploadAll(@Upload() uploads: FileMap) {
     for (const [, file] of Object.entries(uploads)) {
-      return { hash: bHash(file) };
+      return { hash: bHash(file), size: file.size };
     }
   }
 

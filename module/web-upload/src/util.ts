@@ -42,7 +42,6 @@ export class WebUploadUtil {
 
     req.body = undefined;
 
-
     if (MULTIPART.has(req.headers.getContentType()?.full!)) {
       const fileMaxes = Object.values(config.uploads ?? {}).map(x => x.maxSize).filter(x => x !== undefined);
       const largestMax = fileMaxes.length ? Math.max(...fileMaxes) : config.maxSize;

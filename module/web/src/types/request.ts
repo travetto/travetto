@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { Any, AppError, BinaryUtil } from '@travetto/runtime';
+import { Any, AppError, BinaryUtil, NodeBinary } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
@@ -29,7 +29,7 @@ export interface WebRequestInternal {
  */
 export class WebRequest {
 
-  static markUnprocessed<T extends Readable | Buffer | undefined>(val: T): T {
+  static markUnprocessed<T extends NodeBinary | undefined>(val: T): T {
     if (val) {
       Object.defineProperty(val, WebInternalSymbol, { value: val });
     }
@@ -70,7 +70,7 @@ export class WebRequest {
   getUnprocessedStream(): Readable | undefined {
     const p = this.body;
     if (typeof p === 'object' && p && p[WebInternalSymbol] === p) {
-      return BinaryUtil.isReadable(p) ? p : Buffer.isBuffer(p) ? Readable.from(p) : undefined;
+      return BinaryUtil.toReadable(p);
     }
   }
 }
