@@ -36,7 +36,7 @@ export class ConnectResponse implements Pick<ServerResponse,
   #written: Buffer[] = [];
 
   constructor(res?: WebResponse) {
-    this.#res = res ?? WebResponse.fromEmpty();
+    this.#res = res ?? new WebResponse({ body: null });
   }
 
   get headersSent(): boolean {
@@ -114,10 +114,8 @@ export class ConnectResponse implements Pick<ServerResponse,
     return true;
   }
   redirect(location: string, code?: number): this {
-    this.#res.with({
-      statusCode: code ?? 301,
-      headers: { location }
-    });
+    this.#res.statusCode = code ?? 301;
+    this.#res.headers.set('Location', location);
     return this;
   }
 
@@ -132,7 +130,7 @@ export class ConnectResponse implements Pick<ServerResponse,
 
   throwIfSent(): void {
     if (!this.#headersSent) {
-      this.#res.payload = Buffer.concat(this.#written);
+      this.#res.body = Buffer.concat(this.#written);
       throw this.#res;
     }
   }

@@ -4,6 +4,7 @@ import assert from 'node:assert';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { BodyParseConfig, BodyParseInterceptor, WebRequest, WebResponse } from '@travetto/web';
+import { BinaryUtil } from '@travetto/runtime';
 
 @Suite()
 class BodyParseInterceptorSuite {
@@ -34,7 +35,7 @@ class BodyParseInterceptorSuite {
       config
     });
 
-    assert.deepStrictEqual(res.source, { hello: 'world' });
+    assert.deepStrictEqual(res.body, { hello: 'world' });
   }
 
   @Test()
@@ -58,7 +59,7 @@ class BodyParseInterceptorSuite {
       config
     });
 
-    assert.deepStrictEqual(res.source, '{ "hello": "world" }');
+    assert.deepStrictEqual(`${res.body}`, '{ "hello": "world" }');
   }
 
   @Test()
@@ -83,6 +84,8 @@ class BodyParseInterceptorSuite {
       config
     });
 
-    assert(res.source === stream);
+    const resBuff = await BinaryUtil.toBuffer(res.toBinary().body);
+    assert(resBuff.length === 1000);
+    assert(!resBuff.some(x => x !== 0));
   }
 }

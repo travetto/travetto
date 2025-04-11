@@ -12,7 +12,8 @@ class ContextController {
   @CacheControl(0)
   @Get('/ip')
   async getIp() {
-    return WebResponse.from({ ip: this.req.getIp() }).with({
+    return new WebResponse({
+      body: { ip: this.req.getIp() },
       headers: {
         'Content-Type': 'application/json+ip'
       }

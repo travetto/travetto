@@ -49,8 +49,10 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
     const encoding: WebDecompressEncoding | 'identity' = castTo(headers.getList('Content-Encoding')?.[0]) ?? 'identity';
 
     if (!config.supportedEncodings.includes(encoding)) {
-      throw WebResponse.fromError(new AppError(`Unsupported Content-Encoding: ${encoding}`))
-        .with({ statusCode: 415 });
+      throw new WebResponse({
+        body: new AppError(`Unsupported Content-Encoding: ${encoding}`),
+        statusCode: 415
+      });
     }
 
     return encoding === 'identity' ? stream : stream.pipe(DECOMPRESSORS[encoding]());

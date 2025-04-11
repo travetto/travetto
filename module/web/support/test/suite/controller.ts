@@ -43,10 +43,10 @@ export class TestController {
 
   @Delete('/cookie')
   withCookie() {
-    return WebResponse.from({ cookie: this.req.getCookie!('orange') })
-      .with({
-        cookies: [{ name: 'flavor', value: 'oreo' }]
-      });
+    return new WebResponse({
+      body: { cookie: this.req.getCookie!('orange') },
+      cookies: [{ name: 'flavor', value: 'oreo' }]
+    });
   }
 
   @Patch('/regexp/super-:special-party')
@@ -69,7 +69,7 @@ export class TestController {
   @Get('/renderable')
   @Produces('text/plain')
   getRenderable(): WebResponse<string> {
-    return WebResponse.from('hello');
+    return new WebResponse({ body: 'hello' });
   }
 
   @Get('/fullUrl')

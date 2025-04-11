@@ -1,6 +1,5 @@
 import assert from 'node:assert';
 
-import { DataUtil } from '@travetto/schema';
 import { Controller, Get, Post, WebRequest, ContextParam, WebResponse } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
@@ -13,7 +12,7 @@ import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
 const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
 
-const multipart = (data: FormData) => new WebRequest(WebResponse.from(data));
+const multipart = (data: FormData) => new WebRequest({ body: data });
 
 @Controller('/test/upload')
 class TestUploadController {
