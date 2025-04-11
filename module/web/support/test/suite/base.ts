@@ -52,7 +52,7 @@ export abstract class BaseWebSuite {
     this.#appHandle = undefined;
   }
 
-  async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse & { source: T }> {
+  async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
 
     const dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
 
@@ -67,31 +67,33 @@ export abstract class BaseWebSuite {
     Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
 
     const webRes = await dispatcher.dispatch({ req: webReq });
-    let bufferResult = await BinaryUtil.toBuffer(webRes.toBinary().body);
+    let result = webRes.body;
+    if (Buffer.isBuffer(result) || BinaryUtil.isReadable(result)) {
+      let bufferResult = await BinaryUtil.toBuffer(webRes.toBinary().body);
 
-    if (bufferResult.length) {
-      try {
-        bufferResult = await toBuffer(DecompressInterceptor.decompress(
-          webRes.headers,
-          Readable.from(bufferResult),
-          { applies: true, supportedEncodings: ['br', 'deflate', 'gzip', 'identity'] }
-        ));
-      } catch { }
+      if (bufferResult.length) {
+        try {
+          bufferResult = await toBuffer(DecompressInterceptor.decompress(
+            webRes.headers,
+            Readable.from(bufferResult),
+            { applies: true, supportedEncodings: ['br', 'deflate', 'gzip', 'identity'] }
+          ));
+        } catch { }
+      }
+
+      result = bufferResult.toString('utf8');
+      try { result = JSON.parse(castTo(result)); } catch { }
     }
-
-    let result: unknown = bufferResult.toString('utf8');
-    try { result = JSON.parse(castTo(result)); } catch { }
 
     if (webRes.statusCode && webRes.statusCode >= 400) {
-      const err = WebResponse.fromCatch(AppError.fromJSON(result) ?? result).body;
-      if (throwOnError) {
-        throw err;
-      } else {
-        result = err;
-      }
+      result = WebResponse.fromCatch(AppError.fromJSON(result) ?? result).body;
     }
 
-    Object.defineProperty(webRes, 'source', { value: result });
+    if (throwOnError && result instanceof Error) {
+      throw result;
+    }
+
+    webRes.body = result;
     return castTo(webRes);
   }
 }

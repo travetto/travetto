@@ -74,7 +74,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const res = await this.request<{ hash: string }>({ ...multipart(uploads), method: 'POST', path: '/test/upload/all' });
 
     const file = await this.fixture.readStream('/logo.png');
-    assert(res.source?.hash === await BinaryUtil.hashInput(file));
+    assert(res.body?.hash === await BinaryUtil.hashInput(file));
   }
 
   @Test()
@@ -87,7 +87,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     });
 
     const file = await this.fixture.readStream('/logo.png');
-    assert(res.source?.hash === await BinaryUtil.hashInput(file));
+    assert(res.body?.hash === await BinaryUtil.hashInput(file));
   }
 
   @Test()
@@ -96,7 +96,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const res = await this.request<{ hash: string }>({ ...multipart(uploads), method: 'POST', path: '/test/upload' });
 
     const file = await this.fixture.readStream('/logo.png');
-    assert(res.source?.hash === await BinaryUtil.hashInput(file));
+    assert(res.body?.hash === await BinaryUtil.hashInput(file));
   }
 
   @Test()
@@ -111,8 +111,8 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const file = await this.fixture.readStream('/logo.png');
     const hash = await BinaryUtil.hashInput(file);
 
-    assert(res.source?.hash1 === hash);
-    assert(res.source?.hash2 === hash);
+    assert(res.body?.hash1 === hash);
+    assert(res.body?.hash2 === hash);
   }
 
   @Test()
@@ -144,8 +144,8 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const file2 = await this.fixture.readStream('/logo.png');
     const hash2 = await BinaryUtil.hashInput(file2);
 
-    assert(res.source?.hash1 === hash1);
-    assert(res.source?.hash2 === hash2);
+    assert(res.body?.hash1 === hash1);
+    assert(res.body?.hash2 === hash2);
   }
 
   @Test()
@@ -177,7 +177,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const file2 = await this.fixture.readStream('/logo.png');
     const hash2 = await BinaryUtil.hashInput(file2);
 
-    assert(res.source?.hash1 === hash1);
-    assert(res.source?.hash2 === hash2);
+    assert(res.body?.hash1 === hash1);
+    assert(res.body?.hash2 === hash2);
   }
 }

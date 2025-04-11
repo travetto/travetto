@@ -103,7 +103,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     const res = await this.request<BlobMeta>({ ...multipart(uploads), method: 'POST', path: '/test/upload/all', });
 
     const { hash } = await this.getFileMeta('/logo.png');
-    assert(res.source?.hash === hash);
+    assert(res.body?.hash === hash);
   }
 
   @Test()
@@ -117,7 +117,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     });
 
     const { hash } = await this.getFileMeta('/logo.png');
-    assert(res.source?.meta.hash === hash);
+    assert(res.body?.meta.hash === hash);
   }
 
   @Test()
@@ -127,7 +127,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { ...multipart(uploads), method: 'POST', path: '/test/upload', }
     );
     const { hash } = await this.getFileMeta('/logo.png');
-    assert(res.source?.meta.hash === hash);
+    assert(res.body?.meta.hash === hash);
   }
 
   @Test()
@@ -151,8 +151,8 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { ...multipart(uploads), method: 'POST', path: '/test/upload/all-named' }
     );
     const { hash } = await this.getFileMeta('/logo.png');
-    assert(res.source?.hash1 === hash);
-    assert(res.source?.hash2 === hash);
+    assert(res.body?.hash1 === hash);
+    assert(res.body?.hash2 === hash);
   }
 
   @Test()
@@ -186,10 +186,10 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     assert(res.statusCode === 200);
 
     const blob = await this.getFileMeta('/logo.gif');
-    assert(res.source?.hash1 === blob?.hash);
+    assert(res.body?.hash1 === blob?.hash);
 
     const blob2 = await this.getFileMeta('/logo.png');
-    assert(res.source?.hash2 === blob2?.hash);
+    assert(res.body?.hash2 === blob2?.hash);
   }
 
   @Test()
@@ -224,10 +224,10 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     assert(res.statusCode === 200);
 
     const blob = await this.getFileMeta('/asset.yml');
-    assert(res.source?.hash1 === blob?.hash);
+    assert(res.body?.hash1 === blob?.hash);
 
     const blob2 = await this.getFileMeta('/logo.png');
-    assert(res.source?.hash2 === blob2?.hash);
+    assert(res.body?.hash2 === blob2?.hash);
   }
 
   @Test()
@@ -245,11 +245,11 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
     assert(res.statusCode === 200);
 
-    const loc = res.source?.location;
+    const loc = res.body?.location;
 
     const item = await this.request({ method: 'GET', path: `/test/upload/${loc}` });
-    assert(typeof item.source === 'string');
-    assert(item.source?.length === 26);
+    assert(typeof item.body === 'string');
+    assert(item.body?.length === 26);
 
     const itemRanged = await this.request(
       {
@@ -260,9 +260,9 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       }
     );
 
-    assert(typeof itemRanged.source === 'string');
-    assert(itemRanged.source === 'abcdefghij');
-    assert(itemRanged.source?.length === 10);
+    assert(typeof itemRanged.body === 'string');
+    assert(itemRanged.body === 'abcdefghij');
+    assert(itemRanged.body?.length === 10);
 
     const itemRanged2 = await this.request(
       {
@@ -274,9 +274,9 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       }
     );
 
-    assert(typeof itemRanged2.source === 'string');
-    assert(itemRanged2.source?.length === 3);
-    assert(itemRanged2.source === 'xyz');
+    assert(typeof itemRanged2.body === 'string');
+    assert(itemRanged2.body?.length === 3);
+    assert(itemRanged2.body === 'xyz');
 
     const itemRanged3 = await this.request<AppError>(
       {
@@ -290,7 +290,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     );
 
     assert(itemRanged3.statusCode === 400);
-    assert(typeof itemRanged3.source?.message === 'string');
-    assert(itemRanged3.source?.message.includes('out of range'));
+    assert(typeof itemRanged3.body?.message === 'string');
+    assert(itemRanged3.body?.message.includes('out of range'));
   }
 }

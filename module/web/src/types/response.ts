@@ -7,7 +7,7 @@ import { WebHeadersInit, WebHeaders } from './headers.ts';
 import { WebRequestInit } from './request.ts';
 import { WebBodyUtil } from '../util/body.ts';
 
-export type WebResponseInput<B = unknown> = {
+export type WebResponseInput<B> = {
   body: B;
   statusCode?: number;
   headers?: WebHeadersInit;
@@ -26,7 +26,7 @@ export class WebResponse<B = unknown> {
     * @param location Location to redirect to
     * @param status Status code
     */
-  static redirect(location: string, status = 302): WebResponse {
+  static redirect(location: string, status = 302): WebResponse<null> {
     return new WebResponse({ body: null, statusCode: status, headers: { Location: location } });
   }
 
@@ -50,7 +50,7 @@ export class WebResponse<B = unknown> {
   body: B;
   readonly headers: WebHeaders;
 
-  constructor(o: WebResponseInput) {
+  constructor(o: WebResponseInput<B>) {
     this.statusCode ??= o.statusCode;
     this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
     this.body = castTo(o.body);
