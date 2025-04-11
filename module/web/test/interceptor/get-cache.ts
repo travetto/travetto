@@ -19,7 +19,7 @@ class GetCacheInterceptorSuite {
 
     const res = await interceptor.filter({
       req: new WebRequest({ method: 'GET' }),
-      next: async () => WebResponse.fromEmpty(),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     });
 
@@ -28,7 +28,7 @@ class GetCacheInterceptorSuite {
 
     const res2 = await interceptor.filter({
       req: new WebRequest({ method: 'PATCH' }),
-      next: async () => WebResponse.fromEmpty(),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     });
 
@@ -42,7 +42,7 @@ class GetCacheInterceptorSuite {
 
     const res = await interceptor.filter({
       req: new WebRequest({ method: 'GET' }),
-      next: async () => WebResponse.fromEmpty().with({
+      next: async () => WebResponse.from(null, {
         headers: { 'cache-control': 'max-age=3000' }
       }),
       config: interceptor.config
