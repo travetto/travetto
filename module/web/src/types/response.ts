@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
 
-import { Any, AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON, Util } from '@travetto/runtime';
+import { AppError, BinaryUtil, castTo, ErrorCategory, hasFunction, hasToJSON, Util } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
@@ -49,6 +49,60 @@ export type WebResponseInternal = {
 export class WebResponse<B = unknown> {
 
   /**
+   * Generate multipart body
+   */
+  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<Buffer | string> {
+    const nl = '\r\n';
+    for (const [k, v] of form.entries()) {
+      const data = v.slice();
+      const filename = data instanceof File ? data.name : undefined;
+      const size = data instanceof Blob ? data.size : data.length;
+      const type = data instanceof Blob ? data.type : undefined;
+      yield `--${boundary}${nl}`;
+      yield `Content-Disposition: form-data; name="${k}"; filename="${filename ?? k}"${nl}`;
+      yield `Content-Length: ${size}${nl}`;
+      if (type) {
+        yield `Content-Type: ${type}${nl}`;
+      }
+      yield nl;
+      if (data instanceof Blob) {
+        for await (const chunk of data.stream()) {
+          yield chunk;
+        }
+      } else {
+        yield data;
+      }
+      yield nl;
+    }
+    yield `--${boundary}--${nl}`;
+  }
+
+  /** Get Blob Headers */
+  static getBlobHeaders(value: Blob): [string, string][] {
+    const meta = BinaryUtil.getBlobMeta(value);
+
+    const toAdd: [string, string | undefined][] = [
+      ['Content-Length', `${value.size}`],
+      ['Content-Encoding', meta?.contentEncoding],
+      ['Cache-Control', meta?.cacheControl],
+      ['Content-Language', meta?.contentLanguage],
+    ];
+
+    if (meta?.range) {
+      toAdd.push(
+        ['Accept-Ranges', 'bytes'],
+        ['Content-range', `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`],
+      );
+    }
+
+    if (value instanceof File && value.name) {
+      toAdd.push(['Content-disposition', `attachment; filename="${value.name}"`]);
+    }
+
+    return toAdd.filter((x): x is [string, string] => !!x[1]);
+  }
+
+  /**
    * Build WebResponse based on return value
    */
   static defaultContentType(value: unknown): string {
@@ -66,116 +120,6 @@ export class WebResponse<B = unknown> {
     } else {
       return 'application/json';
     }
-  }
-
-  /** Serialize file/blob */
-  static toBlobResponse(res: WebResponse<Blob>): WebResponse<BinaryBody> {
-    const value = res.body;
-    const meta = BinaryUtil.getBlobMeta(value);
-
-    const toAdd: Record<string, string> = {};
-
-    toAdd['Content-Length'] = `${value.size}`;
-
-    if (meta?.range) {
-      toAdd['Accept-Ranges'] = 'bytes';
-      toAdd['Content-range'] = `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`;
-    }
-
-    meta?.contentEncoding && (toAdd['Content-Encoding'] = meta.contentEncoding);
-    meta?.cacheControl && (toAdd['Cache-Control'] = meta.cacheControl);
-    meta?.contentLanguage && (toAdd['Content-Language'] = meta.contentLanguage);
-
-    if (value instanceof File && value.name) {
-      toAdd['Content-disposition'] = `attachment; filename="${value.name}"`;
-    }
-
-    return new WebResponse({
-      body: res.body,
-      headers: [
-        ...res.headers.entries(),
-        ...Object.entries(toAdd)
-      ],
-      statusCode: res.statusCode,
-      cookies: res.getCookies(),
-    });
-  }
-
-  /** Get response from form data */
-  static toFormDataResponse(res: WebResponse<FormData>): WebResponse<BinaryBody> {
-    const boundary = `-------------------------multipart-${Util.uuid()}`;
-    const nl = '\r\n';
-
-    const source = (async function* (): AsyncIterable<Buffer | string> {
-      for (const [k, v] of res.body.entries()) {
-        const data = v.slice();
-        const filename = data instanceof File ? data.name : undefined;
-        const size = data instanceof Blob ? data.size : data.length;
-        const type = data instanceof Blob ? data.type : undefined;
-        yield `--${boundary}${nl}`;
-        yield `Content-Disposition: form-data; name="${k}"; filename="${filename ?? k}"${nl}`;
-        yield `Content-Length: ${size}${nl}`;
-        if (type) {
-          yield `Content-Type: ${type}${nl}`;
-        }
-        yield nl;
-        if (data instanceof Blob) {
-          for await (const chunk of data.stream()) {
-            yield chunk;
-          }
-        } else {
-          yield data;
-        }
-        yield nl;
-      }
-      yield `--${boundary}--${nl}`;
-    });
-
-    return new WebResponse({
-      headers: [
-        ...res.headers.entries(),
-        ['Content-Type', `multipart/form-data; boundary=${boundary}`]
-      ],
-      statusCode: res.statusCode,
-      cookies: res.getCookies(),
-      body: Readable.from(source())
-    });
-  }
-
-  static toBinaryResponse(res: WebResponse): WebResponse<BinaryBody> {
-    const body = res.body;
-    let out: Readable | Buffer;
-    if (Buffer.isBuffer(body) || isReadableStream(body)) {
-      return castTo(res);
-    }
-    if (body === undefined || body === null) {
-      out = Buffer.alloc(0);
-    } else if (typeof body === 'string') {
-      out = Buffer.from(body, 'utf8');
-    } else if (Buffer.isBuffer(body) || isArrayBuffer(body)) {
-      out = Buffer.isBuffer(body) ? body : Buffer.from(body);
-    } else if (BinaryUtil.isReadable(body) || isReadableStream(body)) {
-      out = isReadableStream(body) ? Readable.fromWeb(body) : body;
-    } else if (body instanceof Error) {
-      const text = JSON.stringify(hasToJSON(body) ? body.toJSON() : { message: body.message });
-      out = Buffer.from(text, 'utf-8');
-    } else if (body instanceof Blob) {
-      return this.toBlobResponse(castTo(res));
-    } else if (isAsyncIterable(body)) {
-      out = Readable.from(body);
-    } else if (body instanceof FormData) {
-      return this.toFormDataResponse(castTo(res));
-    } else {
-      const text = JSON.stringify(hasToJSON(body) ? body.toJSON() : body);
-      out = Buffer.from(text, 'utf-8');
-    }
-
-    return new WebResponse({
-      headers: res.headers,
-      body: out,
-      cookies: res.getCookies(),
-      statusCode: res.statusCode
-    });
   }
 
   /**
@@ -285,7 +229,45 @@ export class WebResponse<B = unknown> {
    * Get a binary version
    */
   toBinary(): WebResponse<BinaryBody> {
-    return WebResponse.toBinaryResponse(this);
+    const body = this.body;
+    if (Buffer.isBuffer(body) || isReadableStream(body)) {
+      return castTo(this);
+    }
+    let headers = this.headers;
+    let statusCode = this.statusCode;
+    let out: Readable | Buffer;
+    let extraHeaders: [string, string][] | undefined;
+
+    if (body === undefined || body === null) {
+      out = Buffer.alloc(0);
+    } else if (typeof body === 'string') {
+      out = Buffer.from(body, 'utf8');
+    } else if (isArrayBuffer(body)) {
+      out = Buffer.from(body);
+    } else if (isReadableStream(body)) {
+      out = Readable.fromWeb(body);
+    } else if (body instanceof Error) {
+      const text = JSON.stringify(hasToJSON(body) ? body.toJSON() : { message: body.message });
+      out = Buffer.from(text, 'utf-8');
+    } else if (body instanceof Blob) {
+      const meta = BinaryUtil.getBlobMeta(body);
+      statusCode = meta?.range ? 206 : statusCode;
+      extraHeaders = WebResponse.getBlobHeaders(body);
+      out = Readable.fromWeb(body.stream());
+    } else if (isAsyncIterable(body)) {
+      out = Readable.from(body);
+    } else if (body instanceof FormData) {
+      const boundary = `-------------------------multipart-${Util.uuid()}`;
+      extraHeaders = [['Content-Type', `multipart/form-data; boundary=${boundary}`]];
+      out = Readable.from(WebResponse.buildMultiPartBody(body, boundary));
+    } else {
+      const text = JSON.stringify(hasToJSON(body) ? body.toJSON() : body);
+      out = Buffer.from(text, 'utf-8');
+    }
+    if (extraHeaders) {
+      headers = new WebHeaders([...headers.entries(), ...extraHeaders]);
+    }
+    return new WebResponse({ headers, body: out, cookies: this.getCookies(), statusCode });
   }
 
   /**
