@@ -1,6 +1,5 @@
 import assert from 'node:assert';
 
-import { DataUtil } from '@travetto/schema';
 import { Controller, Get, Post, WebRequest, ContextParam, WebResponse } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';

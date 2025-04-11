@@ -52,7 +52,7 @@ export abstract class BaseWebSuite {
     this.#appHandle = undefined;
   }
 
-  async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
+  async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse & { source: T }> {
 
     const dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
 
@@ -83,7 +83,7 @@ export abstract class BaseWebSuite {
     try { result = JSON.parse(castTo(result)); } catch { }
 
     if (webRes.statusCode && webRes.statusCode >= 400) {
-      const err = WebResponse.fromCatch(AppError.fromJSON(result) ?? result).source!;
+      const err = WebResponse.getSourceError(WebResponse.fromCatch(AppError.fromJSON(result) ?? result))!;
       if (throwOnError) {
         throw err;
       } else {
@@ -91,7 +91,7 @@ export abstract class BaseWebSuite {
       }
     }
 
-    webRes.source = castTo(result);
+    Object.defineProperty(webRes, 'source', { value: result });
     return castTo(webRes);
   }
 }

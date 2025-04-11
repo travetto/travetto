@@ -34,7 +34,7 @@ class BodyParseInterceptorSuite {
       config
     });
 
-    assert.deepStrictEqual(res.source, { hello: 'world' });
+    assert.deepStrictEqual(JSON.parse(res.body.toString('utf8')), { hello: 'world' });
   }
 
   @Test()
@@ -58,7 +58,7 @@ class BodyParseInterceptorSuite {
       config
     });
 
-    assert.deepStrictEqual(res.source, '{ "hello": "world" }');
+    assert.deepStrictEqual(res.body.toString('utf8'), '{ "hello": "world" }');
   }
 
   @Test()
@@ -83,6 +83,8 @@ class BodyParseInterceptorSuite {
       config
     });
 
-    assert(res.source === stream);
+    const resBuff = await res.getBodyAsBuffer();
+    assert(resBuff.length === 1000);
+    assert(!resBuff.some(x => x !== 0));
   }
 }
