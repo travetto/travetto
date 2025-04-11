@@ -4,7 +4,6 @@ import { Any, BinaryUtil, castTo, Util } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
-import { WebRequestInit } from './request.ts';
 import { WebBodyUtil } from '../util/body.ts';
 
 export type WebResponseInput<B> = {
@@ -41,8 +40,8 @@ export class WebResponse<B = unknown> {
   /**
    * Create a web response from a body input
    */
-  static from<T>(body: T, opts?: Omit<WebRequestInit, 'body'>): WebResponse<T> {
-    return new WebResponse({ ...opts, body });
+  static from<T>(body: T, opts?: Omit<WebResponseInput<T>, 'body'>): WebResponse<T> {
+    return new WebResponse<T>({ ...opts, body });
   }
 
   #cookies: Record<string, Cookie> = {};

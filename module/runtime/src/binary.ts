@@ -113,13 +113,13 @@ export class BinaryUtil {
    * Write limiter
    * @returns
    */
-  static limitWrite(maxSize: number): Transform {
+  static limitWrite(maxSize: number, field?: string): Transform {
     let read = 0;
     return new Transform({
       transform(chunk, encoding, callback): void {
         read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : (chunk instanceof Uint8Array ? chunk.byteLength : 0);
         if (read > maxSize) {
-          callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize } }));
+          callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
         } else {
           callback(null, chunk);
         }

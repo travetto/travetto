@@ -74,7 +74,7 @@ export class WebUploadUtil {
   /**
    * Convert an UploadItem to a File
    */
-  static async toFile({ stream, filename }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
+  static async toFile({ stream, filename, field }: UploadItem, config: Partial<WebUploadConfig>): Promise<File> {
     const uniqueDir = path.resolve(os.tmpdir(), `file_${Date.now()}_${Util.uuid(5)}`);
     await fs.mkdir(uniqueDir, { recursive: true });
 
@@ -88,7 +88,7 @@ export class WebUploadUtil {
       const target = createWriteStream(location);
 
       await (config.maxSize ?
-        pipeline(stream, BinaryUtil.limitWrite(config.maxSize), target) :
+        pipeline(stream, BinaryUtil.limitWrite(config.maxSize, field), target) :
         pipeline(stream, target));
 
       const detected = await this.getFileType(location);
