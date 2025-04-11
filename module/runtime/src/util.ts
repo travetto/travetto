@@ -195,4 +195,15 @@ export class Util {
       }
     });
   }
+
+  /**
+   * Ensure we have an error
+   */
+  static ensureError(err: unknown): Error {
+    return (err instanceof Error) ?
+      err :
+      (!!err && typeof err === 'object' && ('message' in err && typeof err.message === 'string')) ?
+        new AppError(err.message, { details: err }) :
+        new AppError(`${err}`);
+  }
 }

@@ -38,8 +38,10 @@ export class EtagInterceptor implements WebInterceptor {
   addTag(ctx: WebChainedContext, res: WebResponse): WebResponse {
     const { req } = ctx;
 
+    const binaryRes = res.toBinary();
+
     if (
-      Buffer.isBuffer(res.body) &&
+      Buffer.isBuffer(binaryRes.body) &&
       (
         !res.statusCode ||
         (res.statusCode < 300 && res.statusCode >= 200) ||
@@ -47,17 +49,17 @@ export class EtagInterceptor implements WebInterceptor {
       )
     ) {
 
-      const tag = res.body.length === 0 ?
+      const tag = binaryRes.body.length === 0 ?
         '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
         crypto
           .createHash('sha1')
-          .update(res.body.toString('utf8'), 'utf8')
+          .update(binaryRes.body.toString('utf8'), 'utf8')
           .digest('base64')
           .substring(0, 27);
 
-      res.headers.set('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
+      binaryRes.headers.set('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
 
-      const lastModified = res.headers.get('Last-Modified');
+      const lastModified = binaryRes.headers.get('Last-Modified');
 
       if (
         (req.method === 'GET' || req.method === 'HEAD') &&
@@ -67,11 +69,11 @@ export class EtagInterceptor implements WebInterceptor {
           'cache-control': req.headers.get('Cache-Control')!,
         }, { etag: tag, 'last-modified': lastModified! })
       ) {
-        return WebResponse.fromEmpty().with({ statusCode: 304 });
+        return new WebResponse({ body: null, statusCode: 304 });
       }
     }
 
-    return res;
+    return binaryRes;
   }
 
   applies(ep: EndpointConfig, config: EtagConfig): boolean {

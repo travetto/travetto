@@ -51,6 +51,14 @@ export class WebHeaders extends Headers {
 
 
   /**
+   * Vary a value
+   * @param value
+   */
+  vary(value: string): void {
+    this.append('Vary', value);
+  }
+
+  /**
    * Get the fully parsed content type
    */
   getContentType(): MimeType | undefined {
@@ -78,5 +86,12 @@ export class WebHeaders extends Headers {
         return { start, end: end ?? (start + chunkSize) };
       }
     }
+  }
+
+  /**
+   * Get content length by header
+   */
+  getContentLength(): number | undefined {
+    return this.has('Content-Length') ? +this.get('Content-Length')! : undefined;
   }
 }

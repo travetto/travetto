@@ -58,10 +58,10 @@ export class CompressInterceptor implements WebInterceptor {
     const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
     const { req } = ctx;
 
-    res.vary('Accept-Encoding');
+    res.headers.vary('Accept-Encoding');
 
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
-    const len = res.length;
+    const len = res.headers.getContentLength();
     if (
       !res.body ||
       (len !== undefined && len >= 0 && len < chunkSize) ||

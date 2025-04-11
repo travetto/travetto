@@ -51,7 +51,7 @@ export class LoggingInterceptor implements WebInterceptor {
       duration,
     };
 
-    const err = WebResponse.getSourceError(res);
+    const err = res.body instanceof Error ? res.body : undefined;
     const code = res.statusCode ?? (!!err ? 500 : 200);
 
     if (code < 400) {

@@ -113,7 +113,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     const res = await this.request<{ location: string, meta: BlobMeta }>({
       method: 'POST',
       path: '/test/upload',
-      ...new WebResponse({ body: sent })
+      ...WebResponse.from(sent)
     });
 
     const { hash } = await this.getFileMeta('/logo.png');
@@ -238,7 +238,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       {
         method: 'POST',
         path: '/test/upload',
-        ...new WebResponse({ body: sent })
+        ...WebResponse.from(sent)
       },
       false
     );

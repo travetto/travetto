@@ -1,73 +1,36 @@
+import { BinaryUtil, ErrorCategory, Util } from '@travetto/runtime';
 import { Readable } from 'node:stream';
-import { isArrayBuffer } from 'node:util/types';
 
-import { BinaryUtil, hasFunction, hasToJSON, Util } from '@travetto/runtime';
-import { WebHeaders, WebResponse } from '@travetto/web';
+type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
-const isReadableStream = hasFunction<ReadableStream>('pipeTo');
-const isAsyncIterable = (v: unknown): v is AsyncIterable<unknown> =>
-  !!v && (typeof v === 'object' || typeof v === 'function') && Symbol.asyncIterator in v;
 
-type WebBodyShape = {
-  body: Readable | Buffer;
-  headers?: WebHeaders;
-  statusCode?: number;
+/**
+ * Mapping from error category to standard http error codes
+ */
+const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
+  general: 500,
+  notfound: 404,
+  data: 400,
+  permissions: 403,
+  authentication: 401,
+  timeout: 408,
+  unavailable: 503,
 };
-
-const DEFAULT_TYPE = 'application/octet-stream';
 
 export class WebBodyUtil {
 
+  static getErrorStatus(e: Error): number {
+    const error: ErrorResponse = e;
+    return error.status ?? error.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
+  }
+
   /**
-   * Build WebResponse based on return value
+   * Generate multipart body
    */
-  static defaultContentType<T>(value: T): string {
-    if (value === undefined || value === null) {
-      return '';
-    } else if (typeof value === 'string') {
-      return 'text/plain';
-    } else if (Buffer.isBuffer(value) || isArrayBuffer(value) || BinaryUtil.isReadable(value) || isReadableStream(value)) {
-      return DEFAULT_TYPE;
-    } else if (value instanceof Blob) {
-      return value.type || DEFAULT_TYPE;
-    } else if (isAsyncIterable(value)) {
-      return DEFAULT_TYPE;
-    } else if (value instanceof FormData) {
-      return 'multipart/form-data';
-    } else {
-      return 'application/json';
-    }
-  }
-
-  /** Serialize file/blob */
-  static fromBlob<T extends Blob>(value: T): WebBodyShape {
-    const meta = BinaryUtil.getBlobMeta(value);
-    const headers = new WebHeaders();
-
-    headers.set('Content-Length', `${value.size}`);
-
-    if (meta?.range) {
-      headers.set('accept-ranges', 'bytes');
-      headers.set('Content-range', `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`);
-    }
-
-    meta?.contentEncoding && headers.set('Content-Encoding', meta.contentEncoding);
-    meta?.cacheControl && headers.set('Cache-Control', meta.cacheControl);
-    meta?.contentLanguage && headers.set('Content-Language', meta.contentLanguage);
-
-    if (value instanceof File && value.name) {
-      headers.set('Content-disposition', `attachment; filename="${value.name}"`);
-    }
-
-    return { body: Readable.fromWeb(value.stream()), headers };
-  }
-
-  /** Get response from form data */
-  static fromFormData<T extends FormData>(form: T): WebBodyShape {
+  static buildMultiPartBody(form: FormData): [string, Readable] {
     const boundary = `-------------------------multipart-${Util.uuid()}`;
-    const nl = '\r\n';
-
-    const source = (async function* (): AsyncIterable<Buffer | string> {
+    async function* source(): AsyncIterable<string | Buffer> {
+      const nl = '\r\n';
       for (const [k, v] of form.entries()) {
         const data = v.slice();
         const filename = data instanceof File ? data.name : undefined;
@@ -90,36 +53,49 @@ export class WebBodyUtil {
         yield nl;
       }
       yield `--${boundary}--${nl}`;
-    });
-
-    const headers = new WebHeaders();
-    headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
-
-    return { body: Readable.from(source()), headers };
+    }
+    return [boundary, Readable.from(source())];
   }
 
-  static toOutputStream(res: WebResponse): WebBodyShape {
-    const value = res.body;
+  /** Get Blob Headers */
+  static getBlobHeaders(value: Blob): [string, string][] {
+    const meta = BinaryUtil.getBlobMeta(value);
+
+    const toAdd: [string, string | undefined][] = [
+      ['Content-Length', `${value.size}`],
+      ['Content-Encoding', meta?.contentEncoding],
+      ['Cache-Control', meta?.cacheControl],
+      ['Content-Language', meta?.contentLanguage],
+    ];
+
+    if (meta?.range) {
+      toAdd.push(
+        ['Accept-Ranges', 'bytes'],
+        ['Content-range', `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`],
+      );
+    }
+
+    if (value instanceof File && value.name) {
+      toAdd.push(['Content-disposition', `attachment; filename="${value.name}"`]);
+    }
+
+    return toAdd.filter((x): x is [string, string] => !!x[1]);
+  }
+
+  /**
+   * Build WebResponse based on return value
+   */
+  static defaultContentType(value: unknown): string {
     if (value === undefined || value === null) {
-      return { body: Buffer.alloc(0) };
+      return '';
     } else if (typeof value === 'string') {
-      return { body: Buffer.from(value, 'utf8') };
-    } else if (Buffer.isBuffer(value) || isArrayBuffer(value)) {
-      return { body: Buffer.isBuffer(value) ? value : Buffer.from(value) };
-    } else if (BinaryUtil.isReadable(value) || isReadableStream(value)) {
-      return { body: isReadableStream(value) ? Readable.fromWeb(value) : value };
-    } else if (value instanceof Error) {
-      const text = JSON.stringify(hasToJSON(value) ? value.toJSON() : { message: value.message });
-      return { body: Buffer.from(text, 'utf-8') };
-    } else if (value instanceof Blob) {
-      return this.fromBlob(value);
-    } else if (isAsyncIterable(value)) {
-      return { body: Readable.from(value) };
+      return 'text/plain';
+    } else if (BinaryUtil.isBinaryType(value)) {
+      return 'application/octet-stream';
     } else if (value instanceof FormData) {
-      return this.fromFormData(value);
+      return 'multipart/form-data';
     } else {
-      const text = JSON.stringify(hasToJSON(value) ? value.toJSON() : value);
-      return { body: Buffer.from(text, 'utf-8') };
+      return 'application/json';
     }
   }
 }

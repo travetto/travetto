@@ -29,12 +29,14 @@ export class NodeWebUtil {
    * Send WebResponse to ServerResponse
    */
   static async respondToServerResponse(webRes: WebResponse, res: ServerResponse): Promise<void> {
-    res.statusCode = webRes.statusCode ?? 200;
-    webRes.headers.forEach((v, k) => res.setHeader(k, v));
-    if (BinaryUtil.isReadable(webRes.body)) {
-      await pipeline(webRes.body, res);
+    const binaryRes = webRes.toBinary();
+    res.statusCode = binaryRes.statusCode ?? 200;
+    binaryRes.headers.forEach((v, k) => res.setHeader(k, v));
+
+    if (BinaryUtil.isReadable(binaryRes.body)) {
+      await pipeline(binaryRes.body, res);
     } else {
-      res.write(webRes.body);
+      res.write(binaryRes.body);
       res.end();
     }
   }
