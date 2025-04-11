@@ -59,7 +59,7 @@ export abstract class BaseWebSuite {
     const webReq = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
 
     if (webReq.body) {
-      const sample = WebResponse.from(webReq.body).ensureContentLength().ensureContentType();
+      const sample = new WebResponse({ body: webReq.body }).toBinary();
       sample.headers.forEach((v, k) => webReq.headers.set(k, Array.isArray(v) ? v.join(',') : v));
       webReq.body = WebRequest.markUnprocessed(await sample.getBodyAsBuffer());
     }
@@ -67,7 +67,7 @@ export abstract class BaseWebSuite {
     Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
 
     const webRes = await dispatcher.dispatch({ req: webReq });
-    let bufferResult = await webRes.getBodyAsBuffer();
+    let bufferResult = await webRes.toBinary().getBodyAsBuffer();
 
     if (bufferResult.length) {
       try {

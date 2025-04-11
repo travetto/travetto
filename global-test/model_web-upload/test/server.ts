@@ -12,7 +12,7 @@ import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
 const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
 
-const multipart = (data: FormData) => new WebRequest(WebResponse.from(data));
+const multipart = (data: FormData) => new WebRequest({ body: data });
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -113,7 +113,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     const res = await this.request<{ location: string, meta: BlobMeta }>({
       method: 'POST',
       path: '/test/upload',
-      ...WebResponse.from(sent)
+      ...new WebResponse({ body: sent })
     });
 
     const { hash } = await this.getFileMeta('/logo.png');
@@ -238,7 +238,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       {
         method: 'POST',
         path: '/test/upload',
-        ...WebResponse.from(sent)
+        ...new WebResponse({ body: sent })
       },
       false
     );

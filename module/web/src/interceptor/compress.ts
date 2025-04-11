@@ -61,9 +61,10 @@ export class CompressInterceptor implements WebInterceptor {
     res.vary('Accept-Encoding');
 
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
+    const len = res.length;
     if (
       !res.body ||
-      (res.length !== undefined && res.length >= 0 && res.length < chunkSize) ||
+      (len !== undefined && len >= 0 && len < chunkSize) ||
       req.method === 'HEAD' ||
       res.headers.has('Content-Encoding') ||
       NO_TRANSFORM_REGEX.test(res.headers.get('Cache-Control')?.toString() ?? '')
@@ -90,21 +91,21 @@ export class CompressInterceptor implements WebInterceptor {
 
     const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
     const stream = COMPRESSORS[type](opts);
+    const binaryRes = res.toBinary();
     // If we are compressing
-    res.headers.set('Content-Encoding', type);
+    binaryRes.headers.set('Content-Encoding', type);
+    binaryRes.headers.delete('Content-Length');
 
-    if (Buffer.isBuffer(res.body)) {
-      stream.end(res.body);
+    if (Buffer.isBuffer(binaryRes.body)) {
+      stream.end(binaryRes.body);
       const out = await buffer(stream);
-      res.body = out;
-      res.length = out.length;
+      binaryRes.body = out;
     } else {
-      res.body.pipe(stream);
-      res.body = stream;
-      res.length = undefined;
+      binaryRes.body.pipe(stream);
+      binaryRes.body = stream;
     }
 
-    return res.ensureContentLength();
+    return binaryRes;
   }
 
   applies(ep: EndpointConfig, config: CompressConfig): boolean {
