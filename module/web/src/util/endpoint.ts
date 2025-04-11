@@ -144,7 +144,7 @@ export class EndpointUtil {
       if (body instanceof WebResponse) {
         return body;
       } else {
-        const statusCode = body === null ? HTTP_METHODS[ctx.req.method].emptyStatusCode : undefined;
+        const statusCode = (body === null || body === undefined) ? HTTP_METHODS[ctx.req.method].emptyStatusCode : 200;
         return new WebResponse({ body, statusCode }).backfillHeaders(endpoint.responseHeaderMap);
       }
     } catch (err) {
