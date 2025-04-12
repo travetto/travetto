@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebDispatcher, WebFilterContext, WebRequest, WebResponse } from '@travetto/web';
-import { AppError, asFull, BinaryUtil, castTo, Util } from '@travetto/runtime';
+import { AppError, asFull, castTo, Util } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -74,10 +74,6 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
   app: AwsLambdaWebHandler;
 
   async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    if (Buffer.isBuffer(req.body) || BinaryUtil.isReadable(req.body)) {
-      req.body = WebRequest.markUnprocessed(req.body);
-    }
-
     const res = await this.app.handle(toLambdaEvent(req), asFull<Context>({}));
 
     return WebTestDispatchUtil.finalizeResponseBody(

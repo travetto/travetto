@@ -3,7 +3,6 @@ import { buffer } from 'node:stream/consumers';
 import { Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebFilterContext, WebResponse, WebDispatcher } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
-import { BindUtil } from '@travetto/schema';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -21,8 +20,7 @@ export class FetchWebDispatcher implements WebDispatcher {
 
     let q = '';
     if (query && Object.keys(query).length) {
-      const qFlat = BindUtil.flattenPaths(query ?? {});
-      const pairs = Object.entries(qFlat).map<[string, string]>(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`]);
+      const pairs = Object.entries(query).map<[string, string]>(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`]);
       q = `?${new URLSearchParams(pairs).toString()}`;
     }
 
@@ -34,7 +32,7 @@ export class FetchWebDispatcher implements WebDispatcher {
 
     return WebTestDispatchUtil.finalizeResponseBody(
       new WebResponse({
-        body: Buffer.from(await res.arrayBuffer()),
+        body: await res.blob(),
         statusCode: res.status, headers: res.headers
       })
     );

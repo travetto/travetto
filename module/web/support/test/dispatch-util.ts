@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
+import { BindUtil } from '@travetto/schema';
 
 import { WebResponse } from '../../src/types/response.ts';
 import { WebRequest } from '../../src/types/request.ts';
@@ -10,13 +11,16 @@ import { WebBodyUtil } from '../../src/util/body.ts';
 export class WebTestDispatchUtil {
 
   static async applyRequestBody(req: WebRequest): Promise<WebRequest> {
-    if (req.body) {
+    if (req.body !== undefined) {
       const sample = WebBodyUtil.toBinaryMessage(req);
-      if (sample.body) {
-        sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-        req.body = await WebBodyUtil.toBuffer(sample.body);
+      if (!sample.headers.getContentType()) {
+        sample.headers.set('Content-Type', WebBodyUtil.defaultContentType(req.body));
       }
+      sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
+      const b = await WebBodyUtil.toBuffer(sample.body!);
+      req.body = WebRequest.markUnprocessed(b);
     }
+    Object.assign(req, { query: BindUtil.flattenPaths(req.query) });
     return req;
   }
 
