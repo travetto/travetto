@@ -92,7 +92,7 @@ class SchemaAPI {
 
   @Get('/customSerialize')
   async customSerialize() {
-    return WebResponse.for(new User());
+    return WebResponse.from(new User());
   }
 
   /**

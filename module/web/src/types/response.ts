@@ -36,7 +36,7 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
   /**
    * Create a web response from a body input
    */
-  static for<T>(body: T, opts?: Omit<WebResponseInput<T>, 'body'>): WebResponse<T> {
+  static from<T>(body: T, opts?: Omit<WebResponseInput<T>, 'body'>): WebResponse<T> {
     return new WebResponse<T>({ ...opts, body });
   }
 

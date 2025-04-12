@@ -27,7 +27,7 @@ class AcceptsInterceptorSuite {
           'Content-Type': 'application/json'
         }
       }),
-      next: async () => WebResponse.for(null),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     }));
 
@@ -37,7 +37,7 @@ class AcceptsInterceptorSuite {
           'Content-Type': 'text/plain'
         }
       }),
-      next: async () => WebResponse.for(null),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     }));
 
@@ -47,7 +47,7 @@ class AcceptsInterceptorSuite {
           'Content-Type': 'text/plain; charset=utf-8'
         }
       }),
-      next: async () => WebResponse.for(null),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     }));
 
@@ -57,7 +57,7 @@ class AcceptsInterceptorSuite {
           'Content-Type': 'text/sql'
         }
       }),
-      next: async () => WebResponse.for(null),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     }), /Content type.*violated/i);
   }
@@ -77,7 +77,7 @@ class AcceptsInterceptorSuite {
           'Content-Type': 'text/json'
         }
       }),
-      next: async () => WebResponse.for(null),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     }));
 
@@ -87,7 +87,7 @@ class AcceptsInterceptorSuite {
           'Content-Type': 'text/plain'
         }
       }),
-      next: async () => WebResponse.for(null),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     }));
 
@@ -97,7 +97,7 @@ class AcceptsInterceptorSuite {
           'Content-Type': 'text/plain; charset=utf-8'
         }
       }),
-      next: async () => WebResponse.for(null),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     }));
 
@@ -107,7 +107,7 @@ class AcceptsInterceptorSuite {
           'Content-Type': 'text/sql'
         }
       }),
-      next: async () => WebResponse.for(null),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     }));
 
@@ -117,7 +117,7 @@ class AcceptsInterceptorSuite {
           'Content-Type': 'json/text'
         }
       }),
-      next: async () => WebResponse.for(null),
+      next: async () => WebResponse.from(null),
       config: interceptor.config
     }), /Content type.*violated/i);
 
