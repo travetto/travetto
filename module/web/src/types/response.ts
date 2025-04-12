@@ -1,4 +1,4 @@
-import { castTo, Util } from '@travetto/runtime';
+import { AppError, castTo } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
 import { WebHeaders } from './headers.ts';
@@ -30,7 +30,16 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
    * From catch value
    */
   static fromCatch(err: unknown): WebResponse<Error> {
-    return err instanceof WebResponse ? err : new WebResponse({ body: Util.ensureError(err) });
+    if (err instanceof WebResponse) {
+      return err;
+    }
+
+    const body = err instanceof Error ? err :
+      (!!err && typeof err === 'object' && ('message' in err && typeof err.message === 'string')) ?
+        new AppError(err.message, { details: err }) :
+        new AppError(`${err}`);
+
+    return new WebResponse({ body });
   }
 
   /**
