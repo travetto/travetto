@@ -69,7 +69,7 @@ export class TestController {
   @Get('/renderable')
   @Produces('text/plain')
   getRenderable(): WebResponse<string> {
-    return new WebResponse({ body: 'hello' });
+    return WebResponse.from('hello');
   }
 
   @Get('/fullUrl')
