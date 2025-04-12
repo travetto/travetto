@@ -2,8 +2,15 @@ import { AppError, castTo } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
 import { WebHeaders } from './headers.ts';
-import { WebInternalSymbol, HttpMethod } from './core.ts';
-import { WebConnection, WebMessage, WebMessageInit } from './message.ts';
+import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
+import { WebMessage, WebMessageInit } from './message.ts';
+
+export interface WebConnection {
+  host?: string;
+  port?: number;
+  protocol?: HttpProtocol;
+  ip?: string;
+}
 
 export interface WebRequestInit<B = unknown> extends WebMessageInit<B> {
   method?: HttpMethod;

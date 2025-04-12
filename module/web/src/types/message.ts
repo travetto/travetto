@@ -10,10 +10,3 @@ export interface WebMessage<B = unknown> {
   body?: B;
   headers: WebHeaders;
 }
-
-export interface WebConnection {
-  host?: string;
-  port?: number;
-  protocol?: HttpProtocol;
-  ip?: string;
-}
