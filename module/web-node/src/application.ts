@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, StandardWebRouter } from '@travetto/web';
+import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, StandardWebRouter, WebRequest } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
 
 import { NodeWebUtil } from './util.ts';

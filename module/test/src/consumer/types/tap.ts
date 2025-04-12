@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { stringify } from 'yaml';
 
 import { Terminal } from '@travetto/terminal';
@@ -90,7 +91,7 @@ export class TapEmitter implements TestConsumerShape {
         let subCount = 0;
         for (const asrt of test.assertions) {
           const text = asrt.message ? `${asrt.text} (${this.#enhancer.failure(asrt.message)})` : asrt.text;
-          const pth = RuntimeIndex.getFromImport(asrt.import)!.sourceFile.replace(Runtime.mainSourcePath, '.');
+          const pth = `./${path.relative(process.cwd(), RuntimeIndex.getFromImport(asrt.import)!.sourceFile)}`;
           let subMessage = [
             this.#enhancer.assertNumber(++subCount),
             '-',

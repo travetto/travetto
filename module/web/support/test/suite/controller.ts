@@ -44,7 +44,7 @@ export class TestController {
   @Delete('/cookie')
   withCookie() {
     return new WebResponse({
-      body: { cookie: this.req.getCookie!('orange') },
+      body: { cookie: this.req.getCookie('orange') },
       cookies: [{ name: 'flavor', value: 'oreo' }]
     });
   }
@@ -91,7 +91,7 @@ export class TestController {
 
   @Get('/ip')
   getIp() {
-    return { ip: this.req.getIp() };
+    return { ip: this.req.connection.ip };
   }
 
   @Post('/ip')

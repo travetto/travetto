@@ -1,10 +1,11 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { BinaryUtil, castTo, ErrorCategory, hasToJSON, Util } from '@travetto/runtime';
+import { Any, BinaryUtil, castTo, ErrorCategory, hasToJSON, Util } from '@travetto/runtime';
 
 import { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
+import { WebInternalSymbol } from '../types/core.ts';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -23,14 +24,16 @@ const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
   unavailable: 503,
 };
 
+/**
+ * Utility classes for supporting web body operations
+ */
 export class WebBodyUtil {
 
   /**
    * Convert a node binary input to a buffer
    */
-  static async toBuffer(src: NodeBinary | WebMessage): Promise<Buffer> {
-    return Buffer.isBuffer(src) ? src : BinaryUtil.isReadable(src) ? toBuffer(src) :
-      this.toBuffer(this.toBinaryMessage(src).body!);
+  static async toBuffer(src: NodeBinary): Promise<Buffer> {
+    return Buffer.isBuffer(src) ? src : toBuffer(src);
   }
 
   /**
@@ -82,6 +85,7 @@ export class WebBodyUtil {
     const meta = BinaryUtil.getBlobMeta(value);
 
     const toAdd: [string, string | undefined][] = [
+      ['Content-Type', value.type],
       ['Content-Length', `${value.size}`],
       ['Content-Encoding', meta?.contentEncoding],
       ['Cache-Control', meta?.cacheControl],
@@ -122,7 +126,7 @@ export class WebBodyUtil {
   /**
    * Convert an existing web message to a binary web message
    */
-  static toBinaryMessage(message: WebMessage): WebMessage<NodeBinary> {
+  static toBinaryMessage(message: WebMessage): WebMessage<NodeBinary> & { body: NodeBinary } {
     const body = message.body;
     if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
       return castTo(message);
@@ -159,6 +163,33 @@ export class WebBodyUtil {
       }
       out.body = Buffer.from(text, 'utf-8');
     }
-    return out;
+
+    if (Buffer.isBuffer(out.body)) {
+      out.headers.set('Content-Length', `${out.body.byteLength}`);
+    }
+
+    out.headers.setIfAbsent('Content-Type', this.defaultContentType(message.body));
+
+    return castTo(out);
+  }
+
+  /**
+   * Set body and mark as unprocessed
+   */
+  static markRaw(val: Readable | Buffer | undefined): typeof val {
+    if (val) {
+      Object.defineProperty(val, WebInternalSymbol, { value: val });
+    }
+    return val;
+  }
+
+  /**
+   * Get unprocessed value as readable stream
+   */
+  static getRawStream(val: unknown): Readable | undefined {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    if ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebInternalSymbol] === val) {
+      return WebBodyUtil.toReadable(val);
+    }
   }
 }

@@ -25,7 +25,7 @@ class BodyParseInterceptorSuite {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: WebRequest.markUnprocessed(Readable.from(Buffer.from('{ "hello": "world" }', 'utf8')))
+      body: WebBodyUtil.markRaw(Buffer.from('{ "hello": "world" }', 'utf8'))
     });
 
     const res = await interceptor.filter({
@@ -49,7 +49,7 @@ class BodyParseInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain'
       },
-      body: WebRequest.markUnprocessed(Readable.from(Buffer.from('{ "hello": "world" }', 'utf8')))
+      body: WebBodyUtil.markRaw(Buffer.from('{ "hello": "world" }', 'utf8'))
     });
 
     const res = await interceptor.filter({
@@ -74,7 +74,7 @@ class BodyParseInterceptorSuite {
       headers: {
         'Content-Type': 'image/jpeg'
       },
-      body: WebRequest.markUnprocessed(stream)
+      body: WebBodyUtil.markRaw(stream)
     });
 
     const res = await interceptor.filter({
@@ -83,7 +83,7 @@ class BodyParseInterceptorSuite {
       config
     });
 
-    const resBuff = await WebBodyUtil.toBuffer(res);
+    const resBuff = await WebBodyUtil.toBuffer(WebBodyUtil.toBinaryMessage(res).body);
     assert(resBuff.length === 1000);
     assert(!resBuff.some(x => x !== 0));
   }

@@ -1,23 +1,26 @@
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebFilterContext, WebRequest, WebResponse, WebDispatcher } from '@travetto/web';
-import { AppError, asFull, castTo, Util } from '@travetto/runtime';
+import { WebDispatcher, WebFilterContext, WebRequest, WebResponse } from '@travetto/web';
+import { AppError, asFull, castTo } from '@travetto/runtime';
+
+import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
 import { AwsLambdaWebHandler } from '../../src/handler.ts';
-
-function isBufferRequest(req: WebRequest): req is WebRequest<Buffer | null> {
-  return req.body === undefined || req.body === null || Buffer.isBuffer(req.body);
-}
 
 /**
  * Create an api gateway event given a web request
  */
-function toLambdaEvent(req: WebRequest<Buffer | null>): APIGatewayProxyEvent {
+function toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
+  const body = req.body;
   const headers: Record<string, string> = {};
   const multiValueHeaders: Record<string, string[]> = {};
   const queryStringParameters: Record<string, string> = {};
   const multiValueQueryStringParameters: Record<string, string[]> = {};
+
+  if (!(body === undefined || body === null || Buffer.isBuffer(body))) {
+    throw new AppError('Unsupported request type, only buffer bodies supported');
+  }
 
   req.headers.forEach((v, k) => {
     headers[k] = Array.isArray(v) ? v.join('; ') : v;
@@ -43,21 +46,10 @@ function toLambdaEvent(req: WebRequest<Buffer | null>): APIGatewayProxyEvent {
     headers,
     multiValueHeaders,
     isBase64Encoded: true,
-    body: req.body?.toString('base64')!,
-    requestContext: {
-      accountId: Util.uuid(),
-      resourceId: Util.uuid(),
-      requestId: Util.uuid(),
-      apiId: Util.uuid(),
-      requestTimeEpoch: 1428582896000,
-      resourcePath: '/{proxy+}',
-      protocol: 'HTTP/1.1',
-      authorizer: {},
+    body: body?.toString('base64')!,
+    requestContext: castTo({
       identity: castTo({ sourceIp: '127.0.0.1' }),
-      stage: '',
-      path: req.path,
-      httpMethod: req.method
-    },
+    }),
   };
 }
 
@@ -71,16 +63,16 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
   app: AwsLambdaWebHandler;
 
   async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    if (!isBufferRequest(req)) {
-      throw new AppError('Unsupported request type, only buffer bodies supported');
-    }
 
     const res = await this.app.handle(toLambdaEvent(req), asFull<Context>({}));
 
-    return new WebResponse({
-      body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
-      headers: { ...res.headers ?? {}, ...res.multiValueHeaders ?? {} },
-      statusCode: res.statusCode
-    });
+    return WebTestDispatchUtil.finalizeResponseBody(
+      new WebResponse<unknown>({
+        body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
+        headers: { ...res.headers ?? {}, ...res.multiValueHeaders ?? {} },
+        statusCode: res.statusCode
+      }),
+      true
+    );
   }
 }

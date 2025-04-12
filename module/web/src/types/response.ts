@@ -1,4 +1,4 @@
-import { AppError, castTo } from '@travetto/runtime';
+import { AppError } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
 import { WebHeaders } from './headers.ts';
@@ -49,50 +49,22 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
     return new WebResponse<T>({ ...opts, body });
   }
 
-  #cookies: Record<string, Cookie> = {};
+  cookies: Cookie[];
   statusCode?: number;
   body: B;
   readonly headers: WebHeaders;
 
   constructor(o: WebResponseInput<B>) {
     this.statusCode ??= o.statusCode;
-    this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
-    this.body = castTo(o.body);
+    this.cookies = o.cookies ?? [];
+    this.body = o.body!;
     this.headers = new WebHeaders(o.headers);
 
     if (this.body instanceof Error) {
       this.statusCode ??= WebBodyUtil.getErrorStatus(this.body);
-    } else if (Buffer.isBuffer(this.body)) {
-      this.headers.set('Content-Length', `${this.body.byteLength}`);
     }
-
-    if (!this.headers.has('Content-Type')) {
-      this.headers.set('Content-Type', WebBodyUtil.defaultContentType(o.body));
-    }
-
-    if (this.headers.has('Content-Range')) { // Force status code if content range specified
+    if (this.headers.has('Content-Range')) {
       this.statusCode = 206;
     }
-  }
-
-  /**
-   * Store a cookie by name, will be handled by the CookieJar at send time
-   */
-  setCookie(cookie: Cookie): void {
-    this.#cookies[cookie.name] = { ...cookie, maxAge: (cookie.value !== undefined) ? cookie.maxAge : -1 };
-  }
-
-  /**
-   * Get all the registered cookies
-   */
-  getCookies(): Cookie[] {
-    return Object.values(this.#cookies);
-  }
-
-  /**
-   * Get a binary version
-   */
-  toBinary(): WebResponse<NodeBinary> {
-    return new WebResponse({ cookies: this.getCookies(), statusCode: this.statusCode, ...WebBodyUtil.toBinaryMessage(this) });
   }
 }

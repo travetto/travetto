@@ -1,13 +1,16 @@
 import router from 'find-my-way';
 
 import { AppError, castTo } from '@travetto/runtime';
-import { Injectable } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 
 import { EndpointConfig } from '../registry/types.ts';
 
 import { WebResponse } from '../types/response.ts';
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { WebFilterContext } from '../types.ts';
+import { WebConfig } from '../config/web.ts';
+import { WebCommonUtil } from '../util/common.ts';
+
 import { BaseWebRouter } from './base.ts';
 
 /**
@@ -15,6 +18,9 @@ import { BaseWebRouter } from './base.ts';
  */
 @Injectable()
 export class StandardWebRouter extends BaseWebRouter {
+
+  @Inject()
+  config: WebConfig;
 
   #cache = new Map<Function, EndpointConfig>();
   raw = router();
@@ -38,13 +44,13 @@ export class StandardWebRouter extends BaseWebRouter {
    * Route and run the request
    */
   dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const method = castTo<HttpMethod>((req.method ?? 'get').toUpperCase());
+    const method = castTo<HttpMethod>((req.method ?? 'GET').toUpperCase());
     const { params, handler } = this.raw.find(method, req.path ?? '/') ?? {};
     const endpoint = this.#cache.get(handler!);
     if (!endpoint) {
       throw new AppError(`Unknown route ${req.method} ${req.path}`, { category: 'notfound' });
     }
     Object.assign(req, { params });
-    return endpoint.filter!({ req });
+    return endpoint.filter!({ req: WebCommonUtil.secureRequest(req, this.config.trustProxy) });
   }
 }
