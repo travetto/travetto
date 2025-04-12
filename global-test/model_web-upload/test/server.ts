@@ -12,8 +12,6 @@ import { BaseWebSuite } from '@travetto/web/support/test/suite/base.ts';
 
 const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
 
-const multipart = (data: FormData) => new WebRequest({ body: data });
-
 @Controller('/test/upload')
 class TestUploadController {
 
@@ -100,7 +98,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUploadAll() {
     const uploads = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<BlobMeta>({ ...multipart(uploads), method: 'POST', path: '/test/upload/all', });
+    const res = await this.request<BlobMeta>({ body: uploads, method: 'POST', path: '/test/upload/all', });
 
     const { hash } = await this.getFileMeta('/logo.png');
     assert(res.body?.hash === hash);
@@ -124,7 +122,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request<{ location: string, meta: BlobMeta }>(
-      { ...multipart(uploads), method: 'POST', path: '/test/upload', }
+      { body: uploads, method: 'POST', path: '/test/upload', }
     );
     const { hash } = await this.getFileMeta('/logo.png');
     assert(res.body?.meta.hash === hash);
@@ -134,7 +132,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   async testCached() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const res = await this.request(
-      { ...multipart(uploads), method: 'POST', path: '/test/upload/cached', }
+      { body: uploads, method: 'POST', path: '/test/upload/cached', }
     );
     assert(res.statusCode === 200);
     assert(res.headers.get('Cache-Control') === 'max-age=3600');
@@ -148,7 +146,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>(
-      { ...multipart(uploads), method: 'POST', path: '/test/upload/all-named' }
+      { body: uploads, method: 'POST', path: '/test/upload/all-named' }
     );
     const { hash } = await this.getFileMeta('/logo.png');
     assert(res.body?.hash1 === hash);
@@ -164,7 +162,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
     const resBad = await this.request<{ hash1: string, hash2: string }>(
       {
-        ...multipart(uploadBad),
+        body: uploadBad,
         method: 'POST',
         path: '/test/upload/all-named-custom',
       },
@@ -178,7 +176,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     );
     const res = await this.request<{ hash1: string, hash2: string }>(
       {
-        ...multipart(uploads),
+        body: uploads,
         method: 'POST', path: '/test/upload/all-named-custom',
       },
       false
@@ -201,7 +199,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
 
     const resBad = await this.request<{ hash1: string, hash2: string }>(
       {
-        ...multipart(uploadBad),
+        body: uploadBad,
         method: 'POST',
         path: '/test/upload/all-named-size',
       },
@@ -215,7 +213,7 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
     );
     const res = await this.request<{ hash1: string, hash2: string }>(
       {
-        ...multipart(uploads),
+        body: uploads,
         method: 'POST',
         path: '/test/upload/all-named-size',
       },
