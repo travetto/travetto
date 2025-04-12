@@ -3,6 +3,9 @@ import { buffer } from 'node:stream/consumers';
 import { Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebFilterContext, WebResponse, WebDispatcher } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
+import { BindUtil } from '@travetto/schema';
+
+import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
 /**
  * Support for invoking http requests against the server
@@ -18,7 +21,8 @@ export class FetchWebDispatcher implements WebDispatcher {
 
     let q = '';
     if (query && Object.keys(query).length) {
-      const pairs = Object.entries(query).map<[string, string]>(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`]);
+      const qFlat = BindUtil.flattenPaths(query ?? {});
+      const pairs = Object.entries(qFlat).map<[string, string]>(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`]);
       q = `?${new URLSearchParams(pairs).toString()}`;
     }
 
@@ -28,9 +32,11 @@ export class FetchWebDispatcher implements WebDispatcher {
 
     const res = await fetch(`http://localhost:${this.config.port}${finalPath}`, { method, body, headers });
 
-    return new WebResponse({
-      body: Buffer.from(await res.arrayBuffer()),
-      statusCode: res.status, headers: res.headers
-    });
+    return WebTestDispatchUtil.finalizeResponseBody(
+      new WebResponse({
+        body: Buffer.from(await res.arrayBuffer()),
+        statusCode: res.status, headers: res.headers
+      })
+    );
   }
 }

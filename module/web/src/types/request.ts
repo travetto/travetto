@@ -15,7 +15,7 @@ export interface WebConnection {
   ip?: string;
 }
 
-export interface WebRequestInit<B> extends WebMessageInit<B> {
+export interface WebRequestInit<B = unknown> extends WebMessageInit<B> {
   method?: HttpMethod;
   connection?: WebConnection;
   query?: Record<string, unknown>;
@@ -40,6 +40,7 @@ export class WebRequest<B = unknown> implements WebMessage<B> {
     }
     return val;
   }
+
 
   [WebInternalSymbol]: WebRequestInternal = {};
 
