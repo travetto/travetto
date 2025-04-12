@@ -1,8 +1,11 @@
-import { BinaryUtil, ErrorCategory, Util } from '@travetto/runtime';
 import { Readable } from 'node:stream';
+import { buffer as toBuffer } from 'node:stream/consumers';
+
+import { AppError, BinaryUtil, ErrorCategory, hasToJSON, Util } from '@travetto/runtime';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
+export type NodeBinary = Readable | Buffer;
 
 /**
  * Mapping from error category to standard http error codes
@@ -18,6 +21,49 @@ const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
 };
 
 export class WebBodyUtil {
+
+  /**
+   * Get value as node-specific binary value, buffer or readable stream
+   */
+  static toNodeBinaryValue(src: unknown): NodeBinary {
+    if (Buffer.isBuffer(src) || BinaryUtil.isReadable(src)) {
+      return src;
+    } else if (src === undefined || src === null) {
+      return Buffer.alloc(0);
+    } else if (typeof src === 'string') {
+      return Buffer.from(src, 'utf8');
+    } else if (BinaryUtil.isArrayBuffer(src)) {
+      return Buffer.from(src);
+    } else if (BinaryUtil.isReadableStream(src)) {
+      return Readable.fromWeb(src);
+    } else if (src instanceof Error) {
+      const text = JSON.stringify(hasToJSON(src) ? src.toJSON() : { message: src.message });
+      return Buffer.from(text, 'utf-8');
+    } else if (src instanceof Blob) {
+      return Readable.fromWeb(src.stream());
+    } else if (BinaryUtil.isAsyncIterable(src)) {
+      return Readable.from(src);
+    } else {
+      const text = JSON.stringify(hasToJSON(src) ? src.toJSON() : src);
+      return Buffer.from(text, 'utf-8');
+    }
+  }
+
+  static async toBuffer(src: NodeBinary): Promise<Buffer> {
+    return Buffer.isBuffer(src) ? src : toBuffer(src);
+  }
+
+  static toReadable(src: NodeBinary | unknown): Readable {
+    if (Buffer.isBuffer(src)) {
+      return Readable.from(src);
+    } else if (BinaryUtil.isReadable(src)) {
+      return src;
+    } else if (typeof src === 'object' && src) {
+      throw new AppError(`Unknown type ${src.constructor.name}`);
+    } else {
+      throw new AppError('Unknown type');
+    }
+  }
 
   static getErrorStatus(e: Error): number {
     const error: ErrorResponse = e;

@@ -1,10 +1,8 @@
-import { Readable } from 'node:stream';
-
-import { Any, BinaryUtil, castTo, NodeBinary, Util } from '@travetto/runtime';
+import { Any, BinaryUtil, castTo, Util } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
-import { WebBodyUtil } from '../util/body.ts';
+import { NodeBinary, WebBodyUtil } from '../util/body.ts';
 
 export type WebResponseInput<B> = {
   body: B;
@@ -111,7 +109,7 @@ export class WebResponse<B = unknown> {
       out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
       out.body = body;
     } else {
-      out.body = BinaryUtil.toNodeBinaryValue(this.body);
+      out.body = WebBodyUtil.toNodeBinaryValue(this.body);
       if (this.body instanceof Blob) {
         const meta = BinaryUtil.getBlobMeta(this.body);
         out.statusCode = meta?.range ? 206 : out.statusCode;

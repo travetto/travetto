@@ -1,34 +1,41 @@
 import path from 'node:path';
-import { isArrayBuffer } from 'node:util/types';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import { PassThrough, Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
-import { text as toText, arrayBuffer as toArrayBuffer, buffer as toBuffer } from 'node:stream/consumers';
+import { text as toText, arrayBuffer as toArrayBuffer } from 'node:stream/consumers';
+import { isArrayBuffer } from 'node:util/types';
 
-import { BinaryInput, BlobMeta, hasFunction, hasToJSON } from './types.ts';
+import { BinaryInput, BlobMeta, hasFunction } from './types.ts';
 import { AppError } from './error.ts';
 import { Util } from './util.ts';
 
-const isReadableStream = hasFunction<ReadableStream>('pipeTo');
-const isAsyncIterable = (v: unknown): v is AsyncIterable<unknown> =>
-  !!v && (typeof v === 'object' || typeof v === 'function') && Symbol.asyncIterator in v;
-
-
-export type NodeBinary = Readable | Buffer;
 const BlobMetaSymbol = Symbol();
+
 
 /**
  * Common functions for dealing with binary data/streams
  */
 export class BinaryUtil {
+  /** Is Array Buffer */
+  static isArrayBuffer = isArrayBuffer;
+  /** Is Readable */
+  static isReadable = hasFunction<Readable>('pipe');
+  /** Is ReadableStream */
+  static isReadableStream = hasFunction<ReadableStream>('pipeTo');
+  /** Is Async Iterable */
+  static isAsyncIterable = (v: unknown): v is AsyncIterable<unknown> =>
+    !!v && (typeof v === 'object' || typeof v === 'function') && Symbol.asyncIterator in v;
 
   /**
-   * Determine if a value is readable
+   * Is src a binary type
    */
-  static isReadable = hasFunction<Readable>('pipe');
+  static isBinaryType(src: unknown): boolean {
+    return src instanceof Blob || Buffer.isBuffer(src) || this.isReadable(src) ||
+      this.isArrayBuffer(src) || this.isReadableStream(src) || this.isAsyncIterable(src);
+  }
 
   /**
    * Generate a proper sha512 hash from a src value
@@ -141,56 +148,5 @@ export class BinaryUtil {
 
     const ext = path.extname(meta.filename ?? '') || '.bin';
     return `${parts.join('/')}${ext}`;
-  }
-
-  /**
-   * Is src a binary type
-   */
-  static isBinaryType(src: unknown): boolean {
-    return src instanceof Blob || Buffer.isBuffer(src) || BinaryUtil.isReadable(src) ||
-      isArrayBuffer(src) || isReadableStream(src) || isAsyncIterable(src);
-  }
-
-  /**
-   * Get value as node-specific binary value, buffer or readable stream
-   */
-  static toNodeBinaryValue(src: unknown): NodeBinary {
-    if (Buffer.isBuffer(src) || this.isReadable(src)) {
-      return src;
-    } else if (src === undefined || src === null) {
-      return Buffer.alloc(0);
-    } else if (typeof src === 'string') {
-      return Buffer.from(src, 'utf8');
-    } else if (isArrayBuffer(src)) {
-      return Buffer.from(src);
-    } else if (isReadableStream(src)) {
-      return Readable.fromWeb(src);
-    } else if (src instanceof Error) {
-      const text = JSON.stringify(hasToJSON(src) ? src.toJSON() : { message: src.message });
-      return Buffer.from(text, 'utf-8');
-    } else if (src instanceof Blob) {
-      return Readable.fromWeb(src.stream());
-    } else if (isAsyncIterable(src)) {
-      return Readable.from(src);
-    } else {
-      const text = JSON.stringify(hasToJSON(src) ? src.toJSON() : src);
-      return Buffer.from(text, 'utf-8');
-    }
-  }
-
-  static async toBuffer(src: NodeBinary): Promise<Buffer> {
-    return Buffer.isBuffer(src) ? src : toBuffer(src);
-  }
-
-  static toReadable(src: NodeBinary | unknown): Readable {
-    if (Buffer.isBuffer(src)) {
-      return Readable.from(src);
-    } else if (this.isReadable(src)) {
-      return src;
-    } else if (typeof src === 'object' && src) {
-      throw new AppError(`Unknown type ${src.constructor.name}`);
-    } else {
-      throw new AppError('Unknown type');
-    }
   }
 }
