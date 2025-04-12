@@ -10,6 +10,7 @@ import { WebInterceptor } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { CompressInterceptor } from './compress.ts';
 import { EndpointConfig } from '../registry/types.ts';
+import { WebBodyUtil } from '../util/body.ts';
 
 @Config('web.etag')
 export class EtagConfig {
@@ -42,7 +43,7 @@ export class EtagInterceptor implements WebInterceptor {
       return res;
     }
 
-    const binaryRes = WebResponse.toBinary(res);
+    const binaryRes = new WebResponse({ ...res, ...WebBodyUtil.toBinaryMessage(res) });
     if (!Buffer.isBuffer(binaryRes.body)) {
       return binaryRes;
     }

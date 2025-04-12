@@ -16,17 +16,6 @@ export interface WebResponseInput<B> extends WebMessageInit<B> {
 export class WebResponse<B = unknown> implements WebMessage<B> {
 
   /**
-   * Make a response into a binary response
-   */
-  static toBinary(res: WebResponse<unknown>): WebResponse<NodeBinary> {
-    const out = new WebResponse({ statusCode: res.statusCode, cookies: res.getCookies(), ...WebBodyUtil.toBinaryMessage(res) });
-    if (out.headers.has('Content-Range')) {
-      out.statusCode = 206;
-    }
-    return out;
-  }
-
-  /**
     * Build the redirect
     * @param location Location to redirect to
     * @param status Status code
@@ -60,33 +49,22 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
     return new WebResponse<T>({ ...opts, body });
   }
 
-  #cookies: Record<string, Cookie> = {};
+  cookies: Cookie[];
   statusCode?: number;
   body: B;
   readonly headers: WebHeaders;
 
   constructor(o: WebResponseInput<B>) {
     this.statusCode ??= o.statusCode;
-    this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
+    this.cookies = o.cookies ?? [];
     this.body = o.body!;
     this.headers = new WebHeaders(o.headers);
 
     if (this.body instanceof Error) {
       this.statusCode ??= WebBodyUtil.getErrorStatus(this.body);
     }
-  }
-
-  /**
-   * Store a cookie by name, will be handled by the CookieJar at send time
-   */
-  setCookie(cookie: Cookie): void {
-    this.#cookies[cookie.name] = { ...cookie, maxAge: (cookie.value !== undefined) ? cookie.maxAge : -1 };
-  }
-
-  /**
-   * Get all the registered cookies
-   */
-  getCookies(): Cookie[] {
-    return Object.values(this.#cookies);
+    if (this.headers.has('Content-Range')) {
+      this.statusCode = 206;
+    }
   }
 }

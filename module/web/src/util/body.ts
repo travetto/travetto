@@ -126,7 +126,7 @@ export class WebBodyUtil {
   /**
    * Convert an existing web message to a binary web message
    */
-  static toBinaryMessage(message: WebMessage): WebMessage<NodeBinary> {
+  static toBinaryMessage(message: WebMessage): WebMessage<NodeBinary> & { body: NodeBinary } {
     const body = message.body;
     if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
       return castTo(message);

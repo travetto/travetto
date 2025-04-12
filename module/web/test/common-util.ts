@@ -55,12 +55,12 @@ export class WebCommonUtilTest {
   async writeValueCookieTest() {
     const res = WebCommonUtil.writeMetadata(WebResponse.from(null), config('cookie', false), 'blue');
 
-    const jar = new CookieJar(res.getCookies());
+    const jar = new CookieJar(res.cookies);
     assert(jar.get('orange') === 'blue');
 
     WebCommonUtil.writeMetadata(res, config('cookie'), undefined);
 
-    const jar2 = new CookieJar(res.getCookies());
+    const jar2 = new CookieJar(res.cookies);
     assert(jar2.get('orange') === undefined);
   }
 

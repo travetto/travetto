@@ -32,7 +32,7 @@ export class NodeWebUtil {
    * Send WebResponse to ServerResponse
    */
   static async respondToServerResponse(webRes: WebResponse, res: ServerResponse): Promise<void> {
-    const binaryRes = WebResponse.toBinary(webRes);
+    const binaryRes = new WebResponse({ ...webRes, ...WebBodyUtil.toBinaryMessage(webRes) });
     binaryRes.headers.forEach((v, k) => res.setHeader(k.toLowerCase(), v));
     res.statusCode = binaryRes.statusCode ?? 200;
 

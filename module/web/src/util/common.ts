@@ -62,7 +62,7 @@ export class WebCommonUtil {
    */
   static writeMetadata(res: WebResponse, cfg: WebMetadataConfig, value: string | undefined, opts?: Omit<Cookie, 'name' | 'value'>): WebResponse {
     if (cfg.mode === 'cookie' || !cfg.mode) {
-      res.setCookie({
+      res.cookies.push({
         ...opts,
         name: cfg.cookie, value, maxAge: (value !== undefined) ? opts?.maxAge : -1,
       });
