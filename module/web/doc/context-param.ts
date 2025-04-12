@@ -13,7 +13,7 @@ class ContextController {
   @Get('/ip')
   async getIp() {
     return new WebResponse({
-      body: { ip: this.req.getIp() },
+      body: { ip: this.req.connection.ip },
       headers: {
         'Content-Type': 'application/json+ip'
       }

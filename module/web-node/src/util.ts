@@ -10,18 +10,20 @@ export class NodeWebUtil {
    */
   static toWebRequest(req: IncomingMessage, params?: Record<string, unknown>): WebRequest {
     const secure = 'encrypted' in req.socket && !!req.socket.encrypted;
-    const url = new URL(`http${secure ? 's' : ''}://${req.headers.host}${req.url}`);
-
+    const [path, query] = (req.url ?? '/').split('?') ?? [];
     return new WebRequest({
-      protocol: secure ? 'https' : 'http',
+      connection: {
+        ip: req.socket.remoteAddress!,
+        host: req.headers.host,
+        protocol: secure ? 'https' : 'http',
+        port: req.socket.localPort
+      },
       method: castTo(req.method?.toUpperCase()),
-      path: url.pathname!,
-      query: Object.fromEntries(url.searchParams.entries()),
+      path,
+      query: Object.fromEntries(new URLSearchParams(query)),
       params,
       headers: req.headers,
       body: WebRequest.markUnprocessed(req),
-      remoteIp: req.socket.remoteAddress,
-      port: req.socket.localPort
     });
   }
 

@@ -38,7 +38,7 @@ export class StandardWebRouter extends BaseWebRouter {
    * Route and run the request
    */
   dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const method = castTo<HttpMethod>((req.method ?? 'get').toUpperCase());
+    const method = castTo<HttpMethod>((req.method ?? 'GET').toUpperCase());
     const { params, handler } = this.raw.find(method, req.path ?? '/') ?? {};
     const endpoint = this.#cache.get(handler!);
     if (!endpoint) {

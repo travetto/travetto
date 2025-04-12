@@ -91,7 +91,7 @@ export class TestController {
 
   @Get('/ip')
   getIp() {
-    return { ip: this.req.getIp() };
+    return { ip: this.req.connection.ip };
   }
 
   @Post('/ip')

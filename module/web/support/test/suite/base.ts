@@ -58,7 +58,7 @@ export abstract class BaseWebSuite {
     const dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
 
     const query = BindUtil.flattenPaths(cfg.query ?? {});
-    const webReq = new WebRequest<unknown>({ ...cfg, query });
+    const webReq = new WebRequest<unknown>({ ...cfg, query }).secure(true);
 
     if (webReq.body) {
       const sample = new WebResponse(webReq).toBinary();

@@ -11,17 +11,19 @@ export class AwsLambdaWebUtil {
   static toWebRequest(event: APIGatewayProxyEvent, params?: Record<string, unknown>): WebRequest {
     // Build request
     const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
-    const req = new WebRequest({
-      protocol: castTo(event.requestContext.protocol ?? 'http'),
+
+    return new WebRequest({
+      connection: {
+        protocol: castTo(event.requestContext.protocol ?? 'http'),
+        ip: event.requestContext.identity.sourceIp,
+      },
       method: castTo(event.httpMethod.toUpperCase()),
       path: event.path,
       query: castTo(event.queryStringParameters!),
       params,
-      remoteIp: event.requestContext.identity.sourceIp,
       headers: { ...event.headers, ...event.multiValueHeaders },
       body: WebRequest.markUnprocessed(body)
     });
-    return req;
   }
 
   /**
