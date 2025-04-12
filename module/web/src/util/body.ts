@@ -196,17 +196,4 @@ export class WebBodyUtil {
       return WebBodyUtil.toReadable(p);
     }
   }
-
-  /**
-   * Get status code for a given message
-   */
-  static getStatusCode(msg: WebMessage, emptyCode = 201): number {
-    if (msg.headers.has('Content-Range')) { // Force status code if content range specified
-      return 206;
-    } else if (Buffer.isBuffer(msg.body) && msg.body.byteLength === 0) {
-      return emptyCode;
-    } else {
-      return 200;
-    }
-  }
 }
