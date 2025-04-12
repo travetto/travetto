@@ -1,4 +1,3 @@
-import { HttpProtocol } from './core';
 import { WebHeaders, WebHeadersInit } from './headers';
 
 export interface WebMessageInit<B = unknown> {
