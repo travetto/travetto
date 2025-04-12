@@ -19,7 +19,6 @@ export class NodeWebApplication implements WebApplication {
   router: StandardWebRouter;
 
   async handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
-    console.error('Trusting?', this.config);
     const webReq = NodeWebUtil.toWebRequest(req).secure(this.config.trustProxy);
     const webRes = await this.router.dispatch({ req: webReq });
     await NodeWebUtil.respondToServerResponse(webRes, res);

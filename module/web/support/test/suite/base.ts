@@ -1,5 +1,5 @@
 import { RootRegistry } from '@travetto/registry';
-import { Class } from '@travetto/runtime';
+import { Class, toConcrete } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { ConfigSource, ConfigSpec } from '@travetto/config';
 import { DependencyRegistry } from '@travetto/di';
@@ -38,7 +38,8 @@ export abstract class BaseWebSuite {
             priority: 2000
           };
         }
-      }
+      },
+      { interfaces: [toConcrete<ConfigSource>()] }
     );
 
     await RootRegistry.init();
