@@ -44,7 +44,7 @@ export class SampleAuth {
    * Simple Echo
    */
   @Post('/')
-  async echo(): Promise<object> {
+  async echo(): Promise<unknown> {
     return this.req.body;
   }
 }

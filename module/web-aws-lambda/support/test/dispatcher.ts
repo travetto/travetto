@@ -2,14 +2,18 @@ import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebFilterContext, WebRequest, WebResponse, WebDispatcher } from '@travetto/web';
-import { asFull, castTo, Util } from '@travetto/runtime';
+import { AppError, asFull, castTo, Util } from '@travetto/runtime';
 
 import { AwsLambdaWebHandler } from '../../src/handler.ts';
+
+function isBufferRequest(req: WebRequest): req is WebRequest<Buffer> {
+  return Buffer.isBuffer(req.body);
+}
 
 /**
  * Create an api gateway event given a web request
  */
-function toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
+function toLambdaEvent(req: WebRequest<Buffer>): APIGatewayProxyEvent {
   const headers: Record<string, string> = {};
   const multiValueHeaders: Record<string, string[]> = {};
   const queryStringParameters: Record<string, string> = {};
@@ -39,7 +43,7 @@ function toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
     headers,
     multiValueHeaders,
     isBase64Encoded: true,
-    body: req.body ? req.body.toString('base64') : req.body ?? null,
+    body: req.body?.toString('utf8') ?? null,
     requestContext: {
       accountId: Util.uuid(),
       resourceId: Util.uuid(),
@@ -67,6 +71,10 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
   app: AwsLambdaWebHandler;
 
   async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
+    if (!isBufferRequest(req)) {
+      throw new AppError('Unsupported request type, only buffer bodies supported');
+    }
+
     const res = await this.app.handle(toLambdaEvent(req), asFull<Context>({}));
 
     return new WebResponse({

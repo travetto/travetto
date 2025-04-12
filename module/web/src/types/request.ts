@@ -1,21 +1,20 @@
 import { Readable } from 'node:stream';
 
-import { Any, AppError } from '@travetto/runtime';
+import { Any, AppError, BinaryUtil } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
-import { WebHeadersInit, WebHeaders } from './headers.ts';
+import { WebHeaders } from './headers.ts';
 import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
 import { NodeBinary, WebBodyUtil } from '../util/body.ts';
+import { WebMessage, WebMessageInit } from './message.ts';
 
-export type WebRequestInit = {
-  headers?: WebHeadersInit;
+export interface WebRequestInit<B> extends WebMessageInit<B> {
   method?: HttpMethod;
   protocol?: HttpProtocol;
   port?: number;
   query?: Record<string, unknown>;
   path?: string;
   params?: Record<string, unknown>;
-  body?: Any;
   remoteIp?: string;
   getCookie?: (key: string, opts: CookieGetOptions) => string | undefined;
 };
@@ -28,7 +27,7 @@ export interface WebRequestInternal {
 /**
  * Web Request object
  */
-export class WebRequest {
+export class WebRequest<B = unknown> implements WebMessage<B> {
 
   static markUnprocessed<T extends NodeBinary | undefined>(val: T): T {
     if (val) {
@@ -47,9 +46,9 @@ export class WebRequest {
   readonly query: Record<string, unknown> = {};
   readonly params: Record<string, string> = {};
   readonly remoteIp?: string;
-  body?: Any;
+  body?: B;
 
-  constructor(init: WebRequestInit = {}) {
+  constructor(init: WebRequestInit<B> = {}) {
     Object.assign(this, init);
     this.headers = new WebHeaders(init.headers);
   }
@@ -70,7 +69,8 @@ export class WebRequest {
    */
   getUnprocessedStream(): Readable | undefined {
     const p = this.body;
-    if (typeof p === 'object' && p && p[WebInternalSymbol] === p) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    if ((Buffer.isBuffer(p) || BinaryUtil.isReadable(p)) && (p as Any)[WebInternalSymbol] === p) {
       return WebBodyUtil.toReadable(p);
     }
   }

@@ -9,7 +9,7 @@ import {
   Controller, Get, Body, Post, Put, WebRequest, WebInterceptor,
   EndpointConfig, ContextParam, WebInterceptorCategory, WebChainedContext
 } from '@travetto/web';
-import { Util } from '@travetto/runtime';
+import { castTo, Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
@@ -67,7 +67,7 @@ class TestController {
 
   @Put('/body')
   withBody() {
-    return { body: this.req.body.age };
+    return { body: castTo<{ age: number }>(this.req.body).age };
   }
 }
 

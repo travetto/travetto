@@ -53,19 +53,20 @@ export abstract class BaseWebSuite {
     this.#appHandle = undefined;
   }
 
-  async request<T>(cfg: WebRequest | WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
+  async request<T, B = unknown>(cfg: WebRequestInit<B>, throwOnError: boolean = true): Promise<WebResponse<T>> {
 
     const dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
 
-    const webReq = !(cfg instanceof WebRequest) ? new WebRequest(cfg) : cfg;
+    const webReq = new WebRequest<unknown>({
+      ...cfg,
+      query: BindUtil.flattenPaths(cfg.query ?? {})
+    });
 
     if (webReq.body) {
       const sample = new WebResponse({ body: webReq.body }).toBinary();
       sample.headers.forEach((v, k) => webReq.headers.set(k, Array.isArray(v) ? v.join(',') : v));
       webReq.body = WebRequest.markUnprocessed(await WebBodyUtil.toBuffer(sample.body));
     }
-
-    Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
 
     const webRes = await dispatcher.dispatch({ req: webReq });
     let result = webRes.body;

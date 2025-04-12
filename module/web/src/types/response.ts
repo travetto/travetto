@@ -4,18 +4,17 @@ import { BinaryUtil, castTo, Util } from '@travetto/runtime';
 import { Cookie } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
 import { NodeBinary, WebBodyUtil } from '../util/body.ts';
+import { WebMessage, WebMessageInit } from './message.ts';
 
-export type WebResponseInput<B> = {
-  body: B;
+export interface WebResponseInput<B> extends WebMessageInit<B> {
   statusCode?: number;
-  headers?: WebHeadersInit;
   cookies?: Cookie[];
 };
 
 /**
  * Web Response as a simple object
  */
-export class WebResponse<B = unknown> {
+export class WebResponse<B = unknown> implements WebMessage<B> {
 
   /**
     * Build the redirect

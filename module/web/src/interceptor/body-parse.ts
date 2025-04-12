@@ -4,7 +4,7 @@ import rawBody from 'raw-body';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError } from '@travetto/runtime';
+import { AppError, Primitive } from '@travetto/runtime';
 
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
@@ -71,7 +71,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
     }
   }
 
-  parse(text: string, type: ParserType): string | Record<string, string> {
+  parse(text: string, type: ParserType): Primitive | Record<string, string> | Object | unknown[] {
     switch (type) {
       case 'json': return JSON.parse(text);
       case 'text': return text;
