@@ -32,14 +32,13 @@ export class WebResponse<B = unknown> {
    * From catch value
    */
   static fromCatch(err: unknown): WebResponse<Error> {
-    return err instanceof WebResponse ? err :
-      new WebResponse({ body: Util.ensureError(err) });
+    return err instanceof WebResponse ? err : new WebResponse({ body: Util.ensureError(err) });
   }
 
   /**
    * Create a web response from a body input
    */
-  static from<T>(body: T, opts?: Omit<WebResponseInput<T>, 'body'>): WebResponse<T> {
+  static for<T>(body: T, opts?: Omit<WebResponseInput<T>, 'body'>): WebResponse<T> {
     return new WebResponse<T>({ ...opts, body });
   }
 

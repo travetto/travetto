@@ -81,7 +81,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const sent = castTo<Blob>(uploads.get('file')?.slice());
     const res = await this.request<{ hash: string }>({
       method: 'POST', path: '/test/upload',
-      ...WebResponse.from(sent)
+      ...WebResponse.for(sent)
     });
 
     const file = await this.fixture.readStream('/logo.png');

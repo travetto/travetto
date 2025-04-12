@@ -53,7 +53,7 @@ export class WebCommonUtilTest {
 
   @Test()
   async writeValueCookieTest() {
-    const res = WebCommonUtil.writeMetadata(WebResponse.from(null), config('cookie', false), 'blue');
+    const res = WebCommonUtil.writeMetadata(WebResponse.for(null), config('cookie', false), 'blue');
 
     const jar = new CookieJar(res.getCookies());
     assert(jar.get('orange') === 'blue');
@@ -67,11 +67,11 @@ export class WebCommonUtilTest {
   @Test()
   async writeValueHeaderTest() {
     const res = WebCommonUtil
-      .writeMetadata(WebResponse.from(null), config('header', false), 'blue');
+      .writeMetadata(WebResponse.for(null), config('header', false), 'blue');
     assert(res.headers.get('Dandy') === 'blue');
 
     const res2 = WebCommonUtil
-      .writeMetadata(WebResponse.from(null), config('header'), undefined);
+      .writeMetadata(WebResponse.for(null), config('header'), undefined);
     assert(!res2.headers.get('Dandy'));
 
     WebCommonUtil.writeMetadata(res, config('header'), undefined);
@@ -92,7 +92,7 @@ export class WebCommonUtilTest {
   @Test()
   async readWriteValueTest() {
     const cfg = config('header', false);
-    const res = WebCommonUtil.writeMetadata(WebResponse.from(null), cfg, 'hello');
+    const res = WebCommonUtil.writeMetadata(WebResponse.for(null), cfg, 'hello');
 
     const req = new WebRequest({ headers: res.headers });
     const value = WebCommonUtil.readMetadata(req, cfg);
