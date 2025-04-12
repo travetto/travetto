@@ -379,8 +379,8 @@ First we must start the application:
       <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
-      AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-      ApiHostConfig: <span class="token punctuation">{{'{'}}</span> servers: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token punctuation">{{'{'}}</span> url: <span class="token string">'http://localhost:12555'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>, openapi: <span class="token string">'3.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
+      AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+      ApiHostConfig: <span class="token punctuation">{{'{'}}</span> servers: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> url: <span class="token string">'http://localhost:12555'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>, openapi: <span class="token string">'3.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
       ApiInfoConfig: <span class="token punctuation">{{'{'}}</span> description: <span class="token string">''</span>, title: <span class="token string">'&#64;travetto/todo-app'</span>, version: <span class="token string">'0.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
       ApiSpecConfig: <span class="token punctuation">{{'{'}}</span>
         output: <span class="token string">'./openapi.yml'</span>,
@@ -393,16 +393,13 @@ First we must start the application:
       CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
-        preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
-        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span> <span class="token punctuation">{{'}'}}</span>
+        preferredEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>,
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span>, <span class="token string">'deflate'</span> <span class="token punctuation">]</span>
       <span class="token punctuation">{{'}'}}</span>,
       ConsoleLogAppenderConfig: <span class="token punctuation">{{'{'}}</span> logToLevel: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       CookieConfig: <span class="token punctuation">{{'{'}}</span> applies: true, signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span>, secure: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       CorsConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      DecompressConfig: <span class="token punctuation">{{'{'}}</span>
-        applies: true,
-        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>
-      <span class="token punctuation">{{'}'}}</span>,
+      DecompressConfig: <span class="token punctuation">{{'{'}}</span> applies: true, supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'deflate'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       FileLogAppenderConfig: <span class="token punctuation">{{'{'}}</span>
         output: <span class="token string">'&lt;workspace-root>/.trv/tool/node_modules/&#64;travetto/todo-app/output.log'</span>,
@@ -428,7 +425,7 @@ First we must start the application:
       <span class="token punctuation">{{'}'}}</span>,
       MemoryModelConfig: <span class="token punctuation">{{'{'}}</span> autoCreate: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       MongoModelConfig: <span class="token punctuation">{{'{'}}</span>
-        hosts: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'localhost'</span> <span class="token punctuation">{{'}'}}</span>,
+        hosts: <span class="token punctuation">[</span> <span class="token string">'localhost'</span> <span class="token punctuation">]</span>,
         namespace: <span class="token string">'app'</span>,
         port: <span class="token number">27017</span>,
         connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
@@ -443,11 +440,11 @@ First we must start the application:
       <span class="token punctuation">{{'}'}}</span>,
       WebAuthLoginConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthLogoutConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
-      WebAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> applies: false, permissions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      WebAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> applies: false, permissions: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">12555</span>,
-        trustProxy: false,
+        trustProxy: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
         hostname: <span class="token string">'localhost'</span>,
         bindAddress: <span class="token string">'0.0.0.0'</span>,
         baseUrl: <span class="token string">'http://localhost:12555'</span>,
@@ -456,7 +453,7 @@ First we must start the application:
         optionsGlobalHandle: <span class="token boolean">true</span>
       <span class="token punctuation">{{'}'}}</span>,
       WebLogConfig: <span class="token punctuation">{{'{'}}</span> applies: true, showStackTrace: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      WebRpcConfig: <span class="token punctuation">{{'{'}}</span> clients: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      WebRpcConfig: <span class="token punctuation">{{'{'}}</span> clients: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       WebSessionConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       WebSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>

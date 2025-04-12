@@ -158,7 +158,7 @@ Each <a target="_blank" class="source-link" href="https://github.com/travetto/tr
 
 <h3 id="contextparam">ContextParam</h3>
 
-In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L22">WebRequest</a>.  These are able to be injected using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">&#64;ContextParam</a> on a class-level field from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L8">WebAsyncContext</a>.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L15">WebRequest</a>.  These are able to be injected using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">&#64;ContextParam</a> on a class-level field from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L8">WebAsyncContext</a>.  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
   <figure class="code">
     <figcaption class="code">Example ContextParam usage
@@ -179,7 +179,8 @@ In addition to endpoint parameters (i.e. user-provided inputs), there may also b
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">CacheControl</span></span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>
   <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/ip'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">getIp</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> WebResponse<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> ip<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>req<span class="token punctuation">.</span><span class="token function">getIp</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">with</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">WebResponse</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+      body<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> ip<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>req<span class="token punctuation">.</span>connection<span class="token punctuation">.</span>ip <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
       headers<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
         <span class="token string-property property">'Content-Type'</span><span class="token operator">:</span> <span class="token string">'application/json+ip'</span>
       <span class="token punctuation">{{'}'}}</span>
@@ -331,12 +332,12 @@ Initialized <span class="token punctuation">{{'{'}}</span>
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
-      AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       BodyParseConfig: <span class="token punctuation">{{'{'}}</span> applies: true, limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
-        preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
-        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span> <span class="token punctuation">{{'}'}}</span>
+        preferredEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>,
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span>, <span class="token string">'deflate'</span> <span class="token punctuation">]</span>
       <span class="token punctuation">{{'}'}}</span>,
       CookieConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
@@ -348,14 +349,14 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       CorsConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       DecompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
-        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'deflate'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>
       <span class="token punctuation">{{'}'}}</span>,
       EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,
-        trustProxy: false,
+        trustProxy: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
         hostname: <span class="token string">'localhost'</span>,
         bindAddress: <span class="token string">'0.0.0.0'</span>,
         baseUrl: <span class="token string">'http://localhost:3000'</span>,
@@ -445,12 +446,12 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
-      AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       BodyParseConfig: <span class="token punctuation">{{'{'}}</span> applies: true, limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
-        preferredEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>,
-        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span> <span class="token punctuation">{{'}'}}</span>
+        preferredEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>,
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span>, <span class="token string">'deflate'</span> <span class="token punctuation">]</span>
       <span class="token punctuation">{{'}'}}</span>,
       CookieConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
@@ -462,14 +463,14 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       CorsConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       DecompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
-        supportedEncodings: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'br'</span>, <span class="token string">'1'</span><span class="token builtin class-name">:</span> <span class="token string">'gzip'</span>, <span class="token string">'2'</span><span class="token builtin class-name">:</span> <span class="token string">'deflate'</span>, <span class="token string">'3'</span><span class="token builtin class-name">:</span> <span class="token string">'identity'</span> <span class="token punctuation">{{'}'}}</span>
+        supportedEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'deflate'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>
       <span class="token punctuation">{{'}'}}</span>,
       EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,
-        trustProxy: false,
+        trustProxy: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
         hostname: <span class="token string">'localhost'</span>,
         bindAddress: <span class="token string">'0.0.0.0'</span>,
         baseUrl: <span class="token string">'http://localhost:3000'</span>,
@@ -512,11 +513,11 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 <h3 id="bodyparseinterceptor">BodyParseInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L45">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L46">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
   <figure class="code">
     <figcaption class="code">Body Parse Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L26">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L27">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BodyParseConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -648,7 +649,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="custom-interceptors">Custom Interceptors</h3>
 
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L13">WebInterceptor</a> interface.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L22">WebRequest</a> object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L13">WebInterceptor</a> interface.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L15">WebRequest</a> object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
   <figure class="code">
     <figcaption class="code">Defining a new Interceptor
@@ -763,7 +764,7 @@ The resolution logic is as follows:
 
 <h2 id="cookie-support">Cookie Support</h2>
 
-<a target="_blank" class="external-link" href="https://expressjs.com">express</a>/<a target="_blank" class="external-link" href="https://koajs.com/">koa</a>/<a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using <a target="_blank" class="external-link" href="https://www.npmjs.com/package/cookies">cookies</a>.  This functionality is exposed onto the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L22">WebRequest</a> object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+<a target="_blank" class="external-link" href="https://expressjs.com">express</a>/<a target="_blank" class="external-link" href="https://koajs.com/">koa</a>/<a target="_blank" class="external-link" href="https://www.fastify.io/">fastify</a> all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using <a target="_blank" class="external-link" href="https://www.npmjs.com/package/cookies">cookies</a>.  This functionality is exposed onto the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L15">WebRequest</a> object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
   <figure class="code">
     <figcaption class="code">Sample Cookie Usage
@@ -787,8 +788,8 @@ The resolution logic is as follows:
     <span class="token keyword">this</span><span class="token punctuation">.</span>req<span class="token punctuation">.</span><span class="token function">getCookie</span><span class="token punctuation">(</span><span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>getOptions<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token comment">// Set a cookie on response</span>
-    <span class="token keyword">const</span> result <span class="token operator">=</span> WebResponse<span class="token punctuation">.</span><span class="token function">fromEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    result<span class="token punctuation">.</span><span class="token function">setCookie</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> name<span class="token operator">:</span> <span class="token string">'name'</span><span class="token punctuation">,</span> value<span class="token punctuation">,</span> <span class="token operator">...</span><span class="token keyword">this</span><span class="token punctuation">.</span>setOptions <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> result <span class="token operator">=</span> WebResponse<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    result<span class="token punctuation">.</span>cookies<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> name<span class="token operator">:</span> <span class="token string">'name'</span><span class="token punctuation">,</span> value<span class="token punctuation">,</span> <span class="token operator">...</span><span class="token keyword">this</span><span class="token punctuation">.</span>setOptions <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> result<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>

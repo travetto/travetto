@@ -348,8 +348,8 @@ npx trv run:web
       { priority: 999, source: 'memory://override' }
     ],
     active: {
-      AcceptsConfig: { applies: false, types: {} },
-      ApiHostConfig: { servers: { '0': { url: 'http://localhost:12555' } }, openapi: '3.0.0' },
+      AcceptsConfig: { applies: false, types: [] },
+      ApiHostConfig: { servers: [ { url: 'http://localhost:12555' } ], openapi: '3.0.0' },
       ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
       ApiSpecConfig: {
         output: './openapi.yml',
@@ -362,16 +362,13 @@ npx trv run:web
       CommonLoggerConfig: { format: 'line', output: 'console' },
       CompressConfig: {
         applies: true,
-        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
-        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
+        preferredEncodings: [ 'br', 'gzip', 'identity' ],
+        supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
       },
       ConsoleLogAppenderConfig: { logToLevel: true },
       CookieConfig: { applies: true, signed: true, httpOnly: true, sameSite: 'lax', secure: false },
       CorsConfig: { applies: true },
-      DecompressConfig: {
-        applies: true,
-        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'deflate', '3': 'identity' }
-      },
+      DecompressConfig: { applies: true, supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ] },
       EtagConfig: { applies: true },
       FileLogAppenderConfig: {
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
@@ -397,7 +394,7 @@ npx trv run:web
       },
       MemoryModelConfig: { autoCreate: true },
       MongoModelConfig: {
-        hosts: { '0': 'localhost' },
+        hosts: [ 'localhost' ],
         namespace: 'app',
         port: 27017,
         connectionOptions: {},
@@ -412,11 +409,11 @@ npx trv run:web
       },
       WebAuthLoginConfig: { applies: false },
       WebAuthLogoutConfig: { applies: false },
-      WebAuthVerifyConfig: { applies: false, permissions: {} },
+      WebAuthVerifyConfig: { applies: false, permissions: [] },
       WebConfig: {
         serve: true,
         port: 12555,
-        trustProxy: false,
+        trustProxy: [],
         hostname: 'localhost',
         bindAddress: '0.0.0.0',
         baseUrl: 'http://localhost:12555',
@@ -425,7 +422,7 @@ npx trv run:web
         optionsGlobalHandle: true
       },
       WebLogConfig: { applies: true, showStackTrace: true },
-      WebRpcConfig: { clients: {} },
+      WebRpcConfig: { clients: [] },
       WebSessionConfig: {},
       WebSslConfig: { active: false }
     }

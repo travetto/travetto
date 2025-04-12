@@ -180,16 +180,17 @@ In addition to files and environment variables, configuration sources can also b
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/config/doc/custom-source.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ConfigData<span class="token punctuation">,</span> ConfigSource <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/config'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ConfigSource<span class="token punctuation">,</span> ConfigSpec <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/config'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomConfigSource</span> <span class="token keyword">implements</span> <span class="token class-name">ConfigSource</span> <span class="token punctuation">{{'{'}}</span>
-  priority <span class="token operator">=</span> <span class="token number">2000</span><span class="token punctuation">;</span>
-  source <span class="token operator">=</span> <span class="token string">'custom://override'</span><span class="token punctuation">;</span>
-
-  <span class="token keyword">async</span> <span class="token function">getData</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>ConfigData<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> user<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> name<span class="token operator">:</span> <span class="token string">'bob'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token keyword">async</span> <span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>ConfigSpec<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span>
+      data<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> user<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> name<span class="token operator">:</span> <span class="token string">'bob'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+      source<span class="token operator">:</span> <span class="token string">'custom://override'</span><span class="token punctuation">,</span>
+      priority<span class="token operator">:</span> <span class="token number">2000</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

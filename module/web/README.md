@@ -142,7 +142,7 @@ export class Simple {
 ```
 
 ### ContextParam
-In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L22).  These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) on a class-level field from the [WebAsyncContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L8).  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
+In addition to endpoint parameters (i.e. user-provided inputs), there may also be a desire to access indirect contextual information.  Specifically you may need access to the entire [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L15).  These are able to be injected using the [@ContextParam](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61) on a class-level field from the [WebAsyncContext](https://github.com/travetto/travetto/tree/main/module/web/src/context.ts#L8).  These are not exposed as endpoint parameters as they cannot be provided when making RPC invocations.
 
 **Code: Example ContextParam usage**
 ```typescript
@@ -160,7 +160,8 @@ class ContextController {
   @CacheControl(0)
   @Get('/ip')
   async getIp() {
-    return WebResponse.from({ ip: this.req.getIp() }).with({
+    return new WebResponse({
+      body: { ip: this.req.connection.ip },
       headers: {
         'Content-Type': 'application/json+ip'
       }
@@ -297,12 +298,12 @@ Initialized {
   config: {
     sources: [ { priority: 999, source: 'memory://override' } ],
     active: {
-      AcceptsConfig: { applies: false, types: {} },
+      AcceptsConfig: { applies: false, types: [] },
       BodyParseConfig: { applies: true, limit: '1mb', parsingTypes: {} },
       CompressConfig: {
         applies: true,
-        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
-        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
+        preferredEncodings: [ 'br', 'gzip', 'identity' ],
+        supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
       },
       CookieConfig: {
         applies: true,
@@ -314,14 +315,14 @@ Initialized {
       CorsConfig: { applies: true },
       DecompressConfig: {
         applies: true,
-        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'deflate', '3': 'identity' }
+        supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ]
       },
       EtagConfig: { applies: true },
       GetCacheConfig: { applies: true },
       WebConfig: {
         serve: true,
         port: 3000,
-        trustProxy: false,
+        trustProxy: [],
         hostname: 'localhost',
         bindAddress: '0.0.0.0',
         baseUrl: 'http://localhost:3000',
@@ -405,12 +406,12 @@ Initialized {
       { priority: 999, source: 'memory://override' }
     ],
     active: {
-      AcceptsConfig: { applies: false, types: {} },
+      AcceptsConfig: { applies: false, types: [] },
       BodyParseConfig: { applies: true, limit: '1mb', parsingTypes: {} },
       CompressConfig: {
         applies: true,
-        preferredEncodings: { '0': 'br', '1': 'gzip', '2': 'identity' },
-        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'identity', '3': 'deflate' }
+        preferredEncodings: [ 'br', 'gzip', 'identity' ],
+        supportedEncodings: [ 'br', 'gzip', 'identity', 'deflate' ]
       },
       CookieConfig: {
         applies: true,
@@ -422,14 +423,14 @@ Initialized {
       CorsConfig: { applies: true },
       DecompressConfig: {
         applies: true,
-        supportedEncodings: { '0': 'br', '1': 'gzip', '2': 'deflate', '3': 'identity' }
+        supportedEncodings: [ 'br', 'gzip', 'deflate', 'identity' ]
       },
       EtagConfig: { applies: true },
       GetCacheConfig: { applies: true },
       WebConfig: {
         serve: true,
         port: 3000,
-        trustProxy: false,
+        trustProxy: [],
         hostname: 'localhost',
         bindAddress: '0.0.0.0',
         baseUrl: 'http://localhost:3000',
@@ -468,7 +469,7 @@ export class HelloWorldInterceptor implements WebInterceptor {
 Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 
 ### BodyParseInterceptor
-[BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L45) handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
+[BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L46) handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
 **Code: Body Parse Config**
 ```typescript
@@ -585,7 +586,7 @@ web.log:
 [AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/context.ts#L13) is responsible for sharing context across the various layers that may be touched by a request. This interceptor can be noisy, and so can easily be disabled as needed by setting `web.log.applies: false` in your config.
 
 ### Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L13) interface.  The interceptors are tied to the defined [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L22) object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [WebInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L13) interface.  The interceptors are tied to the defined [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L15) object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
@@ -686,7 +687,7 @@ The resolution logic is as follows:
    *  By default, if nothing else matched, assume the interceptor is valid.
 
 ## Cookie Support
-[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L22) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L15) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 **Code: Sample Cookie Usage**
 ```typescript
@@ -707,8 +708,8 @@ export class SimpleEndpoints {
     this.req.getCookie('name', this.getOptions);
 
     // Set a cookie on response
-    const result = WebResponse.fromEmpty();
-    result.setCookie({ name: 'name', value, ...this.setOptions });
+    const result = WebResponse.from(null);
+    result.cookies.push({ name: 'name', value, ...this.setOptions });
     return result;
   }
 }
