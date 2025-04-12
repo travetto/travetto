@@ -14,8 +14,8 @@ export class AwsLambdaWebUtil {
 
     return new WebRequest({
       connection: {
-        protocol: castTo(event.requestContext.protocol ?? 'http'),
-        ip: event.requestContext.identity.sourceIp,
+        protocol: 'http',
+        ip: event.requestContext.identity?.sourceIp,
       },
       method: castTo(event.httpMethod.toUpperCase()),
       path: event.path,

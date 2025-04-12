@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebDispatcher, WebFilterContext, WebRequest, WebResponse } from '@travetto/web';
-import { AppError, asFull, castTo, Util } from '@travetto/runtime';
+import { AppError, asFull, castTo } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
 
@@ -47,20 +47,9 @@ function toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
     multiValueHeaders,
     isBase64Encoded: true,
     body: body?.toString('base64')!,
-    requestContext: {
-      accountId: Util.uuid(),
-      resourceId: Util.uuid(),
-      requestId: Util.uuid(),
-      apiId: Util.uuid(),
-      requestTimeEpoch: 1428582896000,
-      resourcePath: '/{proxy+}',
-      protocol: 'HTTP/1.1',
-      authorizer: {},
+    requestContext: castTo({
       identity: castTo({ sourceIp: '127.0.0.1' }),
-      stage: '',
-      path: req.path,
-      httpMethod: req.method
-    },
+    }),
   };
 }
 
@@ -74,6 +63,7 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
   app: AwsLambdaWebHandler;
 
   async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
+
     const res = await this.app.handle(toLambdaEvent(req), asFull<Context>({}));
 
     return WebTestDispatchUtil.finalizeResponseBody(

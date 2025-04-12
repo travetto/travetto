@@ -79,11 +79,11 @@ export class WebRequest<B = unknown> implements WebMessage<B> {
   /**
    * Secure the request
    */
-  secure(trustProxy: boolean | string[]): this {
+  secure(trustProxy: string[]): this {
     const forwardedFor = this.headers.get('X-Forwarded-For');
 
     if (forwardedFor) {
-      if (this.connection.ip && (trustProxy === true || (Array.isArray(trustProxy) && trustProxy?.includes(this.connection.ip)))) {
+      if (trustProxy[0] === '*' || (this.connection.ip && Array.isArray(trustProxy) && trustProxy.includes(this.connection.ip))) {
         this.connection.protocol = castTo(this.headers.get('X-Forwarded-Proto')) || this.connection.protocol;
         this.connection.host = this.headers.get('X-Forwarded-Host') || this.connection.host;
         this.connection.ip = forwardedFor;

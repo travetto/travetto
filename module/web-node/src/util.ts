@@ -5,6 +5,7 @@ import { BinaryUtil, castTo } from '@travetto/runtime';
 import { WebRequest, WebResponse } from '@travetto/web';
 
 export class NodeWebUtil {
+
   /**
    * Create a web request given a node IncomingMessage
    */

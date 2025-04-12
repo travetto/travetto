@@ -8,7 +8,7 @@ import { WebTestDispatchUtil } from './dispatch-util.ts';
 @Injectable()
 export class LocalRequestDispatcher extends StandardWebRouter {
   async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const res = await super.dispatch({ req: req.secure(true) });
+    const res = await super.dispatch({ req: req.secure(['*']) });
     return WebTestDispatchUtil.finalizeResponseBody(res, true);
   }
 }

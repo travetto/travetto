@@ -20,9 +20,9 @@ export class WebConfig {
   @EnvVar('WEB_PORT')
   port = 3000;
   /**
-   * Should we trust the proxy requests implicitly
+   * Which proxies should we trust implicitly, '*' trusts all
    */
-  trustProxy = false;
+  trustProxy: string[] = [];
   /**
    * The hostname for the server
    */
