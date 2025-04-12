@@ -123,6 +123,7 @@ export class WebTransformer {
     // If we have a valid response type, declare it
     const nodeType = state.resolveReturnType(node);
     let targetType = nodeType;
+
     if (nodeType.key === 'literal' && nodeType.typeArguments?.length && nodeType.name === 'Promise') {
       targetType = nodeType.typeArguments[0];
     }
@@ -130,6 +131,7 @@ export class WebTransformer {
     let inner: AnyType | undefined;
     if (targetType.key === 'managed' && targetType.name === 'WebResponse' && targetType.importName.startsWith('@travetto/web')) {
       inner = state.getApparentTypeOfField(targetType.original!, 'body');
+      process.send!({ type: 'log', payload: { level: 'info', message: `Resolving web response ${state.source.fileName}#${node.name.getText()}#${inner?.name}` } });
     }
 
     const returnType = SchemaTransformUtil.ensureType(state, inner ?? nodeType, node);

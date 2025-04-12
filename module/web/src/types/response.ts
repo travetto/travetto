@@ -23,8 +23,10 @@ export class WebResponse<B = unknown> {
     * @param location Location to redirect to
     * @param status Status code
     */
-  static redirect(location: string, status = 302): WebResponse<null> {
-    return new WebResponse({ body: null, statusCode: status, headers: { Location: location } });
+  static redirect(location: string, status = 302): WebResponse<undefined> {
+    return new WebResponse({
+      body: undefined, statusCode: status, headers: { Location: location }
+    });
   }
 
   /**

@@ -48,7 +48,7 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
 
   if (flags & ts.TypeFlags.Void) {
     return { category: 'void', type };
-  } else if (flags & ts.TypeFlags.Undefined) {
+  } else if (flags & (ts.TypeFlags.Undefined | ts.TypeFlags.Null)) {
     return { category: 'undefined', type };
   } else if (DocUtil.hasDocTag(type, 'concrete')) {
     return { category: 'concrete', type };
