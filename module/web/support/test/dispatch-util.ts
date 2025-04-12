@@ -8,10 +8,14 @@ import { WebRequest } from '../../src/types/request.ts';
 import { DecompressInterceptor } from '../../src/interceptor/decompress.ts';
 import { WebBodyUtil } from '../../src/util/body.ts';
 
+/**
+ * Utilities for supporting custom test dispatchers
+ */
 export class WebTestDispatchUtil {
 
   static async applyRequestBody(req: WebRequest): Promise<WebRequest> {
     if (req.body !== undefined) {
+      req.headers.setIfAbsent('Content-Type', WebBodyUtil.defaultContentType(req.body));
       const sample = WebBodyUtil.toBinaryMessage(req);
       sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
       WebBodyUtil.setBodyUnprocessed(req, await WebBodyUtil.toBuffer(sample.body!));
@@ -57,13 +61,5 @@ export class WebTestDispatchUtil {
     res.body = result;
 
     return res;
-  }
-
-  static returnResponse<T>(res: WebResponse, throwOnError: boolean): WebResponse<T> {
-    if (throwOnError && res.body instanceof Error) {
-      throw res.body;
-    }
-
-    return castTo(res);
   }
 }

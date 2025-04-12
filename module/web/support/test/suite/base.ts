@@ -1,5 +1,5 @@
 import { RootRegistry } from '@travetto/registry';
-import { Class, toConcrete } from '@travetto/runtime';
+import { castTo, Class, toConcrete } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { ConfigSource, ConfigSpec } from '@travetto/config';
 import { DependencyRegistry } from '@travetto/di';
@@ -47,7 +47,6 @@ export abstract class BaseWebSuite {
     if (this.appType) {
       this.#appHandle = await DependencyRegistry.getInstance(this.appType).then(v => v.run());
     }
-
     this.#dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
   }
 
@@ -60,6 +59,7 @@ export abstract class BaseWebSuite {
   async request<T>(cfg: WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
     const req = await WebTestDispatchUtil.applyRequestBody(new WebRequest(cfg));
     const res = await this.#dispatcher.dispatch({ req });
-    return WebTestDispatchUtil.returnResponse(res, throwOnError);
+    if (throwOnError && res.statusCode && res.statusCode >= 400) { throw res.body; }
+    return castTo(res);
   }
 }

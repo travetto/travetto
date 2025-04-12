@@ -5,8 +5,6 @@ import { WebHeaders } from './headers.ts';
 import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
 import { WebMessage, WebMessageInit } from './message.ts';
 
-import { WebBodyUtil } from '../util/body.ts';
-
 export interface WebConnection {
   host?: string;
   port?: number;
@@ -46,10 +44,6 @@ export class WebRequest<B = unknown> implements WebMessage<B> {
   constructor(init: WebRequestInit<B> = {}) {
     Object.assign(this, init);
     this.headers = new WebHeaders(init.headers);
-
-    if (!this.headers.getContentType() && this.body) {
-      this.headers.set('Content-Type', WebBodyUtil.defaultContentType(this.body));
-    }
   }
 
   getCookie(key: string, opts?: CookieGetOptions): string | undefined {

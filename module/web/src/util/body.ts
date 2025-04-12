@@ -24,6 +24,9 @@ const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
   unavailable: 503,
 };
 
+/**
+ * Utility classes for supporting web body operations
+ */
 export class WebBodyUtil {
 
   /**
