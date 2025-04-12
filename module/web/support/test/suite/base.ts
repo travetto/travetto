@@ -65,13 +65,13 @@ export abstract class BaseWebSuite {
     if (webReq.body) {
       const sample = WebBodyUtil.toBinaryMessage(webReq);
       sample.headers.forEach((v, k) => webReq.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      webReq.body = WebRequest.markUnprocessed(await WebBodyUtil.toBuffer(sample.body!));
+      webReq.body = WebRequest.markUnprocessed(await WebBodyUtil.toBuffer(sample));
     }
 
     const webRes = await dispatcher.dispatch({ req: webReq });
     let result = webRes.body;
     if (Buffer.isBuffer(result) || BinaryUtil.isReadable(result)) {
-      let bufferResult = await WebBodyUtil.toBuffer(webRes.toBinary().body);
+      let bufferResult = await WebBodyUtil.toBuffer(webRes);
 
       if (bufferResult.length) {
         try {

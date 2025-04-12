@@ -83,7 +83,7 @@ class BodyParseInterceptorSuite {
       config
     });
 
-    const resBuff = await WebBodyUtil.toBuffer(res.toBinary().body);
+    const resBuff = await WebBodyUtil.toBuffer(res);
     assert(resBuff.length === 1000);
     assert(!resBuff.some(x => x !== 0));
   }

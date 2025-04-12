@@ -55,8 +55,9 @@ export class WebBodyUtil {
   /**
    * Convert a node binary input to a buffer
    */
-  static async toBuffer(src: NodeBinary): Promise<Buffer> {
-    return Buffer.isBuffer(src) ? src : toBuffer(src);
+  static async toBuffer(src: NodeBinary | WebMessage): Promise<Buffer> {
+    return Buffer.isBuffer(src) ? src : BinaryUtil.isReadable(src) ? toBuffer(src) :
+      this.toBuffer(this.toBinaryMessage(src).body!);
   }
 
   /**
