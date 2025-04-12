@@ -1,10 +1,11 @@
 import { Readable } from 'node:stream';
 
-import { Any, AppError, BinaryUtil, NodeBinary } from '@travetto/runtime';
+import { Any, AppError } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
 import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
+import { NodeBinary, WebBodyUtil } from '../util/body.ts';
 
 export type WebRequestInit = {
   headers?: WebHeadersInit;
@@ -70,7 +71,7 @@ export class WebRequest {
   getUnprocessedStream(): Readable | undefined {
     const p = this.body;
     if (typeof p === 'object' && p && p[WebInternalSymbol] === p) {
-      return BinaryUtil.toReadable(p);
+      return WebBodyUtil.toReadable(p);
     }
   }
 }

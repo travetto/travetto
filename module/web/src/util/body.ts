@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { AppError, BinaryUtil, ErrorCategory, hasToJSON, Util } from '@travetto/runtime';
+import { AppError, BinaryUtil, ErrorCategory, hasToJSON } from '@travetto/runtime';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -49,58 +49,82 @@ export class WebBodyUtil {
     }
   }
 
+  /**
+   * Convert a node binary input to a buffer
+   */
   static async toBuffer(src: NodeBinary): Promise<Buffer> {
     return Buffer.isBuffer(src) ? src : toBuffer(src);
   }
 
-  static toReadable(src: NodeBinary | unknown): Readable {
-    if (Buffer.isBuffer(src)) {
-      return Readable.from(src);
-    } else if (BinaryUtil.isReadable(src)) {
-      return src;
-    } else if (typeof src === 'object' && src) {
-      throw new AppError(`Unknown type ${src.constructor.name}`);
-    } else {
-      throw new AppError('Unknown type');
-    }
+  /**
+   * Convert a node binary input to a readable
+   */
+  static toReadable(src: NodeBinary): Readable {
+    return Buffer.isBuffer(src) ? Readable.from(src) : src;
   }
 
+  /**
+   * Get the error status code given its category
+   */
   static getErrorStatus(e: Error): number {
     const error: ErrorResponse = e;
     return error.status ?? error.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
   }
 
   /**
+   * Build a buffer payload
+   */
+  static buildBufferPayload(value: unknown): Buffer {
+    if (BinaryUtil.isReadable(value) || BinaryUtil.isReadableStream(value) || value instanceof Blob) {
+      throw new AppError('Unable to convert value to buffer');
+    } else if (Buffer.isBuffer(value)) {
+      return value;
+    } else if (value === null || value === undefined) {
+      return Buffer.alloc(0);
+    } else if (BinaryUtil.isArrayBuffer(value)) {
+      return Buffer.from(value);
+    } else {
+      let text: string;
+      if (typeof value === 'string') {
+        text = value;
+      } else if (hasToJSON(value)) {
+        text = JSON.stringify(value.toJSON());
+      } else if (value instanceof Error) {
+        text = JSON.stringify({ message: value.message });
+      } else {
+        text = JSON.stringify(value);
+      }
+      return Buffer.from(text, 'utf-8');
+    }
+  }
+
+  /**
    * Generate multipart body
    */
-  static buildMultiPartBody(form: FormData): [string, Readable] {
-    const boundary = `-------------------------multipart-${Util.uuid()}`;
-    async function* source(): AsyncIterable<string | Buffer> {
-      const nl = '\r\n';
-      for (const [k, v] of form.entries()) {
-        const data = v.slice();
-        const filename = data instanceof File ? data.name : undefined;
-        const size = data instanceof Blob ? data.size : data.length;
-        const type = data instanceof Blob ? data.type : undefined;
-        yield `--${boundary}${nl}`;
-        yield `Content-Disposition: form-data; name="${k}"; filename="${filename ?? k}"${nl}`;
-        yield `Content-Length: ${size}${nl}`;
-        if (type) {
-          yield `Content-Type: ${type}${nl}`;
-        }
-        yield nl;
-        if (data instanceof Blob) {
-          for await (const chunk of data.stream()) {
-            yield chunk;
-          }
-        } else {
-          yield data;
-        }
-        yield nl;
+  static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<string | Buffer> {
+    const nl = '\r\n';
+    for (const [k, v] of form.entries()) {
+      const data = v.slice();
+      const filename = data instanceof File ? data.name : undefined;
+      const size = data instanceof Blob ? data.size : data.length;
+      const type = data instanceof Blob ? data.type : undefined;
+      yield `--${boundary}${nl}`;
+      yield `Content-Disposition: form-data; name="${k}"; filename="${filename ?? k}"${nl}`;
+      yield `Content-Length: ${size}${nl}`;
+      if (type) {
+        yield `Content-Type: ${type}${nl}`;
       }
-      yield `--${boundary}--${nl}`;
+      yield nl;
+      if (data instanceof Blob) {
+        for await (const chunk of data.stream()) {
+          yield chunk;
+        }
+      } else {
+        yield data;
+      }
+      yield nl;
     }
-    return [boundary, Readable.from(source())];
+    yield `--${boundary}--${nl}`;
   }
 
   /** Get Blob Headers */

@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { BinaryUtil, castTo } from '@travetto/runtime';
-import { WebRequest, WebResponse } from '@travetto/web';
+import { castTo } from '@travetto/runtime';
+import { WebBodyUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class AwsLambdaWebUtil {
 
@@ -28,7 +28,7 @@ export class AwsLambdaWebUtil {
    * Create an API Gateway result from a web response
    */
   static async toLambdaResult(res: WebResponse, base64Encoded: boolean = false): Promise<APIGatewayProxyResult> {
-    const output = await BinaryUtil.toBuffer(res.toBinary().body);
+    const output = await WebBodyUtil.toBuffer(res.toBinary().body);
     const isBase64Encoded = !!output.length && base64Encoded;
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};

@@ -14,6 +14,7 @@ import { WebResponse } from '../../../src/types/response.ts';
 import { CookieConfig } from '../../../src/interceptor/cookies.ts';
 import { WebConfig } from '../../../src/config/web.ts';
 import { DecompressInterceptor } from '../../../src/interceptor/decompress.ts';
+import { WebBodyUtil } from '../../../src/util/body.ts';
 
 /**
  * Base Web Suite
@@ -61,7 +62,7 @@ export abstract class BaseWebSuite {
     if (webReq.body) {
       const sample = new WebResponse({ body: webReq.body }).toBinary();
       sample.headers.forEach((v, k) => webReq.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      webReq.body = WebRequest.markUnprocessed(await BinaryUtil.toBuffer(sample.body));
+      webReq.body = WebRequest.markUnprocessed(await WebBodyUtil.toBuffer(sample.body));
     }
 
     Object.assign(webReq, { query: BindUtil.flattenPaths(webReq.query ?? {}) });
@@ -69,7 +70,7 @@ export abstract class BaseWebSuite {
     const webRes = await dispatcher.dispatch({ req: webReq });
     let result = webRes.body;
     if (Buffer.isBuffer(result) || BinaryUtil.isReadable(result)) {
-      let bufferResult = await BinaryUtil.toBuffer(webRes.toBinary().body);
+      let bufferResult = await WebBodyUtil.toBuffer(webRes.toBinary().body);
 
       if (bufferResult.length) {
         try {

@@ -1,4 +1,5 @@
-import { Any, BinaryUtil, castTo, Util } from '@travetto/runtime';
+import { Readable } from 'node:stream';
+import { BinaryUtil, castTo, Util } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
 import { WebHeadersInit, WebHeaders } from './headers.ts';
@@ -95,29 +96,36 @@ export class WebResponse<B = unknown> {
    * Get a binary version
    */
   toBinary(): WebResponse<NodeBinary> {
-    if (Buffer.isBuffer(this.body) || BinaryUtil.isReadable(this.body)) {
+    let b: unknown = this.body;
+    if (Buffer.isBuffer(b) || BinaryUtil.isReadable(b)) {
       return castTo(this);
     }
 
-    const out: Omit<WebResponseInput<Any>, 'headers'> & { headers: WebHeaders } = {
-      headers: new WebHeaders(this.headers), body: this.body,
+    const out = new WebResponse<NodeBinary>({
+      headers: new WebHeaders(this.headers), body: null!,
       cookies: this.getCookies(), statusCode: this.statusCode
-    };
+    });
 
-    if (this.body instanceof FormData) {
-      const [boundary, body] = WebBodyUtil.buildMultiPartBody(this.body);
-      out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
-      out.body = body;
-    } else {
-      out.body = WebBodyUtil.toNodeBinaryValue(this.body);
-      if (this.body instanceof Blob) {
-        const meta = BinaryUtil.getBlobMeta(this.body);
-        out.statusCode = meta?.range ? 206 : out.statusCode;
-        for (const [k, v] of Object.entries(WebBodyUtil.getBlobHeaders(this.body))) {
-          out.headers.set(k, v);
-        }
+    if (b instanceof Blob) {
+      const meta = BinaryUtil.getBlobMeta(b);
+      out.statusCode = meta?.range ? 206 : out.statusCode;
+      for (const [k, v] of Object.entries(WebBodyUtil.getBlobHeaders(b))) {
+        out.headers.set(k, v);
       }
+      b = b.stream();
+    } else if (b instanceof FormData) {
+      const boundary = `-------------------------multipart-${Util.uuid()}`;
+      out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
+      b = WebBodyUtil.buildMultiPartBody(b, boundary);
     }
-    return new WebResponse(out);
+
+    if (BinaryUtil.isReadableStream(b)) {
+      out.body = Readable.fromWeb(b);
+    } else if (BinaryUtil.isAsyncIterable(b)) {
+      out.body = Readable.from(b);
+    } else {
+      out.body = WebBodyUtil.buildBufferPayload(b);
+    }
+    return out;
   }
 }
