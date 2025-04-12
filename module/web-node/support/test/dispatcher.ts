@@ -25,7 +25,7 @@ export class FetchWebDispatcher implements WebDispatcher {
     }
 
     const finalPath = `${path}${q}`;
-    const stream = WebBodyUtil.getUnprocessedStream(req.body);
+    const stream = WebBodyUtil.getRawStream(req.body);
     const body: RequestInit['body'] = stream ? await buffer(stream) : castTo(req.body);
 
     const res = await fetch(`http://localhost:${this.config.port}${finalPath}`, { method, body, headers });

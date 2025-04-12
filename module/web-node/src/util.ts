@@ -24,7 +24,7 @@ export class NodeWebUtil {
       query: Object.fromEntries(new URLSearchParams(query)),
       params,
       headers: req.headers,
-      body: WebBodyUtil.asUnprocessed(req)
+      body: WebBodyUtil.markRaw(req)
     });
   }
 

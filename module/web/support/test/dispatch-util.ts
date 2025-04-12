@@ -17,7 +17,7 @@ export class WebTestDispatchUtil {
     if (req.body !== undefined) {
       const sample = WebBodyUtil.toBinaryMessage(req);
       sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      req.body = WebBodyUtil.asUnprocessed(await WebBodyUtil.toBuffer(sample.body!));
+      req.body = WebBodyUtil.markRaw(await WebBodyUtil.toBuffer(sample.body!));
     }
     Object.assign(req, { query: BindUtil.flattenPaths(req.query) });
     return req;

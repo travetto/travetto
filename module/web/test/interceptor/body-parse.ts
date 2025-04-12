@@ -25,7 +25,7 @@ class BodyParseInterceptorSuite {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: WebBodyUtil.asUnprocessed(Buffer.from('{ "hello": "world" }', 'utf8'))
+      body: WebBodyUtil.markRaw(Buffer.from('{ "hello": "world" }', 'utf8'))
     });
 
     const res = await interceptor.filter({
@@ -49,7 +49,7 @@ class BodyParseInterceptorSuite {
       headers: {
         'Content-Type': 'text/plain'
       },
-      body: WebBodyUtil.asUnprocessed(Buffer.from('{ "hello": "world" }', 'utf8'))
+      body: WebBodyUtil.markRaw(Buffer.from('{ "hello": "world" }', 'utf8'))
     });
 
     const res = await interceptor.filter({
@@ -74,7 +74,7 @@ class BodyParseInterceptorSuite {
       headers: {
         'Content-Type': 'image/jpeg'
       },
-      body: WebBodyUtil.asUnprocessed(stream)
+      body: WebBodyUtil.markRaw(stream)
     });
 
     const res = await interceptor.filter({

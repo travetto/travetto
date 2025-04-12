@@ -170,13 +170,13 @@ export class WebBodyUtil {
 
     out.headers.setIfAbsent('Content-Type', this.defaultContentType(message.body));
 
-    return out;
+    return castTo(out);
   }
 
   /**
    * Set body and mark as unprocessed
    */
-  static asUnprocessed(val: Readable | Buffer | undefined): typeof val {
+  static markRaw(val: Readable | Buffer | undefined): typeof val {
     if (val) {
       Object.defineProperty(val, WebInternalSymbol, { value: val });
     }
@@ -186,7 +186,7 @@ export class WebBodyUtil {
   /**
    * Get unprocessed value as readable stream
    */
-  static getUnprocessedStream(val: unknown): Readable | undefined {
+  static getRawStream(val: unknown): Readable | undefined {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     if ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebInternalSymbol] === val) {
       return WebBodyUtil.toReadable(val);

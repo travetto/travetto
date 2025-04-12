@@ -22,7 +22,7 @@ export class AwsLambdaWebUtil {
       query: castTo(event.queryStringParameters!),
       params,
       headers: { ...event.headers, ...event.multiValueHeaders },
-      body: WebBodyUtil.asUnprocessed(body)
+      body: WebBodyUtil.markRaw(body)
     });
   }
 
