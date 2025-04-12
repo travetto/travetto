@@ -154,7 +154,7 @@ export class AssertTransformer {
     this.initState(state);
 
     const first = CoreUtil.firstArgument(node);
-    const firstText = first!.getText();
+    const firstText = first?.getText() ?? node.getText();
 
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
     const check = state.factory.createCallExpression(state[AssertSymbol]!.assertCheck, undefined, state.factory.createNodeArray([
@@ -252,7 +252,6 @@ export class AssertTransformer {
    * Determine which type of check to perform
    */
   static getCommand(state: TransformerState, args: Args): Command | undefined {
-
     const comp = args[0]!;
     const message = args.length === 2 ? args[1] : undefined;
 
@@ -303,7 +302,9 @@ export class AssertTransformer {
       const fn = exp.name.escapedText.toString();
       if (ident.escapedText === ASSERT_CMD) {
         // Look for reject/throw
-        if (/^(doesNot)?(Throw|Reject)s?$/i.test(fn)) {
+        if (fn === 'fail') {
+          node = this.doAssert(state, node, { fn: 'fail', args: node.arguments.slice() });
+        } else if (/^(doesNot)?(Throw|Reject)s?$/i.test(fn)) {
           node = this.doThrows(state, node, fn, [...node.arguments]);
         } else {
           const sub = { ...this.getCommand(state, node.arguments)!, fn };
