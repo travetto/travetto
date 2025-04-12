@@ -6,14 +6,14 @@ import { AppError, asFull, castTo, Util } from '@travetto/runtime';
 
 import { AwsLambdaWebHandler } from '../../src/handler.ts';
 
-function isBufferRequest(req: WebRequest): req is WebRequest<Buffer> {
-  return Buffer.isBuffer(req.body);
+function isBufferRequest(req: WebRequest): req is WebRequest<Buffer | null> {
+  return req.body === undefined || req.body === null || Buffer.isBuffer(req.body);
 }
 
 /**
  * Create an api gateway event given a web request
  */
-function toLambdaEvent(req: WebRequest<Buffer>): APIGatewayProxyEvent {
+function toLambdaEvent(req: WebRequest<Buffer | null>): APIGatewayProxyEvent {
   const headers: Record<string, string> = {};
   const multiValueHeaders: Record<string, string[]> = {};
   const queryStringParameters: Record<string, string> = {};

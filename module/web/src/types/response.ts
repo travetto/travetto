@@ -1,8 +1,7 @@
-import { Readable } from 'node:stream';
-import { BinaryUtil, castTo, Util } from '@travetto/runtime';
+import { castTo, Util } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
-import { WebHeadersInit, WebHeaders } from './headers.ts';
+import { WebHeaders } from './headers.ts';
 import { NodeBinary, WebBodyUtil } from '../util/body.ts';
 import { WebMessage, WebMessageInit } from './message.ts';
 
@@ -61,6 +60,10 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
     if (!this.headers.has('Content-Type')) {
       this.headers.set('Content-Type', WebBodyUtil.defaultContentType(o.body));
     }
+
+    if (this.headers.has('Content-Range')) { // Force status code if content range specified
+      this.statusCode = 206;
+    }
   }
 
   /**
@@ -78,50 +81,9 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
   }
 
   /**
-   * Set all values into the map
-   */
-  backfillHeaders(value: WebHeadersInit): this {
-    const entries = Array.isArray(value) ? value : value instanceof Headers ? value.entries() : Object.entries(value);
-    for (const [k, v] of entries) {
-      if (!this.headers.has(k) && v !== null && v !== undefined) {
-        this.headers.set(k, castTo(v));
-      }
-    }
-    return this;
-  }
-
-  /**
    * Get a binary version
    */
   toBinary(): WebResponse<NodeBinary> {
-    const body = this.body;
-    if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
-      return castTo(this);
-    }
-
-    const out = new WebResponse<NodeBinary>({
-      headers: new WebHeaders(this.headers), body: null!,
-      cookies: this.getCookies(), statusCode: this.statusCode
-    });
-
-    if (body instanceof Blob) {
-      const meta = BinaryUtil.getBlobMeta(body);
-      out.statusCode = meta?.range ? 206 : out.statusCode;
-      for (const [k, v] of WebBodyUtil.getBlobHeaders(body)) {
-        out.headers.set(k, v);
-      }
-      out.body = Readable.fromWeb(body.stream());
-    } else if (body instanceof FormData) {
-      const boundary = `${'-'.repeat(24)}'-multipart-${Util.uuid()}`;
-      out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
-      out.body = Readable.from(WebBodyUtil.buildMultiPartBody(body, boundary));
-    } else if (BinaryUtil.isReadableStream(body)) {
-      out.body = Readable.fromWeb(body);
-    } else if (BinaryUtil.isAsyncIterable(body)) {
-      out.body = Readable.from(body);
-    } else {
-      out.body = WebBodyUtil.buildBufferPayload(body);
-    }
-    return out;
+    return new WebResponse({ cookies: this.getCookies(), statusCode: this.statusCode, ...WebBodyUtil.toBinaryMessage(this) });
   }
 }

@@ -27,6 +27,13 @@ export class WebHeaders extends Headers {
     }
   }
 
+  /** Set if key not already set */
+  setIfAbsent(key: string, value: string): void {
+    if (!this.has(key)) {
+      this.set(key, value);
+    }
+  }
+
   /**
    * Get a header value as a list, breaking on commas except for cookies
    */

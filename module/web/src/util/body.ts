@@ -1,7 +1,10 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { AppError, BinaryUtil, ErrorCategory, hasToJSON } from '@travetto/runtime';
+import { BinaryUtil, castTo, ErrorCategory, hasToJSON, Util } from '@travetto/runtime';
+
+import { WebMessage } from '../types/message.ts';
+import { WebHeaders } from '../types/headers.ts';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -72,33 +75,6 @@ export class WebBodyUtil {
   }
 
   /**
-   * Build a buffer payload
-   */
-  static buildBufferPayload(value: unknown): Buffer {
-    if (BinaryUtil.isReadable(value) || BinaryUtil.isReadableStream(value) || value instanceof Blob) {
-      throw new AppError('Unable to convert value to buffer');
-    } else if (Buffer.isBuffer(value)) {
-      return value;
-    } else if (value === null || value === undefined) {
-      return Buffer.alloc(0);
-    } else if (BinaryUtil.isArrayBuffer(value)) {
-      return Buffer.from(value);
-    } else {
-      let text: string;
-      if (typeof value === 'string') {
-        text = value;
-      } else if (hasToJSON(value)) {
-        text = JSON.stringify(value.toJSON());
-      } else if (value instanceof Error) {
-        text = JSON.stringify({ message: value.message });
-      } else {
-        text = JSON.stringify(value);
-      }
-      return Buffer.from(text, 'utf-8');
-    }
-  }
-
-  /**
    * Generate multipart body
    */
   static async * buildMultiPartBody(form: FormData, boundary: string): AsyncIterable<string | Buffer> {
@@ -141,7 +117,7 @@ export class WebBodyUtil {
     if (meta?.range) {
       toAdd.push(
         ['Accept-Ranges', 'bytes'],
-        ['Content-range', `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`],
+        ['Content-Range', `bytes ${meta.range.start}-${meta.range.end}/${meta.size}`],
       );
     }
 
@@ -167,5 +143,48 @@ export class WebBodyUtil {
     } else {
       return 'application/json';
     }
+  }
+
+  /**
+   * Convert an existing web message to a binary web message
+   */
+  static toBinaryMessage(message: WebMessage): WebMessage<NodeBinary> {
+    const body = message.body;
+    if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
+      return castTo(message);
+    }
+
+    const out: WebMessage<NodeBinary> = { headers: new WebHeaders(message.headers), body: null! };
+    if (body instanceof Blob) {
+      for (const [k, v] of this.getBlobHeaders(body)) {
+        out.headers.set(k, v);
+      }
+      out.body = Readable.fromWeb(body.stream());
+    } else if (body instanceof FormData) {
+      const boundary = `${'-'.repeat(24)}'-multipart-${Util.uuid()}`;
+      out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
+      out.body = Readable.from(this.buildMultiPartBody(body, boundary));
+    } else if (BinaryUtil.isReadableStream(body)) {
+      out.body = Readable.fromWeb(body);
+    } else if (BinaryUtil.isAsyncIterable(body)) {
+      out.body = Readable.from(body);
+    } else if (body === null || body === undefined) {
+      out.body = Buffer.alloc(0);
+    } else if (BinaryUtil.isArrayBuffer(body)) {
+      out.body = Buffer.from(body);
+    } else {
+      let text: string;
+      if (typeof body === 'string') {
+        text = body;
+      } else if (hasToJSON(body)) {
+        text = JSON.stringify(body.toJSON());
+      } else if (body instanceof Error) {
+        text = JSON.stringify({ message: body.message });
+      } else {
+        text = JSON.stringify(body);
+      }
+      out.body = Buffer.from(text, 'utf-8');
+    }
+    return out;
   }
 }
