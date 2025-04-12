@@ -31,6 +31,7 @@ export * from './src/interceptor/cors.ts';
 export * from './src/interceptor/cookies.ts';
 export * from './src/interceptor/compress.ts';
 export * from './src/interceptor/context.ts';
+export * from './src/interceptor/decompress.ts';
 export * from './src/interceptor/etag.ts';
 export * from './src/interceptor/get-cache.ts';
 export * from './src/interceptor/logging.ts';
