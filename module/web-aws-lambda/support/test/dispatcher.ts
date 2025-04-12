@@ -1,8 +1,10 @@
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebFilterContext, WebRequest, WebResponse, WebDispatcher } from '@travetto/web';
+import { WebFilterContext, WebRequest, WebResponse } from '@travetto/web';
 import { AppError, asFull, castTo, Util } from '@travetto/runtime';
+
+import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
 
 import { AwsLambdaWebHandler } from '../../src/handler.ts';
 
@@ -65,7 +67,7 @@ function toLambdaEvent(req: WebRequest<Buffer | null>): APIGatewayProxyEvent {
  * AWS Lambda support for invoking directly
  */
 @Injectable()
-export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
+export class LocalAwsLambdaWebDispatcher extends LocalRequestDispatcher {
 
   @Inject()
   app: AwsLambdaWebHandler;
