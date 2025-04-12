@@ -45,10 +45,7 @@ export class WebTestDispatchUtil {
 
     if (text) {
       switch (res.headers.get('Content-Type')) {
-        case 'application/json': {
-          try { result = JSON.parse(castTo(text)); } catch { }
-          break;
-        }
+        case 'application/json': result = JSON.parse(castTo(text)); break;
         case 'text/plain': result = text; break;
       }
     }
@@ -58,7 +55,6 @@ export class WebTestDispatchUtil {
     }
 
     res.body = result;
-
     return res;
   }
 }

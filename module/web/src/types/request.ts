@@ -1,4 +1,4 @@
-import { AppError, castTo } from '@travetto/runtime';
+import { AppError } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
 import { WebHeaders } from './headers.ts';
@@ -30,25 +30,6 @@ export interface WebRequestInternal {
  * Web Request object
  */
 export class WebRequest<B = unknown> implements WebMessage<B> {
-
-  /**
-   * Secure the request
-   */
-  static secure(req: WebRequest, trustProxy: string[]): typeof req {
-    const forwardedFor = req.headers.get('X-Forwarded-For');
-
-    if (forwardedFor) {
-      if (trustProxy[0] === '*' || (req.connection.ip && Array.isArray(trustProxy) && trustProxy.includes(req.connection.ip))) {
-        req.connection.protocol = castTo(req.headers.get('X-Forwarded-Proto')!) || req.connection.protocol;
-        req.connection.host = req.headers.get('X-Forwarded-Host') || req.connection.host;
-        req.connection.ip = forwardedFor;
-      }
-    }
-    req.headers.delete('X-Forwarded-For');
-    req.headers.delete('X-Forwarded-Proto');
-    req.headers.delete('X-Forwarded-Host');
-    return req;
-  }
 
   [WebInternalSymbol]: WebRequestInternal = {};
 
