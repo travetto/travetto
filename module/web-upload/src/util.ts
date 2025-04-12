@@ -2,8 +2,8 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs/promises';
-import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { Readable, Transform } from 'node:stream';
 
 import busboy from '@fastify/busboy';
 
@@ -22,6 +22,24 @@ const RawFileSymbol = Symbol();
  * Web upload utilities
  */
 export class WebUploadUtil {
+
+  /**
+   * Write limiter
+   * @returns
+   */
+  static limitWrite(maxSize: number, field?: string): Transform {
+    let read = 0;
+    return new Transform({
+      transform(chunk, encoding, callback): void {
+        read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : (chunk instanceof Uint8Array ? chunk.byteLength : 0);
+        if (read > maxSize) {
+          callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
+        } else {
+          callback(null, chunk);
+        }
+      },
+    });
+  }
 
   /**
    * Get uploaded file path location
@@ -87,7 +105,7 @@ export class WebUploadUtil {
       const target = createWriteStream(location);
 
       await (config.maxSize ?
-        pipeline(stream, BinaryUtil.limitWrite(config.maxSize, field), target) :
+        pipeline(stream, this.limitWrite(config.maxSize, field), target) :
         pipeline(stream, target));
 
       const detected = await this.getFileType(location);

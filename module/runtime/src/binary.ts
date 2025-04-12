@@ -2,18 +2,16 @@ import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
-import { PassThrough, Readable, Transform } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
 import { text as toText, arrayBuffer as toArrayBuffer } from 'node:stream/consumers';
 import { isArrayBuffer } from 'node:util/types';
 
 import { BinaryInput, BlobMeta, hasFunction } from './types.ts';
-import { AppError } from './error.ts';
 import { Util } from './util.ts';
 
 const BlobMetaSymbol = Symbol();
-
 
 /**
  * Common functions for dealing with binary data/streams
@@ -115,24 +113,6 @@ export class BinaryUtil {
   static getBlobMeta(blob: Blob): BlobMeta | undefined {
     const withMeta: Blob & { [BlobMetaSymbol]?: BlobMeta } = blob;
     return withMeta[BlobMetaSymbol];
-  }
-
-  /**
-   * Write limiter
-   * @returns
-   */
-  static limitWrite(maxSize: number, field?: string): Transform {
-    let read = 0;
-    return new Transform({
-      transform(chunk, encoding, callback): void {
-        read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : (chunk instanceof Uint8Array ? chunk.byteLength : 0);
-        if (read > maxSize) {
-          callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize, field } }));
-        } else {
-          callback(null, chunk);
-        }
-      },
-    });
   }
 
   /**
