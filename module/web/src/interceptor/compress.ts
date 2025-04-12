@@ -13,7 +13,6 @@ import { WebInterceptorCategory } from '../types/core.ts';
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
-import { WebBodyUtil } from '@travetto/web';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const COMPRESSORS = {
