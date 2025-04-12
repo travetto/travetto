@@ -20,15 +20,13 @@ class BodyParseInterceptorSuite {
       applies: true
     });
 
-    const req = WebBodyUtil.setBodyUnprocessed(
-      new WebRequest({
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }),
-      Buffer.from('{ "hello": "world" }', 'utf8')
-    );
+    const req = new WebRequest({
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: WebBodyUtil.asUnprocessed(Buffer.from('{ "hello": "world" }', 'utf8'))
+    });
 
     const res = await interceptor.filter({
       req,
@@ -46,15 +44,13 @@ class BodyParseInterceptorSuite {
       applies: true
     });
 
-    const req = WebBodyUtil.setBodyUnprocessed(
-      new WebRequest({
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain'
-        },
-      }),
-      Buffer.from('{ "hello": "world" }', 'utf8')
-    );
+    const req = new WebRequest({
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain'
+      },
+      body: WebBodyUtil.asUnprocessed(Buffer.from('{ "hello": "world" }', 'utf8'))
+    });
 
     const res = await interceptor.filter({
       req,
@@ -73,15 +69,13 @@ class BodyParseInterceptorSuite {
     });
 
     const stream = Readable.from(Buffer.alloc(1000));
-    const req = WebBodyUtil.setBodyUnprocessed(
-      new WebRequest({
-        method: 'POST',
-        headers: {
-          'Content-Type': 'image/jpeg'
-        },
-      }),
-      stream
-    );
+    const req = new WebRequest({
+      method: 'POST',
+      headers: {
+        'Content-Type': 'image/jpeg'
+      },
+      body: WebBodyUtil.asUnprocessed(stream)
+    });
 
     const res = await interceptor.filter({
       req,

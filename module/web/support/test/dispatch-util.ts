@@ -18,7 +18,7 @@ export class WebTestDispatchUtil {
       req.headers.setIfAbsent('Content-Type', WebBodyUtil.defaultContentType(req.body));
       const sample = WebBodyUtil.toBinaryMessage(req);
       sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      WebBodyUtil.setBodyUnprocessed(req, await WebBodyUtil.toBuffer(sample.body!));
+      req.body = WebBodyUtil.asUnprocessed(await WebBodyUtil.toBuffer(sample.body!));
     }
     Object.assign(req, { query: BindUtil.flattenPaths(req.query) });
     return req;

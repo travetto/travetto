@@ -12,22 +12,20 @@ export class NodeWebUtil {
   static toWebRequest(req: IncomingMessage, params?: Record<string, unknown>): WebRequest {
     const secure = 'encrypted' in req.socket && !!req.socket.encrypted;
     const [path, query] = (req.url ?? '/').split('?') ?? [];
-    return WebBodyUtil.setBodyUnprocessed(
-      new WebRequest({
-        connection: {
-          ip: req.socket.remoteAddress!,
-          host: req.headers.host,
-          protocol: secure ? 'https' : 'http',
-          port: req.socket.localPort
-        },
-        method: castTo(req.method?.toUpperCase()),
-        path,
-        query: Object.fromEntries(new URLSearchParams(query)),
-        params,
-        headers: req.headers,
-      }),
-      req
-    );
+    return new WebRequest({
+      connection: {
+        ip: req.socket.remoteAddress!,
+        host: req.headers.host,
+        protocol: secure ? 'https' : 'http',
+        port: req.socket.localPort
+      },
+      method: castTo(req.method?.toUpperCase()),
+      path,
+      query: Object.fromEntries(new URLSearchParams(query)),
+      params,
+      headers: req.headers,
+      body: WebBodyUtil.asUnprocessed(req)
+    });
   }
 
   /**

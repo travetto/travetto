@@ -44,7 +44,7 @@ export class TestController {
   @Delete('/cookie')
   withCookie() {
     return new WebResponse({
-      body: { cookie: this.req.getCookie!('orange') },
+      body: { cookie: this.req.getCookie('orange') },
       cookies: [{ name: 'flavor', value: 'oreo' }]
     });
   }

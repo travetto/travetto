@@ -12,20 +12,18 @@ export class AwsLambdaWebUtil {
     // Build request
     const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
 
-    return WebBodyUtil.setBodyUnprocessed(
-      new WebRequest({
-        connection: {
-          protocol: 'http',
-          ip: event.requestContext.identity?.sourceIp,
-        },
-        method: castTo(event.httpMethod.toUpperCase()),
-        path: event.path,
-        query: castTo(event.queryStringParameters!),
-        params,
-        headers: { ...event.headers, ...event.multiValueHeaders },
-      }),
-      body
-    );
+    return new WebRequest({
+      connection: {
+        protocol: 'http',
+        ip: event.requestContext.identity?.sourceIp,
+      },
+      method: castTo(event.httpMethod.toUpperCase()),
+      path: event.path,
+      query: castTo(event.queryStringParameters!),
+      params,
+      headers: { ...event.headers, ...event.multiValueHeaders },
+      body: WebBodyUtil.asUnprocessed(body)
+    });
   }
 
   /**

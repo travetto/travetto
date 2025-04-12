@@ -168,9 +168,7 @@ export class WebBodyUtil {
       out.headers.set('Content-Length', `${out.body.byteLength}`);
     }
 
-    if (!out.headers.has('Content-Type')) {
-      out.headers.set('Content-Type', this.defaultContentType(message.body));
-    }
+    out.headers.setIfAbsent('Content-Type', this.defaultContentType(message.body));
 
     return out;
   }
@@ -178,22 +176,20 @@ export class WebBodyUtil {
   /**
    * Set body and mark as unprocessed
    */
-  static setBodyUnprocessed<T extends WebMessage>(req: T, val: Readable | Buffer | undefined): T {
+  static asUnprocessed(val: Readable | Buffer | undefined): typeof val {
     if (val) {
       Object.defineProperty(val, WebInternalSymbol, { value: val });
-      req.body = val;
     }
-    return castTo(req);
+    return val;
   }
 
   /**
-   * Get unprocessed body as readable stream
+   * Get unprocessed value as readable stream
    */
-  static getUnprocessedBody(req: WebMessage): Readable | undefined {
-    const p = req.body;
+  static getUnprocessedStream(val: unknown): Readable | undefined {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if ((Buffer.isBuffer(p) || BinaryUtil.isReadable(p)) && (p as Any)[WebInternalSymbol] === p) {
-      return WebBodyUtil.toReadable(p);
+    if ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebInternalSymbol] === val) {
+      return WebBodyUtil.toReadable(val);
     }
   }
 }

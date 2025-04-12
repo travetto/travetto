@@ -52,7 +52,7 @@ export class WebUploadUtil {
    * Get all the uploads, separating multipart from direct
    */
   static async* getUploads(req: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
-    const bodyStream = WebBodyUtil.getUnprocessedBody(req);
+    const bodyStream = WebBodyUtil.getUnprocessedStream(req.body);
 
     if (!bodyStream) {
       throw new AppError('No input stream provided for upload', { category: 'data' });
