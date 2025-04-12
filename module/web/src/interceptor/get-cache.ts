@@ -39,7 +39,7 @@ export class GetCacheInterceptor implements WebInterceptor {
     }
 
     const res = await next();
-    // Only apply on the way out, and on success
-    return res.backfillHeaders({ 'Cache-Control': 'max-age=0, no-cache' });
+    res.headers.setIfAbsent('Cache-Control', 'max-age=0, no-cache');
+    return res;
   }
 }

@@ -27,6 +27,13 @@ export class WebHeaders extends Headers {
     }
   }
 
+  /** Set if key not already set */
+  setIfAbsent(key: string, value: string): void {
+    if (!this.has(key)) {
+      this.set(key, value);
+    }
+  }
+
   /**
    * Get a header value as a list, breaking on commas except for cookies
    */
@@ -47,8 +54,14 @@ export class WebHeaders extends Headers {
     for (const [k, v] of this.entries()) {
       set(k === 'set-cookie' ? this.getSetCookie() : v, k, this);
     }
-  };
+  }
 
+  /**
+   * Vary a value
+   */
+  vary(value: string): void {
+    this.append('Vary', value);
+  }
 
   /**
    * Get the fully parsed content type
@@ -70,7 +83,6 @@ export class WebHeaders extends Headers {
    */
   getRange(chunkSize: number = 100 * 1024): ByteRange | undefined {
     const rangeHeader = this.get('Range');
-
     if (rangeHeader) {
       const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
         .map(x => x ? parseInt(x, 10) : undefined);

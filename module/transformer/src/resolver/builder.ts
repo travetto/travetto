@@ -28,6 +28,7 @@ const GLOBAL_COMPLEX: Record<string, Function> = {
 /**
  * List of global types that are simple
  */
+const UNDEFINED_GLOBAL = { undefined: 1, void: 1, null: 1 };
 const SIMPLE_NAMES: Record<string, string> = { String: 'string', Number: 'number', Boolean: 'boolean', Object: 'object' };
 const GLOBAL_SIMPLE: Record<string, Function> = {
   RegExp, Date, Number, Boolean, String, Function, Object, Error,
@@ -35,9 +36,8 @@ const GLOBAL_SIMPLE: Record<string, Function> = {
 };
 
 type Category =
-  'void' | 'undefined' | 'concrete' | 'unknown' |
   'tuple' | 'shape' | 'literal' | 'template' | 'managed' |
-  'composition' | 'foreign';
+  'composition' | 'foreign' | 'concrete' | 'unknown';
 
 /**
  * Type categorizer, input for builder
@@ -46,16 +46,26 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
   const flags = type.getFlags();
   const objectFlags = DeclarationUtil.getObjectFlags(type) ?? 0;
 
-  if (flags & ts.TypeFlags.Void) {
-    return { category: 'void', type };
-  } else if (flags & ts.TypeFlags.Undefined) {
-    return { category: 'undefined', type };
+  if (flags & (ts.TypeFlags.TemplateLiteral)) {
+    return { category: 'template', type };
+  } else if (flags & (
+    ts.TypeFlags.BigIntLike |
+    ts.TypeFlags.BooleanLike |
+    ts.TypeFlags.NumberLike |
+    ts.TypeFlags.StringLike |
+    ts.TypeFlags.Null |
+    ts.TypeFlags.Undefined |
+    ts.TypeFlags.Void
+  )) {
+    return { category: 'literal', type };
   } else if (DocUtil.hasDocTag(type, 'concrete')) {
     return { category: 'concrete', type };
   } else if (flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never)) { // Any or unknown
     return { category: 'unknown', type };
   } else if (objectFlags & ts.ObjectFlags.Reference && !CoreUtil.getSymbol(type)) { // Tuple type?
     return { category: 'tuple', type };
+  } else if (type.isUnionOrIntersection()) {
+    return { category: 'composition', type };
   } else if (objectFlags & ts.ObjectFlags.Anonymous) {
     try {
       const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
@@ -86,18 +96,6 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     } else {
       return { category: 'managed', type: resolvedType };
     }
-  } else if (flags & (ts.TypeFlags.TemplateLiteral)) {
-    return { category: 'template', type };
-  } else if (flags & (
-    ts.TypeFlags.BigIntLike |
-    ts.TypeFlags.BooleanLike |
-    ts.TypeFlags.NumberLike |
-    ts.TypeFlags.StringLike |
-    ts.TypeFlags.Void | ts.TypeFlags.Undefined
-  )) {
-    return { category: 'literal', type };
-  } else if (type.isUnionOrIntersection()) {
-    return { category: 'composition', type };
   } else if (objectFlags & ts.ObjectFlags.Tuple) {
     return { category: 'tuple', type };
   } else if (type.isLiteral()) {
@@ -121,12 +119,6 @@ export const TypeBuilder: {
 } = {
   unknown: {
     build: (resolver, type) => ({ key: 'unknown' })
-  },
-  undefined: {
-    build: (resolver, type) => ({ key: 'literal', name: 'undefined', ctor: undefined })
-  },
-  void: {
-    build: (resolver, type) => ({ key: 'literal', name: 'void', ctor: undefined })
   },
   tuple: {
     build: (resolver, type) => ({ key: 'tuple', tsTupleTypes: resolver.getAllTypeArguments(type), subTypes: [] })
@@ -166,7 +158,9 @@ export const TypeBuilder: {
       const name = resolver.getTypeAsString(type) ?? '';
       const complexName = CoreUtil.getSymbol(type)?.getName() ?? '';
 
-      if (name in GLOBAL_SIMPLE) {
+      if (name in UNDEFINED_GLOBAL) {
+        return { key: 'literal', ctor: undefined, name };
+      } else if (name in GLOBAL_SIMPLE) {
         const cons = GLOBAL_SIMPLE[name];
         const ret = LiteralUtil.isLiteralType(type) ? CoerceUtil.coerce(type.value, transformCast(cons), false) :
           undefined;

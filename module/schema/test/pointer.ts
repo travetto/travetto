@@ -37,7 +37,7 @@ class PointerSuite {
     try {
       // @ts-ignore
       await SchemaValidator.validate(Custom, Custom.from({ pointer: false }));
-      assert(false);
+      assert.fail();
     } catch (err) {
       assert(err instanceof ValidationResultError);
       assert(err.details.errors[0].kind === 'type');
@@ -45,7 +45,7 @@ class PointerSuite {
 
     try {
       await SchemaValidator.validate(Custom, Custom.from({ pointer: 1000 }));
-      assert(false);
+      assert.fail();
     } catch (err) {
       assert(err instanceof ValidationResultError);
       assert(err.details.errors[0].kind === 'maxlength');
@@ -53,7 +53,7 @@ class PointerSuite {
 
     try {
       await SchemaValidator.validate(Custom, Custom.from({}));
-      assert(false);
+      assert.fail();
     } catch (err) {
       assert(err instanceof ValidationResultError);
       assert(err.details.errors[0].kind === 'required');

@@ -40,9 +40,6 @@ export class LoggingInterceptor implements WebInterceptor {
   async filter({ req, next }: WebChainedContext): Promise<WebResponse> {
     const createdDate = Date.now();
     const res = await next();
-
-    const err = res.source instanceof Error ? res.source : undefined;
-    const defaultCode = !!err ? 500 : 200;
     const duration = Date.now() - createdDate;
 
     const reqLog = {
@@ -54,7 +51,8 @@ export class LoggingInterceptor implements WebInterceptor {
       duration,
     };
 
-    const code = res.statusCode ?? defaultCode;
+    const err = res.body instanceof Error ? res.body : undefined;
+    const code = res.statusCode ?? (!!err ? 500 : 200);
 
     if (code < 400) {
       console.info('Request', reqLog);
@@ -64,7 +62,7 @@ export class LoggingInterceptor implements WebInterceptor {
       console.error('Request', reqLog);
     }
 
-    if (this.config.showStackTrace && err instanceof Error) {
+    if (this.config.showStackTrace && err) {
       console.error(err.message, { error: err });
     }
 

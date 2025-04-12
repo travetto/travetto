@@ -2,6 +2,7 @@ import { buffer } from 'node:stream/consumers';
 
 import { Inject, Injectable } from '@travetto/di';
 import { WebConfig, WebFilterContext, WebResponse, WebDispatcher } from '@travetto/web';
+import { castTo } from '@travetto/runtime';
 
 /**
  * Support for invoking http requests against the server
@@ -23,11 +24,13 @@ export class FetchWebDispatcher implements WebDispatcher {
 
     const finalPath = `${path}${q}`;
     const stream = req.getUnprocessedStream();
-    const body = stream ? await buffer(stream) : req.body;
+    const body: RequestInit['body'] = stream ? await buffer(stream) : castTo(req.body);
 
     const res = await fetch(`http://localhost:${this.config.port}${finalPath}`, { method, body, headers });
 
-    const out = Buffer.from(await res.arrayBuffer());
-    return WebResponse.from(out).with({ statusCode: res.status, headers: res.headers });
+    return new WebResponse({
+      body: Buffer.from(await res.arrayBuffer()),
+      statusCode: res.status, headers: res.headers
+    });
   }
 }

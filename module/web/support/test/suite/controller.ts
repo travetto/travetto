@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 
-import { AppError } from '@travetto/runtime';
+import { AppError, castTo } from '@travetto/runtime';
 
 import { Controller } from '../../../src/decorator/controller.ts';
 import { Get, Post, Put, Delete, Patch } from '../../../src/decorator/endpoint.ts';
@@ -38,15 +38,15 @@ export class TestController {
 
   @Put('/body')
   withBody() {
-    return { body: this.req.body?.age };
+    return { body: castTo<{ age: number }>(this.req.body).age };
   }
 
   @Delete('/cookie')
   withCookie() {
-    return WebResponse.from({ cookie: this.req.getCookie!('orange') })
-      .with({
-        cookies: [{ name: 'flavor', value: 'oreo' }]
-      });
+    return new WebResponse({
+      body: { cookie: this.req.getCookie!('orange') },
+      cookies: [{ name: 'flavor', value: 'oreo' }]
+    });
   }
 
   @Patch('/regexp/super-:special-party')

@@ -73,15 +73,16 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
   decorate(req: WebRequest, resolved: CorsConfig['resolved'], res: WebResponse,): WebResponse {
     const origin = req.headers.get('Origin');
     if (resolved.origins.size === 0 || resolved.origins.has(origin!)) {
-      return res.backfillHeaders({
-        'Access-Control-Allow-Origin': origin || '*',
-        'Access-Control-Allow-Credentials': `${resolved.credentials}`,
-        'Access-Control-Allow-Methods': resolved.methods,
-        'Access-Control-Allow-Headers': resolved.headers || req.headers.get('Access-Control-Request-Headers') || '*',
-      });
-    } else {
-      return res;
+      for (const [k, v] of [
+        ['Access-Control-Allow-Origin', origin || '*'],
+        ['Access-Control-Allow-Credentials', `${resolved.credentials}`],
+        ['Access-Control-Allow-Methods', resolved.methods],
+        ['Access-Control-Allow-Headers', resolved.headers || req.headers.get('Access-Control-Request-Headers') || '*'],
+      ]) {
+        res.headers.setIfAbsent(k, v);
+      }
     }
+    return res;
   }
 
   async filter({ req, config: { resolved }, next }: WebChainedContext<CorsConfig>): Promise<WebResponse> {

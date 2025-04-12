@@ -1,5 +1,7 @@
 import assert from 'node:assert';
 import fs from 'node:fs/promises';
+import { PassThrough, Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
@@ -66,4 +68,19 @@ export class BytesUtilTest {
     assert(result.mime === 'image/png');
   }
 
+
+  @Test({ shouldThrow: 'size' })
+  async testMaxBlobWrite() {
+    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), WebUploadUtil.limitWrite(1), new PassThrough());
+  }
+
+  @Test({ shouldThrow: 'size' })
+  async testMaxCloseBlobWrite() {
+    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), WebUploadUtil.limitWrite(99), new PassThrough());
+  }
+
+  @Test()
+  async testMaxExactBlobWrite() {
+    await pipeline(Readable.from(Buffer.alloc(100, 'A', 'utf8')), WebUploadUtil.limitWrite(100), new PassThrough());
+  }
 }

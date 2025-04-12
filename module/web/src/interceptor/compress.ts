@@ -55,15 +55,13 @@ export class CompressInterceptor implements WebInterceptor {
   config: CompressConfig;
 
   async compress(ctx: WebChainedContext, res: WebResponse): Promise<WebResponse> {
-    const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
+    const { raw = {}, preferredEncodings = [], supportedEncodings } = this.config;
     const { req } = ctx;
 
-    res.vary('Accept-Encoding');
+    res.headers.vary('Accept-Encoding');
 
-    const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     if (
       !res.body ||
-      (res.length !== undefined && res.length >= 0 && res.length < chunkSize) ||
       req.method === 'HEAD' ||
       res.headers.has('Content-Encoding') ||
       NO_TRANSFORM_REGEX.test(res.headers.get('Cache-Control')?.toString() ?? '')
@@ -72,39 +70,47 @@ export class CompressInterceptor implements WebInterceptor {
     }
 
     const accepts = req.headers.get('Accept-Encoding');
-    const method = new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
-      // Bad typings, need to override
-      .encoding(...castTo<[string[]]>([supportedEncodings, preferredEncodings]));
+    const type: WebCompressEncoding | undefined =
+      castTo(new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
+        .encoding([...supportedEncodings, ...preferredEncodings]));
 
-    if (accepts && (!method || !accepts.includes(method))) {
-      throw Object.assign(
-        new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`),
-        { status: 406 }
-      );
+    if (accepts && (!type || !accepts.includes(type))) {
+      throw new WebResponse({
+        body: new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`),
+        statusCode: 406
+      });
     }
 
-    const type = castTo<WebCompressEncoding>(method!);
-    if (type === 'identity') {
+    if (type === 'identity' || !type) {
       return res;
+    }
+
+    const binaryRes = res.toBinary();
+    const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
+    const len = Buffer.isBuffer(binaryRes.body) ? binaryRes.body.byteLength : undefined;
+
+    if (len !== undefined && len >= 0 && len < chunkSize) {
+      return binaryRes;
     }
 
     const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
     const stream = COMPRESSORS[type](opts);
-    // If we are compressing
-    res.headers.set('Content-Encoding', type);
 
-    if (Buffer.isBuffer(res.body)) {
-      stream.end(res.body);
+    // If we are compressing
+    binaryRes.headers.set('Content-Encoding', type);
+
+    if (Buffer.isBuffer(binaryRes.body)) {
+      stream.end(binaryRes.body);
       const out = await buffer(stream);
-      res.body = out;
-      res.length = out.length;
+      binaryRes.body = out;
+      binaryRes.headers.set('Content-Length', `${out.byteLength}`);
     } else {
-      res.body.pipe(stream);
-      res.body = stream;
-      res.length = undefined;
+      binaryRes.body.pipe(stream);
+      binaryRes.body = stream;
+      binaryRes.headers.delete('Content-Length');
     }
 
-    return res.ensureContentLength();
+    return binaryRes;
   }
 
   applies(ep: EndpointConfig, config: CompressConfig): boolean {

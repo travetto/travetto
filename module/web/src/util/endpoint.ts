@@ -1,15 +1,17 @@
 import { asConstructable, castTo, Class, Runtime, TypedObject } from '@travetto/runtime';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { DependencyRegistry } from '@travetto/di';
+import { RetargettingProxy } from '@travetto/registry';
 
 import { WebFilterContext, WebChainedFilter, WebChainedContext, WebFilter } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
+
 import { WebInternalSymbol, HTTP_METHODS, WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
+import { ControllerRegistry } from '../registry/controller.ts';
+
 import { WebCommonUtil } from './common.ts';
-import { ControllerRegistry } from '@travetto/web';
-import { DependencyRegistry } from '@travetto/di';
-import { RetargettingProxy } from '@travetto/registry';
 
 /**
  * Endpoint specific utilities
@@ -138,12 +140,17 @@ export class EndpointUtil {
   static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebFilterContext): Promise<WebResponse> {
     const params = await this.extractParameters(ctx, endpoint);
     try {
-      const res = WebResponse.from(await endpoint.endpoint.apply(endpoint.instance, params));
-      return res
-        .backfillHeaders(endpoint.responseHeaderMap)
-        .ensureContentLength()
-        .ensureContentType()
-        .ensureStatusCode(HTTP_METHODS[ctx.req.method].emptyStatusCode);
+      const body = await endpoint.endpoint.apply(endpoint.instance, params);
+      if (body instanceof WebResponse) {
+        return body;
+      } else {
+        const statusCode = (body === null || body === undefined) ? HTTP_METHODS[ctx.req.method].emptyStatusCode : 200;
+        const res = new WebResponse({ body, statusCode });
+        for (const [k, v] of endpoint.responseHeaderMap) {
+          res.headers.setIfAbsent(k, v);
+        }
+        return res;
+      }
     } catch (err) {
       throw WebResponse.fromCatch(err);
     }

@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BinaryUtil, castTo } from '@travetto/runtime';
-import { Controller, Post, WebRequest, WebResponse } from '@travetto/web';
+import { Controller, Post } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
@@ -11,8 +11,6 @@ import { Upload } from '../../src/decorator.ts';
 import { FileMap } from '../../src/types.ts';
 
 const bHash = (blob: Blob) => BinaryUtil.getBlobMeta(blob)?.hash;
-
-const multipart = (data: FormData) => new WebRequest(WebResponse.from(data));
 
 @Controller('/test/upload')
 class TestUploadController {
@@ -71,32 +69,29 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUploadAll() {
     const uploads = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<{ hash: string }>({ ...multipart(uploads), method: 'POST', path: '/test/upload/all' });
+    const res = await this.request<{ hash: string }>({ body: uploads, method: 'POST', path: '/test/upload/all' });
 
     const file = await this.fixture.readStream('/logo.png');
-    assert(res.source?.hash === await BinaryUtil.hashInput(file));
+    assert(res.body?.hash === await BinaryUtil.hashInput(file));
   }
 
   @Test()
   async testUploadDirect() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const sent = castTo<Blob>(uploads.get('file')?.slice());
-    const res = await this.request<{ hash: string }>({
-      method: 'POST', path: '/test/upload',
-      ...WebResponse.from(sent)
-    });
+    const sent = castTo<Blob>(uploads.get('file'));
+    const res = await this.request<{ hash: string }>({ method: 'POST', path: '/test/upload', body: sent });
 
     const file = await this.fixture.readStream('/logo.png');
-    assert(res.source?.hash === await BinaryUtil.hashInput(file));
+    assert(res.body?.hash === await BinaryUtil.hashInput(file));
   }
 
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<{ hash: string }>({ ...multipart(uploads), method: 'POST', path: '/test/upload' });
+    const res = await this.request<{ hash: string }>({ body: uploads, method: 'POST', path: '/test/upload' });
 
     const file = await this.fixture.readStream('/logo.png');
-    assert(res.source?.hash === await BinaryUtil.hashInput(file));
+    assert(res.body?.hash === await BinaryUtil.hashInput(file));
   }
 
   @Test()
@@ -106,13 +101,13 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>({
-      ...multipart(uploads), method: 'POST', path: '/test/upload/all-named'
+      body: uploads, method: 'POST', path: '/test/upload/all-named'
     });
     const file = await this.fixture.readStream('/logo.png');
     const hash = await BinaryUtil.hashInput(file);
 
-    assert(res.source?.hash1 === hash);
-    assert(res.source?.hash2 === hash);
+    assert(res.body?.hash1 === hash);
+    assert(res.body?.hash2 === hash);
   }
 
   @Test()
@@ -123,7 +118,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     );
 
     const resBad = await this.request<{ hash1: string, hash2: string }>({
-      ...multipart(uploadBad),
+      body: uploadBad,
       method: 'POST', path: '/test/upload/all-named-custom',
     }, false);
     assert(resBad.statusCode === 400);
@@ -133,7 +128,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>({
-      ...multipart(uploads),
+      body: uploads,
       method: 'POST', path: '/test/upload/all-named-custom',
     }, false);
     assert(res.statusCode === 200);
@@ -144,8 +139,8 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const file2 = await this.fixture.readStream('/logo.png');
     const hash2 = await BinaryUtil.hashInput(file2);
 
-    assert(res.source?.hash1 === hash1);
-    assert(res.source?.hash2 === hash2);
+    assert(res.body?.hash1 === hash1);
+    assert(res.body?.hash2 === hash2);
   }
 
   @Test()
@@ -156,7 +151,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     );
 
     const resBad = await this.request<{ hash1: string, hash2: string }>({
-      ...multipart(uploadBad),
+      body: uploadBad,
       method: 'POST', path: '/test/upload/all-named-size',
     }, false);
     assert(resBad.statusCode === 400);
@@ -166,7 +161,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>({
-      ...multipart(uploads),
+      body: uploads,
       method: 'POST', path: '/test/upload/all-named-size',
     }, false);
     assert(res.statusCode === 200);
@@ -177,7 +172,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     const file2 = await this.fixture.readStream('/logo.png');
     const hash2 = await BinaryUtil.hashInput(file2);
 
-    assert(res.source?.hash1 === hash1);
-    assert(res.source?.hash2 === hash2);
+    assert(res.body?.hash1 === hash1);
+    assert(res.body?.hash2 === hash2);
   }
 }

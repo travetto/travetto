@@ -2,13 +2,13 @@ import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
-import { PassThrough, Readable, Transform } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { ReadableStream } from 'node:stream/web';
-import { text as toText, arrayBuffer as toBuffer } from 'node:stream/consumers';
+import { text as toText, arrayBuffer as toArrayBuffer } from 'node:stream/consumers';
+import { isArrayBuffer } from 'node:util/types';
 
 import { BinaryInput, BlobMeta, hasFunction } from './types.ts';
-import { AppError } from './error.ts';
 import { Util } from './util.ts';
 
 const BlobMetaSymbol = Symbol();
@@ -17,11 +17,23 @@ const BlobMetaSymbol = Symbol();
  * Common functions for dealing with binary data/streams
  */
 export class BinaryUtil {
+  /** Is Array Buffer */
+  static isArrayBuffer = isArrayBuffer;
+  /** Is Readable */
+  static isReadable = hasFunction<Readable>('pipe');
+  /** Is ReadableStream */
+  static isReadableStream = hasFunction<ReadableStream>('pipeTo');
+  /** Is Async Iterable */
+  static isAsyncIterable = (v: unknown): v is AsyncIterable<unknown> =>
+    !!v && (typeof v === 'object' || typeof v === 'function') && Symbol.asyncIterator in v;
 
   /**
-   * Determine if a value is readable
+   * Is src a binary type
    */
-  static isReadable = hasFunction<Readable>('pipe');
+  static isBinaryType(src: unknown): boolean {
+    return src instanceof Blob || Buffer.isBuffer(src) || this.isReadable(src) ||
+      this.isArrayBuffer(src) || this.isReadableStream(src) || this.isAsyncIterable(src);
+  }
 
   /**
    * Generate a proper sha512 hash from a src value
@@ -88,9 +100,9 @@ export class BinaryUtil {
     return Object.defineProperties(out, {
       size: { value: size },
       stream: { value: () => ReadableStream.from(go()) },
-      arrayBuffer: { value: () => toBuffer(go()) },
+      arrayBuffer: { value: () => toArrayBuffer(go()) },
       text: { value: () => toText(go()) },
-      bytes: { value: () => toBuffer(go()).then(v => new Uint8Array(v)) },
+      bytes: { value: () => toArrayBuffer(go()).then(v => new Uint8Array(v)) },
       [BlobMetaSymbol]: { value: metadata }
     });
   }
@@ -101,24 +113,6 @@ export class BinaryUtil {
   static getBlobMeta(blob: Blob): BlobMeta | undefined {
     const withMeta: Blob & { [BlobMetaSymbol]?: BlobMeta } = blob;
     return withMeta[BlobMetaSymbol];
-  }
-
-  /**
-   * Write limiter
-   * @returns
-   */
-  static limitWrite(maxSize: number): Transform {
-    let read = 0;
-    return new Transform({
-      transform(chunk, encoding, callback): void {
-        read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : (chunk instanceof Uint8Array ? chunk.byteLength : 0);
-        if (read > maxSize) {
-          callback(new AppError('File size exceeded', { category: 'data', details: { read, size: maxSize } }));
-        } else {
-          callback(null, chunk);
-        }
-      },
-    });
   }
 
   /**

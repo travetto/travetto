@@ -28,7 +28,7 @@ class AsyncContextInterceptorSuite {
       config: {}
     });
 
-    assert(res.source === true);
+    assert(res.body === true);
     assert(req.headers.get('Modified') === '1');
   }
 }

@@ -224,7 +224,7 @@ export abstract class AuthWebServerSuite extends BaseWebSuite {
     const cookie = this.getCookieValue(headers);
     assert(cookie);
 
-    const { source: body, statusCode: lastStatus } = await this.request({
+    const { body, statusCode: lastStatus } = await this.request({
       method: 'GET', path: '/test/auth/token',
       headers: { cookie }
     }, false);

@@ -4,6 +4,6 @@ import { StandardWebRouter } from '@travetto/web';
 import { WebUploadServerSuite } from '../support/test/server.ts';
 
 @Suite()
-export class StandardAuthWebTest extends WebUploadServerSuite {
+export class StandardWebUploadTest extends WebUploadServerSuite {
   dispatcherType = StandardWebRouter;
 }
