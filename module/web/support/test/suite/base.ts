@@ -1,14 +1,32 @@
 import { RootRegistry } from '@travetto/registry';
-import { castTo, Class, toConcrete } from '@travetto/runtime';
+import { castTo, Class } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
+import { DependencyRegistry, Injectable } from '@travetto/di';
 import { ConfigSource, ConfigSpec } from '@travetto/config';
-import { DependencyRegistry } from '@travetto/di';
 
 import { WebApplication, WebApplicationHandle } from '../../../src/types/application.ts';
 import { WebDispatcher } from '../../../src/types.ts';
 import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
+
 import { WebTestDispatchUtil } from '../dispatch-util.ts';
+
+@Injectable()
+export class WebTestConfig implements ConfigSource {
+  async get(): Promise<ConfigSpec> {
+    return {
+      data: {
+        web: {
+          cookie: { active: true, secure: false },
+          ssl: { active: false },
+          trustProxy: ['*'], port: -1
+        }
+      },
+      source: 'custom://test/web',
+      priority: 10000
+    };
+  }
+}
 
 /**
  * Base Web Suite
@@ -23,27 +41,7 @@ export abstract class BaseWebSuite {
 
   @BeforeAll()
   async initServer(): Promise<void> {
-    DependencyRegistry.registerClass(
-      class implements ConfigSource {
-        async get(): Promise<ConfigSpec> {
-          return {
-            data: {
-              web: {
-                cookie: { active: true, secure: false },
-                ssl: { active: false },
-                port: -1, trustProxy: ['*']
-              }
-            },
-            source: 'custom://test/override',
-            priority: 2000
-          };
-        }
-      },
-      { interfaces: [toConcrete<ConfigSource>()] }
-    );
-
     await RootRegistry.init();
-
     if (this.appType) {
       this.#appHandle = await DependencyRegistry.getInstance(this.appType).then(v => v.run());
     }
