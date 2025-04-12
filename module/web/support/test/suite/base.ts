@@ -1,8 +1,5 @@
-import { buffer as toBuffer } from 'node:stream/consumers';
-import { Readable } from 'node:stream';
-
 import { RootRegistry } from '@travetto/registry';
-import { AppError, BinaryUtil, castTo, Class } from '@travetto/runtime';
+import { AppError, castTo, Class } from '@travetto/runtime';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { BindUtil } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
@@ -13,7 +10,6 @@ import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
 import { CookieConfig } from '../../../src/interceptor/cookies.ts';
 import { WebConfig } from '../../../src/config/web.ts';
-import { DecompressInterceptor } from '../../../src/interceptor/decompress.ts';
 import { WebBodyUtil } from '../../../src/util/body.ts';
 
 /**
@@ -39,7 +35,7 @@ export abstract class BaseWebSuite {
     // Deactivate ssl/port
     Object.assign(
       await DependencyRegistry.getInstance(WebConfig),
-      { port: -1, ssl: { active: false } }
+      { port: -1, ssl: { active: false }, trustProxy: true }
     );
 
     if (this.appType) {
@@ -58,7 +54,7 @@ export abstract class BaseWebSuite {
     const dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
 
     const query = BindUtil.flattenPaths(cfg.query ?? {});
-    const webReq = new WebRequest<unknown>({ ...cfg, query }).secure(true);
+    const webReq = new WebRequest<unknown>({ ...cfg, query });
 
     if (webReq.body) {
       const sample = new WebResponse(webReq).toBinary();
@@ -68,21 +64,18 @@ export abstract class BaseWebSuite {
 
     const webRes = await dispatcher.dispatch({ req: webReq });
     let result = webRes.body;
-    if (Buffer.isBuffer(result) || BinaryUtil.isReadable(result)) {
-      let bufferResult = await WebBodyUtil.toBuffer(webRes);
 
-      if (bufferResult.length) {
-        try {
-          bufferResult = await toBuffer(DecompressInterceptor.decompress(
-            webRes.headers,
-            Readable.from(bufferResult),
-            { applies: true, supportedEncodings: ['br', 'deflate', 'gzip', 'identity'] }
-          ));
-        } catch { }
+    const text = Buffer.isBuffer(result) ? result.toString('utf8') : (typeof result === 'string' ? result : undefined);
+    console.log('Got the response', webRes.headers.getContentType(), text);
+
+    if (text) {
+      switch (webRes.headers.get('Content-Type')) {
+        case 'application/json': {
+          try { result = JSON.parse(castTo(text)); } catch { }
+          break;
+        }
+        case 'text/plain': result = text; break;
       }
-
-      result = bufferResult.toString('utf8');
-      try { result = JSON.parse(castTo(result)); } catch { }
     }
 
     if (webRes.statusCode && webRes.statusCode >= 400) {

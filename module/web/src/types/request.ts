@@ -75,18 +75,18 @@ export class WebRequest<B = unknown> implements WebMessage<B> {
    * Secure the request
    */
   secure(trustProxy: boolean | string[]): this {
-    const forwardedFor = this.headers.get('x-forwarded-for');
+    const forwardedFor = this.headers.get('X-Forwarded-For');
 
     if (forwardedFor) {
-      if (this.connection.ip && (trustProxy === true || (trustProxy !== false && trustProxy?.includes(this.connection.ip)))) {
-        this.connection.protocol = castTo(this.headers.get('x-forwarded-proto')) || this.connection.protocol;
-        this.connection.host = this.headers.get('x-forwarded-host') || this.connection.host;
+      if (this.connection.ip && (trustProxy === true || (Array.isArray(trustProxy) && trustProxy?.includes(this.connection.ip)))) {
+        this.connection.protocol = castTo(this.headers.get('X-Forwarded-Proto')) || this.connection.protocol;
+        this.connection.host = this.headers.get('X-Forwarded-Host') || this.connection.host;
         this.connection.ip = forwardedFor;
       }
     }
-    this.headers.delete('x-forwarded-for');
-    this.headers.delete('x-forwarded-proto');
-    this.headers.delete('x-forwarded-host');
+    this.headers.delete('X-Forwarded-For');
+    this.headers.delete('X-Forwarded-Proto');
+    this.headers.delete('X-Forwarded-Host');
     return this;
   }
 }

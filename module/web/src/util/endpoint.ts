@@ -145,9 +145,9 @@ export class EndpointUtil {
         return body;
       } else {
         const statusCode = (body === null || body === undefined) ? HTTP_METHODS[ctx.req.method].emptyStatusCode : 200;
-        const res = new WebResponse({ body, statusCode });
+        const res = new WebResponse({ body, statusCode, });
         for (const [k, v] of endpoint.responseHeaderMap) {
-          res.headers.setIfAbsent(k, v);
+          res.headers.set(k, v);
         }
         return res;
       }

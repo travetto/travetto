@@ -82,6 +82,7 @@ export class WebBodyUtil {
     const meta = BinaryUtil.getBlobMeta(value);
 
     const toAdd: [string, string | undefined][] = [
+      ['Content-Type', value.type],
       ['Content-Length', `${value.size}`],
       ['Content-Encoding', meta?.contentEncoding],
       ['Cache-Control', meta?.cacheControl],
