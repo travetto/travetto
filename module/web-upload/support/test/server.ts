@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 
 import { BinaryUtil, castTo } from '@travetto/runtime';
-import { Controller, Post, WebRequest, WebResponse } from '@travetto/web';
+import { Controller, Post } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
@@ -78,11 +78,8 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUploadDirect() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const sent = castTo<Blob>(uploads.get('file')?.slice());
-    const res = await this.request<{ hash: string }>({
-      method: 'POST', path: '/test/upload',
-      ...WebResponse.from(sent)
-    });
+    const sent = castTo<Blob>(uploads.get('file'));
+    const res = await this.request<{ hash: string }>({ method: 'POST', path: '/test/upload', body: sent });
 
     const file = await this.fixture.readStream('/logo.png');
     assert(res.body?.hash === await BinaryUtil.hashInput(file));

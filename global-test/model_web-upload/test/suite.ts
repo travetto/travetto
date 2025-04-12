@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Controller, Get, Post, WebRequest, ContextParam, WebResponse } from '@travetto/web';
+import { Controller, Get, Post, WebRequest, ContextParam } from '@travetto/web';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Inject } from '@travetto/di';
@@ -107,12 +107,8 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUploadDirect() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const sent = castTo<Blob>(uploads.get('file')?.slice());
-    const res = await this.request<{ location: string, meta: BlobMeta }>({
-      method: 'POST',
-      path: '/test/upload',
-      ...WebResponse.from(sent)
-    });
+    const sent = castTo<Blob>(uploads.get('file'));
+    const res = await this.request<{ location: string, meta: BlobMeta }>({ method: 'POST', path: '/test/upload', body: sent });
 
     const { hash } = await this.getFileMeta('/logo.png');
     assert(res.body?.meta.hash === hash);
@@ -231,15 +227,8 @@ export abstract class ModelBlobWebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testRangedDownload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'alpha.txt', type: 'text/plain' });
-    const sent = castTo<Blob>(uploads.get('file')?.slice());
-    const res = await this.request<{ location: string }>(
-      {
-        method: 'POST',
-        path: '/test/upload',
-        ...WebResponse.from(sent)
-      },
-      false
-    );
+    const sent = castTo<Blob>(uploads.get('file')!);
+    const res = await this.request<{ location: string }>({ method: 'POST', path: '/test/upload', body: sent }, false);
 
     assert(res.statusCode === 200);
 

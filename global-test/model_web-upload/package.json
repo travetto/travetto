@@ -1,5 +1,5 @@
 {
-  "name": "@travetto-test/model-web-upload",
+  "name": "@travetto-test/model_web-upload",
   "version": "0.0.0",
   "dependencies": {
     "@travetto/model": "^6.0.0-rc.1",

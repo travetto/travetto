@@ -57,15 +57,13 @@ export abstract class BaseWebSuite {
 
     const dispatcher = await DependencyRegistry.getInstance(this.dispatcherType);
 
-    const webReq = new WebRequest<unknown>({
-      ...cfg,
-      query: BindUtil.flattenPaths(cfg.query ?? {})
-    });
+    const query = BindUtil.flattenPaths(cfg.query ?? {});
+    const webReq = new WebRequest<unknown>({ ...cfg, query });
 
     if (webReq.body) {
       const sample = new WebResponse(webReq).toBinary();
       sample.headers.forEach((v, k) => webReq.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      webReq.body = WebRequest.markUnprocessed(await WebBodyUtil.toBuffer(sample));
+      webReq.body = WebRequest.markUnprocessed(await WebBodyUtil.toBuffer(sample.body));
     }
 
     const webRes = await dispatcher.dispatch({ req: webReq });

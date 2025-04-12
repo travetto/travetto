@@ -1,7 +1,7 @@
 import { Suite } from '@travetto/test';
 import { NodeWebApplication } from '@travetto/web-node';
 
-import { ModelBlobWebUploadServerSuite } from './server.ts';
+import { ModelBlobWebUploadServerSuite } from './suite.ts';
 import { FetchWebDispatcher } from '@travetto/web-node/support/test/dispatcher.ts';
 
 @Suite()

@@ -43,7 +43,7 @@ function toLambdaEvent(req: WebRequest<Buffer | null>): APIGatewayProxyEvent {
     headers,
     multiValueHeaders,
     isBase64Encoded: true,
-    body: req.body?.toString('utf8') ?? null,
+    body: req.body?.toString('base64')!,
     requestContext: {
       accountId: Util.uuid(),
       resourceId: Util.uuid(),
