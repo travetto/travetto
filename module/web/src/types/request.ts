@@ -1,12 +1,11 @@
-import { Readable } from 'node:stream';
-
-import { Any, AppError, BinaryUtil, castTo } from '@travetto/runtime';
+import { AppError, castTo } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
 import { WebHeaders } from './headers.ts';
 import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
-import { NodeBinary, WebBodyUtil } from '../util/body.ts';
 import { WebMessage, WebMessageInit } from './message.ts';
+
+import { WebBodyUtil } from '../util/body.ts';
 
 export interface WebConnection {
   host?: string;
@@ -34,14 +33,6 @@ export interface WebRequestInternal {
  */
 export class WebRequest<B = unknown> implements WebMessage<B> {
 
-  static markUnprocessed<T extends NodeBinary | undefined>(val: T): T {
-    if (val) {
-      Object.defineProperty(val, WebInternalSymbol, { value: val });
-    }
-    return val;
-  }
-
-
   [WebInternalSymbol]: WebRequestInternal = {};
 
   readonly headers: WebHeaders;
@@ -63,17 +54,6 @@ export class WebRequest<B = unknown> implements WebMessage<B> {
 
   getCookie(key: string, opts?: CookieGetOptions): string | undefined {
     throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
-  }
-
-  /**
-   * Get unprocessed body as readable stream
-   */
-  getUnprocessedStream(): Readable | undefined {
-    const p = this.body;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if ((Buffer.isBuffer(p) || BinaryUtil.isReadable(p)) && (p as Any)[WebInternalSymbol] === p) {
-      return WebBodyUtil.toReadable(p);
-    }
   }
 
   /**

@@ -10,9 +10,9 @@ import { WebResponse } from '../types/response.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { WebHeaders } from '../types/headers.ts';
-import { WebRequest } from '../types/request.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
+import { WebBodyUtil } from '../util/body.ts';
 
 const DECOMPRESSORS = {
   gzip: zlib.createGunzip,
@@ -70,9 +70,9 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
 
   async filter({ req, config, next }: WebChainedContext<DecompressConfig>): Promise<WebResponse> {
     if (req.body === undefined) {
-      const stream = req.getUnprocessedStream();
+      const stream = WebBodyUtil.getUnprocessedBody(req);
       if (stream) {
-        req.body = WebRequest.markUnprocessed(DecompressInterceptor.decompress(req.headers, stream, config));
+        WebBodyUtil.setBodyUnprocessed(req, DecompressInterceptor.decompress(req.headers, stream, config));
       }
     }
     return next();

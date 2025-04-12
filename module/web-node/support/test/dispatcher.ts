@@ -1,7 +1,7 @@
 import { buffer } from 'node:stream/consumers';
 
 import { Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebFilterContext, WebResponse, WebDispatcher } from '@travetto/web';
+import { WebConfig, WebFilterContext, WebResponse, WebDispatcher, WebBodyUtil } from '@travetto/web';
 import { castTo } from '@travetto/runtime';
 
 import { WebTestDispatchUtil } from '@travetto/web/support/test/dispatch-util.ts';
@@ -25,7 +25,7 @@ export class FetchWebDispatcher implements WebDispatcher {
     }
 
     const finalPath = `${path}${q}`;
-    const stream = req.getUnprocessedStream();
+    const stream = WebBodyUtil.getUnprocessedBody(req);
     const body: RequestInit['body'] = stream ? await buffer(stream) : castTo(req.body);
 
     const res = await fetch(`http://localhost:${this.config.port}${finalPath}`, { method, body, headers });

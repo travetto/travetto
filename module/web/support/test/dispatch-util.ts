@@ -14,8 +14,7 @@ export class WebTestDispatchUtil {
     if (req.body !== undefined) {
       const sample = WebBodyUtil.toBinaryMessage(req);
       sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      const b = await WebBodyUtil.toBuffer(sample.body!);
-      req.body = WebRequest.markUnprocessed(b);
+      WebBodyUtil.setBodyUnprocessed(req, await WebBodyUtil.toBuffer(sample.body!));
     }
     Object.assign(req, { query: BindUtil.flattenPaths(req.query) });
     return req;
@@ -58,5 +57,13 @@ export class WebTestDispatchUtil {
     res.body = result;
 
     return res;
+  }
+
+  static returnResponse<T>(res: WebResponse, throwOnError: boolean): WebResponse<T> {
+    if (throwOnError && res.body instanceof Error) {
+      throw res.body;
+    }
+
+    return castTo(res);
   }
 }

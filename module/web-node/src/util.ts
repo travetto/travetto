@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { pipeline } from 'node:stream/promises';
 
 import { BinaryUtil, castTo } from '@travetto/runtime';
-import { WebRequest, WebResponse } from '@travetto/web';
+import { WebBodyUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class NodeWebUtil {
 
@@ -12,20 +12,22 @@ export class NodeWebUtil {
   static toWebRequest(req: IncomingMessage, params?: Record<string, unknown>): WebRequest {
     const secure = 'encrypted' in req.socket && !!req.socket.encrypted;
     const [path, query] = (req.url ?? '/').split('?') ?? [];
-    return new WebRequest({
-      connection: {
-        ip: req.socket.remoteAddress!,
-        host: req.headers.host,
-        protocol: secure ? 'https' : 'http',
-        port: req.socket.localPort
-      },
-      method: castTo(req.method?.toUpperCase()),
-      path,
-      query: Object.fromEntries(new URLSearchParams(query)),
-      params,
-      headers: req.headers,
-      body: WebRequest.markUnprocessed(req),
-    });
+    return WebBodyUtil.setBodyUnprocessed(
+      new WebRequest({
+        connection: {
+          ip: req.socket.remoteAddress!,
+          host: req.headers.host,
+          protocol: secure ? 'https' : 'http',
+          port: req.socket.localPort
+        },
+        method: castTo(req.method?.toUpperCase()),
+        path,
+        query: Object.fromEntries(new URLSearchParams(query)),
+        params,
+        headers: req.headers,
+      }),
+      req
+    );
   }
 
   /**

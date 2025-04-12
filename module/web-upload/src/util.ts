@@ -7,7 +7,7 @@ import { Readable, Transform } from 'node:stream';
 
 import busboy from '@fastify/busboy';
 
-import { WebRequest, MimeUtil } from '@travetto/web';
+import { WebRequest, MimeUtil, WebBodyUtil } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { WebUploadConfig } from './config.ts';
@@ -52,7 +52,7 @@ export class WebUploadUtil {
    * Get all the uploads, separating multipart from direct
    */
   static async* getUploads(req: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
-    const bodyStream = req.getUnprocessedStream();
+    const bodyStream = WebBodyUtil.getUnprocessedBody(req);
 
     if (!bodyStream) {
       throw new AppError('No input stream provided for upload', { category: 'data' });

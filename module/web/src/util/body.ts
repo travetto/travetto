@@ -1,10 +1,11 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { BinaryUtil, castTo, ErrorCategory, hasToJSON, Util } from '@travetto/runtime';
+import { Any, BinaryUtil, castTo, ErrorCategory, hasToJSON, Util } from '@travetto/runtime';
 
 import { WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
+import { WebInternalSymbol } from '../types/core.ts';
 
 type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
 
@@ -161,5 +162,27 @@ export class WebBodyUtil {
       out.body = Buffer.from(text, 'utf-8');
     }
     return out;
+  }
+
+  /**
+   * Set body and mark as unprocessed
+   */
+  static setBodyUnprocessed<T extends WebMessage>(req: T, val: Readable | Buffer | undefined): T {
+    if (val) {
+      Object.defineProperty(val, WebInternalSymbol, { value: val });
+      req.body = val;
+    }
+    return castTo(req);
+  }
+
+  /**
+   * Get unprocessed body as readable stream
+   */
+  static getUnprocessedBody(req: WebMessage): Readable | undefined {
+    const p = req.body;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    if ((Buffer.isBuffer(p) || BinaryUtil.isReadable(p)) && (p as Any)[WebInternalSymbol] === p) {
+      return WebBodyUtil.toReadable(p);
+    }
   }
 }

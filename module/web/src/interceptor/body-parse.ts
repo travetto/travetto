@@ -13,6 +13,7 @@ import { WebInterceptorCategory, HTTP_METHODS } from '../types/core.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
+import { WebBodyUtil } from '../util/body.ts';
 
 import { AcceptsInterceptor } from './accepts.ts';
 import { DecompressInterceptor } from './decompress.ts';
@@ -84,7 +85,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   }
 
   async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
-    const stream = req.getUnprocessedStream();
+    const stream = WebBodyUtil.getUnprocessedBody(req);
     if (!stream) { // No body to process
       return next();
     }
