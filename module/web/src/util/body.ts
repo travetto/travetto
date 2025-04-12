@@ -32,9 +32,8 @@ export class WebBodyUtil {
   /**
    * Convert a node binary input to a buffer
    */
-  static async toBuffer(src: NodeBinary | WebMessage): Promise<Buffer> {
-    return Buffer.isBuffer(src) ? src : BinaryUtil.isReadable(src) ? toBuffer(src) :
-      this.toBuffer(this.toBinaryMessage(src).body!);
+  static async toBuffer(src: NodeBinary): Promise<Buffer> {
+    return Buffer.isBuffer(src) ? src : toBuffer(src);
   }
 
   /**
@@ -164,6 +163,15 @@ export class WebBodyUtil {
       }
       out.body = Buffer.from(text, 'utf-8');
     }
+
+    if (Buffer.isBuffer(out.body)) {
+      out.headers.set('Content-Length', `${out.body.byteLength}`);
+    }
+
+    if (!out.headers.has('Content-Type')) {
+      out.headers.set('Content-Type', this.defaultContentType(message.body));
+    }
+
     return out;
   }
 
@@ -186,6 +194,19 @@ export class WebBodyUtil {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     if ((Buffer.isBuffer(p) || BinaryUtil.isReadable(p)) && (p as Any)[WebInternalSymbol] === p) {
       return WebBodyUtil.toReadable(p);
+    }
+  }
+
+  /**
+   * Get status code for a given message
+   */
+  static getStatusCode(msg: WebMessage, emptyCode = 201): number {
+    if (msg.headers.has('Content-Range')) { // Force status code if content range specified
+      return 206;
+    } else if (Buffer.isBuffer(msg.body) && msg.body.byteLength === 0) {
+      return emptyCode;
+    } else {
+      return 200;
     }
   }
 }

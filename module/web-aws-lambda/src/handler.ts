@@ -4,7 +4,7 @@ import { Runtime, ConsoleManager } from '@travetto/runtime';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
-import { StandardWebRouter, WebConfig } from '@travetto/web';
+import { StandardWebRouter, WebConfig, WebRequest } from '@travetto/web';
 
 import { AwsLambdaWebUtil } from './util.ts';
 
@@ -34,7 +34,7 @@ export class AwsLambdaWebHandler {
 
   async handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
     context.callbackWaitsForEmptyEventLoop = false;
-    const req = AwsLambdaWebUtil.toWebRequest(event).secure(this.config.trustProxy);
+    const req = WebRequest.secure(AwsLambdaWebUtil.toWebRequest(event), this.config.trustProxy);
     const res = await this.router.dispatch({ req });
     return AwsLambdaWebUtil.toLambdaResult(res, event.isBase64Encoded);
   }

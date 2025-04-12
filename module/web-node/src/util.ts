@@ -34,9 +34,9 @@ export class NodeWebUtil {
    * Send WebResponse to ServerResponse
    */
   static async respondToServerResponse(webRes: WebResponse, res: ServerResponse): Promise<void> {
-    const binaryRes = webRes.toBinary();
+    const binaryRes = WebResponse.toBinary(webRes);
+    binaryRes.headers.forEach((v, k) => res.setHeader(k.toLowerCase(), v));
     res.statusCode = binaryRes.statusCode ?? 200;
-    binaryRes.headers.forEach((v, k) => res.setHeader(k, v));
 
     if (BinaryUtil.isReadable(binaryRes.body)) {
       await pipeline(binaryRes.body, res);

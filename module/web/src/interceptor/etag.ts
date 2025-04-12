@@ -42,7 +42,7 @@ export class EtagInterceptor implements WebInterceptor {
       return res;
     }
 
-    const binaryRes = res.toBinary();
+    const binaryRes = WebResponse.toBinary(res);
     if (!Buffer.isBuffer(binaryRes.body)) {
       return binaryRes;
     }

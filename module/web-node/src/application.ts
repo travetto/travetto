@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, StandardWebRouter } from '@travetto/web';
+import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, StandardWebRouter, WebRequest } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
 
 import { NodeWebUtil } from './util.ts';
@@ -19,7 +19,7 @@ export class NodeWebApplication implements WebApplication {
   router: StandardWebRouter;
 
   async handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
-    const webReq = NodeWebUtil.toWebRequest(req).secure(this.config.trustProxy);
+    const webReq = WebRequest.secure(NodeWebUtil.toWebRequest(req), this.config.trustProxy);
     const webRes = await this.router.dispatch({ req: webReq });
     await NodeWebUtil.respondToServerResponse(webRes, res);
   }

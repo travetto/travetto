@@ -13,6 +13,7 @@ import { WebInterceptorCategory } from '../types/core.ts';
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
+import { WebBodyUtil } from '@travetto/web';
 
 const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const COMPRESSORS = {
@@ -85,7 +86,7 @@ export class CompressInterceptor implements WebInterceptor {
       return res;
     }
 
-    const binaryRes = res.toBinary();
+    const binaryRes = WebResponse.toBinary(res);
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     const len = Buffer.isBuffer(binaryRes.body) ? binaryRes.body.byteLength : undefined;
 

@@ -1,4 +1,4 @@
-import { AppError, castTo } from '@travetto/runtime';
+import { AppError } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
 import { WebHeaders } from './headers.ts';
@@ -14,6 +14,17 @@ export interface WebResponseInput<B> extends WebMessageInit<B> {
  * Web Response as a simple object
  */
 export class WebResponse<B = unknown> implements WebMessage<B> {
+
+  /**
+   * Make a response into a binary response
+   */
+  static toBinary(res: WebResponse<unknown>): WebResponse<NodeBinary> {
+    const out = new WebResponse({ statusCode: res.statusCode, cookies: res.getCookies(), ...WebBodyUtil.toBinaryMessage(res) });
+    if (out.headers.has('Content-Range')) {
+      out.statusCode = 206;
+    }
+    return out;
+  }
 
   /**
     * Build the redirect
@@ -57,21 +68,11 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
   constructor(o: WebResponseInput<B>) {
     this.statusCode ??= o.statusCode;
     this.#cookies = Object.fromEntries(o.cookies?.map(x => [x.name, x]) ?? []);
-    this.body = castTo(o.body);
+    this.body = o.body!;
     this.headers = new WebHeaders(o.headers);
 
     if (this.body instanceof Error) {
       this.statusCode ??= WebBodyUtil.getErrorStatus(this.body);
-    } else if (Buffer.isBuffer(this.body)) {
-      this.headers.set('Content-Length', `${this.body.byteLength}`);
-    }
-
-    if (!this.headers.has('Content-Type')) {
-      this.headers.set('Content-Type', WebBodyUtil.defaultContentType(o.body));
-    }
-
-    if (this.headers.has('Content-Range')) { // Force status code if content range specified
-      this.statusCode = 206;
     }
   }
 
@@ -87,12 +88,5 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
    */
   getCookies(): Cookie[] {
     return Object.values(this.#cookies);
-  }
-
-  /**
-   * Get a binary version
-   */
-  toBinary(): WebResponse<NodeBinary> {
-    return new WebResponse({ cookies: this.getCookies(), statusCode: this.statusCode, ...WebBodyUtil.toBinaryMessage(this) });
   }
 }

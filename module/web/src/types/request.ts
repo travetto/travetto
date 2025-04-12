@@ -2,15 +2,8 @@ import { AppError, castTo } from '@travetto/runtime';
 
 import { CookieGetOptions } from './cookie.ts';
 import { WebHeaders } from './headers.ts';
-import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
-import { WebMessage, WebMessageInit } from './message.ts';
-
-export interface WebConnection {
-  host?: string;
-  port?: number;
-  protocol?: HttpProtocol;
-  ip?: string;
-}
+import { WebInternalSymbol, HttpMethod } from './core.ts';
+import { WebConnection, WebMessage, WebMessageInit } from './message.ts';
 
 export interface WebRequestInit<B = unknown> extends WebMessageInit<B> {
   method?: HttpMethod;
@@ -31,6 +24,25 @@ export interface WebRequestInternal {
  */
 export class WebRequest<B = unknown> implements WebMessage<B> {
 
+  /**
+   * Secure the request
+   */
+  static secure(req: WebRequest, trustProxy: string[]): typeof req {
+    const forwardedFor = req.headers.get('X-Forwarded-For');
+
+    if (forwardedFor) {
+      if (trustProxy[0] === '*' || (req.connection.ip && Array.isArray(trustProxy) && trustProxy.includes(req.connection.ip))) {
+        req.connection.protocol = castTo(req.headers.get('X-Forwarded-Proto')!) || req.connection.protocol;
+        req.connection.host = req.headers.get('X-Forwarded-Host') || req.connection.host;
+        req.connection.ip = forwardedFor;
+      }
+    }
+    req.headers.delete('X-Forwarded-For');
+    req.headers.delete('X-Forwarded-Proto');
+    req.headers.delete('X-Forwarded-Host');
+    return req;
+  }
+
   [WebInternalSymbol]: WebRequestInternal = {};
 
   readonly headers: WebHeaders;
@@ -48,24 +60,5 @@ export class WebRequest<B = unknown> implements WebMessage<B> {
 
   getCookie(key: string, opts?: CookieGetOptions): string | undefined {
     throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
-  }
-
-  /**
-   * Secure the request
-   */
-  secure(trustProxy: string[]): this {
-    const forwardedFor = this.headers.get('X-Forwarded-For');
-
-    if (forwardedFor) {
-      if (trustProxy[0] === '*' || (this.connection.ip && Array.isArray(trustProxy) && trustProxy.includes(this.connection.ip))) {
-        this.connection.protocol = castTo(this.headers.get('X-Forwarded-Proto')) || this.connection.protocol;
-        this.connection.host = this.headers.get('X-Forwarded-Host') || this.connection.host;
-        this.connection.ip = forwardedFor;
-      }
-    }
-    this.headers.delete('X-Forwarded-For');
-    this.headers.delete('X-Forwarded-Proto');
-    this.headers.delete('X-Forwarded-Host');
-    return this;
   }
 }
