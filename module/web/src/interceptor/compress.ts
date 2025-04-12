@@ -21,10 +21,6 @@ const COMPRESSORS = {
   br: createBrotliCompress,
 };
 
-function isCompressionType(o: string | undefined, allowed: WebCompressEncoding[]): o is WebCompressEncoding {
-  return !allowed.includes(castTo(o));
-}
-
 type WebCompressEncoding = keyof typeof COMPRESSORS | 'identity';
 
 @Config('web.compress')
@@ -74,17 +70,18 @@ export class CompressInterceptor implements WebInterceptor {
     }
 
     const accepts = req.headers.get('Accept-Encoding');
-    const type = new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
-      .encoding([...supportedEncodings, ...preferredEncodings]);
+    const type: WebCompressEncoding | undefined =
+      castTo(new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
+        .encoding([...supportedEncodings, ...preferredEncodings]));
 
-    if (!isCompressionType(type, supportedEncodings)) {
+    if (accepts && (!type || !accepts.includes(type))) {
       throw new WebResponse({
         body: new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`),
         statusCode: 406
       });
     }
 
-    if (type === 'identity') {
+    if (type === 'identity' || !type) {
       return res;
     }
 
