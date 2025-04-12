@@ -84,11 +84,4 @@ export class WebHeaders extends Headers {
       }
     }
   }
-
-  /**
-   * Get content length by header
-   */
-  getContentLength(): number | undefined {
-    return this.has('Content-Length') ? +this.get('Content-Length')! : undefined;
-  }
 }

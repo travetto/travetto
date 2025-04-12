@@ -96,8 +96,8 @@ export class WebResponse<B = unknown> {
    * Get a binary version
    */
   toBinary(): WebResponse<NodeBinary> {
-    let b: unknown = this.body;
-    if (Buffer.isBuffer(b) || BinaryUtil.isReadable(b)) {
+    const body = this.body;
+    if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
       return castTo(this);
     }
 
@@ -106,25 +106,23 @@ export class WebResponse<B = unknown> {
       cookies: this.getCookies(), statusCode: this.statusCode
     });
 
-    if (b instanceof Blob) {
-      const meta = BinaryUtil.getBlobMeta(b);
+    if (body instanceof Blob) {
+      const meta = BinaryUtil.getBlobMeta(body);
       out.statusCode = meta?.range ? 206 : out.statusCode;
-      for (const [k, v] of Object.entries(WebBodyUtil.getBlobHeaders(b))) {
+      for (const [k, v] of WebBodyUtil.getBlobHeaders(body)) {
         out.headers.set(k, v);
       }
-      b = b.stream();
-    } else if (b instanceof FormData) {
-      const boundary = `-------------------------multipart-${Util.uuid()}`;
+      out.body = Readable.fromWeb(body.stream());
+    } else if (body instanceof FormData) {
+      const boundary = `${'-'.repeat(24)}'-multipart-${Util.uuid()}`;
       out.headers.set('Content-Type', `multipart/form-data; boundary=${boundary}`);
-      b = WebBodyUtil.buildMultiPartBody(b, boundary);
-    }
-
-    if (BinaryUtil.isReadableStream(b)) {
-      out.body = Readable.fromWeb(b);
-    } else if (BinaryUtil.isAsyncIterable(b)) {
-      out.body = Readable.from(b);
+      out.body = Readable.from(WebBodyUtil.buildMultiPartBody(body, boundary));
+    } else if (BinaryUtil.isReadableStream(body)) {
+      out.body = Readable.fromWeb(body);
+    } else if (BinaryUtil.isAsyncIterable(body)) {
+      out.body = Readable.from(body);
     } else {
-      out.body = WebBodyUtil.buildBufferPayload(b);
+      out.body = WebBodyUtil.buildBufferPayload(body);
     }
     return out;
   }

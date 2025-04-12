@@ -38,39 +38,36 @@ export class EtagInterceptor implements WebInterceptor {
   addTag(ctx: WebChainedContext, res: WebResponse): WebResponse {
     const { req } = ctx;
 
+    if (res.statusCode && (res.statusCode >= 300 && res.statusCode !== 304)) {
+      return res;
+    }
+
     const binaryRes = res.toBinary();
+    if (!Buffer.isBuffer(binaryRes.body)) {
+      return binaryRes;
+    }
+
+    const tag = binaryRes.body.byteLength === 0 ?
+      '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
+      crypto
+        .createHash('sha1')
+        .update(binaryRes.body.toString('utf8'), 'utf8')
+        .digest('base64')
+        .substring(0, 27);
+
+    binaryRes.headers.set('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
+
+    const lastModified = binaryRes.headers.get('Last-Modified');
 
     if (
-      Buffer.isBuffer(binaryRes.body) &&
-      (
-        !res.statusCode ||
-        (res.statusCode < 300 && res.statusCode >= 200) ||
-        res.statusCode === 304
-      )
+      (req.method === 'GET' || req.method === 'HEAD') &&
+      fresh({
+        'if-modified-since': req.headers.get('If-Modified-Since')!,
+        'if-none-match': req.headers.get('If-None-Match')!,
+        'cache-control': req.headers.get('Cache-Control')!,
+      }, { etag: tag, 'last-modified': lastModified! })
     ) {
-
-      const tag = binaryRes.body.length === 0 ?
-        '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
-        crypto
-          .createHash('sha1')
-          .update(binaryRes.body.toString('utf8'), 'utf8')
-          .digest('base64')
-          .substring(0, 27);
-
-      binaryRes.headers.set('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
-
-      const lastModified = binaryRes.headers.get('Last-Modified');
-
-      if (
-        (req.method === 'GET' || req.method === 'HEAD') &&
-        fresh({
-          'if-modified-since': req.headers.get('If-Modified-Since')!,
-          'if-none-match': req.headers.get('If-None-Match')!,
-          'cache-control': req.headers.get('Cache-Control')!,
-        }, { etag: tag, 'last-modified': lastModified! })
-      ) {
-        return new WebResponse({ body: null, statusCode: 304 });
-      }
+      return new WebResponse({ body: null, statusCode: 304 });
     }
 
     return binaryRes;

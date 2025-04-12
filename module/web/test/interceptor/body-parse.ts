@@ -3,8 +3,7 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { BodyParseConfig, BodyParseInterceptor, WebRequest, WebResponse } from '@travetto/web';
-import { BinaryUtil } from '@travetto/runtime';
+import { BodyParseConfig, BodyParseInterceptor, WebBodyUtil, WebRequest, WebResponse } from '@travetto/web';
 
 @Suite()
 class BodyParseInterceptorSuite {
@@ -84,7 +83,7 @@ class BodyParseInterceptorSuite {
       config
     });
 
-    const resBuff = await BinaryUtil.toBuffer(res.toBinary().body);
+    const resBuff = await WebBodyUtil.toBuffer(res.toBinary().body);
     assert(resBuff.length === 1000);
     assert(!resBuff.some(x => x !== 0));
   }

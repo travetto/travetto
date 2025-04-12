@@ -55,16 +55,13 @@ export class CompressInterceptor implements WebInterceptor {
   config: CompressConfig;
 
   async compress(ctx: WebChainedContext, res: WebResponse): Promise<WebResponse> {
-    const { raw = {}, preferredEncodings, supportedEncodings } = this.config;
+    const { raw = {}, preferredEncodings = [], supportedEncodings } = this.config;
     const { req } = ctx;
 
     res.headers.vary('Accept-Encoding');
 
-    const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
-    const len = res.headers.getContentLength();
     if (
       !res.body ||
-      (len !== undefined && len >= 0 && len < chunkSize) ||
       req.method === 'HEAD' ||
       res.headers.has('Content-Encoding') ||
       NO_TRANSFORM_REGEX.test(res.headers.get('Cache-Control')?.toString() ?? '')
@@ -74,14 +71,13 @@ export class CompressInterceptor implements WebInterceptor {
 
     const accepts = req.headers.get('Accept-Encoding');
     const method = new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
-      // Bad typings, need to override
-      .encoding(...castTo<[string[]]>([supportedEncodings, preferredEncodings]));
+      .encoding([...supportedEncodings, ...preferredEncodings]);
 
     if (accepts && (!method || !accepts.includes(method))) {
-      throw Object.assign(
-        new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`),
-        { status: 406 }
-      );
+      throw new WebResponse({
+        body: new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`),
+        statusCode: 406
+      });
     }
 
     const type = castTo<WebCompressEncoding>(method!);
@@ -89,9 +85,17 @@ export class CompressInterceptor implements WebInterceptor {
       return res;
     }
 
+    const binaryRes = res.toBinary();
+    const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
+    const len = Buffer.isBuffer(binaryRes.body) ? binaryRes.body.byteLength : undefined;
+
+    if (len !== undefined && len >= 0 && len < chunkSize) {
+      return binaryRes;
+    }
+
     const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
     const stream = COMPRESSORS[type](opts);
-    const binaryRes = res.toBinary();
+
     // If we are compressing
     binaryRes.headers.set('Content-Encoding', type);
     binaryRes.headers.delete('Content-Length');
