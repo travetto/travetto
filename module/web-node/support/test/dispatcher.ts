@@ -32,7 +32,7 @@ export class FetchWebDispatcher implements WebDispatcher {
 
     return WebTestDispatchUtil.finalizeResponseBody(
       new WebResponse({
-        body: await res.blob(),
+        body: Buffer.from(await res.arrayBuffer()),
         statusCode: res.status, headers: res.headers
       })
     );

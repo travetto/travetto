@@ -13,9 +13,6 @@ export class WebTestDispatchUtil {
   static async applyRequestBody(req: WebRequest): Promise<WebRequest> {
     if (req.body !== undefined) {
       const sample = WebBodyUtil.toBinaryMessage(req);
-      if (!sample.headers.getContentType()) {
-        sample.headers.set('Content-Type', WebBodyUtil.defaultContentType(req.body));
-      }
       sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
       const b = await WebBodyUtil.toBuffer(sample.body!);
       req.body = WebRequest.markUnprocessed(b);
