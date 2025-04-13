@@ -540,15 +540,15 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="respondinterceptor">RespondInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L11">RespondInterceptor</a> is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L12">RespondInterceptor</a> is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
 
 <h3 id="corsinterceptor">CorsInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51">CorsInterceptor</a> allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, the <code class="item input">web.cors</code> config space.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L52">CorsInterceptor</a> allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, the <code class="item input">web.cors</code> config space.
 
   <figure class="code">
     <figcaption class="code">Cors Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L16">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L17">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CorsConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -793,9 +793,8 @@ The resolution logic is as follows:
     <span class="token keyword">this</span><span class="token punctuation">.</span>cookies<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>getOptions<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
     <span class="token comment">// Set a cookie on response</span>
-    <span class="token keyword">const</span> result <span class="token operator">=</span> WebResponse<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>cookies<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> name<span class="token operator">:</span> <span class="token string">'name'</span><span class="token punctuation">,</span> value<span class="token punctuation">,</span> <span class="token operator">...</span><span class="token keyword">this</span><span class="token punctuation">.</span>setOptions <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">WebResponse</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> body<span class="token operator">:</span> <span class="token keyword">null</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>

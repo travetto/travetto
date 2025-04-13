@@ -492,10 +492,10 @@ export class BodyParseConfig {
 ```
 
 ### RespondInterceptor
-[RespondInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L11) is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+[RespondInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L12) is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
 
 ### CorsInterceptor
-[CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51) allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, the `web.cors` config space.
+[CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L52) allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, the `web.cors` config space.
 
 **Code: Cors Config**
 ```typescript
@@ -713,9 +713,8 @@ export class SimpleEndpoints {
     this.cookies.get('name', this.getOptions);
 
     // Set a cookie on response
-    const result = WebResponse.from(null);
     this.cookies.set({ name: 'name', value, ...this.setOptions });
-    return result;
+    return new WebResponse({ body: null });
   }
 }
 ```
