@@ -12,7 +12,7 @@ import { Controller } from '../src/decorator/controller.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
 import { EndpointUtil } from '../src/util/endpoint.ts';
-import { HttpMethodWithAll } from '../src/types/core.ts';
+import { HttpMethod } from '../src/types/core.ts';
 
 class User {
   name: string;
@@ -87,7 +87,7 @@ class ParamController {
 
 @Suite()
 export class EndpointParameterTest {
-  static getEndpoint(path: string, method: HttpMethodWithAll) {
+  static getEndpoint(path: string, method: HttpMethod) {
     return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.method === method)!;
   }
 
