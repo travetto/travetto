@@ -54,7 +54,7 @@ export class WebTestDispatchUtil {
     }
 
     if (res.statusCode && res.statusCode >= 400) {
-      result = WebResponse.fromCatch(AppError.fromJSON(result) ?? result).body;
+      result = WebCommonUtil.catchResponse(AppError.fromJSON(result) ?? result).body;
     }
 
     res.body = result;
