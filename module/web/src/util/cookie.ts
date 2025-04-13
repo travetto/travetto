@@ -120,7 +120,7 @@ export class CookieJar {
     c.secure ??= this.#secure;
     c.signed ??= !!this.#grip;
 
-    if (!c.value) {
+    if (c.value === null || c.value === undefined) {
       c.maxAge = -1;
       c.expires = undefined;
     }
