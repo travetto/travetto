@@ -33,7 +33,7 @@ export class SampleAuth {
   @Get('/facebook/callback')
   @Login(FbAuthSymbol)
   async fbLoginComplete() {
-    return WebResponse.redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self');
   }
 
   @Post('/logout')

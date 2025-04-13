@@ -34,10 +34,6 @@ export class GetCacheInterceptor implements WebInterceptor {
   }
 
   async filter({ req, next }: WebChainedContext): Promise<WebResponse> {
-    if (req.method !== 'GET') {
-      return next();
-    }
-
     const res = await next();
     res.headers.setIfAbsent('Cache-Control', 'max-age=0, no-cache');
     return res;

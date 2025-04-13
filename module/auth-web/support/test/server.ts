@@ -66,7 +66,7 @@ class TestAuthController {
   @Get('/logout')
   @Logout()
   async logout() {
-    return WebResponse.redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self');
   }
 }
 

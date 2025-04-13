@@ -13,7 +13,7 @@ export class SampleAuth {
   @Get('/simple')
   @Login(FbAuthSymbol)
   async simpleLogin() {
-    return WebResponse.redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self');
   }
 
   @Get('/self')
@@ -25,6 +25,6 @@ export class SampleAuth {
   @Get('/logout')
   @Logout()
   async logout() {
-    return WebResponse.redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self');
   }
 }

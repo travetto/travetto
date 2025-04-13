@@ -68,7 +68,7 @@ export class EtagInterceptor implements WebInterceptor {
         'cache-control': req.headers.get('Cache-Control')!,
       }, { etag: tag, 'last-modified': lastModified! })
     ) {
-      return new WebResponse({ body: null, statusCode: 304 });
+      return new WebResponse({ statusCode: 304 });
     }
 
     return binaryRes;
