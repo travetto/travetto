@@ -52,10 +52,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   token(req: WebRequest): AuthToken | undefined {
     let value;
     if (this.config.mode === 'header') {
-      value = req.headers.get(this.config.header);
-      if (value && this.config.headerPrefix) {
-        value = value.split(this.config.headerPrefix)[1].trim();
-      }
+      value = req.headers.getWithPrefix(this.config.header, this.config.headerPrefix);
     } else {
       value = this.webAsyncContext.cookies.get(this.config.cookie, { signed: false });
     }
@@ -88,11 +85,7 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   async encode(res: WebResponse, data: Principal | undefined): Promise<WebResponse> {
     const token = data ? await this.create(data) : undefined;
     if (this.config.mode === 'header') {
-      if (token) {
-        res.headers.set(this.config.header, `${this.config.headerPrefix || ''} ${token}`.trim());
-      } else {
-        res.headers.delete(this.config.header);
-      }
+      res.headers.setWithPrefix(this.config.header, token, this.config.headerPrefix);
     } else {
       this.webAsyncContext.cookies.set({
         name: this.config.cookie, value: token, signed: false,

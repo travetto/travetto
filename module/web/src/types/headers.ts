@@ -91,4 +91,18 @@ export class WebHeaders extends Headers {
       }
     }
   }
+
+  /**
+   * Set header value with a prefix
+   */
+  setWithPrefix(key: string, value: string | undefined, prefix: string = ''): void {
+    value ? this.set(key, `${prefix} ${value}`.trim()) : this.delete(key);
+  }
+
+  /**
+   * Get with prefix
+   */
+  getWithPrefix(key: string, prefix: string = ''): string | undefined {
+    return this.get(key)?.replace(prefix, '').trim();
+  }
 }
