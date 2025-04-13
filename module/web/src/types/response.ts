@@ -23,7 +23,7 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
   body: B;
   readonly headers: WebHeaders;
 
-  constructor(o: WebResponseInput<B>) {
+  constructor(o: WebResponseInput<B> = {}) {
     Object.assign(this, { cookies: [] }, o);
     this.headers = new WebHeaders(o.headers);
   }

@@ -19,7 +19,7 @@ class GetCacheInterceptorSuite {
 
     const res = await interceptor.filter({
       req: new WebRequest({ method: 'GET' }),
-      next: async () => new WebResponse({}),
+      next: async () => new WebResponse(),
       config: interceptor.config
     });
 
@@ -28,7 +28,7 @@ class GetCacheInterceptorSuite {
 
     const res2 = await interceptor.filter({
       req: new WebRequest({ method: 'PATCH' }),
-      next: async () => new WebResponse({}),
+      next: async () => new WebResponse(),
       config: interceptor.config
     });
 
