@@ -6,6 +6,7 @@ import { WebResponse } from '../types/response.ts';
 
 import { WebChainedContext } from '../types.ts';
 import { LoggingInterceptor } from './logging.ts';
+import { WebCommonUtil } from '../util/common.ts';
 
 @Injectable()
 export class RespondInterceptor implements WebInterceptor {
@@ -18,7 +19,7 @@ export class RespondInterceptor implements WebInterceptor {
     try {
       res = await ctx.next();
     } catch (err) {
-      res = WebResponse.fromCatch(err);
+      res = WebCommonUtil.catchResponse(err);
     }
     return res;
   }

@@ -1,6 +1,3 @@
-import { AppError } from '@travetto/runtime';
-
-import { CookieGetOptions } from './cookie.ts';
 import { WebHeaders } from './headers.ts';
 import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
 import { WebMessage, WebMessageInit } from './message.ts';
@@ -18,7 +15,6 @@ export interface WebRequestInit<B = unknown> extends WebMessageInit<B> {
   query?: Record<string, unknown>;
   path?: string;
   params?: Record<string, unknown>;
-  getCookie?: (key: string, opts: CookieGetOptions) => string | undefined;
 };
 
 export interface WebRequestInternal {
@@ -44,9 +40,5 @@ export class WebRequest<B = unknown> implements WebMessage<B> {
   constructor(init: WebRequestInit<B> = {}) {
     Object.assign(this, init);
     this.headers = new WebHeaders(init.headers);
-  }
-
-  getCookie(key: string, opts?: CookieGetOptions): string | undefined {
-    throw new AppError('Cannot access cookies without establishing read support', { category: 'general' });
   }
 }

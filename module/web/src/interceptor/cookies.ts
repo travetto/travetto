@@ -11,6 +11,7 @@ import { WebConfig } from '../config/web.ts';
 import { EndpointConfig } from '../registry/types.ts';
 import { Cookie, CookieSetOptions } from '../types/cookie.ts';
 import { CookieJar } from '../util/cookie.ts';
+import { WebAsyncContext } from '../context.ts';
 
 /**
  * Web cookie configuration
@@ -62,6 +63,9 @@ export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
   @Inject()
   webConfig: WebConfig;
 
+  @Inject()
+  webAsyncContext: WebAsyncContext;
+
   finalizeConfig(config: CookieConfig): CookieConfig {
     config.secure ??= this.webConfig.ssl?.active;
     config.domain ??= this.webConfig.hostname;
@@ -73,11 +77,8 @@ export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
   }
 
   async filter({ req, config, next }: WebChainedContext<CookieConfig>): Promise<WebResponse> {
-    const jar = new CookieJar(req.headers.get('Cookie'), config);
-    req.getCookie = jar.get.bind(jar);
-
+    const jar = this.webAsyncContext.cookies = new CookieJar(req.headers.get('Cookie'), config);
     const res = await next();
-    for (const c of res.cookies) { jar.set(c); }
     for (const c of jar.export()) { res.headers.append('Set-Cookie', c); }
     return res;
   }

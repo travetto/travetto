@@ -7,7 +7,7 @@ import { WebFilterContext, WebChainedFilter, WebChainedContext, WebFilter } from
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
-import { WebInternalSymbol, HTTP_METHODS, WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
+import { WebInternalSymbol, WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
 
@@ -138,21 +138,12 @@ export class EndpointUtil {
    * Endpoint invocation code
    */
   static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebFilterContext): Promise<WebResponse> {
-    const params = await this.extractParameters(ctx, endpoint);
     try {
+      const params = await this.extractParameters(ctx, endpoint);
       const body = await endpoint.endpoint.apply(endpoint.instance, params);
-      if (body instanceof WebResponse) {
-        return body;
-      } else {
-        const statusCode = (body === null || body === undefined) ? HTTP_METHODS[ctx.req.method].emptyStatusCode : 200;
-        const res = new WebResponse({ body, statusCode });
-        for (const [k, v] of endpoint.responseHeaderMap) {
-          res.headers.set(k, v);
-        }
-        return res;
-      }
+      return WebCommonUtil.commonResponse(ctx.req.method, body, endpoint.responseHeaderMap);
     } catch (err) {
-      throw WebResponse.fromCatch(err);
+      throw WebCommonUtil.catchResponse(err);
     }
   }
 

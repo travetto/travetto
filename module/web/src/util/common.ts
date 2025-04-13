@@ -1,10 +1,22 @@
-import { Cookie, CookieGetOptions } from '../types/cookie.ts';
-import { WebRequest } from '../types/request.ts';
+import { AppError, ErrorCategory } from '@travetto/runtime';
 import { WebResponse } from '../types/response.ts';
+import { HTTP_METHODS, HttpMethod, WebHeaders, WebHeadersInit } from '@travetto/web';
 
-type WebMetadataConfig = { mode: 'cookie' | 'header', header: string, cookie: string, headerPrefix?: string };
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
+
+/**
+ * Mapping from error category to standard http error codes
+ */
+const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
+  general: 500,
+  notfound: 404,
+  data: 400,
+  permissions: 403,
+  authentication: 401,
+  timeout: 408,
+  unavailable: 503,
+};
 
 export class WebCommonUtil {
 
@@ -57,44 +69,44 @@ export class WebCommonUtil {
   }
 
   /**
-   * Write value to response
-   */
-  static writeMetadata(res: WebResponse, cfg: WebMetadataConfig, value: string | undefined, opts?: Omit<Cookie, 'name' | 'value'>): WebResponse {
-    if (cfg.mode === 'cookie' || !cfg.mode) {
-      res.cookies.push({
-        ...opts,
-        name: cfg.cookie, value, maxAge: (value !== undefined) ? opts?.maxAge : -1,
-      });
-    }
-    if (cfg.mode === 'header') {
-      if (value) {
-        res.headers.set(cfg.header, `${cfg.headerPrefix || ''} ${value}`.trim());
-      } else {
-        res.headers.delete(cfg.header);
-      }
-    }
-    return res;
-  }
-
-  /**
-   * Read value from request
-   */
-  static readMetadata(req: WebRequest, cfg: WebMetadataConfig, opts?: CookieGetOptions): string | undefined {
-    let value = (cfg.mode === 'cookie' || !cfg.mode) ?
-      req.getCookie(cfg.cookie, opts) :
-      req.headers.get(cfg.header) ?? undefined;
-
-    if (value && cfg.mode === 'header' && cfg.headerPrefix) {
-      value = value.split(cfg.headerPrefix)[1].trim();
-    }
-
-    return value;
-  }
-
-  /**
    * Get status code
    */
   static getStatusCode(res: WebResponse): number {
     return (res.headers.has('Content-Range') && res.statusCode === 200) ? 206 : res.statusCode ?? 200;
+  }
+
+  /**
+   * From catch value
+   */
+  static catchResponse(err: unknown): WebResponse<Error> {
+    if (err instanceof WebResponse) {
+      return err;
+    }
+
+    const body = err instanceof Error ? err :
+      (!!err && typeof err === 'object' && ('message' in err && typeof err.message === 'string')) ?
+        new AppError(err.message, { details: err }) :
+        new AppError(`${err}`);
+
+    const error: Error & { category?: ErrorCategory, status?: number, statusCode?: number } = body;
+    const statusCode = error.status ?? error.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
+
+    return new WebResponse({ body, statusCode });
+  }
+
+  /**
+   * Generate common valid response
+   */
+  static commonResponse(method: HttpMethod, body: unknown, extraHeaders: WebHeaders): WebResponse {
+    if (body instanceof WebResponse) {
+      return body;
+    } else {
+      const statusCode = (body === null || body === undefined) ? HTTP_METHODS[method].emptyStatusCode : 200;
+      const res = new WebResponse({ body, statusCode });
+      for (const [k, v] of extraHeaders) {
+        res.headers.set(k, v);
+      }
+      return res;
+    }
   }
 }

@@ -2,7 +2,7 @@ import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt
 
 import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
-import { WebResponse, WebRequest, WebCommonUtil } from '@travetto/web';
+import { WebResponse, WebRequest, WebAsyncContext } from '@travetto/web';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
@@ -19,6 +19,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   @Inject()
   authContext: AuthContext;
+
+  @Inject()
+  webAsyncContext: WebAsyncContext;
 
   #verifier: Verifier;
   #algorithm: SupportedAlgorithms = 'HS256';
@@ -47,7 +50,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   token(req: WebRequest): AuthToken | undefined {
-    const value = WebCommonUtil.readMetadata(req, this.config, { signed: false });
+    const value = (this.config.mode === 'header') ?
+      req.headers.getWithPrefix(this.config.header, this.config.headerPrefix) :
+      this.webAsyncContext.cookies.get(this.config.cookie, { signed: false });
     return value ? { type: 'jwt', value } : undefined;
   }
 
@@ -76,7 +81,12 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   async encode(res: WebResponse, data: Principal | undefined): Promise<WebResponse> {
     const token = data ? await this.create(data) : undefined;
-    WebCommonUtil.writeMetadata(res, this.config, token, { expires: data?.expiresAt, signed: false });
+    const { header, headerPrefix, cookie } = this.config;
+    if (this.config.mode === 'header') {
+      res.headers.setWithPrefix(header, token, headerPrefix);
+    } else {
+      this.webAsyncContext.cookies.set({ name: cookie, value: token, signed: false, expires: data?.expiresAt });
+    }
     return res;
   }
 }

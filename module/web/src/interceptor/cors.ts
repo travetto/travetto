@@ -8,6 +8,7 @@ import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 import { EndpointConfig } from '../registry/types.ts';
+import { WebCommonUtil } from '../util/common.ts';
 
 /**
  * Web cors support
@@ -88,7 +89,7 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
     try {
       return this.decorate(req, resolved, await next());
     } catch (err) {
-      throw this.decorate(req, resolved, WebResponse.fromCatch(err));
+      throw this.decorate(req, resolved, WebCommonUtil.catchResponse(err));
     }
   }
 }

@@ -26,7 +26,7 @@ export class CodecTest {
 
   @Test()
   async testHeader() {
-    const res = WebResponse.from(null);
+    const res = new WebResponse();
     this.interceptor.config.mode = 'header';
 
     await this.interceptor.codec.encode(res,
@@ -43,7 +43,7 @@ export class CodecTest {
 
   @Test()
   async testHeaderMissing() {
-    const res = WebResponse.from(null);
+    const res = new WebResponse();
     this.interceptor.config.mode = 'header';
 
     await this.interceptor.codec.encode(res, undefined);
