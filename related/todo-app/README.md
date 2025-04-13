@@ -400,6 +400,7 @@ npx trv run:web
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
       },
+      TrustProxyConfig: { applies: true, ips: [] },
       WebAuthConfig: {
         applies: false,
         mode: 'cookie',

@@ -319,6 +319,7 @@ Initialized {
       },
       EtagConfig: { applies: true },
       GetCacheConfig: { applies: true },
+      TrustProxyConfig: { applies: true, ips: [] },
       WebConfig: {
         serve: true,
         port: 3000,
@@ -427,6 +428,7 @@ Initialized {
       },
       EtagConfig: { applies: true },
       GetCacheConfig: { applies: true },
+      TrustProxyConfig: { applies: true, ips: [] },
       WebConfig: {
         serve: true,
         port: 3000,
@@ -493,7 +495,7 @@ export class BodyParseConfig {
 [RespondInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/respond.ts#L11) is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
 
 ### CorsInterceptor
-[CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L52) allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, the `web.cors` config space.
+[CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51) allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, the `web.cors` config space.
 
 **Code: Cors Config**
 ```typescript

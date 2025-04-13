@@ -353,6 +353,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
       EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,
@@ -467,6 +468,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
       EtagConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       GetCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
+      TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       WebConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,
@@ -542,11 +544,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="corsinterceptor">CorsInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L52">CorsInterceptor</a> allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, the <code class="item input">web.cors</code> config space.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51">CorsInterceptor</a> allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, the <code class="item input">web.cors</code> config space.
 
   <figure class="code">
     <figcaption class="code">Cors Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L17">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L16">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CorsConfig</span> <span class="token punctuation">{{'{'}}</span>
