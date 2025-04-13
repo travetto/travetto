@@ -120,6 +120,11 @@ export class CookieJar {
     c.secure ??= this.#secure;
     c.signed ??= !!this.#grip;
 
+    if (!c.value) {
+      c.maxAge = -1;
+      c.expires = undefined;
+    }
+
     if (c.signed) {
       const sc = this.#signCookie(c);
       this.#modified[sc.name] = sc;
