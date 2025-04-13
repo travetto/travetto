@@ -1,12 +1,10 @@
 import { AppError, ErrorCategory } from '@travetto/runtime';
 
-import { Cookie } from './cookie.ts';
 import { WebHeaders } from './headers.ts';
 import { WebMessage, WebMessageInit } from './message.ts';
 
 export interface WebResponseInput<B> extends WebMessageInit<B> {
   statusCode?: number;
-  cookies?: Cookie[];
 };
 
 /**
@@ -62,7 +60,6 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
     return new WebResponse<T>({ ...opts, body });
   }
 
-  cookies: Cookie[];
   statusCode?: number;
   body: B;
   readonly headers: WebHeaders;

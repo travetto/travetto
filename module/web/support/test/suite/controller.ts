@@ -9,12 +9,16 @@ import { Produces, SetHeaders } from '../../../src/decorator/common.ts';
 
 import { WebRequest } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
+import { CookieJar } from '../../../src/util/cookie.ts';
 
 @Controller('/test')
 export class TestController {
 
   @ContextParam()
   req: WebRequest;
+
+  @ContextParam()
+  cookies: CookieJar;
 
   @Get('/json')
   getJSON() {
@@ -43,9 +47,9 @@ export class TestController {
 
   @Delete('/cookie')
   withCookie() {
+    this.cookies.set({ name: 'flavor', value: 'oreo' });
     return new WebResponse({
-      body: { cookie: this.req.getCookie('orange') },
-      cookies: [{ name: 'flavor', value: 'oreo' }]
+      body: { cookie: this.cookies.get('orange') },
     });
   }
 

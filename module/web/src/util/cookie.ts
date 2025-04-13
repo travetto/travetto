@@ -55,10 +55,12 @@ export class CookieJar {
   #cookies: Record<string, Cookie> = {};
   #modified: Record<string, Cookie> = {};
 
-  constructor(input?: string | null | undefined | Cookie[], options?: { grip?: keygrip, secure?: boolean }) {
+  constructor(input?: string | null | undefined | Cookie[] | CookieJar, options?: { grip?: keygrip, secure?: boolean }) {
     this.#grip = options?.grip;
     this.#secure = options?.secure ?? false;
-    if (Array.isArray(input)) {
+    if (input instanceof CookieJar) {
+      this.#cookies = { ...input.#cookies };
+    } else if (Array.isArray(input)) {
       this.#import(input);
     } else {
       this.#import(input?.split(/\s{0,4},\s{0,4}/) ?? []);

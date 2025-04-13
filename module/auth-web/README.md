@@ -58,7 +58,7 @@ export interface Authenticator<T = unknown, C = unknown, P extends Principal = P
 }
 ```
 
-The only required method to be defined is the `authenticate` method.  This takes in a pre-principal payload and a filter context with a [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L15) and [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L7), and is responsible for:
+The only required method to be defined is the `authenticate` method.  This takes in a pre-principal payload and a filter context with a [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L12) and [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L6), and is responsible for:
    *  Returning an [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) if authentication was successful
    *  Throwing an error if it failed
    *  Returning undefined if the authentication is multi-staged and has not completed yet
@@ -109,11 +109,11 @@ export class AppConfig {
 The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L70) method.
 
 ## Maintaining Auth Context
-The [AuthContextInterceptor](https://github.com/travetto/travetto/tree/main/module/auth-web/src/interceptors/context.ts#L19) acts as the bridge between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14) and the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L15)/[WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L7) object. The integration, leveraging [WebAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-web/src/config.ts#L8)'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the [JWT](https://jwt.io/) appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  
+The [AuthContextInterceptor](https://github.com/travetto/travetto/tree/main/module/auth-web/src/interceptors/context.ts#L19) acts as the bridge between the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") and [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the [AuthContext](https://github.com/travetto/travetto/tree/main/module/auth/src/context.ts#L14) and the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L12)/[WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L6) object. The integration, leveraging [WebAuthConfig](https://github.com/travetto/travetto/tree/main/module/auth-web/src/config.ts#L8)'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the [JWT](https://jwt.io/) appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  
 
 **Note:** When using cookies, the automatic renewal, and update, and seamless receipt and transmission all the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) to act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. 
 
-The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-web/src/types.ts#L10) contract is the primary interface for reading and writing [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) data out of the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L15)/[WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L7). This contract is flexible by design, allowing for all sorts of usage. [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-web/src/codec.ts#L15) is the default [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-web/src/types.ts#L10), leveraging [JWT](https://jwt.io/)s for encoding/decoding the principal information.
+The [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-web/src/types.ts#L10) contract is the primary interface for reading and writing [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) data out of the [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L12)/[WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L6). This contract is flexible by design, allowing for all sorts of usage. [JWTPrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-web/src/codec.ts#L15) is the default [PrincipalCodec](https://github.com/travetto/travetto/tree/main/module/auth-web/src/types.ts#L10), leveraging [JWT](https://jwt.io/)s for encoding/decoding the principal information.
 
 **Code: JWTPrincipalCodec**
 ```typescript
@@ -121,7 +121,7 @@ import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt
 
 import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
-import { WebResponse, WebRequest, WebCommonUtil } from '@travetto/web';
+import { WebResponse, WebRequest, WebAsyncContext } from '@travetto/web';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
@@ -138,6 +138,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   @Inject()
   authContext: AuthContext;
+
+  @Inject()
+  webAsyncContext: WebAsyncContext;
 
   #verifier: Verifier;
   #algorithm: SupportedAlgorithms = 'HS256';
@@ -166,7 +169,18 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   token(req: WebRequest): AuthToken | undefined {
-    const value = WebCommonUtil.readMetadata(req, this.config, { signed: false });
+    let value;
+    switch (this.config.mode) {
+      case 'header': {
+        value = req.headers.get(this.config.header);
+        if (value && this.config.headerPrefix) {
+          value = value.split(this.config.headerPrefix)[1].trim();
+        }
+        break;
+      }
+      case 'cookie':
+      default: value = this.webAsyncContext.cookies.get(this.config.cookie, { signed: false });
+    }
     return value ? { type: 'jwt', value } : undefined;
   }
 
@@ -195,7 +209,22 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   async encode(res: WebResponse, data: Principal | undefined): Promise<WebResponse> {
     const token = data ? await this.create(data) : undefined;
-    WebCommonUtil.writeMetadata(res, this.config, token, { expires: data?.expiresAt, signed: false });
+    switch (this.config.mode) {
+      case 'header': {
+        if (token) {
+          res.headers.set(this.config.header, `${this.config.headerPrefix || ''} ${token}`.trim());
+        } else {
+          res.headers.delete(this.config.header);
+        }
+        break;
+      }
+      case 'cookie':
+      default: this.webAsyncContext.cookies.set({
+        name: this.config.cookie, value: token,
+        expires: data?.expiresAt, signed: false,
+        maxAge: token === undefined ? -1 : undefined,
+      });
+    }
     return res;
   }
 }

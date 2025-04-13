@@ -1,4 +1,4 @@
-import { Controller, Get, QueryParam, WebRequest, ContextParam, WebResponse } from '@travetto/web';
+import { Controller, Get, QueryParam, WebRequest, ContextParam, WebResponse, CookieJar } from '@travetto/web';
 import { CookieGetOptions, CookieSetOptions } from '../src/types/cookie.ts';
 
 @Controller('/simple')
@@ -10,13 +10,16 @@ export class SimpleEndpoints {
   @ContextParam()
   req: WebRequest;
 
+  @ContextParam()
+  cookies: CookieJar;
+
   @Get('/cookies')
-  cookies(@QueryParam() value: string) {
-    this.req.getCookie('name', this.getOptions);
+  getCookies(@QueryParam() value: string) {
+    this.cookies.get('name', this.getOptions);
 
     // Set a cookie on response
     const result = WebResponse.from(null);
-    result.cookies.push({ name: 'name', value, ...this.setOptions });
+    this.cookies.set({ name: 'name', value, ...this.setOptions });
     return result;
   }
 }

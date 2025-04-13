@@ -2,7 +2,7 @@ import { createVerifier, create, Jwt, Verifier, SupportedAlgorithms } from 'njwt
 
 import { AuthContext, AuthenticationError, AuthToken, Principal } from '@travetto/auth';
 import { Injectable, Inject } from '@travetto/di';
-import { WebResponse, WebRequest, WebCommonUtil } from '@travetto/web';
+import { WebResponse, WebRequest, WebAsyncContext } from '@travetto/web';
 import { AppError, castTo, TimeUtil } from '@travetto/runtime';
 
 import { CommonPrincipalCodecSymbol, PrincipalCodec } from './types.ts';
@@ -19,6 +19,9 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   @Inject()
   authContext: AuthContext;
+
+  @Inject()
+  webAsyncContext: WebAsyncContext;
 
   #verifier: Verifier;
   #algorithm: SupportedAlgorithms = 'HS256';
@@ -47,7 +50,18 @@ export class JWTPrincipalCodec implements PrincipalCodec {
   }
 
   token(req: WebRequest): AuthToken | undefined {
-    const value = WebCommonUtil.readMetadata(req, this.config, { signed: false });
+    let value;
+    switch (this.config.mode) {
+      case 'header': {
+        value = req.headers.get(this.config.header);
+        if (value && this.config.headerPrefix) {
+          value = value.split(this.config.headerPrefix)[1].trim();
+        }
+        break;
+      }
+      case 'cookie':
+      default: value = this.webAsyncContext.cookies.get(this.config.cookie, { signed: false });
+    }
     return value ? { type: 'jwt', value } : undefined;
   }
 
@@ -76,7 +90,22 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   async encode(res: WebResponse, data: Principal | undefined): Promise<WebResponse> {
     const token = data ? await this.create(data) : undefined;
-    WebCommonUtil.writeMetadata(res, this.config, token, { expires: data?.expiresAt, signed: false });
+    switch (this.config.mode) {
+      case 'header': {
+        if (token) {
+          res.headers.set(this.config.header, `${this.config.headerPrefix || ''} ${token}`.trim());
+        } else {
+          res.headers.delete(this.config.header);
+        }
+        break;
+      }
+      case 'cookie':
+      default: this.webAsyncContext.cookies.set({
+        name: this.config.cookie, value: token,
+        expires: data?.expiresAt, signed: false,
+        maxAge: token === undefined ? -1 : undefined,
+      });
+    }
     return res;
   }
 }
