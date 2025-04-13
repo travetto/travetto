@@ -36,7 +36,7 @@ export class ConnectResponse implements Pick<ServerResponse,
   #written: Buffer[] = [];
 
   constructor(res?: WebResponse) {
-    this.#res = res ?? new WebResponse({ body: null });
+    this.#res = res ?? new WebResponse({});
   }
 
   get headersSent(): boolean {
