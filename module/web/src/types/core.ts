@@ -19,7 +19,9 @@ export type HttpProtocol = 'http' | 'https';
 /**
  * High level categories with a defined ordering
  */
-export const WEB_INTERCEPTOR_CATEGORIES = ['global', 'terminal', 'request', 'response', 'application', 'value', 'unbound'] as const;
+export const WEB_INTERCEPTOR_CATEGORIES = [
+  'global', 'terminal', 'pre-request', 'request', 'response', 'application', 'value', 'unbound'
+] as const;
 
 /**
  * High level categories with a defined ordering

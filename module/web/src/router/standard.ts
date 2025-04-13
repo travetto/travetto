@@ -9,7 +9,6 @@ import { WebResponse } from '../types/response.ts';
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
 import { WebFilterContext } from '../types.ts';
 import { WebConfig } from '../config/web.ts';
-import { WebCommonUtil } from '../util/common.ts';
 
 import { BaseWebRouter } from './base.ts';
 
@@ -51,6 +50,6 @@ export class StandardWebRouter extends BaseWebRouter {
       throw new AppError(`Unknown route ${req.method} ${req.path}`, { category: 'notfound' });
     }
     Object.assign(req, { params });
-    return endpoint.filter!({ req: WebCommonUtil.secureRequest(req, this.config.trustProxy) });
+    return endpoint.filter!({ req });
   }
 }

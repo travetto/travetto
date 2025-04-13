@@ -17,9 +17,10 @@ export class WebTestConfig implements ConfigSource {
     return {
       data: {
         web: {
-          cookie: { active: true, secure: false },
+          cookie: { secure: false },
           ssl: { active: false },
-          trustProxy: ['*'], port: -1
+          trustProxy: { ips: ['*'] },
+          port: -1
         }
       },
       source: 'custom://test/web',

@@ -36,6 +36,7 @@ export * from './src/interceptor/etag.ts';
 export * from './src/interceptor/get-cache.ts';
 export * from './src/interceptor/logging.ts';
 export * from './src/interceptor/respond.ts';
+export * from './src/interceptor/trust-proxy.ts';
 
 export * from './src/util/body.ts';
 export * from './src/util/endpoint.ts';

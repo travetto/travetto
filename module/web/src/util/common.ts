@@ -1,4 +1,3 @@
-import { castTo } from '@travetto/runtime';
 import { Cookie, CookieGetOptions } from '../types/cookie.ts';
 import { WebRequest } from '../types/request.ts';
 import { WebResponse } from '../types/response.ts';
@@ -90,24 +89,5 @@ export class WebCommonUtil {
     }
 
     return value;
-  }
-
-  /**
-   * Secure the request
-   */
-  static secureRequest(req: WebRequest, trustProxy: string[]): typeof req {
-    const forwardedFor = req.headers.get('X-Forwarded-For');
-
-    if (forwardedFor) {
-      if (trustProxy[0] === '*' || (req.connection.ip && Array.isArray(trustProxy) && trustProxy.includes(req.connection.ip))) {
-        req.connection.protocol = castTo(req.headers.get('X-Forwarded-Proto')!) || req.connection.protocol;
-        req.connection.host = req.headers.get('X-Forwarded-Host') || req.connection.host;
-        req.connection.ip = forwardedFor;
-      }
-    }
-    req.headers.delete('X-Forwarded-For');
-    req.headers.delete('X-Forwarded-Proto');
-    req.headers.delete('X-Forwarded-Host');
-    return req;
   }
 }
