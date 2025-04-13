@@ -18,7 +18,7 @@ export class SimpleEndpoints {
     this.cookies.get('name', this.getOptions);
 
     // Set a cookie on response
-    const result = WebResponse.from(null);
+    const result = new WebResponse({ body: null });
     this.cookies.set({ name: 'name', value, ...this.setOptions });
     return result;
   }

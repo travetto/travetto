@@ -23,7 +23,7 @@ class AsyncContextInterceptorSuite {
       next: async () => {
         const ctx = await DependencyRegistry.getInstance(WebAsyncContext);
         req.headers.set('Modified', '1');
-        return WebResponse.from(ctx.req === req); // We have the same instance
+        return new WebResponse({ body: ctx.req === req }); // We have the same instance
       },
       config: {}
     });

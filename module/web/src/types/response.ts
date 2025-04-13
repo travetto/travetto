@@ -53,13 +53,6 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
     return new WebResponse({ body, statusCode });
   }
 
-  /**
-   * Create a web response from a body input
-   */
-  static from<T>(body: T, opts?: Omit<WebResponseInput<T>, 'body'>): WebResponse<T> {
-    return new WebResponse<T>({ ...opts, body });
-  }
-
   statusCode?: number;
   body: B;
   readonly headers: WebHeaders;

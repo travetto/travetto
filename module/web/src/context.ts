@@ -8,7 +8,7 @@ import { CookieJar } from './util/cookie.ts';
 @Injectable()
 export class WebAsyncContext {
 
-  #active = new AsyncContextValue<WebRequest>(this);
+  #req = new AsyncContextValue<WebRequest>(this);
   #cookie = new AsyncContextValue<CookieJar>(this);
   #byType = new Map<string, () => unknown>();
 
@@ -16,7 +16,7 @@ export class WebAsyncContext {
   context: AsyncContext;
 
   get req(): WebRequest {
-    return this.#active.get()!;
+    return this.#req.get()!;
   }
 
   get cookies(): CookieJar {
@@ -28,13 +28,13 @@ export class WebAsyncContext {
   }
 
   postConstruct(): void {
-    this.registerType(toConcrete<WebRequest>(), () => this.#active.get()!);
+    this.registerType(toConcrete<WebRequest>(), () => this.#req.get());
     this.registerType(CookieJar, () => this.#cookie.get());
   }
 
   withContext<T>(req: WebRequest, next: () => Promise<T>): Promise<T> {
     return this.context.run(() => {
-      this.#active.set(req);
+      this.#req.set(req);
       return next();
     });
   }

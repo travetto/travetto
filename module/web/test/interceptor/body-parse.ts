@@ -30,7 +30,7 @@ class BodyParseInterceptorSuite {
 
     const res = await interceptor.filter({
       req,
-      next: async () => WebResponse.from(req.body),
+      next: async () => new WebResponse({ body: req.body }),
       config
     });
 
@@ -54,7 +54,7 @@ class BodyParseInterceptorSuite {
 
     const res = await interceptor.filter({
       req,
-      next: async () => WebResponse.from(req.body),
+      next: async () => new WebResponse({ body: req.body }),
       config
     });
 
@@ -79,7 +79,7 @@ class BodyParseInterceptorSuite {
 
     const res = await interceptor.filter({
       req,
-      next: async () => WebResponse.from(req.body),
+      next: async () => new WebResponse({ body: req.body }),
       config
     });
 

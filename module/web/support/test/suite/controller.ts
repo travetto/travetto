@@ -48,7 +48,7 @@ export class TestController {
   @Delete('/cookie')
   withCookie() {
     this.cookies.set({ name: 'flavor', value: 'oreo' });
-    return WebResponse.from({ cookie: this.cookies.get('orange') });
+    return new WebResponse({ body: { cookie: this.cookies.get('orange') } });
   }
 
   @Patch('/regexp/super-:special-party')
@@ -71,7 +71,7 @@ export class TestController {
   @Get('/renderable')
   @Produces('text/plain')
   getRenderable(): WebResponse<string> {
-    return WebResponse.from('hello');
+    return new WebResponse({ body: 'hello' });
   }
 
   @Get('/fullUrl')

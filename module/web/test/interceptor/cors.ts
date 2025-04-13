@@ -21,7 +21,7 @@ class CorsInterceptorSuite {
 
     const res = await interceptor.filter({
       req: new WebRequest(),
-      next: async () => WebResponse.from(null),
+      next: async () => new WebResponse({ body: null }),
       config: interceptor.config
     });
 
@@ -46,7 +46,7 @@ class CorsInterceptorSuite {
           'Access-Control-Request-Headers': ['ETag', 'BTag']
         }
       }),
-      next: async () => WebResponse.from(null),
+      next: async () => new WebResponse({ body: null }),
       config: interceptor.config
     });
 
@@ -72,7 +72,7 @@ class CorsInterceptorSuite {
           Origin: 'google.com'
         }
       }),
-      next: async () => WebResponse.from(null),
+      next: async () => new WebResponse({ body: null }),
       config: interceptor.config
     });
 
@@ -110,7 +110,7 @@ class CorsInterceptorSuite {
           Origin: 'google2.com'
         }
       }),
-      next: async () => WebResponse.from(null),
+      next: async () => new WebResponse({ body: null }),
       config: interceptor.config
     });
 
