@@ -48,9 +48,7 @@ export class TestController {
   @Delete('/cookie')
   withCookie() {
     this.cookies.set({ name: 'flavor', value: 'oreo' });
-    return new WebResponse({
-      body: { cookie: this.cookies.get('orange') },
-    });
+    return WebResponse.from({ cookie: this.cookies.get('orange') });
   }
 
   @Patch('/regexp/super-:special-party')

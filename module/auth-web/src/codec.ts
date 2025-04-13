@@ -51,16 +51,13 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   token(req: WebRequest): AuthToken | undefined {
     let value;
-    switch (this.config.mode) {
-      case 'header': {
-        value = req.headers.get(this.config.header);
-        if (value && this.config.headerPrefix) {
-          value = value.split(this.config.headerPrefix)[1].trim();
-        }
-        break;
+    if (this.config.mode === 'header') {
+      value = req.headers.get(this.config.header);
+      if (value && this.config.headerPrefix) {
+        value = value.split(this.config.headerPrefix)[1].trim();
       }
-      case 'cookie':
-      default: value = this.webAsyncContext.cookies.get(this.config.cookie, { signed: false });
+    } else {
+      value = this.webAsyncContext.cookies.get(this.config.cookie, { signed: false });
     }
     return value ? { type: 'jwt', value } : undefined;
   }
@@ -90,20 +87,16 @@ export class JWTPrincipalCodec implements PrincipalCodec {
 
   async encode(res: WebResponse, data: Principal | undefined): Promise<WebResponse> {
     const token = data ? await this.create(data) : undefined;
-    switch (this.config.mode) {
-      case 'header': {
-        if (token) {
-          res.headers.set(this.config.header, `${this.config.headerPrefix || ''} ${token}`.trim());
-        } else {
-          res.headers.delete(this.config.header);
-        }
-        break;
+    if (this.config.mode === 'header') {
+      if (token) {
+        res.headers.set(this.config.header, `${this.config.headerPrefix || ''} ${token}`.trim());
+      } else {
+        res.headers.delete(this.config.header);
       }
-      case 'cookie':
-      default: this.webAsyncContext.cookies.set({
-        name: this.config.cookie, value: token,
-        expires: data?.expiresAt, signed: false,
-        maxAge: token === undefined ? -1 : undefined,
+    } else {
+      this.webAsyncContext.cookies.set({
+        name: this.config.cookie, value: token, signed: false,
+        ...(!token ? { maxAge: -1 } : { expires: data?.expiresAt }),
       });
     }
     return res;
