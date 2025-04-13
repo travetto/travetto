@@ -7,7 +7,6 @@ import { HTTP_METHODS, WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
-
 import { EndpointConfig } from '../registry/types.ts';
 
 /**

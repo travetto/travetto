@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { castTo } from '@travetto/runtime';
-import { WebBodyUtil, WebRequest, WebResponse } from '@travetto/web';
+import { WebBodyUtil, WebCommonUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class AwsLambdaWebUtil {
 
@@ -45,7 +45,7 @@ export class AwsLambdaWebUtil {
     });
 
     return {
-      statusCode: binaryRes.statusCode ?? 200,
+      statusCode: WebCommonUtil.getStatusCode(binaryRes),
       isBase64Encoded,
       body: output.toString(isBase64Encoded ? 'base64' : 'utf8'),
       headers,

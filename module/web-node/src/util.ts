@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { pipeline } from 'node:stream/promises';
 
 import { BinaryUtil, castTo } from '@travetto/runtime';
-import { WebBodyUtil, WebRequest, WebResponse } from '@travetto/web';
+import { WebBodyUtil, WebCommonUtil, WebRequest, WebResponse } from '@travetto/web';
 
 export class NodeWebUtil {
 
@@ -34,7 +34,7 @@ export class NodeWebUtil {
   static async respondToServerResponse(webRes: WebResponse, res: ServerResponse): Promise<void> {
     const binaryRes = new WebResponse({ ...webRes, ...WebBodyUtil.toBinaryMessage(webRes) });
     binaryRes.headers.forEach((v, k) => res.setHeader(k.toLowerCase(), v));
-    res.statusCode = binaryRes.statusCode ?? 200;
+    res.statusCode = WebCommonUtil.getStatusCode(binaryRes);
 
     if (BinaryUtil.isReadable(binaryRes.body)) {
       await pipeline(binaryRes.body, res);

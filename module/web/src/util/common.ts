@@ -90,4 +90,11 @@ export class WebCommonUtil {
 
     return value;
   }
+
+  /**
+   * Get status code
+   */
+  static getStatusCode(res: WebResponse): number {
+    return (res.headers.has('Content-Range') && res.statusCode === 200) ? 206 : res.statusCode ?? 200;
+  }
 }

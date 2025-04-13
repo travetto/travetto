@@ -1,28 +1,11 @@
 import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
-import { Any, BinaryUtil, castTo, ErrorCategory, hasToJSON, Util } from '@travetto/runtime';
+import { Any, BinaryUtil, castTo, hasToJSON, Util } from '@travetto/runtime';
 
-import { WebMessage } from '../types/message.ts';
+import { WebBinaryBody, WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
 import { WebInternalSymbol } from '../types/core.ts';
-
-type ErrorResponse = Error & { category?: ErrorCategory, status?: number, statusCode?: number };
-
-export type NodeBinary = Readable | Buffer;
-
-/**
- * Mapping from error category to standard http error codes
- */
-const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
-  general: 500,
-  notfound: 404,
-  data: 400,
-  permissions: 403,
-  authentication: 401,
-  timeout: 408,
-  unavailable: 503,
-};
 
 /**
  * Utility classes for supporting web body operations
@@ -32,23 +15,15 @@ export class WebBodyUtil {
   /**
    * Convert a node binary input to a buffer
    */
-  static async toBuffer(src: NodeBinary): Promise<Buffer> {
+  static async toBuffer(src: WebBinaryBody): Promise<Buffer> {
     return Buffer.isBuffer(src) ? src : toBuffer(src);
   }
 
   /**
    * Convert a node binary input to a readable
    */
-  static toReadable(src: NodeBinary): Readable {
+  static toReadable(src: WebBinaryBody): Readable {
     return Buffer.isBuffer(src) ? Readable.from(src) : src;
-  }
-
-  /**
-   * Get the error status code given its category
-   */
-  static getErrorStatus(e: Error): number {
-    const error: ErrorResponse = e;
-    return error.status ?? error.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
   }
 
   /**
@@ -126,13 +101,13 @@ export class WebBodyUtil {
   /**
    * Convert an existing web message to a binary web message
    */
-  static toBinaryMessage(message: WebMessage): WebMessage<NodeBinary> & { body: NodeBinary } {
+  static toBinaryMessage(message: WebMessage): WebMessage<WebBinaryBody> & { body: WebBinaryBody } {
     const body = message.body;
     if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
       return castTo(message);
     }
 
-    const out: WebMessage<NodeBinary> = { headers: new WebHeaders(message.headers), body: null! };
+    const out: WebMessage<WebBinaryBody> = { headers: new WebHeaders(message.headers), body: null! };
     if (body instanceof Blob) {
       for (const [k, v] of this.getBlobHeaders(body)) {
         out.headers.set(k, v);

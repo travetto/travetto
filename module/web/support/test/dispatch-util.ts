@@ -7,6 +7,7 @@ import { WebResponse } from '../../src/types/response.ts';
 import { WebRequest } from '../../src/types/request.ts';
 import { DecompressInterceptor } from '../../src/interceptor/decompress.ts';
 import { WebBodyUtil } from '../../src/util/body.ts';
+import { WebCommonUtil } from '../../src/util/common.ts';
 
 /**
  * Utilities for supporting custom test dispatchers
@@ -25,6 +26,8 @@ export class WebTestDispatchUtil {
 
   static async finalizeResponseBody(res: WebResponse, decompress?: boolean): Promise<WebResponse> {
     let result = res.body;
+
+    res.statusCode = WebCommonUtil.getStatusCode(res);
 
     if (decompress) {
       if (Buffer.isBuffer(result) || BinaryUtil.isReadable(result)) {

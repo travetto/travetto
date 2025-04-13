@@ -1,13 +1,25 @@
-import { AppError } from '@travetto/runtime';
+import { AppError, ErrorCategory } from '@travetto/runtime';
 
 import { Cookie } from './cookie.ts';
 import { WebHeaders } from './headers.ts';
-import { NodeBinary, WebBodyUtil } from '../util/body.ts';
 import { WebMessage, WebMessageInit } from './message.ts';
 
 export interface WebResponseInput<B> extends WebMessageInit<B> {
   statusCode?: number;
   cookies?: Cookie[];
+};
+
+/**
+ * Mapping from error category to standard http error codes
+ */
+const ERROR_CATEGORY_STATUS: Record<ErrorCategory, number> = {
+  general: 500,
+  notfound: 404,
+  data: 400,
+  permissions: 403,
+  authentication: 401,
+  timeout: 408,
+  unavailable: 503,
 };
 
 /**
@@ -18,12 +30,10 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
   /**
     * Build the redirect
     * @param location Location to redirect to
-    * @param status Status code
+    * @param statusCode Status code
     */
-  static redirect(location: string, status = 302): WebResponse<undefined> {
-    return new WebResponse({
-      body: undefined, statusCode: status, headers: { Location: location }
-    });
+  static redirect(location: string, statusCode = 302): WebResponse<undefined> {
+    return new WebResponse({ statusCode, headers: { Location: location } });
   }
 
   /**
@@ -39,7 +49,10 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
         new AppError(err.message, { details: err }) :
         new AppError(`${err}`);
 
-    return new WebResponse({ body });
+    const error: Error & { category?: ErrorCategory, status?: number, statusCode?: number } = body;
+    const statusCode = error.status ?? error.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
+
+    return new WebResponse({ body, statusCode });
   }
 
   /**
@@ -55,16 +68,7 @@ export class WebResponse<B = unknown> implements WebMessage<B> {
   readonly headers: WebHeaders;
 
   constructor(o: WebResponseInput<B>) {
-    this.statusCode ??= o.statusCode;
-    this.cookies = o.cookies ?? [];
-    this.body = o.body!;
+    Object.assign(this, { cookies: [] }, o);
     this.headers = new WebHeaders(o.headers);
-
-    if (this.body instanceof Error) {
-      this.statusCode ??= WebBodyUtil.getErrorStatus(this.body);
-    }
-    if (this.headers.has('Content-Range')) {
-      this.statusCode = 206;
-    }
   }
 }
