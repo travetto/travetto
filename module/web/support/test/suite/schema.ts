@@ -105,7 +105,7 @@ class SchemaAPI {
 
 function getEndpoint(path: string, method: HttpMethod) {
   return ControllerRegistry.get(SchemaAPI)
-    .endpoints.find(x => x.path === path && x.method === method)!;
+    .endpoints.find(x => x.path === path && x.httpMethod === method)!;
 }
 
 @Suite()
@@ -115,19 +115,19 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyBody() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<UserShape>({ method: 'POST', path: '/test/schema/user', body: user });
+    const res1 = await this.request<UserShape>({ context: { httpMethod: 'POST', path: '/test/schema/user' }, body: user });
 
     assert(res1.body?.name === user.name);
 
-    const res2 = await this.request<ValidationResultError>({ method: 'POST', path: '/test/schema/user', body: { id: 'orange' } }, false);
+    const res2 = await this.request<ValidationResultError>({ context: { httpMethod: 'POST', path: '/test/schema/user' }, body: { id: 'orange' } }, false);
 
-    assert(res2.statusCode === 400);
+    assert(res2.context.httpStatusCode === 400);
     assert(/Validation errors have occurred/.test(res2.body?.message ?? ''));
     assert(res2.body?.details.errors[0].path === 'id');
 
-    const res3 = await this.request<ValidationResultError>({ method: 'POST', path: '/test/schema/user', body: { id: 0, name: 'bob', age: 'a' } }, false);
+    const res3 = await this.request<ValidationResultError>({ context: { httpMethod: 'POST', path: '/test/schema/user' }, body: { id: 0, name: 'bob', age: 'a' } }, false);
 
-    assert(res3.statusCode === 400);
+    assert(res3.context.httpStatusCode === 400);
     assert(/Validation errors have occurred/.test(res3.body?.message ?? ''));
     assert(res3.body?.details.errors[0].path === 'age');
   }
@@ -136,19 +136,19 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyQuery() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<UserShape>({ method: 'GET', path: '/test/schema/user', query: user });
+    const res1 = await this.request<UserShape>({ context: { httpMethod: 'GET', path: '/test/schema/user', httpQuery: user } });
 
     assert(res1.body?.name === user.name);
 
-    const res2 = await this.request<ValidationResultError>({ method: 'GET', path: '/test/schema/user', query: { id: 'orange' } }, false);
+    const res2 = await this.request<ValidationResultError>({ context: { httpMethod: 'GET', path: '/test/schema/user', httpQuery: { id: 'orange' } } }, false);
 
-    assert(res2.statusCode === 400);
+    assert(res2.context.httpStatusCode === 400);
     assert(/Validation errors have occurred/.test(res2.body?.message ?? ''));
     assert(res2.body?.details.errors[0].path === 'id');
 
-    const res3 = await this.request<ValidationResultError>({ method: 'GET', path: '/test/schema/user', query: { id: '0', name: 'bob', age: 'a' } }, false);
+    const res3 = await this.request<ValidationResultError>({ context: { httpMethod: 'GET', path: '/test/schema/user', httpQuery: { id: '0', name: 'bob', age: 'a' } } }, false);
 
-    assert(res3.statusCode === 400);
+    assert(res3.context.httpStatusCode === 400);
     assert(/Validation errors have occurred/.test(res3.body?.message ?? ''));
     assert(res3.body?.details.errors[0].path === 'age');
   }
@@ -157,20 +157,26 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyInterface() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<UserShape>({ method: 'GET', path: '/test/schema/interface', query: user });
+    const res1 = await this.request<UserShape>({ context: { httpMethod: 'GET', path: '/test/schema/interface', httpQuery: user } });
 
     assert(res1.body?.name === user.name);
     assert(res1.body?.age === 20);
 
-    const res2 = await this.request<ValidationResultError>({ method: 'GET', path: '/test/schema/interface', query: { id: 'orange' } }, false);
+    const res2 = await this.request<ValidationResultError>({ context: { httpMethod: 'GET', path: '/test/schema/interface', httpQuery: { id: 'orange' } } }, false);
 
-    assert(res2.statusCode === 400);
+    assert(res2.context.httpStatusCode === 400);
     assert(/Validation errors have occurred/.test(res2.body?.message ?? ''));
     assert(res2.body?.details.errors[0].path === 'id');
 
-    const res3 = await this.request<ValidationResultError>({ method: 'GET', path: '/test/schema/interface', query: { id: '0', name: 'bob', age: 'a' } }, false);
+    const res3 = await this.request<ValidationResultError>({
+      context: {
+        httpMethod: 'GET',
+        path: '/test/schema/interface',
+        httpQuery: { id: '0', name: 'bob', age: 'a' }
+      }
+    }, false);
 
-    assert(res3.statusCode === 400);
+    assert(res3.context.httpStatusCode === 400);
     assert(/Validation errors have occurred/.test(res3.body?.message ?? ''));
     assert(res3.body?.details.errors[0].path === 'age');
   }
@@ -179,32 +185,34 @@ export abstract class SchemaWebServerSuite extends BaseWebSuite {
   async verifyPrefix() {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
-    const res1 = await this.request<ValidationResultError>({ method: 'GET', path: '/test/schema/interface-prefix', query: user, }, false);
+    const res1 = await this.request<ValidationResultError>({ context: { httpMethod: 'GET', path: '/test/schema/interface-prefix', httpQuery: user, } }, false);
 
-    assert(res1.statusCode === 400);
+    assert(res1.context.httpStatusCode === 400);
     assert(/Validation errors have occurred/.test(res1.body?.message ?? ''));
     console.error(res1.body);
     assert(res1.body?.details.errors[0].path.startsWith('user2'));
 
-    const res2 = await this.request<ValidationResultError>({ method: 'GET', path: '/test/schema/interface-prefix', query: { user3: user } }, false);
+    const res2 = await this.request<ValidationResultError>({ context: { httpMethod: 'GET', path: '/test/schema/interface-prefix', httpQuery: { user3: user } } }, false);
 
-    assert(res2.statusCode === 400);
+    assert(res2.context.httpStatusCode === 400);
     assert(/Validation errors have occurred/.test(res2.body?.message ?? ''));
     assert(res2.body?.details.errors[0].path);
     assert(!res2.body?.details.errors[0].path.startsWith('user'));
 
-    const res3 = await this.request<User>({ method: 'GET', path: '/test/schema/interface-prefix', query: { ...user, user2: user } });
+    const res3 = await this.request<User>({ context: { httpMethod: 'GET', path: '/test/schema/interface-prefix', httpQuery: { ...user, user2: user } } });
 
-    assert(res3.statusCode === 200);
+    assert(res3.context.httpStatusCode === 200);
     assert(res3.body?.name === user.name);
     assert(res3.body?.age === 20);
 
     const res4 = await this.request<ValidationResultError>({
-      method: 'GET', path: '/test/schema/interface-prefix',
-      query: { ...user, user2: { ...user, age: '300' } },
+      context: {
+        httpMethod: 'GET', path: '/test/schema/interface-prefix',
+        httpQuery: { ...user, user2: { ...user, age: '300' } }
+      }
     }, false);
 
-    assert(res4.statusCode === 400);
+    assert(res4.context.httpStatusCode === 400);
     assert(/Validation errors have occurred/.test(res4.body?.message ?? ''));
     assert(res4.body?.details.errors[0].path);
     assert(!res4.body?.details.errors[0].path.startsWith('user2.age'));

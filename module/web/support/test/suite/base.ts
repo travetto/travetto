@@ -6,10 +6,11 @@ import { ConfigSource, ConfigSpec } from '@travetto/config';
 
 import { WebApplication, WebApplicationHandle } from '../../../src/types/application.ts';
 import { WebDispatcher } from '../../../src/types.ts';
-import { WebRequest, WebRequestInit } from '../../../src/types/request.ts';
+import { WebRequest, WebRequestContext } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
 
 import { WebTestDispatchUtil } from '../dispatch-util.ts';
+import { WebMessageInit } from '../../../src/types/message.ts';
 
 @Injectable()
 export class WebTestConfig implements ConfigSource {
@@ -55,10 +56,10 @@ export abstract class BaseWebSuite {
     this.#appHandle = undefined;
   }
 
-  async request<T>(cfg: WebRequestInit, throwOnError: boolean = true): Promise<WebResponse<T>> {
+  async request<T>(cfg: WebMessageInit<unknown, WebRequestContext>, throwOnError: boolean = true): Promise<WebResponse<T>> {
     const req = await WebTestDispatchUtil.applyRequestBody(new WebRequest(cfg));
     const res = await this.#dispatcher.dispatch({ req });
-    if (throwOnError && res.statusCode && res.statusCode >= 400) { throw res.body; }
+    if (throwOnError && res.context.httpStatusCode && res.context.httpStatusCode >= 400) { throw res.body; }
     return castTo(res);
   }
 }

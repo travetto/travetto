@@ -69,7 +69,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUploadAll() {
     const uploads = await this.getUploads({ name: 'random', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<{ hash: string }>({ body: uploads, method: 'POST', path: '/test/upload/all' });
+    const res = await this.request<{ hash: string }>({ body: uploads, context: { httpMethod: 'POST', path: '/test/upload/all' } });
 
     const file = await this.fixture.readStream('/logo.png');
     assert(res.body?.hash === await BinaryUtil.hashInput(file));
@@ -79,7 +79,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
   async testUploadDirect() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
     const sent = castTo<Blob>(uploads.get('file'));
-    const res = await this.request<{ hash: string }>({ method: 'POST', path: '/test/upload', body: sent });
+    const res = await this.request<{ hash: string }>({ context: { httpMethod: 'POST', path: '/test/upload' }, body: sent });
 
     const file = await this.fixture.readStream('/logo.png');
     assert(res.body?.hash === await BinaryUtil.hashInput(file));
@@ -88,7 +88,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
   @Test()
   async testUpload() {
     const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
-    const res = await this.request<{ hash: string }>({ body: uploads, method: 'POST', path: '/test/upload' });
+    const res = await this.request<{ hash: string }>({ body: uploads, context: { httpMethod: 'POST', path: '/test/upload' } });
 
     const file = await this.fixture.readStream('/logo.png');
     assert(res.body?.hash === await BinaryUtil.hashInput(file));
@@ -101,7 +101,10 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       { name: 'file2', resource: 'logo.png', type: 'image/png' }
     );
     const res = await this.request<{ hash1: string, hash2: string }>({
-      body: uploads, method: 'POST', path: '/test/upload/all-named'
+      body: uploads,
+      context: {
+        httpMethod: 'POST', path: '/test/upload/all-named'
+      }
     });
     const file = await this.fixture.readStream('/logo.png');
     const hash = await BinaryUtil.hashInput(file);
@@ -119,7 +122,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
 
     const resBad = await this.request<{ hash1: string, hash2: string }>({
       body: uploadBad,
-      method: 'POST', path: '/test/upload/all-named-custom',
+      context: { httpMethod: 'POST', path: '/test/upload/all-named-custom' },
     }, false);
     assert(resBad.context.httpStatusCode === 400);
 
@@ -129,7 +132,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     );
     const res = await this.request<{ hash1: string, hash2: string }>({
       body: uploads,
-      method: 'POST', path: '/test/upload/all-named-custom',
+      context: { httpMethod: 'POST', path: '/test/upload/all-named-custom' },
     }, false);
     assert(res.context.httpStatusCode === 200);
 
@@ -152,7 +155,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
 
     const resBad = await this.request<{ hash1: string, hash2: string }>({
       body: uploadBad,
-      method: 'POST', path: '/test/upload/all-named-size',
+      context: { httpMethod: 'POST', path: '/test/upload/all-named-size' },
     }, false);
     assert(resBad.context.httpStatusCode === 400);
 
@@ -162,7 +165,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
     );
     const res = await this.request<{ hash1: string, hash2: string }>({
       body: uploads,
-      method: 'POST', path: '/test/upload/all-named-size',
+      context: { httpMethod: 'POST', path: '/test/upload/all-named-size' },
     }, false);
     assert(res.context.httpStatusCode === 200);
 

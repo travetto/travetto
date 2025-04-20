@@ -77,7 +77,7 @@ export class TestController {
   @Get('/fullUrl')
   getFullUrl() {
     return {
-      path: this.req.path
+      path: this.req.context.path
     };
   }
 
@@ -88,12 +88,12 @@ export class TestController {
 
   @Get('/fun/*')
   getFun() {
-    return { path: this.req.path.split('fun/')[1] };
+    return { path: this.req.context.path.split('fun/')[1] };
   }
 
   @Get('/ip')
   getIp() {
-    return { ip: this.req.connection.ip };
+    return { ip: this.req.context.connection?.ip };
   }
 
   @Post('/ip')

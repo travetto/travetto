@@ -17,7 +17,7 @@ class AsyncContextInterceptorSuite {
   async basicTest() {
     const interceptor = await DependencyRegistry.getInstance(AsyncContextInterceptor);
 
-    const req = new WebRequest({ method: 'GET' });
+    const req = new WebRequest({ context: { path: '/', httpMethod: 'GET' } });
     const res = await interceptor.filter({
       req,
       next: async () => {
