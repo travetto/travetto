@@ -11,12 +11,14 @@ import { WebRequest, MimeUtil, WebBodyUtil } from '@travetto/web';
 import { AsyncQueue, AppError, castTo, Util, BinaryUtil } from '@travetto/runtime';
 
 import { WebUploadConfig } from './config.ts';
+import { FileMap } from './types.ts';
 
 const MULTIPART = new Set(['application/x-www-form-urlencoded', 'multipart/form-data']);
 
 type UploadItem = { stream: Readable, filename?: string, field: string };
 type FileType = { ext: string, mime: string };
 const RawFileSymbol = Symbol();
+const WebUploadSymbol = Symbol();
 
 /**
  * Web upload utilities
@@ -172,5 +174,19 @@ export class WebUploadUtil {
     if (config.cleanupFiles !== false) {
       await fs.rm(this.getUploadLocation(upload), { force: true });
     }
+  }
+
+  /**
+   * Get Uploads
+   */
+  static getRequestUploads(req: WebRequest & { [WebUploadSymbol]?: FileMap }): FileMap {
+    return req[WebUploadSymbol] ?? {};
+  }
+
+  /**
+   * Set Uploads
+   */
+  static setRequestUploads(req: WebRequest & { [WebUploadSymbol]?: FileMap }, uploads: FileMap): void {
+    req[WebUploadSymbol] ??= uploads;
   }
 }

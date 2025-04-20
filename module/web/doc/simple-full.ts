@@ -42,7 +42,7 @@ export class Simple {
     @QueryParam('w') @Integer() @Min(100) width?: number,
     @QueryParam('h') @Integer() @Min(100) height?: number
   ) {
-    const img = await this.service.fetchImage(req.path, { width, height });
+    const img = await this.service.fetchImage(req.context.path, { width, height });
     return img;
   }
 }

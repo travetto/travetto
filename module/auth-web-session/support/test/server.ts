@@ -113,7 +113,7 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>({ method: 'POST', path: '/test/session/complex', body: payload });
-    assert(res.statusCode === 201);
+    assert(res.context.httpStatusCode === 201);
 
     const cookie = res.headers.get('Set-Cookie');
     assert(cookie);
@@ -163,7 +163,7 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>({ method: 'POST', path: '/test/session/complex', body: payload });
-    assert(res.statusCode === 201);
+    assert(res.context.httpStatusCode === 201);
 
     const header = res.headers.get(key);
     res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
@@ -185,14 +185,14 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     const key = this.config({ mode: 'header', maxAgeMs: 1000 });
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>({ method: 'POST', path: '/test/session/complex', body: payload });
-    assert(res.statusCode === 201);
+    assert(res.context.httpStatusCode === 201);
 
     const start = Date.now();
     let header = res.headers.get(key);
     assert(header);
 
     res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
-    assert(res.statusCode === 200);
+    assert(res.context.httpStatusCode === 200);
     header = res.headers.get(key) ?? header;
 
     assert(res.body?.payload === payload);
@@ -201,11 +201,11 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     await timers.setTimeout(1000 - (Date.now() - start));
 
     res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } }, false);
-    assert(res.statusCode === 403);
+    assert(res.context.httpStatusCode === 403);
 
 
     res = await this.request({ method: 'GET', path: '/test/session' });
-    assert(res.statusCode === 200);
+    assert(res.context.httpStatusCode === 200);
     assert(res.body?.payload === undefined);
     assert(res.body?.age === 1);
   }
@@ -216,7 +216,7 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>({ method: 'POST', path: '/test/session/complex', body: payload });
-    assert(res.statusCode === 201);
+    assert(res.context.httpStatusCode === 201);
     const start = Date.now();
 
     const cookie = res.headers.get('Set-Cookie');
@@ -228,10 +228,10 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
     await timers.setTimeout(1000 - (Date.now() - start));
 
     res = await this.request({ method: 'GET', path: '/test/session', headers: { Cookie: cookie } }, false);
-    assert(res.statusCode === 403);
+    assert(res.context.httpStatusCode === 403);
 
     res = await this.request({ method: 'GET', path: '/test/session', headers: {} });
-    assert(res.statusCode === 200);
+    assert(res.context.httpStatusCode === 200);
     assert(res.body?.payload === undefined);
     assert(res.body?.age === 1);
   }
@@ -242,12 +242,12 @@ export abstract class AuthWebSessionServerSuite extends BaseWebSuite {
 
     const payload = { name: 'Bob', color: 'green', faves: [1, 2, 3] };
     let res = await this.request<Aged>({ method: 'POST', path: '/test/session/complex', body: payload });
-    assert(res.statusCode === 201);
+    assert(res.context.httpStatusCode === 201);
     const header = res.headers.get(key);
     await timers.setTimeout(350);
 
     res = await this.request({ method: 'GET', path: '/test/session', headers: { [key]: header } });
-    assert(res.statusCode === 200);
+    assert(res.context.httpStatusCode === 200);
     assert(res.body?.payload === payload);
     assert(!res.headers.has(key));
     await timers.setTimeout(350);

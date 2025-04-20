@@ -10,7 +10,7 @@ import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/en
 import { PathParam, QueryParam, Body, Param, HeaderParam, ContextParam } from './src/decorator/param.ts';
 import { BodyParseInterceptor, BodyParseConfig } from './src/interceptor/body-parse.ts';
 import { CorsInterceptor, CorsConfig } from './src/interceptor/cors.ts';
-import { GetCacheInterceptor } from './src/interceptor/get-cache.ts';
+import { ResponseCacheInterceptor } from './src/interceptor/get-cache.ts';
 import { LoggingInterceptor } from './src/interceptor/logging.ts';
 import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies.ts';
 import { WebConfig } from './src/config/web.ts';
@@ -190,8 +190,8 @@ export const text = <>
 
       <c.Code title='Cookies Config' src={CookieConfig} />
     </c.SubSection>
-    <c.SubSection title={GetCacheInterceptor.name}>
-      {GetCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting {d.input('web.getCache.applies: <boolean>')} in your config.  This interceptor applies by default.
+    <c.SubSection title={ResponseCacheInterceptor.name}>
+      {ResponseCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting {d.input('web.getCache.applies: <boolean>')} in your config.  This interceptor applies by default.
     </c.SubSection>
     <c.SubSection title={LoggingInterceptor.name}>
       {LoggingInterceptor} allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so

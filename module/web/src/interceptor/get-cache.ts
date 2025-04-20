@@ -9,28 +9,33 @@ import { WebResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
 import { EtagInterceptor } from './etag.ts';
 
-@Config('web.getCache')
-export class GetCacheConfig {
+@Config('web.cache')
+export class ResponseCacheConfig {
   /**
-   * Generate GET cache headers
+   * Generate response cache headers
    */
   applies = true;
+
+  /**
+   * Determines how we cache
+   */
+  mode: 'allow' | 'deny' = 'allow';
 }
 
 /**
  * Determines if we should cache all get requests
  */
 @Injectable()
-export class GetCacheInterceptor implements WebInterceptor {
+export class ResponseCacheInterceptor implements WebInterceptor {
 
   category: WebInterceptorCategory = 'response';
   dependsOn = [EtagInterceptor];
 
   @Inject()
-  config?: GetCacheConfig;
+  config?: ResponseCacheConfig;
 
-  applies(endpoint: EndpointConfig, config: GetCacheConfig): boolean {
-    return endpoint.method === 'GET' && config.applies;
+  applies(endpoint: EndpointConfig, config: ResponseCacheConfig): boolean {
+    return !!endpoint.cacheable && config.applies && config.mode === 'deny';
   }
 
   async filter({ req, next }: WebChainedContext): Promise<WebResponse> {

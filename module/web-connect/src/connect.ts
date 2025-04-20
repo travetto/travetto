@@ -10,11 +10,11 @@ export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> 
   }
 
   get path(): string {
-    return this.#req.path;
+    return this.#req.context.path;
   }
 
   get url(): string {
-    return this.#req.path;
+    return this.#req.context.path;
   }
 
   get headers(): Record<string, string> {
@@ -22,7 +22,7 @@ export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> 
   }
 
   get query(): Record<string, unknown> {
-    return this.#req.query;
+    return this.#req.context.httpQuery ?? {};
   }
 }
 
@@ -48,15 +48,15 @@ export class ConnectResponse implements Pick<ServerResponse,
   }
 
   get statusCode(): number | undefined {
-    return this.#res.statusCode;
+    return this.#res.context.httpStatusCode;
   }
 
   set statusCode(val: number) {
-    this.#res.statusCode = val;
+    this.#res.context.httpStatusCode = val;
   }
 
   writeHead(statusCode: unknown, statusMessage?: unknown, headers?: unknown): this {
-    this.#res.statusCode = castTo(statusCode);
+    this.#res.context.httpStatusCode = castTo(statusCode);
     for (const [k, v] of Object.entries(headers ?? {})) {
       this.#res.headers.set(k, v);
     }
@@ -114,7 +114,7 @@ export class ConnectResponse implements Pick<ServerResponse,
     return true;
   }
   redirect(location: string, code?: number): this {
-    this.#res.statusCode = code ?? 301;
+    this.#res.context.httpStatusCode = code ?? 301;
     this.#res.headers.set('Location', location);
     return this;
   }

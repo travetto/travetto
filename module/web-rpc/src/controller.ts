@@ -2,7 +2,7 @@ import { Inject } from '@travetto/di';
 import { Any, AppError, Util } from '@travetto/runtime';
 import {
   HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistry,
-  WebAsyncContext, Body, EndpointUtil, BodyParseInterceptor, Post, WebInternalSymbol
+  WebAsyncContext, Body, EndpointUtil, BodyParseInterceptor, Post, WebCommonUtil
 } from '@travetto/web';
 
 @Controller('/rpc')
@@ -45,7 +45,7 @@ export class WebRpController {
       params = [];
     }
 
-    req[WebInternalSymbol].requestParams = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]);
+    WebCommonUtil.setRequestParams(req, endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]));
 
     // Dispatch
     return await endpoint.filter!({ req: this.ctx.req });

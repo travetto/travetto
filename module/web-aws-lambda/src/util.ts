@@ -8,19 +8,21 @@ export class AwsLambdaWebUtil {
   /**
    * Create a request from an api gateway event
    */
-  static toWebRequest(event: APIGatewayProxyEvent, params?: Record<string, unknown>): WebRequest {
+  static toWebRequest(event: APIGatewayProxyEvent, pathParams?: Record<string, unknown>): WebRequest {
     // Build request
     const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
 
     return new WebRequest({
-      connection: {
-        protocol: 'http',
-        ip: event.requestContext.identity?.sourceIp,
+      context: {
+        connection: {
+          httpProtocol: 'http',
+          ip: event.requestContext.identity?.sourceIp,
+        },
+        httpMethod: castTo(event.httpMethod.toUpperCase()),
+        httpQuery: castTo(event.queryStringParameters!),
+        path: event.path,
+        pathParams,
       },
-      method: castTo(event.httpMethod.toUpperCase()),
-      path: event.path,
-      query: castTo(event.queryStringParameters!),
-      params,
       headers: { ...event.headers, ...event.multiValueHeaders },
       body: WebBodyUtil.markRaw(body)
     });
@@ -31,7 +33,7 @@ export class AwsLambdaWebUtil {
    */
   static async toLambdaResult(res: WebResponse, base64Encoded: boolean = false): Promise<APIGatewayProxyResult> {
     const binaryRes = new WebResponse({ ...res, ...WebBodyUtil.toBinaryMessage(res) });
-    const output = await WebBodyUtil.toBuffer(binaryRes.body);
+    const output = binaryRes.body ? await WebBodyUtil.toBuffer(binaryRes.body) : Buffer.alloc(0);
     const isBase64Encoded = !!output.length && base64Encoded;
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};

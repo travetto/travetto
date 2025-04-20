@@ -13,16 +13,18 @@ export class NodeWebUtil {
     const secure = 'encrypted' in req.socket && !!req.socket.encrypted;
     const [path, query] = (req.url ?? '/').split('?') ?? [];
     return new WebRequest({
-      connection: {
-        ip: req.socket.remoteAddress!,
-        host: req.headers.host,
-        protocol: secure ? 'https' : 'http',
-        port: req.socket.localPort
+      context: {
+        connection: {
+          ip: req.socket.remoteAddress!,
+          host: req.headers.host,
+          httpProtocol: secure ? 'https' : 'http',
+          port: req.socket.localPort
+        },
+        httpMethod: castTo(req.method?.toUpperCase()),
+        path,
+        httpQuery: Object.fromEntries(new URLSearchParams(query)),
+        pathParams: params,
       },
-      method: castTo(req.method?.toUpperCase()),
-      path,
-      query: Object.fromEntries(new URLSearchParams(query)),
-      params,
       headers: req.headers,
       body: WebBodyUtil.markRaw(req)
     });

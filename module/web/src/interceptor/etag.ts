@@ -39,7 +39,9 @@ export class EtagInterceptor implements WebInterceptor {
   addTag(ctx: WebChainedContext, res: WebResponse): WebResponse {
     const { req } = ctx;
 
-    if (res.statusCode && (res.statusCode >= 300 && res.statusCode !== 304)) {
+    const statusCode = res.context.httpStatusCode;
+
+    if (statusCode && (statusCode >= 300 && statusCode !== 304)) {
       return res;
     }
 
@@ -61,14 +63,14 @@ export class EtagInterceptor implements WebInterceptor {
     const lastModified = binaryRes.headers.get('Last-Modified');
 
     if (
-      (req.method === 'GET' || req.method === 'HEAD') &&
+      (req.context.httpMethod === 'GET' || req.context.httpMethod === 'HEAD') &&
       fresh({
         'if-modified-since': req.headers.get('If-Modified-Since')!,
         'if-none-match': req.headers.get('If-None-Match')!,
         'cache-control': req.headers.get('Cache-Control')!,
       }, { etag: tag, 'last-modified': lastModified! })
     ) {
-      return new WebResponse({ statusCode: 304 });
+      return new WebResponse({ context: { httpStatusCode: 304 } });
     }
 
     return binaryRes;

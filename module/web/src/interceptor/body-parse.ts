@@ -81,7 +81,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   }
 
   applies(endpoint: EndpointConfig, config: BodyParseConfig): boolean {
-    return config.applies && HTTP_METHODS[endpoint.method].body;
+    return config.applies && endpoint.allowsBody;
   }
 
   async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {

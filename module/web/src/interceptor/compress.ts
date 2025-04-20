@@ -63,7 +63,7 @@ export class CompressInterceptor implements WebInterceptor {
 
     if (
       !res.body ||
-      req.method === 'HEAD' ||
+      req.context.httpMethod === 'HEAD' ||
       res.headers.has('Content-Encoding') ||
       NO_TRANSFORM_REGEX.test(res.headers.get('Cache-Control')?.toString() ?? '')
     ) {
@@ -78,7 +78,7 @@ export class CompressInterceptor implements WebInterceptor {
     if (accepts && (!type || !accepts.includes(type))) {
       throw new WebResponse({
         body: new AppError(`Please accept one of: ${supportedEncodings.join(', ')}. ${accepts} is not supported`),
-        statusCode: 406
+        context: { httpStatusCode: 406 }
       });
     }
 
@@ -90,7 +90,7 @@ export class CompressInterceptor implements WebInterceptor {
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     const len = Buffer.isBuffer(binaryRes.body) ? binaryRes.body.byteLength : undefined;
 
-    if (len !== undefined && len >= 0 && len < chunkSize) {
+    if (len !== undefined && len >= 0 && len < chunkSize || !binaryRes.body) {
       return binaryRes;
     }
 

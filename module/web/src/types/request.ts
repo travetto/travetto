@@ -1,44 +1,22 @@
-import { WebHeaders } from './headers.ts';
-import { WebInternalSymbol, HttpMethod, HttpProtocol } from './core.ts';
-import { WebMessage, WebMessageInit } from './message.ts';
+import { HttpMethod, HttpProtocol } from './core.ts';
+import { BaseWebMessage } from './message.ts';
 
 export interface WebConnection {
   host?: string;
   port?: number;
-  protocol?: HttpProtocol;
   ip?: string;
+  httpProtocol?: HttpProtocol;
 }
 
-export interface WebRequestInit<B = unknown> extends WebMessageInit<B> {
-  method?: HttpMethod;
+export interface WebRequestContext {
+  path: string;
+  pathParams?: Record<string, unknown>;
   connection?: WebConnection;
-  query?: Record<string, unknown>;
-  path?: string;
-  params?: Record<string, unknown>;
-};
-
-export interface WebRequestInternal {
-  requestParams?: unknown[];
-  expandedQuery?: Record<string, unknown>;
+  httpQuery?: Record<string, unknown>;
+  httpMethod?: HttpMethod;
 }
 
 /**
  * Web Request object
  */
-export class WebRequest<B = unknown> implements WebMessage<B> {
-
-  [WebInternalSymbol]: WebRequestInternal = {};
-
-  readonly headers: WebHeaders;
-  readonly connection: WebConnection = {};
-  readonly path: string = '';
-  readonly method: HttpMethod = 'GET';
-  readonly query: Record<string, unknown> = {};
-  readonly params: Record<string, string> = {};
-  body?: B;
-
-  constructor(init: WebRequestInit<B> = {}) {
-    Object.assign(this, init);
-    this.headers = new WebHeaders(init.headers);
-  }
-}
+export class WebRequest<B = unknown> extends BaseWebMessage<B, WebRequestContext> { }

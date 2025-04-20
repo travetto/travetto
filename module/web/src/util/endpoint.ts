@@ -7,11 +7,13 @@ import { WebFilterContext, WebChainedFilter, WebChainedContext, WebFilter } from
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
-import { WebInternalSymbol, WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
+import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
 
 import { WebCommonUtil } from './common.ts';
+
+const WebQueryExpandedSymbol = Symbol();
 
 /**
  * Endpoint specific utilities
@@ -92,11 +94,12 @@ export class EndpointUtil {
     const name = param.name!;
     const { req } = ctx;
     switch (param.location) {
-      case 'path': return req.params[name];
+      case 'path': return req.context.pathParams?.[name];
       case 'header': return field.array ? req.headers.getList(name) : req.headers.get(name);
       case 'body': return req.body;
       case 'query': {
-        const q = req[WebInternalSymbol].expandedQuery ??= BindUtil.expandPaths(req.query);
+        const reqWithQ: typeof req & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = req;
+        const q = reqWithQ[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(req.context.httpQuery ?? {});
         return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[name]);
       }
     }
@@ -111,7 +114,7 @@ export class EndpointUtil {
   static async extractParameters(ctx: WebFilterContext, endpoint: EndpointConfig): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
-    const vals = ctx.req[WebInternalSymbol]?.requestParams ?? [];
+    const vals = WebCommonUtil.getRequestParams(ctx.req);
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
@@ -141,7 +144,7 @@ export class EndpointUtil {
     try {
       const params = await this.extractParameters(ctx, endpoint);
       const body = await endpoint.endpoint.apply(endpoint.instance, params);
-      return WebCommonUtil.commonResponse(ctx.req.method, body, endpoint.responseHeaderMap);
+      return WebCommonUtil.commonResponse(body, endpoint.responseHeaderMap, endpoint.defaultResponseContext);
     } catch (err) {
       throw WebCommonUtil.catchResponse(err);
     }

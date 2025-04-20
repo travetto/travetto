@@ -121,7 +121,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       body: uploadBad,
       method: 'POST', path: '/test/upload/all-named-custom',
     }, false);
-    assert(resBad.statusCode === 400);
+    assert(resBad.context.httpStatusCode === 400);
 
     const uploads = await this.getUploads(
       { name: 'file1', resource: 'logo.gif', type: 'image/gif' },
@@ -131,7 +131,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       body: uploads,
       method: 'POST', path: '/test/upload/all-named-custom',
     }, false);
-    assert(res.statusCode === 200);
+    assert(res.context.httpStatusCode === 200);
 
     const file1 = await this.fixture.readStream('/logo.gif');
     const hash1 = await BinaryUtil.hashInput(file1);
@@ -154,7 +154,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       body: uploadBad,
       method: 'POST', path: '/test/upload/all-named-size',
     }, false);
-    assert(resBad.statusCode === 400);
+    assert(resBad.context.httpStatusCode === 400);
 
     const uploads = await this.getUploads(
       { name: 'file1', resource: 'asset.yml', type: 'text/plain' },
@@ -164,7 +164,7 @@ export abstract class WebUploadServerSuite extends BaseWebSuite {
       body: uploads,
       method: 'POST', path: '/test/upload/all-named-size',
     }, false);
-    assert(res.statusCode === 200);
+    assert(res.context.httpStatusCode === 200);
 
     const file1 = await this.fixture.readStream('/asset.yml');
     const hash1 = await BinaryUtil.hashInput(file1);

@@ -3,7 +3,7 @@ import { Injectable, Inject } from '@travetto/di';
 import { Ignore } from '@travetto/schema';
 
 import { WebChainedContext } from '../types.ts';
-import { HTTP_METHODS, WebInterceptorCategory } from '../types/core.ts';
+import { HTTP_METHODS, HttpMethod, WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
@@ -26,7 +26,7 @@ export class CorsConfig {
   /**
    * Allowed http methods
    */
-  methods?: WebRequest['method'][];
+  methods?: HttpMethod[];
   /**
    * Allowed http headers
    */

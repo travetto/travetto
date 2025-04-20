@@ -326,7 +326,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     this.#paths[key] = {
       ...(this.#paths[key] ?? {}),
-      [HTTP_METHODS[ep.method].lower]: op
+      [HTTP_METHODS[ep.httpMethod ?? 'GET'].lower]: op
     };
   }
 

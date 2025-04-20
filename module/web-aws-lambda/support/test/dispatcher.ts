@@ -27,7 +27,7 @@ function toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
     multiValueHeaders[k] = req.headers.getList(k) ?? [];
   });
 
-  Object.entries(req.query ?? {}).forEach(([k, v]) => {
+  Object.entries(req.context.httpQuery ?? {}).forEach(([k, v]) => {
     if (Array.isArray(v)) {
       multiValueQueryStringParameters[k] = v;
     } else {
@@ -39,8 +39,8 @@ function toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
     resource: '/{proxy+}',
     pathParameters: {},
     stageVariables: {},
-    path: req.path,
-    httpMethod: req.method,
+    path: req.context.path,
+    httpMethod: req.context.httpMethod ?? 'POST',
     queryStringParameters,
     multiValueQueryStringParameters,
     headers,
@@ -70,7 +70,9 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
       new WebResponse<unknown>({
         body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
         headers: { ...res.headers ?? {}, ...res.multiValueHeaders ?? {} },
-        statusCode: res.statusCode
+        context: {
+          httpStatusCode: res.statusCode
+        }
       }),
       true
     );

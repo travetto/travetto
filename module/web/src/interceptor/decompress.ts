@@ -51,7 +51,9 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
     if (!config.supportedEncodings.includes(encoding)) {
       throw new WebResponse({
         body: new AppError(`Unsupported Content-Encoding: ${encoding}`),
-        statusCode: 415
+        context: {
+          httpStatusCode: 415
+        }
       });
     }
 

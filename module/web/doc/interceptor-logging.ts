@@ -21,7 +21,7 @@ export class CustomLoggingInterceptor implements WebInterceptor {
       return await next();
     } finally {
       // Write request to database
-      this.appender.write(req.method, req.path, req.query);
+      this.appender.write(req.context.httpMethod, req.context.path, req.context.httpQuery);
     }
   }
 }

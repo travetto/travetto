@@ -20,14 +20,14 @@ export class WebTestDispatchUtil {
       sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
       req.body = WebBodyUtil.markRaw(await WebBodyUtil.toBuffer(sample.body!));
     }
-    Object.assign(req, { query: BindUtil.flattenPaths(req.query) });
+    Object.assign(req, { query: BindUtil.flattenPaths(req.context.httpQuery ?? {}) });
     return req;
   }
 
   static async finalizeResponseBody(res: WebResponse, decompress?: boolean): Promise<WebResponse> {
     let result = res.body;
 
-    res.statusCode = WebCommonUtil.getStatusCode(res);
+    res.context.httpStatusCode = WebCommonUtil.getStatusCode(res);
 
     if (decompress) {
       if (Buffer.isBuffer(result) || BinaryUtil.isReadable(result)) {
@@ -53,7 +53,7 @@ export class WebTestDispatchUtil {
       }
     }
 
-    if (res.statusCode && res.statusCode >= 400) {
+    if (res.context.httpStatusCode && res.context.httpStatusCode >= 400) {
       result = WebCommonUtil.catchResponse(AppError.fromJSON(result) ?? result).body;
     }
 

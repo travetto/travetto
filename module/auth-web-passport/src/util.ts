@@ -11,7 +11,7 @@ export class PassportUtil {
    * @param src The input src for a state read (string, or a request obj)
    */
   static readState<T = Record<string, unknown>>(src?: string | WebRequest): T | undefined {
-    const state = (typeof src === 'string' ? src : (typeof src?.query.state === 'string' ? src?.query.state : ''));
+    const state = (typeof src === 'string' ? src : (typeof src?.context.httpQuery?.state === 'string' ? src?.context.httpQuery?.state : ''));
     if (state) {
       try {
         return Util.decodeSafeJSON(state);

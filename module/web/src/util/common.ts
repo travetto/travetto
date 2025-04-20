@@ -1,9 +1,12 @@
 import { AppError, ErrorCategory } from '@travetto/runtime';
-import { WebResponse } from '../types/response.ts';
-import { HTTP_METHODS, HttpMethod, WebHeaders, WebHeadersInit } from '@travetto/web';
+import { WebResponse, WebResponseContext } from '../types/response.ts';
+import { WebHeaders } from '../types/headers.ts';
+import { WebRequest } from '@travetto/web';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
+
+const WebRequestParamsSymbol = Symbol();
 
 /**
  * Mapping from error category to standard http error codes
@@ -72,7 +75,7 @@ export class WebCommonUtil {
    * Get status code
    */
   static getStatusCode(res: WebResponse): number {
-    return (res.headers.has('Content-Range') && res.statusCode === 200) ? 206 : res.statusCode ?? 200;
+    return (res.headers.has('Content-Range') && res.context.httpStatusCode === 200) ? 206 : res.context.httpStatusCode ?? 200;
   }
 
   /**
@@ -91,22 +94,35 @@ export class WebCommonUtil {
     const error: Error & { category?: ErrorCategory, status?: number, statusCode?: number } = body;
     const statusCode = error.status ?? error.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
 
-    return new WebResponse({ body, statusCode });
+    return new WebResponse({ body, context: { httpStatusCode: statusCode } });
   }
 
   /**
    * Generate common valid response
    */
-  static commonResponse(method: HttpMethod, body: unknown, extraHeaders: WebHeaders): WebResponse {
+  static commonResponse(body: unknown, extraHeaders: WebHeaders, context?: WebResponseContext): WebResponse {
     if (body instanceof WebResponse) {
       return body;
     } else {
-      const statusCode = (body === null || body === undefined) ? HTTP_METHODS[method].emptyStatusCode : 200;
-      const res = new WebResponse({ body, statusCode });
+      const res = new WebResponse({ body, context: context ?? {} });
       for (const [k, v] of extraHeaders) {
         res.headers.set(k, v);
       }
       return res;
     }
+  }
+
+  /**
+   * Get request parameters
+   */
+  static getRequestParams(req: WebRequest & { [WebRequestParamsSymbol]?: unknown[] }): unknown[] {
+    return req[WebRequestParamsSymbol] ?? [];
+  }
+
+  /**
+   * Set request parameters
+   */
+  static setRequestParams(req: WebRequest & { [WebRequestParamsSymbol]?: unknown[] }, params: unknown[]): void {
+    req[WebRequestParamsSymbol] ??= params;
   }
 }

@@ -42,17 +42,17 @@ export class LoggingInterceptor implements WebInterceptor {
     const res = await next();
     const duration = Date.now() - createdDate;
 
+    const err = res.body instanceof Error ? res.body : undefined;
+    const code = res.context.httpStatusCode ?? (!!err ? 500 : 200);
+
     const reqLog = {
-      method: req.method,
-      path: req.path,
-      query: { ...req.query },
-      params: req.params,
-      statusCode: res.statusCode,
+      method: req.context.httpMethod,
+      path: req.context.path,
+      query: req.context.httpQuery,
+      params: req.context.pathParams,
+      statusCode: code,
       duration,
     };
-
-    const err = res.body instanceof Error ? res.body : undefined;
-    const code = res.statusCode ?? (!!err ? 500 : 200);
 
     if (code < 400) {
       console.info('Request', reqLog);

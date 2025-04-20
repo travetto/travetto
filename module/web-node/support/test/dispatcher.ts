@@ -16,7 +16,7 @@ export class FetchWebDispatcher implements WebDispatcher {
   config: WebConfig;
 
   async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const { query, method, headers, path } = req;
+    const { context: { httpQuery: query, httpMethod: method, path }, headers } = req;
 
     let q = '';
     if (query && Object.keys(query).length) {
@@ -33,7 +33,8 @@ export class FetchWebDispatcher implements WebDispatcher {
     return WebTestDispatchUtil.finalizeResponseBody(
       new WebResponse({
         body: Buffer.from(await res.arrayBuffer()),
-        statusCode: res.status, headers: res.headers
+        context: { httpStatusCode: res.status },
+        headers: res.headers
       })
     );
   }

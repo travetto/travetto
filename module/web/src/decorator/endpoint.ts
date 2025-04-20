@@ -2,17 +2,22 @@ import { asConstructable } from '@travetto/runtime';
 
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, EndpointFunctionDescriptor, EndpointIOType } from '../registry/types.ts';
-import { HttpMethod } from '../types/core.ts';
+import { HTTP_METHODS, HttpMethod } from '@travetto/web';
 
 type EndpointFunctionDecorator = <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
 
-function Endpoint(method: HttpMethod, path: string = '/', extra: Partial<EndpointConfig> = {}): EndpointFunctionDecorator {
+function Endpoint(config: { path: string } & Partial<EndpointConfig>): EndpointFunctionDecorator {
   return function <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
     const ret = ControllerRegistry.registerPendingEndpoint(
-      asConstructable(target).constructor, descriptor, { method, path, ...extra }
+      asConstructable(target).constructor, descriptor, config
     );
     return ret;
   };
+}
+
+function buildConfig(method: HttpMethod, path: string): Partial<EndpointConfig> & { path: string } {
+  const { body: allowsBody, cacheable } = HTTP_METHODS[method];
+  return { path, allowsBody, cacheable, httpMethod: method };
 }
 
 /**
@@ -20,46 +25,46 @@ function Endpoint(method: HttpMethod, path: string = '/', extra: Partial<Endpoin
  * @param path The endpoint path for the request
  * @augments `@travetto/web:Endpoint`
  */
-export function Get(path?: string): EndpointFunctionDecorator { return Endpoint('GET', path); }
+export function Get(path = '/'): EndpointFunctionDecorator { return Endpoint(buildConfig('GET', path)); }
 /**
  * Registers POST requests
  * @param path The endpoint path for the request
  * @augments `@travetto/web:HttpRequestBody`
  * @augments `@travetto/web:Endpoint`
  */
-export function Post(path?: string): EndpointFunctionDecorator { return Endpoint('POST', path); }
+export function Post(path = '/'): EndpointFunctionDecorator { return Endpoint(buildConfig('POST', path)); }
 /**
  * Registers PUT requests
  * @param path The endpoint path for the request
  * @augments `@travetto/web:HttpRequestBody`
  * @augments `@travetto/web:Endpoint`
  */
-export function Put(path?: string): EndpointFunctionDecorator { return Endpoint('PUT', path); }
+export function Put(path = '/'): EndpointFunctionDecorator { return Endpoint(buildConfig('PUT', path)); }
 /**
  * Registers PATCH requests
  * @param path The endpoint path for the request
  * @augments `@travetto/web:HttpRequestBody`
  * @augments `@travetto/web:Endpoint`
  */
-export function Patch(path?: string): EndpointFunctionDecorator { return Endpoint('PATCH', path); }
+export function Patch(path = '/'): EndpointFunctionDecorator { return Endpoint(buildConfig('PATCH', path)); }
 /**
  * Registers DELETE requests
  * @param path The endpoint path for the request
  * @augments `@travetto/web:Endpoint`
  */
-export function Delete(path?: string): EndpointFunctionDecorator { return Endpoint('DELETE', path); }
+export function Delete(path = '/'): EndpointFunctionDecorator { return Endpoint(buildConfig('DELETE', path)); }
 /**
  * Registers HEAD requests
  * @param path The endpoint path for the request
  * @augments `@travetto/web:Endpoint`
  */
-export function Head(path?: string): EndpointFunctionDecorator { return Endpoint('HEAD', path); }
+export function Head(path = '/'): EndpointFunctionDecorator { return Endpoint(buildConfig('HEAD', path)); }
 /**
  * Registers OPTIONS requests
  * @param path The endpoint path for the request
  * @augments `@travetto/web:Endpoint`
  */
-export function Options(path?: string): EndpointFunctionDecorator { return Endpoint('OPTIONS', path); }
+export function Options(path = '/'): EndpointFunctionDecorator { return Endpoint(buildConfig('OPTIONS', path)); }
 
 /**
  * Defines the response type of the endpoint

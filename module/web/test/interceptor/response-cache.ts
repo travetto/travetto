@@ -2,10 +2,10 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { GetCacheConfig, GetCacheInterceptor, WebRequest, WebResponse } from '@travetto/web';
+import { ResponseCacheConfig, ResponseCacheInterceptor, WebRequest, WebResponse } from '@travetto/web';
 
 @Suite()
-class GetCacheInterceptorSuite {
+class ResponseCacheInterceptorSuite {
 
   @BeforeAll()
   async init() {
@@ -14,11 +14,11 @@ class GetCacheInterceptorSuite {
 
   @Test()
   async basicTest() {
-    const interceptor = new GetCacheInterceptor();
-    interceptor.config = GetCacheConfig.from({});
+    const interceptor = new ResponseCacheInterceptor();
+    interceptor.config = ResponseCacheConfig.from({ mode: 'deny' });
 
     const res = await interceptor.filter({
-      req: new WebRequest({ method: 'GET' }),
+      req: new WebRequest({ context: { path: '/', httpMethod: 'GET' } }),
       next: async () => new WebResponse(),
       config: interceptor.config
     });
@@ -27,7 +27,7 @@ class GetCacheInterceptorSuite {
     assert(/no-cache/.test(res.headers.get('Cache-Control')!));
 
     const res2 = await interceptor.filter({
-      req: new WebRequest({ method: 'PATCH' }),
+      req: new WebRequest({ context: { path: '/', httpMethod: 'PATCH' } }),
       next: async () => new WebResponse(),
       config: interceptor.config
     });
@@ -37,11 +37,11 @@ class GetCacheInterceptorSuite {
 
   @Test()
   async overridden() {
-    const interceptor = new GetCacheInterceptor();
-    interceptor.config = GetCacheConfig.from({});
+    const interceptor = new ResponseCacheInterceptor();
+    interceptor.config = ResponseCacheConfig.from({ mode: 'allow' });
 
     const res = await interceptor.filter({
-      req: new WebRequest({ method: 'GET' }),
+      req: new WebRequest({ context: { path: '/', httpMethod: 'GET' } }),
       next: async () => new WebResponse({ headers: { 'cache-control': 'max-age=3000' } }),
       config: interceptor.config
     });

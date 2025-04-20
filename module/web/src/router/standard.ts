@@ -1,12 +1,12 @@
 import router from 'find-my-way';
 
-import { AppError, castTo } from '@travetto/runtime';
+import { AppError } from '@travetto/runtime';
 import { Inject, Injectable } from '@travetto/di';
 
 import { EndpointConfig } from '../registry/types.ts';
 
 import { WebResponse } from '../types/response.ts';
-import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
+import { HTTP_METHODS } from '../types/core.ts';
 import { WebFilterContext } from '../types.ts';
 import { WebConfig } from '../config/web.ts';
 
@@ -29,12 +29,12 @@ export class StandardWebRouter extends BaseWebRouter {
       const fullPath = ep.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
       const handler = (): void => { };
       this.#cache.set(handler, ep);
-      this.raw[HTTP_METHODS[ep.method].lower](fullPath, handler);
+      this.raw[HTTP_METHODS[ep.httpMethod ?? 'POST'].lower](fullPath, handler);
     }
 
     return (): void => {
       for (const ep of endpoints ?? []) {
-        this.raw.off(ep.method, ep.fullPath);
+        this.raw.off(ep.httpMethod ?? 'POST', ep.fullPath);
       }
     };
   }
@@ -43,11 +43,11 @@ export class StandardWebRouter extends BaseWebRouter {
    * Route and run the request
    */
   dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const method = castTo<HttpMethod>((req.method ?? 'GET').toUpperCase());
-    const { params, handler } = this.raw.find(method, req.path ?? '/') ?? {};
+    const method = req.context.httpMethod ?? 'POST';
+    const { params, handler } = this.raw.find(method, req.context.path) ?? {};
     const endpoint = this.#cache.get(handler!);
     if (!endpoint) {
-      throw new AppError(`Unknown route ${req.method} ${req.path}`, { category: 'notfound' });
+      throw new AppError(`Unknown route ${method} ${req.context.path}`, { category: 'notfound' });
     }
     Object.assign(req, { params });
     return endpoint.filter!({ req });

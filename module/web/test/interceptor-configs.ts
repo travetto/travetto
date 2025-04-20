@@ -14,7 +14,7 @@ import { WebInterceptorCategory } from '../src/types/core.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { WebChainedContext } from '../src/types.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
-import { GetCacheInterceptor } from '../src/interceptor/get-cache.ts';
+import { ResponseCacheInterceptor } from '../src/interceptor/get-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
 import { WebRequest } from '../src/types/request.ts';
 import { StandardWebRouter } from '@travetto/web';
@@ -50,7 +50,7 @@ class CustomInterceptor implements WebInterceptor<CustomInterceptorConfig> {
 @Controller('/test-interceptor')
 @ConfigureInterceptor(CustomInterceptor, { applies: true })
 @ConfigureInterceptor(CorsInterceptor, { applies: false })
-@ConfigureInterceptor(GetCacheInterceptor, { applies: false })
+@ConfigureInterceptor(ResponseCacheInterceptor, { applies: false })
 class TestController {
   @Get('/')
   async std() { }
@@ -73,7 +73,7 @@ class TestController {
 @Controller('/alt-test-interceptor')
 @ConfigureInterceptor(CustomInterceptor, { applies: false, name: 'greg' })
 @ConfigureInterceptor(CorsInterceptor, { applies: false })
-@ConfigureInterceptor(GetCacheInterceptor, { applies: false })
+@ConfigureInterceptor(ResponseCacheInterceptor, { applies: false })
 class AltTestController {
   @Get('/')
   async std() { }

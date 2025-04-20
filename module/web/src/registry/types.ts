@@ -5,6 +5,7 @@ import type { WebInterceptor } from '../types/interceptor.ts';
 import type { WebChainedFilter, WebFilterContext, WebFilter } from '../types.ts';
 import { HttpMethod } from '../types/core.ts';
 import { WebHeaders } from '../types/headers.ts';
+import { WebResponseContext } from '../types/response.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
@@ -126,9 +127,17 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    */
   instance?: unknown;
   /**
-   * The HTTP method the endpoint is for
+   * Method alias for the endpoint
    */
-  method: HttpMethod;
+  httpMethod?: HttpMethod;
+  /**
+   * Is this endpoint cacheable
+   */
+  cacheable: boolean;
+  /**
+   * Does this endpoint allow a body
+   */
+  allowsBody: boolean;
   /**
    * The path of the endpoint
    */
@@ -161,6 +170,10 @@ export interface EndpointConfig extends CoreConfig, DescribableConfig {
    * Response header map
    */
   responseHeaderMap: WebHeaders;
+  /**
+   * Default web request context
+   */
+  defaultResponseContext?: WebResponseContext;
 }
 
 /**
