@@ -9,7 +9,7 @@ export class NodeWebUtil {
   /**
    * Create a web request given a node IncomingMessage
    */
-  static toWebRequest(req: IncomingMessage, params?: Record<string, unknown>): WebRequest {
+  static toWebRequest(req: IncomingMessage, pathParams?: Record<string, unknown>): WebRequest {
     const secure = 'encrypted' in req.socket && !!req.socket.encrypted;
     const [path, query] = (req.url ?? '/').split('?') ?? [];
     return new WebRequest({
@@ -23,7 +23,7 @@ export class NodeWebUtil {
         httpMethod: castTo(req.method?.toUpperCase()),
         path,
         httpQuery: Object.fromEntries(new URLSearchParams(query)),
-        pathParams: params,
+        pathParams,
       },
       headers: req.headers,
       body: WebBodyUtil.markRaw(req)

@@ -48,7 +48,7 @@ export function Upload(
 
     return Param('body', {
       ...finalConf,
-      extract: (ctx, config) => {
+      extract: (request, config) => {
         const field = SchemaRegistry.getMethodSchema(inst.constructor, prop)[idx];
 
         if (!field) {
@@ -60,7 +60,7 @@ export function Upload(
         }
 
         const isMap = field.type === FileMapContract;
-        const map = WebUploadUtil.getRequestUploads(ctx.request);
+        const map = WebUploadUtil.getRequestUploads(request);
         return isMap ? map : map[config.name!];
       }
     })(inst, prop, idx);

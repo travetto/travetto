@@ -31,9 +31,12 @@ export class AwsLambdaWebUtil {
   /**
    * Create an API Gateway result from a web response
    */
-  static async toLambdaResult(res: WebResponse, base64Encoded: boolean = false): Promise<APIGatewayProxyResult> {
-    const binaryResponse = new WebResponse({ ...res, ...WebBodyUtil.toBinaryMessage(res) });
-    const output = binaryResponse.body ? await WebBodyUtil.toBuffer(binaryResponse.body) : Buffer.alloc(0);
+  static async toLambdaResult(response: WebResponse, base64Encoded: boolean = false): Promise<APIGatewayProxyResult> {
+    const binaryResponse = new WebResponse({
+      context: response.context,
+      ...WebBodyUtil.toBinaryMessage(response)
+    });
+    const output = binaryResponse.body ? await WebBodyUtil.toBuffer(binaryResponse.body!) : Buffer.alloc(0);
     const isBase64Encoded = !!output.length && base64Encoded;
     const headers: Record<string, string> = {};
     const multiValueHeaders: Record<string, string[]> = {};

@@ -86,7 +86,7 @@ export class CompressInterceptor implements WebInterceptor {
       return response;
     }
 
-    const binaryResponse = new WebResponse({ ...response, ...WebBodyUtil.toBinaryMessage(response) });
+    const binaryResponse = new WebResponse({ context: response.context, ...WebBodyUtil.toBinaryMessage(response) });
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     const len = Buffer.isBuffer(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
 
