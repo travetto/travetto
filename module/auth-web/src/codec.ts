@@ -79,14 +79,14 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     return jwt.toString();
   }
 
-  async encode(res: WebResponse, data: Principal | undefined): Promise<WebResponse> {
+  async encode(response: WebResponse, data: Principal | undefined): Promise<WebResponse> {
     const token = data ? await this.create(data) : undefined;
     const { header, headerPrefix, cookie } = this.config;
     if (this.config.mode === 'header') {
-      res.headers.setWithPrefix(header, token, headerPrefix);
+      response.headers.setWithPrefix(header, token, headerPrefix);
     } else {
       this.webAsyncContext.cookies.set({ name: cookie, value: token, signed: false, expires: data?.expiresAt });
     }
-    return res;
+    return response;
   }
 }

@@ -196,9 +196,9 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async head<T extends ModelType>(cls: Class<T>, id: string): Promise<boolean> {
     try {
-      const res = await this.client.headObject(this.#q(cls, id));
+      const result = await this.client.headObject(this.#q(cls, id));
       const { expiresAt } = ModelRegistry.get(cls);
-      if (expiresAt && res.Expires && res.Expires.getTime() < Date.now()) {
+      if (expiresAt && result.Expires && result.Expires.getTime() < Date.now()) {
         return false;
       }
       return true;
@@ -334,29 +334,29 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   async #getObject(location: string, range?: Required<ByteRange>): Promise<Readable> {
     // Read from s3
-    const res = await this.client.getObject(this.#qBlob(location, range ? {
+    const result = await this.client.getObject(this.#qBlob(location, range ? {
       Range: `bytes=${range.start}-${range.end}`
     } : {}));
 
-    if (!res.Body) {
+    if (!result.Body) {
       throw new AppError('Unable to read type: undefined');
     }
 
-    if (typeof res.Body === 'string') { // string
-      return Readable.from(res.Body, { encoding: castTo<string>(res.Body).endsWith('=') ? 'base64' : 'utf8' });
-    } else if (res.Body instanceof Buffer) { // Buffer
-      return Readable.from(res.Body);
-    } else if ('pipe' in res.Body) { // Stream
-      return castTo<Readable>(res.Body);
+    if (typeof result.Body === 'string') { // string
+      return Readable.from(result.Body, { encoding: castTo<string>(result.Body).endsWith('=') ? 'base64' : 'utf8' });
+    } else if (result.Body instanceof Buffer) { // Buffer
+      return Readable.from(result.Body);
+    } else if ('pipe' in result.Body) { // Stream
+      return castTo<Readable>(result.Body);
     }
-    throw new AppError(`Unable to read type: ${typeof res.Body}`);
+    throw new AppError(`Unable to read type: ${typeof result.Body}`);
   }
 
   async getBlob(location: string, range?: ByteRange): Promise<Blob> {
     const meta = await this.getBlobMeta(location);
     const final = range ? ModelBlobUtil.enforceRange(range, meta.size!) : undefined;
-    const res = (): Promise<Readable> => this.#getObject(location, final);
-    return BinaryUtil.readableBlob(res, { ...meta, range: final });
+    const result = (): Promise<Readable> => this.#getObject(location, final);
+    return BinaryUtil.readableBlob(result, { ...meta, range: final });
   }
 
   async headBlob(location: string): Promise<{ Metadata?: BlobMeta, ContentLength?: number }> {

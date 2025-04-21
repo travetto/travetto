@@ -8,11 +8,11 @@ import { WebSslUtil } from '../src/util/ssl.ts';
 export class SSLTest {
   @Test()
   async verify() {
-    const res = await WebSslUtil.generateKeyPair();
+    const result = await WebSslUtil.generateKeyPair();
 
-    assert(!!res.cert);
-    assert(!!res.key);
-    assert(/^-+BEGIN CERTIFICATE-+(\n|\r)+/s.test(res.cert));
-    assert(/^-+BEGIN( RSA)? PRIVATE KEY-+(\n|\r)+/s.test(res.key));
+    assert(!!result.cert);
+    assert(!!result.key);
+    assert(/^-+BEGIN CERTIFICATE-+(\n|\r)+/s.test(result.cert));
+    assert(/^-+BEGIN( RSA)? PRIVATE KEY-+(\n|\r)+/s.test(result.key));
   }
 }

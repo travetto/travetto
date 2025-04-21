@@ -40,12 +40,12 @@ export class NodemailerTransport implements MailTransport {
 
     mail = this.#forceContentToAlternative(mail);
 
-    const res = await this.#transport.sendMail(mail);
+    const response = await this.#transport.sendMail(mail);
 
-    if (res.rejected?.length) {
-      console.error('Unable to send emails', { recipientCount: res.rejected?.length });
+    if (response.rejected?.length) {
+      console.error('Unable to send emails', { recipientCount: response.rejected?.length });
     }
 
-    return castTo(res);
+    return castTo(response);
   }
 }

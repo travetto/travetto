@@ -96,11 +96,11 @@ export class ExecUtil {
   static getResult(proc: ChildProcess, options: { catch?: boolean, binary: true }): Promise<ExecutionResult<Buffer>>;
   static getResult<T extends string | Buffer>(proc: ChildProcess, options: { catch?: boolean, binary?: boolean } = {}): Promise<ExecutionResult<T>> {
     const _proc: ChildProcess & { [ResultSymbol]?: Promise<ExecutionResult> } = proc;
-    const res = _proc[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
+    const result = _proc[ResultSymbol] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let done = false;
-      const finish = (result: ExecutionBaseResult): void => {
+      const finish = (finalResult: ExecutionBaseResult): void => {
         if (done) {
           return;
         }
@@ -114,7 +114,7 @@ export class ExecUtil {
         const final = {
           stdout: options.binary ? buffers.stdout : buffers.stdout.toString('utf8'),
           stderr: options.binary ? buffers.stderr : buffers.stderr.toString('utf8'),
-          ...result
+          ...finalResult
         };
 
         resolve(!final.valid ?
@@ -137,7 +137,7 @@ export class ExecUtil {
       }
     });
 
-    return castTo(options.catch ? res : res.then(v => {
+    return castTo(options.catch ? result : result.then(v => {
       if (v.valid) {
         return v;
       } else {

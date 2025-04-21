@@ -71,8 +71,8 @@ export class CacheService {
       }
     }
 
-    const res = await this.#modelService.get(CacheRecord, id);
-    return Util.decodeSafeJSON(res.entry);
+    const record = await this.#modelService.get(CacheRecord, id);
+    return Util.decodeSafeJSON(record.entry);
   }
 
   /**

@@ -268,13 +268,13 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   // Crud
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
-    const res = await this.client.getItem({
+    const result = await this.client.getItem({
       TableName: this.#resolveTable(cls),
       Key: { id: toValue(id) }
     });
 
-    if (res && res.Item && res.Item.body) {
-      return loadAndCheckExpiry(cls, res.Item.body.S!);
+    if (result && result.Item && result.Item.body) {
+      return loadAndCheckExpiry(cls, result.Item.body.S!);
     }
     throw new NotFoundError(cls, id);
   }
@@ -312,12 +312,12 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
     ModelCrudUtil.ensureNotSubType(cls);
-    const res = await this.client.deleteItem({
+    const result = await this.client.deleteItem({
       TableName: this.#resolveTable(cls),
       ReturnValues: 'ALL_OLD',
       Key: { id: { S: id } }
     });
-    if (!res.Attributes) {
+    if (!result.Attributes) {
       throw new NotFoundError(cls, id);
     }
   }

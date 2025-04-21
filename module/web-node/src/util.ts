@@ -34,14 +34,14 @@ export class NodeWebUtil {
    * Send WebResponse to ServerResponse
    */
   static async respondToServerResponse(webRes: WebResponse, res: ServerResponse): Promise<void> {
-    const binaryRes = new WebResponse({ ...webRes, ...WebBodyUtil.toBinaryMessage(webRes) });
-    binaryRes.headers.forEach((v, k) => res.setHeader(k.toLowerCase(), v));
-    res.statusCode = WebCommonUtil.getStatusCode(binaryRes);
+    const binaryResponse = new WebResponse({ ...webRes, ...WebBodyUtil.toBinaryMessage(webRes) });
+    binaryResponse.headers.forEach((v, k) => res.setHeader(k.toLowerCase(), v));
+    res.statusCode = WebCommonUtil.getStatusCode(binaryResponse);
 
-    if (BinaryUtil.isReadable(binaryRes.body)) {
-      await pipeline(binaryRes.body, res);
+    if (BinaryUtil.isReadable(binaryResponse.body)) {
+      await pipeline(binaryResponse.body, res);
     } else {
-      res.write(binaryRes.body);
+      res.write(binaryResponse.body);
       res.end();
     }
   }

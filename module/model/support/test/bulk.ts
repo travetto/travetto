@@ -18,29 +18,29 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   @Test()
   async bulkInsert() {
     const service = await this.service;
-    const res = await service.processBulk(User, [
+    const result = await service.processBulk(User, [
       { insert: User.from({}) },
       { insert: User.from({}) },
       { insert: User.from({}) },
       { insert: User.from({}) }
     ]);
 
-    assert(res.counts.insert === 4);
-    assert(res.insertedIds.size === 4);
+    assert(result.counts.insert === 4);
+    assert(result.insertedIds.size === 4);
   }
 
   @Test()
   async bulkUpsert() {
     const service = await this.service;
-    const res = await service.processBulk(User, [
+    const result = await service.processBulk(User, [
       { upsert: User.from({}) },
       { upsert: User.from({}) },
       { upsert: User.from({}) },
       { upsert: User.from({}) }
     ]);
 
-    assert(res.counts.upsert === 4);
-    assert(res.insertedIds.size === 4);
+    assert(result.counts.upsert === 4);
+    assert(result.insertedIds.size === 4);
   }
 
   @Test()
@@ -48,9 +48,9 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     const service = await this.service;
     const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.idSource.create() }));
 
-    const res = await service.processBulk(User, users.map(u => ({ insert: u })));
-    assert(res.counts.insert === 4);
-    assert(res.insertedIds.size === 4);
+    const result = await service.processBulk(User, users.map(u => ({ insert: u })));
+    assert(result.counts.insert === 4);
+    assert(result.insertedIds.size === 4);
 
     const res2 = await service.processBulk(User, users.map(u => ({ update: u })));
     assert(res2.counts.update === 4);
@@ -62,9 +62,9 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
     const service = await this.service;
     const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.idSource.create() }));
 
-    const res = await service.processBulk(User, users.map(u => ({ insert: u })));
-    assert(res.counts.insert === 4);
-    assert(res.insertedIds.size === 4);
+    const result = await service.processBulk(User, users.map(u => ({ insert: u })));
+    assert(result.counts.insert === 4);
+    assert(result.insertedIds.size === 4);
 
     const res2 = await service.processBulk(User, users.map(u => ({ delete: u })));
     assert(res2.counts.delete === 4);

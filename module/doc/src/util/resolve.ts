@@ -14,11 +14,11 @@ export class DocResolveUtil {
   static async resolveRef(title: string, file: string): Promise<ResolvedRef> {
 
     let line = 0;
-    const res = await DocFileUtil.readSource(file);
-    file = res.file;
+    const result = await DocFileUtil.readSource(file);
+    file = result.file;
 
-    if (res.content) {
-      line = res.content.split(/\n/g)
+    if (result.content) {
+      line = result.content.split(/\n/g)
         .findIndex(x => new RegExp(`(class|interface|function)[ ]+${title.replaceAll('$', '\\$')}`).test(x));
       if (line < 0) {
         line = 0;
@@ -33,13 +33,13 @@ export class DocResolveUtil {
   }
 
   static async resolveCode(content: string | Function, language?: string, outline = false): Promise<ResolvedCode> {
-    const res = DocFileUtil.readSource(content);
-    let text = res.content;
+    const result = DocFileUtil.readSource(content);
+    let text = result.content;
 
     let file: string | undefined;
-    if (res.file) {
-      language = res.language;
-      file = res.file;
+    if (result.file) {
+      language = result.language;
+      file = result.file;
       if (outline) {
         text = DocFileUtil.buildOutline(text);
       }

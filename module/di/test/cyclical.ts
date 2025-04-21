@@ -18,8 +18,8 @@ class CycleTest {
       await RootRegistry.init();
 
       const { ABC } = await import('./cycle/a.ts');
-      const res = await DependencyRegistry.getInstance(ABC);
-      console.log('Loaded dependency', { instance: res.constructor.name });
+      const result = await DependencyRegistry.getInstance(ABC);
+      console.log('Loaded dependency', { instance: result.constructor.name });
     } catch {
       throw new Error('Failed to load dependency');
     }

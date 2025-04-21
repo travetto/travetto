@@ -20,18 +20,18 @@ export class MainCommand implements CliCommandShape {
   }
 
   async main(fileOrImport: string, args: string[] = []): Promise<void> {
-    let res: unknown;
+    let result: unknown;
     try {
       const mod = await Runtime.importFrom<{ main(..._: unknown[]): Promise<unknown> }>(fileOrImport);
-      res = await mod.main(...args, ...this._parsed.unknown);
+      result = await mod.main(...args, ...this._parsed.unknown);
     } catch (err) {
-      res = err;
+      result = err;
       process.exitCode = Math.max(process.exitCode ? +process.exitCode : 1, 1);
     }
 
-    if (res !== undefined) {
-      if (process.connected) { process.send?.(res); }
-      const payload = typeof res === 'string' ? res : (res instanceof Error ? res.stack : JSON.stringify(res));
+    if (result !== undefined) {
+      if (process.connected) { process.send?.(result); }
+      const payload = typeof result === 'string' ? result : (result instanceof Error ? result.stack : JSON.stringify(result));
       process[process.exitCode ? 'stderr' : 'stdout'].write(`${payload}\n`);
     }
   }

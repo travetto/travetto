@@ -93,31 +93,31 @@ export class ManagerTest {
 
   @Test()
   async nestedBindTo() {
-    const res = await this.config.bindTo(Nested, {}, 'nested', false);
-    assert.ok(res.user);
-    assert(res.user.age === 52);
-    assert(res.user.height === undefined);
+    const result = await this.config.bindTo(Nested, {}, 'nested', false);
+    assert.ok(result.user);
+    assert(result.user.age === 52);
+    assert(result.user.height === undefined);
 
     await assert.rejects(() => DependencyRegistry.getInstance(Nested), ValidationResultError);
   }
 
   @Test()
   async genericBind() {
-    const res = await this.config.bindTo(Generic, new Generic(), 'vague', false);
-    assert(res.name === 'bob');
-    assert.ok(res.props);
-    assert(res.props.person === 20);
-    assert(res.props.age === true);
-    assert.deepStrictEqual(res.props.child, { name: [1, 2, 3] });
-    assert.deepStrictEqual(res.props.jsonColor, ['2', '3', '4']);
-    assert.deepStrictEqual(res.props.propsColor, '2,3,4');
-    assert(res.props.superpower === 'green');
+    const result = await this.config.bindTo(Generic, new Generic(), 'vague', false);
+    assert(result.name === 'bob');
+    assert.ok(result.props);
+    assert(result.props.person === 20);
+    assert(result.props.age === true);
+    assert.deepStrictEqual(result.props.child, { name: [1, 2, 3] });
+    assert.deepStrictEqual(result.props.jsonColor, ['2', '3', '4']);
+    assert.deepStrictEqual(result.props.propsColor, '2,3,4');
+    assert(result.props.superpower === 'green');
   }
 
   @Test()
   async propsMultiline() {
-    const res = await this.config.bindTo(Properties, new Properties(), 'props', false);
-    assert(res.multiline);
-    assert(res.multiline === 'hello my name is bob');
+    const result = await this.config.bindTo(Properties, new Properties(), 'props', false);
+    assert(result.multiline);
+    assert(result.multiline === 'hello my name is bob');
   }
 }

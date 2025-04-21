@@ -73,8 +73,10 @@ export class WebCommonUtil {
   /**
    * Get status code
    */
-  static getStatusCode(res: WebResponse): number {
-    return (res.headers.has('Content-Range') && res.context.httpStatusCode === 200) ? 206 : res.context.httpStatusCode ?? 200;
+  static getStatusCode(response: WebResponse): number {
+    return (response.headers.has('Content-Range') && response.context.httpStatusCode === 200) ?
+      206 :
+      response.context.httpStatusCode ?? 200;
   }
 
   /**

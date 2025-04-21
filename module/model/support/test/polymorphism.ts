@@ -171,11 +171,11 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     await timers.setTimeout(15);
 
     try {
-      const res = await service.upsert(Doctor, Doctor.from({
+      const result = await service.upsert(Doctor, Doctor.from({
         id: doc.id, name: 'gob', specialty: 'eyes'
       }));
 
-      assert(res.updatedDate!.getTime() > update.getTime());
+      assert(result.updatedDate!.getTime() > update.getTime());
     } catch (err) {
       assert(err instanceof SubTypeNotSupportedError);
     }
@@ -219,12 +219,12 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
 
     await this.saveAll(IndexedWorker, [doc, fire, eng]);
 
-    const res = await service.getByIndex(IndexedWorker, 'worker-name', {
+    const result = await service.getByIndex(IndexedWorker, 'worker-name', {
       age: now,
       name: 'rob'
     });
 
-    assert(res instanceof IndexedFirefighter);
+    assert(result instanceof IndexedFirefighter);
 
     try {
       const res2 = await service.getByIndex(IndexedFirefighter, 'worker-name', {

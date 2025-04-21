@@ -26,10 +26,10 @@ export class CodecTest {
 
   @Test()
   async testHeader() {
-    const res = new WebResponse();
+    const response = new WebResponse();
     this.interceptor.config.mode = 'header';
 
-    await this.interceptor.codec.encode(res,
+    await this.interceptor.codec.encode(response,
       {
         id: 'true',
         details: {
@@ -38,17 +38,17 @@ export class CodecTest {
       }
     );
 
-    assert(res.headers.has('Authorization'));
+    assert(response.headers.has('Authorization'));
   }
 
   @Test()
   async testHeaderMissing() {
-    const res = new WebResponse();
+    const response = new WebResponse();
     this.interceptor.config.mode = 'header';
 
-    await this.interceptor.codec.encode(res, undefined);
+    await this.interceptor.codec.encode(response, undefined);
 
-    assert(!res.headers.has('Authorization'));
+    assert(!response.headers.has('Authorization'));
   }
 
   @Test()

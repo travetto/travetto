@@ -55,8 +55,8 @@ export class CompilerClient {
         ctrl.abort('TIMEOUT');
       })
       .catch(() => { });
-    const res = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
-    const out = { ok: res.ok, text: await res.text() };
+    const response = await fetch(`${this.#url}${rel}`, { ...opts, signal: ctrl.signal });
+    const out = { ok: response.ok, text: await response.text() };
     timeoutCtrl.abort();
     return out;
   }

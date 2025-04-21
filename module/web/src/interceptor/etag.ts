@@ -36,31 +36,31 @@ export class EtagInterceptor implements WebInterceptor {
   @Inject()
   config: EtagConfig;
 
-  addTag(ctx: WebChainedContext, res: WebResponse): WebResponse {
+  addTag(ctx: WebChainedContext, response: WebResponse): WebResponse {
     const { request } = ctx;
 
-    const statusCode = res.context.httpStatusCode;
+    const statusCode = response.context.httpStatusCode;
 
     if (statusCode && (statusCode >= 300 && statusCode !== 304)) {
-      return res;
+      return response;
     }
 
-    const binaryRes = new WebResponse({ ...res, ...WebBodyUtil.toBinaryMessage(res) });
-    if (!Buffer.isBuffer(binaryRes.body)) {
-      return binaryRes;
+    const binaryResponse = new WebResponse({ ...response, ...WebBodyUtil.toBinaryMessage(response) });
+    if (!Buffer.isBuffer(binaryResponse.body)) {
+      return binaryResponse;
     }
 
-    const tag = binaryRes.body.byteLength === 0 ?
+    const tag = binaryResponse.body.byteLength === 0 ?
       '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
       crypto
         .createHash('sha1')
-        .update(binaryRes.body.toString('utf8'), 'utf8')
+        .update(binaryResponse.body.toString('utf8'), 'utf8')
         .digest('base64')
         .substring(0, 27);
 
-    binaryRes.headers.set('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
+    binaryResponse.headers.set('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
 
-    const lastModified = binaryRes.headers.get('Last-Modified');
+    const lastModified = binaryResponse.headers.get('Last-Modified');
 
     if (
       request.context.httpMethod && HTTP_METHODS[request.context.httpMethod].cacheable &&
@@ -73,7 +73,7 @@ export class EtagInterceptor implements WebInterceptor {
       return new WebResponse({ context: { httpStatusCode: 304 } });
     }
 
-    return binaryRes;
+    return binaryResponse;
   }
 
   applies(ep: EndpointConfig, config: EtagConfig): boolean {

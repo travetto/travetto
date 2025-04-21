@@ -169,14 +169,14 @@ export abstract class ModelBlobSuite extends BaseModelSuite<ModelBlobSupport> {
     console.log(writable);
     assert(writable);
 
-    const res = await fetch(writable, {
+    const response = await fetch(writable, {
       method: 'PUT',
       body: new File([buffer], 'gary', { type: 'image/jpeg' }),
     });
 
-    console.error(await res.text());
+    console.error(await response.text());
 
-    assert(res.ok);
+    assert(response.ok);
 
     await service.updateBlobMeta('largeFile/one', {
       contentType: 'image/jpeg',

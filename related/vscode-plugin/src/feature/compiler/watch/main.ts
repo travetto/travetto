@@ -102,8 +102,8 @@ export class CompilerWatchFeature extends BaseFeature {
   async #compilerState(): Promise<CompilerStateType | undefined> {
     const { stdout } = await ExecUtil.getResult(this.run('info'));
     try {
-      const res: CompilerStateEvent = JSON.parse(stdout);
-      return res.state;
+      const event: CompilerStateEvent = JSON.parse(stdout);
+      return event.state;
     } catch { }
   }
 

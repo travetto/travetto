@@ -99,8 +99,8 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const res = await endpoint.filter!({ request: new WebRequest({}) });
-    return res.headers.get('Name') ?? undefined;
+    const response = await endpoint.filter!({ request: new WebRequest({}) });
+    return response.headers.get('Name') ?? undefined;
   }
 
   @BeforeAll()

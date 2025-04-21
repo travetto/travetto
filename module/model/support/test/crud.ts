@@ -213,22 +213,22 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   @Test('verify dates')
   async testDates() {
     const service = await this.service;
-    const res = await service.create(Dated, Dated.from({ createdDate: new Date() }));
+    const result = await service.create(Dated, Dated.from({ createdDate: new Date() }));
 
-    assert(res.createdDate instanceof Date);
+    assert(result.createdDate instanceof Date);
   }
 
   @Test('verify pre-persist on create/update')
   async testPrePersist() {
     const service = await this.service;
-    const res = await service.create(Dated, Dated.from({}));
-    const created = res.createdDate;
-    assert(res.createdDate instanceof Date);
-    assert(res.updatedDate instanceof Date);
+    const result = await service.create(Dated, Dated.from({}));
+    const created = result.createdDate;
+    assert(result.createdDate instanceof Date);
+    assert(result.updatedDate instanceof Date);
 
     await timers.setTimeout(100);
 
-    const final = await service.updatePartial(Dated, { id: res.id, value: 'random' });
+    const final = await service.updatePartial(Dated, { id: result.id, value: 'random' });
     assert(final.createdDate instanceof Date);
     assert(final.createdDate.getTime() === created?.getTime());
     assert(final.updatedDate instanceof Date);

@@ -86,32 +86,32 @@ export class CompressInterceptor implements WebInterceptor {
       return response;
     }
 
-    const binaryRes = new WebResponse({ ...response, ...WebBodyUtil.toBinaryMessage(response) });
+    const binaryResponse = new WebResponse({ ...response, ...WebBodyUtil.toBinaryMessage(response) });
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
-    const len = Buffer.isBuffer(binaryRes.body) ? binaryRes.body.byteLength : undefined;
+    const len = Buffer.isBuffer(binaryResponse.body) ? binaryResponse.body.byteLength : undefined;
 
-    if (len !== undefined && len >= 0 && len < chunkSize || !binaryRes.body) {
-      return binaryRes;
+    if (len !== undefined && len >= 0 && len < chunkSize || !binaryResponse.body) {
+      return binaryResponse;
     }
 
     const opts = type === 'br' ? { params: { [constants.BROTLI_PARAM_QUALITY]: 4, ...raw.params }, ...raw } : { ...raw };
     const stream = COMPRESSORS[type](opts);
 
     // If we are compressing
-    binaryRes.headers.set('Content-Encoding', type);
+    binaryResponse.headers.set('Content-Encoding', type);
 
-    if (Buffer.isBuffer(binaryRes.body)) {
-      stream.end(binaryRes.body);
+    if (Buffer.isBuffer(binaryResponse.body)) {
+      stream.end(binaryResponse.body);
       const out = await buffer(stream);
-      binaryRes.body = out;
-      binaryRes.headers.set('Content-Length', `${out.byteLength}`);
+      binaryResponse.body = out;
+      binaryResponse.headers.set('Content-Length', `${out.byteLength}`);
     } else {
-      binaryRes.body.pipe(stream);
-      binaryRes.body = stream;
-      binaryRes.headers.delete('Content-Length');
+      binaryResponse.body.pipe(stream);
+      binaryResponse.body = stream;
+      binaryResponse.headers.delete('Content-Length');
     }
 
-    return binaryRes;
+    return binaryResponse;
   }
 
   applies(ep: EndpointConfig, config: CompressConfig): boolean {

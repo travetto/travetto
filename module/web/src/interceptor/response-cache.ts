@@ -39,8 +39,8 @@ export class ResponseCacheInterceptor implements WebInterceptor {
   }
 
   async filter({ next }: WebChainedContext): Promise<WebResponse> {
-    const res = await next();
-    res.headers.setIfAbsent('Cache-Control', 'max-age=0, no-cache');
-    return res;
+    const response = await next();
+    response.headers.setIfAbsent('Cache-Control', 'max-age=0, no-cache');
+    return response;
   }
 }

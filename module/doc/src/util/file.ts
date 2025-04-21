@@ -72,13 +72,13 @@ export class DocFileUtil {
   }
 
   static async readCodeSnippet(src: string | Function, startPattern: RegExp): Promise<{ file: string, startIdx: number, lines: string[], language: string }> {
-    const res = this.readSource(src);
-    const lines = res.content.split(/\n/);
+    const result = this.readSource(src);
+    const lines = result.content.split(/\n/);
     const startIdx = lines.findIndex(l => startPattern.test(l));
     if (startIdx < 0) {
       throw new Error(`Pattern ${startPattern.source} not found in ${src}`);
     }
-    return { file: res.file, startIdx, lines, language: res.language };
+    return { file: result.file, startIdx, lines, language: result.language };
   }
 
   /**
@@ -91,14 +91,14 @@ export class DocFileUtil {
       return this.#decCache[key];
     }
 
-    const res = await this.readSource(file);
-    const text = res.content.split(/\n/g);
+    const text = await this.readSource(file);
+    const lines = text.content.split(/\n/g);
 
-    const start = text.findIndex(x => new RegExp(`function ${name}\\b`).test(x));
+    const start = lines.findIndex(x => new RegExp(`function ${name}\\b`).test(x));
     let ret = false;
     if (start > 0) {
       for (let i = start - 1; i > start - 3; i--) {
-        if (text[i].includes('@augments')) {
+        if (lines[i].includes('@augments')) {
           ret = true;
           break;
         }

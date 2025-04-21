@@ -24,14 +24,14 @@ export class ScaffoldCommand implements CliCommandShape {
 
   async #getName(name?: string): Promise<string> {
     if (!name) {
-      const res = await prompt<{ name: string }>([
+      const response = await prompt<{ name: string }>([
         {
           type: 'input',
           name: 'name',
           message: 'Enter a name for application: '
         }
       ]);
-      name = res.name;
+      name = response.name;
     }
     return name;
   }
@@ -45,8 +45,8 @@ export class ScaffoldCommand implements CliCommandShape {
       choices: feature.choices!.map(x => x.title).filter((x?: string): x is string => !!x),
     };
 
-    const res = await prompt<{ choice: string }>(choice);
-    return feature.choices?.find(x => x.title === res.choice);
+    const response = await prompt<{ choice: string }>(choice);
+    return feature.choices?.find(x => x.title === response.choice);
   }
 
   async * #resolveFeatures(features: Feature[], chosen = false): AsyncGenerator<Feature> {

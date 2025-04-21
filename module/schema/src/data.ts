@@ -142,11 +142,11 @@ export class DataUtil {
 
     switch (type) {
       case Date: {
-        let res: Date | undefined;
+        let value: Date | undefined;
         if (typeof input === 'object' && 'toDate' in input && typeof input.toDate === 'function') {
-          res = castTo(input.toDate());
+          value = castTo(input.toDate());
         } else {
-          res = input instanceof Date ?
+          value = input instanceof Date ?
             input :
             typeof input === 'number' ?
               new Date(input) :
@@ -154,17 +154,17 @@ export class DataUtil {
                 new Date(parseInt(input, 10)) :
                 new Date(input.toString());
         }
-        if (strict && res && Number.isNaN(res.getTime())) {
+        if (strict && value && Number.isNaN(value.getTime())) {
           throw new Error(`Invalid date value: ${input}`);
         }
-        return res;
+        return value;
       }
       case Number: {
-        const res = `${input}`.includes('.') ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
-        if (strict && Number.isNaN(res)) {
+        const value = `${input}`.includes('.') ? parseFloat(`${input}`) : parseInt(`${input}`, 10);
+        if (strict && Number.isNaN(value)) {
           throw new Error(`Invalid numeric value: ${input}`);
         }
-        return res;
+        return value;
       }
       case BigInt: {
         if (typeof input === 'bigint') {

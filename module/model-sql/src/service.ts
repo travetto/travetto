@@ -182,9 +182,9 @@ export class SQLModelService implements
 
   @Connected()
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
-    const res = await this.query(cls, { where: castTo({ id }) });
-    if (res.length === 1) {
-      return await ModelCrudUtil.load(cls, res[0]);
+    const result = await this.query(cls, { where: castTo({ id }) });
+    if (result.length === 1) {
+      return await ModelCrudUtil.load(cls, result[0]);
     }
     throw new NotFoundError(cls, id);
   }

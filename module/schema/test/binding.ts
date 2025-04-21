@@ -66,28 +66,28 @@ class DataBinding {
 
   @Test('Validate Object')
   validateObject() {
-    const res = Response.from({
+    const response = Response.from({
       questionId: '20',
       answer: ['a', 'd']
     });
-    assert(res.questionId === '20');
-    assert(!!res.answer);
-    assert.deepStrictEqual(res.answer, ['a', 'd']);
+    assert(response.questionId === '20');
+    assert(!!response.answer);
+    assert.deepStrictEqual(response.answer, ['a', 'd']);
   }
 
   @Test('Should handle inheritance')
   validateInheritance() {
-    const res = SuperAddress.from({
+    const address = SuperAddress.from({
       street1: 'a',
       street2: 'b',
       unit: '20'
     });
-    assert(res.unit === '20');
+    assert(address.unit === '20');
   }
 
   @Test('Should handle aliases')
   validateAliases() {
-    const res = Response.from({
+    const response = Response.from({
       correct: true,
       // @ts-expect-error
       status: 'orange',
@@ -95,9 +95,9 @@ class DataBinding {
       valid: 'true'
     });
 
-    console.log('Response', { ...res });
+    console.log('Response', { ...response });
 
-    assert(res.valid);
+    assert(response.valid);
   }
 
   @Test('Should handle aliases')

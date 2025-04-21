@@ -70,7 +70,7 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
     return config.applies;
   }
 
-  decorate(request: WebRequest, resolved: CorsConfig['resolved'], res: WebResponse,): WebResponse {
+  decorate(request: WebRequest, resolved: CorsConfig['resolved'], response: WebResponse,): WebResponse {
     const origin = request.headers.get('Origin');
     if (resolved.origins.size === 0 || resolved.origins.has(origin!)) {
       for (const [k, v] of [
@@ -79,10 +79,10 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
         ['Access-Control-Allow-Methods', resolved.methods],
         ['Access-Control-Allow-Headers', resolved.headers || request.headers.get('Access-Control-Request-Headers') || '*'],
       ]) {
-        res.headers.setIfAbsent(k, v);
+        response.headers.setIfAbsent(k, v);
       }
     }
-    return res;
+    return response;
   }
 
   async filter({ request, config: { resolved }, next }: WebChainedContext<CorsConfig>): Promise<WebResponse> {
