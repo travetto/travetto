@@ -51,7 +51,7 @@ export class StandardWebRouter extends BaseWebRouter {
     if (!endpoint) {
       throw new AppError(`Unknown route ${method} ${request.context.path}`, { category: 'notfound' });
     }
-    Object.assign(request, { params });
+    request.context.pathParams = params;
     return endpoint.filter!({ request });
   }
 }

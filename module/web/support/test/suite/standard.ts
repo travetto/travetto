@@ -81,7 +81,7 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
   @Test()
   async testRegex() {
     const response = await this.request({ context: { httpMethod: 'PATCH', path: '/test/regexp/super-poodle-party' } });
-    assert.deepStrictEqual(response.body, { context: { path: 'poodle' } });
+    assert.deepStrictEqual(response.body, { path: 'poodle' });
     assert(response.headers.has('ETag'));
   }
 
