@@ -101,13 +101,13 @@ export class WebBodyUtil {
   /**
    * Convert an existing web message to a binary web message
    */
-  static toBinaryMessage(message: WebMessage): { body: WebBinaryBody, headers: WebHeaders } {
+  static toBinaryMessage(message: WebMessage): Omit<WebMessage<WebBinaryBody>, 'context'> {
     const body = message.body;
     if (Buffer.isBuffer(body) || BinaryUtil.isReadable(body)) {
       return castTo(message);
     }
 
-    const out = { headers: new WebHeaders(message.headers), body: null! as WebBinaryBody };
+    const out: Omit<WebMessage<WebBinaryBody>, 'context'> = { headers: new WebHeaders(message.headers), body: null! };
     if (body instanceof Blob) {
       for (const [k, v] of this.getBlobHeaders(body)) {
         out.headers.set(k, v);
