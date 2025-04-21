@@ -1,9 +1,10 @@
-import { asConstructable, castTo, Class, TimeSpan, TimeUtil } from '@travetto/runtime';
+import { asConstructable, castTo, Class, TimeSpan } from '@travetto/runtime';
 
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator, EndpointFunctionDescriptor } from '../registry/types.ts';
 import { AcceptsInterceptor } from '../interceptor/accepts.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
+import { WebCommonUtil, CacheControlFlag } from '../util/common.ts';
 
 function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: EndpointFunctionDescriptor) {
@@ -42,30 +43,23 @@ export function Produces(mime: string): EndpointDecorator { return SetHeaders({ 
 /**
  * Specifies if endpoint should be conditional
  */
-export function ConditionalRegister(handler: () => (boolean | Promise<boolean>)): EndpointDecorator { return register({ conditional: handler }); }
-
-
-type HeaderSet = ReturnType<typeof SetHeaders>;
-type CacheControlFlag =
-  'must-revalidate' | 'public' | 'private' | 'no-cache' |
-  'no-store' | 'no-transform' | 'proxy-revalidate' | 'immutable' |
-  'must-understand' | 'stale-if-error' | 'stale-while-revalidate';
+export function ConditionalRegister(handler: () => (boolean | Promise<boolean>)): EndpointDecorator {
+  return register({ conditional: handler });
+}
 
 /**
  * Set the max-age of a response based on the config
  * @param value The value for the duration
  * @param unit The unit of measurement
  */
-export function CacheControl(value: number | TimeSpan, flags: CacheControlFlag[] = []): HeaderSet {
-  const delta = TimeUtil.asSeconds(value);
-  const output = delta === 0 ? 'max-age=0,no-cache' : [...flags, `max-age=${delta}`].join(',');
-  return SetHeaders({ 'Cache-Control': output });
+export function CacheControl(value: number | TimeSpan, flags: CacheControlFlag[] = []): EndpointDecorator {
+  return SetHeaders({ 'Cache-Control': WebCommonUtil.getCacheControlValue(value, flags) });
 }
 
 /**
  * Disable cache control, ensuring endpoint will not cache
  */
-export const DisableCacheControl = (): HeaderSet => CacheControl('0s');
+export const DisableCacheControl = (): EndpointDecorator => CacheControl(0);
 
 /**
  * Define an endpoint to support specific input types

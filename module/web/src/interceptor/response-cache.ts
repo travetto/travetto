@@ -7,6 +7,8 @@ import { WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
+import { WebCommonUtil } from '../util/common.ts';
+
 import { EtagInterceptor } from './etag.ts';
 
 @Config('web.cache')
@@ -38,9 +40,9 @@ export class ResponseCacheInterceptor implements WebInterceptor {
     return !!endpoint.cacheable && config.applies && config.mode === 'deny';
   }
 
-  async filter({ next, config }: WebChainedContext<ResponseCacheConfig>): Promise<WebResponse> {
+  async filter({ next }: WebChainedContext<ResponseCacheConfig>): Promise<WebResponse> {
     const response = await next();
-    response.headers.setIfAbsent('Cache-Control', 'max-age=0, no-cache');
+    response.headers.setIfAbsent('Cache-Control', WebCommonUtil.getCacheControlValue(0));
     return response;
   }
 }
