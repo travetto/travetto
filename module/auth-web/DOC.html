@@ -15,11 +15,11 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/auth-web</code></pre>
   </figure>
 
-This is a primary integration for the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a> module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate. <br><br>
+This is a primary integration for the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth" title="Authentication scaffolding for the Travetto framework">Authentication</a> module with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a> module. <br><br>
 The integration with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a> module touches multiple levels. Primarily:
 <ul> <li>Authenticating</li>
 <li>Maintaining Auth Context</li>
-<li>Endpoint declaration</li>
+<li>Endpoint Decoration</li>
 <li>Multi-Step Login</li>
 </ul>
 
@@ -64,7 +64,7 @@ Every external framework integration relies upon the <a target="_blank" class="s
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-The only required method to be defined is the <code class="item method">authenticate</code> method.  This takes in a pre-principal payload and a filter context with a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11">WebRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3">WebResponse</a>, and is responsible for:
+The only required method to be defined is the <code class="item method">authenticate</code> method.  This takes in a pre-principal payload and a filter context with a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11">WebRequest</a>, and is responsible for:
 <ul> <li>Returning an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7">Principal</a> if authentication was successful</li>
 <li>Throwing an error if it failed</li>
 <li>Returning undefined if the authentication is multi-staged and has not completed yet</li>
@@ -237,13 +237,16 @@ A trivial/sample custom <a target="_blank" class="source-link" href="https://git
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Principal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> PrincipalCodec <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-web'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> BinaryUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/runtime'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WebResponse<span class="token punctuation">,</span> WebRequest <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/web'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomCodec</span> <span class="token keyword">implements</span> <span class="token class-name">PrincipalCodec</span> <span class="token punctuation">{{'{'}}</span>
+  secret<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+
   <span class="token function">decode</span><span class="token punctuation">(</span>request<span class="token operator">:</span> WebRequest<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token operator">|</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> userId <span class="token operator">=</span> request<span class="token punctuation">.</span>headers<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'USER_ID'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span>userId<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> <span class="token punctuation">[</span>userId<span class="token punctuation">,</span> sig<span class="token punctuation">]</span> <span class="token operator">=</span> request<span class="token punctuation">.</span>headers<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'USER_ID'</span><span class="token punctuation">)</span><span class="token operator">?.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token string">':'</span><span class="token punctuation">)</span> <span class="token operator">??</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>userId <span class="token operator">&amp;&amp;</span> sig <span class="token operator">===</span> BinaryUtil<span class="token punctuation">.</span><span class="token function">hash</span><span class="token punctuation">(</span>userId <span class="token operator">+</span> <span class="token keyword">this</span><span class="token punctuation">.</span>secret<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">let</span> p<span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
       <span class="token comment">// Lookup user from db, remote system, etc.,</span>
       <span class="token keyword">return</span> p<span class="token punctuation">;</span>
@@ -252,7 +255,7 @@ A trivial/sample custom <a target="_blank" class="source-link" href="https://git
   <span class="token punctuation">{{'}'}}</span>
   <span class="token function">encode</span><span class="token punctuation">(</span>response<span class="token operator">:</span> WebResponse<span class="token punctuation">,</span> data<span class="token operator">:</span> Principal <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token operator">:</span> WebResponse <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      response<span class="token punctuation">.</span>headers<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'USER_ID'</span><span class="token punctuation">,</span> data<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      response<span class="token punctuation">.</span>headers<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'USER_ID'</span><span class="token punctuation">,</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>data<span class="token punctuation">.</span>id<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>BinaryUtil<span class="token punctuation">.</span><span class="token function">hash</span><span class="token punctuation">(</span>data<span class="token punctuation">.</span>id <span class="token operator">+</span> <span class="token keyword">this</span><span class="token punctuation">.</span>secret<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
     <span class="token keyword">return</span> response<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
@@ -261,7 +264,7 @@ A trivial/sample custom <a target="_blank" class="source-link" href="https://git
 
 This implementation is not suitable for production, but shows the general pattern needed to integrate with any principal source.
 
-<h2 id="endpoint-declaration">Endpoint Declaration</h2>
+<h2 id="endpoint-decoration">Endpoint Decoration</h2>
 
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L13">@Login</a> integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.<br><br>
 <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L48">@Logout</a> integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.

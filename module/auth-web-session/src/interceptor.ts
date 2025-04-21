@@ -2,11 +2,7 @@ import { toConcrete } from '@travetto/runtime';
 import { Injectable, Inject } from '@travetto/di';
 import { WebInterceptor, WebAsyncContext, WebInterceptorCategory, WebChainedContext, WebResponse } from '@travetto/web';
 import { Session, SessionContext, SessionData, SessionService } from '@travetto/auth-session';
-import { Config } from '@travetto/config';
 import { AuthContextInterceptor } from '@travetto/auth-web';
-
-@Config('web.session')
-class WebSessionConfig { }
 
 /**
  * Loads session, and provides ability to create session as needed, persists when complete.
@@ -22,9 +18,6 @@ export class AuthSessionInterceptor implements WebInterceptor {
 
   @Inject()
   context: SessionContext;
-
-  @Inject()
-  config: WebSessionConfig;
 
   @Inject()
   webAsyncContext: WebAsyncContext;

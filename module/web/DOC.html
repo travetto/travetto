@@ -191,7 +191,7 @@ In addition to endpoint parameters (i.e. user-provided inputs), there may also b
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<p class="note"><strong>Note</strong> When referencing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">@ContextParam</a> values, the contract for idempotency needs to be carefully inspected to ensure idempotency, if expected. You can see in the example above that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L59">CacheControl</a> decorator is used to ensure that the response is not cached.</p>
+<p class="note"><strong>Note</strong> When referencing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/param.ts#L61">@ContextParam</a> values, the contract for idempotency needs to be carefully inspected to ensure idempotency, if expected. You can see in the example above that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/decorator/common.ts#L55">CacheControl</a> decorator is used to ensure that the response is not cached.</p>
 
 <h3 id="body-and-queryschema">Body and QuerySchema</h3>
 
@@ -491,7 +491,7 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 
 <h2 id="interceptors">Interceptors</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L13">WebInterceptor</a> s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every endpoint, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every endpoint, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
   <figure class="code">
     <figcaption class="code">A Trivial Interceptor
@@ -517,11 +517,11 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 <h3 id="bodyparseinterceptor">BodyParseInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L46">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L45">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
   <figure class="code">
     <figcaption class="code">Body Parse Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L27">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L26">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BodyParseConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -546,11 +546,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="corsinterceptor">CorsInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L52">CorsInterceptor</a> allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, the <code class="item input">web.cors</code> config space.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L51">CorsInterceptor</a> allows cors functionality to be configured out of the box, by setting properties in your <code class="item path">application.yml</code>, specifically, the <code class="item input">web.cors</code> config space.
 
   <figure class="code">
     <figcaption class="code">Cors Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L17">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cors.ts#L16">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CorsConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -587,11 +587,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="cookiesinterceptor">CookiesInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L56">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L55">CookiesInterceptor</a> is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
   <figure class="code">
     <figcaption class="code">Cookies Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L20">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/cookies.ts#L19">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CookieConfig</span> <span class="token keyword">implements</span> <span class="token class-name">CookieSetOptions</span> <span class="token punctuation">{{'{'}}</span>
@@ -629,11 +629,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="responsecacheinterceptor">ResponseCacheInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/response-cache.ts#L29">ResponseCacheInterceptor</a> by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting <code class="item input">web.getCache.applies: &lt;boolean&gt;</code> in your config.  This interceptor applies by default.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/response-cache.ts#L30">ResponseCacheInterceptor</a> by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting <code class="item input">web.getCache.applies: &lt;boolean&gt;</code> in your config.  This interceptor applies by default.
 
 <h3 id="logginginterceptor">LoggingInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L29">LoggingInterceptor</a> allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/logging.ts#L28">LoggingInterceptor</a> allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
 
   <figure class="code">
     <figcaption class="code">Control Logging
@@ -653,7 +653,7 @@ Out of the box, the web framework comes with a few interceptors, and more are co
 
 <h3 id="custom-interceptors">Custom Interceptors</h3>
 
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L13">WebInterceptor</a> interface.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11">WebRequest</a> object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by implementing the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/interceptor.ts#L15">WebInterceptor</a> interface.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11">WebRequest</a> object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
   <figure class="code">
     <figcaption class="code">Defining a new Interceptor

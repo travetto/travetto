@@ -13,12 +13,12 @@ npm install @travetto/auth-web
 yarn add @travetto/auth-web
 ```
 
-This is a primary integration for the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate. 
+This is a primary integration for the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") module with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module. 
 
 The integration with the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module touches multiple levels. Primarily:
    *  Authenticating
    *  Maintaining Auth Context
-   *  Endpoint declaration
+   *  Endpoint Decoration
    *  Multi-Step Login
 
 ## Authenticating
@@ -58,7 +58,7 @@ export interface Authenticator<T = unknown, C = unknown, P extends Principal = P
 }
 ```
 
-The only required method to be defined is the `authenticate` method.  This takes in a pre-principal payload and a filter context with a [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11) and [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3), and is responsible for:
+The only required method to be defined is the `authenticate` method.  This takes in a pre-principal payload and a filter context with a [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11), and is responsible for:
    *  Returning an [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L7) if authentication was successful
    *  Throwing an error if it failed
    *  Returning undefined if the authentication is multi-staged and has not completed yet
@@ -220,13 +220,16 @@ A trivial/sample custom [PrincipalCodec](https://github.com/travetto/travetto/tr
 import { Principal } from '@travetto/auth';
 import { PrincipalCodec } from '@travetto/auth-web';
 import { Injectable } from '@travetto/di';
+import { BinaryUtil } from '@travetto/runtime';
 import { WebResponse, WebRequest } from '@travetto/web';
 
 @Injectable()
 export class CustomCodec implements PrincipalCodec {
+  secret: string;
+
   decode(request: WebRequest): Promise<Principal | undefined> | Principal | undefined {
-    const userId = request.headers.get('USER_ID');
-    if (userId) {
+    const [userId, sig] = request.headers.get('USER_ID')?.split(':') ?? [];
+    if (userId && sig === BinaryUtil.hash(userId + this.secret)) {
       let p: Principal | undefined;
       // Lookup user from db, remote system, etc.,
       return p;
@@ -235,7 +238,7 @@ export class CustomCodec implements PrincipalCodec {
   }
   encode(response: WebResponse, data: Principal | undefined): WebResponse {
     if (data) {
-      response.headers.set('USER_ID', data.id);
+      response.headers.set('USER_ID', `${data.id}:${BinaryUtil.hash(data.id + this.secret)}`);
     }
     return response;
   }
@@ -244,7 +247,7 @@ export class CustomCodec implements PrincipalCodec {
 
 This implementation is not suitable for production, but shows the general pattern needed to integrate with any principal source.
 
-## Endpoint Declaration
+## Endpoint Decoration
 [@Login](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L13) integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
 [@Logout](https://github.com/travetto/travetto/tree/main/module/auth-web/src/decorator.ts#L48) integrates with middleware that will automatically deauthenticate a user, throw an error if the user is unauthenticated.

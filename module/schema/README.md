@@ -323,8 +323,8 @@ const InvalidSymbol = Symbol();
 
 export class PointImpl {
   static validateSchema(input: unknown): 'type' | undefined {
-    const ret = this.bindSchema(input);
-    return ret !== InvalidSymbol && ret && !isNaN(ret[0]) && !isNaN(ret[1]) ? undefined : 'type';
+    const bound = this.bindSchema(input);
+    return bound !== InvalidSymbol && bound && !isNaN(bound[0]) && !isNaN(bound[1]) ? undefined : 'type';
   }
 
   static bindSchema(input: unknown): [number, number] | typeof InvalidSymbol | undefined {

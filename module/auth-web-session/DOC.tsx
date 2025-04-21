@@ -10,7 +10,7 @@ export const text = <>
 
   This module's main responsibilities is to expose {d.mod('AuthSession')}'s data within the scope of the request/response flow.
 
-  <c.Code src={AuthSessionInterceptor} title='Anatomy of the Session Interceptor' startRe={/WebSessionConfig/} />
+  <c.Code src={AuthSessionInterceptor} title='Anatomy of the Session Interceptor' />
 
   Once operating within the {Session} boundaries, the session state can be injected via {ContextParam}s, injected as {SessionContext},  or accessed via the {SessionService}.
 
