@@ -32,13 +32,13 @@ export class ResponseCacheInterceptor implements WebInterceptor {
   dependsOn = [EtagInterceptor];
 
   @Inject()
-  config?: ResponseCacheConfig;
+  config: ResponseCacheConfig;
 
   applies(endpoint: EndpointConfig, config: ResponseCacheConfig): boolean {
     return !!endpoint.cacheable && config.applies && config.mode === 'deny';
   }
 
-  async filter({ next }: WebChainedContext): Promise<WebResponse> {
+  async filter({ next, config }: WebChainedContext<ResponseCacheConfig>): Promise<WebResponse> {
     const response = await next();
     response.headers.setIfAbsent('Cache-Control', 'max-age=0, no-cache');
     return response;

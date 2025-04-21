@@ -1,52 +1,88 @@
 import assert from 'node:assert';
 
-import { BeforeAll, Suite, Test } from '@travetto/test';
-import { RootRegistry } from '@travetto/registry';
-import { ResponseCacheConfig, ResponseCacheInterceptor, WebRequest, WebResponse } from '@travetto/web';
+import { Suite, Test } from '@travetto/test';
+import { CacheControl, ConfigureInterceptor, Controller, Get, Patch, ResponseCacheInterceptor } from '@travetto/web';
 
-@Suite()
-class ResponseCacheInterceptorSuite {
+import { BaseWebSuite } from '../../support/test/suite/base';
+import { LocalRequestDispatcher } from '../../support/test/dispatcher';
 
-  @BeforeAll()
-  async init() {
-    await RootRegistry.init();
+@Controller('/test/response')
+class TestResponseCache {
+  @Get('/uncached')
+  getUnCached() {
+    return 'hello';
   }
 
-  @Test()
-  async basicTest() {
-    const interceptor = new ResponseCacheInterceptor();
-    interceptor.config = ResponseCacheConfig.from({ mode: 'deny' });
+  @ConfigureInterceptor(ResponseCacheInterceptor, { mode: 'allow' })
+  @Get('/uncached/override')
+  getUnCachedOverride() {
+    return 'hello';
+  }
 
-    const response = await interceptor.filter({
-      request: new WebRequest({ context: { path: '/', httpMethod: 'GET' } }),
-      next: async () => new WebResponse(),
-      config: interceptor.config
+  @CacheControl('1d')
+  @Get('/cached')
+  getCached() {
+    return 'hello';
+  }
+
+  @Patch('/uncached')
+  getPatched() {
+    return 'hello';
+  }
+}
+
+@Suite()
+class ResponseCacheInterceptorSuite extends BaseWebSuite {
+
+  dispatcherType = LocalRequestDispatcher;
+
+  @Test()
+  async testUncachedGet() {
+    const response = await this.request({
+      context: {
+        path: '/test/response/uncached',
+        httpMethod: 'GET'
+      }
     });
 
     assert(response.headers.has('Cache-Control'));
     assert(/no-cache/.test(response.headers.get('Cache-Control')!));
-
-    const res2 = await interceptor.filter({
-      request: new WebRequest({ context: { path: '/', httpMethod: 'PATCH' } }),
-      next: async () => new WebResponse(),
-      config: interceptor.config
-    });
-
-    assert(!res2.headers.has('Cache-Control'));
   }
 
   @Test()
-  async overridden() {
-    const interceptor = new ResponseCacheInterceptor();
-    interceptor.config = ResponseCacheConfig.from({ mode: 'allow' });
-
-    const response = await interceptor.filter({
-      request: new WebRequest({ context: { path: '/', httpMethod: 'GET' } }),
-      next: async () => new WebResponse({ headers: { 'cache-control': 'max-age=3000' } }),
-      config: interceptor.config
+  async testCachedGet() {
+    const response = await this.request({
+      context: {
+        path: '/test/response/cached',
+        httpMethod: 'GET'
+      }
     });
 
     assert(response.headers.has('Cache-Control'));
-    assert(response.headers.get('Cache-Control') === 'max-age=3000');
+    assert(/max-age/.test(response.headers.get('Cache-Control')!));
+  }
+
+  @Test()
+  async testUncachedPatch() {
+    const response = await this.request({
+      context: {
+        path: '/test/response/uncached',
+        httpMethod: 'PATCH'
+      }
+    });
+
+    assert(!response.headers.has('Cache-Control'));
+  }
+
+  @Test()
+  async testUncachedGetOverride() {
+    const response = await this.request({
+      context: {
+        path: '/test/response/uncached/override',
+        httpMethod: 'GET'
+      }
+    });
+
+    assert(!response.headers.has('Cache-Control'));
   }
 }
