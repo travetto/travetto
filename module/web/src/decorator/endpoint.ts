@@ -3,7 +3,6 @@ import { asConstructable } from '@travetto/runtime';
 import { ControllerRegistry } from '../registry/controller.ts';
 import { EndpointConfig, EndpointFunctionDescriptor, EndpointIOType } from '../registry/types.ts';
 import { HTTP_METHODS, HttpMethod } from '../types/core.ts';
-import { WebResponse } from '../types/response.ts';
 
 type EndpointFunctionDecorator = <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor) => EndpointFunctionDescriptor;
 
