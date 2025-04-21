@@ -11,9 +11,9 @@ export interface WebConnection {
 export interface WebRequestContext {
   path: string;
   pathParams?: Record<string, unknown>;
-  connection?: WebConnection;
   httpQuery?: Record<string, unknown>;
   httpMethod?: HttpMethod;
+  connection?: WebConnection;
 }
 
 /**

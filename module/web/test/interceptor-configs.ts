@@ -14,7 +14,7 @@ import { WebInterceptorCategory } from '../src/types/core.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { WebChainedContext } from '../src/types.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
-import { ResponseCacheInterceptor } from '../src/interceptor/get-cache.ts';
+import { ResponseCacheInterceptor } from '../src/interceptor/response-cache.ts';
 import { EndpointConfig } from '../src/registry/types.ts';
 import { WebRequest } from '../src/types/request.ts';
 import { StandardWebRouter } from '@travetto/web';

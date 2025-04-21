@@ -12,6 +12,8 @@ import { WebConfig } from '../config/web.ts';
 
 import { BaseWebRouter } from './base.ts';
 
+const DEFAULT_HTTP_METHOD = 'POST';
+
 /**
  * The web router
  */
@@ -29,12 +31,12 @@ export class StandardWebRouter extends BaseWebRouter {
       const fullPath = ep.fullPath.replace(/[*][^*]+/g, '*'); // Flatten wildcards
       const handler = (): void => { };
       this.#cache.set(handler, ep);
-      this.raw[HTTP_METHODS[ep.httpMethod ?? 'POST'].lower](fullPath, handler);
+      this.raw[HTTP_METHODS[ep.httpMethod ?? DEFAULT_HTTP_METHOD].lower](fullPath, handler);
     }
 
     return (): void => {
       for (const ep of endpoints ?? []) {
-        this.raw.off(ep.httpMethod ?? 'POST', ep.fullPath);
+        this.raw.off(ep.httpMethod ?? DEFAULT_HTTP_METHOD, ep.fullPath);
       }
     };
   }
@@ -43,7 +45,7 @@ export class StandardWebRouter extends BaseWebRouter {
    * Route and run the request
    */
   dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const method = req.context.httpMethod ?? 'POST';
+    const method = req.context.httpMethod ?? DEFAULT_HTTP_METHOD;
     const { params, handler } = this.raw.find(method, req.context.path) ?? {};
     const endpoint = this.#cache.get(handler!);
     if (!endpoint) {

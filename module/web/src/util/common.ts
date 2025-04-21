@@ -1,7 +1,6 @@
 import { AppError, ErrorCategory } from '@travetto/runtime';
-import { WebResponse, WebResponseContext } from '../types/response.ts';
-import { WebHeaders } from '../types/headers.ts';
-import { WebRequest } from '@travetto/web';
+import { WebResponse } from '../types/response.ts';
+import { WebRequest } from '../types/request.ts';
 
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
@@ -95,21 +94,6 @@ export class WebCommonUtil {
     const statusCode = error.status ?? error.statusCode ?? ERROR_CATEGORY_STATUS[error.category!] ?? 500;
 
     return new WebResponse({ body, context: { httpStatusCode: statusCode } });
-  }
-
-  /**
-   * Generate common valid response
-   */
-  static commonResponse(body: unknown, extraHeaders: WebHeaders, context?: WebResponseContext): WebResponse {
-    if (body instanceof WebResponse) {
-      return body;
-    } else {
-      const res = new WebResponse({ body, context: context ?? {} });
-      for (const [k, v] of extraHeaders) {
-        res.headers.set(k, v);
-      }
-      return res;
-    }
   }
 
   /**

@@ -10,7 +10,7 @@ import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/en
 import { PathParam, QueryParam, Body, Param, HeaderParam, ContextParam } from './src/decorator/param.ts';
 import { BodyParseInterceptor, BodyParseConfig } from './src/interceptor/body-parse.ts';
 import { CorsInterceptor, CorsConfig } from './src/interceptor/cors.ts';
-import { ResponseCacheInterceptor } from './src/interceptor/get-cache.ts';
+import { ResponseCacheInterceptor } from './src/interceptor/response-cache.ts';
 import { LoggingInterceptor } from './src/interceptor/logging.ts';
 import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies.ts';
 import { WebConfig } from './src/config/web.ts';

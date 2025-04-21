@@ -144,7 +144,12 @@ export class EndpointUtil {
     try {
       const params = await this.extractParameters(ctx, endpoint);
       const body = await endpoint.endpoint.apply(endpoint.instance, params);
-      return WebCommonUtil.commonResponse(body, endpoint.responseHeaderMap, endpoint.defaultResponseContext);
+      const headers = endpoint.responseHeaderMap;
+      const res = body instanceof WebResponse ? body : new WebResponse({ body, headers });
+      if (res === body) {
+        for (const [k, v] of headers) { res.headers.setIfAbsent(k, v); }
+      }
+      return endpoint.responseFinalizer?.(res) ?? res;
     } catch (err) {
       throw WebCommonUtil.catchResponse(err);
     }

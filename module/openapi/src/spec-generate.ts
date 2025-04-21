@@ -290,7 +290,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
    * Process controller endpoint
    */
   onEndpointEnd(ep: EndpointConfig, ctrl: ControllerConfig): void {
-    if (this.#config.skipEndpoints) {
+    if (this.#config.skipEndpoints || !ep.httpMethod) {
       return;
     }
 
@@ -326,7 +326,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
 
     this.#paths[key] = {
       ...(this.#paths[key] ?? {}),
-      [HTTP_METHODS[ep.httpMethod ?? 'GET'].lower]: op
+      [HTTP_METHODS[ep.httpMethod].lower]: op
     };
   }
 

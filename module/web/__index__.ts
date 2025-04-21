@@ -33,7 +33,7 @@ export * from './src/interceptor/compress.ts';
 export * from './src/interceptor/context.ts';
 export * from './src/interceptor/decompress.ts';
 export * from './src/interceptor/etag.ts';
-export * from './src/interceptor/get-cache.ts';
+export * from './src/interceptor/response-cache.ts';
 export * from './src/interceptor/logging.ts';
 export * from './src/interceptor/respond.ts';
 export * from './src/interceptor/trust-proxy.ts';

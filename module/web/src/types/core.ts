@@ -1,5 +1,9 @@
 type MethodConfig = { body: boolean, emptyStatusCode: number, cacheable: boolean };
-function verb<M extends string, L extends string, C extends Partial<MethodConfig>>(method: M, lower: L, cfg: C): { method: M, lower: L } & C & MethodConfig {
+function verb<
+  M extends string,
+  L extends string,
+  C extends Partial<MethodConfig>
+>(method: M, lower: L, cfg: C): { method: M, lower: L } & C & MethodConfig {
   return { body: false, cacheable: false, emptyStatusCode: 204, ...cfg, method, lower, };
 }
 
@@ -10,7 +14,7 @@ export const HTTP_METHODS = {
   GET: verb('GET', 'get', { cacheable: true }),
   DELETE: verb('DELETE', 'delete', {}),
   HEAD: verb('HEAD', 'head', { cacheable: true }),
-  OPTIONS: verb('OPTIONS', 'options', { cacheable: true }),
+  OPTIONS: verb('OPTIONS', 'options', {}),
 } as const;
 
 export type HttpMethod = keyof typeof HTTP_METHODS;
