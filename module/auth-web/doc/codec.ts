@@ -5,8 +5,8 @@ import { WebResponse, WebRequest } from '@travetto/web';
 
 @Injectable()
 export class CustomCodec implements PrincipalCodec {
-  decode(req: WebRequest): Promise<Principal | undefined> | Principal | undefined {
-    const userId = req.headers.get('USER_ID');
+  decode(request: WebRequest): Promise<Principal | undefined> | Principal | undefined {
+    const userId = request.headers.get('USER_ID');
     if (userId) {
       let p: Principal | undefined;
       // Lookup user from db, remote system, etc.,

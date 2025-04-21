@@ -49,7 +49,7 @@ export class AuthContextInterceptor implements WebInterceptor {
 
     try {
       let lastExpiresAt: Date | undefined;
-      const decoded = await this.codec.decode(ctx.req);
+      const decoded = await this.codec.decode(ctx.request);
 
       if (decoded) {
         lastExpiresAt = decoded.expiresAt = toDate(decoded.expiresAt);
@@ -58,7 +58,7 @@ export class AuthContextInterceptor implements WebInterceptor {
 
       const checked = this.authService.enforceExpiry(decoded);
       this.authContext.principal = checked;
-      this.authContext.authToken = await this.codec.token?.(ctx.req);
+      this.authContext.authToken = await this.codec.token?.(ctx.request);
 
       let value = await ctx.next();
 

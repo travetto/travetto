@@ -34,15 +34,15 @@ export class WebUploadInterceptor implements WebInterceptor<WebUploadConfig> {
     return config.applies;
   }
 
-  async filter({ req, config, next }: WebChainedContext<WebUploadConfig>): Promise<WebResponse> {
+  async filter({ request, config, next }: WebChainedContext<WebUploadConfig>): Promise<WebResponse> {
     const uploads: FileMap = {};
 
     try {
-      for await (const item of WebUploadUtil.getUploads(req, config)) {
+      for await (const item of WebUploadUtil.getUploads(request, config)) {
         uploads[item.field] = await WebUploadUtil.toFile(item, config.uploads?.[item.field] ?? config);
       }
 
-      WebUploadUtil.setRequestUploads(req, uploads);
+      WebUploadUtil.setRequestUploads(request, uploads);
 
       return await next();
     } finally {

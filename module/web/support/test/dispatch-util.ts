@@ -14,20 +14,20 @@ import { WebCommonUtil } from '../../src/util/common.ts';
  */
 export class WebTestDispatchUtil {
 
-  static async applyRequestBody(req: WebRequest): Promise<WebRequest> {
-    if (req.body !== undefined) {
-      const sample = WebBodyUtil.toBinaryMessage(req);
-      sample.headers.forEach((v, k) => req.headers.set(k, Array.isArray(v) ? v.join(',') : v));
-      req.body = WebBodyUtil.markRaw(await WebBodyUtil.toBuffer(sample.body!));
+  static async applyRequestBody(request: WebRequest): Promise<WebRequest> {
+    if (request.body !== undefined) {
+      const sample = WebBodyUtil.toBinaryMessage(request);
+      sample.headers.forEach((v, k) => request.headers.set(k, Array.isArray(v) ? v.join(',') : v));
+      request.body = WebBodyUtil.markRaw(await WebBodyUtil.toBuffer(sample.body!));
     }
-    Object.assign(req, { query: BindUtil.flattenPaths(req.context.httpQuery ?? {}) });
-    return req;
+    Object.assign(request, { query: BindUtil.flattenPaths(request.context.httpQuery ?? {}) });
+    return request;
   }
 
-  static async finalizeResponseBody(res: WebResponse, decompress?: boolean): Promise<WebResponse> {
-    let result = res.body;
+  static async finalizeResponseBody(response: WebResponse, decompress?: boolean): Promise<WebResponse> {
+    let result = response.body;
 
-    res.context.httpStatusCode = WebCommonUtil.getStatusCode(res);
+    response.context.httpStatusCode = WebCommonUtil.getStatusCode(response);
 
     if (decompress) {
       if (Buffer.isBuffer(result) || BinaryUtil.isReadable(result)) {
@@ -35,7 +35,7 @@ export class WebTestDispatchUtil {
         if (bufferResult.length) {
           try {
             result = await toBuffer(DecompressInterceptor.decompress(
-              res.headers,
+              response.headers,
               Readable.from(bufferResult),
               { applies: true, supportedEncodings: ['br', 'deflate', 'gzip', 'identity'] }
             ));
@@ -47,17 +47,17 @@ export class WebTestDispatchUtil {
     const text = Buffer.isBuffer(result) ? result.toString('utf8') : (typeof result === 'string' ? result : undefined);
 
     if (text) {
-      switch (res.headers.get('Content-Type')) {
+      switch (response.headers.get('Content-Type')) {
         case 'application/json': result = JSON.parse(castTo(text)); break;
         case 'text/plain': result = text; break;
       }
     }
 
-    if (res.context.httpStatusCode && res.context.httpStatusCode >= 400) {
+    if (response.context.httpStatusCode && response.context.httpStatusCode >= 400) {
       result = WebCommonUtil.catchResponse(AppError.fromJSON(result) ?? result).body;
     }
 
-    res.body = result;
-    return res;
+    response.body = result;
+    return response;
   }
 }

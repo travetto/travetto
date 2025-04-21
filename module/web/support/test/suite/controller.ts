@@ -15,7 +15,7 @@ import { CookieJar } from '../../../src/util/cookie.ts';
 export class TestController {
 
   @ContextParam()
-  req: WebRequest;
+  request: WebRequest;
 
   @ContextParam()
   cookies: CookieJar;
@@ -42,7 +42,7 @@ export class TestController {
 
   @Put('/body')
   withBody() {
-    return { body: castTo<{ age: number }>(this.req.body).age };
+    return { body: castTo<{ age: number }>(this.request.body).age };
   }
 
   @Delete('/cookie')
@@ -77,23 +77,23 @@ export class TestController {
   @Get('/fullUrl')
   getFullUrl() {
     return {
-      path: this.req.context.path
+      path: this.request.context.path
     };
   }
 
   @Get('/headerFirst')
   getHeaderFirst() {
-    return { header: this.req.headers.get('Age')?.split(',')?.[0] };
+    return { header: this.request.headers.get('Age')?.split(',')?.[0] };
   }
 
   @Get('/fun/*')
   getFun() {
-    return { path: this.req.context.path.split('fun/')[1] };
+    return { path: this.request.context.path.split('fun/')[1] };
   }
 
   @Get('/ip')
   getIp() {
-    return { ip: this.req.context.connection?.ip };
+    return { ip: this.request.context.connection?.ip };
   }
 
   @Post('/ip')

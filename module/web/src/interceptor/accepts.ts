@@ -47,8 +47,8 @@ export class AcceptsInterceptor implements WebInterceptor<AcceptsConfig> {
     return config.applies;
   }
 
-  filter({ req, config, next }: WebChainedContext<AcceptsConfig>): Promise<WebResponse> {
-    const contentType = req.headers.get('Content-Type');
+  filter({ request, config, next }: WebChainedContext<AcceptsConfig>): Promise<WebResponse> {
+    const contentType = request.headers.get('Content-Type');
     if (!contentType || !config.matcher(contentType)) {
       throw new AppError(`Content type ${contentType} violated ${config.types.join(', ')}`, { category: 'data' });
     }

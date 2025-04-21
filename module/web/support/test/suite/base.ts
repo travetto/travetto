@@ -8,9 +8,9 @@ import { WebApplication, WebApplicationHandle } from '../../../src/types/applica
 import { WebDispatcher } from '../../../src/types.ts';
 import { WebRequest, WebRequestContext } from '../../../src/types/request.ts';
 import { WebResponse } from '../../../src/types/response.ts';
+import { WebMessageInit } from '../../../src/types/message.ts';
 
 import { WebTestDispatchUtil } from '../dispatch-util.ts';
-import { WebMessageInit } from '../../../src/types/message.ts';
 
 @Injectable()
 export class WebTestConfig implements ConfigSource {
@@ -57,9 +57,9 @@ export abstract class BaseWebSuite {
   }
 
   async request<T>(cfg: WebMessageInit<unknown, WebRequestContext>, throwOnError: boolean = true): Promise<WebResponse<T>> {
-    const req = await WebTestDispatchUtil.applyRequestBody(new WebRequest(cfg));
-    const res = await this.#dispatcher.dispatch({ req });
-    if (throwOnError && res.context.httpStatusCode && res.context.httpStatusCode >= 400) { throw res.body; }
-    return castTo(res);
+    const request = await WebTestDispatchUtil.applyRequestBody(new WebRequest(cfg));
+    const response = await this.#dispatcher.dispatch({ request });
+    if (throwOnError && response.context.httpStatusCode && response.context.httpStatusCode >= 400) { throw response.body; }
+    return castTo(response);
   }
 }

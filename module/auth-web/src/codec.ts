@@ -49,15 +49,15 @@ export class JWTPrincipalCodec implements PrincipalCodec {
     }
   }
 
-  token(req: WebRequest): AuthToken | undefined {
+  token(request: WebRequest): AuthToken | undefined {
     const value = (this.config.mode === 'header') ?
-      req.headers.getWithPrefix(this.config.header, this.config.headerPrefix) :
+      request.headers.getWithPrefix(this.config.header, this.config.headerPrefix) :
       this.webAsyncContext.cookies.get(this.config.cookie, { signed: false });
     return value ? { type: 'jwt', value } : undefined;
   }
 
-  async decode(req: WebRequest): Promise<Principal | undefined> {
-    const token = this.token(req);
+  async decode(request: WebRequest): Promise<Principal | undefined> {
+    const token = this.token(request);
     return token ? await this.verify(token.value) : undefined;
   }
 

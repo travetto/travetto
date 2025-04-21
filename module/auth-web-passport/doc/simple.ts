@@ -8,7 +8,7 @@ import { FbAuthSymbol } from './conf.ts';
 export class SampleAuth {
 
   @ContextParam()
-  req: WebRequest;
+  request: WebRequest;
 
   @ContextParam()
   user: Principal;
@@ -45,6 +45,6 @@ export class SampleAuth {
    */
   @Post('/')
   async echo(): Promise<unknown> {
-    return this.req.body;
+    return this.request.body;
   }
 }

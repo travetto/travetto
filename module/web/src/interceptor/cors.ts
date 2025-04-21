@@ -70,14 +70,14 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
     return config.applies;
   }
 
-  decorate(req: WebRequest, resolved: CorsConfig['resolved'], res: WebResponse,): WebResponse {
-    const origin = req.headers.get('Origin');
+  decorate(request: WebRequest, resolved: CorsConfig['resolved'], res: WebResponse,): WebResponse {
+    const origin = request.headers.get('Origin');
     if (resolved.origins.size === 0 || resolved.origins.has(origin!)) {
       for (const [k, v] of [
         ['Access-Control-Allow-Origin', origin || '*'],
         ['Access-Control-Allow-Credentials', `${resolved.credentials}`],
         ['Access-Control-Allow-Methods', resolved.methods],
-        ['Access-Control-Allow-Headers', resolved.headers || req.headers.get('Access-Control-Request-Headers') || '*'],
+        ['Access-Control-Allow-Headers', resolved.headers || request.headers.get('Access-Control-Request-Headers') || '*'],
       ]) {
         res.headers.setIfAbsent(k, v);
       }
@@ -85,11 +85,11 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
     return res;
   }
 
-  async filter({ req, config: { resolved }, next }: WebChainedContext<CorsConfig>): Promise<WebResponse> {
+  async filter({ request, config: { resolved }, next }: WebChainedContext<CorsConfig>): Promise<WebResponse> {
     try {
-      return this.decorate(req, resolved, await next());
+      return this.decorate(request, resolved, await next());
     } catch (err) {
-      throw this.decorate(req, resolved, WebCommonUtil.catchResponse(err));
+      throw this.decorate(request, resolved, WebCommonUtil.catchResponse(err));
     }
   }
 }

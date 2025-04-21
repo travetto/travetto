@@ -22,7 +22,7 @@ class User {
 class ParamController {
 
   @ContextParam()
-  req: WebRequest;
+  request: WebRequest;
 
   @Post('/:name')
   async endpoint(@PathParam() name: string, @QueryParam() age: number) { }
@@ -35,7 +35,7 @@ class ParamController {
 
   @Post('/req/res')
   async reqRes() {
-    return this.req.context.path;
+    return this.request.context.path;
   }
 
   @Post('/array')
@@ -91,9 +91,9 @@ export class EndpointParameterTest {
     return ControllerRegistry.get(ParamController).endpoints.find(x => x.path === path && x.httpMethod === method)!;
   }
 
-  static async extract(ep: EndpointConfig, req: Partial<WebRequest>): Promise<unknown[]> {
+  static async extract(ep: EndpointConfig, request: Partial<WebRequest>): Promise<unknown[]> {
     return await EndpointUtil.extractParameters({
-      req: new WebRequest({ ...req })
+      request: new WebRequest({ ...request })
     }, ep);
   }
 

@@ -17,6 +17,9 @@ export interface WebMessage<B = unknown, C = unknown> {
   body?: B;
 }
 
+/**
+ * Common implementation for a rudimentary web message (request / response)
+ */
 export class BaseWebMessage<B = unknown, C = unknown> implements WebMessage<B, C> {
   readonly context: C;
   readonly headers: WebHeaders;

@@ -15,8 +15,8 @@ export class FetchWebDispatcher implements WebDispatcher {
   @Inject()
   config: WebConfig;
 
-  async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
-    const { context: { httpQuery: query, httpMethod: method, path }, headers } = req;
+  async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
+    const { context: { httpQuery: query, httpMethod: method, path }, headers } = request;
 
     let q = '';
     if (query && Object.keys(query).length) {
@@ -25,16 +25,16 @@ export class FetchWebDispatcher implements WebDispatcher {
     }
 
     const finalPath = `${path}${q}`;
-    const stream = WebBodyUtil.getRawStream(req.body);
-    const body: RequestInit['body'] = stream ? await buffer(stream) : castTo(req.body);
+    const stream = WebBodyUtil.getRawStream(request.body);
+    const body: RequestInit['body'] = stream ? await buffer(stream) : castTo(request.body);
 
-    const res = await fetch(`http://localhost:${this.config.port}${finalPath}`, { method, body, headers });
+    const response = await fetch(`http://localhost:${this.config.port}${finalPath}`, { method, body, headers });
 
     return WebTestDispatchUtil.finalizeResponseBody(
       new WebResponse({
-        body: Buffer.from(await res.arrayBuffer()),
-        context: { httpStatusCode: res.status },
-        headers: res.headers
+        body: Buffer.from(await response.arrayBuffer()),
+        context: { httpStatusCode: response.status },
+        headers: response.headers
       })
     );
   }

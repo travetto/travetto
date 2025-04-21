@@ -17,19 +17,19 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
 
   @Test()
   async getJSON() {
-    const res = await this.request({ context: { httpMethod: 'GET', path: '/test/json' } });
-    assert.deepStrictEqual(res.body, { json: true });
+    const response = await this.request({ context: { httpMethod: 'GET', path: '/test/json' } });
+    assert.deepStrictEqual(response.body, { json: true });
   }
 
   @Test()
   async getParam() {
-    const res = await this.request({ context: { httpMethod: 'POST', path: '/test/param/bob' } });
-    assert.deepStrictEqual(res.body, { param: 'bob' });
+    const response = await this.request({ context: { httpMethod: 'POST', path: '/test/param/bob' } });
+    assert.deepStrictEqual(response.body, { param: 'bob' });
   }
 
   @Test()
   async putQuery() {
-    const res = await this.request({
+    const response = await this.request({
       context: {
         httpMethod: 'PUT', path: '/test/query',
         httpQuery: {
@@ -37,7 +37,7 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
         }
       }
     });
-    assert.deepStrictEqual(res.body, { query: 20 });
+    assert.deepStrictEqual(response.body, { query: 20 });
 
     await assert.rejects(() => this.request({
       context: {
@@ -51,7 +51,7 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
 
   @Test()
   async postBody() {
-    const res = await this.request({
+    const response = await this.request({
       context: {
         httpMethod: 'PUT', path: '/test/body',
       },
@@ -59,12 +59,12 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
         age: 20
       }
     });
-    assert.deepStrictEqual(res.body, { body: 20 });
+    assert.deepStrictEqual(response.body, { body: 20 });
   }
 
   @Test()
   async testCookie() {
-    const res = await this.request({
+    const response = await this.request({
       context: {
         httpMethod: 'DELETE', path: '/test/cookie',
       },
@@ -72,32 +72,32 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
         Cookie: 'orange=yummy'
       }
     });
-    const [cookie] = res.headers.getSetCookie();
+    const [cookie] = response.headers.getSetCookie();
     assert(cookie !== undefined);
     assert(/flavor.*oreo/.test(cookie));
-    assert.deepStrictEqual(res.body, { cookie: 'yummy' });
+    assert.deepStrictEqual(response.body, { cookie: 'yummy' });
   }
 
   @Test()
   async testRegex() {
-    const res = await this.request({ context: { httpMethod: 'PATCH', path: '/test/regexp/super-poodle-party' } });
-    assert.deepStrictEqual(res.body, { context: { path: 'poodle' } });
-    assert(res.headers.has('ETag'));
+    const response = await this.request({ context: { httpMethod: 'PATCH', path: '/test/regexp/super-poodle-party' } });
+    assert.deepStrictEqual(response.body, { context: { path: 'poodle' } });
+    assert(response.headers.has('ETag'));
   }
 
   @Test()
   async testBuffer() {
-    const res = await this.request({ context: { httpMethod: 'GET', path: '/test/buffer' } });
-    assert(res.body === 'hello');
-    assert(res.headers.has('ETag'));
+    const response = await this.request({ context: { httpMethod: 'GET', path: '/test/buffer' } });
+    assert(response.body === 'hello');
+    assert(response.headers.has('ETag'));
   }
 
   @Test()
   async testStream() {
     try {
-      const res = await this.request({ context: { httpMethod: 'GET', path: '/test/stream' } });
-      assert(res.body === 'hello');
-      assert(!res.headers.has('ETag'));
+      const response = await this.request({ context: { httpMethod: 'GET', path: '/test/stream' } });
+      assert(response.body === 'hello');
+      assert(!response.headers.has('ETag'));
     } catch (err) {
       console.error(err);
       throw err;
@@ -106,19 +106,19 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
 
   @Test()
   async testRenderable() {
-    const res = await this.request({ context: { httpMethod: 'GET', path: '/test/renderable' } });
-    assert(res.body === 'hello');
+    const response = await this.request({ context: { httpMethod: 'GET', path: '/test/renderable' } });
+    assert(response.body === 'hello');
   }
 
   @Test()
   async testFullUrl() {
-    const res = await this.request({ context: { httpMethod: 'GET', path: '/test/fullUrl' } });
-    assert.deepStrictEqual(res.body, { path: '/test/fullUrl' });
+    const response = await this.request({ context: { httpMethod: 'GET', path: '/test/fullUrl' } });
+    assert.deepStrictEqual(response.body, { path: '/test/fullUrl' });
   }
 
   @Test()
   async testHeaderFirst() {
-    const res = await this.request({
+    const response = await this.request({
       context: {
         httpMethod: 'GET', path: '/test/headerFirst',
       },
@@ -126,13 +126,13 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
         age: ['1', '2', '3']
       }
     });
-    assert.deepStrictEqual(res.body, { header: '1' });
+    assert.deepStrictEqual(response.body, { header: '1' });
   }
 
   @Test()
   async testGetIp() {
-    const res = await this.request<{ ip: string | undefined }>({ context: { httpMethod: 'GET', path: '/test/ip', connection: { ip: '::1' } } });
-    assert(res.body?.ip === '127.0.0.1' || res.body?.ip === '::1');
+    const response = await this.request<{ ip: string | undefined }>({ context: { httpMethod: 'GET', path: '/test/ip', connection: { ip: '::1' } } });
+    assert(response.body?.ip === '127.0.0.1' || response.body?.ip === '::1');
 
     const { body: ret2 } = await this.request<{ ip: string | undefined }>({ context: { httpMethod: 'GET', path: '/test/ip' }, headers: { 'X-Forwarded-For': 'bob' } });
     assert(ret2?.ip === 'bob');
@@ -147,20 +147,20 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
   @Test()
   async compressionReturned() {
     {
-      const res = await this.request({ context: { httpMethod: 'GET', path: '/test/json' }, headers: { 'Accept-Encoding': 'gzip;q=1' } });
-      assert(!res.headers.has('Content-Encoding'));
-      assert.deepStrictEqual(res.body, { json: true });
+      const response = await this.request({ context: { httpMethod: 'GET', path: '/test/json' }, headers: { 'Accept-Encoding': 'gzip;q=1' } });
+      assert(!response.headers.has('Content-Encoding'));
+      assert.deepStrictEqual(response.body, { json: true });
     }
     for (const encoding of ['gzip', 'br', 'deflate']) {
-      const res = await this.request({ context: { httpMethod: 'GET', path: '/test/json/large/20000' }, headers: { 'Accept-Encoding': `${encoding};q=1` } });
-      const value = res.headers.get('Content-Encoding');
+      const response = await this.request({ context: { httpMethod: 'GET', path: '/test/json/large/20000' }, headers: { 'Accept-Encoding': `${encoding};q=1` } });
+      const value = response.headers.get('Content-Encoding');
       assert(value === encoding);
 
-      assert(res.body);
-      assert(typeof res.body === 'object');
-      assert('json' in res.body);
-      assert(typeof res.body.json === 'string');
-      assert(res.body.json.startsWith('0123456789'));
+      assert(response.body);
+      assert(typeof response.body === 'object');
+      assert('json' in response.body);
+      assert(typeof response.body.json === 'string');
+      assert(response.body.json.startsWith('0123456789'));
     }
 
     {
@@ -172,7 +172,7 @@ export abstract class StandardWebServerSuite extends BaseWebSuite {
 
   @Test()
   async testWildcard() {
-    const res = await this.request<{ path: string }>({ context: { httpMethod: 'GET', path: '/test/fun/1/2/3/4' } });
-    assert(res.body?.path === '1/2/3/4');
+    const response = await this.request<{ path: string }>({ context: { httpMethod: 'GET', path: '/test/fun/1/2/3/4' } });
+    assert(response.body?.path === '1/2/3/4');
   }
 }

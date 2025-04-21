@@ -11,8 +11,8 @@ import { AwsLambdaWebHandler } from '../../src/handler.ts';
 /**
  * Create an api gateway event given a web request
  */
-function toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
-  const body = req.body;
+function toLambdaEvent(request: WebRequest): APIGatewayProxyEvent {
+  const body = request.body;
   const headers: Record<string, string> = {};
   const multiValueHeaders: Record<string, string[]> = {};
   const queryStringParameters: Record<string, string> = {};
@@ -22,12 +22,12 @@ function toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
     throw new AppError('Unsupported request type, only buffer bodies supported');
   }
 
-  req.headers.forEach((v, k) => {
+  request.headers.forEach((v, k) => {
     headers[k] = Array.isArray(v) ? v.join('; ') : v;
-    multiValueHeaders[k] = req.headers.getList(k) ?? [];
+    multiValueHeaders[k] = request.headers.getList(k) ?? [];
   });
 
-  Object.entries(req.context.httpQuery ?? {}).forEach(([k, v]) => {
+  Object.entries(request.context.httpQuery ?? {}).forEach(([k, v]) => {
     if (Array.isArray(v)) {
       multiValueQueryStringParameters[k] = v;
     } else {
@@ -39,8 +39,8 @@ function toLambdaEvent(req: WebRequest): APIGatewayProxyEvent {
     resource: '/{proxy+}',
     pathParameters: {},
     stageVariables: {},
-    path: req.context.path,
-    httpMethod: req.context.httpMethod ?? 'POST',
+    path: request.context.path,
+    httpMethod: request.context.httpMethod ?? 'POST',
     queryStringParameters,
     multiValueQueryStringParameters,
     headers,
@@ -62,16 +62,16 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
   @Inject()
   app: AwsLambdaWebHandler;
 
-  async dispatch({ req }: WebFilterContext): Promise<WebResponse> {
+  async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
 
-    const res = await this.app.handle(toLambdaEvent(req), asFull<Context>({}));
+    const response = await this.app.handle(toLambdaEvent(request), asFull<Context>({}));
 
     return WebTestDispatchUtil.finalizeResponseBody(
       new WebResponse<unknown>({
-        body: Buffer.from(res.body, res.isBase64Encoded ? 'base64' : 'utf8'),
-        headers: { ...res.headers ?? {}, ...res.multiValueHeaders ?? {} },
+        body: Buffer.from(response.body, response.isBase64Encoded ? 'base64' : 'utf8'),
+        headers: { ...response.headers ?? {}, ...response.multiValueHeaders ?? {} },
         context: {
-          httpStatusCode: res.statusCode
+          httpStatusCode: response.statusCode
         }
       }),
       true

@@ -1,4 +1,4 @@
-import { Get, Controller, Post, QueryParam, WebRequest } from '@travetto/web';
+import { Get, Controller, Post, QueryParam, WebRequest, ContextParam } from '@travetto/web';
 import { Integer, Min } from '@travetto/schema';
 
 import { MockService } from './mock.ts';
@@ -7,6 +7,9 @@ import { MockService } from './mock.ts';
 export class Simple {
 
   service: MockService;
+
+  @ContextParam()
+  request: WebRequest;
 
   constructor(service: MockService) {
     this.service = service;
@@ -38,11 +41,10 @@ export class Simple {
 
   @Get('img/*')
   async getImage(
-    req: WebRequest,
     @QueryParam('w') @Integer() @Min(100) width?: number,
     @QueryParam('h') @Integer() @Min(100) height?: number
   ) {
-    const img = await this.service.fetchImage(req.context.path, { width, height });
+    const img = await this.service.fetchImage(this.request.context.path, { width, height });
     return img;
   }
 }

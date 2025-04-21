@@ -141,8 +141,8 @@ export async function consumeError(err: unknown): Promise<Error> {
   }
 }
 
-export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Promise<T> {
-  let core = req.core!;
+export async function invokeFetch<T>(request: RpcRequest, ...params: unknown[]): Promise<T> {
+  let core = request.core!;
 
   try {
     const { body, headers } = getBody(params);
@@ -152,7 +152,7 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
       ...headers
     };
 
-    for (const fn of req.preRequestHandlers ?? []) {
+    for (const fn of request.preRequestHandlers ?? []) {
       const computed = await fn(core);
       if (computed) {
         core = computed;
@@ -178,9 +178,9 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
     let resolved: Response | undefined;
     for (let i = 0; i <= (core.retriesOnConnectFailure ?? 0); i += 1) {
       try {
-        const url = typeof req.url === 'string' ? new URL(req.url) : req.url;
-        if (req.core?.path) {
-          url.pathname = `${url.pathname}/${req.core.path}`.replaceAll('//', '/');
+        const url = typeof request.url === 'string' ? new URL(request.url) : request.url;
+        if (request.core?.path) {
+          url.pathname = `${url.pathname}/${request.core.path}`.replaceAll('//', '/');
         }
         resolved = await fetch(url, core);
         break;
@@ -198,7 +198,7 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
       throw new Error('Unable to connect');
     }
 
-    for (const fn of req.postResponseHandlers ?? []) {
+    for (const fn of request.postResponseHandlers ?? []) {
       const computed = await fn(resolved);
       if (computed) {
         resolved = computed;
@@ -210,24 +210,24 @@ export async function invokeFetch<T>(req: RpcRequest, ...params: unknown[]): Pro
     if (resolved.ok) {
       const text = await resolved.text();
       if (contentType === 'application/json') {
-        return await req.consumeJSON!<T>(text);
+        return await request.consumeJSON!<T>(text);
       } else if (contentType === 'text/plain') {
-        return await req.consumeJSON!<T>(text);
+        return await request.consumeJSON!<T>(text);
       } else {
         throw new Error(`Unknown content type: ${contentType}`);
       }
     } else {
-      let res;
+      let responseObject;
       if (contentType === 'application/json') {
         const text = await resolved.text();
-        res = await req.consumeJSON!(text);
+        responseObject = await request.consumeJSON!(text);
       } else {
-        res = resolved;
+        responseObject = resolved;
       }
-      throw res;
+      throw responseObject;
     }
   } catch (err) {
-    throw await req.consumeError!(err);
+    throw await request.consumeError!(err);
   }
 }
 

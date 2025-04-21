@@ -31,8 +31,8 @@ export class AwsLambdaWebHandler {
 
   async handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
     context.callbackWaitsForEmptyEventLoop = false;
-    const req = AwsLambdaWebUtil.toWebRequest(event);
-    const res = await this.router.dispatch({ req });
-    return AwsLambdaWebUtil.toLambdaResult(res, event.isBase64Encoded);
+    const request = AwsLambdaWebUtil.toWebRequest(event);
+    const response = await this.router.dispatch({ request });
+    return AwsLambdaWebUtil.toLambdaResult(response, event.isBase64Encoded);
   }
 }

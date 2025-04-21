@@ -55,22 +55,22 @@ export class CompressInterceptor implements WebInterceptor {
   @Inject()
   config: CompressConfig;
 
-  async compress(ctx: WebChainedContext, res: WebResponse): Promise<WebResponse> {
+  async compress(ctx: WebChainedContext, response: WebResponse): Promise<WebResponse> {
     const { raw = {}, preferredEncodings = [], supportedEncodings } = this.config;
-    const { req } = ctx;
+    const { request } = ctx;
 
-    res.headers.vary('Accept-Encoding');
+    response.headers.vary('Accept-Encoding');
 
     if (
-      !res.body ||
-      req.context.httpMethod === 'HEAD' ||
-      res.headers.has('Content-Encoding') ||
-      NO_TRANSFORM_REGEX.test(res.headers.get('Cache-Control')?.toString() ?? '')
+      !response.body ||
+      request.context.httpMethod === 'HEAD' ||
+      response.headers.has('Content-Encoding') ||
+      NO_TRANSFORM_REGEX.test(response.headers.get('Cache-Control')?.toString() ?? '')
     ) {
-      return res;
+      return response;
     }
 
-    const accepts = req.headers.get('Accept-Encoding');
+    const accepts = request.headers.get('Accept-Encoding');
     const type: WebCompressEncoding | undefined =
       castTo(new Negotiator({ headers: { 'accept-encoding': accepts ?? '*' } })
         .encoding([...supportedEncodings, ...preferredEncodings]));
@@ -83,10 +83,10 @@ export class CompressInterceptor implements WebInterceptor {
     }
 
     if (type === 'identity' || !type) {
-      return res;
+      return response;
     }
 
-    const binaryRes = new WebResponse({ ...res, ...WebBodyUtil.toBinaryMessage(res) });
+    const binaryRes = new WebResponse({ ...response, ...WebBodyUtil.toBinaryMessage(response) });
     const chunkSize = raw.chunkSize ?? constants.Z_DEFAULT_CHUNK;
     const len = Buffer.isBuffer(binaryRes.body) ? binaryRes.body.byteLength : undefined;
 

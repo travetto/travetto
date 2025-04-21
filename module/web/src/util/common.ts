@@ -99,14 +99,14 @@ export class WebCommonUtil {
   /**
    * Get request parameters
    */
-  static getRequestParams(req: WebRequest & { [WebRequestParamsSymbol]?: unknown[] }): unknown[] {
-    return req[WebRequestParamsSymbol] ?? [];
+  static getRequestParams(request: WebRequest & { [WebRequestParamsSymbol]?: unknown[] }): unknown[] {
+    return request[WebRequestParamsSymbol] ?? [];
   }
 
   /**
    * Set request parameters
    */
-  static setRequestParams(req: WebRequest & { [WebRequestParamsSymbol]?: unknown[] }, params: unknown[]): void {
-    req[WebRequestParamsSymbol] ??= params;
+  static setRequestParams(request: WebRequest & { [WebRequestParamsSymbol]?: unknown[] }, params: unknown[]): void {
+    request[WebRequestParamsSymbol] ??= params;
   }
 }

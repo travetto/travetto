@@ -11,7 +11,9 @@ export class PassportUtil {
    * @param src The input src for a state read (string, or a request obj)
    */
   static readState<T = Record<string, unknown>>(src?: string | WebRequest): T | undefined {
-    const state = (typeof src === 'string' ? src : (typeof src?.context.httpQuery?.state === 'string' ? src?.context.httpQuery?.state : ''));
+    const state = (typeof src === 'string' ? src :
+      (typeof src?.context.httpQuery?.state === 'string' ?
+        src?.context.httpQuery?.state : ''));
     if (state) {
       try {
         return Util.decodeSafeJSON(state);
@@ -52,10 +54,10 @@ export class PassportUtil {
 
   /**
    * Enhance passport state with additional information information
-   * @param req The travetto request,
+   * @param ctx The travetto filter context
    * @param currentState The current state, if any
    */
   static enhanceState(ctx: WebFilterContext, currentState?: string): string {
-    return this.addToState({ referrer: ctx.req.headers.get('Referer') }, currentState);
+    return this.addToState({ referrer: ctx.request.headers.get('Referer') }, currentState);
   }
 }

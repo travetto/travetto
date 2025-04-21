@@ -60,7 +60,7 @@ export function Upload(
         }
 
         const isMap = field.type === FileMapContract;
-        const map = WebUploadUtil.getRequestUploads(ctx.req);
+        const map = WebUploadUtil.getRequestUploads(ctx.request);
         return isMap ? map : map[config.name!];
       }
     })(inst, prop, idx);

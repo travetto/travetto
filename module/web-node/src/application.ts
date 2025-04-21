@@ -20,7 +20,7 @@ export class NodeWebApplication implements WebApplication {
 
   async handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const webReq = NodeWebUtil.toWebRequest(req);
-    const webRes = await this.router.dispatch({ req: webReq });
+    const webRes = await this.router.dispatch({ request: webReq });
     await NodeWebUtil.respondToServerResponse(webRes, res);
   }
 

@@ -1,7 +1,12 @@
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { castTo } from '@travetto/runtime';
-import { EndpointConfig, WebChainedContext, WebInterceptor, WebInterceptorCategory, WebResponse } from '@travetto/web';
+
+import { EndpointConfig } from '../registry/types.ts';
+import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebChainedContext } from '../types.ts';
 
 @Config('web.trustProxy')
 export class TrustProxyConfig {
@@ -27,21 +32,21 @@ export class TrustProxyInterceptor implements WebInterceptor<TrustProxyConfig> {
     return config.applies;
   }
 
-  filter({ req, next, config }: WebChainedContext<TrustProxyConfig>): Promise<WebResponse> {
-    const forwardedFor = req.headers.get('X-Forwarded-For');
+  filter({ request, next, config }: WebChainedContext<TrustProxyConfig>): Promise<WebResponse> {
+    const forwardedFor = request.headers.get('X-Forwarded-For');
 
     if (forwardedFor) {
-      const connection = req.context.connection ??= {};
+      const connection = request.context.connection ??= {};
       if (config.ips[0] === '*' || (connection.ip && config.ips.includes(connection.ip))) {
-        connection.httpProtocol = castTo(req.headers.get('X-Forwarded-Proto')!) || connection.httpProtocol;
-        connection.host = req.headers.get('X-Forwarded-Host') || connection.host;
+        connection.httpProtocol = castTo(request.headers.get('X-Forwarded-Proto')!) || connection.httpProtocol;
+        connection.host = request.headers.get('X-Forwarded-Host') || connection.host;
         connection.ip = forwardedFor;
       }
     }
 
-    req.headers.delete('X-Forwarded-For');
-    req.headers.delete('X-Forwarded-Proto');
-    req.headers.delete('X-Forwarded-Host');
+    request.headers.delete('X-Forwarded-For');
+    request.headers.delete('X-Forwarded-Proto');
+    request.headers.delete('X-Forwarded-Host');
 
     return next();
   }

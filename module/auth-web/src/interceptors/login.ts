@@ -42,7 +42,7 @@ export class AuthLoginInterceptor implements WebInterceptor<WebAuthLoginConfig> 
   }
 
   async filter(ctx: WebChainedContext<WebAuthLoginConfig>): Promise<WebResponse> {
-    await this.service.authenticate(ctx.req.body, ctx, ctx.config.providers ?? []);
+    await this.service.authenticate(ctx.request.body, ctx, ctx.config.providers ?? []);
     return ctx.next();
   }
 }

@@ -9,7 +9,7 @@ import { AppError, Primitive } from '@travetto/runtime';
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
-import { WebInterceptorCategory, HTTP_METHODS } from '../types/core.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
 
 import { EndpointConfig } from '../registry/types.ts';
@@ -51,14 +51,14 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   @Inject()
   config: BodyParseConfig;
 
-  async read(req: WebRequest, body: Readable, limit: string | number): Promise<string> {
-    const cfg = req.headers.getContentType();
+  async read(request: WebRequest, body: Readable, limit: string | number): Promise<string> {
+    const cfg = request.headers.getContentType();
     const encoding = cfg?.parameters.charset ?? 'utf8';
     return rawBody(body, { limit, encoding });
   }
 
-  detectParserType(req: WebRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
-    const { full = '', type } = req.headers.getContentType() ?? {};
+  detectParserType(request: WebRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
+    const { full = '', type } = request.headers.getContentType() ?? {};
     if (!full) {
       return;
     } else if (full in parsingTypes) {
@@ -84,20 +84,20 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
     return config.applies && endpoint.allowsBody;
   }
 
-  async filter({ req, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
-    const stream = WebBodyUtil.getRawStream(req.body);
+  async filter({ request, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
+    const stream = WebBodyUtil.getRawStream(request.body);
     if (!stream) { // No body to process
       return next();
     }
 
-    const parserType = this.detectParserType(req, config.parsingTypes);
+    const parserType = this.detectParserType(request, config.parsingTypes);
     if (!parserType) {
       return next();
     }
 
     try {
-      const text = await this.read(req, stream, config.limit);
-      req.body = this.parse(text, parserType);
+      const text = await this.read(request, stream, config.limit);
+      request.body = this.parse(text, parserType);
       return next();
     } catch (err) {
       throw new AppError('Malformed input', { category: 'data', cause: err });

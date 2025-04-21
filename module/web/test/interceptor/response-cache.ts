@@ -18,7 +18,7 @@ class ResponseCacheInterceptorSuite {
     interceptor.config = ResponseCacheConfig.from({ mode: 'deny' });
 
     const res = await interceptor.filter({
-      req: new WebRequest({ context: { path: '/', httpMethod: 'GET' } }),
+      request: new WebRequest({ context: { path: '/', httpMethod: 'GET' } }),
       next: async () => new WebResponse(),
       config: interceptor.config
     });
@@ -27,7 +27,7 @@ class ResponseCacheInterceptorSuite {
     assert(/no-cache/.test(res.headers.get('Cache-Control')!));
 
     const res2 = await interceptor.filter({
-      req: new WebRequest({ context: { path: '/', httpMethod: 'PATCH' } }),
+      request: new WebRequest({ context: { path: '/', httpMethod: 'PATCH' } }),
       next: async () => new WebResponse(),
       config: interceptor.config
     });
@@ -41,7 +41,7 @@ class ResponseCacheInterceptorSuite {
     interceptor.config = ResponseCacheConfig.from({ mode: 'allow' });
 
     const res = await interceptor.filter({
-      req: new WebRequest({ context: { path: '/', httpMethod: 'GET' } }),
+      request: new WebRequest({ context: { path: '/', httpMethod: 'GET' } }),
       next: async () => new WebResponse({ headers: { 'cache-control': 'max-age=3000' } }),
       config: interceptor.config
     });

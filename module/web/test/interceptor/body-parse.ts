@@ -20,21 +20,24 @@ class BodyParseInterceptorSuite {
       applies: true
     });
 
-    const req = new WebRequest({
-      method: 'POST',
+    const request = new WebRequest({
+      context: {
+        path: '/',
+        httpMethod: 'POST',
+      },
       headers: {
         'Content-Type': 'application/json'
       },
       body: WebBodyUtil.markRaw(Buffer.from('{ "hello": "world" }', 'utf8'))
     });
 
-    const res = await interceptor.filter({
-      req,
-      next: async () => new WebResponse({ body: req.body }),
+    const response = await interceptor.filter({
+      request,
+      next: async () => new WebResponse({ body: request.body }),
       config
     });
 
-    assert.deepStrictEqual(res.body, { hello: 'world' });
+    assert.deepStrictEqual(response.body, { hello: 'world' });
   }
 
   @Test()
@@ -44,21 +47,24 @@ class BodyParseInterceptorSuite {
       applies: true
     });
 
-    const req = new WebRequest({
-      method: 'POST',
+    const request = new WebRequest({
+      context: {
+        path: '/',
+        httpMethod: 'POST',
+      },
       headers: {
         'Content-Type': 'text/plain'
       },
       body: WebBodyUtil.markRaw(Buffer.from('{ "hello": "world" }', 'utf8'))
     });
 
-    const res = await interceptor.filter({
-      req,
-      next: async () => new WebResponse({ body: req.body }),
+    const response = await interceptor.filter({
+      request,
+      next: async () => new WebResponse({ body: request.body }),
       config
     });
 
-    assert.deepStrictEqual(`${res.body}`, '{ "hello": "world" }');
+    assert.deepStrictEqual(`${response.body}`, '{ "hello": "world" }');
   }
 
   @Test()
@@ -69,21 +75,24 @@ class BodyParseInterceptorSuite {
     });
 
     const stream = Readable.from(Buffer.alloc(1000));
-    const req = new WebRequest({
-      method: 'POST',
+    const request = new WebRequest({
+      context: {
+        path: '/',
+        httpMethod: 'POST',
+      },
       headers: {
         'Content-Type': 'image/jpeg'
       },
       body: WebBodyUtil.markRaw(stream)
     });
 
-    const res = await interceptor.filter({
-      req,
-      next: async () => new WebResponse({ body: req.body }),
+    const response = await interceptor.filter({
+      request,
+      next: async () => new WebResponse({ body: request.body }),
       config
     });
 
-    const resBuff = await WebBodyUtil.toBuffer(WebBodyUtil.toBinaryMessage(res).body);
+    const resBuff = await WebBodyUtil.toBuffer(WebBodyUtil.toBinaryMessage(response).body);
     assert(resBuff.length === 1000);
     assert(!resBuff.some(x => x !== 0));
   }

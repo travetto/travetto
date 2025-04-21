@@ -38,7 +38,7 @@ export class ResponseCacheInterceptor implements WebInterceptor {
     return !!endpoint.cacheable && config.applies && config.mode === 'deny';
   }
 
-  async filter({ req, next }: WebChainedContext): Promise<WebResponse> {
+  async filter({ next }: WebChainedContext): Promise<WebResponse> {
     const res = await next();
     res.headers.setIfAbsent('Cache-Control', 'max-age=0, no-cache');
     return res;

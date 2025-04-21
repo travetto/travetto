@@ -29,9 +29,9 @@ function HttpEndpoint(method: HttpMethod, path: string): EndpointFunctionDecorat
     allowsBody,
     cacheable,
     httpMethod: method,
-    responseFinalizer: res => {
-      res.context.httpStatusCode = (res.body === null || res.body === undefined || res.body === '') ? emptyStatusCode : 200;
-      return res;
+    responseFinalizer: v => {
+      v.context.httpStatusCode = (v.body === null || v.body === undefined || v.body === '') ? emptyStatusCode : 200;
+      return v;
     }
   });
 }

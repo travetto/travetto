@@ -27,7 +27,7 @@ export class WebRpController {
 
     const bodyParamIdx = endpoint.params.findIndex((x) => x.location === 'body');
 
-    const { req } = this.ctx;
+    const { request } = this.ctx;
 
     let params: unknown[];
 
@@ -37,7 +37,7 @@ export class WebRpController {
     } else if (Array.isArray(body)) { // Params passed via body
       params = body;
       if (bodyParamIdx >= 0) { // Re-assign body
-        req.body = params[bodyParamIdx];
+        request.body = params[bodyParamIdx];
       }
     } else if (body) {
       throw new AppError('Invalid parameters, must be an array', { category: 'data' });
@@ -45,9 +45,9 @@ export class WebRpController {
       params = [];
     }
 
-    WebCommonUtil.setRequestParams(req, endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]));
+    WebCommonUtil.setRequestParams(request, endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]));
 
     // Dispatch
-    return await endpoint.filter!({ req: this.ctx.req });
+    return await endpoint.filter!({ request: this.ctx.request });
   }
 }

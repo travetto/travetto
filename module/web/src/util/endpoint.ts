@@ -47,7 +47,7 @@ export class EndpointUtil {
     return function filterChain(ctx: WebChainedContext, idx: number = 0): Promise<WebResponse> {
       const { filter, config } = filters[idx]!;
       const chainedNext = idx === len ? ctx.next : filterChain.bind(null, ctx, idx + 1);
-      return filter({ req: ctx.req, next: chainedNext, config });
+      return filter({ request: ctx.request, next: chainedNext, config });
     };
   }
 
@@ -92,14 +92,14 @@ export class EndpointUtil {
     }
 
     const name = param.name!;
-    const { req } = ctx;
+    const { request } = ctx;
     switch (param.location) {
-      case 'path': return req.context.pathParams?.[name];
-      case 'header': return field.array ? req.headers.getList(name) : req.headers.get(name);
-      case 'body': return req.body;
+      case 'path': return request.context.pathParams?.[name];
+      case 'header': return field.array ? request.headers.getList(name) : request.headers.get(name);
+      case 'body': return request.body;
       case 'query': {
-        const reqWithQ: typeof req & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = req;
-        const q = reqWithQ[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(req.context.httpQuery ?? {});
+        const reqWithQ: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
+        const q = reqWithQ[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
         return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[name]);
       }
     }
@@ -114,7 +114,7 @@ export class EndpointUtil {
   static async extractParameters(ctx: WebFilterContext, endpoint: EndpointConfig): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
-    const vals = WebCommonUtil.getRequestParams(ctx.req);
+    const vals = WebCommonUtil.getRequestParams(ctx.request);
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);

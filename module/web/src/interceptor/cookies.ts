@@ -76,8 +76,8 @@ export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
     return config.applies;
   }
 
-  async filter({ req, config, next }: WebChainedContext<CookieConfig>): Promise<WebResponse> {
-    const jar = this.webAsyncContext.cookies = new CookieJar(req.headers.get('Cookie'), config);
+  async filter({ request, config, next }: WebChainedContext<CookieConfig>): Promise<WebResponse> {
+    const jar = this.webAsyncContext.cookies = new CookieJar(request.headers.get('Cookie'), config);
     const res = await next();
     for (const c of jar.export()) { res.headers.append('Set-Cookie', c); }
     return res;

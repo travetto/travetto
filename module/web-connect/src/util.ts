@@ -16,7 +16,7 @@ export class WebConnectUtil {
       next: (err: Error | null | undefined, value: T | undefined | null) => void
     ) => Middleware
   ): Promise<T | undefined> {
-    const connectReq = new ConnectRequest(ctx.req);
+    const connectReq = new ConnectRequest(ctx.request);
     const connectRes = new ConnectResponse();
 
     const p = Promise.withResolvers<T | undefined>();

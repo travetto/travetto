@@ -11,7 +11,7 @@ export interface PrincipalCodec {
   /**
    * Extract token for re-use elsewhere
    */
-  token?(req: WebRequest): Promise<AuthToken | undefined> | AuthToken | undefined;
+  token?(request: WebRequest): Promise<AuthToken | undefined> | AuthToken | undefined;
   /**
    * Encode data
    */
@@ -19,5 +19,5 @@ export interface PrincipalCodec {
   /**
    * Decode data
    */
-  decode(req: WebRequest): Promise<Principal | undefined> | Principal | undefined;
+  decode(request: WebRequest): Promise<Principal | undefined> | Principal | undefined;
 }

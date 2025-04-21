@@ -22,7 +22,7 @@ class AcceptsInterceptorSuite {
     interceptor.finalizeConfig(interceptor.config);
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           'Content-Type': 'application/json'
         }
@@ -32,7 +32,7 @@ class AcceptsInterceptorSuite {
     }));
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           'Content-Type': 'text/plain'
         }
@@ -42,7 +42,7 @@ class AcceptsInterceptorSuite {
     }));
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           'Content-Type': 'text/plain; charset=utf-8'
         }
@@ -52,7 +52,7 @@ class AcceptsInterceptorSuite {
     }));
 
     await assert.rejects(() => interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           'Content-Type': 'text/sql'
         }
@@ -72,7 +72,7 @@ class AcceptsInterceptorSuite {
     interceptor.finalizeConfig(interceptor.config);
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           'Content-Type': 'text/json'
         }
@@ -82,7 +82,7 @@ class AcceptsInterceptorSuite {
     }));
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           'Content-Type': 'text/plain'
         }
@@ -92,7 +92,7 @@ class AcceptsInterceptorSuite {
     }));
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           'Content-Type': 'text/plain; charset=utf-8'
         }
@@ -102,7 +102,7 @@ class AcceptsInterceptorSuite {
     }));
 
     await assert.doesNotReject(() => interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           'Content-Type': 'text/sql'
         }
@@ -112,7 +112,7 @@ class AcceptsInterceptorSuite {
     }));
 
     await assert.rejects(() => interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           'Content-Type': 'json/text'
         }

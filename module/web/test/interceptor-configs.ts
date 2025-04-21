@@ -40,7 +40,7 @@ class CustomInterceptor implements WebInterceptor<CustomInterceptorConfig> {
     return config.applies || /opt-in/.test(`${endpoint.fullPath}`);
   }
 
-  async filter({ req, config, next }: WebChainedContext<CustomInterceptorConfig>) {
+  async filter({ config, next }: WebChainedContext<CustomInterceptorConfig>) {
     const out = await next();
     out.headers.set('Name', config.name);
     return out;
@@ -99,7 +99,7 @@ class TestInterceptorConfigSuite {
   async name<T>(cls: Class<T>, path: string): Promise<string | undefined> {
     const inst = await ControllerRegistry.get(cls);
     const endpoint = inst.endpoints.find(x => x.path === path)!;
-    const res = await endpoint.filter!({ req: new WebRequest({}) });
+    const res = await endpoint.filter!({ request: new WebRequest({}) });
     return res.headers.get('Name') ?? undefined;
   }
 

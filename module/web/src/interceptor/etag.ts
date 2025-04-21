@@ -7,7 +7,7 @@ import { Config } from '@travetto/config';
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
-import { WebInterceptorCategory } from '../types/core.ts';
+import { HTTP_METHODS, WebInterceptorCategory } from '../types/core.ts';
 import { CompressInterceptor } from './compress.ts';
 import { EndpointConfig } from '../registry/types.ts';
 import { WebBodyUtil } from '../util/body.ts';
@@ -37,7 +37,7 @@ export class EtagInterceptor implements WebInterceptor {
   config: EtagConfig;
 
   addTag(ctx: WebChainedContext, res: WebResponse): WebResponse {
-    const { req } = ctx;
+    const { request } = ctx;
 
     const statusCode = res.context.httpStatusCode;
 
@@ -63,11 +63,11 @@ export class EtagInterceptor implements WebInterceptor {
     const lastModified = binaryRes.headers.get('Last-Modified');
 
     if (
-      (req.context.httpMethod === 'GET' || req.context.httpMethod === 'HEAD') &&
+      request.context.httpMethod && HTTP_METHODS[request.context.httpMethod].cacheable &&
       fresh({
-        'if-modified-since': req.headers.get('If-Modified-Since')!,
-        'if-none-match': req.headers.get('If-None-Match')!,
-        'cache-control': req.headers.get('Cache-Control')!,
+        'if-modified-since': request.headers.get('If-Modified-Since')!,
+        'if-none-match': request.headers.get('If-None-Match')!,
+        'cache-control': request.headers.get('Cache-Control')!,
       }, { etag: tag, 'last-modified': lastModified! })
     ) {
       return new WebResponse({ context: { httpStatusCode: 304 } });

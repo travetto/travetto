@@ -20,7 +20,7 @@ class CorsInterceptorSuite {
     interceptor.finalizeConfig(interceptor.config);
 
     const res = await interceptor.filter({
-      req: new WebRequest(),
+      request: new WebRequest(),
       next: async () => new WebResponse(),
       config: interceptor.config
     });
@@ -41,7 +41,7 @@ class CorsInterceptorSuite {
     assert(res.headers.get('Access-Control-Allow-Credentials') === 'false');
 
     const res2 = await interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           'Access-Control-Request-Headers': ['ETag', 'BTag']
         }
@@ -67,7 +67,7 @@ class CorsInterceptorSuite {
     interceptor.finalizeConfig(interceptor.config);
 
     const res = await interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           Origin: 'google.com'
         }
@@ -105,7 +105,7 @@ class CorsInterceptorSuite {
     interceptor.finalizeConfig(interceptor.config);
 
     const res = await interceptor.filter({
-      req: new WebRequest({
+      request: new WebRequest({
         headers: {
           Origin: 'google2.com'
         }

@@ -37,36 +37,36 @@ export class LoggingInterceptor implements WebInterceptor {
     return config.applies;
   }
 
-  async filter({ req, next }: WebChainedContext): Promise<WebResponse> {
+  async filter({ request, next }: WebChainedContext): Promise<WebResponse> {
     const createdDate = Date.now();
-    const res = await next();
+    const response = await next();
     const duration = Date.now() - createdDate;
 
-    const err = res.body instanceof Error ? res.body : undefined;
-    const code = res.context.httpStatusCode ?? (!!err ? 500 : 200);
+    const err = response.body instanceof Error ? response.body : undefined;
+    const code = response.context.httpStatusCode ?? (!!err ? 500 : 200);
 
-    const reqLog = {
-      method: req.context.httpMethod,
-      path: req.context.path,
-      query: req.context.httpQuery,
-      params: req.context.pathParams,
+    const logMessage = {
+      method: request.context.httpMethod,
+      path: request.context.path,
+      query: request.context.httpQuery,
+      params: request.context.pathParams,
       statusCode: code,
       duration,
     };
 
     if (code < 400) {
-      console.info('Request', reqLog);
+      console.info('Request', logMessage);
     } else if (code < 500) {
-      console.warn('Request', reqLog);
+      console.warn('Request', logMessage);
     } else {
-      console.error('Request', reqLog);
+      console.error('Request', logMessage);
     }
 
     if (this.config.showStackTrace && err) {
       console.error(err.message, { error: err });
     }
 
-    return res;
+    return response;
   }
 }
 
