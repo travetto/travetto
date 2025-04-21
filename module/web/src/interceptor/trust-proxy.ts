@@ -15,7 +15,7 @@ export class TrustProxyConfig {
    */
   applies = true;
   /**
-   * The accepted types
+   * The accepted ips
    */
   ips: string[] = [];
 }
