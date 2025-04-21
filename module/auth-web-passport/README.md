@@ -85,7 +85,7 @@ import { FbAuthSymbol } from './conf.ts';
 export class SampleAuth {
 
   @ContextParam()
-  req: WebRequest;
+  request: WebRequest;
 
   @ContextParam()
   user: Principal;
@@ -110,7 +110,7 @@ export class SampleAuth {
   @Get('/facebook/callback')
   @Login(FbAuthSymbol)
   async fbLoginComplete() {
-    return WebResponse.redirect('/auth/self', 301);
+    return WebResponse.redirect('/auth/self');
   }
 
   @Post('/logout')
@@ -122,7 +122,7 @@ export class SampleAuth {
    */
   @Post('/')
   async echo(): Promise<unknown> {
-    return this.req.body;
+    return this.request.body;
   }
 }
 ```

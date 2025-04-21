@@ -15,7 +15,7 @@ yarn add @travetto/web-upload
 
 This module provides a clean and direct mechanism for processing uploads, built upon [@fastify/busboy](https://github.com/fastify/busboy). The module also provides some best practices with respect to temporary file deletion.
 
-Once the files are uploaded, they are exposed on [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.")'s request object as `req.uploads`. The uploaded files are constructed as `Blob` instances.
+Once the files are uploaded, they are exposed on [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.")'s request object. The uploaded files are constructed as `Blob` instances.
 
 A simple example:
 

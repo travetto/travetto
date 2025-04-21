@@ -402,7 +402,6 @@ First we must start the application:
         output: <span class="token string">'&lt;workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log'</span>,
         writeSync: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
-      GetCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       JSONLogFormatterConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       LineLogFormatterConfig: <span class="token punctuation">{{'{'}}</span>
         plain: false,
@@ -428,6 +427,7 @@ First we must start the application:
         connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
         options: <span class="token punctuation">{{'{'}}</span> waitQueueTimeoutMS: <span class="token number">86400000</span> <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
+      ResponseCacheConfig: <span class="token punctuation">{{'{'}}</span> applies: true, mode: <span class="token string">'deny'</span> <span class="token punctuation">{{'}'}}</span>,
       TrustProxyConfig: <span class="token punctuation">{{'{'}}</span> applies: true, ips: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
       WebAuthConfig: <span class="token punctuation">{{'{'}}</span>
         applies: false,

@@ -22,7 +22,6 @@ export class WebTestConfig implements ConfigSource {
           ssl: { active: false },
           trustProxy: { ips: ['*'] },
           port: -1,
-          cache: { mode: 'deny' }
         }
       },
       source: 'custom://test/web',

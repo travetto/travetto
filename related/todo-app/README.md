@@ -374,7 +374,6 @@ npx trv run:web
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
-      GetCacheConfig: { applies: true },
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,
@@ -400,6 +399,7 @@ npx trv run:web
         connectionOptions: {},
         options: { waitQueueTimeoutMS: 86400000 }
       },
+      ResponseCacheConfig: { applies: true, mode: 'deny' },
       TrustProxyConfig: { applies: true, ips: [] },
       WebAuthConfig: {
         applies: false,

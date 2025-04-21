@@ -19,7 +19,7 @@ export class ResponseCacheConfig {
   /**
    * Determines how we cache
    */
-  mode: 'allow' | 'deny' = 'allow';
+  mode: 'allow' | 'deny' = 'deny';
 }
 
 /**
