@@ -72,7 +72,7 @@ export class EndpointUtil {
       const cls = asConstructable<WebInterceptor>(inst).constructor;
       const inputs = (inputByClass.get(cls) ?? []).map(x => x[1]);
       const config = Object.assign({}, inst.config, ...inputs);
-      return [cls, inst.finalizeConfig?.(config, castTo(inputs)) ?? config];
+      return [cls, inst.finalizeConfig?.({ config, endpoint }, castTo(inputs)) ?? config];
     }));
 
     return interceptors.map(inst => [
@@ -173,7 +173,7 @@ export class EndpointUtil {
 
     const interceptorFilters =
       this.resolveInterceptorsWithConfig(interceptors, endpoint, controller)
-        .filter(([inst, cfg]) => inst.applies?.(endpoint, cfg) ?? true)
+        .filter(([inst, config]) => inst.applies?.({ endpoint, config }) ?? true)
         .map(([inst, config]) => ({ filter: inst.filter.bind(inst), config }));
 
     const endpointFilters = [

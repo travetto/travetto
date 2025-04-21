@@ -1,11 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
-import { EndpointConfig } from '../registry/types.ts';
 
 /**
  * Web logging configuration
@@ -33,7 +32,7 @@ export class LoggingInterceptor implements WebInterceptor {
   @Inject()
   config: WebLogConfig;
 
-  applies(ep: EndpointConfig, config: WebLogConfig): boolean {
+  applies({ config }: WebInterceptorContext<WebLogConfig>): boolean {
     return config.applies;
   }
 

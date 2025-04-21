@@ -8,10 +8,9 @@ import { AppError, castTo } from '@travetto/runtime';
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebHeaders } from '../types/headers.ts';
 
-import { EndpointConfig } from '../registry/types.ts';
 import { WebBodyUtil } from '../util/body.ts';
 
 const DECOMPRESSORS = {
@@ -66,7 +65,7 @@ export class DecompressInterceptor implements WebInterceptor<DecompressConfig> {
   @Inject()
   config: DecompressConfig;
 
-  applies(endpoint: EndpointConfig, config: DecompressConfig): boolean {
+  applies({ config }: WebInterceptorContext<DecompressConfig>): boolean {
     return config.applies;
   }
 

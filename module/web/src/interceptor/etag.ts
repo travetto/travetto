@@ -3,13 +3,13 @@ import fresh from 'fresh';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Ignore } from '@travetto/schema';
 
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
-import { HTTP_METHODS, WebInterceptorCategory } from '../types/core.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
+import { WebInterceptorCategory } from '../types/core.ts';
 import { CompressInterceptor } from './compress.ts';
-import { EndpointConfig } from '../registry/types.ts';
 import { WebBodyUtil } from '../util/body.ts';
 
 @Config('web.etag')
@@ -22,6 +22,9 @@ export class EtagConfig {
    * Should we generate a weak etag
    */
   weak?: boolean;
+
+  @Ignore()
+  cacheable?: boolean;
 }
 
 /**
@@ -36,7 +39,7 @@ export class EtagInterceptor implements WebInterceptor {
   @Inject()
   config: EtagConfig;
 
-  addTag(ctx: WebChainedContext, response: WebResponse): WebResponse {
+  addTag(ctx: WebChainedContext<EtagConfig>, response: WebResponse): WebResponse {
     const { request } = ctx;
 
     const statusCode = response.context.httpStatusCode;
@@ -62,8 +65,7 @@ export class EtagInterceptor implements WebInterceptor {
 
     const lastModified = binaryResponse.headers.get('Last-Modified');
 
-    if (
-      request.context.httpMethod && HTTP_METHODS[request.context.httpMethod].cacheable &&
+    if (ctx.config.cacheable &&
       fresh({
         'if-modified-since': request.headers.get('If-Modified-Since')!,
         'if-none-match': request.headers.get('If-None-Match')!,
@@ -76,11 +78,18 @@ export class EtagInterceptor implements WebInterceptor {
     return binaryResponse;
   }
 
-  applies(ep: EndpointConfig, config: EtagConfig): boolean {
+  finalizeConfig({ config, endpoint }: WebInterceptorContext<EtagConfig>): EtagConfig {
+    if (endpoint.cacheable) {
+      return { ...config, cacheable: true };
+    }
+    return config;
+  }
+
+  applies({ config }: WebInterceptorContext<EtagConfig>): boolean {
     return config.applies;
   }
 
-  async filter(ctx: WebChainedContext): Promise<WebResponse> {
+  async filter(ctx: WebChainedContext<EtagConfig>): Promise<WebResponse> {
     return this.addTag(ctx, await ctx.next());
   }
 }

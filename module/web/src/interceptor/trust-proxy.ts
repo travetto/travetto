@@ -2,8 +2,7 @@ import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { castTo } from '@travetto/runtime';
 
-import { EndpointConfig } from '../registry/types.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebChainedContext } from '../types.ts';
@@ -28,7 +27,7 @@ export class TrustProxyInterceptor implements WebInterceptor<TrustProxyConfig> {
   @Inject()
   config: TrustProxyConfig;
 
-  applies(endpoint: EndpointConfig, config: TrustProxyConfig): boolean {
+  applies({ config }: WebInterceptorContext<TrustProxyConfig>): boolean {
     return config.applies;
   }
 

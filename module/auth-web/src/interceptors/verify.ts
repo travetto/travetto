@@ -1,5 +1,5 @@
 import { AppError, Util } from '@travetto/runtime';
-import { WebInterceptor, WebInterceptorCategory, WebChainedContext, EndpointConfig, WebResponse } from '@travetto/web';
+import { WebInterceptor, WebInterceptorCategory, WebChainedContext, WebResponse, WebInterceptorContext } from '@travetto/web';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -52,7 +52,7 @@ export class AuthVerifyInterceptor implements WebInterceptor<WebAuthVerifyConfig
   @Inject()
   authContext: AuthContext;
 
-  finalizeConfig(config: WebAuthVerifyConfig): WebAuthVerifyConfig {
+  finalizeConfig({ config }: WebInterceptorContext<WebAuthVerifyConfig>): WebAuthVerifyConfig {
     config.matcher = Util.allowDeny<string[], [Set<string>]>(config.permissions ?? [],
       x => x.split('|'),
       matchPermissionSet,
@@ -60,7 +60,7 @@ export class AuthVerifyInterceptor implements WebInterceptor<WebAuthVerifyConfig
     return config;
   }
 
-  applies(ep: EndpointConfig, config: WebAuthVerifyConfig): boolean {
+  applies({ config }: WebInterceptorContext<WebAuthVerifyConfig>): boolean {
     return config.applies;
   }
 

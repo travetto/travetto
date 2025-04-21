@@ -10,9 +10,8 @@ import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 
-import { EndpointConfig } from '../registry/types.ts';
 import { WebBodyUtil } from '../util/body.ts';
 
 import { AcceptsInterceptor } from './accepts.ts';
@@ -80,7 +79,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
     }
   }
 
-  applies(endpoint: EndpointConfig, config: BodyParseConfig): boolean {
+  applies({ endpoint, config }: WebInterceptorContext<BodyParseConfig>): boolean {
     return config.applies && endpoint.allowsBody;
   }
 

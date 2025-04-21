@@ -7,7 +7,7 @@ import { SessionService, SessionData } from '@travetto/auth-session';
 import { Inject, Injectable } from '@travetto/di';
 import {
   Controller, Get, Body, Post, Put, WebRequest, WebInterceptor,
-  EndpointConfig, ContextParam, WebInterceptorCategory, WebChainedContext
+  ContextParam, WebInterceptorCategory, WebChainedContext, WebInterceptorContext
 } from '@travetto/web';
 import { castTo, Util } from '@travetto/runtime';
 import { Suite, Test } from '@travetto/test';
@@ -26,7 +26,7 @@ class AutoLogin implements WebInterceptor {
   @Inject()
   auth: AuthContext;
 
-  applies(endpoint: EndpointConfig) {
+  applies({ endpoint }: WebInterceptorContext) {
     return !endpoint.path.endsWith('/body');
   }
 

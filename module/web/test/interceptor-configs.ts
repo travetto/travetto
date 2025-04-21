@@ -9,15 +9,14 @@ import { RootRegistry } from '@travetto/registry';
 import { ConfigureInterceptor } from '../src/decorator/common.ts';
 import { Controller } from '../src/decorator/controller.ts';
 import { Get } from '../src/decorator/endpoint.ts';
-import { WebInterceptor } from '../src/types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../src/types/interceptor.ts';
 import { WebInterceptorCategory } from '../src/types/core.ts';
 import { ControllerRegistry } from '../src/registry/controller.ts';
 import { WebChainedContext } from '../src/types.ts';
 import { CorsInterceptor } from '../src/interceptor/cors.ts';
 import { ResponseCacheInterceptor } from '../src/interceptor/response-cache.ts';
-import { EndpointConfig } from '../src/registry/types.ts';
 import { WebRequest } from '../src/types/request.ts';
-import { StandardWebRouter } from '@travetto/web';
+import { StandardWebRouter } from '../src/router/standard.ts';
 
 @Injectable()
 @Config('web.custom')
@@ -36,7 +35,7 @@ class CustomInterceptor implements WebInterceptor<CustomInterceptorConfig> {
   @Inject()
   config: CustomInterceptorConfig;
 
-  applies(endpoint: EndpointConfig, config: CustomInterceptorConfig) {
+  applies({ endpoint, config }: WebInterceptorContext<CustomInterceptorConfig>) {
     return config.applies || /opt-in/.test(`${endpoint.fullPath}`);
   }
 

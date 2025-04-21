@@ -2,11 +2,10 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { WebChainedContext } from '../types.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
 
-import { EndpointConfig } from '../registry/types.ts';
 import { WebCommonUtil } from '../util/common.ts';
 
 import { EtagInterceptor } from './etag.ts';
@@ -36,7 +35,7 @@ export class ResponseCacheInterceptor implements WebInterceptor {
   @Inject()
   config: ResponseCacheConfig;
 
-  applies(endpoint: EndpointConfig, config: ResponseCacheConfig): boolean {
+  applies({ config, endpoint }: WebInterceptorContext<ResponseCacheConfig>): boolean {
     return !!endpoint.cacheable && config.applies && config.mode === 'deny';
   }
 

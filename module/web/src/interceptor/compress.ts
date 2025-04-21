@@ -8,11 +8,10 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, castTo } from '@travetto/runtime';
 
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
-import { EndpointConfig } from '../registry/types.ts';
 import { WebBodyUtil } from '../util/body.ts';
 
 const COMPRESSORS = {
@@ -112,7 +111,7 @@ export class CompressInterceptor implements WebInterceptor {
     return binaryResponse;
   }
 
-  applies(ep: EndpointConfig, config: CompressConfig): boolean {
+  applies({ config }: WebInterceptorContext<CompressConfig>): boolean {
     return config.applies;
   }
 

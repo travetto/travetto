@@ -6,11 +6,9 @@ import { Ignore } from '@travetto/schema';
 import { MimeUtil } from '../util/mime.ts';
 
 import { WebChainedContext } from '../types.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
-
-import { EndpointConfig } from '../registry/types.ts';
 
 @Config('web.accepts')
 export class AcceptsConfig {
@@ -38,12 +36,12 @@ export class AcceptsInterceptor implements WebInterceptor<AcceptsConfig> {
   @Inject()
   config: AcceptsConfig;
 
-  finalizeConfig(cfg: AcceptsConfig): AcceptsConfig {
-    cfg.matcher = MimeUtil.matcher(cfg.types ?? []);
-    return cfg;
+  finalizeConfig({ config }: WebInterceptorContext<AcceptsConfig>): AcceptsConfig {
+    config.matcher = MimeUtil.matcher(config.types ?? []);
+    return config;
   }
 
-  applies(ep: EndpointConfig, config: AcceptsConfig): boolean {
+  applies({ config }: WebInterceptorContext<AcceptsConfig>): boolean {
     return config.applies;
   }
 

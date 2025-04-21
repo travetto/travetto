@@ -6,8 +6,7 @@ import { WebChainedContext } from '../types.ts';
 import { HTTP_METHODS, HttpMethod, WebInterceptorCategory } from '../types/core.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebRequest } from '../types/request.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
-import { EndpointConfig } from '../registry/types.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebCommonUtil } from '../util/common.ts';
 
 /**
@@ -56,7 +55,7 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
   @Inject()
   config: CorsConfig;
 
-  finalizeConfig(config: CorsConfig): CorsConfig {
+  finalizeConfig({ config }: WebInterceptorContext<CorsConfig>): CorsConfig {
     config.resolved = {
       origins: new Set(config.origins ?? []),
       methods: (config.methods ?? Object.keys(HTTP_METHODS)).join(',').toUpperCase(),
@@ -66,7 +65,7 @@ export class CorsInterceptor implements WebInterceptor<CorsConfig> {
     return config;
   }
 
-  applies(ep: EndpointConfig, config: CorsConfig): boolean {
+  applies({ config }: WebInterceptorContext<CorsConfig>): boolean {
     return config.applies;
   }
 

@@ -4,11 +4,10 @@ import { Secret } from '@travetto/schema';
 
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebInterceptor } from '../types/interceptor.ts';
+import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 
 import { WebConfig } from '../config/web.ts';
-import { EndpointConfig } from '../registry/types.ts';
 import { Cookie, CookieSetOptions } from '../types/cookie.ts';
 import { CookieJar } from '../util/cookie.ts';
 import { WebAsyncContext } from '../context.ts';
@@ -66,13 +65,13 @@ export class CookiesInterceptor implements WebInterceptor<CookieConfig> {
   @Inject()
   webAsyncContext: WebAsyncContext;
 
-  finalizeConfig(config: CookieConfig): CookieConfig {
+  finalizeConfig({ config }: WebInterceptorContext<CookieConfig>): CookieConfig {
     config.secure ??= this.webConfig.ssl?.active;
     config.domain ??= this.webConfig.hostname;
     return config;
   }
 
-  applies(ep: EndpointConfig, config: CookieConfig): boolean {
+  applies({ config }: WebInterceptorContext<CookieConfig>): boolean {
     return config.applies;
   }
 
