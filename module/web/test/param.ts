@@ -92,9 +92,7 @@ export class EndpointParameterTest {
   }
 
   static async extract(ep: EndpointConfig, request: Partial<WebRequest>): Promise<unknown[]> {
-    return await EndpointUtil.extractParameters({
-      request: new WebRequest({ ...request })
-    }, ep);
+    return await EndpointUtil.extractParameters(ep, new WebRequest({ ...request }));
   }
 
   @BeforeAll()

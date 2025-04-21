@@ -2,10 +2,11 @@ import type { Any, Class, TypedFunction } from '@travetto/runtime';
 import type { FieldConfig, ClassConfig } from '@travetto/schema';
 
 import type { WebInterceptor } from '../types/interceptor.ts';
-import type { WebChainedFilter, WebFilterContext, WebFilter } from '../types.ts';
+import type { WebChainedFilter, WebFilter } from '../types.ts';
 import { HttpMethod } from '../types/core.ts';
 import { WebHeaders } from '../types/headers.ts';
-import { WebResponse, WebResponseContext } from '../types/response.ts';
+import { WebResponse } from '../types/response.ts';
+import { WebRequest } from '../types/request.ts';
 
 export type EndpointFunction = TypedFunction<Any, unknown>;
 export type EndpointFunctionDescriptor = TypedPropertyDescriptor<EndpointFunction>;
@@ -103,7 +104,7 @@ export interface EndpointParamConfig {
    * Extract the value from request
    * @param context The http context with the endpoint param config
    */
-  extract?: (ctx: WebFilterContext, config: EndpointParamConfig) => unknown;
+  extract?: (ctx: WebRequest, config: EndpointParamConfig) => unknown;
   /**
    * Input prefix for parameter
    */

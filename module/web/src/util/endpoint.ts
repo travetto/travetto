@@ -3,15 +3,15 @@ import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResul
 import { DependencyRegistry } from '@travetto/di';
 import { RetargettingProxy } from '@travetto/registry';
 
-import { WebFilterContext, WebChainedFilter, WebChainedContext, WebFilter } from '../types.ts';
+import { WebChainedFilter, WebChainedContext, WebFilter } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
 import { WebInterceptor } from '../types/interceptor.ts';
-
+import { WebRequest } from '../types/request.ts';
 import { WEB_INTERCEPTOR_CATEGORIES } from '../types/core.ts';
 import { EndpointConfig, ControllerConfig, EndpointParamConfig } from '../registry/types.ts';
 import { ControllerRegistry } from '../registry/controller.ts';
-
 import { WebCommonUtil } from './common.ts';
+
 
 const WebQueryExpandedSymbol = Symbol();
 
@@ -84,15 +84,14 @@ export class EndpointUtil {
   /**
    * Extract parameter from request
    */
-  static extractParameter(ctx: WebFilterContext, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
+  static extractParameter(request: WebRequest, param: EndpointParamConfig, field: FieldConfig, value?: unknown): unknown {
     if (value !== undefined && value !== this.MissingParamSymbol) {
       return value;
     } else if (param.extract) {
-      return param.extract(ctx, param);
+      return param.extract(request, param);
     }
 
     const name = param.name!;
-    const { request } = ctx;
     switch (param.location) {
       case 'path': return request.context.pathParams?.[name];
       case 'header': return field.array ? request.headers.getList(name) : request.headers.get(name);
@@ -111,14 +110,14 @@ export class EndpointUtil {
    * @param req The request
    * @param res The response
    */
-  static async extractParameters(ctx: WebFilterContext, endpoint: EndpointConfig): Promise<unknown[]> {
+  static async extractParameters(endpoint: EndpointConfig, request: WebRequest): Promise<unknown[]> {
     const cls = endpoint.class;
     const method = endpoint.name;
-    const vals = WebCommonUtil.getRequestParams(ctx.request);
+    const vals = WebCommonUtil.getRequestParams(request);
 
     try {
       const fields = SchemaRegistry.getMethodSchema(cls, method);
-      const extracted = endpoint.params.map((c, i) => this.extractParameter(ctx, c, fields[i], vals?.[i]));
+      const extracted = endpoint.params.map((c, i) => this.extractParameter(request, c, fields[i], vals?.[i]));
       const params = BindUtil.coerceMethodParams(cls, method, extracted);
       await SchemaValidator.validateMethod(cls, method, params, endpoint.params.map(x => x.prefix));
       return params;
@@ -140,9 +139,9 @@ export class EndpointUtil {
   /**
    * Endpoint invocation code
    */
-  static async invokeEndpoint(endpoint: EndpointConfig, ctx: WebFilterContext): Promise<WebResponse> {
+  static async invokeEndpoint(endpoint: EndpointConfig, { request }: WebChainedContext): Promise<WebResponse> {
     try {
-      const params = await this.extractParameters(ctx, endpoint);
+      const params = await this.extractParameters(endpoint, request);
       const body = await endpoint.endpoint.apply(endpoint.instance, params);
       const headers = endpoint.responseHeaderMap;
       const response = body instanceof WebResponse ? body : new WebResponse({ body, headers });

@@ -57,7 +57,7 @@ export class PassportUtil {
    * @param ctx The travetto filter context
    * @param currentState The current state, if any
    */
-  static enhanceState(ctx: WebFilterContext, currentState?: string): string {
-    return this.addToState({ referrer: ctx.request.headers.get('Referer') }, currentState);
+  static enhanceState({ request }: WebFilterContext, currentState?: string): string {
+    return this.addToState({ referrer: request.headers.get('Referer') }, currentState);
   }
 }
