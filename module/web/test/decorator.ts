@@ -50,7 +50,7 @@ export class ConfigureTest {
 
     const cacher = headers.get('Cache-Control');
     assert(typeof cacher !== 'function');
-    assert(cacher === 'max-age=0,no-cache');
+    assert(cacher === 'no-cache,max-age=0');
   }
 
   @Test()

@@ -17,7 +17,7 @@ class CorsInterceptorSuite {
 
     const interceptor = new CorsInterceptor();
     interceptor.config = CorsConfig.from({});
-    interceptor.finalizeConfig(interceptor.config);
+    interceptor.finalizeConfig({ config: interceptor.config, endpoint: undefined! });
 
     const response = await interceptor.filter({
       request: new WebRequest(),
@@ -64,7 +64,7 @@ class CorsInterceptorSuite {
       headers: ['Content-Type', 'Accept'],
       credentials: true,
     });
-    interceptor.finalizeConfig(interceptor.config);
+    interceptor.finalizeConfig({ config: interceptor.config, endpoint: undefined! });
 
     const response = await interceptor.filter({
       request: new WebRequest({
@@ -102,7 +102,7 @@ class CorsInterceptorSuite {
       headers: ['Content-Type', 'Accept'],
       credentials: true,
     });
-    interceptor.finalizeConfig(interceptor.config);
+    interceptor.finalizeConfig({ config: interceptor.config, endpoint: undefined! });
 
     const response = await interceptor.filter({
       request: new WebRequest({

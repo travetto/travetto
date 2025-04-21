@@ -19,7 +19,7 @@ class AcceptsInterceptorSuite {
     interceptor.config = AcceptsConfig.from({
       types: ['text/plain', 'application/json']
     });
-    interceptor.finalizeConfig(interceptor.config);
+    interceptor.finalizeConfig({ config: interceptor.config, endpoint: undefined! });
 
     await assert.doesNotReject(() => interceptor.filter({
       request: new WebRequest({
@@ -69,7 +69,7 @@ class AcceptsInterceptorSuite {
     interceptor.config = AcceptsConfig.from({
       types: ['text/*']
     });
-    interceptor.finalizeConfig(interceptor.config);
+    interceptor.finalizeConfig({ config: interceptor.config, endpoint: undefined! });
 
     await assert.doesNotReject(() => interceptor.filter({
       request: new WebRequest({

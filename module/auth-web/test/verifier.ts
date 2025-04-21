@@ -10,17 +10,17 @@ class VerifierSuite {
   async testPermissions() {
     const interceptor = new AuthVerifyInterceptor();
 
-    let cfg = interceptor.finalizeConfig({ ...base, permissions: ['!c|d', 'a|b'] });
+    let cfg = interceptor.finalizeConfig({ endpoint: undefined!, config: { ...base, permissions: ['!c|d', 'a|b'] } });
 
     assert(cfg.matcher(new Set(['a', 'b'])) === true);
     assert(cfg.matcher(new Set(['a', 'b', 'c', 'd'])) === false);
 
-    cfg = interceptor.finalizeConfig({ ...base, permissions: ['!c', '!d', 'a', 'b'] });
+    cfg = interceptor.finalizeConfig({ endpoint: undefined!, config: { ...base, permissions: ['!c', '!d', 'a', 'b'] } });
     assert(cfg.matcher(new Set(['a'])) === true);
     assert(cfg.matcher(new Set(['b'])) === true);
     assert(cfg.matcher(new Set(['a', 'b', 'c'])) === false);
 
-    cfg = interceptor.finalizeConfig({ ...base, permissions: ['!c', '!d'] });
+    cfg = interceptor.finalizeConfig({ endpoint: undefined!, config: { ...base, permissions: ['!c', '!d'] } });
     assert(cfg.matcher(new Set(['a'])) === true);
     assert(cfg.matcher(new Set([])) === true);
   }
