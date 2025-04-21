@@ -15,7 +15,6 @@ import { WebResponse } from '../types/response.ts';
 import { EndpointConfig } from '../registry/types.ts';
 import { WebBodyUtil } from '../util/body.ts';
 
-const NO_TRANSFORM_REGEX = /(?:^|,)\s*?no-transform\s*?(?:,|$)/;
 const COMPRESSORS = {
   gzip: createGzip,
   deflate: createDeflate,
@@ -63,9 +62,8 @@ export class CompressInterceptor implements WebInterceptor {
 
     if (
       !response.body ||
-      request.context.httpMethod === 'HEAD' ||
       response.headers.has('Content-Encoding') ||
-      NO_TRANSFORM_REGEX.test(response.headers.get('Cache-Control')?.toString() ?? '')
+      response.headers.get('Cache-Control')?.includes('no-transform')
     ) {
       return response;
     }

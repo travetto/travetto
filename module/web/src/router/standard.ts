@@ -45,11 +45,11 @@ export class StandardWebRouter extends BaseWebRouter {
    * Route and run the request
    */
   dispatch({ request }: WebFilterContext): Promise<WebResponse> {
-    const method = request.context.httpMethod ?? DEFAULT_HTTP_METHOD;
-    const { params, handler } = this.raw.find(method, request.context.path) ?? {};
+    const httpMethod = request.context.httpMethod ?? DEFAULT_HTTP_METHOD;
+    const { params, handler } = this.raw.find(httpMethod, request.context.path) ?? {};
     const endpoint = this.#cache.get(handler!);
     if (!endpoint) {
-      throw new AppError(`Unknown route ${method} ${request.context.path}`, { category: 'notfound' });
+      throw new AppError(`Unknown route ${httpMethod} ${request.context.path}`, { category: 'notfound' });
     }
     Object.assign(request.context, { pathParams: params });
     return endpoint.filter!({ request });
