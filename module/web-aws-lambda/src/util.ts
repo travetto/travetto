@@ -8,7 +8,7 @@ export class AwsLambdaWebUtil {
   /**
    * Create a request from an api gateway event
    */
-  static toWebRequest(event: APIGatewayProxyEvent, pathParams?: Record<string, unknown>): WebRequest {
+  static toWebRequest(event: APIGatewayProxyEvent): WebRequest {
     // Build request
     const body = event.body ? Buffer.from(event.body, event.isBase64Encoded ? 'base64' : 'utf8') : undefined;
 
@@ -21,7 +21,6 @@ export class AwsLambdaWebUtil {
         httpMethod: castTo(event.httpMethod.toUpperCase()),
         httpQuery: castTo(event.queryStringParameters!),
         path: event.path,
-        pathParams,
       },
       headers: { ...event.headers, ...event.multiValueHeaders },
       body: WebBodyUtil.markRaw(body)

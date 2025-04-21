@@ -36,11 +36,12 @@ export class TrustProxyInterceptor implements WebInterceptor<TrustProxyConfig> {
     const forwardedFor = request.headers.get('X-Forwarded-For');
 
     if (forwardedFor) {
-      const connection = request.context.connection ??= {};
+      const connection = request.context.connection ?? {};
       if (config.ips[0] === '*' || (connection.ip && config.ips.includes(connection.ip))) {
         connection.httpProtocol = castTo(request.headers.get('X-Forwarded-Proto')!) || connection.httpProtocol;
         connection.host = request.headers.get('X-Forwarded-Host') || connection.host;
         connection.ip = forwardedFor;
+        Object.assign(request.context, { connection });
       }
     }
 

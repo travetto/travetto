@@ -20,7 +20,7 @@ export class WebTestDispatchUtil {
       sample.headers.forEach((v, k) => request.headers.set(k, Array.isArray(v) ? v.join(',') : v));
       request.body = WebBodyUtil.markRaw(await WebBodyUtil.toBuffer(sample.body!));
     }
-    Object.assign(request, { query: BindUtil.flattenPaths(request.context.httpQuery ?? {}) });
+    Object.assign(request.context, { httpQuery: BindUtil.flattenPaths(request.context.httpQuery ?? {}) });
     return request;
   }
 

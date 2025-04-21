@@ -97,8 +97,8 @@ export class EndpointUtil {
       case 'header': return field.array ? request.headers.getList(name) : request.headers.get(name);
       case 'body': return request.body;
       case 'query': {
-        const reqWithQ: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
-        const q = reqWithQ[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
+        const withQuery: typeof request & { [WebQueryExpandedSymbol]?: Record<string, unknown> } = request;
+        const q = withQuery[WebQueryExpandedSymbol] ??= BindUtil.expandPaths(request.context.httpQuery ?? {});
         return param.prefix ? q[param.prefix] : (field.type.Ⲑid ? q : q[name]);
       }
     }
