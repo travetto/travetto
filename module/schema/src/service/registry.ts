@@ -109,11 +109,11 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
     if (clsSchema.subTypeName || baseSchema.baseType) { // We have a sub type
       const type = castTo<string>(o[castKey<T>(baseSchema.subTypeField)]) ?? clsSchema.subTypeName ?? baseSchema.subTypeName;
-      const ret = this.#subTypes.get(base)!.get(type)!;
-      if (ret && !(classConstruct(ret) instanceof cls)) {
-        throw new AppError(`Resolved class ${ret.name} is not assignable to ${cls.name}`);
+      const subType = this.#subTypes.get(base)!.get(type)!;
+      if (subType && !(classConstruct(subType) instanceof cls)) {
+        throw new AppError(`Resolved class ${subType.name} is not assignable to ${cls.name}`);
       }
-      return ret;
+      return subType;
     } else {
       return cls;
     }

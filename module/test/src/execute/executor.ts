@@ -211,13 +211,13 @@ export class TestExecutor {
         await mgr.startPhase('each');
 
         // Run test
-        const ret = await this.executeTest(test);
-        result[ret.status]++;
-        result.tests.push(ret);
+        const testResult = await this.executeTest(test);
+        result[testResult.status]++;
+        result.tests.push(testResult);
 
         // Handle after each
         await mgr.endPhase('each');
-        ret.durationTotal = Date.now() - testStart;
+        testResult.durationTotal = Date.now() - testStart;
       }
 
       // Handle after all

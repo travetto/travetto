@@ -5,7 +5,8 @@ import { Any, BinaryUtil, castTo, hasToJSON, Util } from '@travetto/runtime';
 
 import { WebBinaryBody, WebMessage } from '../types/message.ts';
 import { WebHeaders } from '../types/headers.ts';
-import { WebInternalSymbol } from '../types/core.ts';
+
+const WebRawStreamSymbol = Symbol();
 
 /**
  * Utility classes for supporting web body operations
@@ -153,7 +154,7 @@ export class WebBodyUtil {
    */
   static markRaw(val: Readable | Buffer | undefined): typeof val {
     if (val) {
-      Object.defineProperty(val, WebInternalSymbol, { value: val });
+      Object.defineProperty(val, WebRawStreamSymbol, { value: val });
     }
     return val;
   }
@@ -163,7 +164,7 @@ export class WebBodyUtil {
    */
   static getRawStream(val: unknown): Readable | undefined {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebInternalSymbol] === val) {
+    if ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebRawStreamSymbol] === val) {
       return WebBodyUtil.toReadable(val);
     }
   }

@@ -109,9 +109,9 @@ class TestConfig {
     config.temp = 'any';
     config.empty = empty;
 
-    const ret = new Database();
-    ret.dbConfig = config;
-    return ret;
+    const db = new Database();
+    db.dbConfig = config;
+    return db;
   }
 
   @InjectableFactory(CustomInterfaceSymbol)

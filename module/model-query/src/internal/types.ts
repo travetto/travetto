@@ -64,11 +64,11 @@ export class TypeUtil {
     } else if (v instanceof Date) {
       return 'Date';
     } else if (Array.isArray(v)) {
-      const ret: string = `${this.getActualType(v[0])}[]`;
-      if (v.length === 2 && ret === 'number[]') {
+      const typeString: string = `${this.getActualType(v[0])}[]`;
+      if (v.length === 2 && typeString === 'number[]') {
         return 'Point';
       } else {
-        return ret;
+        return typeString;
       }
     }
     throw new Error(`Unknown type for ${v}`);

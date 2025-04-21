@@ -139,14 +139,14 @@ export class InjectableTransformer {
       dependencies,
       src: parent.name,
     };
-    let ret = state.resolveReturnType(node);
-    if (ret.key === 'literal' && ret.ctor === Promise && ret.typeArguments) {
-      ret = ret.typeArguments![0];
+    let returnType = state.resolveReturnType(node);
+    if (returnType.key === 'literal' && returnType.ctor === Promise && returnType.typeArguments) {
+      returnType = returnType.typeArguments![0];
     }
-    if (ret.key === 'managed') {
-      config.target = state.getOrImport(ret);
-    } else if (ret.key === 'foreign') {
-      config.target = state.getForeignTarget(ret);
+    if (returnType.key === 'managed') {
+      config.target = state.getOrImport(returnType);
+    } else if (returnType.key === 'foreign') {
+      config.target = state.getForeignTarget(returnType);
     }
 
     // Build decl

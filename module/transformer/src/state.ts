@@ -222,9 +222,8 @@ export class TransformerState implements State {
   /**
    * Finalize the source file for emission
    */
-  finalize(ret: ts.SourceFile): ts.SourceFile {
-    ret = this.#imports.finalize(ret);
-    return ret;
+  finalize(source: ts.SourceFile): ts.SourceFile {
+    return this.#imports.finalize(source);
   }
 
   /**

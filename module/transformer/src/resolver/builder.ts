@@ -162,14 +162,14 @@ export const TypeBuilder: {
         return { key: 'literal', ctor: undefined, name };
       } else if (name in GLOBAL_SIMPLE) {
         const cons = GLOBAL_SIMPLE[name];
-        const ret = LiteralUtil.isLiteralType(type) ? CoerceUtil.coerce(type.value, transformCast(cons), false) :
+        const literal = LiteralUtil.isLiteralType(type) ? CoerceUtil.coerce(type.value, transformCast(cons), false) :
           undefined;
 
         return {
           key: 'literal',
           ctor: cons,
           name: SIMPLE_NAMES[cons.name] ?? cons.name,
-          value: ret
+          value: literal
         };
       } else if (complexName in GLOBAL_COMPLEX) {
         const cons = GLOBAL_COMPLEX[complexName];

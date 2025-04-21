@@ -186,7 +186,7 @@ export class SchemaTransformUtil {
       state.createDecorator(this.FIELD_IMPORT, 'Field', ...params)
     ];
 
-    let ret: unknown;
+    let result: unknown;
     if (ts.isPropertyDeclaration(node)) {
       const comments = DocUtil.describeDocs(node);
       if (comments.description) {
@@ -195,19 +195,19 @@ export class SchemaTransformUtil {
         })));
       }
 
-      ret = state.factory.updatePropertyDeclaration(node,
+      result = state.factory.updatePropertyDeclaration(node,
         newModifiers, node.name, node.questionToken, node.type, node.initializer);
     } else if (ts.isParameter(node)) {
-      ret = state.factory.updateParameterDeclaration(node,
+      result = state.factory.updateParameterDeclaration(node,
         newModifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer);
     } else if (ts.isGetAccessorDeclaration(node)) {
-      ret = state.factory.updateGetAccessorDeclaration(node,
+      result = state.factory.updateGetAccessorDeclaration(node,
         newModifiers, node.name, node.parameters, node.type, node.body);
     } else {
-      ret = state.factory.updateSetAccessorDeclaration(node,
+      result = state.factory.updateSetAccessorDeclaration(node,
         newModifiers, node.name, node.parameters, node.body);
     }
-    return transformCast(ret);
+    return transformCast(result);
   }
 
   /**

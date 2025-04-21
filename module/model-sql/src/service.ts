@@ -227,9 +227,9 @@ export class SQLModelService implements
       getStatements('update')
     ]);
 
-    const ret = await this.#dialect.bulkProcess(deletes, inserts, upserts, updates);
-    ret.insertedIds = addedIds;
-    return ret;
+    const result = await this.#dialect.bulkProcess(deletes, inserts, upserts, updates);
+    result.insertedIds = addedIds;
+    return result;
   }
 
   // Expiry

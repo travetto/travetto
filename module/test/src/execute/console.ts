@@ -26,9 +26,9 @@ export class ConsoleCapture implements ConsoleListener {
   }
 
   end(): Record<string, string> {
-    const ret = this.out ?? {};
+    const result = this.out ?? {};
     this.out = {};
     ConsoleManager.set(ConsoleCapture.#listener);
-    return Object.fromEntries(Object.entries(ret).map(([k, v]) => [k, v.join('\n')]));
+    return Object.fromEntries(Object.entries(result).map(([k, v]) => [k, v.join('\n')]));
   }
 }

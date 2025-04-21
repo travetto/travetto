@@ -13,10 +13,10 @@ type EndpointDecConfig = Partial<EndpointConfig> & { path: string };
  */
 export function Endpoint(config: EndpointDecConfig): EndpointFunctionDecorator {
   return function <T>(target: T, prop: symbol | string, descriptor: EndpointFunctionDescriptor): EndpointFunctionDescriptor {
-    const ret = ControllerRegistry.registerPendingEndpoint(
+    const result = ControllerRegistry.registerPendingEndpoint(
       asConstructable(target).constructor, descriptor, config
     );
-    return ret;
+    return result;
   };
 }
 

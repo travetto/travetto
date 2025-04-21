@@ -4,6 +4,14 @@ import { OutgoingHttpHeaders } from 'http';
 import { IncomingMessage, ServerResponse } from 'node:http';
 
 export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> {
+
+  /**
+   * Get a connect incoming message given a framework request
+   */
+  static get(request: WebRequest): ConnectRequest & IncomingMessage {
+    return castTo(new ConnectRequest(request));
+  }
+
   #request: WebRequest;
   constructor(request: WebRequest) {
     this.#request = request;
@@ -30,6 +38,14 @@ export class ConnectResponse implements Pick<ServerResponse,
   'getHeader' | 'getHeaderNames' | 'getHeaders' | 'hasHeader' |
   'headersSent' | 'write' | 'flushHeaders'
 > {
+
+  /**
+   * Get a connect server response given a framework response
+   */
+  static get(response?: WebResponse): ConnectResponse & ServerResponse {
+    return castTo(new ConnectResponse(response));
+  }
+
   #response: WebResponse;
   #headersSent = false;
   #finished = false;

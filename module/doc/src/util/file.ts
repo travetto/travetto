@@ -95,17 +95,17 @@ export class DocFileUtil {
     const lines = text.content.split(/\n/g);
 
     const start = lines.findIndex(x => new RegExp(`function ${name}\\b`).test(x));
-    let ret = false;
+    let found = false;
     if (start > 0) {
       for (let i = start - 1; i > start - 3; i--) {
         if (lines[i].includes('@augments')) {
-          ret = true;
+          found = true;
           break;
         }
       }
     }
-    this.#decCache[key] = ret;
-    return ret;
+    this.#decCache[key] = found;
+    return found;
   }
 
   /**
