@@ -636,7 +636,7 @@ Release 5.0 - 2024-8-26
 * Pulled in sharp for native-node support, avoiding the external operations
 
 ---------------------------------------------
-Release 6.0 - 2025-2-1
+Release 6.0 - 2025-5-1
 ---------------------------------------------
 
 ## Major/Breaking Changes
@@ -655,7 +655,7 @@ Release 6.0 - 2025-2-1
    * Simplified to being the bridge between auth-session and rest
    * Session is tied to the principal lifecycle
 
-### Rest
+### Web (Formerly known as Rest)
 * Renamed Param type "X" to be named "X"Param.  This is in preparation for the new HTTP Verb QUERY which would have conflicted with the Query param (and is now QueryParam).
 
 ### Context

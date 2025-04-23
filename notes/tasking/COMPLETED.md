@@ -260,3 +260,11 @@ Platform Support
     - [x] Logging file names
   - [x] Execution
     - [x] Must have node at front at all times
+
+* [x] Omit/Pick as type shapes for schema validation
+* [X] Web Lambda support now handles all lambda invocations
+* [X] Web now supports Eventing in general, just requires a dispatcher/router
+* [X] Pack and mono-repo + shared resources/config 
+  - [X] Need a way to pack in common resources if necessary?
+  - [X] May need to combine config files potentially
+* [X] Contemplate relationship between base/registry, no longer applies
