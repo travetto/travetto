@@ -60,4 +60,27 @@ export class WebTestDispatchUtil {
     response.body = result;
     return response;
   }
+
+  static async toFetchRequestInit(request: WebRequest): Promise<{ init: RequestInit, path: string }> {
+    const { context: { httpQuery: query, httpMethod: method, path }, headers } = request;
+
+    let q = '';
+    if (query && Object.keys(query).length) {
+      const pairs = Object.fromEntries(Object.entries(query).map(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`] as const));
+      q = `?${new URLSearchParams(pairs).toString()}`;
+    }
+
+    const finalPath = `${path}${q}`;
+    const stream = WebBodyUtil.getRawStream(request.body);
+    const body: RequestInit['body'] = stream ? await toBuffer(stream) : castTo(request.body);
+    return { path: finalPath, init: { headers, method, body } };
+  }
+
+  static async fromFetchResponse(response: Response): Promise<WebResponse> {
+    return new WebResponse({
+      body: Buffer.from(await response.arrayBuffer()),
+      context: { httpStatusCode: response.status },
+      headers: response.headers
+    });
+  }
 }
