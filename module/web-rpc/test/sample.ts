@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 
-import { Controller, Delete, Get, Post, Put } from '@travetto/web';
+import { Body, Controller, Delete, Get, Post, Put } from '@travetto/web';
 import { Specifier } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 import { Util } from '@travetto/runtime';
@@ -34,7 +34,8 @@ export class UserController {
   }
 
   @Put('/upload')
-  async uploadFun(@Specifier('file') user: Buffer): Promise<void> {
+  async uploadFun(@Body() @Specifier('file') data: Buffer, multiplier = 1): Promise<number> {
+    return data.byteLength * multiplier;
   }
 }
 
@@ -138,5 +139,23 @@ class WebRpcSuite extends BaseWebSuite {
     assert(removedStatusCode === 204);
     assert(Buffer.isBuffer(removed));
     assert(removed.byteLength === 0);
+  }
+
+  @Test()
+  async files() {
+    const { context: { httpStatusCode: createdStatus }, body: created } = await this.request<number>({
+      context: {
+        path: '/rpc/UserController:uploadFun',
+        httpMethod: 'POST',
+      },
+      headers: {
+        'content-type': 'application/octet-stream',
+        'X-TRV-RPC-INPUTS': Util.encodeSafeJSON([null, 11])
+      },
+      body: Buffer.alloc(100)
+    });
+
+    assert(createdStatus === 200);
+    assert(created === 1100);
   }
 }

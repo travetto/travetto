@@ -40,13 +40,13 @@ export class WebRpController {
         request.body = params[bodyParamIdx];
       }
     } else if (body) {
-      console.error!('HI');
       throw new AppError('Invalid parameters, must be an array', { category: 'data' });
     } else {
       params = [];
     }
 
-    WebCommonUtil.setRequestParams(request, endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]));
+    const final = endpoint.params.map((x, i) => (x.location === 'body' && paramInput) ? EndpointUtil.MissingParamSymbol : params[i]);
+    WebCommonUtil.setRequestParams(request, final);
 
     // Dispatch
     return await endpoint.filter!({ request: this.ctx.request });
