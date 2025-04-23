@@ -84,7 +84,7 @@ class WebRpcSuite extends BaseWebSuite {
   dispatcherType = LocalRequestDispatcher;
 
   @Test()
-  async getRpc() {
+  async basic() {
     const { context: { httpStatusCode: createdStatus }, body: created } = await this.request<Todo>({
       context: {
         path: '/rpc/TodoController:createTodo',
