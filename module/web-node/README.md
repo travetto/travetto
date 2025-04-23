@@ -13,4 +13,54 @@ npm install @travetto/web-node
 yarn add @travetto/web-node
 ```
 
-The module is an [Node](https://nodejs.org) provider for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.  This module provides an implementation of [WebApplication](https://github.com/travetto/travetto/tree/main/module/web/src/types/application.ts#L8) for automatic injection in the default Web server.
+The module is an [http](https://nodejs.org/api/http.html) adapter for the [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.") module.  This module provides will run an [http](https://nodejs.org/api/http.html) or [https](https://nodejs.org/api/https.html) server using [Node](https://nodejs.org) primitives.
+
+**Code: Node Web Application**
+```typescript
+import { IncomingMessage, ServerResponse } from 'node:http';
+
+import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
+import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, StandardWebRouter } from '@travetto/web';
+import { ConfigurationService } from '@travetto/config';
+
+import { NodeWebUtil } from './util.ts';
+
+/**
+ * A node http server
+ */
+@Injectable()
+export class NodeWebApplication implements WebApplication {
+
+  @Inject()
+  config: WebConfig;
+
+  @Inject()
+  router: StandardWebRouter;
+
+  async handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
+    const webReq = NodeWebUtil.toWebRequest(req);
+    const webRes = await this.router.dispatch({ request: webReq });
+    await NodeWebUtil.respondToServerResponse(webRes, res);
+  }
+
+  async run(): Promise<WebApplicationHandle> {
+    await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
+
+    const server = await NetUtil.startHttpServer({
+      port: this.config.port,
+      bindAddress: this.config.bindAddress,
+      sslKeys: this.config.ssl?.active ? this.config.ssl.keys : undefined,
+      handler: (req, res) => this.handler(req, res)
+    });
+
+    console.log('Listening', { port: this.config.port });
+
+    return server;
+  }
+}
+```
+
+In the handler code, you can see that the main work is:
+   *  Converting the node primitive request to a  [WebRequest](https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11)
+   *  Dispatching the request through the framework
+   *  Receiving the [WebResponse](https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3) and sending that back over the primitive response.

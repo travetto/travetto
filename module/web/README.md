@@ -732,4 +732,4 @@ This is useful for local development where you implicitly trust the cert.
 SSL support can be enabled by setting `web.ssl.active: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by [RuntimeResources](https://github.com/travetto/travetto/tree/main/module/runtime/src/resources.ts#L8).
 
 ## Full Config
-The entire [WebConfig](https://github.com/travetto/travetto/tree/main/module/web/src/config/web.ts#L12) which will show the full set of valid configuration parameters for the web module.
+The entire [WebConfig](https://github.com/travetto/travetto/tree/main/module/web/src/config/web.ts#L13) which will show the full set of valid configuration parameters for the web module.

@@ -424,12 +424,11 @@ npx trv run:web
       },
       WebLogConfig: { applies: true, showStackTrace: true },
       WebRpcConfig: { clients: [] },
-      WebSessionConfig: {},
       WebSslConfig: { active: false }
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/application.ts:41] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/web-node:src/application.ts:37] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

@@ -13,9 +13,9 @@ npm install @travetto/web-upload
 yarn add @travetto/web-upload
 ```
 
-This module provides a clean and direct mechanism for processing uploads, built upon [@fastify/busboy](https://github.com/fastify/busboy). The module also provides some best practices with respect to temporary file deletion.
+This module provides a clean and direct mechanism for processing uploads, built upon [@fastify/busboy](https://github.com/fastify/busboy). The module also provides some best practices with respect to temporary file management.
 
-Once the files are uploaded, they are exposed on [Web API](https://github.com/travetto/travetto/tree/main/module/web#readme "Declarative api for Web Applications with support for the dependency injection.")'s request object. The uploaded files are constructed as `Blob` instances.
+Once the files are uploaded, they are exposed via [Endpoint](https://github.com/travetto/travetto/tree/main/module/web/src/decorator/endpoint.ts#L14) parameters using the [@Upload](https://github.com/travetto/travetto/tree/main/module/web-upload/src/decorator.ts#L20) decorator.  This decorator requires the related field type to be a standard [Buffer](https://nodejs.org/api/buffer.html#class-file) object, or a [FileMap](https://github.com/travetto/travetto/tree/main/module/web-upload/src/types.ts#L4).
 
 A simple example:
 

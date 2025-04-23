@@ -19,12 +19,6 @@ This module's main responsibilities is to expose [Auth Session](https://github.c
 
 **Code: Anatomy of the Session Interceptor**
 ```typescript
-class WebSessionConfig { }
-
-/**
- * Loads session, and provides ability to create session as needed, persists when complete.
- */
-@Injectable()
 export class AuthSessionInterceptor implements WebInterceptor {
 
   category: WebInterceptorCategory = 'application';
@@ -35,9 +29,6 @@ export class AuthSessionInterceptor implements WebInterceptor {
 
   @Inject()
   context: SessionContext;
-
-  @Inject()
-  config: WebSessionConfig;
 
   @Inject()
   webAsyncContext: WebAsyncContext;

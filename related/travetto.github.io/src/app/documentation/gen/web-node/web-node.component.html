@@ -15,4 +15,58 @@
 <span class="token function">yarn</span> <span class="token function">add</span> &#64;travetto/web-node</code></pre>
   </figure>
 
-The module is an <a target="_blank" class="external-link" href="https://nodejs.org">Node</a> provider for the <a class="module-link" routerLink="/docs/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a> module.  This module provides an implementation of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/application.ts#L8">WebApplication</a> for automatic injection in the default Web server.
+The module is an <a target="_blank" class="external-link" href="https://nodejs.org/api/http.html">http</a> adapter for the <a class="module-link" routerLink="/docs/web" title="Declarative api for Web Applications with support for the dependency injection.">Web API</a> module.  This module provides will run an <a target="_blank" class="external-link" href="https://nodejs.org/api/http.html">http</a> or <a target="_blank" class="external-link" href="https://nodejs.org/api/https.html">https</a> server using <a target="_blank" class="external-link" href="https://nodejs.org">Node</a> primitives.
+
+  <figure class="code">
+    <figcaption class="code">Node Web Application
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web-node/src/application.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> IncomingMessage<span class="token punctuation">,</span> ServerResponse <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'node:http'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry<span class="token punctuation">,</span> Inject<span class="token punctuation">,</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> WebConfig<span class="token punctuation">,</span> WebApplication<span class="token punctuation">,</span> WebApplicationHandle<span class="token punctuation">,</span> NetUtil<span class="token punctuation">,</span> StandardWebRouter <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ConfigurationService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/config'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> NodeWebUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./util.ts'</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * A node http server
+ */</span>
+<span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">NodeWebApplication</span> <span class="token keyword">implements</span> <span class="token class-name">WebApplication</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  config<span class="token operator">:</span> WebConfig<span class="token punctuation">;</span>
+
+  <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  router<span class="token operator">:</span> StandardWebRouter<span class="token punctuation">;</span>
+
+  <span class="token keyword">async</span> <span class="token function">handler</span><span class="token punctuation">(</span>req<span class="token operator">:</span> IncomingMessage<span class="token punctuation">,</span> res<span class="token operator">:</span> ServerResponse<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> webReq <span class="token operator">=</span> NodeWebUtil<span class="token punctuation">.</span><span class="token function">toWebRequest</span><span class="token punctuation">(</span>req<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> webRes <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>router<span class="token punctuation">.</span><span class="token function">dispatch</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> request<span class="token operator">:</span> webReq <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">await</span> NodeWebUtil<span class="token punctuation">.</span><span class="token function">respondToServerResponse</span><span class="token punctuation">(</span>webRes<span class="token punctuation">,</span> res<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">async</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>WebApplicationHandle<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span>ConfigurationService<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>v <span class="token operator">=></span> v<span class="token punctuation">.</span><span class="token function">initBanner</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">const</span> server <span class="token operator">=</span> <span class="token keyword">await</span> NetUtil<span class="token punctuation">.</span><span class="token function">startHttpServer</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+      port<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>port<span class="token punctuation">,</span>
+      bindAddress<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>bindAddress<span class="token punctuation">,</span>
+      sslKeys<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>ssl<span class="token operator">?.</span>active <span class="token operator">?</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>ssl<span class="token punctuation">.</span>keys <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+      <span class="token function-variable function">handler</span><span class="token operator">:</span> <span class="token punctuation">(</span>req<span class="token punctuation">,</span> res<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">handler</span><span class="token punctuation">(</span>req<span class="token punctuation">,</span> res<span class="token punctuation">)</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Listening'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> port<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>config<span class="token punctuation">.</span>port <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> server<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+In the handler code, you can see that the main work is:
+<ul> <li>Converting the node primitive request to a  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/request.ts#L11">WebRequest</a></li>
+<li>Dispatching the request through the framework</li>
+<li>Receiving the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/types/response.ts#L3">WebResponse</a> and sending that back over the primitive response.</li>
+</ul>

@@ -4,7 +4,7 @@ import { WebRequest, WebResponse } from '@travetto/web';
 
 export const text = <>
   <c.StdHeader />
-  The module is an {d.library('Http')} adapter for the {d.mod('Web')} module.  This module provides will run an {d.library('Http')} or {d.library('Https')} server using {d.library('Node')} primitives.
+  The module is an {d.library('NodeHttp')} adapter for the {d.mod('Web')} module.  This module provides will run an {d.library('NodeHttp')} or {d.library('NodeHttps')} server using {d.library('Node')} primitives.
 
   <c.Code title="Node Web Application" src="./src/application.ts"></c.Code>
 

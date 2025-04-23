@@ -27,7 +27,7 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Assertions'>
-    A common aspect of the tests themselves are the assertions that are made.  {d.library('Node')} provides a built-in {d.library('Assert')} library.  The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions.  For example:
+    A common aspect of the tests themselves are the assertions that are made.  {d.library('Node')} provides a built-in {d.library('NodeAssert')} library.  The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions.  For example:
 
     <c.Code title='Example assertion for deep comparison' src='doc/assert-example.ts' />
 
@@ -43,7 +43,7 @@ AssertionError(
 )
 `} />
 
-    The equivalences for all of the {d.library('Assert')} operations are:
+    The equivalences for all of the {d.library('NodeAssert')} operations are:
 
     <ul>
       <li>{d.method('assert(a == b)')} as {d.method('assert.equal(a, b)')}</li>

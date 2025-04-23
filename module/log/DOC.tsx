@@ -18,7 +18,7 @@ const ConsoleEventContract = toConcrete<ConsoleEvent>();
 
 export const text = <>
   <c.StdHeader />
-  This module provides logging functionality, building upon {ConsoleManager} in the {d.mod('Runtime')} module.  This is all ultimately built upon {d.library('Console')} operations. The logging infrastructure is built upon the {d.mod('Di')} system, and so new loggers can be created that rely upon dependency injected services and sources.
+  This module provides logging functionality, building upon {ConsoleManager} in the {d.mod('Runtime')} module.  This is all ultimately built upon {d.library('NodeConsole')} operations. The logging infrastructure is built upon the {d.mod('Di')} system, and so new loggers can be created that rely upon dependency injected services and sources.
 
   <c.Section title='Extending the Common Logger'>
     By default, the system ships with the {CommonLogger}, and by default will leverage the {LineLogFormatter} and the {ConsoleLogAppender}. The configuration {CommonLoggerConfig} provides two configuration variables that allows for switching out {LineLogFormatter} for the {JsonLogFormatter}, depending on the value of {d.field('CommonLoggerConfig.format')}.  Additionally the {ConsoleLogAppender} can be swapped out for the {FileLogAppender} depending on the value of {d.field('CommonLoggerConfig.output')}.
