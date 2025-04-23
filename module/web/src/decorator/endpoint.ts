@@ -29,7 +29,7 @@ function HttpEndpoint(method: HttpMethod, path: string): EndpointFunctionDecorat
     cacheable,
     httpMethod: method,
     responseFinalizer: v => {
-      v.context.httpStatusCode = (v.body === null || v.body === undefined || v.body === '') ? emptyStatusCode : 200;
+      v.context.httpStatusCode ??= (v.body === null || v.body === undefined || v.body === '') ? emptyStatusCode : 200;
       return v;
     }
   });
