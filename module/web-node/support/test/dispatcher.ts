@@ -16,7 +16,7 @@ export class FetchWebDispatcher implements WebDispatcher {
   config: WebConfig;
 
   async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
-    const { context: { httpQuery: query, httpMethod: method, path }, headers } = request;
+    const { context: { httpQuery: query, httpMethod: method, path }, headers } = await WebTestDispatchUtil.applyRequestBody(request);
 
     let q = '';
     if (query && Object.keys(query).length) {

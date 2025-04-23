@@ -4,7 +4,7 @@ import https from 'node:https';
 import { spawn } from 'node:child_process';
 
 import { ExecUtil } from '@travetto/runtime';
-import { WebSslKeyPair } from '@travetto/web';
+import { WebSslKeyPair } from '../types/core.ts';
 
 /** Net utilities */
 export class NetUtil {

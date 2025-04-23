@@ -1,13 +1,13 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
 
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, StandardWebRouter, WebRequest } from '@travetto/web';
+import { WebConfig, WebApplication, WebApplicationHandle, NetUtil, StandardWebRouter } from '@travetto/web';
 import { ConfigurationService } from '@travetto/config';
 
 import { NodeWebUtil } from './util.ts';
 
 /**
- * An express http server
+ * A node http server
  */
 @Injectable()
 export class NodeWebApplication implements WebApplication {
@@ -25,10 +25,6 @@ export class NodeWebApplication implements WebApplication {
   }
 
   async run(): Promise<WebApplicationHandle> {
-    if (this.config.port < 0) {
-      this.config.port = await NetUtil.getFreePort();
-    }
-
     await DependencyRegistry.getInstance(ConfigurationService).then(v => v.initBanner());
 
     const server = await NetUtil.startHttpServer({

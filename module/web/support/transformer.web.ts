@@ -51,7 +51,7 @@ export class WebTransformer {
         detectedParamType = new RegExp(`:${name}\\b`).test(literal) ? 'PathParam' : 'QueryParam';
       } else {
         // Default to query for empty or regex endpoints
-        detectedParamType = 'Query';
+        detectedParamType = 'QueryParam';
       }
     } else if (epDec.ident.getText() !== 'All') { // Treat all separate
       // Treat as schema, and see if endpoint supports a body for default behavior on untyped

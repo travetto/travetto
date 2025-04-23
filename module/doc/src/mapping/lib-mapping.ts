@@ -47,9 +47,11 @@ export const LIB_MAPPING = {
   Https: { title: 'https', href: 'https://nodejs.org/api/https.html' },
   Console: { title: 'console', href: 'https://nodejs.org/api/console.html' },
   Assert: { title: 'assert', href: 'https://nodejs.org/api/assert.html' },
+  EventEmitter: { title: 'event emitter', href: 'https://nodejs.org/api/events.html#class-eventemitter' },
 
   // Cloud
   AwsCloudwatch: { title: 'AWS Cloudwatch', href: 'https://aws.amazon.com/cloudwatch/' },
+  AwsLambda: { title: 'AWS Lambda', href: 'https://aws.amazon.com/lambda/' },
 
   // Utils
   Lodash: { title: 'lodash', href: 'https://lodash.com' },

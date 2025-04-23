@@ -12,6 +12,8 @@ import { transformCast, TemplateLiteralPart } from '../types/shared.ts';
 import { Type, AnyType, CompositionType, TransformResolver, TemplateType } from './types.ts';
 import { CoerceUtil } from './coerce.ts';
 
+const UNDEFINED = Symbol();
+
 /**
  * List of global types that can be parameterized
  */
@@ -118,7 +120,10 @@ export const TypeBuilder: {
   }
 } = {
   unknown: {
-    build: (resolver, type) => ({ key: 'unknown' })
+    build: (resolver, type) => {
+      const optional = UNDEFINED in type;
+      return { key: 'unknown', nullable: optional, undefinable: optional };
+    }
   },
   tuple: {
     build: (resolver, type) => ({ key: 'tuple', tsTupleTypes: resolver.getAllTypeArguments(type), subTypes: [] })
@@ -219,6 +224,11 @@ export const TypeBuilder: {
     },
     finalize: (type: CompositionType) => {
       const { undefinable, nullable, subTypes } = type;
+
+      if (subTypes.length === 0) { // We have an unknown type?
+        return { key: 'unknown', nullable, undefinable };
+      }
+
       const [first] = subTypes;
 
       if (first.key === 'template') {
@@ -258,6 +268,9 @@ export const TypeBuilder: {
             !member.getName().includes('@') && // if not a symbol
             !memberType.getCallSignatures().length // if not a function
           ) {
+            if ((ts.isPropertySignature(dec) || ts.isPropertyDeclaration(dec)) && !!dec.questionToken) {
+              Object.defineProperty(memberType, UNDEFINED, { value: true });
+            }
             tsFieldTypes[member.getName()] = memberType;
           }
         }

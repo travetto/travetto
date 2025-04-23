@@ -63,8 +63,9 @@ export class LocalAwsLambdaWebDispatcher implements WebDispatcher {
   app: AwsLambdaWebHandler;
 
   async dispatch({ request }: WebFilterContext): Promise<WebResponse> {
+    const event = toLambdaEvent(await WebTestDispatchUtil.applyRequestBody(request));
 
-    const response = await this.app.handle(toLambdaEvent(request), asFull<Context>({}));
+    const response = await this.app.handle(event, asFull<Context>({}));
 
     return WebTestDispatchUtil.finalizeResponseBody(
       new WebResponse<unknown>({

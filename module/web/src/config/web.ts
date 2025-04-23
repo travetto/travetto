@@ -4,6 +4,7 @@ import { Config, EnvVar } from '@travetto/config';
 import { Required } from '@travetto/schema';
 
 import { WebSslConfig } from './ssl.ts';
+import { NetUtil } from '../util/net.ts';
 
 /**
  * Web configuration
@@ -55,7 +56,12 @@ export class WebConfig {
   /**
    * Redefine base url to be the full URL if not specified
    */
-  postConstruct(): void {
+  async postConstruct(): Promise<void> {
+
+    if (this.port < 0) {
+      this.port = await NetUtil.getFreePort();
+    }
+
     if (!this.bindAddress) {
       const useIPv4 = !![...Object.values(os.networkInterfaces())]
         .find(interfaces => interfaces?.find(nic => nic.family === 'IPv4'));

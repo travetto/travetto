@@ -2,11 +2,12 @@ import { Inject } from '@travetto/di';
 import { Any, AppError, Util } from '@travetto/runtime';
 import {
   HeaderParam, Controller, Undocumented, ExcludeInterceptors, ControllerRegistry,
-  WebAsyncContext, Body, EndpointUtil, BodyParseInterceptor, Post, WebCommonUtil
+  WebAsyncContext, Body, EndpointUtil, BodyParseInterceptor, Post, WebCommonUtil,
+  RespondInterceptor
 } from '@travetto/web';
 
 @Controller('/rpc')
-@ExcludeInterceptors(val => !(val instanceof BodyParseInterceptor || val.category === 'global'))
+@ExcludeInterceptors(val => !(val instanceof BodyParseInterceptor || val instanceof RespondInterceptor || val.category === 'global'))
 @Undocumented()
 export class WebRpController {
 
@@ -18,7 +19,6 @@ export class WebRpController {
    */
   @Post('/:target')
   async onRequest(target: string, @HeaderParam('X-TRV-RPC-INPUTS') paramInput?: string, @Body() body?: Any): Promise<unknown> {
-
     const endpoint = ControllerRegistry.getEndpointById(target);
 
     if (!endpoint) {
@@ -40,6 +40,7 @@ export class WebRpController {
         request.body = params[bodyParamIdx];
       }
     } else if (body) {
+      console.error!('HI');
       throw new AppError('Invalid parameters, must be an array', { category: 'data' });
     } else {
       params = [];
