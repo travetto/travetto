@@ -12,6 +12,7 @@ import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
   PageableModelQuery, ValidStringFields, WhereClauseRaw, QueryVerifier, ModelQuerySuggestSupport,
   ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
+  ModelQueryFacet,
 } from '@travetto/model-query';
 
 import { SQLModelConfig } from './config.ts';
@@ -309,7 +310,7 @@ export class SQLModelService implements
   }
 
   @Connected()
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
     const col = this.#dialect.ident(field);
     const ttl = this.#dialect.ident('count');

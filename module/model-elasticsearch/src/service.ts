@@ -13,6 +13,7 @@ import {
   ModelQuerySupport, PageableModelQuery, Query, ValidStringFields,
   QueryVerifier, ModelQuerySuggestSupport,
   ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
+  ModelQueryFacet,
 } from '@travetto/model-query';
 
 
@@ -539,7 +540,7 @@ export class ElasticsearchModelService implements
   }
 
   // Facet
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
 
     const q = ElasticsearchQueryUtil.getSearchObject(cls, query ?? {}, this.config.schemaConfig);

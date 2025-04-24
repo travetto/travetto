@@ -11,11 +11,6 @@ import { ModelBasicSupport } from './basic.ts';
 export interface ModelCrudSupport extends ModelBasicSupport {
 
   /**
-   * Id Source
-   */
-  idSource: ModelIdSource;
-
-  /**
    * Update an item
    * @param item The document to update.
    * @throws {NotFoundError} When an item is not found

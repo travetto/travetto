@@ -16,6 +16,7 @@ import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport,
   QueryVerifier, ModelQueryUtil, ModelQuerySuggestUtil, ModelQueryCrudUtil,
+  ModelQueryFacet,
 } from '@travetto/model-query';
 
 import {
@@ -517,7 +518,7 @@ export class MongoModelService implements
   }
 
   // Facet
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
+  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]> {
     await QueryVerifier.verify(cls, query);
 
     const col = await this.getStore(cls);
