@@ -1,9 +1,8 @@
 import { DependencyRegistry, Inject, Injectable, InjectableFactory } from '@travetto/di';
-
-class TargetConcrete { }
+import { toConcrete } from '@travetto/runtime';
 
 /**
- * @concrete #TargetConcrete
+ * @concrete
  */
 export interface ServiceContract {
   deleteUser(userId: string): Promise<void>;
@@ -25,6 +24,6 @@ class SpecificService {
 class ManualInvocationOfInterface {
   @InjectableFactory()
   static getCustomService(): Promise<ServiceContract> {
-    return DependencyRegistry.getInstance<ServiceContract>(TargetConcrete);
+    return DependencyRegistry.getInstance<ServiceContract>(toConcrete<ServiceContract>());
   }
 }

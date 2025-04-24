@@ -2,7 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeEach } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { asFull } from '@travetto/runtime';
+import { asFull, toConcrete } from '@travetto/runtime';
 
 import { DependencyRegistry } from '../src/registry.ts';
 import { Injectable, InjectableFactory } from '../src/decorator.ts';
@@ -56,10 +56,8 @@ class PrimaryFactory {
   }
 }
 
-class PrimaryTargetClass { }
-
 /**
- * @concrete #PrimaryTargetClass
+ * @concrete
  */
 interface PrimaryTargetInterface {
   name: string;
@@ -117,6 +115,6 @@ class ComplexDiTest {
 
   @Test()
   async primaryTargetFactory() {
-    assert(!!(await DependencyRegistry.getInstance(PrimaryTargetClass)));
+    assert(!!(await DependencyRegistry.getInstance(toConcrete<PrimaryTargetInterface>())));
   }
 }

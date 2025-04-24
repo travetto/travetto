@@ -8,7 +8,7 @@ import { DependencyRegistry } from '../src/registry.ts';
 import {
   ServiceInherit, ServiceInheritSymbol2, CustomServiceInheritSymbol,
   CustomDatabaseSymbol, Database, CustomEmptySymbol, BasePattern,
-  SpecificPattern, InterfaceType, BaseTypeTarget, CustomInterfaceSymbol, UsableMainClass, UsableSubClass,
+  SpecificPattern, InterfaceType, BaseType, CustomInterfaceSymbol, UsableMainClass, UsableSubClass,
   UsableSubSubClass,
   LooseResolutionClass,
   LooseSymbol,
@@ -17,6 +17,7 @@ import {
 
 import { DbConfig } from './config.ts';
 import { InjectionError } from '../src/error.ts';
+import { toConcrete } from '@travetto/runtime';
 
 const FOUR = 4;
 
@@ -164,6 +165,7 @@ class DiTest2 {
 
   @Test('interface injection')
   async intInjection() {
+    const BaseTypeTarget = toConcrete<BaseType>();
     const types = DependencyRegistry.getCandidateTypes(BaseTypeTarget);
     assert(types.length > 0);
 

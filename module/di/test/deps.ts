@@ -8,10 +8,8 @@ export class SpecificPattern extends BasePattern {
 
 }
 
-export class BaseTypeTarget { }
-
 /**
- * @concrete #BaseTypeTarget
+ * @concrete
  */
 export interface BaseType {
   age: number;

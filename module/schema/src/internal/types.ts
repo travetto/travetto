@@ -1,16 +1,29 @@
 import { DataUtil } from '../data.ts';
 
+const InvalidSymbol = Symbol();
+
+/**
+ * Point Implementation
+ */
 export class PointImpl {
+
+  /**
+   * Validate we have an actual point
+   */
   static validateSchema(input: unknown): 'type' | undefined {
-    const value = this.bindSchema(input);
-    return value && !isNaN(value[0]) && !isNaN(value[1]) ? undefined : 'type';
+    const bound = this.bindSchema(input);
+    return bound !== InvalidSymbol && bound && !isNaN(bound[0]) && !isNaN(bound[1]) ? undefined : 'type';
   }
-  static bindSchema(input: unknown): [number, number] | undefined {
+
+  /**
+   * Convert to tuple of two numbers
+   */
+  static bindSchema(input: unknown): [number, number] | typeof InvalidSymbol | undefined {
     if (Array.isArray(input) && input.length === 2) {
-      return [
-        DataUtil.coerceType(input[0], Number, false),
-        DataUtil.coerceType(input[1], Number, false)
-      ];
+      const [a, b] = input.map(x => DataUtil.coerceType(x, Number, false));
+      return [a, b];
+    } else {
+      return InvalidSymbol;
     }
   }
 }

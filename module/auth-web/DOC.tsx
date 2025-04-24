@@ -11,7 +11,6 @@ const PrincipalCodecContract = toConcrete<PrincipalCodec>();
 const AuthenticatorContract = toConcrete<Authenticator>();
 const AuthenticatorStateContract = toConcrete<AuthenticatorState>();
 const WebRequestContract = toConcrete<WebRequest>();
-const WebResponseContract = toConcrete<WebResponse>();
 
 export const text = <>
   <c.StdHeader />
@@ -51,11 +50,11 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Maintaining Auth Context'>
-    The {AuthContextInterceptor} acts as the bridge between the {d.mod('Auth')} and {d.mod('Web')} modules.  It serves to take an authenticated principal (via the request/response) and integrate it into the {AuthContext} and the {WebRequestContract}/{WebResponseContract} object. The integration, leveraging {WebAuthConfig}'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the {d.library('JWT')} appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  <br />
+    The {AuthContextInterceptor} acts as the bridge between the {d.mod('Auth')} and {d.mod('Web')} modules.  It serves to take an authenticated principal (via the {WebRequest}/{WebResponse}) and integrate it into the {AuthContext}. Leveraging {WebAuthConfig}'s configuration allows for basic control of how the principal is encoded and decoded, primarily with the choice between using a header or a cookie, and which header, or cookie value is specifically referenced.  Additionally, the encoding process allows for auto-renewing of the token (on by default). The information is encoded into the {d.library('JWT')} appropriately, and when encoding using cookies, is also  set as the expiry time for the cookie.  <br />
 
-    <strong>Note:</strong> When using cookies, the automatic renewal, and update, and seamless receipt and transmission all the {PrincipalContract} to act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. <br />
+    <strong>Note for Cookie Use:</strong> The automatic renewal, update, seamless receipt and transmission of the {PrincipalContract} cookie act as a light-weight session.  Generally the goal is to keep the token as small as possible, but for small amounts of data, this pattern proves to be fairly sufficient at maintaining a decentralized state. <br />
 
-    The {PrincipalCodecContract} contract is the primary interface for reading and writing {PrincipalContract} data out of the {WebRequestContract}/{WebResponseContract}. This contract is flexible by design, allowing for all sorts of usage. {JWTPrincipalCodec} is the default {PrincipalCodecContract}, leveraging {d.library('JWT')}s for encoding/decoding the principal information.
+    The {PrincipalCodecContract} contract is the primary interface for reading and writing {PrincipalContract} data out of the {WebRequestContract}. This contract is flexible by design, allowing for all sorts of usage. {JWTPrincipalCodec} is the default {PrincipalCodecContract}, leveraging {d.library('JWT')}s for encoding/decoding the principal information.
 
     <c.Code src={JWTPrincipalCodec} startRe={/./} />
 
