@@ -86,7 +86,7 @@ export interface ModelQueryFacetSupport extends ModelQuerySupport {
    * @param field The field to facet on
    * @param query Additional query filtering
    */
-  facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]>;
+  facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<ModelQueryFacet[]>;
 }
 ```
 

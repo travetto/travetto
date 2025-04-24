@@ -27,3 +27,5 @@ export class PointImpl {
     }
   }
 }
+
+Object.defineProperty(PointImpl, 'name', { value: 'Point' });

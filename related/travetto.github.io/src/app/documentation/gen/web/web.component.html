@@ -775,8 +775,10 @@ The resolution logic is as follows:
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/doc/cookie-endpoints.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> WebRequest<span class="token punctuation">,</span> ContextParam<span class="token punctuation">,</span> WebResponse<span class="token punctuation">,</span> CookieJar <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CookieGetOptions<span class="token punctuation">,</span> CookieSetOptions <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/types/cookie.ts'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span>
+  Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QueryParam<span class="token punctuation">,</span> WebRequest<span class="token punctuation">,</span> ContextParam<span class="token punctuation">,</span>
+  WebResponse<span class="token punctuation">,</span> CookieJar<span class="token punctuation">,</span> CookieGetOptions<span class="token punctuation">,</span> CookieSetOptions
+<span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/web'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/simple'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SimpleEndpoints</span> <span class="token punctuation">{{'{'}}</span>

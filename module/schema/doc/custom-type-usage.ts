@@ -1,5 +1,4 @@
-import { Schema } from '@travetto/schema';
-import { Point } from './custom-type.ts';
+import { Schema, Point } from '@travetto/schema';
 
 @Schema()
 export class LocationAware {

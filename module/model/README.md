@@ -24,6 +24,12 @@ All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/modul
 **Code: Basic Contract**
 ```typescript
 export interface ModelBasicSupport<C = unknown> {
+
+  /**
+   * Id Source
+   */
+  idSource: ModelIdSource;
+
   /**
    * Get underlying client
    */
@@ -58,11 +64,6 @@ The [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/types
 **Code: Crud Contract**
 ```typescript
 export interface ModelCrudSupport extends ModelBasicSupport {
-
-  /**
-   * Id Source
-   */
-  idSource: ModelIdSource;
 
   /**
    * Update an item

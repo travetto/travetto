@@ -350,25 +350,43 @@ To that end, the module supports two concepts:
 This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a> module handles geo data.
 
   <figure class="code">
-    <figcaption class="code">Simple Custom Type
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema/doc/custom-type.ts">Source</a></cite>
+    <figcaption class="code">Point Contract
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema/src/types.ts#L3">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DataUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
-
-<span class="token comment">/**
- * @concrete #PointImpl
+    <pre><code class="language-typescript"><span class="token comment">/**
+ * Geometric Point as [number,number] with validation and binding support
+ *
+ * @concrete ./internal/types.ts#PointImpl
  */</span>
-<span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">Point</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token builtin">number</span><span class="token punctuation">,</span> <span class="token builtin">number</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">Point</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token builtin">number</span><span class="token punctuation">,</span> <span class="token builtin">number</span><span class="token punctuation">]</span><span class="token punctuation">;</span></code></pre>
+  </figure>
+
+  <figure class="code">
+    <figcaption class="code">Point Implementation
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema/src/internal/types.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DataUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../data.ts'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">const</span> InvalidSymbol <span class="token operator">=</span> <span class="token function">Symbol</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
+<span class="token comment">/**
+ * Point Implementation
+ */</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">PointImpl</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token comment">/**
+   * Validate we have an actual point
+   */</span>
   <span class="token keyword">static</span> <span class="token function">validateSchema</span><span class="token punctuation">(</span>input<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token string">'type'</span> <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">const</span> bound <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">bindSchema</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> bound <span class="token operator">!==</span> InvalidSymbol <span class="token operator">&amp;&amp;</span> bound <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">isNaN</span><span class="token punctuation">(</span>bound<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">isNaN</span><span class="token punctuation">(</span>bound<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token keyword">undefined</span> <span class="token operator">:</span> <span class="token string">'type'</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
+  <span class="token comment">/**
+   * Convert to tuple of two numbers
+   */</span>
   <span class="token keyword">static</span> <span class="token function">bindSchema</span><span class="token punctuation">(</span>input<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token builtin">number</span><span class="token punctuation">,</span> <span class="token builtin">number</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token keyword">typeof</span> InvalidSymbol <span class="token operator">|</span> <span class="token keyword">undefined</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token builtin">Array</span><span class="token punctuation">.</span><span class="token function">isArray</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> input<span class="token punctuation">.</span>length <span class="token operator">===</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">const</span> <span class="token punctuation">[</span>a<span class="token punctuation">,</span> b<span class="token punctuation">]</span> <span class="token operator">=</span> input<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>x <span class="token operator">=></span> DataUtil<span class="token punctuation">.</span><span class="token function">coerceType</span><span class="token punctuation">(</span>x<span class="token punctuation">,</span> Number<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -377,7 +395,9 @@ This feature is meant to allow for simple Typescript types to be able to be back
       <span class="token keyword">return</span> InvalidSymbol<span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
+<span class="token punctuation">{{'}'}}</span>
+
+Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>PointImpl<span class="token punctuation">,</span> <span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> value<span class="token operator">:</span> <span class="token string">'Point'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
   </figure>
 
 What you can see here is that the <code class="item input">Point</code> type is now backed by a class that supports:
@@ -390,8 +410,7 @@ What you can see here is that the <code class="item input">Point</code> type is 
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema/doc/custom-type-usage.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Point <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./custom-type.ts'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema<span class="token punctuation">,</span> Point <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">LocationAware</span> <span class="token punctuation">{{'{'}}</span>
@@ -417,8 +436,8 @@ Validation Failed <span class="token punctuation">{{'{'}}</span>
     <span class="token string">"errors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
       <span class="token punctuation">{{'{'}}</span>
         <span class="token string">"kind"</span><span class="token builtin class-name">:</span> <span class="token string">"type"</span>,
-        <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"PointImpl"</span>,
-        <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"point is not a valid PointImpl"</span>,
+        <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"Point"</span>,
+        <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"point is not a valid Point"</span>,
         <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token string">"point"</span>
       <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">]</span>

@@ -17,6 +17,8 @@ This is a primary integration for the [Web Auth](https://github.com/travetto/tra
 
 Within the node ecosystem, the most prevalent auth framework is [passport](http://passportjs.org).  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for [passport](http://passportjs.org) baked in. Registering and configuring a [passport](http://passportjs.org) strategy is fairly straightforward.
 
+**NOTE:** Given that [passport](http://passportjs.org) is oriented around [express](https://expressjs.com), this module relies on [Web Connect Support](https://github.com/travetto/travetto/tree/main/module/web-connect#readme "Web integration for Connect-Like Resources") as an adapter for the request/response handoff.  There are some limitations listed in the module, and those would translate to any [passport](http://passportjs.org) strategies that are being used.
+
 **Code: Sample Facebook/passport config**
 ```typescript
 import { Strategy as FacebookStrategy } from 'passport-facebook';
