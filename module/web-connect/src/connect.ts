@@ -1,7 +1,7 @@
+import { OutgoingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http';
+
 import { castTo } from '@travetto/runtime';
 import { WebRequest, WebResponse } from '@travetto/web';
-import { OutgoingHttpHeaders } from 'http';
-import { IncomingMessage, ServerResponse } from 'node:http';
 
 export class ConnectRequest implements Pick<IncomingMessage, 'url' | 'headers'> {
 

@@ -2,6 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
+import { toConcrete } from '@travetto/runtime';
 
 import { DependencyRegistry } from '../src/registry.ts';
 
@@ -17,7 +18,6 @@ import {
 
 import { DbConfig } from './config.ts';
 import { InjectionError } from '../src/error.ts';
-import { toConcrete } from '@travetto/runtime';
 
 const FOUR = 4;
 
