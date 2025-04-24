@@ -31,7 +31,7 @@ This is the file the linter will use, and any other tooling (e.g. IDEs).
 
 **Code: Sample configuration**
 ```javascript
-process.env.TRV_MANIFEST = './.trv/output/node_modules/@travetto/eslint';
+process.env.TRV_MANIFEST = './.trv/output/node_modules/@travetto/mono-repo';
 
 const { buildConfig } = require('./.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js');
 const { RuntimeIndex } = require('./.trv/output/node_modules/@travetto/runtime/__index__.js');
