@@ -49,7 +49,7 @@ export class CacheService {
    * @param extendOnAccess should the expiry be extended on access
    */
   async get(id: string, extendOnAccess = true): Promise<unknown> {
-    const { expiresAt, issuedAt } = await this.#modelService.get(CacheRecord, id);
+    const { expiresAt, issuedAt, entry } = await this.#modelService.get(CacheRecord, id);
 
     const delta = expiresAt.getTime() - Date.now();
     const maxAge = expiresAt.getTime() - issuedAt.getTime();
@@ -63,16 +63,16 @@ export class CacheService {
     if (extendOnAccess) {
       const threshold = maxAge / 2;
       if (delta < threshold) {
-        await this.#modelService.updatePartial(CacheRecord, {
+        // Do not wait
+        this.#modelService.updatePartial(CacheRecord, {
           id,
           expiresAt: TimeUtil.fromNow(maxAge),
           issuedAt: new Date()
-        }); // Do not wait
+        });
       }
     }
 
-    const record = await this.#modelService.get(CacheRecord, id);
-    return Util.decodeSafeJSON(record.entry);
+    return Util.decodeSafeJSON(entry);
   }
 
   /**
