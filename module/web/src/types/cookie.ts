@@ -11,6 +11,7 @@ export type Cookie = {
   secure?: boolean;
   httpOnly?: boolean;
   partitioned?: boolean;
+  response?: boolean;
 };
 
 export type CookieGetOptions = { signed?: boolean };
