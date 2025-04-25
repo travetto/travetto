@@ -1,6 +1,6 @@
 import rawBody from 'raw-body';
 
-import { Injectable, Inject, DependencyRegistry, InjectableFactory } from '@travetto/di';
+import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { AppError, toConcrete } from '@travetto/runtime';
 
@@ -53,11 +53,7 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
   dependsOn = [AcceptsInterceptor, DecompressInterceptor];
   category: WebInterceptorCategory = 'request';
-  parsers: Record<string, BodyContentParser> = {
-    text: { type: 'text', parse: s => s },
-    json: { type: 'json', parse: s => JSON.parse(s) },
-    form: { type: 'form', parse: s => Object.fromEntries(new URLSearchParams(s)) }
-  };
+  parsers: Record<string, BodyContentParser> = {};
 
   @Inject()
   config: BodyParseConfig;
@@ -77,15 +73,20 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   async filter({ request, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
     const stream = WebBodyUtil.getRawStream(request.body);
     const contentType = request.headers.getContentType();
-    const parserType = config.parsingTypes[contentType?.full!] ?? config.parsingTypes[contentType?.type!];
+    if (!contentType || !stream) {
+      return next();
+    }
 
-    if (stream && contentType && parserType) { // We have a stream, content type and a parser
+    const parserType = config.parsingTypes[contentType.full] ?? config.parsingTypes[contentType.type];
+    if (parserType) { // We have a stream, content type and a parser
       try {
         const text = await rawBody(stream, {
           limit: config.limit,
           encoding: contentType.parameters.charset ?? 'utf8'
         });
-        request.body = this.parsers[parserType].parse(text);
+        request.body = parserType in this.parsers ?
+          this.parsers[parserType].parse(text) :
+          WebBodyUtil.parseBody(parserType, text);
         return next();
       } catch (err) {
         throw new AppError('Malformed input', { category: 'data', cause: err });

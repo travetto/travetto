@@ -168,4 +168,15 @@ export class WebBodyUtil {
       return WebBodyUtil.toReadable(val);
     }
   }
+
+  /**
+   * Simple parse support
+   */
+  static parseBody(type: string, val: string): unknown {
+    switch (type) {
+      case 'text': return val;
+      case 'json': return JSON.parse(val);
+      case 'form': return Object.fromEntries(new URLSearchParams(val));
+    }
+  }
 }
