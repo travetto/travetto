@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@travetto/runtime": "^6.0.0-rc.1",
-    "sharp": "^0.33.5"
+    "sharp": "^0.34.1"
   },
   "travetto": {
     "displayName": "Image",
