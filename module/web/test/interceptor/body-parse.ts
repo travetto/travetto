@@ -3,7 +3,8 @@ import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { BodyParseConfig, BodyParseInterceptor, WebBodyUtil, WebRequest, WebResponse } from '@travetto/web';
+import { BodyParseInterceptor, WebBodyUtil, WebRequest, WebResponse } from '@travetto/web';
+import { DependencyRegistry } from '@travetto/di';
 
 @Suite()
 class BodyParseInterceptorSuite {
@@ -15,10 +16,8 @@ class BodyParseInterceptorSuite {
 
   @Test()
   async basicJSON() {
-    const interceptor = new BodyParseInterceptor();
-    const config = BodyParseConfig.from({
-      applies: true
-    });
+    const interceptor = await DependencyRegistry.getInstance(BodyParseInterceptor);
+    interceptor.config.applies = true;
 
     const request = new WebRequest({
       context: {
@@ -34,7 +33,7 @@ class BodyParseInterceptorSuite {
     const response = await interceptor.filter({
       request,
       next: async () => new WebResponse({ body: request.body }),
-      config
+      config: interceptor.config
     });
 
     assert.deepStrictEqual(response.body, { hello: 'world' });
@@ -42,10 +41,8 @@ class BodyParseInterceptorSuite {
 
   @Test()
   async basicText() {
-    const interceptor = new BodyParseInterceptor();
-    const config = BodyParseConfig.from({
-      applies: true
-    });
+    const interceptor = await DependencyRegistry.getInstance(BodyParseInterceptor);
+    interceptor.config.applies = true;
 
     const request = new WebRequest({
       context: {
@@ -61,7 +58,7 @@ class BodyParseInterceptorSuite {
     const response = await interceptor.filter({
       request,
       next: async () => new WebResponse({ body: request.body }),
-      config
+      config: interceptor.config
     });
 
     assert.deepStrictEqual(`${response.body}`, '{ "hello": "world" }');
@@ -69,10 +66,8 @@ class BodyParseInterceptorSuite {
 
   @Test()
   async basicBinary() {
-    const interceptor = new BodyParseInterceptor();
-    const config = BodyParseConfig.from({
-      applies: true
-    });
+    const interceptor = await DependencyRegistry.getInstance(BodyParseInterceptor);
+    interceptor.config.applies = true;
 
     const stream = Readable.from(Buffer.alloc(1000));
     const request = new WebRequest({
@@ -89,7 +84,7 @@ class BodyParseInterceptorSuite {
     const response = await interceptor.filter({
       request,
       next: async () => new WebResponse({ body: request.body }),
-      config
+      config: interceptor.config
     });
 
     const responseBuffer = await WebBodyUtil.toBuffer(WebBodyUtil.toBinaryMessage(response).body!);

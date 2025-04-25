@@ -335,7 +335,15 @@ Initialized <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
       AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-      BodyParseConfig: <span class="token punctuation">{{'{'}}</span> applies: true, limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      BodyParseConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        limit: <span class="token string">'1mb'</span>,
+        parsingTypes: <span class="token punctuation">{{'{'}}</span>
+          text: <span class="token string">'text'</span>,
+          <span class="token string">'application/json'</span><span class="token builtin class-name">:</span> <span class="token string">'json'</span>,
+          <span class="token string">'application/x-www-form-urlencoded'</span><span class="token builtin class-name">:</span> <span class="token string">'form'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
         preferredEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>,
@@ -450,7 +458,15 @@ Initialized <span class="token punctuation">{{'{'}}</span>
     <span class="token punctuation">]</span>,
     active: <span class="token punctuation">{{'{'}}</span>
       AcceptsConfig: <span class="token punctuation">{{'{'}}</span> applies: false, types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-      BodyParseConfig: <span class="token punctuation">{{'{'}}</span> applies: true, limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      BodyParseConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        limit: <span class="token string">'1mb'</span>,
+        parsingTypes: <span class="token punctuation">{{'{'}}</span>
+          text: <span class="token string">'text'</span>,
+          <span class="token string">'application/json'</span><span class="token builtin class-name">:</span> <span class="token string">'json'</span>,
+          <span class="token string">'application/x-www-form-urlencoded'</span><span class="token builtin class-name">:</span> <span class="token string">'form'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
         preferredEncodings: <span class="token punctuation">[</span> <span class="token string">'br'</span>, <span class="token string">'gzip'</span>, <span class="token string">'identity'</span> <span class="token punctuation">]</span>,
@@ -517,11 +533,11 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 <h3 id="bodyparseinterceptor">BodyParseInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L45">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L52">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
   <figure class="code">
     <figcaption class="code">Body Parse Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L26">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L29">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BodyParseConfig</span> <span class="token punctuation">{{'{'}}</span>
@@ -536,7 +552,11 @@ Out of the box, the web framework comes with a few interceptors, and more are co
   <span class="token comment">/**
    * How to interpret different content types
    */</span>
-  parsingTypes<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> ParserType<span class="token operator">></span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  parsingTypes<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+    text<span class="token operator">:</span> <span class="token string">'text'</span><span class="token punctuation">,</span>
+    <span class="token string-property property">'application/json'</span><span class="token operator">:</span> <span class="token string">'json'</span><span class="token punctuation">,</span>
+    <span class="token string-property property">'application/x-www-form-urlencoded'</span><span class="token operator">:</span> <span class="token string">'form'</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 

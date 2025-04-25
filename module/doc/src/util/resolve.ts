@@ -67,7 +67,7 @@ export class DocResolveUtil {
 
   static applyCodePropDefaults(props: CodeProps) {
     const type = typeof props.src === 'function' ? props.src : undefined;
-    props.startRe ??= props.startRe ?? (type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${type.name.replaceAll('$', '\\$')}\\b`) : undefined);
+    props.startRe ??= (type ? new RegExp(`^(export)?\\s*(interface|class)\\s+${type.name.replaceAll('$', '\\$')}\\b`) : undefined);
     props.language ??= (type ? 'typescript' : undefined);
     props.endRe ??= (type ? /^[}]/ : undefined);
     props.title ??= typeof props.src == 'function' ? props.src.name.replace(/^[$]/, '') : undefined;

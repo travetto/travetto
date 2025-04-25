@@ -358,7 +358,15 @@ npx trv run:web
         exposeAllSchemas: false
       },
       AuthConfig: { maxAge: '1h', rollingRenew: true },
-      BodyParseConfig: { applies: true, limit: '1mb', parsingTypes: {} },
+      BodyParseConfig: {
+        applies: true,
+        limit: '1mb',
+        parsingTypes: {
+          text: 'text',
+          'application/json': 'json',
+          'application/x-www-form-urlencoded': 'form'
+        }
+      },
       CommonLoggerConfig: { format: 'line', output: 'console' },
       CompressConfig: {
         applies: true,

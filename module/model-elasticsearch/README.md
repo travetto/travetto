@@ -45,15 +45,6 @@ where the [ElasticsearchModelConfig](https://github.com/travetto/travetto/tree/m
 
 **Code: Structure of ElasticsearchModelConfig**
 ```typescript
-import { TimeSpan } from '@travetto/runtime';
-import { Config } from '@travetto/config';
-import { Field } from '@travetto/schema';
-
-import { EsSchemaConfig } from './internal/types.ts';
-
-/**
- * Elasticsearch model config
- */
 @Config('model.elasticsearch')
 export class ElasticsearchModelConfig {
   /**

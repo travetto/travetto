@@ -1,14 +1,11 @@
-import { Readable } from 'node:stream';
-
 import rawBody from 'raw-body';
 
-import { Injectable, Inject } from '@travetto/di';
+import { Injectable, Inject, DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AppError, Primitive } from '@travetto/runtime';
+import { AppError, toConcrete } from '@travetto/runtime';
 
 import { WebChainedContext } from '../types.ts';
 import { WebResponse } from '../types/response.ts';
-import { WebRequest } from '../types/request.ts';
 import { WebInterceptorCategory } from '../types/core.ts';
 import { WebInterceptor, WebInterceptorContext } from '../types/interceptor.ts';
 
@@ -17,7 +14,13 @@ import { WebBodyUtil } from '../util/body.ts';
 import { AcceptsInterceptor } from './accepts.ts';
 import { DecompressInterceptor } from './decompress.ts';
 
-type ParserType = 'json' | 'text' | 'form';
+/**
+ * @concrete
+ */
+export interface BodyContentParser {
+  type: string;
+  parse: (source: string) => unknown;
+};
 
 /**
  * Web body parse configuration
@@ -35,7 +38,11 @@ export class BodyParseConfig {
   /**
    * How to interpret different content types
    */
-  parsingTypes: Record<string, ParserType> = {};
+  parsingTypes: Record<string, string> = {
+    text: 'text',
+    'application/json': 'json',
+    'application/x-www-form-urlencoded': 'form'
+  };
 }
 
 /**
@@ -46,36 +53,20 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
   dependsOn = [AcceptsInterceptor, DecompressInterceptor];
   category: WebInterceptorCategory = 'request';
+  parsers: Record<string, BodyContentParser> = {
+    text: { type: 'text', parse: s => s },
+    json: { type: 'json', parse: s => JSON.parse(s) },
+    form: { type: 'form', parse: s => Object.fromEntries(new URLSearchParams(s)) }
+  };
 
   @Inject()
   config: BodyParseConfig;
 
-  async read(request: WebRequest, body: Readable, limit: string | number): Promise<string> {
-    const cfg = request.headers.getContentType();
-    const encoding = cfg?.parameters.charset ?? 'utf8';
-    return rawBody(body, { limit, encoding });
-  }
-
-  detectParserType(request: WebRequest, parsingTypes: Record<string, ParserType>): ParserType | undefined {
-    const { full = '', type } = request.headers.getContentType() ?? {};
-    if (!full) {
-      return;
-    } else if (full in parsingTypes) {
-      return parsingTypes[full];
-    } else if (/\bjson\b/.test(full)) {
-      return 'json';
-    } else if (full === 'application/x-www-form-urlencoded') {
-      return 'form';
-    } else if (type === 'text') {
-      return 'text';
-    }
-  }
-
-  parse(text: string, type: ParserType): Primitive | Record<string, string> | Object | unknown[] {
-    switch (type) {
-      case 'json': return JSON.parse(text);
-      case 'text': return text;
-      case 'form': return Object.fromEntries(new URLSearchParams(text));
+  async postConstruct(): Promise<void> {
+    // Load all the parser types
+    const instances = await DependencyRegistry.getCandidateInstances(toConcrete<BodyContentParser>());
+    for (const instance of instances) {
+      this.parsers[instance.type] = instance;
     }
   }
 
@@ -85,21 +76,22 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
 
   async filter({ request, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
     const stream = WebBodyUtil.getRawStream(request.body);
-    if (!stream) { // No body to process
-      return next();
+    const contentType = request.headers.getContentType();
+    const parserType = config.parsingTypes[contentType?.full!] ?? config.parsingTypes[contentType?.type!];
+
+    if (stream && contentType && parserType) { // We have a stream, content type and a parser
+      try {
+        const text = await rawBody(stream, {
+          limit: config.limit,
+          encoding: contentType.parameters.charset ?? 'utf8'
+        });
+        request.body = this.parsers[parserType].parse(text);
+        return next();
+      } catch (err) {
+        throw new AppError('Malformed input', { category: 'data', cause: err });
+      }
     }
 
-    const parserType = this.detectParserType(request, config.parsingTypes);
-    if (!parserType) {
-      return next();
-    }
-
-    try {
-      const text = await this.read(request, stream, config.limit);
-      request.body = this.parse(text, parserType);
-      return next();
-    } catch (err) {
-      throw new AppError('Malformed input', { category: 'data', cause: err });
-    }
+    return next();
   }
 }

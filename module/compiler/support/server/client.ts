@@ -127,7 +127,7 @@ export class CompilerClient {
 
         for await (const line of rl.createInterface(response)) {
           if (line.trim().charAt(0) === '{') {
-            const val = JSON.parse(line);
+            const val: T = JSON.parse(line);
             if (cfg.until?.(val)) {
               await CommonUtil.queueMacroTask();
               ctrl.abort();

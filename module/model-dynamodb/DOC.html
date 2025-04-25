@@ -44,15 +44,10 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 
   <figure class="code">
     <figcaption class="code">Structure of DynamoDBModelConfig
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/config.ts">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-dynamodb/src/config.ts#L6">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token class-name">dynamodb</span> <span class="token keyword">from</span> <span class="token string">'@aws-sdk/client-dynamodb'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Field <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
-
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.dynamodb'</span><span class="token punctuation">)</span>
+    <pre><code class="language-typescript"><span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.dynamodb'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">DynamoDBModelConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Field</span></span><span class="token punctuation">(</span>Object<span class="token punctuation">)</span>
   client<span class="token operator">:</span> dynamodb<span class="token punctuation">.</span>DynamoDBClientConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>

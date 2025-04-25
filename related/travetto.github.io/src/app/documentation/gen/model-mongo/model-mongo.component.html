@@ -51,19 +51,10 @@ where the <a target="_blank" class="source-link" href="https://github.com/travet
 
   <figure class="code">
     <figcaption class="code">Structure of MongoModelConfig
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-mongo/src/config.ts">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model-mongo/src/config.ts#L10">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token class-name">mongo</span> <span class="token keyword">from</span> <span class="token string">'mongodb'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> TimeSpan<span class="token punctuation">,</span> TimeUtil<span class="token punctuation">,</span> RuntimeResources<span class="token punctuation">,</span> Runtime <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/runtime'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/config'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Field <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/schema'</span><span class="token punctuation">;</span>
-
-<span class="token comment">/**
- * Mongo model config
- */</span>
-<span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.mongo'</span><span class="token punctuation">)</span>
+    <pre><code class="language-typescript"><span class="token decorator"><span class="token at operator">&#64;</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.mongo'</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MongoModelConfig</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Hosts

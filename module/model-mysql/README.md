@@ -46,12 +46,6 @@ where the [SQLModelConfig](https://github.com/travetto/travetto/tree/main/module
 
 **Code: Structure of SQLModelConfig**
 ```typescript
-import { Config } from '@travetto/config';
-import { asFull } from '@travetto/runtime';
-
-/**
- * SQL Model Config
- */
 @Config('model.sql')
 export class SQLModelConfig<T extends {} = {}> {
   /**

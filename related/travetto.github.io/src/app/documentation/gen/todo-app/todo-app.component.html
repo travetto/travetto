@@ -389,7 +389,15 @@ First we must start the application:
         exposeAllSchemas: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
       AuthConfig: <span class="token punctuation">{{'{'}}</span> maxAge: <span class="token string">'1h'</span>, rollingRenew: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
-      BodyParseConfig: <span class="token punctuation">{{'{'}}</span> applies: true, limit: <span class="token string">'1mb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      BodyParseConfig: <span class="token punctuation">{{'{'}}</span>
+        applies: true,
+        limit: <span class="token string">'1mb'</span>,
+        parsingTypes: <span class="token punctuation">{{'{'}}</span>
+          text: <span class="token string">'text'</span>,
+          <span class="token string">'application/json'</span><span class="token builtin class-name">:</span> <span class="token string">'json'</span>,
+          <span class="token string">'application/x-www-form-urlencoded'</span><span class="token builtin class-name">:</span> <span class="token string">'form'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
       CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
       CompressConfig: <span class="token punctuation">{{'{'}}</span>
         applies: true,
