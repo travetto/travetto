@@ -39,6 +39,16 @@ export class EtagInterceptor implements WebInterceptor {
   @Inject()
   config: EtagConfig;
 
+  computeTag(body: Buffer): string {
+    return body.byteLength === 0 ?
+      '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
+      crypto
+        .createHash('sha1')
+        .update(body.toString('utf8'), 'utf8')
+        .digest('base64')
+        .substring(0, 27);
+  }
+
   addTag(ctx: WebChainedContext<EtagConfig>, response: WebResponse): WebResponse {
     const { request } = ctx;
 
@@ -53,24 +63,18 @@ export class EtagInterceptor implements WebInterceptor {
       return binaryResponse;
     }
 
-    const tag = binaryResponse.body.byteLength === 0 ?
-      '2jmj7l5rSw0yVb/vlWAYkK/YBwk' :
-      crypto
-        .createHash('sha1')
-        .update(binaryResponse.body.toString('utf8'), 'utf8')
-        .digest('base64')
-        .substring(0, 27);
-
-    binaryResponse.headers.set('ETag', `${this.config.weak ? 'W/' : ''}"${tag}"`);
-
-    const lastModified = binaryResponse.headers.get('Last-Modified');
+    const tag = this.computeTag(binaryResponse.body);
+    binaryResponse.headers.set('ETag', `${ctx.config.weak ? 'W/' : ''}"${tag}"`);
 
     if (ctx.config.cacheable &&
       fresh({
         'if-modified-since': request.headers.get('If-Modified-Since')!,
         'if-none-match': request.headers.get('If-None-Match')!,
         'cache-control': request.headers.get('Cache-Control')!,
-      }, { etag: tag, 'last-modified': lastModified! })
+      }, {
+        etag: binaryResponse.headers.get('ETag')!,
+        'last-modified': binaryResponse.headers.get('Last-Modified')!
+      })
     ) {
       return new WebResponse({ context: { httpStatusCode: 304 } });
     }
