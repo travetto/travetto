@@ -160,13 +160,11 @@ export class WebBodyUtil {
   }
 
   /**
-   * Get unprocessed value as readable stream
+   * Is the input raw
    */
-  static getRawStream(val: unknown): Readable | undefined {
+  static isRaw(val: unknown): val is Readable | Buffer {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebRawStreamSymbol] === val) {
-      return WebBodyUtil.toReadable(val);
-    }
+    return !!val && ((Buffer.isBuffer(val) || BinaryUtil.isReadable(val)) && (val as Any)[WebRawStreamSymbol] === val);
   }
 
   /**

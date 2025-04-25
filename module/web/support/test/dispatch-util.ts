@@ -1,4 +1,3 @@
-import { Readable } from 'node:stream';
 import { buffer as toBuffer } from 'node:stream/consumers';
 
 import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
@@ -35,11 +34,11 @@ export class WebTestDispatchUtil {
         const bufferResult = result = await WebBodyUtil.toBuffer(result);
         if (bufferResult.length) {
           try {
-            result = await toBuffer(DecompressInterceptor.decompress(
+            result = await DecompressInterceptor.decompress(
               response.headers,
-              Readable.from(bufferResult),
+              bufferResult,
               { applies: true, supportedEncodings: ['br', 'deflate', 'gzip', 'identity'] }
-            ));
+            );
           } catch { }
         }
       }
@@ -72,8 +71,12 @@ export class WebTestDispatchUtil {
     }
 
     const finalPath = `${path}${q}`;
-    const stream = WebBodyUtil.getRawStream(request.body);
-    const body: RequestInit['body'] = stream ? await toBuffer(stream) : castTo(request.body);
+
+    const body: RequestInit['body'] =
+      WebBodyUtil.isRaw(request.body) ?
+        Buffer.isBuffer(request.body) ? request.body : await toBuffer(request.body) :
+        castTo(request.body);
+
     return { path: finalPath, init: { headers, method, body } };
   }
 

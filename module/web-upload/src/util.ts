@@ -54,12 +54,11 @@ export class WebUploadUtil {
    * Get all the uploads, separating multipart from direct
    */
   static async* getUploads(request: WebRequest, config: Partial<WebUploadConfig>): AsyncIterable<UploadItem> {
-    const bodyStream = WebBodyUtil.getRawStream(request.body);
-
-    if (!bodyStream) {
+    if (!WebBodyUtil.isRaw(request.body)) {
       throw new AppError('No input stream provided for upload', { category: 'data' });
     }
 
+    const bodyStream = Buffer.isBuffer(request.body) ? Readable.from(request.body) : request.body;
     request.body = undefined;
 
     if (MULTIPART.has(request.headers.getContentType()?.full!)) {

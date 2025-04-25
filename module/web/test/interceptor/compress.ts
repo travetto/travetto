@@ -5,7 +5,7 @@ import { buffer } from 'node:stream/consumers';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { CompressInterceptor, WebHeadersInit, WebRequest, WebResponse } from '@travetto/web';
+import { CompressInterceptor, WebRequest, WebResponse } from '@travetto/web';
 import { DependencyRegistry } from '@travetto/di';
 import { BinaryUtil } from '@travetto/runtime';
 
@@ -17,10 +17,10 @@ class BodyParseInterceptorSuite {
     await RootRegistry.init();
   }
 
-  async compress({ size, stream, requestHeaders: headers, responseHeaders }: {
+  async compress({ size, stream, requestHeaders, responseHeaders }: {
     size: number;
-    requestHeaders?: WebHeadersInit;
-    responseHeaders?: WebHeadersInit;
+    requestHeaders?: Record<string, string>;
+    responseHeaders?: Record<string, string>;
     stream?: boolean;
   }): Promise<WebResponse> {
     const interceptor = await DependencyRegistry.getInstance(CompressInterceptor);
@@ -38,7 +38,7 @@ class BodyParseInterceptorSuite {
             path: '/',
             httpMethod: 'POST',
           },
-          headers
+          headers: requestHeaders
         }),
         next: async () => new WebResponse({ body: data, headers: responseHeaders }),
         config: interceptor.config

@@ -1,4 +1,5 @@
 import rawBody from 'raw-body';
+import { Readable } from 'node:stream';
 
 import { Injectable, Inject, DependencyRegistry } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -71,16 +72,16 @@ export class BodyParseInterceptor implements WebInterceptor<BodyParseConfig> {
   }
 
   async filter({ request, config, next }: WebChainedContext<BodyParseConfig>): Promise<WebResponse> {
-    const stream = WebBodyUtil.getRawStream(request.body);
     const contentType = request.headers.getContentType();
-    if (!contentType || !stream) {
+    if (!contentType || !WebBodyUtil.isRaw(request.body)) {
       return next();
     }
 
     const parserType = config.parsingTypes[contentType.full] ?? config.parsingTypes[contentType.type];
     if (parserType) { // We have a stream, content type and a parser
       try {
-        const text = await rawBody(stream, {
+        const bodyStream = Buffer.isBuffer(request.body) ? Readable.from(request.body) : request.body;
+        const text = await rawBody(bodyStream, {
           limit: config.limit,
           encoding: contentType.parameters.charset ?? 'utf8'
         });
