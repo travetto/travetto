@@ -27,26 +27,26 @@ export class CookieJar {
     return c;
   }
 
-  static toHeaderValue(c: Cookie): string {
-    if (!c.value) {
-      c.expires = new Date(0);
-      c.maxAge = undefined;
-    }
-    if (c.maxAge) {
-      c.expires = new Date(Date.now() + c.maxAge);
-    }
-
+  static toHeaderValue(c: Cookie, response = true): string {
     const header = [pair(c.name, c.value)];
+    if (response) {
+      if (!c.value) {
+        c.expires = new Date(0);
+        c.maxAge = undefined;
+      }
+      if (c.maxAge) {
+        c.expires = new Date(Date.now() + c.maxAge);
+      }
 
-    if (c.path) { header.push(pair('path', c.path)); }
-    if (c.expires) { header.push(pair('expires', c.expires.toUTCString())); }
-    if (c.domain) { header.push(pair('domain', c.domain)); }
-    if (c.priority) { header.push(pair('priority', c.priority.toLowerCase())); }
-    if (c.sameSite) { header.push(pair('samesite', c.sameSite.toLowerCase())); }
-    if (c.secure) { header.push('secure'); }
-    if (c.httpOnly) { header.push('httponly'); }
-    if (c.partitioned) { header.push('partitioned'); }
-
+      if (c.path) { header.push(pair('path', c.path)); }
+      if (c.expires) { header.push(pair('expires', c.expires.toUTCString())); }
+      if (c.domain) { header.push(pair('domain', c.domain)); }
+      if (c.priority) { header.push(pair('priority', c.priority.toLowerCase())); }
+      if (c.sameSite) { header.push(pair('samesite', c.sameSite.toLowerCase())); }
+      if (c.secure) { header.push('secure'); }
+      if (c.httpOnly) { header.push('httponly'); }
+      if (c.partitioned) { header.push('partitioned'); }
+    }
     return header.join(';');
   }
 
@@ -131,7 +131,11 @@ export class CookieJar {
     }
   }
 
-  export(): string[] {
-    return Object.values(this.#modified).map(CookieJar.toHeaderValue);
+  export(response = true): string[] {
+    return Object.values(response ? this.#modified : this.#cookies).map(c => CookieJar.toHeaderValue(c, response));
+  }
+
+  raw(): Cookie[] {
+    return Object.values(this.#cookies);
   }
 }
