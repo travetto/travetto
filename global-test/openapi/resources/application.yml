@@ -1,4 +1,0 @@
-api:
-  spec:
-    output: ./api-client.json
-web.cors.active: true

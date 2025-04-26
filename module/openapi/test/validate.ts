@@ -5,6 +5,9 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test } from '@travetto/test';
 import { OpenApiService } from '@travetto/openapi';
 
+import './validate-source/user-controller.ts';
+import './validate-source/relationship-controller.ts';
+
 @Suite()
 export class OpenApiSuite {
   @Test()
