@@ -489,7 +489,7 @@ export class HelloWorldInterceptor implements WebInterceptor {
 Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 
 ### BodyParseInterceptor
-[BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L52) handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
+[BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/web/src/interceptor/body-parse.ts#L53) handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
 **Code: Body Parse Config**
 ```typescript

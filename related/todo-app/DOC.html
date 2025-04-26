@@ -256,7 +256,7 @@ Finally, we establish the controller at <code class="item path">src/web.ts</code
    */</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span>
   <span class="token keyword">async</span> <span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token operator">:</span> TodoSearch<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Todo<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">getAll</span><span class="token punctuation">(</span>search<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token comment">/**

@@ -233,7 +233,7 @@ export class TodoController {
    */
   @Get('/')
   async getAll(search: TodoSearch): Promise<Todo[]> {
-    return await this._svc.getAll(search);
+    return this._svc.getAll(search);
   }
 
   /**
