@@ -121,6 +121,11 @@
         "category": "Travetto"
       },
       {
+        "command": "travetto.test.test:restart",
+        "title": "Restart Test Server",
+        "category": "Travetto"
+      },
+      {
         "command": "travetto.test.test:stop",
         "title": "Stop Test Server",
         "category": "Travetto"
@@ -235,6 +240,9 @@
         },
         {
           "command": "travetto.test.test:start"
+        },
+        {
+          "command": "travetto.test.test:restart"
         },
         {
           "command": "travetto.test.test:stop"

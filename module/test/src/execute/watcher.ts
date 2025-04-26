@@ -9,6 +9,7 @@ import { CumulativeSummaryConsumer } from '../consumer/types/cumulative.ts';
 import { TestRun } from '../model/test.ts';
 import { RunnerUtil } from './util.ts';
 import { TestReadyEvent, TestRemovedEvent } from '../worker/types.ts';
+
 /**
  * Test Watcher.
  *

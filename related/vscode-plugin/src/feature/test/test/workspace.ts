@@ -1,4 +1,5 @@
 import vscode from 'vscode';
+import fs from 'node:fs';
 
 import type { TestWatchEvent } from '@travetto/test';
 
@@ -16,6 +17,7 @@ export class WorkspaceResultsManager {
   #results: Map<string, DocumentResultsManager> = new Map();
   #window: typeof vscode.window;
   #log: Log;
+  #existsCache: Record<string, boolean> = {};
 
   constructor(log: Log, window: typeof vscode.window) {
     this.#log = log;
@@ -65,7 +67,15 @@ export class WorkspaceResultsManager {
    */
   getLocation(target: vscode.TextDocument | TestWatchEvent | string): string | undefined {
     if (typeof target === 'string') {
-      return Workspace.workspaceIndex.getSourceFile(target);
+      const res = Workspace.workspaceIndex.getSourceFile(target);
+      const exists = this.#existsCache[res] ??= (res.startsWith('/') ?? fs.existsSync(res));
+      if (!exists) {
+        // Reinitialize if we are looking at file that we should know that we don't
+        Workspace.workspaceIndex.reinitForModule(Workspace.workspaceIndex.mainModule.name);
+        return Workspace.workspaceIndex.getSourceFile(target);
+      } else {
+        return res;
+      }
     } else if ('fileName' in target) {
       return target.fileName;
     } else if ('import' in target) {

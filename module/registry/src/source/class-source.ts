@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { Class, Env, Runtime, RuntimeIndex, describeFunction, flushPendingFunctions } from '@travetto/runtime';
+import { Class, Env, Runtime, RuntimeIndex, WatchEvent, describeFunction, flushPendingFunctions } from '@travetto/runtime';
 
 import { DynamicFileLoader } from '../internal/file-loader.ts';
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types.ts';
@@ -30,7 +30,7 @@ export class ClassSource implements ChangeSource<Class> {
    */
   #flush(): void {
     for (const cls of flushPendingFunctions().filter(isClass)) {
-      const src = Runtime.getImport(cls);
+      const src = Runtime.getSourceFile(cls);
       if (!this.#classes.has(src)) {
         this.#classes.set(src, new Map());
       }
@@ -39,21 +39,32 @@ export class ClassSource implements ChangeSource<Class> {
     }
   }
 
+  #removeFile(file: string): void {
+    const data = this.#classes.get(file);
+    if (data) {
+      this.#classes.delete(file);
+      for (const cls of data) {
+        this.emit({ type: 'removing', prev: cls[1] });
+      }
+    }
+  }
+
   /**
    * Process changes for a single file, looking for add/remove/update of classes
    */
   #handleFileChanges(importFile: string, classes: Class[] = []): number {
     const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
+    const src = RuntimeIndex.getSourceFile(importFile);
 
     let prev = new Map<string, Class>();
-    if (this.#classes.has(importFile)) {
-      prev = new Map(this.#classes.get(importFile)!.entries());
+    if (this.#classes.has(src)) {
+      prev = new Map(this.#classes.get(src)!.entries());
     }
 
     const keys = new Set([...Array.from(prev.keys()), ...Array.from(next.keys())]);
 
-    if (!this.#classes.has(importFile)) {
-      this.#classes.set(importFile, new Map());
+    if (!this.#classes.has(src)) {
+      this.#classes.set(src, new Map());
     }
 
     let changes = 0;
@@ -63,9 +74,9 @@ export class ClassSource implements ChangeSource<Class> {
       if (!next.has(k)) {
         changes += 1;
         this.emit({ type: 'removing', prev: prev.get(k)! });
-        this.#classes.get(importFile)!.delete(k);
+        this.#classes.get(src)!.delete(k);
       } else {
-        this.#classes.get(importFile)!.set(k, next.get(k)!);
+        this.#classes.get(src)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
           changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });
@@ -119,7 +130,11 @@ export class ClassSource implements ChangeSource<Class> {
     if (Runtime.dynamic && !this.#listening) {
       this.#listening = (async () => {
         for await (const ev of await DynamicFileLoader.listen()) {
-          this.#handleChanges(flushPendingFunctions().filter(isClass));
+          if (ev.action === 'delete') {
+            this.#removeFile(ev.file); // File no longer exists
+          } else {
+            this.#handleChanges(flushPendingFunctions().filter(isClass));
+          }
 
           if (ev.action === 'create') {
             this.#flush();
