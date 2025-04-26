@@ -2,8 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-
-import { DependencyRegistry } from '../src/registry.ts';
+import { DependencyRegistry } from '@travetto/di';
 
 @Suite('cycle')
 class CycleTest {

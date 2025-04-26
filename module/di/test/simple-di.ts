@@ -3,8 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { toConcrete } from '@travetto/runtime';
-
-import { DependencyRegistry } from '../src/registry.ts';
+import { DependencyRegistry, InjectionError } from '@travetto/di';
 
 import {
   ServiceInherit, ServiceInheritSymbol2, CustomServiceInheritSymbol,
@@ -17,7 +16,6 @@ import {
 } from './deps.ts';
 
 import { DbConfig } from './config.ts';
-import { InjectionError } from '../src/error.ts';
 
 const FOUR = 4;
 

@@ -7,8 +7,7 @@ import { createWriteStream } from 'node:fs';
 import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-
-import { ImageUtil } from '../src/util.ts';
+import { ImageUtil } from '@travetto/image';
 
 @Suite()
 class ImageUtilSuite {

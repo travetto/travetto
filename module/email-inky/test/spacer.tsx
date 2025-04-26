@@ -3,9 +3,9 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
+import { Spacer } from '@travetto/email-inky';
 
 import { renderJSX } from './util.ts';
-import { Spacer } from '../src/components.ts';
 
 @Suite('Spacer')
 

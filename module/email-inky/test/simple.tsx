@@ -3,10 +3,9 @@
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
+import { HLine, Summary, SUMMARY_STYLE, Title, Wrapper } from '@travetto/email-inky';
 
 import { renderJSX } from './util.ts';
-import { SUMMARY_STYLE } from '../src/render/html.ts';
-import { HLine, Wrapper, Summary, Title } from '../src/components.ts';
 
 @Suite('simple')
 class SimpleComponentTest {

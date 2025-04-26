@@ -44,3 +44,4 @@ export * from './src/util/mime.ts';
 export * from './src/util/cookie.ts';
 export * from './src/util/common.ts';
 export * from './src/util/net.ts';
+export * from './src/util/ssl.ts';

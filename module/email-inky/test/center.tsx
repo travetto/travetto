@@ -3,9 +3,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+import { Center, Menu, Item } from '@travetto/email-inky';
 
 import { renderJSX } from './util.ts';
-import { Center, Item, Menu } from '../src/components.ts';
 
 @Suite()
 export class CenterComponentTest {

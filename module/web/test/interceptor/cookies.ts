@@ -113,4 +113,27 @@ class CookiesInterceptorSuite {
     assert(cookies[0].secure);
     assert(cookies[0].value === new Keygrip(['bally']).sign('age=100'));
   }
+
+  @Test()
+  async testInvalidSigned() {
+    const cookies = await this.testCookies(
+      [{
+        name: 'age',
+        value: '100',
+        signingKey: 'billy'
+      }],
+      jar => {
+        jar.set({
+          name: 'valid',
+          value: (!!jar.get('age', { signed: true })).toString()
+        });
+      },
+      ['bally]']
+    );
+
+    assert(cookies.length === 2);
+    assert(cookies[0].name === 'valid');
+    assert(cookies[1].name === 'valid.sig');
+    assert(cookies[0].value === 'false');
+  }
 }

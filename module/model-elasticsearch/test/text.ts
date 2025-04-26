@@ -4,7 +4,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { LongText, Text, Schema } from '@travetto/schema';
 
-import { ElasticsearchSchemaUtil } from '../src/internal/schema.ts';
+import { ElasticsearchSchemaUtil } from '@travetto/model-elasticsearch/src/internal/schema.ts';
 
 @Schema()
 class TextAble {
@@ -29,11 +29,13 @@ export class TextTestSuite {
 
     assert(schema.properties);
     assert(schema.properties.bio);
+    assert(schema.properties.bio.type === 'keyword');
     assert(schema.properties.bio.fields);
     assert(schema.properties.bio.fields.text);
     assert(schema.properties.bio.fields.text.type === 'text');
 
     assert(schema.properties.messages);
+    assert(schema.properties.messages.type === 'keyword');
     assert(schema.properties.messages.fields);
     assert(schema.properties.messages.fields.text);
     assert(schema.properties.messages.fields.text.type === 'text');

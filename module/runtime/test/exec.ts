@@ -8,9 +8,7 @@ import timers from 'node:timers/promises';
 import path from 'node:path';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-
-import { Runtime } from '../src/context.ts';
-import { ExecUtil } from '../src/exec.ts';
+import { ExecUtil, Runtime } from '@travetto/runtime';
 
 @Suite()
 export class ExecUtilTest {

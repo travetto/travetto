@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '../src/decorator.ts';
+import { Injectable, Inject } from '@travetto/di';
 import { Util } from './util.ts';
 
 @Injectable()

@@ -5,7 +5,7 @@ import { DataUtil, Schema } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import type { WhereClause } from '@travetto/model-query';
 
-import { ElasticsearchQueryUtil } from '../src/internal/query.ts';
+import { ElasticsearchQueryUtil } from '@travetto/model-elasticsearch/src/internal/query.ts';
 
 @Schema()
 class User {

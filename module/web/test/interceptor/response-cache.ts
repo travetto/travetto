@@ -3,8 +3,8 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { CacheControl, ConfigureInterceptor, Controller, Get, Patch, ResponseCacheInterceptor } from '@travetto/web';
 
-import { BaseWebSuite } from '../../support/test/suite/base';
-import { LocalRequestDispatcher } from '../../support/test/dispatcher';
+import { BaseWebSuite } from '@travetto/web/support/test/suite/base';
+import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher';
 
 @Controller('/test/response')
 class TestResponseCache {

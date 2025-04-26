@@ -6,9 +6,7 @@ import keygrip from 'keygrip';
 
 import { Suite, Test } from '@travetto/test';
 import { castTo } from '@travetto/runtime';
-
-import { DependencyRegistry } from '../src/registry.ts';
-import { Inject, Injectable, InjectableFactory } from '../src/decorator.ts';
+import { DependencyRegistry, Inject, Injectable, InjectableFactory } from '@travetto/di';
 
 class Item {
   follow: number;

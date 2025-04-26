@@ -4,8 +4,7 @@ import { PassThrough, Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-
-import { WebUploadUtil } from '../src/util.ts';
+import { WebUploadUtil } from '@travetto/web-upload';
 
 @Suite()
 export class BytesUtilTest {

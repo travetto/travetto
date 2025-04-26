@@ -2,10 +2,7 @@ import assert from 'node:assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-
-import { Schema } from '../src/decorator/schema.ts';
-import { SchemaValidator } from '../src/validate/validator.ts';
-import { SchemaRegistry } from '../src/service/registry.ts';
+import { Schema, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
 @Schema()
 export class OptionalAsUnion {

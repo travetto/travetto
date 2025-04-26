@@ -3,9 +3,9 @@
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
+import { Container } from '@travetto/email-inky';
 
 import { renderJSX } from './util.ts';
-import { Container } from '../src/components.ts';
 
 @Suite('Inky')
 class InkyTest {

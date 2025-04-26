@@ -3,9 +3,7 @@ import assert from 'node:assert';
 import path from 'node:path';
 
 import { Suite, Test } from '@travetto/test';
-
-import { FileLoader } from '../src/file-loader.ts';
-import { Runtime } from '../src/context.ts';
+import { FileLoader, Runtime } from '@travetto/runtime';
 
 @Suite()
 class FileLoaderSuite {

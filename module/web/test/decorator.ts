@@ -3,11 +3,8 @@ import assert from 'node:assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Class } from '@travetto/runtime';
+import { CacheControl, Controller, ControllerRegistry, Patch, SetHeaders } from '@travetto/web';
 
-import { ControllerRegistry } from '../src/registry/controller.ts';
-import { Controller } from '../src/decorator/controller.ts';
-import { Patch } from '../src/decorator/endpoint.ts';
-import { CacheControl, SetHeaders } from '../src/decorator/common.ts';
 
 @Controller('/test')
 class TestController {

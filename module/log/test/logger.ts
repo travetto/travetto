@@ -4,11 +4,7 @@ import { Suite, Test, BeforeAll, BeforeEach } from '@travetto/test';
 import { castTo, ConsoleListener, ConsoleManager } from '@travetto/runtime';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
-
-import { LogService } from '../src/service.ts';
-import { LogDecorator, LogEvent, Logger } from '../src/types.ts';
-import { JsonLogFormatter } from '../src/formatter/json.ts';
-import { LogFormatUtil } from '../src/formatter/util.ts';
+import { JsonLogFormatter, LogDecorator, LogEvent, LogFormatUtil, Logger, LogService } from '@travetto/log';
 
 @Injectable()
 class CustomLogger implements Logger {

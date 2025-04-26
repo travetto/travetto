@@ -3,16 +3,10 @@ import assert from 'node:assert';
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
-
-import { WebRequest } from '../src/types/request.ts';
-import { WebHeaders } from '../src/types/headers.ts';
-import { QueryParam, HeaderParam, PathParam, ContextParam } from '../src/decorator/param.ts';
-import { Post, Get } from '../src/decorator/endpoint.ts';
-import { Controller } from '../src/decorator/controller.ts';
-import { ControllerRegistry } from '../src/registry/controller.ts';
-import { EndpointConfig } from '../src/registry/types.ts';
-import { EndpointUtil } from '../src/util/endpoint.ts';
-import { HttpMethod } from '../src/types/core.ts';
+import {
+  ContextParam, Controller, ControllerRegistry, EndpointConfig, EndpointUtil,
+  Get, HeaderParam, HttpMethod, PathParam, Post, QueryParam, WebHeaders, WebRequest
+} from '@travetto/web';
 
 class User {
   name: string;

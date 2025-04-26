@@ -3,13 +3,10 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { WebResponse } from '@travetto/web';
+import { AuthContextInterceptor, CommonPrincipalCodecSymbol, JWTPrincipalCodec, WebAuthConfig } from '@travetto/auth-web';
 
 import { InjectableSuite } from '@travetto/di/support/test/suite.ts';
 
-import { AuthContextInterceptor } from '../src/interceptors/context.ts';
-import { JWTPrincipalCodec } from '../src/codec.ts';
-import { WebAuthConfig } from '../src/config.ts';
-import { CommonPrincipalCodecSymbol } from '../src/types.ts';
 
 @Suite()
 @InjectableSuite()

@@ -5,18 +5,11 @@ import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { Config } from '@travetto/config';
 import { RootRegistry } from '@travetto/registry';
-
-import { ConfigureInterceptor } from '../src/decorator/common.ts';
-import { Controller } from '../src/decorator/controller.ts';
-import { Get } from '../src/decorator/endpoint.ts';
-import { WebInterceptor, WebInterceptorContext } from '../src/types/interceptor.ts';
-import { WebInterceptorCategory } from '../src/types/core.ts';
-import { ControllerRegistry } from '../src/registry/controller.ts';
-import { WebChainedContext } from '../src/types.ts';
-import { CorsInterceptor } from '../src/interceptor/cors.ts';
-import { ResponseCacheInterceptor } from '../src/interceptor/response-cache.ts';
-import { WebRequest } from '../src/types/request.ts';
-import { StandardWebRouter } from '../src/router/standard.ts';
+import {
+  ConfigureInterceptor, Controller, ControllerRegistry, CorsInterceptor, Get,
+  ResponseCacheInterceptor, StandardWebRouter, WebChainedContext, WebInterceptor,
+  WebInterceptorCategory, WebInterceptorContext, WebRequest
+} from '@travetto/web';
 
 @Injectable()
 @Config('web.custom')

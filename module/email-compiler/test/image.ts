@@ -1,8 +1,7 @@
 import assert from 'node:assert';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-
-import { EmailCompileUtil } from '../src/util.ts';
+import { EmailCompileUtil } from '@travetto/email-compiler';
 
 @Suite()
 class ImageUtilTest {

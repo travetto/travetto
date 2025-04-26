@@ -1,12 +1,10 @@
-import { Injectable, Inject, InjectableFactory } from '../src/decorator.ts';
+import { Inject, Injectable, InjectableFactory } from '@travetto/di';
 import { DbConfig, AltConfig, Empty } from './config.ts';
 
 export abstract class BasePattern { }
 
 @Injectable()
-export class SpecificPattern extends BasePattern {
-
-}
+export class SpecificPattern extends BasePattern { }
 
 /**
  * @concrete

@@ -3,11 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
-
-import { Controller, } from '../src/decorator/controller.ts';
-import { Get } from '../src/decorator/endpoint.ts';
-import { PathParam } from '../src/decorator/param.ts';
-import { ControllerRegistry } from '../src/registry/controller.ts';
+import { Controller, ControllerRegistry, Get, PathParam } from '@travetto/web';
 
 /**
  * Test Controller For Fun

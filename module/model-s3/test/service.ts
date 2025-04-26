@@ -2,14 +2,14 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { BinaryUtil, castTo } from '@travetto/runtime';
+import { S3ModelConfig, S3ModelService } from '@travetto/model-s3';
+
 import { ModelBasicSuite } from '@travetto/model/support/test/basic.ts';
 import { ModelCrudSuite } from '@travetto/model/support/test/crud.ts';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry.ts';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism.ts';
 import { ModelBlobSuite } from '@travetto/model/support/test/blob.ts';
 
-import { S3ModelConfig } from '../src/config.ts';
-import { S3ModelService } from '../src/service.ts';
 
 @Suite()
 export class S3BasicSuite extends ModelBasicSuite {

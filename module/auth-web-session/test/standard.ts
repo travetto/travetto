@@ -4,8 +4,7 @@ import { SessionModelSymbol } from '@travetto/auth-session';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model-memory';
 
 import { LocalRequestDispatcher } from '@travetto/web/support/test/dispatcher.ts';
-
-import { AuthWebSessionServerSuite } from '../support/test/server.ts';
+import { AuthWebSessionServerSuite } from '@travetto/auth-web-session/support/test/server.ts';
 
 class Config {
   @InjectableFactory({ primary: true, qualifier: SessionModelSymbol })
