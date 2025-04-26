@@ -122,11 +122,12 @@ export class Decorations {
       title = error.message;
       suffix = error.message;
 
-      body = error.stack?.replaceAll(Workspace.path, '.')!
+      body = (error.stack ?? '')
+        .replaceAll(Workspace.path, '.')
         .replaceAll('\n', '  \n')
         .replace(
           /[(]([^):]+)[:]?(\d+(?:[:]\d+)?)?[)]/g, (_, file, loc) => loc ? `(**${file}**:_${loc}_)` : `(**${file}**)`
-        )!;
+        );
       bodyFirst = body.split('\n')[0];
     }
     return { suffix, title, bodyFirst, body, markdown: new vscode.MarkdownString(`**${title}** \n\n${body}`) };

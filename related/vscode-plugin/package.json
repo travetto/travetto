@@ -1,6 +1,6 @@
 {
   "name": "travetto-plugin",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "displayName": "Travetto Plugin",
   "description": "VS Code plugin for interacting with the Travetto framework ",
   "keywords": [
@@ -33,19 +33,19 @@
     "start": "npx trvc start"
   },
   "devDependencies": {
-    "@travetto/cli": "~6.0.0.rc-0",
-    "@travetto/compiler": "~6.0.0.rc-0",
-    "@travetto/doc": "~6.0.0.rc-0",
-    "@travetto/email-compiler": "~6.0.0.rc-0",
-    "@travetto/log": "~6.0.0.rc-0",
-    "@travetto/pack": "~6.0.0.rc-0",
-    "@travetto/test": "~6.0.0.rc-0",
-    "@types/node": "22.5.4",
-    "@types/vscode": "^1.96.0"
+    "@travetto/cli": "~6.0.0.rc-1",
+    "@travetto/compiler": "~6.0.0.rc-1",
+    "@travetto/doc": "~6.0.0.rc-1",
+    "@travetto/email-compiler": "~6.0.0.rc-1",
+    "@travetto/log": "~6.0.0.rc-1",
+    "@travetto/pack": "~6.0.0.rc-1",
+    "@travetto/test": "~6.0.0.rc-1",
+    "@types/node": "^22.15.2",
+    "@types/vscode": "^1.99.1"
   },
   "dependencies": {
-    "@travetto/registry": "~6.0.0.rc-0",
-    "@travetto/runtime": "~6.0.0.rc-0"
+    "@travetto/registry": "~6.0.0.rc-1",
+    "@travetto/runtime": "~6.0.0.rc-1"
   },
   "travetto": {
     "displayName": "Travetto Plugin",
@@ -63,7 +63,7 @@
     }
   },
   "engines": {
-    "vscode": "^1.92.0"
+    "vscode": "^1.99.0"
   },
   "publishConfig": {
     "access": "restricted"

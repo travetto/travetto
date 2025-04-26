@@ -127,13 +127,21 @@ class CookiesInterceptorSuite {
           name: 'valid',
           value: (!!jar.get('age', { signed: true })).toString()
         });
+        jar.set({
+          name: 'invalid',
+          value: (!!jar.get('age', { signed: false })).toString()
+        });
       },
       ['bally]']
     );
 
-    assert(cookies.length === 2);
+    assert(cookies.length === 4);
     assert(cookies[0].name === 'valid');
     assert(cookies[1].name === 'valid.sig');
     assert(cookies[0].value === 'false');
+
+    assert(cookies[2].name === 'invalid');
+    assert(cookies[3].name === 'invalid.sig');
+    assert(cookies[2].value === 'true');
   }
 }
