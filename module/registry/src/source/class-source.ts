@@ -18,6 +18,7 @@ export class ClassSource implements ChangeSource<Class> {
 
   #classes = new Map<string, Map<string, Class>>();
   #emitter = new EventEmitter();
+  #listening: Promise<void> | undefined;
 
   /**
    * Are we in a mode that should have enhanced debug info
@@ -115,15 +116,16 @@ export class ClassSource implements ChangeSource<Class> {
    * Initialize
    */
   async init(): Promise<void> {
-    if (Runtime.dynamic) {
-      DynamicFileLoader.onLoadEvent(ev => {
-        this.#handleChanges(flushPendingFunctions().filter(isClass));
+    if (Runtime.dynamic && !this.#listening) {
+      this.#listening = (async () => {
+        for await (const ev of await DynamicFileLoader.listen()) {
+          this.#handleChanges(flushPendingFunctions().filter(isClass));
 
-        if (ev.action === 'create') {
-          this.#flush();
+          if (ev.action === 'create') {
+            this.#flush();
+          }
         }
-      });
-      await DynamicFileLoader.init();
+      })();
     }
 
     // Ensure everything is loaded

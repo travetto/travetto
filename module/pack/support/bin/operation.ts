@@ -89,7 +89,7 @@ export class PackOperation {
       yield bundleCommand;
       yield ActiveShellCommand.chdir(path.resolve());
     } else {
-      await PackUtil.runCommand(bundleCommand, { cwd, env: { ...process.env, ...env } });
+      await PackUtil.runCommand(bundleCommand, { cwd, env: { ...process.env, ...env }, stdio: [0, 'pipe', 2] });
       const stat = await fs.stat(path.resolve(cfg.buildDir, cfg.mainFile));
       yield [cliTpl`${{ title: 'Bundled Output ' }} ${{ identifier: 'sizeKb' }}=${{ param: Math.trunc(stat.size / 2 ** 10) }}`];
     }
