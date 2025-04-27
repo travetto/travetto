@@ -2,6 +2,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
 import { AppError, Runtime, RuntimeIndex } from '@travetto/runtime';
+import { ManifestFileUtil, ManifestModuleFileType, ManifestModuleUtil } from '@travetto/manifest';
 
 const ESLINT_PATTERN = /\s{0,10}\/\/ eslint.{0,300}$/g;
 const ENV_KEY = /Env.([^.]{1,100})[.]key/g;
@@ -12,19 +13,18 @@ const ENV_KEY = /Env.([^.]{1,100})[.]key/g;
 export class DocFileUtil {
 
   static #decCache: Record<string, boolean> = {};
+  static #modFileTypeToLang: Record<ManifestModuleFileType, string | undefined> = {
+    ts: 'typescript',
+    js: 'javascript',
+    md: 'markdown',
+    json: 'json',
+    typings: 'typescript',
+    'package-json': 'json',
+    fixture: undefined,
+    unknown: undefined
+  };
   static #extToLang: Record<string, string> = {
-    '.ts': 'typescript',
-    '.cts': 'typescript',
-    '.mts': 'typescript',
-    '.tsx': 'typescript',
-    '.ctsx': 'typescript',
-    '.mtsx': 'typescript',
-    '.js': 'javascript',
-    '.cjs': 'javascript',
-    '.mjs': 'javascript',
-    '.jsx': 'javascript',
-    '.cjsx': 'javascript',
-    '.mjsx': 'javascript',
+    '.yaml': 'yaml',
     '.yml': 'yaml',
     '.sh': 'bash',
   };
@@ -73,7 +73,8 @@ export class DocFileUtil {
 
     if (file !== undefined) {
       const ext = path.extname(file);
-      const language = this.#extToLang[ext] ?? ext.replace('.', '');
+      const type = ManifestModuleUtil.getFileType(file);
+      const language = this.#modFileTypeToLang[type] ?? this.#extToLang[ext] ?? ext.replace('.', '');
       return { content, file, language };
     } else {
       return { content, file: '', language: '' };
