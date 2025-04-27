@@ -12,7 +12,7 @@ interface Link extends vscode.TerminalLink {
 }
 
 const MODULE_REGEX = /(@[a-z0-9\-]+\/[a-z0-9\-]+)[^\/]/gi;
-const FILE_CLASS_REGEX = /([a-z_\-\/@]+)[:\/]((?:src|support|bin|test|doc)\/[a-z_0-9\/.\-]+)(:\d+|#[$_a-z0-9]+)?/gi;
+const FILE_CLASS_REGEX = /((?:@[a-z_\-]+[/])[a-z_\-]+)[:\/]((?:src|support|bin|test|doc)\/[a-z_0-9\/.\-]+)(:\d+|#[$_a-z0-9]+)?/gi;
 
 /**
  * Logging workspace
