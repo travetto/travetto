@@ -1,8 +1,12 @@
 import vscode from 'vscode';
 import timers from 'node:timers/promises';
+import path from 'node:path';
+import fs from 'node:fs';
 
-import { type ManifestContext, ManifestIndex, ManifestUtil, PackageUtil } from '@travetto/manifest';
+import { type ManifestContext, ManifestIndex, ManifestModuleUtil, ManifestUtil, PackageUtil } from '@travetto/manifest';
 import type { CompilerStateType } from '@travetto/compiler/support/types.ts';
+
+const SUFFIXES = ['.ts', '.js', '.tsx', '.jsx', '.d.ts'];
 
 /**
  * Standard set of workspace utilities
@@ -14,6 +18,7 @@ export class Workspace {
   static #workspaceIndex: ManifestIndex;
   static #compilerState: CompilerStateType = 'closed';
   static #compilerStateListeners: ((ev: CompilerStateType) => void)[] = [];
+  static #importToFile: Record<string, string | undefined> = {};
 
   static readonly folder: vscode.WorkspaceFolder;
 
@@ -114,5 +119,38 @@ export class Workspace {
       token.onCancellationRequested(() => ctrl.abort());
       await timers.setTimeout(duration, undefined, { signal: ctrl.signal }).catch(() => { });
     });
+  }
+
+  /**
+   * Try to get file location from import, relying on manifest
+   */
+  static resolveManifestFileFromImport(imp: string): string | undefined {
+    let resolved = this.#importToFile[imp];
+
+    // Special provision for local files
+    if (!resolved && imp.startsWith(Workspace.moduleName)) {
+      const local = path.resolve(Workspace.path, imp.replace(Workspace.moduleName, '.'));
+      if (fs.existsSync(local)) {
+        resolved = local;
+      }
+    }
+
+    const fileType = ManifestModuleUtil.getFileType(imp);
+
+    for (let i = 0; i < 2 && !resolved; i += 1) {
+      if (i === 1) {
+        this.workspaceIndex.reinitForModule(this.workspaceIndex.mainModule.name);
+      }
+
+      resolved ??= this.workspaceIndex.getFromImport(imp)?.sourceFile;
+
+      if (!resolved && fileType === 'unknown') {
+        for (const suffix of SUFFIXES) {
+          resolved ??= this.workspaceIndex.getFromImport(`${imp}${suffix}`)?.sourceFile;
+        }
+      }
+    }
+
+    return this.#importToFile[imp] = resolved;
   }
 }
