@@ -54,17 +54,17 @@ export class ClassSource implements ChangeSource<Class> {
    */
   #handleFileChanges(importFile: string, classes: Class[] = []): number {
     const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
-    const src = RuntimeIndex.getSourceFile(importFile);
+    const sourceFile = RuntimeIndex.getSourceFile(importFile);
 
     let prev = new Map<string, Class>();
-    if (this.#classes.has(src)) {
-      prev = new Map(this.#classes.get(src)!.entries());
+    if (this.#classes.has(sourceFile)) {
+      prev = new Map(this.#classes.get(sourceFile)!.entries());
     }
 
     const keys = new Set([...Array.from(prev.keys()), ...Array.from(next.keys())]);
 
-    if (!this.#classes.has(src)) {
-      this.#classes.set(src, new Map());
+    if (!this.#classes.has(sourceFile)) {
+      this.#classes.set(sourceFile, new Map());
     }
 
     let changes = 0;
@@ -74,9 +74,9 @@ export class ClassSource implements ChangeSource<Class> {
       if (!next.has(k)) {
         changes += 1;
         this.emit({ type: 'removing', prev: prev.get(k)! });
-        this.#classes.get(src)!.delete(k);
+        this.#classes.get(sourceFile)!.delete(k);
       } else {
-        this.#classes.get(src)!.set(k, next.get(k)!);
+        this.#classes.get(sourceFile)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
           changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });

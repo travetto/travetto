@@ -199,8 +199,8 @@ class UserController {
 
   @Post('/saveUser')
   async save(@Body() user: User) {
-    user = await this.service.update(user);
-    return { success: true };
+    const saved = await this.service.update(user);
+    return { success: !!saved };
   }
 }
 ```

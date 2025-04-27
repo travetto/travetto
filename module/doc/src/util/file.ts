@@ -14,8 +14,17 @@ export class DocFileUtil {
   static #decCache: Record<string, boolean> = {};
   static #extToLang: Record<string, string> = {
     '.ts': 'typescript',
+    '.cts': 'typescript',
+    '.mts': 'typescript',
     '.tsx': 'typescript',
+    '.ctsx': 'typescript',
+    '.mtsx': 'typescript',
     '.js': 'javascript',
+    '.cjs': 'javascript',
+    '.mjs': 'javascript',
+    '.jsx': 'javascript',
+    '.cjsx': 'javascript',
+    '.mjsx': 'javascript',
     '.yml': 'yaml',
     '.sh': 'bash',
   };

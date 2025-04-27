@@ -24,7 +24,7 @@ In a new project, the first thing that will need to be done, post installation, 
 ```bash
 $ trv lint:register
 
-Wrote eslint config to <workspace-root>/eslint.config.js
+Wrote eslint config to <workspace-root>/eslint.config.cjs
 ```
 
 This is the file the linter will use, and any other tooling (e.g. IDEs).
