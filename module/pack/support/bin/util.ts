@@ -12,7 +12,7 @@ export class PackUtil {
    */
   static buildEnvFile(env: Record<string, string | number | boolean | undefined>): string[] {
     return Object.entries(env)
-      .filter(([k, v]) => (v !== undefined))
+      .filter(([, v]) => (v !== undefined))
       .map(([k, v]) => `${k}=${v}`);
   }
 

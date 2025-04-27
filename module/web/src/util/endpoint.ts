@@ -236,7 +236,7 @@ export class EndpointUtil {
         return [ep, parts.map(x => /[*]/.test(x) ? 1 : /:/.test(x) ? 2 : 3)] as const;
       })
       .toSorted((a, b) => this.#compareEndpoints(a[1], b[1]) || a[0].path.localeCompare(b[0].path))
-      .map(([ep, _]) => ep);
+      .map(([ep,]) => ep);
   }
 
 

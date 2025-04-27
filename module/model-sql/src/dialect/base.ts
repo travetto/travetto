@@ -578,7 +578,7 @@ export abstract class SQLDialect implements DialectState {
     const stack = SQLModelUtil.classToStack(cls);
     const aliases = this.getAliasCache(stack, this.namespace);
     const tables = [...aliases.keys()].toSorted((a, b) => a.length - b.length); // Shortest first
-    return `FROM ${tables.map((table, i) => {
+    return `FROM ${tables.map((table) => {
       const { alias, path } = aliases.get(table)!;
       let from = `${this.ident(table)} ${alias}`;
       if (path.length > 1) {
@@ -605,25 +605,26 @@ LEFT OUTER JOIN ${from} ON
   /**
    * Generate GROUP BY clause
    */
-  getGroupBySQL<T>(cls: Class<T>, query?: Query<T>): string {
-    return `GROUP BY ${this.alias(this.idField)}`;
-  }
-
-  /**
-   * Generate full query
-   */
-  getQuerySQL<T>(cls: Class<T>, query: Query<T>, where?: WhereClause<T>): string {
+  getGroupBySQL<T>(cls: Class<T>, query: Query<T>): string {
     const sortFields = !query.sort ?
       '' :
       SQLModelUtil.orderBy(cls, query.sort)
         .map(x => this.resolveName(x.stack))
         .join(', ');
 
+    // TODO: Really confused on this
+    return `GROUP BY ${this.alias(this.idField)}${sortFields ? `, ${sortFields}` : ''}`;
+  }
+
+  /**
+   * Generate full query
+   */
+  getQuerySQL<T>(cls: Class<T>, query: Query<T>, where?: WhereClause<T>): string {
     return `
 ${this.getSelectSQL(cls, query.select)}
 ${this.getFromSQL(cls)}
 ${this.getWhereSQL(cls, where)}
-${this.getGroupBySQL(cls, query)}${sortFields ? `, ${sortFields}` : ''}
+${this.getGroupBySQL(cls, query)}
 ${this.getOrderBySQL(cls, query.sort)}
 ${this.getLimitSQL(cls, query)}`;
   }

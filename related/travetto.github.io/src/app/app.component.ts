@@ -13,7 +13,7 @@ export class AppComponent {
   href = '';
 
   constructor(router: Router) {
-    router.events.subscribe(x => {
+    router.events.subscribe(() => {
       this.href = router.url.split('/')[1];
     });
 

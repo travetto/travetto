@@ -305,7 +305,7 @@ export class SQLModelUtil {
    * Build property path for a table/field given the current stack
    */
   static buildPath(list: VisitStack[]): string {
-    return list.map((el, i) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
+    return list.map((el) => `${el.name}${el.index ? `[${el.index}]` : ''}`).join('.');
   }
 
   /**

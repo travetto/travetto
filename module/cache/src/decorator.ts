@@ -21,7 +21,7 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
       config = cfg;
     }
   }
-  const dec = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
+  const dec = function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, _descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[CacheConfigSymbol] ??= {})[propertyKey] = config;
   };
@@ -36,7 +36,7 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
  * @augments `@travetto/cache:Evict`
  */
 export function EvictCache<F extends string, U extends Record<F, CacheService>>(field: F, config: CoreCacheConfig = {}) {
-  return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {
+  return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, _descriptor: MethodDescriptor<R>): void {
     config.keySpace ??= `${target.constructor.name}.${propertyKey}`;
     (target[EvictConfigSymbol] ??= {})[propertyKey] = config;
   };

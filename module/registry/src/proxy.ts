@@ -1,3 +1,4 @@
+/* eslint @typescript-eslint/no-unused-vars: ["error", { "args": "none", "varsIgnorePattern": "^(_.*|[A-Z])$" } ] */
 import { Any, castKey, castTo, classConstruct } from '@travetto/runtime';
 
 const ProxyTargetSymbol = Symbol();

@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 import { AuthVerifyInterceptor } from '@travetto/auth-web';
 
-const base = { applies: true, matcher: (key: Set<string>) => { throw new Error('Function not implemented.'); } } as const;
+const base = { applies: true, matcher: () => { throw new Error('Function not implemented.'); } } as const;
 
 @Suite()
 class VerifierSuite {

@@ -63,7 +63,11 @@ export const STD_RULES = {
   'require-atomic-updates': 0,
   '@typescript-eslint/no-unused-vars': [
     'error',
-    { varsIgnorePattern: '^(_|[A-Z])[A-Za-z0-9]*', args: 'none' }
+    {
+      varsIgnorePattern: '^(_|[A-Z])[A-Za-z0-9]*',
+      argsIgnorePattern: '^_',
+      args: 'after-used'
+    }
   ],
   '@stylistic/quotes': [
     'error',

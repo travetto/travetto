@@ -229,7 +229,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
    */
   async deleteModel(cls: Class<ModelType>): Promise<void> {
     const table = this.#resolveTable(cls);
-    const { Table: verify } = (await this.client.describeTable({ TableName: table }).catch(err => ({ Table: undefined })));
+    const { Table: verify } = (await this.client.describeTable({ TableName: table }).catch(() => ({ Table: undefined })));
     if (verify) {
       await this.client.deleteTable({ TableName: table });
     }
@@ -262,7 +262,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
     for (const model of ModelRegistry.getClasses()) {
       await this.client.deleteTable({
         TableName: this.#resolveTable(model)
-      }).catch(err => { });
+      }).catch(() => { });
     }
   }
 
@@ -352,7 +352,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Expiry
-  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
+  async deleteExpired<T extends ModelType>(_cls: Class<T>): Promise<number> {
     return -1;
   }
 

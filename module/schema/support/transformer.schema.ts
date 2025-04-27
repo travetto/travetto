@@ -23,7 +23,7 @@ export class SchemaTransformer {
    * Track schema on start
    */
   @OnClass('Schema')
-  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration, dec?: DecoratorMeta): ts.ClassDeclaration {
+  static startSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
     state[InSchemaSymbol] = true;
     state[AccessorsSymbol] = new Set();
     return node;

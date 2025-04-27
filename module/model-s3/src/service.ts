@@ -41,7 +41,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
 
   constructor(config: S3ModelConfig) { this.config = config; }
 
-  #getMetaBase({ range, size, ...meta }: BlobMeta): MetaBase {
+  #getMetaBase({ range: _, size, ...meta }: BlobMeta): MetaBase {
     return {
       ContentType: meta.contentType,
       ...(meta.contentEncoding ? { ContentEncoding: meta.contentEncoding } : {}),
@@ -308,7 +308,7 @@ export class S3ModelService implements ModelCrudSupport, ModelBlobSupport, Model
   }
 
   // Expiry
-  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
+  async deleteExpired<T extends ModelType>(_cls: Class<T>): Promise<number> {
     return -1;
   }
 

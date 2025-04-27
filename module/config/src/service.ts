@@ -73,7 +73,7 @@ export class ConfigurationService {
       DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(spec.data), 'coerce');
     }
 
-    this.#specs = specs.map(({ data, ...v }) => v);
+    this.#specs = specs.map(({ data: _, ...v }) => v);
 
     // Initialize Secrets
     const userSpecified = (this.#get('config')?.secrets ?? []);

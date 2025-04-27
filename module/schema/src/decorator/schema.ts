@@ -26,7 +26,7 @@ export function Schema(cfg?: Partial<Pick<ClassConfig, 'subTypeName' | 'subTypeF
  * @param fn The validator function
  */
 export const Validator = <T>(fn: ValidatorFn<T, string>) =>
-  (target: Class<T>, k?: string): void => {
+  (target: Class<T>, _k?: string): void => {
     SchemaRegistry.getOrCreatePending(target).validators!.push(castTo(fn));
   };
 
@@ -36,7 +36,7 @@ export const Validator = <T>(fn: ValidatorFn<T, string>) =>
  * @param fn The validator function
  */
 export function MethodValidator<T extends (...args: Any[]) => Any>(fn: MethodValidatorFn<Parameters<T>>) {
-  return (target: ClassInstance, k: string, prop: TypedPropertyDescriptor<T>): void => {
+  return (target: ClassInstance, k: string, _prop: TypedPropertyDescriptor<T>): void => {
     SchemaRegistry.registerPendingMethod(target.constructor, k).validators!.push(castTo(fn));
   };
 }

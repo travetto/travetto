@@ -103,8 +103,7 @@ class CookiesInterceptorSuite {
         value: '100',
         signingKey: 'billy'
       }],
-      jar => {
-      },
+      jar => { },
       ['bally', 'billy']
     );
 

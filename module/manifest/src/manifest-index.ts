@@ -57,7 +57,7 @@ export class ManifestIndex {
   }
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
-    return files.map(([f, type, ts, role = 'std']) => {
+    return files.map(([f, type, _ts, role = 'std']) => {
       const isSource = type === 'ts' || type === 'js';
       const sourceFile = path.resolve(this.#manifest.workspace.path, m.sourceFolder, f);
       const js = isSource ? ManifestModuleUtil.withOutputExtension(f) : f;

@@ -7,5 +7,5 @@ import { TestConsumer } from '../registry.ts';
  */
 @TestConsumer()
 export class NoopConsumer implements TestConsumerShape {
-  onEvent(event: TestEvent): void { }
+  onEvent(): void { }
 }

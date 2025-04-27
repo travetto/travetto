@@ -58,7 +58,7 @@ export class TapSummaryEmitter implements TestConsumerShape {
     this.#progress = this.#terminal.streamToBottom(
       Util.mapAsyncItr(
         this.#results,
-        (value, idx) => {
+        (value) => {
           failed += (value.status === 'failed' ? 1 : 0);
           skipped += (value.status === 'skipped' ? 1 : 0);
           completed += (value.status !== 'skipped' ? 1 : 0);

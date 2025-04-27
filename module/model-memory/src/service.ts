@@ -31,7 +31,7 @@ function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | n
   if (data instanceof Set) {
     id = data.values().next().value;
   } else {
-    id = [...data.entries()].find(([k, v]) => value === undefined || v === value)?.[0];
+    id = [...data.entries()].find(([, v]) => value === undefined || v === value)?.[0];
   }
   return id;
 }
@@ -342,7 +342,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelBlobSupport, M
           yield this.get(cls, id);
         }
       } else {
-        for (const id of [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a, b]) => a)) {
+        for (const id of [...index.entries()].toSorted((a, b) => +a[1] - +b[1]).map(([a,]) => a)) {
           yield this.get(cls, id);
         }
       }

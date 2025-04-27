@@ -16,7 +16,7 @@ export function travettoImportPlugin(config: CoreRollupConfig): Plugin {
   const out: Plugin = {
     name: 'travetto-import',
 
-    resolveDynamicImport(specifier, importer, options) {
+    resolveDynamicImport(specifier, _importer, _options) {
       const key = typeof specifier === 'string' ? specifier : '';
       if (config.ignore.has(key)) {
         return false;

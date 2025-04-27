@@ -118,7 +118,7 @@ export class ConnectResponse implements Pick<ServerResponse,
   flushHeaders(): void {
     this.#headersSent = true;
   }
-  write(chunk: unknown, encoding?: unknown, callback?: unknown): boolean {
+  write(chunk: unknown, encoding?: unknown, callback?: (err?: Error) => void): boolean {
     if (this.#headersSent) {
       this.flushHeaders();
     }
@@ -127,6 +127,7 @@ export class ConnectResponse implements Pick<ServerResponse,
     } else {
       this.#written.push(chunk);
     }
+    callback?.();
     return true;
   }
   redirect(location: string, code?: number): this {
@@ -135,12 +136,13 @@ export class ConnectResponse implements Pick<ServerResponse,
     return this;
   }
 
-  end(chunk?: unknown, encoding?: unknown, cb?: unknown): this {
+  end(chunk?: unknown, encoding?: unknown, cb?: () => void): this {
     this.flushHeaders();
     if (chunk) {
       this.write(chunk, encoding);
     }
     this.#finished = true;
+    cb?.();
     return this;
   }
 

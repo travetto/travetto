@@ -75,8 +75,8 @@ export const Html: RenderProvider<RenderContext> = {
   a: async ({ recurse, props }) => `<a ${propsToStr(props)}>${await recurse()}</a>`,
 
   InkyTemplate: c => c.recurse(),
-  Title: async ({ recurse, el }) => `<title>${await recurse()}</title>`,
-  Summary: async ({ recurse, el }) => `<span id="summary" style="${SUMMARY_STYLE}">${await recurse()}</span>`,
+  Title: async ({ recurse }) => `<title>${await recurse()}</title>`,
+  Summary: async ({ recurse }) => `<span id="summary" style="${SUMMARY_STYLE}">${await recurse()}</span>`,
 
   Column: async ({ props, recurse, stack, el, context }): Promise<string> => {
 
@@ -159,7 +159,7 @@ export const Html: RenderProvider<RenderContext> = {
   </tbody>
 </table>`,
 
-  Button: async ({ recurse, el, props, createState }): Promise<string> => {
+  Button: async ({ recurse, props, createState }): Promise<string> => {
     const { href, target, ...rest } = props;
     let inner = await recurse();
     let expander = '';
@@ -280,7 +280,7 @@ export const Html: RenderProvider<RenderContext> = {
     `;
   },
 
-  Callout: async ({ recurse, el, props }): Promise<string> => {
+  Callout: async ({ recurse, props }): Promise<string> => {
 
     const innerProps: JSXElement['props'] = { className: props.className };
     delete props.className;

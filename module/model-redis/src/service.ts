@@ -263,7 +263,7 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
   }
 
   // Expiry
-  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
+  async deleteExpired<T extends ModelType>(_cls: Class<T>): Promise<number> {
     // Automatic
     return -1;
   }

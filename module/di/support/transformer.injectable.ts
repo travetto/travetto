@@ -78,7 +78,7 @@ export class InjectableTransformer {
    * Handle Inject annotations for fields/args
    */
   @OnProperty('Inject')
-  static registerInjectProperty(state: TransformerState, node: ts.PropertyDeclaration, dm?: DecoratorMeta): typeof node {
+  static registerInjectProperty(state: TransformerState, node: ts.PropertyDeclaration): typeof node {
     const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_IMPORT);
 
     // Doing decls
@@ -98,7 +98,7 @@ export class InjectableTransformer {
   * Handle Inject annotations for fields/args
   */
   @OnSetter('Inject')
-  static registerInjectSetter(state: TransformerState, node: ts.SetAccessorDeclaration, dm?: DecoratorMeta): typeof node {
+  static registerInjectSetter(state: TransformerState, node: ts.SetAccessorDeclaration): typeof node {
     const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_IMPORT);
 
     const modifiers = DecoratorUtil.spliceDecorators(node, decl, [
