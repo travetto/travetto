@@ -12,8 +12,7 @@ interface Link extends vscode.TerminalLink {
 }
 
 const MODULE_REGEX = /(@[a-z0-9\-]+\/[a-z0-9\-]+)[^\/]/gi;
-const FILE_CLASS_REGEX = /([a-z_\-\/@]+)[:\/]((?:src|support|bin|test|doc)\/[a-z_0-9\/.\-]+)(:\d+|￮#[$_a-z0-9]+)?/gi;
-const CLASS_SEP_REGEX = /[￮#]/;
+const FILE_CLASS_REGEX = /([a-z_\-\/@]+)[:\/]((?:src|support|bin|test|doc)\/[a-z_0-9\/.\-]+)(:\d+|#[$_a-z0-9]+)?/gi;
 
 /**
  * Logging workspace
@@ -51,7 +50,7 @@ export class LogFeature extends BaseFeature {
       const [full, mod, pth, suffix = ''] = match;
       const sourceFile = Workspace.resolveManifestFileFromImport(`${mod}/${pth}`);
       if (sourceFile) {
-        const suffixType = CLASS_SEP_REGEX.test(suffix) ? 'class' : suffix.includes(':') ? 'file-numbered' : 'file';
+        const suffixType = suffix.includes('#') ? 'class' : suffix.includes(':') ? 'file-numbered' : 'file';
         const type = suffixType === 'class' ? 'Class' : 'File';
         out.push({
           startIndex: match.index!,
@@ -59,7 +58,7 @@ export class LogFeature extends BaseFeature {
           tooltip: `Travetto ${type}: ${mod}/${pth}${suffix}`,
           file: sourceFile,
           line: suffixType === 'file-numbered' ? suffix.split(':')[1] : undefined,
-          cls: suffixType === 'class' ? suffix.split(CLASS_SEP_REGEX)[1] : undefined
+          cls: suffixType === 'class' ? suffix.split('#')[1] : undefined
         });
       }
     }
