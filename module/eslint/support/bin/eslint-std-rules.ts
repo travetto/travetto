@@ -207,6 +207,7 @@ export const STD_RULES = {
   'no-useless-escape': 0,
   'no-unused-expressions': 0,
   'no-unused-labels': 'error',
+  'unused-imports/no-unused-imports': 'error',
   'no-var': 'error',
   'object-shorthand': 'error',
   'prefer-const': 'error',

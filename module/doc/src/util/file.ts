@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
 import { AppError, Runtime, RuntimeIndex } from '@travetto/runtime';
-import { ManifestFileUtil, ManifestModuleFileType, ManifestModuleUtil } from '@travetto/manifest';
+import { ManifestModuleFileType, ManifestModuleUtil } from '@travetto/manifest';
 
 const ESLINT_PATTERN = /\s{0,10}\/\/ eslint.{0,300}$/g;
 const ENV_KEY = /Env.([^.]{1,100})[.]key/g;

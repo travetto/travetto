@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { createElement, JSXElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
+import { createElement, JSXRuntimeTag } from '@travetto/doc/jsx-runtime';
 
 import { PackageUtil } from '@travetto/manifest';
 import { castTo, RuntimeIndex } from '@travetto/runtime';

@@ -15,7 +15,6 @@ import { LoggingInterceptor } from './src/interceptor/logging.ts';
 import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies.ts';
 import { WebConfig } from './src/config/web.ts';
 import { WebRequest } from './src/types/request.ts';
-import { WebResponse } from './src/types/response.ts';
 import { WebInterceptor } from './src/types/interceptor.ts';
 import { AsyncContextInterceptor } from './src/interceptor/context.ts';
 import { CacheControl } from './src/decorator/common.ts';

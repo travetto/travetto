@@ -1,6 +1,5 @@
 import type { Writable } from 'node:stream';
 
-import type { TestEvent } from '../../model/event.ts';
 import type { SuitesSummary } from '../types.ts';
 import { TestConsumer } from '../registry.ts';
 

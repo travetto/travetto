@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import { Class, Env, Runtime, RuntimeIndex, WatchEvent, describeFunction, flushPendingFunctions } from '@travetto/runtime';
+import { Class, Env, Runtime, RuntimeIndex, describeFunction, flushPendingFunctions } from '@travetto/runtime';
 
 import { DynamicFileLoader } from '../internal/file-loader.ts';
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types.ts';

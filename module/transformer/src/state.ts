@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { path, ManifestIndex } from '@travetto/manifest';
 
-import { ManagedType, AnyType, Type, ForeignType } from './resolver/types.ts';
+import { ManagedType, AnyType, ForeignType } from './resolver/types.ts';
 import { State, DecoratorMeta, Transformer, ModuleNameSymbol } from './types/visitor.ts';
 import { SimpleResolver } from './resolver/service.ts';
 import { ImportManager } from './importer.ts';

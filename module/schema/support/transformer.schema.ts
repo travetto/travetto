@@ -1,7 +1,7 @@
 import ts from 'typescript';
 
 import {
-  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, OnGetter, OnSetter
+  TransformerState, OnProperty, OnClass, AfterClass, DocUtil, DeclarationUtil, OnGetter, OnSetter
 } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transformer/util.ts';
