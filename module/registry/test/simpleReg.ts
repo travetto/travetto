@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+
 import { Suite, Test } from '@travetto/test';
 import { MethodSource, Registry, RootRegistry } from '@travetto/registry';
 

@@ -109,13 +109,14 @@ class BodyParseInterceptorSuite {
       requestHeaders: { 'Accept-Encoding': 'br,gzip' }
     });
 
-    assert(response.body);
-    assert(Buffer.isBuffer(response.body));
-    assert(response.body.byteLength < 50000);
+    const body = response.body;
+    assert(body);
+    assert(Buffer.isBuffer(body));
+    assert(body.byteLength < 50000);
 
-    assert.doesNotThrow(() => brotliDecompressSync(response.body as Buffer));
+    assert.doesNotThrow(() => brotliDecompressSync(body));
 
-    assert(brotliDecompressSync(response.body).byteLength === 50000);
+    assert(brotliDecompressSync(body).byteLength === 50000);
   }
 
   @Test()
@@ -125,13 +126,14 @@ class BodyParseInterceptorSuite {
       requestHeaders: { 'Accept-Encoding': 'gzip,br' }
     });
 
-    assert(response.body);
-    assert(Buffer.isBuffer(response.body));
-    assert(response.body.byteLength < 50000);
+    const body = response.body;
+    assert(body);
+    assert(Buffer.isBuffer(body));
+    assert(body.byteLength < 50000);
 
-    assert.doesNotThrow(() => gunzipSync(response.body as Buffer));
+    assert.doesNotThrow(() => gunzipSync(body));
 
-    assert(gunzipSync(response.body).byteLength === 50000);
+    assert(gunzipSync(body).byteLength === 50000);
   }
 
   @Test()
@@ -141,13 +143,14 @@ class BodyParseInterceptorSuite {
       requestHeaders: { 'Accept-Encoding': 'deflate,gzip,br' }
     });
 
-    assert(response.body);
-    assert(Buffer.isBuffer(response.body));
-    assert(response.body.byteLength < 50000);
+    const body = response.body;
+    assert(body);
+    assert(Buffer.isBuffer(body));
+    assert(body.byteLength < 50000);
 
-    assert.doesNotThrow(() => inflateSync(response.body as Buffer));
+    assert.doesNotThrow(() => inflateSync(body));
 
-    assert(inflateSync(response.body).byteLength === 50000);
+    assert(inflateSync(body).byteLength === 50000);
   }
 
   @Test()
@@ -157,13 +160,14 @@ class BodyParseInterceptorSuite {
       requestHeaders: { 'Accept-Encoding': 'deflate;q=0.1,gzip;q=0.1,br;q=2' }
     });
 
-    assert(response.body);
-    assert(Buffer.isBuffer(response.body));
-    assert(response.body.byteLength < 50000);
+    const body = response.body;
+    assert(body);
+    assert(Buffer.isBuffer(body));
+    assert(body.byteLength < 50000);
 
-    assert.doesNotThrow(() => brotliDecompressSync(response.body as Buffer));
+    assert.doesNotThrow(() => brotliDecompressSync(body));
 
-    assert(brotliDecompressSync(response.body).byteLength === 50000);
+    assert(brotliDecompressSync(body).byteLength === 50000);
   }
 
   @Test()

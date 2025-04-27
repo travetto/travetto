@@ -128,7 +128,7 @@ export class ClassSource implements ChangeSource<Class> {
    */
   async init(): Promise<void> {
     if (Runtime.dynamic && !this.#listening) {
-      this.#listening = (async () => {
+      this.#listening = (async (): Promise<void> => {
         for await (const ev of await DynamicFileLoader.listen()) {
           if (ev.action === 'delete') {
             this.#removeFile(ev.file); // File no longer exists

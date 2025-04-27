@@ -1,13 +1,13 @@
 import assert from 'node:assert';
 import { brotliCompressSync, createBrotliCompress, createDeflate, createGzip, deflateSync, gzipSync } from 'node:zlib';
+import { Readable } from 'node:stream';
+import { buffer } from 'node:stream/consumers';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { WebResponse, WebRequest, DecompressInterceptor, WebBodyUtil } from '@travetto/web';
-import { Readable } from 'node:stream';
-import { BinaryUtil } from '@travetto/runtime';
-import { buffer } from 'node:stream/consumers';
+import { AppError, BinaryUtil, castTo } from '@travetto/runtime';
 
 @Suite()
 class DecompressInterceptorSuite {
@@ -73,7 +73,11 @@ class DecompressInterceptorSuite {
         next: async () => new WebResponse({ headers: responseHeaders }),
         config: interceptor.config
       });
-      return request.body as Buffer | Readable;
+      if (Buffer.isBuffer(request.body) || BinaryUtil.isReadable(request.body)) {
+        return request.body;
+      } else {
+        throw new AppError('Unexpected return type');
+      }
     } catch (err) {
       if (err instanceof WebResponse) {
         throw err.body;
@@ -161,7 +165,7 @@ class DecompressInterceptorSuite {
       () =>
         this.decompress({
           data: Readable.from(data),
-          encoding: 'google' as 'gzip',
+          encoding: castTo('google'),
         }),
       /Unsupported.*google/
     );
