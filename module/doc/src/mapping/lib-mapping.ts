@@ -49,6 +49,7 @@ export const LIB_MAPPING = {
   NodeAssert: { title: 'assert', href: 'https://nodejs.org/api/assert.html' },
   NodeEventEmitter: { title: 'EventEmitter', href: 'https://nodejs.org/api/events.html#class-eventemitter' },
   NodeBuffer: { title: 'Buffer', href: 'https://nodejs.org/api/buffer.html' },
+  NodeZlib: { title: 'Buffer', href: 'https://nodejs.org/api/zlib.html' },
   NodeFile: { title: 'Buffer', href: 'https://nodejs.org/api/buffer.html#class-file' },
 
   // Cloud

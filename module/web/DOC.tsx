@@ -1,17 +1,16 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { Field, Schema } from '@travetto/schema';
 import { CliCommand } from '@travetto/cli';
 import { RuntimeResources, toConcrete } from '@travetto/runtime';
 
 import { WebApplication } from './src/types/application.ts';
 import { Controller } from './src/decorator/controller.ts';
-import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint.ts';
+import { Get, Post, Put, Delete, Patch, Head, Options, Endpoint } from './src/decorator/endpoint.ts';
 import { PathParam, QueryParam, Body, Param, HeaderParam, ContextParam } from './src/decorator/param.ts';
 import { BodyParseInterceptor, BodyParseConfig } from './src/interceptor/body-parse.ts';
 import { CorsInterceptor, CorsConfig } from './src/interceptor/cors.ts';
 import { ResponseCacheInterceptor } from './src/interceptor/response-cache.ts';
-import { LoggingInterceptor } from './src/interceptor/logging.ts';
+import { LoggingInterceptor, WebLogConfig } from './src/interceptor/logging.ts';
 import { CookiesInterceptor, CookieConfig } from './src/interceptor/cookies.ts';
 import { WebConfig } from './src/config/web.ts';
 import { WebRequest } from './src/types/request.ts';
@@ -20,18 +19,66 @@ import { AsyncContextInterceptor } from './src/interceptor/context.ts';
 import { CacheControl } from './src/decorator/common.ts';
 import { WebAsyncContext } from './src/context.ts';
 import { RespondInterceptor } from './src/interceptor/respond.ts';
+import { BaseWebMessage } from './src/types/message.ts';
+import { WebResponse } from './src/types/response.ts';
+import { CompressConfig, CompressInterceptor } from './src/interceptor/compress.ts';
+import { AcceptsConfig, AcceptsInterceptor } from './src/interceptor/accepts.ts';
+import { DecompressConfig, DecompressInterceptor } from './src/interceptor/decompress.ts';
+import { EtagConfig, EtagInterceptor } from './src/interceptor/etag.ts';
 
 const WebInterceptorContract = toConcrete<WebInterceptor>();
 const WebApplicationContract = toConcrete<WebApplication>();
 
 export const text = <>
   <c.StdHeader />
-  The module provides a declarative API for creating and describing an Web application.  Since the framework is declarative, decorators are used to configure almost everything. This module is built upon the {d.mod('Schema')} structure, and all controller method parameters follow the same rules/abilities as any {Field} in a standard {Schema} class.
+  The module provides a declarative API for creating and describing a Web application.  Since the framework is declarative, decorators are used to configure almost everything. The general layout of an application is a collection of {Controller}s that employ some combination of {WebInterceptorContract}s to help manage which functionality is executed before the {Endpoint} code, within the {Controller}.
 
-  <c.Section title='Controller'>
-    To define an endpoint, you must first declare a {Controller} which is only allowed on classes. Controllers can be configured with:
+  This module will look at:
+  <ul>
+    <li>Running a {WebApplicationContract}</li>
+    <li>Request/Response Pattern</li>
+    <li>Defining a {Controller}</li>
+    <li>Defining an {Endpoint}s</li>
+    <li>Using {WebInterceptorContract}s</li>
+    <li>Creating a Custom {WebInterceptorContract}</li>
+    <li>Error Handling</li>
+  </ul>
+
+  <c.Section title='Running an App'>
+
+    By default, the framework provides a default {CliCommand} for {WebApplicationContract} that will follow default behaviors, and spin up the server. Currently, {d.mod('WebNode')} is the only module that provides a compatible {WebApplicationContract}.
+
+    <c.Execution title='Standard application' cmd='trv' args={['run:web']} config={{
+      cwd: './doc-exec'
+    }} />
+
+    <c.SubSection title='Creating a Custom CLI Entry Point'>
+
+      To customize a Web server, you may need to construct an entry point using the {CliCommand} decorator. This could look like:
+
+      <c.Code title='Application entry point for Web Applications' src='doc/cli.run_web_custom.ts' />
+
+      And using the pattern established in the {d.mod('Cli')} module, you would run your program using {d.command('npx trv run:web:custom')}.
+
+      <c.Execution title='Custom application' cmd='trv' args={['run:web:custom']} config={{ cwd: './doc-exec' }} />
+    </c.SubSection>
+  </c.Section>
+
+  <c.Section title='Request/Response Pattern'>
+    Unlike other frameworks (e.g. {d.library('Express')}, {d.library('Fastify')}), this module takes an approach that is similar to {d.library('AwsLambda')}'s model for requests and responses. What you can see here is that {WebRequest} and {WebResponse} are very simple objects, with the focus being on the {d.field('payload')} and {d.field('body')}.  This is intended to provide maximal compatibility with non-HTTP sources.  The driving goal is to support more than just standard HTTP servers but also allow for seamless integration with tools like event queues, web sockets, etc.
+
+    <c.Code title='Base Shape' src={BaseWebMessage} outline />
+    <c.Code title='Request Shape' src={WebRequest} outline />
+    <c.Code title='Response Shape' src={WebResponse} outline />
+
+    These objects do not represent the underlying sockets provided by various http servers, but in fact are simple wrappers that track the flow through the call stack of the various {WebInterceptorContract}s and the {Endpoint} handler.  One of the biggest departures here, is that the response is not an entity that is passed around from call-site to call-site, but is is solely a return-value.  This doesn't mean the return value has to be static and pre-allocated, on the contrary streams are still supported.  The difference here is that the streams/asynchronous values will be consumed until the response is sent back to the user. The {CompressInterceptor} is a good reference for transforming a {WebResponse} that can either be a stream or a fixed value.
+  </c.Section>
+
+  <c.Section title='Defining a Controller'>
+    To start, we must define a {Controller}, which is only allowed on classes. Controllers can be configured with:
 
     <ul>
+      <li>{d.input('path')} - The required context path the controller will operate atop</li>
       <li>{d.input('title')} - The definition of the controller</li>
       <li>{d.input('description')} - High level description fo the controller</li>
     </ul>
@@ -43,11 +90,11 @@ export const text = <>
     <c.Code title='Basic Controller Registration' src='doc/simple-controller.ts' />
   </c.Section>
 
-  <c.Section title='Endpoints'>
+  <c.Section title='Defining an Endpoint'>
 
-    Once the controller is declared, each method of the controller is a candidate for routing.  By design, everything is asynchronous, and so async/await is natively supported. <br />
+    Once the controller is declared, each method of the controller is a candidate for being an endpoint.  By design, everything is asynchronous, and so async/await is natively supported. <br />
 
-    The HTTP methods that are supported via:
+    The most common pattern is to register HTTP-driven endpoints.  The HTTP methods that are currently supported:
     <ul>
       <li>{Get}</li>
       <li>{Post}</li>
@@ -58,18 +105,15 @@ export const text = <>
       <li>{Options}</li>
     </ul>
 
-
-    Each endpoint decorator handles the following config:
+    Similar to the Controller, each endpoint decorator handles the following config:
     <ul>
       <li>{d.input('title')} - The definition of the endpoint</li>
       <li>{d.input('description')} - High level description fo the endpoint</li>
-      <li>{d.input('responseType?')} - Class describing the response type</li>
-      <li>{d.input('requestType?')} - Class describing the request body</li>
     </ul>
 
     {d.library('JSDoc')} comments can also be used to define the {d.input('title')} attribute, as well as describing the parameters using {d.input('@param')} tags in the comment. <br />
 
-    Additionally, the return type of the method will also be used to describe the {d.input('responseType')} if not specified manually.
+    The return type of the method will also be used to describe the {d.input('responseType')} if not specified manually.
 
     <c.Code title='Controller with Sample Endpoint' src='doc/simple-endpoint.ts' />
 
@@ -79,8 +123,8 @@ export const text = <>
       Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
       <ul>
         <li>{PathParam} - Path params</li>
-        <li>{QueryParam} - Query params</li>
-        <li>{Body} - Request body (in it's entirety), with support for validation</li>
+        <li>{QueryParam} - Query params - can be either a single value or bind to a whole object</li>
+        <li>{Body} - Request body</li>
         <li>{HeaderParam} - Header values</li>
       </ul>
 
@@ -102,18 +146,16 @@ export const text = <>
 
       <c.Code title='Example ContextParam usage' src='doc/context-param.ts'></c.Code>
 
-      <c.Note>When referencing the {ContextParam} values, the contract for idempotency needs to be carefully inspected to ensure idempotency, if expected. You can see in the example above that the {CacheControl} decorator is used to ensure that the response is not cached.</c.Note>
+      <c.Note>When referencing the {ContextParam} values, the contract for idempotency needs to be carefully inspected, if expected. You can see in the example above that the {CacheControl} decorator is used to ensure that the response is not cached.</c.Note>
     </c.SubSection>
 
-    <c.SubSection title='Body and QuerySchema'>
+    <c.SubSection title='Validating Inputs'>
 
-      The module provides high level access for {d.mod('Schema')} support, via decorators, for validating and typing request bodies. <br />
+      The module provides high level access for {d.mod('Schema')} support, via decorators, for validating and typing request inputs. <br />
 
-      {Body} provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+      By default, all endpoint parameters are validated for type, and any additional constraints added (required, vs optional, minlength, etc).  Each parameter location ({PathParam}, {Body}, {QueryParam}, {HeaderParam}) primarily provides a source to bind the endpoint arguments from.  Once bound, the module will validate that the provided arguments are in fact valid. All validation will occur before the endpoint is ever executed, ensuring a strong contract.
 
       <c.Code title='Using Body for POST requests' src='doc/schema-body.ts' />
-
-      The framework provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
       <c.Code title='Using Query + Schema for GET requests' src='doc/schema-query.ts' />
 
@@ -123,95 +165,89 @@ export const text = <>
     </c.SubSection>
   </c.Section>
 
-  <c.Section title='Input/Output'>
+  <c.Section title='Using Interceptors'>
 
-    The module provides standard structure for rendering content on the response.  This includes:
-    <ul>
-      <li>JSON</li>
-      <li>String responses</li>
-      <li>Files</li>
-    </ul>
+    {WebInterceptorContract}s are a key part of the web framework, to allow for conditional functionality to be added, across all endpoints.
 
-    Per the {d.mod('Runtime')} module, the following types automatically have web support as well:
-    <ul>
-      <li>{d.input('Error')} - Serializes to a standard object, with status, and the error message.</li>
-      <li>{d.input('AppError')} - Serializes like {d.input('Error')} but translates the error category to an HTTP status</li>
-    </ul>
+    <c.SubSection title='Anatomy of an Interceptor'>
+      <c.Code title='A Simple Interceptor' src='doc/interceptor-hello-world.ts' />
 
-    Additionally, the {d.mod('Schema')} module supports typing requests and request bodies for run-time validation of requests.
-  </c.Section>
+      In this example you can see the markers of a simple interceptor:
 
-  <c.Section title='Running an App'>
+      <c.SubSubSection title='category'>
+        {d.field('category')} - This represents the generally request lifecycle phase an interceptor will run in.  It can be customized further with {d.field('dependsOn')} and {d.field('runsBefore')} to control exact ordering within a category.  In this example {d.input('application')} represents the lowest priority, and will run right before the endpoint is executed.
+      </c.SubSubSection>
 
-    By default, the framework provides a default {CliCommand} for {WebApplicationContract} that will follow default behaviors, and spin up the Web server.
+      <c.SubSubSection title='applies'>
+        {d.method('applies')} - This represents ability for the per-endpoint configuration to determine if an interceptor is applicable.  By default, all interceptors will auto-register on every endpoint. Some interceptors are opt-in, and control that by setting applies to constantly return {d.input('false')}.
+      </c.SubSubSection>
 
-    <c.Execution title='Standard application' cmd='trv' args={['run:web']} config={{
-      cwd: './doc-exec'
-    }} />
-
-    <c.SubSection title='Creating a Custom CLI Entry Point'>
-
-      To customize a Web server, you may need to construct an entry point using the {CliCommand} decorator. This could look like:
-
-      <c.Code title='Application entry point for Web Applications' src='doc/cli.run_web_custom.ts' />
-
-      And using the pattern established in the {d.mod('Cli')} module, you would run your program using {d.command('npx trv run:web:custom')}.
-
-      <c.Execution title='Custom application' cmd='trv' args={['run:web:custom']} config={{ cwd: './doc-exec' }} />
+      <c.SubSubSection title='filter'>
+        {d.method('filter')} - This is the actual logic that will be invoked around the endpoint call, represented by {d.input('ctx.next()')}.  The next call passes control to the next interceptor all the way down to the endpoint, and then will pop back up the stack.  Code executed before {d.input('next()')} is generally used for request filtering, and code afterwards is generally used for response control.
+      </c.SubSubSection>
     </c.SubSection>
-  </c.Section>
 
-  <c.Section title='Interceptors'>
+    Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is (in order of execution):
 
-    {WebInterceptorContract}s  are a key part of the web framework, to allow for conditional functions to be added, sometimes to every endpoint, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
-
-    <c.Code title='A Trivial Interceptor' src='doc/interceptor-hello-world.ts' />
-
-    <c.Note>The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after requirements to ensure the appropriate order of execution.</c.Note>
-
-    Out of the box, the web framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
-
-    <c.SubSection title={BodyParseInterceptor.name}>
-      {BodyParseInterceptor} handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
-
-      <c.Code title='Body Parse Config' src={BodyParseConfig} />
+    <c.SubSection title={AsyncContextInterceptor.name}>
+      {AsyncContextInterceptor} is responsible for sharing context across the various layers that may be touched by a request.  This
     </c.SubSection>
+
+    <c.SubSection title={LoggingInterceptor.name}>
+      {LoggingInterceptor} is used for logging the request/response, handling any error logging as needed. This interceptor can be noisy, and so can easily be disabled as needed by setting {d.input('web.log.applies: false')} in your config.
+
+      <c.Code title='Web Log Config' src={WebLogConfig} />
+    </c.SubSection>
+
     <c.SubSection title={RespondInterceptor.name}>
-      {RespondInterceptor} is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+      {RespondInterceptor} is a basic catch-all that forces errors and data alike into a consistent format for sending back to the user.
     </c.SubSection>
-    <c.SubSection title={CorsInterceptor.name}>
-      {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, the {d.input('web.cors')} config space.
 
-      <c.Code title='Cors Config' src={CorsConfig} />
+    <c.SubSection title={AcceptsInterceptor.name}>
+      {AcceptsInterceptor} handles verifying the inbound request matches the allowed content-types. This acts as a standard gate-keeper for spurious input.
+
+      <c.Code title='Accepts Config' src={AcceptsConfig} />
     </c.SubSection>
+
+    <c.SubSection title={DecompressInterceptor.name}>
+      {DecompressInterceptor} handles decompressing the inbound request, if supported.  This relies upon HTTP standards for content encoding, and negotiating the appropriate decompression scheme.
+
+      <c.Code title='Decompress Config' src={DecompressConfig} />
+    </c.SubSection>
+
     <c.SubSection title={CookiesInterceptor.name}>
       {CookiesInterceptor} is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
 
       <c.Code title='Cookies Config' src={CookieConfig} />
     </c.SubSection>
+
+    <c.SubSection title={BodyParseInterceptor.name}>
+      {BodyParseInterceptor} handles the inbound request, and converting the body payload into an appropriate format.
+
+      <c.Code title='Body Parse Config' src={BodyParseConfig} />
+    </c.SubSection>
+
+    <c.SubSection title={CompressInterceptor.name}>
+      {CompressInterceptor} by default, will compress all valid outbound responses over a certain size, or for streams will cache every response. This relies on Node's {d.library('NodeZlib')} support for compression.
+
+      <c.Code title='Compress Config' src={CompressConfig} />
+    </c.SubSection>
+
+    <c.SubSection title={EtagInterceptor.name}>
+      {EtagInterceptor} by default, will tag all cacheable HTTP responses, when the response value/length is known.  Streams, and other async data sources do not have a pre-defined length, and so are ineligible for etagging.
+      <c.Code title='ETag Config' src={EtagConfig} />
+    </c.SubSection>
+
+    <c.SubSection title={CorsInterceptor.name}>
+      {CorsInterceptor} allows cors functionality to be configured out of the box, by setting properties in your {d.path('application.yml')}, specifically, the {d.input('web.cors')} config space.
+
+      <c.Code title='Cors Config' src={CorsConfig} />
+    </c.SubSection>
+
     <c.SubSection title={ResponseCacheInterceptor.name}>
       {ResponseCacheInterceptor} by default, disables caching for all GET requests if the response does not include caching headers.  This can be managed by setting {d.input('web.getCache.applies: <boolean>')} in your config.  This interceptor applies by default.
     </c.SubSection>
-    <c.SubSection title={LoggingInterceptor.name}>
-      {LoggingInterceptor} allows for logging of all requests, and their response codes.  You can deny/allow specific endpoints, by setting config like so
 
-      <c.Code title='Control Logging' src='doc/log.yml' />
-    </c.SubSection>
-    <c.SubSection title={AsyncContextInterceptor.name}>
-      {AsyncContextInterceptor} is responsible for sharing context across the various layers that may be touched by a request. This interceptor can be noisy, and so can easily be disabled as needed by setting {d.input('web.log.applies: false')} in your config.
-    </c.SubSection>
-
-    <c.SubSection title='Custom Interceptors'>
-      Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {WebInterceptorContract} interface.  The interceptors are tied to the defined {WebRequest} object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
-
-      <c.Code title='Defining a new Interceptor' src='doc/interceptor-logging.ts' />
-
-      A {d.input('next')} parameter is also available to allow for controlling the flow of the request, either by stopping the flow of interceptors, or being able to determine when a request starts, and when it is ending.
-
-      <c.Code title='Defining a fully controlled Interceptor' src='doc/interceptor-controlled.ts' />
-
-      Currently {d.mod('WebUpload')} is implemented in this fashion, as well as {d.mod('AuthWeb')}.
-    </c.SubSection>
     <c.SubSection title='Configuring Interceptors'>
       All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:
       <c.SubSubSection title='Enable/disable of individual interceptors via configuration'>
@@ -230,6 +266,19 @@ export const text = <>
       </ul>
     </c.SubSection>
   </c.Section>
+
+  <c.Section title='Creating a Custom WebInterceptor'>
+    Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the {d.mod('Di')} by implementing the {WebInterceptorContract} interface.  The interceptors are tied to the defined {WebRequest} object of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+
+    <c.Code title='Defining a new Interceptor' src='doc/interceptor-logging.ts' />
+
+    A {d.input('next')} parameter is also available to allow for controlling the flow of the request, either by stopping the flow of interceptors, or being able to determine when a request starts, and when it is ending.
+
+    <c.Code title='Defining a fully controlled Interceptor' src='doc/interceptor-controlled.ts' />
+
+    Currently {d.mod('WebUpload')} is implemented in this fashion, as well as {d.mod('AuthWeb')}.
+  </c.Section>
+
   <c.Section title='Cookie Support'>
     {d.library('Express')}/{d.library('Koa')}/{d.library('Fastify')} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using {d.library('Cookies')}.  This functionality is exposed onto the {WebRequest} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
