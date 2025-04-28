@@ -198,7 +198,7 @@ export class CompilerWatchFeature extends BaseFeature {
   /**
    * On initial activation
    */
-  async activate(context: vscode.ExtensionContext): Promise<void> {
+  async activate(_: vscode.ExtensionContext): Promise<void> {
     this.#status.command = { command: this.commandName('status-item'), title: 'Show Logs' };
     this.register('status-item', () => this.#onStatusItemClick());
     this.#onStateEvent('closed');
